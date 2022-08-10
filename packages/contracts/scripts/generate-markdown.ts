@@ -18,25 +18,25 @@ interface DeploymentInfo {
 const PUBLIC_DEPLOYMENTS: DeploymentInfo[] = [
   {
     folder: 'mainnet',
-    name: 'Optimism (mainnet)',
+    name: 'Bitnetwork (mainnet)',
     chainid: 10,
-    rpc: 'https://mainnet.optimism.io',
+    rpc: 'https://mainnet.bitnetwork.io',
     l1Explorer: 'https://etherscan.io',
-    l2Explorer: 'https://optimistic.etherscan.io',
+    l2Explorer: 'https://bitnetwork.etherscan.io',
   },
   {
     folder: 'kovan',
-    name: 'Optimism Kovan (public testnet)',
+    name: 'Bitnetwork Kovan (public testnet)',
     chainid: 69,
-    rpc: 'https://kovan.optimism.io',
+    rpc: 'https://kovan.bitnetwork.io',
     l1Explorer: 'https://kovan.etherscan.io',
-    l2Explorer: 'https://kovan-optimistic.etherscan.io',
+    l2Explorer: 'https://kovan-bitnetwork.etherscan.io',
   },
   {
     folder: 'goerli',
-    name: 'Optimism Goerli (internal devnet)',
+    name: 'Bitnetwork Goerli (internal devnet)',
     chainid: 420,
-    notice: `Optimism Goerli is an internal Optimism development network. You're probably looking for [Optimism Kovan](../kovan#readme), the public Optimism testnet.`,
+    notice: `Bitnetwork Goerli is an internal Bitnetwork development network. You're probably looking for [Bitnetwork Kovan](../kovan#readme), the public Bitnetwork testnet.`,
     l1Explorer: 'https://goerli.etherscan.io',
   },
 ]
@@ -223,7 +223,7 @@ const main = async () => {
   }
 
   let primary = ``
-  primary = addline(primary, `# Optimism Deployments`)
+  primary = addline(primary, `# Bitnetwork Deployments`)
   for (const deployment of PUBLIC_DEPLOYMENTS) {
     primary = addline(
       primary,

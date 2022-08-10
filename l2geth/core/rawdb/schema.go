@@ -53,7 +53,7 @@ var (
 	txLookupPrefix  = []byte("l") // txLookupPrefix + hash -> transaction/receipt lookup metadata
 	bloomBitsPrefix = []byte("B") // bloomBitsPrefix + bit (uint16 big endian) + section (uint64 big endian) + hash -> bloom bits
 
-	// Optimism specific
+	// Bitnetwork specific
 	txMetaPrefix = []byte("x") // txMetaPrefix + hash -> transaction metadata
 
 	// headIndexKey tracks the last processed ctc index

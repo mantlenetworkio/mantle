@@ -1,5 +1,5 @@
 /**
- * Optimism 2020 Copyright
+ * Bitnetwork 2020 Copyright
  */
 
 package types

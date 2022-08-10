@@ -32,7 +32,7 @@
     "url": "https://github.com/bitdao-io/bitnetwork.git"
   },
   "dependencies": {
-    "@bitdaoio/core-utils": "1.0.0",
+    "@bitdaoio/core-utils": "1.0.2",
     "@sentry/node": "^6.3.1",
     "bcfg": "^0.1.7",
     "body-parser": "^1.20.0",

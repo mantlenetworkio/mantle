@@ -30,7 +30,7 @@ interface IStaticL1ChugSplashProxy {
  * @title ProxyAdmin
  * @notice This is an auxiliary contract meant to be assigned as the admin of an ERC1967 Proxy,
  *         based on the OpenZeppelin implementation. It has backwards compatibility logic to work
- *         with the various types of proxies that have been deployed by Optimism in the past.
+ *         with the various types of proxies that have been deployed by Bitnetwork in the past.
  */
 contract ProxyAdmin is Owned {
     /**

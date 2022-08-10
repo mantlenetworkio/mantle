@@ -3,12 +3,12 @@ import { L1ChainID, L2ChainID } from '../interfaces'
 export const DEPOSIT_CONFIRMATION_BLOCKS: {
   [ChainID in L2ChainID]: number
 } = {
-  [L2ChainID.OPTIMISM]: 50 as const,
-  [L2ChainID.OPTIMISM_GOERLI]: 12 as const,
-  [L2ChainID.OPTIMISM_KOVAN]: 12 as const,
-  [L2ChainID.OPTIMISM_HARDHAT_LOCAL]: 2 as const,
-  [L2ChainID.OPTIMISM_HARDHAT_DEVNET]: 2 as const,
-  [L2ChainID.OPTIMISM_BEDROCK_LOCAL_DEVNET]: 2 as const,
+  [L2ChainID.BITNETWORK]: 50 as const,
+  [L2ChainID.BITNETWORK_GOERLI]: 12 as const,
+  [L2ChainID.BITNETWORK_KOVAN]: 12 as const,
+  [L2ChainID.BITNETWORK_HARDHAT_LOCAL]: 2 as const,
+  [L2ChainID.BITNETWORK_HARDHAT_DEVNET]: 2 as const,
+  [L2ChainID.BITNETWORK_BEDROCK_LOCAL_DEVNET]: 2 as const,
 }
 
 export const CHAIN_BLOCK_TIMES: {

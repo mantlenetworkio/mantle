@@ -32,7 +32,7 @@ locally.
 import { TxGasLimit } from '@bitnetwork/core-utils'
 import { JsonRpcProvider } from 'ethers'
 
-const L2Provider = new JsonRpcProvider('https://mainnet.optimism.io')
+const L2Provider = new JsonRpcProvider('https://mainnet.bitnetwork.io')
 const L1Provider = new JsonRpcProvider('http://127.0.0.1:8545')
 
 const l2GasLimit = await L2Provider.send('eth_estimateExecutionGas', [tx])

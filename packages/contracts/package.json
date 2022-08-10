@@ -1,7 +1,7 @@
 {
   "name": "@bitdaoio/contracts",
-  "version": "1.0.1",
-  "description": "[Optimism] L1 and L2 smart contracts for Optimism",
+  "version": "1.0.2",
+  "description": "[Bitnetwork] L1 and L2 smart contracts for Bitnetwork",
   "main": "dist/index",
   "types": "dist/index",
   "files": [
@@ -51,13 +51,13 @@
   ],
   "homepage": "https://github.com/bitnetworkio/bitnetwork/tree/main/packages/contracts#readme",
   "license": "MIT",
-  "author": "Optimism PBC",
+  "author": "Bitnetwork PBC",
   "repository": {
     "type": "git",
     "url": "https://github.com/bitnetworkio/bitnetwork.git"
   },
   "dependencies": {
-    "@bitdaoio/core-utils": "1.0.0",
+    "@bitdaoio/core-utils": "1.0.2",
     "@ethersproject/abstract-provider": "^5.6.1",
     "@ethersproject/abstract-signer": "^5.6.2"
   },

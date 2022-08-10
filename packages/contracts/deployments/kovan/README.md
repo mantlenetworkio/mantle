@@ -1,8 +1,8 @@
-# Optimism Kovan (public testnet)
+# Bitnetwork Kovan (public testnet)
 ## Network Info
 - **Chain ID**: 69
-- **Public RPC**: https://kovan.optimism.io
-- **Block Explorer**: https://kovan-optimistic.etherscan.io
+- **Public RPC**: https://kovan.bitnetwork.io
+- **Block Explorer**: https://kovan-bitnetwork.etherscan.io
 ## Layer 1 Contracts
 <table>
 <tr>
@@ -124,7 +124,7 @@ TeleportrDeposit
 OVM_L2ToL1MessagePasser
 </td>
 <td align="center">
-<a href="https://kovan-optimistic.etherscan.io/address/0x4200000000000000000000000000000000000000">
+<a href="https://kovan-bitnetwork.etherscan.io/address/0x4200000000000000000000000000000000000000">
 <code>0x4200000000000000000000000000000000000000</code>
 </a>
 </td>
@@ -134,7 +134,7 @@ OVM_L2ToL1MessagePasser
 OVM_DeployerWhitelist
 </td>
 <td align="center">
-<a href="https://kovan-optimistic.etherscan.io/address/0x4200000000000000000000000000000000000002">
+<a href="https://kovan-bitnetwork.etherscan.io/address/0x4200000000000000000000000000000000000002">
 <code>0x4200000000000000000000000000000000000002</code>
 </a>
 </td>
@@ -144,7 +144,7 @@ OVM_DeployerWhitelist
 L2CrossDomainMessenger
 </td>
 <td align="center">
-<a href="https://kovan-optimistic.etherscan.io/address/0x4200000000000000000000000000000000000007">
+<a href="https://kovan-bitnetwork.etherscan.io/address/0x4200000000000000000000000000000000000007">
 <code>0x4200000000000000000000000000000000000007</code>
 </a>
 </td>
@@ -154,7 +154,7 @@ L2CrossDomainMessenger
 OVM_GasPriceOracle
 </td>
 <td align="center">
-<a href="https://kovan-optimistic.etherscan.io/address/0x420000000000000000000000000000000000000F">
+<a href="https://kovan-bitnetwork.etherscan.io/address/0x420000000000000000000000000000000000000F">
 <code>0x420000000000000000000000000000000000000F</code>
 </a>
 </td>
@@ -164,7 +164,7 @@ OVM_GasPriceOracle
 L2StandardBridge
 </td>
 <td align="center">
-<a href="https://kovan-optimistic.etherscan.io/address/0x4200000000000000000000000000000000000010">
+<a href="https://kovan-bitnetwork.etherscan.io/address/0x4200000000000000000000000000000000000010">
 <code>0x4200000000000000000000000000000000000010</code>
 </a>
 </td>
@@ -174,7 +174,7 @@ L2StandardBridge
 OVM_SequencerFeeVault
 </td>
 <td align="center">
-<a href="https://kovan-optimistic.etherscan.io/address/0x4200000000000000000000000000000000000011">
+<a href="https://kovan-bitnetwork.etherscan.io/address/0x4200000000000000000000000000000000000011">
 <code>0x4200000000000000000000000000000000000011</code>
 </a>
 </td>
@@ -184,7 +184,7 @@ OVM_SequencerFeeVault
 L2StandardTokenFactory
 </td>
 <td align="center">
-<a href="https://kovan-optimistic.etherscan.io/address/0x4200000000000000000000000000000000000012">
+<a href="https://kovan-bitnetwork.etherscan.io/address/0x4200000000000000000000000000000000000012">
 <code>0x4200000000000000000000000000000000000012</code>
 </a>
 </td>
@@ -194,7 +194,7 @@ L2StandardTokenFactory
 OVM_L1BlockNumber
 </td>
 <td align="center">
-<a href="https://kovan-optimistic.etherscan.io/address/0x4200000000000000000000000000000000000013">
+<a href="https://kovan-bitnetwork.etherscan.io/address/0x4200000000000000000000000000000000000013">
 <code>0x4200000000000000000000000000000000000013</code>
 </a>
 </td>
@@ -204,7 +204,7 @@ OVM_L1BlockNumber
 OVM_ETH
 </td>
 <td align="center">
-<a href="https://kovan-optimistic.etherscan.io/address/0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000">
+<a href="https://kovan-bitnetwork.etherscan.io/address/0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000">
 <code>0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000</code>
 </a>
 </td>
@@ -214,7 +214,7 @@ OVM_ETH
 WETH9
 </td>
 <td align="center">
-<a href="https://kovan-optimistic.etherscan.io/address/0x4200000000000000000000000000000000000006">
+<a href="https://kovan-bitnetwork.etherscan.io/address/0x4200000000000000000000000000000000000006">
 <code>0x4200000000000000000000000000000000000006</code>
 </a>
 </td>

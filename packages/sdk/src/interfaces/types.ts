@@ -24,12 +24,12 @@ export enum L1ChainID {
  * L2 network chain IDs
  */
 export enum L2ChainID {
-  OPTIMISM = 10,
-  OPTIMISM_GOERLI = 420,
-  OPTIMISM_KOVAN = 69,
-  OPTIMISM_HARDHAT_LOCAL = 31337,
-  OPTIMISM_HARDHAT_DEVNET = 17,
-  OPTIMISM_BEDROCK_LOCAL_DEVNET = 901,
+  BITNETWORK = 10,
+  BITNETWORK_GOERLI = 420,
+  BITNETWORK_KOVAN = 69,
+  BITNETWORK_HARDHAT_LOCAL = 31337,
+  BITNETWORK_HARDHAT_DEVNET = 17,
+  BITNETWORK_BEDROCK_LOCAL_DEVNET = 901,
 }
 
 /**
@@ -43,7 +43,7 @@ export interface OEL1Contracts {
   CanonicalTransactionChain: Contract
   BondManager: Contract
   // Bedrock
-  OptimismPortal: Contract
+  BitnetworkPortal: Contract
   L2OutputOracle: Contract
 }
 
@@ -64,7 +64,7 @@ export interface OEL2Contracts {
 }
 
 /**
- * Represents Optimism contracts, assumed to be connected to their appropriate
+ * Represents Bitnetwork contracts, assumed to be connected to their appropriate
  * providers and addresses.
  */
 export interface OEContracts {

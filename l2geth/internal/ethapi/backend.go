@@ -85,7 +85,7 @@ type Backend interface {
 	ChainConfig() *params.ChainConfig
 	CurrentBlock() *types.Block
 
-	// Optimism-specific API
+	// Bitnetwork-specific API
 	IsVerifier() bool
 	IsSyncing() bool
 	GetEthContext() (uint64, uint64)

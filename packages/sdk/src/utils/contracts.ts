@@ -56,7 +56,7 @@ const NAME_REMAPPING = {
 export const CONTRACT_ADDRESSES: {
   [ChainID in L2ChainID]: OEContractsLike
 } = {
-  [L2ChainID.OPTIMISM]: {
+  [L2ChainID.BITNETWORK]: {
     l1: {
       AddressManager: '0xdE1FCfB0851916CA5101820A69b13a4E276bd81F' as const,
       L1CrossDomainMessenger:
@@ -67,12 +67,12 @@ export const CONTRACT_ADDRESSES: {
       CanonicalTransactionChain:
         '0x5E4e65926BA27467555EB562121fac00D24E9dD2' as const,
       BondManager: '0xcd626E1328b41fCF24737F137BcD4CE0c32bc8d1' as const,
-      OptimismPortal: '0x0000000000000000000000000000000000000000' as const,
+      BitnetworkPortal: '0x0000000000000000000000000000000000000000' as const,
       L2OutputOracle: '0x0000000000000000000000000000000000000000' as const,
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.OPTIMISM_KOVAN]: {
+  [L2ChainID.BITNETWORK_KOVAN]: {
     l1: {
       AddressManager: '0x100Dd3b414Df5BbA2B542864fF94aF8024aFdf3a' as const,
       L1CrossDomainMessenger:
@@ -83,12 +83,12 @@ export const CONTRACT_ADDRESSES: {
       CanonicalTransactionChain:
         '0xf7B88A133202d41Fe5E2Ab22e6309a1A4D50AF74' as const,
       BondManager: '0xc5a603d273E28185c18Ba4d26A0024B2d2F42740' as const,
-      OptimismPortal: '0x0000000000000000000000000000000000000000' as const,
+      BitnetworkPortal: '0x0000000000000000000000000000000000000000' as const,
       L2OutputOracle: '0x0000000000000000000000000000000000000000' as const,
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.OPTIMISM_GOERLI]: {
+  [L2ChainID.BITNETWORK_GOERLI]: {
     l1: {
       AddressManager: '0xfA5b622409E1782597952a4A78c1D34CF32fF5e2' as const,
       L1CrossDomainMessenger:
@@ -99,12 +99,12 @@ export const CONTRACT_ADDRESSES: {
       CanonicalTransactionChain:
         '0x607F755149cFEB3a14E1Dc3A4E2450Cde7dfb04D' as const,
       BondManager: '0xfC2ab6987C578218f99E85d61Dcf4814A26637Bd' as const,
-      OptimismPortal: '0x0000000000000000000000000000000000000000' as const,
+      BitnetworkPortal: '0x0000000000000000000000000000000000000000' as const,
       L2OutputOracle: '0x0000000000000000000000000000000000000000' as const,
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.OPTIMISM_HARDHAT_LOCAL]: {
+  [L2ChainID.BITNETWORK_HARDHAT_LOCAL]: {
     l1: {
       AddressManager: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as const,
       L1CrossDomainMessenger:
@@ -115,12 +115,12 @@ export const CONTRACT_ADDRESSES: {
       CanonicalTransactionChain:
         '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9' as const,
       BondManager: '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707' as const,
-      OptimismPortal: '0x0000000000000000000000000000000000000000' as const,
+      BitnetworkPortal: '0x0000000000000000000000000000000000000000' as const,
       L2OutputOracle: '0x0000000000000000000000000000000000000000' as const,
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.OPTIMISM_HARDHAT_DEVNET]: {
+  [L2ChainID.BITNETWORK_HARDHAT_DEVNET]: {
     l1: {
       AddressManager: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as const,
       L1CrossDomainMessenger:
@@ -131,12 +131,12 @@ export const CONTRACT_ADDRESSES: {
       CanonicalTransactionChain:
         '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9' as const,
       BondManager: '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707' as const,
-      OptimismPortal: '0x0000000000000000000000000000000000000000' as const,
+      BitnetworkPortal: '0x0000000000000000000000000000000000000000' as const,
       L2OutputOracle: '0x0000000000000000000000000000000000000000' as const,
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.OPTIMISM_BEDROCK_LOCAL_DEVNET]: {
+  [L2ChainID.BITNETWORK_BEDROCK_LOCAL_DEVNET]: {
     l1: {
       AddressManager: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as const,
       L1CrossDomainMessenger:
@@ -147,7 +147,7 @@ export const CONTRACT_ADDRESSES: {
       CanonicalTransactionChain:
         '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9' as const,
       BondManager: '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707' as const,
-      OptimismPortal: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9' as const,
+      BitnetworkPortal: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9' as const,
       L2OutputOracle: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as const,
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
@@ -160,7 +160,7 @@ export const CONTRACT_ADDRESSES: {
 export const BRIDGE_ADAPTER_DATA: {
   [ChainID in L2ChainID]?: BridgeAdapterData
 } = {
-  [L2ChainID.OPTIMISM]: {
+  [L2ChainID.BITNETWORK]: {
     BitBTC: {
       Adapter: StandardBridgeAdapter,
       l1Bridge: '0xaBA2c5F108F7E820C049D5Af70B16ac266c8f128' as const,
@@ -172,7 +172,7 @@ export const BRIDGE_ADAPTER_DATA: {
       l2Bridge: '0x467194771dAe2967Aef3ECbEDD3Bf9a310C76C65' as const,
     },
   },
-  [L2ChainID.OPTIMISM_KOVAN]: {
+  [L2ChainID.BITNETWORK_KOVAN]: {
     wstETH: {
       Adapter: DAIBridgeAdapter,
       l1Bridge: '0xa88751C0a08623E11ff38c6B70F2BbEe7865C17c' as const,
@@ -270,7 +270,7 @@ export const getAllOEContracts = (
       StateCommitmentChain: undefined,
       CanonicalTransactionChain: undefined,
       BondManager: undefined,
-      OptimismPortal: undefined,
+      BitnetworkPortal: undefined,
       L2OutputOracle: undefined,
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,

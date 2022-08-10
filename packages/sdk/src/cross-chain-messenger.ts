@@ -282,9 +282,8 @@ export class CrossChainMessenger implements ICrossChainMessenger {
   //   throw new Error(`
   //     The function getMessagesByAddress is currently not enabled because the sender parameter of
   //     the SentMessage event is not indexed within the CrossChainMessenger contracts.
-  //     getMessagesByAddress will be enabled by plugging in an Optimism Indexer (coming soon).
+  //     getMessagesByAddress will be enabled by plugging in an Bitnetwork Indexer (coming soon).
   //     See the following issue on GitHub for additional context:
-  //     https://github.com/ethereum-optimism/optimism/issues/2129
   //   `)
   // }
 
@@ -714,7 +713,7 @@ export class CrossChainMessenger implements ICrossChainMessenger {
 
   public async getChallengePeriodSeconds(): Promise<number> {
     const challengePeriod = this.bedrock
-      ? await this.contracts.l1.OptimismPortal.FINALIZATION_PERIOD_SECONDS()
+      ? await this.contracts.l1.BitnetworkPortal.FINALIZATION_PERIOD_SECONDS()
       : await this.contracts.l1.StateCommitmentChain.FRAUD_PROOF_WINDOW()
     return challengePeriod.toNumber()
   }
@@ -937,7 +936,7 @@ export class CrossChainMessenger implements ICrossChainMessenger {
     // We need to calculate the specific storage slot that demonstrates that this message was
     // actually included in the L2 chain. The following calculation is based on the fact that
     // messages are stored in the following mapping on L2:
-    // https://github.com/ethereum-optimism/optimism/blob/c84d3450225306abbb39b4e7d6d82424341df2be/packages/contracts/contracts/L2/predeploys/BVM_L2ToL1MessagePasser.sol#L23
+    // https://github.com/bitdao-io/bitnetwork/blob/c84d3450225306abbb39b4e7d6d82424341df2be/packages/contracts/contracts/L2/predeploys/BVM_L2ToL1MessagePasser.sol#L23
     // You can read more about how Solidity storage slots are computed for mappings here:
     // https://docs.soliditylang.org/en/v0.8.4/internals/layout_in_storage.html#mappings-and-dynamic-arrays
     const messageSlot = ethers.utils.keccak256(
@@ -1328,7 +1327,7 @@ export class CrossChainMessenger implements ICrossChainMessenger {
           message
         )
 
-        return this.contracts.l1.OptimismPortal.populateTransaction.finalizeWithdrawalTransaction(
+        return this.contracts.l1.BitnetworkPortal.populateTransaction.finalizeWithdrawalTransaction(
           [
             withdrawalTx.messageNonce,
             withdrawalTx.sender,

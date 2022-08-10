@@ -6,7 +6,7 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 /**
  * @custom:legacy
  * @title AddressManager
- * @notice AddressManager is a legacy contract that was used in the old version of the Optimism
+ * @notice AddressManager is a legacy contract that was used in the old version of the Bitnetwork
  *         system to manage a registry of string names to addresses. We now use a more standard
  *         proxy system instead, but this contract is still necessary for backwards compatibility
  *         with several older contracts.

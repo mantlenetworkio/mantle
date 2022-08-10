@@ -12,7 +12,7 @@ STATE_DUMP=${STATE_DUMP:-$REPO/../packages/contracts/dist/dumps/state-dump.lates
 DATADIR=${DATADIR:-$HOME/.ethereum}
 
 # These are the initial key and address that must be used for the clique
-# signer on the optimism network. All nodes must be initialized with this
+# signer on the Bitnetwork network. All nodes must be initialized with this
 # key before they are able to join the network and sync correctly.
 # The signer address needs to be in the genesis block's extradata.
 SIGNER_KEY=6587ae678cf4fc9a33000cdbf9f35226b71dcc6a4684a31203241f9bcfd55d27
