@@ -1,0 +1,1 @@
+# @bitdaoio/hardhat-deploy-config
