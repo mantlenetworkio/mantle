@@ -1,0 +1,47 @@
+{
+  "private": true,
+  "name": "@bitdaoio/message-relayer",
+  "version": "1.0.0",
+  "description": "[Bitnetwork] Service for automatically relaying L2 to L1 transactions",
+  "main": "dist/index",
+  "types": "dist/index",
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "start": "ts-node ./src/service.ts",
+    "test:coverage": "echo 'No tests defined.'",
+    "build": "tsc -p ./tsconfig.json",
+    "clean": "rimraf  dist/ ./tsconfig.tsbuildinfo",
+    "lint": "yarn lint:fix && yarn lint:check",
+    "pre-commit": "lint-staged",
+    "lint:fix": "yarn lint:check --fix",
+    "lint:check": "eslint . --max-warnings=0"
+  },
+  "keywords": [
+    "bitnetwork",
+    "ethereum",
+    "relayer"
+  ],
+  "homepage": "https://github.com/bitdao-io/bitnetwork/tree/develop/packages/message-relayer#readme",
+  "license": "MIT",
+  "author": "Bitnetwork PBC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bitdao-io/bitnetwork.git"
+  },
+  "dependencies": {
+    "@bitdaoio/common-ts": "1.0.0",
+    "@bitdaoio/core-utils": "1.0.0",
+    "@bitdaoio/sdk": "1.0.0",
+    "ethers": "^5.6.8"
+  },
+  "devDependencies": {
+    "@ethersproject/abstract-provider": "^5.6.1",
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "ethereum-waffle": "^3.3.0",
+    "hardhat": "^2.9.6",
+    "ts-node": "^10.0.0"
+  }
+}

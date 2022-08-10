@@ -1,0 +1,53 @@
+{
+  "name": "@bitdaoio/core-utils",
+  "version": "1.0.0",
+  "description": "[BitNetwork] Core typescript utilities",
+  "main": "dist/index",
+  "types": "dist/index",
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "all": "yarn clean && yarn build && yarn test && yarn lint:fix && yarn lint",
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist/ ./tsconfig.tsbuildinfo",
+    "lint": "yarn lint:fix && yarn lint:check",
+    "lint:check": "eslint . --max-warnings=0",
+    "lint:fix": "yarn lint:check --fix",
+    "pre-commit": "lint-staged",
+    "test": "ts-mocha test/*.spec.ts",
+    "test:coverage": "nyc ts-mocha test/*.spec.ts && nyc merge .nyc_output coverage.json"
+  },
+  "keywords": [
+    "bitnetwork",
+    "ethereum",
+    "core",
+    "utils"
+  ],
+  "homepage": "https://github.com/bitnetworkio/bitnetwork/tree/main/packages/core-utils#readme",
+  "license": "MIT",
+  "author": "BitNetwork",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitnetworkio/bitnetwork.git"
+  },
+  "dependencies": {
+    "@ethersproject/abstract-provider": "^5.6.1",
+    "@ethersproject/providers": "^5.6.8",
+    "@ethersproject/transactions": "^5.6.2",
+    "@ethersproject/properties": "^5.6.0",
+    "@ethersproject/web": "^5.6.1",
+    "bufio": "^1.0.7",
+    "chai": "^4.3.4",
+    "ethers": "^5.6.8"
+  },
+  "devDependencies": {
+    "mocha": "^10.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/bitnetworkio/bitnetwork/issues"
+  },
+  "directories": {
+    "test": "test"
+  }
+}

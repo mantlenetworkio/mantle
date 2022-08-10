@@ -1,0 +1,6 @@
+{
+  "name": "@eth-bitnetwork/l2geth",
+  "version": "0.5.23",
+  "private": true,
+  "devDependencies": {}
+}
