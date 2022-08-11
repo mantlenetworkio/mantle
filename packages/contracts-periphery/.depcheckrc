@@ -1,5 +1,4 @@
 ignores: [
-  "@bitdaoio/contracts-bedrock",
   "@openzeppelin/contracts",
   "@openzeppelin/contracts-upgradeable",
   "@ethersproject/providers",

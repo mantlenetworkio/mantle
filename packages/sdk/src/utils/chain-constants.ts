@@ -8,7 +8,6 @@ export const DEPOSIT_CONFIRMATION_BLOCKS: {
   [L2ChainID.BITNETWORK_KOVAN]: 12 as const,
   [L2ChainID.BITNETWORK_HARDHAT_LOCAL]: 2 as const,
   [L2ChainID.BITNETWORK_HARDHAT_DEVNET]: 2 as const,
-  [L2ChainID.BITNETWORK_BEDROCK_LOCAL_DEVNET]: 2 as const,
 }
 
 export const CHAIN_BLOCK_TIMES: {
@@ -18,5 +17,4 @@ export const CHAIN_BLOCK_TIMES: {
   [L1ChainID.GOERLI]: 15 as const,
   [L1ChainID.KOVAN]: 4 as const,
   [L1ChainID.HARDHAT_LOCAL]: 1 as const,
-  [L1ChainID.BEDROCK_LOCAL_DEVNET]: 15 as const,
 }
