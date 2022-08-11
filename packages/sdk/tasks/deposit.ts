@@ -50,10 +50,6 @@ task('deposit', 'Deposits WETH9 onto L2.')
       args.l2ProviderUrl
     )
 
-    const Deployment__L2OutputOracleProxy = await hre.deployments.get(
-      'L2OutputOracleProxy'
-    )
-
     const l2Signer = new hre.ethers.Wallet(
       hre.network.config.accounts[0],
       l2Provider
@@ -68,10 +64,6 @@ task('deposit', 'Deposits WETH9 onto L2.')
 
     const Deployment__BitnetworkMintableERC20TokenFactory =
       await hre.deployments.get('BitnetworkMintableERC20Factory')
-
-    const Deployment__BitnetworkPortalProxy = await hre.deployments.get(
-      'BitnetworkPortalProxy'
-    )
 
     const Deployment__L1StandardBridgeProxy = await hre.deployments.get(
       'L1StandardBridgeProxy'
@@ -98,16 +90,13 @@ task('deposit', 'Deposits WETH9 onto L2.')
           L1StandardBridge: Deployment__L1StandardBridgeProxy.address,
           L1CrossDomainMessenger:
             Deployment__L1CrossDomainMessengerProxy.address,
-          L2OutputOracle: Deployment__L2OutputOracleProxy.address,
-          BitnetworkPortal: Deployment__BitnetworkPortalProxy.address,
         },
       },
-      bedrock: true,
     })
 
     const BitnetworkMintableERC20TokenFactory = await hre.ethers.getContractAt(
       Deployment__BitnetworkMintableERC20TokenFactory.abi,
-      predeploys.BitnetworkMintableERC20Factory,
+      predeploys.WETH9,
       l2Signer
     )
 

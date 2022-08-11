@@ -21,17 +21,6 @@ const config: HardhatUserConfig = {
       ],
     },
   },
-  external: {
-    contracts: [
-      {
-        artifacts: '../contracts-bedrock/artifacts',
-      },
-    ],
-    deployments: {
-      devnetL1: ['../contracts-bedrock/deployments/devnetL1'],
-      goerli: ['../contracts-bedrock/deployments/goerli'],
-    },
-  },
 }
 
 export default config

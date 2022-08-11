@@ -57,7 +57,7 @@
     "url": "https://github.com/bitnetworkio/bitnetwork.git"
   },
   "dependencies": {
-    "@bitdaoio/core-utils": "1.0.2",
+    "@bitdaoio/core-utils": "1.0.3",
     "@ethersproject/abstract-provider": "^5.6.1",
     "@ethersproject/abstract-signer": "^5.6.2"
   },

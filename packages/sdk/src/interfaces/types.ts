@@ -17,7 +17,6 @@ export enum L1ChainID {
   GOERLI = 5,
   KOVAN = 42,
   HARDHAT_LOCAL = 31337,
-  BEDROCK_LOCAL_DEVNET = 900,
 }
 
 /**
@@ -29,7 +28,6 @@ export enum L2ChainID {
   BITNETWORK_KOVAN = 69,
   BITNETWORK_HARDHAT_LOCAL = 31337,
   BITNETWORK_HARDHAT_DEVNET = 17,
-  BITNETWORK_BEDROCK_LOCAL_DEVNET = 901,
 }
 
 /**
@@ -42,9 +40,6 @@ export interface OEL1Contracts {
   StateCommitmentChain: Contract
   CanonicalTransactionChain: Contract
   BondManager: Contract
-  // Bedrock
-  BitnetworkPortal: Contract
-  L2OutputOracle: Contract
 }
 
 /**
@@ -53,7 +48,6 @@ export interface OEL1Contracts {
 export interface OEL2Contracts {
   L2CrossDomainMessenger: Contract
   L2StandardBridge: Contract
-  L2ToL1MessagePasser: Contract
   BVM_L1BlockNumber: Contract
   BVM_L2ToL1MessagePasser: Contract
   BVM_DeployerWhitelist: Contract

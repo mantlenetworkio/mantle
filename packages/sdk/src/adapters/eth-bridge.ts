@@ -180,7 +180,7 @@ export class ETHBridgeAdapter extends StandardBridgeAdapter {
           '0x', // No data.
           {
             ...omit(opts?.overrides || {}, 'value'),
-            value: this.messenger.bedrock ? amount : 0,
+            value: 0,
           }
         )
       } else {
@@ -192,7 +192,7 @@ export class ETHBridgeAdapter extends StandardBridgeAdapter {
           '0x', // No data.
           {
             ...omit(opts?.overrides || {}, 'value'),
-            value: this.messenger.bedrock ? amount : 0,
+            value: 0,
           }
         )
       }

@@ -1,6 +1,6 @@
 {
   "name": "@bitdaoio/sdk",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "[Bitnetwork] Tools for working with Bitnetwork",
   "main": "dist/index",
   "types": "dist/index",
@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@bitdaoio/contracts": "1.0.2",
-    "@bitdaoio/core-utils": "1.0.2",
+    "@bitdaoio/core-utils": "1.0.3",
     "lodash": "^4.17.21",
     "merkletreejs": "^0.2.27",
     "rlp": "^2.2.7"

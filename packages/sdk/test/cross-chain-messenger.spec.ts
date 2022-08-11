@@ -201,8 +201,6 @@ describe('CrossChainMessenger', () => {
                 StateCommitmentChain: '0x' + '14'.repeat(20),
                 CanonicalTransactionChain: '0x' + '15'.repeat(20),
                 BondManager: '0x' + '16'.repeat(20),
-                BitnetworkPortal: '0x' + '17'.repeat(20),
-                L2OutputOracle: '0x' + '18'.repeat(20),
               },
               l2: {
                 L2CrossDomainMessenger: '0x' + '22'.repeat(20),
@@ -509,7 +507,6 @@ describe('CrossChainMessenger', () => {
         )
       })
     })
-
     describe('when the input is a TokenBridgeMessage', () => {
       // TODO: There are some edge cases here with custom bridges that conform to the interface but
       // not to the behavioral spec. Possibly worth testing those. For now this is probably
