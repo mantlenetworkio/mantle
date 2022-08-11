@@ -7,27 +7,27 @@ import {
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { IOptimismMintableERC721 } from "./IOptimismMintableERC721.sol";
+import { IBitnetworkMintableERC721 } from "./IBitnetworkMintableERC721.sol";
 
 /**
- * @title OptimismMintableERC721
+ * @title BitnetworkMintableERC721
  * @notice This contract is the remote representation for some token that lives on another network,
- *         typically an Optimism representation of an Ethereum-based token. Standard reference
+ *         typically an Bitnetwork representation of an Ethereum-based token. Standard reference
  *         implementation that can be extended or modified according to your needs.
  */
-contract OptimismMintableERC721 is ERC721Enumerable, IOptimismMintableERC721 {
+contract BitnetworkMintableERC721 is ERC721Enumerable, IBitnetworkMintableERC721 {
     /**
-     * @inheritdoc IOptimismMintableERC721
+     * @inheritdoc IBitnetworkMintableERC721
      */
     uint256 public immutable remoteChainId;
 
     /**
-     * @inheritdoc IOptimismMintableERC721
+     * @inheritdoc IBitnetworkMintableERC721
      */
     address public immutable remoteToken;
 
     /**
-     * @inheritdoc IOptimismMintableERC721
+     * @inheritdoc IBitnetworkMintableERC721
      */
     address public immutable bridge;
 
@@ -71,12 +71,12 @@ contract OptimismMintableERC721 is ERC721Enumerable, IOptimismMintableERC721 {
      * @notice Modifier that prevents callers other than the bridge from calling the function.
      */
     modifier onlyBridge() {
-        require(msg.sender == bridge, "OptimismMintableERC721: only bridge can call this function");
+        require(msg.sender == bridge, "BitnetworkMintableERC721: only bridge can call this function");
         _;
     }
 
     /**
-     * @inheritdoc IOptimismMintableERC721
+     * @inheritdoc IBitnetworkMintableERC721
      */
     function mint(address _to, uint256 _tokenId) external virtual onlyBridge {
         _mint(_to, _tokenId);
@@ -85,7 +85,7 @@ contract OptimismMintableERC721 is ERC721Enumerable, IOptimismMintableERC721 {
     }
 
     /**
-     * @inheritdoc IOptimismMintableERC721
+     * @inheritdoc IBitnetworkMintableERC721
      */
     function burn(address _from, uint256 _tokenId) external virtual onlyBridge {
         _burn(_tokenId);
@@ -107,7 +107,7 @@ contract OptimismMintableERC721 is ERC721Enumerable, IOptimismMintableERC721 {
         returns (bool)
     {
         bytes4 iface1 = type(IERC165).interfaceId;
-        bytes4 iface2 = type(IOptimismMintableERC721).interfaceId;
+        bytes4 iface2 = type(IBitnetworkMintableERC721).interfaceId;
         return
             _interfaceId == iface1 ||
             _interfaceId == iface2 ||

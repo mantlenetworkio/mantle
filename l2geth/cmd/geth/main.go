@@ -148,10 +148,10 @@ var (
 		configFileFlag,
 	}
 
-	// UsingOVM
-	// Optimism specific flags must be added to the application
+	// UsingBVM
+	// Bitnetwork specific flags must be added to the application
 	// flag parsing logic
-	optimismFlags = []cli.Flag{
+	bitnetworkFlags = []cli.Flag{
 		utils.Eth1SyncServiceEnable,
 		utils.Eth1CanonicalTransactionChainDeployHeightFlag,
 		utils.RollupClientHttpFlag,
@@ -247,7 +247,7 @@ func init() {
 
 	app.Flags = append(app.Flags, nodeFlags...)
 	// UsingOVM
-	app.Flags = append(app.Flags, optimismFlags...)
+	app.Flags = append(app.Flags, bitnetworkFlags...)
 	app.Flags = append(app.Flags, rpcFlags...)
 	app.Flags = append(app.Flags, consoleFlags...)
 	app.Flags = append(app.Flags, debug.Flags...)

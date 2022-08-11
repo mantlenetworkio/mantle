@@ -227,10 +227,10 @@ var (
 	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, new(EthashConfig), nil}
 	TestRules       = TestChainConfig.Rules(new(big.Int))
 
-	// OpMainnetChainID is the ID of Optimism's mainnet chain.
+	// OpMainnetChainID is the ID of Bitnetwork's mainnet chain.
 	OpMainnetChainID = big.NewInt(10)
 
-	// OpKovanChainID is the ID of Optimism's Kovan testnet chain.
+	// OpKovanChainID is the ID of Bitnetwork's Kovan testnet chain.
 	OpKovanChainID = big.NewInt(69)
 
 	// OpMainnetSDUpdateForkNum is the height at which the SD update fork activates on Mainnet.

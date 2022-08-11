@@ -66,11 +66,11 @@ task('deposit', 'Deposits WETH9 onto L2.')
       signer
     )
 
-    const Deployment__OptimismMintableERC20TokenFactory =
-      await hre.deployments.get('OptimismMintableERC20Factory')
+    const Deployment__BitnetworkMintableERC20TokenFactory =
+      await hre.deployments.get('BitnetworkMintableERC20Factory')
 
-    const Deployment__OptimismPortalProxy = await hre.deployments.get(
-      'OptimismPortalProxy'
+    const Deployment__BitnetworkPortalProxy = await hre.deployments.get(
+      'BitnetworkPortalProxy'
     )
 
     const Deployment__L1StandardBridgeProxy = await hre.deployments.get(
@@ -99,15 +99,15 @@ task('deposit', 'Deposits WETH9 onto L2.')
           L1CrossDomainMessenger:
             Deployment__L1CrossDomainMessengerProxy.address,
           L2OutputOracle: Deployment__L2OutputOracleProxy.address,
-          OptimismPortal: Deployment__OptimismPortalProxy.address,
+          BitnetworkPortal: Deployment__BitnetworkPortalProxy.address,
         },
       },
       bedrock: true,
     })
 
-    const OptimismMintableERC20TokenFactory = await hre.ethers.getContractAt(
-      Deployment__OptimismMintableERC20TokenFactory.abi,
-      predeploys.OptimismMintableERC20Factory,
+    const BitnetworkMintableERC20TokenFactory = await hre.ethers.getContractAt(
+      Deployment__BitnetworkMintableERC20TokenFactory.abi,
+      predeploys.BitnetworkMintableERC20Factory,
       l2Signer
     )
 
@@ -118,20 +118,19 @@ task('deposit', 'Deposits WETH9 onto L2.')
 
     console.log('Creating L2 WETH9')
     const deployTx =
-      await OptimismMintableERC20TokenFactory.createOptimismMintableERC20(
+      await BitnetworkMintableERC20TokenFactory.createBitnetworkMintableERC20(
         WETH9.address,
         'L2 Wrapped Ether',
         'L2-WETH9'
       )
     const receipt = await deployTx.wait()
     const event = receipt.events.find(
-      (e: Event) => e.event === 'OptimismMintableERC20Created'
+      (e: Event) => e.event === 'BitnetworkMintableERC20Created'
     )
     if (!event) {
-      throw new Error('Unable to find OptimismMintableERC20Created event')
+      throw new Error('Unable to find BitnetworkMintableERC20Created event')
     }
     // TODO(tynes): may need to be updated based on
-    // https://github.com/ethereum-optimism/optimism/pull/3104
     const l2WethAddress = event.args.remoteToken
     console.log(`Deployed to ${l2WethAddress}`)
 
@@ -168,7 +167,7 @@ task('deposit', 'Deposits WETH9 onto L2.')
 
     const L2WETH9 = new hre.ethers.Contract(
       l2WethAddress,
-      getContractInterface('OptimismMintableERC20'),
+      getContractInterface('BitnetworkMintableERC20'),
       l2Signer
     )
 

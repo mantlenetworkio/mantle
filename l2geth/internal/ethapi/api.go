@@ -978,7 +978,7 @@ func (s *PublicBlockChainAPI) Call(ctx context.Context, args CallArgs, blockNrOr
 	return (hexutil.Bytes)(result), err
 }
 
-// Optimism note: The gasPrice in Optimism is modified to always return 1 gwei. We
+// Bitnetwork note: The gasPrice in Bitnetwork is modified to always return 1 gwei. We
 // use the gasLimit field to communicate the entire user fee. This is done for
 // for compatibility reasons with the existing Ethereum toolchain, so that the user
 // fees can compensate for the additional costs the sequencer pays for publishing the

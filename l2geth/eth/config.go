@@ -181,6 +181,6 @@ type Config struct {
 	// MuirGlacier block override (TODO: remove after the fork)
 	OverrideMuirGlacier *big.Int
 
-	// Optimism Rollup Config
+	// Bitnetwork Rollup Config
 	Rollup rollup.Config
 }

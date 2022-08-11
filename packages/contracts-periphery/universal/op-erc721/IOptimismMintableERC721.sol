@@ -6,11 +6,11 @@ import {
 } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 
 /**
- * @title IOptimismMintableERC721
- * @notice Interface for contracts that are compatible with the OptimismMintableERC721 standard.
+ * @title IBitnetworkMintableERC721
+ * @notice Interface for contracts that are compatible with the BitnetworkMintableERC721 standard.
  *         Tokens that follow this standard can be easily transferred across the ERC721 bridge.
  */
-interface IOptimismMintableERC721 is IERC721Enumerable {
+interface IBitnetworkMintableERC721 is IERC721Enumerable {
     /**
      * @notice Emitted when a token is minted.
      *

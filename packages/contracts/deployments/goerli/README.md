@@ -1,6 +1,6 @@
-# Optimism Goerli (internal devnet)
+# Bitnetwork Goerli (internal devnet)
 ## Notice
-Optimism Goerli is an internal Optimism development network. You're probably looking for [Optimism Kovan](../kovan#readme), the public Optimism testnet.
+Bitnetwork Goerli is an internal Bitnetwork development network. You're probably looking for [Bitnetwork Kovan](../kovan#readme), the public Bitnetwork testnet.
 ## Network Info
 - **Chain ID**: 420
 ## Layer 1 Contracts

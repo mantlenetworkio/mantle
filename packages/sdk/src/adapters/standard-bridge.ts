@@ -156,7 +156,7 @@ export class StandardBridgeAdapter implements IBridgeAdapter {
     try {
       const contract = new Contract(
         toAddress(l2Token),
-        getContractInterface('OptimismMintableERC20'),
+        getContractInterface('BitnetworkMintableERC20'),
         this.messenger.l2Provider
       )
       // Don't support ETH deposits or withdrawals via this bridge.
@@ -203,7 +203,7 @@ export class StandardBridgeAdapter implements IBridgeAdapter {
 
     const token = new Contract(
       toAddress(l1Token),
-      getContractInterface('OptimismMintableERC20'), // Any ERC20 will do
+      getContractInterface('BitnetworkMintableERC20'), // Any ERC20 will do
       this.messenger.l1Provider
     )
 
@@ -270,7 +270,7 @@ export class StandardBridgeAdapter implements IBridgeAdapter {
 
       const token = new Contract(
         toAddress(l1Token),
-        getContractInterface('OptimismMintableERC20'), // Any ERC20 will do
+        getContractInterface('BitnetworkMintableERC20'), // Any ERC20 will do
         this.messenger.l1Provider
       )
 

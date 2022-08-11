@@ -29,11 +29,11 @@ import (
 // be reverted to their upstream implementations.
 
 // Modified dynamic gas cost to always return the cold cost
-func gasSLoadEIP2929Optimism(evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySize uint64) (uint64, error) {
+func gasSLoadEIP2929Bitnetwork(evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySize uint64) (uint64, error) {
 	return params.ColdSloadCostEIP2929, nil
 }
 
-func gasExtCodeCopyEIP2929Optimism(evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySize uint64) (uint64, error) {
+func gasExtCodeCopyEIP2929Bitnetwork(evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySize uint64) (uint64, error) {
 	// memory expansion first (dynamic part of pre-2929 implementation)
 	gas, err := gasExtCodeCopy(evm, contract, stack, mem, memorySize)
 	if err != nil {
@@ -46,11 +46,11 @@ func gasExtCodeCopyEIP2929Optimism(evm *EVM, contract *Contract, stack *Stack, m
 	return gas, nil
 }
 
-func gasEip2929AccountCheckOptimism(evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySize uint64) (uint64, error) {
+func gasEip2929AccountCheckBitnetwork(evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySize uint64) (uint64, error) {
 	return params.ColdAccountAccessCostEIP2929 - params.WarmStorageReadCostEIP2929, nil
 }
 
-func makeCallVariantGasCallEIP2929Optimism(oldCalculator gasFunc) gasFunc {
+func makeCallVariantGasCallEIP2929Bitnetwork(oldCalculator gasFunc) gasFunc {
 	return func(evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySize uint64) (uint64, error) {
 		// The WarmStorageReadCostEIP2929 (100) is already deducted in the form of a constant cost, so
 		// the cost to charge for cold access, if any, is Cold - Warm
@@ -77,15 +77,15 @@ func makeCallVariantGasCallEIP2929Optimism(oldCalculator gasFunc) gasFunc {
 }
 
 var (
-	gasCallEIP2929Optimism         = makeCallVariantGasCallEIP2929Optimism(gasCall)
-	gasDelegateCallEIP2929Optimism = makeCallVariantGasCallEIP2929Optimism(gasDelegateCall)
-	gasStaticCallEIP2929Optimism   = makeCallVariantGasCallEIP2929Optimism(gasStaticCall)
-	gasCallCodeEIP2929Optimism     = makeCallVariantGasCallEIP2929Optimism(gasCallCode)
-	gasSelfdestructEIP2929Optimism = makeSelfdestructGasFnOptimism(true)
+	gasCallEIP2929Bitnetwork         = makeCallVariantGasCallEIP2929Bitnetwork(gasCall)
+	gasDelegateCallEIP2929Bitnetwork = makeCallVariantGasCallEIP2929Bitnetwork(gasDelegateCall)
+	gasStaticCallEIP2929Bitnetwork   = makeCallVariantGasCallEIP2929Bitnetwork(gasStaticCall)
+	gasCallCodeEIP2929Bitnetwork     = makeCallVariantGasCallEIP2929Bitnetwork(gasCallCode)
+	gasSelfdestructEIP2929Bitnetwork = makeSelfdestructGasFnBitnetwork(true)
 )
 
 // makeSelfdestructGasFn can create the selfdestruct dynamic gas function for EIP-2929 and EIP-2539
-func makeSelfdestructGasFnOptimism(refundsEnabled bool) gasFunc {
+func makeSelfdestructGasFnBitnetwork(refundsEnabled bool) gasFunc {
 	gasFunc := func(evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySize uint64) (uint64, error) {
 		address := common.BigToAddress(stack.peek())
 		gas := params.ColdAccountAccessCostEIP2929

@@ -26,7 +26,7 @@
   ],
   "homepage": "https://github.com/bitdaoio/bitnetwork/tree/develop/packages/hardhat-deploy-config#readme",
   "license": "MIT",
-  "author": "Optimism PBC",
+  "author": "Bitnetwork PBC",
   "repository": {
     "type": "git",
     "url": "https://github.com/bitdaoio/bitnetwork.git"

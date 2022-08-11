@@ -139,37 +139,37 @@ func enable3529(jt *JumpTable) {
 }
 
 // UsingOVM
-// Optimism specific changes
+// Bitnetwork specific changes
 func enableMinimal2929(jt *JumpTable) {
 	jt[SLOAD].constantGas = 0
-	jt[SLOAD].dynamicGas = gasSLoadEIP2929Optimism
+	jt[SLOAD].dynamicGas = gasSLoadEIP2929Bitnetwork
 
 	jt[EXTCODECOPY].constantGas = params.WarmStorageReadCostEIP2929
-	jt[EXTCODECOPY].dynamicGas = gasExtCodeCopyEIP2929Optimism
+	jt[EXTCODECOPY].dynamicGas = gasExtCodeCopyEIP2929Bitnetwork
 
 	jt[EXTCODESIZE].constantGas = params.WarmStorageReadCostEIP2929
-	jt[EXTCODESIZE].dynamicGas = gasEip2929AccountCheckOptimism
+	jt[EXTCODESIZE].dynamicGas = gasEip2929AccountCheckBitnetwork
 
 	jt[EXTCODEHASH].constantGas = params.WarmStorageReadCostEIP2929
-	jt[EXTCODEHASH].dynamicGas = gasEip2929AccountCheckOptimism
+	jt[EXTCODEHASH].dynamicGas = gasEip2929AccountCheckBitnetwork
 
 	jt[BALANCE].constantGas = params.WarmStorageReadCostEIP2929
-	jt[BALANCE].dynamicGas = gasEip2929AccountCheckOptimism
+	jt[BALANCE].dynamicGas = gasEip2929AccountCheckBitnetwork
 
 	jt[CALL].constantGas = params.WarmStorageReadCostEIP2929
-	jt[CALL].dynamicGas = gasCallEIP2929Optimism
+	jt[CALL].dynamicGas = gasCallEIP2929Bitnetwork
 
 	jt[CALLCODE].constantGas = params.WarmStorageReadCostEIP2929
-	jt[CALLCODE].dynamicGas = gasCallCodeEIP2929Optimism
+	jt[CALLCODE].dynamicGas = gasCallCodeEIP2929Bitnetwork
 
 	jt[STATICCALL].constantGas = params.WarmStorageReadCostEIP2929
-	jt[STATICCALL].dynamicGas = gasStaticCallEIP2929Optimism
+	jt[STATICCALL].dynamicGas = gasStaticCallEIP2929Bitnetwork
 
 	jt[DELEGATECALL].constantGas = params.WarmStorageReadCostEIP2929
-	jt[DELEGATECALL].dynamicGas = gasDelegateCallEIP2929Optimism
+	jt[DELEGATECALL].dynamicGas = gasDelegateCallEIP2929Bitnetwork
 
 	// This was previously part of the dynamic cost, but we're using it as a constantGas
 	// factor here
 	jt[SELFDESTRUCT].constantGas = params.SelfdestructGasEIP150
-	jt[SELFDESTRUCT].dynamicGas = gasSelfdestructEIP2929Optimism
+	jt[SELFDESTRUCT].dynamicGas = gasSelfdestructEIP2929Bitnetwork
 }

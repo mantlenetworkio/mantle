@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 /**
  * @title BVM_DeployerWhitelist
  * @dev The Deployer Whitelist is a temporary predeploy used to provide additional safety during the
- * initial phases of our mainnet roll out. It is owned by the Optimism team, and defines accounts
+ * initial phases of our mainnet roll out. It is owned by the Bitnetwork team, and defines accounts
  * which are allowed to deploy contracts on Layer2. The Execution Manager will only allow an
  * bvmCREATE or bvmCREATE2 operation to proceed if the deployer's address whitelisted.
  */
