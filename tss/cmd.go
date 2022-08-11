@@ -1,40 +1,42 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/tss"
 	"github.com/bitdao-io/bitnetwork/tss/manager"
 	"github.com/bitdao-io/bitnetwork/tss/node"
+	"github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/spf13/cobra"
 )
 
 func main() {
-	var config tss.Configuration
 	rootCmd := &cobra.Command{
 		Use:   "tss",
 		Short: "Tss Daemon",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			cfgFile, _ := cmd.Flags().GetString("config")
-			loadedCfg, err := tss.LoadConfig(cfgFile)
+			loadedCfg, err := types.LoadConfig(cfgFile)
 			if err != nil {
 				log.Error("fail to load config", err)
 				return err
 			}
-			config = *loadedCfg
-			return nil
+
+			return types.SetCmdConfig(cmd, loadedCfg)
 		},
 	}
 
 	rootCmd.AddCommand(
-		manager.Command(config),
-		node.Command(config),
+		manager.Command(),
+		node.Command(),
 	)
 
-	rootCmd.Flags().StringP("config", "c", "config", "configuration file with extension")
+	rootCmd.PersistentFlags().StringP("config", "c", "config", "configuration file with extension")
 
-	if err := rootCmd.Execute(); err != nil {
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, "config", &types.Configuration{})
+	if err := rootCmd.ExecuteContext(ctx); err != nil {
 		os.Exit(1)
 	}
 }
