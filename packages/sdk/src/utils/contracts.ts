@@ -26,7 +26,6 @@ import {
  */
 export const DEFAULT_L2_CONTRACT_ADDRESSES: OEL2ContractsLike = {
   L2CrossDomainMessenger: predeploys.L2CrossDomainMessenger,
-  L2ToL1MessagePasser: predeploys.BVM_L2ToL1MessagePasser,
   L2StandardBridge: predeploys.L2StandardBridge,
   BVM_L1BlockNumber: predeploys.BVM_L1BlockNumber,
   BVM_L2ToL1MessagePasser: predeploys.BVM_L2ToL1MessagePasser,
@@ -242,8 +241,6 @@ export const getAllOEContracts = (
       StateCommitmentChain: undefined,
       CanonicalTransactionChain: undefined,
       BondManager: undefined,
-      BitnetworkPortal: undefined,
-      L2OutputOracle: undefined,
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   }

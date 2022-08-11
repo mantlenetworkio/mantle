@@ -507,7 +507,6 @@ describe('CrossChainMessenger', () => {
         )
       })
     })
-
     describe('when the input is a TokenBridgeMessage', () => {
       // TODO: There are some edge cases here with custom bridges that conform to the interface but
       // not to the behavioral spec. Possibly worth testing those. For now this is probably

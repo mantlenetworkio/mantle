@@ -48,7 +48,6 @@ export interface OEL1Contracts {
 export interface OEL2Contracts {
   L2CrossDomainMessenger: Contract
   L2StandardBridge: Contract
-  L2ToL1MessagePasser: Contract
   BVM_L1BlockNumber: Contract
   BVM_L2ToL1MessagePasser: Contract
   BVM_DeployerWhitelist: Contract
