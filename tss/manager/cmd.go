@@ -3,6 +3,7 @@ package manager
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -10,25 +11,28 @@ import (
 	"time"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/tss"
 	"github.com/bitdao-io/bitnetwork/tss/manager/router"
+	"github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 )
 
-func Command(cfg tss.Configuration) *cobra.Command {
+func Command() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "manager",
 		Short: "launch a tss manager process",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return run(cfg)
+			return run(cmd)
 		},
 	}
 	return cmd
 }
 
-func run(cfg tss.Configuration) error {
+func run(cmd *cobra.Command) error {
+	config := types.GetConfigFromCmd(cmd)
+	fmt.Println(config)
+
 	wsServer, err := server.NewWSServer("")
 	if err != nil {
 		return err
