@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/ethereum-optimism/optimism/tss"
-	"github.com/ethereum-optimism/optimism/tss/manager"
-	"github.com/ethereum-optimism/optimism/tss/node"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/bitnetwork/tss"
+	"github.com/bitdao-io/bitnetwork/tss/manager"
+	"github.com/bitdao-io/bitnetwork/tss/node"
+	"github.com/spf13/cobra"
 )
 
 func main() {

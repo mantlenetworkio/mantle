@@ -3,8 +3,8 @@ package manager
 import (
 	"errors"
 
-	"github.com/ethereum-optimism/optimism/tss/manager/types"
-	"github.com/ethereum-optimism/optimism/tss/ws/server"
+	"github.com/bitdao-io/bitnetwork/tss/manager/types"
+	"github.com/bitdao-io/bitnetwork/tss/ws/server"
 )
 
 const threshold = 3

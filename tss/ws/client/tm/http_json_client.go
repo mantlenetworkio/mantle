@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	tmsync "github.com/tendermint/tendermint/libs/sync"
-	types "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+	"github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
 const (

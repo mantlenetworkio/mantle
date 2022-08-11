@@ -3,11 +3,12 @@ package client
 import (
 	"context"
 	"crypto/ecdsa"
+	"time"
+
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/ethereum-optimism/optimism/tss/ws/client/tm"
+	"github.com/bitdao-io/bitnetwork/tss/ws/client/tm"
 	tmsync "github.com/tendermint/tendermint/libs/sync"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
-	"time"
 )
 
 type WSClients struct {

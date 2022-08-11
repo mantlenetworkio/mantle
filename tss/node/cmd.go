@@ -1,7 +1,7 @@
 package node
 
 import (
-	"github.com/ethereum-optimism/optimism/tss"
+	"github.com/bitdao-io/bitnetwork/tss"
 	"github.com/spf13/cobra"
 )
 

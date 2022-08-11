@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/ethereum-optimism/optimism/tss/manager/types"
+	"github.com/bitdao-io/bitnetwork/tss/manager/types"
 	"github.com/gin-gonic/gin"
 )
 

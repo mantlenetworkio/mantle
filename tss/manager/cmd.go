@@ -3,17 +3,18 @@ package manager
 import (
 	"context"
 	"errors"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/ethereum-optimism/optimism/tss"
-	"github.com/ethereum-optimism/optimism/tss/manager/router"
-	"github.com/ethereum-optimism/optimism/tss/ws/server"
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/cobra"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/bitnetwork/tss"
+	"github.com/bitdao-io/bitnetwork/tss/manager/router"
+	"github.com/bitdao-io/bitnetwork/tss/ws/server"
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/cobra"
 )
 
 func Command(cfg tss.Configuration) *cobra.Command {
