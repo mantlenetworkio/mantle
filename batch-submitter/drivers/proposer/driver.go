@@ -208,7 +208,7 @@ func (d *Driver) CraftBatchTx(
 	offsetStartsAtIndex := new(big.Int).Sub(start, blockOffset)
 
 	tx, err := d.sccContract.AppendStateBatch(
-		opts, stateRoots, offsetStartsAtIndex,
+		opts, stateRoots, []byte("0x00"), offsetStartsAtIndex,
 	)
 	switch {
 	case err == nil:
@@ -225,7 +225,7 @@ func (d *Driver) CraftBatchTx(
 			"by current backend, using fallback gasTipCap")
 		opts.GasTipCap = drivers.FallbackGasTipCap
 		return d.sccContract.AppendStateBatch(
-			opts, stateRoots, offsetStartsAtIndex,
+			opts, stateRoots, []byte("0x00"), offsetStartsAtIndex,
 		)
 
 	default:
