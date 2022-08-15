@@ -47,7 +47,7 @@ function SEQUENCER_PUBLISH_WINDOW() external view returns (uint256)
 ### appendStateBatch
 
 ```solidity
-function appendStateBatch(bytes32[] _batch, uint256 _shouldStartAtElement) external nonpayable
+function appendStateBatch(bytes32[] _batch, bytes _signature, uint256 _shouldStartAtElement) external nonpayable
 ```
 
 Appends a batch of state roots to the chain.
@@ -59,6 +59,7 @@ Appends a batch of state roots to the chain.
 | Name | Type | Description |
 |---|---|---|
 | _batch | bytes32[] | Batch of state roots.
+| _signature | bytes | undefined
 | _shouldStartAtElement | uint256 | Index of the element at which this batch should start.
 
 ### batches
@@ -237,7 +238,7 @@ Verifies a batch inclusion proof.
 ### StateBatchAppended
 
 ```solidity
-event StateBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint256 _batchSize, uint256 _prevTotalElements, bytes _extraData)
+event StateBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint256 _batchSize, uint256 _prevTotalElements, bytes signature, bytes _extraData)
 ```
 
 
@@ -252,6 +253,7 @@ event StateBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint25
 | _batchRoot  | bytes32 | undefined |
 | _batchSize  | uint256 | undefined |
 | _prevTotalElements  | uint256 | undefined |
+| signature  | bytes | undefined |
 | _extraData  | bytes | undefined |
 
 ### StateBatchDeleted
