@@ -10,21 +10,21 @@ import { envConfig, DEFAULT_TEST_GAS_L1 } from './shared/utils'
 import { BitnetworkEnv } from './shared/env'
 
 /**
- * These tests cover the OVM execution contexts. In the OVM execution
+ * These tests cover the BVM execution contexts. In the BVM execution
  * of a L1 to L2 transaction, both `block.number` and `block.timestamp`
  * must be equal to the blocknumber/timestamp of the L1 transaction.
  */
-describe('OVM Context: Layer 2 EVM Context', () => {
+describe('BVM Context: Layer 2 EVM Context', () => {
   let env: BitnetworkEnv
   before(async () => {
     env = await BitnetworkEnv.new()
   })
 
   let Multicall: Contract
-  let OVMContextStorage: Contract
+  let BVMContextStorage: Contract
   beforeEach(async () => {
-    const OVMContextStorageFactory = await ethers.getContractFactory(
-      'OVMContextStorage',
+    const BVMContextStorageFactory = await ethers.getContractFactory(
+      'BVMContextStorage',
       env.l2Wallet
     )
     const MulticallFactory = await ethers.getContractFactory(
@@ -32,8 +32,8 @@ describe('OVM Context: Layer 2 EVM Context', () => {
       env.l2Wallet
     )
 
-    OVMContextStorage = await OVMContextStorageFactory.deploy()
-    await OVMContextStorage.deployTransaction.wait()
+    BVMContextStorage = await BVMContextStorageFactory.deploy()
+    await BVMContextStorage.deployTransaction.wait()
     Multicall = await MulticallFactory.deploy()
     await Multicall.deployTransaction.wait()
   })
@@ -46,7 +46,7 @@ describe('OVM Context: Layer 2 EVM Context', () => {
       // information like the L1 block number and L1 timestamp.
       const tx =
         await env.messenger.contracts.l1.L1CrossDomainMessenger.sendMessage(
-          OVMContextStorage.address,
+          BVMContextStorage.address,
           '0x',
           2_000_000,
           {
@@ -66,31 +66,31 @@ describe('OVM Context: Layer 2 EVM Context', () => {
       )
 
       // block.number should return the value of the L2 block number.
-      const l2BlockNumber = await OVMContextStorage.blockNumbers(i)
+      const l2BlockNumber = await BVMContextStorage.blockNumbers(i)
       expect(l2BlockNumber.toNumber()).to.deep.equal(l2Block.number)
 
       // L1BLOCKNUMBER opcode should return the value of the L1 block number.
-      const l1BlockNumber = await OVMContextStorage.l1BlockNumbers(i)
+      const l1BlockNumber = await BVMContextStorage.l1BlockNumbers(i)
       expect(l1BlockNumber.toNumber()).to.deep.equal(l1Block.number)
 
       // L1 and L2 blocks will have approximately the same timestamp.
-      const timestamp = await OVMContextStorage.timestamps(i)
+      const timestamp = await BVMContextStorage.timestamps(i)
       expectApprox(timestamp.toNumber(), l1Block.timestamp, {
         percentUpperDeviation: 5,
       })
       expect(timestamp.toNumber()).to.deep.equal(l2Block.timestamp)
 
       // Difficulty should always be zero.
-      const difficulty = await OVMContextStorage.difficulty(i)
+      const difficulty = await BVMContextStorage.difficulty(i)
       expect(difficulty.toNumber()).to.equal(0)
 
       // Coinbase should always be sequencer fee vault.
-      const coinbase = await OVMContextStorage.coinbases(i)
+      const coinbase = await BVMContextStorage.coinbases(i)
       expect(coinbase).to.equal(predeploys.BVM_SequencerFeeVault)
     }
   })
 
-  it('should set correct OVM Context for `eth_call`', async () => {
+  it('should set correct BVM Context for `eth_call`', async () => {
     for (let i = 0; i < numTxs; i++) {
       // Make an empty transaction to bump the latest block number.
       const dummyTx = await env.l2Wallet.sendTransaction({
@@ -103,20 +103,20 @@ describe('OVM Context: Layer 2 EVM Context', () => {
       const [, returnData] = await Multicall.callStatic.aggregate(
         [
           [
-            OVMContextStorage.address,
-            OVMContextStorage.interface.encodeFunctionData(
+            BVMContextStorage.address,
+            BVMContextStorage.interface.encodeFunctionData(
               'getCurrentBlockTimestamp'
             ),
           ],
           [
-            OVMContextStorage.address,
-            OVMContextStorage.interface.encodeFunctionData(
+            BVMContextStorage.address,
+            BVMContextStorage.interface.encodeFunctionData(
               'getCurrentBlockNumber'
             ),
           ],
           [
-            OVMContextStorage.address,
-            OVMContextStorage.interface.encodeFunctionData(
+            BVMContextStorage.address,
+            BVMContextStorage.interface.encodeFunctionData(
               'getCurrentL1BlockNumber'
             ),
           ],
@@ -136,9 +136,9 @@ describe('OVM Context: Layer 2 EVM Context', () => {
   })
 
   /**
-   * `rollup_getInfo` is a new RPC endpoint that is used to return the OVM
+   * `rollup_getInfo` is a new RPC endpoint that is used to return the BVM
    * context. The data returned should match what is actually being used as the
-   * OVM context.
+   * BVM context.
    */
   // TODO: This test is not reliable. If we really care about this then we need to figure out a
   // more reliable way to test this behavior.
@@ -150,14 +150,14 @@ describe('OVM Context: Layer 2 EVM Context', () => {
     //   L2Provider.send('rollup_getInfo', []),
     //   Multicall.callStatic.aggregate([
     //     [
-    //       OVMContextStorage.address,
-    //       OVMContextStorage.interface.encodeFunctionData(
+    //       BVMContextStorage.address,
+    //       BVMContextStorage.interface.encodeFunctionData(
     //         'getCurrentBlockTimestamp'
     //       ),
     //     ],
     //     [
-    //       OVMContextStorage.address,
-    //       OVMContextStorage.interface.encodeFunctionData(
+    //       BVMContextStorage.address,
+    //       BVMContextStorage.interface.encodeFunctionData(
     //         'getCurrentL1BlockNumber'
     //       ),
     //     ],
