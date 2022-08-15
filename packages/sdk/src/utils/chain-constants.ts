@@ -6,6 +6,7 @@ export const DEPOSIT_CONFIRMATION_BLOCKS: {
   [L2ChainID.BITNETWORK]: 50 as const,
   [L2ChainID.BITNETWORK_GOERLI]: 12 as const,
   [L2ChainID.BITNETWORK_KOVAN]: 12 as const,
+  [L2ChainID.BITNETWORK_GOERLIQA]: 12 as const,
   [L2ChainID.BITNETWORK_HARDHAT_LOCAL]: 2 as const,
   [L2ChainID.BITNETWORK_HARDHAT_DEVNET]: 2 as const,
 }

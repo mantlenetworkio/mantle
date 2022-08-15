@@ -96,6 +96,20 @@ export const CONTRACT_ADDRESSES: {
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
+  [L2ChainID.BITNETWORK_GOERLIQA]: {
+    l1: {
+      AddressManager: '0x814f96200465c7E0567E29E47B48fBD84E26c8bC' as const,
+      L1CrossDomainMessenger:
+        '0x0De8cB7b76E7dc0b9AD597975952236c16727E73' as const,
+      L1StandardBridge: '0x1563316bB249e4071C0e748779c7d713CB0CE930' as const,
+      StateCommitmentChain:
+        '0x48ecF751613E1EE471B6645B474B6407214E9992' as const,
+      CanonicalTransactionChain:
+        '0x54b8957F8027D300922C6AfE1565421b5869DE63' as const,
+      BondManager: '0x44516aAcBA92503e6013863986e615a52447731e' as const,
+    },
+    l2: DEFAULT_L2_CONTRACT_ADDRESSES,
+  },
   [L2ChainID.BITNETWORK_HARDHAT_LOCAL]: {
     l1: {
       AddressManager: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as const,
