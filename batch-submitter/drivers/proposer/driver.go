@@ -9,11 +9,13 @@ import (
 
 	"github.com/bitdao-io/bitnetwork/batch-submitter/bindings/ctc"
 	"github.com/bitdao-io/bitnetwork/batch-submitter/bindings/scc"
+	tssClient "github.com/bitdao-io/bitnetwork/batch-submitter/tss-client"
 	"github.com/bitdao-io/bitnetwork/bss-core/drivers"
 	"github.com/bitdao-io/bitnetwork/bss-core/metrics"
 	"github.com/bitdao-io/bitnetwork/bss-core/txmgr"
 	l2ethclient "github.com/bitdao-io/bitnetwork/l2geth/ethclient"
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	tss_types "github.com/bitdao-io/bitnetwork/tss/manager/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -31,6 +33,7 @@ type Config struct {
 	Name                 string
 	L1Client             *ethclient.Client
 	L2Client             *l2ethclient.Client
+	TssClient            *tssClient.Client
 	BlockOffset          uint64
 	MaxStateRootElements uint64
 	MinStateRootElements uint64
@@ -163,8 +166,7 @@ func (d *Driver) CraftBatchTx(
 
 	name := d.cfg.Name
 
-	log.Info(name+" crafting batch tx", "start", start, "end", end,
-		"nonce", nonce)
+	log.Info(name+" crafting batch tx", "start", start, "end", end, "nonce", nonce)
 
 	var stateRoots [][stateRootSize]byte
 	for i := new(big.Int).Set(start); i.Cmp(end) < 0; i.Add(i, bigOne) {
@@ -206,14 +208,22 @@ func (d *Driver) CraftBatchTx(
 
 	blockOffset := new(big.Int).SetUint64(d.cfg.BlockOffset)
 	offsetStartsAtIndex := new(big.Int).Sub(start, blockOffset)
-
+	// Assembly data request tss node signature
+	tssReqParams := tss_types.SignStateRequest{
+		StartBlock:          start,
+		OffsetStartsAtIndex: offsetStartsAtIndex,
+		StateRoots:          stateRoots,
+	}
+	signature, err := d.cfg.TssClient.GetSignStateBatch(tssReqParams)
+	if err != nil {
+		log.Error("get tss manager signature fail")
+	}
 	tx, err := d.sccContract.AppendStateBatch(
-		opts, stateRoots, []byte("0x00"), offsetStartsAtIndex,
+		opts, stateRoots, signature, offsetStartsAtIndex,
 	)
 	switch {
 	case err == nil:
 		return tx, nil
-
 	// If the transaction failed because the backend does not support
 	// eth_maxPriorityFeePerGas, fallback to using the default constant.
 	// Currently Alchemy is the only backend provider that exposes this method,
@@ -225,9 +235,8 @@ func (d *Driver) CraftBatchTx(
 			"by current backend, using fallback gasTipCap")
 		opts.GasTipCap = drivers.FallbackGasTipCap
 		return d.sccContract.AppendStateBatch(
-			opts, stateRoots, []byte("0x00"), offsetStartsAtIndex,
+			opts, stateRoots, signature, offsetStartsAtIndex,
 		)
-
 	default:
 		return nil, err
 	}

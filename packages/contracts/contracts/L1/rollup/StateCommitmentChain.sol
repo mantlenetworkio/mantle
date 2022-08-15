@@ -105,7 +105,8 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
                 ICanonicalTransactionChain(resolve("CanonicalTransactionChain")).getTotalElements(),
             "Number of state roots cannot exceed the number of canonical transactions."
         );
-
+        // todo: ecdsa sign decode _signature, _batch and _shouldStartAtElement msg32 verify, cpk signature verify.
+        
         // Pass the block's timestamp and the publisher of the data
         // to be used in the fraud proofs
         _appendBatch(_batch, _signature, abi.encode(block.timestamp, msg.sender));
