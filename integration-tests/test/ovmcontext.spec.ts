@@ -38,7 +38,7 @@ describe('OVM Context: Layer 2 EVM Context', () => {
     await Multicall.deployTransaction.wait()
   })
 
-  const numTxs = envConfig.OVMCONTEXT_SPEC_NUM_TXS
+  const numTxs = envConfig.BVMCONTEXT_SPEC_NUM_TXS
 
   it('enqueue: L1 contextual values are correctly set in L2', async () => {
     for (let i = 0; i < numTxs; i++) {
@@ -86,7 +86,7 @@ describe('OVM Context: Layer 2 EVM Context', () => {
 
       // Coinbase should always be sequencer fee vault.
       const coinbase = await OVMContextStorage.coinbases(i)
-      expect(coinbase).to.equal(predeploys.OVM_SequencerFeeVault)
+      expect(coinbase).to.equal(predeploys.BVM_SequencerFeeVault)
     }
   })
 
