@@ -508,6 +508,7 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
             batchRoot: _transactionRoot,
             batchSize: _batchSize,
             prevTotalElements: totalElements,
+            signature:  hex"",
             extraData: hex""
         });
 
@@ -516,6 +517,7 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
             header.batchRoot,
             header.batchSize,
             header.prevTotalElements,
+            header.signature,
             header.extraData
         );
 

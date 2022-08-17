@@ -17,6 +17,7 @@ interface IStateCommitmentChain {
         bytes32 _batchRoot,
         uint256 _batchSize,
         uint256 _prevTotalElements,
+        bytes signature,
         bytes _extraData
     );
 
@@ -49,7 +50,7 @@ interface IStateCommitmentChain {
      * @param _batch Batch of state roots.
      * @param _shouldStartAtElement Index of the element at which this batch should start.
      */
-    function appendStateBatch(bytes32[] calldata _batch, uint256 _shouldStartAtElement) external;
+    function appendStateBatch(bytes32[] calldata _batch, bytes memory _signature, uint256 _shouldStartAtElement) external;
 
     /**
      * Deletes all state roots after (and including) a given batch.
