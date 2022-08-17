@@ -50,6 +50,9 @@ func (c *Client) GetSignStateBatch(BatchData types.SignStateRequest) ([]byte, er
 	if err != nil {
 		return nil, fmt.Errorf("cannot get signature: %w", err)
 	}
-	signature = response.Body()
-	return signature, nil
+	if response.StatusCode() == 200 {
+		return response.Body(), nil
+	} else {
+		return nil, errors.New("fetch tss manager signature faill")
+	}
 }
