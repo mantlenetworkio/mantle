@@ -18,6 +18,7 @@ package core
 
 import (
 	"errors"
+	"github.com/bitdao-io/bitnetwork/l2geth/rollup/dump"
 	"math"
 	"math/big"
 
@@ -274,10 +275,10 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		// codepath. Add the L1 fee to the L2 fee for the total fee that is sent
 		// to the sequencer.
 		l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
-		fee := new(big.Int).Add(st.l1Fee, l2Fee)
-		st.state.AddBalance(evm.Coinbase, fee)
+		st.state.AddBalance(dump.L1ExcuteFeeWallet, st.l1Fee)
+		st.state.AddBalance(dump.L2ExcuteFeeWallet, l2Fee)
 	} else {
-		st.state.AddBalance(evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
+		st.state.AddBalance(dump.L2ExcuteFeeWallet, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
 	}
 
 	return ret, st.gasUsed(), vmerr != nil, err

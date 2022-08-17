@@ -520,7 +520,7 @@ func (evm *EVM) ChainConfig() *params.ChainConfig { return evm.chainConfig }
 func (evm *EVM) AddressWhitelisted(addr common.Address) bool {
 	// First check if the owner is address(0), which implicitly disables the whitelist.
 	ownerKey := common.Hash{}
-	owner := evm.StateDB.GetState(dump.OvmWhitelistAddress, ownerKey)
+	owner := evm.StateDB.GetState(dump.BvmWhitelistAddress, ownerKey)
 	if (owner == common.Hash{}) {
 		return true
 	}
@@ -533,6 +533,6 @@ func (evm *EVM) AddressWhitelisted(addr common.Address) bool {
 	hasher.Write(common.LeftPadBytes(position.Bytes(), 32))
 	digest := hasher.Sum(nil)
 	key := common.BytesToHash(digest)
-	isWhitelisted := evm.StateDB.GetState(dump.OvmWhitelistAddress, key)
+	isWhitelisted := evm.StateDB.GetState(dump.BvmWhitelistAddress, key)
 	return isWhitelisted != common.Hash{}
 }

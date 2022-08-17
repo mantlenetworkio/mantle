@@ -245,7 +245,7 @@ func (s *StateDB) GetBalance(addr common.Address) *big.Int {
 		// Get balance from the OVM_ETH contract.
 		// NOTE: We may remove this feature in a future release.
 		key := GetOVMBalanceKey(addr)
-		bal := s.GetState(dump.OvmEthAddress, key)
+		bal := s.GetState(dump.BvmBitAddress, key)
 		return bal.Big()
 	} else {
 		stateObject := s.getStateObject(addr)
@@ -378,10 +378,10 @@ func (s *StateDB) AddBalance(addr common.Address, amount *big.Int) {
 		// uses this codepath already checks for them. You can follow the original codepath below
 		// (stateObject.AddBalance) to confirm that there are no checks being performed here.
 		key := GetOVMBalanceKey(addr)
-		value := s.GetState(dump.OvmEthAddress, key)
+		value := s.GetState(dump.BvmBitAddress, key)
 		bal := value.Big()
 		bal = bal.Add(bal, amount)
-		s.SetState(dump.OvmEthAddress, key, common.BigToHash(bal))
+		s.SetState(dump.BvmBitAddress, key, common.BigToHash(bal))
 	} else {
 		stateObject := s.GetOrNewStateObject(addr)
 		if stateObject != nil {
@@ -398,10 +398,10 @@ func (s *StateDB) SubBalance(addr common.Address, amount *big.Int) {
 		// uses this codepath already checks for them. You can follow the original codepath below
 		// (stateObject.SubBalance) to confirm that there are no checks being performed here.
 		key := GetOVMBalanceKey(addr)
-		value := s.GetState(dump.OvmEthAddress, key)
+		value := s.GetState(dump.BvmBitAddress, key)
 		bal := value.Big()
 		bal = bal.Sub(bal, amount)
-		s.SetState(dump.OvmEthAddress, key, common.BigToHash(bal))
+		s.SetState(dump.BvmBitAddress, key, common.BigToHash(bal))
 	} else {
 		stateObject := s.GetOrNewStateObject(addr)
 		if stateObject != nil {
@@ -414,7 +414,7 @@ func (s *StateDB) SetBalance(addr common.Address, amount *big.Int) {
 	if rcfg.UsingOVM {
 		// Mutate the storage slot inside of OVM_ETH to change balances.
 		key := GetOVMBalanceKey(addr)
-		s.SetState(dump.OvmEthAddress, key, common.BigToHash(amount))
+		s.SetState(dump.BvmBitAddress, key, common.BigToHash(amount))
 	} else {
 		stateObject := s.GetOrNewStateObject(addr)
 		if stateObject != nil {
