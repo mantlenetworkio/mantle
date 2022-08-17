@@ -2,6 +2,7 @@ package batchsubmitter
 
 import (
 	"context"
+	tss "github.com/bitdao-io/bitnetwork/batch-submitter/tss-client"
 	"os"
 	"time"
 
@@ -102,6 +103,9 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			return err
 		}
 
+		tssClient := tss.NewClient(cfg.TssClientUrl)
+		log.Info("Configured tss client", "url", cfg.TssClientUrl)
+
 		if cfg.MetricsServerEnable {
 			go metrics.RunServer(cfg.MetricsHostname, cfg.MetricsPort)
 		}
@@ -152,6 +156,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				Name:                 "Proposer",
 				L1Client:             l1Client,
 				L2Client:             l2Client,
+				TssClient:            tssClient,
 				BlockOffset:          cfg.BlockOffset,
 				MinStateRootElements: cfg.MinStateRootElements,
 				MaxStateRootElements: cfg.MaxStateRootElements,

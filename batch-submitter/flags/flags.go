@@ -40,6 +40,12 @@ var (
 		Required: true,
 		EnvVar:   "L2_ETH_RPC",
 	}
+	TssClientUrl = cli.StringFlag{
+		Name:     "tss-client-url",
+		Usage:    "HTTP provider URL for tss",
+		Required: true,
+		EnvVar:   "TSS_CLIENT_RPC",
+	}
 	CTCAddressFlag = cli.StringFlag{
 		Name:     "ctc-address",
 		Usage:    "Address of the CTC contract",
@@ -257,6 +263,7 @@ var requiredFlags = []cli.Flag{
 	EthNetworkNameFlag,
 	L1EthRpcFlag,
 	L2EthRpcFlag,
+	TssClientUrl,
 	CTCAddressFlag,
 	SCCAddressFlag,
 	MinL1TxSizeFlag,

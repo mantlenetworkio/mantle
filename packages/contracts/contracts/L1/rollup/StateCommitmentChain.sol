@@ -84,7 +84,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
      * @inheritdoc IStateCommitmentChain
      */
     // slither-disable-next-line external-function
-    function appendStateBatch(bytes32[] memory _batch, uint256 _shouldStartAtElement) public {
+    function appendStateBatch(bytes32[] memory _batch, bytes memory _signature, uint256 _shouldStartAtElement) public {
         // Fail fast in to make sure our batch roots aren't accidentally made fraudulent by the
         // publication of batches by some other user.
         require(
@@ -105,10 +105,11 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
                 ICanonicalTransactionChain(resolve("CanonicalTransactionChain")).getTotalElements(),
             "Number of state roots cannot exceed the number of canonical transactions."
         );
-
+        // todo: ecdsa sign decode _signature, _batch and _shouldStartAtElement msg32 verify, cpk signature verify.
+        
         // Pass the block's timestamp and the publisher of the data
         // to be used in the fraud proofs
-        _appendBatch(_batch, abi.encode(block.timestamp, msg.sender));
+        _appendBatch(_batch, _signature, abi.encode(block.timestamp, msg.sender));
     }
 
     /**
@@ -227,7 +228,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
      * @param _batch Elements within the batch.
      * @param _extraData Any extra data to append to the batch.
      */
-    function _appendBatch(bytes32[] memory _batch, bytes memory _extraData) internal {
+    function _appendBatch(bytes32[] memory _batch, bytes memory _signature, bytes memory _extraData) internal {
         address sequencer = resolve("BVM_Proposer");
         (uint40 totalElements, uint40 lastSequencerTimestamp) = _getBatchExtraData();
 
@@ -252,6 +253,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
             batchRoot: Lib_MerkleTree.getMerkleRoot(_batch),
             batchSize: _batch.length,
             prevTotalElements: totalElements,
+            signature: _signature,
             extraData: _extraData
         });
 
@@ -260,6 +262,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
             batchHeader.batchRoot,
             batchHeader.batchSize,
             batchHeader.prevTotalElements,
+            batchHeader.signature,
             batchHeader.extraData
         );
 
