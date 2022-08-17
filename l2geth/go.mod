@@ -17,7 +17,7 @@ require (
 	github.com/docker/docker v20.10.10+incompatible
 	github.com/edsrzf/mmap-go v1.1.0
 	github.com/elastic/gosigar v0.12.0
-	github.com/ethereum/go-ethereum v1.10.16
+	github.com/ethereum/go-ethereum v1.10.17
 	github.com/fatih/color v1.7.0
 	github.com/fjl/memsize v0.0.1
 	github.com/gballet/go-libpcsclite v0.0.0-20191108122812-4678299bea08
@@ -59,15 +59,14 @@ require (
 	github.com/wsddn/go-ecdh v0.0.0-20161211032359-48726bab9208
 	golang.org/x/crypto v0.0.0-20220307211146-efcb8507fb70
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20220204135822-1c1b9b1eba6a
+	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7
-	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65
+	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce
 	gopkg.in/olebedev/go-duktape.v3 v3.0.0-20200619000410-60c24ae608a6
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/urfave/cli.v1 v1.20.0
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	gotest.tools/v3 v3.0.3 // indirect
 )
