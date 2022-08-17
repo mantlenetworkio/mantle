@@ -73,7 +73,7 @@ func NewSequencerSet(seqz []*Sequencer) *SequencerSet {
 		panic(fmt.Sprintf("Cannot create sequencer set: %v", err))
 	}
 	if len(seqz) > 0 {
-		seqs.IncrementProposerPriority(1)
+		seqs.IncrementProducerPriority(1)
 	}
 	return seqs
 }
@@ -101,23 +101,23 @@ func (seqs *SequencerSet) IsNilOrEmpty() bool {
 	return seqs == nil || len(seqs.Sequencers) == 0
 }
 
-// CopyIncrementProducerPriority increments ProposerPriority and updates the
-// proposer on a copy, and returns it.
+// CopyIncrementProducerPriority increments ProducerPriority and updates the
+// producer on a copy, and returns it.
 func (seqs *SequencerSet) CopyIncrementProducerPriority(times int32) *SequencerSet {
 	copy := seqs.Copy()
-	copy.IncrementProposerPriority(times)
+	copy.IncrementProducerPriority(times)
 	return copy
 }
 
-// IncrementProposerPriority increments ProposerPriority of each sequencer and
-// updates the proposer. Panics if sequencer set is empty.
+// IncrementProposerPriority increments ProducerPriority of each sequencer and
+// updates the producer. Panics if sequencer set is empty.
 // `times` must be positive.
-func (seqs *SequencerSet) IncrementProposerPriority(times int32) {
+func (seqs *SequencerSet) IncrementProducerPriority(times int32) {
 	if seqs.IsNilOrEmpty() {
 		panic("empty sequencer set")
 	}
 	if times <= 0 {
-		panic("Cannot call IncrementProposerPriority with non-positive times")
+		panic("Cannot call IncrementProducerPriority with non-positive times")
 	}
 
 	// Cap the difference between priorities to be proportional to 2*totalPower by

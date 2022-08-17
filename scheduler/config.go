@@ -67,11 +67,11 @@ type Config struct {
 	SCCAddress string
 
 	// MinL1TxSize is the minimum size in bytes of any L1 transactions generated
-	// by the batch submitter.
+	// by the scheduler.
 	MinL1TxSize uint64
 
 	// MaxL1TxSize is the maximum size in bytes of any L1 transactions generated
-	// by the batch submitter.
+	// by the scheduler.
 	MaxL1TxSize uint64
 
 	// MaxPlaintextL1TxSize is the maximum size in bytes of the plaintext tx

@@ -11,7 +11,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// Main is the entrypoint into the batch submitter service. This method returns
+// Main is the entrypoint into the scheduler service. This method returns
 // a closure that executes the service and blocks until the service exits. The
 // use of a closure allows the parameters bound to the top-level main package,
 // e.g. GitVersion, to be captured and used once the function is executed.
@@ -32,7 +32,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			defer sentry.Flush(2 * time.Second)
 		}
 
-		log.Info("Initializing batch submitter")
+		log.Info("Initializing scheduler")
 
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
@@ -45,7 +45,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			err := sentry.Init(sentry.ClientOptions{
 				Dsn:              cfg.SentryDsn,
 				Environment:      cfg.EthNetworkName,
-				Release:          "batch-submitter@" + gitVersion,
+				Release:          "scheduler@" + gitVersion,
 				TracesSampleRate: bsscore.TraceRateToFloat64(cfg.SentryTraceRate),
 				Debug:            false,
 			})
@@ -71,11 +71,11 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 
 		batchSubmitter, err := bsscore.NewBatchSubmitter(ctx, cancel, services)
 		if err != nil {
-			log.Error("Unable to create batch submitter", "error", err)
+			log.Error("Unable to create scheduler", "error", err)
 			return err
 		}
 
-		log.Info("Starting batch submitter")
+		log.Info("Starting scheduler")
 
 		if err := batchSubmitter.Start(); err != nil {
 			return err

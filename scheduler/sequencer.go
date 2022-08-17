@@ -3,9 +3,12 @@ package scheduler
 import (
 	"bytes"
 	"crypto/ecdsa"
+	"crypto/elliptic"
+	crand "crypto/rand"
 	"errors"
 	"fmt"
 	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"math/rand"
 	"strings"
 )
 
@@ -105,4 +108,27 @@ func SequencerListString(seqs []*Sequencer) string {
 	}
 
 	return strings.Join(chunks, ",")
+}
+
+//----------------------------------------
+// RandSequencer
+
+// RandSequencer returns a randomized validator, useful for testing.
+// UNSTABLE
+func RandSequencer(randPower bool, minPower int64) *Sequencer {
+	votePower := minPower
+	if randPower {
+		votePower += int64(rand.Uint32())
+	}
+	var seed []byte
+	rand.Read(seed)
+	var addr common.Address
+	copy(addr[:], seed)
+	priKey, err := ecdsa.GenerateKey(elliptic.P256(), crand.Reader)
+	pubKey := priKey.PublicKey
+	if err != nil {
+		panic(fmt.Errorf("could not retrieve pubkey %w", err))
+	}
+	seq := NewSequencer(addr, pubKey, votePower)
+	return seq
 }
