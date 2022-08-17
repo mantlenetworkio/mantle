@@ -3,6 +3,7 @@ package oracle
 import (
 	"context"
 	"errors"
+	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"math/big"
 	"time"
 
@@ -74,11 +75,7 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(ui
 	if err != nil {
 		return nil, err
 	}
-	// Once https://github.com/ethereum/go-ethereum/pull/23062 is released
-	// then we can remove setting the context here
-	if opts.Context == nil {
-		opts.Context = context.Background()
-	}
+
 	// Don't send the transaction using the `contract` so that we can inspect
 	// it beforehand
 	opts.NoSend = true
@@ -91,6 +88,12 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(ui
 	}
 
 	return func(updatedGasPrice uint64) error {
+		ratio, err := tokenprice.PriceRatio()
+		if err != nil {
+			log.Error("cannot fetch PriceRatio", err)
+			return err
+		}
+		updatedGasPrice *= ratio
 		log.Trace("UpdateL2GasPriceFn", "gas-price", updatedGasPrice)
 		if cfg.gasPrice == nil {
 			// Set the gas price manually to use legacy transactions

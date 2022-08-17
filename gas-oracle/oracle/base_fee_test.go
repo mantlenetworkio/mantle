@@ -1,6 +1,7 @@
 package oracle
 
 import (
+	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"math/big"
 	"testing"
 
@@ -48,6 +49,11 @@ func TestBaseFeeUpdate(t *testing.T) {
 	if tip.BaseFee == nil {
 		t.Fatal("no base fee found")
 	}
+	ratio, err := tokenprice.PriceRatio()
+	if err != nil {
+		t.Fatal(err)
+	}
+	tip.BaseFee = new(big.Int).Mul(tip.BaseFee, big.NewInt(int64(ratio)))
 	// Ensure that there is no false negative by
 	// checking that the values don't start out the same
 	if l1BaseFee.Cmp(tip.BaseFee) == 0 {
