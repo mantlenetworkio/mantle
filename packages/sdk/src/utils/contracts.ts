@@ -34,6 +34,7 @@ export const DEFAULT_L2_CONTRACT_ADDRESSES: OEL2ContractsLike = {
   BVM_GasPriceOracle: predeploys.BVM_GasPriceOracle,
   BVM_SequencerFeeVault: predeploys.BVM_SequencerFeeVault,
   WETH: predeploys.WETH9,
+  TssRewardContract: predeploys.TssRewardContract,
 }
 
 /**

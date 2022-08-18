@@ -62,6 +62,8 @@ const main = async () => {
     path.resolve(__dirname, `../src/contract-artifacts.ts`),
     content
   )
+  // @ts-ignore
+  print("CONTENT: ", content)
 }
 
 main()

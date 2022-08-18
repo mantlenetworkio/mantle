@@ -56,6 +56,7 @@ export interface OEL2Contracts {
   BVM_GasPriceOracle: Contract
   BVM_SequencerFeeVault: Contract
   WETH: Contract
+  TssRewardContract: Contract,
 }
 
 /**

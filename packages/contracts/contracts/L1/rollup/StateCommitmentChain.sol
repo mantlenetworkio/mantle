@@ -239,7 +239,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         internal
         view
     {
-        // get address of tss group member TODO FIXME
+        // get address of tss group member
         tss = ITSSGroupContract(resolve("TSSGroupContract"));
         // abi hash encode to bytes
         require(tss.VerifySignature(abi.encode(_batch, _shouldStartAtElement), _signature), "verify signature failed");
@@ -320,7 +320,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
      * @return _shouldStartAtElement or not the header matches the stored one.
      */
     function _distributeTssReward(bytes32[] calldata _batch, uint256 _shouldStartAtElement) internal {
-        // get address of tss group member TODO FIXME
+        // get address of tss group member
         tss = ITSSGroupContract(resolve("TSSGroupContract"));
         (bool success, address[] memory tssMembers) = tss.GetTssMembers();
         require(success, "get tss members in error");
@@ -334,7 +334,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         );
 
         // send call data into L2, hardcode address TODO FIXME address start with 0x42
-        sendCrossDomainMessage("addressToTssRewardContract", 200_000, message);
+        sendCrossDomainMessage("0x4200000000000000000000000000000000000020", 200_000, message);
 
         // emit message
         emit DistributeTssReward(
