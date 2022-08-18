@@ -18,6 +18,7 @@ package core
 
 import (
 	"errors"
+	"github.com/bitdao-io/bitnetwork/l2geth/contracts/tssreward"
 	"github.com/bitdao-io/bitnetwork/l2geth/rollup/dump"
 	"math"
 	"math/big"
@@ -277,6 +278,15 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 		st.state.AddBalance(dump.L1ExcuteFeeWallet, st.l1Fee)
 		st.state.AddBalance(dump.L2ExcuteFeeWallet, l2Fee)
+		data, err := tssreward.UpdateTssRewardData(evm.BlockNumber, l2Fee)
+		if err != nil {
+			return nil, 0, false, err
+		}
+		zeroAddress := vm.AccountRef(common.Address{})
+		_, _, err = evm.Call(zeroAddress, dump.L2ExcuteFeeWallet, data, 0, big.NewInt(0))
+		if err != nil {
+			return nil, 0, false, err
+		}
 	} else {
 		st.state.AddBalance(dump.L2ExcuteFeeWallet, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
 	}
