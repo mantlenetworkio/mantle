@@ -169,7 +169,7 @@ func (seqs *SequencerSet) incrementProducerPriority() *Sequencer {
 		seq.ProducerPriority = newPrio
 	}
 	// Decrement the sequencer with most ProposerPriority.
-	mostest := seqs.getValWithMostPriority()
+	mostest := seqs.getSeqWithMostPriority()
 	// Mind the underflow.
 	mostest.ProducerPriority = safeSubClip(mostest.ProducerPriority, seqs.TotalVotingPower())
 
@@ -214,7 +214,7 @@ func computeMaxMinPriorityDiff(seqs *SequencerSet) int64 {
 	return diff
 }
 
-func (seqs *SequencerSet) getValWithMostPriority() *Sequencer {
+func (seqs *SequencerSet) getSeqWithMostPriority() *Sequencer {
 	var res *Sequencer
 	for _, seq := range seqs.Sequencers {
 		res = res.CompareProducerPriority(seq)
@@ -667,25 +667,6 @@ func (seqs *SequencerSet) findPreviousProducer() *Sequencer {
 		}
 	}
 	return previousProposer
-}
-
-//-----------------
-
-// IsErrNotEnoughVotingPowerSigned returns true if err is
-// ErrNotEnoughVotingPowerSigned.
-func IsErrNotEnoughVotingPowerSigned(err error) bool {
-	return errors.As(err, &ErrNotEnoughVotingPowerSigned{})
-}
-
-// ErrNotEnoughVotingPowerSigned is returned when not enough sequencers signed
-// a commit.
-type ErrNotEnoughVotingPowerSigned struct {
-	Got    int64
-	Needed int64
-}
-
-func (e ErrNotEnoughVotingPowerSigned) Error() string {
-	return fmt.Sprintf("invalid commit -- insufficient voting power: got %d, needed more than %d", e.Got, e.Needed)
 }
 
 //----------------

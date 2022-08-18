@@ -67,9 +67,9 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 
 		log.Root().SetHandler(log.LvlFilterHandler(logLevel, logHandler))
 
-		var services []*bsscore.Service
+		var services []*Service
 
-		batchSubmitter, err := bsscore.NewBatchSubmitter(ctx, cancel, services)
+		scheduler, err := NewScheduler(ctx, cancel, services)
 		if err != nil {
 			log.Error("Unable to create scheduler", "error", err)
 			return err
@@ -77,15 +77,57 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 
 		log.Info("Starting scheduler")
 
-		if err := batchSubmitter.Start(); err != nil {
+		if err := scheduler.Start(); err != nil {
 			return err
 		}
-		defer batchSubmitter.Stop()
+		defer scheduler.Stop()
 
 		log.Info("Batch submitter started")
 
 		<-(chan struct{})(nil)
 
 		return nil
+	}
+}
+
+// Scheduler is a service that configures the necessary resources for
+// running the scheduler sub-services.
+type Scheduler struct {
+	ctx      context.Context
+	services []*Service
+	cancel   func()
+}
+
+// NewBatchSubmitter initializes the BatchSubmitter, gathering any resources
+// that will be needed by the TxBatchSubmitter and StateBatchSubmitter
+// sub-services.
+func NewScheduler(
+	ctx context.Context,
+	cancel func(),
+	services []*Service,
+) (*Scheduler, error) {
+
+	return &Scheduler{
+		ctx:      ctx,
+		services: services,
+		cancel:   cancel,
+	}, nil
+}
+
+// Start starts all provided services.
+func (s *Scheduler) Start() error {
+	for _, service := range s.services {
+		if err := service.Start(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Stop stops all provided services and blocks until shutdown.
+func (s *Scheduler) Stop() {
+	s.cancel()
+	for _, service := range s.services {
+		_ = service.Stop()
 	}
 }
