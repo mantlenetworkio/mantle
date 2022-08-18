@@ -32,7 +32,7 @@ interface ITssRewardContract {
      * @param _length Rollup batch length.
      * @param _tssMembers Tss member address array.
      */
-    function claimReward(uint256 _blockStartHeight, uint32 _length, address[] _tssMembers) external virtual;
+    function claimReward(uint256 _blockStartHeight, uint32 _length, address[] calldata _tssMembers) external;
 
     /**
      * @dev Update deposit block gas into contract.
@@ -40,7 +40,7 @@ interface ITssRewardContract {
      * @param _amount Update gas reward amount.
      * @return Update success.
      */
-    function updateReward(uint256 _blockID, uint256 _amount) external returns (bool);
+    function updateReward(uint256 _blockID, uint256 _amount) external payable returns (bool);
 
     /**
      * @dev withdraw dust.

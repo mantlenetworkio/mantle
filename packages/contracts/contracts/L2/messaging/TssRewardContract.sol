@@ -2,6 +2,7 @@
 pragma solidity ^0.8.9;
 
 /* Library Imports */
+//import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
 /* Interface Imports */
 import { ITssRewardContract } from "./ITssRewardContract.sol";
@@ -11,19 +12,22 @@ import { ITssRewardContract } from "./ITssRewardContract.sol";
  * @dev Collect L2 block gas reward per block and release to batch roll up tss members.
  */
 contract TssRewardContract is ITssRewardContract {
+//    using SafeMath for uint256;
+
     mapping(uint256 => uint256) public ledger;
     address public deadAddress;
+    address payable public owner;
     uint256 public bestBlockID = 0;
     uint256 public dust = 0;
 
     // set call address
-    constructor(uint256 _deadAddress) {
+    constructor(address _deadAddress, address payable _owner) {
         deadAddress = _deadAddress;
+        owner = _owner;
     }
 
     /**
-     * Enforces that the modified function is only callable by a specific cross-domain account.
-     * @param _sourceDomainAccount The only account on the originating domain which is
+     * Enforces that the modified function is only callable by a specific null address.
      *  authenticated to call this function.
      */
     modifier onlyFromDeadAddress() {
@@ -47,23 +51,24 @@ contract TssRewardContract is ITssRewardContract {
      * @param _length The distribute batch block number
      * @param _tssMembers The address array of tss group members
      */
-    function claimReward(uint256 _blockStartHeight, uint32 _length, address[] _tssMembers)
+    function claimReward(uint256 _blockStartHeight, uint32 _length, address[] calldata _tssMembers)
         external
         virtual
         onlyFromDeadAddress
     {
-        uint256 totalAmount = ledger[blockStartHeight];
+        uint256 totalAmount = ledger[_blockStartHeight];
         uint256 sendAmount = 0;
         uint256 accu = 0;
         // release reward from _blockStartHeight to _blockStartHeight + _length
-        for (i=_blockStartHeight; i<_length; i++) {
+        for (uint256 i=_blockStartHeight; i<_length; i++) {
             // calc send amount
-            sendAmount = amount / _tssMembers.length; // safemath
+            sendAmount = totalAmount / _tssMembers.length; // TODO safemath
             // delete distributed height
-            delete ledger[blockStartHeight];
-            for (j=0; j < _tssMembers.length; j++) {
+            delete ledger[_blockStartHeight];
+            for (uint256 j=0; j < _tssMembers.length; j++) {
+                address payable addr = payable(_tssMembers[j]);
                 accu += sendAmount;
-                owner.transfer(sendAmount);
+                addr.transfer(sendAmount);
             }
             uint256 reserved = totalAmount - accu;
             require(reserved >= 0, "release amount gt real balance");
@@ -75,7 +80,7 @@ contract TssRewardContract is ITssRewardContract {
         emit DistributeTssReward(
             _blockStartHeight,
             _length,
-            tssMembers
+            _tssMembers
         );
     }
 
@@ -85,8 +90,9 @@ contract TssRewardContract is ITssRewardContract {
      * @param _amount Distribute batch block number
      * @return _tssMembers Address array of tss group members
      */
-    function updateTssReward(uint256 _blockID, uint256 _amount)
+    function updateReward(uint256 _blockID, uint256 _amount)
         external
+        payable
         onlyFromDeadAddress
         returns (bool)
     {
@@ -94,6 +100,8 @@ contract TssRewardContract is ITssRewardContract {
 
         // check update block ID
         require(_blockID == bestBlockID+1, "block id update illegal");
+        // check transfer amount
+        require(msg.value == _amount, "transfer amount and update amount not equal");
         // iter address to update balance
         ledger[_blockID] = _amount;
         bestBlockID = _blockID;
@@ -103,6 +111,7 @@ contract TssRewardContract is ITssRewardContract {
     function withdrawDust() external {
         require(msg.sender == owner);
         owner.transfer(dust);
+        dust = 0;
     }
 
     function withdraw() external {
