@@ -38,16 +38,12 @@ func (s *Sequencer) SequencerBasic() error {
 	if s == nil {
 		return errors.New("nil sequencer")
 	}
-	if s.PubKey.Equal(nil) {
+	if s.PubKey.Curve == nil || s.PubKey.X == nil || s.PubKey.Y == nil {
 		return errors.New("sequencer does not have a public key")
 	}
 
 	if s.VotingPower < 0 {
 		return errors.New("sequencer has negative voting power")
-	}
-
-	if len(s.Address) != common.AddressLength {
-		return fmt.Errorf("sequencer address is the wrong size: %v", s.Address)
 	}
 
 	return nil

@@ -90,7 +90,7 @@ func (seqs *SequencerSet) ValidateBasic() error {
 	}
 
 	if err := seqs.Producer.SequencerBasic(); err != nil {
-		return fmt.Errorf("proposer failed validate basic, error: %w", err)
+		return fmt.Errorf("producer failed validate basic, error: %w", err)
 	}
 
 	return nil
@@ -177,7 +177,7 @@ func (seqs *SequencerSet) incrementProducerPriority() *Sequencer {
 }
 
 // Should not be called on an empty sequencer set.
-func (seqs *SequencerSet) computeAvgProposerPriority() int64 {
+func (seqs *SequencerSet) computeAvgProducerPriority() int64 {
 	n := int64(len(seqs.Sequencers))
 	sum := big.NewInt(0)
 	for _, seq := range seqs.Sequencers {
@@ -226,7 +226,7 @@ func (seqs *SequencerSet) shiftByAvgProducerPriority() {
 	if seqs.IsNilOrEmpty() {
 		panic("empty sequencer set")
 	}
-	avgProposerPriority := seqs.computeAvgProposerPriority()
+	avgProposerPriority := seqs.computeAvgProducerPriority()
 	for _, val := range seqs.Sequencers {
 		val.ProducerPriority = safeSubClip(val.ProducerPriority, avgProposerPriority)
 	}
@@ -321,7 +321,7 @@ func (seqs *SequencerSet) TotalVotingPower() int64 {
 
 // GetProposer returns the current proposer. If the sequencer set is empty, nil
 // is returned.
-func (seqs *SequencerSet) GetProducer() (proposer *Sequencer) {
+func (seqs *SequencerSet) GetProducer() (producer *Sequencer) {
 	if len(seqs.Sequencers) == 0 {
 		return nil
 	}
@@ -373,7 +373,6 @@ func processChanges(origChanges []*Sequencer) (updates, removals []*Sequencer, e
 	removals = make([]*Sequencer, 0, len(changes))
 	updates = make([]*Sequencer, 0, len(changes))
 	var prevAddr common.Address
-
 	// Scan changes by address and append valid sequencers to updates or removals lists.
 	for _, seqUpdate := range changes {
 		if bytes.Equal(seqUpdate.Address.Bytes(), prevAddr.Bytes()) {
