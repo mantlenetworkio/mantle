@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
+	"github.com/bitdao-io/bitnetwork/tss/node/cmd/tssnode"
 	"os"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
 	"github.com/bitdao-io/bitnetwork/tss/manager"
-	"github.com/bitdao-io/bitnetwork/tss/node"
 	"github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/spf13/cobra"
 )
@@ -29,7 +29,7 @@ func main() {
 
 	rootCmd.AddCommand(
 		manager.Command(),
-		node.Command(),
+		tssnode.Command(),
 	)
 
 	rootCmd.PersistentFlags().StringP("config", "c", "config", "configuration file with extension")
