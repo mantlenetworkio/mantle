@@ -22,9 +22,15 @@ interface IStateCommitmentChain {
 
     event StateBatchDeleted(uint256 indexed _batchIndex, bytes32 _batchRoot);
 
-    /********************
-     * Public Functions *
-     ********************/
+    event DistributeTssReward(
+        uint256 indexed _startBlockNumber,
+        uint256 _length,
+        address[] _tssMembers
+    );
+
+/********************
+ * Public Functions *
+ ********************/
 
     /**
      * Retrieves the total number of elements submitted.
