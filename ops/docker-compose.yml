@@ -123,8 +123,8 @@ services:
       - deployer
       - dtl
       - l2geth
-    deploy:
-      replicas: 1
+    # deploy:
+    #   replicas: 1
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile
@@ -150,8 +150,8 @@ services:
     depends_on:
       - dtl
       - l2geth
-    deploy:
-      replicas: 1
+    # deploy:
+    #   replicas: 1
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile
