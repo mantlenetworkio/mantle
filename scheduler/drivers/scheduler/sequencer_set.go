@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
 	"math"
 	"math/big"
 	"sort"
 	"strings"
+
+	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
+	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
 )
 
 const (
@@ -423,7 +424,6 @@ func verifyUpdates(
 	seqs *SequencerSet,
 	removedPower int64,
 ) (tvpAfterUpdatesBeforeRemovals int64, err error) {
-
 	delta := func(update *Sequencer, seqs *SequencerSet) int64 {
 		_, seq := seqs.GetByAddress(update.Address)
 		if seq != nil {
@@ -487,7 +487,6 @@ func computeNewPriorities(updates []*Sequencer, seqs *SequencerSet, updatedTotal
 			valUpdate.ProducerPriority = val.ProducerPriority
 		}
 	}
-
 }
 
 // Merges the seqs' sequencer list with the updates list.
@@ -699,7 +698,6 @@ func (seqs *SequencerSet) StringIndented(indent string) string {
 		indent,
 		indent, strings.Join(valStrings, "\n"+indent+"    "),
 		indent)
-
 }
 
 // Len returns the length of s.

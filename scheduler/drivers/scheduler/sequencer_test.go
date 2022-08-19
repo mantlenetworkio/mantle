@@ -5,10 +5,9 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"fmt"
+	"testing"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/common"
-
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )

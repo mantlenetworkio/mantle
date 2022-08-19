@@ -56,6 +56,9 @@ bindings-scc:
 
 	rm $(temp)
 
+format:
+	find . -name '*.go' -type f -not -path "./bindings*" | xargs gofumpt -w -l
+
 .PHONY: \
 	scheduler \
 	bindings \
@@ -63,4 +66,5 @@ bindings-scc:
 	bindings-scc \
 	clean \
 	test \
-	lint
+	lint \
+  format

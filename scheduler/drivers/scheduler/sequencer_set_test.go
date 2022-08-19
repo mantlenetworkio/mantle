@@ -6,14 +6,15 @@ import (
 	"crypto/elliptic"
 	crand "crypto/rand"
 	"fmt"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/stretchr/testify/assert"
 	"math"
 	"math/rand"
 	"sort"
 	"strings"
 	"testing"
 	"testing/quick"
+
+	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSequencerSetBasic(t *testing.T) {
@@ -44,7 +45,7 @@ func TestSequencerSetBasic(t *testing.T) {
 	assert.Zero(t, sset.Size())
 	assert.Equal(t, int64(0), sset.TotalVotingPower())
 	assert.Nil(t, sset.GetProducer())
-	//assert.Equal(t, []byte{0xe3, 0xb0, 0xc4, 0x42, 0x98, 0xfc, 0x1c, 0x14, 0x9a, 0xfb, 0xf4,
+	// assert.Equal(t, []byte{0xe3, 0xb0, 0xc4, 0x42, 0x98, 0xfc, 0x1c, 0x14, 0x9a, 0xfb, 0xf4,
 	//	0xc8, 0x99, 0x6f, 0xb9, 0x24, 0x27, 0xae, 0x41, 0xe4, 0x64, 0x9b, 0x93, 0x4c, 0xa4, 0x95,
 	//	0x99, 0x1b, 0x78, 0x52, 0xb8, 0x55}, sset.Hash())
 	// add
@@ -74,7 +75,6 @@ func TestSequencerSetBasic(t *testing.T) {
 	assert.NoError(t, sset.UpdateWithChangeSet([]*Sequencer{seq}))
 	_, seq = sset.GetByAddress(seq.Address)
 	assert.Equal(t, proposerPriority, seq.ProducerPriority)
-
 }
 
 func TestSequencerSetSequencerBasic(t *testing.T) {
@@ -132,7 +132,6 @@ func TestSequencerSetSequencerBasic(t *testing.T) {
 			assert.NoError(t, err)
 		}
 	}
-
 }
 
 func TestCopy(t *testing.T) {
@@ -327,8 +326,8 @@ func TestProducerSelection3(t *testing.T) {
 		}
 
 		// serialize, deserialize, check producer
-		//b := sset.toBytes()
-		//sset = sset.fromBytes(b)
+		// b := sset.toBytes()
+		// sset = sset.fromBytes(b)
 
 		computed := sset.GetProducer() // findGetProducer()
 		if i != 0 {
@@ -464,28 +463,39 @@ func TestAveragingInIncrementProducerPriority(t *testing.T) {
 		times int32
 		avg   int64
 	}{
-		0: {SequencerSet{
-			Sequencers: []*Sequencer{
-				{Address: byteToCommonAddr([]byte("a")), ProducerPriority: 1},
-				{Address: byteToCommonAddr([]byte("b")), ProducerPriority: 2},
-				{Address: byteToCommonAddr([]byte("c")), ProducerPriority: 3}}},
-			1, 2},
-		1: {SequencerSet{
-			Sequencers: []*Sequencer{
-				{Address: byteToCommonAddr([]byte("a")), ProducerPriority: 10},
-				{Address: byteToCommonAddr([]byte("b")), ProducerPriority: -10},
-				{Address: byteToCommonAddr([]byte("c")), ProducerPriority: 1}}},
+		0: {
+			SequencerSet{
+				Sequencers: []*Sequencer{
+					{Address: byteToCommonAddr([]byte("a")), ProducerPriority: 1},
+					{Address: byteToCommonAddr([]byte("b")), ProducerPriority: 2},
+					{Address: byteToCommonAddr([]byte("c")), ProducerPriority: 3},
+				},
+			},
+			1, 2,
+		},
+		1: {
+			SequencerSet{
+				Sequencers: []*Sequencer{
+					{Address: byteToCommonAddr([]byte("a")), ProducerPriority: 10},
+					{Address: byteToCommonAddr([]byte("b")), ProducerPriority: -10},
+					{Address: byteToCommonAddr([]byte("c")), ProducerPriority: 1},
+				},
+			},
 			// this should average twice but the average should be 0 after the first iteration
 			// (voting power is 0 -> no changes)
 			11,
 			0, // 1 / 3
 		},
-		2: {SequencerSet{
-			Sequencers: []*Sequencer{
-				{Address: byteToCommonAddr([]byte("a")), ProducerPriority: 100},
-				{Address: byteToCommonAddr([]byte("b")), ProducerPriority: -10},
-				{Address: byteToCommonAddr([]byte("c")), ProducerPriority: 1}}},
-			1, 91 / 3},
+		2: {
+			SequencerSet{
+				Sequencers: []*Sequencer{
+					{Address: byteToCommonAddr([]byte("a")), ProducerPriority: 100},
+					{Address: byteToCommonAddr([]byte("b")), ProducerPriority: -10},
+					{Address: byteToCommonAddr([]byte("c")), ProducerPriority: 1},
+				},
+			},
+			1, 91 / 3,
+		},
 	}
 	for i, tc := range tcs {
 		// work on copy to have the old ProducerPriorities:
@@ -509,103 +519,125 @@ func TestAveragingInIncrementProducerPriorityWithVotingPower(t *testing.T) {
 	seqs := SequencerSet{Sequencers: []*Sequencer{
 		{Address: byteToCommonAddr([]byte{0}), ProducerPriority: 0, VotingPower: vp0},
 		{Address: byteToCommonAddr([]byte{1}), ProducerPriority: 0, VotingPower: vp1},
-		{Address: byteToCommonAddr([]byte{2}), ProducerPriority: 0, VotingPower: vp2}}}
+		{Address: byteToCommonAddr([]byte{2}), ProducerPriority: 0, VotingPower: vp2},
+	}}
 	tcs := []struct {
 		seqs                  *SequencerSet
 		wantProducerPrioritys []int64
 		times                 int32
 		wantProducer          *Sequencer
 	}{
-
 		0: {
 			seqs.Copy(),
 			[]int64{
 				// Acumm+VotingPower-Avg:
 				0 + vp0 - total - avg, // mostest will be subtracted by total voting power (12)
 				0 + vp1,
-				0 + vp2},
+				0 + vp2,
+			},
 			1,
-			seqs.Sequencers[0]},
+			seqs.Sequencers[0],
+		},
 		1: {
 			seqs.Copy(),
 			[]int64{
 				(0 + vp0 - total) + vp0 - total - avg, // this will be mostest on 2nd iter, too
 				(0 + vp1) + vp1,
-				(0 + vp2) + vp2},
+				(0 + vp2) + vp2,
+			},
 			2,
-			seqs.Sequencers[0]}, // increment twice -> expect average to be subtracted twice
+			seqs.Sequencers[0],
+		}, // increment twice -> expect average to be subtracted twice
 		2: {
 			seqs.Copy(),
 			[]int64{
 				0 + 3*(vp0-total) - avg, // still mostest
 				0 + 3*vp1,
-				0 + 3*vp2},
+				0 + 3*vp2,
+			},
 			3,
-			seqs.Sequencers[0]},
+			seqs.Sequencers[0],
+		},
 		3: {
 			seqs.Copy(),
 			[]int64{
 				0 + 4*(vp0-total), // still mostest
 				0 + 4*vp1,
-				0 + 4*vp2},
+				0 + 4*vp2,
+			},
 			4,
-			seqs.Sequencers[0]},
+			seqs.Sequencers[0],
+		},
 		4: {
 			seqs.Copy(),
 			[]int64{
 				0 + 4*(vp0-total) + vp0, // 4 iters was mostest
 				0 + 5*vp1 - total,       // now this seq is mostest for the 1st time (hence -12==totalVotingPower)
-				0 + 5*vp2},
+				0 + 5*vp2,
+			},
 			5,
-			seqs.Sequencers[1]},
+			seqs.Sequencers[1],
+		},
 		5: {
 			seqs.Copy(),
 			[]int64{
 				0 + 6*vp0 - 5*total, // mostest again
 				0 + 6*vp1 - total,   // mostest once up to here
-				0 + 6*vp2},
+				0 + 6*vp2,
+			},
 			6,
-			seqs.Sequencers[0]},
+			seqs.Sequencers[0],
+		},
 		6: {
 			seqs.Copy(),
 			[]int64{
 				0 + 7*vp0 - 6*total, // in 7 iters this seq is mostest 6 times
 				0 + 7*vp1 - total,   // in 7 iters this seq is mostest 1 time
-				0 + 7*vp2},
+				0 + 7*vp2,
+			},
 			7,
-			seqs.Sequencers[0]},
+			seqs.Sequencers[0],
+		},
 		7: {
 			seqs.Copy(),
 			[]int64{
 				0 + 8*vp0 - 7*total, // mostest again
 				0 + 8*vp1 - total,
-				0 + 8*vp2},
+				0 + 8*vp2,
+			},
 			8,
-			seqs.Sequencers[0]},
+			seqs.Sequencers[0],
+		},
 		8: {
 			seqs.Copy(),
 			[]int64{
 				0 + 9*vp0 - 7*total,
 				0 + 9*vp1 - total,
-				0 + 9*vp2 - total}, // mostest
+				0 + 9*vp2 - total,
+			}, // mostest
 			9,
-			seqs.Sequencers[2]},
+			seqs.Sequencers[2],
+		},
 		9: {
 			seqs.Copy(),
 			[]int64{
 				0 + 10*vp0 - 8*total, // after 10 iters this is mostest again
 				0 + 10*vp1 - total,   // after 6 iters this seq is "mostest" once and not in between
-				0 + 10*vp2 - total},  // in between 10 iters this seq is "mostest" once
+				0 + 10*vp2 - total,
+			}, // in between 10 iters this seq is "mostest" once
 			10,
-			seqs.Sequencers[0]},
+			seqs.Sequencers[0],
+		},
 		10: {
 			seqs.Copy(),
 			[]int64{
 				0 + 11*vp0 - 9*total,
-				0 + 11*vp1 - total,  // after 6 iters this seq is "mostest" once and not in between
-				0 + 11*vp2 - total}, // after 10 iters this seq is "mostest" once
+				0 + 11*vp1 - total, // after 6 iters this seq is "mostest" once and not in between
+				0 + 11*vp2 - total,
+			}, // after 10 iters this seq is "mostest" once
 			11,
-			seqs.Sequencers[0]},
+			seqs.Sequencers[0],
+		},
 	}
 	for i, tc := range tcs {
 		tc.seqs.IncrementProducerPriority(tc.times)
@@ -651,7 +683,6 @@ func TestSafeSubClip(t *testing.T) {
 //-------------------------------------------------------------------
 
 func TestEmptySet(t *testing.T) {
-
 	var seqList []*Sequencer
 	seqSet := NewSequencerSet(seqList)
 	assert.Panics(t, func() { seqSet.IncrementProducerPriority(1) })
@@ -675,11 +706,9 @@ func TestEmptySet(t *testing.T) {
 
 	// Attempt delete from empty set
 	assert.Error(t, seqSet.UpdateWithChangeSet(delList))
-
 }
 
 func TestUpdatesForNewSequencerSet(t *testing.T) {
-
 	v1 := newSequencer(byteToCommonAddr([]byte("v1")), randPubKey(), 100)
 	v2 := newSequencer(byteToCommonAddr([]byte("v2")), randPubKey(), 100)
 	seqList := []*Sequencer{v1, v2}
@@ -706,7 +735,6 @@ func TestUpdatesForNewSequencerSet(t *testing.T) {
 	v3 = newSequencer(byteToCommonAddr([]byte("v3")), randPubKey(), 30)
 	seqList = []*Sequencer{v1, v2, v3}
 	assert.Panics(t, func() { NewSequencerSet(seqList) })
-
 }
 
 type testSeq struct {
@@ -1062,41 +1090,50 @@ func TestSeqSetApplyUpdatesTestsExecute(t *testing.T) {
 		0: { // prepend
 			[]testSeq{{"v4", 44}, {"v5", 55}},
 			[]testSeq{{"v1", 11}},
-			[]testSeq{{"v1", 11}, {"v4", 44}, {"v5", 55}}},
+			[]testSeq{{"v1", 11}, {"v4", 44}, {"v5", 55}},
+		},
 		1: { // append
 			[]testSeq{{"v4", 44}, {"v5", 55}},
 			[]testSeq{{"v6", 66}},
-			[]testSeq{{"v4", 44}, {"v5", 55}, {"v6", 66}}},
+			[]testSeq{{"v4", 44}, {"v5", 55}, {"v6", 66}},
+		},
 		2: { // insert
 			[]testSeq{{"v4", 44}, {"v6", 66}},
 			[]testSeq{{"v5", 55}},
-			[]testSeq{{"v4", 44}, {"v5", 55}, {"v6", 66}}},
+			[]testSeq{{"v4", 44}, {"v5", 55}, {"v6", 66}},
+		},
 		3: { // insert multi
 			[]testSeq{{"v4", 44}, {"v6", 66}, {"v9", 99}},
 			[]testSeq{{"v5", 55}, {"v7", 77}, {"v8", 88}},
-			[]testSeq{{"v4", 44}, {"v5", 55}, {"v6", 66}, {"v7", 77}, {"v8", 88}, {"v9", 99}}},
+			[]testSeq{{"v4", 44}, {"v5", 55}, {"v6", 66}, {"v7", 77}, {"v8", 88}, {"v9", 99}},
+		},
 		// changes
 		4: { // head
 			[]testSeq{{"v1", 111}, {"v2", 22}},
 			[]testSeq{{"v1", 11}},
-			[]testSeq{{"v1", 11}, {"v2", 22}}},
+			[]testSeq{{"v1", 11}, {"v2", 22}},
+		},
 		5: { // tail
 			[]testSeq{{"v1", 11}, {"v2", 222}},
 			[]testSeq{{"v2", 22}},
-			[]testSeq{{"v1", 11}, {"v2", 22}}},
+			[]testSeq{{"v1", 11}, {"v2", 22}},
+		},
 		6: { // middle
 			[]testSeq{{"v1", 11}, {"v2", 222}, {"v3", 33}},
 			[]testSeq{{"v2", 22}},
-			[]testSeq{{"v1", 11}, {"v2", 22}, {"v3", 33}}},
+			[]testSeq{{"v1", 11}, {"v2", 22}, {"v3", 33}},
+		},
 		7: { // multi
 			[]testSeq{{"v1", 111}, {"v2", 222}, {"v3", 333}},
 			[]testSeq{{"v1", 11}, {"v2", 22}, {"v3", 33}},
-			[]testSeq{{"v1", 11}, {"v2", 22}, {"v3", 33}}},
+			[]testSeq{{"v1", 11}, {"v2", 22}, {"v3", 33}},
+		},
 		// additions and changes
 		8: {
 			[]testSeq{{"v1", 111}, {"v2", 22}},
 			[]testSeq{{"v1", 11}, {"v3", 33}, {"v4", 44}},
-			[]testSeq{{"v1", 11}, {"v2", 22}, {"v3", 33}, {"v4", 44}}},
+			[]testSeq{{"v1", 11}, {"v2", 22}, {"v3", 33}, {"v4", 44}},
+		},
 	}
 
 	for i, tt := range seqSetUpdatesBasicTests {
@@ -1320,28 +1357,56 @@ func TestSeqSetUpdateOverflowRelated(t *testing.T) {
 		{
 			name: "4 no false overflow error messages for adds, updates and deletes",
 			startSeqs: []testSeq{
-				{"v1", MaxTotalVotingPower / 4}, {"v2", MaxTotalVotingPower / 4},
-				{"v3", MaxTotalVotingPower / 4}, {"v4", MaxTotalVotingPower / 4}},
+				{"v1", MaxTotalVotingPower / 4},
+				{"v2", MaxTotalVotingPower / 4},
+				{"v3", MaxTotalVotingPower / 4},
+				{"v4", MaxTotalVotingPower / 4},
+			},
 			deletedSeqs: []testSeq{{"v2", 0}},
 			updatedSeqs: []testSeq{
-				{"v1", MaxTotalVotingPower/2 - 2}, {"v3", MaxTotalVotingPower/2 - 3}, {"v4", 2}},
+				{"v1", MaxTotalVotingPower/2 - 2}, {"v3", MaxTotalVotingPower/2 - 3}, {"v4", 2},
+			},
 			addedSeqs: []testSeq{{"v5", 3}},
 			expectedSeqs: []testSeq{
-				{"v1", MaxTotalVotingPower/2 - 2}, {"v3", MaxTotalVotingPower/2 - 3}, {"v5", 3}, {"v4", 2}},
+				{"v1", MaxTotalVotingPower/2 - 2}, {"v3", MaxTotalVotingPower/2 - 3}, {"v5", 3}, {"v4", 2},
+			},
 			expErr: nil,
 		},
 		{
 			name: "5 check panic on overflow is prevented: update 8 seqidators with power int64(math.MaxInt64)/8",
 			startSeqs: []testSeq{
-				{"v1", 1}, {"v2", 1}, {"v3", 1}, {"v4", 1}, {"v5", 1},
-				{"v6", 1}, {"v7", 1}, {"v8", 1}, {"v9", 1}},
+				{"v1", 1},
+				{"v2", 1},
+				{"v3", 1},
+				{"v4", 1},
+				{"v5", 1},
+				{"v6", 1},
+				{"v7", 1},
+				{"v8", 1},
+				{"v9", 1},
+			},
 			updatedSeqs: []testSeq{
-				{"v1", MaxTotalVotingPower}, {"v2", MaxTotalVotingPower}, {"v3", MaxTotalVotingPower},
-				{"v4", MaxTotalVotingPower}, {"v5", MaxTotalVotingPower}, {"v6", MaxTotalVotingPower},
-				{"v7", MaxTotalVotingPower}, {"v8", MaxTotalVotingPower}, {"v9", 8}},
+				{"v1", MaxTotalVotingPower},
+				{"v2", MaxTotalVotingPower},
+				{"v3", MaxTotalVotingPower},
+				{"v4", MaxTotalVotingPower},
+				{"v5", MaxTotalVotingPower},
+				{"v6", MaxTotalVotingPower},
+				{"v7", MaxTotalVotingPower},
+				{"v8", MaxTotalVotingPower},
+				{"v9", 8},
+			},
 			expectedSeqs: []testSeq{
-				{"v1", 1}, {"v2", 1}, {"v3", 1}, {"v4", 1}, {"v5", 1},
-				{"v6", 1}, {"v7", 1}, {"v8", 1}, {"v9", 1}},
+				{"v1", 1},
+				{"v2", 1},
+				{"v3", 1},
+				{"v4", 1},
+				{"v5", 1},
+				{"v6", 1},
+				{"v7", 1},
+				{"v8", 1},
+				{"v9", 1},
+			},
 			expErr: ErrTotalVotingPowerOverflow,
 		},
 	}

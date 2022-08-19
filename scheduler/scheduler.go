@@ -6,6 +6,7 @@ import (
 	"time"
 
 	bsscore "github.com/bitdao-io/bitnetwork/bss-core"
+	"github.com/bitdao-io/bitnetwork/scheduler/service"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/getsentry/sentry-go"
 	"github.com/urfave/cli"
@@ -67,7 +68,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 
 		log.Root().SetHandler(log.LvlFilterHandler(logLevel, logHandler))
 
-		var services []*Service
+		var services []*service.Service
 
 		scheduler, err := NewScheduler(ctx, cancel, services)
 		if err != nil {
@@ -91,22 +92,20 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 }
 
 // Scheduler is a service that configures the necessary resources for
-// running the scheduler sub-services.
+// running the scheduler services.
 type Scheduler struct {
 	ctx      context.Context
-	services []*Service
+	services []*service.Service
 	cancel   func()
 }
 
-// NewBatchSubmitter initializes the BatchSubmitter, gathering any resources
-// that will be needed by the TxBatchSubmitter and StateBatchSubmitter
-// sub-services.
+// NewScheduler initializes the Scheduler, gathering any resources
+// that will be needed by the scheduler services.
 func NewScheduler(
 	ctx context.Context,
 	cancel func(),
-	services []*Service,
+	services []*service.Service,
 ) (*Scheduler, error) {
-
 	return &Scheduler{
 		ctx:      ctx,
 		services: services,

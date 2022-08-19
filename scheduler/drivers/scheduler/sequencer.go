@@ -7,9 +7,10 @@ import (
 	crand "crypto/rand"
 	"errors"
 	"fmt"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
 	"math/rand"
 	"strings"
+
+	"github.com/bitdao-io/bitnetwork/l2geth/common"
 )
 
 // Volatile state for each Sequencer

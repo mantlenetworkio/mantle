@@ -123,8 +123,8 @@ type Config struct {
 	// submitter.
 	RunStateBatchSubmitter bool
 
-	//SafeMinimumEtherBalance is the safe minimum amount of ether the batch
-	//submitter key should hold before it starts to log errors.
+	// SafeMinimumEtherBalance is the safe minimum amount of ether the batch
+	// submitter key should hold before it starts to log errors.
 	SafeMinimumEtherBalance uint64
 
 	// ClearPendingTxs is a boolean to clear the pending transactions in the
