@@ -12,6 +12,8 @@ import { IStateCommitmentChain } from "./IStateCommitmentChain.sol";
 import { ICanonicalTransactionChain } from "./ICanonicalTransactionChain.sol";
 import { IBondManager } from "../verification/IBondManager.sol";
 import { IChainStorageContainer } from "./IChainStorageContainer.sol";
+import { ITSSGroupContract } from "Path_To/ITSSGroupContract.sol"; // TODO FIXME
+import { ITssRewardContract } from "../../L2/predeploys/iTssRewardContract.sol";
 
 /**
  * @title StateCommitmentChain
@@ -239,10 +241,12 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         internal
         view
     {
-        // get address of tss group member
-        tss = ITSSGroupContract(resolve("TSSGroupContract"));
         // abi hash encode to bytes
-        require(tss.VerifySignature(abi.encode(_batch, _shouldStartAtElement), _signature), "verify signature failed");
+        require(
+            ITSSGroupContract(resolve("TSSGroupContract")).VerifySignature(
+                abi.encode(_batch, _shouldStartAtElement), _signature),
+            "verify signature failed"
+        );
     }
 
     /**
@@ -321,13 +325,12 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
      */
     function _distributeTssReward(bytes32[] calldata _batch, uint256 _shouldStartAtElement) internal {
         // get address of tss group member
-        tss = ITSSGroupContract(resolve("TSSGroupContract"));
-        (bool success, address[] memory tssMembers) = tss.GetTssMembers();
+        (bool success, address[] memory tssMembers) = ITSSGroupContract(resolve("TSSGroupContract")).GetTssMembers();
         require(success, "get tss members in error");
 
         // construct calldata for claimReward call
         bytes memory message = abi.encodeWithSelector(
-        ITssRewardContract.claimReward.selector,
+            ITssRewardContract.claimReward.selector,
             _shouldStartAtElement,
             _batch.length,
             tssMembers

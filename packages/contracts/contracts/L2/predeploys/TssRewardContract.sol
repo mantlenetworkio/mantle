@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import "./iTssRewardContract.sol";
+
 /* Library Imports */
 //import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
 /* Interface Imports */
-//import { ITssRewardContract } from "./iTssRewardContract.sol";
 
 /* External Imports */
 
@@ -13,7 +14,7 @@ pragma solidity ^0.8.9;
  * @title TssRewardContract
  * @dev Collect L2 block gas reward per block and release to batch roll up tss members.
  */
-contract TssRewardContract {
+contract TssRewardContract is ITssRewardContract {
 //    using SafeMath for uint256;
 
     mapping(uint256 => uint256) public ledger;
@@ -21,12 +22,6 @@ contract TssRewardContract {
     address payable public owner;
     uint256 public bestBlockID = 0;
     uint256 public dust = 0;
-
-    event DistributeTssReward(
-        uint256 blockStartHeight,
-        uint256 length,
-        address[] tssMembers
-    );
 
     // set call address
     constructor(address _deadAddress, address payable _owner) {
