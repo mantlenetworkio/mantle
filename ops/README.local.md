@@ -8,7 +8,7 @@ make -f Makefile.local up
 make -f Makefile.local stop
 ```
 
-### Restart Single Services
+### Restart a Single Service
 ```bash
 make -f Makefile.local restart
 ```
