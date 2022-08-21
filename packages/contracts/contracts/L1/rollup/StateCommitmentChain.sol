@@ -5,12 +5,15 @@ pragma solidity ^0.8.9;
 import { Lib_BVMCodec } from "../../libraries/codec/Lib_BVMCodec.sol";
 import { Lib_AddressResolver } from "../../libraries/resolver/Lib_AddressResolver.sol";
 import { Lib_MerkleTree } from "../../libraries/utils/Lib_MerkleTree.sol";
+import { CrossDomainEnabled } from "../../libraries/bridge/CrossDomainEnabled.sol";
 
 /* Interface Imports */
 import { IStateCommitmentChain } from "./IStateCommitmentChain.sol";
 import { ICanonicalTransactionChain } from "./ICanonicalTransactionChain.sol";
 import { IBondManager } from "../verification/IBondManager.sol";
 import { IChainStorageContainer } from "./IChainStorageContainer.sol";
+import { ITSSGroupContract } from "Path_To/ITSSGroupContract.sol"; // TODO FIXME
+import { ITssRewardContract } from "../../L2/predeploys/iTssRewardContract.sol";
 
 /**
  * @title StateCommitmentChain
@@ -20,7 +23,7 @@ import { IChainStorageContainer } from "./IChainStorageContainer.sol";
  * state root calculated off-chain by applying the canonical transactions one by one.
  *
  */
-contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
+contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, CrossDomainEnabled {
     /*************
      * Constants *
      *************/
@@ -84,7 +87,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
      * @inheritdoc IStateCommitmentChain
      */
     // slither-disable-next-line external-function
-    function appendStateBatch(bytes32[] memory _batch, bytes memory _signature, uint256 _shouldStartAtElement) public {
+    function appendStateBatch(bytes32[] memory _batch, uint256 _shouldStartAtElement, bytes memory _signature) public {
         // Fail fast in to make sure our batch roots aren't accidentally made fraudulent by the
         // publication of batches by some other user.
         require(
@@ -105,11 +108,16 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
                 ICanonicalTransactionChain(resolve("CanonicalTransactionChain")).getTotalElements(),
             "Number of state roots cannot exceed the number of canonical transactions."
         );
-        // todo: ecdsa sign decode _signature, _batch and _shouldStartAtElement msg32 verify, cpk signature verify.
-        
+
+        // Call tss group register contract to verify the signature
+        _checkClusterSignature(_batch, _shouldStartAtElement, _signature);
+
         // Pass the block's timestamp and the publisher of the data
         // to be used in the fraud proofs
         _appendBatch(_batch, _signature, abi.encode(block.timestamp, msg.sender));
+
+        // Update distributed state batch, and emit message
+        _distributeTssReward(_batch, _shouldStartAtElement);
     }
 
     /**
@@ -226,6 +234,24 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
     /**
      * Appends a batch to the chain.
      * @param _batch Elements within the batch.
+     * @param _shouldStartAtElement Relative rollup block height.
+     * @param _signature Signature of batch roots and rollup start height.
+     */
+    function _checkClusterSignature(bytes32[] memory _batch, uint256 _shouldStartAtElement, bytes memory _signature)
+        internal
+        view
+    {
+        // abi hash encode to bytes
+        require(
+            ITSSGroupContract(resolve("TSSGroupContract")).VerifySignature(
+                abi.encode(_batch, _shouldStartAtElement), _signature),
+            "verify signature failed"
+        );
+    }
+
+    /**
+     * Appends a batch to the chain.
+     * @param _batch Elements within the batch.
      * @param _extraData Any extra data to append to the batch.
      */
     function _appendBatch(bytes32[] memory _batch, bytes memory _signature, bytes memory _extraData) internal {
@@ -292,6 +318,35 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
 
         // slither-disable-next-line reentrancy-events
         emit StateBatchDeleted(_batchHeader.batchIndex, _batchHeader.batchRoot);
+    }
+
+    /**
+     * Checks that a batch header matches the stored hash for the given index.
+     * @param _batch Submit batch data.
+     * @return _shouldStartAtElement or not the header matches the stored one.
+     */
+    function _distributeTssReward(bytes32[] calldata _batch, uint256 _shouldStartAtElement) internal {
+        // get address of tss group member
+        (bool success, address[] memory tssMembers) = ITSSGroupContract(resolve("TSSGroupContract")).GetTssMembers();
+        require(success, "get tss members in error");
+
+        // construct calldata for claimReward call
+        bytes memory message = abi.encodeWithSelector(
+            ITssRewardContract.claimReward.selector,
+            _shouldStartAtElement,
+            _batch.length,
+            tssMembers
+        );
+
+        // send call data into L2, hardcode address
+        sendCrossDomainMessage("0x4200000000000000000000000000000000000020", 200_000, message);
+
+        // emit message
+        emit DistributeTssReward(
+            _shouldStartAtElement,
+            _batch.length,
+            tssMembers
+        );
     }
 
     /**
