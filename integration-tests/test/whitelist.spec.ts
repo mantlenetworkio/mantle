@@ -88,7 +88,7 @@ describe('Whitelist', async () => {
           },
           'latest',
           {
-            [predeploys.OVM_DeployerWhitelist]: {
+            [predeploys.BVM_DeployerWhitelist]: {
               state: {
                 // Set an owner
                 ['0x0000000000000000000000000000000000000000000000000000000000000000']:

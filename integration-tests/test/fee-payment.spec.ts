@@ -176,12 +176,12 @@ describe('Fee Payment Integration Tests', async () => {
       })
       await tx.wait()
 
-      const vaultBalance = await env.messenger.contracts.l2.OVM_ETH.balanceOf(
-        env.messenger.contracts.l2.OVM_SequencerFeeVault.address
+      const vaultBalance = await env.messenger.contracts.l2.BVM_ETH.balanceOf(
+        env.messenger.contracts.l2.BVM_SequencerFeeVault.address
       )
 
       const withdrawTx =
-        await env.messenger.contracts.l2.OVM_SequencerFeeVault.withdraw()
+        await env.messenger.contracts.l2.BVM_SequencerFeeVault.withdraw()
 
       // Wait for the withdrawal to be relayed to L1.
       await withdrawTx.wait()
