@@ -248,3 +248,20 @@ services:
       BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY: '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
       BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY: '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a'
       BATCH_SUBMITTER_SEQUENCER_BATCH_TYPE: ${BATCH_SUBMITTER_SEQUENCER_BATCH_TYPE:-zlib}
+
+  fault_detector:
+    depends_on:
+      - l1_chain
+      - l2geth
+    deploy:
+      replicas: 0
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.packages
+      target: fault-detector
+    image: ethereumbitnetwork/fault-detector:${DOCKER_TAG_FAULT_DETECTOR:-latest}
+    entrypoint: ./detector.sh
+    environment:
+      FAULT_DETECTOR__L1_RPC_PROVIDER: http://l1_chain:8545
+      FAULT_DETECTOR__L2_RPC_PROVIDER: http://l2geth:8545
+      RETRIES: 60

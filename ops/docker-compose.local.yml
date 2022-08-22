@@ -78,3 +78,9 @@ services:
     container_name: bitreplicahealthcheck
     deploy:
       replicas: 0
+
+  fault_detector:
+    <<: *base
+    container_name: bitfaultdetector
+    deploy:
+      replicas: 1
