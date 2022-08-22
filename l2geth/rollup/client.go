@@ -42,7 +42,7 @@ type Batch struct {
 }
 
 // EthContext represents the L1 EVM context that is injected into
-// the OVM at runtime. It is updated with each `enqueue` transaction
+// the BVM at runtime. It is updated with each `enqueue` transaction
 // and needs to be fetched from a remote server to be updated when
 // too much time has passed between `enqueue` transactions.
 type EthContext struct {

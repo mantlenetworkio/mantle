@@ -31,14 +31,14 @@ func main() {
 		log.Error("L1_URL environmental variable is required")
 		os.Exit(1)
 	}
-	ctcAddress := os.Getenv("OVM_CTC_ADDRESS")
+	ctcAddress := os.Getenv("BVM_CTC_ADDRESS")
 	if ctcAddress == "" {
 		log.Error("CTC_ADDRESS environmental variable is required")
 		os.Exit(1)
 	}
-	sccAddress := os.Getenv("OVM_SCC_ADDRESS")
+	sccAddress := os.Getenv("BVM_SCC_ADDRESS")
 	if sccAddress == "" {
-		log.Error("OVM_SCC_ADDRESS environmental variable is required")
+		log.Error("BVM_SCC_ADDRESS environmental variable is required")
 		os.Exit(1)
 	}
 	client, err := ethclient.Dial(l1Url)

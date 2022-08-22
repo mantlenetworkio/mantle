@@ -36,12 +36,12 @@ if [[ ! -z "$DEVELOPMENT" ]]; then
 fi
 
 geth="$REPO/build/bin/geth"
-USING_OVM=true $geth init --datadir $DATADIR $STATE_DUMP
+USING_BVM=true $geth init --datadir $DATADIR $STATE_DUMP
 
 echo "6587ae678cf4fc9a33000cdbf9f35226b71dcc6a4684a31203241f9bcfd55d27" \
     > $DATADIR/keyfile
 
 echo "password" > $DATADIR/password
 
-USING_OVM=true $geth account import \
+USING_BVM=true $geth account import \
     --datadir $DATADIR --password $DATADIR/password $DATADIR/keyfile

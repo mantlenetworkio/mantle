@@ -193,5 +193,5 @@ if [[ ! -z "$IS_VERIFIER" ]]; then
 fi
 cmd="$cmd --verbosity=$VERBOSITY"
 
-echo -e "Running:\nTARGET_GAS_LIMIT=$TARGET_GAS_LIMIT USING_OVM=true $cmd"
-TARGET_GAS_LIMIT=$TARGET_GAS_LIMIT USING_OVM=true $cmd
+echo -e "Running:\nTARGET_GAS_LIMIT=$TARGET_GAS_LIMIT USING_BVM=true $cmd"
+TARGET_GAS_LIMIT=$TARGET_GAS_LIMIT USING_BVM=true $cmd

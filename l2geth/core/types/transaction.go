@@ -302,7 +302,7 @@ func (tx *Transaction) AsMessage(s Signer) (Message, error) {
 	}
 
 	var err error
-	if rcfg.UsingOVM {
+	if rcfg.UsingBVM {
 		if tx.meta.QueueOrigin == QueueOriginL1ToL2 && tx.meta.L1MessageSender != nil {
 			msg.from = *tx.meta.L1MessageSender
 		} else {

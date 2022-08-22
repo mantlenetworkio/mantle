@@ -250,8 +250,8 @@ func TestTransactionJSON(t *testing.T) {
 	}
 }
 
-// Tests that OVM metadata has no impact on hash
-func TestOVMMetaDataHash(t *testing.T) {
+// Tests that bvm metadata has no impact on hash
+func TestbvmMetaDataHash(t *testing.T) {
 	if rightvrsTx.Hash() != rightvrsTxWithL1Sender.Hash() {
 		t.Errorf("L1MessageSender, should not affect the hash, want %x, got %x with L1MessageSender", rightvrsTx.Hash(), rightvrsTxWithL1Sender.Hash())
 	}

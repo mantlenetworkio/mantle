@@ -73,7 +73,7 @@ func NewPublicEthereumAPI(b Backend) *PublicEthereumAPI {
 	return &PublicEthereumAPI{b}
 }
 
-// GasPrice returns the L2 gas price in the OVM_GasPriceOracle
+// GasPrice returns the L2 gas price in the BVM_GasPriceOracle
 func (s *PublicEthereumAPI) GasPrice(ctx context.Context) (*hexutil.Big, error) {
 	gasPrice, err := s.b.SuggestL2GasPrice(context.Background())
 	if err != nil {
@@ -826,7 +826,7 @@ func DoCall(ctx context.Context, b Backend, args CallArgs, blockNrOrHash rpc.Blo
 	// Set sender address or use a default if none specified
 	var addr common.Address
 	if args.From == nil {
-		if !rcfg.UsingOVM {
+		if !rcfg.UsingBVM {
 			if wallets := b.AccountManager().Wallets(); len(wallets) > 0 {
 				if accounts := wallets[0].Accounts(); len(accounts) > 0 {
 					addr = accounts[0].Address
@@ -893,7 +893,7 @@ func DoCall(ctx context.Context, b Backend, args CallArgs, blockNrOrHash rpc.Blo
 	// or else the result of `eth_call` will not be correct.
 	blockNumber := header.Number
 	timestamp := header.Time
-	if rcfg.UsingOVM {
+	if rcfg.UsingBVM {
 		block, err := b.BlockByNumber(ctx, rpc.BlockNumber(header.Number.Uint64()))
 		if err != nil {
 			return nil, 0, false, err
@@ -1006,7 +1006,7 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNrOrHash 
 	}
 	cap = hi
 
-	if !rcfg.UsingOVM {
+	if !rcfg.UsingBVM {
 		// Set sender address or use a default if none specified
 		if args.From == nil {
 			if wallets := b.AccountManager().Wallets(); len(wallets) > 0 {
@@ -1480,7 +1480,7 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context, ha
 		"contractAddress":   nil,
 		"logs":              receipt.Logs,
 		"logsBloom":         receipt.Bloom,
-		// UsingOVM
+		// UsingBVM
 		"l1GasPrice":  (*hexutil.Big)(receipt.L1GasPrice),
 		"l1GasUsed":   (*hexutil.Big)(receipt.L1GasUsed),
 		"l1Fee":       (*hexutil.Big)(receipt.L1Fee),

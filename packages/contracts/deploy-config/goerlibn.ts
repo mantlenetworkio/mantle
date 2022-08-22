@@ -9,7 +9,7 @@ const config = {
   sccSequencerPublishWindowSeconds: 12592000,
   bvmSequencerAddress: '0xCd0B4E309FB855d644bA64E5fb3dC3DD08f13917',
   bvmProposerAddress: '0x24280Da7E82ab0Ec4E38B394aCF0196c21663B75',
-  //default ovmBlockSignerAddress
+  //default bvmBlockSignerAddress
   bvmBlockSignerAddress: '0x00000398232E2064F896018496b4b44b3D62751F',
   bvmFeeWalletAddress: '0xCd0B4E309FB855d644bA64E5fb3dC3DD08f13917',
   bvmAddressManagerOwner: '0xCd0B4E309FB855d644bA64E5fb3dC3DD08f13917',

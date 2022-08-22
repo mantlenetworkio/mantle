@@ -49,7 +49,7 @@ type EthAPIBackend struct {
 	rollupGpo       *gasprice.RollupOracle
 	verifier        bool
 	gasLimit        uint64
-	UsingOVM        bool
+	UsingBVM        bool
 	MaxCallDataSize int
 }
 
@@ -102,7 +102,7 @@ func (b *EthAPIBackend) SetHead(number uint64) {
 		log.Info("Cannot reset to genesis")
 		return
 	}
-	if !b.UsingOVM {
+	if !b.UsingBVM {
 		b.eth.protocolManager.downloader.Cancel()
 	}
 	b.eth.blockchain.SetHead(number)
@@ -256,9 +256,9 @@ func (b *EthAPIBackend) GetTd(blockHash common.Hash) *big.Int {
 func (b *EthAPIBackend) GetEVM(ctx context.Context, msg core.Message, state *state.StateDB, header *types.Header, vmCfg *vm.Config) (*vm.EVM, func() error, error) {
 	// This was removed upstream:
 	// https://github.com/bitdao-io/bitnetwork/l2geth/commit/39f502329fac4640cfb71959c3496f19ea88bc85#diff-9886da3412b43831145f62cec6e895eb3613a175b945e5b026543b7463454603
-	// We're throwing this behind a UsingOVM flag for now as to not break
+	// We're throwing this behind a UsingBVM flag for now as to not break
 	// any tests that may depend on this behavior.
-	if !rcfg.UsingOVM {
+	if !rcfg.UsingBVM {
 		state.SetBalance(msg.From(), math.MaxBig256)
 	}
 	vmError := func() error { return nil }
@@ -296,7 +296,7 @@ func (b *EthAPIBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscri
 // Transactions originating from the RPC endpoints are added to remotes so that
 // a lock can be used around the remotes for when the sequencer is reorganizing.
 func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
-	if b.UsingOVM {
+	if b.UsingBVM {
 		to := signedTx.To()
 		if to != nil {
 			// Prevent QueueOriginSequencer transactions that are too large to
@@ -311,7 +311,7 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 		}
 		return b.eth.syncService.ValidateAndApplySequencerTransaction(signedTx)
 	}
-	// OVM Disabled
+	// BVM Disabled
 	return b.eth.txPool.AddLocal(signedTx)
 }
 

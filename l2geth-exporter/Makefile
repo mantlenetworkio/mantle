@@ -27,10 +27,10 @@ lint:
 binding:
 	$(eval tempCTC := $(shell mktemp))
 
-	cat ../../packages/contracts/deployments/mainnet/CanonicalTransactionChain.json \
+	cat ../packages/contracts/deployments/goerlibn/CanonicalTransactionChain.json \
 		| jq -r .bytecode > $(tempCTC)
 
-	cat ../../packages/contracts/deployments/mainnet/CanonicalTransactionChain.json \
+	cat ../packages/contracts/deployments/goerlibn/CanonicalTransactionChain.json \
 		| jq .abi \
 		| abigen --pkg bindings \
 		--abi - \
@@ -42,10 +42,10 @@ binding:
 
 	$(eval tempSCC := $(shell mktemp))
 
-	cat ../../packages/contracts/deployments/mainnet/StateCommitmentChain.json \
+	cat ../packages/contracts/deployments/goerlibn/StateCommitmentChain.json \
 		| jq -r .bytecode > $(tempSCC)
 
-	cat ../../packages/contracts/deployments/mainnet/StateCommitmentChain.json \
+	cat ../packages/contracts/deployments/goerlibn/StateCommitmentChain.json \
 		| jq .abi \
 		| abigen --pkg bindings \
 		--abi - \

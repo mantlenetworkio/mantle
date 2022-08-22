@@ -80,8 +80,7 @@ contract MockBridge {
                 address(0),
                 hex"1234",
                 1234,
-                12345678,
-                0
+                12345678
             )
         );
     }
@@ -102,8 +101,7 @@ contract MockBridge {
                 address(0),
                 hex"1234",
                 1234,
-                12345678,
-                0
+                12345678
             )
         );
     }

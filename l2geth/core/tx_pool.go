@@ -554,7 +554,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrUnderpriced
 	}
 	// Ensure the transaction adheres to nonce ordering
-	if rcfg.UsingOVM {
+	if rcfg.UsingBVM {
 		if pool.currentState.GetNonce(from) != tx.Nonce() {
 			return ErrNonceTooLow
 		}
@@ -565,7 +565,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	}
 	// Transactor should have enough funds to cover the costs
 	// cost == V + GP * GL
-	if !rcfg.UsingOVM {
+	if !rcfg.UsingBVM {
 		// This check is done in SyncService.verifyFee
 		if pool.currentState.GetBalance(from).Cmp(tx.Cost()) < 0 {
 			return ErrInsufficientFunds

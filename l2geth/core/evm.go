@@ -46,15 +46,15 @@ func NewEVMContext(msg Message, header *types.Header, chain ChainContext, author
 	} else {
 		beneficiary = *author
 	}
-	if rcfg.UsingOVM {
-		// When using the OVM, we must:
+	if rcfg.UsingBVM {
+		// When using the bvm, we must:
 		// - Set the Time to be the msg.L1Timestamp
 		return vm.Context{
 			CanTransfer:   CanTransfer,
 			Transfer:      Transfer,
 			GetHash:       GetHashFn(header, chain),
 			Origin:        msg.From(),
-			Coinbase:      dump.OvmFeeWallet, // Coinbase is the fee vault.
+			Coinbase:      dump.BvmFeeWallet, // Coinbase is the fee vault.
 			BlockNumber:   new(big.Int).Set(header.Number),
 			Time:          new(big.Int).SetUint64(msg.L1Timestamp()),
 			Difficulty:    new(big.Int), // Difficulty always returns zero.
