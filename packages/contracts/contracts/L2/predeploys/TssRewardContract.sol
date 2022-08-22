@@ -112,7 +112,7 @@ contract TssRewardContract is ITssRewardContract {
      * @param _amount Distribute batch block number
      * @return _tssMembers Address array of tss group members
      */
-    function updateReward(uint256 _blockID) // TODO remove _amount
+    function updateReward(uint256 _blockID)
         external
         payable
         onlyFromDeadAddress
@@ -130,7 +130,7 @@ contract TssRewardContract is ITssRewardContract {
 
     function withdrawDust() external onlyOwner checkBalance {
         uint256 amount = dust;
-        totalAmount -= dust;
+        totalAmount = totalAmount.sub(dust);
         dust = 0;
         if (amount > 0) {
             owner.transfer(dust);
