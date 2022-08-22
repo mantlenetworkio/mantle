@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 import "./iTssRewardContract.sol";
 
 /* Library Imports */
-//import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 /* Interface Imports */
 
@@ -15,14 +15,14 @@ import "./iTssRewardContract.sol";
  * @dev Collect L2 block gas reward per block and release to batch roll up tss members.
  */
 contract TssRewardContract is ITssRewardContract {
-    //    using SafeMath for uint256;
+    using SafeMath for uint256;
 
     mapping(uint256 => uint256) public ledger;
     address public deadAddress;
     address payable public owner;
-    uint256 public bestBlockID = 0;
-    uint256 public dust = 0;
-    uint256 public totalAmount = 0;
+    uint256 public bestBlockID;
+    uint256 public dust;
+    uint256 public totalAmount;
 
     // set call address
     constructor(address _deadAddress, address payable _owner) {
@@ -52,7 +52,7 @@ contract TssRewardContract is ITssRewardContract {
 
     modifier checkBalance() {
         require(
-            address(this).balance == totalAmount,
+            address(this).balance >= totalAmount,
             "balance record and contract balance are not equal"
         );
         _;
@@ -83,19 +83,19 @@ contract TssRewardContract is ITssRewardContract {
         // release reward from _blockStartHeight to _blockStartHeight + _length
         for (uint256 i=_blockStartHeight; i<_length; i++) {
             // calc send amount
-            sendAmount = blockAmount / _tssMembers.length; // TODO safemath
+            sendAmount = blockAmount.div(_tssMembers.length);
             // delete distributed height
             delete ledger[_blockStartHeight];
             for (uint256 j=0; j < _tssMembers.length; j++) {
                 address payable addr = payable(_tssMembers[j]);
-                accu += sendAmount;
-                totalAmount -= sendAmount;
-                addr.transfer(sendAmount);
+                accu = accu.add(sendAmount);
+                totalAmount = totalAmount.sub(sendAmount);
+                addr.transfer(sendAmount); // TODO use call to transfer
             }
-            uint256 reserved = blockAmount - accu;
+            uint256 reserved = blockAmount.sub(accu);
             require(reserved >= 0, "release amount gt real balance");
             if (reserved > 0) {
-                dust += reserved;
+                dust = dust.add(reserved);
             }
         }
 
@@ -112,7 +112,7 @@ contract TssRewardContract is ITssRewardContract {
      * @param _amount Distribute batch block number
      * @return _tssMembers Address array of tss group members
      */
-    function updateReward(uint256 _blockID, uint256 _amount)
+    function updateReward(uint256 _blockID) // TODO remove _amount
         external
         payable
         onlyFromDeadAddress
@@ -121,24 +121,26 @@ contract TssRewardContract is ITssRewardContract {
     {
         // check update block ID
         require(_blockID == bestBlockID+1, "block id update illegal");
-        // check transfer amount
-        require(msg.value == _amount, "transfer amount and update amount not equal");
         // iter address to update balance
         bestBlockID = _blockID;
-        totalAmount += _amount;
-        ledger[_blockID] = _amount;
+        totalAmount = totalAmount.add(msg.value);
+        ledger[_blockID] = msg.value;
         return true;
     }
 
     function withdrawDust() external onlyOwner checkBalance {
         uint256 amount = dust;
-        dust = 0;
         totalAmount -= dust;
-        owner.transfer(amount);
+        dust = 0;
+        if (amount > 0) {
+            owner.transfer(dust);
+        }
     }
 
     function withdraw() external onlyOwner checkBalance {
         totalAmount = 0;
-        owner.transfer(address(this).balance);
+        if (address(this).balance > 0) {
+            owner.transfer(address(this).balance);
+        }
     }
 }
