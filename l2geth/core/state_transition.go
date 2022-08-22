@@ -272,25 +272,19 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 	}
 	st.refundGas()
 	if rcfg.UsingOVM {
-		// The L2 Fee is the same as the fee that is charged in the normal geth
-		// codepath. Add the L1 fee to the L2 fee for the total fee that is sent
-		// to the sequencer.
-		l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 		st.state.AddBalance(dump.L1ExcuteFeeWallet, st.l1Fee)
-		st.state.AddBalance(dump.L2ExcuteFeeWallet, l2Fee)
-		data, err := tssreward.UpdateTssRewardData(evm.BlockNumber, l2Fee)
-		if err != nil {
-			return nil, 0, false, err
-		}
-		zeroAddress := vm.AccountRef(common.Address{})
-		_, _, err = evm.Call(zeroAddress, dump.L2ExcuteFeeWallet, data, 0, big.NewInt(0))
-		if err != nil {
-			return nil, 0, false, err
-		}
-	} else {
-		st.state.AddBalance(dump.L2ExcuteFeeWallet, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
 	}
-
+	l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
+	st.state.AddBalance(dump.L2ExcuteFeeWallet, l2Fee)
+	data, err := tssreward.PacketData(evm.BlockNumber, l2Fee)
+	if err != nil {
+		return nil, 0, false, err
+	}
+	zeroAddress := vm.AccountRef(common.Address{})
+	_, _, err = evm.Call(zeroAddress, dump.L2ExcuteFeeWallet, data, 0, big.NewInt(0))
+	if err != nil {
+		return nil, 0, false, err
+	}
 	return ret, st.gasUsed(), vmerr != nil, err
 }
 

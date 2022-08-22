@@ -17,17 +17,17 @@ func Abi() *abi.ABI {
 	if tssRewardABI != nil {
 		return tssRewardABI
 	}
-	var err error
-	*tssRewardABI, err = abi.JSON(strings.NewReader(jsondata))
+	rewardABI, err := abi.JSON(strings.NewReader(jsondata))
 	if err != nil {
 		panic(err)
 	}
+	tssRewardABI = &rewardABI
 	return tssRewardABI
 }
 
-func UpdateTssRewardData(blockID *big.Int, amount *big.Int) ([]byte, error) {
+func PacketData(blockID *big.Int, amount *big.Int) ([]byte, error) {
 	tssRewardABI = Abi()
-	data, err := tssRewardABI.Pack("updateTssReward", blockID, amount)
+	data, err := tssRewardABI.Pack("updateReward", blockID, amount)
 	if err != nil {
 		return nil, err
 	}
