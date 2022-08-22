@@ -27,7 +27,7 @@ func (m Manager) observeElection() {
 			continue
 		}
 		// check if new round election is held(inactive tss members?)
-		tssMembers, electionId := getInactiveMembers()
+		tssMembers, threshold, electionId := getInactiveMembers()
 		if tssMembers != nil {
 			// the CPK has not been confirmed in the latest election
 			// start to generate CPK
@@ -42,7 +42,7 @@ func (m Manager) observeElection() {
 				time.Sleep(10 * time.Second)
 				continue
 			}
-			cpk, err = m.generateKey(tssMembers)
+			cpk, err = m.generateKey(tssMembers, threshold)
 			if err != nil {
 				time.Sleep(10 * time.Second)
 				continue
@@ -71,12 +71,12 @@ func (m Manager) getCPK(electionId uint64) (string, time.Time, error) {
 	return cpkData.Cpk, cpkData.CreationTime, nil
 }
 
-func getInactiveMembers() ([]string, uint64) {
+func getInactiveMembers() ([]string, int, uint64) {
 	// todo query from layer1 contract
-	return nil, 0
+	return nil, 0, 0
 }
 
-func (m Manager) generateKey(tssMembers []string) (string, error) {
+func (m Manager) generateKey(tssMembers []string, threshold int) (string, error) {
 	availableNodes := m.availableNodes(tssMembers)
 	if len(availableNodes) < len(tssMembers) {
 		return "", errors.New("not enough available nodes to generate CPK")
@@ -134,7 +134,7 @@ func (m Manager) generateKey(tssMembers []string) (string, error) {
 		}
 	}()
 
-	m.callKeygen(availableNodes, requestId, sendError)
+	m.callKeygen(availableNodes, threshold, requestId, sendError)
 	wg.Wait()
 
 	if anyError != nil {
@@ -159,10 +159,11 @@ func (m Manager) generateKey(tssMembers []string) (string, error) {
 	return base, nil
 }
 
-func (m Manager) callKeygen(availableNodes []string, requestId string, sendError chan struct{}) {
+func (m Manager) callKeygen(availableNodes []string, threshold int, requestId string, sendError chan struct{}) {
 	for _, node := range availableNodes {
 		nodeRequest := tss.KeygenRequest{
 			Nodes:     availableNodes,
+			Threshold: threshold,
 			Timestamp: time.Now().UnixMilli(),
 		}
 		requestBz, _ := json.Marshal(nodeRequest)

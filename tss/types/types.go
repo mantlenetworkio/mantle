@@ -25,6 +25,7 @@ type SignResponse struct {
 
 type KeygenRequest struct {
 	Nodes     []string `json:"nodes"`
+	Threshold int      `json:"threshold"`
 	Timestamp int64    `json:"timestamp"`
 }
 
