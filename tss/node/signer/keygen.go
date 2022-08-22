@@ -47,7 +47,7 @@ func (p *Processor) Keygen() {
 				} else {
 					if resp.Status == common.Success {
 						keygenResponse := tsstypes.KeygenResponse{
-							PoolPubKey: resp.PubKey,
+							ClusterPublicKey: resp.PubKey,
 						}
 						RpcResponse := tdtypes.NewRPCSuccessResponse(tdtypes.JSONRPCStringID(resId), keygenResponse)
 						p.wsClient.SendMsg(RpcResponse)

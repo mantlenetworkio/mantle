@@ -3,7 +3,6 @@ package signer
 import (
 	"context"
 	"crypto/ecdsa"
-	batchsubmitter "github.com/bitdao-io/bitnetwork/batch-submitter"
 	l2ethclient "github.com/bitdao-io/bitnetwork/l2geth/ethclient"
 	"github.com/bitdao-io/bitnetwork/tss/node/config"
 	"github.com/bitdao-io/bitnetwork/tss/node/tsslib"
@@ -34,9 +33,7 @@ type Processor struct {
 	signRequestChan   chan tdtypes.RPCRequest
 	keygenRequestChan chan tdtypes.RPCRequest
 	waitSignLock      *sync.Mutex
-	waitSignMsgs      map[string]types.AskStateRequest
-	signRequests      map[string]int64
-	signMsgQuitChan   map[string]chan struct{}
+	waitSignMsgs      map[string]types.SignStateRequest
 	logger            zerolog.Logger
 
 	metrics *Metrics
@@ -49,7 +46,7 @@ func NewProcessor(cfg config.Configuration, contx context.Context, tssInstance t
 	if err != nil {
 		return nil, err
 	}
-	l2Client, err := batchsubmitter.DialL2EthClientWithTimeout(ctx, cfg.BaseConfig.L2EthRpc, cfg.BaseConfig.DisableHTTP2)
+	l2Client, err := DialL2EthClientWithTimeout(ctx, cfg.BaseConfig.L2EthRpc, cfg.BaseConfig.DisableHTTP2)
 
 	processor := Processor{
 		localPubkey:       pubKey,
@@ -66,9 +63,7 @@ func NewProcessor(cfg config.Configuration, contx context.Context, tssInstance t
 		signRequestChan:   make(chan tdtypes.RPCRequest, 100),
 		keygenRequestChan: make(chan tdtypes.RPCRequest, 1),
 		waitSignLock:      &sync.Mutex{},
-		waitSignMsgs:      make(map[string]types.AskStateRequest),
-		signRequests:      make(map[string]int64),
-		signMsgQuitChan:   make(map[string]chan struct{}),
+		waitSignMsgs:      make(map[string]types.SignStateRequest),
 		metrics:           PrometheusMetrics("tssnode"),
 	}
 	return &processor, nil

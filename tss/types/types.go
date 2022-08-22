@@ -2,7 +2,7 @@ package types
 
 import "math/big"
 
-type AskStateRequest struct {
+type SignStateRequest struct {
 	StartBlock          big.Int    `json:"start_block"`
 	OffsetStartsAtIndex big.Int    `json:"offset_starts_at_index"`
 	StateRoots          [][32]byte `json:"state_roots"`
@@ -12,29 +12,25 @@ type AskResponse struct {
 	Result bool `json:"result"`
 }
 
-type BatchSignRequest struct {
-	Timestamp  int64         `json:"timestamp"`
-	Signs      []SignRequest `json:"signs"`
-	PoolPubKey string        `json:"pool_pub_key"`
-}
-
-type SignRequest struct {
-	UniqueId string   `json:"unique_id"`
-	Nodes    []string `json:"nodes"`
+type NodeSignStateRequest struct {
+	ClusterPublicKey string           `json:"cluster_public_key"`
+	Timestamp        int64            `json:"timestamp"`
+	Nodes            []string         `json:"nodes"`
+	StateBatch       SignStateRequest `json:"state_batch"`
 }
 
 type SignResponse struct {
-	UniqueId  string        `json:"unique_id"`
 	Signature SignatureData `json:"signature"`
 }
 
 type KeygenRequest struct {
 	Nodes     []string `json:"nodes"`
 	Threshold int      `json:"threshold"`
+	Timestamp int64    `json:"timestamp"`
 }
 
 type KeygenResponse struct {
-	PoolPubKey string `json:"pool_pub_key"`
+	ClusterPublicKey string `json:"cluster_public_key"`
 }
 
 type SignatureData struct {

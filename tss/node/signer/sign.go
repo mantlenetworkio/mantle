@@ -4,13 +4,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	l2common "github.com/bitdao-io/bitnetwork/l2geth/common"
 	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
 	"github.com/bitdao-io/bitnetwork/tss/node/tsslib/common"
 	"github.com/bitdao-io/bitnetwork/tss/node/tsslib/keysign"
 	tsstypes "github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/rs/zerolog"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
-	"sync"
 )
 
 func (p *Processor) Sign() {
@@ -31,26 +31,15 @@ func (p *Processor) Sign() {
 				var resId = req.ID.(tdtypes.JSONRPCStringID).String()
 				logger.Info().Msgf("dealing resId (%s) ", resId)
 
-				var batchSignRequest tsstypes.BatchSignRequest
-				if err := json.Unmarshal(req.Params, &batchSignRequest); err != nil {
+				var nodeSignRequest tsstypes.NodeSignStateRequest
+				if err := json.Unmarshal(req.Params, &nodeSignRequest); err != nil {
 					logger.Error().Msg("failed to unmarshal ask request")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 					p.wsClient.SendMsg(RpcResponse)
 					continue
 				}
-				v, ok := p.signRequests[resId]
-				if !ok {
-					p.signRequests[resId] = batchSignRequest.Timestamp
-				} else {
-					if v < batchSignRequest.Timestamp {
-						p.signRequests[resId] = batchSignRequest.Timestamp
-						ch, ok := p.signMsgQuitChan[resId]
-						if ok {
-							ch <- struct{}{}
-						}
-					}
-				}
-				err := checkMessages(batchSignRequest.Signs, p.waitSignMsgs)
+
+				err, hash := checkMessages(nodeSignRequest.StateBatch, p.waitSignMsgs)
 				if err != nil {
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 
@@ -59,75 +48,39 @@ func (p *Processor) Sign() {
 					continue
 				}
 
-				wg := &sync.WaitGroup{}
-				wg.Add(len(batchSignRequest.Signs))
+				data, err := p.handleSign(nodeSignRequest, hash, logger)
 
-				quit := make(chan struct{})
-				p.signMsgQuitChan[resId] = quit
-				for _, sign := range batchSignRequest.Signs {
-					go p.distribute(resId, sign, quit, wg, batchSignRequest.PoolPubKey, logger)
+				if err != nil {
+					logger.Error().Msgf(" %s sign failed ", hash.String())
+					er := p.wsClient.SendMsg(tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error()))
+					if er != nil {
+						logger.Err(er).Msg("failed to send msg to tss manager")
+					} else {
+						p.removeWaitEvent(hash.String())
+					}
+					return
 				}
-				wg.Wait()
-				close(p.signMsgQuitChan[resId])
-				delete(p.signMsgQuitChan, resId)
+
+				signResponse := tsstypes.SignResponse{
+					Signature: data,
+				}
+				RpcResponse := tdtypes.NewRPCSuccessResponse(req.ID, signResponse)
+				err = p.wsClient.SendMsg(RpcResponse)
+				if err != nil {
+					logger.Err(err).Msg("failed to sendMsg to bridge ")
+				} else {
+					p.removeWaitEvent(hash.String())
+				}
 			}
 		}
 	}()
 }
 
-func (p *Processor) distribute(reqId string, sign tsstypes.SignRequest, quit <-chan struct{}, wg *sync.WaitGroup, poolPubKey string, logger zerolog.Logger) {
+func (p *Processor) handleSign(sign tsstypes.NodeSignStateRequest, hash l2common.Hash, logger zerolog.Logger) (tsstypes.SignatureData, error) {
 
-	defer wg.Done()
-	select {
-	case <-quit:
-		return
-	default:
-		data, err := p.handleSign(sign, poolPubKey, logger)
+	logger.Info().Msgf(" timestamp (%s) ,dealing sign hex (%s)", sign.Timestamp, hash.String())
 
-		if err != nil {
-			logger.Error().Msgf(" %s sign failed ", sign.UniqueId)
-			er := p.wsClient.SendMsg(tdtypes.NewRPCErrorResponse(tdtypes.JSONRPCStringID(reqId), 201, "failed", err.Error()))
-			if er != nil {
-				logger.Err(er).Msg("failed to send msg to tss manager")
-			} else {
-				p.removeWaitEvent(sign.UniqueId)
-			}
-			return
-		}
-
-		signResponse := tsstypes.SignResponse{
-			UniqueId:  sign.UniqueId,
-			Signature: data,
-		}
-		RpcResponse := tdtypes.NewRPCSuccessResponse(tdtypes.JSONRPCStringID(reqId), signResponse)
-		err = p.wsClient.SendMsg(RpcResponse)
-		if err != nil {
-			logger.Err(err).Msg("failed to sendMsg to bridge ")
-		} else {
-			p.removeWaitEvent(sign.UniqueId)
-		}
-	}
-
-}
-
-func (p *Processor) handleSign(sign tsstypes.SignRequest, poolPubKey string, logger zerolog.Logger) (tsstypes.SignatureData, error) {
-
-	logger.Info().Msgf(" dealing sign (%s)", sign.UniqueId)
-	msg, ok := p.waitSignMsgs[sign.UniqueId]
-
-	if !ok {
-		logger.Error().Msgf("msg (%s) doesn't verify ", sign.UniqueId)
-		return tsstypes.SignatureData{}, errors.New("msg doesn't verify " + sign.UniqueId)
-	}
-
-	rawBytes := make([]byte, 0)
-	for _, sr := range msg.StateRoots {
-		rawBytes = append(rawBytes, sr[:]...)
-	}
-	rawBytes = append(rawBytes, msg.OffsetStartsAtIndex.Bytes()...)
-	digestBz := crypto.Keccak256Hash(rawBytes).Bytes()
-
-	signedData, culpritNodes, err := p.sign(digestBz, sign.Nodes, poolPubKey, logger)
+	signedData, culpritNodes, err := p.sign(hash.Bytes(), sign.Nodes, sign.ClusterPublicKey, logger)
 	if err != nil {
 		if len(culpritNodes) > 0 {
 			logger.Err(err).Msgf(" sign failed with culpritNodes %s ", culpritNodes)
@@ -160,14 +113,23 @@ func (p *Processor) sign(digestBz []byte, signerPubKeys []string, poolPubKey str
 	}
 }
 
-func checkMessages(signs []tsstypes.SignRequest, waitSignMsgs map[string]tsstypes.AskStateRequest) error {
-	for _, sign := range signs {
-		_, ok := waitSignMsgs[sign.UniqueId]
-		if !ok {
-			return errors.New("event sign request has the event which unverified")
-		}
+func checkMessages(sign tsstypes.SignStateRequest, waitSignMsgs map[string]tsstypes.SignStateRequest) (error, l2common.Hash) {
+	hash := signMsgToHash(sign)
+	_, ok := waitSignMsgs[hash.String()]
+	if !ok {
+		return errors.New("event sign request has the event which unverified"), hash
 	}
-	return nil
+
+	return nil, hash
+}
+
+func signMsgToHash(msg tsstypes.SignStateRequest) l2common.Hash {
+	rawBytes := make([]byte, 0)
+	for _, sr := range msg.StateRoots {
+		rawBytes = append(rawBytes, sr[:]...)
+	}
+	rawBytes = append(rawBytes, msg.OffsetStartsAtIndex.Bytes()...)
+	return crypto.Keccak256Hash(rawBytes)
 }
 
 func (p *Processor) removeWaitEvent(key string) {

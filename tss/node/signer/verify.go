@@ -24,7 +24,7 @@ func (p *Processor) Verify() {
 			case <-p.stopChan:
 				return
 			case req := <-p.askRequestChan:
-				var askRequest tsstypes.AskStateRequest
+				var askRequest tsstypes.SignStateRequest
 				if err := json.Unmarshal(req.Params, &askRequest); err != nil {
 					logger.Error().Msg("failed to unmarshal ask request")
 					continue
@@ -95,7 +95,7 @@ func (p *Processor) verify(start big.Int, index int, stateRoot [32]byte, logger 
 	}
 }
 
-func (p *Processor) UpdateWaitSignEvents(uniqueId string, msg tsstypes.AskStateRequest) {
+func (p *Processor) UpdateWaitSignEvents(uniqueId string, msg tsstypes.SignStateRequest) {
 	p.waitSignLock.Lock()
 	defer p.waitSignLock.Unlock()
 	p.waitSignMsgs[uniqueId] = msg
