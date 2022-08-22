@@ -1,0 +1,56 @@
+{
+  "private": true,
+  "name": "@bitdaoio/fault-detector",
+  "version": "1.0.0",
+  "description": "[BitNetwork] Service for detecting faulty L2 output proposals",
+  "main": "dist/index",
+  "types": "dist/index",
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "start": "ts-node ./src/service.ts",
+    "test": "hardhat test",
+    "test:coverage": "nyc hardhat test && nyc merge .nyc_output coverage.json",
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist/ ./tsconfig.tsbuildinfo",
+    "lint": "yarn lint:fix && yarn lint:check",
+    "pre-commit": "lint-staged",
+    "lint:fix": "yarn lint:check --fix",
+    "lint:check": "eslint . --max-warnings=0"
+  },
+  "keywords": [
+    "bitnetwork",
+    "ethereum",
+    "fault",
+    "detector"
+  ],
+  "homepage": "https://github.com/bitnetworkio/bitnetworkio/tree/main/packages/fault-detector#readme",
+  "license": "MIT",
+  "author": "BitNetwork PBC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bitnetworkio/bitnetwork.git"
+  },
+  "devDependencies": {
+    "@defi-wonderland/smock": "^2.0.7",
+    "@nomiclabs/hardhat-ethers": "^2.0.6",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@types/chai": "^4.3.1",
+    "@types/dateformat": "^5.0.0",
+    "chai-as-promised": "^7.1.1",
+    "dateformat": "^4.5.1",
+    "ethereum-waffle": "^3.4.4",
+    "ethers": "^5.6.8",
+    "hardhat": "^2.9.6",
+    "lodash": "^4.17.21",
+    "ts-node": "^10.8.2"
+  },
+  "dependencies": {
+    "@bitdaoio/common-ts": "^1.0.0",
+    "@bitdaoio/contracts": "^1.0.3",
+    "@bitdaoio/core-utils": "^1.0.3",
+    "@bitdaoio/sdk": "^1.0.6",
+    "@ethersproject/abstract-provider": "^5.6.1"
+  }
+}

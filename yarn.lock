@@ -352,6 +352,54 @@
   resolved "https://registry.yarnpkg.com/@bitdaoio/contracts-periphery/-/contracts-periphery-1.0.0.tgz#4f1ed7d5c22f4f229ae244bb81dac0dbad2a141f"
   integrity sha512-zkrqdeZaNic4pXHc9CFg5wFUtApntWr6md2ePvWwGCf7xFDkIssIup1c9mpvvFwgwBRQgXWHWlFYSM9iRv89vQ==
 
+"@bitdaoio/contracts@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@bitdaoio/contracts/-/contracts-1.0.2.tgz#97ab78572bb29c1193545c88255e71c4d3d30f0c"
+  integrity sha512-yT2xGbUKKC7HWsixLnMaWUT8TERkslPp4+gja0N7kOQnq/VuwLv+0WYurm342qbShK4cfipy7yFD8Z7P2uhtnQ==
+  dependencies:
+    "@bitdaoio/core-utils" "1.0.0"
+    "@ethersproject/abstract-provider" "^5.6.1"
+    "@ethersproject/abstract-signer" "^5.6.2"
+
+"@bitdaoio/core-utils@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@bitdaoio/core-utils/-/core-utils-1.0.0.tgz#23ea724cc916323f7b68c05825636a9b3082365c"
+  integrity sha512-BLsUXw5IGWnz9EAJ4uMUV5Ro2oKTkgUytnn1vYdeXK7iIL+17ho53SLhiPzFukibsjc7H335q5hPpv2hlsfRrw==
+  dependencies:
+    "@ethersproject/abstract-provider" "^5.6.1"
+    "@ethersproject/properties" "^5.6.0"
+    "@ethersproject/providers" "^5.6.8"
+    "@ethersproject/transactions" "^5.6.2"
+    "@ethersproject/web" "^5.6.1"
+    bufio "^1.0.7"
+    chai "^4.3.4"
+    ethers "^5.6.8"
+
+"@bitdaoio/core-utils@1.0.3", "@bitdaoio/core-utils@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@bitdaoio/core-utils/-/core-utils-1.0.3.tgz#8dd67e843097f725e00479b0b4ed7b2324859c38"
+  integrity sha512-x/iwJ+Yb46oNOhLHm5RyP6hDNp5dXBw3EgTKVqkalfVdp5o1NAnm/eFtWNoEqwM8CCDmv7OazTBgkORCYCHefA==
+  dependencies:
+    "@ethersproject/abstract-provider" "^5.6.1"
+    "@ethersproject/properties" "^5.6.0"
+    "@ethersproject/providers" "^5.6.8"
+    "@ethersproject/transactions" "^5.6.2"
+    "@ethersproject/web" "^5.6.1"
+    bufio "^1.0.7"
+    chai "^4.3.4"
+    ethers "^5.6.8"
+
+"@bitdaoio/sdk@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@bitdaoio/sdk/-/sdk-1.0.6.tgz#93272befbcf7ea94657488312f813bcbbebac353"
+  integrity sha512-4JTkKFmf7a01qMJkLMsWoO/JBBr7fMlCqTFKCifJDATDAnjE0CD9XSoW8uW4ErE28B3I0ukj7n5y/iDFBS4B4Q==
+  dependencies:
+    "@bitdaoio/contracts" "1.0.2"
+    "@bitdaoio/core-utils" "1.0.3"
+    lodash "^4.17.21"
+    merkletreejs "^0.2.27"
+    rlp "^2.2.7"
+
 "@changesets/apply-release-plan@^5.0.0":
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@changesets/apply-release-plan/-/apply-release-plan-5.0.0.tgz#11bf168acecbf4cfa2b0e6425160bac5ceeec1c3"
@@ -2572,6 +2620,11 @@
   resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-ethers/-/hardhat-ethers-2.0.2.tgz#c472abcba0c5185aaa4ad4070146e95213c68511"
   integrity sha512-6quxWe8wwS4X5v3Au8q1jOvXYEPkS1Fh+cME5u6AwNdnI4uERvPlVjlgRWzpnb+Rrt1l/cEqiNRH9GlsBMSDQg==
 
+"@nomiclabs/hardhat-ethers@^2.0.6":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-ethers/-/hardhat-ethers-2.1.1.tgz#3f1d1ab49813d1bae4c035cc1adec224711e528b"
+  integrity sha512-Gg0IFkT/DW3vOpih4/kMjeZCLYqtfgECLeLXTs7ZDPzcK0cfoc5wKk4nq5n/izCUzdhidO/Utd6ptF9JrWwWVA==
+
 "@nomiclabs/hardhat-etherscan@^3.0.3":
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-etherscan/-/hardhat-etherscan-3.0.3.tgz#ca54a03351f3de41f9f5240e37bea9d64fa24e64"
@@ -3174,6 +3227,11 @@
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.2.21.tgz#9f35a5643129df132cf3b5c1ec64046ea1af0650"
   integrity sha512-yd+9qKmJxm496BOV9CMNaey8TWsikaZOwMRwPHQIjcOJM9oV+fi9ZMNw3JsVnbEEbo2gRTDnGEBv8pjyn67hNg==
 
+"@types/chai@^4.3.1":
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.3.3.tgz#3c90752792660c4b562ad73b3fbd68bf3bc7ae07"
+  integrity sha512-hC7OMnszpxhZPduX+m+nrx+uFoLkWOMiR4oa/AZF3MuSETYTZmFfJAHqZEM8MVlvfG7BEUcgvtwoCTxBp6hm3g==
+
 "@types/concat-stream@^1.6.0":
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/@types/concat-stream/-/concat-stream-1.6.1.tgz#24bcfc101ecf68e886aaedce60dfd74b632a1b74"
@@ -3192,6 +3250,11 @@
   version "2.8.12"
   resolved "https://registry.yarnpkg.com/@types/cors/-/cors-2.8.12.tgz#6b2c510a7ad7039e98e7b8d3d6598f4359e5c080"
   integrity sha512-vt+kDhq/M2ayberEtJcIN/hxXy1Pk+59g2FV/ZQceeaTyCtCucjL2Q7FXlFjtWn4n15KCr1NE2lNNFhp0lEThw==
+
+"@types/dateformat@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@types/dateformat/-/dateformat-5.0.0.tgz#17ce64b0318f3f36d1c830c58a7a915445f1f93d"
+  integrity sha512-SZg4JdHIWHQGEokbYGZSDvo5wA4TLYPXaqhigs/wH+REDOejcJzgH+qyY+HtEUtWOZxEUkbhbdYPqQDiEgrXeA==
 
 "@types/express-serve-static-core@^4.17.18":
   version "4.17.24"
