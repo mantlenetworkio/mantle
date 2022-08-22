@@ -6,7 +6,7 @@ import (
 
 type IWebsocketManager interface {
 	AliveNodes() []string
-	RegisterResChannel(responseMsg chan ResponseMsg, stopChan chan struct{}) error
+	RegisterResChannel(id string, responseMsg chan ResponseMsg, stopChan chan struct{}) error
 	SendMsg(request RequestMsg) error
 }
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
+	tss "github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,7 +22,7 @@ func NewRegistry(signService types.SignService) *Registry {
 
 func (registry *Registry) SignStateHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var request types.SignStateRequest
+		var request tss.SignStateRequest
 		if err := c.ShouldBindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, errors.New("invalid request body"))
 			return

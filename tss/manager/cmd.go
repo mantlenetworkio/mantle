@@ -37,7 +37,10 @@ func run(cmd *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-	manager := NewManager(wsServer)
+	manager, err := NewManager(wsServer, nil, nil, "")
+	if err != nil {
+		return err
+	}
 
 	registry := router.NewRegistry(manager)
 	r := gin.Default()

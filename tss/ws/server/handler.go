@@ -35,8 +35,8 @@ type WebsocketManager struct {
 	logger        log.Logger
 	wsConnOptions []func(*wsConnection)
 
-	recvChan chan ResponseMsg
-	rcRWLock *sync.RWMutex
+	recvChanMap map[string]chan ResponseMsg
+	rcRWLock    *sync.RWMutex
 
 	sendChan   map[string]chan types.RPCRequest // node -> send channel
 	aliveNodes map[string]struct{}              // node -> struct{}{}
@@ -66,8 +66,8 @@ func NewWebsocketManager(
 		logger:        log.NewNopLogger(),
 		wsConnOptions: wsConnOptions,
 
-		recvChan: make(chan ResponseMsg),
-		rcRWLock: &sync.RWMutex{},
+		recvChanMap: make(map[string]chan ResponseMsg),
+		rcRWLock:    &sync.RWMutex{},
 
 		sendChan:   make(map[string]chan types.RPCRequest),
 		aliveNodes: make(map[string]struct{}),
@@ -92,14 +92,14 @@ func (wm *WebsocketManager) AliveNodes() []string {
 	return ret
 }
 
-func (wm *WebsocketManager) RegisterResChannel(recvChan chan ResponseMsg, stopChan chan struct{}) error {
+func (wm *WebsocketManager) RegisterResChannel(requestId string, recvChan chan ResponseMsg, stopChan chan struct{}) error {
 	wm.rcRWLock.Lock()
 	defer wm.rcRWLock.Unlock()
-	wm.recvChan = recvChan
+	wm.recvChanMap[requestId] = recvChan
 
 	go func() {
 		<-stopChan // block util stop
-		wm.unregisterRecvChan()
+		wm.unregisterRecvChan(requestId)
 	}()
 
 	return nil
@@ -118,10 +118,10 @@ func (wm *WebsocketManager) SendMsg(msg RequestMsg) error {
 	return nil
 }
 
-func (wm *WebsocketManager) unregisterRecvChan() {
+func (wm *WebsocketManager) unregisterRecvChan(requestId string) {
 	wm.rcRWLock.Lock()
 	defer wm.rcRWLock.Unlock()
-	wm.recvChan = nil
+	delete(wm.recvChanMap, requestId)
 }
 
 func (wm *WebsocketManager) clientConnected(pubkey string, channel chan types.RPCRequest) {
