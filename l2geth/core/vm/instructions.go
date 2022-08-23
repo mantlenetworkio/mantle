@@ -884,7 +884,7 @@ func opSuicide(pc *uint64, interpreter *EVMInterpreter, contract *Contract, memo
 	interpreter.evm.StateDB.AddBalance(common.BigToAddress(stack.pop()), balance)
 
 	interpreter.evm.StateDB.Suicide(contract.Address())
-	if rcfg.UsingOVM && interpreter.evm.chainConfig.IsSDUpdate(interpreter.evm.BlockNumber) {
+	if rcfg.UsingBVM && interpreter.evm.chainConfig.IsSDUpdate(interpreter.evm.BlockNumber) {
 		interpreter.evm.StateDB.SubBalance(contract.Address(), balance)
 	}
 	return nil, nil
@@ -972,7 +972,7 @@ func makeSwap(size int64) executionFunc {
 	}
 }
 
-// OVM opcodes
+// bvm opcodes
 func opL1BlockNumber(pc *uint64, interpreter *EVMInterpreter, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	stack.push(math.U256(interpreter.intPool.get().Set(interpreter.evm.L1BlockNumber)))
 	return nil, nil

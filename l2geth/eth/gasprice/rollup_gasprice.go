@@ -66,7 +66,7 @@ func (gpo *RollupOracle) SetL2GasPrice(gasPrice *big.Int) error {
 }
 
 // SuggestOverhead returns the cached overhead value from the
-// OVM_GasPriceOracle
+// BVM_GasPriceOracle
 func (gpo *RollupOracle) SuggestOverhead(ctx context.Context) (*big.Int, error) {
 	gpo.overheadLock.RLock()
 	defer gpo.overheadLock.RUnlock()
@@ -74,7 +74,7 @@ func (gpo *RollupOracle) SuggestOverhead(ctx context.Context) (*big.Int, error) 
 }
 
 // SetOverhead caches the overhead value that is set in the
-// OVM_GasPriceOracle
+// BVM_GasPriceOracle
 func (gpo *RollupOracle) SetOverhead(overhead *big.Int) error {
 	gpo.overheadLock.Lock()
 	defer gpo.overheadLock.Unlock()
@@ -90,7 +90,7 @@ func (gpo *RollupOracle) SuggestScalar(ctx context.Context) (*big.Float, error) 
 	return gpo.scalar, nil
 }
 
-// SetScalar sets the scalar value held in the OVM_GasPriceOracle
+// SetScalar sets the scalar value held in the BVM_GasPriceOracle
 func (gpo *RollupOracle) SetScalar(scalar *big.Int, decimals *big.Int) error {
 	gpo.scalarLock.Lock()
 	defer gpo.scalarLock.Unlock()

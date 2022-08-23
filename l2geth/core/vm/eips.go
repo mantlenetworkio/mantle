@@ -138,7 +138,7 @@ func enable3529(jt *JumpTable) {
 	jt[SELFDESTRUCT].dynamicGas = gasSelfdestructEIP3529
 }
 
-// UsingOVM
+// UsingBVM
 // Bitnetwork specific changes
 func enableMinimal2929(jt *JumpTable) {
 	jt[SLOAD].constantGas = 0

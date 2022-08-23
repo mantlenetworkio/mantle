@@ -1,6 +1,6 @@
 {
   "name": "@bitdaoio/sdk",
-  "version": "1.0.4",
+  "version": "1.0.7",
   "description": "[Bitnetwork] Tools for working with Bitnetwork",
   "main": "dist/index",
   "types": "dist/index",

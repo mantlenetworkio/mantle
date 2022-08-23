@@ -5,7 +5,7 @@ import (
 	"github.com/bitdao-io/bitnetwork/l2geth/common"
 )
 
-type OvmDumpAccount struct {
+type BvmDumpAccount struct {
 	Address  common.Address         `json:"address"`
 	Code     string                 `json:"code"`
 	CodeHash string                 `json:"codeHash"`
@@ -14,6 +14,6 @@ type OvmDumpAccount struct {
 	Nonce    uint64                 `json:"nonce"`
 }
 
-type OvmDump struct {
-	Accounts map[string]OvmDumpAccount `json:"accounts"`
+type BvmDump struct {
+	Accounts map[string]BvmDumpAccount `json:"accounts"`
 }

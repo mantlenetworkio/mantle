@@ -136,15 +136,15 @@ describe('Native ETH value integration tests', () => {
         'geth RPC does not match BVM_ETH.balanceOf'
       )
       // query address(this).balance solidity via eth_call as final check
-      const ovmAddressThisBalance0 =
+      const bvmAddressThisBalance0 =
         await ValueCalls0.callStatic.getAddressThisBalance()
-      const ovmAddressThisBalance01 =
+      const bvmAddressThisBalance01 =
         await ValueCalls1.callStatic.getAddressThisBalance()
-      expect(ovmAddressThisBalance0).to.deep.eq(
+      expect(bvmAddressThisBalance0).to.deep.eq(
         BigNumber.from(expectedBalances[0]),
         'geth RPC does not match address(this).balance'
       )
-      expect(ovmAddressThisBalance01).to.deep.eq(
+      expect(bvmAddressThisBalance01).to.deep.eq(
         BigNumber.from(expectedBalances[1]),
         'geth RPC does not match address(this).balance'
       )
@@ -187,7 +187,7 @@ describe('Native ETH value integration tests', () => {
       expect(returndata).to.eq('0x')
     })
 
-    it('should allow ETH to be sent and have the correct ovmCALLVALUE', async () => {
+    it('should allow ETH to be sent and have the correct bvmCALLVALUE', async () => {
       const sendAmount = 15
       const [success, returndata] = await ValueCalls0.callStatic.sendWithData(
         ValueCalls1.address,
@@ -199,8 +199,8 @@ describe('Native ETH value integration tests', () => {
       expect(BigNumber.from(returndata)).to.deep.eq(BigNumber.from(sendAmount))
     })
 
-    it('should have the correct ovmSELFBALANCE which includes the msg.value', async () => {
-      // give an initial balance which the ovmCALLVALUE should be added to when calculating ovmSELFBALANCE
+    it('should have the correct bvmSELFBALANCE which includes the msg.value', async () => {
+      // give an initial balance which the bvmCALLVALUE should be added to when calculating bvmSELFBALANCE
       const initialBalance = 10
       await fundUser(env.messenger, initialBalance, ValueCalls1.address)
 
@@ -251,7 +251,7 @@ describe('Native ETH value integration tests', () => {
       expect(returndata).to.eq('0x')
     })
 
-    it('should preserve msg.value through ovmDELEGATECALLs', async () => {
+    it('should preserve msg.value through bvmDELEGATECALLs', async () => {
       const Factory__ValueContext = await ethers.getContractFactory(
         'ValueContext',
         wallet
@@ -274,17 +274,17 @@ describe('Native ETH value integration tests', () => {
           'delegateCallToCallValue',
           outerReturndata
         )
-      const delegatedOvmCALLVALUE = ValueContext.interface.decodeFunctionResult(
+      const delegatedBvmCALLVALUE = ValueContext.interface.decodeFunctionResult(
         'getCallValue',
         innerReturndata
       )[0]
 
       expect(outerSuccess).to.be.true
       expect(innerSuccess).to.be.true
-      expect(delegatedOvmCALLVALUE).to.deep.eq(BigNumber.from(sendAmount))
+      expect(delegatedBvmCALLVALUE).to.deep.eq(BigNumber.from(sendAmount))
     })
 
-    it('should have correct address(this).balance through ovmDELEGATECALLs to another account', async () => {
+    it('should have correct address(this).balance through bvmDELEGATECALLs to another account', async () => {
       const Factory__ValueContext = await ethers.getContractFactory(
         'ValueContext',
         wallet
@@ -301,7 +301,7 @@ describe('Native ETH value integration tests', () => {
       expect(delegatedReturndata).to.deep.eq(BigNumber.from(initialBalance0))
     })
 
-    it('should have correct address(this).balance through ovmDELEGATECALLs to same account', async () => {
+    it('should have correct address(this).balance through bvmDELEGATECALLs to same account', async () => {
       const [delegatedSuccess, delegatedReturndata] =
         await ValueCalls0.callStatic.delegateCallToAddressThisBalance(
           ValueCalls0.address
