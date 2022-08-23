@@ -109,12 +109,10 @@ contract TssRewardContract is ITssRewardContract {
     /**
      * @dev update tss member gas reward by every block.
      * @param _blockID The block height at L2 which needs to distribute profits
-     * @param _amount Distribute batch block number
      * @return _tssMembers Address array of tss group members
      */
-    function updateReward(uint256 _blockID)
+    function updateReward(uint256 _blockID, uint256 _amount)
         external
-        payable
         onlyFromDeadAddress
         checkBalance
         returns (bool)
@@ -123,8 +121,8 @@ contract TssRewardContract is ITssRewardContract {
         require(_blockID == bestBlockID+1, "block id update illegal");
         // iter address to update balance
         bestBlockID = _blockID;
-        totalAmount = totalAmount.add(msg.value);
-        ledger[_blockID] = msg.value;
+        totalAmount = totalAmount.add(_amount);
+        ledger[_blockID] = _amount;
         return true;
     }
 

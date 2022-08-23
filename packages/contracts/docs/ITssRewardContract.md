@@ -48,7 +48,7 @@ function queryReward() external view returns (uint256)
 ### updateReward
 
 ```solidity
-function updateReward(uint256 _blockID, uint256 _amount) external payable returns (bool)
+function updateReward(uint256 _blockID, uint256 _amount) external nonpayable returns (bool)
 ```
 
 
@@ -60,7 +60,7 @@ function updateReward(uint256 _blockID, uint256 _amount) external payable return
 | Name | Type | Description |
 |---|---|---|
 | _blockID | uint256 | Update gas reward L2 block ID.
-| _amount | uint256 | Update gas reward amount.
+| _amount | uint256 | undefined
 
 #### Returns
 

@@ -37,10 +37,9 @@ interface ITssRewardContract {
     /**
      * @dev Update deposit block gas into contract.
      * @param _blockID Update gas reward L2 block ID.
-     * @param _amount Update gas reward amount.
      * @return Update success.
      */
-    function updateReward(uint256 _blockID) external payable returns (bool);
+    function updateReward(uint256 _blockID, uint256 _amount) external returns (bool);
 
     /**
      * @dev withdraw dust.

@@ -135,10 +135,27 @@ function queryReward() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
+### totalAmount
+
+```solidity
+function totalAmount() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
 ### updateReward
 
 ```solidity
-function updateReward(uint256 _blockID, uint256 _amount) external payable returns (bool)
+function updateReward(uint256 _blockID, uint256 _amount) external nonpayable returns (bool)
 ```
 
 
@@ -150,7 +167,7 @@ function updateReward(uint256 _blockID, uint256 _amount) external payable return
 | Name | Type | Description |
 |---|---|---|
 | _blockID | uint256 | The block height at L2 which needs to distribute profits
-| _amount | uint256 | Distribute batch block number
+| _amount | uint256 | undefined
 
 #### Returns
 
