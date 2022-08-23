@@ -352,54 +352,6 @@
   resolved "https://registry.yarnpkg.com/@bitdaoio/contracts-periphery/-/contracts-periphery-1.0.0.tgz#4f1ed7d5c22f4f229ae244bb81dac0dbad2a141f"
   integrity sha512-zkrqdeZaNic4pXHc9CFg5wFUtApntWr6md2ePvWwGCf7xFDkIssIup1c9mpvvFwgwBRQgXWHWlFYSM9iRv89vQ==
 
-"@bitdaoio/contracts@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@bitdaoio/contracts/-/contracts-1.0.2.tgz#97ab78572bb29c1193545c88255e71c4d3d30f0c"
-  integrity sha512-yT2xGbUKKC7HWsixLnMaWUT8TERkslPp4+gja0N7kOQnq/VuwLv+0WYurm342qbShK4cfipy7yFD8Z7P2uhtnQ==
-  dependencies:
-    "@bitdaoio/core-utils" "1.0.0"
-    "@ethersproject/abstract-provider" "^5.6.1"
-    "@ethersproject/abstract-signer" "^5.6.2"
-
-"@bitdaoio/core-utils@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@bitdaoio/core-utils/-/core-utils-1.0.0.tgz#23ea724cc916323f7b68c05825636a9b3082365c"
-  integrity sha512-BLsUXw5IGWnz9EAJ4uMUV5Ro2oKTkgUytnn1vYdeXK7iIL+17ho53SLhiPzFukibsjc7H335q5hPpv2hlsfRrw==
-  dependencies:
-    "@ethersproject/abstract-provider" "^5.6.1"
-    "@ethersproject/properties" "^5.6.0"
-    "@ethersproject/providers" "^5.6.8"
-    "@ethersproject/transactions" "^5.6.2"
-    "@ethersproject/web" "^5.6.1"
-    bufio "^1.0.7"
-    chai "^4.3.4"
-    ethers "^5.6.8"
-
-"@bitdaoio/core-utils@1.0.3", "@bitdaoio/core-utils@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@bitdaoio/core-utils/-/core-utils-1.0.3.tgz#8dd67e843097f725e00479b0b4ed7b2324859c38"
-  integrity sha512-x/iwJ+Yb46oNOhLHm5RyP6hDNp5dXBw3EgTKVqkalfVdp5o1NAnm/eFtWNoEqwM8CCDmv7OazTBgkORCYCHefA==
-  dependencies:
-    "@ethersproject/abstract-provider" "^5.6.1"
-    "@ethersproject/properties" "^5.6.0"
-    "@ethersproject/providers" "^5.6.8"
-    "@ethersproject/transactions" "^5.6.2"
-    "@ethersproject/web" "^5.6.1"
-    bufio "^1.0.7"
-    chai "^4.3.4"
-    ethers "^5.6.8"
-
-"@bitdaoio/sdk@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@bitdaoio/sdk/-/sdk-1.0.6.tgz#93272befbcf7ea94657488312f813bcbbebac353"
-  integrity sha512-4JTkKFmf7a01qMJkLMsWoO/JBBr7fMlCqTFKCifJDATDAnjE0CD9XSoW8uW4ErE28B3I0ukj7n5y/iDFBS4B4Q==
-  dependencies:
-    "@bitdaoio/contracts" "1.0.2"
-    "@bitdaoio/core-utils" "1.0.3"
-    lodash "^4.17.21"
-    merkletreejs "^0.2.27"
-    rlp "^2.2.7"
-
 "@changesets/apply-release-plan@^5.0.0":
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@changesets/apply-release-plan/-/apply-release-plan-5.0.0.tgz#11bf168acecbf4cfa2b0e6425160bac5ceeec1c3"

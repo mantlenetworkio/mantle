@@ -84,7 +84,7 @@ services:
     entrypoint: ./dtl.sh
     env_file:
       - ./envs/dtl.env
-    # set the rest of the env vars for the network whcih do not
+    # set the rest of the env vars for the network which do not
     # depend on the docker-compose setup
     environment:
       # used for setting the address manager address
