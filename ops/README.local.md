@@ -3,6 +3,8 @@
 ### Start/Stop All Services
 
 ```bash
+# this command will down all services, build all images and start all services
+# Don't worry, it won't cost long time if you have executed it before because image cache will be used.
 make -f Makefile.local up
 
 make -f Makefile.local stop
