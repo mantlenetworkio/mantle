@@ -80,7 +80,8 @@ contract MockBridge {
                 address(0),
                 hex"1234",
                 1234,
-                12345678
+                12345678,
+                0
             )
         );
     }
@@ -101,7 +102,8 @@ contract MockBridge {
                 address(0),
                 hex"1234",
                 1234,
-                12345678
+                12345678,
+                0
             )
         );
     }
@@ -122,8 +124,8 @@ contract MockBridge {
         uint32 _l2GasLimit,
         bytes memory _data
     )
-        public
-        payable
+    public
+    payable
     {
         emit ETHDepositInitiated(
             msg.sender,
@@ -139,8 +141,8 @@ contract MockBridge {
         uint32 _l1Gas,
         bytes calldata _data
     )
-        public
-        payable
+    public
+    payable
     {
         emit WithdrawalInitiated(
             address(0),
