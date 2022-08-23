@@ -8,13 +8,33 @@ make -f Makefile.local up
 make -f Makefile.local stop
 ```
 
-### Restart a Single Service
+### Restart All Services
 ```bash
 make -f Makefile.local restart
 ```
+
+### Restart a Single Service
+```bash
+make -f Makefile.local restart service=l1_chain
+```
+
 ### List Containers/Services
 ```bash
 make -f Makefile.local ps
+```
+
+### Rebuild All Service Images
+```shell
+
+make -f Makefile.local build
+
+```
+
+### Rebuild A Single Service Image
+```shell
+
+make -f Makefile.local build service=l1_chain
+
 ```
 
 ## Some Key Points

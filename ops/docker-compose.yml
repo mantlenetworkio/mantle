@@ -9,6 +9,13 @@ x-system-addr-env: &system-addr-env
   # OK to publish this since it will only ever be used in itests
   SYSTEM_ADDRESS_1_DEPLOYER: '0xdfc82d475833a50de90c642770f34a9db7deb725'
 
+x-healthcheck: &healthcheck
+  test: [ "CMD", "curl", "-sf", "http://localhost:8545" ]
+  interval: 5s
+  timeout: 5s
+  retries: 3
+  start_period: 30s
+
 services:
   # this is a helper service used because there's no official hardhat image
   l1_chain:
@@ -21,6 +28,9 @@ services:
     ports:
       # expose the service to the host for integration testing
       - ${L1CHAIN_HTTP_PORT:-9545}:8545
+    healthcheck:
+      <<: *healthcheck
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8545" ]
 
   deployer:
     depends_on:
@@ -39,6 +49,9 @@ services:
     ports:
       # expose the service to the host for getting the contract addrs
       - ${DEPLOYER_PORT:-8080}:8081
+    healthcheck:
+      <<: *healthcheck
+      test: [ "CMD", "curl", "-sf", "http://localhost:8081" ]
 
   dtl:
     depends_on:
@@ -98,6 +111,7 @@ services:
     ports:
       - ${L2GETH_HTTP_PORT:-8545}:8545
       - ${L2GETH_WS_PORT:-8546}:8546
+    healthcheck: *healthcheck
 
   relayer:
     depends_on:
