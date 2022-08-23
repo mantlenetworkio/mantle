@@ -33,3 +33,12 @@ func PacketData(blockID *big.Int, amount *big.Int) ([]byte, error) {
 	}
 	return data, nil
 }
+
+func PacketQueryData() ([]byte, error) {
+	tssRewardABI = Abi()
+	data, err := tssRewardABI.Pack("queryReward")
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}

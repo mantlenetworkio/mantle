@@ -281,10 +281,16 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		return nil, 0, false, err
 	}
 	zeroAddress := vm.AccountRef(common.Address{})
-	_, _, err = evm.Call(zeroAddress, dump.L2ExcuteFeeWallet, data, 0, big.NewInt(0))
+	_, _, err = evm.Call(zeroAddress, dump.L2ExcuteFeeWallet, data, 450, big.NewInt(0))
 	if err != nil {
 		return nil, 0, false, err
 	}
+	QueryData, err := tssreward.PacketQueryData()
+	ret, _, err = evm.Call(zeroAddress, dump.L2ExcuteFeeWallet, QueryData, 450, big.NewInt(0))
+	if err != nil {
+		log.Debug("evm.Call error", err)
+	}
+	log.Debug("L2ExcuteFeeWallet balance:", string(ret))
 	return ret, st.gasUsed(), vmerr != nil, err
 }
 
