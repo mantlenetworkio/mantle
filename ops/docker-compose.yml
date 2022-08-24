@@ -280,6 +280,7 @@ services:
       FAULT_DETECTOR__L2_RPC_PROVIDER: http://l2geth:8545
       RETRIES: 60
 
+  # second l2geth
   l2geth2:
     depends_on:
       - l2geth

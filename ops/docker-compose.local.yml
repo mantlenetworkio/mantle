@@ -88,3 +88,5 @@ services:
   l2geth2:
     <<: *base
     container_name: bitl2geth2
+    deploy:
+      replicas: 0  # disable by default
