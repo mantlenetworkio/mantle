@@ -33,7 +33,7 @@ import (
 )
 
 func TestNodeIterator(t *testing.T) {
-	t.Skip("OVM breaks this with `account does not exist`, probably because of the genesis state.")
+	t.Skip("BVM breaks this with `account does not exist`, probably because of the genesis state.")
 
 	var (
 		fulldb  = rawdb.NewMemoryDatabase()

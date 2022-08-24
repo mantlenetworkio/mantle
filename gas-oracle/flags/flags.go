@@ -29,13 +29,13 @@ var (
 	}
 	GasPriceOracleAddressFlag = cli.StringFlag{
 		Name:   "gas-price-oracle-address",
-		Usage:  "Address of OVM_GasPriceOracle",
+		Usage:  "Address of BVM_GasPriceOracle",
 		Value:  "0x420000000000000000000000000000000000000F",
 		EnvVar: "GAS_PRICE_ORACLE_GAS_PRICE_ORACLE_ADDRESS",
 	}
 	PrivateKeyFlag = cli.StringFlag{
 		Name:   "private-key",
-		Usage:  "Private Key corresponding to OVM_GasPriceOracle Owner",
+		Usage:  "Private Key corresponding to BVM_GasPriceOracle Owner",
 		EnvVar: "GAS_PRICE_ORACLE_PRIVATE_KEY",
 	}
 	TransactionGasPriceFlag = cli.Uint64Flag{

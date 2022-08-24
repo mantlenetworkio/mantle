@@ -249,7 +249,7 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 	}
 	number := header.Number.Uint64()
 
-	if !rcfg.UsingOVM {
+	if !rcfg.UsingBVM {
 		// Don't waste time checking blocks from the future
 		if header.Time > uint64(time.Now().Unix()) {
 			return consensus.ErrFutureBlock
@@ -325,10 +325,10 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 		return consensus.ErrUnknownAncestor
 	}
 
-	// Do not account for timestamps in consensus when running the OVM
+	// Do not account for timestamps in consensus when running the bvm
 	// changes. The timestamp must be montonic, meaning that it can be the same
 	// or increase. L1 dictates the timestamp.
-	if !rcfg.UsingOVM {
+	if !rcfg.UsingBVM {
 		if parent.Time+c.config.Period > header.Time {
 			return ErrInvalidTimestamp
 		}
@@ -554,8 +554,8 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 		return consensus.ErrUnknownAncestor
 	}
 
-	// Do not manipulate the timestamps when running with the OVM
-	if !rcfg.UsingOVM {
+	// Do not manipulate the timestamps when running with the bvm
+	if !rcfg.UsingBVM {
 		header.Time = parent.Time + c.config.Period
 		if header.Time < uint64(time.Now().Unix()) {
 			header.Time = uint64(time.Now().Unix())
@@ -640,10 +640,10 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 
 		log.Trace("Out-of-turn signing requested", "wiggle", common.PrettyDuration(wiggle))
 	}
-	// Set the delay to 0 when using the OVM so that blocks are always
-	// produced instantly. When running in a non-OVM network, the delay prevents
+	// Set the delay to 0 when using the bvm so that blocks are always
+	// produced instantly. When running in a non-bvm network, the delay prevents
 	// the creation of invalid blocks.
-	if rcfg.UsingOVM {
+	if rcfg.UsingBVM {
 		delay = 0
 	}
 	// Sign all the things!

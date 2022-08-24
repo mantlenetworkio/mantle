@@ -15,3 +15,7 @@ l2geth/cmd/puppeth
 l2geth/cmd/clef
 go/gas-oracle/gas-oracle
 go/batch-submitter/batch-submitter
+
+ops/Makefile.local
+ops/docker-compose.local.yml
+ops/docker-compose.yml

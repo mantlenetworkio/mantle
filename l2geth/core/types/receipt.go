@@ -69,7 +69,7 @@ type Receipt struct {
 	BlockNumber      *big.Int    `json:"blockNumber,omitempty"`
 	TransactionIndex uint        `json:"transactionIndex"`
 
-	// UsingOVM
+	// UsingBVM
 	L1GasPrice *big.Int   `json:"l1GasPrice" gencodec:"required"`
 	L1GasUsed  *big.Int   `json:"l1GasUsed" gencodec:"required"`
 	L1Fee      *big.Int   `json:"l1Fee" gencodec:"required"`
@@ -101,7 +101,7 @@ type storedReceiptRLP struct {
 	PostStateOrStatus []byte
 	CumulativeGasUsed uint64
 	Logs              []*LogForStorage
-	// UsingOVM
+	// UsingBVM
 	L1GasUsed  *big.Int
 	L1GasPrice *big.Int
 	L1Fee      *big.Int
@@ -259,7 +259,7 @@ func decodeStoredReceiptRLP(r *ReceiptForStorage, blob []byte) error {
 	}
 	r.Bloom = CreateBloom(Receipts{(*Receipt)(r)})
 
-	// UsingOVM
+	// UsingBVM
 	scalar := new(big.Float)
 	if stored.FeeScalar != "" {
 		var ok bool
@@ -356,7 +356,7 @@ func (r Receipts) DeriveFields(config *params.ChainConfig, hash common.Hash, num
 			from, _ := Sender(signer, txs[i])
 			nonce := txs[i].Nonce()
 
-			if rcfg.UsingOVM {
+			if rcfg.UsingBVM {
 				sysAddress := rcfg.SystemAddressFor(config.ChainID, from)
 				// If nonce is zero, and the deployer is a system address deployer,
 				// set the provided system contract address.

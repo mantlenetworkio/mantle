@@ -46,8 +46,8 @@ func NewEVMContext(msg Message, header *types.Header, chain ChainContext, author
 	} else {
 		beneficiary = *author
 	}
-	if rcfg.UsingOVM {
-		// When using the OVM, we must:
+	if rcfg.UsingBVM {
+		// When using the bvm, we must:
 		// - Set the Time to be the msg.L1Timestamp
 		return vm.Context{
 			CanTransfer:   CanTransfer,

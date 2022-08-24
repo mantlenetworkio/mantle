@@ -64,7 +64,7 @@ type StateTransition struct {
 	data       []byte
 	state      vm.StateDB
 	evm        *vm.EVM
-	// UsingOVM
+	// UsingBVM
 	l1Fee *big.Int
 }
 
@@ -128,7 +128,7 @@ func IntrinsicGas(data []byte, contractCreation, isHomestead bool, isEIP2028 boo
 // NewStateTransition initialises and returns a new state transition object.
 func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition {
 	l1Fee := new(big.Int)
-	if rcfg.UsingOVM {
+	if rcfg.UsingBVM {
 		if msg.GasPrice().Cmp(common.Big0) != 0 {
 			// Compute the L1 fee before the state transition
 			// so it only has to be read from state one time.
@@ -178,7 +178,7 @@ func (st *StateTransition) useGas(amount uint64) error {
 
 func (st *StateTransition) buyGas() error {
 	mgval := new(big.Int).Mul(new(big.Int).SetUint64(st.msg.Gas()), st.gasPrice)
-	if rcfg.UsingOVM {
+	if rcfg.UsingBVM {
 		// Only charge the L1 fee for QueueOrigin sequencer transactions
 		if st.msg.QueueOrigin() == types.QueueOriginSequencer {
 			mgval = mgval.Add(mgval, st.l1Fee)
@@ -203,7 +203,7 @@ func (st *StateTransition) buyGas() error {
 func (st *StateTransition) preCheck() error {
 	// Make sure this transaction's nonce is correct.
 	if st.msg.CheckNonce() {
-		if rcfg.UsingOVM {
+		if rcfg.UsingBVM {
 			if st.msg.QueueOrigin() == types.QueueOriginL1ToL2 {
 				return st.buyGas()
 			}
@@ -271,7 +271,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		}
 	}
 	st.refundGas()
-	if rcfg.UsingOVM {
+	if rcfg.UsingBVM {
 		st.state.AddBalance(dump.L1ExcuteFeeWallet, st.l1Fee)
 	}
 	l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)

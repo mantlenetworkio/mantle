@@ -10,13 +10,13 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-// CTC interacts with the OVM Canonical Transaction Chain contract
+// CTC interacts with the BVM Canonical Transaction Chain contract
 type CTC struct {
 	Address common.Address
 	Client  *ethclient.Client
 }
 
-// SCC interacts with the OVM State Commitment Chain contract
+// SCC interacts with the BVM State Commitment Chain contract
 type SCC struct {
 	Address common.Address
 	Client  *ethclient.Client

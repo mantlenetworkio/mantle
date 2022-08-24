@@ -338,7 +338,7 @@ func DeleteBody(db ethdb.KeyValueWriter, hash common.Hash, number uint64) {
 	}
 }
 
-// UsingOVM
+// UsingBVM
 // ReadTransactionMeta returns the transaction metadata associated with a
 // transaction hash.
 func ReadTransactionMeta(db ethdb.Reader, number uint64) *types.TransactionMeta {
@@ -356,7 +356,7 @@ func ReadTransactionMeta(db ethdb.Reader, number uint64) *types.TransactionMeta 
 	return meta
 }
 
-// UsingOVM
+// UsingBVM
 // ReadTransactionMetaRaw returns the raw transaction metadata associated with a
 // transaction hash.
 func ReadTransactionMetaRaw(db ethdb.Reader, number uint64) []byte {
@@ -367,14 +367,14 @@ func ReadTransactionMetaRaw(db ethdb.Reader, number uint64) []byte {
 	return nil
 }
 
-// UsingOVM
+// UsingBVM
 // WriteTransactionMeta writes the TransactionMeta to disk by hash.
 func WriteTransactionMeta(db ethdb.KeyValueWriter, number uint64, meta *types.TransactionMeta) {
 	data := types.TxMetaEncode(meta)
 	WriteTransactionMetaRaw(db, number, data)
 }
 
-// UsingOVM
+// UsingBVM
 // WriteTransactionMetaRaw writes the raw transaction metadata bytes to disk.
 func WriteTransactionMetaRaw(db ethdb.KeyValueWriter, number uint64, data []byte) {
 	if err := db.Put(txMetaKey(number), data); err != nil {
@@ -382,7 +382,7 @@ func WriteTransactionMetaRaw(db ethdb.KeyValueWriter, number uint64, data []byte
 	}
 }
 
-// UsingOVM
+// UsingBVM
 // DeleteTransactionMeta removes the transaction metadata associated with a hash
 func DeleteTransactionMeta(db ethdb.KeyValueWriter, number uint64) {
 	if err := db.Delete(txMetaKey(number)); err != nil {
@@ -582,7 +582,7 @@ func ReadBlock(db ethdb.Reader, hash common.Hash, number uint64) *types.Block {
 	if body == nil {
 		return nil
 	}
-	// UsingOVM
+	// UsingBVM
 	// Read all of the transaction meta from the db when reading a block
 	// and set the txmeta on each transaction. This is because the tx meta
 	// is not included as part of the RLP encoding of a transaction to be

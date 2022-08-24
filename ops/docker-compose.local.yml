@@ -1,0 +1,86 @@
+version: '3.4'
+
+networks:
+  bitnetwork: {}
+
+x-base: &base
+  restart: unless-stopped
+  networks:
+    bitnetwork: {}
+
+services:
+  l1_chain:
+    <<: *base
+    container_name: bitl1chain
+    deploy: # run switch
+      replicas: 1
+
+  deployer:
+    <<: *base
+    container_name: bitdeployer
+    platform: linux/amd64
+    environment:
+      CONTRACTS_RPC_URL: ${CONTRACTS_RPC_URL:-http://l1_chain:8545}
+      CONTRACTS_DEPLOYER_KEY: ${CONTRACTS_DEPLOYER_KEY:-ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80}
+      CONTRACTS_TARGET_NETWORK: ${CONTRACTS_TARGET_NETWORK:-local}
+      BVM_SEQUENCER_ADDRESS: ${BVM_SEQUENCER_ADDRESS:-}
+      BVM_PROPOSER_ADDRESS: ${BVM_PROPOSER_ADDRESS:-}
+      BVM_BLOCK_SIGNER_ADDRESS: ${BVM_BLOCK_SIGNER_ADDRESS:-}
+      BVM_FEE_WALLET_ADDRESS: ${BVM_FEE_WALLET_ADDRESS:-}
+      BVM_ADDRESS_MANAGER_OWNER: ${BVM_ADDRESS_MANAGER_OWNER:-}
+      BVM_GAS_PRICE_ORACLE_OWNER: ${BVM_GAS_PRICE_ORACLE_OWNER:-}
+
+  dtl:
+    <<: *base
+    container_name: bitdtl
+    platform: linux/amd64
+
+  l2geth:
+    <<: *base
+    container_name: bitl2geth
+
+  gas_oracle:
+    <<: *base
+    container_name: bitgasoracle
+    deploy:
+      replicas: 1
+
+  batch_submitter:
+    <<: *base
+    container_name: bitbatchsubmitter
+
+  integration_tests:
+    <<: *base
+    container_name: bititests
+    deploy:
+      replicas: 1
+
+  relayer:
+    <<: *base
+    container_name: bitrelayer
+    deploy:
+      replicas: 0
+
+  verifier:
+    <<: *base
+    container_name: bitverifier
+    deploy:
+      replicas: 0
+
+  replica:
+    <<: *base
+    container_name: bitreplica
+    deploy:
+      replicas: 0
+
+  replica_healthcheck:
+    <<: *base
+    container_name: bitreplicahealthcheck
+    deploy:
+      replicas: 0
+
+  fault_detector:
+    <<: *base
+    container_name: bitfaultdetector
+    deploy:
+      replicas: 1

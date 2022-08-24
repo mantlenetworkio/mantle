@@ -8,7 +8,7 @@ time and send transactions that actually do update the gas prices.
 
 ### Generating the Bindings
 
-Note: this only needs to happen if the ABI of the `OVM_GasPriceOracle` is
+Note: this only needs to happen if the ABI of the `BVM_GasPriceOracle` is
 updated.
 
 This project uses `abigen` to automatically create smart contract bindings in
@@ -57,8 +57,8 @@ COMMANDS:
 GLOBAL OPTIONS:
    --ethereum-http-url value                  Sequencer HTTP Endpoint (default: "http://127.0.0.1:8545") [$GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL]
    --chain-id value                           L2 Chain ID (default: 0) [$GAS_PRICE_ORACLE_CHAIN_ID]
-   --gas-price-oracle-address value           Address of OVM_GasPriceOracle (default: "0x420000000000000000000000000000000000000F") [$GAS_PRICE_ORACLE_GAS_PRICE_ORACLE_ADDRESS]
-   --private-key value                        Private Key corresponding to OVM_GasPriceOracle Owner [$GAS_PRICE_ORACLE_PRIVATE_KEY]
+   --gas-price-oracle-address value           Address of BVM_GasPriceOracle (default: "0x420000000000000000000000000000000000000F") [$GAS_PRICE_ORACLE_GAS_PRICE_ORACLE_ADDRESS]
+   --private-key value                        Private Key corresponding to BVM_GasPriceOracle Owner [$GAS_PRICE_ORACLE_PRIVATE_KEY]
    --transaction-gas-price value              Hardcoded tx.gasPrice, not setting it uses gas estimation (default: 0) [$GAS_PRICE_ORACLE_TRANSACTION_GAS_PRICE]
    --loglevel value                           log level to emit to the screen (default: 3) [$GAS_PRICE_ORACLE_LOG_LEVEL]
    --floor-price value                        gas price floor (default: 1) [$GAS_PRICE_ORACLE_FLOOR_PRICE]

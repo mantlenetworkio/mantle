@@ -99,7 +99,7 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	// about the transaction and calling mechanisms.
 	vmenv := vm.NewEVM(context, statedb, config, cfg)
 
-	// UsingOVM
+	// UsingBVM
 	// Compute the fee related information that is to be included
 	// on the receipt. This must happen before the state transition
 	// to ensure that the correct information is used.
@@ -134,7 +134,7 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	receipt.GasUsed = gas
 	// if the transaction created a contract, store the creation address in the receipt.
 	if msg.To() == nil {
-		if rcfg.UsingOVM {
+		if rcfg.UsingBVM {
 			sysAddress := rcfg.SystemAddressFor(config.ChainID, vmenv.Context.Origin)
 			// If nonce is zero, and the deployer is a system address deployer,
 			// set the provided system contract address.
