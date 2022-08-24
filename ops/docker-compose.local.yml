@@ -84,3 +84,7 @@ services:
     container_name: bitfaultdetector
     deploy:
       replicas: 1
+
+  l2geth2:
+    <<: *base
+    container_name: bitl2geth2
