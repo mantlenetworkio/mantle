@@ -283,6 +283,7 @@ services:
   l2geth2:
     depends_on:
       - l2geth
+      - deployer
     deploy:
       replicas: 0
     build:
