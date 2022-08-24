@@ -1,13 +1,13 @@
 # @eth-optimism/fault-detector
 
-The `fault-detector` is a simple service for detecting discrepancies between your local view of the Optimism network and the L2 output proposals published to Ethereum.
+The `fault-detector` is a simple service for detecting discrepancies between your local view of the Bitnetwork network and the L2 output proposals published to Ethereum.
 
 ## Installation
 
 Clone, install, and build the Optimism monorepo:
 
 ```
-git clone https://github.com/ethereum-optimism/optimism.git
+git clone https://github.com/bitnetworkio/bitnetwork.git
 yarn install
 yarn build
 ```
