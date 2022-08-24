@@ -73,8 +73,7 @@ describe('helpers', () => {
       beforeEach(async () => {
         await StateCommitmentChain.appendStateBatch(
           [hre.ethers.constants.HashZero],
-          0,
-          "0x"
+          0
         )
       })
 
@@ -96,8 +95,7 @@ describe('helpers', () => {
       beforeEach(async () => {
         await StateCommitmentChain.appendStateBatch(
           [hre.ethers.constants.HashZero],
-          0,
-          "0x"
+          0
         )
         await hre.ethers.provider.send('hardhat_setStorageAt', [
           ChainStorageContainer.address,
@@ -106,8 +104,7 @@ describe('helpers', () => {
         ])
         await StateCommitmentChain.appendStateBatch(
           [hre.ethers.constants.HashZero],
-          0,
-          "0x"
+          0
         )
       })
 
@@ -124,8 +121,7 @@ describe('helpers', () => {
       beforeEach(async () => {
         await StateCommitmentChain.appendStateBatch(
           [hre.ethers.constants.HashZero],
-          0,
-          "0x"
+          0
         )
 
         // Simulate FPW passing
@@ -135,13 +131,11 @@ describe('helpers', () => {
 
         await StateCommitmentChain.appendStateBatch(
           [hre.ethers.constants.HashZero],
-          1,
-          "0x"
+          1
         )
         await StateCommitmentChain.appendStateBatch(
           [hre.ethers.constants.HashZero],
-          2,
-          "0x"
+          2
         )
       })
 
@@ -158,18 +152,15 @@ describe('helpers', () => {
       beforeEach(async () => {
         await StateCommitmentChain.appendStateBatch(
           [hre.ethers.constants.HashZero],
-          0,
-          "0x"
+          0
         )
         await StateCommitmentChain.appendStateBatch(
           [hre.ethers.constants.HashZero],
-          1,
-          "0x"
+          1
         )
         await StateCommitmentChain.appendStateBatch(
           [hre.ethers.constants.HashZero],
-          2,
-          "0x"
+          2
         )
       })
 
@@ -186,18 +177,15 @@ describe('helpers', () => {
       beforeEach(async () => {
         await StateCommitmentChain.appendStateBatch(
           [hre.ethers.constants.HashZero],
-          0,
-          "0x"
+          0
         )
         await StateCommitmentChain.appendStateBatch(
           [hre.ethers.constants.HashZero],
-          1,
-          "0x"
+          1
         )
         await StateCommitmentChain.appendStateBatch(
           [hre.ethers.constants.HashZero],
-          2,
-          "0x"
+          2
         )
 
         // Simulate FPW passing and no new batches
