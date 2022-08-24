@@ -1,4 +1,5 @@
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: MIT
+pragma solidity >0.5.0 <0.9.0;
 
 interface ITssGroupManager {
     enum MemberStatus {
@@ -12,16 +13,16 @@ interface ITssGroupManager {
         MemberStatus  status;
     }
 
-    function setTssGroupMember(uint256 _threshold, bytes[] memory _batchPublicKey) public onlyOwner;
-    function setGroupPublicKey(bytes memory _publicKey, bytes memory _groupPublicKey) public;
-    function getTssGroupInfo() public returns (uint256, uint256, bytes, TssMember[]);
-    function memberJail(bytes memory _publicKey) public;
-    function memberUnJail(bytes memory _publicKey) public;
-    function removeMember(bytes memory _publicKey) public;
-    function getTssGroupUnJailMembers() public returns (address[] memory);
-    function getTssGroupMembers() public returns (TssMember[] memory);
-    function getTssMember(bytes _address) public returns (TssMember memory);
-    function memberExistActive(bytes _address) public returns (bool);
-    function memberExistInActive(bytes _address) public returns (bool);
-    function verifySign(bytes32 memory _message, bytes memory _sig)  public returns (bool, address);
+    function setTssGroupMember(uint256 _threshold, bytes[] memory _batchPublicKey) external;
+    function setGroupPublicKey(bytes memory _publicKey, bytes memory _groupPublicKey) external;
+    function getTssGroupInfo() external returns (uint256, uint256, bytes memory, TssMember[] memory);
+    function memberJail(bytes memory _publicKey) external;
+    function memberUnJail(bytes memory _publicKey) external;
+    function removeMember(bytes memory _publicKey) external;
+    function getTssGroupUnJailMembers() external returns (address[] memory);
+    function getTssGroupMembers() external returns (TssMember[] memory);
+    function getTssMember(bytes memory _publicKey) external returns (TssMember memory);
+    function memberExistActive(bytes memory _publicKey) external returns (bool);
+    function memberExistInActive(bytes memory _publicKey) external returns (bool);
+    function verifySign(bytes32 _message, bytes memory _sig) external returns (bool, address);
 }
