@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
-	tss "github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
@@ -56,7 +56,7 @@ func (m Manager) observeElection() {
 }
 
 func (m Manager) insertCPK(cpk string, electionId uint64) error {
-	return m.cpkStore.Insert(types.CpkData{
+	return m.store.Insert(types.CpkData{
 		Cpk:          cpk,
 		ElectionId:   electionId,
 		CreationTime: time.Now(),
@@ -64,7 +64,7 @@ func (m Manager) insertCPK(cpk string, electionId uint64) error {
 }
 
 func (m Manager) getCPK(electionId uint64) (string, time.Time, error) {
-	cpkData, err := m.cpkStore.GetByElectionId(electionId)
+	cpkData, err := m.store.GetByElectionId(electionId)
 	if err != nil {
 		return "", time.Time{}, err
 	}

@@ -1,26 +1,43 @@
-package types
+package common
 
 import "math/big"
+
+type Method string
+
+const (
+	AskStateBatch  Method = "askStateBatch"
+	SignStateBatch Method = "signStateBatch"
+	AskSlash       Method = "askSlash"
+	SignSlash      Method = "signSlash"
+)
+
+func (m Method) String() string {
+	return string(m)
+}
 
 type SignStateRequest struct {
 	StartBlock          big.Int    `json:"start_block"`
 	OffsetStartsAtIndex big.Int    `json:"offset_starts_at_index"`
 	StateRoots          [][32]byte `json:"state_roots"`
+	ElectionId          uint64     `json:"election_id"`
 }
 
 type AskResponse struct {
 	Result bool `json:"result"`
 }
 
-type NodeSignStateRequest struct {
-	ClusterPublicKey string           `json:"cluster_public_key"`
-	Timestamp        int64            `json:"timestamp"`
-	Nodes            []string         `json:"nodes"`
-	StateBatch       SignStateRequest `json:"state_batch"`
+type NodeSignRequest struct {
+	ClusterPublicKey string      `json:"cluster_public_key"`
+	Timestamp        int64       `json:"timestamp"`
+	Nodes            []string    `json:"nodes"`
+	RequestBody      interface{} `json:"request_body"`
 }
 
 type SignResponse struct {
-	Signature SignatureData `json:"signature"`
+	Signature       []byte   `json:"signature"`
+	Culprits        []string `json:"culprits"`
+	SlashTxBytes    []byte   `json:"slash_tx_bytes"`
+	SlashTxGasPrice string   `json:"slash_tx_gas_price"`
 }
 
 type KeygenRequest struct {

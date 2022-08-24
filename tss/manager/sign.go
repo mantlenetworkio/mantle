@@ -1,7 +1,6 @@
 package manager
 
 import (
-	"bytes"
 	"context"
 	"encoding/hex"
 	"encoding/json"
@@ -13,25 +12,25 @@ import (
 
 	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
-	tss "github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
 	"github.com/btcsuite/btcd/btcec"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
-func (m Manager) sign(ctx types.Context, request tss.SignStateRequest) ([]byte, error) {
+func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, method tss.Method) (tss.SignResponse, error) {
 	respChan := make(chan server.ResponseMsg)
 	stopChan := make(chan struct{})
 
 	if err := m.wsServer.RegisterResChannel(ctx.RequestId(), respChan, stopChan); err != nil {
 		log.Error("failed to register response channel at signing step", err)
-		return nil, err
+		return tss.SignResponse{}, err
 	}
 
 	errSendChan := make(chan struct{})
-	var validSignatureBz []byte
+	var validSignatureResponse tss.SignResponse
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
@@ -55,27 +54,12 @@ func (m Manager) sign(ctx types.Context, request tss.SignStateRequest) ([]byte, 
 						continue
 					}
 
-					rawBytes := make([]byte, 0)
-					for _, sr := range request.StateRoots {
-						rawBytes = append(rawBytes, sr[:]...)
-					}
-					rawBytes = append(rawBytes, request.OffsetStartsAtIndex.Bytes()...)
-					digestBz := crypto.Keccak256Hash(rawBytes).Bytes()
-					if bytes.Compare(digestBz, signResponse.Signature.M) != 0 {
-						log.Error("mismatched hash", "expected hash", hex.EncodeToString(digestBz), "actual", signResponse.Signature.M)
-						continue
-					}
 					poolPubKeyBz, _ := hex.DecodeString(ctx.TssInfos().ClusterPubKey)
-					signatureBz, err := getSignature(&signResponse.Signature)
-					if err != nil {
-						log.Error("failed to parse signature", err)
-						continue
-					}
-					if !crypto.VerifySignature(poolPubKeyBz, digestBz, signatureBz[:64]) {
+					if !crypto.VerifySignature(poolPubKeyBz, digestBz, signResponse.Signature[:64]) {
 						log.Error("illegal signature")
 						continue
 					}
-					validSignatureBz = signatureBz
+					validSignatureResponse = signResponse
 					return
 				}
 			case <-cctx.Done():
@@ -86,23 +70,23 @@ func (m Manager) sign(ctx types.Context, request tss.SignStateRequest) ([]byte, 
 		}
 	}()
 
-	m.sendToNodes(ctx, request, errSendChan)
+	m.sendToNodes(ctx, request, method, errSendChan)
 	wg.Wait()
 
 	var err error
-	if validSignatureBz == nil {
+	if validSignatureResponse.Signature == nil {
 		err = errors.New("failed to generate signature")
 	}
-	return validSignatureBz, err
+	return validSignatureResponse, err
 }
 
-func (m Manager) sendToNodes(ctx types.Context, request tss.SignStateRequest, errSendChan chan struct{}) {
+func (m Manager) sendToNodes(ctx types.Context, request interface{}, method tss.Method, errSendChan chan struct{}) {
 	nodes := ctx.Approvers()
-	nodeRequest := tss.NodeSignStateRequest{
+	nodeRequest := tss.NodeSignRequest{
 		ClusterPublicKey: ctx.TssInfos().ClusterPubKey,
 		Timestamp:        time.Now().UnixMilli(),
 		Nodes:            ctx.Approvers(),
-		StateBatch:       request,
+		RequestBody:      request,
 	}
 	requestBz, err := json.Marshal(nodeRequest)
 	if err != nil {
@@ -111,7 +95,7 @@ func (m Manager) sendToNodes(ctx types.Context, request tss.SignStateRequest, er
 		return
 	}
 
-	rpcRequest := tmtypes.NewRPCRequest(tmtypes.JSONRPCStringID(ctx.RequestId()), "signState", requestBz)
+	rpcRequest := tmtypes.NewRPCRequest(tmtypes.JSONRPCStringID(ctx.RequestId()), method.String(), requestBz)
 	for _, node := range nodes {
 		go func(node string, request tmtypes.RPCRequest) {
 			if err := m.wsServer.SendMsg(

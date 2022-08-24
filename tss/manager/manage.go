@@ -3,12 +3,16 @@ package manager
 import (
 	"errors"
 	"fmt"
+	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
+	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/bitnetwork/tss/index"
 	"math/rand"
 	"time"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/ethclient"
+	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
-	tss "github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
 	"github.com/influxdata/influxdb/pkg/slices"
 )
@@ -16,13 +20,14 @@ import (
 type Manager struct {
 	wsServer        server.IWebsocketManager
 	tssQueryService types.TssQueryService
-	cpkStore        types.CPKStore
+	store           types.ManagerStore
 
-	l1Cli      *ethclient.Client
-	stopGenKey bool
+	l1Cli           *ethclient.Client
+	sccContractAddr common.Address
+	stopGenKey      bool
 }
 
-func NewManager(wsServer server.IWebsocketManager, tssQueryService types.TssQueryService, cpkStore types.CPKStore, l1Url string) (Manager, error) {
+func NewManager(wsServer server.IWebsocketManager, tssQueryService types.TssQueryService, l1Url string) (Manager, error) {
 	l1Cli, err := ethclient.Dial(l1Url)
 	if err != nil {
 		return Manager{}, err
@@ -30,7 +35,6 @@ func NewManager(wsServer server.IWebsocketManager, tssQueryService types.TssQuer
 	return Manager{
 		wsServer:        wsServer,
 		tssQueryService: tssQueryService,
-		cpkStore:        cpkStore,
 		l1Cli:           l1Cli,
 	}, nil
 }
@@ -53,18 +57,51 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	if len(availableNodes) < tssInfo.Threshold+1 {
 		return nil, errors.New("not enough available nodes to sign state")
 	}
+	stateBatchRoot, _ := tss.GetMerkleRoot(request.StateRoots)
+	found, stateBatch, err := m.store.GetStateBatch(stateBatchRoot)
+	if err != nil {
+		return nil, err
+	}
+	if found && stateBatch.BatchIndex != 0 {
+		return nil, errors.New("the state batch is already indexed on layer1")
+	}
 	ctx := types.NewContext().
 		WithAvailableNodes(availableNodes).
 		WithTssInfo(tssInfo).
-		WithRequestId(randomRequestId())
-	ctx, err := m.agreement(ctx, request)
+		WithRequestId(randomRequestId()).
+		WithElectionId(tssInfo.ElectionId)
+
+	// ask tss nodes for the agreement
+	ctx, err = m.agreement(ctx, request, tss.AskStateBatch)
 	if err != nil {
 		return nil, err
 	}
 	if len(ctx.Approvers()) < ctx.TssInfos().Threshold+1 {
 		return nil, errors.New("failed to sign, not enough approvals from tss nodes")
 	}
-	return m.sign(ctx, request)
+
+	rawBytes := make([]byte, 0)
+	for _, sr := range request.StateRoots {
+		rawBytes = append(rawBytes, sr[:]...)
+	}
+	rawBytes = append(rawBytes, request.OffsetStartsAtIndex.Bytes()...)
+	digestBz := crypto.Keccak256Hash(rawBytes).Bytes()
+	request.ElectionId = tssInfo.ElectionId
+	resp, err := m.sign(ctx, request, digestBz, tss.SignStateBatch)
+	if err != nil {
+		return nil, err
+	}
+	absents := make([]string, 0)
+	for _, node := range tssInfo.PartyPubKeys {
+		if slices.ExistsIgnoreCase(ctx.AvailableNodes(), node) {
+			absents = append(absents, node)
+		}
+	}
+	if err = m.afterSignStateBatch(ctx, request.StateRoots, absents, resp.Culprits); err != nil {
+		log.Error("failed to execute afterSign", "err", err)
+	}
+
+	return resp.Signature, nil
 }
 
 func (m Manager) SignTxBatch() error {
@@ -75,7 +112,7 @@ func (m Manager) availableNodes(tssMembers []string) []string {
 	aliveNodes := m.wsServer.AliveNodes()
 	availableNodes := make([]string, 0)
 	for _, n := range aliveNodes {
-		if slices.Exists(tssMembers, n) {
+		if slices.ExistsIgnoreCase(tssMembers, n) {
 			availableNodes = append(availableNodes, n)
 		}
 	}
@@ -86,4 +123,22 @@ func (m Manager) availableNodes(tssMembers []string) []string {
 func randomRequestId() string {
 	code := fmt.Sprintf("%04v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(10000))
 	return time.Now().Format("20060102150405") + code
+}
+
+func (m Manager) afterSignStateBatch(ctx types.Context, stateBatch [][32]byte, absentNodes []string, culprits []string) error {
+	batchRoot, err := tss.GetMerkleRoot(stateBatch)
+	if err != nil {
+		return err
+	}
+	sbi := index.StateBatchInfo{
+		BatchRoot:    batchRoot,
+		ElectionId:   ctx.ElectionId(),
+		AbsentNodes:  absentNodes,
+		WorkingNodes: ctx.AvailableNodes(),
+		Culprits:     culprits,
+	}
+	if err = m.store.SetStateBatch(sbi); err != nil {
+		return err
+	}
+	return nil
 }

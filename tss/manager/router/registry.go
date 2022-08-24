@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
-	tss "github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/gin-gonic/gin"
 )
 

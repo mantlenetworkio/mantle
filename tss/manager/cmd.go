@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/router"
-	"github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -30,14 +30,14 @@ func Command() *cobra.Command {
 }
 
 func run(cmd *cobra.Command) error {
-	config := types.GetConfigFromCmd(cmd)
+	config := common.GetConfigFromCmd(cmd)
 	fmt.Println(config)
 
 	wsServer, err := server.NewWSServer("")
 	if err != nil {
 		return err
 	}
-	manager, err := NewManager(wsServer, nil, nil, "")
+	manager, err := NewManager(wsServer, nil, "")
 	if err != nil {
 		return err
 	}
