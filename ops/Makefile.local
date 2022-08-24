@@ -8,10 +8,10 @@ build:
 		build $(service)
 .PHONY: build
 
-up: down
+up:
 	DOCKER_BUILDKIT=1 \
 	$(DOCKER_COMPOSE_CMD) \
-		up --build --detach
+		up --build --detach $(service)
 .PHONY: up
 
 down:
@@ -23,6 +23,16 @@ ps:
 	$(DOCKER_COMPOSE_CMD) \
 		ps
 .PHONY: ps
+
+start:
+	$(DOCKER_COMPOSE_CMD) \
+		start $(service)
+.PHONY: restart
+
+stop:
+	$(DOCKER_COMPOSE_CMD) \
+		stop $(service)
+.PHONY: restart
 
 restart:
 	$(DOCKER_COMPOSE_CMD) \

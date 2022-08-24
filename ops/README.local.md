@@ -1,13 +1,37 @@
 ## Setting Development Environment Locally
 
-### Start/Stop All Services
+### Up All Services
 
 ```bash
-# this command will down all services, build all images and start all services
-# Don't worry, it won't cost long time if you have executed it before because image cache will be used.
+# up = build image + start service
 make -f Makefile.local up
+````
 
+### Up a Single Service
+```bash
+# up = build image + start service
+make -f Makefile.local up service=l1_chain
+````
+
+### Down All Services
+
+```bash
+# down = destroy all containers with images kept; you can not down a single service
+make -f Makefile.local down
+````
+
+### Start/Stop All Services
+
+```shell
+make -f Makefile.local start
 make -f Makefile.local stop
+```
+
+### Start/Stop a Single Service
+equal to `docker start/stop bitl1chain` (container name, not service name)
+```shell
+make -f Makefile.local start service=l1_chain
+make -f Makefile.local stop service=l1_chain
 ```
 
 ### Restart All Services
