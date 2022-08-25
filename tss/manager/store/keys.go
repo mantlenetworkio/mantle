@@ -12,6 +12,7 @@ var (
 	SigningInfoKeyPrefix             = []byte{0x04}
 	NodeMissedBatchBitArrayKeyPrefix = []byte{0x05}
 	SlashingInfoKeyPrefix            = []byte{0x06}
+	SlashingTxKeyPrefix              = []byte{0x07}
 )
 
 func getCPKDataKey(electionId uint64) []byte {
@@ -50,4 +51,10 @@ func getSlashingInfoKey(address common.Address, batchIndex uint64) []byte {
 	indexBz := make([]byte, 8)
 	binary.BigEndian.PutUint64(indexBz, batchIndex)
 	return append(append(SlashingInfoKeyPrefix, indexBz...), address.Bytes()...)
+}
+
+func getSlashingTxKey(address common.Address, batchIndex uint64) []byte {
+	indexBz := make([]byte, 8)
+	binary.BigEndian.PutUint64(indexBz, batchIndex)
+	return append(append(SlashingTxKeyPrefix, indexBz...), address.Bytes()...)
 }

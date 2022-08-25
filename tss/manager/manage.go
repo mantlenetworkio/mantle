@@ -4,13 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
 	"github.com/bitdao-io/bitnetwork/tss/index"
+	"github.com/bitdao-io/bitnetwork/tss/slash"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"math"
 	"math/rand"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/ethclient"
 	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
@@ -25,6 +26,7 @@ type Manager struct {
 	l1Cli           *ethclient.Client
 	sccContractAddr common.Address
 	stopGenKey      bool
+	stopChan        chan struct{}
 }
 
 func NewManager(wsServer server.IWebsocketManager, tssQueryService types.TssQueryService, l1Url string) (Manager, error) {
@@ -41,6 +43,7 @@ func NewManager(wsServer server.IWebsocketManager, tssQueryService types.TssQuer
 
 func (m Manager) Start() {
 	go m.observeElection()
+	go m.slashing()
 }
 
 func (m Manager) stopGenerateKey() {
@@ -80,15 +83,24 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		return nil, errors.New("failed to sign, not enough approvals from tss nodes")
 	}
 
-	rawBytes := make([]byte, 0)
-	for _, sr := range request.StateRoots {
-		rawBytes = append(rawBytes, sr[:]...)
-	}
-	rawBytes = append(rawBytes, request.OffsetStartsAtIndex.Bytes()...)
-	digestBz := crypto.Keccak256Hash(rawBytes).Bytes()
+	digestBz := tss.StateBatchDigestBytes(request.StateRoots, request.OffsetStartsAtIndex)
 	request.ElectionId = tssInfo.ElectionId
-	resp, err := m.sign(ctx, request, digestBz, tss.SignStateBatch)
+	resp, culprits, err := m.sign(ctx, request, digestBz, tss.SignStateBatch)
 	if err != nil {
+		for _, culprit := range culprits {
+			addr, err := tss.NodeToAddress(culprit)
+			if err != nil {
+				log.Error("failed to convert node to address", "public key", culprit, "err", err)
+				continue
+			}
+			m.store.SetSlashingInfo(slash.SlashingInfo{
+				Address:    addr,
+				ElectionId: tssInfo.ElectionId,
+				BatchIndex: math.MaxUint64, // not real, just for identifying slashing info.
+				SlashType:  2,
+			})
+		}
+
 		return nil, err
 	}
 	absents := make([]string, 0)
@@ -97,7 +109,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 			absents = append(absents, node)
 		}
 	}
-	if err = m.afterSignStateBatch(ctx, request.StateRoots, absents, resp.Culprits); err != nil {
+	if err = m.afterSignStateBatch(ctx, request.StateRoots, absents); err != nil {
 		log.Error("failed to execute afterSign", "err", err)
 	}
 
@@ -125,7 +137,7 @@ func randomRequestId() string {
 	return time.Now().Format("20060102150405") + code
 }
 
-func (m Manager) afterSignStateBatch(ctx types.Context, stateBatch [][32]byte, absentNodes []string, culprits []string) error {
+func (m Manager) afterSignStateBatch(ctx types.Context, stateBatch [][32]byte, absentNodes []string) error {
 	batchRoot, err := tss.GetMerkleRoot(stateBatch)
 	if err != nil {
 		return err
@@ -135,7 +147,6 @@ func (m Manager) afterSignStateBatch(ctx types.Context, stateBatch [][32]byte, a
 		ElectionId:   ctx.ElectionId(),
 		AbsentNodes:  absentNodes,
 		WorkingNodes: ctx.AvailableNodes(),
-		Culprits:     culprits,
 	}
 	if err = m.store.SetStateBatch(sbi); err != nil {
 		return err

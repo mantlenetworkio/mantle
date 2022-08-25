@@ -5,7 +5,6 @@ type StateBatchInfo struct {
 	ElectionId   uint64   `json:"election_id"`
 	AbsentNodes  []string `json:"absent_nodes"`
 	WorkingNodes []string `json:"working_nodes"`
-	Culprits     []string `json:"culprits"`
 	BatchIndex   uint64   `json:"batch_index"`
 }
 

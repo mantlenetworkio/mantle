@@ -4,9 +4,8 @@ import (
 	"errors"
 	"github.com/bitdao-io/bitnetwork/l2geth/common"
 	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
+	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/index"
-	"github.com/btcsuite/btcd/btcec"
 )
 
 const (
@@ -47,7 +46,7 @@ func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
 	maxMissed := signedBatchesWindow - minSignedInWindow
 	// update signingInfo for working nodes
 	for _, workingNode := range stateBatch.WorkingNodes {
-		address, err := nodeToAddress(workingNode)
+		address, err := tss.NodeToAddress(workingNode)
 		if err != nil {
 			return err
 		}
@@ -59,7 +58,7 @@ func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
 
 	// update signingInfo for absent nodes
 	for _, absentNode := range stateBatch.AbsentNodes {
-		address, err := nodeToAddress(absentNode)
+		address, err := tss.NodeToAddress(absentNode)
 		if err != nil {
 			return err
 		}
@@ -121,14 +120,4 @@ func (s Slashing) InitializeSigningInfo(batchIndex uint64, address common.Addres
 	s.slashingStore.SetSigningInfo(signingInfo)
 	s.slashingStore.ClearNodeMissedBatchBitArray(address)
 	return signingInfo
-}
-
-func nodeToAddress(workingNode string) (common.Address, error) {
-	pubKeyBz, err := hexutil.Decode(workingNode)
-	if err != nil {
-		return common.Address{}, err
-	}
-	pk, err := btcec.ParsePubKey(pubKeyBz, btcec.S256())
-	address := crypto.PubkeyToAddress(*pk.ToECDSA())
-	return address, nil
 }

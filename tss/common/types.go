@@ -1,6 +1,9 @@
 package common
 
-import "math/big"
+import (
+	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"math/big"
+)
 
 type Method string
 
@@ -22,6 +25,12 @@ type SignStateRequest struct {
 	ElectionId          uint64     `json:"election_id"`
 }
 
+type SlashRequest struct {
+	Address    common.Address `json:"address"`
+	BatchIndex uint64         `json:"batch_index"`
+	SignType   byte           `json:"sign_type"`
+}
+
 type AskResponse struct {
 	Result bool `json:"result"`
 }
@@ -34,10 +43,10 @@ type NodeSignRequest struct {
 }
 
 type SignResponse struct {
-	Signature       []byte   `json:"signature"`
-	Culprits        []string `json:"culprits"`
-	SlashTxBytes    []byte   `json:"slash_tx_bytes"`
-	SlashTxGasPrice string   `json:"slash_tx_gas_price"`
+	Signature             []byte   `json:"signature"`
+	SlashTxBytes          []byte   `json:"slash_tx_bytes"`
+	SlashTxGasPrice       string   `json:"slash_tx_gas_price"`
+	SlashTxGasPriceBigInt *big.Int `json:"slash_tx_gas_price_big_int"`
 }
 
 type KeygenRequest struct {

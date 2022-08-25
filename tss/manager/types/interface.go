@@ -3,6 +3,7 @@ package types
 import (
 	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/index"
+	"github.com/bitdao-io/bitnetwork/tss/slash"
 )
 
 type SignService interface {
@@ -22,5 +23,8 @@ type CPKStore interface {
 type ManagerStore interface {
 	CPKStore
 	index.StateBatchStore
-	index.ScanHeightStore
+	//index.ScanHeightStore
+	slash.SlashingStore
+
+	SetSlashingTx(info slash.SlashingInfo, txBytes []byte)
 }

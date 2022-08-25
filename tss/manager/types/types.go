@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+	"github.com/bitdao-io/bitnetwork/tss/slash"
 	"time"
 )
 
@@ -16,6 +17,11 @@ type CpkData struct {
 	Cpk          string    `json:"cpk"`
 	ElectionId   uint64    `json:"election_id"`
 	CreationTime time.Time `json:"creation_time"`
+}
+
+type SlashingTx struct {
+	Info    slash.SlashingInfo `json:"info"`
+	TxBytes []byte             `json:"tx_bytes"`
 }
 
 // Context ---------------------------------------------

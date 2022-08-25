@@ -13,7 +13,7 @@ type SlashingInfo struct {
 	Address    common.Address `json:"address"`
 	BatchIndex uint64         `json:"batch_index"`
 	ElectionId uint64         `json:"election_id"`
-	SlashType  uint           `json:"slash_type"`
+	SlashType  byte           `json:"slash_type"`
 }
 
 type SlashingStore interface {

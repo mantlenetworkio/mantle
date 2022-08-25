@@ -21,46 +21,47 @@ const (
 )
 
 func (m Manager) observeElection() {
+	queryTicker := time.NewTicker(queryInterval)
 	for {
 		if m.stopGenKey {
-			time.Sleep(10 * time.Second)
+			time.Sleep(queryInterval)
 			continue
 		}
-		// check if new round election is held(inactive tss members?)
-		tssMembers, threshold, electionId := getInactiveMembers()
-		if tssMembers != nil {
-			// the CPK has not been confirmed in the latest election
-			// start to generate CPK
-			// todo query CPK by electionId from storage
-			cpk, creationTime, err := m.getCPK(electionId)
-			if err != nil {
-				log.Error("failed to get cpk from storage", "err", err)
-				time.Sleep(10 * time.Second)
-				continue
+		func() {
+			// check if new round election is held(inactive tss members?)
+			tssMembers, threshold, electionId := getInactiveMembers()
+			if tssMembers != nil {
+				// the CPK has not been confirmed in the latest election
+				// start to generate CPK
+				cpk, creationTime, err := m.getCPK(electionId)
+				if err != nil {
+					log.Error("failed to get cpk from storage", "err", err)
+					return
+				}
+				if len(cpk) != 0 && time.Now().Sub(creationTime).Hours() < cpkConfirmMaxPeriodHours { // cpk is generated, but has not been confirmed yet
+					return
+				}
+				cpk, err = m.generateKey(tssMembers, threshold)
+				if err != nil {
+					return
+				}
+
+				if err = m.store.Insert(types.CpkData{
+					Cpk:          cpk,
+					ElectionId:   electionId,
+					CreationTime: time.Now(),
+				}); err != nil {
+					log.Error("failed to get cpk from storage", "err", err)
+				}
 			}
-			if len(cpk) != 0 && time.Now().Sub(creationTime).Hours() < cpkConfirmMaxPeriodHours { // cpk is generated, but has not been confirmed yet
-				time.Sleep(10 * time.Second)
-				continue
-			}
-			cpk, err = m.generateKey(tssMembers, threshold)
-			if err != nil {
-				time.Sleep(10 * time.Second)
-				continue
-			}
-			if err = m.insertCPK(cpk, electionId); err != nil {
-				log.Error("failed to get cpk from storage", "err", err)
-				time.Sleep(10 * time.Second)
-			}
+		}()
+
+		select {
+		case <-m.stopChan:
+			return
+		case <-queryTicker.C:
 		}
 	}
-}
-
-func (m Manager) insertCPK(cpk string, electionId uint64) error {
-	return m.store.Insert(types.CpkData{
-		Cpk:          cpk,
-		ElectionId:   electionId,
-		CreationTime: time.Now(),
-	})
 }
 
 func (m Manager) getCPK(electionId uint64) (string, time.Time, error) {
