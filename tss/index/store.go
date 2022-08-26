@@ -21,7 +21,7 @@ type ScanHeightStore interface {
 	GetScannedHeight() (uint64, error)
 }
 
-type ObserverStore interface {
+type IndexerStore interface {
 	StateBatchStore
 	ScanHeightStore
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/bitdao-io/bitnetwork/tss/index"
 	"github.com/bitdao-io/bitnetwork/tss/manager/store"
+	"github.com/bitdao-io/bitnetwork/tss/slash"
 	"net/http"
 	"os"
 	"os/signal"
@@ -43,11 +44,13 @@ func run(cmd *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-	observer, err := index.NewObserver(managerStore, "", "")
+	observer, err := index.NewIndexer(managerStore, "", "")
 	if err != nil {
 		return err
 	}
-	manager, err := NewManager(wsServer, nil, managerStore, observer, "")
+	observer.SetHook(slash.NewSlashing(managerStore, managerStore))
+	observer.Start()
+	manager, err := NewManager(wsServer, nil, managerStore, "")
 	if err != nil {
 		return err
 	}
@@ -80,6 +83,9 @@ func run(cmd *cobra.Command) error {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Info("Shutting down server...")
+
+	manager.Stop()
+	observer.Stop()
 
 	// The context is used to inform the server it has 10 seconds to finish
 	// the request it is currently handling

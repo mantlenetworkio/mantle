@@ -15,8 +15,8 @@ const (
 	scanRange             = 10
 )
 
-type Observer struct {
-	store           ObserverStore
+type Indexer struct {
+	store           IndexerStore
 	l1Cli           *ethclient.Client
 	sccContractAddr common.Address
 	hook            Hook
@@ -27,13 +27,13 @@ type Hook interface {
 	AfterStateBatchIndexed([32]byte) error
 }
 
-func NewObserver(store ObserverStore, l1url string, sccContractAddr string) (Observer, error) {
+func NewIndexer(store IndexerStore, l1url string, sccContractAddr string) (Indexer, error) {
 	l1Cli, err := ethclient.Dial(l1url)
 	if err != nil {
-		return Observer{}, err
+		return Indexer{}, err
 	}
 	address := common.HexToAddress(sccContractAddr)
-	return Observer{
+	return Indexer{
 		store:           store,
 		l1Cli:           l1Cli,
 		sccContractAddr: address,
@@ -41,12 +41,12 @@ func NewObserver(store ObserverStore, l1url string, sccContractAddr string) (Obs
 	}, nil
 }
 
-func (o Observer) SetHook(hook Hook) Observer {
+func (o Indexer) SetHook(hook Hook) Indexer {
 	o.hook = hook
 	return o
 }
 
-func (o Observer) Start() {
+func (o Indexer) Start() {
 	scannedHeight, err := o.store.GetScannedHeight()
 	if err != nil {
 		panic(err)
@@ -54,11 +54,11 @@ func (o Observer) Start() {
 	go o.ObserveStateBatchAppended(scannedHeight)
 }
 
-func (o Observer) Stop() {
+func (o Indexer) Stop() {
 	close(o.stopChan)
 }
 
-func (o Observer) ObserveStateBatchAppended(scannedHeight uint64) {
+func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
 	queryTicker := time.NewTicker(5 * time.Second)
 	for {
 		func() {

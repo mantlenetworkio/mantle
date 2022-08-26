@@ -19,10 +19,9 @@ import (
 )
 
 type Manager struct {
-	wsServer           server.IWebsocketManager
-	tssQueryService    types.TssQueryService
-	store              types.ManagerStore
-	stateBatchObserver index.Observer
+	wsServer        server.IWebsocketManager
+	tssQueryService types.TssQueryService
+	store           types.ManagerStore
 
 	l1Cli      *ethclient.Client
 	stopGenKey bool
@@ -32,19 +31,17 @@ type Manager struct {
 func NewManager(wsServer server.IWebsocketManager,
 	tssQueryService types.TssQueryService,
 	store types.ManagerStore,
-	stateBatchObserver index.Observer,
 	l1Url string) (Manager, error) {
 	l1Cli, err := ethclient.Dial(l1Url)
 	if err != nil {
 		return Manager{}, err
 	}
 	return Manager{
-		wsServer:           wsServer,
-		tssQueryService:    tssQueryService,
-		stateBatchObserver: stateBatchObserver,
-		store:              store,
-		l1Cli:              l1Cli,
-		stopChan:           make(chan struct{}),
+		wsServer:        wsServer,
+		tssQueryService: tssQueryService,
+		store:           store,
+		l1Cli:           l1Cli,
+		stopChan:        make(chan struct{}),
 	}, nil
 }
 
@@ -52,12 +49,10 @@ func NewManager(wsServer server.IWebsocketManager,
 func (m Manager) Start() {
 	go m.observeElection()
 	go m.slashing()
-	go m.stateBatchObserver.Start()
 }
 
 func (m Manager) Stop() {
 	close(m.stopChan)
-	m.stateBatchObserver.Stop()
 }
 
 func (m Manager) stopGenerateKey() {
