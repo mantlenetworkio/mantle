@@ -12,7 +12,8 @@ type SignService interface {
 }
 
 type TssQueryService interface {
-	QueryInfo() TssCommitteeInfo
+	QueryActiveInfo() TssCommitteeInfo
+	QueryInactiveInfo() TssCommitteeInfo
 }
 
 type CPKStore interface {
@@ -23,8 +24,6 @@ type CPKStore interface {
 type ManagerStore interface {
 	CPKStore
 	index.StateBatchStore
-	//index.ScanHeightStore
+	index.ScanHeightStore
 	slash.SlashingStore
-
-	SetSlashingTx(info slash.SlashingInfo, txBytes []byte)
 }

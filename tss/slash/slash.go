@@ -2,6 +2,7 @@ package slash
 
 import (
 	"errors"
+
 	"github.com/bitdao-io/bitnetwork/l2geth/common"
 	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
 	tss "github.com/bitdao-io/bitnetwork/tss/common"
@@ -16,6 +17,13 @@ const (
 type Slashing struct {
 	stateBatchStore index.StateBatchStore
 	slashingStore   SlashingStore
+}
+
+func NewSlashing(sbs index.StateBatchStore, ss SlashingStore) Slashing {
+	return Slashing{
+		stateBatchStore: sbs,
+		slashingStore:   ss,
+	}
 }
 
 func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {

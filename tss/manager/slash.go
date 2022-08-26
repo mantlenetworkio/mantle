@@ -45,7 +45,7 @@ func (m Manager) slashing() {
 }
 
 func (m Manager) handleSlashing(si slash.SlashingInfo) {
-	currentTssInfo := m.tssQueryService.QueryInfo()
+	currentTssInfo := m.tssQueryService.QueryActiveInfo()
 	if si.ElectionId != currentTssInfo.ElectionId {
 		log.Error("the election which this node supposed to be slashed is expired, ignore the slash",
 			"node", si.Address.String(), "electionId", si.ElectionId, "batch index", si.BatchIndex)
@@ -59,7 +59,7 @@ func (m Manager) handleSlashing(si slash.SlashingInfo) {
 		return
 	}
 
-	availableNodes := m.availableNodes(currentTssInfo.PartyPubKeys)
+	availableNodes := m.availableNodes(currentTssInfo.TssMembers)
 	if len(availableNodes) < currentTssInfo.Threshold+1 {
 		log.Error("not enough available nodes to sign slashing")
 		return

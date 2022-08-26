@@ -2,7 +2,6 @@ package manager
 
 import (
 	"errors"
-	"math/big"
 	"testing"
 	"time"
 
@@ -194,8 +193,8 @@ func prepareParams(afterMsgSent func(request server.RequestMsg, respCh chan serv
 		wsServer: &mock,
 	}
 	request := tss.SignStateRequest{
-		StartBlock:          *big.NewInt(1),
-		OffsetStartsAtIndex: *big.NewInt(1),
+		StartBlock:          "1",
+		OffsetStartsAtIndex: "1",
 		StateRoots:          [][32]byte{},
 	}
 	return manager, request

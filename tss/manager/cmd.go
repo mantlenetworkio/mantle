@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bitdao-io/bitnetwork/tss/index"
+	"github.com/bitdao-io/bitnetwork/tss/manager/store"
 	"net/http"
 	"os"
 	"os/signal"
@@ -37,10 +39,19 @@ func run(cmd *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-	manager, err := NewManager(wsServer, nil, "")
+	managerStore, err := store.NewStorage("")
 	if err != nil {
 		return err
 	}
+	observer, err := index.NewObserver(managerStore, "", "")
+	if err != nil {
+		return err
+	}
+	manager, err := NewManager(wsServer, nil, managerStore, observer, "")
+	if err != nil {
+		return err
+	}
+	manager.Start()
 
 	registry := router.NewRegistry(manager)
 	r := gin.Default()

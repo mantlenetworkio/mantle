@@ -27,19 +27,41 @@ type Hook interface {
 	AfterStateBatchIndexed([32]byte) error
 }
 
-func (o Observer) Start() error {
+func NewObserver(store ObserverStore, l1url string, sccContractAddr string) (Observer, error) {
+	l1Cli, err := ethclient.Dial(l1url)
+	if err != nil {
+		return Observer{}, err
+	}
+	address := common.HexToAddress(sccContractAddr)
+	return Observer{
+		store:           store,
+		l1Cli:           l1Cli,
+		sccContractAddr: address,
+		stopChan:        make(chan struct{}),
+	}, nil
+}
+
+func (o Observer) SetHook(hook Hook) Observer {
+	o.hook = hook
+	return o
+}
+
+func (o Observer) Start() {
 	scannedHeight, err := o.store.GetScannedHeight()
 	if err != nil {
-		return err
+		panic(err)
 	}
 	go o.ObserveStateBatchAppended(scannedHeight)
-	return nil
+}
+
+func (o Observer) Stop() {
+	close(o.stopChan)
 }
 
 func (o Observer) ObserveStateBatchAppended(scannedHeight uint64) {
-	queryTicker := time.NewTicker(2 * time.Second)
+	queryTicker := time.NewTicker(5 * time.Second)
 	for {
-		go func() {
+		func() {
 			currentHeader, err := o.l1Cli.HeaderByNumber(context.Background(), nil)
 			if err != nil {
 				log.Error("failed to call layer1 HeaderByNumber", err)

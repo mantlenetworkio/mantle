@@ -3,12 +3,12 @@ package manager
 import (
 	"errors"
 	"fmt"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
 	"github.com/bitdao-io/bitnetwork/tss/index"
 	"github.com/bitdao-io/bitnetwork/tss/slash"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"math"
+	"math/big"
 	"math/rand"
 	"time"
 
@@ -19,31 +19,45 @@ import (
 )
 
 type Manager struct {
-	wsServer        server.IWebsocketManager
-	tssQueryService types.TssQueryService
-	store           types.ManagerStore
+	wsServer           server.IWebsocketManager
+	tssQueryService    types.TssQueryService
+	store              types.ManagerStore
+	stateBatchObserver index.Observer
 
-	l1Cli           *ethclient.Client
-	sccContractAddr common.Address
-	stopGenKey      bool
-	stopChan        chan struct{}
+	l1Cli      *ethclient.Client
+	stopGenKey bool
+	stopChan   chan struct{}
 }
 
-func NewManager(wsServer server.IWebsocketManager, tssQueryService types.TssQueryService, l1Url string) (Manager, error) {
+func NewManager(wsServer server.IWebsocketManager,
+	tssQueryService types.TssQueryService,
+	store types.ManagerStore,
+	stateBatchObserver index.Observer,
+	l1Url string) (Manager, error) {
 	l1Cli, err := ethclient.Dial(l1Url)
 	if err != nil {
 		return Manager{}, err
 	}
 	return Manager{
-		wsServer:        wsServer,
-		tssQueryService: tssQueryService,
-		l1Cli:           l1Cli,
+		wsServer:           wsServer,
+		tssQueryService:    tssQueryService,
+		stateBatchObserver: stateBatchObserver,
+		store:              store,
+		l1Cli:              l1Cli,
+		stopChan:           make(chan struct{}),
 	}, nil
 }
 
+// Start launch a manager
 func (m Manager) Start() {
 	go m.observeElection()
 	go m.slashing()
+	go m.stateBatchObserver.Start()
+}
+
+func (m Manager) Stop() {
+	close(m.stopChan)
+	m.stateBatchObserver.Stop()
 }
 
 func (m Manager) stopGenerateKey() {
@@ -55,8 +69,8 @@ func (m Manager) recoverGenerateKey() {
 }
 
 func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
-	tssInfo := m.tssQueryService.QueryInfo()
-	availableNodes := m.availableNodes(tssInfo.PartyPubKeys)
+	tssInfo := m.tssQueryService.QueryActiveInfo()
+	availableNodes := m.availableNodes(tssInfo.TssMembers)
 	if len(availableNodes) < tssInfo.Threshold+1 {
 		return nil, errors.New("not enough available nodes to sign state")
 	}
@@ -83,7 +97,8 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		return nil, errors.New("failed to sign, not enough approvals from tss nodes")
 	}
 
-	digestBz := tss.StateBatchDigestBytes(request.StateRoots, request.OffsetStartsAtIndex)
+	offsetStartsAtIndex, _ := new(big.Int).SetString(request.OffsetStartsAtIndex, 10)
+	digestBz := tss.StateBatchDigestBytes(request.StateRoots, offsetStartsAtIndex)
 	request.ElectionId = tssInfo.ElectionId
 	resp, culprits, err := m.sign(ctx, request, digestBz, tss.SignStateBatch)
 	if err != nil {
@@ -96,7 +111,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 			m.store.SetSlashingInfo(slash.SlashingInfo{
 				Address:    addr,
 				ElectionId: tssInfo.ElectionId,
-				BatchIndex: math.MaxUint64, // not real, just for identifying slashing info.
+				BatchIndex: math.MaxUint64, // not real, just for identifying the specific slashing info.
 				SlashType:  2,
 			})
 		}
@@ -104,7 +119,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		return nil, err
 	}
 	absents := make([]string, 0)
-	for _, node := range tssInfo.PartyPubKeys {
+	for _, node := range tssInfo.TssMembers {
 		if slices.ExistsIgnoreCase(ctx.AvailableNodes(), node) {
 			absents = append(absents, node)
 		}
