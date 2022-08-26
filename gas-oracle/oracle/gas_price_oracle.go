@@ -90,7 +90,7 @@ func (g *GasPriceOracle) Wait() {
 }
 
 // ensure makes sure that the configured private key is the owner
-// of the `OVM_GasPriceOracle`. If it is not the owner, then it will
+// of the `BVM_GasPriceOracle`. If it is not the owner, then it will
 // not be able to make updates to the L2 gas price.
 func (g *GasPriceOracle) ensure() error {
 	owner, err := g.contract.Owner(&bind.CallOpts{

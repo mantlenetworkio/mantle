@@ -98,7 +98,7 @@ func NewEVMInterpreter(evm *EVM, cfg Config) *EVMInterpreter {
 			jt = berlinInstructionSet
 		case evm.chainRules.IsIstanbul:
 			jt = istanbulInstructionSet
-			if rcfg.UsingOVM {
+			if rcfg.UsingBVM {
 				enableMinimal2929(&jt)
 			}
 		case evm.chainRules.IsConstantinople:

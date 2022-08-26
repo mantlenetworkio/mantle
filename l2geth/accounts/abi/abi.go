@@ -189,7 +189,7 @@ func (abi *ABI) EventByID(topic common.Hash) (*Event, error) {
 	return nil, fmt.Errorf("no event with id: %#x", topic.Hex())
 }
 
-// UsingOVM
+// UsingBVM
 // Both RevertSelector and UnpackRevert were pulled from upstream
 // geth as they were not present in the version of geth that this
 // codebase was forked from. These are useful for displaying revert

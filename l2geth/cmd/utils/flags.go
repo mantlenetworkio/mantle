@@ -1095,7 +1095,7 @@ func setIPC(ctx *cli.Context, cfg *node.Config) {
 	}
 }
 
-// UsingOVM
+// UsingBVM
 // setEth1 configures the sync service
 func setEth1(ctx *cli.Context, cfg *rollup.Config) {
 	if ctx.GlobalIsSet(Eth1CanonicalTransactionChainDeployHeightFlag.Name) {
@@ -1110,7 +1110,7 @@ func setEth1(ctx *cli.Context, cfg *rollup.Config) {
 	}
 }
 
-// UsingOVM
+// UsingBVM
 // setRollup configures the rollup
 func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	if ctx.GlobalIsSet(RollupEnableVerifierFlag.Name) {

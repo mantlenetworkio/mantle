@@ -356,7 +356,7 @@ func TestSimulatedBackend_TransactionByHash(t *testing.T) {
 }
 
 func TestSimulatedBackend_EstimateGas(t *testing.T) {
-	t.Skip("OVM breaks this because gas consumption is not yet standardized")
+	t.Skip("BVM breaks this because gas consumption is not yet standardized")
 
 	sim := NewSimulatedBackend(
 		core.GenesisAlloc{}, 10000000,

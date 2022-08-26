@@ -246,7 +246,7 @@ func init() {
 	sort.Sort(cli.CommandsByName(app.Commands))
 
 	app.Flags = append(app.Flags, nodeFlags...)
-	// UsingOVM
+	// UsingBVM
 	app.Flags = append(app.Flags, bitnetworkFlags...)
 	app.Flags = append(app.Flags, rpcFlags...)
 	app.Flags = append(app.Flags, consoleFlags...)
@@ -453,7 +453,7 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 		if err := ethereum.StartMining(threads); err != nil {
 			utils.Fatalf("Failed to start mining: %v", err)
 		}
-		// UsingOVM
+		// UsingBVM
 		// Can optionally configure the sync service. Turning it off allows
 		// for statically serving historical data and is also useful for
 		// local development. When it is turned on, it will attempt to sync

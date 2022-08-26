@@ -9,6 +9,13 @@ x-system-addr-env: &system-addr-env
   # OK to publish this since it will only ever be used in itests
   SYSTEM_ADDRESS_1_DEPLOYER: '0xdfc82d475833a50de90c642770f34a9db7deb725'
 
+x-healthcheck: &healthcheck
+  test: [ "CMD", "curl", "-sf", "http://localhost:8545" ]
+  interval: 5s
+  timeout: 5s
+  retries: 3
+  start_period: 30s
+
 services:
   # this is a helper service used because there's no official hardhat image
   l1_chain:
@@ -21,6 +28,9 @@ services:
     ports:
       # expose the service to the host for integration testing
       - ${L1CHAIN_HTTP_PORT:-9545}:8545
+    healthcheck:
+      <<: *healthcheck
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8545" ]
 
   deployer:
     depends_on:
@@ -39,6 +49,26 @@ services:
     ports:
       # expose the service to the host for getting the contract addrs
       - ${DEPLOYER_PORT:-8080}:8081
+    healthcheck:
+      <<: *healthcheck
+      test: [ "CMD", "curl", "-sf", "http://localhost:8081" ]
+
+  fault_detector:
+    depends_on:
+      - l1_chain
+      - l2geth
+    deploy:
+      replicas: 0
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.packages
+      target: fault-detector
+    image: ethereumbitnetwork/fault-detector:${DOCKER_TAG_FAULT_DETECTOR:-latest}
+    entrypoint: ./detector.sh
+    environment:
+      FAULT_DETECTOR__L1_RPC_PROVIDER: http://l1_chain:8545
+      FAULT_DETECTOR__L2_RPC_PROVIDER: http://l2geth:8545
+      RETRIES: 60
 
   dtl:
     depends_on:
@@ -54,7 +84,7 @@ services:
     entrypoint: ./dtl.sh
     env_file:
       - ./envs/dtl.env
-    # set the rest of the env vars for the network whcih do not
+    # set the rest of the env vars for the network which do not
     # depend on the docker-compose setup
     environment:
       # used for setting the address manager address
@@ -98,6 +128,7 @@ services:
     ports:
       - ${L2GETH_HTTP_PORT:-8545}:8545
       - ${L2GETH_WS_PORT:-8546}:8546
+    healthcheck: *healthcheck
 
   relayer:
     depends_on:
@@ -123,8 +154,8 @@ services:
       - deployer
       - dtl
       - l2geth
-    deploy:
-      replicas: 1
+    # deploy:
+    #   replicas: 1
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile
@@ -150,8 +181,8 @@ services:
     depends_on:
       - dtl
       - l2geth
-    deploy:
-      replicas: 1
+    # deploy:
+    #   replicas: 1
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile

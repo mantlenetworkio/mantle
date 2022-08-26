@@ -100,7 +100,7 @@ type Context struct {
 	Time        *big.Int       // Provides information for TIME
 	Difficulty  *big.Int       // Provides information for DIFFICULTY
 
-	// OVM information
+	// bvm information
 	L1BlockNumber *big.Int // Provides information for L1BLOCKNUMBER
 }
 
@@ -403,7 +403,7 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 	if !evm.CanTransfer(evm.StateDB, caller.Address(), value) {
 		return nil, common.Address{}, gas, ErrInsufficientBalance
 	}
-	if rcfg.UsingOVM {
+	if rcfg.UsingBVM {
 		// Make sure the creator address should be able to deploy.
 		if !evm.AddressWhitelisted(caller.Address()) {
 			// Try to encode this error as a Solidity error message so it's more clear to end-users
@@ -520,7 +520,7 @@ func (evm *EVM) ChainConfig() *params.ChainConfig { return evm.chainConfig }
 func (evm *EVM) AddressWhitelisted(addr common.Address) bool {
 	// First check if the owner is address(0), which implicitly disables the whitelist.
 	ownerKey := common.Hash{}
-	owner := evm.StateDB.GetState(dump.OvmWhitelistAddress, ownerKey)
+	owner := evm.StateDB.GetState(dump.BvmWhitelistAddress, ownerKey)
 	if (owner == common.Hash{}) {
 		return true
 	}
@@ -533,6 +533,6 @@ func (evm *EVM) AddressWhitelisted(addr common.Address) bool {
 	hasher.Write(common.LeftPadBytes(position.Bytes(), 32))
 	digest := hasher.Sum(nil)
 	key := common.BytesToHash(digest)
-	isWhitelisted := evm.StateDB.GetState(dump.OvmWhitelistAddress, key)
+	isWhitelisted := evm.StateDB.GetState(dump.BvmWhitelistAddress, key)
 	return isWhitelisted != common.Hash{}
 }

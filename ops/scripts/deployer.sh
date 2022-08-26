@@ -24,11 +24,15 @@ curl \
 echo "Connected to L1."
 echo "Building deployment command."
 
-DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
+if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
+  DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
 
-echo "Deploying contracts. Deployment command:"
-echo "$DEPLOY_CMD"
-eval "$DEPLOY_CMD"
+  echo "Deploying contracts. Deployment command:"
+  echo "$DEPLOY_CMD"
+  eval "$DEPLOY_CMD"
+else
+    echo "skipping deploy contract"
+fi
 
 echo "Building addresses.json."
 export ADDRESS_MANAGER_ADDRESS=$(cat "./deployments/$CONTRACTS_TARGET_NETWORK/Lib_AddressManager.json" | jq -r .address)
@@ -53,6 +57,11 @@ echo "Building dump file."
 npx hardhat take-dump --network $CONTRACTS_TARGET_NETWORK
 mv addresses.json ./genesis
 cp ./genesis/$CONTRACTS_TARGET_NETWORK.json ./genesis/state-dump.latest.json
+
+# init balance
+jq -n 'reduce inputs as $item ({}; . *= $item)' ./genesis/state-dump.latest.json ./balance.json > genesis2.json
+mv ./genesis/state-dump.latest.json ./genesis/state-dump1.latest.json
+mv ./genesis2.json ./genesis/state-dump.latest.json
 
 # service the addresses and dumps
 echo "Starting server."

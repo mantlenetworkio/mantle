@@ -602,8 +602,8 @@ func (m callmsg) Value() *big.Int              { return m.CallMsg.Value }
 func (m callmsg) Data() []byte                 { return m.CallMsg.Data }
 func (m callmsg) AccessList() types.AccessList { return m.CallMsg.AccessList }
 
-// UsingOVM
-// These getters return OVM specific fields
+// UsingBVM
+// These getters return BVM specific fields
 func (m callmsg) L1Timestamp() uint64            { return m.CallMsg.L1Timestamp }
 func (m callmsg) L1BlockNumber() *big.Int        { return m.CallMsg.L1BlockNumber }
 func (m callmsg) QueueOrigin() types.QueueOrigin { return m.CallMsg.QueueOrigin }

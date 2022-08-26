@@ -507,35 +507,35 @@ describe('CrossChainMessenger', () => {
         )
       })
     })
-    describe('when the input is a TokenBridgeMessage', () => {
-      // TODO: There are some edge cases here with custom bridges that conform to the interface but
-      // not to the behavioral spec. Possibly worth testing those. For now this is probably
-      // sufficient.
-      it('should return the sent message event that came after the deposit or withdrawal', async () => {
-        const from = '0x' + '99'.repeat(20)
-        const deposit = {
-          l1Token: '0x' + '11'.repeat(20),
-          l2Token: '0x' + '22'.repeat(20),
-          from,
-          to: '0x' + '44'.repeat(20),
-          amount: ethers.BigNumber.from(1234),
-          data: '0x1234',
-        }
 
-        const tx = await l1Bridge.emitERC20DepositInitiated(deposit)
-
-        const foundCrossChainMessages =
-          await messenger.getMessagesByTransaction(tx)
-        const foundTokenBridgeMessages = await messenger.getDepositsByAddress(
-          from
-        )
-        const resolved = await messenger.toCrossChainMessage(
-          foundTokenBridgeMessages[0]
-        )
-
-        expect(resolved).to.deep.equal(foundCrossChainMessages[0])
-      })
-    })
+    // describe('when the input is a TokenBridgeMessage', () => {
+    //   // TODO: There are some edge cases here with custom bridges that conform to the interface but
+    //   // not to the behavioral spec. Possibly worth testing those. For now this is probably
+    //   // sufficient.
+    //   it('should return the sent message event that came after the deposit or withdrawal', async () => {
+    //     const from = '0x' + '99'.repeat(20)
+    //     const deposit = {
+    //       l1Token: '0x' + '11'.repeat(20),
+    //       l2Token: '0x' + '22'.repeat(20),
+    //       from,
+    //       to: '0x' + '44'.repeat(20),
+    //       amount: ethers.BigNumber.from(1234),
+    //       data: '0x1234',
+    //     }
+    //
+    //     const tx = await l1Bridge.emitERC20DepositInitiated(deposit)
+    //
+    //     const foundCrossChainMessages = await messenger.getMessagesByTransaction(tx)
+    //     const foundTokenBridgeMessages = await messenger.getDepositsByAddress(
+    //       from
+    //     )
+    //     const resolved = await messenger.toCrossChainMessage(
+    //       foundTokenBridgeMessages[0]
+    //     )
+    //
+    //     expect(resolved).to.deep.equal(foundCrossChainMessages[0])
+    //   })
+    // })
 
     describe('when the input is a TransactionLike', () => {
       describe('when the transaction sent exactly one message', () => {

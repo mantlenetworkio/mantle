@@ -192,12 +192,12 @@ func newTestWorker(t *testing.T, chainConfig *params.ChainConfig, engine consens
 }
 
 func TestGenerateBlockAndImportEthash(t *testing.T) {
-	t.Skip("OVM")
+	t.Skip("BVM")
 	testGenerateBlockAndImport(t, false)
 }
 
 func TestGenerateBlockAndImportClique(t *testing.T) {
-	t.Skip("OVM breaks this since it aborts after first tx fails")
+	t.Skip("BVM breaks this since it aborts after first tx fails")
 	testGenerateBlockAndImport(t, true)
 }
 
@@ -269,7 +269,7 @@ func TestEmptyWorkClique(t *testing.T) {
 }
 
 func testEmptyWork(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine) {
-	t.Skip("OVM breaks this with `account balance mismatch`, probably because transfers don't work.")
+	t.Skip("BVM breaks this with `account balance mismatch`, probably because transfers don't work.")
 
 	defer engine.Close()
 
@@ -395,7 +395,7 @@ func TestRegenerateMiningBlockClique(t *testing.T) {
 }
 
 func testRegenerateMiningBlock(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine) {
-	t.Skip("OVM breaks this with `account balance mismatch`, probably because transfers don't work.")
+	t.Skip("BVM breaks this with `account balance mismatch`, probably because transfers don't work.")
 
 	defer engine.Close()
 

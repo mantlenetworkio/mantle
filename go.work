@@ -5,11 +5,9 @@ use (
 	./scheduler
 	./bss-core
 	./gas-oracle
-	./indexer
 	./l2geth
 	./l2geth-exporter
 	./proxyd
-	./teleportr
 	./state-surgery
 )
 
