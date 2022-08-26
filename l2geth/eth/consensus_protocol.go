@@ -16,7 +16,9 @@
 
 package eth
 
-import "github.com/bitdao-io/bitnetwork/l2geth/consensus/coterie"
+import (
+	"github.com/bitdao-io/bitnetwork/l2geth/consensus/coterie"
+)
 
 // consensusProtocolLength is the number of implemented message.
 var consensusProtocolLength = 2
