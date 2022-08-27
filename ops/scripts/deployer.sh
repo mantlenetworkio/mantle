@@ -24,11 +24,15 @@ curl \
 echo "Connected to L1."
 echo "Building deployment command."
 
-DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
+if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
+  DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
 
-echo "Deploying contracts. Deployment command:"
-echo "$DEPLOY_CMD"
-eval "$DEPLOY_CMD"
+  echo "Deploying contracts. Deployment command:"
+  echo "$DEPLOY_CMD"
+  eval "$DEPLOY_CMD"
+else
+    echo "skipping deploy contract"
+fi
 
 echo "Building addresses.json."
 export ADDRESS_MANAGER_ADDRESS=$(cat "./deployments/$CONTRACTS_TARGET_NETWORK/Lib_AddressManager.json" | jq -r .address)
