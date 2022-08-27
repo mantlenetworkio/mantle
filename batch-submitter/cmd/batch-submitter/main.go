@@ -24,7 +24,7 @@ func main() {
 	log.Root().SetHandler(
 		log.LvlFilterHandler(
 			log.LvlInfo,
-			log.StreamHandler(os.Stdout, log.TerminalFormat(true)),
+			log.StreamHandler(os.Stdout, log.JSONFormat()),
 		),
 	)
 

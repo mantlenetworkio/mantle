@@ -33,7 +33,7 @@ func main() {
 	// Configure the logging
 	app.Before = func(ctx *cli.Context) error {
 		loglevel := ctx.GlobalUint64(flags.LogLevelFlag.Name)
-		log.Root().SetHandler(log.LvlFilterHandler(log.Lvl(loglevel), log.StreamHandler(os.Stdout, log.TerminalFormat(true))))
+		log.Root().SetHandler(log.LvlFilterHandler(log.Lvl(loglevel), log.StreamHandler(os.Stdout, log.JSONFormat())))
 		return nil
 	}
 
