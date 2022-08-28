@@ -110,12 +110,13 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 				SlashType:  2,
 			})
 		}
-
+		m.store.AddCulprits(culprits)
 		return nil, err
 	}
 	absents := make([]string, 0)
 	for _, node := range tssInfo.TssMembers {
-		if slices.ExistsIgnoreCase(ctx.AvailableNodes(), node) {
+		if !slices.ExistsIgnoreCase(ctx.AvailableNodes(), node) {
+			// 并且node不在slashing中
 			absents = append(absents, node)
 		}
 	}

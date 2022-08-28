@@ -1,6 +1,6 @@
 module github.com/bitdao-io/bitnetwork/tss
 
-go 1.17
+go 1.18
 
 require (
 	github.com/SSSaaS/sssa-golang v0.0.0-20170502204618-d37d7782d752

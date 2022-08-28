@@ -6,6 +6,7 @@ type QueryService struct {
 }
 
 func (q QueryService) QueryActiveInfo() types.TssCommitteeInfo {
+	// need to exclude the culprits
 	return types.TssCommitteeInfo{}
 }
 

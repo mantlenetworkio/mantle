@@ -27,4 +27,7 @@ type SlashingStore interface {
 	SetSlashingInfo(SlashingInfo)
 	ListSlashingInfo() []SlashingInfo
 	RemoveSlashingInfo(common.Address, uint64)
+
+	AddCulprits([]string)
+	GetCulprits() []string
 }

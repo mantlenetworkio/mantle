@@ -13,6 +13,7 @@ var (
 	NodeMissedBatchBitArrayKeyPrefix = []byte{0x05}
 	SlashingInfoKeyPrefix            = []byte{0x06}
 	ScannedHeightKeyPrefix           = []byte{0x07}
+	CulpritsKeyPrefix                = []byte{0x08}
 )
 
 func getCPKDataKey(electionId uint64) []byte {
@@ -55,4 +56,8 @@ func getSlashingInfoKey(address common.Address, batchIndex uint64) []byte {
 
 func getScannedHeightKey() []byte {
 	return ScannedHeightKeyPrefix
+}
+
+func getCulpritsKey() []byte {
+	return CulpritsKeyPrefix
 }
