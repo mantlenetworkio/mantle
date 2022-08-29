@@ -15,14 +15,16 @@ interface ITssGroupManager {
 
     function setTssGroupMember(uint256 _threshold, bytes[] memory _batchPublicKey) external;
     function setGroupPublicKey(bytes memory _publicKey, bytes memory _groupPublicKey) external;
-    function getTssGroupInfo() external returns (uint256, uint256, bytes memory, TssMember[] memory);
+    function getTssGroupInfo() external returns (uint256, uint256, bytes memory, bytes[] memory);
     function memberJail(bytes memory _publicKey) external;
     function memberUnJail(bytes memory _publicKey) external;
     function removeMember(bytes memory _publicKey) external;
     function getTssGroupUnJailMembers() external returns (address[] memory);
-    function getTssGroupMembers() external returns (TssMember[] memory);
+    function getTssGroupMembers() external returns (bytes[] memory);
     function getTssMember(bytes memory _publicKey) external returns (TssMember memory);
     function memberExistActive(bytes memory _publicKey) external returns (bool);
     function memberExistInActive(bytes memory _publicKey) external returns (bool);
-    function verifySign(bytes32 _message, bytes memory _sig) external returns (bool, address);
+    function inActiveIsEmpty() external returns (bool);
+    function verifySign(bytes32 _message, bytes memory _sig) external returns (bool);
+    function publicKeyToAddress (bytes memory publicKey) external returns (address);
 }
