@@ -190,8 +190,9 @@ func prepareParams(afterMsgSent func(request server.RequestMsg, respCh chan serv
 		afterMsgSent: afterMsgSent,
 	}
 	manager := Manager{
-		wsServer:   &mock,
-		askTimeout: 10 * time.Second,
+		wsServer:    &mock,
+		askTimeout:  5 * time.Second,
+		signTimeout: 5 * time.Second,
 	}
 	request := tss.SignStateRequest{
 		StartBlock:          "1",

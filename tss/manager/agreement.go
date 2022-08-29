@@ -9,6 +9,7 @@ import (
 	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
+	"github.com/influxdata/influxdb/pkg/slices"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	"sync"
@@ -34,7 +35,7 @@ func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Me
 	maxAllowedLostCount := len(ctx.AvailableNodes()) - ctx.TssInfos().Threshold - 1
 	results := make(map[string]bool) // node -> true/false
 	go func() {
-		cctx, cancel := context.WithTimeout(context.Background(), m.signTimeout)
+		cctx, cancel := context.WithTimeout(context.Background(), m.askTimeout)
 		defer func() {
 			log.Info("exit accept agreement response goroutine")
 			cancel()
@@ -47,6 +48,9 @@ func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Me
 		for {
 			select {
 			case resp := <-respChan:
+				if !slices.ExistsIgnoreCase(ctx.AvailableNodes(), resp.SourceNode) { // ignore the message which the sender should not be involved in available node set
+					continue
+				}
 				log.Info("received ask response", "response", resp.RpcResponse.String(), "ndoe", resp.SourceNode)
 				if resp.RpcResponse.Error != nil {
 					errResp[resp.SourceNode] = struct{}{}
