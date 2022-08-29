@@ -56,3 +56,5 @@ op-exporter
 .idea/
 
 bitnetwork.iml
+
+ops/data/**
