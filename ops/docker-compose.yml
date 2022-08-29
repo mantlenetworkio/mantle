@@ -28,6 +28,8 @@ services:
     ports:
       # expose the service to the host for integration testing
       - ${L1CHAIN_HTTP_PORT:-9545}:8545
+    volumes:
+      - ./data/l1_chain:/root/.ethereum/geth/
     healthcheck:
       <<: *healthcheck
       test: [ "CMD", "wget", "-qO-", "http://localhost:8545" ]
@@ -109,6 +111,8 @@ services:
     entrypoint: sh ./geth.sh
     env_file:
       - ./envs/geth.env
+    volumes:
+      - ./data/l2geth:/root/.ethereum/geth/
     environment:
       <<: *system-addr-env
       ETH1_HTTP: http://l1_chain:8545
@@ -163,6 +167,8 @@ services:
     entrypoint: sh ./geth.sh
     env_file:
       - ./envs/geth.env
+    volumes:
+      - ./data/verifier:/root/.ethereum/geth/
     environment:
       <<: *system-addr-env
       ETH1_HTTP: http://l1_chain:8545
