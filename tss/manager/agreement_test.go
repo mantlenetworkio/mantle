@@ -181,7 +181,7 @@ func TestTimeoutAgreement(t *testing.T) {
 	ctx, err := manager.agreement(ctx, request, "ask")
 	require.NoError(t, err)
 	costTime := time.Now().Sub(before)
-	require.True(t, costTime.Seconds() >= askTimeOutSeconds)
+	require.True(t, costTime.Seconds() >= manager.askTimeout.Seconds())
 	require.EqualValues(t, 3, len(ctx.Approvers()))
 }
 
@@ -190,7 +190,8 @@ func prepareParams(afterMsgSent func(request server.RequestMsg, respCh chan serv
 		afterMsgSent: afterMsgSent,
 	}
 	manager := Manager{
-		wsServer: &mock,
+		wsServer:   &mock,
+		askTimeout: 10 * time.Second,
 	}
 	request := tss.SignStateRequest{
 		StartBlock:          "1",

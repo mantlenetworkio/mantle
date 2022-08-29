@@ -47,11 +47,15 @@ func getNodeMissedBatchBitArrayAddressPrefixKey(address common.Address) []byte {
 	return append(NodeMissedBatchBitArrayKeyPrefix, address.Bytes()...)
 }
 
-// key: prefix + batchIndex + address
+// key: prefix + address + batchIndex
 func getSlashingInfoKey(address common.Address, batchIndex uint64) []byte {
 	indexBz := make([]byte, 8)
 	binary.BigEndian.PutUint64(indexBz, batchIndex)
-	return append(append(SlashingInfoKeyPrefix, indexBz...), address.Bytes()...)
+	return append(getSlashingInfoAddressKey(address), indexBz...)
+}
+
+func getSlashingInfoAddressKey(address common.Address) []byte {
+	return append(SlashingInfoKeyPrefix, address.Bytes()...)
 }
 
 func getScannedHeightKey() []byte {

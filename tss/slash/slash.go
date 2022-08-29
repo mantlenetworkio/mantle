@@ -9,20 +9,20 @@ import (
 	"github.com/bitdao-io/bitnetwork/tss/index"
 )
 
-const (
-	signedBatchesWindow = 100
-	minSignedInWindow   = 50
-)
-
 type Slashing struct {
 	stateBatchStore index.StateBatchStore
 	slashingStore   SlashingStore
+
+	signedBatchesWindow int
+	minSignedInWindow   int
 }
 
-func NewSlashing(sbs index.StateBatchStore, ss SlashingStore) Slashing {
+func NewSlashing(sbs index.StateBatchStore, ss SlashingStore, signedBatchesWindow, minSignedInWindow int) Slashing {
 	return Slashing{
-		stateBatchStore: sbs,
-		slashingStore:   ss,
+		stateBatchStore:     sbs,
+		slashingStore:       ss,
+		signedBatchesWindow: signedBatchesWindow,
+		minSignedInWindow:   minSignedInWindow,
 	}
 }
 
@@ -51,7 +51,7 @@ func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
 		}
 	}
 
-	maxMissed := signedBatchesWindow - minSignedInWindow
+	maxMissed := s.signedBatchesWindow - s.minSignedInWindow
 	// update signingInfo for working nodes
 	for _, workingNode := range stateBatch.WorkingNodes {
 		address, err := tss.NodeToAddress(workingNode)
@@ -97,7 +97,7 @@ func (s Slashing) UpdateSigningInfo(batchIndex uint64, address common.Address, e
 		signingInfo = s.InitializeSigningInfo(batchIndex, address, missed)
 	} else {
 		signingInfo.IndexOffset++
-		idx := signingInfo.IndexOffset % signedBatchesWindow
+		idx := signingInfo.IndexOffset % uint64(s.signedBatchesWindow)
 
 		previous := s.slashingStore.GetNodeMissedBatchBitArray(address, idx)
 		switch {

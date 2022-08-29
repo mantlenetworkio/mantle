@@ -18,7 +18,6 @@ import (
 	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
-	"github.com/btcsuite/btcd/btcec"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
@@ -60,7 +59,7 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		cctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+		cctx, cancel := context.WithTimeout(context.Background(), m.signTimeout)
 		defer func() {
 			log.Info("exit signing process")
 			cancel()
@@ -187,23 +186,4 @@ func (m Manager) sendToNodes(ctx types.Context, request interface{}, method tss.
 			}
 		}(node, rpcRequest)
 	}
-}
-
-func getSignature(sig *tss.SignatureData) ([]byte, error) {
-	R := new(big.Int).SetBytes(sig.R)
-	S := new(big.Int).SetBytes(sig.S)
-	N := btcec.S256().N
-	halfOrder := new(big.Int).Rsh(N, 1)
-	if S.Cmp(halfOrder) == 1 {
-		S.Sub(N, S)
-	}
-	rBytes := R.Bytes()
-	sBytes := S.Bytes()
-	cBytes := sig.SignatureRecovery
-
-	sigBytes := make([]byte, 65)
-	copy(sigBytes[32-len(rBytes):32], rBytes)
-	copy(sigBytes[64-len(sBytes):64], sBytes)
-	copy(sigBytes[64:65], cBytes)
-	return sigBytes, nil
 }

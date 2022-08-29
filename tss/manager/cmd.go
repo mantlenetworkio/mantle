@@ -3,7 +3,6 @@ package manager
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/bitdao-io/bitnetwork/tss/index"
 	"github.com/bitdao-io/bitnetwork/tss/manager/store"
 	"github.com/bitdao-io/bitnetwork/tss/slash"
@@ -34,23 +33,23 @@ func Command() *cobra.Command {
 
 func run(cmd *cobra.Command) error {
 	config := common.GetConfigFromCmd(cmd)
-	fmt.Println(config)
 
-	wsServer, err := server.NewWSServer("")
+	wsServer, err := server.NewWSServer(config.Manager.WsAddr)
 	if err != nil {
 		return err
 	}
-	managerStore, err := store.NewStorage("")
+	managerStore, err := store.NewStorage(config.Manager.DBDir)
 	if err != nil {
 		return err
 	}
-	observer, err := index.NewIndexer(managerStore, "", "")
+	observer, err := index.NewIndexer(managerStore, config.L1Url, config.L1ConfirmBlocks, config.SccContractAddress, config.TimedTaskInterval)
 	if err != nil {
 		return err
 	}
-	observer.SetHook(slash.NewSlashing(managerStore, managerStore))
+	observer.SetHook(slash.NewSlashing(managerStore, managerStore, config.SignedBatchesWindow, config.MinSignedInWindow))
 	observer.Start()
-	manager, err := NewManager(wsServer, nil, managerStore, "")
+
+	manager, err := NewManager(wsServer, nil, managerStore, config)
 	if err != nil {
 		return err
 	}
@@ -62,12 +61,9 @@ func run(cmd *cobra.Command) error {
 
 	// custom http configuration
 	s := &http.Server{
-		Addr:         "",
-		Handler:      r,
-		ReadTimeout:  0,
-		WriteTimeout: 0,
+		Addr:    config.Manager.HttpAddr,
+		Handler: r,
 	}
-
 	go func() {
 		if err := s.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
 			log.Error("api server starts failed", err)

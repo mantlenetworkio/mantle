@@ -88,6 +88,18 @@ func (s *Storage) GetSlashingInfo(address common.Address, batchIndex uint64) (bo
 	return true, slashingInfo
 }
 
+func (s *Storage) IsInSlashing(address common.Address) bool {
+	iterator := s.db.NewIterator(util.BytesPrefix(getSlashingInfoAddressKey(address)), nil)
+	defer iterator.Release()
+	for iterator.Next() {
+		buf := iterator.Value()
+		if len(buf) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *Storage) ListSlashingInfo() (slashingInfos []slash.SlashingInfo) {
 	iterator := s.db.NewIterator(util.BytesPrefix(SlashingInfoKeyPrefix), nil)
 	defer iterator.Release()

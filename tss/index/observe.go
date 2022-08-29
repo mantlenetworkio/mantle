@@ -10,16 +10,15 @@ import (
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
 )
 
-const (
-	ethereumConfirmBlocks = 15
-	scanRange             = 10
-)
+const scanRange = 10
 
 type Indexer struct {
 	store           IndexerStore
 	l1Cli           *ethclient.Client
+	l1ConfirmBlocks int
 	sccContractAddr common.Address
 	hook            Hook
+	taskInterval    time.Duration
 	stopChan        chan struct{}
 }
 
@@ -27,7 +26,11 @@ type Hook interface {
 	AfterStateBatchIndexed([32]byte) error
 }
 
-func NewIndexer(store IndexerStore, l1url string, sccContractAddr string) (Indexer, error) {
+func NewIndexer(store IndexerStore, l1url string, l1ConfirmBlocks int, sccContractAddr string, taskInterval string) (Indexer, error) {
+	taskIntervalDur, err := time.ParseDuration(taskInterval)
+	if err != nil {
+		return Indexer{}, nil
+	}
 	l1Cli, err := ethclient.Dial(l1url)
 	if err != nil {
 		return Indexer{}, err
@@ -36,7 +39,9 @@ func NewIndexer(store IndexerStore, l1url string, sccContractAddr string) (Index
 	return Indexer{
 		store:           store,
 		l1Cli:           l1Cli,
+		l1ConfirmBlocks: l1ConfirmBlocks,
 		sccContractAddr: address,
+		taskInterval:    taskIntervalDur,
 		stopChan:        make(chan struct{}),
 	}, nil
 }
@@ -59,7 +64,7 @@ func (o Indexer) Stop() {
 }
 
 func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
-	queryTicker := time.NewTicker(5 * time.Second)
+	queryTicker := time.NewTicker(o.taskInterval)
 	for {
 		func() {
 			currentHeader, err := o.l1Cli.HeaderByNumber(context.Background(), nil)
@@ -67,7 +72,7 @@ func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
 				log.Error("failed to call layer1 HeaderByNumber", err)
 				return
 			}
-			latestConfirmedBlockHeight := currentHeader.Number.Uint64() - ethereumConfirmBlocks
+			latestConfirmedBlockHeight := currentHeader.Number.Uint64() - uint64(o.l1ConfirmBlocks)
 
 			startHeight := scannedHeight + 1
 			endHeight := startHeight + scanRange

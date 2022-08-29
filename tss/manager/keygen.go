@@ -4,24 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/bitdao-io/bitnetwork/tss/manager/types"
 	"sync"
 	"time"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
 	tss "github.com/bitdao-io/bitnetwork/tss/common"
+	"github.com/bitdao-io/bitnetwork/tss/manager/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
-const (
-	keygenTimeOutSeconds     = 120
-	cpkConfirmMaxPeriodHours = 2
-)
-
 func (m Manager) observeElection() {
-	queryTicker := time.NewTicker(queryInterval)
+	queryTicker := time.NewTicker(m.taskInterval)
 	for {
 		if !m.stopGenKey {
 			func() {
@@ -38,7 +33,7 @@ func (m Manager) observeElection() {
 						return
 					}
 
-					if len(cpkData.Cpk) != 0 && time.Now().Sub(cpkData.CreationTime).Hours() < cpkConfirmMaxPeriodHours { // cpk is generated, but has not been confirmed yet
+					if len(cpkData.Cpk) != 0 && time.Now().Sub(cpkData.CreationTime).Hours() < m.cpkConfirmTimeout.Hours() { // cpk is generated, but has not been confirmed yet
 						return
 					}
 					cpk, err := m.generateKey(tssInfo.TssMembers, tssInfo.Threshold)
@@ -84,7 +79,7 @@ func (m Manager) generateKey(tssMembers []string, threshold int) (string, error)
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		cctx, cancel := context.WithTimeout(context.Background(), keygenTimeOutSeconds*time.Second)
+		cctx, cancel := context.WithTimeout(context.Background(), m.keygenTimeout)
 		defer func() {
 			log.Info("exit accept keygen response goroutine")
 			cancel()

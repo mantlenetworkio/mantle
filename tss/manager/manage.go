@@ -3,18 +3,18 @@ package manager
 import (
 	"errors"
 	"fmt"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/tss/index"
-	"github.com/bitdao-io/bitnetwork/tss/slash"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"math"
 	"math/big"
 	"math/rand"
 	"time"
 
+	"github.com/bitdao-io/bitnetwork/l2geth/log"
 	tss "github.com/bitdao-io/bitnetwork/tss/common"
+	"github.com/bitdao-io/bitnetwork/tss/index"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
+	"github.com/bitdao-io/bitnetwork/tss/slash"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/influxdata/influxdb/pkg/slices"
 )
 
@@ -22,8 +22,16 @@ type Manager struct {
 	wsServer        server.IWebsocketManager
 	tssQueryService types.TssQueryService
 	store           types.ManagerStore
+	l1Cli           *ethclient.Client
+	l1ConfirmBlocks int
 
-	l1Cli      *ethclient.Client
+	taskInterval          time.Duration
+	confirmReceiptTimeout time.Duration
+	keygenTimeout         time.Duration
+	cpkConfirmTimeout     time.Duration
+	askTimeout            time.Duration
+	signTimeout           time.Duration
+
 	stopGenKey bool
 	stopChan   chan struct{}
 }
@@ -31,8 +39,33 @@ type Manager struct {
 func NewManager(wsServer server.IWebsocketManager,
 	tssQueryService types.TssQueryService,
 	store types.ManagerStore,
-	l1Url string) (Manager, error) {
-	l1Cli, err := ethclient.Dial(l1Url)
+	config tss.Configuration) (Manager, error) {
+	taskIntervalDur, err := time.ParseDuration(config.TimedTaskInterval)
+	if err != nil {
+		return Manager{}, err
+	}
+	receiptConfirmTimeoutDur, err := time.ParseDuration(config.L1ReceiptConfirmTimeout)
+	if err != nil {
+		return Manager{}, err
+	}
+	keygenTimeoutDur, err := time.ParseDuration(config.Manager.KeygenTimeout)
+	if err != nil {
+		return Manager{}, err
+	}
+	cpkConfirmTimeoutDur, err := time.ParseDuration(config.Manager.CPKConfirmTimeout)
+	if err != nil {
+		return Manager{}, err
+	}
+	askTimeoutDur, err := time.ParseDuration(config.Manager.AskTimeout)
+	if err != nil {
+		return Manager{}, err
+	}
+	signTimeoutDur, err := time.ParseDuration(config.Manager.SignTimeout)
+	if err != nil {
+		return Manager{}, err
+	}
+
+	l1Cli, err := ethclient.Dial(config.L1Url)
 	if err != nil {
 		return Manager{}, err
 	}
@@ -41,7 +74,16 @@ func NewManager(wsServer server.IWebsocketManager,
 		tssQueryService: tssQueryService,
 		store:           store,
 		l1Cli:           l1Cli,
-		stopChan:        make(chan struct{}),
+		l1ConfirmBlocks: config.L1ConfirmBlocks,
+
+		taskInterval:          taskIntervalDur,
+		confirmReceiptTimeout: receiptConfirmTimeoutDur,
+		keygenTimeout:         keygenTimeoutDur,
+		cpkConfirmTimeout:     cpkConfirmTimeoutDur,
+		askTimeout:            askTimeoutDur,
+		signTimeout:           signTimeoutDur,
+
+		stopChan: make(chan struct{}),
 	}, nil
 }
 
@@ -115,9 +157,12 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	}
 	absents := make([]string, 0)
 	for _, node := range tssInfo.TssMembers {
-		if !slices.ExistsIgnoreCase(ctx.AvailableNodes(), node) {
+		if !slices.ExistsIgnoreCase(ctx.Approvers(), node) {
 			// 并且node不在slashing中
-			absents = append(absents, node)
+			addr, _ := tss.NodeToAddress(node)
+			if !m.store.IsInSlashing(addr) {
+				absents = append(absents, node)
+			}
 		}
 	}
 	if err = m.afterSignStateBatch(ctx, request.StateRoots, absents); err != nil {

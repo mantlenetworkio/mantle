@@ -15,12 +15,7 @@ import (
 	eth "github.com/ethereum/go-ethereum/core/types"
 )
 
-const numConfirmations = 15
-
-var (
-	queryInterval = 10 * time.Second
-	sendState     SendState
-)
+var sendState SendState
 
 func init() {
 	sendState = SendState{
@@ -30,7 +25,7 @@ func init() {
 }
 
 func (m Manager) slashing() {
-	queryTicker := time.NewTicker(queryInterval)
+	queryTicker := time.NewTicker(m.taskInterval)
 	for {
 		signingInfos := m.store.ListSlashingInfo()
 		for _, si := range signingInfos {
@@ -126,8 +121,8 @@ func (m Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo
 	}
 	confirmTxReceipt := func(txHash ethc.Hash, info slash.SlashingInfo) *eth.Receipt {
 		sendState.set(info.Address, info.BatchIndex, "has not minted")
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
-		queryTicker := time.NewTicker(queryInterval)
+		ctx, cancel := context.WithTimeout(context.Background(), m.confirmReceiptTimeout)
+		queryTicker := time.NewTicker(m.taskInterval)
 		defer func() {
 			cancel()
 			queryTicker.Stop()
@@ -146,9 +141,9 @@ func (m Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo
 				log.Info("Transaction mined, checking confirmations",
 					"txHash", txHash, "txHeight", txHeight,
 					"tipHeight", tipHeight,
-					"numConfirmations", numConfirmations)
+					"numConfirmations", m.l1ConfirmBlocks)
 				sendState.set(info.Address, info.BatchIndex, "minted, wait for confirming")
-				if txHeight+numConfirmations < tipHeight {
+				if txHeight+uint64(m.l1ConfirmBlocks) < tipHeight {
 					reverted := receipt.Status == 0
 					log.Info("Transaction confirmed",
 						"txHash", txHash,
