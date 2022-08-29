@@ -1,13 +1,13 @@
-import { Signer, Wallet, BytesLike } from "ethers"
-import { TssGroupManager } from '../typechain'
+import { Signer, Wallet, BytesLike,Contract } from "ethers"
 import chai from "chai"
+import { deploy } from '../../../helpers'
 
 const { expect } = chai
-const { ethers, upgrades, waffle } = require("hardhat")
+const { ethers, waffle } = require("hardhat")
 
 describe('TssGroupManager', () => {
     let accounts: Signer[]
-    let tssGroup: TssGroupManager
+    let tssGroup: Contract
     let myWallet: Wallet
     let tssNodes: Wallet[] = []
     let newTssNodes: Wallet[] = []
@@ -80,10 +80,8 @@ describe('TssGroupManager', () => {
     })
 
     const deployTssGroup = async () => {
-        const TssGroupFactory = await ethers.getContractFactory("TssGroupManager")
-        tssGroup = await upgrades.deployProxy(
-            TssGroupFactory,
-        ) as TssGroupManager
+        tssGroup = await deploy('TssGroupManager', {})
+        await tssGroup.initialize()
     }
 
     const initAccount = async () => {

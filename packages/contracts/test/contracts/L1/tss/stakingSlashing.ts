@@ -1,15 +1,15 @@
-import { Signer, Wallet, BytesLike, utils } from "ethers"
-import chai, { util } from "chai"
-import { TssGroupManager, StakingSlashing, TestToken } from '../typechain'
+import { Signer, Wallet, BytesLike, utils,Contract } from "ethers"
+import chai from "chai"
+import { deploy } from '../../../helpers'
 
 const { expect } = chai
-const { ethers, upgrades, waffle } = require("hardhat")
+const { ethers, waffle } = require("hardhat")
 
 describe('StakingSlashing', () => {
     let accounts: Signer[]
-    let tssGroup: TssGroupManager
-    let stakingSlashing: StakingSlashing
-    let bitToken: TestToken
+    let tssGroup: Contract
+    let stakingSlashing: Contract
+    let bitToken: Contract
     let myWallet: Wallet
     let tssNodes: Wallet[] = []
     let newTssNodes: Wallet[] = []
@@ -19,8 +19,8 @@ describe('StakingSlashing', () => {
 
     before('deploy stakingSlashing contracts', async () => {
         accounts = await ethers.getSigners()
-        await deployTssGroup()
         await deployBitToken()
+        await deployTssGroup()
         await deployStakingSlashing()
         await initAccount()
         await initTssGroup()
@@ -72,7 +72,7 @@ describe('StakingSlashing', () => {
         // error case public key invalid : not equal
         await expect(stakingSlashing.connect(myWallet).staking(1000, myWallet.publicKey)).to.be.revertedWith("pubKey not equal")
         // error case erc20 transfer failed : need approve first
-        await expect(stakingSlashing.connect(myWallet).staking(10000, pubKey)).to.be.revertedWith("ERC20: insufficient allowance")
+        await expect(stakingSlashing.connect(myWallet).staking(10000, pubKey)).to.be.revertedWith("ERC20: transfer amount exceeds allowance")
 
         // add staking for myWallet
         await bitToken.connect(myWallet).approve(stakingSlashing.address, 10000)
@@ -190,7 +190,7 @@ describe('StakingSlashing', () => {
         expect(info.nodeAddress).to.eq(tssNodes[0].address)
         expect(info.status).to.eq(0)
 
-        // err case slash animus : already slashed 
+        // err case slash animus : already slashed
         message = utils.defaultAbiCoder.encode(
             ["tuple(uint256,address,address[],uint256)"],
             [[
@@ -204,7 +204,7 @@ describe('StakingSlashing', () => {
         signature = await cpk.signMessage(ethers.utils.arrayify(messageHash))
         await expect(stakingSlashing.connect(tssNodes[1]).slashing(message, signature)).to.be.revertedWith("already slashed")
 
-        // slash case animus 
+        // slash case animus
         message = utils.defaultAbiCoder.encode(
             ["tuple(uint256,address,address[],uint256)"],
             [[
@@ -221,7 +221,7 @@ describe('StakingSlashing', () => {
         let tssMemberInfo = await tssGroup.getTssGroupInfo()
         expect(tssMemberInfo[3].length).to.eq(4)
 
-        // slash case nothing 
+        // slash case nothing
         message = utils.defaultAbiCoder.encode(
             ["tuple(uint256,address,address[],uint256)"],
             [[
@@ -237,28 +237,21 @@ describe('StakingSlashing', () => {
     })
 
     const deployBitToken = async () => {
-        const tokenFactory = await ethers.getContractFactory("TestToken")
-        bitToken = await tokenFactory.deploy("BITCOIN", "BIT")
-        await bitToken.deployed()
+        bitToken = await deploy('TestERC20', {})
     }
 
     const deployStakingSlashing = async () => {
-        const StakingSlashingFactory = await ethers.getContractFactory("StakingSlashing")
-        stakingSlashing = await upgrades.deployProxy(
-            StakingSlashingFactory,
-            [
-                bitToken.address,
-                tssGroup.address
-            ]
-        ) as StakingSlashing
-        await tssGroup.setStakingSlash(stakingSlashing.address)
+          stakingSlashing = await deploy('StakingSlashing', {})
+          await stakingSlashing.initialize(
+            bitToken.address,
+            tssGroup.address,
+          )
+          await tssGroup.setStakingSlash(stakingSlashing.address)
     }
 
     const deployTssGroup = async () => {
-        const TssGroupFactory = await ethers.getContractFactory("TssGroupManager")
-        tssGroup = await upgrades.deployProxy(
-            TssGroupFactory,
-        ) as TssGroupManager
+        tssGroup = await deploy('TssGroupManager', {})
+        await tssGroup.initialize()
     }
 
     const initAccount = async () => {
