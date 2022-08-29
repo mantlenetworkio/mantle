@@ -9,15 +9,12 @@ import (
 )
 
 func (pm *ProtocolManager) makeConsensusProtocol(version uint) p2p.Protocol {
-	length, ok := protocolLengths[version]
-	if !ok {
-		panic("makeProtocol for unknown version")
-	}
+	length := consensusProtocolLength
 
 	return p2p.Protocol{
 		Name:    protocolName,
 		Version: version,
-		Length:  length,
+		Length:  uint64(length),
 		Run:     pm.consensusHandler,
 		NodeInfo: func() interface{} {
 			return pm.NodeInfo()

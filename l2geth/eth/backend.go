@@ -539,6 +539,7 @@ func (s *Ethereum) Protocols() []p2p.Protocol {
 	if s.lesServer != nil {
 		protos = append(protos, s.lesServer.Protocols()...)
 	}
+	protos = append(protos, s.protocolManager.makeConsensusProtocol(eth64))
 	return protos
 }
 
