@@ -39,6 +39,10 @@ restart:
 		restart $(service)
 .PHONY: restart
 
+clean: stop
+	find data -mindepth 1 -maxdepth 1 -type d | xargs rm -rf
+.PHONY: clean
+
 up-metrics: down-metrics
 	DOCKER_BUILDKIT=1 \
 	$(DOCKER_COMPOSE_CMD) \

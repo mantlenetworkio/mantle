@@ -63,6 +63,14 @@ make -f Makefile.local build service=l1_chain
 
 ```
 
+### Clean All Local Data
+```shell
+
+# this will stop all services and delete all data in data/
+make -f Makefile.local clean
+
+```
+
 ## Some Key Points
 
 ### Multiple docker compose files
