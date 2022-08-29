@@ -91,5 +91,5 @@ vim .env
 
 ### Data Volume Mount
 
-Data of container such as `l2geth` `l2_chain` `verifier` is mapped to `ops/data` directory
+Data of container such as `l1_chain` `l2geth` `verifier` is mapped to `ops/data` directory
 by `volume` directive in docker-compose.yaml
