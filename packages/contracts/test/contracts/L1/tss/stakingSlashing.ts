@@ -1,4 +1,4 @@
-import { Signer, Wallet, BytesLike, utils,Contract } from "ethers"
+import { Signer, Wallet, BytesLike, utils, Contract } from "ethers"
 import chai from "chai"
 import { deploy } from '../../../helpers'
 
@@ -10,6 +10,7 @@ describe('StakingSlashing', () => {
     let tssGroup: Contract
     let stakingSlashing: Contract
     let bitToken: Contract
+    let addressManager: Contract
     let myWallet: Wallet
     let tssNodes: Wallet[] = []
     let newTssNodes: Wallet[] = []
@@ -19,6 +20,7 @@ describe('StakingSlashing', () => {
 
     before('deploy stakingSlashing contracts', async () => {
         accounts = await ethers.getSigners()
+        await deployAddressManager()
         await deployBitToken()
         await deployTssGroup()
         await deployStakingSlashing()
@@ -36,8 +38,8 @@ describe('StakingSlashing', () => {
     })
 
     it("setSlashingParams", async () => {
-        await expect(stakingSlashing.setSlashingParams([1000, 100], [1001, 99])).to.be.revertedWith("slashAmount need bigger than _exIncome")
-        await expect(stakingSlashing.setSlashingParams([1000, 100], [999, 100])).to.be.revertedWith("slashAmount need bigger than _exIncome")
+        await expect(stakingSlashing.setSlashingParams([1000, 100], [1001, 99])).to.be.revertedWith("slashAmount need bigger than exIncome")
+        await expect(stakingSlashing.setSlashingParams([1000, 100], [999, 100])).to.be.revertedWith("slashAmount need bigger than exIncome")
         await expect(stakingSlashing.setSlashingParams([1000, 100], [0, 99])).to.be.revertedWith("invalid amount")
 
         let slashAmounts = [100, 1000]
@@ -236,22 +238,31 @@ describe('StakingSlashing', () => {
         await expect(stakingSlashing.connect(tssNodes[1]).slashing(message, signature)).to.be.revertedWith("err type for slashing")
     })
 
+    const deployAddressManager = async () => {
+        addressManager = await deploy('Lib_AddressManager')
+    }
+
     const deployBitToken = async () => {
-        bitToken = await deploy('TestERC20', {})
+        bitToken = await deploy('TestERC20')
+        await addressManager.setAddress(
+            'BitToken',
+            bitToken.address
+        )
     }
 
     const deployStakingSlashing = async () => {
-          stakingSlashing = await deploy('StakingSlashing', {})
-          await stakingSlashing.initialize(
-            bitToken.address,
-            tssGroup.address,
-          )
-          await tssGroup.setStakingSlash(stakingSlashing.address)
+        stakingSlashing = await deploy('StakingSlashing')
+        await stakingSlashing.initialize(addressManager.address)
+        await tssGroup.setStakingSlash(stakingSlashing.address)
     }
 
     const deployTssGroup = async () => {
-        tssGroup = await deploy('TssGroupManager', {})
-        await tssGroup.initialize()
+        tssGroup = await deploy('TssGroupManager')
+        await tssGroup.initialize(addressManager.address)
+        await addressManager.setAddress(
+            'TssGroupManager',
+            tssGroup.address
+        )
     }
 
     const initAccount = async () => {

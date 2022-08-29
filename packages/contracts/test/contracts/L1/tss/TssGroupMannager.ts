@@ -1,4 +1,4 @@
-import { Signer, Wallet, BytesLike,Contract } from "ethers"
+import { Signer, Wallet, BytesLike, Contract } from "ethers"
 import chai from "chai"
 import { deploy } from '../../../helpers'
 
@@ -14,9 +14,11 @@ describe('TssGroupManager', () => {
     let cpk: Wallet
     let tssNodesPublicKeys: BytesLike[] = []
     let cpkPubKey: BytesLike
+    let addressManager: Contract
 
     before('deploy tssgroup contracts', async () => {
         accounts = await ethers.getSigners()
+        await deployAddressManager()
         await deployTssGroup()
         await initAccount()
     })
@@ -79,9 +81,17 @@ describe('TssGroupManager', () => {
         expect(info[3].length).to.eq(tssNodesPublicKeys.length)
     })
 
+    const deployAddressManager = async () => {
+        addressManager = await deploy('Lib_AddressManager')
+    }
+
     const deployTssGroup = async () => {
-        tssGroup = await deploy('TssGroupManager', {})
-        await tssGroup.initialize()
+        tssGroup = await deploy('TssGroupManager')
+        await tssGroup.initialize(addressManager.address)
+        await addressManager.setAddress(
+            'TssGroupManager',
+            tssGroup.address
+        )
     }
 
     const initAccount = async () => {

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >0.5.0 <0.9.0;
+pragma solidity ^0.8.9;
 
+import { Lib_AddressResolver } from "../../libraries/resolver/Lib_AddressResolver.sol";
+import { Lib_AddressManager } from "../../libraries/resolver/Lib_AddressManager.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
@@ -10,6 +12,7 @@ import "./ITssGroupManager.sol";
 
 contract TssGroupManager is
     OwnableUpgradeable,
+    Lib_AddressResolver,
     ReentrancyGuardUpgradeable,
     ITssGroupManager
 {
@@ -31,30 +34,35 @@ contract TssGroupManager is
     mapping(bytes => bool) public isSubmitGroupKey; // submit group key or not
     mapping(bytes => bool) public isInActiveMember; // tss member exist or not
 
-    event tssGroupMemberAppend(
-        uint256 _roundId,
-        uint256 _threshold,
-        bytes[] _inActiveTssMembers
-    );
+    event tssGroupMemberAppend(uint256 _roundId, uint256 _threshold, bytes[] _inActiveTssMembers);
 
-    event tssActiveMemberAppended(
-        uint256 _roundId,
-        bytes _groupKey,
-        bytes[] activeTssMembers
-    );
+    event tssActiveMemberAppended(uint256 _roundId, bytes _groupKey, bytes[] activeTssMembers);
 
-    function initialize() public initializer {
+    /***************
+     * Constructor *
+     ***************/
+
+    /**
+     * This contract is intended to be behind a delegate proxy.
+     * We pass the zero address to the address resolver just to satisfy the constructor.
+     * We still need to set this value in initialize().
+     */
+    constructor() Lib_AddressResolver(address(0)) {}
+
+    function initialize(address _libAddressManager) public initializer {
         __Ownable_init();
+        require(
+            address(libAddressManager) == address(0),
+            "L1CrossDomainMessenger already intialized."
+        );
+        libAddressManager = Lib_AddressManager(_libAddressManager);
         gRoundId = 0;
         confirmNumber = 0;
         threshold = 0;
     }
 
     modifier onlyStakingSlash() {
-        require(
-            msg.sender == stakingSlash,
-            "contract call is not staking slashing"
-        );
+        require(msg.sender == stakingSlash, "contract call is not staking slashing");
         _;
     }
 
@@ -66,19 +74,14 @@ contract TssGroupManager is
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function setTssGroupMember(
-        uint256 _threshold,
-        bytes[] memory _batchPublicKey
-    ) public override onlyOwner {
+    function setTssGroupMember(uint256 _threshold, bytes[] memory _batchPublicKey)
+        public
+        override
+        onlyOwner
+    {
         require((_batchPublicKey.length > 0), "batch public key is empty");
-        require(
-            _threshold <= _batchPublicKey.length,
-            "threshold must less than tss member"
-        );
-        require(
-            (inActiveTssMembers.length == 0),
-            "inactive tss member array is not empty"
-        );
+        require(_threshold <= _batchPublicKey.length, "threshold must less than tss member");
+        require((inActiveTssMembers.length == 0), "inactive tss member array is not empty");
         for (uint256 i = 0; i < _batchPublicKey.length; i++) {
             inActiveTssMembers.push(_batchPublicKey[i]);
             isInActiveMember[_batchPublicKey[i]] = true;
@@ -94,24 +97,18 @@ contract TssGroupManager is
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function setGroupPublicKey(
-        bytes memory _publicKey,
-        bytes memory _groupPublicKey
-    ) public override {
-        require(
-            isInActiveMember[_publicKey] == true,
-            "your public key is not in InActiveMember"
-        );
-        require(
-            msg.sender == publicKeyToAddress(_publicKey),
-            "public key not match"
-        );
+    function setGroupPublicKey(bytes memory _publicKey, bytes memory _groupPublicKey)
+        public
+        override
+    {
+        require(isInActiveMember[_publicKey] == true, "your public key is not in InActiveMember");
+        require(msg.sender == publicKeyToAddress(_publicKey), "public key not match");
 
         if (isSubmitGroupKey[_publicKey] == false) {
             isSubmitGroupKey[_publicKey] = true;
             confirmNumber = confirmNumber + 1;
         }
-        if (isEqual(memberGroupKey[_publicKey], _groupPublicKey) == false) {
+        if (!isEqual(memberGroupKey[_publicKey], _groupPublicKey)) {
             groupKeyCounter[_groupPublicKey] += 1;
             if (memberGroupKey[_publicKey].length != 0) {
                 groupKeyCounter[memberGroupKey[_publicKey]] -= 1;
@@ -145,11 +142,7 @@ contract TssGroupManager is
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function memberJail(bytes memory _publicKey)
-        public
-        override
-        onlyStakingSlash
-    {
+    function memberJail(bytes memory _publicKey) public override onlyStakingSlash {
         tssActiveMemberInfo[_publicKey].status = MemberStatus.jail;
     }
 
@@ -157,11 +150,7 @@ contract TssGroupManager is
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function memberUnJail(bytes memory _publicKey)
-        public
-        override
-        onlyStakingSlash
-    {
+    function memberUnJail(bytes memory _publicKey) public override onlyStakingSlash {
         tssActiveMemberInfo[_publicKey].status = MemberStatus.unJail;
     }
 
@@ -169,11 +158,7 @@ contract TssGroupManager is
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function removeMember(bytes memory _publicKey)
-        public
-        override
-        onlyStakingSlash
-    {
+    function removeMember(bytes memory _publicKey) public override onlyStakingSlash {
         for (uint256 i = 0; i < activeTssMembers.length; i++) {
             if (isEqual(activeTssMembers[i], _publicKey)) {
                 removeActiveTssMembers(i);
@@ -186,20 +171,11 @@ contract TssGroupManager is
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function getTssGroupUnJailMembers()
-        public
-        override
-        returns (address[] memory)
-    {
+    function getTssGroupUnJailMembers() public override returns (address[] memory) {
         delete addresses;
         for (uint256 i = 0; i < activeTssMembers.length; i++) {
-            if (
-                tssActiveMemberInfo[activeTssMembers[i]].status ==
-                MemberStatus.unJail
-            ) {
-                addresses.push(
-                    tssActiveMemberInfo[activeTssMembers[i]].nodeAddress
-                );
+            if (tssActiveMemberInfo[activeTssMembers[i]].status == MemberStatus.unJail) {
+                addresses.push(tssActiveMemberInfo[activeTssMembers[i]].nodeAddress);
             }
         }
         return addresses;
@@ -217,12 +193,7 @@ contract TssGroupManager is
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function getTssMember(bytes memory _publicKey)
-        public
-        view
-        override
-        returns (TssMember memory)
-    {
+    function getTssMember(bytes memory _publicKey) public view override returns (TssMember memory) {
         return tssActiveMemberInfo[_publicKey];
     }
 
@@ -230,12 +201,7 @@ contract TssGroupManager is
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function memberExistActive(bytes memory _publicKey)
-        public
-        view
-        override
-        returns (bool)
-    {
+    function memberExistActive(bytes memory _publicKey) public view override returns (bool) {
         if (tssActiveMemberInfo[_publicKey].publicKey.length > 0) {
             return true;
         } else {
@@ -247,12 +213,7 @@ contract TssGroupManager is
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function memberExistInActive(bytes memory _publicKey)
-        public
-        view
-        override
-        returns (bool)
-    {
+    function memberExistInActive(bytes memory _publicKey) public view override returns (bool) {
         return isInActiveMember[_publicKey];
     }
 
@@ -268,27 +229,16 @@ contract TssGroupManager is
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function verifySign(bytes32 _message, bytes memory _sig)
-        public
-        view
-        override
-        returns (bool)
-    {
+    function verifySign(bytes32 _message, bytes memory _sig) public view override returns (bool) {
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(_message);
-        return (recover(ethSignedMessageHash, _sig) ==
-            publicKeyToAddress(confirmGroupPublicKey));
+        return (recover(ethSignedMessageHash, _sig) == publicKeyToAddress(confirmGroupPublicKey));
     }
 
     /**
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function publicKeyToAddress(bytes memory publicKey)
-        public
-        pure
-        override
-        returns (address)
-    {
+    function publicKeyToAddress(bytes memory publicKey) public pure override returns (address) {
         require(publicKey.length == 64, "public key length must 64 bytes");
         return address(uint160(uint256(keccak256(publicKey))));
     }
@@ -308,25 +258,11 @@ contract TssGroupManager is
         confirmGroupPublicKey = _groupPublicKey;
         delete inActiveTssMembers;
 
-        emit tssActiveMemberAppended(
-            gRoundId,
-            _groupPublicKey,
-            activeTssMembers
-        );
+        emit tssActiveMemberAppended(gRoundId, _groupPublicKey, activeTssMembers);
     }
 
-    function getEthSignedMessageHash(bytes32 _messageHash)
-        public
-        pure
-        returns (bytes32)
-    {
-        return
-            keccak256(
-                abi.encodePacked(
-                    "\x19Ethereum Signed Message:\n32",
-                    _messageHash
-                )
-            );
+    function getEthSignedMessageHash(bytes32 _messageHash) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", _messageHash));
     }
 
     function recover(bytes32 _ethSignedMessageHash, bytes memory _sig)
@@ -355,11 +291,7 @@ contract TssGroupManager is
         }
     }
 
-    function isEqual(bytes memory byteListA, bytes memory byteListB)
-        public
-        pure
-        returns (bool)
-    {
+    function isEqual(bytes memory byteListA, bytes memory byteListB) public pure returns (bool) {
         if (byteListA.length != byteListB.length) return false;
         for (uint256 i = 0; i < byteListA.length; i++) {
             if (byteListA[i] != byteListB[i]) return false;

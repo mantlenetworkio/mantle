@@ -1,18 +1,17 @@
-//SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
 
+import { Lib_AddressResolver } from "../../libraries/resolver/Lib_AddressResolver.sol";
+import { Lib_AddressManager } from "../../libraries/resolver/Lib_AddressManager.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./ITssGroupManager.sol";
 import "./IStakingSlashing.sol";
 
 contract StakingSlashing is
     Initializable,
+    Lib_AddressResolver,
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
     IStakingSlashing
@@ -22,6 +21,7 @@ contract StakingSlashing is
         uptime,
         animus
     }
+
     struct SlashMsg {
         uint256 batchIndex;
         address jailNode;
@@ -67,15 +67,32 @@ contract StakingSlashing is
      */
     event Slashing(address, SlashType);
 
+    /***************
+     * Constructor *
+     ***************/
+
+    /**
+     * This contract is intended to be behind a delegate proxy.
+     * We pass the zero address to the address resolver just to satisfy the constructor.
+     * We still need to set this value in initialize().
+     */
+    constructor() Lib_AddressResolver(address(0)) {}
+
     /**
      * @notice initializes the contract setting and the deployer as the initial owner
-     * @param _token the erc20 bit token contract address
-     * @param _tssGroup tssGroup contract address
+     * @param _libAddressManager address manager contract address
      */
-    function initialize(address _token, address _tssGroup) public initializer {
+    function initialize(address _libAddressManager) public initializer {
         __Ownable_init();
-        BitToken = _token;
-        tssGroupContract = _tssGroup;
+
+        require(
+            address(libAddressManager) == address(0),
+            "L1CrossDomainMessenger already intialized."
+        );
+        libAddressManager = Lib_AddressManager(_libAddressManager);
+
+        BitToken = resolve("BitToken");
+        tssGroupContract = resolve("TssGroupManager");
     }
 
     /**
@@ -93,16 +110,13 @@ contract StakingSlashing is
      * @param _slashAmount the amount to be deducted for each type
      * @param _exIncome additional amount available to the originator of the report
      */
-    function setSlashingParams(
-        uint256[] memory _slashAmount,
-        uint256[] memory _exIncome
-    ) public onlyOwner {
+    function setSlashingParams(uint256[2] memory _slashAmount, uint256[2] memory _exIncome)
+        public
+        onlyOwner
+    {
         for (uint256 i = 0; i < 2; i++) {
             require(_exIncome[i] > 0, "invalid amount");
-            require(
-                _slashAmount[i] > _exIncome[i],
-                "slashAmount need bigger than _exIncome"
-            );
+            require(_slashAmount[i] > _exIncome[i], "slashAmount need bigger than exIncome");
             slashAmount[i] = _slashAmount[i];
             exIncome[i] = _exIncome[i];
         }
@@ -112,11 +126,7 @@ contract StakingSlashing is
      * @notice set the slashing params (0 -> uptime , 1 -> animus)
      * @return _slashAmount the amount to be deducted for each type
      */
-    function getSlashingParams()
-        public
-        view
-        returns (uint256[2] memory, uint256[2] memory)
-    {
+    function getSlashingParams() public view returns (uint256[2] memory, uint256[2] memory) {
         return (slashAmount, exIncome);
     }
 
@@ -125,26 +135,17 @@ contract StakingSlashing is
      * @param _amount deposit amount of bit token
      * @param _pubKey public key of sender
      */
-    function staking(uint256 _amount, bytes memory _pubKey)
-        public
-        nonReentrant
-    {
+    function staking(uint256 _amount, bytes memory _pubKey) public nonReentrant {
         // verify amount
         require(_amount > 0, "invalid amount");
 
         if (deposits[msg.sender].pubKey.length > 0) {
             // increase pledge amount
-            require(
-                isEqual(deposits[msg.sender].pubKey, _pubKey),
-                "pubKey not equal"
-            );
+            require(isEqual(deposits[msg.sender].pubKey, _pubKey), "pubKey not equal");
         } else {
             // new to staking
             require(
-                msg.sender ==
-                    ITssGroupManager(tssGroupContract).publicKeyToAddress(
-                        _pubKey
-                    ),
+                msg.sender == ITssGroupManager(tssGroupContract).publicKeyToAddress(_pubKey),
                 "invalid pubKey"
             );
             deposits[msg.sender].pubKey = _pubKey;
@@ -152,19 +153,12 @@ contract StakingSlashing is
 
         // send bit token to staking contract , need user approve first
         require(
-            IERC20Upgradeable(BitToken).transferFrom(
-                msg.sender,
-                address(this),
-                _amount
-            ),
+            IERC20(BitToken).transferFrom(msg.sender, address(this), _amount),
             "transfer erc20 token failed"
         );
         deposits[msg.sender].amount += _amount;
 
-        emit AddDeposit(
-            msg.sender,
-            DepositInfo({pubKey: _pubKey, amount: _amount})
-        );
+        emit AddDeposit(msg.sender, DepositInfo({ pubKey: _pubKey, amount: _amount }));
     }
 
     /**
@@ -184,10 +178,7 @@ contract StakingSlashing is
 
         delete deposits[msg.sender];
 
-        require(
-            IERC20Upgradeable(BitToken).transfer(msg.sender, amount),
-            "erc20 transfer failed"
-        );
+        require(IERC20(BitToken).transfer(msg.sender, amount), "erc20 transfer failed");
 
         emit Withdraw(msg.sender, amount);
     }
@@ -198,15 +189,10 @@ contract StakingSlashing is
     function quit() public nonReentrant {
         require(deposits[msg.sender].amount > 0, "do not have deposit");
         // when not in consensus period
-        require(
-            ITssGroupManager(tssGroupContract).inActiveIsEmpty(),
-            "not at the right time"
-        );
+        require(ITssGroupManager(tssGroupContract).inActiveIsEmpty(), "not at the right time");
         // is active member
         require(
-            ITssGroupManager(tssGroupContract).memberExistActive(
-                deposits[msg.sender].pubKey
-            ),
+            ITssGroupManager(tssGroupContract).memberExistActive(deposits[msg.sender].pubKey),
             "not at the active group"
         );
         for (uint256 i = 0; i < quitList.length; i++) {
@@ -234,32 +220,21 @@ contract StakingSlashing is
      * @param _messageBytes the message that abi encode by type SlashMsg
      * @param _sig the signature of the hash keccak256(_messageBytes)
      */
-    function slashing(bytes memory _messageBytes, bytes memory _sig)
-        public
-        nonReentrant
-    {
+    function slashing(bytes memory _messageBytes, bytes memory _sig) public nonReentrant {
         SlashMsg memory message = abi.decode(_messageBytes, (SlashMsg));
         // verify tss member state
         require(!isJailed(message.jailNode), "the node already jailed");
         require(
-            ITssGroupManager(tssGroupContract).memberExistActive(
-                deposits[msg.sender].pubKey
-            ),
+            ITssGroupManager(tssGroupContract).memberExistActive(deposits[msg.sender].pubKey),
             "sender not at the active group"
         );
         // have not slash before todo record by index and node address
 
-        require(
-            !slashRecord[message.batchIndex][message.jailNode],
-            "already slashed"
-        );
+        require(!slashRecord[message.batchIndex][message.jailNode], "already slashed");
         slashRecord[message.batchIndex][message.jailNode] = true;
 
         require(
-            ITssGroupManager(tssGroupContract).verifySign(
-                keccak256(_messageBytes),
-                _sig
-            ),
+            ITssGroupManager(tssGroupContract).verifySign(keccak256(_messageBytes), _sig),
             "singer not tss group pub key"
         );
 
@@ -310,19 +285,19 @@ contract StakingSlashing is
         uint256 gain;
 
         if (deposits[deduction].amount > slashAmount[slashType]) {
-            // deposit > slashAmount,deduct slashAmount then
+            // deposit > slashAmount, deduct slashAmount then
             // distribute additional tokens for the sender
             deductedAmount = slashAmount[slashType];
             deposits[deduction].amount -= slashAmount[slashType];
             extraAmount = slashAmount[slashType] - exIncome[slashType];
         } else if (deposits[deduction].amount > exIncome[slashType]) {
-            // exIncome < deposit < slashAmount,deduct all token then
+            // exIncome < deposit <= slashAmount, deduct all token then
             // distribute additional tokens for the sender
             deductedAmount = deposits[deduction].amount;
             deposits[deduction].amount = 0;
             extraAmount = deductedAmount - exIncome[slashType];
         } else if (deposits[deduction].amount > 0) {
-            // 0 < deposit < exIncome,deduct all token
+            // 0 < deposit <= exIncome, deduct all token
             deductedAmount = deposits[deduction].amount;
             deposits[deduction].amount = 0;
             extraAmount = deductedAmount;
@@ -341,7 +316,7 @@ contract StakingSlashing is
             deposits[tssNodes[i]].amount += gain;
         }
         // The total transfer amount is the same as the deducted amount
-        require(totalTransfer == deductedAmount, "panic , calculation error");
+        require(totalTransfer == deductedAmount, "panic, calculation error");
     }
 
     /**
@@ -353,24 +328,15 @@ contract StakingSlashing is
             require(slashAmount[i] > 0, "have not set the slash amount");
             require(exIncome[i] > 0, "have not set the extra income amount");
         }
-        require(
-            deposits[msg.sender].amount >= slashAmount[1],
-            "Insufficient balance"
-        );
-        ITssGroupManager(tssGroupContract).memberUnJail(
-            deposits[msg.sender].pubKey
-        );
+        require(deposits[msg.sender].amount >= slashAmount[1], "Insufficient balance");
+        ITssGroupManager(tssGroupContract).memberUnJail(deposits[msg.sender].pubKey);
     }
 
     /**
      * @notice get the deposit info
      * @param user address of the staker
      */
-    function getDeposits(address user)
-        public
-        view
-        returns (DepositInfo memory)
-    {
+    function getDeposits(address user) public view returns (DepositInfo memory) {
         return deposits[user];
     }
 
@@ -379,11 +345,7 @@ contract StakingSlashing is
      * @param batchIndex the index of batch
      * @param user address of the staker
      */
-    function getSlashRecord(uint256 batchIndex, address user)
-        public
-        view
-        returns (bool)
-    {
+    function getSlashRecord(uint256 batchIndex, address user) public view returns (bool) {
         return slashRecord[batchIndex][user];
     }
 
@@ -392,24 +354,16 @@ contract StakingSlashing is
      * @param user address of the staker
      */
     function isJailed(address user) public returns (bool) {
-        ITssGroupManager.TssMember memory tssMember = ITssGroupManager(
-            tssGroupContract
-        ).getTssMember(deposits[user].pubKey);
+        ITssGroupManager.TssMember memory tssMember = ITssGroupManager(tssGroupContract)
+            .getTssMember(deposits[user].pubKey);
 
-        if (tssMember.status == ITssGroupManager.MemberStatus.jail) {
-            return true;
-        }
-        return false;
+        return tssMember.status == ITssGroupManager.MemberStatus.jail;
     }
 
     /**
      * @notice check two bytes for equality
      */
-    function isEqual(bytes memory byteListA, bytes memory byteListB)
-        public
-        pure
-        returns (bool)
-    {
+    function isEqual(bytes memory byteListA, bytes memory byteListB) public pure returns (bool) {
         if (byteListA.length != byteListB.length) return false;
         for (uint256 i = 0; i < byteListA.length; i++) {
             if (byteListA[i] != byteListB[i]) return false;

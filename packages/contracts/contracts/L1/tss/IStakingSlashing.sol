@@ -8,16 +8,10 @@ interface IStakingSlashing {
     }
 
     function staking(uint256, bytes memory) external;
-
     function withdrawToken() external;
-
     function quit() external;
-
     function clearQuitList() external;
-
     function slashing(bytes memory, bytes memory) external;
-
     function getDeposits(address) external returns (DepositInfo memory);
-
     function getSlashRecord(uint256, address) external returns (bool);
 }
