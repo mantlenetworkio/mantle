@@ -16,7 +16,7 @@ func (s *Storage) Insert(cpkData types.CpkData) error {
 func (s *Storage) GetByElectionId(electionId uint64) (types.CpkData, error) {
 	bz, err := s.db.Get(getCPKDataKey(electionId), nil)
 	if err != nil {
-		return types.CpkData{}, err
+		return handleError(types.CpkData{}, err)
 	}
 	var cpkData types.CpkData
 	if err = json.Unmarshal(bz, &cpkData); err != nil {

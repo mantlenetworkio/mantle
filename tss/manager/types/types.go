@@ -5,9 +5,10 @@ import (
 	"time"
 )
 
-type TssInfos struct {
+type TssCommitteeInfo struct {
+	ElectionId    uint64   `json:"election_id"`
 	ClusterPubKey string   `json:"cluster_pub_key"`
-	PartyPubKeys  []string `json:"party_pub_keys"`
+	TssMembers    []string `json:"tss_members"`
 	Threshold     int      `json:"threshold"`
 }
 
@@ -17,12 +18,15 @@ type CpkData struct {
 	CreationTime time.Time `json:"creation_time"`
 }
 
+// Context ---------------------------------------------
 type Context struct {
 	ctx            context.Context
 	requestId      string
-	tssInfo        TssInfos
+	tssInfo        TssCommitteeInfo
 	availableNodes []string
 	approvers      []string
+	electionId     uint64
+	stateBatchRoot [32]byte
 }
 
 func NewContext() Context {
@@ -34,7 +38,7 @@ func NewContext() Context {
 func (c Context) RequestId() string {
 	return c.requestId
 }
-func (c Context) TssInfos() TssInfos {
+func (c Context) TssInfos() TssCommitteeInfo {
 	return c.tssInfo
 }
 func (c Context) AvailableNodes() []string {
@@ -43,13 +47,19 @@ func (c Context) AvailableNodes() []string {
 func (c Context) Approvers() []string {
 	return c.approvers
 }
+func (c Context) ElectionId() uint64 {
+	return c.electionId
+}
+func (c Context) StateBatchRoot() [32]byte {
+	return c.stateBatchRoot
+}
 
 func (c Context) WithRequestId(requestId string) Context {
 	c.requestId = requestId
 	return c
 }
 
-func (c Context) WithTssInfo(tssInfos TssInfos) Context {
+func (c Context) WithTssInfo(tssInfos TssCommitteeInfo) Context {
 	c.tssInfo = tssInfos
 	return c
 }
@@ -61,5 +71,15 @@ func (c Context) WithAvailableNodes(nodes []string) Context {
 
 func (c Context) WithApprovers(nodes []string) Context {
 	c.approvers = nodes
+	return c
+}
+
+func (c Context) WithElectionId(election uint64) Context {
+	c.electionId = election
+	return c
+}
+
+func (c Context) WithStateBatchRoot(stateBatchRoot [32]byte) Context {
+	c.stateBatchRoot = stateBatchRoot
 	return c
 }
