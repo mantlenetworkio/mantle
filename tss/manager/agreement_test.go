@@ -12,24 +12,6 @@ import (
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
-type mockWsManager struct {
-	responseCh   chan server.ResponseMsg
-	afterMsgSent func(server.RequestMsg, chan server.ResponseMsg) error
-}
-
-func (mock *mockWsManager) AliveNodes() []string {
-	return nil
-}
-
-func (mock *mockWsManager) RegisterResChannel(id string, responseMsg chan server.ResponseMsg, stopChan chan struct{}) error {
-	mock.responseCh = responseMsg
-	return nil
-}
-
-func (mock *mockWsManager) SendMsg(request server.RequestMsg) error {
-	return mock.afterMsgSent(request, mock.responseCh)
-}
-
 func TestAgreement(t *testing.T) {
 	// all return true
 	afterMsgSent := func(request server.RequestMsg, respCh chan server.ResponseMsg) error {
@@ -43,7 +25,7 @@ func TestAgreement(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	ctx := types.NewContext().
 		WithAvailableNodes([]string{"a", "b", "c", "d"}).
 		WithTssInfo(types.TssCommitteeInfo{
@@ -73,7 +55,7 @@ func TestOneRefuseAgreement(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	ctx := types.NewContext().
 		WithAvailableNodes([]string{"a", "b", "c", "d"}).
 		WithTssInfo(types.TssCommitteeInfo{
@@ -101,7 +83,7 @@ func TestSentErrorAgreement(t *testing.T) {
 		return nil
 	}
 
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	ctx := types.NewContext().
 		WithAvailableNodes([]string{"a", "b", "c", "d"}).
 		WithTssInfo(types.TssCommitteeInfo{
@@ -136,7 +118,7 @@ func TestErrorRespAgreement(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	ctx := types.NewContext().
 		WithAvailableNodes([]string{"a", "b", "c", "d"}).
 		WithTssInfo(types.TssCommitteeInfo{
@@ -171,7 +153,7 @@ func TestTimeoutAgreement(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	ctx := types.NewContext().
 		WithAvailableNodes([]string{"a", "b", "c", "d"}).
 		WithTssInfo(types.TssCommitteeInfo{
@@ -183,21 +165,4 @@ func TestTimeoutAgreement(t *testing.T) {
 	costTime := time.Now().Sub(before)
 	require.True(t, costTime.Seconds() >= manager.askTimeout.Seconds())
 	require.EqualValues(t, 3, len(ctx.Approvers()))
-}
-
-func prepareParams(afterMsgSent func(request server.RequestMsg, respCh chan server.ResponseMsg) error) (Manager, tss.SignStateRequest) {
-	mock := mockWsManager{
-		afterMsgSent: afterMsgSent,
-	}
-	manager := Manager{
-		wsServer:    &mock,
-		askTimeout:  5 * time.Second,
-		signTimeout: 5 * time.Second,
-	}
-	request := tss.SignStateRequest{
-		StartBlock:          "1",
-		OffsetStartsAtIndex: "1",
-		StateRoots:          [][32]byte{},
-	}
-	return manager, request
 }

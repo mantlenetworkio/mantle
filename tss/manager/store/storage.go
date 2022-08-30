@@ -34,3 +34,17 @@ func NewStorage(levelDbFolder string) (*Storage, error) {
 func (s *Storage) Close() error {
 	return s.db.Close()
 }
+
+func handleError[T any](defaultValue T, err error) (T, error) {
+	if err == leveldb.ErrNotFound {
+		return defaultValue, nil
+	}
+	return defaultValue, err
+}
+
+func handleError2[T any](defaultValue T, err error) (bool, T) {
+	if err == leveldb.ErrNotFound {
+		return false, defaultValue
+	}
+	panic(err)
+}

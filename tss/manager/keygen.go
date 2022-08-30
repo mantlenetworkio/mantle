@@ -125,7 +125,7 @@ func (m Manager) generateKey(tssMembers []string, threshold int) (string, error)
 		return "", anyError
 	}
 
-	// check if exists found different CPKs
+	// check if existing different CPKs
 	var base string
 	for _, cpk := range clusterPublicKeys {
 		if len(base) == 0 {
@@ -138,7 +138,7 @@ func (m Manager) generateKey(tssMembers []string, threshold int) (string, error)
 	}
 
 	if len(clusterPublicKeys) != len(availableNodes) {
-		return "", nil
+		return "", errors.New("timeout")
 	}
 	return base, nil
 }

@@ -27,10 +27,7 @@ func NewSlashing(sbs index.StateBatchStore, ss SlashingStore, signedBatchesWindo
 }
 
 func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
-	found, stateBatch, err := s.stateBatchStore.GetStateBatch(root)
-	if err != nil {
-		return err
-	}
+	found, stateBatch := s.stateBatchStore.GetStateBatch(root)
 	if !found {
 		return errors.New("can not find the state batch with root: " + hexutil.Encode(root[:]))
 	}
@@ -38,15 +35,9 @@ func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
 	// check whether it is a new round election
 	var electionAdvanced bool
 	if stateBatch.ElectionId > 1 {
-		found, previousBatchRoot, err := s.stateBatchStore.GetIndexStateBatch(stateBatch.BatchIndex - 1)
-		if err != nil {
-			return err
-		}
+		found, previousBatchRoot := s.stateBatchStore.GetIndexStateBatch(stateBatch.BatchIndex - 1)
 		if found {
-			_, previousStateBatch, err := s.stateBatchStore.GetStateBatch(previousBatchRoot)
-			if err != nil {
-				return err
-			}
+			_, previousStateBatch := s.stateBatchStore.GetStateBatch(previousBatchRoot)
 			electionAdvanced = stateBatch.ElectionId != previousStateBatch.ElectionId
 		}
 	}
@@ -79,7 +70,7 @@ func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
 				Address:    address,
 				ElectionId: stateBatch.ElectionId,
 				BatchIndex: stateBatch.BatchIndex,
-				SlashType:  1,
+				SlashType:  tss.SlashTypeLiveness,
 			})
 		}
 	}
@@ -126,6 +117,9 @@ func (s Slashing) InitializeSigningInfo(batchIndex uint64, address common.Addres
 		signingInfo.MissedBlocksCounter++
 	}
 	s.slashingStore.SetSigningInfo(signingInfo)
+	// clear historic data
 	s.slashingStore.ClearNodeMissedBatchBitArray(address)
+	// init the first one
+	s.slashingStore.SetNodeMissedBatchBitArray(address, 0, missed)
 	return signingInfo
 }

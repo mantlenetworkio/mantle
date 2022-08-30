@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/bitdao-io/bitnetwork/l2geth/common"
 	"github.com/bitdao-io/bitnetwork/tss/slash"
+	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
@@ -20,10 +21,7 @@ func (s *Storage) SetSigningInfo(signingInfo slash.SigningInfo) {
 func (s *Storage) GetSigningInfo(address common.Address) (bool, slash.SigningInfo) {
 	bz, err := s.db.Get(getSigningInfoKey(address), nil)
 	if err != nil {
-		panic(err)
-	}
-	if bz == nil {
-		return false, slash.SigningInfo{}
+		return handleError2(slash.SigningInfo{}, err)
 	}
 	var signingInfo slash.SigningInfo
 	if err = json.Unmarshal(bz, &signingInfo); err != nil {
@@ -35,10 +33,10 @@ func (s *Storage) GetSigningInfo(address common.Address) (bool, slash.SigningInf
 func (s *Storage) GetNodeMissedBatchBitArray(address common.Address, index uint64) bool {
 	bz, err := s.db.Get(getNodeMissedBatchBitArrayKey(address, index), nil)
 	if err != nil {
+		if err == leveldb.ErrNotFound {
+			return false // lazy: treat empty key as not missed
+		}
 		panic(err)
-	}
-	if len(bz) == 0 {
-		return false // lazy: treat empty key as not missed
 	}
 	return bz[0] == 1
 }
@@ -56,7 +54,7 @@ func (s *Storage) SetNodeMissedBatchBitArray(address common.Address, index uint6
 func (s *Storage) ClearNodeMissedBatchBitArray(address common.Address) {
 	iterator := s.db.NewIterator(util.BytesPrefix(getNodeMissedBatchBitArrayAddressPrefixKey(address)), nil)
 	defer iterator.Release()
-	for ; iterator.Valid(); iterator.Next() {
+	for iterator.Next() {
 		if err := s.db.Delete(iterator.Key(), nil); err != nil {
 			panic(err)
 		}
@@ -76,10 +74,7 @@ func (s *Storage) SetSlashingInfo(slashingInfo slash.SlashingInfo) {
 func (s *Storage) GetSlashingInfo(address common.Address, batchIndex uint64) (bool, slash.SlashingInfo) {
 	bz, err := s.db.Get(getSlashingInfoKey(address, batchIndex), nil)
 	if err != nil {
-		panic(err)
-	}
-	if len(bz) == 0 {
-		return false, slash.SlashingInfo{}
+		return handleError2(slash.SlashingInfo{}, err)
 	}
 	var slashingInfo slash.SlashingInfo
 	if err = json.Unmarshal(bz, &slashingInfo); err != nil {
@@ -125,7 +120,7 @@ func (s *Storage) RemoveSlashingInfo(address common.Address, batchIndex uint64) 
 
 func (s *Storage) AddCulprits(culprits []string) {
 	bz, err := s.db.Get(getCulpritsKey(), nil)
-	if err != nil {
+	if err != nil && err != leveldb.ErrNotFound {
 		panic(err)
 	}
 	if len(bz) > 0 {

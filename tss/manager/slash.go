@@ -15,13 +15,9 @@ import (
 	eth "github.com/ethereum/go-ethereum/core/types"
 )
 
-var sendState SendState
-
-func init() {
-	sendState = SendState{
-		states: make(map[[28]byte]string, 0),
-		lock:   &sync.Mutex{},
-	}
+var sendState = SendState{
+	states: make(map[[28]byte]string, 0),
+	lock:   &sync.Mutex{},
 }
 
 func (m Manager) slashing() {
@@ -114,8 +110,7 @@ func (m Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo
 	if err := tx.UnmarshalBinary(signResp.SlashTxBytes); err != nil {
 		return err
 	}
-	err := m.l1Cli.SendTransaction(context.Background(), tx)
-	if err != nil {
+	if err := m.l1Cli.SendTransaction(context.Background(), tx); err != nil {
 		log.Error("failed to send transaction", "err", err)
 		return err
 	}

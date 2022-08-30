@@ -118,7 +118,7 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 								validSignResponse = &signResponse
 							}
 						}
-					} else if resp.RpcResponse.Error.Code == 100 {
+					} else if resp.RpcResponse.Error.Code == tss.CulpritErrorCode {
 						_, ok := responseNodes[resp.SourceNode]
 						if ok { // ignore if handled
 							return

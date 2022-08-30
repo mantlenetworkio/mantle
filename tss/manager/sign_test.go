@@ -36,7 +36,7 @@ func TestSign(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	signResp, culprits, err := manager.sign(ctx, request, digest, tss.SignStateBatch)
 	require.NoError(t, err)
 	require.Nil(t, culprits)
@@ -55,7 +55,7 @@ func TestSign(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request = prepareParams(afterMsgSent)
+	manager, request = setup(afterMsgSent, nil)
 	signResp, culprits, err = manager.sign(ctx, request, digest, tss.SignStateBatch)
 	require.NoError(t, err)
 	require.Nil(t, culprits)
@@ -78,7 +78,7 @@ func TestErrorSend(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	signResp, culprits, err := manager.sign(ctx, request, digest, tss.SignStateBatch)
 	require.Nil(t, signResp.Signature)
 	require.Nil(t, culprits)
@@ -107,7 +107,7 @@ func TestWrongSignature(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	signResp, culprits, err := manager.sign(ctx, request, digest, tss.SignStateBatch)
 	require.Nil(t, signResp.Signature)
 	require.Nil(t, culprits)
@@ -125,7 +125,7 @@ func TestSignTimeout(t *testing.T) {
 	afterMsgSent := func(request server.RequestMsg, respCh chan server.ResponseMsg) error {
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	before := time.Now()
 	signResp, culprits, err := manager.sign(ctx, request, nil, tss.SignStateBatch)
 	require.Nil(t, signResp.Signature)
@@ -150,7 +150,7 @@ func TestSignTimeout(t *testing.T) {
 		}()
 		return nil
 	}
-	manager, request = prepareParams(afterMsgSent)
+	manager, request = setup(afterMsgSent, nil)
 	ctx = ctx.WithTssInfo(types.TssCommitteeInfo{
 		Threshold:     3,
 		ClusterPubKey: publicKey,
@@ -174,13 +174,13 @@ func TestCulprits(t *testing.T) {
 	afterMsgSent := func(request server.RequestMsg, respCh chan server.ResponseMsg) error {
 		if request.TargetNode != "a" {
 			respMsg := server.ResponseMsg{
-				RpcResponse: tmtypes.NewRPCErrorResponse(request.RpcRequest.ID, 100, "find culprits", "a"),
+				RpcResponse: tmtypes.NewRPCErrorResponse(request.RpcRequest.ID, tss.CulpritErrorCode, "find culprits", "a"),
 				SourceNode:  request.TargetNode,
 			}
 			respCh <- respMsg
 		} else {
 			respMsg := server.ResponseMsg{
-				RpcResponse: tmtypes.NewRPCErrorResponse(request.RpcRequest.ID, 100, "find culprits", "b"),
+				RpcResponse: tmtypes.NewRPCErrorResponse(request.RpcRequest.ID, tss.CulpritErrorCode, "find culprits", "b"),
 				SourceNode:  request.TargetNode,
 			}
 			respCh <- respMsg
@@ -188,7 +188,7 @@ func TestCulprits(t *testing.T) {
 
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	signResp, culprits, err := manager.sign(ctx, request, nil, tss.SignStateBatch)
 	require.Error(t, err)
 	require.ErrorContains(t, err, "failed to generate signature")
@@ -249,7 +249,7 @@ func TestSignSlash(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	signResp, culprits, err := manager.sign(ctx, request, digest, tss.SignSlash)
 	require.NoError(t, err)
 	require.Nil(t, culprits)
@@ -286,7 +286,7 @@ func TestSignSlash(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request = prepareParams(afterMsgSent)
+	manager, request = setup(afterMsgSent, nil)
 	before := time.Now()
 	signResp, culprits, err = manager.sign(ctx, request, digest, tss.SignSlash)
 	require.NoError(t, err)
@@ -303,7 +303,6 @@ func mockSign() (digest []byte, signature []byte, compressedPublicKey string) {
 	if err != nil {
 		panic(err)
 	}
-	crypto.PubkeyToAddress(priK.PublicKey)
 	pubKey := btcec.PublicKey(priK.PublicKey)
 	compressedPublicKey = hex.EncodeToString(pubKey.SerializeCompressed())
 	digest = crypto.Keccak256Hash([]byte("testme")).Bytes()

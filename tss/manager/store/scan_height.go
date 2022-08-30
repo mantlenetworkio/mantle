@@ -1,6 +1,8 @@
 package store
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+)
 
 func (s *Storage) UpdateHeight(height uint64) error {
 	heightBz := make([]byte, 8)
@@ -11,7 +13,7 @@ func (s *Storage) UpdateHeight(height uint64) error {
 func (s *Storage) GetScannedHeight() (uint64, error) {
 	bz, err := s.db.Get(getScannedHeightKey(), nil)
 	if err != nil {
-		return 0, err
+		return handleError(uint64(0), err)
 	}
 	return binary.BigEndian.Uint64(bz), nil
 }

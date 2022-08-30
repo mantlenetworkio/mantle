@@ -1,6 +1,8 @@
 package slash
 
-import "github.com/bitdao-io/bitnetwork/l2geth/common"
+import (
+	"github.com/bitdao-io/bitnetwork/l2geth/common"
+)
 
 type SigningInfo struct {
 	Address             common.Address `json:"address"`

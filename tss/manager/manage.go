@@ -112,10 +112,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		return nil, errors.New("not enough available nodes to sign state")
 	}
 	stateBatchRoot, _ := tss.GetMerkleRoot(request.StateRoots)
-	found, stateBatch, err := m.store.GetStateBatch(stateBatchRoot)
-	if err != nil {
-		return nil, err
-	}
+	found, stateBatch := m.store.GetStateBatch(stateBatchRoot)
 	if found && stateBatch.BatchIndex != 0 {
 		return nil, errors.New("the state batch is already indexed on layer1")
 	}
@@ -126,7 +123,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		WithElectionId(tssInfo.ElectionId)
 
 	// ask tss nodes for the agreement
-	ctx, err = m.agreement(ctx, request, tss.AskStateBatch)
+	ctx, err := m.agreement(ctx, request, tss.AskStateBatch)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +146,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 				Address:    addr,
 				ElectionId: tssInfo.ElectionId,
 				BatchIndex: math.MaxUint64, // not real, just for identifying the specific slashing info.
-				SlashType:  2,
+				SlashType:  tss.SlashTypeCulprit,
 			})
 		}
 		m.store.AddCulprits(culprits)

@@ -118,24 +118,19 @@ func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
 }
 
 func indexBatch(store StateBatchStore, stateBatchRoot [32]byte, batchIndex uint64) (retry bool) {
-	found, stateBatch, err := store.GetStateBatch(stateBatchRoot)
-	if err != nil {
-		log.Error("failed to GetStateBatch from store", err)
-		time.Sleep(2 * time.Second)
-		return true
-	}
+	found, stateBatch := store.GetStateBatch(stateBatchRoot)
 	if !found {
 		log.Error("can not find the state batch with root, skip this batch", "root", hexutil.Encode(stateBatchRoot[:]))
 		return false
 	}
 	stateBatch.BatchIndex = batchIndex
-	if err = store.SetStateBatch(stateBatch); err != nil { // update stateBatch with index
+	if err := store.SetStateBatch(stateBatch); err != nil { // update stateBatch with index
 		log.Error("failed to SetStateBatch with index", err)
 		time.Sleep(2 * time.Second)
 		return true
 	}
 
-	if err = store.IndexStateBatch(batchIndex, stateBatchRoot); err != nil {
+	if err := store.IndexStateBatch(batchIndex, stateBatchRoot); err != nil {
 		log.Error("failed to IndexStateBatch", err)
 		time.Sleep(2 * time.Second)
 		return true

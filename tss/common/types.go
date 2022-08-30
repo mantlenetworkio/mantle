@@ -12,6 +12,11 @@ const (
 	SignStateBatch Method = "signStateBatch"
 	AskSlash       Method = "askSlash"
 	SignSlash      Method = "signSlash"
+
+	SlashTypeLiveness byte = 1
+	SlashTypeCulprit  byte = 2
+
+	CulpritErrorCode = 100
 )
 
 func (m Method) String() string {
