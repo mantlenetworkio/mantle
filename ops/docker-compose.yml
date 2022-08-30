@@ -76,7 +76,6 @@ services:
     depends_on:
       - l1_chain
       - deployer
-      - l2geth
     build:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.packages
@@ -103,6 +102,7 @@ services:
     depends_on:
       - l1_chain
       - deployer
+      - dtl
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile
