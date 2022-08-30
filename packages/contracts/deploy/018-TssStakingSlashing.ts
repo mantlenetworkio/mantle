@@ -10,8 +10,7 @@ import {
 import { names } from '../src/address-names'
 
 const deployFn: DeployFunction = async (hre) => {
-  const { deploy } = hre.deployments
-
+  // this contract deploy need bit token and tss group first
   const Lib_AddressManager = await getContractFromArtifact(
     hre,
     names.unmanaged.Lib_AddressManager
