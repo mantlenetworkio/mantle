@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import { Lib_AddressResolver } from "../../libraries/resolver/Lib_AddressResolver.sol";
-import { Lib_AddressManager } from "../../libraries/resolver/Lib_AddressManager.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
@@ -12,7 +10,6 @@ import "./ITssGroupManager.sol";
 
 contract TssGroupManager is
     OwnableUpgradeable,
-    Lib_AddressResolver,
     ReentrancyGuardUpgradeable,
     ITssGroupManager
 {
@@ -38,24 +35,8 @@ contract TssGroupManager is
 
     event tssActiveMemberAppended(uint256 _roundId, bytes _groupKey, bytes[] activeTssMembers);
 
-    /***************
-     * Constructor *
-     ***************/
-
-    /**
-     * This contract is intended to be behind a delegate proxy.
-     * We pass the zero address to the address resolver just to satisfy the constructor.
-     * We still need to set this value in initialize().
-     */
-    constructor() Lib_AddressResolver(address(0)) {}
-
-    function initialize(address _libAddressManager) public initializer {
+    function initialize() public initializer {
         __Ownable_init();
-        require(
-            address(libAddressManager) == address(0),
-            "L1CrossDomainMessenger already intialized."
-        );
-        libAddressManager = Lib_AddressManager(_libAddressManager);
         gRoundId = 0;
         confirmNumber = 0;
         threshold = 0;

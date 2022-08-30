@@ -7,9 +7,9 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./ITssGroupManager.sol";
-import "./IStakingSlashing.sol";
+import "./ITssStakingSlashing.sol";
 
-contract StakingSlashing is
+contract TssStakingSlashing is
     Initializable,
     Lib_AddressResolver,
     OwnableUpgradeable,
