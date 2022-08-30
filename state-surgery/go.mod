@@ -12,8 +12,7 @@ require (
 require (
 	github.com/VictoriaMetrics/fastcache v1.9.0 // indirect
 	github.com/allegro/bigcache v1.2.1 // indirect
-	github.com/btcsuite/btcd/btcec/v2 v2.1.2 // indirect
-	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1 // indirect
+	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
