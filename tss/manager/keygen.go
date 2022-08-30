@@ -8,72 +8,56 @@ import (
 	"time"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
-	tss "github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
-const (
-	keygenTimeOutSeconds     = 120
-	cpkConfirmMaxPeriodHours = 2
-)
-
 func (m Manager) observeElection() {
+	queryTicker := time.NewTicker(m.taskInterval)
 	for {
-		if m.stopGenKey {
-			time.Sleep(10 * time.Second)
-			continue
+		if !m.stopGenKey {
+			func() {
+				// check if new round election is held(inactive tss members?)
+				tssInfo := m.tssQueryService.QueryInactiveInfo()
+
+				//tssMembers, threshold, electionId := getInactiveMembers()
+				if len(tssInfo.TssMembers) > 0 {
+					// the CPK has not been confirmed in the latest election
+					// start to generate CPK
+					cpkData, err := m.store.GetByElectionId(tssInfo.ElectionId)
+					if err != nil {
+						log.Error("failed to get cpk from storage", "err", err)
+						return
+					}
+
+					if len(cpkData.Cpk) != 0 && time.Now().Sub(cpkData.CreationTime).Hours() < m.cpkConfirmTimeout.Hours() { // cpk is generated, but has not been confirmed yet
+						return
+					}
+					cpk, err := m.generateKey(tssInfo.TssMembers, tssInfo.Threshold)
+					if err != nil {
+						return
+					}
+
+					if err = m.store.Insert(types.CpkData{
+						Cpk:          cpk,
+						ElectionId:   tssInfo.ElectionId,
+						CreationTime: time.Now(),
+					}); err != nil {
+						log.Error("failed to get cpk from storage", "err", err)
+					}
+				}
+			}()
 		}
-		// check if new round election is held(inactive tss members?)
-		tssMembers, threshold, electionId := getInactiveMembers()
-		if tssMembers != nil {
-			// the CPK has not been confirmed in the latest election
-			// start to generate CPK
-			// todo query CPK by electionId from storage
-			cpk, creationTime, err := m.getCPK(electionId)
-			if err != nil {
-				log.Error("failed to get cpk from storage", "err", err)
-				time.Sleep(10 * time.Second)
-				continue
-			}
-			if len(cpk) != 0 && time.Now().Sub(creationTime).Hours() < cpkConfirmMaxPeriodHours { // cpk is generated, but has not been confirmed yet
-				time.Sleep(10 * time.Second)
-				continue
-			}
-			cpk, err = m.generateKey(tssMembers, threshold)
-			if err != nil {
-				time.Sleep(10 * time.Second)
-				continue
-			}
-			if err = m.insertCPK(cpk, electionId); err != nil {
-				log.Error("failed to get cpk from storage", "err", err)
-				time.Sleep(10 * time.Second)
-			}
+
+		select {
+		case <-m.stopChan:
+			return
+		case <-queryTicker.C:
 		}
 	}
-}
-
-func (m Manager) insertCPK(cpk string, electionId uint64) error {
-	return m.cpkStore.Insert(types.CpkData{
-		Cpk:          cpk,
-		ElectionId:   electionId,
-		CreationTime: time.Now(),
-	})
-}
-
-func (m Manager) getCPK(electionId uint64) (string, time.Time, error) {
-	cpkData, err := m.cpkStore.GetByElectionId(electionId)
-	if err != nil {
-		return "", time.Time{}, err
-	}
-	return cpkData.Cpk, cpkData.CreationTime, nil
-}
-
-func getInactiveMembers() ([]string, int, uint64) {
-	// todo query from layer1 contract
-	return nil, 0, 0
 }
 
 func (m Manager) generateKey(tssMembers []string, threshold int) (string, error) {
@@ -95,7 +79,7 @@ func (m Manager) generateKey(tssMembers []string, threshold int) (string, error)
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		cctx, cancel := context.WithTimeout(context.Background(), keygenTimeOutSeconds*time.Second)
+		cctx, cancel := context.WithTimeout(context.Background(), m.keygenTimeout)
 		defer func() {
 			log.Info("exit accept keygen response goroutine")
 			cancel()
@@ -141,7 +125,7 @@ func (m Manager) generateKey(tssMembers []string, threshold int) (string, error)
 		return "", anyError
 	}
 
-	// check if exists found different CPKs
+	// check if existing different CPKs
 	var base string
 	for _, cpk := range clusterPublicKeys {
 		if len(base) == 0 {
@@ -154,7 +138,7 @@ func (m Manager) generateKey(tssMembers []string, threshold int) (string, error)
 	}
 
 	if len(clusterPublicKeys) != len(availableNodes) {
-		return "", nil
+		return "", errors.New("timeout")
 	}
 	return base, nil
 }

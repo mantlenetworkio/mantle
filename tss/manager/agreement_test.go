@@ -2,34 +2,15 @@ package manager
 
 import (
 	"errors"
-	"math/big"
 	"testing"
 	"time"
 
+	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
-	tss "github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
 	"github.com/stretchr/testify/require"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
-
-type mockWsManager struct {
-	responseCh   chan server.ResponseMsg
-	afterMsgSent func(server.RequestMsg, chan server.ResponseMsg) error
-}
-
-func (mock *mockWsManager) AliveNodes() []string {
-	return nil
-}
-
-func (mock *mockWsManager) RegisterResChannel(id string, responseMsg chan server.ResponseMsg, stopChan chan struct{}) error {
-	mock.responseCh = responseMsg
-	return nil
-}
-
-func (mock *mockWsManager) SendMsg(request server.RequestMsg) error {
-	return mock.afterMsgSent(request, mock.responseCh)
-}
 
 func TestAgreement(t *testing.T) {
 	// all return true
@@ -44,13 +25,13 @@ func TestAgreement(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	ctx := types.NewContext().
 		WithAvailableNodes([]string{"a", "b", "c", "d"}).
-		WithTssInfo(types.TssInfos{
+		WithTssInfo(types.TssCommitteeInfo{
 			Threshold: 3,
 		})
-	ctx, err := manager.agreement(ctx, request)
+	ctx, err := manager.agreement(ctx, request, "ask")
 	require.NoError(t, err)
 	approvers := ctx.Approvers()
 	require.EqualValues(t, 4, len(approvers))
@@ -74,13 +55,13 @@ func TestOneRefuseAgreement(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	ctx := types.NewContext().
 		WithAvailableNodes([]string{"a", "b", "c", "d"}).
-		WithTssInfo(types.TssInfos{
+		WithTssInfo(types.TssCommitteeInfo{
 			Threshold: 3,
 		})
-	ctx, err := manager.agreement(ctx, request)
+	ctx, err := manager.agreement(ctx, request, "ask")
 	require.NoError(t, err)
 	approvers := ctx.Approvers()
 	require.EqualValues(t, 3, len(approvers))
@@ -102,22 +83,22 @@ func TestSentErrorAgreement(t *testing.T) {
 		return nil
 	}
 
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	ctx := types.NewContext().
 		WithAvailableNodes([]string{"a", "b", "c", "d"}).
-		WithTssInfo(types.TssInfos{
+		WithTssInfo(types.TssCommitteeInfo{
 			Threshold: 3,
 		})
-	ctx, err := manager.agreement(ctx, request)
+	ctx, err := manager.agreement(ctx, request, "ask")
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "not enough response")
 
 	ctx = types.NewContext().
 		WithAvailableNodes([]string{"a", "b", "c", "d"}).
-		WithTssInfo(types.TssInfos{
+		WithTssInfo(types.TssCommitteeInfo{
 			Threshold: 2,
 		})
-	ctx, err = manager.agreement(ctx, request)
+	ctx, err = manager.agreement(ctx, request, "ask")
 	require.NoError(t, err)
 	require.EqualValues(t, 3, len(ctx.Approvers()))
 }
@@ -137,22 +118,22 @@ func TestErrorRespAgreement(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	ctx := types.NewContext().
 		WithAvailableNodes([]string{"a", "b", "c", "d"}).
-		WithTssInfo(types.TssInfos{
+		WithTssInfo(types.TssCommitteeInfo{
 			Threshold: 3,
 		})
-	ctx, err := manager.agreement(ctx, request)
+	ctx, err := manager.agreement(ctx, request, "ask")
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "not enough response")
 
 	ctx = types.NewContext().
 		WithAvailableNodes([]string{"a", "b", "c", "d"}).
-		WithTssInfo(types.TssInfos{
+		WithTssInfo(types.TssCommitteeInfo{
 			Threshold: 2,
 		})
-	ctx, err = manager.agreement(ctx, request)
+	ctx, err = manager.agreement(ctx, request, "ask")
 	require.NoError(t, err)
 	require.EqualValues(t, 3, len(ctx.Approvers()))
 }
@@ -172,31 +153,16 @@ func TestTimeoutAgreement(t *testing.T) {
 		}
 		return nil
 	}
-	manager, request := prepareParams(afterMsgSent)
+	manager, request := setup(afterMsgSent, nil)
 	ctx := types.NewContext().
 		WithAvailableNodes([]string{"a", "b", "c", "d"}).
-		WithTssInfo(types.TssInfos{
+		WithTssInfo(types.TssCommitteeInfo{
 			Threshold: 2,
 		})
 	before := time.Now()
-	ctx, err := manager.agreement(ctx, request)
+	ctx, err := manager.agreement(ctx, request, "ask")
 	require.NoError(t, err)
 	costTime := time.Now().Sub(before)
-	require.True(t, costTime.Seconds() >= askTimeOutSeconds)
+	require.True(t, costTime.Seconds() >= manager.askTimeout.Seconds())
 	require.EqualValues(t, 3, len(ctx.Approvers()))
-}
-
-func prepareParams(afterMsgSent func(request server.RequestMsg, respCh chan server.ResponseMsg) error) (Manager, tss.SignStateRequest) {
-	mock := mockWsManager{
-		afterMsgSent: afterMsgSent,
-	}
-	manager := Manager{
-		wsServer: &mock,
-	}
-	request := tss.SignStateRequest{
-		StartBlock:          *big.NewInt(1),
-		OffsetStartsAtIndex: *big.NewInt(1),
-		StateRoots:          [][32]byte{},
-	}
-	return manager, request
 }

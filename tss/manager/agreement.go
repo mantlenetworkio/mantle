@@ -5,20 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
-	"time"
-
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
-	tss "github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
+	"github.com/influxdata/influxdb/pkg/slices"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+	"sync"
 )
 
-const askTimeOutSeconds = 10
-
-func (m Manager) agreement(ctx types.Context, request tss.SignStateRequest) (types.Context, error) {
+func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Method) (types.Context, error) {
 	respChan := make(chan server.ResponseMsg)
 	stopChan := make(chan struct{})
 	if err := m.wsServer.RegisterResChannel(ctx.RequestId(), respChan, stopChan); err != nil {
@@ -38,7 +35,7 @@ func (m Manager) agreement(ctx types.Context, request tss.SignStateRequest) (typ
 	maxAllowedLostCount := len(ctx.AvailableNodes()) - ctx.TssInfos().Threshold - 1
 	results := make(map[string]bool) // node -> true/false
 	go func() {
-		cctx, cancel := context.WithTimeout(context.Background(), askTimeOutSeconds*time.Second)
+		cctx, cancel := context.WithTimeout(context.Background(), m.askTimeout)
 		defer func() {
 			log.Info("exit accept agreement response goroutine")
 			cancel()
@@ -51,6 +48,9 @@ func (m Manager) agreement(ctx types.Context, request tss.SignStateRequest) (typ
 		for {
 			select {
 			case resp := <-respChan:
+				if !slices.ExistsIgnoreCase(ctx.AvailableNodes(), resp.SourceNode) { // ignore the message which the sender should not be involved in available node set
+					continue
+				}
 				log.Info("received ask response", "response", resp.RpcResponse.String(), "ndoe", resp.SourceNode)
 				if resp.RpcResponse.Error != nil {
 					errResp[resp.SourceNode] = struct{}{}
@@ -98,7 +98,7 @@ func (m Manager) agreement(ctx types.Context, request tss.SignStateRequest) (typ
 		}
 	}()
 
-	m.askNodes(ctx, requestBz, stopChan, errSendChan)
+	m.askNodes(ctx, requestBz, method, stopChan, errSendChan)
 	wg.Wait()
 
 	if len(results) < ctx.TssInfos().Threshold+1 {
@@ -116,7 +116,7 @@ func (m Manager) agreement(ctx types.Context, request tss.SignStateRequest) (typ
 	return ctx, nil
 }
 
-func (m Manager) askNodes(ctx types.Context, request []byte, stopChan chan struct{}, errSendChan chan struct{}) {
+func (m Manager) askNodes(ctx types.Context, request []byte, method tss.Method, stopChan chan struct{}, errSendChan chan struct{}) {
 	log.Info("start to sendTonNodes", "number", len(ctx.AvailableNodes()))
 	nodes := ctx.AvailableNodes()
 	for i := range nodes {
@@ -128,7 +128,7 @@ func (m Manager) askNodes(ctx types.Context, request []byte, stopChan chan struc
 			default:
 				requestMsg := server.RequestMsg{
 					TargetNode: node,
-					RpcRequest: tmtypes.NewRPCRequest(tmtypes.JSONRPCStringID(ctx.RequestId()), "ask", request),
+					RpcRequest: tmtypes.NewRPCRequest(tmtypes.JSONRPCStringID(ctx.RequestId()), method.String(), request),
 				}
 				if err := m.wsServer.SendMsg(requestMsg); err != nil {
 					log.Error("fail to send ask request", "requestId", ctx.RequestId(), "node", node, "err", err)
