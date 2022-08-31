@@ -116,7 +116,18 @@ contract TssGroupManager is
             bytes[] memory
         )
     {
+        if (inActiveTssMembers.length > 0) {
+            return (gRoundId - 1, threshold, confirmGroupPublicKey, activeTssMembers);
+        }
         return (gRoundId, threshold, confirmGroupPublicKey, activeTssMembers);
+    }
+
+    /**
+    * @inheritdoc ITssGroupManager
+     */
+    // slither-disable-next-line external-function
+    function getTssInactiveGroupInfo() public view override returns (uint256, uint256,  bytes[] memory){
+        return (gRoundId, threshold, inActiveTssMembers);
     }
 
     /**

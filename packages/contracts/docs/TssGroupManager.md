@@ -86,6 +86,25 @@ function getTssGroupUnJailMembers() external nonpayable returns (address[])
 |---|---|---|
 | _0 | address[] | undefined
 
+### getTssInactiveGroupInfo
+
+```solidity
+function getTssInactiveGroupInfo() external view returns (uint256, uint256, bytes[])
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+| _1 | uint256 | undefined
+| _2 | bytes[] | undefined
+
 ### getTssMember
 
 ```solidity
