@@ -91,7 +91,7 @@ contract TssStakingSlashing is
         );
         libAddressManager = Lib_AddressManager(_libAddressManager);
 
-        BitToken = resolve("BitToken");
+        BitToken = resolve("L1_BitAddress");
         tssGroupContract = resolve("TssGroupManager");
     }
 
