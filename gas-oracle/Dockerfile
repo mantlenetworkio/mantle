@@ -10,6 +10,7 @@ FROM alpine:3.15
 
 RUN apk add --no-cache ca-certificates jq curl
 COPY --from=builder /gas-oracle/gas-oracle /usr/local/bin/
+COPY --from=builder /gas-oracle/gas-oracle.sh /usr/local/bin/
 
 WORKDIR /usr/local/bin/
-ENTRYPOINT ["gas-oracle"]
+ENTRYPOINT ["/bin/sh","gas-oracle.sh"]
