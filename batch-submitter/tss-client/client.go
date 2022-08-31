@@ -2,22 +2,15 @@ package tss_client
 
 import (
 	"fmt"
-	"github.com/bitdao-io/bitnetwork/tss/manager/types"
+	"github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/go-resty/resty/v2"
 	"github.com/syndtr/goleveldb/leveldb/errors"
-	"math/big"
 )
 
 var errTssHTTPError = errors.New("tss http error")
 
-type SignStateRequest struct {
-	StartBlock          big.Int `json:"start_block"`
-	OffsetStartsAtIndex big.Int `json:"offset_starts_at_index"`
-	StateRoots          string  `json:"state_roots"`
-}
-
 type TssClient interface {
-	GetSignStateBatch(BatchData types.SignStateRequest) ([]byte, error)
+	GetSignStateBatch(BatchData common.SignStateRequest) ([]byte, error)
 }
 
 type Client struct {
@@ -41,7 +34,7 @@ func NewClient(url string) *Client {
 	}
 }
 
-func (c *Client) GetSignStateBatch(BatchData types.SignStateRequest) ([]byte, error) {
+func (c *Client) GetSignStateBatch(BatchData common.SignStateRequest) ([]byte, error) {
 	var signature []byte
 	response, err := c.client.R().
 		SetBody(map[string]interface{}{"start_block": BatchData.StartBlock, "offset_starts_at_index": BatchData.OffsetStartsAtIndex, "state_roots": BatchData.StateRoots}).
