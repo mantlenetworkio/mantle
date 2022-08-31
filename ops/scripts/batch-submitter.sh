@@ -4,6 +4,13 @@ set -e
 
 RETRIES=${RETRIES:-40}
 
+if [ $USE_SECRET_MANAGER ] ;then
+  echo "use secret-manager"
+else
+  echo "doesn't use secret-manager"
+fi
+
+
 if [[ ! -z "$URL" ]]; then
     # get the addrs from the URL provided
     ADDRESSES=$(curl --fail --show-error --silent --retry-connrefused --retry $RETRIES --retry-delay 5 $URL)
