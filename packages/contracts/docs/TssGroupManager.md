@@ -200,28 +200,6 @@ function isInActiveMember(bytes) external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined
 
-### isSubmitGroupKey
-
-```solidity
-function isSubmitGroupKey(bytes) external view returns (bool)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined
-
 ### memberExistActive
 
 ```solidity
@@ -265,28 +243,6 @@ function memberExistInActive(bytes _publicKey) external view returns (bool)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined
-
-### memberGroupKey
-
-```solidity
-function memberGroupKey(bytes) external view returns (bytes)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined
 
 ### memberJail
 
@@ -498,22 +454,6 @@ function tssActiveMemberInfo(bytes) external view returns (bytes publicKey, addr
 | publicKey | bytes | undefined
 | nodeAddress | address | undefined
 | status | enum ITssGroupManager.MemberStatus | undefined
-
-### updateTssMember
-
-```solidity
-function updateTssMember(bytes _groupPublicKey) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _groupPublicKey | bytes | undefined
 
 ### verifySign
 
