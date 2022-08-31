@@ -283,7 +283,7 @@ contract TssStakingSlashing is
         uint256 extraAmount;
         uint256 remainder;
         uint256 gain;
-        uint256 _exIncome;
+        uint256 _exIncome = 0;
 
         if (deposits[deduction].amount > slashAmount[slashType]) {
             // deposit > slashAmount, deduct slashAmount then
@@ -304,7 +304,6 @@ contract TssStakingSlashing is
             deductedAmount = deposits[deduction].amount;
             deposits[deduction].amount = 0;
             extraAmount = deductedAmount;
-            _exIncome = 0;
         } else {
             require(false, "panic , invalid type");
         }
