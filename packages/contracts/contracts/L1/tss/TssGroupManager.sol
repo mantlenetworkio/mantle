@@ -26,9 +26,9 @@ contract TssGroupManager is
     bytes[] activeTssMembers; // active tss member group
     bytes[] inActiveTssMembers; // inactive tss member group
     mapping(bytes => TssMember) public tssActiveMemberInfo; // Tss member publicKey => tssMember
-    mapping(bytes => bytes) public memberGroupKey; // user publicKey => Cpk
+    mapping(bytes => bytes) private memberGroupKey; // user publicKey => Cpk
     mapping(bytes => uint256) groupKeyCounter; // Cpk counter
-    mapping(bytes => bool) public isSubmitGroupKey; // submit group key or not
+    mapping(bytes => bool) private isSubmitGroupKey; // submit group key or not
     mapping(bytes => bool) public isInActiveMember; // tss member exist or not
 
     event tssGroupMemberAppend(uint256 _roundId, uint256 _threshold, bytes[] _inActiveTssMembers);
@@ -61,8 +61,11 @@ contract TssGroupManager is
         onlyOwner
     {
         require((_batchPublicKey.length > 0), "batch public key is empty");
-        require(_threshold <= _batchPublicKey.length, "threshold must less than tss member");
-        require((inActiveTssMembers.length == 0), "inactive tss member array is not empty");
+        require(_threshold < _batchPublicKey.length, "threshold must less than tss member");
+        // require((inActiveTssMembers.length == 0), "inactive tss member array is not empty");
+        if(inActiveTssMembers.length > 0) {
+            delete inActiveTssMembers;
+        }
         for (uint256 i = 0; i < _batchPublicKey.length; i++) {
             inActiveTssMembers.push(_batchPublicKey[i]);
             isInActiveMember[_batchPublicKey[i]] = true;
@@ -235,7 +238,13 @@ contract TssGroupManager is
         return address(uint160(uint256(keccak256(publicKey))));
     }
 
-    function updateTssMember(bytes memory _groupPublicKey) public {
+    function updateTssMember(bytes memory _groupPublicKey) private {
+        if (activeTssMembers.length > 0) {
+            for (uint256 i = 0; i < activeTssMembers.length; i++) {
+                delete tssActiveMemberInfo[activeTssMembers[i]];    // delete tss active member map
+            }
+            delete activeTssMembers;  // delete active members
+        }
         for (uint256 i = 0; i < inActiveTssMembers.length; i++) {
             activeTssMembers.push(inActiveTssMembers[i]);
             tssActiveMemberInfo[inActiveTssMembers[i]] = TssMember({
@@ -243,13 +252,14 @@ contract TssGroupManager is
                 nodeAddress: publicKeyToAddress(inActiveTssMembers[i]),
                 status: MemberStatus.unJail
             });
+            // clear InActiveMember data
+            delete memberGroupKey[inActiveTssMembers[i]];
+            delete groupKeyCounter[memberGroupKey[inActiveTssMembers[i]]];
+            delete isSubmitGroupKey[inActiveTssMembers[i]];
             delete isInActiveMember[inActiveTssMembers[i]];
         }
-        confirmNumber = 0;
-        groupKeyCounter[_groupPublicKey] = 0;
-        confirmGroupPublicKey = _groupPublicKey;
         delete inActiveTssMembers;
-
+        confirmGroupPublicKey = _groupPublicKey;
         emit tssActiveMemberAppended(gRoundId, _groupPublicKey, activeTssMembers);
     }
 
