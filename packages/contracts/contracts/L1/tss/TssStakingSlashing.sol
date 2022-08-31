@@ -235,7 +235,7 @@ contract TssStakingSlashing is
 
         require(
             ITssGroupManager(tssGroupContract).verifySign(keccak256(_messageBytes), _sig),
-            "singer not tss group pub key"
+            "signer not tss group pub key"
         );
 
         // slash tokens
@@ -283,6 +283,7 @@ contract TssStakingSlashing is
         uint256 extraAmount;
         uint256 remainder;
         uint256 gain;
+        uint256 _exIncome;
 
         if (deposits[deduction].amount > slashAmount[slashType]) {
             // deposit > slashAmount, deduct slashAmount then
@@ -290,17 +291,20 @@ contract TssStakingSlashing is
             deductedAmount = slashAmount[slashType];
             deposits[deduction].amount -= slashAmount[slashType];
             extraAmount = slashAmount[slashType] - exIncome[slashType];
+            _exIncome = exIncome[slashType];
         } else if (deposits[deduction].amount > exIncome[slashType]) {
             // exIncome < deposit <= slashAmount, deduct all token then
             // distribute additional tokens for the sender
             deductedAmount = deposits[deduction].amount;
             deposits[deduction].amount = 0;
             extraAmount = deductedAmount - exIncome[slashType];
+            _exIncome = exIncome[slashType];
         } else if (deposits[deduction].amount > 0) {
             // 0 < deposit <= exIncome, deduct all token
             deductedAmount = deposits[deduction].amount;
             deposits[deduction].amount = 0;
             extraAmount = deductedAmount;
+            _exIncome = 0;
         } else {
             require(false, "panic , invalid type");
         }
@@ -309,7 +313,7 @@ contract TssStakingSlashing is
         remainder = extraAmount % tssNodes.length;
         gain = (extraAmount - remainder) / tssNodes.length;
 
-        deposits[msg.sender].amount += exIncome[slashType] + remainder;
+        deposits[msg.sender].amount += _exIncome + remainder;
         totalTransfer = exIncome[slashType] + remainder;
         for (uint256 i = 0; i < tssNodes.length; i++) {
             totalTransfer += gain;
