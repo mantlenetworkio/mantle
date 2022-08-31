@@ -14,6 +14,7 @@ export const names = {
       Proxy__BVM_L1StandardBridge: 'Proxy__BVM_L1StandardBridge',
     },
     accounts: { BVM_Sequencer: 'BVM_Sequencer', BVM_Proposer: 'BVM_Proposer' },
+    configs: { L1_BIT_ADDRESS: 'L1_BitAddress' },
   },
   unmanaged: {
     AddressDictator: 'AddressDictator',
