@@ -15,7 +15,7 @@ import (
 	"github.com/bitdao-io/bitnetwork/bss-core/txmgr"
 	l2ethclient "github.com/bitdao-io/bitnetwork/l2geth/ethclient"
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	tss_types "github.com/bitdao-io/bitnetwork/tss/manager/types"
+	tss_types "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -210,8 +210,8 @@ func (d *Driver) CraftBatchTx(
 	offsetStartsAtIndex := new(big.Int).Sub(start, blockOffset)
 	// Assembly data request tss node signature
 	tssReqParams := tss_types.SignStateRequest{
-		StartBlock:          start,
-		OffsetStartsAtIndex: offsetStartsAtIndex,
+		StartBlock:          start.String(),
+		OffsetStartsAtIndex: offsetStartsAtIndex.String(),
 		StateRoots:          stateRoots,
 	}
 	signature, err := d.cfg.TssClient.GetSignStateBatch(tssReqParams)
