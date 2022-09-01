@@ -3,15 +3,16 @@ package manager
 import (
 	"context"
 	"encoding/binary"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"math/big"
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
 	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
 	"github.com/bitdao-io/bitnetwork/tss/slash"
-	ethc "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common"
 	eth "github.com/ethereum/go-ethereum/core/types"
 )
 
@@ -36,7 +37,33 @@ func (m Manager) slashing() {
 }
 
 func (m Manager) handleSlashing(si slash.SlashingInfo) {
-	currentTssInfo := m.tssQueryService.QueryActiveInfo()
+	currentBlockNumber, err := m.l1Cli.BlockNumber(context.Background())
+	if err != nil {
+		log.Error("failed to query block number", "err", err)
+		return
+	}
+	found, err := m.tssStakingSlashingCaller.GetSlashRecord(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber)}, new(big.Int).SetUint64(si.BatchIndex), si.Address)
+	if err != nil {
+		log.Error("failed to GetSlashRecord", "err", err)
+		return
+	}
+	if found { // is submitted to ethereum
+		found, err = m.tssStakingSlashingCaller.GetSlashRecord(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - uint64(m.l1ConfirmBlocks))}, new(big.Int).SetUint64(si.BatchIndex), si.Address)
+		if err != nil {
+			log.Error("failed to GetSlashRecord", "err", err)
+			return
+		}
+		if found { // this slashing is confirmed on ethereum
+			m.store.RemoveSlashingInfo(si.Address, si.BatchIndex)
+		}
+		return
+	}
+
+	currentTssInfo, err := m.tssQueryService.QueryActiveInfo()
+	if err != nil {
+		log.Error("failed to query active tss info", "err", err)
+		return
+	}
 	if si.ElectionId != currentTssInfo.ElectionId {
 		log.Error("the election which this node supposed to be slashed is expired, ignore the slash",
 			"node", si.Address.String(), "electionId", si.ElectionId, "batch index", si.BatchIndex)
@@ -82,7 +109,7 @@ func (m Manager) handleSlashing(si slash.SlashingInfo) {
 		BatchIndex: si.BatchIndex,
 		SignType:   si.SlashType,
 	}
-	ctx, err := m.agreement(ctx, request, tss.AskSlash)
+	ctx, err = m.agreement(ctx, request, tss.AskSlash)
 	if err != nil {
 		log.Error("failed to achieve agreement to sign slashing", "address", si.Address.String(), "index", si.BatchIndex)
 		return
@@ -92,8 +119,18 @@ func (m Manager) handleSlashing(si slash.SlashingInfo) {
 		return
 	}
 
+	approversAddress := make([]common.Address, len(ctx.Approvers()), len(ctx.Approvers()))
+	for i, node := range ctx.Approvers() {
+		addr, _ := tss.NodeToAddress(node)
+		approversAddress[i] = addr
+	}
+	digestBz, err := tss.SlashMsgHash(request.BatchIndex, request.Address, approversAddress, request.SignType)
+	if err != nil {
+		log.Error("failed to encode SlashMsg")
+		return
+	}
 	// store the si with the related transaction bytes
-	signResp, _, err := m.sign(ctx, request, nil, tss.SignSlash)
+	signResp, _, err := m.sign(ctx, request, digestBz, tss.SignSlash)
 	if err != nil {
 		log.Error("failed to sign slashing", "error", err)
 		return
@@ -114,7 +151,7 @@ func (m Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo
 		log.Error("failed to send transaction", "err", err)
 		return err
 	}
-	confirmTxReceipt := func(txHash ethc.Hash, info slash.SlashingInfo) *eth.Receipt {
+	confirmTxReceipt := func(txHash common.Hash, info slash.SlashingInfo) *eth.Receipt {
 		sendState.set(info.Address, info.BatchIndex, "has not minted")
 		ctx, cancel := context.WithTimeout(context.Background(), m.confirmReceiptTimeout)
 		queryTicker := time.NewTicker(m.taskInterval)

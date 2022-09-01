@@ -2,8 +2,8 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
 	"github.com/bitdao-io/bitnetwork/tss/slash"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
@@ -143,6 +143,9 @@ func (s *Storage) AddCulprits(culprits []string) {
 func (s *Storage) GetCulprits() []string {
 	bz, err := s.db.Get(getCulpritsKey(), nil)
 	if err != nil {
+		if err == leveldb.ErrNotFound {
+			return nil
+		}
 		panic(err)
 	}
 	var ret []string

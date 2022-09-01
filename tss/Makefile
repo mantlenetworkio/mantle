@@ -1,3 +1,19 @@
+GITCOMMIT := $(shell git rev-parse HEAD)
+GITDATE := $(shell git show -s --format='%ct')
+
+LDFLAGSSTRING +=-X main.GitCommit=$(GITCOMMIT)
+LDFLAGSSTRING +=-X main.GitDate=$(GITDATE)
+LDFLAGS := -ldflags "$(LDFLAGSSTRING)"
+
+build:
+	env GO111MODULE=on go build -v $(LDFLAGS) .
+
+test:
+	go test -v ./...
+
+lint:
+	golangci-lint run ./...
+
 TSS_GROUP_MANAGER_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/L1/tss/TssGroupManager.sol/TssGroupManager.json
 TSS_STAKING_SLASHING_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/L1/tss/TssStakingSlashing.sol/TssStakingSlashing.json
 

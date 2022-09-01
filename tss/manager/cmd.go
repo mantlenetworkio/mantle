@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/bitdao-io/bitnetwork/tss/index"
+	"github.com/bitdao-io/bitnetwork/tss/manager/l1chain"
 	"github.com/bitdao-io/bitnetwork/tss/manager/store"
 	"github.com/bitdao-io/bitnetwork/tss/slash"
 	"net/http"
@@ -49,7 +50,8 @@ func run(cmd *cobra.Command) error {
 	observer.SetHook(slash.NewSlashing(managerStore, managerStore, config.SignedBatchesWindow, config.MinSignedInWindow))
 	observer.Start()
 
-	manager, err := NewManager(wsServer, nil, managerStore, config)
+	queryService := l1chain.NewQueryService(config.L1Url, config.TssGroupContractAddress, config.L1ConfirmBlocks, managerStore)
+	manager, err := NewManager(wsServer, queryService, managerStore, config)
 	if err != nil {
 		return err
 	}
