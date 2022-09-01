@@ -70,6 +70,9 @@ func (g *GasPriceOracle) Start() error {
 		return err
 	}
 	gasPriceGauge.Update(int64(price.Uint64()))
+	
+	log.Info("Starting Gas Price Oracle enableL1BaseFee", "enableL1BaseFee",
+		g.config.enableL1BaseFee, "enableL2GasPrice", g.config.enableL2GasPrice)
 
 	if g.config.enableL1BaseFee {
 		go g.BaseFeeLoop()
