@@ -190,14 +190,11 @@ contract TssStakingSlashing is
         require(deposits[msg.sender].amount > 0, "do not have deposit");
         // when not in consensus period
         require(
-            ITssGroupManager(tssGroupContract).memberExistInActive(deposits[msg.sender].pubKey),
-            "not at the inactive group"
+            ITssGroupManager(tssGroupContract).memberExistInActive(deposits[msg.sender].pubKey) ||
+                ITssGroupManager(tssGroupContract).memberExistActive(deposits[msg.sender].pubKey),
+            "not at the inactive group or active group"
         );
         // is active member
-        require(
-            ITssGroupManager(tssGroupContract).memberExistActive(deposits[msg.sender].pubKey),
-            "not at the active group"
-        );
         for (uint256 i = 0; i < quitList.length; i++) {
             require(quitList[i] != msg.sender, "already in quitList");
         }
