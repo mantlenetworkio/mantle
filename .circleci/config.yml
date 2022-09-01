@@ -345,9 +345,6 @@ workflows:
           package_name: core-utils
           requires:
             - yarn-monorepo
-      - contracts-bedrock-tests:
-          requires:
-            - yarn-monorepo
       - js-lint-test:
           name: dtl-tests
           package_name: data-transport-layer
