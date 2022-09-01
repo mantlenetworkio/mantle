@@ -109,7 +109,7 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 
 func (p *Processor) Start() {
 	p.logger.Info().Msg("Signer is starting")
-	p.wg.Add(6)
+	p.wg.Add(7)
 	p.run()
 }
 
@@ -131,4 +131,5 @@ func (p *Processor) run() {
 	go p.Sign()
 	go p.SignSlash()
 	go p.Keygen()
+	go p.deleteSlashing()
 }
