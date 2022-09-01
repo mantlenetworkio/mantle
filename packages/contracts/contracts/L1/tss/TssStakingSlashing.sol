@@ -224,12 +224,8 @@ contract TssStakingSlashing is
         SlashMsg memory message = abi.decode(_messageBytes, (SlashMsg));
         // verify tss member state not at jailed status
         require(!isJailed(message.jailNode), "the node already jailed");
-        require(
-            ITssGroupManager(tssGroupContract).memberExistActive(deposits[msg.sender].pubKey),
-            "sender not at the active group"
-        );
-        // have not slash before todo record by index and node address
 
+        // have not slash before
         require(!slashRecord[message.batchIndex][message.jailNode], "already slashed");
         slashRecord[message.batchIndex][message.jailNode] = true;
 
@@ -359,7 +355,7 @@ contract TssStakingSlashing is
     function isJailed(address user) public returns (bool) {
         ITssGroupManager.TssMember memory tssMember = ITssGroupManager(tssGroupContract)
             .getTssMember(deposits[user].pubKey);
-
+        require(tssMember.publicKey.length == 64 ,"tss member not exist");
         return tssMember.status == ITssGroupManager.MemberStatus.jail;
     }
 
