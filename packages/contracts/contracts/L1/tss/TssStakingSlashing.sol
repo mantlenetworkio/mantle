@@ -39,9 +39,9 @@ contract TssStakingSlashing is
     // slashing parameter settings
     // record the quit request
     address[] public quitList;
-    // slashing amount of type uptime and animus (0:uptime , 1:animus)
+    // slashing amount of type uptime and animus (0:uptime, 1:animus)
     uint256[2] public slashAmount;
-    // additional rewards for sender (0:uptime , 1:animus)
+    // additional rewards for sender (0:uptime, 1:animus)
     uint256[2] public exIncome;
     // record the slash operate (map[batchIndex] -> (map[staker] -> slashed))
     mapping(uint256 => mapping(address => bool)) slashRecord;
@@ -114,8 +114,8 @@ contract TssStakingSlashing is
         public
         onlyOwner
     {
-        require(_slashAmount[1] > _slashAmount[0], "invalid param slashAmount,animus <= uptime");
-        require(_exIncome[1] > _exIncome[0], "invalid param exIncome,animus <= uptime");
+        require(_slashAmount[1] > _slashAmount[0], "invalid param slashAmount, animus <= uptime");
+        require(_exIncome[1] > _exIncome[0], "invalid param exIncome, animus <= uptime");
 
         for (uint256 i = 0; i < 2; i++) {
             require(_exIncome[i] > 0, "invalid amount");
@@ -126,7 +126,7 @@ contract TssStakingSlashing is
     }
 
     /**
-     * @notice set the slashing params (0 -> uptime , 1 -> animus)
+     * @notice set the slashing params (0 -> uptime, 1 -> animus)
      * @return _slashAmount the amount to be deducted for each type
      */
     function getSlashingParams() public view returns (uint256[2] memory, uint256[2] memory) {
@@ -163,7 +163,7 @@ contract TssStakingSlashing is
             deposits[msg.sender].pubKey = _pubKey;
         }
 
-        // send bit token to staking contract , need user approve first
+        // send bit token to staking contract, need user approve first
         require(
             IERC20(BitToken).transferFrom(msg.sender, address(this), _amount),
             "transfer erc20 token failed"
@@ -326,7 +326,7 @@ contract TssStakingSlashing is
             deposits[tssNodes[i]].amount += gain;
         }
         // The total transfer amount is the same as the deducted amount
-        require(totalTransfer == deductedAmount, "panic,calculation error");
+        require(totalTransfer == deductedAmount, "panic, calculation error");
     }
 
     /**
