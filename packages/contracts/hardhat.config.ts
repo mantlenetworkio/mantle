@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv'
 import { ethers } from 'ethers'
 
 // Hardhat plugins
+import "@openzeppelin/hardhat-upgrades"
 import '@bitdaoio/hardhat-deploy-config'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
