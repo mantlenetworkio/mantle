@@ -20,8 +20,12 @@ func (m Manager) observeElection() {
 	for {
 		if !m.stopGenKey {
 			func() {
-				// check if new round election is held(inactive tss members?)
-				tssInfo := m.tssQueryService.QueryInactiveInfo()
+				// check if new round election is held(inactive tss members)
+				tssInfo, err := m.tssQueryService.QueryInactiveInfo()
+				if err != nil {
+					log.Error("failed to query inactive info", "err", err)
+					return
+				}
 
 				//tssMembers, threshold, electionId := getInactiveMembers()
 				if len(tssInfo.TssMembers) > 0 {

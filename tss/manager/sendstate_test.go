@@ -3,7 +3,7 @@ package manager
 import (
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
 )
 

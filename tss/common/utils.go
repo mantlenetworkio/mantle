@@ -1,12 +1,53 @@
 package common
 
 import (
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 )
+
+var (
+	typByte32Array      abi.Type
+	typUint256          abi.Type
+	typSlashType        abi.Type
+	typAddress          abi.Type
+	typAddresses        abi.Type
+	stateBatchArguments abi.Arguments
+	slashMsgArguments   abi.Arguments
+)
+
+func init() {
+	typByte32Array, _ = abi.NewType("bytes32[]", "bytes32[]", nil)
+	typUint256, _ = abi.NewType("uint256", "uint256", nil)
+	typSlashType, _ = abi.NewType("uint8", "enumTssStakingSlashing.SlashType", nil)
+	typAddress, _ = abi.NewType("address", "address", nil)
+	typAddresses, _ = abi.NewType("address[]", "address[]", nil)
+	stateBatchArguments = abi.Arguments{
+		{
+			Type: typByte32Array,
+		}, {
+			Type: typUint256,
+		},
+	}
+
+	slashMsgArguments = abi.Arguments{
+		{
+			Type: typUint256,
+		},
+		{
+			Type: typAddress,
+		},
+		{
+			Type: typAddresses,
+		},
+		{
+			Type: typSlashType,
+		},
+	}
+}
 
 func NodeToAddress(publicKey string) (common.Address, error) {
 	pubKeyBz, err := hexutil.Decode(publicKey)
@@ -18,11 +59,22 @@ func NodeToAddress(publicKey string) (common.Address, error) {
 	return address, nil
 }
 
-func StateBatchDigestBytes(stateRoots [][32]byte, offsetStartsAtIndex *big.Int) []byte {
-	rawBytes := make([]byte, 0)
-	for _, sr := range stateRoots {
-		rawBytes = append(rawBytes, sr[:]...)
+func StateBatchHash(stateRoots [][32]byte, offsetStartsAtIndex *big.Int) ([]byte, error) {
+	abiEncodedRaw, err := stateBatchArguments.Pack(stateRoots, offsetStartsAtIndex)
+	if err != nil {
+		return nil, err
 	}
-	rawBytes = append(rawBytes, offsetStartsAtIndex.Bytes()...)
-	return crypto.Keccak256Hash(rawBytes).Bytes()
+	return crypto.Keccak256Hash(abiEncodedRaw).Bytes(), nil
+}
+
+func SlashMsgBytes(batchIndex uint64, jailNode common.Address, tssNodes []common.Address, slashType byte) ([]byte, error) {
+	return slashMsgArguments.Pack(new(big.Int).SetUint64(batchIndex), jailNode, tssNodes, slashType)
+}
+
+func SlashMsgHash(batchIndex uint64, jailNode common.Address, tssNodes []common.Address, slashType byte) ([]byte, error) {
+	abiEncodedRaw, err := SlashMsgBytes(batchIndex, jailNode, tssNodes, slashType)
+	if err != nil {
+		return nil, err
+	}
+	return crypto.Keccak256Hash(abiEncodedRaw).Bytes(), nil
 }

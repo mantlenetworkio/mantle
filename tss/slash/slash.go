@@ -3,10 +3,10 @@ package slash
 import (
 	"errors"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
 	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
 	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/index"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type Slashing struct {
