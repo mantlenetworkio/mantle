@@ -2,13 +2,14 @@ package signer
 
 import (
 	"encoding/json"
+	"math/big"
+	"strconv"
+	"sync"
+
 	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
 	"github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/rs/zerolog"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
-	"math/big"
-	"strconv"
-	"sync"
 )
 
 func (p *Processor) Verify() {
@@ -61,8 +62,16 @@ func (p *Processor) Verify() {
 					}
 					wg.Wait()
 					if result {
-						hash := signMsgToHash(askRequest)
-						p.UpdateWaitSignEvents(hash.String(), askRequest)
+						hash, err := signMsgToHash(askRequest)
+						if err != nil {
+							logger.Err(err).Msg("failed to conv msg to hash")
+							RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to conv msg to hash", err.Error())
+							p.wsClient.SendMsg(RpcResponse)
+							continue
+						}else {
+							hashStr := hexutil.Encode(hash)
+							p.UpdateWaitSignEvents(hashStr, askRequest)
+						}
 					}
 					askResponse := common.AskResponse{
 						Result: result,

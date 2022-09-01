@@ -5,7 +5,12 @@ import (
 	"crypto/ecdsa"
 	"github.com/bitdao-io/bitnetwork/bss-core/dial"
 	l2ethclient "github.com/bitdao-io/bitnetwork/l2geth/ethclient"
+	"github.com/bitdao-io/bitnetwork/tss/bindings/tsh"
 	"github.com/bitdao-io/bitnetwork/tss/common"
+	"github.com/bitdao-io/bitnetwork/tss/manager/l1chain"
+	managertypes "github.com/bitdao-io/bitnetwork/tss/manager/types"
+	ethc "github.com/ethereum/go-ethereum/common"
+
 	"github.com/bitdao-io/bitnetwork/tss/node/tsslib"
 	"github.com/bitdao-io/bitnetwork/tss/node/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/client"
@@ -13,6 +18,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+	"time"
 
 	"sync"
 )
@@ -26,11 +32,6 @@ type Processor struct {
 	l1Client                  *ethclient.Client
 	ctx                       context.Context
 	cancel                    func()
-	srcChainId                string
-	dstChainId                string
-	dstChainName              string
-	pause                     bool
-	pauseWg                   *sync.WaitGroup
 	stopChan                  chan struct{}
 	wg                        *sync.WaitGroup
 	askRequestChan            chan tdtypes.RPCRequest
@@ -46,10 +47,18 @@ type Processor struct {
 	logger                    zerolog.Logger
 	tssGroupManagerAddress    string
 	tssStakingSlashingAddress string
+	taskInterval              time.Duration
+	tssStakingSlashingCaller  *tsh.TssStakingSlashingCaller
+	tssQueryService           managertypes.TssQueryService
+	l1ConfirmBlocks           int
 	metrics                   *Metrics
 }
 
 func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance tsslib.Server, privKey *ecdsa.PrivateKey, pubKey string, nodeStore types.NodeStore) (*Processor, error) {
+	taskIntervalDur, err := time.ParseDuration(cfg.TimedTaskInterval)
+	if err != nil {
+		return nil, err
+	}
 	ctx, cancel := context.WithCancel(contx)
 	l1Cli, err := dial.L1EthClientWithTimeout(ctx, cfg.L1Url, cfg.Node.DisableHTTP2)
 	if err != nil {
@@ -60,12 +69,17 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 		return nil, err
 	}
 	l2Client, err := DialL2EthClientWithTimeout(ctx, cfg.Node.L2EthRpc, cfg.Node.DisableHTTP2)
+	tssStakingSlashingCaller, err := tsh.NewTssStakingSlashingCaller(ethc.HexToAddress(cfg.TssStakingSlashContractAddress), l1Cli)
+	if err != nil {
+		return nil, err
+	}
+
+	queryService := l1chain.NewQueryService(cfg.L1Url, cfg.TssGroupContractAddress, cfg.L1ConfirmBlocks, nodeStore)
 
 	processor := Processor{
 		localPubkey:               pubKey,
 		privateKey:                privKey,
 		tssServer:                 tssInstance,
-		pauseWg:                   &sync.WaitGroup{},
 		stopChan:                  make(chan struct{}),
 		wg:                        &sync.WaitGroup{},
 		logger:                    log.With().Str("module", "signer").Logger(),
@@ -84,22 +98,17 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 		nodeStore:                 nodeStore,
 		tssGroupManagerAddress:    cfg.Node.TssGroupManagerAddress,
 		tssStakingSlashingAddress: cfg.Node.TssStakingSlashingAddress,
+		taskInterval:              taskIntervalDur,
+		tssStakingSlashingCaller:  tssStakingSlashingCaller,
+		tssQueryService:           queryService,
+		l1ConfirmBlocks:           cfg.L1ConfirmBlocks,
 		metrics:                   PrometheusMetrics("tssnode"),
 	}
 	return &processor, nil
 }
 
-func (p *Processor) waitIfPause() {
-	if p.pause {
-		p.logger.Info().Msg("signing process is paused, waiting for the wake up signal")
-		p.pauseWg.Wait()
-		p.logger.Info().Msg("signing process is waked up, continue working......")
-	}
-}
-
 func (p *Processor) Start() {
 	p.logger.Info().Msg("Signer is starting")
-	p.waitIfPause()
 	p.wg.Add(6)
 	p.run()
 }

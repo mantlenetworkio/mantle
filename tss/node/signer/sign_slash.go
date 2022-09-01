@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math/big"
+	"strings"
+
 	"github.com/bitdao-io/bitnetwork/tss/bindings/tsh"
 	tsscommon "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
-	"math/big"
-	"strings"
 )
 
 func (p *Processor) SignSlash() {
@@ -59,8 +60,20 @@ func (p *Processor) SignSlash() {
 					continue
 				}
 
+				nodesaddrs := make([]ethc.Address, len(nodeSignRequest.Nodes))
+				for i, node := range nodeSignRequest.Nodes {
+					addr, _ := tsscommon.NodeToAddress(node)
+					nodesaddrs[i] = addr
+				}
 				//TODO SlashMsg bytes
-				hashTx := []byte{}
+				hashTx, err := tsscommon.SlashMsgHash(requestBody.BatchIndex, requestBody.Address, nodesaddrs, requestBody.SignType)
+
+				if err != nil {
+					logger.Err(err).Msg("failed to encode SlashMsg")
+					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
+					p.wsClient.SendMsg(RpcResponse)
+					continue
+				}
 
 				data, culprits, err := p.handleSign(nodeSignRequest, hashTx, logger)
 
@@ -83,6 +96,12 @@ func (p *Processor) SignSlash() {
 					continue
 				}
 				txData, gasPrice, err := p.txBuilder(hashTx, data)
+				if err != nil {
+					logger.Err(err).Msg("failed to txbuilder slash tranction")
+					errorRes := tdtypes.NewRPCErrorResponse(req.ID, 201, "sign failed", err.Error())
+					p.wsClient.SendMsg(errorRes)
+					continue
+				}
 
 				signResponse := tsscommon.SignResponse{
 					Signature:             data,
@@ -148,6 +167,11 @@ func (p *Processor) txBuilder(txData, sig []byte) ([]byte, *big.Int, error) {
 	}
 
 	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, chainId)
+
+	if err != nil {
+		p.logger.Err(err).Msg("failed to new keyed transactor")
+		return nil, nil, err
+	}
 	if opts.Context == nil {
 		opts.Context = context.Background()
 	}

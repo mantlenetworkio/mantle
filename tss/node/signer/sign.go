@@ -4,19 +4,20 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	l2common "github.com/bitdao-io/bitnetwork/l2geth/common"
+	"math"
+	"math/big"
+	"strings"
+
 	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
 	tsscommon "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/index"
 	"github.com/bitdao-io/bitnetwork/tss/node/tsslib/common"
 	"github.com/bitdao-io/bitnetwork/tss/node/tsslib/keysign"
+	"github.com/bitdao-io/bitnetwork/tss/slash"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/influxdata/influxdb/pkg/slices"
 	"github.com/rs/zerolog"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
-	"math/big"
-	"strings"
 )
 
 func (p *Processor) Sign() {
@@ -65,15 +66,31 @@ func (p *Processor) Sign() {
 					continue
 				}
 
-				data, culprits, err := p.handleSign(nodeSignRequest, hash.Bytes(), logger)
+				data, culprits, err := p.handleSign(nodeSignRequest, hash, logger)
+				hashStr := hexutil.Encode(hash)
 
 				if err != nil {
-					logger.Error().Msgf(" %s sign failed ", hash.String())
+					logger.Error().Msgf(" %s sign failed ", hashStr)
 					var errorRes tdtypes.RPCResponse
 					if len(culprits) > 0 {
 						respData := strings.Join(culprits, ",")
 						errorRes = tdtypes.NewRPCErrorResponse(req.ID, 100, err.Error(), respData)
 						p.nodeStore.AddCulprits(culprits)
+
+						//store slash info
+						for _, culprit := range culprits {
+							addr, err := tsscommon.NodeToAddress(culprit)
+							if err != nil {
+								logger.Error().Msgf("failed to convert node to address %s", culprit)
+							}
+							p.nodeStore.SetSlashingInfo(slash.SlashingInfo{
+								Address:    addr,
+								ElectionId: requestBody.ElectionId,
+								BatchIndex: math.MaxUint64, // not real, just for identifying the specific slashing info.
+								SlashType:  tsscommon.SlashTypeCulprit,
+							})
+						}
+
 					} else {
 						errorRes = tdtypes.NewRPCErrorResponse(req.ID, 201, "sign failed", err.Error())
 					}
@@ -81,7 +98,7 @@ func (p *Processor) Sign() {
 					if er != nil {
 						logger.Err(er).Msg("failed to send msg to tss manager")
 					} else {
-						p.removeWaitEvent(hash.String())
+						p.removeWaitEvent(hashStr)
 					}
 
 					continue
@@ -99,7 +116,7 @@ func (p *Processor) Sign() {
 					if err != nil {
 						logger.Err(err).Msg("failed to store StateBatch to level db")
 					}
-					p.removeWaitEvent(hash.String())
+					p.removeWaitEvent(hashStr)
 				}
 			}
 		}
@@ -144,24 +161,22 @@ func (p *Processor) sign(digestBz []byte, signerPubKeys []string, poolPubKey str
 	}
 }
 
-func checkMessages(sign tsscommon.SignStateRequest, waitSignMsgs map[string]tsscommon.SignStateRequest) (error, l2common.Hash) {
-	hash := signMsgToHash(sign)
-	_, ok := waitSignMsgs[hash.String()]
-	if !ok {
-		return errors.New("event sign request has the event which unverified"), hash
+func checkMessages(sign tsscommon.SignStateRequest, waitSignMsgs map[string]tsscommon.SignStateRequest) (error, []byte) {
+	hashByte, err := signMsgToHash(sign)
+	if err != nil {
+		return err, hashByte
 	}
-
-	return nil, hash
+	hashStr := hexutil.Encode(hashByte)
+	_, ok := waitSignMsgs[hashStr]
+	if !ok {
+		return errors.New("sign request has the unverified state batch"), nil
+	}
+	return nil, hashByte
 }
 
-func signMsgToHash(msg tsscommon.SignStateRequest) l2common.Hash {
-	rawBytes := make([]byte, 0)
-	for _, sr := range msg.StateRoots {
-		rawBytes = append(rawBytes, sr[:]...)
-	}
+func signMsgToHash(msg tsscommon.SignStateRequest) ([]byte, error) {
 	offsetStartsAtIndex, _ := new(big.Int).SetString(msg.OffsetStartsAtIndex, 10)
-	rawBytes = append(rawBytes, offsetStartsAtIndex.Bytes()...)
-	return crypto.Keccak256Hash(rawBytes)
+	return tsscommon.StateBatchHash(msg.StateRoots, offsetStartsAtIndex)
 }
 
 func (p *Processor) removeWaitEvent(key string) {
