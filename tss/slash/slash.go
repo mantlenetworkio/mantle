@@ -88,6 +88,7 @@ func (s Slashing) UpdateSigningInfo(batchIndex uint64, address common.Address, e
 		signingInfo = s.InitializeSigningInfo(batchIndex, address, missed)
 	} else {
 		signingInfo.IndexOffset++
+
 		idx := signingInfo.IndexOffset % uint64(s.signedBatchesWindow)
 
 		previous := s.slashingStore.GetNodeMissedBatchBitArray(address, idx)
@@ -117,6 +118,7 @@ func (s Slashing) InitializeSigningInfo(batchIndex uint64, address common.Addres
 		signingInfo.MissedBlocksCounter++
 	}
 	s.slashingStore.SetSigningInfo(signingInfo)
+
 	// clear historic data
 	s.slashingStore.ClearNodeMissedBatchBitArray(address)
 	// init the first one

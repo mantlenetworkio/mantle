@@ -11,7 +11,6 @@ type StateBatchInfo struct {
 type StateBatchStore interface {
 	SetStateBatch(StateBatchInfo) error
 	GetStateBatch([32]byte) (bool, StateBatchInfo)
-
 	IndexStateBatch(uint64, [32]byte) error
 	GetIndexStateBatch(index uint64) (bool, [32]byte)
 }

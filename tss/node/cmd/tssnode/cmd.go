@@ -12,7 +12,6 @@ func Command() *cobra.Command {
 	}
 
 	cmd.AddCommand(StartCmd())
-	cmd.AddCommand(InitConfigTemplate())
 
 	cmd.PersistentFlags().StringP("config", "c", "config", "configuration file with extension")
 

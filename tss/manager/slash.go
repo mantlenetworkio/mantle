@@ -64,6 +64,7 @@ func (m Manager) handleSlashing(si slash.SlashingInfo) {
 		log.Error("failed to query active tss info", "err", err)
 		return
 	}
+
 	if si.ElectionId != currentTssInfo.ElectionId {
 		log.Error("the election which this node supposed to be slashed is expired, ignore the slash",
 			"node", si.Address.String(), "electionId", si.ElectionId, "batch index", si.BatchIndex)

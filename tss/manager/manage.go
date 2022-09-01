@@ -76,6 +76,7 @@ func NewManager(wsServer server.IWebsocketManager,
 		return Manager{}, err
 	}
 	tssStakingSlashingCaller, err := tsh.NewTssStakingSlashingCaller(common.HexToAddress(config.TssStakingSlashContractAddress), l1Cli)
+
 	if err != nil {
 		return Manager{}, err
 	}
