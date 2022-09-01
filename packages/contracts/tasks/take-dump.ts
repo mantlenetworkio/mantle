@@ -71,7 +71,7 @@ task('take-dump').setAction(async (args, hre) => {
     },
     BVM_BIT: {
       l2Bridge: predeploys.L2StandardBridge,
-      l1Token: ethers.constants.AddressZero,
+      l1Token: hre.deployConfig.l1BitAddress,
       _name: 'Bit Token',
       _symbol: 'BIT',
     },

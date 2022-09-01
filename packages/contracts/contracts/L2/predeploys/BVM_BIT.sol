@@ -16,9 +16,9 @@ contract BVM_BIT is L2StandardERC20 {
     /***************
      * Constructor *
      ***************/
-
+    // hardcode to bit token mainnet address
     constructor()
-        L2StandardERC20(Lib_PredeployAddresses.L2_STANDARD_BRIDGE, address(0), "Bit Token", "BIT")
+        L2StandardERC20(Lib_PredeployAddresses.L2_STANDARD_BRIDGE, address(0x1a4b46696b2bb4794eb3d4c26f1c55f9170fa4c5), "Bit Token", "BIT")
     {}
 
 
