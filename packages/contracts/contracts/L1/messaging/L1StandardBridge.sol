@@ -196,7 +196,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
             _l2Token = Lib_PredeployAddresses.BVM_BIT;
             message = abi.encodeWithSelector(
                 IL2ERC20Bridge.finalizeDeposit.selector,
-                address(0),
+                address(0x1a4b46696b2bb4794eb3d4c26f1c55f9170fa4c5),
                 Lib_PredeployAddresses.BVM_BIT,
                 _from,
                 _to,
