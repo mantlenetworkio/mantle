@@ -11,14 +11,16 @@ import (
 )
 
 type Configuration struct {
-	Manager                 ManagerConfig `json:"manager"`
-	L1Url                   string        `json:"l1_url" mapstructure:"l1_url"`
-	SccContractAddress      string        `json:"scc_contract_address" mapstructure:"scc_contract_address"`
-	TimedTaskInterval       string        `json:"timed_task_interval" mapstructure:"timed_task_interval"`
-	L1ReceiptConfirmTimeout string        `json:"l1_receipt_confirm_timeout" mapstructure:"l1_receipt_confirm_timeout"`
-	L1ConfirmBlocks         int           `json:"l1_confirm_blocks" mapstructure:"l1_confirm_blocks"`
-	SignedBatchesWindow     int           `json:"signed_batches_window" mapstructure:"signedBatchesWindow"`
-	MinSignedInWindow       int           `json:"min_signed_in_window" mapstructure:"minSignedInWindow"`
+	Manager                        ManagerConfig `json:"manager"`
+	L1Url                          string        `json:"l1_url" mapstructure:"l1_url"`
+	SccContractAddress             string        `json:"scc_contract_address" mapstructure:"scc_contract_address"`
+	TssGroupContractAddress        string        `json:"tss_group_contract_address" mapstructure:"tss_group_contract_address"`
+	TssStakingSlashContractAddress string        `json:"tss_staking_slash_contract_address" mapstructure:"tss_staking_slash_contract_address"`
+	TimedTaskInterval              string        `json:"timed_task_interval" mapstructure:"timed_task_interval"`
+	L1ReceiptConfirmTimeout        string        `json:"l1_receipt_confirm_timeout" mapstructure:"l1_receipt_confirm_timeout"`
+	L1ConfirmBlocks                int           `json:"l1_confirm_blocks" mapstructure:"l1_confirm_blocks"`
+	SignedBatchesWindow            int           `json:"signed_batches_window" mapstructure:"signedBatchesWindow"`
+	MinSignedInWindow              int           `json:"min_signed_in_window" mapstructure:"minSignedInWindow"`
 }
 
 type ManagerConfig struct {

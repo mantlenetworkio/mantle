@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 )
 

@@ -2,7 +2,7 @@ package store
 
 import (
 	"encoding/binary"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var (

@@ -12,8 +12,8 @@ type SignService interface {
 }
 
 type TssQueryService interface {
-	QueryActiveInfo() TssCommitteeInfo
-	QueryInactiveInfo() TssCommitteeInfo
+	QueryActiveInfo() (TssCommitteeInfo, error)
+	QueryInactiveInfo() (TssCommitteeInfo, error)
 }
 
 type CPKStore interface {

@@ -3,9 +3,12 @@ package manager
 import (
 	"errors"
 	"fmt"
+	"github.com/bitdao-io/bitnetwork/tss/bindings/tsh"
+	"github.com/ethereum/go-ethereum/common"
 	"math"
 	"math/big"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
@@ -19,11 +22,12 @@ import (
 )
 
 type Manager struct {
-	wsServer        server.IWebsocketManager
-	tssQueryService types.TssQueryService
-	store           types.ManagerStore
-	l1Cli           *ethclient.Client
-	l1ConfirmBlocks int
+	wsServer                 server.IWebsocketManager
+	tssQueryService          types.TssQueryService
+	store                    types.ManagerStore
+	l1Cli                    *ethclient.Client
+	tssStakingSlashingCaller *tsh.TssStakingSlashingCaller
+	l1ConfirmBlocks          int
 
 	taskInterval          time.Duration
 	confirmReceiptTimeout time.Duration
@@ -32,8 +36,10 @@ type Manager struct {
 	askTimeout            time.Duration
 	signTimeout           time.Duration
 
-	stopGenKey bool
-	stopChan   chan struct{}
+	stateSignatureCache map[[32]byte][]byte
+	sigCacheLock        *sync.RWMutex
+	stopGenKey          bool
+	stopChan            chan struct{}
 }
 
 func NewManager(wsServer server.IWebsocketManager,
@@ -69,12 +75,17 @@ func NewManager(wsServer server.IWebsocketManager,
 	if err != nil {
 		return Manager{}, err
 	}
+	tssStakingSlashingCaller, err := tsh.NewTssStakingSlashingCaller(common.HexToAddress(config.TssStakingSlashContractAddress), l1Cli)
+	if err != nil {
+		return Manager{}, err
+	}
 	return Manager{
-		wsServer:        wsServer,
-		tssQueryService: tssQueryService,
-		store:           store,
-		l1Cli:           l1Cli,
-		l1ConfirmBlocks: config.L1ConfirmBlocks,
+		wsServer:                 wsServer,
+		tssQueryService:          tssQueryService,
+		store:                    store,
+		l1Cli:                    l1Cli,
+		l1ConfirmBlocks:          config.L1ConfirmBlocks,
+		tssStakingSlashingCaller: tssStakingSlashingCaller,
 
 		taskInterval:          taskIntervalDur,
 		confirmReceiptTimeout: receiptConfirmTimeoutDur,
@@ -83,7 +94,9 @@ func NewManager(wsServer server.IWebsocketManager,
 		askTimeout:            askTimeoutDur,
 		signTimeout:           signTimeoutDur,
 
-		stopChan: make(chan struct{}),
+		stateSignatureCache: make(map[[32]byte][]byte),
+		sigCacheLock:        &sync.RWMutex{},
+		stopChan:            make(chan struct{}),
 	}, nil
 }
 
@@ -106,7 +119,19 @@ func (m Manager) recoverGenerateKey() {
 }
 
 func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
-	tssInfo := m.tssQueryService.QueryActiveInfo()
+	offsetStartsAtIndex, _ := new(big.Int).SetString(request.OffsetStartsAtIndex, 10)
+	digestBz, err := tss.StateBatchHash(request.StateRoots, offsetStartsAtIndex)
+	if err != nil {
+		return nil, err
+	}
+	if sig := m.getStateSignature(digestBz); len(sig) > 0 {
+		return sig, nil
+	}
+
+	tssInfo, err := m.tssQueryService.QueryActiveInfo()
+	if err != nil {
+		return nil, err
+	}
 	availableNodes := m.availableNodes(tssInfo.TssMembers)
 	if len(availableNodes) < tssInfo.Threshold+1 {
 		return nil, errors.New("not enough available nodes to sign state")
@@ -123,7 +148,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		WithElectionId(tssInfo.ElectionId)
 
 	// ask tss nodes for the agreement
-	ctx, err := m.agreement(ctx, request, tss.AskStateBatch)
+	ctx, err = m.agreement(ctx, request, tss.AskStateBatch)
 	if err != nil {
 		return nil, err
 	}
@@ -131,8 +156,6 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		return nil, errors.New("failed to sign, not enough approvals from tss nodes")
 	}
 
-	offsetStartsAtIndex, _ := new(big.Int).SetString(request.OffsetStartsAtIndex, 10)
-	digestBz := tss.StateBatchDigestBytes(request.StateRoots, offsetStartsAtIndex)
 	request.ElectionId = tssInfo.ElectionId
 	resp, culprits, err := m.sign(ctx, request, digestBz, tss.SignStateBatch)
 	if err != nil {
@@ -166,6 +189,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		log.Error("failed to execute afterSign", "err", err)
 	}
 
+	m.setStateSignature(digestBz, resp.Signature)
 	return resp.Signature, nil
 }
 
@@ -205,4 +229,20 @@ func (m Manager) afterSignStateBatch(ctx types.Context, stateBatch [][32]byte, a
 		return err
 	}
 	return nil
+}
+
+func (m Manager) getStateSignature(digestBz []byte) []byte {
+	m.sigCacheLock.RLock()
+	defer m.sigCacheLock.RUnlock()
+	var key [32]byte
+	copy(key[:], digestBz)
+	return m.stateSignatureCache[key]
+}
+
+func (m Manager) setStateSignature(digestBz []byte, sig []byte) {
+	m.sigCacheLock.Lock()
+	defer m.sigCacheLock.Unlock()
+	var key [32]byte
+	copy(key[:], digestBz)
+	m.stateSignatureCache[key] = sig
 }
