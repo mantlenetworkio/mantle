@@ -46,9 +46,6 @@ packages/contracts-bedrock/deployments/anvil
 
 coverage.out
 
-# Ignore bedrock go bindings local output files
-op-exporter
-
 .idea/
 
 bitnetwork.iml

@@ -25,7 +25,6 @@ jobs:
       hardhat-node: ${{ steps.packages.outputs.hardhat-node }}
       canary-docker-tag: ${{ steps.docker-image-name.outputs.canary-docker-tag }}
       proxyd: ${{ steps.packages.outputs.proxyd }}
-      op-exporter: ${{ steps.packages.outputs.op-exporter }}
       l2geth-exporter: ${{ steps.packages.outputs.l2geth-exporter }}
       batch-submitter-service: ${{ steps.packages.outputs.batch-submitter-service }}
 
