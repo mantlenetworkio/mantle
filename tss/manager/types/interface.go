@@ -1,7 +1,9 @@
 package types
 
 import (
-	tss "github.com/bitdao-io/bitnetwork/tss/types"
+	tss "github.com/bitdao-io/bitnetwork/tss/common"
+	"github.com/bitdao-io/bitnetwork/tss/index"
+	"github.com/bitdao-io/bitnetwork/tss/slash"
 )
 
 type SignService interface {
@@ -10,10 +12,18 @@ type SignService interface {
 }
 
 type TssQueryService interface {
-	QueryInfo() TssInfos
+	QueryActiveInfo() (TssCommitteeInfo, error)
+	QueryInactiveInfo() (TssCommitteeInfo, error)
 }
 
 type CPKStore interface {
 	Insert(CpkData) error
 	GetByElectionId(uint64) (CpkData, error)
+}
+
+type ManagerStore interface {
+	CPKStore
+	index.StateBatchStore
+	index.ScanHeightStore
+	slash.SlashingStore
 }

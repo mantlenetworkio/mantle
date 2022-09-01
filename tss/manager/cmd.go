@@ -3,7 +3,10 @@ package manager
 import (
 	"context"
 	"errors"
-	"fmt"
+	"github.com/bitdao-io/bitnetwork/tss/index"
+	"github.com/bitdao-io/bitnetwork/tss/manager/l1chain"
+	"github.com/bitdao-io/bitnetwork/tss/manager/store"
+	"github.com/bitdao-io/bitnetwork/tss/slash"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,8 +14,8 @@ import (
 	"time"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/router"
-	"github.com/bitdao-io/bitnetwork/tss/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -30,17 +33,29 @@ func Command() *cobra.Command {
 }
 
 func run(cmd *cobra.Command) error {
-	config := types.GetConfigFromCmd(cmd)
-	fmt.Println(config)
+	config := common.GetConfigFromCmd(cmd)
 
-	wsServer, err := server.NewWSServer("")
+	wsServer, err := server.NewWSServer(config.Manager.WsAddr)
 	if err != nil {
 		return err
 	}
-	manager, err := NewManager(wsServer, nil, nil, "")
+	managerStore, err := store.NewStorage(config.Manager.DBDir)
 	if err != nil {
 		return err
 	}
+	observer, err := index.NewIndexer(managerStore, config.L1Url, config.L1ConfirmBlocks, config.SccContractAddress, config.TimedTaskInterval)
+	if err != nil {
+		return err
+	}
+	observer.SetHook(slash.NewSlashing(managerStore, managerStore, config.SignedBatchesWindow, config.MinSignedInWindow))
+	observer.Start()
+
+	queryService := l1chain.NewQueryService(config.L1Url, config.TssGroupContractAddress, config.L1ConfirmBlocks, managerStore)
+	manager, err := NewManager(wsServer, queryService, managerStore, config)
+	if err != nil {
+		return err
+	}
+	manager.Start()
 
 	registry := router.NewRegistry(manager)
 	r := gin.Default()
@@ -48,12 +63,9 @@ func run(cmd *cobra.Command) error {
 
 	// custom http configuration
 	s := &http.Server{
-		Addr:         "",
-		Handler:      r,
-		ReadTimeout:  0,
-		WriteTimeout: 0,
+		Addr:    config.Manager.HttpAddr,
+		Handler: r,
 	}
-
 	go func() {
 		if err := s.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
 			log.Error("api server starts failed", err)
@@ -69,6 +81,9 @@ func run(cmd *cobra.Command) error {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Info("Shutting down server...")
+
+	manager.Stop()
+	observer.Stop()
 
 	// The context is used to inform the server it has 10 seconds to finish
 	// the request it is currently handling

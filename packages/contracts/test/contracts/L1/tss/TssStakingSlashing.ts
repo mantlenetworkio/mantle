@@ -110,7 +110,7 @@ describe('StakingSlashing', () => {
     let quitList = await stakingSlashing.getQuitList()
     expect(quitList[0]).to.eq(tssNodes[1].address)
     await expect(stakingSlashing.connect(tssNodes[1]).quit()).to.be.revertedWith("already in quitList")
-
+    
     let tssNodesPubKey: BytesLike[] = []
     // tssnodes staking first
     for (let i = 0; i < newTssNodes.length; i++) {
