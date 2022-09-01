@@ -151,7 +151,7 @@ get the slash record
 function getSlashingParams() external view returns (uint256[2], uint256[2])
 ```
 
-set the slashing params (0 -&gt; uptime , 1 -&gt; animus)
+set the slashing params (0 -&gt; uptime, 1 -&gt; animus)
 
 
 

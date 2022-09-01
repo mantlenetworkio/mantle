@@ -47,7 +47,7 @@ function SEQUENCER_PUBLISH_WINDOW() external view returns (uint256)
 ### appendStateBatch
 
 ```solidity
-function appendStateBatch(bytes32[] _batch, bytes _signature, uint256 _shouldStartAtElement) external nonpayable
+function appendStateBatch(bytes32[] _batch, uint256 _shouldStartAtElement, bytes _signature) external nonpayable
 ```
 
 Appends a batch of state roots to the chain.
@@ -59,8 +59,8 @@ Appends a batch of state roots to the chain.
 | Name | Type | Description |
 |---|---|---|
 | _batch | bytes32[] | Batch of state roots.
-| _signature | bytes | undefined
 | _shouldStartAtElement | uint256 | Index of the element at which this batch should start.
+| _signature | bytes | undefined
 
 ### batches
 
@@ -185,6 +185,23 @@ function libAddressManager() external view returns (contract Lib_AddressManager)
 |---|---|---|
 | _0 | contract Lib_AddressManager | undefined
 
+### messenger
+
+```solidity
+function messenger() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
+
 ### resolve
 
 ```solidity
@@ -234,6 +251,24 @@ Verifies a batch inclusion proof.
 
 
 ## Events
+
+### DistributeTssReward
+
+```solidity
+event DistributeTssReward(uint256 indexed _startBlockNumber, uint256 _length, address[] _tssMembers)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _startBlockNumber `indexed` | uint256 | undefined |
+| _length  | uint256 | undefined |
+| _tssMembers  | address[] | undefined |
 
 ### StateBatchAppended
 

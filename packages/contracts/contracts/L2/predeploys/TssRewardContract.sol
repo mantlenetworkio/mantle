@@ -126,6 +126,9 @@ contract TssRewardContract is ITssRewardContract {
         return true;
     }
 
+    /**
+     * @dev withdraw div dust
+     */
     function withdrawDust() external onlyOwner checkBalance {
         uint256 amount = dust;
         totalAmount = totalAmount.sub(dust);
@@ -135,6 +138,9 @@ contract TssRewardContract is ITssRewardContract {
         }
     }
 
+    /**
+     * @dev clear balance
+     */
     function withdraw() external onlyOwner checkBalance {
         totalAmount = 0;
         if (address(this).balance > 0) {
