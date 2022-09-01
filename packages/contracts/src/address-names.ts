@@ -12,6 +12,8 @@ export const names = {
       BVM_L1CrossDomainMessenger: 'BVM_L1CrossDomainMessenger',
       Proxy__BVM_L1CrossDomainMessenger: 'Proxy__BVM_L1CrossDomainMessenger',
       Proxy__BVM_L1StandardBridge: 'Proxy__BVM_L1StandardBridge',
+      TssGroupManager: 'TssGroupManager',
+      TssStakingSlashing:'TssStakingSlashing',
     },
     accounts: { BVM_Sequencer: 'BVM_Sequencer', BVM_Proposer: 'BVM_Proposer' },
   },
