@@ -2,6 +2,7 @@ package signer
 
 import (
 	"errors"
+	"github.com/bitdao-io/bitnetwork/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
@@ -25,17 +26,25 @@ func (p *Processor) ProcessMessage() {
 			case rpcReq := <-reqChan:
 				reqId := rpcReq.ID.(tdtypes.JSONRPCStringID).String()
 				logger.Info().Str("reqId", reqId).Msgf("receive request method : %s", rpcReq.Method)
-				if rpcReq.Method == "ask" {
+				if rpcReq.Method == common.AskStateBatch.String() {
 					if err := p.writeChan(p.askRequestChan, rpcReq); err != nil {
 						logger.Err(err).Msg("failed to write msg to ask channel,channel blocked ")
 					}
-				} else if rpcReq.Method == "sign" {
+				} else if rpcReq.Method == common.SignStateBatch.String() {
 					if err := p.writeChan(p.signRequestChan, rpcReq); err != nil {
 						logger.Err(err).Msg("failed to write msg to sign channel,channel blocked ")
 					}
 				} else if rpcReq.Method == "keygen" {
 					if err := p.writeChan(p.keygenRequestChan, rpcReq); err != nil {
 						logger.Err(err).Msg("failed to write msg to keygen channel,channel blocked")
+					}
+				} else if rpcReq.Method == common.AskSlash.String() {
+					if err := p.writeChan(p.askSlashChan, rpcReq); err != nil {
+						logger.Err(err).Msg("failed to write msg to ask slash channel,channel blocked")
+					}
+				} else if rpcReq.Method == common.SignSlash.String() {
+					if err := p.writeChan(p.signSlashChan, rpcReq); err != nil {
+						logger.Err(err).Msg("failed to write msg to sign slash channel,channel blocked")
 					}
 				} else {
 					logger.Error().Msgf("unknown rpc request method : %s ", rpcReq.Method)
@@ -49,9 +58,9 @@ func (p *Processor) ProcessMessage() {
 func (p *Processor) writeChan(cache chan tdtypes.RPCRequest, msg tdtypes.RPCRequest) error {
 	select {
 	case cache <- msg:
-		if msg.Method == "ask" {
+		if msg.Method == common.AskStateBatch.String() {
 			p.metrics.AskChannelCount.Set(float64(len(cache)))
-		} else {
+		} else if msg.Method == common.SignStateBatch.String() {
 			p.metrics.SignChannelCount.Set(float64(len(cache)))
 		}
 		return nil

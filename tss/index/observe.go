@@ -10,16 +10,15 @@ import (
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
 )
 
-const (
-	ethereumConfirmBlocks = 15
-	scanRange             = 10
-)
+const scanRange = 10
 
-type Observer struct {
-	store           ObserverStore
+type Indexer struct {
+	store           IndexerStore
 	l1Cli           *ethclient.Client
+	l1ConfirmBlocks int
 	sccContractAddr common.Address
 	hook            Hook
+	taskInterval    time.Duration
 	stopChan        chan struct{}
 }
 
@@ -27,25 +26,54 @@ type Hook interface {
 	AfterStateBatchIndexed([32]byte) error
 }
 
-func (o Observer) Start() error {
-	scannedHeight, err := o.store.GetScannedHeight()
+func NewIndexer(store IndexerStore, l1url string, l1ConfirmBlocks int, sccContractAddr string, taskInterval string) (Indexer, error) {
+	taskIntervalDur, err := time.ParseDuration(taskInterval)
 	if err != nil {
-		return err
+		return Indexer{}, nil
 	}
-	go o.ObserveStateBatchAppended(scannedHeight)
-	return nil
+	l1Cli, err := ethclient.Dial(l1url)
+	if err != nil {
+		return Indexer{}, err
+	}
+	address := common.HexToAddress(sccContractAddr)
+	return Indexer{
+		store:           store,
+		l1Cli:           l1Cli,
+		l1ConfirmBlocks: l1ConfirmBlocks,
+		sccContractAddr: address,
+		taskInterval:    taskIntervalDur,
+		stopChan:        make(chan struct{}),
+	}, nil
 }
 
-func (o Observer) ObserveStateBatchAppended(scannedHeight uint64) {
-	queryTicker := time.NewTicker(2 * time.Second)
+func (o Indexer) SetHook(hook Hook) Indexer {
+	o.hook = hook
+	return o
+}
+
+func (o Indexer) Start() {
+	scannedHeight, err := o.store.GetScannedHeight()
+	if err != nil {
+		panic(err)
+	}
+	go o.ObserveStateBatchAppended(scannedHeight)
+}
+
+func (o Indexer) Stop() {
+	close(o.stopChan)
+}
+
+func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
+	queryTicker := time.NewTicker(o.taskInterval)
 	for {
-		go func() {
+		func() {
 			currentHeader, err := o.l1Cli.HeaderByNumber(context.Background(), nil)
 			if err != nil {
 				log.Error("failed to call layer1 HeaderByNumber", err)
 				return
 			}
-			latestConfirmedBlockHeight := currentHeader.Number.Uint64() - ethereumConfirmBlocks
+
+			latestConfirmedBlockHeight := currentHeader.Number.Uint64() - uint64(o.l1ConfirmBlocks)
 
 			startHeight := scannedHeight + 1
 			endHeight := startHeight + scanRange
@@ -91,24 +119,21 @@ func (o Observer) ObserveStateBatchAppended(scannedHeight uint64) {
 }
 
 func indexBatch(store StateBatchStore, stateBatchRoot [32]byte, batchIndex uint64) (retry bool) {
-	found, stateBatch, err := store.GetStateBatch(stateBatchRoot)
-	if err != nil {
-		log.Error("failed to GetStateBatch from store", err)
-		time.Sleep(2 * time.Second)
-		return true
-	}
+
+	found, stateBatch := store.GetStateBatch(stateBatchRoot)
 	if !found {
 		log.Error("can not find the state batch with root, skip this batch", "root", hexutil.Encode(stateBatchRoot[:]))
 		return false
 	}
 	stateBatch.BatchIndex = batchIndex
-	if err = store.SetStateBatch(stateBatch); err != nil { // update stateBatch with index
+
+	if err := store.SetStateBatch(stateBatch); err != nil { // update stateBatch with index
 		log.Error("failed to SetStateBatch with index", err)
 		time.Sleep(2 * time.Second)
 		return true
 	}
 
-	if err = store.IndexStateBatch(batchIndex, stateBatchRoot); err != nil {
+	if err := store.IndexStateBatch(batchIndex, stateBatchRoot); err != nil {
 		log.Error("failed to IndexStateBatch", err)
 		time.Sleep(2 * time.Second)
 		return true

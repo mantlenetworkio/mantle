@@ -18,7 +18,7 @@ import (
 	tss "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/manager/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/server"
-	"github.com/btcsuite/btcd/btcec"
+
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
@@ -26,7 +26,7 @@ type Counter struct {
 	count map[string]int
 }
 
-func (c Counter) increment(node string) {
+func (c *Counter) increment(node string) {
 	if c.count == nil {
 		c.count = make(map[string]int, 0)
 	}
@@ -34,8 +34,8 @@ func (c Counter) increment(node string) {
 	c.count[node] = num + 1
 }
 
-func (c Counter) satisfied(minNumber int) []string {
-	ret := make([]string, 0)
+func (c *Counter) satisfied(minNumber int) []string {
+	var ret []string
 	for n, ct := range c.count {
 		if ct >= minNumber {
 			ret = append(ret, n)
@@ -55,12 +55,13 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 
 	errSendChan := make(chan struct{})
 	responseNodes := make(map[string]struct{})
-	counter := Counter{}
+
+	counter := &Counter{}
 	var validSignResponse *tss.SignResponse
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		cctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+		cctx, cancel := context.WithTimeout(context.Background(), m.signTimeout)
 		defer func() {
 			log.Info("exit signing process")
 			cancel()
@@ -73,8 +74,10 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 				return
 			case resp := <-respChan:
 				log.Info(fmt.Sprintf("signed response: %s", resp.RpcResponse.String()), "node", resp.SourceNode)
-				responseNodes[resp.SourceNode] = struct{}{}
 
+				if !slices.ExistsIgnoreCase(ctx.Approvers(), resp.SourceNode) { // ignore the message which the sender should not be involved in approver set
+					continue
+				}
 				func() {
 					defer func() {
 						responseNodes[resp.SourceNode] = struct{}{}
@@ -99,7 +102,8 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 
 						// if signing slashing, we chose a better gas price as the valid one
 						if validSignResponse == nil {
-							slashTxGasPrice, succ := new(big.Int).SetString(validSignResponse.SlashTxGasPrice, 10)
+
+							slashTxGasPrice, succ := new(big.Int).SetString(signResponse.SlashTxGasPrice, 10)
 							if !succ {
 								log.Error("wrong format of slashTxGasPrice")
 								return
@@ -118,7 +122,8 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 								validSignResponse = &signResponse
 							}
 						}
-					} else if resp.RpcResponse.Error.Code == 100 {
+
+					} else if resp.RpcResponse.Error.Code == tss.CulpritErrorCode {
 						_, ok := responseNodes[resp.SourceNode]
 						if ok { // ignore if handled
 							return
@@ -149,13 +154,12 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 	m.sendToNodes(ctx, request, method, errSendChan)
 	wg.Wait()
 
-	var err error
 	var culprits []string
 	if validSignResponse == nil {
-		err = errors.New("failed to generate signature")
 		culprits = counter.satisfied(ctx.TssInfos().Threshold + 1)
+		return tss.SignResponse{}, culprits, errors.New("failed to generate signature")
 	}
-	return *validSignResponse, culprits, err
+	return *validSignResponse, culprits, nil
 }
 
 func (m Manager) sendToNodes(ctx types.Context, request interface{}, method tss.Method, errSendChan chan struct{}) {
@@ -187,23 +191,4 @@ func (m Manager) sendToNodes(ctx types.Context, request interface{}, method tss.
 			}
 		}(node, rpcRequest)
 	}
-}
-
-func getSignature(sig *tss.SignatureData) ([]byte, error) {
-	R := new(big.Int).SetBytes(sig.R)
-	S := new(big.Int).SetBytes(sig.S)
-	N := btcec.S256().N
-	halfOrder := new(big.Int).Rsh(N, 1)
-	if S.Cmp(halfOrder) == 1 {
-		S.Sub(N, S)
-	}
-	rBytes := R.Bytes()
-	sBytes := S.Bytes()
-	cBytes := sig.SignatureRecovery
-
-	sigBytes := make([]byte, 65)
-	copy(sigBytes[32-len(rBytes):32], rBytes)
-	copy(sigBytes[64-len(sBytes):64], sBytes)
-	copy(sigBytes[64:65], cBytes)
-	return sigBytes, nil
 }

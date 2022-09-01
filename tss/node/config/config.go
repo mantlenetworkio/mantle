@@ -33,23 +33,28 @@ type Configuration struct {
 }
 
 type BaseConfig struct {
-	BaseDir         string        `json:"base_dir" mapstructure:"base_dir"`
-	PreParamFile    string        `json:"pre_param_file" mapstructure:"pre_param_file"`
-	P2PPort         string        `json:"p2p_port" mapstructure:"p2p_port"`
-	BootstrapPeers  string        `json:"bootstrap_peers" mapstructure:"bootstrap_peers"`
-	ExternalIP      string        `json:"external_ip" mapstructure:"external_ip"`
-	KeyGenTimeout   time.Duration `json:"key_gen_timeout" mapstructure:"key_gen_timeout"`
-	KeySignTimeout  time.Duration `json:"key_sign_timeout" mapstructure:"key_sign_timeout"`
-	PreParamTimeout time.Duration `json:"pre_param_timeout" mapstructure:"pre_param_timeout"`
-	PauseSigning    bool          `json:"pause_signing" mapstructure:"pause_signing"`
-	WsAddr          string        `json:"ws_addr" mapstructure:"ws_addr"`
-	L2EthRpc        string        `json:"l2_eth_rpc" mapstructure:"l2_eth_rpc"`
-	DisableHTTP2    bool          `json:"disable_http2" mapstructure:"disable_http2"`
+	BaseDir                   string        `json:"base_dir" mapstructure:"base_dir"`
+	DBDir                     string        `json:"db_dir" mapstructure:"db_dir"`
+	PreParamFile              string        `json:"pre_param_file" mapstructure:"pre_param_file"`
+	P2PPort                   string        `json:"p2p_port" mapstructure:"p2p_port"`
+	BootstrapPeers            string        `json:"bootstrap_peers" mapstructure:"bootstrap_peers"`
+	ExternalIP                string        `json:"external_ip" mapstructure:"external_ip"`
+	KeyGenTimeout             time.Duration `json:"key_gen_timeout" mapstructure:"key_gen_timeout"`
+	KeySignTimeout            time.Duration `json:"key_sign_timeout" mapstructure:"key_sign_timeout"`
+	PreParamTimeout           time.Duration `json:"pre_param_timeout" mapstructure:"pre_param_timeout"`
+	PauseSigning              bool          `json:"pause_signing" mapstructure:"pause_signing"`
+	WsAddr                    string        `json:"ws_addr" mapstructure:"ws_addr"`
+	L2EthRpc                  string        `json:"l2_eth_rpc" mapstructure:"l2_eth_rpc"`
+	L1EthRpc                  string        `json:"l1_eth_rpc" mapstructure:"l1_eth_rpc"`
+	DisableHTTP2              bool          `json:"disable_http2" mapstructure:"disable_http2"`
+	TssGroupManagerAddress    string        `json:"tss_group_manager_address" mapstructure:"tss_group_manager_address"`
+	TssStakingSlashingAddress string        `json:"tss_staking_slashing_address" mapstructure:"tss_staking_slashing_address"`
 }
 
 func DefaultBaseConfiguration() BaseConfig {
 	return BaseConfig{
 		BaseDir:         DefaultBaseDir,
+		DBDir:           filepath.Join(DefaultBaseDir, "db"),
 		P2PPort:         "8000",
 		KeyGenTimeout:   10 * time.Second,
 		KeySignTimeout:  10 * time.Second,

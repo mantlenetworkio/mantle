@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
+	"github.com/bitdao-io/bitnetwork/tss/node/store"
 	"os"
 	"os/signal"
 	"strconv"
@@ -55,6 +56,12 @@ func runNode(cmd *cobra.Command) error {
 		return err
 	}
 
+	//new level db storage
+	store, err := store.NewStorage(cfg.DBDir)
+	if err != nil {
+		return err
+	}
+
 	//new tss server instance
 	p2pPort, err := strconv.Atoi(cfg.P2PPort)
 	if err != nil {
@@ -91,7 +98,7 @@ func runNode(cmd *cobra.Command) error {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	signer, err := sign.NewProcessor(cfg, ctx, tssInstance, privKey, pubkey)
+	signer, err := sign.NewProcessor(cfg, ctx, tssInstance, privKey, pubkey, store)
 	if err != nil {
 		log.Error().Err(err).Msg("fail to new signer ")
 		return err

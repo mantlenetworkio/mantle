@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"math/big"
 	"net/http"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/log"
@@ -28,6 +29,16 @@ func (registry *Registry) SignStateHandler() gin.HandlerFunc {
 			return
 		}
 
+		_, succ := new(big.Int).SetString(request.StartBlock, 10)
+		if !succ {
+			c.JSON(http.StatusBadRequest, errors.New("wrong StartBlock, can not be converted to number"))
+			return
+		}
+		_, succ = new(big.Int).SetString(request.OffsetStartsAtIndex, 10)
+		if !succ {
+			c.JSON(http.StatusBadRequest, errors.New("wrong OffsetStartsAtIndex, can not be converted to number"))
+			return
+		}
 		signature, err := registry.signService.SignStateBatch(request)
 		if err != nil {
 			c.String(http.StatusInternalServerError, "failed to sign state")

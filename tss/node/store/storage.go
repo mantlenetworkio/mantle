@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+	"github.com/bitdao-io/bitnetwork/tss/node/types"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/storage"
 )
@@ -10,7 +11,7 @@ type Storage struct {
 	db *leveldb.DB
 }
 
-func NewStorage(levelDbFolder string) (*Storage, error) {
+func NewStorage(levelDbFolder string) (types.NodeStore, error) {
 	var db *leveldb.DB
 	var err error
 	if len(levelDbFolder) == 0 {

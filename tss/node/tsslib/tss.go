@@ -29,6 +29,7 @@ type TssServer struct {
 	logger           zerolog.Logger
 	p2pCommunication *p2p2.Communication
 	localNodePubKey  string
+	participants     map[string][]string
 	preParams        *bkeygen.LocalPreParams
 	tssKeyGenLocker  *sync.Mutex
 	stopChan         chan struct{}
@@ -161,6 +162,7 @@ func NewTss(
 		logger:           log.With().Str("module", "tss").Logger(),
 		p2pCommunication: comm,
 		localNodePubKey:  pubkey,
+		participants:     make(map[string][]string),
 		preParams:        preParams,
 		tssKeyGenLocker:  &sync.Mutex{},
 		stopChan:         make(chan struct{}),

@@ -2,14 +2,13 @@ package types
 
 import (
 	"context"
-	"github.com/bitdao-io/bitnetwork/tss/slash"
 	"time"
 )
 
 type TssCommitteeInfo struct {
 	ElectionId    uint64   `json:"election_id"`
 	ClusterPubKey string   `json:"cluster_pub_key"`
-	PartyPubKeys  []string `json:"party_pub_keys"`
+	TssMembers    []string `json:"tss_members"`
 	Threshold     int      `json:"threshold"`
 }
 
@@ -17,11 +16,6 @@ type CpkData struct {
 	Cpk          string    `json:"cpk"`
 	ElectionId   uint64    `json:"election_id"`
 	CreationTime time.Time `json:"creation_time"`
-}
-
-type SlashingTx struct {
-	Info    slash.SlashingInfo `json:"info"`
-	TxBytes []byte             `json:"tx_bytes"`
 }
 
 // Context ---------------------------------------------

@@ -3,11 +3,14 @@ package signer
 import (
 	"context"
 	"crypto/ecdsa"
+	"github.com/bitdao-io/bitnetwork/bss-core/dial"
 	l2ethclient "github.com/bitdao-io/bitnetwork/l2geth/ethclient"
+	"github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/node/config"
 	"github.com/bitdao-io/bitnetwork/tss/node/tsslib"
-	"github.com/bitdao-io/bitnetwork/tss/types"
+	"github.com/bitdao-io/bitnetwork/tss/node/types"
 	"github.com/bitdao-io/bitnetwork/tss/ws/client"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
@@ -16,32 +19,43 @@ import (
 )
 
 type Processor struct {
-	localPubkey       string
-	tssServer         tsslib.Server
-	wsClient          *client.WSClients
-	l2Client          *l2ethclient.Client
-	ctx               context.Context
-	cancel            func()
-	srcChainId        string
-	dstChainId        string
-	dstChainName      string
-	pause             bool
-	pauseWg           *sync.WaitGroup
-	stopChan          chan struct{}
-	wg                *sync.WaitGroup
-	askRequestChan    chan tdtypes.RPCRequest
-	signRequestChan   chan tdtypes.RPCRequest
-	keygenRequestChan chan tdtypes.RPCRequest
-	waitSignLock      *sync.Mutex
-	waitSignMsgs      map[string]types.SignStateRequest
-	logger            zerolog.Logger
-
-	metrics *Metrics
+	localPubkey               string
+	privateKey                *ecdsa.PrivateKey
+	tssServer                 tsslib.Server
+	wsClient                  *client.WSClients
+	l2Client                  *l2ethclient.Client
+	l1Client                  *ethclient.Client
+	ctx                       context.Context
+	cancel                    func()
+	srcChainId                string
+	dstChainId                string
+	dstChainName              string
+	pause                     bool
+	pauseWg                   *sync.WaitGroup
+	stopChan                  chan struct{}
+	wg                        *sync.WaitGroup
+	askRequestChan            chan tdtypes.RPCRequest
+	signRequestChan           chan tdtypes.RPCRequest
+	askSlashChan              chan tdtypes.RPCRequest
+	signSlashChan             chan tdtypes.RPCRequest
+	keygenRequestChan         chan tdtypes.RPCRequest
+	waitSignLock              *sync.Mutex
+	waitSignMsgs              map[string]common.SignStateRequest
+	waitSignSlashLock         *sync.Mutex
+	waitSignSlashMsgs         map[string]map[uint64]common.SlashRequest
+	nodeStore                 types.NodeStore
+	logger                    zerolog.Logger
+	tssGroupManagerAddress    string
+	tssStakingSlashingAddress string
+	metrics                   *Metrics
 }
 
-func NewProcessor(cfg config.Configuration, contx context.Context, tssInstance tsslib.Server, privKey *ecdsa.PrivateKey, pubKey string) (*Processor, error) {
+func NewProcessor(cfg config.Configuration, contx context.Context, tssInstance tsslib.Server, privKey *ecdsa.PrivateKey, pubKey string, nodeStore types.NodeStore) (*Processor, error) {
 	ctx, cancel := context.WithCancel(contx)
-
+	l1Cli, err := dial.L1EthClientWithTimeout(ctx, cfg.L1EthRpc, cfg.DisableHTTP2)
+	if err != nil {
+		return nil, err
+	}
 	wsClient, err := client.NewWSClient(cfg.WsAddr, "/ws", privKey, pubKey)
 	if err != nil {
 		return nil, err
@@ -49,22 +63,29 @@ func NewProcessor(cfg config.Configuration, contx context.Context, tssInstance t
 	l2Client, err := DialL2EthClientWithTimeout(ctx, cfg.BaseConfig.L2EthRpc, cfg.BaseConfig.DisableHTTP2)
 
 	processor := Processor{
-		localPubkey:       pubKey,
-		tssServer:         tssInstance,
-		pauseWg:           &sync.WaitGroup{},
-		stopChan:          make(chan struct{}),
-		wg:                &sync.WaitGroup{},
-		logger:            log.With().Str("module", "signer").Logger(),
-		wsClient:          wsClient,
-		l2Client:          l2Client,
-		ctx:               ctx,
-		cancel:            cancel,
-		askRequestChan:    make(chan tdtypes.RPCRequest, 100),
-		signRequestChan:   make(chan tdtypes.RPCRequest, 100),
-		keygenRequestChan: make(chan tdtypes.RPCRequest, 1),
-		waitSignLock:      &sync.Mutex{},
-		waitSignMsgs:      make(map[string]types.SignStateRequest),
-		metrics:           PrometheusMetrics("tssnode"),
+		localPubkey:               pubKey,
+		privateKey:                privKey,
+		tssServer:                 tssInstance,
+		pauseWg:                   &sync.WaitGroup{},
+		stopChan:                  make(chan struct{}),
+		wg:                        &sync.WaitGroup{},
+		logger:                    log.With().Str("module", "signer").Logger(),
+		wsClient:                  wsClient,
+		l2Client:                  l2Client,
+		l1Client:                  l1Cli,
+		ctx:                       ctx,
+		cancel:                    cancel,
+		askRequestChan:            make(chan tdtypes.RPCRequest, 100),
+		signRequestChan:           make(chan tdtypes.RPCRequest, 100),
+		askSlashChan:              make(chan tdtypes.RPCRequest, 1),
+		signSlashChan:             make(chan tdtypes.RPCRequest, 1),
+		keygenRequestChan:         make(chan tdtypes.RPCRequest, 1),
+		waitSignLock:              &sync.Mutex{},
+		waitSignMsgs:              make(map[string]common.SignStateRequest),
+		nodeStore:                 nodeStore,
+		tssGroupManagerAddress:    cfg.TssGroupManagerAddress,
+		tssStakingSlashingAddress: cfg.TssStakingSlashingAddress,
+		metrics:                   PrometheusMetrics("tssnode"),
 	}
 	return &processor, nil
 }

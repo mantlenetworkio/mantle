@@ -15,22 +15,13 @@ import (
 	eth "github.com/ethereum/go-ethereum/core/types"
 )
 
-const numConfirmations = 15
-
-var (
-	queryInterval = 10 * time.Second
-	sendState     SendState
-)
-
-func init() {
-	sendState = SendState{
-		states: make(map[[28]byte]string, 0),
-		lock:   &sync.Mutex{},
-	}
+var sendState = SendState{
+	states: make(map[[28]byte]string, 0),
+	lock:   &sync.Mutex{},
 }
 
 func (m Manager) slashing() {
-	queryTicker := time.NewTicker(queryInterval)
+	queryTicker := time.NewTicker(m.taskInterval)
 	for {
 		signingInfos := m.store.ListSlashingInfo()
 		for _, si := range signingInfos {
@@ -45,7 +36,8 @@ func (m Manager) slashing() {
 }
 
 func (m Manager) handleSlashing(si slash.SlashingInfo) {
-	currentTssInfo := m.tssQueryService.QueryInfo()
+
+	currentTssInfo := m.tssQueryService.QueryActiveInfo()
 	if si.ElectionId != currentTssInfo.ElectionId {
 		log.Error("the election which this node supposed to be slashed is expired, ignore the slash",
 			"node", si.Address.String(), "electionId", si.ElectionId, "batch index", si.BatchIndex)
@@ -59,7 +51,7 @@ func (m Manager) handleSlashing(si slash.SlashingInfo) {
 		return
 	}
 
-	availableNodes := m.availableNodes(currentTssInfo.PartyPubKeys)
+	availableNodes := m.availableNodes(currentTssInfo.TssMembers)
 	if len(availableNodes) < currentTssInfo.Threshold+1 {
 		log.Error("not enough available nodes to sign slashing")
 		return
@@ -119,15 +111,16 @@ func (m Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo
 	if err := tx.UnmarshalBinary(signResp.SlashTxBytes); err != nil {
 		return err
 	}
-	err := m.l1Cli.SendTransaction(context.Background(), tx)
-	if err != nil {
+
+	if err := m.l1Cli.SendTransaction(context.Background(), tx); err != nil {
 		log.Error("failed to send transaction", "err", err)
 		return err
 	}
 	confirmTxReceipt := func(txHash ethc.Hash, info slash.SlashingInfo) *eth.Receipt {
 		sendState.set(info.Address, info.BatchIndex, "has not minted")
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
-		queryTicker := time.NewTicker(queryInterval)
+
+		ctx, cancel := context.WithTimeout(context.Background(), m.confirmReceiptTimeout)
+		queryTicker := time.NewTicker(m.taskInterval)
 		defer func() {
 			cancel()
 			queryTicker.Stop()
@@ -146,9 +139,10 @@ func (m Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo
 				log.Info("Transaction mined, checking confirmations",
 					"txHash", txHash, "txHeight", txHeight,
 					"tipHeight", tipHeight,
-					"numConfirmations", numConfirmations)
+
+					"numConfirmations", m.l1ConfirmBlocks)
 				sendState.set(info.Address, info.BatchIndex, "minted, wait for confirming")
-				if txHeight+numConfirmations < tipHeight {
+				if txHeight+uint64(m.l1ConfirmBlocks) < tipHeight {
 					reverted := receipt.Status == 0
 					log.Info("Transaction confirmed",
 						"txHash", txHash,

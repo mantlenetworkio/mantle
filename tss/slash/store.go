@@ -1,6 +1,8 @@
 package slash
 
-import "github.com/bitdao-io/bitnetwork/l2geth/common"
+import (
+	"github.com/bitdao-io/bitnetwork/l2geth/common"
+)
 
 type SigningInfo struct {
 	Address             common.Address `json:"address"`
@@ -26,5 +28,11 @@ type SlashingStore interface {
 
 	SetSlashingInfo(SlashingInfo)
 	ListSlashingInfo() []SlashingInfo
+
+	GetSlashingInfo(common.Address, uint64) (bool, SlashingInfo)
+	IsInSlashing(common.Address) bool
 	RemoveSlashingInfo(common.Address, uint64)
+
+	AddCulprits([]string)
+	GetCulprits() []string
 }

@@ -1,6 +1,6 @@
 module github.com/bitdao-io/bitnetwork/tss
 
-go 1.17
+go 1.18
 
 require (
 	github.com/SSSaaS/sssa-golang v0.0.0-20170502204618-d37d7782d752
@@ -170,6 +170,7 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
+	github.com/rjeczalik/notify v0.9.2 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/rs/cors v1.8.2 // indirect
 	github.com/sasha-s/go-deadlock v0.2.1-0.20190427202633-1595213edefa // indirect
@@ -211,4 +212,5 @@ require (
 replace (
 	github.com/bitdao-io/bitnetwork/bss-core v0.0.0 => ../bss-core
 	github.com/bitdao-io/bitnetwork/l2geth v0.0.0 => ../l2geth
+	github.com/lucas-clemente/quic-go v0.24.0 => github.com/lucas-clemente/quic-go v0.26.0
 )

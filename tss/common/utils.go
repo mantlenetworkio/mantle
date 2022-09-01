@@ -18,7 +18,7 @@ func NodeToAddress(publicKey string) (common.Address, error) {
 	return address, nil
 }
 
-func StateBatchDigestBytes(stateRoots [][32]byte, offsetStartsAtIndex big.Int) []byte {
+func StateBatchDigestBytes(stateRoots [][32]byte, offsetStartsAtIndex *big.Int) []byte {
 	rawBytes := make([]byte, 0)
 	for _, sr := range stateRoots {
 		rawBytes = append(rawBytes, sr[:]...)

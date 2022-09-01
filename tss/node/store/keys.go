@@ -16,12 +16,6 @@ var (
 	CulpritsKeyPrefix                = []byte{0x08}
 )
 
-func getCPKDataKey(electionId uint64) []byte {
-	electionIdBz := make([]byte, 8)
-	binary.BigEndian.PutUint64(electionIdBz, electionId)
-	return append(CPKDataKeyPrefix, electionIdBz...)
-}
-
 func getStateBatchKey(batchRoot [32]byte) []byte {
 	return append(StateBatchKeyPrefix, batchRoot[:]...)
 }
