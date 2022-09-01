@@ -15,10 +15,7 @@ jobs:
           name: Check if we should run
           command: |
             shopt -s inherit_errexit
-            CHANGED=$(check-changed "(op-bindings|packages/)")
-            if [[ "$CHANGED" = "FALSE" ]]; then
-              circleci step halt
-            fi
+            circleci step halt
       - save_cache:
           key: v2-cache-source-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -36,11 +33,8 @@ jobs:
             - node_modules
             - packages/common-ts/node_modules
             - packages/contracts/node_modules
-            - packages/contracts-bedrock/node_modules
-            - packages/contracts-periphery/node_modules
             - packages/core-utils/node_modules
             - packages/data-transport-layer/node_modules
-            - packages/drippie-mon/node_modules
             - packages/fault-detector/node_modules
             - packages/message-relayer/node_modules
             - packages/replica-healthcheck/node_modules
@@ -104,74 +98,6 @@ jobs:
             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USERNAME" --password-stdin
             docker push <<parameters.docker_tags>>
 
-  contracts-bedrock-tests:
-    docker:
-      - image: ethereumbitnetwork/ci-builder:latest
-    resource_class: large
-    steps:
-      - restore_cache:
-          keys:
-            - v2-cache-yarn-build-{{ .Revision }}
-      - checkout
-      - run:
-          name: Check if we should run
-          command: |
-            shopt -s inherit_errexit
-            CHANGED=$(check-changed "(contracts-bedrock|hardhat-deploy-config)")
-            if [[ "$CHANGED" = "FALSE" ]]; then
-              circleci step halt
-            fi
-      - run:
-          name: lint
-          command: yarn lint:check
-          working_directory: packages/contracts-bedrock
-      - run:
-          name: slither
-          command: |
-            slither --version
-            yarn slither || exit 0
-          working_directory: packages/contracts-bedrock
-      - run:
-          name: test
-          command: yarn test
-          working_directory: packages/contracts-bedrock
-          environment:
-            FOUNDRY_PROFILE: ci
-      - run:
-          name: gas snapshot
-          command: |
-            forge --version
-            forge snapshot --check
-          environment:
-            FOUNDRY_PROFILE: ci
-          working_directory: packages/contracts-bedrock
-      - run:
-          name: storage snapshot
-          command: yarn storage-snapshot && git diff --exit-code .storage-layout
-          working_directory: packages/contracts-bedrock
-
-  op-bindings-build:
-    docker:
-      - image: ethereumbitnetwork/ci-builder:latest
-    resource_class: medium
-    steps:
-      - restore_cache:
-          keys:
-            - v2-cache-yarn-build-{{ .Revision }}
-      - checkout
-      - run:
-          name: Check if we should run
-          command: |
-            shopt -s inherit_errexit
-            CHANGED=$(check-changed "(contracts-bedrock|op-bindings)")
-            if [[ "$CHANGED" = "FALSE" ]]; then
-              circleci step halt
-            fi
-      - run:
-          name: check go bindings
-          command: make && git diff --exit-code
-          working_directory: op-bindings
-
   js-lint-test:
     parameters:
       package_name:
@@ -206,109 +132,6 @@ jobs:
           command: yarn test:coverage
           working_directory: packages/<<parameters.package_name>>
 
-  bedrock-go-tests:
-    docker:
-      - image: ethereumbitnetwork/ci-builder:latest
-    steps:
-      - checkout
-      - run:
-          name: Check if we should run
-          command: |
-            shopt -s inherit_errexit
-            CHANGED=$(check-changed "op-(batcher|bindings|e2e|node|proposer)")
-            if [[ "$CHANGED" = "FALSE" ]]; then
-              circleci step halt
-            fi
-      - run:
-          name: lint op-bindings
-          command: |
-            golangci-lint run -E goimports,sqlclosecheck,bodyclose,asciicheck,misspell ./...
-          working_directory: op-bindings
-      - run:
-          name: lint op-node
-          command: |
-            golangci-lint run -E goimports,sqlclosecheck,bodyclose,asciicheck,misspell ./...
-          working_directory: op-node
-      - run:
-          name: lint op-proposer
-          command: |
-            golangci-lint run -E goimports,sqlclosecheck,bodyclose,asciicheck,misspell ./...
-          working_directory: op-proposer
-      - run:
-          name: lint op-batcher
-          command: |
-            golangci-lint run -E goimports,sqlclosecheck,bodyclose,asciicheck,misspell ./...
-          working_directory: op-batcher
-      - run:
-          name: lint op-e2e
-          command: |
-            golangci-lint run -E goimports,sqlclosecheck,bodyclose,asciicheck,misspell ./...
-          working_directory: op-e2e
-      - run:
-          name: prep results dir
-          command: mkdir -p /test-results
-      - run:
-          name: test op-node
-          command: |
-            gotestsum --junitfile /test-results/op-node.xml -- -coverpkg=github.com/bitdao-io/bitnetwork/... -coverprofile=coverage.out -covermode=atomic ./...
-          working_directory: op-node
-      - run:
-          name: test op-proposer
-          command: |
-            gotestsum --junitfile /test-results/op-proposer.xml -- -coverpkg=github.com/bitdao-io/bitnetwork/... -coverprofile=coverage.out -covermode=atomic ./...
-          working_directory: op-proposer
-      - run:
-          name: test op-batcher
-          command: |
-            gotestsum --junitfile /test-results/op-batcher.xml -- -coverpkg=github.com/bitdao-io/bitnetwork/... -coverprofile=coverage.out -covermode=atomic ./...
-          working_directory: op-batcher
-      - run:
-          name: test op-e2e
-          command: |
-            gotestsum --junitfile /test-results/op-e2e.xml -- -coverpkg=github.com/bitdao-io/bitnetwork/... -coverprofile=coverage.out -covermode=atomic ./...
-          working_directory: op-e2e
-      - store_test_results:
-          path: /test-results
-      - run:
-          command: echo "Done."
-
-  bedrock-markdown:
-    machine:
-      image: ubuntu-2004:202111-02
-    steps:
-      - checkout
-      - run:
-          name: yarn dev deps  # todo: what's the best way to pull in the dependencies for linting? yarn install above is using production env without dev dependencies
-          command: yarn install --production=false
-      - run:
-          name: specs toc
-          command: yarn lint:specs:toc && git diff --exit-code
-      - run:
-          name: markdown lint
-          command: yarn lint:specs:check
-      - run:
-          name: link lint
-          command: |
-            docker run --init -it -v `pwd`:/input lycheeverse/lychee --verbose --no-progress --exclude-loopback --exclude twitter.com --exclude-mail /input/README.md "/input/specs/**/*.md"
-
-  fuzz-op-node:
-    docker:
-      - image: ethereumbitnetwork/ci-builder:latest
-    steps:
-      - checkout
-      - run:
-          name: Check if we should run
-          command: |
-            shopt -s inherit_errexit
-            CHANGED=$(check-changed "op-node")
-            if [[ "$CHANGED" = "FALSE" ]]; then
-              circleci step halt
-            fi
-      - run:
-          name: Fuzz
-          command: make fuzz
-          working_directory: op-node
-
   depcheck:
     docker:
       - image: ethereumbitnetwork/ci-builder:latest
@@ -331,10 +154,6 @@ jobs:
           name: Check contracts
           command: npx depcheck
           working_directory: packages/contracts
-      - run:
-          name: Check contracts-periphery
-          command: npx depcheck
-          working_directory: packages/contracts-periphery
       - run:
           name: Check core-utils
           command: npx depcheck
@@ -420,59 +239,6 @@ jobs:
           name: Test
           command: make test
           working_directory: l2geth
-
-  devnet:
-    machine:
-      image: ubuntu-2004:202201-01
-      docker_layer_caching: true
-    environment:
-      DOCKER_BUILDKIT: 1
-    steps:
-      - checkout
-      - run:
-          name: Check if we should run
-          command: |
-            CHANGED=$(bash ./ops/docker/ci-builder/check-changed.sh "(contracts-bedrock|op-bindings|op-batcher|op-node|op-proposer|ops-bedrock)/")
-            if [[ "$CHANGED" = "FALSE" ]]; then
-              circleci step halt
-            fi
-      - run:
-          name: foundryup
-          command: |
-            curl -L https://foundry.paradigm.xyz | bash
-            source $HOME/.bashrc
-            foundryup
-            echo 'export PATH=$HOME/.foundry/bin:$PATH' >> $BASH_ENV
-      - run:
-          name: Install and build
-          command: |
-            yarn install
-            yarn build
-      - run:
-          name: Bring up the stack
-          command: |
-            make devnet-up
-      - run:
-          name: Do a deposit
-          command: |
-            timeout 5m npx hardhat deposit \
-                --to 0xB79f76EF2c5F0286176833E7B2eEe103b1CC3244  \
-                --amount-eth 1 \
-                --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
-                --network devnetL1
-          working_directory: packages/contracts-bedrock
-      - run:
-          name: Deposit ERC20 through the bridge
-          command: timeout 5m npx hardhat deposit --network devnetL1
-          working_directory: packages/sdk
-      - run:
-          name: Check the status
-          command: npx hardhat check-op-node
-          working_directory: packages/contracts-bedrock
-      - run:
-          name: Check L2 Config
-          command: npx hardhat check-l2-config
-          working_directory: packages/contracts-bedrock
 
   integration-tests:
     machine:
@@ -582,25 +348,10 @@ workflows:
       - contracts-bedrock-tests:
           requires:
             - yarn-monorepo
-      - op-bindings-build:
-          requires:
-            - yarn-monorepo
-      - js-lint-test:
-          name: contracts-periphery-tests
-          package_name: contracts-periphery
-          dependencies: "(contracts|contracts-bedrock|core-utils|hardhat-deploy-config)"
-          requires:
-            - yarn-monorepo
       - js-lint-test:
           name: dtl-tests
           package_name: data-transport-layer
           dependencies: "(common-ts|contracts|core-utils)"
-          requires:
-            - yarn-monorepo
-      - js-lint-test:
-          name: drippie-mon-tests
-          package_name: drippie-mon
-          dependencies: "(common-ts|contracts-periphery|core-utils|sdk)"
           requires:
             - yarn-monorepo
       - js-lint-test:
@@ -630,10 +381,6 @@ workflows:
       - depcheck:
           requires:
             - yarn-monorepo
-      - bedrock-go-tests
-      - fuzz-op-node
-      - bedrock-markdown
-      - devnet
       - go-lint-test-build:
           name: batch-submitter-tests
           binary_name: batch-submitter
@@ -644,19 +391,9 @@ workflows:
           binary_name: proxyd
           working_directory: proxyd
       - go-lint-test-build:
-          name: teleportr-tests
-          binary_name: teleportr
-          working_directory: teleportr
-          dependencies: bss-core
-      - go-lint-test-build:
           name: gas-oracle-tests
           binary_name: gas-oracle
           working_directory: gas-oracle
-      - go-lint-test-build:
-          name: indexer-tests
-          binary_name: indexer
-          working_directory: indexer
-          dependencies: op-bindings
       - go-lint-test-build:
           name: bss-core-tests
           binary_name: bss-core
@@ -713,26 +450,11 @@ workflows:
           context:
             - bitnetwork
       - docker-publish:
-          name: op-exporter-release
-          docker_file: op-exporter/Dockerfile
-          docker_tags: ethereumbitnetwork/op-exporter:nightly
-          docker_context: .
-          context:
-            - bitnetwork
-      - docker-publish:
           name: fault-detector-release
           docker_file: ops/docker/Dockerfile.packages
           docker_tags: ethereumbitnetwork/fault-detector:nightly
           docker_context: .
           target: fault-detector
-          context:
-            - bitnetwork
-      - docker-publish:
-          name: drippie-mon-release
-          docker_file: ops/docker/Dockerfile.packages
-          docker_tags: ethereumbitnetwork/drippie-mon:nightly
-          docker_context: .
-          target: drippie-mon
           context:
             - bitnetwork
       - docker-publish:
@@ -771,20 +493,6 @@ workflows:
           name: batch-submitter-service-release
           docker_file: batch-submitter/Dockerfile
           docker_tags: ethereumbitnetwork/batch-submitter-service:nightly
-          docker_context: .
-          context:
-            - bitnetwork
-      - docker-publish:
-          name: indexer-release
-          docker_file: indexer/Dockerfile
-          docker_tags: ethereumbitnetwork/indexer:nightly
-          docker_context: .
-          context:
-            - bitnetwork
-      - docker-publish:
-          name: teleportr-release
-          docker_file: teleportr/Dockerfile
-          docker_tags: ethereumbitnetwork/teleportr:nightly
           docker_context: .
           context:
             - bitnetwork
