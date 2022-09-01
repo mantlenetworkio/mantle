@@ -17,6 +17,7 @@ contract TssGroupManager is
     using ECDSAUpgradeable for bytes32;
     using AddressUpgradeable for address;
     bytes confirmGroupPublicKey;
+    address confirmGroupAddress;
     uint256 threshold;
     uint256 gRoundId;
     uint256 confirmNumber;
@@ -64,6 +65,13 @@ contract TssGroupManager is
         require(_threshold < _batchPublicKey.length, "threshold must less than tss member");
         // require((inActiveTssMembers.length == 0), "inactive tss member array is not empty");
         if(inActiveTssMembers.length > 0) {
+            for (uint256 i = 0; i < inActiveTssMembers.length; i++) {
+                // re-election clear data
+                delete groupKeyCounter[memberGroupKey[inActiveTssMembers[i]]];
+                delete memberGroupKey[inActiveTssMembers[i]];
+                delete isSubmitGroupKey[inActiveTssMembers[i]];
+                delete isInActiveMember[inActiveTssMembers[i]];
+            }
             delete inActiveTssMembers;
         }
         for (uint256 i = 0; i < _batchPublicKey.length; i++) {
@@ -226,7 +234,7 @@ contract TssGroupManager is
     // slither-disable-next-line external-function
     function verifySign(bytes32 _message, bytes memory _sig) public view override returns (bool) {
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(_message);
-        return (recover(ethSignedMessageHash, _sig) == publicKeyToAddress(confirmGroupPublicKey));
+        return (recover(ethSignedMessageHash, _sig) == confirmGroupAddress);
     }
 
     /**
@@ -252,14 +260,15 @@ contract TssGroupManager is
                 nodeAddress: publicKeyToAddress(inActiveTssMembers[i]),
                 status: MemberStatus.unJail
             });
-            // clear InActiveMember data
-            delete memberGroupKey[inActiveTssMembers[i]];
+            // election finish clear InActiveMember data
             delete groupKeyCounter[memberGroupKey[inActiveTssMembers[i]]];
+            delete memberGroupKey[inActiveTssMembers[i]];
             delete isSubmitGroupKey[inActiveTssMembers[i]];
             delete isInActiveMember[inActiveTssMembers[i]];
         }
         delete inActiveTssMembers;
         confirmGroupPublicKey = _groupPublicKey;
+        confirmGroupAddress = publicKeyToAddress(_groupPublicKey);
         emit tssActiveMemberAppended(gRoundId, _groupPublicKey, activeTssMembers);
     }
 
