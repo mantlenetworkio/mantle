@@ -1,6 +1,5 @@
 import { Signer, Wallet, BytesLike, Contract } from "ethers"
 import chai from "chai"
-
 import { deploy } from '../../../helpers'
 
 const { expect } = chai
@@ -46,7 +45,7 @@ describe('TssGroupManager', () => {
       tssNodesPublicKeys
     )
     const msg = await tssGroup.getTssGroupInfo()
-    expect(msg[0]).to.eq(1)
+    expect(msg[0]).to.eq(0)
     expect(msg[1]).to.eq(3)
   })
 
@@ -72,7 +71,6 @@ describe('TssGroupManager', () => {
         tssNodesPublicKeys[i],
         cpkPubKey
       )
-      expect(await tssGroup.isSubmitGroupKey(tssNodesPublicKeys[i])).to.eq(true)
     }
 
     let info = await tssGroup.getTssGroupInfo()
