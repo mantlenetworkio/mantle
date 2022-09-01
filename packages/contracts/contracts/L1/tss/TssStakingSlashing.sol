@@ -189,7 +189,10 @@ contract TssStakingSlashing is
     function quit() public nonReentrant {
         require(deposits[msg.sender].amount > 0, "do not have deposit");
         // when not in consensus period
-        require(ITssGroupManager(tssGroupContract).inActiveIsEmpty(), "not at the right time");
+        require(
+            ITssGroupManager(tssGroupContract).memberExistInActive(deposits[msg.sender].pubKey),
+            "not at the inactive group"
+        );
         // is active member
         require(
             ITssGroupManager(tssGroupContract).memberExistActive(deposits[msg.sender].pubKey),
@@ -222,7 +225,7 @@ contract TssStakingSlashing is
      */
     function slashing(bytes memory _messageBytes, bytes memory _sig) public nonReentrant {
         SlashMsg memory message = abi.decode(_messageBytes, (SlashMsg));
-        // verify tss member state
+        // verify tss member state not at jailed status
         require(!isJailed(message.jailNode), "the node already jailed");
         require(
             ITssGroupManager(tssGroupContract).memberExistActive(deposits[msg.sender].pubKey),
