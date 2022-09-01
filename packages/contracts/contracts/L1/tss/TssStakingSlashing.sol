@@ -114,6 +114,9 @@ contract TssStakingSlashing is
         public
         onlyOwner
     {
+        require(_slashAmount[1] > _slashAmount[0], "invalid param slashAmount,animus <= uptime");
+        require(_exIncome[1] > _exIncome[0], "invalid param exIncome,animus <= uptime");
+
         for (uint256 i = 0; i < 2; i++) {
             require(_exIncome[i] > 0, "invalid amount");
             require(_slashAmount[i] > _exIncome[i], "slashAmount need bigger than exIncome");
@@ -136,8 +139,17 @@ contract TssStakingSlashing is
      * @param _pubKey public key of sender
      */
     function staking(uint256 _amount, bytes memory _pubKey) public nonReentrant {
+        // slashing params check
+        for (uint256 i = 0; i < 2; i++) {
+            require(slashAmount[i] > 0, "have not set the slash amount");
+            require(exIncome[i] > 0, "have not set the extra income amount");
+        }
         // verify amount
         require(_amount > 0, "invalid amount");
+        require(
+            deposits[msg.sender].amount + _amount >= slashAmount[1],
+            "need deposit >= slashAmount"
+        );
 
         if (deposits[msg.sender].pubKey.length > 0) {
             // increase pledge amount
@@ -280,42 +292,41 @@ contract TssStakingSlashing is
         uint256 remainder;
         uint256 gain;
         uint256 _exIncome = 0;
+        // total slash slashAmount[slashType]
+        // tssnodes get: gain = (slashAmount[slashType] - exIncome[slashType]) / tssnodes.length
+        // sender get: remainder + _exIncome = (slashAmount[slashType] - exIncome[slashType]) % tssnodes.length + exIncome[slashType]
+        // deductedAmount = tssnodes.length * gain + remainder + _exIncome = slashAmount[slashType]
 
-        if (deposits[deduction].amount > slashAmount[slashType]) {
-            // deposit > slashAmount, deduct slashAmount then
-            // distribute additional tokens for the sender
-            deductedAmount = slashAmount[slashType];
-            deposits[deduction].amount -= slashAmount[slashType];
-            extraAmount = slashAmount[slashType] - exIncome[slashType];
-            _exIncome = exIncome[slashType];
-        } else if (deposits[deduction].amount > exIncome[slashType]) {
-            // exIncome < deposit <= slashAmount, deduct all token then
-            // distribute additional tokens for the sender
-            deductedAmount = deposits[deduction].amount;
-            deposits[deduction].amount = 0;
-            extraAmount = deductedAmount - exIncome[slashType];
-            _exIncome = exIncome[slashType];
-        } else if (deposits[deduction].amount > 0) {
-            // 0 < deposit <= exIncome, deduct all token
-            deductedAmount = deposits[deduction].amount;
-            deposits[deduction].amount = 0;
-            extraAmount = deductedAmount;
-        } else {
-            require(false, "panic , invalid type");
-        }
+        // check deposit > slashAmount, deduct slashAmount then
+        // distribute additional tokens for the sender
+        require(
+            deposits[deduction].amount >= slashAmount[slashType],
+            "do not have enought deposit"
+        );
+        // record total penalty
+        deductedAmount = slashAmount[slashType];
+        // record the sender's fixed additional income
+        _exIncome = exIncome[slashType];
 
-        // transfer sender the remainder as an additional bonus
+        // deal with the punished
+        deposits[deduction].amount -= deductedAmount;
+        // record the deserving income for tss nodes
+        extraAmount = deductedAmount - _exIncome;
+        // deserving income should subtract the remainder
         remainder = extraAmount % tssNodes.length;
+        // record the gain for tss nodes
         gain = (extraAmount - remainder) / tssNodes.length;
 
+        // sender get the fixed additional income and remainder
         deposits[msg.sender].amount += _exIncome + remainder;
         totalTransfer = exIncome[slashType] + remainder;
+        // send gain to tss nodes
         for (uint256 i = 0; i < tssNodes.length; i++) {
             totalTransfer += gain;
             deposits[tssNodes[i]].amount += gain;
         }
         // The total transfer amount is the same as the deducted amount
-        require(totalTransfer == deductedAmount, "panic, calculation error");
+        require(totalTransfer == deductedAmount, "panic,calculation error");
     }
 
     /**
@@ -355,7 +366,7 @@ contract TssStakingSlashing is
     function isJailed(address user) public returns (bool) {
         ITssGroupManager.TssMember memory tssMember = ITssGroupManager(tssGroupContract)
             .getTssMember(deposits[user].pubKey);
-        require(tssMember.publicKey.length == 64 ,"tss member not exist");
+        require(tssMember.publicKey.length == 64, "tss member not exist");
         return tssMember.status == ITssGroupManager.MemberStatus.jail;
     }
 

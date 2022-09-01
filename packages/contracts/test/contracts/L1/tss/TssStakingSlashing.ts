@@ -25,7 +25,6 @@ describe('StakingSlashing', () => {
     await deployTssGroup()
     await deployStakingSlashing()
     await initAccount()
-    await initTssGroup()
   })
 
   it("setAddress test", async () => {
@@ -38,9 +37,12 @@ describe('StakingSlashing', () => {
   })
 
   it("setSlashingParams", async () => {
-    await expect(stakingSlashing.setSlashingParams([1000, 100], [1001, 99])).to.be.revertedWith("slashAmount need bigger than exIncome")
-    await expect(stakingSlashing.setSlashingParams([1000, 100], [999, 100])).to.be.revertedWith("slashAmount need bigger than exIncome")
-    await expect(stakingSlashing.setSlashingParams([1000, 100], [0, 99])).to.be.revertedWith("invalid amount")
+    await expect(stakingSlashing.setSlashingParams([1000, 100], [1, 2])).to.be.revertedWith("invalid param slashAmount,animus <= uptime")
+    await expect(stakingSlashing.setSlashingParams([100, 1000], [2, 1])).to.be.revertedWith("invalid param exIncome,animus <= uptime")
+
+    await expect(stakingSlashing.setSlashingParams([100, 1000], [101, 999])).to.be.revertedWith("slashAmount need bigger than exIncome")
+    await expect(stakingSlashing.setSlashingParams([100, 1000], [99, 10001])).to.be.revertedWith("slashAmount need bigger than exIncome")
+    await expect(stakingSlashing.setSlashingParams([0, 100], [0, 99])).to.be.revertedWith("invalid amount")
 
     let slashAmounts = [100, 1000]
     let exIncomes = [10, 100]
@@ -87,6 +89,7 @@ describe('StakingSlashing', () => {
   })
 
   it("withdrawToken", async () => {
+    await initTssGroup()
     await expect(stakingSlashing.withdrawToken()).to.be.revertedWith("do not have deposit")
     let pubKey = "0x" + tssNodes[0].publicKey.substring(4)
     expect(await tssGroup.memberExistActive(pubKey)).to.eq(true)
@@ -106,7 +109,6 @@ describe('StakingSlashing', () => {
     await stakingSlashing.connect(tssNodes[1]).quit()
     let quitList = await stakingSlashing.getQuitList()
     expect(quitList[0]).to.eq(tssNodes[1].address)
-
     await expect(stakingSlashing.connect(tssNodes[1]).quit()).to.be.revertedWith("already in quitList")
 
     let tssNodesPubKey: BytesLike[] = []
@@ -154,8 +156,6 @@ describe('StakingSlashing', () => {
     )
     let messageHash = ethers.utils.solidityKeccak256(['bytes'], [message]);
     let signature = await cpk.signMessage(ethers.utils.arrayify(messageHash));
-    // error case : sender not active member
-    await expect(stakingSlashing.slashing(message, signature)).to.be.revertedWith("sender not at the active group")
 
     // slash case uptime : deposit > slashAmount
     await stakingSlashing.connect(tssNodes[1]).slashing(message, signature)
