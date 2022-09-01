@@ -109,7 +109,6 @@ describe('StakingSlashing', () => {
 
     await expect(stakingSlashing.connect(tssNodes[1]).quit()).to.be.revertedWith("already in quitList")
 
-
     let tssNodesPubKey: BytesLike[] = []
     // tssnodes staking first
     for (let i = 0; i < newTssNodes.length; i++) {
@@ -128,7 +127,7 @@ describe('StakingSlashing', () => {
       tssNodesPubKey[i] = pubKey
     }
 
-    await expect(stakingSlashing.connect(newTssNodes[1]).quit()).to.be.revertedWith("not at the active group")
+    await expect(stakingSlashing.connect(newTssNodes[1]).quit()).to.be.revertedWith("not at the inactive group or active group")
 
     // set inactive tss group members
     await tssGroup.setTssGroupMember(
@@ -136,10 +135,9 @@ describe('StakingSlashing', () => {
       tssNodesPubKey
     )
     let info = await tssGroup.getTssGroupInfo()
-    expect(info[0]).to.eq(2)
+    expect(info[0]).to.eq(1)
     expect(info[1]).to.eq(4)
-
-    await expect(stakingSlashing.connect(tssNodes[2]).quit()).to.be.revertedWith("not at the right tim")
+    await stakingSlashing.connect(tssNodes[2]).quit()
   })
 
   it("slashing", async () => {
@@ -245,7 +243,7 @@ describe('StakingSlashing', () => {
   const deployBitToken = async () => {
     bitToken = await deploy('TestERC20')
     await addressManager.setAddress(
-      'BitToken',
+      'L1_BitAddress',
       bitToken.address
     )
   }
@@ -334,7 +332,6 @@ describe('StakingSlashing', () => {
         tssNodesPubKey[i],
         testGroupKey
       )
-      expect(await tssGroup.isSubmitGroupKey(tssNodesPubKey[i])).to.eq(true)
     }
 
     let info = await tssGroup.getTssGroupInfo()
