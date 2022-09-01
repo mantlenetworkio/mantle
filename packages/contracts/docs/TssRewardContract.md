@@ -183,7 +183,7 @@ function withdraw() external nonpayable
 
 
 
-*clear contract(canonical).*
+*clear balance*
 
 
 ### withdrawDust
@@ -194,7 +194,7 @@ function withdrawDust() external nonpayable
 
 
 
-*withdraw dust.*
+*withdraw div dust*
 
 
 
