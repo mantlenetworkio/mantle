@@ -38,12 +38,10 @@ COPY packages/sdk/package.json ./packages/sdk/package.json
 COPY packages/core-utils/package.json ./packages/core-utils/package.json
 COPY packages/common-ts/package.json ./packages/common-ts/package.json
 COPY packages/contracts/package.json ./packages/contracts/package.json
-COPY packages/contracts-periphery/package.json ./packages/contracts-periphery/package.json
 COPY packages/data-transport-layer/package.json ./packages/data-transport-layer/package.json
 COPY packages/hardhat-deploy-config/package.json ./packages/hardhat-deploy-config/package.json
 COPY packages/message-relayer/package.json ./packages/message-relayer/package.json
 COPY packages/replica-healthcheck/package.json ./packages/replica-healthcheck/package.json
-COPY packages/drippie-mon/package.json ./packages/drippie-mon/package.json
 COPY integration-tests/package.json ./integration-tests/package.json
 
 RUN yarn install --frozen-lockfile && yarn cache clean
