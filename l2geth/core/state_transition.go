@@ -18,6 +18,8 @@ package core
 
 import (
 	"errors"
+	"github.com/bitdao-io/bitnetwork/l2geth/contracts/tssreward"
+	"github.com/bitdao-io/bitnetwork/l2geth/rollup/dump"
 	"math"
 	"math/big"
 
@@ -269,17 +271,23 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		}
 	}
 	st.refundGas()
-	if rcfg.UsingBVM {
-		// The L2 Fee is the same as the fee that is charged in the normal geth
-		// codepath. Add the L1 fee to the L2 fee for the total fee that is sent
-		// to the sequencer.
-		l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
-		fee := new(big.Int).Add(st.l1Fee, l2Fee)
-		st.state.AddBalance(evm.Coinbase, fee)
-	} else {
-		st.state.AddBalance(evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
+	if rcfg.UsingOVM {
+		st.state.AddBalance(dump.OvmFeeWallet, st.l1Fee)
 	}
-
+	l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
+	st.state.AddBalance(dump.TssRewardAddress, l2Fee)
+	data, err := tssreward.PacketData(evm.BlockNumber, l2Fee)
+	if err != nil {
+		return nil, 0, false, err
+	}
+	deadAddress := vm.AccountRef(dump.DeadAddress)
+	log.Info("update reward ........")
+	_, _, err = evm.Call(deadAddress, dump.TssRewardAddress, data, 210000, big.NewInt(0))
+	if err != nil {
+		log.Error("update reward in error: ", err)
+		return nil, 0, false, err
+	}
+	log.Info("reward updated ........")
 	return ret, st.gasUsed(), vmerr != nil, err
 }
 

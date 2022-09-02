@@ -50,5 +50,3 @@ coverage.out
 .idea/
 
 bitnetwork.iml
-
-ops/data/**
