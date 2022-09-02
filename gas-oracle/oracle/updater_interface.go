@@ -3,12 +3,12 @@ package oracle
 import (
 	"context"
 	"errors"
-	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"math/big"
 	"time"
 
 	"github.com/bitdao-io/bitnetwork/gas-oracle/bindings"
 	ometrics "github.com/bitdao-io/bitnetwork/gas-oracle/metrics"
+	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common/hexutil"

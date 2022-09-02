@@ -1,11 +1,11 @@
 package oracle
 
 import (
-	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"math/big"
 	"testing"
 
 	"github.com/bitdao-io/bitnetwork/gas-oracle/bindings"
+	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
