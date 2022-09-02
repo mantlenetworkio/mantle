@@ -271,8 +271,8 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		}
 	}
 	st.refundGas()
-	if rcfg.UsingOVM {
-		st.state.AddBalance(dump.OvmFeeWallet, st.l1Fee)
+	if rcfg.UsingBVM {
+		st.state.AddBalance(dump.BvmFeeWallet, st.l1Fee)
 	}
 	l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 	st.state.AddBalance(dump.TssRewardAddress, l2Fee)
