@@ -6,16 +6,17 @@ import (
 )
 
 func TestGetTokenPrice(t *testing.T) {
-	ethPrice, err := Query("ETHUSDT")
+	tokenPricer := NewClient("https://api.bybit.com", 3)
+	ethPrice, err := tokenPricer.Query("ETHUSDT")
 	require.NoError(t, err)
 	t.Logf("Btc price:%v", ethPrice)
 
-	bitPrice, err := Query("BITUSDT")
+	bitPrice, err := tokenPricer.Query("BITUSDT")
 	require.NoError(t, err)
 	t.Logf("Btc price:%v", bitPrice)
 
 	t.Log(ethPrice.Quo(ethPrice, bitPrice))
-	ratio, err := PriceRatio()
+	ratio, err := tokenPricer.PriceRatio()
 	require.NoError(t, err)
 	t.Logf("ratio:%v", ratio)
 

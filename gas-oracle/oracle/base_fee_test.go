@@ -1,21 +1,20 @@
 package oracle
 
 import (
-	"math/big"
-	"testing"
-
 	"github.com/bitdao-io/bitnetwork/gas-oracle/bindings"
 	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"math/big"
+	"testing"
 )
 
 func TestBaseFeeUpdate(t *testing.T) {
 	key, _ := crypto.GenerateKey()
 	sim, _ := newSimulatedBackend(key)
 	chain := sim.Blockchain()
-
+	tokenPricer := tokenprice.NewClient("https://api.bybit.com", 3)
 	opts, _ := bind.NewKeyedTransactorWithChainID(key, big.NewInt(1337))
 	addr, _, gpo, err := bindings.DeployGasPriceOracle(opts, sim, opts.From)
 	if err != nil {
@@ -30,7 +29,7 @@ func TestBaseFeeUpdate(t *testing.T) {
 		gasPrice:              big.NewInt(784637584),
 	}
 
-	update, err := wrapUpdateBaseFee(sim, sim, cfg)
+	update, err := wrapUpdateBaseFee(sim, sim, tokenPricer, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,7 +48,7 @@ func TestBaseFeeUpdate(t *testing.T) {
 	if tip.BaseFee == nil {
 		t.Fatal("no base fee found")
 	}
-	ratio, err := tokenprice.PriceRatio()
+	ratio, err := tokenPricer.PriceRatio()
 	if err != nil {
 		t.Fatal(err)
 	}

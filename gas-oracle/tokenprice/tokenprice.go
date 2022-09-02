@@ -1,21 +1,43 @@
 package tokenprice
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"github.com/go-resty/resty/v2"
 	"math"
 	"math/big"
-	"net/http"
 	"time"
 )
 
-var (
-	bybitUrl   = "https://api.bybit.com/spot/quote/v1/ticker/price"
+var errHTTPError = errors.New("http error")
+
+// NewClient create a new Client given a remote HTTP url and update frequency
+func NewClient(url string, frequency uint64) *Client {
+	client := resty.New()
+	client.SetHostURL(url)
+	client.OnAfterResponse(func(c *resty.Client, r *resty.Response) error {
+		statusCode := r.StatusCode()
+		if statusCode >= 400 {
+			method := r.Request.Method
+			url := r.Request.URL
+			return fmt.Errorf("%d cannot %s %s: %w", statusCode, method, url, errHTTPError)
+		}
+		return nil
+	})
+
+	return &Client{
+		client:    client,
+		frequency: time.Duration(frequency) * time.Second,
+	}
+}
+
+// Client is an HTTP based TokenPriceClient
+type Client struct {
+	client     *resty.Client
+	frequency  time.Duration
 	lastRatio  uint64
 	lastUpdate time.Time
-	frequency  = 3 * time.Second
-)
+}
 
 type TokenPrice struct {
 	Symbol string `json:"symbol"`
@@ -27,26 +49,20 @@ type Result struct {
 	Result  TokenPrice
 }
 
-func Query(symbol string) (*big.Float, error) {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s?symbol=%s", bybitUrl, symbol), nil)
+func (c *Client) Query(symbol string) (*big.Float, error) {
+	response, err := c.client.R().
+		SetResult(&Result{}).
+		SetQueryParams(map[string]string{
+			"symbol": symbol,
+		}).
+		Get("/spot/quote/v1/ticker/price")
+
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot fetch token price result: %w", err)
 	}
-	req.Header.Add("Content-Type", "application/json")
-	cli := http.Client{
-		Timeout: 45 * time.Second,
-	}
-	resp, err := cli.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	out, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	var result Result
-	if err := json.Unmarshal(out, &result); err != nil {
-		return nil, err
+	result, ok := response.Result().(*Result)
+	if !ok {
+		return nil, fmt.Errorf("cannot parse result")
 	}
 	if result.Result.Price == "" {
 		return nil, fmt.Errorf("empty price")
@@ -55,15 +71,15 @@ func Query(symbol string) (*big.Float, error) {
 	return bigPrice, nil
 }
 
-func PriceRatio() (uint64, error) {
-	if time.Now().Sub(lastUpdate) < frequency {
-		return lastRatio, nil
+func (c *Client) PriceRatio() (uint64, error) {
+	if time.Now().Sub(c.lastUpdate) < c.frequency {
+		return c.lastRatio, nil
 	}
-	ethPrice, err := Query("ETHUSDT")
+	ethPrice, err := c.Query("ETHUSDT")
 	if err != nil {
 		return 0, err
 	}
-	bitPrice, err := Query("BITUSDT")
+	bitPrice, err := c.Query("BITUSDT")
 	if err != nil {
 		return 0, err
 	}
@@ -75,7 +91,7 @@ func PriceRatio() (uint64, error) {
 		return 0, fmt.Errorf("invalid bit Price")
 	}
 	ratio, _ := ethPrice.Quo(ethPrice, bitPrice).Float64()
-	lastUpdate = time.Now()
-	lastRatio = uint64(math.Ceil(ratio))
-	return lastRatio, nil
+	c.lastUpdate = time.Now()
+	c.lastRatio = uint64(math.Ceil(ratio))
+	return c.lastRatio, nil
 }

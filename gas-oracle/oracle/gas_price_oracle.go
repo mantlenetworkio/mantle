@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"math/big"
 	"time"
 
@@ -41,6 +42,7 @@ type GasPriceOracle struct {
 	ctx             context.Context
 	stop            chan struct{}
 	contract        *bindings.GasPriceOracle
+	tokenPricer     *tokenprice.Client
 	l2Backend       DeployContractBackend
 	l1Backend       bind.ContractTransactor
 	gasPriceUpdater *gasprices.GasPriceUpdater
@@ -70,7 +72,7 @@ func (g *GasPriceOracle) Start() error {
 		return err
 	}
 	gasPriceGauge.Update(int64(price.Uint64()))
-	
+
 	log.Info("Starting Gas Price Oracle enableL1BaseFee", "enableL1BaseFee",
 		g.config.enableL1BaseFee, "enableL2GasPrice", g.config.enableL2GasPrice)
 
@@ -133,7 +135,7 @@ func (g *GasPriceOracle) BaseFeeLoop() {
 	timer := time.NewTicker(time.Duration(g.config.l1BaseFeeEpochLengthSeconds) * time.Second)
 	defer timer.Stop()
 
-	updateBaseFee, err := wrapUpdateBaseFee(g.l1Backend, g.l2Backend, g.config)
+	updateBaseFee, err := wrapUpdateBaseFee(g.l1Backend, g.l2Backend, g.tokenPricer, g.config)
 	if err != nil {
 		panic(err)
 	}
@@ -219,6 +221,12 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 	log.Info("Creating GasPricer", "currentPrice", currentPrice,
 		"floorPrice", cfg.floorPrice, "targetGasPerSecond", cfg.targetGasPerSecond,
 		"maxPercentChangePerEpoch", cfg.maxPercentChangePerEpoch)
+	tokenPricer := tokenprice.NewClient(cfg.bybitBackendURL, cfg.tokenPricerUpdateFrequencySecond)
+	if tokenPricer == nil {
+		if err != nil {
+			return nil, fmt.Errorf("invalid token price client")
+		}
+	}
 
 	gasPricer, err := gasprices.NewGasPricer(
 		currentPrice.Uint64(),
@@ -275,7 +283,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 	getLatestBlockNumberFn := wrapGetLatestBlockNumberFn(l2Client)
 	// updateL2GasPriceFn is used by the GasPriceUpdater to
 	// update the gas price
-	updateL2GasPriceFn, err := wrapUpdateL2GasPriceFn(l2Client, cfg)
+	updateL2GasPriceFn, err := wrapUpdateL2GasPriceFn(l2Client, tokenPricer, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -289,6 +297,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 
 	gasPriceUpdater, err := gasprices.NewGasPriceUpdater(
 		gasPricer,
+		tokenPricer,
 		epochStartBlockNumber,
 		cfg.averageBlockGasLimitPerEpoch,
 		cfg.epochLengthSeconds,

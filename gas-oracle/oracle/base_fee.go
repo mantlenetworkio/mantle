@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 )
 
-func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContractBackend, cfg *Config) (func() error, error) {
+func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContractBackend, tokenPricer *tokenprice.Client, cfg *Config) (func() error, error) {
 	if cfg.privateKey == nil {
 		return nil, errNoPrivateKey
 	}
@@ -58,7 +58,7 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 			log.Debug("non significant base fee update", "tip", tip.BaseFee, "current", baseFee)
 			return nil
 		}
-		ratio, err := tokenprice.PriceRatio()
+		ratio, err := tokenPricer.PriceRatio()
 		if err != nil {
 			return err
 		}

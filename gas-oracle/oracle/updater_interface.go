@@ -63,7 +63,7 @@ type DeployContractBackend interface {
 // to update the L2 gas price
 // perhaps this should take an options struct along with the backend?
 // how can this continue to be decomposed?
-func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(uint64) error, error) {
+func wrapUpdateL2GasPriceFn(backend DeployContractBackend, tokenPricer *tokenprice.Client, cfg *Config) (func(uint64) error, error) {
 	if cfg.privateKey == nil {
 		return nil, errNoPrivateKey
 	}
@@ -88,7 +88,7 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(ui
 	}
 
 	return func(updatedGasPrice uint64) error {
-		ratio, err := tokenprice.PriceRatio()
+		ratio, err := tokenPricer.PriceRatio()
 		if err != nil {
 			log.Error("cannot fetch PriceRatio", err)
 			return err

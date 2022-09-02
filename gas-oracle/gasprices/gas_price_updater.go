@@ -2,6 +2,7 @@ package gasprices
 
 import (
 	"errors"
+	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"math/big"
 	"sync"
 
@@ -15,6 +16,7 @@ type GetGasUsedByBlockFn func(*big.Int) (uint64, error)
 type GasPriceUpdater struct {
 	mu                     *sync.RWMutex
 	gasPricer              *GasPricer
+	tokenPricer            *tokenprice.Client
 	epochStartBlockNumber  uint64
 	averageBlockGasLimit   uint64
 	epochLengthSeconds     uint64
@@ -25,6 +27,7 @@ type GasPriceUpdater struct {
 
 func NewGasPriceUpdater(
 	gasPricer *GasPricer,
+	tokenPricer *tokenprice.Client,
 	epochStartBlockNumber uint64,
 	averageBlockGasLimit uint64,
 	epochLengthSeconds uint64,
@@ -41,6 +44,7 @@ func NewGasPriceUpdater(
 	return &GasPriceUpdater{
 		mu:                     new(sync.RWMutex),
 		gasPricer:              gasPricer,
+		tokenPricer:            tokenPricer,
 		epochStartBlockNumber:  epochStartBlockNumber,
 		epochLengthSeconds:     epochLengthSeconds,
 		averageBlockGasLimit:   averageBlockGasLimit,
