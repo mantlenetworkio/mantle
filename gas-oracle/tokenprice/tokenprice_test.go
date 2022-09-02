@@ -1,8 +1,9 @@
 package tokenprice
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetTokenPrice(t *testing.T) {

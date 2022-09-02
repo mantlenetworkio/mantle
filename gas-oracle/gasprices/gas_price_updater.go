@@ -2,10 +2,10 @@ package gasprices
 
 import (
 	"errors"
-	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"math/big"
 	"sync"
 
+	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"github.com/ethereum/go-ethereum/log"
 )
 

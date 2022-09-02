@@ -3,10 +3,11 @@ package tokenprice
 import (
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	"math"
 	"math/big"
 	"time"
+
+	"github.com/go-resty/resty/v2"
 )
 
 var errHTTPError = errors.New("http error")
