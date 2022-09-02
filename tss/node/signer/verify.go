@@ -3,7 +3,6 @@ package signer
 import (
 	"encoding/json"
 	"math/big"
-	"strconv"
 	"sync"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
@@ -35,51 +34,34 @@ func (p *Processor) Verify() {
 					continue
 				}
 				var resId = req.ID
-				offset, err := strconv.Atoi(askRequest.OffsetStartsAtIndex)
-				if err != nil {
-					logger.Error().Msg("failed to conv OffsetStartsAtIndex to int")
-					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to conv OffsetStartsAtIndex to int", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
-					continue
+				offset := len(askRequest.StateRoots)
+
+				wg := &sync.WaitGroup{}
+				wg.Add(offset)
+				var result = true
+				var rLock = &sync.Mutex{}
+				quit := make(chan struct{})
+				for index, stateRoot := range askRequest.StateRoots {
+					go p.verify(askRequest.StartBlock, index, stateRoot, logger, wg, result, rLock, quit)
 				}
-
-				// if offset value does not equal  length of state roots array, return false
-				if len(askRequest.StateRoots) != offset {
-					askResponse := common.AskResponse{
-						Result: false,
+				wg.Wait()
+				if result {
+					hash, err := signMsgToHash(askRequest)
+					if err != nil {
+						logger.Err(err).Msg("failed to conv msg to hash")
+						RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to conv msg to hash", err.Error())
+						p.wsClient.SendMsg(RpcResponse)
+						continue
+					} else {
+						hashStr := hexutil.Encode(hash)
+						p.UpdateWaitSignEvents(hashStr, askRequest)
 					}
-
-					RpcResponse := tdtypes.NewRPCSuccessResponse(resId, askResponse)
-					p.wsClient.SendMsg(RpcResponse)
-				} else {
-					wg := &sync.WaitGroup{}
-					wg.Add(offset)
-					var result = true
-					var rLock = &sync.Mutex{}
-					quit := make(chan struct{})
-					for index, stateRoot := range askRequest.StateRoots {
-						go p.verify(askRequest.StartBlock, index, stateRoot, logger, wg, result, rLock, quit)
-					}
-					wg.Wait()
-					if result {
-						hash, err := signMsgToHash(askRequest)
-						if err != nil {
-							logger.Err(err).Msg("failed to conv msg to hash")
-							RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to conv msg to hash", err.Error())
-							p.wsClient.SendMsg(RpcResponse)
-							continue
-						}else {
-							hashStr := hexutil.Encode(hash)
-							p.UpdateWaitSignEvents(hashStr, askRequest)
-						}
-					}
-					askResponse := common.AskResponse{
-						Result: result,
-					}
-					RpcResponse := tdtypes.NewRPCSuccessResponse(resId, askResponse)
-					p.wsClient.SendMsg(RpcResponse)
-
 				}
+				askResponse := common.AskResponse{
+					Result: result,
+				}
+				RpcResponse = tdtypes.NewRPCSuccessResponse(resId, askResponse)
+				p.wsClient.SendMsg(RpcResponse)
 
 			}
 

@@ -104,10 +104,9 @@ func (p *Processor) SignSlash() {
 				}
 
 				signResponse := tsscommon.SignResponse{
-					Signature:             data,
-					SlashTxBytes:          txData,
-					SlashTxGasPrice:       gasPrice.String(),
-					SlashTxGasPriceBigInt: gasPrice,
+					Signature:       data,
+					SlashTxBytes:    txData,
+					SlashTxGasPrice: gasPrice.String(),
 				}
 
 				RpcResponse := tdtypes.NewRPCSuccessResponse(req.ID, signResponse)

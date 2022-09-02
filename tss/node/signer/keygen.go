@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	ethereum "github.com/bitdao-io/bitnetwork/l2geth"
+	"github.com/bitdao-io/bitnetwork/l2geth/log"
 	"github.com/bitdao-io/bitnetwork/tss/bindings/tgm"
 	tsscommon "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/bitnetwork/tss/node/tsslib/common"
 	"github.com/bitdao-io/bitnetwork/tss/node/tsslib/keygen"
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
 	etht "github.com/ethereum/go-ethereum/core/types"
@@ -115,11 +116,50 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey string) error {
 		return err
 	}
 
-	receipt, err := waitForReceipt(p.l1Client, tx)
+	confirmTxReceipt := func(txHash ethc.Hash) *etht.Receipt {
+		ctx, cancel := context.WithTimeout(context.Background(), p.confirmReceiptTimeout)
+		queryTicker := time.NewTicker(p.taskInterval)
+		defer func() {
+			cancel()
+			queryTicker.Stop()
+		}()
+		for {
+			receipt, err := p.l1Client.TransactionReceipt(context.Background(), txHash)
+			switch {
+			case receipt != nil:
+				txHeight := receipt.BlockNumber.Uint64()
+				tipHeight, err := p.l1Client.BlockNumber(context.Background())
+				if err != nil {
+					log.Error("Unable to fetch block number", "err", err)
+					break
+				}
+				log.Info("Transaction mined, checking confirmations",
+					"txHash", txHash, "txHeight", txHeight,
+					"tipHeight", tipHeight,
+					"numConfirmations", p.l1ConfirmBlocks)
+				if txHeight+uint64(p.l1ConfirmBlocks) < tipHeight {
+					reverted := receipt.Status == 0
+					log.Info("Transaction confirmed",
+						"txHash", txHash,
+						"reverted", reverted)
+					// remove submitted slashing info
+					return receipt
+				}
+			case err != nil:
+				log.Error("failed to query receipt for transaction", "txHash", txHash.String())
+			default:
+			}
+			select {
+			case <-ctx.Done():
+				return nil
+			case <-queryTicker.C:
+			}
+		}
+	}
+	go confirmTxReceipt(tx.Hash())
 	if err != nil {
 		return err
 	}
-	p.logger.Info().Msgf("tss group tss transaction confirmed , hash %s, gas-used %s,block number  %s", tx.Hash().Hex(), receipt.GasUsed, receipt.BlockNumber)
 	return nil
 
 }

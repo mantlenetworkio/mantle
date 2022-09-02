@@ -51,6 +51,7 @@ type Processor struct {
 	tssStakingSlashingCaller  *tsh.TssStakingSlashingCaller
 	tssQueryService           managertypes.TssQueryService
 	l1ConfirmBlocks           int
+	confirmReceiptTimeout     time.Duration
 	metrics                   *Metrics
 }
 
@@ -59,6 +60,11 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 	if err != nil {
 		return nil, err
 	}
+	receiptConfirmTimeoutDur, err := time.ParseDuration(cfg.L1ReceiptConfirmTimeout)
+	if err != nil {
+		return nil, err
+	}
+
 	ctx, cancel := context.WithCancel(contx)
 	l1Cli, err := dial.L1EthClientWithTimeout(ctx, cfg.L1Url, cfg.Node.DisableHTTP2)
 	if err != nil {
@@ -102,6 +108,7 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 		tssStakingSlashingCaller:  tssStakingSlashingCaller,
 		tssQueryService:           queryService,
 		l1ConfirmBlocks:           cfg.L1ConfirmBlocks,
+		confirmReceiptTimeout:     receiptConfirmTimeoutDur,
 		metrics:                   PrometheusMetrics("tssnode"),
 	}
 	return &processor, nil
