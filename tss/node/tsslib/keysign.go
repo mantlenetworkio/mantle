@@ -103,6 +103,11 @@ func (t *TssServer) KeySign(req keysign2.Request) (keysign2.Response, error) {
 		}
 	}
 
+	_, ok := t.participants[req.PoolPubKey]
+	if !ok {
+		t.participants[req.PoolPubKey] = localStateItem.ParticipantKeys
+	}
+
 	//check signers if not contained in participants
 	err = t.isContainPubkeys(req.SignerPubKeys, localStateItem.ParticipantKeys, req.PoolPubKey)
 	if err != nil {
@@ -182,4 +187,12 @@ func (t *TssServer) isContainPubkeys(signerPubKeys, participants []string, poolP
 		return errors.New(fmt.Sprintf("these pub keys %s are not members of %s's participants", strings.Join(errPubkyes, ","), poolPubkey))
 	}
 	return nil
+}
+
+func (t *TssServer) GetParticipants(poolPubkey string) ([]string, error) {
+	value, ok := t.participants[poolPubkey]
+	if !ok {
+		return nil, errors.New("There is wrong in participants map, need to store latest pool pubkey's participants!")
+	}
+	return value, nil
 }

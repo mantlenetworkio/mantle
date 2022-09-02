@@ -12,4 +12,5 @@ type Server interface {
 	Keygen(req keygen2.Request) (keygen2.Response, error)
 	KeySign(req keysign2.Request) (keysign2.Response, error)
 	ExportPeerAddress() map[string]string
+	GetParticipants(poolPubkey string) ([]string, error)
 }
