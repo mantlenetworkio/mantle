@@ -113,9 +113,9 @@ var (
 		Usage:  "bybit exchange backend url",
 		EnvVar: "BYBIT_BACKEND_URL",
 	}
-	TokenPricerUpdateFrequencySecond = cli.StringFlag{
+	TokenPricerUpdateFrequencySecond = cli.Uint64Flag{
 		Name:   "tokenPricerUpdateFrequencySecond",
-		Value:  "3",
+		Value:  3,
 		Usage:  "token pricer update frequency",
 		EnvVar: "TOKEN_PRICER_UPDATE_FREQUENCY",
 	}
