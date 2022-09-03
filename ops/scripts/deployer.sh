@@ -22,6 +22,20 @@ curl \
     $CONTRACTS_RPC_URL > /dev/null
 
 echo "Connected to L1."
+
+if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
+  cd ../contract-bit
+  yarn install
+  DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
+  echo "$DEPLOY_CMD"
+  eval "$DEPLOY_CMD"
+  cd ../contracts
+else
+#    echo "skipping deploy contract"
+  echo "not local network"
+fi
+
+
 echo "Building deployment command."
 
 if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
