@@ -58,3 +58,5 @@ op-exporter
 bitnetwork.iml
 
 ops/data/**
+
+dist/
