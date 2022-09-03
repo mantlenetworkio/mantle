@@ -24,10 +24,7 @@
     ],
     "nohoist": [
       "**/typechain/*",
-      "**/@typechain/*",
-      "@bitdaoio/contracts-periphery/ds-test",
-      "@bitdaoio/contracts-periphery/forge-std",
-      "@bitdaoio/contracts-periphery/@rari-capital/solmate"
+      "**/@typechain/*"
     ]
   },
   "private": true,
@@ -72,6 +69,7 @@
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-react": "^7.24.0",
     "eslint-plugin-unicorn": "^42.0.0",
+    "hardhat": "^2.10.2",
     "husky": "^6.0.0",
     "lerna": "^4.0.0",
     "lint-staged": "11.0.0",

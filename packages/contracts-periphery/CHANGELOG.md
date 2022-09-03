@@ -1,2 +1,0 @@
-# @bitdaoio/contracts-periphery
-
