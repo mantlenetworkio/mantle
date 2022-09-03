@@ -4,7 +4,11 @@ builds:
   - id: l2geth-darwin
     dir: l2geth/cmd/geth
     binary: l2geth
-    env: *cgo_darwin
+    env:
+      - GO111MODULE=on
+      - CGO_ENABLED=1
+      - CC=o64-clang
+      - CXX=o64-clang++
     goos:
       - darwin
     goarch:
@@ -13,7 +17,11 @@ builds:
   - id: l2geth-linux-amd64
     dir: l2geth/cmd/geth
     binary: l2geth
-    env: *cgo_linux_amd64
+    env:
+      - GO111MODULE=on
+      - CGO_ENABLED=1
+      - CC=x86_64-linux-gnu-gcc
+      - CXX=x86_64-linux-gnu-g++
     goos:
       - linux
     goarch:
@@ -21,7 +29,11 @@ builds:
   - id: l2geth-linux-arm64
     dir: l2geth/cmd/geth
     binary: l2geth
-    env: *cgo_linux_arm64
+    env:
+      - GO111MODULE=on
+      - CGO_ENABLED=1
+      - CC=aarch64-linux-gnu-gcc
+      - CXX=aarch64-linux-gnu-g++
     goos:
       - linux
     goarch:
