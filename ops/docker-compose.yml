@@ -82,6 +82,7 @@ services:
       dockerfile: ./ops/docker/Dockerfile.packages
       target: data-transport-layer
     image: ethereumbitnetwork/data-transport-layer:${DOCKER_TAG_DATA_TRANSPORT_LAYER:-latest}
+    restart: on-failure
     # override with the dtl script and the env vars required for it
     entrypoint: ./dtl.sh
     env_file:
