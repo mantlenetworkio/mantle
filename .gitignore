@@ -22,10 +22,6 @@ packages/contracts/coverage*
 packages/contracts/@ens*
 packages/contracts/@openzeppelin*
 packages/contracts/hardhat
-packages/contracts-periphery/coverage*
-packages/contracts-periphery/@openzeppelin*
-packages/contracts-periphery/hardhat
-packages/contracts-periphery/forge-artifacts*
 
 packages/data-transport-layer/db
 
@@ -49,9 +45,6 @@ packages/contracts-bedrock/deployments/anvil
 **/testdata/fuzz/
 
 coverage.out
-
-# Ignore bedrock go bindings local output files
-op-exporter
 
 .idea/
 

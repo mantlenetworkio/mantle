@@ -48,41 +48,11 @@ RUN yarn install --frozen-lockfile && yarn cache clean
 
 COPY ./packages ./packages
 COPY ./integration-tests ./integration-tests
+COPY ./ops/scripts/init-l1-contract.sh ./packages/contracts/
 
 # build it!
 RUN yarn build
 
 
-FROM base as deployer
 WORKDIR /opt/bitnetwork/packages/contracts
-COPY ./ops/scripts/deployer.sh .
-CMD ["yarn", "run", "deploy"]
-
-FROM base as data-transport-layer
-WORKDIR /opt/bitnetwork/packages/data-transport-layer
-COPY ./ops/scripts/dtl.sh .
-CMD ["node", "dist/src/services/run.js"]
-
-
-FROM base as integration-tests
-WORKDIR /opt/bitnetwork/integration-tests
-COPY ./ops/scripts/integration-tests.sh ./
-CMD ["yarn", "test:integration"]
-
-
-FROM base as message-relayer
-WORKDIR /opt/bitnetwork/packages/message-relayer
-COPY ./ops/scripts/relayer.sh .
-CMD ["npm", "run", "start"]
-
-
-FROM base as fault-detector
-WORKDIR /opt/bitnetwork/packages/fault-detector
-COPY ./ops/scripts/detector.sh .
-CMD ["npm", "run", "start"]
-
-
-FROM base as replica-healthcheck
-WORKDIR /opt/bitnetwork/packages/replica-healthcheck
-ENTRYPOINT ["npm", "run", "start"]
-
+ENTRYPOINT ./init-l1-contract.sh
