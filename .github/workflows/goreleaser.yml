@@ -16,6 +16,9 @@ jobs:
           fetch-depth: 0
       - name: Set up Go
         uses: actions/setup-go@v3
+      - uses: mbround18/setup-osxcross@v1
+        with:
+          osx-version: "12.3"
       - name: Cache Go modules
         uses: actions/cache@v1
         with:
