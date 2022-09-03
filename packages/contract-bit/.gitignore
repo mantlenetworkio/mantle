@@ -4,3 +4,5 @@ cache/
 .env
 .idea
 deployments/local
+yarn.lock
+yarn-error.log
