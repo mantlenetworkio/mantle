@@ -44,6 +44,8 @@ if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
   echo "Deploying contracts. Deployment command:"
   echo "$DEPLOY_CMD"
   eval "$DEPLOY_CMD"
+
+  cp -r ../contract-bit/deployments/local/L1Bit.json deployments/local/L1Bit.json
 else
     echo "skipping deploy contract"
 fi
