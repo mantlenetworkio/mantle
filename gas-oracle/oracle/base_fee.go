@@ -3,16 +3,13 @@ package oracle
 import (
 	"context"
 	"fmt"
-	"math/big"
-
 	"github.com/bitdao-io/bitnetwork/gas-oracle/bindings"
-	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
 )
 
-func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContractBackend, tokenPricer *tokenprice.Client, cfg *Config) (func() error, error) {
+func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContractBackend, cfg *Config) (func() error, error) {
 	if cfg.privateKey == nil {
 		return nil, errNoPrivateKey
 	}
@@ -58,11 +55,6 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 			log.Debug("non significant base fee update", "tip", tip.BaseFee, "current", baseFee)
 			return nil
 		}
-		ratio, err := tokenPricer.PriceRatio()
-		if err != nil {
-			return err
-		}
-		tip.BaseFee = new(big.Int).Mul(tip.BaseFee, big.NewInt(int64(ratio)))
 		// Use the configured gas price if it is set,
 		// otherwise use gas estimation
 		if cfg.gasPrice != nil {

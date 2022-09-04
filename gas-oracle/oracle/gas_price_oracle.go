@@ -41,9 +41,8 @@ type GasPriceOracle struct {
 	ctx             context.Context
 	stop            chan struct{}
 	contract        *bindings.GasPriceOracle
-	tokenPricer     *tokenprice.Client
 	l2Backend       DeployContractBackend
-	l1Backend       bind.ContractTransactor
+	l1Backend       *L1Client
 	gasPriceUpdater *gasprices.GasPriceUpdater
 	config          *Config
 }
@@ -134,7 +133,7 @@ func (g *GasPriceOracle) BaseFeeLoop() {
 	timer := time.NewTicker(time.Duration(g.config.l1BaseFeeEpochLengthSeconds) * time.Second)
 	defer timer.Stop()
 
-	updateBaseFee, err := wrapUpdateBaseFee(g.l1Backend, g.l2Backend, g.tokenPricer, g.config)
+	updateBaseFee, err := wrapUpdateBaseFee(g.l1Backend, g.l2Backend, g.config)
 	if err != nil {
 		panic(err)
 	}
@@ -179,17 +178,20 @@ func (g *GasPriceOracle) Update() error {
 
 // NewGasPriceOracle creates a new GasPriceOracle based on a Config
 func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
+	tokenPricer := tokenprice.NewClient(cfg.bybitBackendURL, cfg.tokenPricerUpdateFrequencySecond)
+	if tokenPricer == nil {
+		return nil, fmt.Errorf("invalid token price client")
+	}
 	// Create the L2 client
 	l2Client, err := ethclient.Dial(cfg.layerTwoHttpUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	l1Client, err := ethclient.Dial(cfg.ethereumHttpUrl)
+	l1Client, err := NewL1Client(cfg.ethereumHttpUrl, tokenPricer)
 	if err != nil {
 		return nil, err
 	}
-
 	// Ensure that we can actually connect to both backends
 	log.Info("Connecting to layer two")
 	if err := ensureConnection(l2Client); err != nil {
@@ -197,7 +199,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 		return nil, err
 	}
 	log.Info("Connecting to layer one")
-	if err := ensureConnection(l1Client); err != nil {
+	if err := ensureConnection(l1Client.Client); err != nil {
 		log.Error("Unable to connect to layer one")
 		return nil, err
 	}
@@ -220,16 +222,10 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 	log.Info("Creating GasPricer", "currentPrice", currentPrice,
 		"floorPrice", cfg.floorPrice, "targetGasPerSecond", cfg.targetGasPerSecond,
 		"maxPercentChangePerEpoch", cfg.maxPercentChangePerEpoch)
-	tokenPricer := tokenprice.NewClient(cfg.bybitBackendURL, cfg.tokenPricerUpdateFrequencySecond)
-	if tokenPricer == nil {
-		if err != nil {
-			return nil, fmt.Errorf("invalid token price client")
-		}
-	}
-
 	gasPricer, err := gasprices.NewGasPricer(
 		currentPrice.Uint64(),
 		cfg.floorPrice,
+		tokenPricer,
 		func() float64 {
 			return float64(cfg.targetGasPerSecond)
 		},
@@ -282,7 +278,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 	getLatestBlockNumberFn := wrapGetLatestBlockNumberFn(l2Client)
 	// updateL2GasPriceFn is used by the GasPriceUpdater to
 	// update the gas price
-	updateL2GasPriceFn, err := wrapUpdateL2GasPriceFn(l2Client, tokenPricer, cfg)
+	updateL2GasPriceFn, err := wrapUpdateL2GasPriceFn(l2Client, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -296,7 +292,6 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 
 	gasPriceUpdater, err := gasprices.NewGasPriceUpdater(
 		gasPricer,
-		tokenPricer,
 		epochStartBlockNumber,
 		cfg.averageBlockGasLimitPerEpoch,
 		cfg.epochLengthSeconds,

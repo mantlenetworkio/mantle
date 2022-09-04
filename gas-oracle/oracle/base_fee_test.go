@@ -29,7 +29,7 @@ func TestBaseFeeUpdate(t *testing.T) {
 		gasPrice:              big.NewInt(784637584),
 	}
 
-	update, err := wrapUpdateBaseFee(sim, sim, tokenPricer, cfg)
+	update, err := wrapUpdateBaseFee(sim, sim, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}

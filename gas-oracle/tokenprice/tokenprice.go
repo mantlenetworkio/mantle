@@ -3,7 +3,6 @@ package tokenprice
 import (
 	"errors"
 	"fmt"
-	"math"
 	"math/big"
 	"time"
 
@@ -36,7 +35,7 @@ func NewClient(url string, frequency uint64) *Client {
 type Client struct {
 	client     *resty.Client
 	frequency  time.Duration
-	lastRatio  uint64
+	lastRatio  float64
 	lastUpdate time.Time
 }
 
@@ -57,7 +56,6 @@ func (c *Client) Query(symbol string) (*big.Float, error) {
 			"symbol": symbol,
 		}).
 		Get("/spot/quote/v1/ticker/price")
-
 	if err != nil {
 		return nil, fmt.Errorf("cannot fetch token price result: %w", err)
 	}
@@ -72,7 +70,7 @@ func (c *Client) Query(symbol string) (*big.Float, error) {
 	return bigPrice, nil
 }
 
-func (c *Client) PriceRatio() (uint64, error) {
+func (c *Client) PriceRatio() (float64, error) {
 	if time.Now().Sub(c.lastUpdate) < c.frequency {
 		return c.lastRatio, nil
 	}
@@ -93,6 +91,6 @@ func (c *Client) PriceRatio() (uint64, error) {
 	}
 	ratio, _ := ethPrice.Quo(ethPrice, bitPrice).Float64()
 	c.lastUpdate = time.Now()
-	c.lastRatio = uint64(math.Ceil(ratio))
+	c.lastRatio = ratio
 	return c.lastRatio, nil
 }

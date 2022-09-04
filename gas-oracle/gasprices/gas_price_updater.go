@@ -27,7 +27,6 @@ type GasPriceUpdater struct {
 
 func NewGasPriceUpdater(
 	gasPricer *GasPricer,
-	tokenPricer *tokenprice.Client,
 	epochStartBlockNumber uint64,
 	averageBlockGasLimit uint64,
 	epochLengthSeconds uint64,
@@ -44,7 +43,6 @@ func NewGasPriceUpdater(
 	return &GasPriceUpdater{
 		mu:                     new(sync.RWMutex),
 		gasPricer:              gasPricer,
-		tokenPricer:            tokenPricer,
 		epochStartBlockNumber:  epochStartBlockNumber,
 		epochLengthSeconds:     epochLengthSeconds,
 		averageBlockGasLimit:   averageBlockGasLimit,

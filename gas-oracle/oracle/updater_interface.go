@@ -8,7 +8,6 @@ import (
 
 	"github.com/bitdao-io/bitnetwork/gas-oracle/bindings"
 	ometrics "github.com/bitdao-io/bitnetwork/gas-oracle/metrics"
-	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -63,7 +62,7 @@ type DeployContractBackend interface {
 // to update the L2 gas price
 // perhaps this should take an options struct along with the backend?
 // how can this continue to be decomposed?
-func wrapUpdateL2GasPriceFn(backend DeployContractBackend, tokenPricer *tokenprice.Client, cfg *Config) (func(uint64) error, error) {
+func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(uint64) error, error) {
 	if cfg.privateKey == nil {
 		return nil, errNoPrivateKey
 	}
@@ -88,12 +87,6 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, tokenPricer *tokenpri
 	}
 
 	return func(updatedGasPrice uint64) error {
-		ratio, err := tokenPricer.PriceRatio()
-		if err != nil {
-			log.Error("cannot fetch PriceRatio", err)
-			return err
-		}
-		updatedGasPrice *= ratio
 		log.Trace("UpdateL2GasPriceFn", "gas-price", updatedGasPrice)
 		if cfg.gasPrice == nil {
 			// Set the gas price manually to use legacy transactions
