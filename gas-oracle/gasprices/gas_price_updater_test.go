@@ -1,9 +1,10 @@
 package gasprices
 
 import (
-	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"math/big"
 	"testing"
+
+	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 )
 
 type MockEpoch struct {
