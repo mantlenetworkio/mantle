@@ -42,7 +42,7 @@ type GasPriceOracle struct {
 	stop            chan struct{}
 	contract        *bindings.GasPriceOracle
 	l2Backend       DeployContractBackend
-	l1Backend       *L1Client
+	l1Backend       bind.ContractTransactor
 	gasPriceUpdater *gasprices.GasPriceUpdater
 	config          *Config
 }
