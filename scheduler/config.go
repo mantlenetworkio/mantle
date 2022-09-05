@@ -66,7 +66,7 @@ type Config struct {
 	// SCCAddress is the SCC contract address.
 	SCCAddress string
 
-	// TGMAddressFlag is the TGM contract address.
+	// TGMAddressFlag is the TSS group manger contract address.
 	TGMAddress string
 
 	// TSHAddressFlag is the TSH contract address.
