@@ -69,7 +69,7 @@ type Config struct {
 	// TGMAddressFlag is the TSS group manger contract address.
 	TGMAddress string
 
-	// TSHAddressFlag is the TSH contract address.
+	// TSHAddressFlag is the TSS staking & slashing contract address.
 	TSHAddress string
 
 	// MinL1TxSize is the minimum size in bytes of any L1 transactions generated
