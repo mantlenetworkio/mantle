@@ -138,11 +138,16 @@ func (d *Driver) CompareValidatorSet(new []*Sequencer) []*Sequencer {
 	var changes []*Sequencer
 	unchangeIndex := []int{}
 	for i, v := range new {
+	    changed := true
 		for _, seq := range d.seqz.Sequencers {
 			if bytes.Equal(seq.Address.Bytes(), v.Address.Bytes()) && v.VotingPower == seq.VotingPower {
 				unchangeIndex = append(unchangeIndex, i)
+				changed = false
 				break
 			}
+		}
+		if changed {
+		    changes = append(changes, new[i])
 		}
 	}
 	for i := 0; len(unchangeIndex) > 0; i++ {
