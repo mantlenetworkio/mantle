@@ -3,6 +3,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 interface IStakingSlashing {
     struct DepositInfo {
+        address pledgor;
         bytes pubKey;
         uint256 amount;
     }
@@ -10,7 +11,8 @@ interface IStakingSlashing {
     function staking(uint256, bytes memory) external;
     function withdrawToken() external;
     function quit() external;
-    function clearQuitList() external;
+    function clearQuitRequestList() external ;
+    function getQuitRequestList() external returns (address[] memory);
     function slashing(bytes memory, bytes memory) external;
     function getDeposits(address) external returns (DepositInfo memory);
     function getSlashRecord(uint256, address) external returns (bool);

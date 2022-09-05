@@ -69,7 +69,7 @@ contract TssStakingSlashing is
      * @param _bitToken bit token contract address
      * @param _tssGroupContract address tss group manager contract address
      */
-    function initialize(address _bitToken,address _tssGroupContract) public initializer {
+    function initialize(address _bitToken, address _tssGroupContract) public initializer {
         __Ownable_init();
 
         BitToken = _bitToken;
@@ -142,6 +142,7 @@ contract TssStakingSlashing is
                 "invalid pubKey"
             );
             deposits[msg.sender].pubKey = _pubKey;
+            deposits[msg.sender].pledgor = msg.sender;
         }
 
         // send bit token to staking contract, need user approve first
@@ -151,7 +152,10 @@ contract TssStakingSlashing is
         );
         deposits[msg.sender].amount += _amount;
 
-        emit AddDeposit(msg.sender, DepositInfo({ pubKey: _pubKey, amount: _amount }));
+        emit AddDeposit(
+            msg.sender,
+            DepositInfo({ pledgor: msg.sender, pubKey: _pubKey, amount: _amount })
+        );
     }
 
     /**
@@ -172,7 +176,6 @@ contract TssStakingSlashing is
         delete deposits[msg.sender];
 
         require(IERC20(BitToken).transfer(msg.sender, amount), "erc20 transfer failed");
-
         emit Withdraw(msg.sender, amount);
     }
 
@@ -197,14 +200,14 @@ contract TssStakingSlashing is
     /**
      * @notice return the quit list
      */
-    function getQuitList() public view returns (address[] memory) {
+    function getQuitRequestList() public view returns (address[] memory) {
         return quitList;
     }
 
     /**
      * @notice clear the quit list
      */
-    function clearQuitList() public onlyOwner {
+    function clearQuitRequestList() public onlyOwner {
         delete quitList;
     }
 
@@ -329,6 +332,18 @@ contract TssStakingSlashing is
      */
     function getDeposits(address user) public view returns (DepositInfo memory) {
         return deposits[user];
+    }
+
+    /**
+     * @notice get the deposit infos
+     * @param users address list of the stakers
+     */
+    function batchGetDeposits(address[] calldata users) public view returns (DepositInfo[] memory) {
+        DepositInfo[] memory depositsList = new DepositInfo[](users.length);
+        for (uint256 i = 0; i < users.length; i++) {
+            depositsList[i] = deposits[users[i]];
+        }
+        return depositsList;
     }
 
     /**

@@ -1,4 +1,4 @@
-import { Signer, Wallet, BytesLike, utils, Contract } from "ethers"
+import { Signer, Wallet, BytesLike, utils, Contract, BigNumber } from "ethers"
 import chai from "chai"
 import { deploy } from '../../../helpers'
 
@@ -103,9 +103,21 @@ describe('StakingSlashing', () => {
     expect(await bitToken.balanceOf(myWallet.address)).to.eq(100000)
   })
 
+  it("batch GetDeposits test", async () => {
+    let address = [tssNodes[0].address, tssNodes[1].address, tssNodes[2].address]
+    let deposits = await stakingSlashing.batchGetDeposits(address)
+
+    for (let i = 0; i < deposits.length; i++) {
+      let pubKey = "0x" + tssNodes[i].publicKey.substring(4)
+      expect(deposits[i].pledgor).to.eq(tssNodes[i].address)
+      expect(deposits[i].pubKey).to.eq(pubKey)
+      expect(deposits[i].amount).to.eq(BigNumber.from(20000))
+    }
+  })
+
   it("quitRequest", async () => {
     await stakingSlashing.connect(tssNodes[1]).quit()
-    let quitList = await stakingSlashing.getQuitList()
+    let quitList = await stakingSlashing.getQuitRequestList()
     expect(quitList[0]).to.eq(tssNodes[1].address)
     await expect(stakingSlashing.connect(tssNodes[1]).quit()).to.be.revertedWith("already in quitList")
 
@@ -297,7 +309,6 @@ describe('StakingSlashing', () => {
       expect(await bitToken.balanceOf(tssNodes[i].address)).to.eq(20000)
       await bitToken.connect(tssNodes[i]).approve(stakingSlashing.address, 20000)
       // staking
-      // console.log(pubKey)
       await stakingSlashing.connect(tssNodes[i]).staking(20000, pubKey)
       // check
       let deposit = await stakingSlashing.getDeposits((await tssNodes[i].address).toString())

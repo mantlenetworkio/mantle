@@ -27,10 +27,32 @@ function BitToken() external view returns (address)
 |---|---|---|
 | _0 | address | undefined
 
-### clearQuitList
+### batchGetDeposits
 
 ```solidity
-function clearQuitList() external nonpayable
+function batchGetDeposits(address[] users) external view returns (struct IStakingSlashing.DepositInfo[])
+```
+
+get the deposit infos
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| users | address[] | address list of the stakers
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | IStakingSlashing.DepositInfo[] | undefined
+
+### clearQuitRequestList
+
+```solidity
+function clearQuitRequestList() external nonpayable
 ```
 
 clear the quit list
@@ -41,7 +63,7 @@ clear the quit list
 ### deposits
 
 ```solidity
-function deposits(address) external view returns (bytes pubKey, uint256 amount)
+function deposits(address) external view returns (address pledgor, bytes pubKey, uint256 amount)
 ```
 
 
@@ -58,6 +80,7 @@ function deposits(address) external view returns (bytes pubKey, uint256 amount)
 
 | Name | Type | Description |
 |---|---|---|
+| pledgor | address | undefined
 | pubKey | bytes | undefined
 | amount | uint256 | undefined
 
@@ -105,10 +128,10 @@ get the deposit info
 |---|---|---|
 | _0 | IStakingSlashing.DepositInfo | undefined
 
-### getQuitList
+### getQuitRequestList
 
 ```solidity
-function getQuitList() external view returns (address[])
+function getQuitRequestList() external view returns (address[])
 ```
 
 return the quit list

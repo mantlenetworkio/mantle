@@ -10,10 +10,10 @@
 
 ## Methods
 
-### clearQuitList
+### clearQuitRequestList
 
 ```solidity
-function clearQuitList() external nonpayable
+function clearQuitRequestList() external nonpayable
 ```
 
 
@@ -42,6 +42,23 @@ function getDeposits(address) external nonpayable returns (struct IStakingSlashi
 | Name | Type | Description |
 |---|---|---|
 | _0 | IStakingSlashing.DepositInfo | undefined
+
+### getQuitRequestList
+
+```solidity
+function getQuitRequestList() external nonpayable returns (address[])
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address[] | undefined
 
 ### getSlashRecord
 
