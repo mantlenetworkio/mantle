@@ -116,10 +116,10 @@ describe('StakingSlashing', () => {
   })
 
   it("quitRequest", async () => {
-    await stakingSlashing.connect(tssNodes[1]).quit()
+    await stakingSlashing.connect(tssNodes[1]).quitRequest()
     let quitList = await stakingSlashing.getQuitRequestList()
     expect(quitList[0]).to.eq(tssNodes[1].address)
-    await expect(stakingSlashing.connect(tssNodes[1]).quit()).to.be.revertedWith("already in quitList")
+    await expect(stakingSlashing.connect(tssNodes[1]).quitRequest()).to.be.revertedWith("already in quitRequestList")
 
     let tssNodesPubKey: BytesLike[] = []
     // tssnodes staking first
@@ -139,7 +139,7 @@ describe('StakingSlashing', () => {
       tssNodesPubKey[i] = pubKey
     }
 
-    await expect(stakingSlashing.connect(newTssNodes[1]).quit()).to.be.revertedWith("not at the inactive group or active group")
+    await expect(stakingSlashing.connect(newTssNodes[1]).quitRequest()).to.be.revertedWith("not at the inactive group or active group")
 
     // set inactive tss group members
     await tssGroup.setTssGroupMember(
@@ -149,7 +149,7 @@ describe('StakingSlashing', () => {
     let info = await tssGroup.getTssGroupInfo()
     expect(info[0]).to.eq(1)
     expect(info[1]).to.eq(4)
-    await stakingSlashing.connect(tssNodes[2]).quit()
+    await stakingSlashing.connect(tssNodes[2]).quitRequest()
   })
 
   it("slashing", async () => {

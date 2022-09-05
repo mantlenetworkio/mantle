@@ -265,10 +265,10 @@ function owner() external view returns (address)
 |---|---|---|
 | _0 | address | undefined
 
-### quit
+### quitRequest
 
 ```solidity
-function quit() external nonpayable
+function quitRequest() external nonpayable
 ```
 
 send quit request for the next election
@@ -276,10 +276,10 @@ send quit request for the next election
 
 
 
-### quitList
+### quitRequestList
 
 ```solidity
-function quitList(uint256) external view returns (address)
+function quitRequestList(uint256) external view returns (address)
 ```
 
 

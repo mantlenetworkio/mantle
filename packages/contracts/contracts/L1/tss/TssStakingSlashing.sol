@@ -35,7 +35,7 @@ contract TssStakingSlashing is
 
     // slashing parameter settings
     // record the quit request
-    address[] public quitList;
+    address[] public quitRequestList;
     // slashing amount of type uptime and animus (0:uptime, 1:animus)
     uint256[2] public slashAmount;
     // additional rewards for sender (0:uptime, 1:animus)
@@ -182,7 +182,7 @@ contract TssStakingSlashing is
     /**
      * @notice send quit request for the next election
      */
-    function quit() public nonReentrant {
+    function quitRequest() public nonReentrant {
         require(deposits[msg.sender].amount > 0, "do not have deposit");
         // when not in consensus period
         require(
@@ -191,24 +191,24 @@ contract TssStakingSlashing is
             "not at the inactive group or active group"
         );
         // is active member
-        for (uint256 i = 0; i < quitList.length; i++) {
-            require(quitList[i] != msg.sender, "already in quitList");
+        for (uint256 i = 0; i < quitRequestList.length; i++) {
+            require(quitRequestList[i] != msg.sender, "already in quitRequestList");
         }
-        quitList.push(msg.sender);
+        quitRequestList.push(msg.sender);
     }
 
     /**
      * @notice return the quit list
      */
     function getQuitRequestList() public view returns (address[] memory) {
-        return quitList;
+        return quitRequestList;
     }
 
     /**
      * @notice clear the quit list
      */
     function clearQuitRequestList() public onlyOwner {
-        delete quitList;
+        delete quitRequestList;
     }
 
     /**
