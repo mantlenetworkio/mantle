@@ -133,6 +133,7 @@ func (d *Driver) SwitchProducer(ctx context.Context) error {
 	return nil
 }
 
+// CompareValidatorSet will return the update with Driver.seqz
 func (d *Driver) CompareValidatorSet(new []*Sequencer) []*Sequencer {
 	var changes []*Sequencer
 	unchangeIndex := []int{}
