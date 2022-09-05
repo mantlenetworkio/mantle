@@ -1,10 +1,10 @@
 <div align="center">
-  <h1> The Bitnework Monorepo</h1>
+  <h1> The Mantle Monorepo</h1>
 </div>
 <p align="center">
-  <a href="https://github.com/bitdao-io/mantle/actions/workflows/ts-packages.yml?query=branch%3Amaster"><img src="https://github.com/guoshijiang/mantle/workflows/typescript%20/%20contracts/badge.svg" /></a>
-  <a href="https://github.com/bitdao-io/mantle/actions/workflows/integration.yml?query=branch%3Amaster"><img src="https://github.com/guoshijiang/mantle/workflows/integration/badge.svg" /></a>
-  <a href="https://github.com/bitdao-io/mantle/actions/workflows/geth.yml?query=branch%3Amaster"><img src="https://github.com/guoshijiang/mantle/workflows/geth%20unit%20tests/badge.svg" /></a>
+  <a href="https://github.com/bitnetworkio/mantle/actions/workflows/ts-packages.yml?query=branch%3Amaster"><img src="https://github.com/bitnetworkio/mantle/workflows/typescript%20/%20contracts/badge.svg" /></a>
+  <a href="https://github.com/bitnetworkio/mantle/actions/workflows/integration.yml?query=branch%3Amaster"><img src="https://github.com/bitnetworkio/mantle/workflows/integration/badge.svg" /></a>
+  <a href="https://github.com/bitnetworkio/mantle/actions/workflows/geth.yml?query=branch%3Amaster"><img src="https://github.com/bitnetworkio/mantle/workflows/geth%20unit%20tests/badge.svg" /></a>
 </p>
 
 ## TL;DR
