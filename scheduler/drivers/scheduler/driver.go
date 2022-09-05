@@ -3,6 +3,7 @@ package scheduler
 import (
 	"bytes"
 	"context"
+	"math"
 	"math/big"
 
 	"github.com/bitdao-io/bitnetwork/bss-core/metrics"
@@ -55,26 +56,9 @@ func NewDriver(cfg Config) (*Driver, error) {
 	}
 
 	// get sequencers from Sequencer contract
-	pubKeys, err := tgmContract.GetTssGroupMembers(nil)
+	seqz, err := GetSequencerSet(tgmContract, tshContract)
 	if err != nil {
 		return nil, err
-	}
-	var seqz []*Sequencer
-	for _, v := range pubKeys {
-		ecdsaPubKey, err := crypto.UnmarshalPubkey(v)
-		if err != nil {
-			return nil, err
-		}
-		addr := crypto.PubkeyToAddress(*ecdsaPubKey)
-		deposit, err := tshContract.GetDeposits(nil, common.BytesToAddress(addr.Bytes()))
-
-		seq := &Sequencer{
-			Address: addr,
-			PubKey:  *ecdsaPubKey,
-			// todo : caculate voting power
-			VotingPower: deposit.Amount.Int64(),
-		}
-		seqz = append(seqz, seq)
 	}
 
 	return &Driver{
@@ -98,27 +82,9 @@ func (d *Driver) Metrics() metrics.Metrics {
 
 // ExecuteProcess executes a process on this driver.
 func (d *Driver) ExecuteProcess(ctx context.Context) error {
-	// get update sequencers from Sequencer contract
-	pubKeys, err := d.tgmContract.GetTssGroupMembers(nil)
+	seqz, err := GetSequencerSet(d.tgmContract, d.tshContract)
 	if err != nil {
 		return err
-	}
-	var seqz []*Sequencer
-	for _, v := range pubKeys {
-		ecdsaPubKey, err := crypto.UnmarshalPubkey(v)
-		if err != nil {
-			return err
-		}
-		addr := crypto.PubkeyToAddress(*ecdsaPubKey)
-		deposit, err := d.tshContract.GetDeposits(nil, common.BytesToAddress(addr.Bytes()))
-
-		seq := &Sequencer{
-			Address: addr,
-			PubKey:  *ecdsaPubKey,
-			// todo : caculate voting power
-			VotingPower: deposit.Amount.Int64(),
-		}
-		seqz = append(seqz, seq)
 	}
 	changes := d.CompareValidatorSet(seqz)
 
@@ -133,29 +99,47 @@ func (d *Driver) SwitchProducer(ctx context.Context) error {
 	return nil
 }
 
+// GetSequencerSet will return the validator set
+func GetSequencerSet(tgmContract *tgm.TssGroupManager, tshContract *tsh.TssStakingSlashing) ([]*Sequencer, error) {
+	pubKeys, err := tgmContract.GetTssGroupMembers(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	scale := int64(math.Pow10(18))
+	var seqz []*Sequencer
+	for _, v := range pubKeys {
+		ecdsaPubKey, err := crypto.UnmarshalPubkey(v)
+		if err != nil {
+			return nil, err
+		}
+		addr := crypto.PubkeyToAddress(*ecdsaPubKey)
+		deposit, err := tshContract.GetDeposits(nil, common.BytesToAddress(addr.Bytes()))
+
+		seq := &Sequencer{
+			Address:     addr,
+			PubKey:      *ecdsaPubKey,
+			VotingPower: deposit.Amount.Div(deposit.Amount, big.NewInt(scale)).Int64(),
+		}
+		seqz = append(seqz, seq)
+	}
+	return seqz, nil
+}
+
 // CompareValidatorSet will return the update with Driver.seqz
 func (d *Driver) CompareValidatorSet(new []*Sequencer) []*Sequencer {
 	var changes []*Sequencer
-	unchangeIndex := []int{}
 	for i, v := range new {
-	    changed := true
+		changed := true
 		for _, seq := range d.seqz.Sequencers {
 			if bytes.Equal(seq.Address.Bytes(), v.Address.Bytes()) && v.VotingPower == seq.VotingPower {
-				unchangeIndex = append(unchangeIndex, i)
 				changed = false
 				break
 			}
 		}
 		if changed {
-		    changes = append(changes, new[i])
+			changes = append(changes, new[i])
 		}
-	}
-	for i := 0; len(unchangeIndex) > 0; i++ {
-		if i == unchangeIndex[0] {
-			unchangeIndex = unchangeIndex[1:]
-			continue
-		}
-		changes = append(changes, new[i])
 	}
 	return changes
 }
