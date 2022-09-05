@@ -82,7 +82,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		tgmContract: tgmContract,
 		tshContract: tshContract,
 		seqz:        NewSequencerSet(seqz),
-		metrics:     metrics.NewBase("batch_submitter", cfg.Name),
+		metrics:     metrics.NewBase("scheduler", cfg.Name),
 	}, nil
 }
 
