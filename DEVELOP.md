@@ -18,8 +18,8 @@ You'll need the following:
 Clone the repository, open it, and install nodejs packages with `yarn`:
 
 ```bash
-git clone git@github.com:bitdao-io/bitnetwork.git
-cd bitnetwork
+git clone git@github.com:bitnetworkio/mantle.git
+cd mantle
 yarn install
 ```
 
@@ -50,7 +50,7 @@ Use the above commands to recompile the packages.
 
 ### Building the rest of the system
 
-If you want to run an bitnetwork node OR **if you want to run the integration tests**, you'll need to build the rest of the system.
+If you want to run an mantle node OR **if you want to run the integration tests**, you'll need to build the rest of the system.
 
 ```bash
 cd ops
@@ -95,7 +95,7 @@ docker-compose up
 Finally, **if you're running into weird problems and nothing seems to be working**, run:
 
 ```bash
-cd bitnetwork
+cd mantle
 yarn clean
 yarn build
 cd ops
@@ -153,3 +153,6 @@ cd packages/contracts
 pip3 install slither-analyzer
 yarn test:slither
 ```
+## Set Up Local Environment
+
+Check out [ops/README.local.md](./ops/README.local.md).

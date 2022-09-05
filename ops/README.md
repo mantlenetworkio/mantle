@@ -1,6 +1,6 @@
 # docker-compose
 
-The docker-compose project runs a local bitnetwork stack.
+The docker-compose project runs a local mantle stack.
 
 ## prerequisites
 
