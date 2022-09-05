@@ -10,12 +10,12 @@ interface IStakingSlashing {
 
     // tx
     function setAddress(address , address ) external;
-    function setSlashingParams(uint256[2] memory , uint256[2] memory) external;
-    function staking(uint256 , bytes memory) external;
+    function setSlashingParams(uint256[2] calldata , uint256[2] calldata) external;
+    function staking(uint256 , bytes calldata) external;
     function withdrawToken() external;
     function quitRequest() external;
     function clearQuitRequestList() external;
-    function slashing(bytes memory, bytes memory) external;
+    function slashing(bytes calldata, bytes calldata) external;
     function unJail() external;
 
     // query
@@ -24,5 +24,5 @@ interface IStakingSlashing {
     function getDeposits(address) external returns (DepositInfo memory);
     function batchGetDeposits(address[] calldata) external view returns (DepositInfo[] memory);
     function getSlashRecord(uint256, address) external view returns (bool);
-    function isJailed(address user) external returns (bool);
+    function isJailed(address) external returns (bool);
 }

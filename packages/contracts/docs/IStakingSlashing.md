@@ -126,7 +126,7 @@ function getSlashingParams() external view returns (uint256[2], uint256[2])
 ### isJailed
 
 ```solidity
-function isJailed(address user) external nonpayable returns (bool)
+function isJailed(address) external nonpayable returns (bool)
 ```
 
 
@@ -137,7 +137,7 @@ function isJailed(address user) external nonpayable returns (bool)
 
 | Name | Type | Description |
 |---|---|---|
-| user | address | undefined
+| _0 | address | undefined
 
 #### Returns
 

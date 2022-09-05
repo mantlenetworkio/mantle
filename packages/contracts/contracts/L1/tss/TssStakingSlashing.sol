@@ -91,7 +91,7 @@ contract TssStakingSlashing is
      * @param _slashAmount the amount to be deducted for each type
      * @param _exIncome additional amount available to the originator of the report
      */
-    function setSlashingParams(uint256[2] memory _slashAmount, uint256[2] memory _exIncome)
+    function setSlashingParams(uint256[2] calldata _slashAmount, uint256[2] calldata _exIncome)
         public
         onlyOwner
     {
@@ -119,7 +119,7 @@ contract TssStakingSlashing is
      * @param _amount deposit amount of bit token
      * @param _pubKey public key of sender
      */
-    function staking(uint256 _amount, bytes memory _pubKey) public nonReentrant {
+    function staking(uint256 _amount, bytes calldata _pubKey) public nonReentrant {
         // slashing params check
         for (uint256 i = 0; i < 2; i++) {
             require(slashAmount[i] > 0, "have not set the slash amount");
@@ -216,7 +216,7 @@ contract TssStakingSlashing is
      * @param _messageBytes the message that abi encode by type SlashMsg
      * @param _sig the signature of the hash keccak256(_messageBytes)
      */
-    function slashing(bytes memory _messageBytes, bytes memory _sig) public nonReentrant {
+    function slashing(bytes calldata _messageBytes, bytes calldata _sig) public nonReentrant {
         SlashMsg memory message = abi.decode(_messageBytes, (SlashMsg));
         // verify tss member state not at jailed status
         require(!isJailed(message.jailNode), "the node already jailed");
