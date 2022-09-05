@@ -17,9 +17,8 @@ export const predeploys = {
   BVM_L1BlockNumber: '0x4200000000000000000000000000000000000013',
 
   // We're temporarily disabling BVM_BIT because the jury is still out on whether BIT as an
-  // ERC20 is desirable.
+  // ERC20 is desirable. ETH on Layer 2 will be the standard ERC20 token
   BVM_BIT: '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000',
-  // ETH on Layer 2 will be the standard ERC20 token
   BVM_ETH: '0xdEAddEaDdeadDEadDEADDEAddEADDEAddead1111',
 
   // We're also putting WETH9 at the old BVM_ETH address.

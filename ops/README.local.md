@@ -20,6 +20,12 @@ make -f Makefile.local up service=l1_chain
 make -f Makefile.local down
 ````
 
+### Stop All Service And Clear Data
+
+```bash
+make -f Makefile.local clean
+````
+
 ### Start/Stop All Services
 
 ```shell
