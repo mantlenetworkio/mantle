@@ -13,17 +13,17 @@ import {
   withdrawalTest,
   gasPriceOracleWallet,
 } from './shared/utils'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 
 // TX size enforced by CTC:
 const MAX_ROLLUP_TX_SIZE = 50_000
 
 describe('Native ETH Integration Tests', async () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
   let l1Bob: Wallet
   let l2Bob: Wallet
 
-  const getBalances = async (_env: BitnetworkEnv) => {
+  const getBalances = async (_env: MantleEnv) => {
     const l1UserBalance = await _env.l1Wallet.getBalance()
     const l2UserBalance = await _env.l2Wallet.getBalance()
 
@@ -44,7 +44,7 @@ describe('Native ETH Integration Tests', async () => {
   }
 
   before(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
     l1Bob = Wallet.createRandom().connect(env.l1Wallet.provider)
     l2Bob = l1Bob.connect(env.l2Wallet.provider)
   })

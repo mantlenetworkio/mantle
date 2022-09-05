@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/abi"
+	"github.com/bitdao-io/mantle/l2geth/accounts/abi"
 )
 
 var codec abi.ABI

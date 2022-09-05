@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: BitNetwork Data Transport Later
+  title: Mantle Data Transport Later
   description: |
     Make sequencer or contract data available behind a common API
   version: 0.1.0

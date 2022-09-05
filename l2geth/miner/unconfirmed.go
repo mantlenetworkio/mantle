@@ -20,9 +20,9 @@ import (
 	"container/ring"
 	"sync"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/log"
 )
 
 // chainRetriever is used by the unconfirmed block set to verify whether a previously

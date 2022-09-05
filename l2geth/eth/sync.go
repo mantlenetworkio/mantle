@@ -21,11 +21,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/eth/downloader"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enode"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/eth/downloader"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
 )
 
 const (

@@ -4,7 +4,7 @@ import { ethers } from 'hardhat'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 import {
   executeL1ToL2TransactionsParallel,
   executeL2ToL1TransactionsParallel,
@@ -25,7 +25,7 @@ const STRESS_TEST_TIMEOUT = envConfig.MOCHA_TIMEOUT * 5
 describe('stress tests', () => {
   const numTransactions = 3
 
-  let env: BitnetworkEnv
+  let env: MantleEnv
 
   const wallets: Wallet[] = []
 
@@ -36,7 +36,7 @@ describe('stress tests', () => {
       return
     }
 
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
 
     for (let i = 0; i < numTransactions; i++) {
       wallets.push(Wallet.createRandom())

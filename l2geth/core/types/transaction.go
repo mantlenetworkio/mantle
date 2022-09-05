@@ -23,11 +23,11 @@ import (
 	"math/big"
 	"sync/atomic"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
-	"github.com/bitdao-io/bitnetwork/l2geth/rollup/rcfg"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/rlp"
+	"github.com/bitdao-io/mantle/l2geth/rollup/rcfg"
 )
 
 //go:generate gencodec -type txdata -field-override txdataMarshaling -out gen_tx_json.go

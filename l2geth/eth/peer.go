@@ -23,11 +23,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/forkid"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p"
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/core/forkid"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/p2p"
+	"github.com/bitdao-io/mantle/l2geth/rlp"
 	mapset "github.com/deckarep/golang-set"
 )
 

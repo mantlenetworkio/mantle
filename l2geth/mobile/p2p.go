@@ -21,7 +21,7 @@ package geth
 import (
 	"errors"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p"
+	"github.com/bitdao-io/mantle/l2geth/p2p"
 )
 
 // NodeInfo represents pi short summary of the information known about the host.

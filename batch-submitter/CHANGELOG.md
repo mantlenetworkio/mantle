@@ -1,2 +1,2 @@
-# @eth-bitnetwork/batch-submitter-service
+# @eth-mantle/batch-submitter-service
 

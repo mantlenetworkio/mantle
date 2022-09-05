@@ -17,7 +17,7 @@
 package les
 
 import (
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
+	"github.com/bitdao-io/mantle/l2geth/rlp"
 )
 
 // lesEntry is the "les" ENR entry. This is set for LES servers only.

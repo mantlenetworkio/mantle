@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common/mclock"
+	"github.com/bitdao-io/mantle/l2geth/common/mclock"
 )
 
 // requestDistributor implements a mechanism that distributes requests to

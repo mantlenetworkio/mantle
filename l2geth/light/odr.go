@@ -21,11 +21,11 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/core"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/rawdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethdb"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/core"
+	"github.com/bitdao-io/mantle/l2geth/core/rawdb"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/ethdb"
 )
 
 // NoOdr is the default context passed to an ODR capable function when the ODR

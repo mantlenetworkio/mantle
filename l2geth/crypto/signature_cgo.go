@@ -24,8 +24,8 @@ import (
 	"crypto/elliptic"
 	"fmt"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common/math"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto/secp256k1"
+	"github.com/bitdao-io/mantle/l2geth/common/math"
+	"github.com/bitdao-io/mantle/l2geth/crypto/secp256k1"
 )
 
 // Ecrecover returns the uncompressed public key that created the given signature.

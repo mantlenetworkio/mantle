@@ -27,10 +27,10 @@ import (
 	"testing/quick"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enode"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enr"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/netutil"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enr"
+	"github.com/bitdao-io/mantle/l2geth/p2p/netutil"
 )
 
 func TestTable_pingReplace(t *testing.T) {

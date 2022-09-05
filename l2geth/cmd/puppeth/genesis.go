@@ -22,13 +22,13 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
-	math2 "github.com/bitdao-io/bitnetwork/l2geth/common/math"
-	"github.com/bitdao-io/bitnetwork/l2geth/consensus/ethash"
-	"github.com/bitdao-io/bitnetwork/l2geth/core"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
+	math2 "github.com/bitdao-io/mantle/l2geth/common/math"
+	"github.com/bitdao-io/mantle/l2geth/consensus/ethash"
+	"github.com/bitdao-io/mantle/l2geth/core"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/params"
 )
 
 // alethGenesisSpec represents the genesis specification format used by the

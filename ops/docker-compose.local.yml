@@ -1,12 +1,12 @@
 version: '3.4'
 
 networks:
-  bitnetwork: {}
+  mantle: {}
 
 x-base: &base
   restart: unless-stopped
   networks:
-    bitnetwork: {}
+    mantle: {}
 
 services:
   l1_chain:

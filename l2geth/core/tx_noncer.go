@@ -19,8 +19,8 @@ package core
 import (
 	"sync"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/state"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/core/state"
 )
 
 // txNoncer is a tiny virtual state database to manage the executable nonces of

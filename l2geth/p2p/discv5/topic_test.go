@@ -21,8 +21,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/mclock"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/mclock"
 )
 
 func TestTopicRadius(t *testing.T) {

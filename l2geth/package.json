@@ -1,5 +1,5 @@
 {
-  "name": "@eth-bitnetwork/l2geth",
+  "name": "@eth-mantle/l2geth",
   "version": "0.5.23",
   "private": true,
   "devDependencies": {}
