@@ -66,6 +66,12 @@ type Config struct {
 	// SCCAddress is the SCC contract address.
 	SCCAddress string
 
+	// TGMAddressFlag is the TGM contract address.
+	TGMAddress string
+
+	// TSHAddressFlag is the TSH contract address.
+	TSHAddress string
+
 	// MinL1TxSize is the minimum size in bytes of any L1 transactions generated
 	// by the scheduler.
 	MinL1TxSize uint64
@@ -205,6 +211,8 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		L2EthRpc:                  ctx.GlobalString(flags.L2EthRpcFlag.Name),
 		CTCAddress:                ctx.GlobalString(flags.CTCAddressFlag.Name),
 		SCCAddress:                ctx.GlobalString(flags.SCCAddressFlag.Name),
+		TGMAddress:                ctx.GlobalString(flags.TGMAddressFlag.Name),
+		TSHAddress:                ctx.GlobalString(flags.TSHAddressFlag.Name),
 		MinL1TxSize:               ctx.GlobalUint64(flags.MinL1TxSizeFlag.Name),
 		MaxL1TxSize:               ctx.GlobalUint64(flags.MaxL1TxSizeFlag.Name),
 		MaxPlaintextBatchSize:     ctx.GlobalUint64(flags.MaxPlaintextBatchSizeFlag.Name),

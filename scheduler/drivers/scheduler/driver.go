@@ -1,12 +1,14 @@
 package scheduler
 
 import (
+	"bytes"
 	"context"
 	"math/big"
 
-	"github.com/bitdao-io/bitnetwork/batch-submitter/bindings/scc"
 	"github.com/bitdao-io/bitnetwork/bss-core/metrics"
-	common2 "github.com/bitdao-io/bitnetwork/l2geth/common"
+	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
+	"github.com/bitdao-io/bitnetwork/scheduler/bindings/tgm"
+	"github.com/bitdao-io/bitnetwork/scheduler/bindings/tsh"
 	"github.com/bitdao-io/bitnetwork/scheduler/service"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -21,44 +23,66 @@ type Config struct {
 	Name          string
 	L1Client      *ethclient.Client
 	SequencerAddr common.Address // sequencer contract address
+	TSHAddr       common.Address // sequencer staking address
 }
 
 // Driver implements the service.Driver interface.
 var _ service.Driver = &Driver{}
 
 type Driver struct {
-	cfg               Config
-	sequencerContract *scc.StateCommitmentChain
-	seqz              *SequencerSet
-	block             uint64     // current block height
-	producer          *Sequencer // currenct producer
-	metrics           *metrics.Base
+	cfg         Config
+	tgmContract *tgm.TssGroupManager
+	tshContract *tsh.TssStakingSlashing
+	seqz        *SequencerSet
+	block       uint64     // current block height
+	producer    *Sequencer // currenct producer
+	metrics     *metrics.Base
 }
 
 func NewDriver(cfg Config) (*Driver, error) {
-	sequencerContract, err := scc.NewStateCommitmentChain(
+	tgmContract, err := tgm.NewTssGroupManager(
 		cfg.SequencerAddr, cfg.L1Client,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: get sequencers from Sequencer contract
-	// d.sequencerContract.getSequencers()
-	sequencers := []common.Address{}
+	tshContract, err := tsh.NewTssStakingSlashing(
+		cfg.TSHAddr, cfg.L1Client,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// get sequencers from Sequencer contract
+	pubKeys, err := tgmContract.GetTssGroupMembers(nil)
+	if err != nil {
+		return nil, err
+	}
 	var seqz []*Sequencer
-	for _, sequencer := range sequencers {
+	for _, v := range pubKeys {
+		ecdsaPubKey, err := crypto.UnmarshalPubkey(v)
+		if err != nil {
+			return nil, err
+		}
+		addr := crypto.PubkeyToAddress(*ecdsaPubKey)
+		deposit, err := tshContract.GetDeposits(nil, common.BytesToAddress(addr.Bytes()))
+
 		seq := &Sequencer{
-			Address: common2.Address(sequencer),
+			Address: addr,
+			PubKey:  *ecdsaPubKey,
+			// todo : caculate voting power
+			VotingPower: deposit.Amount.Int64(),
 		}
 		seqz = append(seqz, seq)
 	}
 
 	return &Driver{
-		cfg:               cfg,
-		sequencerContract: sequencerContract,
-		seqz:              NewSequencerSet(seqz),
-		metrics:           metrics.NewBase("batch_submitter", cfg.Name),
+		cfg:         cfg,
+		tgmContract: tgmContract,
+		tshContract: tshContract,
+		seqz:        NewSequencerSet(seqz),
+		metrics:     metrics.NewBase("batch_submitter", cfg.Name),
 	}, nil
 }
 
@@ -74,17 +98,31 @@ func (d *Driver) Metrics() metrics.Metrics {
 
 // ExecuteProcess executes a process on this driver.
 func (d *Driver) ExecuteProcess(ctx context.Context) error {
-	// TODO: get update sequencers from Sequencer contract
-	// d.sequencerContract.getSequencers()
-	updateSequencers := []common.Address{}
+	// get update sequencers from Sequencer contract
+	pubKeys, err := d.tgmContract.GetTssGroupMembers(nil)
+	if err != nil {
+		return err
+	}
 	var seqz []*Sequencer
-	for _, sequencer := range updateSequencers {
+	for _, v := range pubKeys {
+		ecdsaPubKey, err := crypto.UnmarshalPubkey(v)
+		if err != nil {
+			return err
+		}
+		addr := crypto.PubkeyToAddress(*ecdsaPubKey)
+		deposit, err := d.tshContract.GetDeposits(nil, common.BytesToAddress(addr.Bytes()))
+
 		seq := &Sequencer{
-			Address: common2.Address(sequencer),
+			Address: addr,
+			PubKey:  *ecdsaPubKey,
+			// todo : caculate voting power
+			VotingPower: deposit.Amount.Int64(),
 		}
 		seqz = append(seqz, seq)
 	}
-	d.seqz.updateWithChangeSet(seqz, true)
+	changes := d.CompareValidatorSet(seqz)
+
+	d.seqz.updateWithChangeSet(changes, true)
 	return nil
 }
 
@@ -93,4 +131,25 @@ func (d *Driver) ExecuteProcess(ctx context.Context) error {
 func (d *Driver) SwitchProducer(ctx context.Context) error {
 	d.seqz.IncrementProducerPriority(0)
 	return nil
+}
+
+func (d *Driver) CompareValidatorSet(new []*Sequencer) []*Sequencer {
+	var changes []*Sequencer
+	unchangeIndex := []int{}
+	for i, v := range new {
+		for _, seq := range d.seqz.Sequencers {
+			if bytes.Equal(seq.Address.Bytes(), v.Address.Bytes()) && v.VotingPower == seq.VotingPower {
+				unchangeIndex = append(unchangeIndex, i)
+				break
+			}
+		}
+	}
+	for i := 0; len(unchangeIndex) > 0; i++ {
+		if i == unchangeIndex[0] {
+			unchangeIndex = unchangeIndex[1:]
+			continue
+		}
+		changes = append(changes, new[i])
+	}
+	return changes
 }
