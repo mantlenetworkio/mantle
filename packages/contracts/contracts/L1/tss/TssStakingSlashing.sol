@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import { Lib_AddressResolver } from "../../libraries/resolver/Lib_AddressResolver.sol";
-import { Lib_AddressManager } from "../../libraries/resolver/Lib_AddressManager.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -11,7 +9,6 @@ import "./ITssStakingSlashing.sol";
 
 contract TssStakingSlashing is
     Initializable,
-    Lib_AddressResolver,
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
     IStakingSlashing
@@ -67,32 +64,16 @@ contract TssStakingSlashing is
      */
     event Slashing(address, SlashType);
 
-    /***************
-     * Constructor *
-     ***************/
-
-    /**
-     * This contract is intended to be behind a delegate proxy.
-     * We pass the zero address to the address resolver just to satisfy the constructor.
-     * We still need to set this value in initialize().
-     */
-    constructor() Lib_AddressResolver(address(0)) {}
-
     /**
      * @notice initializes the contract setting and the deployer as the initial owner
-     * @param _libAddressManager address manager contract address
+     * @param _bitToken bit token contract address
+     * @param _tssGroupContract address tss group manager contract address
      */
-    function initialize(address _libAddressManager) public initializer {
+    function initialize(address _bitToken,address _tssGroupContract) public initializer {
         __Ownable_init();
 
-        require(
-            address(libAddressManager) == address(0),
-            "L1CrossDomainMessenger already intialized."
-        );
-        libAddressManager = Lib_AddressManager(_libAddressManager);
-
-        BitToken = resolve("L1_BitAddress");
-        tssGroupContract = resolve("TssGroupManager");
+        BitToken = _bitToken;
+        tssGroupContract = _tssGroupContract;
     }
 
     /**

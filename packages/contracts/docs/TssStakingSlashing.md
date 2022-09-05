@@ -166,7 +166,7 @@ set the slashing params (0 -&gt; uptime, 1 -&gt; animus)
 ### initialize
 
 ```solidity
-function initialize(address _libAddressManager) external nonpayable
+function initialize(address _bitToken, address _tssGroupContract) external nonpayable
 ```
 
 initializes the contract setting and the deployer as the initial owner
@@ -177,7 +177,8 @@ initializes the contract setting and the deployer as the initial owner
 
 | Name | Type | Description |
 |---|---|---|
-| _libAddressManager | address | address manager contract address
+| _bitToken | address | bit token contract address
+| _tssGroupContract | address | address tss group manager contract address
 
 ### isEqual
 
@@ -223,23 +224,6 @@ check the tssnode status
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined
-
-### libAddressManager
-
-```solidity
-function libAddressManager() external view returns (contract Lib_AddressManager)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract Lib_AddressManager | undefined
 
 ### owner
 
@@ -301,28 +285,6 @@ function renounceOwnership() external nonpayable
 
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
-
-### resolve
-
-```solidity
-function resolve(string _name) external view returns (address)
-```
-
-Resolves the address associated with a given name.
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _name | string | Name to resolve an address for.
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | Address associated with the given name.
 
 ### setAddress
 
