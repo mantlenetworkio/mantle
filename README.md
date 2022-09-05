@@ -1,5 +1,5 @@
 <div align="center">
-  <h1> The Mantle Monorepo</h1>
+  <h1> The Mantle Repo</h1>
 </div>
 <p align="center">
   <a href="https://github.com/bitnetworkio/mantle/actions/workflows/ts-packages.yml?query=branch%3Amaster"><img src="https://github.com/bitnetworkio/mantle/workflows/typescript%20/%20contracts/badge.svg" /></a>
