@@ -7,6 +7,7 @@ import (
 	"math/big"
 
 	"github.com/bitdao-io/bitnetwork/bss-core/metrics"
+	common2 "github.com/bitdao-io/bitnetwork/l2geth/common"
 	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
 	"github.com/bitdao-io/bitnetwork/scheduler/bindings/tgm"
 	"github.com/bitdao-io/bitnetwork/scheduler/bindings/tsh"
@@ -101,28 +102,43 @@ func (d *Driver) SwitchProducer(ctx context.Context) error {
 
 // GetSequencerSet will return the validator set
 func GetSequencerSet(tgmContract *tgm.TssGroupManager, tshContract *tsh.TssStakingSlashing) ([]*Sequencer, error) {
+	// get activeTssMembers public keys from tss group contract
 	pubKeys, err := tgmContract.GetTssGroupMembers(nil)
 	if err != nil {
 		return nil, err
 	}
 
-	scale := int64(math.Pow10(18))
-	var seqz []*Sequencer
+	// find users deposit and infos
+	var users []common.Address
 	for _, v := range pubKeys {
 		ecdsaPubKey, err := crypto.UnmarshalPubkey(v)
 		if err != nil {
 			return nil, err
 		}
 		addr := crypto.PubkeyToAddress(*ecdsaPubKey)
-		deposit, err := tshContract.GetDeposits(nil, common.BytesToAddress(addr.Bytes()))
+		users = append(users, common.BytesToAddress(addr.Bytes()))
+	}
+	valSetInfo, err := tshContract.BatchGetDeposits(nil, users)
+	if err != nil {
+		return nil, err
+	}
 
+	// set sequencer, voting power = deposit / 10^18
+	scale := int64(math.Pow10(18))
+	var seqz []*Sequencer
+	for _, v := range valSetInfo {
+		ecdsaPubKey, err := crypto.UnmarshalPubkey(v.PubKey)
+		if err != nil {
+			return nil, err
+		}
 		seq := &Sequencer{
-			Address:     addr,
+			Address:     common2.BytesToAddress(v.Pledgor.Bytes()),
 			PubKey:      *ecdsaPubKey,
-			VotingPower: deposit.Amount.Div(deposit.Amount, big.NewInt(scale)).Int64(),
+			VotingPower: v.Amount.Div(v.Amount, big.NewInt(scale)).Int64(),
 		}
 		seqz = append(seqz, seq)
 	}
+
 	return seqz, nil
 }
 
