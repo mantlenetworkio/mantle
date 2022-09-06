@@ -329,7 +329,7 @@
   resolved "https://registry.yarnpkg.com/@bitdaoio/common-ts/-/common-ts-1.0.0.tgz#d0dce372d78ca5e6cf0113a9b507ccb1b2b9cbec"
   integrity sha512-o0nZflP9vBiNoxgwgX4KzZxYDNj65jScCxhGxJyqgL84c5QuPej5me+jW7wiW+IDP8A5O+93hsHUqMuJPx+6Og==
   dependencies:
-    "@bitdaoio/core-utils" "1.0.3"
+    "@eth-optimism/core-utils" "0.9.3"
     "@sentry/node" "^6.3.1"
     bcfg "^0.1.7"
     body-parser "^1.20.0"
@@ -653,6 +653,20 @@
     js-yaml "^4.1.0"
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
+
+"@eth-optimism/core-utils@0.9.3":
+  version "0.9.3"
+  resolved "https://registry.yarnpkg.com/@eth-optimism/core-utils/-/core-utils-0.9.3.tgz#40c0271f815af68e0a4715e97a045a96462df7b6"
+  integrity sha512-b3V8qBgM0e85wdp3CNdJ6iSUvjT2k86F9oCAYeCIXQcQ6+EPaetjxP0T6ct6jLVepnJjoPRlW/lvWslKk1UBGg==
+  dependencies:
+    "@ethersproject/abstract-provider" "^5.6.1"
+    "@ethersproject/properties" "^5.6.0"
+    "@ethersproject/providers" "^5.6.8"
+    "@ethersproject/transactions" "^5.6.2"
+    "@ethersproject/web" "^5.6.1"
+    bufio "^1.0.7"
+    chai "^4.3.4"
+    ethers "^5.6.8"
 
 "@ethereum-waffle/chai@^3.4.0":
   version "3.4.0"
