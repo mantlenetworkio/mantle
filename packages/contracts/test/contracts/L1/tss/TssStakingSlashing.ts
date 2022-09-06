@@ -1,4 +1,4 @@
-import { Signer, Wallet, BytesLike, utils, Contract } from "ethers"
+import { Signer, Wallet, BytesLike, utils, Contract, BigNumber } from "ethers"
 import chai from "chai"
 import { deploy } from '../../../helpers'
 
@@ -10,7 +10,6 @@ describe('StakingSlashing', () => {
   let tssGroup: Contract
   let stakingSlashing: Contract
   let bitToken: Contract
-  let addressManager: Contract
   let myWallet: Wallet
   let tssNodes: Wallet[] = []
   let newTssNodes: Wallet[] = []
@@ -20,7 +19,6 @@ describe('StakingSlashing', () => {
 
   before('deploy stakingSlashing contracts', async () => {
     accounts = await ethers.getSigners()
-    await deployAddressManager()
     await deployBitToken()
     await deployTssGroup()
     await deployStakingSlashing()
@@ -37,8 +35,8 @@ describe('StakingSlashing', () => {
   })
 
   it("setSlashingParams", async () => {
-    await expect(stakingSlashing.setSlashingParams([1000, 100], [1, 2])).to.be.revertedWith("invalid param slashAmount,animus <= uptime")
-    await expect(stakingSlashing.setSlashingParams([100, 1000], [2, 1])).to.be.revertedWith("invalid param exIncome,animus <= uptime")
+    await expect(stakingSlashing.setSlashingParams([1000, 100], [1, 2])).to.be.revertedWith("invalid param slashAmount, animus <= uptime")
+    await expect(stakingSlashing.setSlashingParams([100, 1000], [2, 1])).to.be.revertedWith("invalid param exIncome, animus <= uptime")
 
     await expect(stakingSlashing.setSlashingParams([100, 1000], [101, 999])).to.be.revertedWith("slashAmount need bigger than exIncome")
     await expect(stakingSlashing.setSlashingParams([100, 1000], [99, 10001])).to.be.revertedWith("slashAmount need bigger than exIncome")
@@ -105,12 +103,24 @@ describe('StakingSlashing', () => {
     expect(await bitToken.balanceOf(myWallet.address)).to.eq(100000)
   })
 
+  it("batch GetDeposits test", async () => {
+    let address = [tssNodes[0].address, tssNodes[1].address, tssNodes[2].address]
+    let deposits = await stakingSlashing.batchGetDeposits(address)
+
+    for (let i = 0; i < deposits.length; i++) {
+      let pubKey = "0x" + tssNodes[i].publicKey.substring(4)
+      expect(deposits[i].pledgor).to.eq(tssNodes[i].address)
+      expect(deposits[i].pubKey).to.eq(pubKey)
+      expect(deposits[i].amount).to.eq(BigNumber.from(20000))
+    }
+  })
+
   it("quitRequest", async () => {
-    await stakingSlashing.connect(tssNodes[1]).quit()
-    let quitList = await stakingSlashing.getQuitList()
+    await stakingSlashing.connect(tssNodes[1]).quitRequest()
+    let quitList = await stakingSlashing.getQuitRequestList()
     expect(quitList[0]).to.eq(tssNodes[1].address)
-    await expect(stakingSlashing.connect(tssNodes[1]).quit()).to.be.revertedWith("already in quitList")
-    
+    await expect(stakingSlashing.connect(tssNodes[1]).quitRequest()).to.be.revertedWith("already in quitRequestList")
+
     let tssNodesPubKey: BytesLike[] = []
     // tssnodes staking first
     for (let i = 0; i < newTssNodes.length; i++) {
@@ -129,7 +139,7 @@ describe('StakingSlashing', () => {
       tssNodesPubKey[i] = pubKey
     }
 
-    await expect(stakingSlashing.connect(newTssNodes[1]).quit()).to.be.revertedWith("not at the inactive group or active group")
+    await expect(stakingSlashing.connect(newTssNodes[1]).quitRequest()).to.be.revertedWith("not at the inactive group or active group")
 
     // set inactive tss group members
     await tssGroup.setTssGroupMember(
@@ -139,7 +149,7 @@ describe('StakingSlashing', () => {
     let info = await tssGroup.getTssGroupInfo()
     expect(info[0]).to.eq(1)
     expect(info[1]).to.eq(4)
-    await stakingSlashing.connect(tssNodes[2]).quit()
+    await stakingSlashing.connect(tssNodes[2]).quitRequest()
   })
 
   it("slashing", async () => {
@@ -236,31 +246,19 @@ describe('StakingSlashing', () => {
     await expect(stakingSlashing.connect(tssNodes[1]).slashing(message, signature)).to.be.revertedWith("err type for slashing")
   })
 
-  const deployAddressManager = async () => {
-    addressManager = await deploy('Lib_AddressManager')
-  }
-
   const deployBitToken = async () => {
     bitToken = await deploy('TestERC20')
-    await addressManager.setAddress(
-      'L1_BitAddress',
-      bitToken.address
-    )
   }
 
   const deployStakingSlashing = async () => {
     stakingSlashing = await deploy('TssStakingSlashing')
-    await stakingSlashing.initialize(addressManager.address)
+    await stakingSlashing.initialize(bitToken.address, tssGroup.address)
     await tssGroup.setStakingSlash(stakingSlashing.address)
   }
 
   const deployTssGroup = async () => {
     tssGroup = await deploy('TssGroupManager')
     await tssGroup.initialize()
-    await addressManager.setAddress(
-      'TssGroupManager',
-      tssGroup.address
-    )
   }
 
   const initAccount = async () => {
@@ -311,7 +309,6 @@ describe('StakingSlashing', () => {
       expect(await bitToken.balanceOf(tssNodes[i].address)).to.eq(20000)
       await bitToken.connect(tssNodes[i]).approve(stakingSlashing.address, 20000)
       // staking
-      // console.log(pubKey)
       await stakingSlashing.connect(tssNodes[i]).staking(20000, pubKey)
       // check
       let deposit = await stakingSlashing.getDeposits((await tssNodes[i].address).toString())

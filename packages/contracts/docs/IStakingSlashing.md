@@ -10,10 +10,32 @@
 
 ## Methods
 
-### clearQuitList
+### batchGetDeposits
 
 ```solidity
-function clearQuitList() external nonpayable
+function batchGetDeposits(address[]) external view returns (struct IStakingSlashing.DepositInfo[])
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address[] | undefined
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | IStakingSlashing.DepositInfo[] | undefined
+
+### clearQuitRequestList
+
+```solidity
+function clearQuitRequestList() external nonpayable
 ```
 
 
@@ -43,10 +65,27 @@ function getDeposits(address) external nonpayable returns (struct IStakingSlashi
 |---|---|---|
 | _0 | IStakingSlashing.DepositInfo | undefined
 
+### getQuitRequestList
+
+```solidity
+function getQuitRequestList() external view returns (address[])
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address[] | undefined
+
 ### getSlashRecord
 
 ```solidity
-function getSlashRecord(uint256, address) external nonpayable returns (bool)
+function getSlashRecord(uint256, address) external view returns (bool)
 ```
 
 
@@ -66,16 +105,90 @@ function getSlashRecord(uint256, address) external nonpayable returns (bool)
 |---|---|---|
 | _0 | bool | undefined
 
-### quit
+### getSlashingParams
 
 ```solidity
-function quit() external nonpayable
+function getSlashingParams() external view returns (uint256[2], uint256[2])
 ```
 
 
 
 
 
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256[2] | undefined
+| _1 | uint256[2] | undefined
+
+### isJailed
+
+```solidity
+function isJailed(address) external nonpayable returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined
+
+### quitRequest
+
+```solidity
+function quitRequest() external nonpayable
+```
+
+
+
+
+
+
+### setAddress
+
+```solidity
+function setAddress(address, address) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
+| _1 | address | undefined
+
+### setSlashingParams
+
+```solidity
+function setSlashingParams(uint256[2], uint256[2]) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256[2] | undefined
+| _1 | uint256[2] | undefined
 
 ### slashing
 
@@ -110,6 +223,17 @@ function staking(uint256, bytes) external nonpayable
 |---|---|---|
 | _0 | uint256 | undefined
 | _1 | bytes | undefined
+
+### unJail
+
+```solidity
+function unJail() external nonpayable
+```
+
+
+
+
+
 
 ### withdrawToken
 

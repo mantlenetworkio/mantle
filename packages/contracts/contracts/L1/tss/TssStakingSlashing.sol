@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import { Lib_AddressResolver } from "../../libraries/resolver/Lib_AddressResolver.sol";
-import { Lib_AddressManager } from "../../libraries/resolver/Lib_AddressManager.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -11,7 +9,6 @@ import "./ITssStakingSlashing.sol";
 
 contract TssStakingSlashing is
     Initializable,
-    Lib_AddressResolver,
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
     IStakingSlashing
@@ -38,7 +35,7 @@ contract TssStakingSlashing is
 
     // slashing parameter settings
     // record the quit request
-    address[] public quitList;
+    address[] public quitRequestList;
     // slashing amount of type uptime and animus (0:uptime, 1:animus)
     uint256[2] public slashAmount;
     // additional rewards for sender (0:uptime, 1:animus)
@@ -67,32 +64,16 @@ contract TssStakingSlashing is
      */
     event Slashing(address, SlashType);
 
-    /***************
-     * Constructor *
-     ***************/
-
-    /**
-     * This contract is intended to be behind a delegate proxy.
-     * We pass the zero address to the address resolver just to satisfy the constructor.
-     * We still need to set this value in initialize().
-     */
-    constructor() Lib_AddressResolver(address(0)) {}
-
     /**
      * @notice initializes the contract setting and the deployer as the initial owner
-     * @param _libAddressManager address manager contract address
+     * @param _bitToken bit token contract address
+     * @param _tssGroupContract address tss group manager contract address
      */
-    function initialize(address _libAddressManager) public initializer {
+    function initialize(address _bitToken, address _tssGroupContract) public initializer {
         __Ownable_init();
 
-        require(
-            address(libAddressManager) == address(0),
-            "L1CrossDomainMessenger already intialized."
-        );
-        libAddressManager = Lib_AddressManager(_libAddressManager);
-
-        BitToken = resolve("L1_BitAddress");
-        tssGroupContract = resolve("TssGroupManager");
+        BitToken = _bitToken;
+        tssGroupContract = _tssGroupContract;
     }
 
     /**
@@ -110,7 +91,7 @@ contract TssStakingSlashing is
      * @param _slashAmount the amount to be deducted for each type
      * @param _exIncome additional amount available to the originator of the report
      */
-    function setSlashingParams(uint256[2] memory _slashAmount, uint256[2] memory _exIncome)
+    function setSlashingParams(uint256[2] calldata _slashAmount, uint256[2] calldata _exIncome)
         public
         onlyOwner
     {
@@ -138,7 +119,7 @@ contract TssStakingSlashing is
      * @param _amount deposit amount of bit token
      * @param _pubKey public key of sender
      */
-    function staking(uint256 _amount, bytes memory _pubKey) public nonReentrant {
+    function staking(uint256 _amount, bytes calldata _pubKey) public nonReentrant {
         // slashing params check
         for (uint256 i = 0; i < 2; i++) {
             require(slashAmount[i] > 0, "have not set the slash amount");
@@ -161,6 +142,7 @@ contract TssStakingSlashing is
                 "invalid pubKey"
             );
             deposits[msg.sender].pubKey = _pubKey;
+            deposits[msg.sender].pledgor = msg.sender;
         }
 
         // send bit token to staking contract, need user approve first
@@ -170,7 +152,10 @@ contract TssStakingSlashing is
         );
         deposits[msg.sender].amount += _amount;
 
-        emit AddDeposit(msg.sender, DepositInfo({ pubKey: _pubKey, amount: _amount }));
+        emit AddDeposit(
+            msg.sender,
+            DepositInfo({ pledgor: msg.sender, pubKey: _pubKey, amount: _amount })
+        );
     }
 
     /**
@@ -191,14 +176,13 @@ contract TssStakingSlashing is
         delete deposits[msg.sender];
 
         require(IERC20(BitToken).transfer(msg.sender, amount), "erc20 transfer failed");
-
         emit Withdraw(msg.sender, amount);
     }
 
     /**
      * @notice send quit request for the next election
      */
-    function quit() public nonReentrant {
+    function quitRequest() public nonReentrant {
         require(deposits[msg.sender].amount > 0, "do not have deposit");
         // when not in consensus period
         require(
@@ -207,24 +191,24 @@ contract TssStakingSlashing is
             "not at the inactive group or active group"
         );
         // is active member
-        for (uint256 i = 0; i < quitList.length; i++) {
-            require(quitList[i] != msg.sender, "already in quitList");
+        for (uint256 i = 0; i < quitRequestList.length; i++) {
+            require(quitRequestList[i] != msg.sender, "already in quitRequestList");
         }
-        quitList.push(msg.sender);
+        quitRequestList.push(msg.sender);
     }
 
     /**
      * @notice return the quit list
      */
-    function getQuitList() public view returns (address[] memory) {
-        return quitList;
+    function getQuitRequestList() public view returns (address[] memory) {
+        return quitRequestList;
     }
 
     /**
      * @notice clear the quit list
      */
-    function clearQuitList() public onlyOwner {
-        delete quitList;
+    function clearQuitRequestList() public onlyOwner {
+        delete quitRequestList;
     }
 
     /**
@@ -232,7 +216,7 @@ contract TssStakingSlashing is
      * @param _messageBytes the message that abi encode by type SlashMsg
      * @param _sig the signature of the hash keccak256(_messageBytes)
      */
-    function slashing(bytes memory _messageBytes, bytes memory _sig) public nonReentrant {
+    function slashing(bytes calldata _messageBytes, bytes calldata _sig) public nonReentrant {
         SlashMsg memory message = abi.decode(_messageBytes, (SlashMsg));
         // verify tss member state not at jailed status
         require(!isJailed(message.jailNode), "the node already jailed");
@@ -348,6 +332,18 @@ contract TssStakingSlashing is
      */
     function getDeposits(address user) public view returns (DepositInfo memory) {
         return deposits[user];
+    }
+
+    /**
+     * @notice get the deposit infos
+     * @param users address list of the stakers
+     */
+    function batchGetDeposits(address[] calldata users) public view returns (DepositInfo[] memory) {
+        DepositInfo[] memory depositsList = new DepositInfo[](users.length);
+        for (uint256 i = 0; i < users.length; i++) {
+            depositsList[i] = deposits[users[i]];
+        }
+        return depositsList;
     }
 
     /**

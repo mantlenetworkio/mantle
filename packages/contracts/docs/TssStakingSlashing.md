@@ -27,10 +27,32 @@ function BitToken() external view returns (address)
 |---|---|---|
 | _0 | address | undefined
 
-### clearQuitList
+### batchGetDeposits
 
 ```solidity
-function clearQuitList() external nonpayable
+function batchGetDeposits(address[] users) external view returns (struct IStakingSlashing.DepositInfo[])
+```
+
+get the deposit infos
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| users | address[] | address list of the stakers
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | IStakingSlashing.DepositInfo[] | undefined
+
+### clearQuitRequestList
+
+```solidity
+function clearQuitRequestList() external nonpayable
 ```
 
 clear the quit list
@@ -41,7 +63,7 @@ clear the quit list
 ### deposits
 
 ```solidity
-function deposits(address) external view returns (bytes pubKey, uint256 amount)
+function deposits(address) external view returns (address pledgor, bytes pubKey, uint256 amount)
 ```
 
 
@@ -58,6 +80,7 @@ function deposits(address) external view returns (bytes pubKey, uint256 amount)
 
 | Name | Type | Description |
 |---|---|---|
+| pledgor | address | undefined
 | pubKey | bytes | undefined
 | amount | uint256 | undefined
 
@@ -105,10 +128,10 @@ get the deposit info
 |---|---|---|
 | _0 | IStakingSlashing.DepositInfo | undefined
 
-### getQuitList
+### getQuitRequestList
 
 ```solidity
-function getQuitList() external view returns (address[])
+function getQuitRequestList() external view returns (address[])
 ```
 
 return the quit list
@@ -166,7 +189,7 @@ set the slashing params (0 -&gt; uptime, 1 -&gt; animus)
 ### initialize
 
 ```solidity
-function initialize(address _libAddressManager) external nonpayable
+function initialize(address _bitToken, address _tssGroupContract) external nonpayable
 ```
 
 initializes the contract setting and the deployer as the initial owner
@@ -177,7 +200,8 @@ initializes the contract setting and the deployer as the initial owner
 
 | Name | Type | Description |
 |---|---|---|
-| _libAddressManager | address | address manager contract address
+| _bitToken | address | bit token contract address
+| _tssGroupContract | address | address tss group manager contract address
 
 ### isEqual
 
@@ -224,23 +248,6 @@ check the tssnode status
 |---|---|---|
 | _0 | bool | undefined
 
-### libAddressManager
-
-```solidity
-function libAddressManager() external view returns (contract Lib_AddressManager)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract Lib_AddressManager | undefined
-
 ### owner
 
 ```solidity
@@ -258,10 +265,10 @@ function owner() external view returns (address)
 |---|---|---|
 | _0 | address | undefined
 
-### quit
+### quitRequest
 
 ```solidity
-function quit() external nonpayable
+function quitRequest() external nonpayable
 ```
 
 send quit request for the next election
@@ -269,10 +276,10 @@ send quit request for the next election
 
 
 
-### quitList
+### quitRequestList
 
 ```solidity
-function quitList(uint256) external view returns (address)
+function quitRequestList(uint256) external view returns (address)
 ```
 
 
@@ -301,28 +308,6 @@ function renounceOwnership() external nonpayable
 
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
-
-### resolve
-
-```solidity
-function resolve(string _name) external view returns (address)
-```
-
-Resolves the address associated with a given name.
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _name | string | Name to resolve an address for.
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | Address associated with the given name.
 
 ### setAddress
 
