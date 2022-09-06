@@ -132,7 +132,7 @@ jobs:
           working_directory: packages/<<parameters.package_name>>
       - run:
           name: Test
-          command: yarn test:coverage
+          command: yarn install && yarn test:coverage
           working_directory: packages/<<parameters.package_name>>
 
   depcheck:
