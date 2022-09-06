@@ -58,7 +58,7 @@ root
 
 | Branch          | Status                                                                           |
 | --------------- | -------------------------------------------------------------------------------- |
-| [main](https://github.com/bitdao-io/mantle/tree/master/)                   | Accepts PRs from `develop` when we intend to deploy to mainnet.                                      |
+| [main](https://github.com/bitdao-io/mantle/tree/main/)                   | Accepts PRs from `develop` when we intend to deploy to mainnet.                                      |
 | [develop](https://github.com/bitdao-io/mantle/tree/develop/)                 | Accepts PRs that are compatible with `main` OR from `release/X.X.X` branches.                    |
 | release/X.X.X                                                                          | Accepts PRs for all changes, particularly those not backwards compatible with `develop` and `main`. |
 
