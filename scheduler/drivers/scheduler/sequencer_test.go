@@ -5,11 +5,13 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/bitdao-io/bitnetwork/l2geth/common"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSequencerValidateBasic(t *testing.T) {
@@ -74,4 +76,9 @@ func TestCommonAddressValidity(t *testing.T) {
 	address := randAddress()
 	rand.Read(newaddress.Bytes())
 	println(address.String())
+}
+
+func TestMathScale(t *testing.T) {
+	scale := int64(math.Pow10(18))
+	require.Equal(t, int64(1000000000000000000), scale)
 }
