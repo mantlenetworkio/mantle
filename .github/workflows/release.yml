@@ -202,7 +202,7 @@ jobs:
           context: .
           file: ./ops/docker/foundry/Dockerfile
           push: true
-          tags: ethereumoptimism/foundry:${{ needs.release.outputs.foundry }},ethereumoptimism/foundry:latest
+          tags: bitnetworkio/foundry:${{ needs.release.outputs.foundry }},bitnetworkio/foundry:latest
 
   proxyd:
     name: Publish proxyd Version ${{ needs.release.outputs.proxyd }}
