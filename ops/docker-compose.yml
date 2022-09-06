@@ -86,6 +86,7 @@ services:
       - l1_chain
       - deployer
       - dtl
+      - relayer
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile
@@ -120,7 +121,6 @@ services:
   relayer:
     depends_on:
       - l1_chain
-      - l2geth
     deploy:
       replicas: 0
     build:
