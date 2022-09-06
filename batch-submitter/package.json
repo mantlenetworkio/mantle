@@ -1,5 +1,5 @@
 {
-	"name": "@eth-mantle/batch-submitter-service",
+	"name": "@bitdaoio/batch-submitter-service",
 	"version": "0.1.12",
 	"private": true,
 	"devDependencies": {}

@@ -1,2 +1,1 @@
-# @eth-mantle/ci-builder
-
+# @bitdaoio/ci-builder

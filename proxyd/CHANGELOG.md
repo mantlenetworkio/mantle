@@ -1,2 +1,2 @@
-# @eth-mantle/proxyd
+# @bitdaoio/proxyd
 

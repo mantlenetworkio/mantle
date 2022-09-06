@@ -1,4 +1,4 @@
-# @eth-mantle/integration-tests
+# @bitdaoio/integration-tests
 
 ## Setup
 
