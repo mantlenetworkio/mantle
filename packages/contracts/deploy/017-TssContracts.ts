@@ -13,8 +13,8 @@ const deployFn: DeployFunction = async (hre) => {
     const tssStakingSlashing = await hre.upgrades.deployProxy(
         TssStakingSlashingFactory,
         [
-            tssGroupManager.address,
-            "0x0000000000000000000000000000000000000001"
+            "0x0000000000000000000000000000000000000001",
+            tssGroupManager.address
         ]
     )
     await tssStakingSlashing.deployed()
