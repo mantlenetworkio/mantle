@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   yarn-monorepo:
     docker:
-      - image: ethereummantle/ci-builder:latest
+      - image: bitnetworkio/ci-builder:latest
     resource_class: xlarge
     steps:
       - restore_cache:
@@ -108,7 +108,7 @@ jobs:
         type: string
         default: this-package-does-not-exist
     docker:
-      - image: ethereummantle/ci-builder:latest
+      - image: bitnetworkio/ci-builder:latest
     resource_class: large
     steps:
       - restore_cache:
@@ -134,7 +134,7 @@ jobs:
 
   depcheck:
     docker:
-      - image: ethereummantle/ci-builder:latest
+      - image: bitnetworkio/ci-builder:latest
     steps:
       - restore_cache:
           keys:
@@ -188,7 +188,7 @@ jobs:
         type: string
         default: this-package-does-not-exist
     docker:
-      - image: ethereummantle/ci-builder:latest
+      - image: bitnetworkio/ci-builder:latest
       - image: cimg/postgres:14.1
     steps:
       - checkout
@@ -224,7 +224,7 @@ jobs:
 
   geth-tests:
     docker:
-      - image: ethereummantle/ci-builder:latest
+      - image: bitnetworkio/ci-builder:latest
     steps:
       - checkout
       - run:
@@ -317,7 +317,7 @@ jobs:
 
   go-mod-tidy:
     docker:
-      - image: ethereummantle/ci-builder:latest
+      - image: bitnetworkio/ci-builder:latest
     steps:
       - checkout
       - run:
@@ -414,42 +414,42 @@ workflows:
       - docker-publish:
           name: l2geth-release
           docker_file: l2geth/Dockerfile
-          docker_tags: ethereummantle/l2geth:nightly
+          docker_tags: bitnetworkio/l2geth:nightly
           docker_context: .
           context:
             - mantle
       - docker-publish:
           name: gas-oracle-release
           docker_file: gas-oracle/Dockerfile
-          docker_tags: ethereummantle/gas-oracle:nightly
+          docker_tags: bitnetworkio/gas-oracle:nightly
           docker_context: .
           context:
             - mantle
       - docker-publish:
           name: hardhat-node-release
           docker_file: ops/docker/hardhat/Dockerfile
-          docker_tags: ethereummantle/hardhat-node:nightly
+          docker_tags: bitnetworkio/hardhat-node:nightly
           docker_context: ops/docker/hardhat
           context:
             - mantle
       - docker-publish:
           name: proxyd-release
           docker_file: proxyd/Dockerfile
-          docker_tags: ethereummantle/proxyd:nightly
+          docker_tags: bitnetworkio/proxyd:nightly
           docker_context: .
           context:
             - mantle
       - docker-publish:
           name: l2geth-exporter-release
           docker_file: l2geth-exporter/Dockerfile
-          docker_tags: ethereummantle/l2geth-exporter:nightly
+          docker_tags: bitnetworkio/l2geth-exporter:nightly
           docker_context: .
           context:
             - mantle
       - docker-publish:
           name: fault-detector-release
           docker_file: ops/docker/Dockerfile.packages
-          docker_tags: ethereummantle/fault-detector:nightly
+          docker_tags: bitnetworkio/fault-detector:nightly
           docker_context: .
           target: fault-detector
           context:
@@ -457,7 +457,7 @@ workflows:
       - docker-publish:
           name: message-relayer-release
           docker_file: ops/docker/Dockerfile.packages
-          docker_tags: ethereummantle/message-relayer:nightly
+          docker_tags: bitnetworkio/message-relayer:nightly
           docker_context: .
           target: message-relayer
           context:
@@ -465,7 +465,7 @@ workflows:
       - docker-publish:
           name: data-transport-layer-release
           docker_file: ops/docker/Dockerfile.packages
-          docker_tags: ethereummantle/data-transport-layer:nightly
+          docker_tags: bitnetworkio/data-transport-layer:nightly
           docker_context: .
           target: data-transport-layer
           context:
@@ -473,7 +473,7 @@ workflows:
       - docker-publish:
           name: integration-tests-release
           docker_file: ops/docker/Dockerfile.packages
-          docker_tags: ethereummantle/integration-tests:nightly
+          docker_tags: bitnetworkio/integration-tests:nightly
           docker_context: .
           target: integration-tests
           context:
@@ -481,7 +481,7 @@ workflows:
       - docker-publish:
           name: replica-healthcheck-release
           docker_file: ops/docker/Dockerfile.packages
-          docker_tags: ethereummantle/replica-healthcheck:nightly
+          docker_tags: bitnetworkio/replica-healthcheck:nightly
           docker_context: .
           target: replica-healthcheck
           context:
@@ -489,7 +489,7 @@ workflows:
       - docker-publish:
           name: batch-submitter-service-release
           docker_file: batch-submitter/Dockerfile
-          docker_tags: ethereummantle/batch-submitter-service:nightly
+          docker_tags: bitnetworkio/batch-submitter-service:nightly
           docker_context: .
           context:
             - mantle
