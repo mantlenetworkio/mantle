@@ -21,9 +21,9 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/core/state"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
+	"github.com/bitdao-io/mantle/l2geth/core/state"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/params"
 )
 
 var (

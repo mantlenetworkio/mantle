@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	surgery "github.com/bitdao-io/bitnetwork/state-surgery"
+	surgery "github.com/bitdao-io/mantle/state-surgery"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v2"
@@ -19,7 +19,7 @@ func main() {
 		Commands: []*cli.Command{
 			{
 				Name:  "dump-addresses",
-				Usage: "dumps addresses from OVM ETH",
+				Usage: "dumps addresses from BVM ETH",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:     "out-file",
@@ -32,7 +32,7 @@ func main() {
 			},
 			{
 				Name:  "migrate",
-				Usage: "migrates state in OVM ETH",
+				Usage: "migrates state in BVM ETH",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:     "genesis-file",

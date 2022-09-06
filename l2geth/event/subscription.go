@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common/mclock"
+	"github.com/bitdao-io/mantle/l2geth/common/mclock"
 )
 
 // Subscription represents a stream of events. The carrier of the events is typically a

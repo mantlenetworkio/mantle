@@ -22,23 +22,23 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/math"
-	"github.com/bitdao-io/bitnetwork/l2geth/core"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/bloombits"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/rawdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/state"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/vm"
-	"github.com/bitdao-io/bitnetwork/l2geth/eth/downloader"
-	"github.com/bitdao-io/bitnetwork/l2geth/eth/gasprice"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/event"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
-	"github.com/bitdao-io/bitnetwork/l2geth/rollup/rcfg"
-	"github.com/bitdao-io/bitnetwork/l2geth/rpc"
+	"github.com/bitdao-io/mantle/l2geth/accounts"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/math"
+	"github.com/bitdao-io/mantle/l2geth/core"
+	"github.com/bitdao-io/mantle/l2geth/core/bloombits"
+	"github.com/bitdao-io/mantle/l2geth/core/rawdb"
+	"github.com/bitdao-io/mantle/l2geth/core/state"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/core/vm"
+	"github.com/bitdao-io/mantle/l2geth/eth/downloader"
+	"github.com/bitdao-io/mantle/l2geth/eth/gasprice"
+	"github.com/bitdao-io/mantle/l2geth/ethdb"
+	"github.com/bitdao-io/mantle/l2geth/event"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/params"
+	"github.com/bitdao-io/mantle/l2geth/rollup/rcfg"
+	"github.com/bitdao-io/mantle/l2geth/rpc"
 )
 
 // EthAPIBackend implements ethapi.Backend for full nodes
@@ -255,7 +255,7 @@ func (b *EthAPIBackend) GetTd(blockHash common.Hash) *big.Int {
 
 func (b *EthAPIBackend) GetEVM(ctx context.Context, msg core.Message, state *state.StateDB, header *types.Header, vmCfg *vm.Config) (*vm.EVM, func() error, error) {
 	// This was removed upstream:
-	// https://github.com/bitdao-io/bitnetwork/l2geth/commit/39f502329fac4640cfb71959c3496f19ea88bc85#diff-9886da3412b43831145f62cec6e895eb3613a175b945e5b026543b7463454603
+	// https://github.com/bitdao-io/mantle/l2geth/commit/39f502329fac4640cfb71959c3496f19ea88bc85#diff-9886da3412b43831145f62cec6e895eb3613a175b945e5b026543b7463454603
 	// We're throwing this behind a UsingBVM flag for now as to not break
 	// any tests that may depend on this behavior.
 	if !rcfg.UsingBVM {

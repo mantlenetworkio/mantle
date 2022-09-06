@@ -1,13 +1,13 @@
-# Bitnetwork monorepo contributing guide
+# Mantle repo contributing guide
 
 🎈 Thanks for your help improving the project! We are so happy to have you!
 
 There are plenty of ways to contribute, in particular we appreciate support in the following areas:
 
 - Reporting issues. For security issues see [Security policy](https://github.com/bitdao-io/.github/blob/master/SECURITY.md).
-- Fixing and responding to existing issues. You can start off with those tagged ["good first issue"](https://github.com/bitdao-io/bitnetwork/contribute) which are meant as introductory issues for external contributors.
-- Improving the [community site](https://community.bitnetwork.io/)[documentation](https://github.com/bitdao-io/community-hub) and [tutorials](https://github.com/bitdao-io/bitnetwork-tutorial).
-- Become an "Optimizer" and answer questions in the [bitnetwork Discord](https://discord.com/invite/jrnFEvq).
+- Fixing and responding to existing issues. You can start off with those tagged ["good first issue"](https://github.com/bitdao-io/mantle/contribute) which are meant as introductory issues for external contributors.
+- Improving the [community site](https://community.mantle.io/)[documentation](https://github.com/bitdao-io/community-hub) and [tutorials](https://github.com/bitdao-io/mantle-tutorial).
+- Become an "Optimizer" and answer questions in the [mantle Discord](https://discord.com/invite/jrnFEvq).
 - Get involved in the protocol design process by proposing changes or new features or write parts of the spec yourself in the [optimistic-specs repo](https://github.com/bitdao-io/optimistic-specs).
 
 Note that we have a [Code of Conduct](https://github.com/bitdao-io/.github/blob/master/CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
@@ -29,7 +29,7 @@ We believe one of the things that makes Mantle special is its coherent design an
 
 In general, the smaller the diff the easier it will be for us to review quickly.
 
-In order to contribute, fork the appropriate branch, for non-breaking changes to production that is `develop` and for the next release that is normally `release/X.X.X` branch, see [details about our branching model](https://github.com/bitdao-io/bitnetwork/blob/develop/README.md#branching-model-and-releases).
+In order to contribute, fork the appropriate branch, for non-breaking changes to production that is `develop` and for the next release that is normally `release/X.X.X` branch, see [details about our branching model](https://github.com/bitdao-io/mantle/blob/develop/README.md#branching-model-and-releases).
 
 Additionally, if you are writing a new feature, please ensure you add appropriate test cases.
 
@@ -87,7 +87,7 @@ Our update process takes the form of a PR merging the `develop` branch into the 
 
 #### The `develop` branch
 
-Mantle is the project only 
+Mantle is the project only
 
 Our primary development branch is [`develop`](https://github.com/bitdao-io/bitnetwork/tree/develop/).
 `develop` contains the most up-to-date software that remains backwards compatible with our latest experimental [network deployments](https://community.bitnetwork.io/docs/useful-tools/networks/).

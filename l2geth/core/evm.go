@@ -19,12 +19,12 @@ package core
 import (
 	"math/big"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/consensus"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/vm"
-	"github.com/bitdao-io/bitnetwork/l2geth/rollup/dump"
-	"github.com/bitdao-io/bitnetwork/l2geth/rollup/rcfg"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/consensus"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/core/vm"
+	"github.com/bitdao-io/mantle/l2geth/rollup/dump"
+	"github.com/bitdao-io/mantle/l2geth/rollup/rcfg"
 )
 
 // ChainContext supports retrieving headers and consensus parameters from the

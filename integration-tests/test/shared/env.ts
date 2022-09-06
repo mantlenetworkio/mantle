@@ -35,7 +35,7 @@ export interface CrossDomainMessagePair {
 }
 
 /// Helper class for instantiating a test environment with a funded account
-export class BitnetworkEnv {
+export class MantleEnv {
   // The wallets
   l1Wallet: Wallet
   l2Wallet: Wallet
@@ -57,7 +57,7 @@ export class BitnetworkEnv {
     this.verifierProvider = args.verifierProvider
   }
 
-  static async new(): Promise<BitnetworkEnv> {
+  static async new(): Promise<MantleEnv> {
     let bridgeOverrides: BridgeAdapterData
     if (envConfig.L1_STANDARD_BRIDGE) {
       bridgeOverrides = {
@@ -100,7 +100,7 @@ export class BitnetworkEnv {
       await fundUser(messenger, utils.parseEther(topUp))
     }
 
-    return new BitnetworkEnv({
+    return new MantleEnv({
       l1Wallet,
       l2Wallet,
       messenger,

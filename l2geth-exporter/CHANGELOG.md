@@ -1,2 +1,2 @@
-# @eth-bitnetwork/l2geth-exporter
+# @bitdaoio/l2geth-exporter
 

@@ -31,7 +31,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
+	"github.com/bitdao-io/mantle/l2geth/params"
 )
 
 // Command line flags to configure the interpreters.

@@ -54,7 +54,7 @@ func TestBloom(t *testing.T) {
 import (
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/core/state"
+	"github.com/bitdao-io/mantle/l2geth/core/state"
 )
 
 func TestBloom9(t *testing.T) {

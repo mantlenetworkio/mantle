@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-contract FakeBitnetworkMintableERC721 is ERC721 {
+contract FakeMantleMintableERC721 is ERC721 {
 
     address public immutable remoteToken;
     address public immutable bridge;

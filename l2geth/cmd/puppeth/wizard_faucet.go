@@ -20,8 +20,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/keystore"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/accounts/keystore"
+	"github.com/bitdao-io/mantle/l2geth/log"
 )
 
 // deployFaucet queries the user for various input on deploying a faucet, after

@@ -86,7 +86,7 @@ Influxdb has authentication disabled.
 Grafana requires a login. The defaults are:
 ```
 user: admin
-password: bitnetwork
+password: mantle
 ```
 
 ## Data persistance

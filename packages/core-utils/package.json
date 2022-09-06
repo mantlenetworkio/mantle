@@ -1,7 +1,7 @@
 {
   "name": "@bitdaoio/core-utils",
   "version": "1.0.3",
-  "description": "[BitNetwork] Core typescript utilities",
+  "description": "[Mantle] Core typescript utilities",
   "main": "dist/index",
   "types": "dist/index",
   "files": [
@@ -19,17 +19,17 @@
     "test:coverage": "nyc ts-mocha test/*.spec.ts && nyc merge .nyc_output coverage.json"
   },
   "keywords": [
-    "bitnetwork",
+    "mantle",
     "ethereum",
     "core",
     "utils"
   ],
-  "homepage": "https://github.com/bitnetworkio/bitnetwork/tree/main/packages/core-utils#readme",
+  "homepage": "https://github.com/mantleio/mantle/tree/main/packages/core-utils#readme",
   "license": "MIT",
-  "author": "BitNetwork",
+  "author": "Mantle",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bitnetworkio/bitnetwork.git"
+    "url": "git+https://github.com/mantleio/mantle.git"
   },
   "dependencies": {
     "@ethersproject/abstract-provider": "^5.6.1",
@@ -45,7 +45,7 @@
     "mocha": "^10.0.0"
   },
   "bugs": {
-    "url": "https://github.com/bitnetworkio/bitnetwork/issues"
+    "url": "https://github.com/mantleio/mantle/issues"
   },
   "directories": {
     "test": "test"

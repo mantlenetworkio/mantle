@@ -26,9 +26,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enr"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/netutil"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enr"
+	"github.com/bitdao-io/mantle/l2geth/p2p/netutil"
 )
 
 const (

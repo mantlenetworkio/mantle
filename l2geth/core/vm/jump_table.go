@@ -19,7 +19,7 @@ package vm
 import (
 	"errors"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
+	"github.com/bitdao-io/mantle/l2geth/params"
 )
 
 type (

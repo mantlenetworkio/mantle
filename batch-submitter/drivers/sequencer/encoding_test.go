@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/batch-submitter/drivers/sequencer"
-	l2types "github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	l2rlp "github.com/bitdao-io/bitnetwork/l2geth/rlp"
+	"github.com/bitdao-io/mantle/batch-submitter/drivers/sequencer"
+	l2types "github.com/bitdao-io/mantle/l2geth/core/types"
+	l2rlp "github.com/bitdao-io/mantle/l2geth/rlp"
 	"github.com/stretchr/testify/require"
 )
 

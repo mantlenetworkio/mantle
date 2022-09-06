@@ -1,6 +1,6 @@
 /**
  * TypeScript typings for bcoin's BCFG config parser (https://github.com/bcoin-org/bcfg)
- * This is NOT a complete set of typings, just what we use at BitNetwork at the moment.
+ * This is NOT a complete set of typings, just what we use at Mantle at the moment.
  * We could consider expanding this into a full set of typings in the future.
  */
 export interface Bcfg {

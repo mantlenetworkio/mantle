@@ -1,5 +1,5 @@
 {
-  "name": "@eth-bitnetwork/l2geth-exporter",
+  "name": "@bitdaoio/l2geth-exporter",
   "version": "0.0.6",
   "private": true,
   "devDependencies": {}

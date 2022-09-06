@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bitdao-io/bitnetwork/proxyd"
+	"github.com/bitdao-io/mantle/proxyd"
 	"github.com/gorilla/websocket"
 )
 

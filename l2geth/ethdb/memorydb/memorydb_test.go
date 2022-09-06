@@ -19,8 +19,8 @@ package memorydb
 import (
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/ethdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethdb/dbtest"
+	"github.com/bitdao-io/mantle/l2geth/ethdb"
+	"github.com/bitdao-io/mantle/l2geth/ethdb/dbtest"
 )
 
 func TestMemoryDB(t *testing.T) {

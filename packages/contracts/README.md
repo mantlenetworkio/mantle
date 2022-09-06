@@ -1,13 +1,13 @@
-# Bitnetwork Smart Contracts
+# Mantle Smart Contracts
 
-`@bitdaoio/contracts` contains the various Solidity smart contracts used within the Bitnetwork system.
-Some of these contracts are [meant to be deployed to Ethereum ("Layer 1")](https://github.com/bitnetworkio/bitnetwork/tree/main/packages/contracts/contracts/L1), while others are [meant to be deployed to Bitnetwork ("Layer 2")](https://github.com/bitnetworkio/bitnetwork/tree/main/packages/contracts/contracts/L2).
-Within each contract file you'll find the network upon which the contract is meant to be deloyed, listed as either `EVM` (for Ethereum) or `BVM` (for Bitnetwork).
+`@bitdaoio/contracts` contains the various Solidity smart contracts used within the Mantle system.
+Some of these contracts are [meant to be deployed to Ethereum ("Layer 1")](https://github.com/mantleio/mantle/tree/main/packages/contracts/contracts/L1), while others are [meant to be deployed to Mantle ("Layer 2")](https://github.com/mantleio/mantle/tree/main/packages/contracts/contracts/L2).
+Within each contract file you'll find the network upon which the contract is meant to be deloyed, listed as either `EVM` (for Ethereum) or `BVM` (for Mantle).
 If neither `EVM` nor `BVM` are listed, the contract is likely intended to be used on either network.
 
 ## Usage (npm)
 
-You can import `@bitdaoio/contracts` to use the Bitnetwork contracts within your own codebase.
+You can import `@bitdaoio/contracts` to use the Mantle contracts within your own codebase.
 Install via `npm` or `yarn`:
 
 ```shell
@@ -20,8 +20,8 @@ Within your contracts:
 import { SomeContract } from "@bitdaoio/contracts/path/to/SomeContract.sol";
 ```
 
-Note that the `/path/to/SomeContract.sol` is the path to the target contract within the [contracts folder](https://github.com/bitnetworkio/bitnetwork/tree/main/packages/contracts/contracts) inside of this package.
-For example, the [L1CrossDomainMessenger](https://github.com/bitnetworkio/bitnetwork/blob/main/packages/contracts/contracts/L1/messaging/L1CrossDomainMessenger.sol) contract is located at `packages/contracts/contracts/L1/messaging/L1CrossDomainMessenger.sol`, relative to this README.
+Note that the `/path/to/SomeContract.sol` is the path to the target contract within the [contracts folder](https://github.com/mantleio/mantle/tree/main/packages/contracts/contracts) inside of this package.
+For example, the [L1CrossDomainMessenger](https://github.com/mantleio/mantle/blob/main/packages/contracts/contracts/L1/messaging/L1CrossDomainMessenger.sol) contract is located at `packages/contracts/contracts/L1/messaging/L1CrossDomainMessenger.sol`, relative to this README.
 You would therefore import the contract as:
 
 
@@ -41,7 +41,7 @@ Install the following:
 Clone the repo:
 
 ```shell
-git clone https://github.com/bitdao-io/bitnetwork.git
+git clone https://github.com/bitdao-io/mantle.git
 cd contracts
 ```
 
@@ -135,7 +135,7 @@ npx hardhat etherscan-verify --network <my network name>
 
 #### Creating a genesis file
 
-Bitnetwork expects that certain contracts (called "predeploys") be deployed to the L2 network at pre-determined addresses.
+Mantle expects that certain contracts (called "predeploys") be deployed to the L2 network at pre-determined addresses.
 We guarantee this by creating a genesis file in which certain contracts are already within the L2 state at the genesis block.
 To create the genesis file for your network, you must first deploy the L1 contracts using the appropriate commands from above.
 Once you've deployed your contracts, run the following command:
@@ -151,7 +151,7 @@ You can then ingest this file via `geth init`.
 
 #### Whitelisting
 
-Bitnetwork has removed the whitelist from the Bitnetwork mainnet.
+Mantle has removed the whitelist from the Mantle mainnet.
 However, if you are running your own network and still wish to use the whitelist, you can manage the whitelist with the `whitelist` task.
 Run the following to get help text for the `whitelist` command:
 
@@ -171,4 +171,4 @@ npx hardhat withdraw-fees --help
 
 ## Security
 Please refer to our [Security Policy](https://github.com/bitdao-io/.github/security/policy) for information about how to disclose security issues with this code.
-We also maintain a [bug bounty program via Immunefi](https://immunefi.com/bounty/bitnetwork/) with a maximum payout of $2,000,042 for critical bug reports.
+We also maintain a [bug bounty program via Immunefi](https://immunefi.com/bounty/mantle/) with a maximum payout of $2,000,042 for critical bug reports.

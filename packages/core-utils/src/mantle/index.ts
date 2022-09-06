@@ -1,5 +1,5 @@
 /**
- * Utils specifically related to BitNetwork.
+ * Utils specifically related to Mantle.
  */
 
 export * from './alias'

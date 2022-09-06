@@ -19,8 +19,8 @@ package trie
 import (
 	"fmt"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/log"
 )
 
 // SecureTrie wraps a trie with key hashing. In a secure trie, all

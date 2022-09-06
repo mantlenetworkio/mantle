@@ -23,10 +23,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/core/state"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/vm"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/tests"
+	"github.com/bitdao-io/mantle/l2geth/core/state"
+	"github.com/bitdao-io/mantle/l2geth/core/vm"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/tests"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

@@ -2,17 +2,17 @@ import { utils, Wallet } from 'ethers'
 import { expect } from 'chai'
 
 import { actor, setupRun, setupActor, run } from './lib/convenience'
-import { BitnetworkEnv } from '../test/shared/env'
+import { MantleEnv } from '../test/shared/env'
 
 interface Context {
   wallet: Wallet
 }
 
 actor('Value sender', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
 
   setupActor(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
   })
 
   setupRun(async () => {

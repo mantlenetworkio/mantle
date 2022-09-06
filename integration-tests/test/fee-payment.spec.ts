@@ -6,9 +6,9 @@ import { predeploys, getContractFactory } from '@bitdaoio/contracts'
 /* Imports: Internal */
 import { expect } from './shared/setup'
 import { hardhatTest, gasPriceOracleWallet } from './shared/utils'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 
-const setPrices = async (env: BitnetworkEnv, value: number | BigNumber) => {
+const setPrices = async (env: MantleEnv, value: number | BigNumber) => {
   const gasPrice = await env.messenger.contracts.l2.BVM_GasPriceOracle.connect(
     gasPriceOracleWallet
   ).setGasPrice(value)
@@ -20,11 +20,11 @@ const setPrices = async (env: BitnetworkEnv, value: number | BigNumber) => {
 }
 
 describe('Fee Payment Integration Tests', async () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
   const other = '0x1234123412341234123412341234123412341234'
 
   before(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
   })
 
   hardhatTest(

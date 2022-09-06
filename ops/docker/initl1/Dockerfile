@@ -32,7 +32,7 @@ COPY --from=foundry /usr/local/bin/cast /usr/local/bin/cast
 # copy over the needed configs to run the dep installation
 # note: this approach can be a bit unhandy to maintain, but it allows
 # us to cache the installation steps
-WORKDIR /opt/bitnetwork
+WORKDIR /opt/mantle
 COPY *.json yarn.lock ./
 COPY packages/sdk/package.json ./packages/sdk/package.json
 COPY packages/core-utils/package.json ./packages/core-utils/package.json
@@ -54,5 +54,5 @@ COPY ./ops/scripts/init-l1-contract.sh ./packages/contracts/
 RUN yarn build
 
 
-WORKDIR /opt/bitnetwork/packages/contracts
+WORKDIR /opt/mantle/packages/contracts
 ENTRYPOINT ./init-l1-contract.sh
