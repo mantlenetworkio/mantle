@@ -42,9 +42,9 @@
     "ethers": "^5.6.8",
     "hardhat": "^2.9.6",
     "hardhat-deploy": "^0.11.4",
+    "mocha": "^10.0.0",
     "nyc": "^15.1.0",
-    "typedoc": "^0.22.13",
-    "mocha": "^10.0.0"
+    "typedoc": "^0.22.13"
   },
   "dependencies": {
     "@bitdaoio/contracts": "1.0.2",

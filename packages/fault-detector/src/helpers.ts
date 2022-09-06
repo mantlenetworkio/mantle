@@ -26,7 +26,6 @@ export const findEventForStateBatch = async (
   return events[0]
 }
 
-
 /**
  * Finds the Event that corresponds to a given state batch by index.
  *
@@ -41,7 +40,11 @@ export const findEventForStateBatchByFromAndTo = async (
   from: number,
   to: number
 ): Promise<ethers.Event> => {
-  const events = await scc.queryFilter(scc.filters.StateBatchAppended(index),from,to)
+  const events = await scc.queryFilter(
+    scc.filters.StateBatchAppended(index),
+    from,
+    to
+  )
 
   // Only happens if the batch with the given index does not exist yet.
   if (events.length === 0) {
@@ -55,7 +58,6 @@ export const findEventForStateBatchByFromAndTo = async (
 
   return events[0]
 }
-
 
 /**
  * Finds the first state batch index that has not yet passed the fault proof window.

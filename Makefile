@@ -30,3 +30,11 @@ submodules:
 clean-node-modules:
 	rm -rf node_modules
 	rm -rf packages/**/node_modules
+
+mod-tidy:
+	cd ./batch-submitter && go mod tidy && cd .. && \
+	cd ./bss-core && go mod tidy && cd ..  && \
+	cd ./gas-oracle && go mod tidy && cd ..  && \
+	cd ./l2geth && go mod tidy && cd ..  && \
+	cd ./l2geth-exporter && go mod tidy && cd ..
+.PHONY: mod-tidy

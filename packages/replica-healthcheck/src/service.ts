@@ -1,10 +1,5 @@
 import { Provider, Block } from '@ethersproject/abstract-provider'
-import {
-  BaseServiceV2,
-  Counter,
-  Gauge,
-  validators,
-} from '@bitdaoio/common-ts'
+import { BaseServiceV2, Counter, Gauge, validators } from '@bitdaoio/common-ts'
 import { sleep } from '@bitdaoio/core-utils'
 
 type HealthcheckOptions = {

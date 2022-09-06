@@ -2,9 +2,9 @@
   <h1> Mantle Wiki</h1>
 </div>
 <p align="center">
-  <a href="https://github.com/bitnetworkio/mantle/actions/workflows/ts-packages.yml?query=branch%3Amaster"><img src="https://github.com/bitnetworkio/mantle/workflows/typescript%20/%20contracts/badge.svg" /></a>
-  <a href="https://github.com/bitnetworkio/mantle/actions/workflows/integration.yml?query=branch%3Amaster"><img src="https://github.com/bitnetworkio/mantle/workflows/integration/badge.svg" /></a>
-  <a href="https://github.com/bitnetworkio/mantle/actions/workflows/geth.yml?query=branch%3Amaster"><img src="https://github.com/bitnetworkio/mantle/workflows/geth%20unit%20tests/badge.svg" /></a>
+  <a href="https://github.com/bitnetworkio/mantle/actions/workflows/ts-packages.yml?query=branch%3Amain"><img src="https://github.com/bitnetworkio/mantle/workflows/typescript%20/%20contracts/badge.svg" /></a>
+  <a href="https://github.com/bitnetworkio/mantle/actions/workflows/integration.yml?query=branch%3Amain"><img src="https://github.com/bitnetworkio/mantle/workflows/integration/badge.svg" /></a>
+  <a href="https://github.com/bitnetworkio/mantle/actions/workflows/geth.yml?query=branch%3Amain"><img src="https://github.com/bitnetworkio/mantle/workflows/geth%20unit%20tests/badge.svg" /></a>
 </p>
 
 ## Documentation & Introduction
@@ -63,12 +63,6 @@ root
 ├── <a href="./proxyd">proxyd</a>: Configurable RPC request router and proxy
 ├── <a href="./technical-documents">technical-documents</a>: audits and post-mortem documents
 </pre>
-
-
-
-
-<br/>
-<br/>
 
 
 ## License

@@ -21,7 +21,6 @@ contract BVM_ETH is L2StandardERC20 {
         L2StandardERC20(Lib_PredeployAddresses.L2_STANDARD_BRIDGE, address(0), "Ether", "ETH")
     {}
 
-
     function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
         revert("BVM_ETH: transfer is disabled pending further community discussion.");
     }
