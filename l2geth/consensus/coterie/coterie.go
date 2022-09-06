@@ -219,7 +219,7 @@ func (c *Coterie) Seal(chain consensus.ChainReader, block *types.Block, results 
 		delay = 0
 	}
 	// Sign all the things!
-	sighash, err := signFn(accounts.Account{Address: signer}, accounts.MimetypeClique, CliqueRLP(header))
+	sighash, err := signFn(accounts.Account{Address: signer}, accounts.MimetypeCoterie, CoterieRLP(header))
 	if err != nil {
 		return err
 	}
@@ -364,7 +364,7 @@ func SealHash(header *types.Header) (hash common.Hash) {
 	return hash
 }
 
-func CliqueRLP(header *types.Header) []byte {
+func CoterieRLP(header *types.Header) []byte {
 	b := new(bytes.Buffer)
 	encodeSigHeader(b, header)
 	return b.Bytes()
