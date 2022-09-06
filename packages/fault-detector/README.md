@@ -1,4 +1,4 @@
-# @eth-optimism/fault-detector
+# @bidaoio/fault-detector
 
 The `fault-detector` is a simple service for detecting discrepancies between your local view of the Mantle network and the L2 output proposals published to Ethereum.
 

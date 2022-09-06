@@ -1,3 +1,3 @@
-# @eth-mantle/foundry
+# @bitdaoio/foundry
 
 

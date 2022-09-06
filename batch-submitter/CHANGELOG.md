@@ -1,2 +1,2 @@
-# @eth-mantle/batch-submitter-service
+# @bitdaoio/batch-submitter-service
 
