@@ -22,11 +22,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/discover"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enode"
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/p2p/discover"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
+	"github.com/bitdao-io/mantle/l2geth/params"
 	"gopkg.in/urfave/cli.v1"
 )
 

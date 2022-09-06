@@ -20,7 +20,7 @@ import (
 	"crypto/sha256"
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
 	"golang.org/x/crypto/pbkdf2"
 )
 

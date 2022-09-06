@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/core"
+	"github.com/bitdao-io/mantle/l2geth/core"
 	"github.com/davecgh/go-spew/spew"
 )
 

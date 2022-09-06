@@ -48,6 +48,6 @@ coverage.out
 
 .idea/
 
-bitnetwork.iml
+mantle.iml
 
 ops/data/**

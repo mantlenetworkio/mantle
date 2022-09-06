@@ -1,2 +1,2 @@
-# @eth-bitnetwork/proxyd
+# @eth-mantle/proxyd
 

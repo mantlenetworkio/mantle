@@ -1,2 +1,2 @@
-# @eth-bitnetwork/integration-tests
+# @eth-mantle/integration-tests
 

@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/node"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p"
-	"github.com/bitdao-io/bitnetwork/l2geth/rpc"
+	"github.com/bitdao-io/mantle/l2geth/node"
+	"github.com/bitdao-io/mantle/l2geth/p2p"
+	"github.com/bitdao-io/mantle/l2geth/rpc"
 )
 
 // SampleService is a trivial network service that can be attached to a node for

@@ -1,2 +1,2 @@
-# @eth-bitnetwork/l2geth-exporter
+# @eth-mantle/l2geth-exporter
 

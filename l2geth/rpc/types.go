@@ -23,8 +23,8 @@ import (
 	"math"
 	"strings"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
 )
 
 // API describes the set of methods offered over the RPC interface

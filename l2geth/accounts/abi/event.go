@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
 )
 
 // Event is an event potentially triggered by the EVM's LOG mechanism. The Event

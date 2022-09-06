@@ -64,18 +64,18 @@ export interface Genesis {
 }
 
 /**
- * Represents the chain config for an BitNetwork chain
+ * Represents the chain config for an Mantle chain
  */
-export interface BitNetworkChainConfig extends ChainConfig {
-  bitnetwork: {
+export interface MantleChainConfig extends ChainConfig {
+  mantle: {
     baseFeeRecipient: string
     l1FeeRecipient: string
   }
 }
 
 /**
- * Represents the Genesis file format for an BitNetwork chain
+ * Represents the Genesis file format for an Mantle chain
  */
-export interface BitNetworkGenesis extends Genesis {
-  config: BitNetworkChainConfig
+export interface MantleGenesis extends Genesis {
+  config: MantleChainConfig
 }

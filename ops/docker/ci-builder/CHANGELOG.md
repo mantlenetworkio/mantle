@@ -1,2 +1,2 @@
-# @eth-bitnetwork/ci-builder
+# @eth-mantle/ci-builder
 

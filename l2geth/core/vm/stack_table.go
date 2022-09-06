@@ -17,7 +17,7 @@
 package vm
 
 import (
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
+	"github.com/bitdao-io/mantle/l2geth/params"
 )
 
 func minSwapStack(n int) int {

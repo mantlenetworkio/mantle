@@ -1,2 +1,2 @@
-# @eth-bitnetwork/hardhat-node
+# @eth-mantle/hardhat-node
 

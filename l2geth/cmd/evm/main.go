@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/cmd/utils"
+	"github.com/bitdao-io/mantle/l2geth/cmd/utils"
 	"gopkg.in/urfave/cli.v1"
 )
 

@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
-	whisper "github.com/bitdao-io/bitnetwork/l2geth/whisper/whisperv6"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
+	whisper "github.com/bitdao-io/mantle/l2geth/whisper/whisperv6"
 )
 
 const powRequirement = 0.00001
