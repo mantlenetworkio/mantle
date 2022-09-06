@@ -19,10 +19,8 @@ import (
 )
 
 const (
-	//l1url           = "http://localhost:9545"
-	//l2url           = "http://localhost:8545"
-	l1url           = "http://149.28.71.219:9545"
-	l2url           = "http://149.28.71.219:8545"
+	l1url           = "http://localhost:9545"
+	l2url           = "http://localhost:8545"
 	l2BitAddress    = "0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000"
 	l2EthAddress    = "0xdEAddEaDdeadDEadDEADDEAddEADDEAddead1111"
 	l1BridgeAddress = "0x610178dA211FEF7D417bC0e6FeD39F05609AD788"
