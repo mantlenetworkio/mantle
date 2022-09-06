@@ -60,7 +60,7 @@ services:
     <<: *base
     container_name: bitrelayer
     deploy:
-      replicas: 0
+      replicas: 1
 
   verifier:
     <<: *base

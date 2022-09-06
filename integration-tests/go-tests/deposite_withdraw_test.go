@@ -76,14 +76,14 @@ func TestDepositAndWithdraw(t *testing.T) {
 	t.Log("l2 eth balance: ", getETHBalanceFromL2(t, userAddress))
 	// do deposit
 	auth := buildAuth(t, l1Client, userPrivateKey, big.NewInt(DECIMAL0_1))
-	tx, err := l1Bridge.DepositETH(auth, 200_000, []byte("0x"))
+	tx, err := l1Bridge.DepositETH(auth, 2_000_000, []byte("0x"))
 	require.NoError(t, err)
 	t.Log("deposit eth tx hash is: ", tx.Hash())
 	t.Log("ETH after deposit...\\")
 	t.Log("l1 eth balance: ", getETHBalanceFromL1(t, userAddress))
 	//require.Equal(t, getETHBalanceFromL1(t, userAddress), 0)
 	// wait for l2 confirmation
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 	t.Log("l2 eth balance: ", getETHBalanceFromL2(t, userAddress))
 	//require.Equal(t, getETHBalanceFromL2(t, userAddress), 0)
 	t.Log("eth deposit amount: ", DECIMAL0_1)
@@ -97,12 +97,12 @@ func TestDepositAndWithdraw(t *testing.T) {
 	t.Log("l1 bit balance: ", getBITBalanceFromL1(t, userAddress))
 	t.Log("l2 bit balance: ", getBITBalanceFromL2(t, userAddress))
 	auth = buildAuth(t, l1Client, userPrivateKey, big.NewInt(0))
-	tx, err = l1Bridge.DepositERC20(auth, common.HexToAddress(l1BitAddress), common.HexToAddress(l2BitAddress), big.NewInt(DECIMAL0_1), 200_000, []byte("0x"))
+	tx, err = l1Bridge.DepositERC20(auth, common.HexToAddress(l1BitAddress), common.HexToAddress(l2BitAddress), big.NewInt(DECIMAL0_1), 2_000_000, []byte("0x"))
 	require.NoError(t, err)
 	t.Log("deposit bit tx hash is: ", tx.Hash())
 	t.Log("BIT after deposit.....\\")
 	t.Log("l1 bit balance: ", getBITBalanceFromL1(t, userAddress))
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 	t.Log("l2 bit balance: ", getBITBalanceFromL2(t, userAddress))
 	t.Log("bit deposit amount: ", DECIMAL0_1)
 
@@ -119,7 +119,7 @@ func TestDepositAndWithdraw(t *testing.T) {
 	require.NoError(t, err)
 	t.Log("withdraw eth tx hash is: ", tx.Hash())
 	t.Log("ETH after withdraw.....\\")
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 	t.Log("l1 eth balance: ", getETHBalanceFromL1(t, userAddress))
 	t.Log("l2 eth balance: ", getETHBalanceFromL2(t, userAddress))
 	t.Log("eth withdraw amount: ", DECIMAL0_1)
@@ -129,18 +129,34 @@ func TestDepositAndWithdraw(t *testing.T) {
 	t.Log("BIT WITHDRAW TEST")
 	t.Log("-----------------")
 	t.Log("BIT before withdraw.....\\")
-	t.Log("l1 bit former balance is: ", getBITBalanceFromL1(t, userAddress))
-	t.Log("l2 bit former balance is: ", getBITBalanceFromL2(t, userAddress))
+	t.Log("l1 bit balance: ", getBITBalanceFromL1(t, userAddress))
+	t.Log("l2 bit balance: ", getBITBalanceFromL2(t, userAddress))
 	auth = buildAuth(t, l2Client, userPrivateKey, big.NewInt(0))
 	tx, err = l2Bridge.Withdraw(auth, common.HexToAddress(l2BitAddress), big.NewInt(DECIMAL0_1), 300_000, []byte("0x"))
 	require.NoError(t, err)
 	t.Log("withdraw bit tx hash is: ", tx.Hash())
 	t.Log("BIT after withdraw.....\\")
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 	t.Log("l1 bit balance: ", getBITBalanceFromL1(t, userAddress))
 	t.Log("l2 bit balance: ", getBITBalanceFromL2(t, userAddress))
 
 	t.Log("bit withdraw amount: ", DECIMAL0_1)
+}
+
+func TestShowL1L2Balance(t *testing.T) {
+	l1Eth := getETHBalanceFromL1(t, userAddress)
+	l2Eth := getETHBalanceFromL2(t, userAddress)
+	t.Log("l1 eth balance: ", l1Eth)
+	t.Log("l2 eth balance: ", l2Eth)
+	sumEth := big.NewInt(0)
+	t.Log("sum balance is: ", sumEth.Add(l1Eth, l2Eth))
+
+	l1Bit := getBITBalanceFromL1(t, userAddress)
+	l2Bit := getBITBalanceFromL2(t, userAddress)
+	t.Log("l1 bit balance: ", l1Bit)
+	t.Log("l2 bit balance: ", l2Bit)
+	sumBit := big.NewInt(0)
+	t.Log("sum balance is: ", sumBit.Add(l1Bit, l2Bit))
 }
 
 func checkTokenAddress(t *testing.T) {
