@@ -26,7 +26,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/log"
 )
 
 // makeWizard creates and returns a new puppeth wizard.

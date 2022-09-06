@@ -21,9 +21,9 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethdb/memorydb"
-	"github.com/bitdao-io/bitnetwork/l2geth/trie"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/ethdb/memorydb"
+	"github.com/bitdao-io/mantle/l2geth/trie"
 )
 
 // randTest performs random trie operations.

@@ -1,8 +1,8 @@
-# @bitnetwork/core-utils
+# @mantle/core-utils
 
 ## What is this?
 
-`@bitnetwork/core-utils` contains the Bit Virtual Machine core utilities.
+`@mantle/core-utils` contains the Bit Virtual Machine core utilities.
 
 ## Getting started
 
@@ -29,10 +29,10 @@ $ yarn lint
 locally.
 
 ```typescript
-import { TxGasLimit } from '@bitnetwork/core-utils'
+import { TxGasLimit } from '@mantle/core-utils'
 import { JsonRpcProvider } from 'ethers'
 
-const L2Provider = new JsonRpcProvider('https://mainnet.bitnetwork.io')
+const L2Provider = new JsonRpcProvider('https://mainnet.mantle.io')
 const L1Provider = new JsonRpcProvider('http://127.0.0.1:8545')
 
 const l2GasLimit = await L2Provider.send('eth_estimateExecutionGas', [tx])

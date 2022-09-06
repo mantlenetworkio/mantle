@@ -98,7 +98,7 @@ jobs:
           context: .
           file: ./l2geth/Dockerfile
           push: true
-          tags: ethereumbitnetwork/l2geth:${{ needs.release.outputs.l2geth }},ethereumbitnetwork/l2geth:latest
+          tags: ethereummantle/l2geth:${{ needs.release.outputs.l2geth }},ethereummantle/l2geth:latest
 
   gas-oracle:
     name: Publish Gas Oracle Version ${{ needs.release.outputs.gas-oracle }}
@@ -124,7 +124,7 @@ jobs:
           context: .
           file: ./gas-oracle/Dockerfile
           push: true
-          tags: ethereumbitnetwork/gas-oracle:${{ needs.release.outputs.gas-oracle }},ethereumbitnetwork/gas-oracle:latest
+          tags: ethereummantle/gas-oracle:${{ needs.release.outputs.gas-oracle }},ethereummantle/gas-oracle:latest
 
   hardhat-node:
     name: Publish Hardhat Node ${{ needs.release.outputs.hardhat-node }}
@@ -150,7 +150,7 @@ jobs:
           context: ./ops/docker/hardhat
           file: ./Dockerfile
           push: true
-          tags: ethereumbitnetwork/hardhat-node:${{ needs.release.outputs.gas-oracle }},ethereumbitnetwork/hardhat-node:latest
+          tags: ethereummantle/hardhat-node:${{ needs.release.outputs.gas-oracle }},ethereummantle/hardhat-node:latest
 
   ci-builder:
     name: Publish ci-builder ${{ needs.release.outputs.ci-builder }}
@@ -176,7 +176,7 @@ jobs:
           context: ./ops/docker/ci-builder
           file: ./ops/docker/ci-builder/Dockerfile
           push: true
-          tags: ethereumbitnetwork/ci-builder:${{ needs.release.outputs.ci-builder }},ethereumbitnetwork/ci-builder:latest
+          tags: ethereummantle/ci-builder:${{ needs.release.outputs.ci-builder }},ethereummantle/ci-builder:latest
 
   foundry:
     name: Publish foundry ${{ needs.release.outputs.foundry }}
@@ -235,7 +235,7 @@ jobs:
           context: .
           file: ./proxyd/Dockerfile
           push: true
-          tags: ethereumbitnetwork/proxyd:${{ needs.release.outputs.proxyd }},ethereumbitnetwork/proxyd:latest
+          tags: ethereummantle/proxyd:${{ needs.release.outputs.proxyd }},ethereummantle/proxyd:latest
           build-args: |
             GITDATE=${{ steps.build_args.outputs.GITDATE }}
             GITCOMMIT=${{ steps.build_args.outputs.GITCOMMIT }}
@@ -272,7 +272,7 @@ jobs:
           context: .
           file: ./l2geth-exporter/Dockerfile
           push: true
-          tags: ethereumbitnetwork/l2geth-exporter:${{ needs.release.outputs.l2geth-exporter }},ethereumbitnetwork/l2geth-exporter:latest
+          tags: ethereummantle/l2geth-exporter:${{ needs.release.outputs.l2geth-exporter }},ethereummantle/l2geth-exporter:latest
           build-args: |
             GITDATE=${{ steps.build_args.outputs.GITDATE }}
             GITCOMMIT=${{ steps.build_args.outputs.GITCOMMIT }}
@@ -303,7 +303,7 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: message-relayer
           push: true
-          tags: ethereumbitnetwork/message-relayer:${{ needs.release.outputs.message-relayer }},ethereumbitnetwork/message-relayer:latest
+          tags: ethereummantle/message-relayer:${{ needs.release.outputs.message-relayer }},ethereummantle/message-relayer:latest
 
   fault-detector:
     name: Publish Fault Detector Version ${{ needs.release.outputs.fault-detector }}
@@ -330,7 +330,7 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: fault-detector
           push: true
-          tags: ethereumbitnetwork/fault-detector:${{ needs.release.outputs.fault-detector }},ethereumbitnetwork/fault-detector:latest
+          tags: ethereummantle/fault-detector:${{ needs.release.outputs.fault-detector }},ethereummantle/fault-detector:latest
 
   data-transport-layer:
     name: Publish Data Transport Layer Version ${{ needs.release.outputs.data-transport-layer }}
@@ -357,7 +357,7 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: data-transport-layer
           push: true
-          tags: ethereumbitnetwork/data-transport-layer:${{ needs.release.outputs.data-transport-layer }},ethereumbitnetwork/data-transport-layer:latest
+          tags: ethereummantle/data-transport-layer:${{ needs.release.outputs.data-transport-layer }},ethereummantle/data-transport-layer:latest
 
   contracts:
     name: Publish Deployer Version ${{ needs.release.outputs.contracts }}
@@ -384,7 +384,7 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: deployer
           push: true
-          tags: ethereumbitnetwork/deployer:${{ needs.release.outputs.contracts }},ethereumbitnetwork/deployer:latest
+          tags: ethereummantle/deployer:${{ needs.release.outputs.contracts }},ethereummantle/deployer:latest
 
   integration_tests:
     name: Publish Integration tests ${{ needs.release.outputs.integration-tests }}
@@ -411,7 +411,7 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: integration-tests
           push: true
-          tags: ethereumbitnetwork/integration-tests:${{ needs.release.outputs.integration-tests }},ethereumbitnetwork/integration-tests:latest
+          tags: ethereummantle/integration-tests:${{ needs.release.outputs.integration-tests }},ethereummantle/integration-tests:latest
 
   replica-healthcheck:
     name: Publish Replica Healthcheck Version ${{ needs.release.outputs.replica-healthcheck }}
@@ -438,7 +438,7 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: replica-healthcheck
           push: true
-          tags: ethereumbitnetwork/replica-healthcheck:${{ needs.release.outputs.replica-healthcheck }},ethereumbitnetwork/replica-healthcheck:latest
+          tags: ethereummantle/replica-healthcheck:${{ needs.release.outputs.replica-healthcheck }},ethereummantle/replica-healthcheck:latest
 
   batch-submitter-service:
     name: Publish batch-submitter-service Version ${{ needs.release.outputs.batch-submitter-service }}
@@ -464,4 +464,4 @@ jobs:
           context: .
           file: ./batch-submitter/Dockerfile
           push: true
-          tags: ethereumbitnetwork/batch-submitter-service:${{ needs.release.outputs.batch-submitter-service }},ethereumbitnetwork/batch-submitter-service:latest
+          tags: ethereummantle/batch-submitter-service:${{ needs.release.outputs.batch-submitter-service }},ethereummantle/batch-submitter-service:latest

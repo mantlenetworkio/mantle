@@ -1,13 +1,14 @@
 package oracle
 
 import (
+	"math/big"
+	"testing"
+
 	"github.com/bitdao-io/bitnetwork/gas-oracle/bindings"
 	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"math/big"
-	"testing"
 )
 
 func TestBaseFeeUpdate(t *testing.T) {

@@ -1,2 +1,2 @@
-# @eth-bitnetwork/hardhat-node
+# @bitdaoio/hardhat-node
 

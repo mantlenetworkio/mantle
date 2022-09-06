@@ -222,6 +222,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 	log.Info("Creating GasPricer", "currentPrice", currentPrice,
 		"floorPrice", cfg.floorPrice, "targetGasPerSecond", cfg.targetGasPerSecond,
 		"maxPercentChangePerEpoch", cfg.maxPercentChangePerEpoch)
+
 	gasPricer, err := gasprices.NewGasPricer(
 		currentPrice.Uint64(),
 		cfg.floorPrice,

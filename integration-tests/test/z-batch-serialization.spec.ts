@@ -1,16 +1,16 @@
 import { SequencerBatch, BatchType } from '@bitdaoio/core-utils'
 
 import { expect } from './shared/setup'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 import { envConfig } from './shared/utils'
 
 describe('Batch Serialization', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
   // Allow for each type to be tested. The env var here must be
   // the same value that is passed to the batch submitter
   const batchType = envConfig.BATCH_SUBMITTER_SEQUENCER_BATCH_TYPE.toUpperCase()
   before(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
   })
 
   it('should fetch batches', async () => {

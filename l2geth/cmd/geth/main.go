@@ -28,19 +28,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts"
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/keystore"
-	"github.com/bitdao-io/bitnetwork/l2geth/cmd/utils"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/console"
-	"github.com/bitdao-io/bitnetwork/l2geth/eth"
-	"github.com/bitdao-io/bitnetwork/l2geth/eth/downloader"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethclient"
-	"github.com/bitdao-io/bitnetwork/l2geth/internal/debug"
-	"github.com/bitdao-io/bitnetwork/l2geth/les"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/metrics"
-	"github.com/bitdao-io/bitnetwork/l2geth/node"
+	"github.com/bitdao-io/mantle/l2geth/accounts"
+	"github.com/bitdao-io/mantle/l2geth/accounts/keystore"
+	"github.com/bitdao-io/mantle/l2geth/cmd/utils"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/console"
+	"github.com/bitdao-io/mantle/l2geth/eth"
+	"github.com/bitdao-io/mantle/l2geth/eth/downloader"
+	"github.com/bitdao-io/mantle/l2geth/ethclient"
+	"github.com/bitdao-io/mantle/l2geth/internal/debug"
+	"github.com/bitdao-io/mantle/l2geth/les"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/metrics"
+	"github.com/bitdao-io/mantle/l2geth/node"
 	"github.com/elastic/gosigar"
 	cli "gopkg.in/urfave/cli.v1"
 )
@@ -149,9 +149,9 @@ var (
 	}
 
 	// UsingBVM
-	// Bitnetwork specific flags must be added to the application
+	// Mantle specific flags must be added to the application
 	// flag parsing logic
-	bitnetworkFlags = []cli.Flag{
+	mantleFlags = []cli.Flag{
 		utils.Eth1SyncServiceEnable,
 		utils.Eth1CanonicalTransactionChainDeployHeightFlag,
 		utils.RollupClientHttpFlag,
@@ -247,7 +247,7 @@ func init() {
 
 	app.Flags = append(app.Flags, nodeFlags...)
 	// UsingBVM
-	app.Flags = append(app.Flags, bitnetworkFlags...)
+	app.Flags = append(app.Flags, mantleFlags...)
 	app.Flags = append(app.Flags, rpcFlags...)
 	app.Flags = append(app.Flags, consoleFlags...)
 	app.Flags = append(app.Flags, debug.Flags...)

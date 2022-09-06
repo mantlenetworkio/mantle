@@ -1,2 +1,2 @@
-# @eth-bitnetwork/batch-submitter-service
+# @bitdaoio/batch-submitter-service
 

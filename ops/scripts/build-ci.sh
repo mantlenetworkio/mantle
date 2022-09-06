@@ -15,15 +15,15 @@ function build() {
 }
 
 mkdir -p /tmp/.buildx-cache-new
-build l2geth "ethereumbitnetwork/l2geth:latest" "./l2geth/Dockerfile" .
-build l1chain "ethereumbitnetwork/hardhat:latest" "./ops/docker/hardhat/Dockerfile" ./ops/docker/hardhat
+build l2geth "ethereummantle/l2geth:latest" "./l2geth/Dockerfile" .
+build l1chain "ethereummantle/hardhat:latest" "./ops/docker/hardhat/Dockerfile" ./ops/docker/hardhat
 
 wait
 
-build deployer "ethereumbitnetwork/deployer:latest" "./ops/docker/Dockerfile.deployer" .
-build dtl "ethereumbitnetwork/data-transport-layer:latest" "./ops/docker/Dockerfile.data-transport-layer" .
-build relayer "ethereumbitnetwork/message-relayer:latest" "./ops/docker/Dockerfile.message-relayer" .
-build relayer "ethereumbitnetwork/fault-detector:latest" "./ops/docker/Dockerfile.fault-detector" .
-build integration-tests "ethereumbitnetwork/integration-tests:latest" "./ops/docker/Dockerfile.integration-tests" .
+build deployer "ethereummantle/deployer:latest" "./ops/docker/Dockerfile.deployer" .
+build dtl "ethereummantle/data-transport-layer:latest" "./ops/docker/Dockerfile.data-transport-layer" .
+build relayer "ethereummantle/message-relayer:latest" "./ops/docker/Dockerfile.message-relayer" .
+build relayer "ethereummantle/fault-detector:latest" "./ops/docker/Dockerfile.fault-detector" .
+build integration-tests "ethereummantle/integration-tests:latest" "./ops/docker/Dockerfile.integration-tests" .
 
 wait

@@ -15,7 +15,7 @@ geth account new --password password.txt
 mkdir -p /root/.ethereum/key
 
 ## clone the ethkey-parse
-git clone https://github.com/bitnetworkio/ethkey-parse
+git clone https://github.com/mantleio/ethkey-parse
 
 ## docker build ethkey-parse binary
 docker run -it -v "$PWD/ethkey-parse":/usr/src/ethkey-parse -w /usr/src/ethkey-parse golang go build -v

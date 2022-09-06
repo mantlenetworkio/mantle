@@ -1,4 +1,4 @@
-module github.com/bitdao-io/bitnetwork/proxyd
+module github.com/bitdao-io/mantle/proxyd
 
 go 1.18
 

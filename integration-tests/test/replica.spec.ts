@@ -4,7 +4,7 @@ import { sleep } from '@bitdaoio/core-utils'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 import {
   defaultTransactionFactory,
   gasPriceForL2,
@@ -12,7 +12,7 @@ import {
 } from './shared/utils'
 
 describe('Replica Tests', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
 
   before(async function () {
     if (!envConfig.RUN_REPLICA_TESTS) {
@@ -20,7 +20,7 @@ describe('Replica Tests', () => {
       return
     }
 
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
   })
 
   describe('Matching blocks', () => {

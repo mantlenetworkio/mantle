@@ -1,5 +1,5 @@
 /**
- * Bitnetwork 2020 Copyright
+ * Mantle 2020 Copyright
  */
 
 package types
@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common"
 )
 
 type QueueOrigin uint8

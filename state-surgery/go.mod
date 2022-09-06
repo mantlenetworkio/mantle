@@ -1,4 +1,4 @@
-module github.com/bitdao-io/bitnetwork/state-surgery
+module github.com/bitdao-io/mantle/state-surgery
 
 go 1.18
 

@@ -4,7 +4,7 @@ import { abi as NFTABI } from '@uniswap/v3-periphery/artifacts/contracts/Nonfung
 import { abi as RouterABI } from '@uniswap/v3-periphery/artifacts/contracts/SwapRouter.sol/SwapRouter.json'
 
 import { actor, run, setupActor, setupRun } from './lib/convenience'
-import { BitnetworkEnv } from '../test/shared/env'
+import { MantleEnv } from '../test/shared/env'
 import ERC20 from '../artifacts/contracts/ERC20.sol/ERC20.json'
 
 interface Context {
@@ -13,14 +13,14 @@ interface Context {
 }
 
 actor('Uniswap swapper', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
 
   let tokens: [Contract, Contract]
 
   let contracts: { [name: string]: Contract }
 
   setupActor(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
 
     contracts = {
       positionManager: new Contract(

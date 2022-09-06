@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common"
 )
 
 type Config struct {

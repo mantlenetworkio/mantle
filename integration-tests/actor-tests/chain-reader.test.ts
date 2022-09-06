@@ -1,11 +1,11 @@
 import { actor, run, setupActor } from './lib/convenience'
-import { BitnetworkEnv } from '../test/shared/env'
+import { MantleEnv } from '../test/shared/env'
 
 actor('Chain reader', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
 
   setupActor(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
   })
 
   run(async (b) => {

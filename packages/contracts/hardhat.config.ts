@@ -31,19 +31,19 @@ const config: HardhatUserConfig = {
       saveDeployments: false,
       tags: ['local'],
     },
-    bitnetwork: {
+    mantle: {
       url: 'http://127.0.0.1:8545',
       saveDeployments: false,
     },
-    'bitnetwork-kovan': {
+    'mantle-kovan': {
       chainId: 69,
-      url: 'https://kovan.bitnetwork.io',
+      url: 'https://kovan.mantle.io',
       deploy,
       accounts: [privateKey],
     },
-    'bitnetwork-mainnet': {
+    'mantle-mainnet': {
       chainId: 10,
-      url: 'https://mainnet.bitnetwork.io',
+      url: 'https://mainnet.mantle.io',
       deploy,
       accounts: [privateKey],
     },

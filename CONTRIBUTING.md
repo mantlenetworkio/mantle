@@ -1,13 +1,13 @@
-# Bitnetwork monorepo contributing guide
+# Mantle repo contributing guide
 
 🎈 Thanks for your help improving the project! We are so happy to have you!
 
 There are plenty of ways to contribute, in particular we appreciate support in the following areas:
 
 - Reporting issues. For security issues see [Security policy](https://github.com/bitdao-io/.github/blob/master/SECURITY.md).
-- Fixing and responding to existing issues. You can start off with those tagged ["good first issue"](https://github.com/bitdao-io/bitnetwork/contribute) which are meant as introductory issues for external contributors.
-- Improving the [community site](https://community.bitnetwork.io/)[documentation](https://github.com/bitdao-io/community-hub) and [tutorials](https://github.com/bitdao-io/bitnetwork-tutorial).
-- Become an "Optimizer" and answer questions in the [bitnetwork Discord](https://discord.com/invite/jrnFEvq).
+- Fixing and responding to existing issues. You can start off with those tagged ["good first issue"](https://github.com/bitdao-io/mantle/contribute) which are meant as introductory issues for external contributors.
+- Improving the [community site](https://community.mantle.io/)[documentation](https://github.com/bitdao-io/community-hub) and [tutorials](https://github.com/bitdao-io/mantle-tutorial).
+- Become an "Optimizer" and answer questions in the [mantle Discord](https://discord.com/invite/jrnFEvq).
 - Get involved in the protocol design process by proposing changes or new features or write parts of the spec yourself in the [optimistic-specs repo](https://github.com/bitdao-io/optimistic-specs).
 
 Note that we have a [Code of Conduct](https://github.com/bitdao-io/.github/blob/master/CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
@@ -18,7 +18,7 @@ Note that we have a [Code of Conduct](https://github.com/bitdao-io/.github/blob/
 
 In general, the smaller the diff the easier it will be for us to review quickly.
 
-In order to contribute, fork the appropriate branch, for non-breaking changes to production that is `develop` and for the next release that is normally `release/X.X.X` branch, see [details about our branching model](https://github.com/bitdao-io/bitnetwork/blob/develop/README.md#branching-model-and-releases).
+In order to contribute, fork the appropriate branch, for non-breaking changes to production that is `develop` and for the next release that is normally `release/X.X.X` branch, see [details about our branching model](https://github.com/bitdao-io/mantle/blob/develop/README.md#branching-model-and-releases).
 
 Additionally, if you are writing a new feature, please ensure you add appropriate test cases.
 
@@ -71,8 +71,8 @@ You'll need the following:
 Clone the repository, open it, and install nodejs packages with `yarn`:
 
 ```bash
-git clone git@github.com:bitdao-io/bitnetwork.git
-cd bitnetwork
+git clone git@github.com:bitdao-io/mantle.git
+cd mantle
 yarn install
 ```
 
@@ -103,7 +103,7 @@ Use the above commands to recompile the packages.
 
 ### Building the rest of the system
 
-If you want to run an bitnetwork node OR **if you want to run the integration tests**, you'll need to build the rest of the system.
+If you want to run an mantle node OR **if you want to run the integration tests**, you'll need to build the rest of the system.
 
 ```bash
 cd ops
@@ -114,14 +114,14 @@ docker-compose build
 
 This will build the following containers:
 
-* [`l1_chain`](https://hub.docker.com/r/ethereumbitnetwork/hardhat): simulated L1 chain using hardhat-evm as a backend
-* [`deployer`](https://hub.docker.com/r/ethereumbitnetwork/deployer): process that deploys L1 smart contracts to the L1 chain
-* [`dtl`](https://hub.docker.com/r/ethereumbitnetwork/data-transport-layer): service that indexes transaction data from the L1 chain
-* [`l2geth`](https://hub.docker.com/r/ethereumbitnetwork/l2geth): L2 geth node running in Sequencer mode
-* [`verifier`](https://hub.docker.com/r/ethereumbitnetwork/go-ethereum): L2 geth node running in Verifier mode
-* [`relayer`](https://hub.docker.com/r/ethereumbitnetwork/message-relayer): helper process that relays messages between L1 and L2
-* [`batch_submitter`](https://hub.docker.com/r/ethereumbitnetwork/batch-submitter-service): service that submits batches of Sequencer transactions to the L1 chain
-* [`integration_tests`](https://hub.docker.com/r/ethereumbitnetwork/integration-tests): integration tests in a box
+* [`l1_chain`](https://hub.docker.com/r/ethereummantle/hardhat): simulated L1 chain using hardhat-evm as a backend
+* [`deployer`](https://hub.docker.com/r/ethereummantle/deployer): process that deploys L1 smart contracts to the L1 chain
+* [`dtl`](https://hub.docker.com/r/ethereummantle/data-transport-layer): service that indexes transaction data from the L1 chain
+* [`l2geth`](https://hub.docker.com/r/ethereummantle/l2geth): L2 geth node running in Sequencer mode
+* [`verifier`](https://hub.docker.com/r/ethereummantle/go-ethereum): L2 geth node running in Verifier mode
+* [`relayer`](https://hub.docker.com/r/ethereummantle/message-relayer): helper process that relays messages between L1 and L2
+* [`batch_submitter`](https://hub.docker.com/r/ethereummantle/batch-submitter-service): service that submits batches of Sequencer transactions to the L1 chain
+* [`integration_tests`](https://hub.docker.com/r/ethereummantle/integration-tests): integration tests in a box
 
 If you want to make a change to a container, you'll need to take it down and rebuild it.
 For example, if you make a change in l2geth:
@@ -148,7 +148,7 @@ docker-compose up
 Finally, **if you're running into weird problems and nothing seems to be working**, run:
 
 ```bash
-cd bitnetwork
+cd mantle
 yarn clean
 yarn build
 cd ops

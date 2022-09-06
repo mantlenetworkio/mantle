@@ -25,16 +25,16 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts"
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/keystore"
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/scwallet"
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/usbwallet"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
-	"github.com/bitdao-io/bitnetwork/l2geth/internal/ethapi"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
-	"github.com/bitdao-io/bitnetwork/l2geth/signer/storage"
+	"github.com/bitdao-io/mantle/l2geth/accounts"
+	"github.com/bitdao-io/mantle/l2geth/accounts/keystore"
+	"github.com/bitdao-io/mantle/l2geth/accounts/scwallet"
+	"github.com/bitdao-io/mantle/l2geth/accounts/usbwallet"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
+	"github.com/bitdao-io/mantle/l2geth/internal/ethapi"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/rlp"
+	"github.com/bitdao-io/mantle/l2geth/signer/storage"
 )
 
 const (

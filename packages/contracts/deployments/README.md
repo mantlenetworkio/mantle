@@ -1,4 +1,4 @@
-# Bitnetwork Deployments
-- [Bitnetwork (mainnet)](./mainnet#readme)
-- [Bitnetwork Kovan (public testnet)](./kovan#readme)
-- [Bitnetwork Goerli (internal devnet)](./goerli#readme)
+# Mantle Deployments
+- [Mantle (mainnet)](./mainnet#readme)
+- [Mantle Kovan (public testnet)](./kovan#readme)
+- [Mantle Goerli (internal devnet)](./goerli#readme)

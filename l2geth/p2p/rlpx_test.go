@@ -31,10 +31,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto/ecies"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/simulations/pipes"
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/crypto/ecies"
+	"github.com/bitdao-io/mantle/l2geth/p2p/simulations/pipes"
+	"github.com/bitdao-io/mantle/l2geth/rlp"
 	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/crypto/sha3"
 )

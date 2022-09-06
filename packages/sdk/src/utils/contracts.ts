@@ -54,7 +54,7 @@ const NAME_REMAPPING = {
 export const CONTRACT_ADDRESSES: {
   [ChainID in L2ChainID]: OEContractsLike
 } = {
-  [L2ChainID.BITNETWORK]: {
+  [L2ChainID.MANTLE]: {
     l1: {
       AddressManager: '0xdE1FCfB0851916CA5101820A69b13a4E276bd81F' as const,
       L1CrossDomainMessenger:
@@ -68,7 +68,7 @@ export const CONTRACT_ADDRESSES: {
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.BITNETWORK_KOVAN]: {
+  [L2ChainID.MANTLE_KOVAN]: {
     l1: {
       AddressManager: '0x100Dd3b414Df5BbA2B542864fF94aF8024aFdf3a' as const,
       L1CrossDomainMessenger:
@@ -82,7 +82,7 @@ export const CONTRACT_ADDRESSES: {
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.BITNETWORK_GOERLI]: {
+  [L2ChainID.MANTLE_GOERLI]: {
     l1: {
       AddressManager: '0xfA5b622409E1782597952a4A78c1D34CF32fF5e2' as const,
       L1CrossDomainMessenger:
@@ -96,7 +96,7 @@ export const CONTRACT_ADDRESSES: {
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.BITNETWORK_GOERLIQA]: {
+  [L2ChainID.MANTLE_GOERLIQA]: {
     l1: {
       AddressManager: '0xcBE8BE5C1B8c592cCb85987672B316a2c4e86d96' as const,
       L1CrossDomainMessenger:
@@ -110,7 +110,7 @@ export const CONTRACT_ADDRESSES: {
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.BITNETWORK_HARDHAT_LOCAL]: {
+  [L2ChainID.MANTLE_HARDHAT_LOCAL]: {
     l1: {
       AddressManager: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as const,
       L1CrossDomainMessenger:
@@ -124,7 +124,7 @@ export const CONTRACT_ADDRESSES: {
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.BITNETWORK_HARDHAT_DEVNET]: {
+  [L2ChainID.MANTLE_HARDHAT_DEVNET]: {
     l1: {
       AddressManager: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as const,
       L1CrossDomainMessenger:
@@ -146,7 +146,7 @@ export const CONTRACT_ADDRESSES: {
 export const BRIDGE_ADAPTER_DATA: {
   [ChainID in L2ChainID]?: BridgeAdapterData
 } = {
-  [L2ChainID.BITNETWORK]: {
+  [L2ChainID.MANTLE]: {
     BitBTC: {
       Adapter: StandardBridgeAdapter,
       l1Bridge: '0xaBA2c5F108F7E820C049D5Af70B16ac266c8f128' as const,
@@ -158,7 +158,7 @@ export const BRIDGE_ADAPTER_DATA: {
       l2Bridge: '0x467194771dAe2967Aef3ECbEDD3Bf9a310C76C65' as const,
     },
   },
-  [L2ChainID.BITNETWORK_KOVAN]: {
+  [L2ChainID.MANTLE_KOVAN]: {
     wstETH: {
       Adapter: DAIBridgeAdapter,
       l1Bridge: '0xa88751C0a08623E11ff38c6B70F2BbEe7865C17c' as const,

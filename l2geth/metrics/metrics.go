@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/log"
 )
 
 // Enabled is checked by the constructor functions for all of the

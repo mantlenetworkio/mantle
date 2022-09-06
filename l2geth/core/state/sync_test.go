@@ -21,12 +21,12 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/rawdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethdb/memorydb"
-	"github.com/bitdao-io/bitnetwork/l2geth/trie"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/core/rawdb"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/ethdb"
+	"github.com/bitdao-io/mantle/l2geth/ethdb/memorydb"
+	"github.com/bitdao-io/mantle/l2geth/trie"
 )
 
 // testAccount is the data associated with an account used by the state tests.
