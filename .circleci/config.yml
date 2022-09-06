@@ -124,8 +124,11 @@ jobs:
               circleci step halt
             fi
       - run:
+          name: Install dependencies
+          command: yarn install
+      - run:
           name: Lint
-          command: yarn install & yarn lint:check
+          command: yarn lint:check
           working_directory: packages/<<parameters.package_name>>
       - run:
           name: Test

@@ -143,7 +143,7 @@ export class FaultDetector extends BaseServiceV2<Options, Metrics, State> {
         this.state.scc,
         this.state.highestCheckedBatchIndex,
         recentBlock - 100,
-        recentBlock,
+        recentBlock
       )
     } catch (err) {
       this.logger.error(`got error when connecting to node`, {

@@ -667,7 +667,8 @@ export class CrossChainMessenger implements ICrossChainMessenger {
   }
 
   public async getChallengePeriodSeconds(): Promise<number> {
-    const challengePeriod = await this.contracts.l1.StateCommitmentChain.FRAUD_PROOF_WINDOW()
+    const challengePeriod =
+      await this.contracts.l1.StateCommitmentChain.FRAUD_PROOF_WINDOW()
     return challengePeriod.toNumber()
   }
 
