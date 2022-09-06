@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
+	"github.com/bitdao-io/mantle/gas-oracle/tokenprice"
 	"github.com/ethereum/go-ethereum/log"
 )
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/bitdao-io/bitnetwork/gas-oracle/tokenprice"
+	"github.com/bitdao-io/mantle/gas-oracle/tokenprice"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -33,6 +33,9 @@ func (c *L1Client) HeaderByNumber(ctx context.Context, number *big.Int) (*types.
 	tip, err := c.Client.HeaderByNumber(ctx, number)
 	if err != nil {
 		return nil, err
+	}
+	if tip == nil {
+		return tip, nil
 	}
 	tip.BaseFee = new(big.Int).Mul(tip.BaseFee, big.NewInt(int64(ratio)))
 	return tip, nil
