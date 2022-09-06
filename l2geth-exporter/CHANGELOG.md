@@ -1,2 +1,2 @@
-# @eth-mantle/l2geth-exporter
+# @bitdaoio/l2geth-exporter
 

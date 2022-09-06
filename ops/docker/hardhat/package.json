@@ -1,5 +1,5 @@
 {
-  "name": "@eth-mantle/hardhat-node",
+  "name": "@bitdaoio/hardhat-node",
   "version": "0.2.0",
   "scripts": {
     "start": "hardhat node --network hardhat"

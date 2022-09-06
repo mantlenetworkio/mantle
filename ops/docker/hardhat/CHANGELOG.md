@@ -1,2 +1,2 @@
-# @eth-mantle/hardhat-node
+# @bitdaoio/hardhat-node
 
