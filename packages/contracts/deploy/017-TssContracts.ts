@@ -19,6 +19,7 @@ const deployFn: DeployFunction = async (hre) => {
     )
     await tssStakingSlashing.deployed()
     console.log("tssStakingSlashing address : ", tssStakingSlashing.address)
+    await tssGroupManager.setStakingSlash(tssStakingSlashing.address)
 
     const owner = hre.deployConfig.bvmAddressManagerOwner
     await hre.upgrades.admin.transferProxyAdminOwnership(owner);
