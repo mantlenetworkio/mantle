@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@bitdao/integration-tests",
+  "name": "@mantlenetworkio/integration-tests",
   "version": "0.0.1",
   "description": "[Mantle] Integration tests",
   "scripts": {
