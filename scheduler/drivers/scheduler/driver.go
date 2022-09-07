@@ -4,10 +4,10 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/bitdao-io/bitnetwork/batch-submitter/bindings/scc"
-	"github.com/bitdao-io/bitnetwork/bss-core/metrics"
-	common2 "github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/scheduler/service"
+	"github.com/bitdao-io/mantle/batch-submitter/bindings/scc"
+	"github.com/bitdao-io/mantle/bss-core/metrics"
+	common2 "github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/scheduler/service"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 )

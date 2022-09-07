@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	scheduler "github.com/bitdao-io/bitnetwork/scheduler"
+	scheduler "github.com/bitdao-io/mantle/scheduler"
 	"github.com/stretchr/testify/require"
 )
 

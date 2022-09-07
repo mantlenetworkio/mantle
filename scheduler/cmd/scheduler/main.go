@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/urfave/cli"
 
-	scheduler "github.com/bitdao-io/bitnetwork/scheduler"
-	"github.com/bitdao-io/bitnetwork/scheduler/flags"
+	scheduler "github.com/bitdao-io/mantle/scheduler"
+	"github.com/bitdao-io/mantle/scheduler/flags"
 )
 
 var (
