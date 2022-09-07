@@ -4,7 +4,6 @@ import { DeployFunction } from 'hardhat-deploy/dist/types'
 /* Imports: Internal */
 import {
   deployAndVerifyAndThen,
-  getContractFromArtifact,
 } from '../src/deploy-utils'
 import { names } from '../src/address-names'
 
