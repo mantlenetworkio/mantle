@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/bitdao-io/bitnetwork/gas-oracle/flags"
+	"github.com/bitdao-io/mantle/gas-oracle/flags"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"

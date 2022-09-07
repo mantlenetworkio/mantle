@@ -180,7 +180,7 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
           currentL2Block === 0
         ) {
           this.logger.info(
-            'All Layer 2 (BitNetwork) transactions are synchronized',
+            'All Layer 2 (Mantle) transactions are synchronized',
             {
               currentL2Block,
               targetL2Block,
@@ -191,7 +191,7 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
         }
 
         this.logger.info(
-          'Synchronizing unconfirmed transactions from Layer 2 (BitNetwork)',
+          'Synchronizing unconfirmed transactions from Layer 2 (Mantle)',
           {
             fromBlock: highestSyncedL2BlockNumber,
             toBlock: targetL2Block,

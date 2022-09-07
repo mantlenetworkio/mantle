@@ -7,7 +7,7 @@ import { Contract, BigNumber } from 'ethers'
 /* Imports: Internal */
 import { expect } from './shared/setup'
 import { envConfig, DEFAULT_TEST_GAS_L1 } from './shared/utils'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 
 /**
  * These tests cover the BVM execution contexts. In the BVM execution
@@ -15,9 +15,9 @@ import { BitnetworkEnv } from './shared/env'
  * must be equal to the blocknumber/timestamp of the L1 transaction.
  */
 describe('BVM Context: Layer 2 EVM Context', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
   before(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
   })
 
   let Multicall: Contract

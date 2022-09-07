@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/rpc"
+	"github.com/bitdao-io/mantle/l2geth/rpc"
 )
 
 // In this example, our client wishes to track the latest 'block number'

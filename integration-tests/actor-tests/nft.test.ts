@@ -2,7 +2,7 @@ import { utils, Wallet, Contract } from 'ethers'
 import { expect } from 'chai'
 
 import { actor, run, setupActor, setupRun } from './lib/convenience'
-import { BitnetworkEnv } from '../test/shared/env'
+import { MantleEnv } from '../test/shared/env'
 import ERC721 from '../artifacts/contracts/NFT.sol/NFT.json'
 
 interface Context {
@@ -11,12 +11,12 @@ interface Context {
 }
 
 actor('NFT claimer', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
 
   let contract: Contract
 
   setupActor(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
     contract = new Contract(process.env.ERC_721_ADDRESS, ERC721.abi)
   })
 

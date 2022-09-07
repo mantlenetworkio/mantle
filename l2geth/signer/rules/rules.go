@@ -22,11 +22,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/internal/ethapi"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/signer/core"
-	"github.com/bitdao-io/bitnetwork/l2geth/signer/rules/deps"
-	"github.com/bitdao-io/bitnetwork/l2geth/signer/storage"
+	"github.com/bitdao-io/mantle/l2geth/internal/ethapi"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/signer/core"
+	"github.com/bitdao-io/mantle/l2geth/signer/rules/deps"
+	"github.com/bitdao-io/mantle/l2geth/signer/storage"
 	"github.com/robertkrimen/otto"
 )
 

@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
+	"github.com/bitdao-io/mantle/l2geth/rlp"
 )
 
 func newTestFullNode(v []byte) []interface{} {

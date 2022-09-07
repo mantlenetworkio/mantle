@@ -22,7 +22,7 @@ package geth
 import (
 	"errors"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/discv5"
+	"github.com/bitdao-io/mantle/l2geth/p2p/discv5"
 )
 
 // Enode represents a host on the network.

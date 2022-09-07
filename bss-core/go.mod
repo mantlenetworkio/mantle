@@ -1,4 +1,4 @@
-module github.com/bitdao-io/bitnetwork/bss-core
+module github.com/bitdao-io/mantle/bss-core
 
 go 1.18
 

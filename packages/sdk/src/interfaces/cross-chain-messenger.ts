@@ -291,7 +291,6 @@ export interface ICrossChainMessenger {
    */
   getChallengePeriodSeconds(): Promise<number>
 
-
   /**
    * Returns the state root that corresponds to a given message. This is the state root for the
    * block in which the transaction was included, as published to the StateCommitmentChain. If the

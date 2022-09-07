@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/log"
 )
 
 // deployEthstats queries the user for various input on deploying an ethstats

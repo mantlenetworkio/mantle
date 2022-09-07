@@ -12,7 +12,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 /* Imports: Internal */
-import { BitnetworkEnv } from './env'
+import { MantleEnv } from './env'
 
 export const isLiveNetwork = () => {
   return process.env.IS_LIVE_NETWORK === 'true'
@@ -199,7 +199,7 @@ export const fundUser = async (
 }
 
 export const conditionalTest = (
-  condition: (env?: BitnetworkEnv) => Promise<boolean>,
+  condition: (env?: MantleEnv) => Promise<boolean>,
   name,
   fn,
   message?: string,

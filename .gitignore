@@ -11,6 +11,7 @@ yarn-error.log
 !.yarn/releases
 !.yarn/plugins
 .pnp.*
+package-lock.json
 
 dist
 artifacts
@@ -49,4 +50,6 @@ coverage.out
 
 .idea/
 
-bitnetwork.iml
+mantle.iml
+
+ops/data/**

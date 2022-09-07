@@ -23,4 +23,4 @@ curl \
     --output /dev/null \
     $L2_URL
 
-npx hardhat test --network bitnetwork --no-compile "$@"
+npx hardhat test --network mantle --no-compile "$@"

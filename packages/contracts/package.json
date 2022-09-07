@@ -1,7 +1,7 @@
 {
   "name": "@bitdaoio/contracts",
   "version": "1.0.2",
-  "description": "[Bitnetwork] L1 and L2 smart contracts for Bitnetwork",
+  "description": "[Mantle] L1 and L2 smart contracts for Mantle",
   "main": "dist/index",
   "types": "dist/index",
   "files": [
@@ -44,17 +44,17 @@
     "validateDocs": "hardhat validateOutput"
   },
   "keywords": [
-    "bitnetwork",
+    "mantle",
     "ethereum",
     "contracts",
     "solidity"
   ],
-  "homepage": "https://github.com/bitnetworkio/bitnetwork/tree/main/packages/contracts#readme",
+  "homepage": "https://github.com/mantleio/mantle/tree/main/packages/contracts#readme",
   "license": "MIT",
-  "author": "Bitnetwork PBC",
+  "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitnetworkio/bitnetwork.git"
+    "url": "https://github.com/mantleio/mantle.git"
   },
   "dependencies": {
     "@bitdaoio/core-utils": "1.0.3",

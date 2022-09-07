@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 import { sleep } from '@bitdaoio/core-utils'
 
 /* Imports: Internal */
-import { BitnetworkEnv } from './env'
+import { MantleEnv } from './env'
 import { gasPriceForL1, gasPriceForL2 } from './utils'
 
 interface TransactionParams {
@@ -16,7 +16,7 @@ interface TransactionParams {
 const MESSAGE_GAS = 8_000_000
 
 export const fundRandomWallet = async (
-  env: BitnetworkEnv,
+  env: MantleEnv,
   wallet: ethers.Wallet,
   value: ethers.BigNumber
 ): Promise<ethers.Wallet> => {
@@ -31,7 +31,7 @@ export const fundRandomWallet = async (
 }
 
 export const executeL1ToL2Transaction = async (
-  env: BitnetworkEnv,
+  env: MantleEnv,
   wallet: ethers.Wallet,
   tx: TransactionParams
 ) => {
@@ -55,7 +55,7 @@ export const executeL1ToL2Transaction = async (
 }
 
 export const executeL2ToL1Transaction = async (
-  env: BitnetworkEnv,
+  env: MantleEnv,
   wallet: ethers.Wallet,
   tx: TransactionParams
 ) => {
@@ -81,7 +81,7 @@ export const executeL2ToL1Transaction = async (
 }
 
 export const executeL2Transaction = async (
-  env: BitnetworkEnv,
+  env: MantleEnv,
   wallet: ethers.Wallet,
   tx: TransactionParams
 ) => {
@@ -97,7 +97,7 @@ export const executeL2Transaction = async (
 }
 
 export const executeRepeatedL1ToL2Transactions = async (
-  env: BitnetworkEnv,
+  env: MantleEnv,
   wallets: ethers.Wallet[],
   tx: TransactionParams
 ) => {
@@ -107,7 +107,7 @@ export const executeRepeatedL1ToL2Transactions = async (
 }
 
 export const executeRepeatedL2ToL1Transactions = async (
-  env: BitnetworkEnv,
+  env: MantleEnv,
   wallets: ethers.Wallet[],
   tx: TransactionParams
 ) => {
@@ -117,7 +117,7 @@ export const executeRepeatedL2ToL1Transactions = async (
 }
 
 export const executeRepeatedL2Transactions = async (
-  env: BitnetworkEnv,
+  env: MantleEnv,
   wallets: ethers.Wallet[],
   tx: TransactionParams
 ) => {
@@ -127,7 +127,7 @@ export const executeRepeatedL2Transactions = async (
 }
 
 export const executeL1ToL2TransactionsParallel = async (
-  env: BitnetworkEnv,
+  env: MantleEnv,
   wallets: ethers.Wallet[],
   tx: TransactionParams
 ) => {
@@ -135,7 +135,7 @@ export const executeL1ToL2TransactionsParallel = async (
 }
 
 export const executeL2ToL1TransactionsParallel = async (
-  env: BitnetworkEnv,
+  env: MantleEnv,
   wallets: ethers.Wallet[],
   tx: TransactionParams
 ) => {
@@ -143,7 +143,7 @@ export const executeL2ToL1TransactionsParallel = async (
 }
 
 export const executeL2TransactionsParallel = async (
-  env: BitnetworkEnv,
+  env: MantleEnv,
   wallets: ethers.Wallet[],
   tx: TransactionParams
 ) => {

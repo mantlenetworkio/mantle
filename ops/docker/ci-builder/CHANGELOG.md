@@ -1,2 +1,1 @@
-# @eth-bitnetwork/ci-builder
-
+# @bitdaoio/ci-builder

@@ -28,7 +28,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common"
 )
 
 // In this test, nodes try to randomly resolve each other.

@@ -8,10 +8,11 @@ use (
 	./l2geth-exporter
 	./proxyd
 	./state-surgery
+	integration-tests/go-tests
 	./tss
 )
 
-replace github.com/ethereum/go-ethereum v1.10.21 => github.com/ethereum-bitnetwork/reference-optimistic-geth v0.0.0-20220803173305-1c9d4cc76a6e
+replace github.com/ethereum/go-ethereum v1.10.21 => github.com/ethereum-mantle/reference-optimistic-geth v0.0.0-20220803173305-1c9d4cc76a6e
 
 // For local debugging:
 //replace github.com/ethereum/go-ethereum v1.10.21 => ../go-ethereum

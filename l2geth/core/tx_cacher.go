@@ -19,7 +19,7 @@ package core
 import (
 	"runtime"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
 )
 
 // senderCacher is a concurrent transaction sender recoverer and cacher.

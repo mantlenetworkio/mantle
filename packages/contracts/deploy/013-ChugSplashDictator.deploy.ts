@@ -37,6 +37,8 @@ const deployFn: DeployFunction = async (hre) => {
       ethers.utils.hexZeroPad(Proxy__BVM_L1CrossDomainMessenger.address, 32),
       ethers.utils.hexZeroPad('0x01', 32),
       ethers.utils.hexZeroPad(predeploys.L2StandardBridge, 32),
+      ethers.utils.hexZeroPad('0x02', 32),
+      ethers.utils.hexZeroPad(hre.deployConfig.l1BitAddress, 32), // TODO
     ],
   })
 }

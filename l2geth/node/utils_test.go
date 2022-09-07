@@ -22,8 +22,8 @@ package node
 import (
 	"reflect"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p"
-	"github.com/bitdao-io/bitnetwork/l2geth/rpc"
+	"github.com/bitdao-io/mantle/l2geth/p2p"
+	"github.com/bitdao-io/mantle/l2geth/rpc"
 )
 
 // NoopService is a trivial implementation of the Service interface.

@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	// OVMETHAddress is the address of the OVM ETH predeploy.
-	OVMETHAddress = common.HexToAddress("0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000")
+	// BVMETHAddress is the address of the BVM ETH predeploy.
+	BVMETHAddress = common.HexToAddress("0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000")
 
 	// maxSlot is the maximum slot we'll consider to be a non-mapping variable.
 	maxSlot = new(big.Int).SetUint64(256)
@@ -51,9 +51,9 @@ func DumpAddresses(dataDir string, outFile string) error {
 //
 //   1. It uses address lists, allowance lists, Mint events, and address preimages in
 //      the input state database to create a comprehensive list of storage slots in the
-//      OVM ETH contract.
-//   2. It iterates over the slots in OVM ETH, and compares then against the list in (1).
-//      If the list doesn't match, or the total supply of OVM ETH doesn't match the sum of
+//      BVM ETH contract.
+//   2. It iterates over the slots in BVM ETH, and compares then against the list in (1).
+//      If the list doesn't match, or the total supply of BVM ETH doesn't match the sum of
 //      all balance storage slots, it panics.
 //   3. It performs the actual migration by copying the input state DB into a new state DB.
 //   4. It imports the provided genesis into the new state DB like Geth would during geth init.
@@ -72,7 +72,7 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 	db := MustOpenDBWithCacheOpts(dataDir, levelDBCacheSize, levelDBHandles)
 	// Set of addresses that we will be migrating.
 	addressesToMigrate := make(map[common.Address]bool)
-	// Set of storage slots that we expect to see in the OVM ETH contract.
+	// Set of storage slots that we expect to see in the BVM ETH contract.
 	storageSlotsToMigrate := make(map[common.Hash]int)
 	// Chain params to use for integrity checking.
 	params := ParamsByChainID[chainID]
@@ -89,7 +89,7 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 		logProgress := ProgressLogger(10000, "read address")
 		err = IterateAddrList(f, func(address common.Address) error {
 			addressesToMigrate[address] = true
-			storageSlotsToMigrate[CalcOVMETHStorageKey(address)] = 1
+			storageSlotsToMigrate[CalcBVMETHStorageKey(address)] = 1
 			logProgress()
 			return nil
 		})
@@ -124,7 +124,7 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 	logProgress := ProgressLogger(10000, "read address")
 	err := IterateDBAddresses(db, func(address common.Address) error {
 		addressesToMigrate[address] = true
-		storageSlotsToMigrate[CalcOVMETHStorageKey(address)] = 1
+		storageSlotsToMigrate[CalcBVMETHStorageKey(address)] = 1
 		logProgress()
 		return nil
 	})
@@ -143,7 +143,7 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 	logProgress = ProgressLogger(100, "read mint event")
 	err = IterateMintEvents(db, headBlock.NumberU64(), func(address common.Address) error {
 		addressesToMigrate[address] = true
-		storageSlotsToMigrate[CalcOVMETHStorageKey(address)] = 1
+		storageSlotsToMigrate[CalcBVMETHStorageKey(address)] = 1
 		logProgress()
 		return nil
 	})
@@ -152,20 +152,20 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 	}
 
 	// Make sure all addresses are accounted for by iterating over
-	// the OVM ETH contract's state, and panicking if we miss
+	// the BVM ETH contract's state, and panicking if we miss
 	// any storage keys. We also keep track of the total amount of
-	// OVM ETH found, and diff that against the total supply of
-	// OVM ETH specified in the contract.
+	// BVM ETH found, and diff that against the total supply of
+	// BVM ETH specified in the contract.
 	backingStateDB := state.NewDatabase(db)
 	stateDB, err := state.New(root, backingStateDB, nil)
 	if err != nil {
 		return wrapErr(err, "error opening state DB")
 	}
-	storageTrie := stateDB.StorageTrie(OVMETHAddress)
+	storageTrie := stateDB.StorageTrie(BVMETHAddress)
 	storageIt := trie.NewIterator(storageTrie.NodeIterator(nil))
 	logProgress = ProgressLogger(10000, "iterating storage keys")
 	totalFound := new(big.Int)
-	totalSupply := getOVMETHTotalSupply(stateDB)
+	totalSupply := getBVMETHTotalSupply(stateDB)
 	for storageIt.Next() {
 		_, content, _, err := rlp.Split(storageIt.Value)
 		if err != nil {
@@ -264,17 +264,17 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 			continue
 		}
 
-		// Skip OVM ETH, though it will probably be put in the genesis. This is here as a fallback
+		// Skip BVM ETH, though it will probably be put in the genesis. This is here as a fallback
 		// in case we don't.
-		if addr == OVMETHAddress {
+		if addr == BVMETHAddress {
 			logAccountProgress()
 			continue
 		}
 
 		addrHash := crypto.Keccak256Hash(addr[:])
 		code := getCode(addrHash, data, backingStateDB)
-		// Get the OVM ETH balance based on the address's storage key.
-		ovmBalance := getOVMETHBalance(stateDB, addr)
+		// Get the BVM ETH balance based on the address's storage key.
+		bvmBalance := getBVMETHBalance(stateDB, addr)
 
 		// No accounts should have a balance in state. If they do, bail.
 		if data.Balance.Sign() > 0 {
@@ -282,12 +282,12 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 		}
 
 		// Actually perform the migration by setting the appropriate values in state.
-		outStateDB.SetBalance(addr, ovmBalance)
+		outStateDB.SetBalance(addr, bvmBalance)
 		outStateDB.SetCode(addr, code)
 		outStateDB.SetNonce(addr, data.Nonce)
 
-		// Bump the total OVM balance.
-		totalMigrated = totalMigrated.Add(totalMigrated, ovmBalance)
+		// Bump the total BVM balance.
+		totalMigrated = totalMigrated.Add(totalMigrated, bvmBalance)
 
 		// Grab the storage trie.
 		storageTrie, err := backingStateDB.OpenStorageTrie(addrHash, data.Root)
@@ -316,7 +316,7 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 	}
 
 	// Take care of nonce zero accounts with balances. These are accounts
-	// that received OVM ETH as part of the regenesis, but never actually
+	// that received BVM ETH as part of the regenesis, but never actually
 	// transacted on-chain.
 	logNonceZeroProgress := ProgressLogger(1000, "imported zero nonce accounts")
 	log.Info("importing accounts with zero-nonce balances")
@@ -325,9 +325,9 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 			continue
 		}
 
-		ovmBalance := getOVMETHBalance(stateDB, addr)
-		totalMigrated = totalMigrated.Add(totalMigrated, ovmBalance)
-		outStateDB.AddBalance(addr, ovmBalance)
+		bvmBalance := getBVMETHBalance(stateDB, addr)
+		totalMigrated = totalMigrated.Add(totalMigrated, bvmBalance)
+		outStateDB.AddBalance(addr, bvmBalance)
 		logNonceZeroProgress()
 	}
 
@@ -335,7 +335,7 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 	// our original state.
 	if totalMigrated.Cmp(totalFound) != 0 {
 		log.Crit(
-			"total migrated does not equal total OVM eth found",
+			"total migrated does not equal total BVM eth found",
 			"migrated", totalMigrated,
 			"found", totalFound,
 		)
@@ -385,12 +385,12 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 	return nil
 }
 
-// getOVMETHTotalSupply returns OVM ETH's total supply by reading
+// getBVMETHTotalSupply returns BVM ETH's total supply by reading
 // the appropriate storage slot.
-func getOVMETHTotalSupply(inStateDB *state.StateDB) *big.Int {
+func getBVMETHTotalSupply(inStateDB *state.StateDB) *big.Int {
 	position := common.Big2
 	key := common.BytesToHash(common.LeftPadBytes(position.Bytes(), 32))
-	return inStateDB.GetState(OVMETHAddress, key).Big()
+	return inStateDB.GetState(BVMETHAddress, key).Big()
 }
 
 // getCode returns a contract's code. Taken verbatim from Geth.
@@ -409,8 +409,8 @@ func getCode(addrHash common.Hash, data types.StateAccount, db state.Database) [
 	return code
 }
 
-// getOVMETHBalance gets a user's OVM ETH balance from state by querying the
+// getBVMETHBalance gets a user's BVM ETH balance from state by querying the
 // appropriate storage slot directly.
-func getOVMETHBalance(inStateDB *state.StateDB, addr common.Address) *big.Int {
-	return inStateDB.GetState(OVMETHAddress, CalcOVMETHStorageKey(addr)).Big()
+func getBVMETHBalance(inStateDB *state.StateDB, addr common.Address) *big.Int {
+	return inStateDB.GetState(BVMETHAddress, CalcBVMETHStorageKey(addr)).Big()
 }

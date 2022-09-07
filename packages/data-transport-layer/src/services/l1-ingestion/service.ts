@@ -14,8 +14,8 @@ import { handleEventsStateBatchAppended } from './handlers/state-batch-appended'
 import { MissingElementError } from './handlers/errors'
 import { TransportDB } from '../../db/transport-db'
 import {
-  BitNetworkContracts,
-  loadBitNetworkContracts,
+  MantleContracts,
+  loadMantleContracts,
   loadContract,
   validators,
 } from '../../utils'
@@ -97,7 +97,7 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
 
   private state: {
     db: TransportDB
-    contracts: BitNetworkContracts
+    contracts: MantleContracts
     l1RpcProvider: BaseProvider
     startingL1BlockNumber: number
   } = {} as any
@@ -154,7 +154,7 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
 
     // Would be nice if this weren't necessary, maybe one day.
     // TODO: Probably just assert inside here that all of the contracts have code in them.
-    this.state.contracts = await loadBitNetworkContracts(
+    this.state.contracts = await loadMantleContracts(
       this.state.l1RpcProvider,
       this.options.addressManager
     )
