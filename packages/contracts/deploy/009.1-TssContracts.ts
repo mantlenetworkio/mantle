@@ -4,11 +4,14 @@ import { names } from '../src/address-names'
 import { getContractDefinition } from '../src/contract-defs'
 import { deployAndVerifyAndThen, getContractFromArtifact } from '../src/deploy-utils'
 import { hexStringEquals, awaitCondition } from '@bitdaoio/core-utils'
+import { ethers } from 'ethers'
 
 
 const deployFn: DeployFunction = async (hre) => {
     const { deployer } = await hre.getNamedAccounts()
+
     const owner = hre.deployConfig.bvmAddressManagerOwner
+    const l1BitAddress = hre.deployConfig.l1BitAddress
 
     // deploy impl
     await deployAndVerifyAndThen({
@@ -54,11 +57,13 @@ const deployFn: DeployFunction = async (hre) => {
         iface: 'TssGroupManager',
         args: [Impl_TSS_GroupManager.address, owner, callData],
         postDeployAction: async (contract) => {
-            await contract.transferOwnership(owner)
+            if (!hexStringEquals(deployer, owner)) {
+                await contract.transferOwnership(owner)
+            }
             console.log(`Checking that contract owner was correctly set...`)
             await awaitCondition(
                 async () => {
-                    return hexStringEquals(await contract.owner(), owner)
+                    return hexStringEquals(await contract.connect(Impl_TSS_GroupManager.signer.provider).owner({ from: ethers.constants.AddressZero }), owner)
                 },
                 5000,
                 100
@@ -67,7 +72,16 @@ const deployFn: DeployFunction = async (hre) => {
     })
     console.log("deploy tss group manager proxy success")
 
-    args = [Impl_TSS_GroupManager.address, Impl_TSS_GroupManager.address]
+    const Proxy__TSS_GroupManager = await getContractFromArtifact(
+        hre,
+        names.managed.contracts.Proxy__TSS_GroupManager,
+        {
+            iface: 'TssGroupManager',
+            signerOrProvider: deployer,
+        }
+    )
+
+    args = [l1BitAddress, Proxy__TSS_GroupManager.address]
     callData = Impl__TssStakingSlashing.interface.encodeFunctionData("initialize", args)
     await deployAndVerifyAndThen({
         hre,
@@ -77,23 +91,24 @@ const deployFn: DeployFunction = async (hre) => {
         args: [Impl__TssStakingSlashing.address, owner, callData],
         postDeployAction: async (contract) => {
             console.log(`Checking that contract was correctly initialized...`)
-            console.log("bit token : ", await contract.BitToken())
             await awaitCondition(
                 async () => {
                     return hexStringEquals(
-                        await contract.BitToken(),
-                        Impl_TSS_GroupManager.address
+                        await contract.connect(Impl_TSS_GroupManager.signer.provider).BitToken({ from: ethers.constants.AddressZero }),
+                        l1BitAddress
                     )
                 },
                 5000,
                 100
             )
-            await contract.transferOwnership(owner)
+            if (!hexStringEquals(deployer, owner)) {
+                await contract.transferOwnership(owner)
+            }
 
             console.log(`Checking that contract owner was correctly set...`)
             await awaitCondition(
                 async () => {
-                    return hexStringEquals(await contract.owner(), owner)
+                    return hexStringEquals(await contract.connect(Impl_TSS_GroupManager.signer.provider).owner({ from: ethers.constants.AddressZero }), owner)
                 },
                 5000,
                 100

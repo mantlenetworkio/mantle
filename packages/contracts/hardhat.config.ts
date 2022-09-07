@@ -32,7 +32,6 @@ const config: HardhatUserConfig = {
       saveDeployments: false,
       tags: ['local'],
     },
-
     local: {
       chainId: 31337,
       url: 'http://127.0.0.1:9545',
