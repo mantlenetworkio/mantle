@@ -4,10 +4,10 @@ import (
 	"context"
 	"math/big"
 
-	ethereum "github.com/bitdao-io/bitnetwork/l2geth"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	ethcrypto "github.com/bitdao-io/bitnetwork/l2geth/crypto"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethclient"
+	ethereum "github.com/bitdao-io/mantle/l2geth"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	ethcrypto "github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/ethclient"
 )
 
 var stateBatchAppendedTopicHash = ethcrypto.Keccak256Hash([]byte("PacketSent(bytes)"))

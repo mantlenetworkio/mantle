@@ -3,9 +3,9 @@ package slash
 import (
 	"errors"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
-	tss "github.com/bitdao-io/bitnetwork/tss/common"
-	"github.com/bitdao-io/bitnetwork/tss/index"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
+	tss "github.com/bitdao-io/mantle/tss/common"
+	"github.com/bitdao-io/mantle/tss/index"
 	"github.com/ethereum/go-ethereum/common"
 )
 

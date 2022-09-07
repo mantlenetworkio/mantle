@@ -3,7 +3,7 @@ package manager
 import (
 	"errors"
 	"fmt"
-	"github.com/bitdao-io/bitnetwork/tss/bindings/tsh"
+	"github.com/bitdao-io/mantle/tss/bindings/tsh"
 	"github.com/ethereum/go-ethereum/common"
 	"math"
 	"math/big"
@@ -11,12 +11,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	tss "github.com/bitdao-io/bitnetwork/tss/common"
-	"github.com/bitdao-io/bitnetwork/tss/index"
-	"github.com/bitdao-io/bitnetwork/tss/manager/types"
-	"github.com/bitdao-io/bitnetwork/tss/slash"
-	"github.com/bitdao-io/bitnetwork/tss/ws/server"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	tss "github.com/bitdao-io/mantle/tss/common"
+	"github.com/bitdao-io/mantle/tss/index"
+	"github.com/bitdao-io/mantle/tss/manager/types"
+	"github.com/bitdao-io/mantle/tss/slash"
+	"github.com/bitdao-io/mantle/tss/ws/server"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/influxdata/influxdb/pkg/slices"
 )

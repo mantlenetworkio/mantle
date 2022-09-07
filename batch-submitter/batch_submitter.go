@@ -2,7 +2,7 @@ package batchsubmitter
 
 import (
 	"context"
-	tss "github.com/bitdao-io/bitnetwork/batch-submitter/tss-client"
+	tss "github.com/bitdao-io/mantle/batch-submitter/tss-client"
 	"os"
 	"time"
 

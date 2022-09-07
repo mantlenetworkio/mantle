@@ -1,7 +1,7 @@
 package abnormal
 
 import (
-	"github.com/bitdao-io/bitnetwork/tss/node/tsslib/messages"
+	"github.com/bitdao-io/mantle/tss/node/tsslib/messages"
 	"sync"
 )
 

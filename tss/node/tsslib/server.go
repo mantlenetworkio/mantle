@@ -1,8 +1,8 @@
 package tsslib
 
 import (
-	keygen2 "github.com/bitdao-io/bitnetwork/tss/node/tsslib/keygen"
-	keysign2 "github.com/bitdao-io/bitnetwork/tss/node/tsslib/keysign"
+	keygen2 "github.com/bitdao-io/mantle/tss/node/tsslib/keygen"
+	keysign2 "github.com/bitdao-io/mantle/tss/node/tsslib/keysign"
 )
 
 type Server interface {

@@ -3,7 +3,7 @@ package p2p
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"github.com/bitdao-io/bitnetwork/tss/node/tsslib/messages"
+	"github.com/bitdao-io/mantle/tss/node/tsslib/messages"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/peer"
 	maddr "github.com/multiformats/go-multiaddr"

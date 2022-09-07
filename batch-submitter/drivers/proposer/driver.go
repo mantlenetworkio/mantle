@@ -7,7 +7,6 @@ import (
 	"math/big"
 	"strings"
 
-	tss_types "github.com/bitdao-io/bitnetwork/tss/common"
 	"github.com/bitdao-io/mantle/batch-submitter/bindings/ctc"
 	"github.com/bitdao-io/mantle/batch-submitter/bindings/scc"
 	tssClient "github.com/bitdao-io/mantle/batch-submitter/tss-client"
@@ -16,6 +15,7 @@ import (
 	"github.com/bitdao-io/mantle/bss-core/txmgr"
 	l2ethclient "github.com/bitdao-io/mantle/l2geth/ethclient"
 	"github.com/bitdao-io/mantle/l2geth/log"
+	tss_types "github.com/bitdao-io/mantle/tss/common"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"

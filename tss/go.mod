@@ -1,4 +1,4 @@
-module github.com/bitdao-io/bitnetwork/tss
+module github.com/bitdao-io/mantle/tss
 
 go 1.18
 
@@ -9,8 +9,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.1.1
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.12.0
 	github.com/binance-chain/tss-lib v1.3.3
-	github.com/bitdao-io/bitnetwork/bss-core v0.0.0
-	github.com/bitdao-io/bitnetwork/l2geth v0.0.0
+	github.com/bitdao-io/mantle/bss-core v0.0.0
+	github.com/bitdao-io/mantle/l2geth v0.0.0
 	github.com/btcsuite/btcd v0.22.1
 	github.com/deckarep/golang-set v1.8.0
 	github.com/ethereum/go-ethereum v1.10.17
@@ -136,6 +136,7 @@ require (
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/marten-seemann/qtls-go1-16 v0.1.5 // indirect
 	github.com/marten-seemann/qtls-go1-17 v0.1.2 // indirect
+	github.com/marten-seemann/qtls-go1-18 v0.1.1 // indirect
 	github.com/marten-seemann/tcp v0.0.0-20210406111302-dfbc87cc63fd // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
@@ -210,7 +211,7 @@ require (
 )
 
 replace (
-	github.com/bitdao-io/bitnetwork/bss-core v0.0.0 => ../bss-core
-	github.com/bitdao-io/bitnetwork/l2geth v0.0.0 => ../l2geth
+	github.com/bitdao-io/mantle/bss-core v0.0.0 => ../bss-core
+	github.com/bitdao-io/mantle/l2geth v0.0.0 => ../l2geth
 	github.com/lucas-clemente/quic-go v0.24.0 => github.com/lucas-clemente/quic-go v0.26.0
 )

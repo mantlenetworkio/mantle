@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
-	"github.com/bitdao-io/bitnetwork/tss/common"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
+	"github.com/bitdao-io/mantle/tss/common"
 	"github.com/rs/zerolog"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
