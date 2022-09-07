@@ -22,7 +22,7 @@ else
 	echoerr "GitHub URL:"
 	echoerr "$GITHUB_API_URL"
 	# Grab the PR's base ref using the GitHub API.
-	PR=$(curl -H "Authorization: token $GITHUB_ACCESS_TOKEN" -H "Accept: application/vnd.github.v3+json" --retry 3 --retry-delay 1 -s "$GITHUB_API_URL")
+	PR=$(curl -H "Authorization: token ${GITHUB_ACCESS_TOKEN:-}" -H "Accept: application/vnd.github.v3+json" --retry 3 --retry-delay 1 -s "$GITHUB_API_URL")
 	echoerr "PR data:"
 	echoerr "$PR"
 	REF=$(echo "$PR" | jq -r ".base.ref")
