@@ -22,13 +22,13 @@ contract TssGroupManager is
     uint256 gRoundId;
     uint256 confirmNumber;
     address[] addresses;
-    address stakingSlash;
+    address public stakingSlash;
 
     bytes[] activeTssMembers; // active tss member group
     bytes[] inActiveTssMembers; // inactive tss member group
     mapping(bytes => TssMember) public tssActiveMemberInfo; // Tss member publicKey => tssMember
     mapping(bytes => bytes) private memberGroupKey; // user publicKey => Cpk
-    mapping(bytes => uint256) groupKeyCounter; // Cpk counter
+    mapping(bytes => uint256) private groupKeyCounter; // Cpk counter
     mapping(bytes => bool) private isSubmitGroupKey; // submit group key or not
     mapping(bytes => bool) public isInActiveMember; // tss member exist or not
 

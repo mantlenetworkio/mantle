@@ -12,7 +12,6 @@ const deployFn: DeployFunction = async (hre) => {
 
     const owner = hre.deployConfig.bvmAddressManagerOwner
     const l1BitAddress = hre.deployConfig.l1BitAddress
-
     // deploy impl
     await deployAndVerifyAndThen({
         hre,
@@ -56,19 +55,6 @@ const deployFn: DeployFunction = async (hre) => {
         contract: 'TransparentUpgradeableProxy',
         iface: 'TssGroupManager',
         args: [Impl_TSS_GroupManager.address, owner, callData],
-        postDeployAction: async (contract) => {
-            if (!hexStringEquals(deployer, owner)) {
-                await contract.transferOwnership(owner)
-            }
-            console.log(`Checking that contract owner was correctly set...`)
-            await awaitCondition(
-                async () => {
-                    return hexStringEquals(await contract.connect(Impl_TSS_GroupManager.signer.provider).owner({ from: ethers.constants.AddressZero }), owner)
-                },
-                5000,
-                100
-            )
-        }
     })
     console.log("deploy tss group manager proxy success")
 
@@ -101,18 +87,49 @@ const deployFn: DeployFunction = async (hre) => {
                 5000,
                 100
             )
-            if (!hexStringEquals(deployer, owner)) {
-                await contract.transferOwnership(owner)
-            }
-
-            console.log(`Checking that contract owner was correctly set...`)
             await awaitCondition(
                 async () => {
-                    return hexStringEquals(await contract.connect(Impl_TSS_GroupManager.signer.provider).owner({ from: ethers.constants.AddressZero }), owner)
+                    return hexStringEquals(
+                        await contract.connect(Impl_TSS_GroupManager.signer.provider).tssGroupContract({ from: ethers.constants.AddressZero }),
+                        Proxy__TSS_GroupManager.address
+                    )
                 },
                 5000,
                 100
             )
+
+            await Proxy__TSS_GroupManager.setStakingSlash(contract.address)
+            await awaitCondition(
+                async () => {
+                    return hexStringEquals(
+                        await Proxy__TSS_GroupManager.connect(Impl_TSS_GroupManager.signer.provider).stakingSlash({ from: ethers.constants.AddressZero }),
+                        contract.address
+                    )
+                },
+                5000,
+                100
+            )
+
+            // await contract.transferOwnership(owner)
+
+            // console.log(`Checking tss staking slashing contract owner was correctly set...`)
+            // await awaitCondition(
+            //     async () => {
+            //         return hexStringEquals(await contract.connect(Impl_TSS_GroupManager.signer.provider).owner({ from: ethers.constants.AddressZero }), owner)
+            //     },
+            //     5000,
+            //     100
+            // )
+
+            // await Proxy__TSS_GroupManager.transferOwnership(owner)
+            // console.log(`Checking tss group contract manager owner was correctly set...`)
+            // await awaitCondition(
+            //     async () => {
+            //         return hexStringEquals(await contract.connect(Impl_TSS_GroupManager.signer.provider).owner({ from: ethers.constants.AddressZero }), owner)
+            //     },
+            //     5000,
+            //     100
+            // )
         }
     })
     console.log("deploy tss staking slashing proxy success")

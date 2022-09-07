@@ -415,6 +415,23 @@ function setTssGroupMember(uint256 _threshold, bytes[] _batchPublicKey) external
 | _threshold | uint256 | undefined
 | _batchPublicKey | bytes[] | undefined
 
+### stakingSlash
+
+```solidity
+function stakingSlash() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
+
 ### transferOwnership
 
 ```solidity
