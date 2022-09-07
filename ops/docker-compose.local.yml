@@ -29,6 +29,7 @@ services:
       BVM_FEE_WALLET_ADDRESS: ${BVM_FEE_WALLET_ADDRESS:-}
       BVM_ADDRESS_MANAGER_OWNER: ${BVM_ADDRESS_MANAGER_OWNER:-}
       BVM_GAS_PRICE_ORACLE_OWNER: ${BVM_GAS_PRICE_ORACLE_OWNER:-}
+      L1_BIT_ADDRESS: ${L1_BIT_ADDRESS:-0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5}
 
   dtl:
     <<: *base
@@ -59,7 +60,7 @@ services:
     <<: *base
     container_name: bitrelayer
     deploy:
-      replicas: 0
+      replicas: 1
 
   verifier:
     <<: *base
