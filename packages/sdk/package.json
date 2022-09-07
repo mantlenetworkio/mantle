@@ -47,7 +47,7 @@
     "typedoc": "^0.22.13"
   },
   "dependencies": {
-    "@bitdaoio/contracts": "1.0.2",
+    "@bitdaoio/contracts": "1.0.7-beta3",
     "@bitdaoio/core-utils": "1.0.3",
     "lodash": "^4.17.21",
     "merkletreejs": "^0.2.27",

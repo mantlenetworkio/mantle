@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@bitdaoio/common-ts": "1.0.0",
-    "@bitdaoio/contracts": "1.0.2",
+    "@bitdaoio/contracts": "1.0.7-beta3",
     "@bitdaoio/core-utils": "1.0.3",
     "@ethersproject/providers": "^5.6.8",
     "@ethersproject/transactions": "^5.6.2",
