@@ -329,7 +329,7 @@
   resolved "https://registry.yarnpkg.com/@bitdaoio/common-ts/-/common-ts-1.0.0.tgz#d0dce372d78ca5e6cf0113a9b507ccb1b2b9cbec"
   integrity sha512-o0nZflP9vBiNoxgwgX4KzZxYDNj65jScCxhGxJyqgL84c5QuPej5me+jW7wiW+IDP8A5O+93hsHUqMuJPx+6Og==
   dependencies:
-    "@bitdaoio/core-utils" "1.0.3"
+    "@eth-optimism/core-utils" "0.9.3"
     "@sentry/node" "^6.3.1"
     bcfg "^0.1.7"
     body-parser "^1.20.0"

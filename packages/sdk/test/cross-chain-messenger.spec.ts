@@ -309,21 +309,22 @@ describe('CrossChainMessenger', () => {
               const found = await messenger.getMessagesByTransaction(tx, {
                 direction: MessageDirection.L1_TO_L2,
               })
-              expect(found).to.deep.equal(
-                messages.map((message, i) => {
-                  return {
-                    direction: MessageDirection.L1_TO_L2,
-                    sender: message.sender,
-                    target: message.target,
-                    message: message.message,
-                    messageNonce: ethers.BigNumber.from(message.messageNonce),
-                    minGasLimit: ethers.BigNumber.from(message.minGasLimit),
-                    value: ethers.BigNumber.from(message.value),
-                    logIndex: i,
-                    blockNumber: tx.blockNumber,
-                    transactionHash: tx.hash,
-                  }
-                })
+              const resultMsg = messages.map((message, i) => {
+                return {
+                  direction: MessageDirection.L1_TO_L2,
+                  target: message.target,
+                  sender: message.sender,
+                  message: message.message,
+                  messageNonce: ethers.BigNumber.from(message.messageNonce),
+                  value: ethers.BigNumber.from(message.value),
+                  minGasLimit: ethers.BigNumber.from(message.minGasLimit),
+                  logIndex: i,
+                  blockNumber: tx.blockNumber,
+                  transactionHash: tx.hash,
+                }
+              })
+              expect(JSON.stringify(found)).to.deep.equal(
+                JSON.stringify(resultMsg)
               )
             })
           }
@@ -362,21 +363,22 @@ describe('CrossChainMessenger', () => {
 
               const tx = await l1Messenger.triggerSentMessageEvents(messages)
               const found = await messenger.getMessagesByTransaction(tx)
-              expect(found).to.deep.equal(
-                messages.map((message, i) => {
-                  return {
-                    direction: MessageDirection.L1_TO_L2,
-                    sender: message.sender,
-                    target: message.target,
-                    message: message.message,
-                    messageNonce: ethers.BigNumber.from(message.messageNonce),
-                    minGasLimit: ethers.BigNumber.from(message.minGasLimit),
-                    value: ethers.BigNumber.from(message.value),
-                    logIndex: i,
-                    blockNumber: tx.blockNumber,
-                    transactionHash: tx.hash,
-                  }
-                })
+              const resultMsg = messages.map((message, i) => {
+                return {
+                  direction: MessageDirection.L1_TO_L2,
+                  target: message.target,
+                  sender: message.sender,
+                  message: message.message,
+                  messageNonce: ethers.BigNumber.from(message.messageNonce),
+                  value: ethers.BigNumber.from(message.value),
+                  minGasLimit: ethers.BigNumber.from(message.minGasLimit),
+                  logIndex: i,
+                  blockNumber: tx.blockNumber,
+                  transactionHash: tx.hash,
+                }
+              })
+              expect(JSON.stringify(found)).to.deep.equal(
+                JSON.stringify(resultMsg)
               )
             })
           }
