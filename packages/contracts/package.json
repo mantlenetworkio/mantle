@@ -1,6 +1,6 @@
 {
   "name": "@bitdaoio/contracts",
-  "version": "1.0.2",
+  "version": "1.0.7-beta3",
   "description": "[Mantle] L1 and L2 smart contracts for Mantle",
   "main": "dist/index",
   "types": "dist/index",
