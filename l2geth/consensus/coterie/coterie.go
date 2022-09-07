@@ -19,6 +19,7 @@ import (
 	"github.com/bitdao-io/mantle/l2geth/crypto"
 	"github.com/bitdao-io/mantle/l2geth/ethdb"
 	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/params"
 	"github.com/bitdao-io/mantle/l2geth/rlp"
 	"github.com/bitdao-io/mantle/l2geth/rollup/rcfg"
 	"github.com/bitdao-io/mantle/l2geth/rpc"
@@ -40,45 +41,36 @@ var (
 	errInvalidUncleHash   = errors.New("non empty uncle hash")
 	errInvalidDifficulty  = errors.New("invalid difficulty")
 	errUnauthorizedSigner = errors.New("unauthorized signer")
+	errInvalidTimestamp   = errors.New("invalid timestamp")
 )
 
 type SignerFn func(accounts.Account, string, []byte) ([]byte, error)
 
 type Coterie struct {
-	db          ethdb.Database
-	current     Snapshot
-	signer      common.Address
-	signFn      SignerFn
-	schedulerID []byte
-	lock        sync.RWMutex
+	config        *params.CoterieConfig // Consensus engine configuration parameters
+	db            ethdb.Database
+	producersData ProducersData
+	signer        common.Address
+	signFn        SignerFn
+	schedulerID   string
+	lock          sync.RWMutex
 }
 
-func New(db ethdb.Database) *Coterie {
+func New(config *params.CoterieConfig, db ethdb.Database) *Coterie {
 	return &Coterie{
-		db: db,
+		config: config,
+		db:     db,
 	}
 }
 
-func (c *Coterie) updateSequencerSet(snap Snapshot) {
-	c.current = snap
-	snap.store(c.db)
-}
-
-func (c *Coterie) RequestSequencerSet() Snapshot {
-	snap := Snapshot{}
-
-	// TODO: rquest sequencer set
-
-	c.updateSequencerSet(snap)
-	return snap
-}
-
-func (c *Coterie) pushSequencerSet(snap Snapshot) {
-	// TODO
+func (c *Coterie) SetSequencerSet(data ProducersData) {
+	c.producersData = data
+	c.schedulerID = data.SchedulerID
+	data.store(c.db)
 }
 
 // Authorize injects a private key into the consensus engine to mint new blocks with.
-func (c *Coterie) Authorize(signer common.Address, signFn SignerFn, schedulerID []byte) {
+func (c *Coterie) Authorize(signer common.Address, signFn SignerFn, schedulerID string) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -129,15 +121,15 @@ func (c *Coterie) Prepare(chain consensus.ChainReader, header *types.Header) err
 
 	number := header.Number.Uint64()
 
-	if header.Number.Uint64() >= c.current.Number+c.current.Epoch {
-		_ = c.RequestSequencerSet()
-	}
-
-	if header.Number.Uint64() < c.current.Number {
+	if header.Number.Uint64() >= c.producersData.Number+c.producersData.Epoch {
 		return errUnknownBlock
 	}
 
-	header.Coinbase = c.current.SequencerSet.GetProducer().Address
+	if header.Number.Uint64() < c.producersData.Number {
+		return errUnknownBlock
+	}
+
+	header.Coinbase = c.producersData.SequencerSet.GetProducer().Address
 
 	// Ensure the extra data has all its components
 	if len(header.Extra) < extraVanity {
@@ -156,7 +148,10 @@ func (c *Coterie) Prepare(chain consensus.ChainReader, header *types.Header) err
 
 	// Do not manipulate the timestamps when running with the bvm
 	if !rcfg.UsingBVM {
-		header.Time = uint64(time.Now().Unix())
+		header.Time = parent.Time + c.config.Period
+		if header.Time < uint64(time.Now().Unix()) {
+			header.Time = uint64(time.Now().Unix())
+		}
 	}
 
 	return nil
@@ -200,15 +195,15 @@ func (c *Coterie) Seal(chain consensus.ChainReader, block *types.Block, results 
 	signer, signFn := c.signer, c.signFn
 	c.lock.RUnlock()
 
-	if header.Number.Uint64() >= c.current.Number+c.current.Epoch {
-		_ = c.RequestSequencerSet()
-	}
-
-	if header.Number.Uint64() < c.current.Number {
+	if header.Number.Uint64() >= c.producersData.Number+c.producersData.Epoch {
 		return errUnknownBlock
 	}
 
-	if c.signer != c.current.SequencerSet.GetProducer().Address {
+	if header.Number.Uint64() < c.producersData.Number {
+		return errUnknownBlock
+	}
+
+	if c.signer != c.producersData.SequencerSet.GetProducer().Address {
 		return errUnauthorizedSigner
 	}
 
@@ -238,7 +233,7 @@ func (c *Coterie) Seal(chain consensus.ChainReader, block *types.Block, results 
 		}
 	}()
 
-	c.current.SequencerSet.IncrementProducerPriority(1)
+	c.producersData.SequencerSet.IncrementProducerPriority(1)
 
 	return nil
 
@@ -322,6 +317,15 @@ func (c *Coterie) verifyCascadingFields(chain consensus.ChainReader, header *typ
 		return consensus.ErrUnknownAncestor
 	}
 
+	// Do not account for timestamps in consensus when running the bvm
+	// changes. The timestamp must be montonic, meaning that it can be the same
+	// or increase. L1 dictates the timestamp.
+	if !rcfg.UsingBVM {
+		if parent.Time+c.config.Period > header.Time {
+			return errInvalidTimestamp
+		}
+	}
+
 	return c.verifySeal(chain, header, parents)
 }
 
@@ -336,11 +340,11 @@ func (c *Coterie) verifySeal(chain consensus.ChainReader, header *types.Header, 
 	// currentNumber <= height < currentNumber + epoch: check
 	// height >= currentNumber + epoch: 				update current
 
-	if header.Number.Uint64() >= c.current.Number+c.current.Epoch {
-		_ = c.RequestSequencerSet()
+	if header.Number.Uint64() >= c.producersData.Number+c.producersData.Epoch {
+		return errUnknownBlock
 	}
 
-	if header.Number.Uint64() < c.current.Number {
+	if header.Number.Uint64() < c.producersData.Number {
 		return nil
 	}
 
@@ -349,7 +353,7 @@ func (c *Coterie) verifySeal(chain consensus.ChainReader, header *types.Header, 
 		return err
 	}
 
-	if signer != c.current.SequencerSet.GetProducer().Address {
+	if signer != c.producersData.SequencerSet.GetProducer().Address {
 		return errUnauthorizedSigner
 	}
 

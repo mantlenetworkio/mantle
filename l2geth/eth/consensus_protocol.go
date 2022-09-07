@@ -16,10 +16,6 @@
 
 package eth
 
-import (
-	"github.com/bitdao-io/mantle/l2geth/consensus/coterie"
-)
-
 // consensusProtocolLength is the number of implemented message.
 var consensusProtocolLength = 2
 
@@ -30,16 +26,3 @@ const (
 	GetProducersMsg = 0x01
 	ProducersMsg    = 0x02
 )
-
-// getProducersData represents a producers query.
-type getProducersData struct {
-	Number uint64 // Block hash from which to retrieve producers (excludes Hash)
-}
-
-// producersDate represents a producer set.
-type producersData struct {
-	Number       uint64 // Number represents Block hash from which to retrieve producers (excludes Hash)
-	Epoch        uint64 // Epoch represents the block number for each producer
-	schedulerId  string // schedulerId represents scheduler's peer.id
-	SequencerSet coterie.SequencerSet
-}

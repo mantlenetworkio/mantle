@@ -3,6 +3,7 @@ package eth
 import (
 	"fmt"
 
+	"github.com/bitdao-io/mantle/l2geth/consensus/coterie"
 	"github.com/bitdao-io/mantle/l2geth/log"
 	"github.com/bitdao-io/mantle/l2geth/p2p"
 	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
@@ -62,7 +63,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 	switch {
 	case msg.Code == ProducersMsg:
 		// A batch of block bodies arrived to one of our previous requests
-		var request producersData
+		var request coterie.ProducersData
 		if err := msg.Decode(&request); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
@@ -88,7 +89,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		}
 		// Gather state data until the fetch or network limits is reached
 		var producers []rlp.RawValue
-		var results producersData
+		var results coterie.ProducersData
 		//TODO:
 		//if eg, ok := pm.blockchain.Engine().(*coterie.SequencerSet); ok {
 		//	results = eg.GetSequencerSet()

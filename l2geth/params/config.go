@@ -335,6 +335,16 @@ func (c *CliqueConfig) String() string {
 	return "clique"
 }
 
+// CoterieConfig is the consensus engine configs for coterie.
+type CoterieConfig struct {
+	Period uint64 `json:"period"` // Number of seconds between blocks to enforce
+}
+
+// String implements the stringer interface, returning the consensus engine details.
+func (c *CoterieConfig) String() string {
+	return "coterie"
+}
+
 // String implements the fmt.Stringer interface.
 func (c *ChainConfig) String() string {
 	var engine interface{}
