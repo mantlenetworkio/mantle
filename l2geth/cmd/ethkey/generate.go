@@ -23,9 +23,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/bitdao-io/mantle/l2geth/accounts/keystore"
-	"github.com/bitdao-io/mantle/l2geth/cmd/utils"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
+	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/pborman/uuid"
 	"gopkg.in/urfave/cli.v1"
 )

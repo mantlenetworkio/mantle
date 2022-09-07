@@ -24,11 +24,11 @@ import (
 	"io/ioutil"
 	"math/big"
 
-	"github.com/bitdao-io/mantle/l2geth/accounts"
-	"github.com/bitdao-io/mantle/l2geth/accounts/keystore"
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/common/math"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common/math"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 )
 
 // SignerUIAPI implements methods Clef provides for a UI to query, in the bidirectional communication

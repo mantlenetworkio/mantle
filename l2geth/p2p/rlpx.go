@@ -35,12 +35,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common/bitutil"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/crypto/ecies"
-	"github.com/bitdao-io/mantle/l2geth/metrics"
-	"github.com/bitdao-io/mantle/l2geth/rlp"
 	"github.com/golang/snappy"
+	"github.com/mantlenetworkio/mantle/l2geth/common/bitutil"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto/ecies"
+	"github.com/mantlenetworkio/mantle/l2geth/metrics"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"golang.org/x/crypto/sha3"
 )
 

@@ -25,12 +25,12 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/bitdao-io/mantle/l2geth/accounts/abi"
-	"github.com/bitdao-io/mantle/l2geth/accounts/abi/bind"
-	"github.com/bitdao-io/mantle/l2geth/cmd/utils"
-	"github.com/bitdao-io/mantle/l2geth/common/compiler"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi/bind"
+	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
+	"github.com/mantlenetworkio/mantle/l2geth/common/compiler"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"gopkg.in/urfave/cli.v1"
 )
 

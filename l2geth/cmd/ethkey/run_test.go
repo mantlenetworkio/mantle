@@ -21,8 +21,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/internal/cmdtest"
 	"github.com/docker/docker/pkg/reexec"
+	"github.com/mantlenetworkio/mantle/l2geth/internal/cmdtest"
 )
 
 type testEthkey struct {

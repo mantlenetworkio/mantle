@@ -1,8 +1,8 @@
 /* Imports: Internal */
 import { providers } from 'ethers'
-import { applyL1ToL2Alias } from '@bitdaoio/core-utils'
-import { asL2Provider } from '@bitdaoio/sdk'
-import { getContractInterface } from '@bitdaoio/contracts'
+import { applyL1ToL2Alias } from '@mantlenetworkio/core-utils'
+import { asL2Provider } from '@mantlenetworkio/sdk'
+import { getContractInterface } from '@mantlenetworkio/contracts'
 
 /* Imports: External */
 import { expect } from './shared/setup'

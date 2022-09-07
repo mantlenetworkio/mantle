@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
-	"github.com/bitdao-io/mantle/l2geth/rollup/fees"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 )
 
 // RollupOracle holds the L1 and L2 gas prices for fee calculation

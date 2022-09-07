@@ -21,10 +21,10 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/bitdao-io/mantle/l2geth/internal/ethapi"
-	"github.com/bitdao-io/mantle/l2geth/log"
-	"github.com/bitdao-io/mantle/l2geth/p2p"
-	"github.com/bitdao-io/mantle/l2geth/rpc"
+	"github.com/mantlenetworkio/mantle/l2geth/internal/ethapi"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p"
+	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 )

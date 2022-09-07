@@ -19,8 +19,8 @@
 package geth
 
 import (
-	"github.com/bitdao-io/mantle/l2geth/whisper/shhclient"
-	whisper "github.com/bitdao-io/mantle/l2geth/whisper/whisperv6"
+	"github.com/mantlenetworkio/mantle/l2geth/whisper/shhclient"
+	whisper "github.com/mantlenetworkio/mantle/l2geth/whisper/whisperv6"
 )
 
 // WhisperClient provides access to the Ethereum APIs.

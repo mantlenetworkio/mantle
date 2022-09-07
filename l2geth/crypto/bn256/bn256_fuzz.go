@@ -11,8 +11,8 @@ import (
 	"bytes"
 	"math/big"
 
-	cloudflare "github.com/bitdao-io/mantle/l2geth/crypto/bn256/cloudflare"
-	google "github.com/bitdao-io/mantle/l2geth/crypto/bn256/google"
+	cloudflare "github.com/mantlenetworkio/mantle/l2geth/crypto/bn256/cloudflare"
+	google "github.com/mantlenetworkio/mantle/l2geth/crypto/bn256/google"
 )
 
 // FuzzAdd fuzzez bn256 addition between the Google and Cloudflare libraries.

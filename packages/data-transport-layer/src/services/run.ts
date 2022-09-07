@@ -1,6 +1,6 @@
 /* Imports: External */
 import * as dotenv from 'dotenv'
-import { Bcfg } from '@bitdaoio/core-utils'
+import { Bcfg } from '@mantlenetworkio/core-utils'
 import Config from 'bcfg'
 
 /* Imports: Internal */

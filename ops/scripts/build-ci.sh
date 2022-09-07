@@ -15,15 +15,15 @@ function build() {
 }
 
 mkdir -p /tmp/.buildx-cache-new
-build l2geth "bitnetworkio/l2geth:latest" "./l2geth/Dockerfile" .
-build l1chain "bitnetworkio/hardhat:latest" "./ops/docker/hardhat/Dockerfile" ./ops/docker/hardhat
+build l2geth "mantlenetworkio/l2geth:latest" "./l2geth/Dockerfile" .
+build l1chain "mantlenetworkio/hardhat:latest" "./ops/docker/hardhat/Dockerfile" ./ops/docker/hardhat
 
 wait
 
-build deployer "bitnetworkio/deployer:latest" "./ops/docker/Dockerfile.deployer" .
-build dtl "bitnetworkio/data-transport-layer:latest" "./ops/docker/Dockerfile.data-transport-layer" .
-build relayer "bitnetworkio/message-relayer:latest" "./ops/docker/Dockerfile.message-relayer" .
-build relayer "bitnetworkio/fault-detector:latest" "./ops/docker/Dockerfile.fault-detector" .
-build integration-tests "bitnetworkio/integration-tests:latest" "./ops/docker/Dockerfile.integration-tests" .
+build deployer "mantlenetworkio/deployer:latest" "./ops/docker/Dockerfile.deployer" .
+build dtl "mantlenetworkio/data-transport-layer:latest" "./ops/docker/Dockerfile.data-transport-layer" .
+build relayer "mantlenetworkio/message-relayer:latest" "./ops/docker/Dockerfile.message-relayer" .
+build relayer "mantlenetworkio/fault-detector:latest" "./ops/docker/Dockerfile.fault-detector" .
+build integration-tests "mantlenetworkio/integration-tests:latest" "./ops/docker/Dockerfile.integration-tests" .
 
 wait

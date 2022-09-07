@@ -21,13 +21,13 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/consensus/ethash"
-	"github.com/bitdao-io/mantle/l2geth/core"
-	"github.com/bitdao-io/mantle/l2geth/core/rawdb"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/ethash"
+	"github.com/mantlenetworkio/mantle/l2geth/core"
+	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
 )
 
 // Test chain parameters.

@@ -1,7 +1,7 @@
 {
   "private": true,
-  "name": "@bitdaoio/replica-healthcheck",
-  "version": "1.0.0",
+  "name": "@mantlenetworkio/replica-healthcheck",
+  "version": "0.0.1",
   "description": "[Mantle] Service for monitoring the health of replica nodes",
   "main": "dist/index",
   "types": "dist/index",
@@ -24,16 +24,16 @@
     "replica",
     "healthcheck"
   ],
-  "homepage": "https://github.com/bitdao-io/mantle/tree/develop/packages/replica-healthcheck#readme",
+  "homepage": "https://github.com/mantlenetworkio/mantle/tree/develop/packages/replica-healthcheck#readme",
   "license": "MIT",
   "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitdao-io/mantle.git"
+    "url": "https://github.com/mantlenetworkio/mantle.git"
   },
   "dependencies": {
-    "@bitdaoio/common-ts": "1.0.0",
-    "@bitdaoio/core-utils": "1.0.3",
+    "@mantlenetworkio/common-ts": "0.0.1",
+    "@mantlenetworkio/core-utils": "0.0.1",
     "@ethersproject/abstract-provider": "^5.6.1"
   },
   "devDependencies": {

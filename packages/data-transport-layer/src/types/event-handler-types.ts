@@ -1,6 +1,6 @@
 import { BaseProvider } from '@ethersproject/providers'
 import { BigNumber } from 'ethers'
-import { TypedEvent } from '@bitdaoio/contracts/dist/types/common'
+import { TypedEvent } from '@mantlenetworkio/contracts/dist/types/common'
 
 import {
   TransactionBatchEntry,

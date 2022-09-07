@@ -21,7 +21,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 )
 
 // Tests that data bitset encoding and decoding works and is bijective.

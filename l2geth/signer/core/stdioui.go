@@ -19,9 +19,9 @@ package core
 import (
 	"context"
 
-	"github.com/bitdao-io/mantle/l2geth/internal/ethapi"
-	"github.com/bitdao-io/mantle/l2geth/log"
-	"github.com/bitdao-io/mantle/l2geth/rpc"
+	"github.com/mantlenetworkio/mantle/l2geth/internal/ethapi"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 )
 
 type StdIOUI struct {

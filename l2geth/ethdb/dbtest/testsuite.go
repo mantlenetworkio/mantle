@@ -22,7 +22,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/ethdb"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
 )
 
 // TestDatabaseSuite runs a suite of tests against a KeyValueStore database

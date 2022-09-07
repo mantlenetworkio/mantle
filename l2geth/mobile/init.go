@@ -22,7 +22,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 func init() {

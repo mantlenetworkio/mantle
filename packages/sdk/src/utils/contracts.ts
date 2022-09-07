@@ -1,4 +1,4 @@
-import { getContractInterface, predeploys } from '@bitdaoio/contracts'
+import { getContractInterface, predeploys } from '@mantlenetworkio/contracts'
 import { ethers, Contract } from 'ethers'
 
 import { toAddress } from './coercion'

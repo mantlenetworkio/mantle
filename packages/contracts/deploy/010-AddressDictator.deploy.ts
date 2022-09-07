@@ -1,6 +1,6 @@
 /* Imports: External */
 import { DeployFunction } from 'hardhat-deploy/dist/types'
-import { hexStringEquals } from '@bitdaoio/core-utils'
+import { hexStringEquals } from '@mantlenetworkio/core-utils'
 
 /* Imports: Internal */
 import {

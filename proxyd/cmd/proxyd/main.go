@@ -6,8 +6,8 @@ import (
 	"syscall"
 
 	"github.com/BurntSushi/toml"
-	"github.com/bitdao-io/mantle/proxyd"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/proxyd"
 )
 
 var (

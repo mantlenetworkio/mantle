@@ -22,7 +22,7 @@ package metrics
 import (
 	"syscall"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 // getProcessCPUTime retrieves the process' CPU time since program startup.

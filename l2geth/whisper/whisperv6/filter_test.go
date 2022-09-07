@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 )
 
 var seed int64

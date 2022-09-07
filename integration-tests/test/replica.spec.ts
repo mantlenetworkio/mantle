@@ -1,6 +1,6 @@
 /* Imports: External */
 import { TransactionReceipt } from '@ethersproject/abstract-provider'
-import { sleep } from '@bitdaoio/core-utils'
+import { sleep } from '@mantlenetworkio/core-utils'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'

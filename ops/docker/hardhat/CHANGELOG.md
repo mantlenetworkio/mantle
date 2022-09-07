@@ -1,2 +1,2 @@
-# @bitdaoio/hardhat-node
+# @mantlenetworkio/hardhat-node
 

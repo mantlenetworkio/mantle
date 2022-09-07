@@ -27,11 +27,11 @@ import (
 
 	cli "gopkg.in/urfave/cli.v1"
 
-	"github.com/bitdao-io/mantle/l2geth/cmd/utils"
-	"github.com/bitdao-io/mantle/l2geth/eth"
-	"github.com/bitdao-io/mantle/l2geth/node"
-	"github.com/bitdao-io/mantle/l2geth/params"
-	whisper "github.com/bitdao-io/mantle/l2geth/whisper/whisperv6"
+	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
+	"github.com/mantlenetworkio/mantle/l2geth/eth"
+	"github.com/mantlenetworkio/mantle/l2geth/node"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
+	whisper "github.com/mantlenetworkio/mantle/l2geth/whisper/whisperv6"
 	"github.com/naoina/toml"
 )
 

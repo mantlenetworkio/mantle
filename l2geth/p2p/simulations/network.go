@@ -27,11 +27,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/event"
-	"github.com/bitdao-io/mantle/l2geth/log"
-	"github.com/bitdao-io/mantle/l2geth/p2p"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
-	"github.com/bitdao-io/mantle/l2geth/p2p/simulations/adapters"
+	"github.com/mantlenetworkio/mantle/l2geth/event"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/simulations/adapters"
 )
 
 var DialBanTimeout = 200 * time.Millisecond

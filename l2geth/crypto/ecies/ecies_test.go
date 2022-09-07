@@ -39,7 +39,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 )
 
 // Ensure the KDF generates appropriately sized keys.

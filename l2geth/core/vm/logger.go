@@ -24,11 +24,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
-	"github.com/bitdao-io/mantle/l2geth/common/math"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
-	"github.com/bitdao-io/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/common/math"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
 )
 
 // Storage represents a contract's storage.

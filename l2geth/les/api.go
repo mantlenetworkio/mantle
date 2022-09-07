@@ -22,9 +22,9 @@ import (
 	"math"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
-	"github.com/bitdao-io/mantle/l2geth/common/mclock"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/common/mclock"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
 )
 
 var (

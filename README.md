@@ -2,9 +2,9 @@
   <h1> Mantle Wiki</h1>
 </div>
 <p align="center">
-  <a href="https://github.com/bitnetworkio/mantle/actions/workflows/ts-packages.yml?query=branch%3Amain"><img src="https://github.com/bitnetworkio/mantle/workflows/typescript%20/%20contracts/badge.svg" /></a>
-  <a href="https://github.com/bitnetworkio/mantle/actions/workflows/integration.yml?query=branch%3Amain"><img src="https://github.com/bitnetworkio/mantle/workflows/integration/badge.svg" /></a>
-  <a href="https://github.com/bitnetworkio/mantle/actions/workflows/geth.yml?query=branch%3Amain"><img src="https://github.com/bitnetworkio/mantle/workflows/geth%20unit%20tests/badge.svg" /></a>
+  <a href="https://github.com/mantlenetworkio/mantle/actions/workflows/ts-packages.yml?query=branch%3Amain"><img src="https://github.com/mantlenetworkio/mantle/workflows/typescript%20/%20contracts/badge.svg" /></a>
+  <a href="https://github.com/mantlenetworkio/mantle/actions/workflows/integration.yml?query=branch%3Amain"><img src="https://github.com/mantlenetworkio/mantle/workflows/integration/badge.svg" /></a>
+  <a href="https://github.com/mantlenetworkio/mantle/actions/workflows/geth.yml?query=branch%3Amain"><img src="https://github.com/mantlenetworkio/mantle/workflows/geth%20unit%20tests/badge.svg" /></a>
 </p>
 
 ## Documentation & Introduction
@@ -31,7 +31,7 @@ ___
 
 
 Read through [CONTRIBUTING.md](./CONTRIBUTING.md) for a general overview of our contribution process.
-Then check out our list of [good first issues](https://github.com/bitdao-io/mantle/contribute) to find something fun to work on!
+Then check out our list of [good first issues](https://github.com/mantlenetworkio/mantle/contribute) to find something fun to work on!
 
 
 <br/>
@@ -68,6 +68,6 @@ root
 ## License
 ___
 
-Code forked from [`optimism`](https://github.com/ethereum-optimism/optimism) under the name [`optimism`](https://github.com/bitdao-io/bitnetwork/tree/master/l2geth) is licensed under the [GNU GPLv3](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60) in accordance with the [original license](https://github.com/ethereum-optimism/optimism/blob/master/COPYING).
+Code forked from [`optimism`](https://github.com/ethereum-optimism/optimism) under the name [`optimism`](https://github.com/mantlenetworkio/bitnetwork/tree/master/l2geth) is licensed under the [GNU GPLv3](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60) in accordance with the [original license](https://github.com/ethereum-optimism/optimism/blob/master/COPYING).
 
-All other files within this repository are licensed under the [MIT License](https://github.com/bitdao-io/bitnetwork/blob/master/LICENSE) unless stated otherwise.
+All other files within this repository are licensed under the [MIT License](https://github.com/mantlenetworkio/bitnetwork/blob/master/LICENSE) unless stated otherwise.
