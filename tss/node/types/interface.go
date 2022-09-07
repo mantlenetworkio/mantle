@@ -1,8 +1,8 @@
 package types
 
 import (
-	"github.com/bitdao-io/bitnetwork/tss/index"
-	"github.com/bitdao-io/bitnetwork/tss/slash"
+	"github.com/bitdao-io/mantle/tss/index"
+	"github.com/bitdao-io/mantle/tss/slash"
 )
 
 type NodeStore interface {

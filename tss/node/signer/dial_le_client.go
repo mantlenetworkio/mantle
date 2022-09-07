@@ -3,10 +3,10 @@ package signer
 import (
 	"context"
 	"crypto/tls"
-	"github.com/bitdao-io/bitnetwork/bss-core/dial"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethclient"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/rpc"
+	"github.com/bitdao-io/mantle/bss-core/dial"
+	"github.com/bitdao-io/mantle/l2geth/ethclient"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/rpc"
 	"net/http"
 	"strings"
 )

@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
 	"github.com/influxdata/influxdb/pkg/slices"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	"math/big"
@@ -14,10 +14,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	tss "github.com/bitdao-io/bitnetwork/tss/common"
-	"github.com/bitdao-io/bitnetwork/tss/manager/types"
-	"github.com/bitdao-io/bitnetwork/tss/ws/server"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	tss "github.com/bitdao-io/mantle/tss/common"
+	"github.com/bitdao-io/mantle/tss/manager/types"
+	"github.com/bitdao-io/mantle/tss/ws/server"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 

@@ -16,7 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
-	nodeconfig "github.com/bitdao-io/bitnetwork/tss/common"
+	nodeconfig "github.com/bitdao-io/mantle/tss/common"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"sort"

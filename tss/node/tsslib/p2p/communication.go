@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bitdao-io/bitnetwork/tss/node/tsslib/messages"
+	"github.com/bitdao-io/mantle/tss/node/tsslib/messages"
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"

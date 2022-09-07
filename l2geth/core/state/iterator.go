@@ -20,9 +20,9 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
-	"github.com/bitdao-io/bitnetwork/l2geth/trie"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/rlp"
+	"github.com/bitdao-io/mantle/l2geth/trie"
 )
 
 // NodeIterator is an iterator to traverse the entire state trie post-order,

@@ -6,13 +6,13 @@ import { MessageStatus } from '@bitdaoio/sdk'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 import { withdrawalTest } from './shared/utils'
 
 describe('Bridged tokens', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
   before(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
   })
 
   let otherWalletL1: Wallet

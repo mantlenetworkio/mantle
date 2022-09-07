@@ -3,8 +3,8 @@ package signer
 import (
 	"context"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/tss/slash"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/tss/slash"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"math/big"
 	"time"

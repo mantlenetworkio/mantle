@@ -1,7 +1,7 @@
 {
-  "name": "bitnetwork",
+  "name": "mantle",
   "version": "1.0.0",
-  "author": "Bitnetwork PBC",
+  "author": "Mantle PBC",
   "license": "MIT",
   "workspaces": {
     "packages": [
@@ -69,7 +69,6 @@
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-react": "^7.24.0",
     "eslint-plugin-unicorn": "^42.0.0",
-    "hardhat": "^2.10.2",
     "husky": "^6.0.0",
     "lerna": "^4.0.0",
     "lint-staged": "11.0.0",
@@ -81,6 +80,7 @@
     "patch-package": "^6.4.7",
     "prettier": "^2.3.1",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
+    "solhint-plugin-prettier": "^0.0.5",
     "ts-mocha": "^10.0.0",
     "typescript": "^4.6.2"
   },

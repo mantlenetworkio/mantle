@@ -25,8 +25,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enode"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
 )
 
 const jsonIndent = "    "

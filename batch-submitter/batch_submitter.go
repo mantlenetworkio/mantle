@@ -2,16 +2,16 @@ package batchsubmitter
 
 import (
 	"context"
-	tss "github.com/bitdao-io/bitnetwork/batch-submitter/tss-client"
+	tss "github.com/bitdao-io/mantle/batch-submitter/tss-client"
 	"os"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/batch-submitter/drivers/proposer"
-	"github.com/bitdao-io/bitnetwork/batch-submitter/drivers/sequencer"
-	bsscore "github.com/bitdao-io/bitnetwork/bss-core"
-	"github.com/bitdao-io/bitnetwork/bss-core/dial"
-	"github.com/bitdao-io/bitnetwork/bss-core/metrics"
-	"github.com/bitdao-io/bitnetwork/bss-core/txmgr"
+	"github.com/bitdao-io/mantle/batch-submitter/drivers/proposer"
+	"github.com/bitdao-io/mantle/batch-submitter/drivers/sequencer"
+	bsscore "github.com/bitdao-io/mantle/bss-core"
+	"github.com/bitdao-io/mantle/bss-core/dial"
+	"github.com/bitdao-io/mantle/bss-core/metrics"
+	"github.com/bitdao-io/mantle/bss-core/txmgr"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/getsentry/sentry-go"
 	"github.com/urfave/cli"

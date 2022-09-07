@@ -2,7 +2,7 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/bitdao-io/bitnetwork/tss/slash"
+	"github.com/bitdao-io/mantle/tss/slash"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"

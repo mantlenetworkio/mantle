@@ -5,7 +5,7 @@ import { predeploys } from '@bitdaoio/contracts'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 
 describe('Whitelist', async () => {
   const initialAmount = 1000
@@ -14,9 +14,9 @@ describe('Whitelist', async () => {
   const TokenSymbol = 'BVM'
 
   let Factory__ERC20: ContractFactory
-  let env: BitnetworkEnv
+  let env: MantleEnv
   before(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
     Factory__ERC20 = await ethers.getContractFactory('ERC20', env.l2Wallet)
   })
 

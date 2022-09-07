@@ -3,9 +3,9 @@ package manager
 import (
 	"time"
 
-	tss "github.com/bitdao-io/bitnetwork/tss/common"
-	"github.com/bitdao-io/bitnetwork/tss/manager/store"
-	"github.com/bitdao-io/bitnetwork/tss/ws/server"
+	tss "github.com/bitdao-io/mantle/tss/common"
+	"github.com/bitdao-io/mantle/tss/manager/store"
+	"github.com/bitdao-io/mantle/tss/ws/server"
 )
 
 type afterMsgSendFunc func(server.RequestMsg, chan server.ResponseMsg) error

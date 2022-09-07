@@ -22,17 +22,17 @@ import (
 	"errors"
 	"time"
 
-	ethereum "github.com/bitdao-io/bitnetwork/l2geth"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/rawdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/state"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/vm"
-	"github.com/bitdao-io/bitnetwork/l2geth/eth/filters"
-	"github.com/bitdao-io/bitnetwork/l2geth/internal/ethapi"
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
-	"github.com/bitdao-io/bitnetwork/l2geth/rpc"
+	ethereum "github.com/bitdao-io/mantle/l2geth"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
+	"github.com/bitdao-io/mantle/l2geth/core/rawdb"
+	"github.com/bitdao-io/mantle/l2geth/core/state"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/core/vm"
+	"github.com/bitdao-io/mantle/l2geth/eth/filters"
+	"github.com/bitdao-io/mantle/l2geth/internal/ethapi"
+	"github.com/bitdao-io/mantle/l2geth/rlp"
+	"github.com/bitdao-io/mantle/l2geth/rpc"
 )
 
 var (

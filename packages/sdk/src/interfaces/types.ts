@@ -23,12 +23,12 @@ export enum L1ChainID {
  * L2 network chain IDs
  */
 export enum L2ChainID {
-  BITNETWORK = 10,
-  BITNETWORK_GOERLI = 420,
-  BITNETWORK_GOERLIQA = 1705003,
-  BITNETWORK_KOVAN = 69,
-  BITNETWORK_HARDHAT_LOCAL = 31337,
-  BITNETWORK_HARDHAT_DEVNET = 17,
+  MANTLE = 10,
+  MANTLE_GOERLI = 420,
+  MANTLE_GOERLIQA = 1705003,
+  MANTLE_KOVAN = 69,
+  MANTLE_HARDHAT_LOCAL = 31337,
+  MANTLE_HARDHAT_DEVNET = 17,
 }
 
 /**
@@ -59,7 +59,7 @@ export interface OEL2Contracts {
 }
 
 /**
- * Represents Bitnetwork contracts, assumed to be connected to their appropriate
+ * Represents Mantle contracts, assumed to be connected to their appropriate
  * providers and addresses.
  */
 export interface OEContracts {

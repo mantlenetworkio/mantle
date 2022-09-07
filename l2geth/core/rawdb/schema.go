@@ -20,8 +20,8 @@ package rawdb
 import (
 	"encoding/binary"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/metrics"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/metrics"
 )
 
 // The fields below define the low level database schema prefixing.
@@ -53,7 +53,7 @@ var (
 	txLookupPrefix  = []byte("l") // txLookupPrefix + hash -> transaction/receipt lookup metadata
 	bloomBitsPrefix = []byte("B") // bloomBitsPrefix + bit (uint16 big endian) + section (uint64 big endian) + hash -> bloom bits
 
-	// Bitnetwork specific
+	// Mantle specific
 	txMetaPrefix = []byte("x") // txMetaPrefix + hash -> transaction metadata
 
 	// headIndexKey tracks the last processed ctc index

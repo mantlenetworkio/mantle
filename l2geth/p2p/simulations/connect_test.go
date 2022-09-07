@@ -19,9 +19,9 @@ package simulations
 import (
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/node"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enode"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/simulations/adapters"
+	"github.com/bitdao-io/mantle/l2geth/node"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
+	"github.com/bitdao-io/mantle/l2geth/p2p/simulations/adapters"
 )
 
 func newTestNetwork(t *testing.T, nodeCount int) (*Network, []enode.ID) {

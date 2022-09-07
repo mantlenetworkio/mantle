@@ -1,4 +1,4 @@
-# @eth-bitnetwork/integration-tests
+# @bitdaoio/integration-tests
 
 ## Setup
 

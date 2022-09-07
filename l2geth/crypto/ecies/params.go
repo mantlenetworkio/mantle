@@ -42,7 +42,7 @@ import (
 	"fmt"
 	"hash"
 
-	ethcrypto "github.com/bitdao-io/bitnetwork/l2geth/crypto"
+	ethcrypto "github.com/bitdao-io/mantle/l2geth/crypto"
 )
 
 var (

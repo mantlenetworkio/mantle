@@ -2,7 +2,7 @@ package signer
 
 import (
 	"encoding/json"
-	"github.com/bitdao-io/bitnetwork/tss/common"
+	"github.com/bitdao-io/mantle/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
@@ -35,7 +35,7 @@ func (p *Processor) VerifySlash() {
 					culprits := p.nodeStore.GetCulprits()
 					if len(culprits) > 0 {
 						for _, v := range culprits {
-							if v == askRequest.Address.String(){
+							if v == askRequest.Address.String() {
 								re = true
 								break
 							}

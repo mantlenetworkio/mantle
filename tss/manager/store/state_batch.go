@@ -2,7 +2,7 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/bitdao-io/bitnetwork/tss/index"
+	"github.com/bitdao-io/mantle/tss/index"
 )
 
 func (s *Storage) SetStateBatch(info index.StateBatchInfo) error {

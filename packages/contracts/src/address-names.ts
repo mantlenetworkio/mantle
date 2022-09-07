@@ -16,6 +16,10 @@ export const names = {
       Proxy__TSS_StakingSlashing: 'Proxy__TSS_StakingSlashing'
     },
     accounts: { BVM_Sequencer: 'BVM_Sequencer', BVM_Proposer: 'BVM_Proposer' },
+    configs: {
+      L1_BIT_ADDRESS: 'L1_BitAddress',
+      Local_Bit_Token: 'LocalBitToken',
+    },
   },
   unmanaged: {
     AddressDictator: 'AddressDictator',

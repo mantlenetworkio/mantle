@@ -1,4 +1,4 @@
-module github.com/bitdao-io/bitnetwork/l2geth
+module github.com/bitdao-io/mantle/l2geth
 
 go 1.15
 

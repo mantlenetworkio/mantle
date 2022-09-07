@@ -9,10 +9,10 @@ import (
 // Params contains the configuration parameters used for verifying
 // the integrity of the migration.
 type Params struct {
-	// KnownMissingKeys is a set of known OVM ETH storage keys that are unaccounted for.
+	// KnownMissingKeys is a set of known BVM ETH storage keys that are unaccounted for.
 	KnownMissingKeys map[common.Hash]bool
 
-	// ExpectedSupplyDelta is the expected delta between the total supply of OVM ETH,
+	// ExpectedSupplyDelta is the expected delta between the total supply of BVM ETH,
 	// and ETH we were able to migrate. This is used to account for supply bugs in
 	//previous regenesis events.
 	ExpectedSupplyDelta *big.Int

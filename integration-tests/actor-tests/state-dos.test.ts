@@ -3,19 +3,19 @@ import { ethers } from 'hardhat'
 import { expect } from 'chai'
 
 import { actor, setupActor, run, setupRun } from './lib/convenience'
-import { BitnetworkEnv } from '../test/shared/env'
+import { MantleEnv } from '../test/shared/env'
 
 interface Context {
   wallet: Wallet
 }
 
 actor('Trie DoS accounts', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
 
   let contract: Contract
 
   setupActor(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
 
     const factory = await ethers.getContractFactory('StateDOS', env.l2Wallet)
     contract = await factory.deploy()

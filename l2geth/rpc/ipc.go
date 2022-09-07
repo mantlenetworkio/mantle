@@ -20,8 +20,8 @@ import (
 	"context"
 	"net"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/netutil"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/p2p/netutil"
 )
 
 // ServeListener accepts connections on l, serving JSON-RPC on them.
