@@ -27,11 +27,9 @@ import (
 var SequencerSetKey = []byte{0x00}
 
 var (
-	extraVanity        = 32                       // Fixed number of extra-data prefix bytes reserved for signer vanity
-	inmemorySnapshots  = 128                      // Number of recent vote snapshots to keep in memory
-	inmemorySignatures = 4096                     // Number of recent block signatures to keep in memory
-	extraSeal          = crypto.SignatureLength   // Fixed number of extra-data suffix bytes reserved for signer seal
-	uncleHash          = types.CalcUncleHash(nil) // Always Keccak256(RLP([])) as uncles are meaningless outside of PoW.
+	extraVanity = 32                       // Fixed number of extra-data prefix bytes reserved for signer vanity
+	extraSeal   = crypto.SignatureLength   // Fixed number of extra-data suffix bytes reserved for signer seal
+	uncleHash   = types.CalcUncleHash(nil) // Always Keccak256(RLP([])) as uncles are meaningless outside of PoW.
 )
 
 var (
@@ -239,6 +237,8 @@ func (c *Coterie) Seal(chain consensus.ChainReader, block *types.Block, results 
 			log.Warn("Sealing result is not read by miner", "sealhash", SealHash(header))
 		}
 	}()
+
+	c.current.SequencerSet.IncrementProducerPriority(1)
 
 	return nil
 

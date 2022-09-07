@@ -40,7 +40,6 @@ type getProducersData struct {
 type producersData struct {
 	Number       uint64 // Number represents Block hash from which to retrieve producers (excludes Hash)
 	Epoch        uint64 // Epoch represents the block number for each producer
-	offset       uint64 // offset represents the block number offset for each producer
-	schedulerIdx string // schedulerIdx represents scheduler's peer.id
+	schedulerId  string // schedulerId represents scheduler's peer.id
 	SequencerSet coterie.SequencerSet
 }
