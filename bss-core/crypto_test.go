@@ -8,7 +8,7 @@ import (
 
 	"github.com/tyler-smith/go-bip39"
 
-	bsscore "github.com/bitdao-io/bitnetwork/bss-core"
+	bsscore "github.com/bitdao-io/mantle/bss-core"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"

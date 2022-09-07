@@ -19,7 +19,7 @@ package vm
 import (
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
 )
 
 func TestJumpDestAnalysis(t *testing.T) {

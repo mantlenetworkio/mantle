@@ -40,7 +40,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
+	"github.com/bitdao-io/mantle/l2geth/rlp"
 )
 
 const SizeLimit = 300 // maximum encoded size of a node record in bytes

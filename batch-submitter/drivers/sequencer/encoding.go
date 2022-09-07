@@ -10,8 +10,8 @@ import (
 	"io"
 	"math"
 
-	l2types "github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	l2rlp "github.com/bitdao-io/bitnetwork/l2geth/rlp"
+	l2types "github.com/bitdao-io/mantle/l2geth/core/types"
+	l2rlp "github.com/bitdao-io/mantle/l2geth/rlp"
 )
 
 const (

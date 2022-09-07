@@ -11,6 +11,7 @@ yarn-error.log
 !.yarn/releases
 !.yarn/plugins
 .pnp.*
+package-lock.json
 
 dist
 artifacts
@@ -22,10 +23,6 @@ packages/contracts/coverage*
 packages/contracts/@ens*
 packages/contracts/@openzeppelin*
 packages/contracts/hardhat
-packages/contracts-periphery/coverage*
-packages/contracts-periphery/@openzeppelin*
-packages/contracts-periphery/hardhat
-packages/contracts-periphery/forge-artifacts*
 
 packages/data-transport-layer/db
 
@@ -50,9 +47,8 @@ packages/contracts-bedrock/deployments/anvil
 
 coverage.out
 
-# Ignore bedrock go bindings local output files
-op-exporter
-
 .idea/
 
-bitnetwork.iml
+mantle.iml
+
+ops/data/**

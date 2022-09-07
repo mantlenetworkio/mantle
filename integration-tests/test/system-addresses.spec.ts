@@ -6,13 +6,13 @@ import { sleep } from '@bitdaoio/core-utils'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 import { envConfig } from './shared/utils'
 
 const SYSTEM_ADDRESSES = [futurePredeploys.System0, futurePredeploys.System1]
 
 describe('System addresses', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
 
   let deployerWallets: Wallet[] = []
 
@@ -27,7 +27,7 @@ describe('System addresses', () => {
       return
     }
 
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
 
     deployerWallets = [
       new Wallet(process.env.SYSTEM_ADDRESS_0_DEPLOYER_KEY, env.l2Provider),

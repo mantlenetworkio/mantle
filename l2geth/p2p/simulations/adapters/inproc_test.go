@@ -23,7 +23,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/simulations/pipes"
+	"github.com/bitdao-io/mantle/l2geth/p2p/simulations/pipes"
 )
 
 func TestTCPPipe(t *testing.T) {

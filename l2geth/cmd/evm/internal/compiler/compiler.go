@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/core/asm"
+	"github.com/bitdao-io/mantle/l2geth/core/asm"
 )
 
 func Compile(fn string, src []byte, debug bool) (string, error) {

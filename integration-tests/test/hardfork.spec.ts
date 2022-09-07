@@ -4,7 +4,7 @@ import { ethers } from 'hardhat'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 
 export const traceToGasByOpcode = (structLogs, opcode) => {
   let gas = 0
@@ -19,13 +19,13 @@ export const traceToGasByOpcode = (structLogs, opcode) => {
 }
 
 describe('Hard forks', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
   let SimpleStorage: Contract
   let SelfDestruction: Contract
   let Precompiles: Contract
 
   before(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
     const Factory__SimpleStorage = await ethers.getContractFactory(
       'SimpleStorage',
       env.l2Wallet
@@ -102,7 +102,7 @@ describe('Hard forks', () => {
     })
   })
 
-  // Bitnetwork includes EIP-3529 as part of its Berlin hardfork. It is part
+  // Mantle includes EIP-3529 as part of its Berlin hardfork. It is part
   // of the London hardfork on L1. Since it is coupled to the Berlin
   // hardfork, some of its functionality cannot be directly tests via
   // integration tests since we can currently only turn on all of the Berlin

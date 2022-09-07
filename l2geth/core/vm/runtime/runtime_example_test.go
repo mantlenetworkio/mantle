@@ -19,8 +19,8 @@ package runtime_test
 import (
 	"fmt"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/vm/runtime"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/core/vm/runtime"
 )
 
 func ExampleExecute() {

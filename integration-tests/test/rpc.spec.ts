@@ -20,10 +20,10 @@ import {
   envConfig,
   gasPriceOracleWallet,
 } from './shared/utils'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 
 describe('Basic RPC tests', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
   let wallet: Wallet
 
   let Reverter: Contract
@@ -33,7 +33,7 @@ describe('Basic RPC tests', () => {
   let revertingDeployTx: TransactionRequest
 
   before(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
     wallet = env.l2Wallet
     const Factory__Reverter = await ethers.getContractFactory(
       'Reverter',
@@ -334,7 +334,7 @@ describe('Basic RPC tests', () => {
       expect(receipt.status).to.eq(0)
     })
 
-    // Bitnetwork special fields on the receipt
+    // Mantle special fields on the receipt
     it('includes L1 gas price and L1 gas used', async () => {
       const tx = await env.l2Wallet.populateTransaction({
         to: env.l2Wallet.address,

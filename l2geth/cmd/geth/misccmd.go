@@ -23,10 +23,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/cmd/utils"
-	"github.com/bitdao-io/bitnetwork/l2geth/consensus/ethash"
-	"github.com/bitdao-io/bitnetwork/l2geth/eth"
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
+	"github.com/bitdao-io/mantle/l2geth/cmd/utils"
+	"github.com/bitdao-io/mantle/l2geth/consensus/ethash"
+	"github.com/bitdao-io/mantle/l2geth/eth"
+	"github.com/bitdao-io/mantle/l2geth/params"
 	"gopkg.in/urfave/cli.v1"
 )
 

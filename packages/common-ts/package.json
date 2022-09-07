@@ -1,7 +1,7 @@
 {
   "name": "@bitdaoio/common-ts",
   "version": "1.0.1",
-  "description": "[Bitnetwork] Advanced typescript tooling used by various services",
+  "description": "[Mantle] Advanced typescript tooling used by various services",
   "main": "dist/index",
   "types": "dist/index",
   "files": [
@@ -19,17 +19,17 @@
     "test:coverage": "echo 'no coverage'"
   },
   "keywords": [
-    "bitnetwork",
+    "mantle",
     "ethereum",
     "common",
     "typescript"
   ],
-  "homepage": "https://github.com/bitdao-io/bitnetwork/tree/develop/packages/common-ts#readme",
+  "homepage": "https://github.com/bitdao-io/mantle/tree/develop/packages/common-ts#readme",
   "license": "MIT",
-  "author": "Bitnetwork PBC",
+  "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitdao-io/bitnetwork.git"
+    "url": "https://github.com/bitdao-io/mantle.git"
   },
   "dependencies": {
     "@bitdaoio/core-utils": "1.0.3",

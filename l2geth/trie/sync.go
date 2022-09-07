@@ -20,9 +20,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/prque"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethdb"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/prque"
+	"github.com/bitdao-io/mantle/l2geth/ethdb"
 )
 
 // ErrNotRequested is returned by the trie sync when it's requested to process a

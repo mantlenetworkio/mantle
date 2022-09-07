@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/math"
-	"github.com/bitdao-io/bitnetwork/l2geth/consensus/ethash"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/math"
+	"github.com/bitdao-io/mantle/l2geth/consensus/ethash"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/params"
 )
 
 //go:generate gencodec -type DifficultyTest -field-override difficultyTestMarshaling -out gen_difficultytest.go

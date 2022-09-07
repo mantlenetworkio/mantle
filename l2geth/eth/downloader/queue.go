@@ -25,11 +25,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/prque"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/metrics"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/prque"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/metrics"
 )
 
 var (

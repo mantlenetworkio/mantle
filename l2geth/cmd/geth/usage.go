@@ -22,8 +22,8 @@ import (
 	"io"
 	"sort"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/cmd/utils"
-	"github.com/bitdao-io/bitnetwork/l2geth/internal/debug"
+	"github.com/bitdao-io/mantle/l2geth/cmd/utils"
+	"github.com/bitdao-io/mantle/l2geth/internal/debug"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -64,7 +64,7 @@ type flagGroup struct {
 var AppHelpFlagGroups = []flagGroup{
 	{
 		// UsingBVM
-		Name: "BITNETWORK",
+		Name: "MANTLE",
 		Flags: []cli.Flag{
 			utils.Eth1SyncServiceEnable,
 			utils.Eth1CanonicalTransactionChainDeployHeightFlag,

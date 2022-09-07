@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/proxyd"
+	"github.com/bitdao-io/mantle/proxyd"
 	"github.com/stretchr/testify/require"
 )
 

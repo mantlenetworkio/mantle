@@ -35,7 +35,7 @@ package whisperv6
 import (
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
 )
 
 // Whisper protocol parameters

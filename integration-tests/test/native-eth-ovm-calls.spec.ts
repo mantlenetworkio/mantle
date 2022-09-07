@@ -9,15 +9,15 @@ import {
   encodeSolidityRevertMessage,
   gasPriceForL2,
 } from './shared/utils'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 
 describe('Native ETH value integration tests', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
   let wallet: Wallet
   let other: Wallet
 
   before(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
     wallet = env.l2Wallet
     other = Wallet.createRandom().connect(wallet.provider)
   })

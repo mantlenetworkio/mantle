@@ -6,8 +6,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/gas-oracle/bindings"
-	ometrics "github.com/bitdao-io/bitnetwork/gas-oracle/metrics"
+	"github.com/bitdao-io/mantle/gas-oracle/bindings"
+	ometrics "github.com/bitdao-io/mantle/gas-oracle/metrics"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common/hexutil"

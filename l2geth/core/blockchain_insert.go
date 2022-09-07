@@ -19,10 +19,10 @@ package core
 import (
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/mclock"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/mclock"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/log"
 )
 
 // insertStats tracks and reports on block insertion.

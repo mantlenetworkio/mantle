@@ -1,7 +1,7 @@
 {
   "name": "@bitdaoio/hardhat-deploy-config",
   "version": "1.0.0",
-  "description": "[Bitnetwork] Hardhat deploy configuration plugin",
+  "description": "[Mantle] Hardhat deploy configuration plugin",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "files": [
@@ -17,19 +17,19 @@
     "lint:check": "eslint . --max-warnings=0"
   },
   "keywords": [
-    "Bitnetwork",
+    "Mantle",
     "ethereum",
     "hardhat",
     "deploy",
     "config",
     "plugin"
   ],
-  "homepage": "https://github.com/bitdaoio/bitnetwork/tree/develop/packages/hardhat-deploy-config#readme",
+  "homepage": "https://github.com/bitdaoio/mantle/tree/develop/packages/hardhat-deploy-config#readme",
   "license": "MIT",
-  "author": "Bitnetwork PBC",
+  "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitdaoio/bitnetwork.git"
+    "url": "https://github.com/bitdaoio/mantle.git"
   },
   "devDependencies": {
     "ethers": "^5.6.8",

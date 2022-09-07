@@ -27,7 +27,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
 	"golang.org/x/crypto/sha3"
 )
 

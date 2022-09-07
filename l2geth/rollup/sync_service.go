@@ -10,19 +10,19 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/core"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/state"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/event"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/core"
+	"github.com/bitdao-io/mantle/l2geth/core/state"
+	"github.com/bitdao-io/mantle/l2geth/ethdb"
+	"github.com/bitdao-io/mantle/l2geth/event"
+	"github.com/bitdao-io/mantle/l2geth/log"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/core/rawdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/core/rawdb"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/eth/gasprice"
-	"github.com/bitdao-io/bitnetwork/l2geth/rollup/fees"
-	"github.com/bitdao-io/bitnetwork/l2geth/rollup/rcfg"
+	"github.com/bitdao-io/mantle/l2geth/eth/gasprice"
+	"github.com/bitdao-io/mantle/l2geth/rollup/fees"
+	"github.com/bitdao-io/mantle/l2geth/rollup/rcfg"
 )
 
 var (

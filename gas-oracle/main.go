@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/gas-oracle/flags"
-	ometrics "github.com/bitdao-io/bitnetwork/gas-oracle/metrics"
-	"github.com/bitdao-io/bitnetwork/gas-oracle/oracle"
+	"github.com/bitdao-io/mantle/gas-oracle/flags"
+	ometrics "github.com/bitdao-io/mantle/gas-oracle/metrics"
+	"github.com/bitdao-io/mantle/gas-oracle/oracle"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics/influxdb"
 	"github.com/ethereum/go-ethereum/params"
@@ -26,8 +26,8 @@ func main() {
 
 	app.Version = GitVersion + "-" + params.VersionWithCommit(GitCommit, GitDate)
 	app.Name = "gas-oracle"
-	app.Usage = "Remotely Control the bitnetwork Gas Price"
-	app.Description = "Configure with a private key and an Bitnetwork HTTP endpoint " +
+	app.Usage = "Remotely Control the mantle Gas Price"
+	app.Description = "Configure with a private key and an Mantle HTTP endpoint " +
 		"to send transactions that update the L2 gas price."
 
 	// Configure the logging

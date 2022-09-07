@@ -18,25 +18,25 @@ interface DeploymentInfo {
 const PUBLIC_DEPLOYMENTS: DeploymentInfo[] = [
   {
     folder: 'mainnet',
-    name: 'Bitnetwork (mainnet)',
+    name: 'Mantle (mainnet)',
     chainid: 10,
-    rpc: 'https://mainnet.bitnetwork.io',
+    rpc: 'https://mainnet.mantle.io',
     l1Explorer: 'https://etherscan.io',
-    l2Explorer: 'https://bitnetwork.etherscan.io',
+    l2Explorer: 'https://mantle.etherscan.io',
   },
   {
     folder: 'kovan',
-    name: 'Bitnetwork Kovan (public testnet)',
+    name: 'Mantle Kovan (public testnet)',
     chainid: 69,
-    rpc: 'https://kovan.bitnetwork.io',
+    rpc: 'https://kovan.mantle.io',
     l1Explorer: 'https://kovan.etherscan.io',
-    l2Explorer: 'https://kovan-bitnetwork.etherscan.io',
+    l2Explorer: 'https://kovan-mantle.etherscan.io',
   },
   {
     folder: 'goerli',
-    name: 'Bitnetwork Goerli (internal devnet)',
+    name: 'Mantle Goerli (internal devnet)',
     chainid: 420,
-    notice: `Bitnetwork Goerli is an internal Bitnetwork development network. You're probably looking for [Bitnetwork Kovan](../kovan#readme), the public Bitnetwork testnet.`,
+    notice: `Mantle Goerli is an internal Mantle development network. You're probably looking for [Mantle Kovan](../kovan#readme), the public Mantle testnet.`,
     l1Explorer: 'https://goerli.etherscan.io',
   },
 ]
@@ -223,7 +223,7 @@ const main = async () => {
   }
 
   let primary = ``
-  primary = addline(primary, `# Bitnetwork Deployments`)
+  primary = addline(primary, `# Mantle Deployments`)
   for (const deployment of PUBLIC_DEPLOYMENTS) {
     primary = addline(
       primary,
