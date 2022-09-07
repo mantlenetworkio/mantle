@@ -54,7 +54,7 @@ services:
     <<: *base
     container_name: bititests
     deploy:
-      replicas: 1
+      replicas: 0
 
   relayer:
     <<: *base

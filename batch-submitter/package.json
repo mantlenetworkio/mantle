@@ -1,5 +1,5 @@
 {
-	"name": "@bitdaoio/batch-submitter-service",
+	"name": "@bitdaoio/batch-submitter",
 	"version": "0.1.12",
 	"private": true,
 	"devDependencies": {}

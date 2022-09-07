@@ -490,9 +490,9 @@ workflows:
           context:
             - mantle
       - docker-publish:
-          name: batch-submitter-service-release
+          name: batch-submitter-release
           docker_file: batch-submitter/Dockerfile
-          docker_tags: bitnetworkio/batch-submitter-service:nightly
+          docker_tags: bitnetworkio/batch-submitter:nightly
           docker_context: .
           context:
             - mantle

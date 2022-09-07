@@ -19,7 +19,7 @@ x-healthcheck: &healthcheck
 services:
   # this is a helper service used because there's no official hardhat image
   l1_chain:
-    image: ethereummantle/hardhat:${DOCKER_TAG_HARDHAT:-latest}
+    image: bitnetworkio/hardhat:${DOCKER_TAG_HARDHAT:-latest}
     build:
       context: ./docker/hardhat
       dockerfile: Dockerfile
@@ -41,7 +41,7 @@ services:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.packages
       target: deployer
-    image: ethereummantle/deployer:${DOCKER_TAG_DEPLOYER:-latest}
+    image: bitnetworkio/deployer:${DOCKER_TAG_DEPLOYER:-latest}
     entrypoint: ./deployer.sh
     environment:
       # Env vars for the deployment script.
@@ -63,7 +63,7 @@ services:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.packages
       target: data-transport-layer
-    image: ethereummantle/data-transport-layer:${DOCKER_TAG_DATA_TRANSPORT_LAYER:-latest}
+    image: bitnetworkio/data-transport-layer:${DOCKER_TAG_DATA_TRANSPORT_LAYER:-latest}
     # override with the dtl script and the env vars required for it
     entrypoint: ./dtl.sh
     env_file:
@@ -89,7 +89,7 @@ services:
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile
-    image: ethereummantle/l2geth:${DOCKER_TAG_L2GETH:-latest}
+    image: bitnetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     # override with the geth script and the env vars required for it
     entrypoint: sh ./geth.sh
     env_file:
@@ -127,7 +127,7 @@ services:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.packages
       target: message-relayer
-    image: ethereummantle/message-relayer:${DOCKER_TAG_MESSAGE_RELAYER:-latest}
+    image: bitnetworkio/message-relayer:${DOCKER_TAG_MESSAGE_RELAYER:-latest}
     entrypoint: ./relayer.sh
     environment:
       MESSAGE_RELAYER__L1_RPC_PROVIDER: http://l1_chain:8545
@@ -146,7 +146,7 @@ services:
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile
-    image: ethereummantle/l2geth:${DOCKER_TAG_L2GETH:-latest}
+    image: bitnetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     env_file:
       - ./envs/geth.env
@@ -175,7 +175,7 @@ services:
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile
-    image: ethereummantle/l2geth:${DOCKER_TAG_L2GETH:-latest}
+    image: bitnetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     env_file:
       - ./envs/geth.env
@@ -203,7 +203,7 @@ services:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.packages
       target: replica-healthcheck
-    image: ethereummantle/replica-healthcheck:${DOCKER_TAG_REPLICA_HEALTHCHECK:-latest}
+    image: bitnetworkio/replica-healthcheck:${DOCKER_TAG_REPLICA_HEALTHCHECK:-latest}
     environment:
       HEALTHCHECK__REFERENCE_RPC_PROVIDER: http://l2geth:8545
       HEALTHCHECK__TARGET_RPC_PROVIDER: http://replica:8545
@@ -217,7 +217,7 @@ services:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.packages
       target: integration-tests
-    image: ethereummantle/integration-tests:${DOCKER_TAG_INTEGRATION_TESTS:-latest}
+    image: bitnetworkio/integration-tests:${DOCKER_TAG_INTEGRATION_TESTS:-latest}
     entrypoint: ./integration-tests.sh
     environment:
       L1_URL: http://l1_chain:8545
@@ -240,7 +240,7 @@ services:
     build:
       context: ..
       dockerfile: ./gas-oracle/Dockerfile
-    image: ethereummantle/gas-oracle:${DOCKER_TAG_GAS_ORACLE:-latest}
+    image: bitnetworkio/gas-oracle:${DOCKER_TAG_GAS_ORACLE:-latest}
     environment:
       GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL: http://l1_chain:8545
       GAS_PRICE_ORACLE_LAYER_TWO_HTTP_URL: http://l2geth:8545
@@ -259,7 +259,7 @@ services:
     build:
       context: ..
       dockerfile: ./batch-submitter/Dockerfile
-    image: ethereummantle/batch-submitter-service:${DOCKER_TAG_BATCH_SUBMITTER_SERVICE:-latest}
+    image: bitnetworkio/batch-submitter:${DOCKER_TAG_BATCH_SUBMITTER:-latest}
     entrypoint: ./batch-submitter.sh
     env_file:
       - ./envs/batch-submitter.env
@@ -281,7 +281,7 @@ services:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.packages
       target: fault-detector
-    image: ethereummantle/fault-detector:${DOCKER_TAG_FAULT_DETECTOR:-latest}
+    image: bitnetworkio/fault-detector:${DOCKER_TAG_FAULT_DETECTOR:-latest}
     entrypoint: ./detector.sh
     environment:
       FAULT_DETECTOR__L1_RPC_PROVIDER: http://l1_chain:8545
@@ -298,7 +298,7 @@ services:
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile
-    image: ethereummantle/l2geth:${DOCKER_TAG_L2GETH:-latest}
+    image: bitnetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     env_file:
       - ./envs/geth.env
