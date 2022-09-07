@@ -16,7 +16,7 @@ configuration will determine the mode of operation. The configuration flags
 can be configured using either environment variables or passed at runtime as
 flags.
 
-A prebuilt Docker image is available at `ethereummantle/l2geth`.
+A prebuilt Docker image is available at `bitnetworkio/l2geth`.
 
 To compile the code, run:
 ```
