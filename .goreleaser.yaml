@@ -1,0 +1,361 @@
+before:
+  hooks:
+builds:
+  - id: batch-submitter-darwin
+    main: cmd/batch-submitter/main.go
+    dir: batch-submitter
+    binary: batch-submitter
+    env: &cgo_darwin
+      - GO111MODULE=on
+      - CGO_ENABLED=1
+      - CC=o64-clang
+      - CXX=o64-clang++
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: batch-submitter-linux-amd64
+    main: cmd/batch-submitter/main.go
+    dir: batch-submitter
+    binary: batch-submitter
+    env: &cgo_linux_amd64
+      - GO111MODULE=on
+      - CGO_ENABLED=1
+      - CC=x86_64-linux-gnu-gcc
+      - CXX=x86_64-linux-gnu-g++
+    goos:
+      - linux
+    goarch:
+      - amd64
+  - id: batch-submitter-linux-arm64
+    main: cmd/batch-submitter/main.go
+    dir: batch-submitter
+    binary: batch-submitter
+    env: &cgo_linux_arm64
+      - GO111MODULE=on
+      - CGO_ENABLED=1
+      - CC=aarch64-linux-gnu-gcc
+      - CXX=aarch64-linux-gnu-g++
+    goos:
+      - linux
+    goarch:
+      - arm64
+  - id: gas-oracle
+    dir: gas-oracle
+    binary: gas-oracle
+    env:
+      - GO111MODULE=on
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: l2geth-exporter
+    dir: l2geth-exporter
+    binary: l2geth-exporter
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: proxyd
+    main: cmd/proxyd/main.go
+    dir: proxyd
+    binary: proxyd
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: state-surgery-darwin
+    dir: state-surgery
+    main: cmd/main.go
+    binary: state-surgery
+    env: *cgo_darwin
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: state-surgery-linux-amd64
+    dir: state-surgery
+    main: cmd/main.go
+    binary: state-surgery
+    env: *cgo_linux_amd64
+    goos:
+      - linux
+    goarch:
+      - amd64
+  - id: state-surgery-linux-arm64
+    dir: state-surgery
+    main: cmd/main.go
+    binary: state-surgery
+    env: *cgo_linux_arm64
+    goos:
+      - linux
+    goarch:
+      - arm64
+  - id: l2geth-darwin
+    dir: l2geth/cmd/geth
+    binary: l2geth
+    env: *cgo_darwin
+    goos:
+      - darwin
+    goarch:
+      - arm64
+      - amd64
+  - id: l2geth-linux-amd64
+    dir: l2geth/cmd/geth
+    binary: l2geth
+    env: *cgo_linux_amd64
+    goos:
+      - linux
+    goarch:
+      - amd64
+  - id: l2geth-linux-arm64
+    dir: l2geth/cmd/geth
+    binary: l2geth
+    env: *cgo_linux_arm64
+    goos:
+      - linux
+    goarch:
+      - arm64
+  - id: bootnode-darwin
+    dir: l2geth/cmd/bootnode
+    binary: bootnode
+    env: *cgo_darwin
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: bootnode-linux-amd64
+    dir: l2geth/cmd/bootnode
+    binary: bootnode
+    env: *cgo_linux_amd64
+    goos:
+      - linux
+    goarch:
+      - amd64
+  - id: bootnode-linux-arm64
+    dir: l2geth/cmd/bootnode
+    binary: bootnode
+    env: *cgo_linux_arm64
+    goos:
+      - linux
+    goarch:
+      - arm64
+  - id: checkpoint-admin-darwin
+    dir: l2geth/cmd/checkpoint-admin
+    binary: checkpoint-admin
+    env: *cgo_darwin
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: checkpoint-admin-linux-amd64
+    dir: l2geth/cmd/checkpoint-admin
+    binary: checkpoint-admin
+    env: *cgo_linux_amd64
+    goos:
+      - linux
+    goarch:
+      - amd64
+  - id: checkpoint-admin-linux-arm64
+    dir: l2geth/cmd/checkpoint-admin
+    binary: checkpoint-admin
+    env: *cgo_linux_arm64
+    goos:
+      - linux
+    goarch:
+      - arm64
+  - id: clef-darwin
+    dir: l2geth/cmd/clef
+    binary: clef
+    env: *cgo_darwin
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: clef-linux-amd64
+    dir: l2geth/cmd/clef
+    binary: clef
+    env: *cgo_linux_amd64
+    goos:
+      - linux
+    goarch:
+      - amd64
+  - id: clef-linux-arm64
+    dir: l2geth/cmd/clef
+    binary: clef
+    env: *cgo_linux_arm64
+    goos:
+      - linux
+    goarch:
+      - arm64
+  - id: devp2p-darwin
+    dir: l2geth/cmd/devp2p
+    binary: devp2p
+    env: *cgo_darwin
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: devp2p-linux
+    dir: l2geth/cmd/devp2p
+    binary: devp2p
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+  - id: ethkey-darwin
+    dir: l2geth/cmd/ethkey
+    binary: ethkey
+    env: *cgo_darwin
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: ethkey-linux-amd64
+    dir: l2geth/cmd/ethkey
+    binary: ethkey
+    env: *cgo_linux_amd64
+    goos:
+      - linux
+    goarch:
+      - amd64
+  - id: ethkey-linux-arm64
+    dir: l2geth/cmd/ethkey
+    binary: ethkey
+    env: *cgo_linux_arm64
+    goos:
+      - linux
+    goarch:
+      - arm64
+  - id: evm-darwin
+    dir: l2geth/cmd/evm
+    binary: evm
+    env: *cgo_darwin
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: evm-linux-amd64
+    dir: l2geth/cmd/evm
+    binary: evm
+    env: *cgo_linux_amd64
+    goos:
+      - linux
+    goarch:
+      - amd64
+  - id: evm-linux-arm64
+    dir: l2geth/cmd/evm
+    binary: evm
+    env: *cgo_linux_arm64
+    goos:
+      - linux
+    goarch:
+      - arm64
+  - id: p2psim-linux
+    dir: l2geth/cmd/p2psim
+    binary: p2psim
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+  - id: p2psim-darwin
+    dir: l2geth/cmd/p2psim
+    binary: p2psim
+    env: *cgo_darwin
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: puppeth-linux
+    dir: l2geth/cmd/puppeth
+    binary: puppeth
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+  - id: puppeth-darwin
+    dir: l2geth/cmd/puppeth
+    binary: puppeth
+    env: *cgo_darwin
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: rlpdump
+    dir: l2geth/cmd/rlpdump
+    binary: rlpdump
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+  - id: wnode-darwin
+    dir: l2geth/cmd/wnode
+    binary: wnode
+    env: *cgo_darwin
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: wnode-linux-amd64
+    dir: l2geth/cmd/wnode
+    binary: wnode
+    env: *cgo_linux_amd64
+    goos:
+      - linux
+    goarch:
+      - amd64
+  - id: wnode-linux-arm64
+    dir: l2geth/cmd/wnode
+    binary: wnode
+    env: *cgo_linux_arm64
+    goos:
+      - linux
+    goarch:
+      - arm64
+archives:
+#  - format: binary
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'

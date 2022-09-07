@@ -31,6 +31,11 @@ const config: HardhatUserConfig = {
       saveDeployments: false,
       tags: ['local'],
     },
+    local: {
+      chainId: 31337,
+      url: 'http://127.0.0.1:9545',
+      accounts: [privateKey],
+    },
     mantle: {
       url: 'http://127.0.0.1:8545',
       saveDeployments: false,
@@ -52,11 +57,13 @@ const config: HardhatUserConfig = {
       url: 'http://127.0.0.1:8545',
       accounts: [privateKey],
     },
-    'goerlibn': {
+    goerlibn: {
       chainId: 5,
       url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
       deploy,
-      accounts: ['6395a7c842a08515961888d21d72f409b61fbce96af1e520384e375f301a8297'],
+      accounts: [
+        '6395a7c842a08515961888d21d72f409b61fbce96af1e520384e375f301a8297',
+      ],
     },
     'goerli-qa': {
       chainId: 5,

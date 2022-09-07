@@ -16,7 +16,7 @@ configuration will determine the mode of operation. The configuration flags
 can be configured using either environment variables or passed at runtime as
 flags.
 
-A prebuilt Docker image is available at `ethereummantle/l2geth`.
+A prebuilt Docker image is available at `bitnetworkio/l2geth`.
 
 To compile the code, run:
 ```
@@ -380,7 +380,7 @@ Please make sure your contributions adhere to our coding guidelines:
    guidelines (i.e. uses [gofmt](https://golang.org/cmd/gofmt/)).
  * Code must be documented adhering to the official Go [commentary](https://golang.org/doc/effective_go.html#commentary)
    guidelines.
- * Pull requests need to be based on and opened against the `master` branch.
+ * Pull requests need to be based on and opened against the `main` branch.
  * Commit messages should be prefixed with the package(s) they modify.
    * E.g. "eth, rpc: make trace configs optional"
 

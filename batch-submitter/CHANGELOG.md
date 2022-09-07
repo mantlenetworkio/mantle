@@ -1,2 +1,1 @@
-# @bitdaoio/batch-submitter-service
-
+# @bitdaoio/batch-submitter

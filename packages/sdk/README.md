@@ -1,4 +1,4 @@
-[![codecov](https://codecov.io/gh/mantleio/mantle/branch/master/graph/badge.svg?token=0VTG7PG7YR&flag=sdk)](https://codecov.io/gh/bitdaoio/mantle)
+[![codecov](https://codecov.io/gh/mantleio/mantle/branch/main/graph/badge.svg?token=0VTG7PG7YR&flag=sdk)](https://codecov.io/gh/bitdaoio/mantle)
 
 # @bitdaoio/sdk
 

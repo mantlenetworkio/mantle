@@ -85,6 +85,7 @@ describe('[GAS BENCHMARK] Depositing via the standard bridge [ @skip-on-coverage
     L1StandardBridge = await deploy('L1StandardBridge')
     await L1StandardBridge.initialize(
       L1CrossDomainMessenger.address,
+      NON_ZERO_ADDRESS,
       NON_ZERO_ADDRESS
     )
 
@@ -151,7 +152,7 @@ describe('[GAS BENCHMARK] Depositing via the standard bridge [ @skip-on-coverage
       const gasUsed = receipt.gasUsed.toNumber()
       console.log('    - Gas used:', gasUsed)
 
-      expectApprox(gasUsed, 192_822, {
+      expectApprox(gasUsed, 195_167, {
         absoluteUpperDeviation: 500,
         // Assert a lower bound of 1% reduction on gas cost. If your tests are breaking because your
         // contracts are too efficient, consider updating the target value!

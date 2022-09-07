@@ -26,7 +26,7 @@ jobs:
       canary-docker-tag: ${{ steps.docker-image-name.outputs.canary-docker-tag }}
       proxyd: ${{ steps.packages.outputs.proxyd }}
       l2geth-exporter: ${{ steps.packages.outputs.l2geth-exporter }}
-      batch-submitter-service: ${{ steps.packages.outputs.batch-submitter-service }}
+      batch-submitter: ${{ steps.packages.outputs.batch-submitter }}
 
     steps:
       - name: Check out source code
@@ -118,7 +118,7 @@ jobs:
           context: .
           file: ./l2geth/Dockerfile
           push: true
-          tags: ethereummantle/l2geth:${{ needs.canary-publish.outputs.canary-docker-tag }}
+          tags: bitnetworkio/l2geth:${{ needs.canary-publish.outputs.canary-docker-tag }}
 
   gas-oracle:
     name: Publish Gas Oracle ${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -144,7 +144,7 @@ jobs:
           context: .
           file: ./gas-oracle/Dockerfile
           push: true
-          tags: ethereummantle/gas-oracle:${{ needs.canary-publish.outputs.canary-docker-tag }}
+          tags: bitnetworkio/gas-oracle:${{ needs.canary-publish.outputs.canary-docker-tag }}
 
   hardhat-node:
     name: Publish Hardhat Node ${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -170,7 +170,7 @@ jobs:
           context: ./ops/docker/hardhat
           file: ./ops/docker/hardhat/Dockerfile
           push: true
-          tags: ethereummantle/hardhat-node:${{ needs.canary-publish.outputs.canary-docker-tag }}
+          tags: bitnetworkio/hardhat-node:${{ needs.canary-publish.outputs.canary-docker-tag }}
 
   message-relayer:
     name: Publish Message Relayer Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -197,7 +197,7 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: relayer
           push: true
-          tags: ethereummantle/message-relayer:${{ needs.canary-publish.outputs.canary-docker-tag }}
+          tags: bitnetworkio/message-relayer:${{ needs.canary-publish.outputs.canary-docker-tag }}
 
   fault-detector:
     name: Publish Fault Detector Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -224,7 +224,7 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: fault-detector
           push: true
-          tags: ethereummantle/fault-detector:${{ needs.canary-publish.outputs.canary-docker-tag }}
+          tags: bitnetworkio/fault-detector:${{ needs.canary-publish.outputs.canary-docker-tag }}
 
   data-transport-layer:
     name: Publish Data Transport Layer Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -251,7 +251,7 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: data-transport-layer
           push: true
-          tags: ethereummantle/data-transport-layer:${{ needs.canary-publish.outputs.canary-docker-tag }}
+          tags: bitnetworkio/data-transport-layer:${{ needs.canary-publish.outputs.canary-docker-tag }}
 
   contracts:
     name: Publish Deployer Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -278,7 +278,7 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: deployer
           push: true
-          tags: ethereummantle/deployer:${{ needs.canary-publish.outputs.canary-docker-tag }}
+          tags: bitnetworkio/deployer:${{ needs.canary-publish.outputs.canary-docker-tag }}
 
   integration_tests:
     name: Publish Integration tests ${{ needs.canary-publish.outputs.integration-tests }}
@@ -305,7 +305,7 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: integration-tests
           push: true
-          tags: ethereummantle/integration-tests:${{ needs.canary-publish.outputs.canary-docker-tag }}
+          tags: bitnetworkio/integration-tests:${{ needs.canary-publish.outputs.canary-docker-tag }}
 
   replica-healthcheck:
     name: Publish Replica Healthcheck Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -332,7 +332,7 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: replica-healthcheck
           push: true
-          tags: ethereummantle/replica-healthcheck:${{ needs.canary-publish.outputs.canary-docker-tag }}
+          tags: bitnetworkio/replica-healthcheck:${{ needs.canary-publish.outputs.canary-docker-tag }}
 
   proxyd:
     name: Publish proxyd Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -365,7 +365,7 @@ jobs:
           context: .
           file: ./proxyd/Dockerfile
           push: true
-          tags: ethereummantle/proxyd:${{ needs.canary-publish.outputs.proxyd }}
+          tags: bitnetworkio/proxyd:${{ needs.canary-publish.outputs.proxyd }}
           build-args: |
             GITDATE=${{ steps.build_args.outputs.GITDATE }}
             GITCOMMIT=${{ steps.build_args.outputs.GITCOMMIT }}
@@ -402,16 +402,16 @@ jobs:
           context: .
           file: ./l2geth-exporter/Dockerfile
           push: true
-          tags: ethereummantle/l2geth-exporter:${{ needs.canary-publish.outputs.l2geth-exporter }}
+          tags: bitnetworkio/l2geth-exporter:${{ needs.canary-publish.outputs.l2geth-exporter }}
           build-args: |
             GITDATE=${{ steps.build_args.outputs.GITDATE }}
             GITCOMMIT=${{ steps.build_args.outputs.GITCOMMIT }}
             GITVERSION=${{ steps.build_args.outputs.GITVERSION }}
 
-  batch-submitter-service:
-    name: Publish batch-submitter-service Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
+  batch-submitter:
+    name: Publish batch-submitter Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
     needs: canary-publish
-    if: needs.canary-publish.outputs.batch-submitter-service != ''
+    if: needs.canary-publish.outputs.batch-submitter != ''
     runs-on: ubuntu-latest
 
     steps:
@@ -432,4 +432,4 @@ jobs:
           context: .
           file: ./batch-submitter/Dockerfile
           push: true
-          tags: ethereummantle/batch-submitter-service:${{ needs.canary-publish.outputs.batch-submitter-service }}
+          tags: bitnetworkio/batch-submitter:${{ needs.canary-publish.outputs.batch-submitter }}
