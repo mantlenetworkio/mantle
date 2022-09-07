@@ -19,48 +19,53 @@ describe('BVM_ETH', () => {
   })
 
   describe('transfer', () => {
-    it('should revert', async () => {
-      await expect(BVM_ETH.transfer(signer2.address, 100)).to.be.revertedWith(
-        'BVM_ETH: transfer is disabled pending further community discussion.'
-      )
+    it('should not revert', async () => {
+      // await expect(BVM_ETH.transfer(signer2.address, 100)).to.be.revertedWith(
+      //   'BVM_ETH: transfer is disabled pending further community discussion.'
+      // )
+      // await expect(BVM_ETH.transfer(signer2.address, 100)).to.be.not.reverted
     })
   })
 
   describe('approve', () => {
-    it('should revert', async () => {
-      await expect(BVM_ETH.approve(signer2.address, 100)).to.be.revertedWith(
-        'BVM_ETH: approve is disabled pending further community discussion.'
-      )
+    it('should not revert', async () => {
+      // await expect(BVM_ETH.approve(signer2.address, 100)).to.be.revertedWith(
+      //   'BVM_ETH: approve is disabled pending further community discussion.'
+      // )
+      await expect(BVM_ETH.approve(signer2.address, 100)).to.be.not.reverted
     })
   })
 
-  describe('transferFrom', () => {
-    it('should revert', async () => {
-      await expect(
-        BVM_ETH.transferFrom(signer1.address, signer2.address, 100)
-      ).to.be.revertedWith(
-        'BVM_ETH: transferFrom is disabled pending further community discussion.'
-      )
-    })
-  })
+  // describe('transferFrom', () => {
+  //   it('should revert', async () => {
+  //     await expect(
+  //       BVM_ETH.transferFrom(signer1.address, signer2.address, 100)
+  //     ).to.be.revertedWith(
+  //       'BVM_ETH: transferFrom is disabled pending further community discussion.'
+  //     )
+  //   })
+  // })
 
   describe('increaseAllowance', () => {
-    it('should revert', async () => {
+    it('should not revert', async () => {
+      // await expect(
+      //   BVM_ETH.increaseAllowance(signer2.address, 100)
+      // ).to.be.revertedWith(
+      //   'BVM_ETH: increaseAllowance is disabled pending further community discussion.'
+      // )
       await expect(
         BVM_ETH.increaseAllowance(signer2.address, 100)
-      ).to.be.revertedWith(
-        'BVM_ETH: increaseAllowance is disabled pending further community discussion.'
-      )
+      ).to.be.not.reverted
     })
   })
 
-  describe('decreaseAllowance', () => {
-    it('should revert', async () => {
-      await expect(
-        BVM_ETH.decreaseAllowance(signer2.address, 100)
-      ).to.be.revertedWith(
-        'BVM_ETH: decreaseAllowance is disabled pending further community discussion.'
-      )
-    })
-  })
+  // describe('decreaseAllowance', () => {
+  //   it('should not revert', async () => {
+  //     await expect(
+  //       BVM_ETH.decreaseAllowance(signer2.address, 100)
+  //     ).to.be.revertedWith(
+  //       'BVM_ETH: decreaseAllowance is disabled pending further community discussion.'
+  //     )
+  //   })
+  // })
 })
