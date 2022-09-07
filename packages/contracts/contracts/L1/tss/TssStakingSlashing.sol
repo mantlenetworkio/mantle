@@ -71,6 +71,7 @@ contract TssStakingSlashing is
      */
     function initialize(address _bitToken, address _tssGroupContract) public initializer {
         __Ownable_init();
+        __ReentrancyGuard_init();
 
         BitToken = _bitToken;
         tssGroupContract = _tssGroupContract;

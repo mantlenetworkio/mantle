@@ -32,6 +32,11 @@ const config: HardhatUserConfig = {
       saveDeployments: false,
       tags: ['local'],
     },
+    local: {
+      chainId: 31337,
+      url: 'http://127.0.0.1:9545',
+      accounts: ['0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97'],
+    },
     bitnetwork: {
       url: 'http://127.0.0.1:8545',
       saveDeployments: false,
