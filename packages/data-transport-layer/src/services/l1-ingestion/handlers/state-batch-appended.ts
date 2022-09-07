@@ -1,6 +1,6 @@
 /* Imports: External */
-import { StateBatchAppendedEvent } from '@bitdaoio/contracts/dist/types/contracts/L1/rollup/StateCommitmentChain'
-import { getContractFactory } from '@bitdaoio/contracts'
+import { StateBatchAppendedEvent } from '@mantlenetworkio/contracts/dist/types/contracts/L1/rollup/StateCommitmentChain'
+import { getContractFactory } from '@mantlenetworkio/contracts'
 import { BigNumber } from 'ethers'
 
 /* Imports: Internal */

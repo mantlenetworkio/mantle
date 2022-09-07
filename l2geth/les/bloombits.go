@@ -19,8 +19,8 @@ package les
 import (
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common/bitutil"
-	"github.com/bitdao-io/mantle/l2geth/light"
+	"github.com/mantlenetworkio/mantle/l2geth/common/bitutil"
+	"github.com/mantlenetworkio/mantle/l2geth/light"
 )
 
 const (

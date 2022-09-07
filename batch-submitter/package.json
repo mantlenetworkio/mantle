@@ -1,5 +1,5 @@
 {
-	"name": "@bitdaoio/batch-submitter",
+	"name": "@mantlenetworkio/batch-submitter",
 	"version": "0.1.12",
 	"private": true,
 	"devDependencies": {}

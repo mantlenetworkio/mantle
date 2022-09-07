@@ -23,7 +23,7 @@ const (
 
 // locationTrims are trimmed for display to avoid unwieldy log lines.
 var locationTrims = []string{
-	"github.com/bitdao-io/mantle/l2geth/",
+	"github.com/mantlenetworkio/mantle/l2geth/",
 }
 
 // PrintOrigins sets or unsets log location (file:line) printing for terminal

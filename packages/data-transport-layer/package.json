@@ -1,7 +1,7 @@
 {
   "private": true,
-  "name": "@bitdaoio/data-transport-layer",
-  "version": "1.0.0",
+  "name": "@mantlenetworkio/data-transport-layer",
+  "version": "0.0.1",
   "description": "[Mantle] Service for shuttling data from L1 into L2",
   "main": "dist/index",
   "types": "dist/index",
@@ -28,17 +28,17 @@
     "transport",
     "layer"
   ],
-  "homepage": "https://github.com/mantleio/mantle/tree/main/packages/data-transport-layer#readme",
+  "homepage": "https://github.com/mantlenetworkio/mantle/tree/main/packages/data-transport-layer#readme",
   "license": "MIT",
   "author": "Mantle",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mantleio/mantle.git"
+    "url": "git+https://github.com/mantlenetworkio/mantle.git"
   },
   "dependencies": {
-    "@bitdaoio/common-ts": "1.0.0",
-    "@bitdaoio/contracts": "1.0.7-beta3",
-    "@bitdaoio/core-utils": "1.0.3",
+    "@mantlenetworkio/common-ts": "0.0.1",
+    "@mantlenetworkio/contracts": "0.0.1",
+    "@mantlenetworkio/core-utils": "0.0.1",
     "@ethersproject/providers": "^5.6.8",
     "@ethersproject/transactions": "^5.6.2",
     "@sentry/node": "^6.3.1",
@@ -69,7 +69,7 @@
     "ts-node": "^10.0.0"
   },
   "bugs": {
-    "url": "https://github.com/mantleio/mantle/issues"
+    "url": "https://github.com/mantlenetworkio/mantle/issues"
   },
   "directories": {
     "test": "test"

@@ -1,5 +1,5 @@
 {
-  "name": "@bitdaoio/gas-oracle",
+  "name": "@mantlenetworkio/gas-oracle",
   "version": "0.1.12",
   "private": true,
   "devDependencies": {}

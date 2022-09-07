@@ -8,9 +8,9 @@ import (
 
 	"github.com/tyler-smith/go-bip39"
 
-	bsscore "github.com/bitdao-io/mantle/bss-core"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/stretchr/testify/require"
 )
 

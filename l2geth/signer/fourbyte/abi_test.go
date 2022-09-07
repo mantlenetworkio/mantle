@@ -22,8 +22,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/accounts/abi"
-	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 func verify(t *testing.T, jsondata, calldata string, exp []interface{}) {

@@ -4,7 +4,7 @@ import {
   TransactionResponse,
   TransactionReceipt,
 } from '@ethersproject/providers'
-import { getChainId, sleep } from '@bitdaoio/core-utils'
+import { getChainId, sleep } from '@mantlenetworkio/core-utils'
 import {
   CrossChainMessenger,
   MessageStatus,
@@ -12,8 +12,8 @@ import {
   StandardBridgeAdapter,
   ETHBridgeAdapter,
   BridgeAdapterData,
-} from '@bitdaoio/sdk'
-import { predeploys } from '@bitdaoio/contracts'
+} from '@mantlenetworkio/sdk'
+import { predeploys } from '@mantlenetworkio/contracts'
 
 /* Imports: Internal */
 import {

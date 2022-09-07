@@ -19,8 +19,8 @@ package vm
 import (
 	"math/big"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/common/math"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common/math"
 )
 
 // calcMemSize64 calculates the required memory size, and returns

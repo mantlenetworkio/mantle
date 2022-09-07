@@ -1,8 +1,8 @@
 package dump
 
 import (
-	"github.com/bitdao-io/mantle/l2geth/accounts/abi"
-	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 type BvmDumpAccount struct {

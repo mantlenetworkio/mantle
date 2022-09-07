@@ -18,7 +18,7 @@ You'll need the following:
 Clone the repository, open it, and install nodejs packages with `yarn`:
 
 ```bash
-git clone git@github.com:bitnetworkio/mantle.git
+git clone git@github.com:mantlenetworkio/mantle.git
 cd mantle
 yarn install
 ```

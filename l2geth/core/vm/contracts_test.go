@@ -23,7 +23,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 // precompiledTest defines the input/output pairs for precompiled contract tests.

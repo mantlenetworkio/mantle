@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 // deployDashboard queries the user for various input on deploying a web-service

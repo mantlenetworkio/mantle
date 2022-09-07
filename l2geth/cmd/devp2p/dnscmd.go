@@ -25,11 +25,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/accounts/keystore"
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/console"
-	"github.com/bitdao-io/mantle/l2geth/p2p/dnsdisc"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/console"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/dnsdisc"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

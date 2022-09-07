@@ -1,2 +1,2 @@
-# @bitdaoio/common-ts
+# @mantlenetworkio/common-ts
 

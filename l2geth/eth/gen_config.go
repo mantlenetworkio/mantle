@@ -6,13 +6,13 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/consensus/ethash"
-	"github.com/bitdao-io/mantle/l2geth/core"
-	"github.com/bitdao-io/mantle/l2geth/eth/downloader"
-	"github.com/bitdao-io/mantle/l2geth/eth/gasprice"
-	"github.com/bitdao-io/mantle/l2geth/miner"
-	"github.com/bitdao-io/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/ethash"
+	"github.com/mantlenetworkio/mantle/l2geth/core"
+	"github.com/mantlenetworkio/mantle/l2geth/eth/downloader"
+	"github.com/mantlenetworkio/mantle/l2geth/eth/gasprice"
+	"github.com/mantlenetworkio/mantle/l2geth/miner"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
 )
 
 // MarshalTOML marshals as TOML.

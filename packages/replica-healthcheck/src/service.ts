@@ -1,6 +1,6 @@
 import { Provider, Block } from '@ethersproject/abstract-provider'
-import { BaseServiceV2, Counter, Gauge, validators } from '@bitdaoio/common-ts'
-import { sleep } from '@bitdaoio/core-utils'
+import { BaseServiceV2, Counter, Gauge, validators } from '@mantlenetworkio/common-ts'
+import { sleep } from '@mantlenetworkio/core-utils'
 
 type HealthcheckOptions = {
   referenceRpcProvider: Provider

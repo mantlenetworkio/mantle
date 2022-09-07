@@ -19,7 +19,7 @@ package keystore
 import (
 	"os"
 
-	"github.com/bitdao-io/mantle/l2geth/accounts/keystore"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
 )
 
 func Fuzz(input []byte) int {

@@ -22,13 +22,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/accounts"
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
-	"github.com/bitdao-io/mantle/l2geth/internal/ethapi"
-	"github.com/bitdao-io/mantle/l2geth/signer/core"
-	"github.com/bitdao-io/mantle/l2geth/signer/storage"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/internal/ethapi"
+	"github.com/mantlenetworkio/mantle/l2geth/signer/core"
+	"github.com/mantlenetworkio/mantle/l2geth/signer/storage"
 )
 
 const JS = `
