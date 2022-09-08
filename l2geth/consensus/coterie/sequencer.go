@@ -17,19 +17,19 @@ import (
 // NOTE: The ProducerPriority is not included in Sequencer.Hash();
 // make sure to update that method if changes are made here
 type Sequencer struct {
-	Address     common.Address  `json:"address"`
-	PubKey      ecdsa.PublicKey `json:"pub_key"`
-	VotingPower int64           `json:"voting_power"`
+	Address common.Address  `json:"address"`
+	PubKey  ecdsa.PublicKey `json:"pub_key"`
+	Power   int64           `json:"power"`
 
 	ProducerPriority int64 `json:"producer_priority"`
 }
 
-// NewSequencer returns a new sequencer with the given pubkey and voting power.
-func NewSequencer(addr common.Address, pubKey ecdsa.PublicKey, votingPower int64) *Sequencer {
+// NewSequencer returns a new sequencer with the given pubkey and power.
+func NewSequencer(addr common.Address, pubKey ecdsa.PublicKey, power int64) *Sequencer {
 	return &Sequencer{
 		Address:          addr,
 		PubKey:           pubKey,
-		VotingPower:      votingPower,
+		Power:            power,
 		ProducerPriority: 0,
 	}
 }
@@ -43,7 +43,7 @@ func (s *Sequencer) SequencerBasic() error {
 		return errors.New("sequencer does not have a public key")
 	}
 
-	if s.VotingPower < 0 {
+	if s.Power < 0 {
 		return errors.New("sequencer has negative voting power")
 	}
 
@@ -90,10 +90,10 @@ func (s *Sequencer) String() string {
 	if s == nil {
 		return "nil-Sequencer"
 	}
-	return fmt.Sprintf("Sequencer{%v %v VP:%v A:%v}",
+	return fmt.Sprintf("Sequencer{%v %v P:%v A:%v}",
 		s.Address,
 		s.PubKey,
-		s.VotingPower,
+		s.Power,
 		s.ProducerPriority)
 }
 
@@ -101,7 +101,7 @@ func (s *Sequencer) String() string {
 func SequencerListString(seqs []*Sequencer) string {
 	chunks := make([]string, len(seqs))
 	for i, seq := range seqs {
-		chunks[i] = fmt.Sprintf("%s:%d", seq.Address, seq.VotingPower)
+		chunks[i] = fmt.Sprintf("%s:%d", seq.Address, seq.Power)
 	}
 
 	return strings.Join(chunks, ",")
@@ -113,9 +113,9 @@ func SequencerListString(seqs []*Sequencer) string {
 // RandSequencer returns a randomized validator, useful for testing.
 // UNSTABLE
 func RandSequencer(randPower bool, minPower int64) *Sequencer {
-	votePower := minPower
+	power := minPower
 	if randPower {
-		votePower += int64(rand.Uint32())
+		power += int64(rand.Uint32())
 	}
 	var seed []byte
 	rand.Read(seed)
@@ -126,6 +126,6 @@ func RandSequencer(randPower bool, minPower int64) *Sequencer {
 	if err != nil {
 		panic(fmt.Errorf("could not retrieve pubkey %w", err))
 	}
-	seq := NewSequencer(addr, pubKey, votePower)
+	seq := NewSequencer(addr, pubKey, power)
 	return seq
 }

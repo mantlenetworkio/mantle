@@ -43,13 +43,13 @@ func TestSequencerSetBasic(t *testing.T) {
 	assert.EqualValues(t, [20]byte{}, addr)
 	assert.Nil(t, seq)
 	assert.Zero(t, sset.Size())
-	assert.Equal(t, int64(0), sset.TotalVotingPower())
+	assert.Equal(t, int64(0), sset.TotalPower())
 	assert.Nil(t, sset.GetProducer())
 	// assert.Equal(t, []byte{0xe3, 0xb0, 0xc4, 0x42, 0x98, 0xfc, 0x1c, 0x14, 0x9a, 0xfb, 0xf4,
 	//	0xc8, 0x99, 0x6f, 0xb9, 0x24, 0x27, 0xae, 0x41, 0xe4, 0x64, 0x9b, 0x93, 0x4c, 0xa4, 0x95,
 	//	0x99, 0x1b, 0x78, 0x52, 0xb8, 0x55}, sset.Hash())
 	// add
-	seq = randSequencer(sset.TotalVotingPower())
+	seq = randSequencer(sset.TotalPower())
 
 	assert.NoError(t, sset.UpdateWithChangeSet([]*Sequencer{seq}))
 
@@ -59,16 +59,16 @@ func TestSequencerSetBasic(t *testing.T) {
 	addr, _ = sset.GetByIndex(0)
 	assert.Equal(t, seq.Address, addr)
 	assert.Equal(t, 1, sset.Size())
-	assert.Equal(t, seq.VotingPower, sset.TotalVotingPower())
+	assert.Equal(t, seq.Power, sset.TotalPower())
 	assert.NotNil(t, sset.Hash())
 	assert.NotPanics(t, func() { sset.IncrementProducerPriority(1) })
 	assert.Equal(t, seq.Address, sset.GetProducer().Address)
 
 	// update
-	seq = randSequencer(sset.TotalVotingPower())
+	seq = randSequencer(sset.TotalPower())
 	assert.NoError(t, sset.UpdateWithChangeSet([]*Sequencer{seq}))
 	_, seq = sset.GetByAddress(seq.Address)
-	seq.VotingPower += 100
+	seq.Power += 100
 	proposerPriority := seq.ProducerPriority
 
 	seq.ProducerPriority = 0
@@ -362,7 +362,7 @@ func byteToCommonAddr(bytes []byte) common.Address {
 }
 
 func newSequencer(address common.Address, pubKey ecdsa.PublicKey, power int64) *Sequencer {
-	return &Sequencer{Address: address, PubKey: pubKey, VotingPower: power}
+	return &Sequencer{Address: address, PubKey: pubKey, Power: power}
 }
 
 func randPubKey() ecdsa.PublicKey {
@@ -379,10 +379,10 @@ func randAddress() common.Address {
 }
 
 func randSequencer(totalVotingPower int64) *Sequencer {
-	// this modulo limits the ProducerPriority/VotingPower to stay in the
-	// bounds of MaxTotalVotingPower minus the already existing voting power:
-	seq := NewSequencer(randAddress(), randPubKey(), int64(rand.Uint64()%uint64(MaxTotalVotingPower-totalVotingPower)))
-	seq.ProducerPriority = rand.Int63() % (MaxTotalVotingPower - totalVotingPower)
+	// this modulo limits the ProducerPriority/Power to stay in the
+	// bounds of MaxTotalPower minus the already existing voting power:
+	seq := NewSequencer(randAddress(), randPubKey(), int64(rand.Uint64()%uint64(MaxTotalPower-totalVotingPower)))
+	seq.ProducerPriority = rand.Int63() % (MaxTotalPower - totalVotingPower)
 	return seq
 }
 
@@ -391,7 +391,7 @@ func randSequencerSet(numSequencers int) *SequencerSet {
 	totalVotingPower := int64(0)
 	for i := 0; i < numSequencers; i++ {
 		sequencers[i] = randSequencer(totalVotingPower)
-		totalVotingPower += sequencers[i].VotingPower
+		totalVotingPower += sequencers[i].Power
 	}
 	return NewSequencerSet(sequencers)
 }
@@ -407,13 +407,13 @@ func randSequencerSet(numSequencers int) *SequencerSet {
 //-------------------------------------------------------------------
 
 func TestSequencerSetTotalVotingPowerPanicsOnOverflow(t *testing.T) {
-	// NewSequencerSet calls IncrementProducerPriority which calls TotalVotingPower()
+	// NewSequencerSet calls IncrementProducerPriority which calls TotalPower()
 	// which should panic on overflows:
 	shouldPanic := func() {
 		NewSequencerSet([]*Sequencer{
-			{Address: byteToCommonAddr([]byte("a")), VotingPower: math.MaxInt64, ProducerPriority: 0},
-			{Address: byteToCommonAddr([]byte("b")), VotingPower: math.MaxInt64, ProducerPriority: 0},
-			{Address: byteToCommonAddr([]byte("c")), VotingPower: math.MaxInt64, ProducerPriority: 0},
+			{Address: byteToCommonAddr([]byte("a")), Power: math.MaxInt64, ProducerPriority: 0},
+			{Address: byteToCommonAddr([]byte("b")), Power: math.MaxInt64, ProducerPriority: 0},
+			{Address: byteToCommonAddr([]byte("c")), Power: math.MaxInt64, ProducerPriority: 0},
 		})
 	}
 
@@ -517,9 +517,9 @@ func TestAveragingInIncrementProducerPriorityWithVotingPower(t *testing.T) {
 	total := vp0 + vp1 + vp2
 	avg := (vp0 + vp1 + vp2 - total) / 3
 	seqs := SequencerSet{Sequencers: []*Sequencer{
-		{Address: byteToCommonAddr([]byte{0}), ProducerPriority: 0, VotingPower: vp0},
-		{Address: byteToCommonAddr([]byte{1}), ProducerPriority: 0, VotingPower: vp1},
-		{Address: byteToCommonAddr([]byte{2}), ProducerPriority: 0, VotingPower: vp2},
+		{Address: byteToCommonAddr([]byte{0}), ProducerPriority: 0, Power: vp0},
+		{Address: byteToCommonAddr([]byte{1}), ProducerPriority: 0, Power: vp1},
+		{Address: byteToCommonAddr([]byte{2}), ProducerPriority: 0, Power: vp2},
 	}}
 	tcs := []struct {
 		seqs                  *SequencerSet
@@ -530,7 +530,7 @@ func TestAveragingInIncrementProducerPriorityWithVotingPower(t *testing.T) {
 		0: {
 			seqs.Copy(),
 			[]int64{
-				// Acumm+VotingPower-Avg:
+				// Acumm+Power-Avg:
 				0 + vp0 - total - avg, // mostest will be subtracted by total voting power (12)
 				0 + vp1,
 				0 + vp2,
@@ -572,7 +572,7 @@ func TestAveragingInIncrementProducerPriorityWithVotingPower(t *testing.T) {
 			seqs.Copy(),
 			[]int64{
 				0 + 4*(vp0-total) + vp0, // 4 iters was mostest
-				0 + 5*vp1 - total,       // now this seq is mostest for the 1st time (hence -12==totalVotingPower)
+				0 + 5*vp1 - total,       // now this seq is mostest for the 1st time (hence -12==totalPower)
 				0 + 5*vp2,
 			},
 			5,
@@ -780,9 +780,9 @@ func verifySequencerSet(t *testing.T, seqSet *SequencerSet) {
 	assert.Equal(t, len(seqSet.Sequencers), cap(seqSet.Sequencers))
 
 	// verify that the set's total voting power has been updated
-	tvp := seqSet.totalVotingPower
-	seqSet.updateTotalVotingPower()
-	expectedTvp := seqSet.TotalVotingPower()
+	tvp := seqSet.totalPower
+	seqSet.updateTotalPower()
+	expectedTvp := seqSet.TotalPower()
 	assert.Equal(t, expectedTvp, tvp,
 		"expected TVP %d. Got %d, seqSet=%s", expectedTvp, tvp, seqSet)
 
@@ -802,7 +802,7 @@ func toTestSeqList(seqList []*Sequencer) []testSeq {
 	testList := make([]testSeq, len(seqList))
 	for i, seq := range seqList {
 		testList[i].name = seq.Address.String()
-		testList[i].power = seq.VotingPower
+		testList[i].power = seq.Power
 	}
 	return testList
 }
@@ -903,7 +903,7 @@ func TestSeqSetUpdatesDuplicateEntries(t *testing.T) {
 }
 
 func TestSeqSetUpdatesOverflows(t *testing.T) {
-	maxVP := MaxTotalVotingPower
+	maxVP := MaxTotalPower
 	testCases := []seqSetErrTestCase{
 		{ // single update leading to overflow
 			testSeqSet(2, 10),
@@ -1011,7 +1011,7 @@ func TestSeqSetUpdatesBasicTestsExecute(t *testing.T) {
 		// is changed in the list of sequencers previously passed as parameter to UpdateWithChangeSet.
 		// this is to make sure copies of the sequencers are made by UpdateWithChangeSet.
 		if len(seqList) > 0 {
-			seqList[0].VotingPower++
+			seqList[0].Power++
 			assert.Equal(t, toTestSeqList(seqListCopy), toTestSeqList(seqSet.Sequencers), "test %v", i)
 
 		}
@@ -1298,7 +1298,7 @@ func verifySeqSetUpdatePriorityOrder(t *testing.T, seqSet *SequencerSet, cfg tes
 		sort.Sort(sequencersByPriority(updatedSeqsPriSorted))
 
 		addedSeqsPriSlice := updatedSeqsPriSorted[:len(cfg.addedSeqs)]
-		sort.Sort(SequencersByVotingPower(addedSeqsPriSlice))
+		sort.Sort(SequencersByPower(addedSeqsPriSlice))
 		assert.Equal(t, renameTestSeqList(cfg.addedSeqs), toTestSeqList(addedSeqsPriSlice))
 
 		//  - and should all have the same priority
@@ -1332,43 +1332,43 @@ func TestSeqSetUpdateOverflowRelated(t *testing.T) {
 	testCases := []testVSetCfg{
 		{
 			name:         "1 no false overflow error messages for updates",
-			startSeqs:    []testSeq{{"v2", MaxTotalVotingPower - 1}, {"v1", 1}},
-			updatedSeqs:  []testSeq{{"v1", MaxTotalVotingPower - 1}, {"v2", 1}},
-			expectedSeqs: []testSeq{{"v1", MaxTotalVotingPower - 1}, {"v2", 1}},
+			startSeqs:    []testSeq{{"v2", MaxTotalPower - 1}, {"v1", 1}},
+			updatedSeqs:  []testSeq{{"v1", MaxTotalPower - 1}, {"v2", 1}},
+			expectedSeqs: []testSeq{{"v1", MaxTotalPower - 1}, {"v2", 1}},
 			expErr:       nil,
 		},
 		{
 			// this test shows that it is important to apply the updates in the order of the change in power
 			// i.e. apply first updates with decreases in power, v2 change in this case.
 			name:         "2 no false overflow error messages for updates",
-			startSeqs:    []testSeq{{"v2", MaxTotalVotingPower - 1}, {"v1", 1}},
-			updatedSeqs:  []testSeq{{"v1", MaxTotalVotingPower/2 - 1}, {"v2", MaxTotalVotingPower / 2}},
-			expectedSeqs: []testSeq{{"v2", MaxTotalVotingPower / 2}, {"v1", MaxTotalVotingPower/2 - 1}},
+			startSeqs:    []testSeq{{"v2", MaxTotalPower - 1}, {"v1", 1}},
+			updatedSeqs:  []testSeq{{"v1", MaxTotalPower/2 - 1}, {"v2", MaxTotalPower / 2}},
+			expectedSeqs: []testSeq{{"v2", MaxTotalPower / 2}, {"v1", MaxTotalPower/2 - 1}},
 			expErr:       nil,
 		},
 		{
 			name:         "3 no false overflow error messages for deletes",
-			startSeqs:    []testSeq{{"v1", MaxTotalVotingPower - 2}, {"v2", 1}, {"v3", 1}},
+			startSeqs:    []testSeq{{"v1", MaxTotalPower - 2}, {"v2", 1}, {"v3", 1}},
 			deletedSeqs:  []testSeq{{"v1", 0}},
-			addedSeqs:    []testSeq{{"v4", MaxTotalVotingPower - 2}},
-			expectedSeqs: []testSeq{{"v4", MaxTotalVotingPower - 2}, {"v2", 1}, {"v3", 1}},
+			addedSeqs:    []testSeq{{"v4", MaxTotalPower - 2}},
+			expectedSeqs: []testSeq{{"v4", MaxTotalPower - 2}, {"v2", 1}, {"v3", 1}},
 			expErr:       nil,
 		},
 		{
 			name: "4 no false overflow error messages for adds, updates and deletes",
 			startSeqs: []testSeq{
-				{"v1", MaxTotalVotingPower / 4},
-				{"v2", MaxTotalVotingPower / 4},
-				{"v3", MaxTotalVotingPower / 4},
-				{"v4", MaxTotalVotingPower / 4},
+				{"v1", MaxTotalPower / 4},
+				{"v2", MaxTotalPower / 4},
+				{"v3", MaxTotalPower / 4},
+				{"v4", MaxTotalPower / 4},
 			},
 			deletedSeqs: []testSeq{{"v2", 0}},
 			updatedSeqs: []testSeq{
-				{"v1", MaxTotalVotingPower/2 - 2}, {"v3", MaxTotalVotingPower/2 - 3}, {"v4", 2},
+				{"v1", MaxTotalPower/2 - 2}, {"v3", MaxTotalPower/2 - 3}, {"v4", 2},
 			},
 			addedSeqs: []testSeq{{"v5", 3}},
 			expectedSeqs: []testSeq{
-				{"v1", MaxTotalVotingPower/2 - 2}, {"v3", MaxTotalVotingPower/2 - 3}, {"v5", 3}, {"v4", 2},
+				{"v1", MaxTotalPower/2 - 2}, {"v3", MaxTotalPower/2 - 3}, {"v5", 3}, {"v4", 2},
 			},
 			expErr: nil,
 		},
@@ -1386,14 +1386,14 @@ func TestSeqSetUpdateOverflowRelated(t *testing.T) {
 				{"v9", 1},
 			},
 			updatedSeqs: []testSeq{
-				{"v1", MaxTotalVotingPower},
-				{"v2", MaxTotalVotingPower},
-				{"v3", MaxTotalVotingPower},
-				{"v4", MaxTotalVotingPower},
-				{"v5", MaxTotalVotingPower},
-				{"v6", MaxTotalVotingPower},
-				{"v7", MaxTotalVotingPower},
-				{"v8", MaxTotalVotingPower},
+				{"v1", MaxTotalPower},
+				{"v2", MaxTotalPower},
+				{"v3", MaxTotalPower},
+				{"v4", MaxTotalPower},
+				{"v5", MaxTotalPower},
+				{"v6", MaxTotalPower},
+				{"v7", MaxTotalPower},
+				{"v8", MaxTotalPower},
 				{"v9", 8},
 			},
 			expectedSeqs: []testSeq{
@@ -1407,7 +1407,7 @@ func TestSeqSetUpdateOverflowRelated(t *testing.T) {
 				{"v8", 1},
 				{"v9", 1},
 			},
-			expErr: ErrTotalVotingPowerOverflow,
+			expErr: ErrTotalPowerOverflow,
 		},
 	}
 

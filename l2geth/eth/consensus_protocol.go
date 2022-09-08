@@ -17,9 +17,12 @@
 package eth
 
 // consensusProtocolLength is the number of implemented message.
-var consensusProtocolLength = 2
+var consensusProtocolLength = uint64(2)
 
 const consensusMaxMsgSize = 10 * 1024 * 1024 // Maximum cap on the size of a protocol message
+
+// protocolName is the official short name of the protocol used during capability negotiation.
+const consensusProtocolName = "coterie"
 
 // eth protocol message codes
 const (

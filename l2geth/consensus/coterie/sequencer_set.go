@@ -15,32 +15,32 @@ import (
 )
 
 const (
-	// MaxTotalVotingPower - the maximum allowed total voting power.
+	// MaxTotalPower - the maximum allowed total power.
 	// It needs to be sufficiently small to, in all cases:
 	// 1. prevent clipping in incrementProposerPriority()
 	// 2. let (diff+diffMax-1) not overflow in IncrementProposerPriority()
 	// (Proof of 1 is tricky, left to the reader).
 	// It could be higher, but this is sufficiently large for our purposes,
 	// and leaves room for defensive purposes.
-	MaxTotalVotingPower = int64(math.MaxInt64) / 8
+	MaxTotalPower = int64(math.MaxInt64) / 8
 
 	// PriorityWindowSizeFactor - is a constant that when multiplied with the
-	// total voting power gives the maximum allowed distance between sequencer
+	// total power gives the maximum allowed distance between sequencer
 	// priorities.
 	PriorityWindowSizeFactor = 2
 )
 
-// ErrTotalVotingPowerOverflow is returned if the total voting power of the
-// resulting sequencer set exceeds MaxTotalVotingPower.
-var ErrTotalVotingPowerOverflow = fmt.Errorf("total voting power of resulting seqset exceeds max %d",
-	MaxTotalVotingPower)
+// ErrTotalPowerOverflow is returned if the total power of the
+// resulting sequencer set exceeds MaxTotalPower.
+var ErrTotalPowerOverflow = fmt.Errorf("total power of resulting seqset exceeds max %d",
+	MaxTotalPower)
 
 // SequencerSet represent a set of *Sequencer at a given height.
 //
 // The sequencers can be fetched by address or index.
-// The index is in order of .VotingPower, so the indices are fixed for all
+// The index is in order of .Power, so the indices are fixed for all
 // rounds of a given blockchain height - ie. the sequencers are sorted by their
-// voting power (descending). Secondary index - .Address (ascending).
+// power (descending). Secondary index - .Address (ascending).
 //
 // On the other hand, the .ProposerPriority of each sequencer and the
 // designated .GetProposer() of a set changes every round, upon calling
@@ -54,7 +54,7 @@ type SequencerSet struct {
 	Producer   *Sequencer   `json:"producer"`
 
 	// cached (unexported)
-	totalVotingPower int64
+	totalPower int64
 }
 
 // NewSequencerSet initializes a SequencerSet by copying over the values from
@@ -123,8 +123,8 @@ func (seqs *SequencerSet) IncrementProducerPriority(times int32) {
 
 	// Cap the difference between priorities to be proportional to 2*totalPower by
 	// re-normalizing priorities, i.e., rescale all priorities by multiplying with:
-	//  2*totalVotingPower/(maxPriority - minPriority)
-	diffMax := PriorityWindowSizeFactor * seqs.TotalVotingPower()
+	//  2*totalPower/(maxPriority - minPriority)
+	diffMax := PriorityWindowSizeFactor * seqs.TotalPower()
 	seqs.RescalePriorities(diffMax)
 	seqs.shiftByAvgProducerPriority()
 
@@ -145,7 +145,7 @@ func (seqs *SequencerSet) RescalePriorities(diffMax int64) {
 		panic("empty sequencer set")
 	}
 	// NOTE: This check is merely a sanity check which could be
-	// removed if all tests would init. voting power appropriately;
+	// removed if all tests would init. power appropriately;
 	// i.e. diffMax should always be > 0
 	if diffMax <= 0 {
 		return
@@ -166,13 +166,13 @@ func (seqs *SequencerSet) RescalePriorities(diffMax int64) {
 func (seqs *SequencerSet) incrementProducerPriority() *Sequencer {
 	for _, seq := range seqs.Sequencers {
 		// Check for overflow for sum.
-		newPrio := safeAddClip(seq.ProducerPriority, seq.VotingPower)
-		seq.ProducerPriority = newPrio
+		newPriority := safeAddClip(seq.ProducerPriority, seq.Power)
+		seq.ProducerPriority = newPriority
 	}
 	// Decrement the sequencer with most ProposerPriority.
 	mostest := seqs.getSeqWithMostPriority()
 	// Mind the underflow.
-	mostest.ProducerPriority = safeSubClip(mostest.ProducerPriority, seqs.TotalVotingPower())
+	mostest.ProducerPriority = safeSubClip(mostest.ProducerPriority, seqs.TotalPower())
 
 	return mostest
 }
@@ -248,9 +248,9 @@ func sequencerListCopy(seqsList []*Sequencer) []*Sequencer {
 // Copy each sequencer into a new SequencerSet.
 func (seqs *SequencerSet) Copy() *SequencerSet {
 	return &SequencerSet{
-		Sequencers:       sequencerListCopy(seqs.Sequencers),
-		Producer:         seqs.Producer,
-		totalVotingPower: seqs.totalVotingPower,
+		Sequencers: sequencerListCopy(seqs.Sequencers),
+		Producer:   seqs.Producer,
+		totalPower: seqs.totalPower,
 	}
 }
 
@@ -293,31 +293,31 @@ func (seqs *SequencerSet) Size() int {
 	return len(seqs.Sequencers)
 }
 
-// Forces recalculation of the set's total voting power.
-// Panics if total voting power is bigger than MaxTotalVotingPower.
-func (seqs *SequencerSet) updateTotalVotingPower() {
+// Forces recalculation of the set's total power.
+// Panics if total power is bigger than MaxTotalPower.
+func (seqs *SequencerSet) updateTotalPower() {
 	sum := int64(0)
 	for _, val := range seqs.Sequencers {
 		// mind overflow
-		sum = safeAddClip(sum, val.VotingPower)
-		if sum > MaxTotalVotingPower {
+		sum = safeAddClip(sum, val.Power)
+		if sum > MaxTotalPower {
 			panic(fmt.Sprintf(
-				"Total voting power should be guarded to not exceed %v; got: %v",
-				MaxTotalVotingPower,
+				"Total power should be guarded to not exceed %v; got: %v",
+				MaxTotalPower,
 				sum))
 		}
 	}
 
-	seqs.totalVotingPower = sum
+	seqs.totalPower = sum
 }
 
-// TotalVotingPower returns the sum of the voting powers of all sequencers.
-// It recomputes the total voting power if required.
-func (seqs *SequencerSet) TotalVotingPower() int64 {
-	if seqs.totalVotingPower == 0 {
-		seqs.updateTotalVotingPower()
+// TotalPower returns the sum of the powers of all sequencers.
+// It recomputes the total power if required.
+func (seqs *SequencerSet) TotalPower() int64 {
+	if seqs.totalPower == 0 {
+		seqs.updateTotalPower()
 	}
-	return seqs.totalVotingPower
+	return seqs.totalPower
 }
 
 // GetProposer returns the current proposer. If the sequencer set is empty, nil
@@ -363,7 +363,7 @@ func (seqs *SequencerSet) Iterate(fn func(index int, val *Sequencer) bool) {
 //
 // Returns:
 // updates, removals - the sorted lists of updates and removals
-// err - non-nil if duplicate entries or entries with negative voting power are seen
+// err - non-nil if duplicate entries or entries with negative power are seen
 //
 // No changes are made to 'origChanges'.
 func processChanges(origChanges []*Sequencer) (updates, removals []*Sequencer, err error) {
@@ -382,14 +382,14 @@ func processChanges(origChanges []*Sequencer) (updates, removals []*Sequencer, e
 		}
 
 		switch {
-		case seqUpdate.VotingPower < 0:
-			err = fmt.Errorf("voting power can't be negative: %d", seqUpdate.VotingPower)
+		case seqUpdate.Power < 0:
+			err = fmt.Errorf("power can't be negative: %d", seqUpdate.Power)
 			return nil, nil, err
-		case seqUpdate.VotingPower > MaxTotalVotingPower:
-			err = fmt.Errorf("to prevent clipping/overflow, voting power can't be higher than %d, got %d",
-				MaxTotalVotingPower, seqUpdate.VotingPower)
+		case seqUpdate.Power > MaxTotalPower:
+			err = fmt.Errorf("to prevent clipping/overflow, power can't be higher than %d, got %d",
+				MaxTotalPower, seqUpdate.Power)
 			return nil, nil, err
-		case seqUpdate.VotingPower == 0:
+		case seqUpdate.Power == 0:
 			removals = append(removals, seqUpdate)
 		default:
 			updates = append(updates, seqUpdate)
@@ -402,7 +402,7 @@ func processChanges(origChanges []*Sequencer) (updates, removals []*Sequencer, e
 }
 
 // verifyUpdates verifies a list of updates against a sequencer set, making sure the allowed
-// total voting power would not be exceeded if these updates would be applied to the set.
+// total power would not be exceeded if these updates would be applied to the set.
 //
 // Inputs:
 // updates - a list of proper sequencer changes, i.e. they have been verified by processChanges for duplicates
@@ -410,15 +410,15 @@ func processChanges(origChanges []*Sequencer) (updates, removals []*Sequencer, e
 //	and invalid values.
 //
 // seqs - the original sequencer set. Note that seqs is NOT modified by this function.
-// removedPower - the total voting power that will be removed after the updates are verified and applied.
+// removedPower - the total power that will be removed after the updates are verified and applied.
 //
 // Returns:
-// tvpAfterUpdatesBeforeRemovals -  the new total voting power if these updates would be applied without the removals.
+// tvpAfterUpdatesBeforeRemovals -  the new total power if these updates would be applied without the removals.
 //
-//	Note that this will be < 2 * MaxTotalVotingPower in case high power sequencers are removed and
+//	Note that this will be < 2 * MaxTotalPower in case high power sequencers are removed and
 //	sequencers are added/ updated with high power values.
 //
-// err - non-nil if the maximum allowed total voting power would be exceeded
+// err - non-nil if the maximum allowed total power would be exceeded
 func verifyUpdates(
 	updates []*Sequencer,
 	seqs *SequencerSet,
@@ -427,9 +427,9 @@ func verifyUpdates(
 	delta := func(update *Sequencer, seqs *SequencerSet) int64 {
 		_, seq := seqs.GetByAddress(update.Address)
 		if seq != nil {
-			return update.VotingPower - seq.VotingPower
+			return update.Power - seq.Power
 		}
-		return update.VotingPower
+		return update.Power
 	}
 
 	updatesCopy := sequencerListCopy(updates)
@@ -437,11 +437,11 @@ func verifyUpdates(
 		return delta(updatesCopy[i], seqs) < delta(updatesCopy[j], seqs)
 	})
 
-	tvpAfterRemovals := seqs.TotalVotingPower() - removedPower
+	tvpAfterRemovals := seqs.TotalPower() - removedPower
 	for _, upd := range updatesCopy {
 		tvpAfterRemovals += delta(upd, seqs)
-		if tvpAfterRemovals > MaxTotalVotingPower {
-			return 0, ErrTotalVotingPowerOverflow
+		if tvpAfterRemovals > MaxTotalPower {
+			return 0, ErrTotalPowerOverflow
 		}
 	}
 	return tvpAfterRemovals + removedPower, nil
@@ -458,31 +458,31 @@ func numNewSequencers(updates []*Sequencer, seqs *SequencerSet) int {
 }
 
 // computeNewPriorities computes the proposer priority for the sequencers not present in the set based on
-// 'updatedTotalVotingPower'.
+// 'updatedTotalPower'.
 // Leaves unchanged the priorities of sequencers that are changed.
 //
 // 'updates' parameter must be a list of unique sequencers to be added or updated.
 //
-// 'updatedTotalVotingPower' is the total voting power of a set where all updates would be applied but
+// 'updatedTotalPower' is the total  power of a set where all updates would be applied but
 //
-//	not the removals. It must be < 2*MaxTotalVotingPower and may be close to this limit if close to
-//	MaxTotalVotingPower will be removed. This is still safe from overflow since MaxTotalVotingPower is maxInt64/8.
+//	not the removals. It must be < 2*MaxTotalPower and may be close to this limit if close to
+//	MaxTotalPower will be removed. This is still safe from overflow since MaxTotalPower is maxInt64/8.
 //
 // No changes are made to the sequencer set 'seqs'.
-func computeNewPriorities(updates []*Sequencer, seqs *SequencerSet, updatedTotalVotingPower int64) {
+func computeNewPriorities(updates []*Sequencer, seqs *SequencerSet, updatedTotalPower int64) {
 	for _, valUpdate := range updates {
 		address := valUpdate.Address
 		_, val := seqs.GetByAddress(address)
 		if val == nil {
 			// add val
-			// Set ProposerPriority to -C*totalVotingPower (with C ~= 1.125) to make sure sequencers can't
+			// Set ProposerPriority to -C*totalPower (with C ~= 1.125) to make sure sequencers can't
 			// un-bond and then re-bond to reset their (potentially previously negative) ProposerPriority to zero.
 			//
-			// Contract: updatedVotingPower < 2 * MaxTotalVotingPower to ensure ProposerPriority does
+			// Contract: updatedPower < 2 * MaxTotalPower to ensure ProposerPriority does
 			// not exceed the bounds of int64.
 			//
-			// Compute ProposerPriority = -1.125*totalVotingPower == -(updatedVotingPower + (updatedVotingPower >> 3)).
-			valUpdate.ProducerPriority = -(updatedTotalVotingPower + (updatedTotalVotingPower >> 3))
+			// Compute ProposerPriority = -1.125*totalPower == -(updatedPower + (updatedPower >> 3)).
+			valUpdate.ProducerPriority = -(updatedTotalPower + (updatedTotalPower >> 3))
 		} else {
 			valUpdate.ProducerPriority = val.ProducerPriority
 		}
@@ -532,20 +532,20 @@ func (seqs *SequencerSet) applyUpdates(updates []*Sequencer) {
 
 // Checks that the sequencers to be removed are part of the sequencer set.
 // No changes are made to the sequencer set 'seqs'.
-func verifyRemovals(deletes []*Sequencer, seqs *SequencerSet) (votingPower int64, err error) {
-	removedVotingPower := int64(0)
+func verifyRemovals(deletes []*Sequencer, seqs *SequencerSet) (power int64, err error) {
+	removedPower := int64(0)
 	for _, valUpdate := range deletes {
 		address := valUpdate.Address
 		_, val := seqs.GetByAddress(address)
 		if val == nil {
-			return removedVotingPower, fmt.Errorf("failed to find sequencer %X to remove", address)
+			return removedPower, fmt.Errorf("failed to find sequencer %X to remove", address)
 		}
-		removedVotingPower += val.VotingPower
+		removedPower += val.Power
 	}
 	if len(deletes) > len(seqs.Sequencers) {
 		panic("more deletes than sequencers")
 	}
-	return removedVotingPower, nil
+	return removedPower, nil
 }
 
 // Removes the sequencers specified in 'deletes' from sequencer set 'seqs'.
@@ -578,7 +578,7 @@ func (seqs *SequencerSet) applyRemovals(deletes []*Sequencer) {
 }
 
 // Main function used by UpdateWithChangeSet() and NewSequencerSet().
-// If 'allowDeletes' is false then delete operations (identified by sequencers with voting power 0)
+// If 'allowDeletes' is false then delete operations (identified by sequencers with power 0)
 // are not allowed and will trigger an error if present in 'changes'.
 // The 'allowDeletes' flag is set to false by NewSequencerSet() and to true by UpdateWithChangeSet().
 func (seqs *SequencerSet) updateWithChangeSet(changes []*Sequencer, allowDeletes bool) error {
@@ -593,7 +593,7 @@ func (seqs *SequencerSet) updateWithChangeSet(changes []*Sequencer, allowDeletes
 	}
 
 	if !allowDeletes && len(deletes) != 0 {
-		return fmt.Errorf("cannot process sequencers with voting power 0: %v", deletes)
+		return fmt.Errorf("cannot process sequencers with power 0: %v", deletes)
 	}
 
 	// Check that the resulting set will not be empty.
@@ -602,15 +602,15 @@ func (seqs *SequencerSet) updateWithChangeSet(changes []*Sequencer, allowDeletes
 	}
 
 	// Verify that applying the 'deletes' against 'seqs' will not result in error.
-	// Get the voting power that is going to be removed.
-	removedVotingPower, err := verifyRemovals(deletes, seqs)
+	// Get the power that is going to be removed.
+	removedPower, err := verifyRemovals(deletes, seqs)
 	if err != nil {
 		return err
 	}
 
 	// Verify that applying the 'updates' against 'seqs' will not result in error.
-	// Get the updated total voting power before removal. Note that this is < 2 * MaxTotalVotingPower
-	tvpAfterUpdatesBeforeRemovals, err := verifyUpdates(updates, seqs, removedVotingPower)
+	// Get the updated total power before removal. Note that this is < 2 * MaxTotalPower
+	tvpAfterUpdatesBeforeRemovals, err := verifyUpdates(updates, seqs, removedPower)
 	if err != nil {
 		return err
 	}
@@ -622,13 +622,13 @@ func (seqs *SequencerSet) updateWithChangeSet(changes []*Sequencer, allowDeletes
 	seqs.applyUpdates(updates)
 	seqs.applyRemovals(deletes)
 
-	seqs.updateTotalVotingPower() // will panic if total voting power > MaxTotalVotingPower
+	seqs.updateTotalPower() // will panic if total power > MaxTotalPower
 
 	// Scale and center.
-	seqs.RescalePriorities(PriorityWindowSizeFactor * seqs.TotalVotingPower())
+	seqs.RescalePriorities(PriorityWindowSizeFactor * seqs.TotalPower())
 	seqs.shiftByAvgProducerPriority()
 
-	sort.Sort(SequencersByVotingPower(seqs.Sequencers))
+	sort.Sort(SequencersByPower(seqs.Sequencers))
 
 	return nil
 }
@@ -637,7 +637,7 @@ func (seqs *SequencerSet) updateWithChangeSet(changes []*Sequencer, allowDeletes
 // It performs the following steps:
 //   - validates the changes making sure there are no duplicates and splits them in updates and deletes
 //   - verifies that applying the changes will not result in errors
-//   - computes the total voting power BEFORE removals to ensure that in the next steps the priorities
+//   - computes the total power BEFORE removals to ensure that in the next steps the priorities
 //     across old and newly added sequencers are fair
 //   - computes the priorities of new sequencers against the final set
 //   - applies the updates against the sequencer set
@@ -712,20 +712,20 @@ func (seqs *SequencerSet) GetRlp(i int) []byte {
 
 //-------------------------------------
 
-// SequencersByVotingPower implements sort.Interface for []*Sequencer based on
-// the VotingPower and Address fields.
-type SequencersByVotingPower []*Sequencer
+// SequencersByPower implements sort.Interface for []*Sequencer based on
+// the Power and Address fields.
+type SequencersByPower []*Sequencer
 
-func (seqz SequencersByVotingPower) Len() int { return len(seqz) }
+func (seqz SequencersByPower) Len() int { return len(seqz) }
 
-func (seqz SequencersByVotingPower) Less(i, j int) bool {
-	if seqz[i].VotingPower == seqz[j].VotingPower {
+func (seqz SequencersByPower) Less(i, j int) bool {
+	if seqz[i].Power == seqz[j].Power {
 		return bytes.Compare(seqz[i].Address.Bytes(), seqz[j].Address.Bytes()) == -1
 	}
-	return seqz[i].VotingPower > seqz[j].VotingPower
+	return seqz[i].Power > seqz[j].Power
 }
 
-func (seqz SequencersByVotingPower) Swap(i, j int) {
+func (seqz SequencersByPower) Swap(i, j int) {
 	seqz[i], seqz[j] = seqz[j], seqz[i]
 }
 

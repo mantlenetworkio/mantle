@@ -29,8 +29,8 @@ func newProducers(number uint64, epoch uint64, schedulerID string, sequencerSet 
 	return data
 }
 
-// loadSnapshot loads an existing producersData from the database.
-func loadSnapshot(db ethdb.Database, number uint64) (*Producers, error) {
+// loadProducers loads an existing producers from the database.
+func loadProducers(db ethdb.Database, number uint64) (*Producers, error) {
 
 	blob, err := db.Get(append([]byte("coterie-"), Uint64ToBytes(number)[:]...))
 	if err != nil {

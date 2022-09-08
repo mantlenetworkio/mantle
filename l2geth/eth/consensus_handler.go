@@ -14,9 +14,9 @@ func (pm *ProtocolManager) makeConsensusProtocol(version uint) p2p.Protocol {
 	length := consensusProtocolLength
 
 	return p2p.Protocol{
-		Name:    protocolName,
+		Name:    consensusProtocolName,
 		Version: version,
-		Length:  uint64(length),
+		Length:  length,
 		Run:     pm.consensusHandler,
 		NodeInfo: func() interface{} {
 			return pm.NodeInfo()
@@ -68,15 +68,12 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		var producers []rlp.RawValue
-		sequencerSet := request.SequencerSet
 		if encoded, err := rlp.EncodeToBytes(request); err != nil {
 			log.Error("Failed to encode receipt", "err", err)
 		} else {
 			producers = append(producers, encoded)
 		}
 
-		// TODO:
-		_ = sequencerSet
 		if eg, ok := pm.blockchain.Engine().(*coterie.Coterie); ok {
 			eg.SetProducers(request)
 		}
@@ -92,7 +89,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		var results coterie.Producers
 
 		var getProducers coterie.GetProducers
-		//TODO:
+
 		if eg, ok := pm.blockchain.Engine().(*coterie.Coterie); ok {
 			results = eg.GetProducers(getProducers)
 		}
