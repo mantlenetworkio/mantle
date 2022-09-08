@@ -9,7 +9,7 @@ import { StandardBridgeAdapter } from './standard-bridge'
 /**
  * Bridge adapter for DAI.
  */
-export class DAIBridgeAdapter extends StandardBridgeAdapter {
+export class ERC20BridgeAdapter extends StandardBridgeAdapter {
   public async supportsTokenPair(
     l1Token: AddressLike,
     l2Token: AddressLike
