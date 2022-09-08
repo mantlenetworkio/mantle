@@ -4,10 +4,10 @@ import (
 	"context"
 	"os"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
-	"github.com/bitdao-io/mantle/tss/common"
-	"github.com/bitdao-io/mantle/tss/manager"
-	"github.com/bitdao-io/mantle/tss/node/cmd/tssnode"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/tss/common"
+	"github.com/mantlenetworkio/mantle/tss/manager"
+	"github.com/mantlenetworkio/mantle/tss/node/cmd/tssnode"
 	"github.com/spf13/cobra"
 )
 

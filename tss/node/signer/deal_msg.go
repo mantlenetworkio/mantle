@@ -2,7 +2,7 @@ package signer
 
 import (
 	"errors"
-	"github.com/bitdao-io/mantle/tss/common"
+	"github.com/mantlenetworkio/mantle/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )

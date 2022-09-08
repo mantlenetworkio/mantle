@@ -3,9 +3,9 @@ package signer
 import (
 	"context"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
-	"github.com/bitdao-io/mantle/tss/slash"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/tss/slash"
 	"math/big"
 	"time"
 )

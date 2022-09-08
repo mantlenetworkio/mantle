@@ -3,10 +3,10 @@ package slash
 import (
 	"errors"
 
-	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
-	tss "github.com/bitdao-io/mantle/tss/common"
-	"github.com/bitdao-io/mantle/tss/index"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	tss "github.com/mantlenetworkio/mantle/tss/common"
+	"github.com/mantlenetworkio/mantle/tss/index"
 )
 
 type Slashing struct {

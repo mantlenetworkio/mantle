@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/binance-chain/tss-lib/tss"
-	conversion2 "github.com/bitdao-io/mantle/tss/node/tsslib/conversion"
-	messages2 "github.com/bitdao-io/mantle/tss/node/tsslib/messages"
 	mapset "github.com/deckarep/golang-set"
 	"github.com/libp2p/go-libp2p-core/peer"
+	conversion2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
+	messages2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 )
 
 func (m *Manager) tssTimeoutAbnormal(lastMessageType string, partyIDMap map[string]*tss.PartyID) ([]string, error) {

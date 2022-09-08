@@ -4,17 +4,17 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
-	"github.com/bitdao-io/mantle/tss/slash"
 	"github.com/influxdata/influxdb/pkg/slices"
+	"github.com/mantlenetworkio/mantle/tss/slash"
 	"math/big"
 
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/log"
-	"github.com/bitdao-io/mantle/tss/bindings/tgm"
-	"github.com/bitdao-io/mantle/tss/manager/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
+	"github.com/mantlenetworkio/mantle/tss/manager/types"
 )
 
 type QueryService struct {

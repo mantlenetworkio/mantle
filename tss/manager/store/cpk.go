@@ -2,7 +2,7 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/bitdao-io/mantle/tss/manager/types"
+	"github.com/mantlenetworkio/mantle/tss/manager/types"
 )
 
 func (s *Storage) Insert(cpkData types.CpkData) error {

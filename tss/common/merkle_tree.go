@@ -2,8 +2,8 @@ package common
 
 import (
 	"errors"
-	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 )
 
 var defaults = []string{

@@ -2,8 +2,8 @@ package tss_client
 
 import (
 	"fmt"
-	"github.com/bitdao-io/mantle/tss/common"
 	"github.com/go-resty/resty/v2"
+	"github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 )
 

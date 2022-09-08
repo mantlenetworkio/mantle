@@ -9,12 +9,12 @@ replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
 replace github.com/mantlenetworkio/mantle/tss v0.0.0 => ../tss
 
 require (
-	github.com/mantlenetworkio/mantle/tss v0.0.0
-	github.com/mantlenetworkio/mantle/bss-core v0.0.0
-	github.com/mantlenetworkio/mantle/l2geth v0.0.0
 	github.com/ethereum/go-ethereum v1.10.17
 	github.com/getsentry/sentry-go v0.12.0
 	github.com/go-resty/resty/v2 v2.4.0
+	github.com/mantlenetworkio/mantle/bss-core v0.0.0
+	github.com/mantlenetworkio/mantle/l2geth v0.0.0
+	github.com/mantlenetworkio/mantle/tss v0.0.0
 	github.com/prometheus/client_golang v1.12.2
 	github.com/stretchr/testify v1.7.1
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7

@@ -1,7 +1,7 @@
 package abnormal
 
 import (
-	"github.com/bitdao-io/mantle/tss/node/tsslib/conversion"
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 )
 
 func (m *Manager) getAbnormalPubKeysInList(peers []string) ([]string, error) {

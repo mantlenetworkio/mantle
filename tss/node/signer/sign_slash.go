@@ -7,10 +7,10 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/bitdao-io/mantle/tss/bindings/tsh"
-	tsscommon "github.com/bitdao-io/mantle/tss/common"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
+	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
+	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 

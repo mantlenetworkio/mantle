@@ -2,7 +2,6 @@ package batchsubmitter
 
 import (
 	"context"
-	tss "github.com/bitdao-io/mantle/batch-submitter/tss-client"
 	"os"
 	"time"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/proposer"
 	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/sequencer"
+	tss "github.com/mantlenetworkio/mantle/batch-submitter/tss-client"
 	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/bss-core/dial"
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"

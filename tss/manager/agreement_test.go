@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	tss "github.com/bitdao-io/mantle/tss/common"
-	"github.com/bitdao-io/mantle/tss/manager/types"
-	"github.com/bitdao-io/mantle/tss/ws/server"
+	tss "github.com/mantlenetworkio/mantle/tss/common"
+	"github.com/mantlenetworkio/mantle/tss/manager/types"
+	"github.com/mantlenetworkio/mantle/tss/ws/server"
 	"github.com/stretchr/testify/require"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )

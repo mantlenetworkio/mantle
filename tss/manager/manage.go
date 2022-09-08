@@ -3,22 +3,22 @@ package manager
 import (
 	"errors"
 	"fmt"
-	"github.com/bitdao-io/mantle/tss/bindings/tsh"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
 	"math"
 	"math/big"
 	"math/rand"
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
-	tss "github.com/bitdao-io/mantle/tss/common"
-	"github.com/bitdao-io/mantle/tss/index"
-	"github.com/bitdao-io/mantle/tss/manager/types"
-	"github.com/bitdao-io/mantle/tss/slash"
-	"github.com/bitdao-io/mantle/tss/ws/server"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/influxdata/influxdb/pkg/slices"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	tss "github.com/mantlenetworkio/mantle/tss/common"
+	"github.com/mantlenetworkio/mantle/tss/index"
+	"github.com/mantlenetworkio/mantle/tss/manager/types"
+	"github.com/mantlenetworkio/mantle/tss/slash"
+	"github.com/mantlenetworkio/mantle/tss/ws/server"
 )
 
 type Manager struct {

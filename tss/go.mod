@@ -1,4 +1,4 @@
-module github.com/bitdao-io/mantle/tss
+module github.com/mantlenetworkio/mantle/tss
 
 go 1.18
 
@@ -9,8 +9,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.1.1
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.12.0
 	github.com/binance-chain/tss-lib v1.3.3
-	github.com/bitdao-io/mantle/bss-core v0.0.0
-	github.com/bitdao-io/mantle/l2geth v0.0.0
 	github.com/btcsuite/btcd v0.22.1
 	github.com/deckarep/golang-set v1.8.0
 	github.com/ethereum/go-ethereum v1.10.17
@@ -24,6 +22,8 @@ require (
 	github.com/libp2p/go-libp2p-core v0.13.0
 	github.com/libp2p/go-libp2p-discovery v0.6.0
 	github.com/libp2p/go-libp2p-kad-dht v0.15.0
+	github.com/mantlenetworkio/mantle/bss-core v0.0.0
+	github.com/mantlenetworkio/mantle/l2geth v0.0.0
 	github.com/multiformats/go-multiaddr v0.4.0
 	github.com/prometheus/client_golang v1.12.2
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0
@@ -211,7 +211,7 @@ require (
 )
 
 replace (
-	github.com/bitdao-io/mantle/bss-core v0.0.0 => ../bss-core
-	github.com/bitdao-io/mantle/l2geth v0.0.0 => ../l2geth
 	github.com/lucas-clemente/quic-go v0.24.0 => github.com/lucas-clemente/quic-go v0.26.0
+	github.com/mantlenetworkio/mantle/bss-core v0.0.0 => ../bss-core
+	github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
 )

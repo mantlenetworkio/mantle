@@ -3,12 +3,12 @@ package manager
 import (
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
-	tss "github.com/bitdao-io/mantle/tss/common"
-	"github.com/bitdao-io/mantle/tss/index"
-	"github.com/bitdao-io/mantle/tss/manager/store"
-	"github.com/bitdao-io/mantle/tss/slash"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	tss "github.com/mantlenetworkio/mantle/tss/common"
+	"github.com/mantlenetworkio/mantle/tss/index"
+	"github.com/mantlenetworkio/mantle/tss/manager/store"
+	"github.com/mantlenetworkio/mantle/tss/slash"
 	"github.com/stretchr/testify/require"
 )
 

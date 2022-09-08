@@ -5,8 +5,8 @@ import (
 	"crypto/ecdsa"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
-	"github.com/bitdao-io/mantle/tss/ws/client/tm"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/tss/ws/client/tm"
 	tmsync "github.com/tendermint/tendermint/libs/sync"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )

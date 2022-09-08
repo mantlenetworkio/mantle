@@ -1,11 +1,11 @@
 package tsslib
 
 import (
-	"github.com/bitdao-io/mantle/tss/node/tsslib/abnormal"
-	"github.com/bitdao-io/mantle/tss/node/tsslib/common"
-	conversion2 "github.com/bitdao-io/mantle/tss/node/tsslib/conversion"
-	keygen2 "github.com/bitdao-io/mantle/tss/node/tsslib/keygen"
-	"github.com/bitdao-io/mantle/tss/node/tsslib/messages"
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/abnormal"
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
+	conversion2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
+	keygen2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/keygen"
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 	"time"
 )
 

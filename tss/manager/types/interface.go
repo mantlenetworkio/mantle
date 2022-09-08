@@ -1,9 +1,9 @@
 package types
 
 import (
-	tss "github.com/bitdao-io/mantle/tss/common"
-	"github.com/bitdao-io/mantle/tss/index"
-	"github.com/bitdao-io/mantle/tss/slash"
+	tss "github.com/mantlenetworkio/mantle/tss/common"
+	"github.com/mantlenetworkio/mantle/tss/index"
+	"github.com/mantlenetworkio/mantle/tss/slash"
 )
 
 type SignService interface {

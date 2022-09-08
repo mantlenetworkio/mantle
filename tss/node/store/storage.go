@@ -2,7 +2,7 @@ package store
 
 import (
 	"fmt"
-	"github.com/bitdao-io/mantle/tss/node/types"
+	"github.com/mantlenetworkio/mantle/tss/node/types"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/storage"
 )
