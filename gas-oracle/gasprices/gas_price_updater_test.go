@@ -3,6 +3,8 @@ package gasprices
 import (
 	"math/big"
 	"testing"
+
+	"github.com/mantlenetworkio/mantle/gas-oracle/tokenprice"
 )
 
 type MockEpoch struct {
@@ -17,8 +19,9 @@ func makeTestGasPricerAndUpdater(curPrice uint64) (*GasPricer, *GasPriceUpdater,
 	getGasTarget := func() float64 { return gpsTarget }
 	epochLengthSeconds := uint64(10)
 	averageBlockGasLimit := uint64(11000000)
+	tokenPricer := tokenprice.NewClient("https://api.bybit.com", 3)
 	// Based on our 10 second epoch, we are targeting 3 blocks per epoch.
-	gasPricer, err := NewGasPricer(curPrice, 1, getGasTarget, 10)
+	gasPricer, err := NewGasPricer(curPrice, 1, tokenPricer, getGasTarget, 10)
 	if err != nil {
 		return nil, nil, nil, err
 	}
