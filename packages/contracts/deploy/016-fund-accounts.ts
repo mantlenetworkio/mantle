@@ -26,14 +26,14 @@ const deployFn: DeployFunction = async (hre) => {
     // future problems if the number of default accounts increases for whatever reason.
     const accounts = normalizeHardhatNetworkAccountsConfig(
       defaultHardhatNetworkHdAccountsConfigParams
-    ).slice(0, 20)
+    ).slice(0, 10)
 
     // Fund the accounts in parallel to speed things up.
     await Promise.all(
       accounts.map(async (account, index) => {
         // Add a sleep here to avoid any potential issues with spamming hardhat. Not sure if this
         // is strictly necessary but it can't hurt.
-        await sleep(200 * index * 3)
+        await sleep(200 * index )
 
         const wallet = new hre.ethers.Wallet(
           account.privateKey,
