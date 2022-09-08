@@ -30,8 +30,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 func TestClientRequest(t *testing.T) {

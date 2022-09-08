@@ -22,12 +22,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/params"
-	"github.com/bitdao-io/mantle/l2geth/rollup/dump"
-	"github.com/bitdao-io/mantle/l2geth/rollup/rcfg"
-	"github.com/bitdao-io/mantle/l2geth/rollup/util"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/util"
 	"golang.org/x/crypto/sha3"
 )
 

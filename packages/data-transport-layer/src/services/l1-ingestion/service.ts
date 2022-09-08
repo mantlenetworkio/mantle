@@ -1,7 +1,7 @@
 /* Imports: External */
-import { fromHexString, sleep } from '@bitdaoio/core-utils'
-import { BaseService, Metrics } from '@bitdaoio/common-ts'
-import { TypedEvent } from '@bitdaoio/contracts/dist/types/common'
+import { fromHexString, sleep } from '@mantlenetworkio/core-utils'
+import { BaseService, Metrics } from '@mantlenetworkio/common-ts'
+import { TypedEvent } from '@mantlenetworkio/contracts/dist/types/common'
 import { BaseProvider, StaticJsonRpcProvider } from '@ethersproject/providers'
 import { LevelUp } from 'levelup'
 import { constants } from 'ethers'

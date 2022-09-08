@@ -17,8 +17,8 @@
 package core
 
 import (
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 )
 
 // NewTxsEvent is posted when a batch of transactions enter the transaction pool.

@@ -22,12 +22,12 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/common/math"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/crypto/blake2b"
-	"github.com/bitdao-io/mantle/l2geth/crypto/bn256"
-	"github.com/bitdao-io/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common/math"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto/blake2b"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto/bn256"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
 
 	//lint:ignore SA1019 Needed for precompile
 	"golang.org/x/crypto/ripemd160"

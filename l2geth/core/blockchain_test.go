@@ -27,16 +27,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/consensus"
-	"github.com/bitdao-io/mantle/l2geth/consensus/ethash"
-	"github.com/bitdao-io/mantle/l2geth/core/rawdb"
-	"github.com/bitdao-io/mantle/l2geth/core/state"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
-	"github.com/bitdao-io/mantle/l2geth/core/vm"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/ethdb"
-	"github.com/bitdao-io/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/ethash"
+	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
+	"github.com/mantlenetworkio/mantle/l2geth/core/state"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
 )
 
 // So we can deterministically seed different blockchains

@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 )
 
 func TestTextHash(t *testing.T) {

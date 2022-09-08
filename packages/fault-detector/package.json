@@ -1,7 +1,7 @@
 {
   "private": true,
-  "name": "@bitdaoio/fault-detector",
-  "version": "1.0.0",
+  "name": "@mantlenetworkio/fault-detector",
+  "version": "0.0.1",
   "description": "[Mantle] Service for detecting faulty L2 output proposals",
   "main": "dist/index",
   "types": "dist/index",
@@ -25,12 +25,12 @@
     "fault",
     "detector"
   ],
-  "homepage": "https://github.com/mantleio/mantleio/tree/main/packages/fault-detector#readme",
+  "homepage": "https://github.com/mantlenetworkio/mantlenetworkio/tree/main/packages/fault-detector#readme",
   "license": "MIT",
   "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mantleio/mantle.git"
+    "url": "https://github.com/mantlenetworkio/mantle.git"
   },
   "devDependencies": {
     "@defi-wonderland/smock": "^2.0.7",
@@ -47,10 +47,10 @@
     "ts-node": "^10.8.2"
   },
   "dependencies": {
-    "@bitdaoio/common-ts": "^1.0.0",
-    "@bitdaoio/contracts": "^1.0.2",
-    "@bitdaoio/core-utils": "^1.0.3",
-    "@bitdaoio/sdk": "^1.0.8",
+    "@mantlenetworkio/common-ts": "0.0.1",
+    "@mantlenetworkio/contracts": "0.0.1",
+    "@mantlenetworkio/core-utils": "0.0.1",
+    "@mantlenetworkio/sdk": "0.0.1",
     "@ethersproject/abstract-provider": "^5.6.1"
   }
 }

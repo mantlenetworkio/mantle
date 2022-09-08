@@ -1,4 +1,4 @@
-module github.com/bitdao-io/mantle/l2geth-exporter
+module github.com/mantlenetworkio/mantle/l2geth-exporter
 
 go 1.18
 

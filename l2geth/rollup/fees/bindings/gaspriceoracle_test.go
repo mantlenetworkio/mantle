@@ -8,16 +8,16 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/accounts/abi/bind"
-	"github.com/bitdao-io/mantle/l2geth/accounts/abi/bind/backends"
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/core"
-	"github.com/bitdao-io/mantle/l2geth/core/rawdb"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/eth/gasprice"
-	"github.com/bitdao-io/mantle/l2geth/ethdb"
-	"github.com/bitdao-io/mantle/l2geth/rollup/fees"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi/bind"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi/bind/backends"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core"
+	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/eth/gasprice"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 )
 
 // Test that the fee calculation is the same in both go and solidity

@@ -1,17 +1,17 @@
-module github.com/bitdao-io/mantle/batch-submitter
+module github.com/mantlenetworkio/mantle/batch-submitter
 
 go 1.18
 
-replace github.com/bitdao-io/mantle/bss-core v0.0.0 => ../bss-core
+replace github.com/mantlenetworkio/mantle/bss-core v0.0.0 => ../bss-core
 
-replace github.com/bitdao-io/mantle/l2geth v0.0.0 => ../l2geth
+replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
 
-replace github.com/bitdao-io/mantle/tss v0.0.0 => ../tss
+replace github.com/mantlenetworkio/mantle/tss v0.0.0 => ../tss
 
 require (
-	github.com/bitdao-io/mantle/bss-core v0.0.0
-	github.com/bitdao-io/mantle/l2geth v0.0.0
-	github.com/bitdao-io/mantle/tss v0.0.0
+	github.com/mantlenetworkio/mantle/tss v0.0.0
+	github.com/mantlenetworkio/mantle/bss-core v0.0.0
+	github.com/mantlenetworkio/mantle/l2geth v0.0.0
 	github.com/ethereum/go-ethereum v1.10.17
 	github.com/getsentry/sentry-go v0.12.0
 	github.com/go-resty/resty/v2 v2.4.0

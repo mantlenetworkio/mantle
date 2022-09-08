@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common/mclock"
+	"github.com/mantlenetworkio/mantle/l2geth/common/mclock"
 )
 
 type testNode struct {

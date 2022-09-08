@@ -16,7 +16,7 @@
 
 package discv5
 
-import "github.com/bitdao-io/mantle/l2geth/metrics"
+import "github.com/mantlenetworkio/mantle/l2geth/metrics"
 
 var (
 	ingressTrafficMeter = metrics.NewRegisteredMeter("discv5/InboundTraffic", nil)

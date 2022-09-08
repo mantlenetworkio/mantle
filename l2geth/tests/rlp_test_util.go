@@ -24,7 +24,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/bitdao-io/mantle/l2geth/rlp"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
 // RLPTest is the JSON structure of a single RLP test.

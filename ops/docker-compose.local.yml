@@ -18,7 +18,6 @@ services:
   deployer:
     <<: *base
     container_name: bitdeployer
-    platform: linux/amd64
     environment:
       CONTRACTS_RPC_URL: ${CONTRACTS_RPC_URL:-http://l1_chain:8545}
       CONTRACTS_DEPLOYER_KEY: ${CONTRACTS_DEPLOYER_KEY:-ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80}
@@ -34,7 +33,6 @@ services:
   dtl:
     <<: *base
     container_name: bitdtl
-    platform: linux/amd64
 
   l2geth:
     <<: *base
@@ -54,7 +52,7 @@ services:
     <<: *base
     container_name: bititests
     deploy:
-      replicas: 1
+      replicas: 0
 
   relayer:
     <<: *base

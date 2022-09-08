@@ -1,1 +1,1 @@
-# @bitdaoio/fault-detector
+# @mantlenetworkio/fault-detector

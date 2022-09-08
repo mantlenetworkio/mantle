@@ -16,7 +16,7 @@
 
 package downloader
 
-import "github.com/bitdao-io/mantle/l2geth/core/types"
+import "github.com/mantlenetworkio/mantle/l2geth/core/types"
 
 type DoneEvent struct {
 	Latest *types.Header

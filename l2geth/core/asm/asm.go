@@ -21,7 +21,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/bitdao-io/mantle/l2geth/core/vm"
+	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 )
 
 // Iterator for disassembled EVM instructions

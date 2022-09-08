@@ -8,9 +8,9 @@ import (
 	"io"
 	"strings"
 
-	l2grawdb "github.com/bitdao-io/mantle/l2geth/core/rawdb"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethdb"
+	l2grawdb "github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 )
 
 var (

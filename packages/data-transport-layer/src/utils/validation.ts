@@ -1,6 +1,6 @@
 import * as url from 'url'
 
-import { fromHexString } from '@bitdaoio/core-utils'
+import { fromHexString } from '@mantlenetworkio/core-utils'
 
 export const validators = {
   isBoolean: (val: any): boolean => {

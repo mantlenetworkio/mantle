@@ -6,14 +6,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/bitdao-io/mantle/batch-submitter/drivers/proposer"
-	"github.com/bitdao-io/mantle/batch-submitter/drivers/sequencer"
-	bsscore "github.com/bitdao-io/mantle/bss-core"
-	"github.com/bitdao-io/mantle/bss-core/dial"
-	"github.com/bitdao-io/mantle/bss-core/metrics"
-	"github.com/bitdao-io/mantle/bss-core/txmgr"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/getsentry/sentry-go"
+	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/proposer"
+	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/sequencer"
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
+	"github.com/mantlenetworkio/mantle/bss-core/dial"
+	"github.com/mantlenetworkio/mantle/bss-core/metrics"
+	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
 	"github.com/urfave/cli"
 )
 

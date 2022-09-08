@@ -7,12 +7,12 @@ import (
 	"math/big"
 	"strings"
 
-	ethereum "github.com/bitdao-io/mantle/l2geth"
-	"github.com/bitdao-io/mantle/l2geth/accounts/abi"
-	"github.com/bitdao-io/mantle/l2geth/accounts/abi/bind"
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
-	"github.com/bitdao-io/mantle/l2geth/event"
+	ethereum "github.com/mantlenetworkio/mantle/l2geth"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi/bind"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/event"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

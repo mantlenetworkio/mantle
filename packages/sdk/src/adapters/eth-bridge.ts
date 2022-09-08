@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ethers, Contract, Overrides, BigNumber } from 'ethers'
 import { TransactionRequest, BlockTag } from '@ethersproject/abstract-provider'
-import { predeploys, getContractInterface } from '@bitdaoio/contracts'
-import { hexStringEquals } from '@bitdaoio/core-utils'
+import { predeploys, getContractInterface } from '@mantlenetworkio/contracts'
+import { hexStringEquals } from '@mantlenetworkio/core-utils'
 
 import {
   NumberLike,

@@ -1,7 +1,7 @@
 import * as rlp from 'rlp'
 import { ethers } from 'hardhat'
 import { Contract } from 'ethers'
-import { toHexString } from '@bitdaoio/core-utils'
+import { toHexString } from '@mantlenetworkio/core-utils'
 
 import { expect } from '../../../setup'
 import { deploy, TrieTestGenerator } from '../../../helpers'

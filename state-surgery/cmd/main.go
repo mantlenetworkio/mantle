@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	surgery "github.com/bitdao-io/mantle/state-surgery"
+	surgery "github.com/mantlenetworkio/mantle/state-surgery"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v2"
