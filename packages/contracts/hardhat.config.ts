@@ -236,7 +236,7 @@ const config: HardhatUserConfig = {
     },
     gasPriceOracleL2GasPrice: {
       type: 'number',
-      default: 1,
+      default: 0,
     },
     hfBerlinBlock: {
       type: 'number',

@@ -516,14 +516,11 @@ func (s *SyncService) updateL1GasPrice(statedb *state.StateDB) error {
 // price oracle at the state that corresponds to the state db. If no state db
 // is passed in, then the tip is used.
 func (s *SyncService) updateL2GasPrice(statedb *state.StateDB) error {
-	if s.enforceFees {
-		value, err := s.readGPOStorageSlot(statedb, rcfg.L2GasPriceSlot)
-		if err != nil {
-			return err
-		}
-		return s.RollupGpo.SetL2GasPrice(value)
+	value, err := s.readGPOStorageSlot(statedb, rcfg.L2GasPriceSlot)
+	if err != nil {
+		return err
 	}
-	return s.RollupGpo.SetL2GasPrice(big.NewInt(0))
+	return s.RollupGpo.SetL2GasPrice(value)
 }
 
 // updateOverhead will update the overhead value from the BVM_GasPriceOracle
