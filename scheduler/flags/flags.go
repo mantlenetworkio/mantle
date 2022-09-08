@@ -52,6 +52,18 @@ var (
 		Required: true,
 		EnvVar:   "SCC_ADDRESS",
 	}
+	TGMAddressFlag = cli.StringFlag{
+		Name:     "tgm-address",
+		Usage:    "Address of the Tss group Manager contract",
+		Required: true,
+		EnvVar:   "TGM_ADDRESS",
+	}
+	TSHAddressFlag = cli.StringFlag{
+		Name:     "tsh-address",
+		Usage:    "Address of the Tss Staking & Slashing contract",
+		Required: true,
+		EnvVar:   "TSH_ADDRESS",
+	}
 	MinL1TxSizeFlag = cli.Uint64Flag{
 		Name: "min-l1-tx-size",
 		Usage: "Minimum size in bytes of any L1 transaction that gets " +
@@ -259,6 +271,8 @@ var requiredFlags = []cli.Flag{
 	L2EthRpcFlag,
 	CTCAddressFlag,
 	SCCAddressFlag,
+	TGMAddressFlag,
+	TSHAddressFlag,
 	MinL1TxSizeFlag,
 	MaxL1TxSizeFlag,
 	MaxPlaintextBatchSizeFlag,
