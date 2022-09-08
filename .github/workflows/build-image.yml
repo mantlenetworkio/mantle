@@ -1,80 +1,71 @@
-name: Release
+name: Build Image
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+    inputs:
+      serviceName:
+        type: choice
+        options:
+        - l2geth
+        - gas-oracle
+        - hardhat-node
+        - ci-builder
+        - foundry
+        - proxyd
+        - l2geth-exporter
+        - message-relayer
+        - fault-detector
+        - data-transport-layer
+        - deployer
+        - integration-tests
+        - replica-healthcheck
+        - batch-submitter
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    # map the step outputs to job outputs
+    env:
+      SERVICE_NAME: ${{ github.event.inputs.serviceName }}
     outputs:
       l2geth: ${{ steps.packages.outputs.l2geth }}
+      gas-oracle: ${{ steps.packages.outputs.gas-oracle }}
+      hardhat-node: ${{ steps.packages.outputs.hardhat-node }}
+      ci-builder: ${{ steps.packages.outputs.ci-builder }}
+      foundry: ${{ steps.packages.outputs.foundry }}
+      proxyd: ${{ steps.packages.outputs.proxyd }}
+      l2geth-exporter: ${{ steps.packages.outputs.l2geth-exporter }}
       message-relayer: ${{ steps.packages.outputs.message-relayer }}
       fault-detector: ${{ steps.packages.outputs.fault-detector }}
       data-transport-layer: ${{ steps.packages.outputs.data-transport-layer }}
-      contracts: ${{ steps.packages.outputs.contracts }}
-      gas-oracle: ${{ steps.packages.outputs.gas-oracle }}
+      deployer: ${{ steps.packages.outputs.deployer }}
+      integration-tests: ${{ steps.packages.outputs.integration-tests }}
       replica-healthcheck: ${{ steps.packages.outputs.replica-healthcheck }}
-      proxyd: ${{ steps.packages.outputs.proxyd }}
-      hardhat-node: ${{ steps.packages.outputs.hardhat-node }}
-      l2geth-exporter: ${{ steps.packages.outputs.l2geth-exporter }}
       batch-submitter: ${{ steps.packages.outputs.batch-submitter }}
-      ci-builder: ${{ steps.packages.outputs.ci-builder }}
-      foundry: ${{ steps.packages.outputs.foundry }}
 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@master
         with:
-          # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
           fetch-depth: 0
 
-      - name: Setup Node.js 16.x
-        uses: actions/setup-node@master
-        with:
-          node-version: 16.x
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - uses: actions/cache@v2
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      - name: Install Dependencies
-        run: yarn --frozen-lockfile
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
-
-      - name: Publish To NPM or Create Release Pull Request
-        uses: changesets/action@v1
-        id: changesets
-        with:
-          publish: yarn release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CI: true
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      # Conditional on the release being executed, we unbundle the publishedPackages to specific
-      # job outputs
-      - name: Get version tags from each published version
+      - name: Get Component Versions
         id: packages
-        if: steps.changesets.outputs.published == 'true'
         run: |
-          node ops/scripts/ci-versions.js ${{ toJSON(steps.changesets.outputs.publishedPackages) }}
+          test "${SERVICE_NAME}" = "l2geth"               && echo "::set-output name=l2geth::$(grep version l2geth/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "gas-oracle"           && echo "::set-output name=gas-oracle::$(grep version gas-oracle/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "hardhat-node"         && echo "::set-output name=hardhat-node::$(grep version ops/docker/hardhat/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "ci-builder"           && echo "::set-output name=ci-build::$(grep version ops/docker/ci-builder/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "foundry"              && echo "::set-output name=foundry::$(grep version ops/docker/foundry/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "proxyd"               && echo "::set-output name=proxyd::$(grep version proxyd/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "l2geth-exporter"      && echo "::set-output name=l2geth-exporter::$(grep version l2geth-exporter/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "message-relayer"      && echo "::set-output name=message-relayer::$(grep version packages/message-relayer/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "fault-detector"       && echo "::set-output name=fault-detector::$(grep version packages/fault-detector/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "data-transport-layer" && echo "::set-output name=data-transport-layer::$(grep version packages/data-transport-layer/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "deployer"             && echo "::set-output name=deployer::$(grep version packages/contracts/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "integration-tests"    && echo "::set-output name=integration-tests::$(grep version integration-tests/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "replica-helthcheck"   && echo "::set-output name=replica-helthcheck::$(grep version packages/replica-healthcheck/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "batch-submitter"      && echo "::set-output name=batch-submitter::$(grep version batch-submitter/package.json | egrep -o '[0-9\.]+' )" || true
 
   l2geth:
     name: Publish L2Geth Version ${{ needs.release.outputs.l2geth }}
@@ -131,7 +122,7 @@ jobs:
   hardhat-node:
     name: Publish Hardhat Node ${{ needs.release.outputs.hardhat-node }}
     needs: release
-    if: needs.release.hardhat-node != ''
+    if: needs.release.outputs.hardhat-node != ''
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -150,9 +141,9 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./ops/docker/hardhat
-          file: ./Dockerfile
+          file: ./ops/docker/hardhat/Dockerfile
           push: true
-          tags: mantlenetworkio/hardhat-node:${{ needs.release.outputs.gas-oracle }},mantlenetworkio/hardhat-node:latest
+          tags: mantlenetworkio/hardhat-node:${{ needs.release.outputs.hardhat-node }},mantlenetworkio/hardhat-node:latest
 
   ci-builder:
     name: Publish ci-builder ${{ needs.release.outputs.ci-builder }}
@@ -362,9 +353,9 @@ jobs:
           tags: mantlenetworkio/data-transport-layer:${{ needs.release.outputs.data-transport-layer }},mantlenetworkio/data-transport-layer:latest
 
   deployer:
-    name: Publish Deployer Version ${{ needs.release.outputs.contracts }}
+    name: Publish Deployer Version ${{ needs.release.outputs.deployer }}
     needs: release
-    if: needs.release.outputs.contracts != ''
+    if: needs.release.outputs.deployer != ''
     runs-on: ubuntu-latest
 
     steps:
@@ -386,7 +377,7 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: deployer
           push: true
-          tags: mantlenetworkio/deployer:${{ needs.release.outputs.contracts }},mantlenetworkio/deployer:latest
+          tags: mantlenetworkio/deployer:${{ needs.release.outputs.deployer }},mantlenetworkio/deployer:latest
 
   integration-tests:
     name: Publish Integration tests ${{ needs.release.outputs.integration-tests }}
