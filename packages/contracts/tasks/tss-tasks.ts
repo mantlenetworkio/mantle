@@ -1,6 +1,19 @@
 import { task } from 'hardhat/config'
 import { getContractFactory } from '../src/contract-defs'
 
+
+task("setTssGroupMember")
+  .addParam('contract', "tss group contract address")
+  .addParam('threshold', "tss threshold")
+  .addParam('batch_publicKey', "tss group batch publicKey")
+  .setAction(async (taskArgs, hre) => {
+    const tssGroupManager = getContractFactory('TssGroupManager').attach(taskArgs.contract)
+    const thresholdP = taskArgs.threshold
+    const batchPublicKey = taskArgs.batch_publicKey
+    await tssGroupManager.setTssGroupMember(thresholdP, batchPublicKey)
+  })
+
+
 task("setSlashingParams")
     .addParam('contract', "tss staking slashing contract address")
     .addParam('slashamount0', "slash uptime amount")
