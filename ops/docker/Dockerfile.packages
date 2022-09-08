@@ -2,7 +2,7 @@
 # be used to build any of the follow-on services
 #
 # ### BASE: Install deps
-FROM bitnetworkio/foundry:latest as foundry
+FROM mantlenetworkio/foundry:latest as foundry
 FROM node:16-alpine3.14 as base
 
 RUN apk --no-cache add curl \
