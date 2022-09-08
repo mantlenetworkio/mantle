@@ -3,7 +3,7 @@ import { DeployFunction } from 'hardhat-deploy/dist/types'
 import { names } from '../src/address-names'
 import { getContractDefinition } from '../src/contract-defs'
 import { deployAndVerifyAndThen, getContractFromArtifact } from '../src/deploy-utils'
-import { hexStringEquals, awaitCondition } from '@bitdaoio/core-utils'
+import { hexStringEquals, awaitCondition } from '@mantlenetworkio/core-utils'
 import { ethers } from 'ethers'
 
 

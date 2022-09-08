@@ -2,7 +2,7 @@
 import { DeployFunction } from 'hardhat-deploy/dist/types'
 
 import { names } from '../src/address-names'
-import { hexStringEquals } from '@bitdaoio/core-utils'
+import { hexStringEquals } from '@mantlenetworkio/core-utils'
 
 /* Imports: External */
 
