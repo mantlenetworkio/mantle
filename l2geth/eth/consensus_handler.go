@@ -63,7 +63,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 	switch {
 	case msg.Code == ProducersMsg:
 		// A batch of block bodies arrived to one of our previous requests
-		var request coterie.ProducersData
+		var request coterie.Producers
 		if err := msg.Decode(&request); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
@@ -77,9 +77,9 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 
 		// TODO:
 		_ = sequencerSet
-		//if eg, ok := pm.blockchain.Engine().(*coterie.SequencerSet); ok {
-		//	eg.SetSequencerSet(p.id,sequencerSet)
-		//}
+		if eg, ok := pm.blockchain.Engine().(*coterie.Coterie); ok {
+			eg.SetProducers(request)
+		}
 
 	case msg.Code == GetProducersMsg:
 		// Decode the retrieval message
@@ -89,11 +89,13 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		}
 		// Gather state data until the fetch or network limits is reached
 		var producers []rlp.RawValue
-		var results coterie.ProducersData
+		var results coterie.Producers
+
+		var getProducers coterie.GetProducers
 		//TODO:
-		//if eg, ok := pm.blockchain.Engine().(*coterie.SequencerSet); ok {
-		//	results = eg.GetSequencerSet()
-		//}
+		if eg, ok := pm.blockchain.Engine().(*coterie.Coterie); ok {
+			results = eg.GetProducers(getProducers)
+		}
 
 		if encoded, err := rlp.EncodeToBytes(results); err != nil {
 			log.Error("Failed to encode receipt", "err", err)

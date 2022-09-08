@@ -47,13 +47,13 @@ var (
 type SignerFn func(accounts.Account, string, []byte) ([]byte, error)
 
 type Coterie struct {
-	config        *params.CoterieConfig // Consensus engine configuration parameters
-	db            ethdb.Database
-	producersData ProducersData
-	signer        common.Address
-	signFn        SignerFn
-	schedulerID   string
-	lock          sync.RWMutex
+	config      *params.CoterieConfig // Consensus engine configuration parameters
+	db          ethdb.Database
+	producers   Producers
+	signer      common.Address
+	signFn      SignerFn
+	schedulerID string
+	lock        sync.RWMutex
 }
 
 func New(config *params.CoterieConfig, db ethdb.Database) *Coterie {
@@ -63,10 +63,14 @@ func New(config *params.CoterieConfig, db ethdb.Database) *Coterie {
 	}
 }
 
-func (c *Coterie) SetSequencerSet(data ProducersData) {
-	c.producersData = data
+func (c *Coterie) SetProducers(data Producers) {
+	c.producers = data
 	c.schedulerID = data.SchedulerID
 	data.store(c.db)
+}
+
+func (c *Coterie) GetProducers(data GetProducers) Producers {
+	return c.producers
 }
 
 // Authorize injects a private key into the consensus engine to mint new blocks with.
@@ -121,15 +125,15 @@ func (c *Coterie) Prepare(chain consensus.ChainReader, header *types.Header) err
 
 	number := header.Number.Uint64()
 
-	if header.Number.Uint64() >= c.producersData.Number+c.producersData.Epoch {
+	if header.Number.Uint64() >= c.producers.Number+c.producers.Epoch {
 		return errUnknownBlock
 	}
 
-	if header.Number.Uint64() < c.producersData.Number {
+	if header.Number.Uint64() < c.producers.Number {
 		return errUnknownBlock
 	}
 
-	header.Coinbase = c.producersData.SequencerSet.GetProducer().Address
+	header.Coinbase = c.producers.SequencerSet.GetProducer().Address
 
 	// Ensure the extra data has all its components
 	if len(header.Extra) < extraVanity {
@@ -195,15 +199,15 @@ func (c *Coterie) Seal(chain consensus.ChainReader, block *types.Block, results 
 	signer, signFn := c.signer, c.signFn
 	c.lock.RUnlock()
 
-	if header.Number.Uint64() >= c.producersData.Number+c.producersData.Epoch {
+	if header.Number.Uint64() >= c.producers.Number+c.producers.Epoch {
 		return errUnknownBlock
 	}
 
-	if header.Number.Uint64() < c.producersData.Number {
+	if header.Number.Uint64() < c.producers.Number {
 		return errUnknownBlock
 	}
 
-	if c.signer != c.producersData.SequencerSet.GetProducer().Address {
+	if c.signer != c.producers.SequencerSet.GetProducer().Address {
 		return errUnauthorizedSigner
 	}
 
@@ -233,7 +237,7 @@ func (c *Coterie) Seal(chain consensus.ChainReader, block *types.Block, results 
 		}
 	}()
 
-	c.producersData.SequencerSet.IncrementProducerPriority(1)
+	c.producers.SequencerSet.IncrementProducerPriority(1)
 
 	return nil
 
@@ -340,11 +344,11 @@ func (c *Coterie) verifySeal(chain consensus.ChainReader, header *types.Header, 
 	// currentNumber <= height < currentNumber + epoch: check
 	// height >= currentNumber + epoch: 				update current
 
-	if header.Number.Uint64() >= c.producersData.Number+c.producersData.Epoch {
+	if header.Number.Uint64() >= c.producers.Number+c.producers.Epoch {
 		return errUnknownBlock
 	}
 
-	if header.Number.Uint64() < c.producersData.Number {
+	if header.Number.Uint64() < c.producers.Number {
 		return nil
 	}
 
@@ -353,7 +357,7 @@ func (c *Coterie) verifySeal(chain consensus.ChainReader, header *types.Header, 
 		return err
 	}
 
-	if signer != c.producersData.SequencerSet.GetProducer().Address {
+	if signer != c.producers.SequencerSet.GetProducer().Address {
 		return errUnauthorizedSigner
 	}
 
