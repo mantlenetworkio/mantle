@@ -2,7 +2,7 @@ package tssreward
 
 import (
 	_ "embed"
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/abi"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi"
 	"math/big"
 	"strings"
 ) // embed compiled smart contract
