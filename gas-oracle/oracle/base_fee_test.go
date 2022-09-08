@@ -4,11 +4,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/bitdao-io/mantle/gas-oracle/bindings"
-	"github.com/bitdao-io/mantle/gas-oracle/tokenprice"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
+	"github.com/bitdao-io/mantle/gas-oracle/tokenprice"
 )
 
 func TestBaseFeeUpdate(t *testing.T) {

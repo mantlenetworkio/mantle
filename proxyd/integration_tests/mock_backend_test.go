@@ -10,8 +10,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bitdao-io/mantle/proxyd"
 	"github.com/gorilla/websocket"
+	"github.com/mantlenetworkio/mantle/proxyd"
 )
 
 type RecordedRequest struct {

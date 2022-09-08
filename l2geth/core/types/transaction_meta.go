@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 type QueueOrigin uint8

@@ -6,10 +6,10 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/bitdao-io/mantle/gas-oracle/flags"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/gas-oracle/flags"
 	"github.com/urfave/cli"
 )
 

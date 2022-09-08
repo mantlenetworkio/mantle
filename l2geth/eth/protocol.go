@@ -21,12 +21,12 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/core"
-	"github.com/bitdao-io/mantle/l2geth/core/forkid"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
-	"github.com/bitdao-io/mantle/l2geth/event"
-	"github.com/bitdao-io/mantle/l2geth/rlp"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core"
+	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/event"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
 // Constants to match up protocol versions and messages

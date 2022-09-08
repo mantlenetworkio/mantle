@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv'
 import { ethers } from 'ethers'
 
 // Hardhat plugins
-import '@bitdaoio/hardhat-deploy-config'
+import '@mantlenetworkio/hardhat-deploy-config'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'

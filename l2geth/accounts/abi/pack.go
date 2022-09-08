@@ -20,8 +20,8 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/common/math"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common/math"
 )
 
 // packBytesSlice packs the given bytes as [L, V] as the canonical representation

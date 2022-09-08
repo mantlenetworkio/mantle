@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 )
 
 var testAddrHex = "970e8128ab834e8eac17ab8e3812f010678cf791"

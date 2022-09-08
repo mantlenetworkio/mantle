@@ -19,7 +19,7 @@ package netutil
 import (
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common/mclock"
+	"github.com/mantlenetworkio/mantle/l2geth/common/mclock"
 )
 
 // IPTracker predicts the external endpoint, i.e. IP address and port, of the local host

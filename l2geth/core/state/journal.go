@@ -19,7 +19,7 @@ package state
 import (
 	"math/big"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 // journalEntry is a modification entry in the state change journal that can be

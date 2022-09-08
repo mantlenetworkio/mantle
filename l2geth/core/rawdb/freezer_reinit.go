@@ -22,11 +22,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/common/prque"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
-	"github.com/bitdao-io/mantle/l2geth/ethdb"
-	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common/prque"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 // InitDatabaseFromFreezer reinitializes an empty database from a previous batch

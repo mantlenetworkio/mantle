@@ -21,7 +21,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/bitdao-io/mantle/l2geth/eth/tracers/internal/tracers"
+	"github.com/mantlenetworkio/mantle/l2geth/eth/tracers/internal/tracers"
 )
 
 // all contains all the built in JavaScript tracers by name.

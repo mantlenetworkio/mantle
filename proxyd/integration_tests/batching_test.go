@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bitdao-io/mantle/proxyd"
+	"github.com/mantlenetworkio/mantle/proxyd"
 	"github.com/stretchr/testify/require"
 )
 

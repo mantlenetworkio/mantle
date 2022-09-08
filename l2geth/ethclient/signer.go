@@ -20,8 +20,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 )
 
 // senderFromServer is a types.Signer that remembers the sender address returned by the RPC

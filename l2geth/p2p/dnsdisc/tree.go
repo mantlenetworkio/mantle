@@ -26,10 +26,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enr"
-	"github.com/bitdao-io/mantle/l2geth/rlp"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enr"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"golang.org/x/crypto/sha3"
 )
 

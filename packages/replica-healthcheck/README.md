@@ -1,4 +1,4 @@
-# @bitdaoio/replica-healthcheck
+# @mantlenetworkio/replica-healthcheck
 
 ## What is this?
 
@@ -10,7 +10,7 @@
 Clone, install, and build the Mantle monorepo:
 
 ```
-git clone https://github.com/mantleio/mantle.git
+git clone https://github.com/mantlenetworkio/mantle.git
 yarn install
 yarn build
 ```

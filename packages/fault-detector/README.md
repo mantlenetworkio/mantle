@@ -7,7 +7,7 @@ The `fault-detector` is a simple service for detecting discrepancies between you
 Clone, install, and build the Optimism monorepo:
 
 ```
-git clone https://github.com/mantleio/mantle.git
+git clone https://github.com/mantlenetworkio/mantle.git
 yarn install
 yarn build
 ```

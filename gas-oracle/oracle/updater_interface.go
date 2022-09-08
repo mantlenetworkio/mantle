@@ -6,14 +6,14 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/bitdao-io/mantle/gas-oracle/bindings"
-	ometrics "github.com/bitdao-io/mantle/gas-oracle/metrics"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
+	ometrics "github.com/mantlenetworkio/mantle/gas-oracle/metrics"
 )
 
 var (

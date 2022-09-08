@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/p2p"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
 )
 
 func TestULCAnnounceThresholdLes2(t *testing.T) { testULCAnnounceThreshold(t, 2) }

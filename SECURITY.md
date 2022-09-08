@@ -1,1 +1,1 @@
-Please see our security policy document [here](https://github.com/bitdao-io/.github/blob/master/SECURITY.md).
+Please see our security policy document [here](https://github.com/mantlenetworkio/.github/blob/master/SECURITY.md).

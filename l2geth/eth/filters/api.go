@@ -25,13 +25,13 @@ import (
 	"sync"
 	"time"
 
-	ethereum "github.com/bitdao-io/mantle/l2geth"
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
-	"github.com/bitdao-io/mantle/l2geth/ethdb"
-	"github.com/bitdao-io/mantle/l2geth/event"
-	"github.com/bitdao-io/mantle/l2geth/rpc"
+	ethereum "github.com/mantlenetworkio/mantle/l2geth"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
+	"github.com/mantlenetworkio/mantle/l2geth/event"
+	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 )
 
 var (

@@ -1,4 +1,4 @@
-# @bitdaoio/message-relayer
+# @mantlenetworkio/message-relayer
 
 `message-relayer` is a service that automatically finalizes ("relays") messages sent from Mantle to Ethereum.
 This package is meant to be used during local development and should NOT be used on a production network.
@@ -8,7 +8,7 @@ This package is meant to be used during local development and should NOT be used
 Clone, install, and build the Mantle monorepo:
 
 ```
-git clone https://github.com/mantleio/mantle.git
+git clone https://github.com/mantlenetworkio/mantle.git
 yarn install
 yarn build
 ```
@@ -16,7 +16,7 @@ yarn build
 ## Running the relayer (Docker)
 
 The `message-relayer` can be included as part of the [local Mantle development environment](https://community.mantle.io/docs/developers/build/dev-node/).
-Although the `message-relayer` is not turned on by default, it can be enabled by [changing this line in docker-compose.yml](https://github.com/mantleio/mantle/blob/51a527b8e3fe69940fb8c0f5e4aa2e0ae8ee294c/ops/docker-compose.yml#L129) to:
+Although the `message-relayer` is not turned on by default, it can be enabled by [changing this line in docker-compose.yml](https://github.com/mantlenetworkio/mantle/blob/51a527b8e3fe69940fb8c0f5e4aa2e0ae8ee294c/ops/docker-compose.yml#L129) to:
 
 ```
 replicas: 1

@@ -21,9 +21,9 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 var (

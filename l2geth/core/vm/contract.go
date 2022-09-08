@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 // ContractRef is a reference to the contract's backing object

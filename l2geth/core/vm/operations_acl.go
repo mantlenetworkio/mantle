@@ -19,9 +19,9 @@ package vm
 import (
 	"errors"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/common/math"
-	"github.com/bitdao-io/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common/math"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
 )
 
 func makeGasSStoreFunc(clearingRefund uint64) gasFunc {

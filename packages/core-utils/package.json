@@ -1,6 +1,6 @@
 {
-  "name": "@bitdaoio/core-utils",
-  "version": "1.0.3",
+  "name": "@mantlenetworkio/core-utils",
+  "version": "0.0.1",
   "description": "[Mantle] Core typescript utilities",
   "main": "dist/index",
   "types": "dist/index",
@@ -24,12 +24,12 @@
     "core",
     "utils"
   ],
-  "homepage": "https://github.com/mantleio/mantle/tree/main/packages/core-utils#readme",
+  "homepage": "https://github.com/mantlenetworkio/mantle/tree/main/packages/core-utils#readme",
   "license": "MIT",
   "author": "Mantle",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mantleio/mantle.git"
+    "url": "git+https://github.com/mantlenetworkio/mantle.git"
   },
   "dependencies": {
     "@ethersproject/abstract-provider": "^5.6.1",
@@ -45,7 +45,7 @@
     "mocha": "^10.0.0"
   },
   "bugs": {
-    "url": "https://github.com/mantleio/mantle/issues"
+    "url": "https://github.com/mantlenetworkio/mantle/issues"
   },
   "directories": {
     "test": "test"

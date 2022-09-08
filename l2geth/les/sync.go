@@ -21,11 +21,11 @@ import (
 	"errors"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/core/rawdb"
-	"github.com/bitdao-io/mantle/l2geth/eth/downloader"
-	"github.com/bitdao-io/mantle/l2geth/light"
-	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
+	"github.com/mantlenetworkio/mantle/l2geth/eth/downloader"
+	"github.com/mantlenetworkio/mantle/l2geth/light"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 var errInvalidCheckpoint = errors.New("invalid advertised checkpoint")

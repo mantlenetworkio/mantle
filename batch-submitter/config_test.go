@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	batchsubmitter "github.com/bitdao-io/mantle/batch-submitter"
+	batchsubmitter "github.com/mantlenetworkio/mantle/batch-submitter"
 	"github.com/stretchr/testify/require"
 )
 

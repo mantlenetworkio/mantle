@@ -23,11 +23,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/ethdb"
-	"github.com/bitdao-io/mantle/l2geth/ethdb/leveldb"
-	"github.com/bitdao-io/mantle/l2geth/ethdb/memorydb"
-	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb/leveldb"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb/memorydb"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/olekukonko/tablewriter"
 )
 

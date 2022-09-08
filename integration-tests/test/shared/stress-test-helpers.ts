@@ -1,6 +1,6 @@
 /* Imports: External */
 import { ethers } from 'ethers'
-import { sleep } from '@bitdaoio/core-utils'
+import { sleep } from '@mantlenetworkio/core-utils'
 
 /* Imports: Internal */
 import { MantleEnv } from './env'

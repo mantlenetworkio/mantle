@@ -1,5 +1,5 @@
 /* Imports: External */
-import { BaseService, Logger, Metrics } from '@bitdaoio/common-ts'
+import { BaseService, Logger, Metrics } from '@mantlenetworkio/common-ts'
 import express, { Request, Response } from 'express'
 import promBundle from 'express-prom-bundle'
 import cors from 'cors'

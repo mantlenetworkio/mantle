@@ -19,10 +19,10 @@ package state
 import (
 	"bytes"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/ethdb"
-	"github.com/bitdao-io/mantle/l2geth/rlp"
-	"github.com/bitdao-io/mantle/l2geth/trie"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/mantlenetworkio/mantle/l2geth/trie"
 )
 
 // NewStateSync create a new state trie download scheduler.

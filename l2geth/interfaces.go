@@ -22,8 +22,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 )
 
 // NotFound is returned by API methods if the requested item does not exist.

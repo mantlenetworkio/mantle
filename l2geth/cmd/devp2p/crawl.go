@@ -19,9 +19,9 @@ package main
 import (
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
-	"github.com/bitdao-io/mantle/l2geth/p2p/discover"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/discover"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
 )
 
 type crawler struct {
