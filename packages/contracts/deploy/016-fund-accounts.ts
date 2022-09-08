@@ -33,7 +33,7 @@ const deployFn: DeployFunction = async (hre) => {
       accounts.map(async (account, index) => {
         // Add a sleep here to avoid any potential issues with spamming hardhat. Not sure if this
         // is strictly necessary but it can't hurt.
-        await sleep(200 * index)
+        await sleep(200 * index * 3)
 
         const wallet = new hre.ethers.Wallet(
           account.privateKey,
