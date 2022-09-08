@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/bitdao-io/mantle/gas-oracle/tokenprice"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/gas-oracle/tokenprice"
 )
 
 type GetTargetGasPerSecond func() float64

@@ -4,9 +4,9 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/bitdao-io/mantle/gas-oracle/tokenprice"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/mantlenetworkio/mantle/gas-oracle/tokenprice"
 )
 
 type L1Client struct {

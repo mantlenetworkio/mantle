@@ -7,13 +7,13 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/bitdao-io/mantle/gas-oracle/bindings"
-	"github.com/bitdao-io/mantle/gas-oracle/gasprices"
-	"github.com/bitdao-io/mantle/gas-oracle/tokenprice"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
+	"github.com/mantlenetworkio/mantle/gas-oracle/gasprices"
+	"github.com/mantlenetworkio/mantle/gas-oracle/tokenprice"
 )
 
 var (
