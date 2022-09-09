@@ -64,7 +64,7 @@ jobs:
           test "${SERVICE_NAME}" = "data-transport-layer" && echo "::set-output name=data-transport-layer::$(grep version packages/data-transport-layer/package.json | egrep -o '[0-9\.]+' )" || true
           test "${SERVICE_NAME}" = "deployer"             && echo "::set-output name=deployer::$(grep version packages/contracts/package.json | egrep -o '[0-9\.]+' )" || true
           test "${SERVICE_NAME}" = "integration-tests"    && echo "::set-output name=integration-tests::$(grep version integration-tests/package.json | egrep -o '[0-9\.]+' )" || true
-          test "${SERVICE_NAME}" = "replica-helthcheck"   && echo "::set-output name=replica-helthcheck::$(grep version packages/replica-healthcheck/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "replica-healthcheck"   && echo "::set-output name=replica-healthcheck::$(grep version packages/replica-healthcheck/package.json | egrep -o '[0-9\.]+' )" || true
           test "${SERVICE_NAME}" = "batch-submitter"      && echo "::set-output name=batch-submitter::$(grep version batch-submitter/package.json | egrep -o '[0-9\.]+' )" || true
 
   l2geth:
