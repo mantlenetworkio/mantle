@@ -33,6 +33,8 @@ if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
 else [ $SKIP_CONTRACT_DEPLOY == "NO" ]
   DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
   echo $PWD
+  rm -rf deployments/goerli-qa
+  rm -rf deployments/goerlibn
 
   echo "Deploying contracts. Deployment command:"
   echo "$DEPLOY_CMD"
