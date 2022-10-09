@@ -10,6 +10,12 @@ x-base: &base
 
 services:
   deployer:
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.packages
+      target: deployer
+    image: mantlenetworkio/deployer:${DOCKER_TAG_DEPLOYER:-latest}
+    entrypoint: ./deployer.sh
     <<: *base
     container_name: mantledeployer
     environment:
@@ -23,4 +29,7 @@ services:
       BVM_ADDRESS_MANAGER_OWNER: ${BVM_ADDRESS_MANAGER_OWNER:-}
       BVM_GAS_PRICE_ORACLE_OWNER: ${BVM_GAS_PRICE_ORACLE_OWNER:-}
       L1_BIT_ADDRESS: ${L1_BIT_ADDRESS:-0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5}
+    ports:
+      # expose the service to the host for getting the contract addrs
+      - ${DEPLOYER_PORT:-8080}:8081
 
