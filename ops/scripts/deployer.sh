@@ -30,8 +30,8 @@ if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
   echo "Deploying contracts. Deployment command:"
   echo "$DEPLOY_CMD"
   eval "$DEPLOY_CMD"
-else
-    echo "skipping deploy contract"
+else [ $SKIP_CONTRACT_DEPLOY == "NO" ]
+  DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
 fi
 
 echo "Building addresses.json."
