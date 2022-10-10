@@ -48,20 +48,27 @@ services:
     container_name: bitdtl
     environment:
       DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT: ${DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
+      DATA_TRANSPORT_LAYER__L1_START_HEIGHT: ${DATA_TRANSPORT_LAYER__L1_START_HEIGHT:-7742200}
 
   l2geth:
     <<: *base
+    environment:
+      ETH1_HTTP: ${ETH1_HTTP:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
     container_name: bitl2geth
 
   gas_oracle:
     <<: *base
     container_name: bitgasoracle
+    environment:
+      GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL: ${GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
     deploy:
       replicas: 1
 
   batch_submitter:
     <<: *base
     container_name: bitbatchsubmitter
+    environment:
+      L1_ETH_RPC: ${L1_ETH_RPC:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
 
   integration_tests:
     <<: *base
