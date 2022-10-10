@@ -9,12 +9,6 @@ x-base: &base
     mantle: {}
 
 services:
-  l1_chain:
-    <<: *base
-    container_name: bitl1chain
-    deploy: # run switch
-      replicas: 0
-
   deployer:
     build:
       context: ..
@@ -31,7 +25,7 @@ services:
       ETHERSCAN_API_KEY: ${ETHERSCAN_API_KEY:-B1XAN986315AME96W9QK7X1RGQ6WJMWEPW}
       BVM_SEQUENCER_ADDRESS: ${BVM_SEQUENCER_ADDRESS:-}
       BVM_PROPOSER_ADDRESS: ${BVM_PROPOSER_ADDRESS:-}
-      SKIP_CONTRACT_DEPLOY: ${CONTRACTS_DEPLOYER_KEY:-YES}
+      SKIP_CONTRACT_DEPLOY: ${CONTRACTS_DEPLOYER_KEY:-NO}
       BVM_BLOCK_SIGNER_ADDRESS: ${BVM_BLOCK_SIGNER_ADDRESS:-}
       BVM_FEE_WALLET_ADDRESS: ${BVM_FEE_WALLET_ADDRESS:-}
       BVM_ADDRESS_MANAGER_OWNER: ${BVM_ADDRESS_MANAGER_OWNER:-}
@@ -41,65 +35,4 @@ services:
     ports:
       # expose the service to the host for getting the contract addrs
       - ${DEPLOYER_PORT:-8080}:8081
-
-
-  dtl:
-    <<: *base
-    container_name: bitdtl
-
-  l2geth:
-    <<: *base
-    container_name: bitl2geth
-
-  gas_oracle:
-    <<: *base
-    container_name: bitgasoracle
-    deploy:
-      replicas: 1
-
-  batch_submitter:
-    <<: *base
-    container_name: bitbatchsubmitter
-
-  integration_tests:
-    <<: *base
-    container_name: bititests
-    deploy:
-      replicas: 0
-
-  relayer:
-    <<: *baseveri
-    container_name: bitrelayer
-    deploy:
-      replicas: 1
-
-  verifier:
-    <<: *base
-    container_name: bitverifier
-    deploy:
-      replicas: 0
-
-  replica:
-    <<: *base
-    container_name: bitreplica
-    deploy:
-      replicas: 0
-
-  replica_healthcheck:
-    <<: *base
-    container_name: bitreplicahealthcheck
-    deploy:
-      replicas: 0
-
-  fault_detector:
-    <<: *base
-    container_name: bitfaultdetector
-    deploy:
-      replicas: 1
-
-  l2geth2:
-    <<: *base
-    container_name: bitl2geth2
-    deploy:
-      replicas: 0  # disable by default
 

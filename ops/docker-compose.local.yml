@@ -55,7 +55,7 @@ services:
       replicas: 0
 
   relayer:
-    <<: *base
+    <<: *baseveri
     container_name: bitrelayer
     deploy:
       replicas: 1
