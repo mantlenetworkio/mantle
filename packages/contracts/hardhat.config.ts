@@ -62,7 +62,7 @@ const config: HardhatUserConfig = {
       url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
       deploy,
       accounts: [
-        '6395a7c842a08515961888d21d72f409b61fbce96af1e520384e375f301a8297',
+        'e4bf8c09fc7bb5c3eb932260b9fcf0f2a3fecb61512b0e979afb4ce1187bfe70',
       ],
     },
     'goerli-qa': {
