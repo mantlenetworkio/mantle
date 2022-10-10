@@ -46,6 +46,8 @@ services:
   dtl:
     <<: *base
     container_name: bitdtl
+    environment:
+      DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT: ${DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
 
   l2geth:
     <<: *base
