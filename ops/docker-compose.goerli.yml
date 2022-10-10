@@ -70,6 +70,8 @@ services:
     container_name: bitbatchsubmitter
     environment:
       L1_ETH_RPC: ${L1_ETH_RPC:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
+      BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY: ${BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY:-0xe4bf8c09fc7bb5c3eb932260b9fcf0f2a3fecb61512b0e979afb4ce1187bfe70}
+      BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY: ${BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY:-0xd04820edb3ce80d3b24595b14e32555280599ea4349a5601788154adbe19d6d4}
 
   integration_tests:
     <<: *base
