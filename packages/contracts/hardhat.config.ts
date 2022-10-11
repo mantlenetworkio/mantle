@@ -69,7 +69,9 @@ const config: HardhatUserConfig = {
       chainId: 5,
       url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
       deploy,
-      accounts: [privateKey],
+      accounts: [
+        'e4bf8c09fc7bb5c3eb932260b9fcf0f2a3fecb61512b0e979afb4ce1187bfe70',
+      ],
     },
     kovan: {
       chainId: 42,
