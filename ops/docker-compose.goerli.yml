@@ -83,7 +83,7 @@ services:
   relayer:
     container_name: bitrelayer
     deploy:
-      replicas: 1
+      replicas: 0
 
   verifier:
     <<: *base
@@ -107,7 +107,7 @@ services:
     <<: *base
     container_name: bitfaultdetector
     deploy:
-      replicas: 1
+      replicas: 0
 
   l2geth2:
     <<: *base
