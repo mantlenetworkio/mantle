@@ -1,5 +1,5 @@
 DOCKER_COMPOSE_CMD := docker-compose \
-	-f docker-compose.goerli.deploy.yml
+	-f docker-compose.goerli.qa.deploy.yml
 COPY_ENV := cp -r envs/deployer.env ./.env
 
 build:
