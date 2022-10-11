@@ -98,6 +98,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./l2geth/Dockerfile
           push: true
           tags: mantlenetworkio/l2geth:${{ needs.release.outputs.l2geth }},mantlenetworkio/l2geth:latest
@@ -124,6 +125,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./gas-oracle/Dockerfile
           push: true
           tags: mantlenetworkio/gas-oracle:${{ needs.release.outputs.gas-oracle }},mantlenetworkio/gas-oracle:latest
@@ -202,6 +204,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./ops/docker/foundry/Dockerfile
           push: true
           tags: mantlenetworkio/foundry:${{ needs.release.outputs.foundry }},mantlenetworkio/foundry:latest
@@ -235,6 +238,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./proxyd/Dockerfile
           push: true
           tags: mantlenetworkio/proxyd:${{ needs.release.outputs.proxyd }},mantlenetworkio/proxyd:latest
@@ -272,6 +276,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./l2geth-exporter/Dockerfile
           push: true
           tags: mantlenetworkio/l2geth-exporter:${{ needs.release.outputs.l2geth-exporter }},mantlenetworkio/l2geth-exporter:latest
@@ -302,6 +307,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./ops/docker/Dockerfile.packages
           target: message-relayer
           push: true
@@ -329,6 +335,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./ops/docker/Dockerfile.packages
           target: fault-detector
           push: true
@@ -356,6 +363,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./ops/docker/Dockerfile.packages
           target: data-transport-layer
           push: true
@@ -383,6 +391,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./ops/docker/Dockerfile.packages
           target: deployer
           push: true
@@ -410,6 +419,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./ops/docker/Dockerfile.packages
           target: integration-tests
           push: true
@@ -437,6 +447,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./ops/docker/Dockerfile.packages
           target: replica-healthcheck
           push: true
@@ -464,6 +475,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./batch-submitter/Dockerfile
           push: true
           tags: mantlenetworkio/batch-submitter:${{ needs.release.outputs.batch-submitter }},mantlenetworkio/batch-submitter:latest

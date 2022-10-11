@@ -116,6 +116,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./l2geth/Dockerfile
           push: true
           tags: mantlenetworkio/l2geth:${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -142,6 +143,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./gas-oracle/Dockerfile
           push: true
           tags: mantlenetworkio/gas-oracle:${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -194,6 +196,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./ops/docker/Dockerfile.packages
           target: relayer
           push: true
@@ -221,6 +224,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./ops/docker/Dockerfile.packages
           target: fault-detector
           push: true
@@ -248,6 +252,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./ops/docker/Dockerfile.packages
           target: data-transport-layer
           push: true
@@ -275,6 +280,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./ops/docker/Dockerfile.packages
           target: deployer
           push: true
@@ -302,6 +308,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./ops/docker/Dockerfile.packages
           target: integration-tests
           push: true
@@ -329,6 +336,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./ops/docker/Dockerfile.packages
           target: replica-healthcheck
           push: true
@@ -363,6 +371,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./proxyd/Dockerfile
           push: true
           tags: mantlenetworkio/proxyd:${{ needs.canary-publish.outputs.proxyd }}
@@ -400,6 +409,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./l2geth-exporter/Dockerfile
           push: true
           tags: mantlenetworkio/l2geth-exporter:${{ needs.canary-publish.outputs.l2geth-exporter }}
@@ -430,6 +440,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./batch-submitter/Dockerfile
           push: true
           tags: mantlenetworkio/batch-submitter:${{ needs.canary-publish.outputs.batch-submitter }}
