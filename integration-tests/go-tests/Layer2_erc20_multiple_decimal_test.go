@@ -36,10 +36,10 @@ const (
 )
 
 func TestCreateNewCoinPair(t *testing.T) {
-	l1Client, err := ethclient.Dial("http://149.28.71.219:9545")
+	l1Client, err := ethclient.Dial(l1url)
 	require.NoError(t, err)
 	require.NotNil(t, l1Client)
-	l2Client, err := ethclient.Dial("http://149.28.71.219:8545")
+	l2Client, err := ethclient.Dial(l2url)
 	require.NoError(t, err)
 	require.NotNil(t, l2Client)
 
@@ -58,7 +58,7 @@ func TestCreateNewCoinPair(t *testing.T) {
 
 	auth := buildAuth(t, l2Client, "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", big.NewInt(0))
 
-	tx, err := tokenFactory.CreateStandardL2Token(auth, common.HexToAddress(L1TokenAddress), "Test Token", "TT")
+	tx, err := tokenFactory.CreateStandardL2Token(auth, common.HexToAddress(L1TokenAddress), "Test Token", "TT", 18)
 	require.NoError(t, err)
 	require.NotNil(t, tx)
 

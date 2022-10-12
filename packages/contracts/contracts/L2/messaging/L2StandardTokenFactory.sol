@@ -23,7 +23,7 @@ contract L2StandardTokenFactory {
         address _l1Token,
         string memory _name,
         string memory _symbol,
-        uint8 memory _decimal
+        uint8 _decimal
     ) external {
         require(_l1Token != address(0), "Must provide L1 token address");
 

@@ -20,7 +20,7 @@ contract L2StandardERC20 is IL2StandardERC20, ERC20 {
         address _l1Token,
         string memory _name,
         string memory _symbol,
-        uint8 memory _decimal
+        uint8 _decimal
     ) ERC20(_name, _symbol) {
         l1Token = _l1Token;
         l2Bridge = _l2Bridge;
