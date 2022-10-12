@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/gas-oracle/tokenprice"
 )
 
 type GetLatestBlockNumberFn func() (uint64, error)
@@ -15,6 +16,7 @@ type GetGasUsedByBlockFn func(*big.Int) (uint64, error)
 type GasPriceUpdater struct {
 	mu                     *sync.RWMutex
 	gasPricer              *GasPricer
+	tokenPricer            *tokenprice.Client
 	epochStartBlockNumber  uint64
 	averageBlockGasLimit   uint64
 	epochLengthSeconds     uint64

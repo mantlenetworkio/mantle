@@ -18,7 +18,7 @@ export const names = {
     accounts: { BVM_Sequencer: 'BVM_Sequencer', BVM_Proposer: 'BVM_Proposer' },
     configs: {
       L1_BIT_ADDRESS: 'L1_BitAddress',
-      Local_Bit_Token: 'LocalBitToken',
+      Local_Bit_Token: 'TestBitToken',
     },
   },
   unmanaged: {

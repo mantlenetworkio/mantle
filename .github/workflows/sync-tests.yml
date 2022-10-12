@@ -61,7 +61,7 @@ jobs:
         if: failure()
         uses: jwalton/gh-docker-logs@v1
         with:
-          images: 'bitnetworkio/hardhat,bitnetworkio/deployer,bitnetworkio/data-transport-layer,bitnetworkio/l2geth,bitnetworkio/message-relayer,bitnetworkio/batch-submitter,bitnetworkio/l2geth'
+          images: 'mantlenetworkio/hardhat,mantlenetworkio/deployer,mantlenetworkio/data-transport-layer,mantlenetworkio/l2geth,mantlenetworkio/message-relayer,mantlenetworkio/batch-submitter,mantlenetworkio/l2geth'
           dest: './logs'
 
       - name: Tar logs

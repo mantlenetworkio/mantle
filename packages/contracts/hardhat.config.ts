@@ -70,14 +70,16 @@ const config: HardhatUserConfig = {
       url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
       deploy,
       accounts: [
-        '6395a7c842a08515961888d21d72f409b61fbce96af1e520384e375f301a8297',
+        'e4bf8c09fc7bb5c3eb932260b9fcf0f2a3fecb61512b0e979afb4ce1187bfe70',
       ],
     },
     'goerli-qa': {
       chainId: 5,
       url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
       deploy,
-      accounts: [privateKey],
+      accounts: [
+        '114983389b91256e6e26cb0e30371ceb5385e3fb309cd0e7823b86fff27c9ba4',
+      ],
     },
     kovan: {
       chainId: 42,
@@ -249,7 +251,7 @@ const config: HardhatUserConfig = {
     },
     gasPriceOracleL2GasPrice: {
       type: 'number',
-      default: 1,
+      default: 0,
     },
     hfBerlinBlock: {
       type: 'number',
