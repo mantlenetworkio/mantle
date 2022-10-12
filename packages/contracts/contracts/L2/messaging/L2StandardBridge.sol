@@ -2,17 +2,17 @@
 pragma solidity ^0.8.9;
 
 /* Interface Imports */
-import { IL1StandardBridge } from "../../L1/messaging/IL1StandardBridge.sol";
-import { IL1ERC20Bridge } from "../../L1/messaging/IL1ERC20Bridge.sol";
-import { IL2ERC20Bridge } from "./IL2ERC20Bridge.sol";
+import {IL1StandardBridge} from "../../L1/messaging/IL1StandardBridge.sol";
+import {IL1ERC20Bridge} from "../../L1/messaging/IL1ERC20Bridge.sol";
+import {IL2ERC20Bridge} from "./IL2ERC20Bridge.sol";
 
 /* Library Imports */
-import { ERC165Checker } from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import { CrossDomainEnabled } from "../../libraries/bridge/CrossDomainEnabled.sol";
-import { Lib_PredeployAddresses } from "../../libraries/constants/Lib_PredeployAddresses.sol";
+import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import {CrossDomainEnabled} from "../../libraries/bridge/CrossDomainEnabled.sol";
+import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAddresses.sol";
 
 /* Contract Imports */
-import { IL2StandardERC20 } from "../../standards/IL2StandardERC20.sol";
+import {IL2StandardERC20} from "../../standards/IL2StandardERC20.sol";
 
 /**
  * @title L2StandardBridge
@@ -39,7 +39,7 @@ contract L2StandardBridge is IL2ERC20Bridge, CrossDomainEnabled {
      * @param _l1TokenBridge Address of the L1 bridge deployed to the main chain.
      */
     constructor(address _l2CrossDomainMessenger, address _l1TokenBridge)
-        CrossDomainEnabled(_l2CrossDomainMessenger)
+    CrossDomainEnabled(_l2CrossDomainMessenger)
     {
         l1TokenBridge = _l1TokenBridge;
     }
@@ -139,6 +139,80 @@ contract L2StandardBridge is IL2ERC20Bridge, CrossDomainEnabled {
         emit WithdrawalInitiated(l1Token, _l2Token, msg.sender, _to, _amount, _data);
     }
 
+    /**
+  * @inheritdoc IL2ERC20Bridge
+     */
+    function burn(
+        address _l2Token,
+        uint256 _amount,
+        uint32 _l1Gas,
+        bytes calldata _data
+    ) external virtual {
+        _initiateBurn(_l2Token, msg.sender, _amount, _l1Gas, _data);
+    }
+
+    /**
+ * @dev Performs the logic for burning by burning the token and informing
+     *      the L1 token Gateway of the burn.
+     * @param _l2Token Address of L2 token where burning is initiated.
+     * @param _from Account to pull the burn from on L2.
+     * @param _amount Amount of the token to burn.
+     * @param _l1Gas Unused, but included for potential forward compatibility considerations.
+     * @param _data Optional data to forward to L1. This data is provided
+     *        solely as a convenience for external contracts. Aside from enforcing a maximum
+     *        length, these contracts provide no guarantees about its content.
+     */
+
+    function _initiateBurn(
+        address _l2Token,
+        address _from,
+        uint256 _amount,
+        uint32 _l1Gas,
+        bytes calldata _data
+    ) internal {
+        // When a withdrawal is initiated, we burn the withdrawer's funds to prevent subsequent L2
+        // usage
+        // slither-disable-next-line reentrancy-events
+        IL2StandardERC20(_l2Token).burn(msg.sender, _amount);
+
+        // Construct calldata for l1TokenBridge.finalizeERC20Withdrawal(_to, _amount)
+        // slither-disable-next-line reentrancy-events
+        address l1Token = IL2StandardERC20(_l2Token).l1Token();
+        bytes memory message;
+
+        if (_l2Token == Lib_PredeployAddresses.BVM_ETH) {
+            message = abi.encodeWithSelector(
+                IL1StandardBridge.finalizeBurnEth.selector,
+                _from,
+                _amount,
+                _data
+            );
+        } else if (_l2Token == Lib_PredeployAddresses.BVM_BIT) {
+            message = abi.encodeWithSelector(
+                IL1ERC20Bridge.finalizeBurnBit.selector,
+                _from,
+                _amount,
+                _data
+            );
+        } else {
+            message = abi.encodeWithSelector(
+                IL1ERC20Bridge.finalizeBurnErc20.selector,
+                l1Token,
+                _l2Token,
+                _from,
+                _amount,
+                _data
+            );
+        }
+
+        // Send message up to L1 bridge
+        // slither-disable-next-line reentrancy-events
+        sendCrossDomainMessage(l1TokenBridge, _l1Gas, message);
+
+        // slither-disable-next-line reentrancy-events
+        emit BurnInitiated(l1Token, _l2Token, msg.sender, _amount, _data);
+    }
+
     /************************************
      * Cross-chain Function: Depositing *
      ************************************/
@@ -157,7 +231,7 @@ contract L2StandardBridge is IL2ERC20Bridge, CrossDomainEnabled {
         // Check the target token is compliant and
         // verify the deposited token on L1 matches the L2 deposited token representation here
         if (
-            // slither-disable-next-line reentrancy-events
+        // slither-disable-next-line reentrancy-events
             ERC165Checker.supportsInterface(_l2Token, 0x1d1d8b63) &&
             _l1Token == IL2StandardERC20(_l2Token).l1Token()
         ) {

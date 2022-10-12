@@ -275,6 +275,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		// to the sequencer.
 		l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 		fee := new(big.Int).Add(st.l1Fee, l2Fee)
+		// burning
 		st.state.AddBalance(evm.Coinbase, fee)
 	} else {
 		st.state.AddBalance(evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))

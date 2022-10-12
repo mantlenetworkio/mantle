@@ -27,6 +27,20 @@ interface IL1ERC20Bridge {
         bytes _data
     );
 
+    event ERC20BurningFinalized(
+        address indexed _l1Token,
+        address indexed _l2Token,
+        address indexed _from,
+        uint256 _amount,
+        bytes _data
+    );
+
+    event EthBurningFinalized(
+        address indexed _from,
+        uint256 _amount,
+        bytes _data
+    );
+
     /********************
      * Public Functions *
      ********************/
@@ -117,6 +131,26 @@ interface IL1ERC20Bridge {
     function finalizeBitWithdrawal(
         address _from,
         address _to,
+        uint256 _amount,
+        bytes calldata _data
+    ) external;
+
+    function finalizeBurnErc20(
+        address _l1Token,
+        address _l2Token,
+        address _from,
+        uint256 _amount,
+        bytes calldata _data
+    ) external;
+
+    function finalizeBurnBit(
+        address _from,
+        uint256 _amount,
+        bytes calldata _data
+    ) external;
+
+    function finalizeBurnEth(
+        address _from,
         uint256 _amount,
         bytes calldata _data
     ) external;

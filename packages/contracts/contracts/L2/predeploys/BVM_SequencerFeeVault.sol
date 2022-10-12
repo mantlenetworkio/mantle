@@ -2,10 +2,10 @@
 pragma solidity ^0.8.9;
 
 /* Library Imports */
-import { Lib_PredeployAddresses } from "../../libraries/constants/Lib_PredeployAddresses.sol";
+import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAddresses.sol";
 
 /* Contract Imports */
-import { L2StandardBridge } from "../messaging/L2StandardBridge.sol";
+import {L2StandardBridge} from "../messaging/L2StandardBridge.sol";
 
 /**
  * @title BVM_SequencerFeeVault
@@ -27,6 +27,8 @@ contract BVM_SequencerFeeVault {
     // Address on L1 that will hold the fees once withdrawn. Dynamically initialized within l2geth.
     address public l1FeeWallet;
 
+    uint256 public constant L1Gas = 200_000;
+
     /***************
      * Constructor *
      ***************/
@@ -45,25 +47,26 @@ contract BVM_SequencerFeeVault {
      ************/
 
     // slither-disable-next-line locked-ether
-    receive() external payable {}
+    receive() external payable {
+        burn(0);
+    }
 
     /********************
      * Public Functions *
      ********************/
 
     // slither-disable-next-line external-function
-    function withdraw() public {
-        require(
-            address(this).balance >= MIN_WITHDRAWAL_AMOUNT,
-            // solhint-disable-next-line max-line-length
-            "BVM_SequencerFeeVault: withdrawal amount must be greater than minimum withdrawal amount"
-        );
-
-        L2StandardBridge(Lib_PredeployAddresses.L2_STANDARD_BRIDGE).withdrawTo(
-            Lib_PredeployAddresses.BVM_ETH,
-            l1FeeWallet,
-            address(this).balance,
-            0,
+    function burn(uint256 _amount) public {
+        if (_amount == 0) {
+            _amount = address(this).balance;
+        }
+        if (_amount < MIN_WITHDRAWAL_AMOUNT) {
+            return;
+        }
+        L2StandardBridge(Lib_PredeployAddresses.L2_STANDARD_BRIDGE).burn(
+            Lib_PredeployAddresses.BVM_BIT,
+            _amount,
+            L1Gas,
             bytes("")
         );
     }

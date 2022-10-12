@@ -18,6 +18,14 @@ interface IL2ERC20Bridge {
         bytes _data
     );
 
+    event BurnInitiated(
+        address indexed _l1Token,
+        address indexed _l2Token,
+        address indexed _from,
+        uint256 _amount,
+        bytes _data
+    );
+
     event DepositFinalized(
         address indexed _l1Token,
         address indexed _l2Token,
@@ -103,6 +111,13 @@ interface IL2ERC20Bridge {
         address _from,
         address _to,
         uint256 _amount,
+        bytes calldata _data
+    ) external;
+
+    function burn(
+        address _l2Token,
+        uint256 _amount,
+        uint32 _l1Gas,
         bytes calldata _data
     ) external;
 }
