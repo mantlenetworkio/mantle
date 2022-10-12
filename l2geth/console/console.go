@@ -28,9 +28,9 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/internal/jsre"
-	"github.com/bitdao-io/bitnetwork/l2geth/internal/web3ext"
-	"github.com/bitdao-io/bitnetwork/l2geth/rpc"
+	"github.com/bitdao-io/mantle/l2geth/internal/jsre"
+	"github.com/bitdao-io/mantle/l2geth/internal/web3ext"
+	"github.com/bitdao-io/mantle/l2geth/rpc"
 	"github.com/mattn/go-colorable"
 	"github.com/peterh/liner"
 	"github.com/robertkrimen/otto"

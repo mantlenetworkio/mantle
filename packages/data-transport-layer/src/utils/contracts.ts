@@ -28,17 +28,17 @@ export const loadProxyFromManager = async (
   return loadContract(name, address, provider)
 }
 
-export interface BitNetworkContracts {
+export interface MantleContracts {
   Lib_AddressManager: Contract
   StateCommitmentChain: Contract
   CanonicalTransactionChain: Contract
 }
 
-export const loadBitNetworkContracts = async (
+export const loadMantleContracts = async (
   l1RpcProvider: BaseProvider,
   addressManagerAddress: string,
   signer?: Signer
-): Promise<BitNetworkContracts> => {
+): Promise<MantleContracts> => {
   const Lib_AddressManager = loadContract(
     'Lib_AddressManager',
     addressManagerAddress,
@@ -73,5 +73,5 @@ export const loadBitNetworkContracts = async (
   contracts['Lib_AddressManager'] = Lib_AddressManager
 
   // TODO: sorry
-  return contracts as BitNetworkContracts
+  return contracts as MantleContracts
 }

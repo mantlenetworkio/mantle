@@ -21,11 +21,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enode"
-	"github.com/bitdao-io/bitnetwork/l2geth/rpc"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/p2p"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
+	"github.com/bitdao-io/mantle/l2geth/rpc"
 )
 
 // PrivateAdminAPI is the collection of administrative API methods exposed only

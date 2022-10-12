@@ -22,7 +22,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common"
 )
 
 // Interface represents a wrapped version of Go's interface{}, with the capacity

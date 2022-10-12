@@ -9,9 +9,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/rlp"
 )
 
 const (
@@ -38,7 +38,7 @@ var ErrTotalVotingPowerOverflow = fmt.Errorf("total voting power of resulting se
 // SequencerSet represent a set of *Sequencer at a given height.
 //
 // The sequencers can be fetched by address or index.
-// The index is in order of .VotingPower, so the indices are fixed for all
+// The index is in order of .Power, so the indices are fixed for all
 // rounds of a given blockchain height - ie. the sequencers are sorted by their
 // voting power (descending). Secondary index - .Address (ascending).
 //
@@ -713,7 +713,7 @@ func (seqs *SequencerSet) GetRlp(i int) []byte {
 //-------------------------------------
 
 // SequencersByVotingPower implements sort.Interface for []*Sequencer based on
-// the VotingPower and Address fields.
+// the Power and Address fields.
 type SequencersByVotingPower []*Sequencer
 
 func (seqz SequencersByVotingPower) Len() int { return len(seqz) }

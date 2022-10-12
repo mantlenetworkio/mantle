@@ -23,10 +23,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/scwallet"
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/usbwallet"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/rpc"
+	"github.com/bitdao-io/mantle/l2geth/accounts/scwallet"
+	"github.com/bitdao-io/mantle/l2geth/accounts/usbwallet"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/rpc"
 	"github.com/robertkrimen/otto"
 )
 

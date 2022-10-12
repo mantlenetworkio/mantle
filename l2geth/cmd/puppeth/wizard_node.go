@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/keystore"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/accounts/keystore"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/log"
 )
 
 // deployNode creates a new node configuration based on some user input.

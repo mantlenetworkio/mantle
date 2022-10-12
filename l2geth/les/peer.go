@@ -26,17 +26,17 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/mclock"
-	"github.com/bitdao-io/bitnetwork/l2geth/core"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/eth"
-	"github.com/bitdao-io/bitnetwork/l2geth/les/flowcontrol"
-	"github.com/bitdao-io/bitnetwork/l2geth/light"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enode"
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/mclock"
+	"github.com/bitdao-io/mantle/l2geth/core"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/eth"
+	"github.com/bitdao-io/mantle/l2geth/les/flowcontrol"
+	"github.com/bitdao-io/mantle/l2geth/light"
+	"github.com/bitdao-io/mantle/l2geth/p2p"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
+	"github.com/bitdao-io/mantle/l2geth/params"
+	"github.com/bitdao-io/mantle/l2geth/rlp"
 )
 
 var (

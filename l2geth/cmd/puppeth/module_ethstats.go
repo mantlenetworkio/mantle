@@ -25,7 +25,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/log"
 )
 
 // ethstatsDockerfile is the Dockerfile required to build an ethstats backend

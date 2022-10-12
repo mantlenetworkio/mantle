@@ -19,7 +19,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/core/vm"
+	"github.com/bitdao-io/mantle/l2geth/core/vm"
 )
 
 func TestVM(t *testing.T) {

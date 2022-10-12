@@ -51,6 +51,8 @@ const deployFn: DeployFunction = async (hre) => {
   const messengerSlotVal = await ChugSplashDictator.messengerSlotVal()
   const bridgeSlotKey = await ChugSplashDictator.bridgeSlotKey()
   const bridgeSlotVal = await ChugSplashDictator.bridgeSlotVal()
+  const bitAddressSlotKey = await ChugSplashDictator.bitAddressSlotKey()
+  const bitAddressSlotVal = await ChugSplashDictator.bitAddressSlotVal()
 
   console.log(`
     The ChugSplashDictator contract (glory to Arstotzka) has been deployed.
@@ -61,6 +63,7 @@ const deployFn: DeployFunction = async (hre) => {
 
         ${messengerSlotKey}:   ${messengerSlotVal}
         ${bridgeSlotKey}:   ${bridgeSlotVal}
+        ${bitAddressSlotKey}:   ${bitAddressSlotVal}
 
     (2) Review the CURRENT and FINAL proxy owners and verify that these are the expected values:
 

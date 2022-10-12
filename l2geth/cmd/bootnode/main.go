@@ -24,14 +24,14 @@ import (
 	"net"
 	"os"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/cmd/utils"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/discover"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/discv5"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enode"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/nat"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/netutil"
+	"github.com/bitdao-io/mantle/l2geth/cmd/utils"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/p2p/discover"
+	"github.com/bitdao-io/mantle/l2geth/p2p/discv5"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
+	"github.com/bitdao-io/mantle/l2geth/p2p/nat"
+	"github.com/bitdao-io/mantle/l2geth/p2p/netutil"
 )
 
 func main() {

@@ -1,10 +1,7 @@
 import hre from 'hardhat'
 import { Contract } from 'ethers'
 import { toRpcHexString } from '@bitdaoio/core-utils'
-import {
-  getContractFactory,
-  getContractInterface,
-} from '@bitdaoio/contracts'
+import { getContractFactory, getContractInterface } from '@bitdaoio/contracts'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { smock, FakeContract } from '@defi-wonderland/smock'
 
@@ -78,7 +75,7 @@ describe('helpers', () => {
       })
 
       it('should return the event', async () => {
-        const event = await findEventForStateBatch(StateCommitmentChain, 0, )
+        const event = await findEventForStateBatch(StateCommitmentChain, 0)
         expect(event.args._batchIndex).to.equal(0)
       })
     })

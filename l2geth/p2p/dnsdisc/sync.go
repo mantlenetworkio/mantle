@@ -21,8 +21,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common/mclock"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enode"
+	"github.com/bitdao-io/mantle/l2geth/common/mclock"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
 )
 
 // clientTree is a full tree being synced.

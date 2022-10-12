@@ -1,12 +1,7 @@
 /* Imports: External */
 import { Signer } from 'ethers'
 import { getChainId, sleep } from '@bitdaoio/core-utils'
-import {
-  BaseServiceV2,
-  validators,
-  Gauge,
-  Counter,
-} from '@bitdaoio/common-ts'
+import { BaseServiceV2, validators, Gauge, Counter } from '@bitdaoio/common-ts'
 import { CrossChainMessenger, MessageStatus } from '@bitdaoio/sdk'
 import { Provider } from '@ethersproject/abstract-provider'
 

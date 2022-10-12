@@ -19,7 +19,7 @@
 package fetcher
 
 import (
-	"github.com/bitdao-io/bitnetwork/l2geth/metrics"
+	"github.com/bitdao-io/mantle/l2geth/metrics"
 )
 
 var (

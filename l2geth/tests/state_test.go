@@ -23,7 +23,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/core/vm"
+	"github.com/bitdao-io/mantle/l2geth/core/vm"
 )
 
 func TestState(t *testing.T) {

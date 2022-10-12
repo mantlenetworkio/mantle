@@ -1,7 +1,7 @@
 {
   "name": "@bitdaoio/sdk",
-  "version": "1.0.7",
-  "description": "[Bitnetwork] Tools for working with Bitnetwork",
+  "version": "1.0.8",
+  "description": "[Mantle] Tools for working with Mantle",
   "main": "dist/index",
   "types": "dist/index",
   "files": [
@@ -20,16 +20,16 @@
     "autogen:docs": "typedoc --out docs src/index.ts"
   },
   "keywords": [
-    "bitnetwork",
+    "mantle",
     "ethereum",
     "sdk"
   ],
-  "homepage": "https://github.com/bitdao-io/bitnetwork/tree/develop/packages/sdk#readme",
+  "homepage": "https://github.com/bitdao-io/mantle/tree/develop/packages/sdk#readme",
   "license": "MIT",
-  "author": "Bitnetwork PBC",
+  "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitdao-io/bitnetwork.git"
+    "url": "https://github.com/bitdao-io/mantle.git"
   },
   "devDependencies": {
     "@ethersproject/abstract-provider": "^5.6.1",
@@ -42,9 +42,9 @@
     "ethers": "^5.6.8",
     "hardhat": "^2.9.6",
     "hardhat-deploy": "^0.11.4",
+    "mocha": "^10.0.0",
     "nyc": "^15.1.0",
-    "typedoc": "^0.22.13",
-    "mocha": "^10.0.0"
+    "typedoc": "^0.22.13"
   },
   "dependencies": {
     "@bitdaoio/contracts": "1.0.2",

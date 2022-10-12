@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	bsscore "github.com/bitdao-io/bitnetwork/bss-core"
-	"github.com/bitdao-io/bitnetwork/scheduler/service"
+	bsscore "github.com/bitdao-io/mantle/bss-core"
+	"github.com/bitdao-io/mantle/scheduler/service"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/getsentry/sentry-go"
 	"github.com/urfave/cli"

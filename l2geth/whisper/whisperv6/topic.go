@@ -19,7 +19,7 @@
 package whisperv6
 
 import (
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
 )
 
 // TopicType represents a cryptographically secure, probabilistic partial

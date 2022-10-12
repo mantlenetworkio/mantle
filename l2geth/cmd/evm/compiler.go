@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/cmd/evm/internal/compiler"
+	"github.com/bitdao-io/mantle/l2geth/cmd/evm/internal/compiler"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

@@ -40,7 +40,7 @@ func skipWithoutSolc(t *testing.T) {
 }
 
 func TestSolidityCompiler(t *testing.T) {
-	t.Skip("Not required for bitnetwork")
+	t.Skip("Not required for mantle")
 	skipWithoutSolc(t)
 
 	contracts, err := CompileSolidityString("", testSource)

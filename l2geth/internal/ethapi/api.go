@@ -25,27 +25,27 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts"
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/abi"
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/keystore"
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/scwallet"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/math"
-	"github.com/bitdao-io/bitnetwork/l2geth/consensus/clique"
-	"github.com/bitdao-io/bitnetwork/l2geth/consensus/ethash"
-	"github.com/bitdao-io/bitnetwork/l2geth/core"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/rawdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/vm"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethclient"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p"
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
-	"github.com/bitdao-io/bitnetwork/l2geth/rollup/rcfg"
-	"github.com/bitdao-io/bitnetwork/l2geth/rpc"
+	"github.com/bitdao-io/mantle/l2geth/accounts"
+	"github.com/bitdao-io/mantle/l2geth/accounts/abi"
+	"github.com/bitdao-io/mantle/l2geth/accounts/keystore"
+	"github.com/bitdao-io/mantle/l2geth/accounts/scwallet"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
+	"github.com/bitdao-io/mantle/l2geth/common/math"
+	"github.com/bitdao-io/mantle/l2geth/consensus/clique"
+	"github.com/bitdao-io/mantle/l2geth/consensus/ethash"
+	"github.com/bitdao-io/mantle/l2geth/core"
+	"github.com/bitdao-io/mantle/l2geth/core/rawdb"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/core/vm"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/ethclient"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/p2p"
+	"github.com/bitdao-io/mantle/l2geth/params"
+	"github.com/bitdao-io/mantle/l2geth/rlp"
+	"github.com/bitdao-io/mantle/l2geth/rollup/rcfg"
+	"github.com/bitdao-io/mantle/l2geth/rpc"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/tyler-smith/go-bip39"
 )
@@ -978,7 +978,7 @@ func (s *PublicBlockChainAPI) Call(ctx context.Context, args CallArgs, blockNrOr
 	return (hexutil.Bytes)(result), err
 }
 
-// Bitnetwork note: The gasPrice in Bitnetwork is modified to always return 1 gwei. We
+// Mantle note: The gasPrice in Mantle is modified to always return 1 gwei. We
 // use the gasLimit field to communicate the entire user fee. This is done for
 // for compatibility reasons with the existing Ethereum toolchain, so that the user
 // fees can compensate for the additional costs the sequencer pays for publishing the

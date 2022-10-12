@@ -21,8 +21,8 @@ package geth
 import (
 	"math/big"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethclient"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/ethclient"
 )
 
 // EthereumClient provides access to the Ethereum APIs.

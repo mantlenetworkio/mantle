@@ -26,9 +26,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/event"
+	"github.com/bitdao-io/mantle/l2geth/accounts"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/event"
 )
 
 var testSigData = make([]byte, 32)

@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/bss-core/metrics"
-	"github.com/bitdao-io/bitnetwork/bss-core/txmgr"
+	"github.com/bitdao-io/mantle/bss-core/metrics"
+	"github.com/bitdao-io/mantle/bss-core/txmgr"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 )

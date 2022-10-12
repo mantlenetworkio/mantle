@@ -10,7 +10,7 @@ import {
 
 /* Imports: Internal */
 import { expect } from './shared/setup'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 import {
   DEFAULT_TEST_GAS_L1,
   DEFAULT_TEST_GAS_L2,
@@ -25,10 +25,10 @@ describe('Basic L1<>L2 Communication', async () => {
   let L1SimpleStorage: Contract
   let L2SimpleStorage: Contract
   let L2Reverter: Contract
-  let env: BitnetworkEnv
+  let env: MantleEnv
 
   before(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
     Factory__L1SimpleStorage = await ethers.getContractFactory(
       'SimpleStorage',
       env.l1Wallet

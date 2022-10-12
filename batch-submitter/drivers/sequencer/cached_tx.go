@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	l2types "github.com/bitdao-io/bitnetwork/l2geth/core/types"
+	l2types "github.com/bitdao-io/mantle/l2geth/core/types"
 )
 
 type CachedTx struct {

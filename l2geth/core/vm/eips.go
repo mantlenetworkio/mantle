@@ -19,7 +19,7 @@ package vm
 import (
 	"fmt"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
+	"github.com/bitdao-io/mantle/l2geth/params"
 )
 
 // EnableEIP enables the given EIP on the config.
@@ -139,37 +139,37 @@ func enable3529(jt *JumpTable) {
 }
 
 // UsingBVM
-// Bitnetwork specific changes
+// Mantle specific changes
 func enableMinimal2929(jt *JumpTable) {
 	jt[SLOAD].constantGas = 0
-	jt[SLOAD].dynamicGas = gasSLoadEIP2929Bitnetwork
+	jt[SLOAD].dynamicGas = gasSLoadEIP2929Mantle
 
 	jt[EXTCODECOPY].constantGas = params.WarmStorageReadCostEIP2929
-	jt[EXTCODECOPY].dynamicGas = gasExtCodeCopyEIP2929Bitnetwork
+	jt[EXTCODECOPY].dynamicGas = gasExtCodeCopyEIP2929Mantle
 
 	jt[EXTCODESIZE].constantGas = params.WarmStorageReadCostEIP2929
-	jt[EXTCODESIZE].dynamicGas = gasEip2929AccountCheckBitnetwork
+	jt[EXTCODESIZE].dynamicGas = gasEip2929AccountCheckMantle
 
 	jt[EXTCODEHASH].constantGas = params.WarmStorageReadCostEIP2929
-	jt[EXTCODEHASH].dynamicGas = gasEip2929AccountCheckBitnetwork
+	jt[EXTCODEHASH].dynamicGas = gasEip2929AccountCheckMantle
 
 	jt[BALANCE].constantGas = params.WarmStorageReadCostEIP2929
-	jt[BALANCE].dynamicGas = gasEip2929AccountCheckBitnetwork
+	jt[BALANCE].dynamicGas = gasEip2929AccountCheckMantle
 
 	jt[CALL].constantGas = params.WarmStorageReadCostEIP2929
-	jt[CALL].dynamicGas = gasCallEIP2929Bitnetwork
+	jt[CALL].dynamicGas = gasCallEIP2929Mantle
 
 	jt[CALLCODE].constantGas = params.WarmStorageReadCostEIP2929
-	jt[CALLCODE].dynamicGas = gasCallCodeEIP2929Bitnetwork
+	jt[CALLCODE].dynamicGas = gasCallCodeEIP2929Mantle
 
 	jt[STATICCALL].constantGas = params.WarmStorageReadCostEIP2929
-	jt[STATICCALL].dynamicGas = gasStaticCallEIP2929Bitnetwork
+	jt[STATICCALL].dynamicGas = gasStaticCallEIP2929Mantle
 
 	jt[DELEGATECALL].constantGas = params.WarmStorageReadCostEIP2929
-	jt[DELEGATECALL].dynamicGas = gasDelegateCallEIP2929Bitnetwork
+	jt[DELEGATECALL].dynamicGas = gasDelegateCallEIP2929Mantle
 
 	// This was previously part of the dynamic cost, but we're using it as a constantGas
 	// factor here
 	jt[SELFDESTRUCT].constantGas = params.SelfdestructGasEIP150
-	jt[SELFDESTRUCT].dynamicGas = gasSelfdestructEIP2929Bitnetwork
+	jt[SELFDESTRUCT].dynamicGas = gasSelfdestructEIP2929Mantle
 }

@@ -27,6 +27,39 @@ export const findEventForStateBatch = async (
 }
 
 /**
+ * Finds the Event that corresponds to a given state batch by index.
+ *
+ * @param scc StateCommitmentChain contract.
+ * @param index State batch index to search for.
+ * @param from State batch index to search from the block
+ * @returns from state batch index to search to the block.
+ */
+export const findEventForStateBatchByFromAndTo = async (
+  scc: Contract,
+  index: number,
+  from: number,
+  to: number
+): Promise<ethers.Event> => {
+  const events = await scc.queryFilter(
+    scc.filters.StateBatchAppended(index),
+    from,
+    to
+  )
+
+  // Only happens if the batch with the given index does not exist yet.
+  if (events.length === 0) {
+    throw new Error(`unable to find event for batch`)
+  }
+
+  // Should never happen.
+  if (events.length > 1) {
+    throw new Error(`found too many events for batch`)
+  }
+
+  return events[0]
+}
+
+/**
  * Finds the first state batch index that has not yet passed the fault proof window.
  *
  * @param scc StateCommitmentChain contract.
@@ -42,6 +75,7 @@ export const findFirstUnfinalizedStateBatchIndex = async (
   // Perform a binary search to find the next batch that will pass the challenge period.
   let lo = 0
   let hi = totalBatches
+
   while (lo !== hi) {
     const mid = Math.floor((lo + hi) / 2)
     const event = await findEventForStateBatch(scc, mid)

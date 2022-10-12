@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bitdao-io/bitnetwork/gas-oracle/bindings"
+	"github.com/bitdao-io/mantle/gas-oracle/bindings"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"

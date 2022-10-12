@@ -1,2 +1,2 @@
-# @eth-bitnetwork/gas-oracle
+# @bitdaoio/gas-oracle
 

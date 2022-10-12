@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common/mclock"
+	"github.com/bitdao-io/mantle/l2geth/common/mclock"
 )
 
 // logger collects events in string format and discards events older than the
