@@ -47,9 +47,9 @@ contract BVM_SequencerFeeVault {
      ************/
 
     // slither-disable-next-line locked-ether
-    receive() external payable {
-        burn(0);
-    }
+//    receive() external payable {
+//        burn(0);
+//    }
 
     /********************
      * Public Functions *

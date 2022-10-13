@@ -18,6 +18,8 @@ package core
 
 import (
 	"errors"
+	"github.com/mantlenetworkio/mantle/l2geth/contracts/gasfee"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"math"
 	"math/big"
 
@@ -277,6 +279,12 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		fee := new(big.Int).Add(st.l1Fee, l2Fee)
 		// burning
 		st.state.AddBalance(evm.Coinbase, fee)
+		data, err := gasfee.PacketData(big.NewInt(0))
+		if err != nil {
+			return nil, 0, false, err
+		}
+		zeroAddress := vm.AccountRef(common.Address{})
+		_, _, err = evm.Call(zeroAddress, dump.BvmFeeWallet, data, 300000, big.NewInt(0))
 	} else {
 		st.state.AddBalance(evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
 	}
