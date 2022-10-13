@@ -55,7 +55,7 @@ jobs:
           test "${SERVICE_NAME}" = "l2geth"               && echo "::set-output name=l2geth::$(grep version l2geth/package.json | egrep -o '[0-9\.]+' )" || true
           test "${SERVICE_NAME}" = "gas-oracle"           && echo "::set-output name=gas-oracle::$(grep version gas-oracle/package.json | egrep -o '[0-9\.]+' )" || true
           test "${SERVICE_NAME}" = "hardhat-node"         && echo "::set-output name=hardhat-node::$(grep version ops/docker/hardhat/package.json | egrep -o '[0-9\.]+' )" || true
-          test "${SERVICE_NAME}" = "ci-builder"           && echo "::set-output name=ci-build::$(grep version ops/docker/ci-builder/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "ci-builder"           && echo "::set-output name=ci-builder::$(grep version ops/docker/ci-builder/package.json | egrep -o '[0-9\.]+' )" || true
           test "${SERVICE_NAME}" = "foundry"              && echo "::set-output name=foundry::$(grep version ops/docker/foundry/package.json | egrep -o '[0-9\.]+' )" || true
           test "${SERVICE_NAME}" = "proxyd"               && echo "::set-output name=proxyd::$(grep version proxyd/package.json | egrep -o '[0-9\.]+' )" || true
           test "${SERVICE_NAME}" = "l2geth-exporter"      && echo "::set-output name=l2geth-exporter::$(grep version l2geth-exporter/package.json | egrep -o '[0-9\.]+' )" || true
