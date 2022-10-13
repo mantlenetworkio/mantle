@@ -103,6 +103,7 @@ func NewManager(wsServer server.IWebsocketManager,
 
 // Start launch a manager
 func (m Manager) Start() {
+	log.Info("manager is starting......")
 	go m.observeElection()
 	go m.slashing()
 }

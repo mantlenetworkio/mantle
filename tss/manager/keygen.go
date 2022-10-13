@@ -16,6 +16,7 @@ import (
 )
 
 func (m Manager) observeElection() {
+	log.Info("Observing election......")
 	queryTicker := time.NewTicker(m.taskInterval)
 	for {
 		if !m.stopGenKey {
@@ -42,6 +43,7 @@ func (m Manager) observeElection() {
 					}
 					cpk, err := m.generateKey(tssInfo.TssMembers, tssInfo.Threshold)
 					if err != nil {
+						log.Error("failed to generate key", "err", err)
 						return
 					}
 
