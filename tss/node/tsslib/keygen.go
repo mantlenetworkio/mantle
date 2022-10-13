@@ -6,6 +6,8 @@ import (
 	conversion2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	keygen2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/keygen"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -20,6 +22,10 @@ func (t *TssServer) Keygen(req keygen2.Request) (keygen2.Response, error) {
 	if err = t.requestCheck(req); err != nil {
 		return keygen2.Response{}, err
 	}
+	t.logger.Info().
+		Str("keygen keys", strings.Join(req.Keys, ",")).
+		Str("threshold", strconv.Itoa(req.ThresHold)).
+		Msg("received keygen request")
 
 	keygenInstance := keygen2.NewTssKeyGen(
 		t.p2pCommunication.GetLocalPeerID(),
