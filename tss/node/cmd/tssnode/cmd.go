@@ -96,11 +96,13 @@ func runNode(cmd *cobra.Command) error {
 	if err := tssInstance.Start(); err != nil {
 		log.Error().Err(err).Msg("fail to start tss server")
 	}
-	pubkey := hex.EncodeToString(crypto.FromECDSAPub(&privKey.PublicKey))
+
+	pubkey := crypto.CompressPubkey(&privKey.PublicKey)
+	pubkeyHex := hex.EncodeToString(pubkey)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	signer, err := sign.NewProcessor(cfg, ctx, tssInstance, privKey, pubkey, store)
+	signer, err := sign.NewProcessor(cfg, ctx, tssInstance, privKey, pubkeyHex, store)
 	if err != nil {
 		log.Error().Err(err).Msg("fail to new signer ")
 		return err
