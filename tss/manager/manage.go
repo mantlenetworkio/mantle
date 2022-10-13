@@ -180,7 +180,6 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	absents := make([]string, 0)
 	for _, node := range tssInfo.TssMembers {
 		if !slices.ExistsIgnoreCase(ctx.Approvers(), node) {
-			// 并且node不在slashing中
 			addr, _ := tss.NodeToAddress(node)
 			if !m.store.IsInSlashing(addr) {
 				absents = append(absents, node)
