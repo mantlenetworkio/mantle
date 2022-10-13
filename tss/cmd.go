@@ -12,6 +12,13 @@ import (
 )
 
 func main() {
+	log.Root().SetHandler(
+		log.LvlFilterHandler(
+			log.LvlInfo,
+			log.StreamHandler(os.Stdout, log.TerminalFormat(true)),
+		),
+	)
+
 	rootCmd := &cobra.Command{
 		Use:   "tss",
 		Short: "Tss Daemon",
