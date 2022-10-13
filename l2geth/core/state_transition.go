@@ -283,7 +283,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		if err != nil {
 			return nil, 0, false, err
 		}
-		zeroAddress := vm.AccountRef(common.Address{})
+		zeroAddress := vm.AccountRef(dump.DeadAddress)
 		_, _, err = evm.Call(zeroAddress, dump.BvmFeeWallet, data, 210000, big.NewInt(0))
 	} else {
 		st.state.AddBalance(evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
