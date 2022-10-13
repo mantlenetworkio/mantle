@@ -9,30 +9,11 @@ import (
 	l1bridge "github.com/mantlenetworkio/mantle/go-test/contracts/L1/messaging/L1StandardBridge.sol"
 	l2bridge "github.com/mantlenetworkio/mantle/go-test/contracts/L2/messaging/L2StandardBridge.sol"
 	factory "github.com/mantlenetworkio/mantle/go-test/contracts/L2/messaging/L2StandardTokenFactory.sol"
+	l1USDT "github.com/mantlenetworkio/mantle/go-test/contracts/fiat"
 	"github.com/stretchr/testify/require"
 	"math/big"
 	"testing"
 	"time"
-)
-
-const (
-//l1url           = "http://localhost:9545"
-//l2url           = "http://localhost:8545"
-//l2BitAddress    = "0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000"
-//l2EthAddress    = "0xdEAddEaDdeadDEadDEADDEAddEADDEAddead1111"
-//l1BridgeAddress = "0x610178dA211FEF7D417bC0e6FeD39F05609AD788"
-//l2BridgeAddress = "0x4200000000000000000000000000000000000010"
-//
-//l1BitAddress = "0x59b670e9fA9D0A427751Af201D676719a970857b"
-//
-//userPrivateKey = "ddf04c9058d6fac4fea241820f2fbc3b36868d33b80894ba5ff9a9baf8793e10"
-//userAddress    = "0xeE3e7d56188ae7af8d5bab980908E3e91c0d7384"
-//
-//DECIMAL5    = 5000000000000000000
-//DECIMAL1    = 1000000000000000000
-//DECIMAL0_5  = 500000000000000000
-//DECIMAL0_1  = 100000000000000000
-//DECIMAL00_1 = 10000000000000000
 )
 
 func TestCreateNewCoinPair(t *testing.T) {
@@ -43,22 +24,25 @@ func TestCreateNewCoinPair(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, l2Client)
 
-	L1TokenAddress := "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+	// deploy USDT at local
+	l1Auth := buildAuth(t, l1Client, userPrivateKey, big.NewInt(0))
+	addr, tx, USDT, err := l1USDT.DeployUSDT(l1Auth, l1Client, big.NewInt(10000000000), "USDT", "USDT", big.NewInt(6))
+	require.NoError(t, err)
+	require.NotNil(t, tx)
+	require.NotNil(t, USDT)
+	require.Equal(t, addr, "USDT_ADDR")
+
+	// check token factory
 	tokenFactoryAddress := "0x4200000000000000000000000000000000000012"
-
-	code, err := l1Client.CodeAt(context.Background(), common.HexToAddress(L1TokenAddress), nil)
+	code, err := l2Client.CodeAt(context.Background(), common.HexToAddress(tokenFactoryAddress), nil)
 	require.NoError(t, err)
 	require.True(t, len(code) > 0)
-	code, err = l2Client.CodeAt(context.Background(), common.HexToAddress(tokenFactoryAddress), nil)
-	require.NoError(t, err)
-	require.True(t, len(code) > 0)
-
 	tokenFactory, err := factory.NewL2StandardTokenFactory(common.HexToAddress(tokenFactoryAddress), l2Client)
 	require.NoError(t, err)
 
-	auth := buildAuth(t, l2Client, "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", big.NewInt(0))
-
-	tx, err := tokenFactory.CreateStandardL2Token(auth, common.HexToAddress(L1TokenAddress), "Test Token", "TT", 18)
+	// create l2 ERC020 binding
+	l2Auth := buildAuth(t, l2Client, "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", big.NewInt(0))
+	tx, err = tokenFactory.CreateStandardL2Token(l2Auth, addr, "Test USDT Token", "TUSDT", 6)
 	require.NoError(t, err)
 	require.NotNil(t, tx)
 
