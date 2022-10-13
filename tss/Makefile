@@ -6,7 +6,7 @@ LDFLAGSSTRING +=-X main.GitDate=$(GITDATE)
 LDFLAGS := -ldflags "$(LDFLAGSSTRING)"
 
 build:
-	env GO111MODULE=on go build -v $(LDFLAGS) .
+	env GO111MODULE=on CGO_ENABLED=1 go build -v $(LDFLAGS) .
 
 test:
 	go test -v ./...
