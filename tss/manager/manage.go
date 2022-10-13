@@ -180,7 +180,6 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	absents := make([]string, 0)
 	for _, node := range tssInfo.TssMembers {
 		if !slices.ExistsIgnoreCase(ctx.Approvers(), node) {
-			// 并且node不在slashing中
 			addr, _ := tss.NodeToAddress(node)
 			if !m.store.IsInSlashing(addr) {
 				absents = append(absents, node)
@@ -201,7 +200,7 @@ func (m Manager) SignTxBatch() error {
 
 func (m Manager) availableNodes(tssMembers []string) []string {
 	aliveNodes := m.wsServer.AliveNodes()
-	log.Info("check available nodes", "expected", fmt.Sprintf("%v", tssMembers), "alive nodes", fmt.Sprintf("%v", aliveNodes))
+	log.Info("check available nodes", "result", "expected", fmt.Sprintf("%v", tssMembers), "alive nodes", fmt.Sprintf("%v", aliveNodes))
 	availableNodes := make([]string, 0)
 	for _, n := range aliveNodes {
 		if slices.ExistsIgnoreCase(tssMembers, n) {
