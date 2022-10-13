@@ -16,9 +16,9 @@ import (
 )
 
 func (m Manager) observeElection() {
-	log.Info("Observing election......")
 	queryTicker := time.NewTicker(m.taskInterval)
 	for {
+		log.Info("trying to handle new election...", "stopGenKey", m.stopGenKey)
 		if !m.stopGenKey {
 			func() {
 				// check if new round election is held(inactive tss members)
@@ -27,6 +27,7 @@ func (m Manager) observeElection() {
 					log.Error("failed to query inactive info", "err", err)
 					return
 				}
+				log.Info("query active members", "numbers", len(tssInfo.TssMembers))
 
 				//tssMembers, threshold, electionId := getInactiveMembers()
 				if len(tssInfo.TssMembers) > 0 {
