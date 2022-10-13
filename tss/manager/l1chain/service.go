@@ -92,17 +92,18 @@ func (q QueryService) QueryInactiveInfo() (types.TssCommitteeInfo, error) {
 	tssMembers := make([]string, len(inactiveTssMembers), len(inactiveTssMembers))
 	for i, m := range inactiveTssMembers {
 		// raw public key(64bytes) ==> compress public key(33bytes)
-		//unmarshalled, err := crypto.UnmarshalPubkey(append([]byte{0x04}, m...))
-		//if err != nil {
-		//	log.Error("fail to unmarshal tss member", "err", err)
-		//	return types.TssCommitteeInfo{}, nil
-		//}
-		//compressed := crypto.CompressPubkey(unmarshalled)
-		//hexEncoded := hex.EncodeToString(compressed)
+		unmarshalled, err := crypto.UnmarshalPubkey(append([]byte{0x04}, m...))
+		if err != nil {
+			log.Error("fail to unmarshal tss member", "err", err)
+			return types.TssCommitteeInfo{}, nil
+		}
+		compressed := crypto.CompressPubkey(unmarshalled)
+		hexEncoded := hex.EncodeToString(compressed)
 
 		// raw public key(64bytes) ==> uncompressed format: 0x04||rawPK (65bytes)
-		uncompressed := append([]byte{0x04}, m...)
-		tssMembers[i] = hex.EncodeToString(uncompressed)
+		// uncompressed := append([]byte{0x04}, m...)
+		// hexEncoded := hex.EncodeToString(uncompressed)
+		tssMembers[i] = hexEncoded
 	}
 	return types.TssCommitteeInfo{
 		ElectionId: electionId.Uint64(),
