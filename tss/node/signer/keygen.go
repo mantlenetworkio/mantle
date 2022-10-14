@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
 	etht "github.com/ethereum/go-ethereum/core/types"
@@ -62,7 +63,8 @@ func (p *Processor) Keygen() {
 						}
 						RpcResponse := tdtypes.NewRPCSuccessResponse(tdtypes.JSONRPCStringID(resId), keygenResponse)
 						p.wsClient.SendMsg(RpcResponse)
-						err := p.setGroupPublicKey(p.localPubkeyUncompress, resp.PubKey)
+						logger.Info().Msgf("keygen start to")
+						err := p.setGroupPublicKey(p.localPubKeyByte, resp.PubKeyByte)
 						if err != nil {
 							logger.Err(err).Msg("failed to send tss group manager transactionx")
 						}
@@ -77,7 +79,7 @@ func (p *Processor) Keygen() {
 	}()
 }
 
-func (p *Processor) setGroupPublicKey(localKey, poolPubkey string) error {
+func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	p.logger.Info().Msg("connecting to layer one")
 	if err := ensureConnection(p.l1Client); err != nil {
 		p.logger.Err(err).Msg("Unable to connect to layer one")
@@ -108,7 +110,7 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey string) error {
 		return err
 	}
 	opts.GasPrice = gasPrice
-	tx, err := contract.SetGroupPublicKey(opts, []byte(localKey), []byte(poolPubkey))
+	tx, err := contract.SetGroupPublicKey(opts, localKey, poolPubkey)
 	if err != nil {
 		return err
 	}
@@ -164,7 +166,7 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey string) error {
 
 }
 
-//Ensure we can actually connect l1
+// Ensure we can actually connect l1
 func ensureConnection(client *ethclient.Client) error {
 	t := time.NewTicker(1 * time.Second)
 	retries := 0

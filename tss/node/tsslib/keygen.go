@@ -1,14 +1,15 @@
 package tsslib
 
 import (
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/abnormal"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	conversion2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	keygen2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/keygen"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func (t *TssServer) Keygen(req keygen2.Request) (keygen2.Response, error) {
@@ -71,17 +72,18 @@ func (t *TssServer) Keygen(req keygen2.Request) (keygen2.Response, error) {
 		t.logger.Error().Err(err).Msg("err in keygen")
 
 		return keygen2.NewResponse(
-			"", nil, common.Fail,
+			"", nil, nil, common.Fail,
 			abnormal.GenerateNewKeyError,
 			abnormalMgr.GetAbnormalNodePubKeys()), err
 	} else {
 		t.tssMetrics.UpdateKeyGen(keygenTime, true)
 	}
 
-	pubkey, address, err := conversion2.GetTssPubKey(k)
+	pubkey, address, pubkeyByte, err := conversion2.GetTssPubKey(k)
 	if err != nil {
 		return keygen2.NewResponse(
 			"",
+			nil,
 			nil,
 			common.Fail,
 			abnormal.GenerateNewKeyError,
@@ -91,6 +93,7 @@ func (t *TssServer) Keygen(req keygen2.Request) (keygen2.Response, error) {
 	return keygen2.NewResponse(
 		pubkey,
 		address,
+		pubkeyByte,
 		status,
 		"",
 		abnormalMgr.GetAbnormalNodePubKeys(),
