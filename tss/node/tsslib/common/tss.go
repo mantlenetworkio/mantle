@@ -223,12 +223,12 @@ func generateSignature(msg []byte, msgID string, privKey *ecdsa.PrivateKey) ([]b
 	return crypto.Sign(digestBz, privKey)
 }
 
-func verifySignature(pubKey *ecdsa.PublicKey, message, sig []byte, msgID string) bool {
+func verifySignature(pubKey, message, sig []byte, msgID string) bool {
 	var dataForSign bytes.Buffer
 	dataForSign.Write(message)
 	dataForSign.WriteString(msgID)
 	digestBz := crypto.Keccak256Hash(dataForSign.Bytes()).Bytes()
-	return crypto.VerifySignature(crypto.FromECDSAPub(pubKey), digestBz, sig)
+	return crypto.VerifySignature(pubKey, digestBz, sig)
 }
 
 func (t *TssCommon) updateLocal(wireMsg *messages.WireMessage) error {
@@ -578,14 +578,8 @@ func (t *TssCommon) processTSSMsg(wireMsg *messages.WireMessage, msgType message
 		return errors.New("error in find the data owner")
 	}
 	keyBytes := dataOwner.GetKey()
-	pk, err := crypto.UnmarshalPubkey(keyBytes)
 
-	if err != nil {
-		t.logger.Error().Msgf("error in unmarshal public key, {%s}", err.Error())
-		return err
-	}
-
-	ok = verifySignature(pk, wireMsg.Message, wireMsg.Sig, t.msgID)
+	ok = verifySignature(keyBytes, wireMsg.Message, wireMsg.Sig, t.msgID)
 	if !ok {
 		t.logger.Error().Msg("fail to verify the signature")
 		return errors.New("signature verify failed")
