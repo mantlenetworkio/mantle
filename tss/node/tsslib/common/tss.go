@@ -228,6 +228,9 @@ func verifySignature(pubKey, message, sig []byte, msgID string) bool {
 	dataForSign.Write(message)
 	dataForSign.WriteString(msgID)
 	digestBz := crypto.Keccak256Hash(dataForSign.Bytes()).Bytes()
+	if len(sig) == crypto.SignatureLength {
+		sig = sig[:len(sig)-1]
+	}
 	return crypto.VerifySignature(pubKey, digestBz, sig)
 }
 
