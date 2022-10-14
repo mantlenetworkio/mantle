@@ -56,10 +56,11 @@ func NewTss(
 	shamirConfig tssconfig.ShamirConfig,
 ) (*TssServer, error) {
 
-	pubkey := hex.EncodeToString(crypto.FromECDSAPub(&priKey.PublicKey))
-	log.Info().Msgf("pub key is (%s) \n", pubkey)
+	pubkey := crypto.CompressPubkey(&priKey.PublicKey)
+	pubkeyHex := hex.EncodeToString(pubkey)
+	log.Info().Msgf("pub key is (%s) \n", pubkeyHex)
 
-	peerId, err := conversion.GetPeerIDFromPubKey(pubkey)
+	peerId, err := conversion.GetPeerIDFromPubKey(pubkeyHex)
 	if err != nil {
 		log.Error().Err(err).Msg("ERROR: fail to get peer id by pub key")
 	}
@@ -161,7 +162,7 @@ func NewTss(
 		conf:             conf,
 		logger:           log.With().Str("module", "tss").Logger(),
 		p2pCommunication: comm,
-		localNodePubKey:  pubkey,
+		localNodePubKey:  pubkeyHex,
 		participants:     make(map[string][]string),
 		preParams:        preParams,
 		tssKeyGenLocker:  &sync.Mutex{},
