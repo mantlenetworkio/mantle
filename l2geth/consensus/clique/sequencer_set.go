@@ -1,4 +1,4 @@
-package coterie
+package clique
 
 import (
 	"bytes"
