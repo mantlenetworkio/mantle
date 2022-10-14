@@ -57,16 +57,7 @@ func (t *TssServer) Keygen(req keygen2.Request) (keygen2.Response, error) {
 	}()
 	abnormalMgr := keygenInstance.GetTssCommonStruct().GetAbnormalMgr()
 
-	parsedPeers := make([]string, len(req.Keys))
-	for i, el := range req.Keys {
-		parsedPeers[i] = el
-	}
-	actives, err := conversion2.GetPubKeysFromPeerIDs(parsedPeers)
-	if err != nil {
-		t.logger.Error().Err(err).Msg("there is a error when get active public keys from peers id")
-	} else {
-		keygenInstance.ParticipantKeys = actives
-	}
+	keygenInstance.ParticipantKeys = req.Keys
 
 	t.logger.Debug().Msg("keygen party formed")
 	// the statistic of keygen only care about Tss it self, even if the
