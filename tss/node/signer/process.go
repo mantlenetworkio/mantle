@@ -3,6 +3,7 @@ package signer
 import (
 	"context"
 	"crypto/ecdsa"
+
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/bss-core/dial"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
@@ -11,6 +12,8 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
 	managertypes "github.com/mantlenetworkio/mantle/tss/manager/types"
 
+	"time"
+
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib"
 	"github.com/mantlenetworkio/mantle/tss/node/types"
@@ -18,13 +21,13 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
-	"time"
 
 	"sync"
 )
 
 type Processor struct {
 	localPubkey               string
+	localPubkeyUncompress     string
 	privateKey                *ecdsa.PrivateKey
 	tssServer                 tsslib.Server
 	wsClient                  *client.WSClients
@@ -55,7 +58,7 @@ type Processor struct {
 	metrics                   *Metrics
 }
 
-func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance tsslib.Server, privKey *ecdsa.PrivateKey, pubKey string, nodeStore types.NodeStore) (*Processor, error) {
+func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance tsslib.Server, privKey *ecdsa.PrivateKey, pubKey, pubKeyHex string, nodeStore types.NodeStore) (*Processor, error) {
 	taskIntervalDur, err := time.ParseDuration(cfg.TimedTaskInterval)
 	if err != nil {
 		return nil, err
@@ -70,7 +73,7 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 	if err != nil {
 		return nil, err
 	}
-	wsClient, err := client.NewWSClient(cfg.Node.WsAddr, "/ws", privKey, pubKey)
+	wsClient, err := client.NewWSClient(cfg.Node.WsAddr, "/ws", privKey, pubKeyHex)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +86,8 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 	queryService := l1chain.NewQueryService(cfg.L1Url, cfg.TssGroupContractAddress, cfg.L1ConfirmBlocks, nodeStore)
 
 	processor := Processor{
-		localPubkey:               pubKey,
+		localPubkey:               pubKeyHex,
+		localPubkeyUncompress:     pubKey,
 		privateKey:                privKey,
 		tssServer:                 tssInstance,
 		stopChan:                  make(chan struct{}),

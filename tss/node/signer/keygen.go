@@ -62,7 +62,7 @@ func (p *Processor) Keygen() {
 						}
 						RpcResponse := tdtypes.NewRPCSuccessResponse(tdtypes.JSONRPCStringID(resId), keygenResponse)
 						p.wsClient.SendMsg(RpcResponse)
-						err := p.setGroupPublicKey(p.localPubkey, resp.PubKey)
+						err := p.setGroupPublicKey(p.localPubkeyUncompress, resp.PubKey)
 						if err != nil {
 							logger.Err(err).Msg("failed to send tss group manager transactionx")
 						}

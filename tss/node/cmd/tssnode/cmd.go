@@ -99,10 +99,14 @@ func runNode(cmd *cobra.Command) error {
 
 	pubkey := crypto.CompressPubkey(&privKey.PublicKey)
 	pubkeyHex := hex.EncodeToString(pubkey)
+	localPubkeyBytes := crypto.FromECDSAPub(&privKey.PublicKey)
+	// bytes len is 64
+	localPubkeyBytes = localPubkeyBytes[1:]
+	localPubkeyHex := hex.EncodeToString(localPubkeyBytes)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	signer, err := sign.NewProcessor(cfg, ctx, tssInstance, privKey, pubkeyHex, store)
+	signer, err := sign.NewProcessor(cfg, ctx, tssInstance, privKey, localPubkeyHex, pubkeyHex, store)
 	if err != nil {
 		log.Error().Err(err).Msg("fail to new signer ")
 		return err
