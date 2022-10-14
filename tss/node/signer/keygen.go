@@ -63,7 +63,7 @@ func (p *Processor) Keygen() {
 						}
 						RpcResponse := tdtypes.NewRPCSuccessResponse(tdtypes.JSONRPCStringID(resId), keygenResponse)
 						p.wsClient.SendMsg(RpcResponse)
-						logger.Info().Msgf("keygen start to")
+						logger.Info().Msgf("keygen start to set group publickey for l1 contract")
 						err := p.setGroupPublicKey(p.localPubKeyByte, resp.PubKeyByte)
 						if err != nil {
 							logger.Err(err).Msg("failed to send tss group manager transactionx")
@@ -99,7 +99,7 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	if opts.Context == nil {
 		opts.Context = context.Background()
 	}
-	opts.NoSend = true
+	// opts.NoSend = true
 	contract, err := tgm.NewTssGroupManager(address, p.l1Client)
 	if err != nil {
 		return err
