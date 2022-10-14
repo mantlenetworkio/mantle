@@ -67,10 +67,10 @@ const config: HardhatUserConfig = {
     },
     'goerli-qa': {
       chainId: 5,
-      url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
+      url: 'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28',
       deploy,
       accounts: [
-        '114983389b91256e6e26cb0e30371ceb5385e3fb309cd0e7823b86fff27c9ba4',
+        '04586afc8e720e5dbb06f598b056d835bb02cd9743efd438cda8055c90722f33',
       ],
     },
     kovan: {
