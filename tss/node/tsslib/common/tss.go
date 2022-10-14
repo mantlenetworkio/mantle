@@ -6,6 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+	"sync"
+
 	"github.com/binance-chain/tss-lib/tss"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
@@ -15,8 +18,6 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/p2p"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"strings"
-	"sync"
 )
 
 type TssCommon struct {
@@ -218,14 +219,16 @@ func generateSignature(msg []byte, msgID string, privKey *ecdsa.PrivateKey) ([]b
 	var dataForSigning bytes.Buffer
 	dataForSigning.Write(msg)
 	dataForSigning.WriteString(msgID)
-	return crypto.Sign(dataForSigning.Bytes(), privKey)
+	digestBz := crypto.Keccak256Hash(dataForSigning.Bytes()).Bytes()
+	return crypto.Sign(digestBz, privKey)
 }
 
 func verifySignature(pubKey *ecdsa.PublicKey, message, sig []byte, msgID string) bool {
 	var dataForSign bytes.Buffer
 	dataForSign.Write(message)
 	dataForSign.WriteString(msgID)
-	return crypto.VerifySignature(crypto.FromECDSAPub(pubKey), dataForSign.Bytes(), sig)
+	digestBz := crypto.Keccak256Hash(dataForSign.Bytes()).Bytes()
+	return crypto.VerifySignature(crypto.FromECDSAPub(pubKey), digestBz, sig)
 }
 
 func (t *TssCommon) updateLocal(wireMsg *messages.WireMessage) error {
