@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"syscall"
 
+	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/tss/node/store"
 
@@ -104,9 +105,11 @@ func runNode(cmd *cobra.Command) error {
 	// bytes len is 64
 	localPubkeyBytes = localPubkeyBytes[1:]
 
+	address := ethcrypto.PubkeyToAddress(privKey.PublicKey)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	signer, err := sign.NewProcessor(cfg, ctx, tssInstance, privKey, localPubkeyBytes, pubkeyHex, store)
+	signer, err := sign.NewProcessor(cfg, ctx, tssInstance, privKey, localPubkeyBytes, pubkeyHex, store, address)
 	if err != nil {
 		log.Error().Err(err).Msg("fail to new signer ")
 		return err

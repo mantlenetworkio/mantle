@@ -28,6 +28,7 @@ import (
 type Processor struct {
 	localPubkey               string
 	localPubKeyByte           []byte
+	address                   ethc.Address
 	privateKey                *ecdsa.PrivateKey
 	tssServer                 tsslib.Server
 	wsClient                  *client.WSClients
@@ -58,7 +59,7 @@ type Processor struct {
 	metrics                   *Metrics
 }
 
-func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance tsslib.Server, privKey *ecdsa.PrivateKey, pubkeyByte []byte, pubKeyHex string, nodeStore types.NodeStore) (*Processor, error) {
+func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance tsslib.Server, privKey *ecdsa.PrivateKey, pubkeyByte []byte, pubKeyHex string, nodeStore types.NodeStore, address ethc.Address) (*Processor, error) {
 	taskIntervalDur, err := time.ParseDuration(cfg.TimedTaskInterval)
 	if err != nil {
 		return nil, err
@@ -88,6 +89,7 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 	processor := Processor{
 		localPubkey:               pubKeyHex,
 		localPubKeyByte:           pubkeyByte,
+		address:                   address,
 		privateKey:                privKey,
 		tssServer:                 tssInstance,
 		stopChan:                  make(chan struct{}),

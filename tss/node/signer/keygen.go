@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
@@ -99,6 +100,15 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	if opts.Context == nil {
 		opts.Context = context.Background()
 	}
+	nonce64, err := p.l1Client.NonceAt(p.ctx, p.address, nil)
+	if err != nil {
+		p.logger.Err(err).Msgf("%s unable to get current nonce",
+			p.address)
+		return err
+	}
+	nonce := new(big.Int).SetUint64(nonce64)
+	opts.Nonce = nonce
+
 	// opts.NoSend = true
 	contract, err := tgm.NewTssGroupManager(address, p.l1Client)
 	if err != nil {
