@@ -10,9 +10,6 @@ interface ISequencer {
         uint256 keyIndex;
     }
 
-    // mapping(owner => Sequencer) sequencers
-    // address[] owners
-
     // create a new sequencer info
     function createSequencer(
         uint256,
