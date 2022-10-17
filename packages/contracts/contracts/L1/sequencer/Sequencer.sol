@@ -5,7 +5,6 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "./ISequencer.sol";
 
 contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
     using SafeERC20 for IERC20;
@@ -17,9 +16,12 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         uint256 amount;
         uint256 keyIndex;
     }
+
     mapping(address => SequencerInfo) public sequencers;
+    mapping(address => address) public rel;
+
     address[] public owners;
-    address bitToken;
+    address public bitToken;
 
     event SequencerCreate(address, address, bytes);
     event SequencerUpdate(address, bytes, uint256);
@@ -43,11 +45,11 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         bytes calldata _nodeID
     ) external nonReentrant {
         // check params todo: check nodeID
-        require(_amount > 0, "invild amount");
-        require(_mintAddress != address(0), "invild address, address can not be 0");
-
+        require(_amount > 0, "Invild amount");
+        require(_mintAddress != address(0), "Invild address, address can not be 0");
         // check already have sequencer
-        require(sequencers[msg.sender].mintAddress == address(0), "already have deposit");
+        require(sequencers[msg.sender].mintAddress == address(0), "Already have deposit");
+        require(rel[_mintAddress] == address(0), "This mint address already have sender");
         IERC20(bitToken).safeTransferFrom(msg.sender, address(this), _amount);
 
         uint256 index = owners.length;
@@ -58,16 +60,17 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
             amount: _amount,
             keyIndex: index
         });
-        owners[index] = msg.sender;
+        owners.push(msg.sender);
+        rel[_mintAddress] = msg.sender;
         emit SequencerCreate(msg.sender, _mintAddress, _nodeID);
     }
 
     // Check sequencer exist then add deposit amount
     function deposit(uint256 _amount) external nonReentrant {
         // check params
-        require(_amount > 0, "invild amount");
+        require(_amount > 0, "Invild amount");
         // check already have sequencer
-        require(sequencers[msg.sender].mintAddress != address(0), "do not have create");
+        require(sequencers[msg.sender].mintAddress != address(0), "Sequencer not exist");
 
         // transfer
         IERC20(bitToken).safeTransferFrom(msg.sender, address(this), _amount);
@@ -84,9 +87,9 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
     // when deposit(signer).amount = 0, delete the sequencer
     function withdraw(uint256 _amount) external nonReentrant {
         // check params
-        require(_amount > 0, "invild amount");
+        require(_amount > 0, "Invild amount");
         // check already have sequencer
-        require(sequencers[msg.sender].mintAddress != address(0), "do not have create");
+        require(sequencers[msg.sender].mintAddress != address(0), "Sequencer not exist");
 
         uint256 withdrawAmount = _amount;
         if (_amount > sequencers[msg.sender].amount) {
@@ -109,10 +112,11 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         }
     }
 
-    // Check sequencer exist then withdraw all
+    // Check sequencer exist then withdraw all.
+    // This action will delete sequencer after withdraw
     function withdrawAll() external nonReentrant {
         // check already have sequencer
-        require(sequencers[msg.sender].mintAddress != address(0), "do not have create");
+        require(sequencers[msg.sender].mintAddress != address(0), "Do not have create");
 
         uint256 withdrawAmount = sequencers[msg.sender].amount;
 
@@ -123,7 +127,11 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
 
     // Return all sequencer infos
     function getSequencers() external view returns (SequencerInfo[] memory) {
-        SequencerInfo[] memory seqs = new SequencerInfo[](owners.length);
+        SequencerInfo[] memory seqs;
+        if (owners.length == 0) {
+            return seqs;
+        }
+        seqs = new SequencerInfo[](owners.length);
         for (uint256 i = 0; i < owners.length; i++) {
             address key = owners[i];
             seqs[i] = sequencers[key];
@@ -134,6 +142,11 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
     // Return sequencer info by signer address
     function getSequencer(address signer) public view returns (SequencerInfo memory) {
         return sequencers[signer];
+    }
+
+    // Return owners
+    function getOwners() public view returns (address[] memory) {
+        return owners;
     }
 
     // Return if signer exist
@@ -147,9 +160,13 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         uint256 length = owners.length;
 
         emit SequencerDelete(sequencers[signer].mintAddress, sequencers[signer].nodeID);
-        // delete
+        // change index
         owners[index] = owners[length - 1];
-        delete owners[length - 1];
+        sequencers[owners[index]].keyIndex = index;
+
+        // delete
+        delete rel[sequencers[signer].mintAddress];
+        owners.pop();
         delete sequencers[signer];
     }
 }
