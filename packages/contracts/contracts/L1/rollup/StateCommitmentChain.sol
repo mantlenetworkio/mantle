@@ -327,7 +327,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
     function _distributeTssReward(bytes32[] memory _batch, uint256 _shouldStartAtElement) internal {
         // get address of tss group member
         address[] memory tssMembers = ITssGroupManager(resolve("TssGroupManager")).getTssGroupUnJailMembers();
-        require(tssMembers.length > 0, "get tss members in error");
+        // require(tssMembers.length > 0, "get tss members in error");
 
         // construct calldata for claimReward call
         bytes memory message = abi.encodeWithSelector(
@@ -338,7 +338,11 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         );
 
         // send call data into L2, hardcode address
-        sendCrossDomainMessage(address(0x4200000000000000000000000000000000000020), 200_000, message);
+        sendCrossDomainMessage(
+            address(0x4200000000000000000000000000000000000020),
+            200_000,
+            message
+        );
 
         // emit message
         emit DistributeTssReward(
