@@ -52,7 +52,10 @@ const deployFn: DeployFunction = async (hre) => {
 
   let args: unknown[]
   args = []
-  let callData = Impl_TSS_GroupManager.interface.encodeFunctionData("initialize", args);
+  let callData = Impl_TSS_GroupManager.interface.encodeFunctionData(
+    'initialize',
+    args
+  )
   await deployAndVerifyAndThen({
     hre,
     name: names.managed.contracts.Proxy__TSS_GroupManager,
@@ -72,7 +75,10 @@ const deployFn: DeployFunction = async (hre) => {
   )
 
   args = [l1BitAddress, Proxy__TSS_GroupManager.address]
-  callData = Impl__TssStakingSlashing.interface.encodeFunctionData("initialize", args)
+  callData = Impl__TssStakingSlashing.interface.encodeFunctionData(
+    'initialize',
+    args
+  )
   await deployAndVerifyAndThen({
     hre,
     name: names.managed.contracts.Proxy__TSS_StakingSlashing,
