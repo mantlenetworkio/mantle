@@ -3,11 +3,10 @@ package gasfee
 import (
 	_ "embed"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi"
-	"math/big"
 	"strings"
 )
 
-const jsondata = `[{"inputs":[{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"burn","stateMutability":"nonpayable","type":"function"}]`
+const jsondata = `[{"inputs":[],"outputs":[],"name":"withdraw","stateMutability":"nonpayable","type":"function"}]`
 
 var (
 	sequencerFeeVault *abi.ABI
@@ -24,9 +23,9 @@ func Abi() *abi.ABI {
 	sequencerFeeVault = &sequencerFeeVaultABI
 	return sequencerFeeVault
 }
-func PacketData(amount *big.Int) ([]byte, error) {
+func PacketData() ([]byte, error) {
 	sequencerFeeVault = Abi()
-	data, err := sequencerFeeVault.Pack("burn", amount)
+	data, err := sequencerFeeVault.Pack("withdraw")
 	if err != nil {
 		return nil, err
 	}

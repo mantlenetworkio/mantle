@@ -283,38 +283,6 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
         emit ERC20WithdrawalFinalized(_l1Token, _l2Token, _from, _to, _amount, _data);
     }
 
-    function finalizeBurnBit(
-        address _from,
-        uint256 _amount,
-        bytes calldata _data
-    ) external onlyFromCrossDomainAccount(l2TokenBridge) {
-        finalizeBurnErc20(l1BitAddress, Lib_PredeployAddresses.BVM_BIT, _from, _amount, _data);
-    }
-
-    function finalizeBurnErc20(
-        address _l1Token,
-        address _l2Token,
-        address _from,
-        uint256 _amount,
-        bytes calldata _data
-    ) public onlyFromCrossDomainAccount(l2TokenBridge) {
-        deposits[_l1Token][_l2Token] = deposits[_l1Token][_l2Token] - _amount;
-        IERC20(_l1Token)._burn();
-
-        emit ERC20BurningFinalized(_l1Token, _l2Token, _from, _amount, _data);
-    }
-
-    function finalizeBurnEth(
-        address _from,
-        uint256 _amount,
-        bytes calldata _data
-    ) onlyFromCrossDomainAccount(l2TokenBridge) {
-        address to = address(0);
-        (bool success,) = to.call{value : _amount}(new bytes(0));
-        require(success, "TransferHelper::safeTransferETH: ETH transfer failed");
-        emit EthBurningFinalized(_from, _amount, _data);
-    }
-
     /*****************************
      * Temporary - Migrating ETH *
      *****************************/

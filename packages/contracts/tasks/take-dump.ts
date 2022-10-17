@@ -62,6 +62,7 @@ task('take-dump').setAction(async (args, hre) => {
     },
     BVM_SequencerFeeVault: {
       l1FeeWallet: hre.deployConfig.bvmFeeWalletAddress,
+      _owner: hre.deployConfig.bvmSequencerFeeWalletOwner,
     },
     BVM_ETH: {
       l2Bridge: predeploys.L2StandardBridge,

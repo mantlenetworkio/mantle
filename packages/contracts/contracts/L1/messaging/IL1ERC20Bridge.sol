@@ -135,24 +135,4 @@ interface IL1ERC20Bridge {
         bytes calldata _data
     ) external;
 
-    function finalizeBurnErc20(
-        address _l1Token,
-        address _l2Token,
-        address _from,
-        uint256 _amount,
-        bytes calldata _data
-    ) external;
-
-    function finalizeBurnBit(
-        address _from,
-        uint256 _amount,
-        bytes calldata _data
-    ) external;
-
-    function finalizeBurnEth(
-        address _from,
-        uint256 _amount,
-        bytes calldata _data
-    ) external;
-
 }

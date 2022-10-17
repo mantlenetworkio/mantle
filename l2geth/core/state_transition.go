@@ -279,7 +279,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		fee := new(big.Int).Add(st.l1Fee, l2Fee)
 		// burning
 		st.state.AddBalance(evm.Coinbase, fee)
-		data, err := gasfee.PacketData(big.NewInt(0))
+		data, err := gasfee.PacketData()
 		if err != nil {
 			return nil, 0, false, err
 		}

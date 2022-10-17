@@ -7,12 +7,19 @@ import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAdd
 /* Contract Imports */
 import {L2StandardBridge} from "../messaging/L2StandardBridge.sol";
 
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
 /**
  * @title BVM_SequencerFeeVault
  * @dev Simple holding contract for fees paid to the Sequencer. Likely to be replaced in the future
  * but "good enough for now".
  */
-contract BVM_SequencerFeeVault {
+
+//interface IBVM_GasPriceOracle {
+//    function getL1FeeWallet() external returns (address);
+//}
+
+contract BVM_SequencerFeeVault is Ownable{
     /*************
      * Constants *
      *************/
@@ -38,35 +45,41 @@ contract BVM_SequencerFeeVault {
      * Currently HAS NO EFFECT in production because l2geth will mutate this storage slot during
      * the genesis block. This is ONLY for testing purposes.
      */
-    constructor(address _l1FeeWallet) {
+    constructor(address _l1FeeWallet,address _owner) {
         l1FeeWallet = _l1FeeWallet;
+        transferOwnership(_owner);
     }
+
 
     /************
      * Fallback *
      ************/
 
     // slither-disable-next-line locked-ether
-//    receive() external payable {
-//        burn(0);
-//    }
+    receive() external payable {}
+
+
 
     /********************
      * Public Functions *
      ********************/
-
+    function setL1FeeWallet(address _l1FeeWallet) public onlyOwner {
+        l1FeeWallet = _l1FeeWallet;
+    }
     // slither-disable-next-line external-function
-    function burn(uint256 _amount) public {
-        if (_amount == 0) {
-            _amount = address(this).balance;
-        }
-        if (_amount < MIN_WITHDRAWAL_AMOUNT) {
-            return;
-        }
-        L2StandardBridge(Lib_PredeployAddresses.L2_STANDARD_BRIDGE).burn(
+    function withdraw() public {
+
+        require(
+            address(this).balance >= MIN_WITHDRAWAL_AMOUNT,
+        // solhint-disable-next-line max-line-length
+            "BVM_SequencerFeeVault: withdrawal amount must be greater than minimum withdrawal amount"
+        );
+
+        L2StandardBridge(Lib_PredeployAddresses.L2_STANDARD_BRIDGE).withdrawTo(
             Lib_PredeployAddresses.BVM_BIT,
-            _amount,
-            L1Gas,
+            l1FeeWallet,
+            address(this).balance,
+            0,
             bytes("")
         );
     }
