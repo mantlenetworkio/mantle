@@ -107,6 +107,7 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 			p.address)
 		return err
 	}
+	p.logger.Info().Msgf("Current nonce is %s", nonce64)
 	nonce := new(big.Int).SetUint64(nonce64)
 	opts.Nonce = nonce
 
