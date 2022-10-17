@@ -93,6 +93,7 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	address := ethc.HexToAddress(p.tssGroupManagerAddress)
 	chainId, err := p.l1Client.ChainID(p.ctx)
 	if err != nil {
+		p.logger.Err(err).Msg("Unable to get chainId on l1 chain")
 		return err
 	}
 
@@ -112,6 +113,7 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	// opts.NoSend = true
 	contract, err := tgm.NewTssGroupManager(address, p.l1Client)
 	if err != nil {
+		p.logger.Err(err).Msg("Unable to new tss group manager contract")
 		return err
 	}
 	gasPrice, err := p.l1Client.SuggestGasPrice(context.Background())
@@ -122,9 +124,11 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	opts.GasPrice = gasPrice
 	tx, err := contract.SetGroupPublicKey(opts, localKey, poolPubkey)
 	if err != nil {
+		p.logger.Err(err).Msg("Unable to set group public key with contract")
 		return err
 	}
 	if err := p.l1Client.SendTransaction(p.ctx, tx); err != nil {
+		p.logger.Err(err).Msg("Unable to send transaction to l1 chain")
 		return err
 	}
 
