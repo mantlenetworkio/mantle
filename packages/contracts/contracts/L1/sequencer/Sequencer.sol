@@ -127,11 +127,7 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
 
     // Return all sequencer infos
     function getSequencers() external view returns (SequencerInfo[] memory) {
-        SequencerInfo[] memory seqs;
-        if (owners.length == 0) {
-            return seqs;
-        }
-        seqs = new SequencerInfo[](owners.length);
+        SequencerInfo[] memory  seqs = new SequencerInfo[](owners.length);
         for (uint256 i = 0; i < owners.length; i++) {
             address key = owners[i];
             seqs[i] = sequencers[key];
