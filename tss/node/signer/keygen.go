@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
 	etht "github.com/ethereum/go-ethereum/core/types"
@@ -62,7 +64,8 @@ func (p *Processor) Keygen() {
 						}
 						RpcResponse := tdtypes.NewRPCSuccessResponse(tdtypes.JSONRPCStringID(resId), keygenResponse)
 						p.wsClient.SendMsg(RpcResponse)
-						err := p.setGroupPublicKey(p.localPubkey, resp.PubKey)
+						logger.Info().Msgf("keygen start to set group publickey for l1 contract")
+						err := p.setGroupPublicKey(p.localPubKeyByte, resp.PubKeyByte)
 						if err != nil {
 							logger.Err(err).Msg("failed to send tss group manager transactionx")
 						}
@@ -77,7 +80,7 @@ func (p *Processor) Keygen() {
 	}()
 }
 
-func (p *Processor) setGroupPublicKey(localKey, poolPubkey string) error {
+func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	p.logger.Info().Msg("connecting to layer one")
 	if err := ensureConnection(p.l1Client); err != nil {
 		p.logger.Err(err).Msg("Unable to connect to layer one")
@@ -90,6 +93,7 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey string) error {
 	address := ethc.HexToAddress(p.tssGroupManagerAddress)
 	chainId, err := p.l1Client.ChainID(p.ctx)
 	if err != nil {
+		p.logger.Err(err).Msg("Unable to get chainId on l1 chain")
 		return err
 	}
 
@@ -97,9 +101,20 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey string) error {
 	if opts.Context == nil {
 		opts.Context = context.Background()
 	}
-	opts.NoSend = true
+	nonce64, err := p.l1Client.NonceAt(p.ctx, p.address, nil)
+	if err != nil {
+		p.logger.Err(err).Msgf("%s unable to get current nonce",
+			p.address)
+		return err
+	}
+	p.logger.Info().Msgf("Current nonce is %s", nonce64)
+	nonce := new(big.Int).SetUint64(nonce64)
+	opts.Nonce = nonce
+
+	// opts.NoSend = true
 	contract, err := tgm.NewTssGroupManager(address, p.l1Client)
 	if err != nil {
+		p.logger.Err(err).Msg("Unable to new tss group manager contract")
 		return err
 	}
 	gasPrice, err := p.l1Client.SuggestGasPrice(context.Background())
@@ -108,11 +123,13 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey string) error {
 		return err
 	}
 	opts.GasPrice = gasPrice
-	tx, err := contract.SetGroupPublicKey(opts, []byte(localKey), []byte(poolPubkey))
+	tx, err := contract.SetGroupPublicKey(opts, localKey, poolPubkey)
 	if err != nil {
+		p.logger.Err(err).Msg("Unable to set group public key with contract")
 		return err
 	}
 	if err := p.l1Client.SendTransaction(p.ctx, tx); err != nil {
+		p.logger.Err(err).Msg("Unable to send transaction to l1 chain")
 		return err
 	}
 
@@ -164,7 +181,7 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey string) error {
 
 }
 
-//Ensure we can actually connect l1
+// Ensure we can actually connect l1
 func ensureConnection(client *ethclient.Client) error {
 	t := time.NewTicker(1 * time.Second)
 	retries := 0

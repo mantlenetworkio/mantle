@@ -107,10 +107,10 @@ func BytesToHashString(msg []byte) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-func GetTssPubKey(pubKeyPoint *crypto.ECPoint) (string, []byte, error) {
+func GetTssPubKey(pubKeyPoint *crypto.ECPoint) (string, []byte,[]byte, error) {
 	// we check whether the point is on curve according to Kudelski report
 	if pubKeyPoint == nil || !isOnCurve(pubKeyPoint.X(), pubKeyPoint.Y()) {
-		return "", nil, errors.New("invalid points")
+		return "", nil,nil, errors.New("invalid points")
 	}
 	tssPubKey := btcec.PublicKey{
 		Curve: btcec.S256(),
@@ -121,7 +121,9 @@ func GetTssPubKey(pubKeyPoint *crypto.ECPoint) (string, []byte, error) {
 	pubKeyStr := hex.EncodeToString(tssPubKey.SerializeCompressed())
 	address := ethcrypto.PubkeyToAddress(*tssPubKey.ToECDSA()).Bytes()
 
-	return pubKeyStr, address, nil
+	pubKeyBytes := tssPubKey.SerializeUncompressed()
+	pubKeyBytes = pubKeyBytes[1:]
+	return pubKeyStr, address,pubKeyBytes, nil
 }
 
 func PartyIDtoPubKey(party *tss.PartyID) (string, error) {
