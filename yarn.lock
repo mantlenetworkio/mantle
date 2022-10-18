@@ -347,14 +347,11 @@
     prom-client "^13.1.0"
     qs "^6.10.5"
 
-<<<<<<< HEAD
 "@bitdaoio/contracts-periphery@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@bitdaoio/contracts-periphery/-/contracts-periphery-1.0.0.tgz#4f1ed7d5c22f4f229ae244bb81dac0dbad2a141f"
   integrity sha512-zkrqdeZaNic4pXHc9CFg5wFUtApntWr6md2ePvWwGCf7xFDkIssIup1c9mpvvFwgwBRQgXWHWlFYSM9iRv89vQ==
 
-=======
->>>>>>> 9e2a9dae41e3da6ee0c3d08518f83f21563e7fcc
 "@changesets/apply-release-plan@^5.0.0":
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@changesets/apply-release-plan/-/apply-release-plan-5.0.0.tgz#11bf168acecbf4cfa2b0e6425160bac5ceeec1c3"
