@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -121,6 +122,7 @@ func (m Manager) recoverGenerateKey() {
 }
 
 func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
+	log.Info("received sign state request", "request", request.String())
 	offsetStartsAtIndex, _ := new(big.Int).SetString(request.OffsetStartsAtIndex, 10)
 	digestBz, err := tss.StateBatchHash(request.StateRoots, offsetStartsAtIndex)
 	if err != nil {
@@ -138,7 +140,13 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	if len(availableNodes) < tssInfo.Threshold+1 {
 		return nil, errors.New("not enough available nodes to sign state")
 	}
-	stateBatchRoot, _ := tss.GetMerkleRoot(request.StateRoots)
+
+	// copy stateRoots
+	elements := make([][32]byte, len(request.StateRoots))
+	for i, sr := range request.StateRoots {
+		elements[i] = sr
+	}
+	stateBatchRoot, _ := tss.GetMerkleRoot(elements)
 	found, stateBatch := m.store.GetStateBatch(stateBatchRoot)
 	if found && stateBatch.BatchIndex != 0 {
 		return nil, errors.New("the state batch is already indexed on layer1")
@@ -227,6 +235,7 @@ func (m Manager) afterSignStateBatch(ctx types.Context, stateBatch [][32]byte, a
 		AbsentNodes:  absentNodes,
 		WorkingNodes: ctx.AvailableNodes(),
 	}
+	log.Info("Store the signed state batch", "batchRoot", hex.EncodeToString(batchRoot[:]))
 	if err = m.store.SetStateBatch(sbi); err != nil {
 		return err
 	}

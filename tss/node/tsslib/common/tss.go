@@ -6,6 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+	"sync"
+
 	"github.com/binance-chain/tss-lib/tss"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
@@ -15,8 +18,6 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/p2p"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"strings"
-	"sync"
 )
 
 type TssCommon struct {
@@ -218,14 +219,19 @@ func generateSignature(msg []byte, msgID string, privKey *ecdsa.PrivateKey) ([]b
 	var dataForSigning bytes.Buffer
 	dataForSigning.Write(msg)
 	dataForSigning.WriteString(msgID)
-	return crypto.Sign(dataForSigning.Bytes(), privKey)
+	digestBz := crypto.Keccak256Hash(dataForSigning.Bytes()).Bytes()
+	return crypto.Sign(digestBz, privKey)
 }
 
-func verifySignature(pubKey *ecdsa.PublicKey, message, sig []byte, msgID string) bool {
+func verifySignature(pubKey, message, sig []byte, msgID string) bool {
 	var dataForSign bytes.Buffer
 	dataForSign.Write(message)
 	dataForSign.WriteString(msgID)
-	return crypto.VerifySignature(crypto.FromECDSAPub(pubKey), dataForSign.Bytes(), sig)
+	digestBz := crypto.Keccak256Hash(dataForSign.Bytes()).Bytes()
+	if len(sig) == crypto.SignatureLength {
+		sig = sig[:len(sig)-1]
+	}
+	return crypto.VerifySignature(pubKey, digestBz, sig)
 }
 
 func (t *TssCommon) updateLocal(wireMsg *messages.WireMessage) error {
@@ -575,14 +581,8 @@ func (t *TssCommon) processTSSMsg(wireMsg *messages.WireMessage, msgType message
 		return errors.New("error in find the data owner")
 	}
 	keyBytes := dataOwner.GetKey()
-	pk, err := crypto.UnmarshalPubkey(keyBytes)
 
-	if err != nil {
-		t.logger.Error().Msgf("error in unmarshal public key, {%s}", err.Error())
-		return err
-	}
-
-	ok = verifySignature(pk, wireMsg.Message, wireMsg.Sig, t.msgID)
+	ok = verifySignature(keyBytes, wireMsg.Message, wireMsg.Sig, t.msgID)
 	if !ok {
 		t.logger.Error().Msg("fail to verify the signature")
 		return errors.New("signature verify failed")

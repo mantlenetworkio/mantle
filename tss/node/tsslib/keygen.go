@@ -1,12 +1,15 @@
 package tsslib
 
 import (
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/abnormal"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	conversion2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	keygen2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/keygen"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
-	"time"
 )
 
 func (t *TssServer) Keygen(req keygen2.Request) (keygen2.Response, error) {
@@ -20,6 +23,10 @@ func (t *TssServer) Keygen(req keygen2.Request) (keygen2.Response, error) {
 	if err = t.requestCheck(req); err != nil {
 		return keygen2.Response{}, err
 	}
+	t.logger.Info().
+		Str("keygen keys", strings.Join(req.Keys, ",")).
+		Str("threshold", strconv.Itoa(req.ThresHold)).
+		Msg("received keygen request")
 
 	keygenInstance := keygen2.NewTssKeyGen(
 		t.p2pCommunication.GetLocalPeerID(),
@@ -51,16 +58,7 @@ func (t *TssServer) Keygen(req keygen2.Request) (keygen2.Response, error) {
 	}()
 	abnormalMgr := keygenInstance.GetTssCommonStruct().GetAbnormalMgr()
 
-	parsedPeers := make([]string, len(req.Keys))
-	for i, el := range req.Keys {
-		parsedPeers[i] = el
-	}
-	actives, err := conversion2.GetPubKeysFromPeerIDs(parsedPeers)
-	if err != nil {
-		t.logger.Error().Err(err).Msg("there is a error when get active public keys from peers id")
-	} else {
-		keygenInstance.ParticipantKeys = actives
-	}
+	keygenInstance.ParticipantKeys = req.Keys
 
 	t.logger.Debug().Msg("keygen party formed")
 	// the statistic of keygen only care about Tss it self, even if the
@@ -74,17 +72,18 @@ func (t *TssServer) Keygen(req keygen2.Request) (keygen2.Response, error) {
 		t.logger.Error().Err(err).Msg("err in keygen")
 
 		return keygen2.NewResponse(
-			"", nil, common.Fail,
+			"", nil, nil, common.Fail,
 			abnormal.GenerateNewKeyError,
 			abnormalMgr.GetAbnormalNodePubKeys()), err
 	} else {
 		t.tssMetrics.UpdateKeyGen(keygenTime, true)
 	}
 
-	pubkey, address, err := conversion2.GetTssPubKey(k)
+	pubkey, address, pubkeyByte, err := conversion2.GetTssPubKey(k)
 	if err != nil {
 		return keygen2.NewResponse(
 			"",
+			nil,
 			nil,
 			common.Fail,
 			abnormal.GenerateNewKeyError,
@@ -94,6 +93,7 @@ func (t *TssServer) Keygen(req keygen2.Request) (keygen2.Response, error) {
 	return keygen2.NewResponse(
 		pubkey,
 		address,
+		pubkeyByte,
 		status,
 		"",
 		abnormalMgr.GetAbnormalNodePubKeys(),

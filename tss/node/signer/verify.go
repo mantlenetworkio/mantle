@@ -39,10 +39,11 @@ func (p *Processor) Verify() {
 				wg := &sync.WaitGroup{}
 				wg.Add(offset)
 				var result = true
-				var rLock = &sync.Mutex{}
-				quit := make(chan struct{})
 				for index, stateRoot := range askRequest.StateRoots {
-					go p.verify(askRequest.StartBlock, index, stateRoot, logger, wg, result, rLock, quit)
+					go func(f_index int, f_stateRoot [32]byte) {
+						result = p.verify(askRequest.StartBlock, f_index, f_stateRoot, logger, wg)
+					}(index, stateRoot)
+
 				}
 				wg.Wait()
 				if result {
@@ -70,31 +71,26 @@ func (p *Processor) Verify() {
 
 }
 
-func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger zerolog.Logger, wg *sync.WaitGroup, result bool, lock *sync.Mutex, quit chan struct{}) {
+func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger zerolog.Logger, wg *sync.WaitGroup) bool {
 	defer wg.Done()
 	defer logger.Info().Msgf("start block number:(%s),index (%s), verify done", start, index)
 
-	select {
-	case <-quit:
-		return
-	default:
-		offset := new(big.Int).SetInt64(int64(index))
-		startBig, _ := new(big.Int).SetString(start, 10)
-		blockNumber := offset.Add(offset, startBig)
-		logger.Info().Msgf("verify block number %s", blockNumber)
-		lock.Lock()
-		defer lock.Unlock()
-		block, err := p.l2Client.BlockByNumber(p.ctx, blockNumber)
-		if err != nil {
-			logger.Err(err).Msgf("failed to get block by (%s) ", blockNumber)
-			result = false
-			quit <- struct{}{}
+	offset := new(big.Int).SetInt64(int64(index))
+	startBig, _ := new(big.Int).SetString(start, 10)
+	blockNumber := offset.Add(offset, startBig)
+	logger.Info().Msgf("verify block number %s", blockNumber)
+
+	block, err := p.l2Client.BlockByNumber(p.ctx, blockNumber)
+	if err != nil {
+		logger.Err(err).Msgf("failed to get block by (%s) ", blockNumber)
+		return false
+	} else {
+		if hexutil.Encode(stateRoot[:]) != block.Root().String() {
+			logger.Info().Msgf("block number (%s) stateroot doesn't same", blockNumber)
+			return false
 		} else {
-			if hexutil.Encode(stateRoot[:]) != block.Root().String() {
-				logger.Info().Msgf("block number (%s) stateroot doesn't same", blockNumber)
-				result = false
-				quit <- struct{}{}
-			}
+			logger.Info().Msgf("block number (%s) verify success", blockNumber)
+			return true
 		}
 	}
 }

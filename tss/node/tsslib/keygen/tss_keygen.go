@@ -4,6 +4,9 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"sync"
+	"time"
+
 	bcrypto "github.com/binance-chain/tss-lib/crypto"
 	"github.com/binance-chain/tss-lib/ecdsa/keygen"
 	"github.com/binance-chain/tss-lib/tss"
@@ -16,8 +19,6 @@ import (
 	storage2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"sync"
-	"time"
 )
 
 type TssKeyGen struct {
@@ -199,7 +200,7 @@ func (tKeyGen *TssKeyGen) processKeyGen(errChan chan struct{},
 			if err != nil {
 				tKeyGen.logger.Error().Err(err).Msg("fail to broadcast the keysign done")
 			}
-			pubKey, addr, err := conversion.GetTssPubKey(msg.ECDSAPub)
+			pubKey, addr, _, err := conversion.GetTssPubKey(msg.ECDSAPub)
 			if err != nil {
 				return nil, fmt.Errorf("fail to get thorchain pubkey: %w", err)
 			}
