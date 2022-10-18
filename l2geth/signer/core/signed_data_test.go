@@ -25,12 +25,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/keystore"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/math"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
-	"github.com/bitdao-io/bitnetwork/l2geth/signer/core"
+	"github.com/bitdao-io/mantle/l2geth/accounts/keystore"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
+	"github.com/bitdao-io/mantle/l2geth/common/math"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/signer/core"
 )
 
 var typesStandard = core.Types{

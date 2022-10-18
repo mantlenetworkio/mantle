@@ -21,9 +21,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/eth/downloader"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enode"
+	"github.com/bitdao-io/mantle/l2geth/eth/downloader"
+	"github.com/bitdao-io/mantle/l2geth/p2p"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
 )
 
 // Tests that fast sync gets disabled as soon as a real block is successfully

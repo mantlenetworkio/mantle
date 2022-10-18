@@ -7,8 +7,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/gas-oracle/bindings"
-	"github.com/bitdao-io/bitnetwork/gas-oracle/gasprices"
+	"github.com/bitdao-io/mantle/gas-oracle/bindings"
+	"github.com/bitdao-io/mantle/gas-oracle/gasprices"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -70,6 +70,9 @@ func (g *GasPriceOracle) Start() error {
 		return err
 	}
 	gasPriceGauge.Update(int64(price.Uint64()))
+
+	log.Info("Starting Gas Price Oracle enableL1BaseFee", "enableL1BaseFee",
+		g.config.enableL1BaseFee, "enableL2GasPrice", g.config.enableL2GasPrice)
 
 	if g.config.enableL1BaseFee {
 		go g.BaseFeeLoop()

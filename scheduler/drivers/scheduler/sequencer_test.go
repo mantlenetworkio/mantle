@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

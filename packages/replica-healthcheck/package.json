@@ -2,7 +2,7 @@
   "private": true,
   "name": "@bitdaoio/replica-healthcheck",
   "version": "1.0.0",
-  "description": "[Bitnetwork] Service for monitoring the health of replica nodes",
+  "description": "[Mantle] Service for monitoring the health of replica nodes",
   "main": "dist/index",
   "types": "dist/index",
   "files": [
@@ -19,17 +19,17 @@
     "lint:check": "eslint . --max-warnings=0"
   },
   "keywords": [
-    "bitnetwork",
+    "mantle",
     "ethereum",
     "replica",
     "healthcheck"
   ],
-  "homepage": "https://github.com/bitdao-io/bitnetwork/tree/develop/packages/replica-healthcheck#readme",
+  "homepage": "https://github.com/bitdao-io/mantle/tree/develop/packages/replica-healthcheck#readme",
   "license": "MIT",
-  "author": "Bitnetwork PBC",
+  "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitdao-io/bitnetwork.git"
+    "url": "https://github.com/bitdao-io/mantle.git"
   },
   "dependencies": {
     "@bitdaoio/common-ts": "1.0.0",

@@ -26,14 +26,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/consensus/ethash"
-	"github.com/bitdao-io/bitnetwork/l2geth/core"
-	"github.com/bitdao-io/bitnetwork/l2geth/eth"
-	"github.com/bitdao-io/bitnetwork/l2geth/internal/jsre"
-	"github.com/bitdao-io/bitnetwork/l2geth/miner"
-	"github.com/bitdao-io/bitnetwork/l2geth/node"
-	"github.com/bitdao-io/bitnetwork/l2geth/rollup"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/consensus/ethash"
+	"github.com/bitdao-io/mantle/l2geth/core"
+	"github.com/bitdao-io/mantle/l2geth/eth"
+	"github.com/bitdao-io/mantle/l2geth/internal/jsre"
+	"github.com/bitdao-io/mantle/l2geth/miner"
+	"github.com/bitdao-io/mantle/l2geth/node"
+	"github.com/bitdao-io/mantle/l2geth/rollup"
 )
 
 const (

@@ -2,7 +2,7 @@ import { utils, Wallet, BigNumber } from 'ethers'
 import { expect } from 'chai'
 
 import { setupActor, setupRun, actor, run } from './lib/convenience'
-import { BitnetworkEnv } from '../test/shared/env'
+import { MantleEnv } from '../test/shared/env'
 
 interface BenchContext {
   l1Wallet: Wallet
@@ -13,10 +13,10 @@ const DEFAULT_TEST_GAS_L1 = 330_000
 const DEFAULT_TEST_GAS_L2 = 1_300_000
 
 actor('Funds depositor', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
 
   setupActor(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
   })
 
   setupRun(async () => {

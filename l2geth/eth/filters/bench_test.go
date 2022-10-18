@@ -22,13 +22,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/bitutil"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/bloombits"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/rawdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/node"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/bitutil"
+	"github.com/bitdao-io/mantle/l2geth/core/bloombits"
+	"github.com/bitdao-io/mantle/l2geth/core/rawdb"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/ethdb"
+	"github.com/bitdao-io/mantle/l2geth/node"
 )
 
 func BenchmarkBloomBits512(b *testing.B) {

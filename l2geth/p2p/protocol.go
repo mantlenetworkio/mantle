@@ -19,8 +19,8 @@ package p2p
 import (
 	"fmt"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enode"
-	"github.com/bitdao-io/bitnetwork/l2geth/p2p/enr"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
+	"github.com/bitdao-io/mantle/l2geth/p2p/enr"
 )
 
 // Protocol represents a P2P subprotocol implementation.

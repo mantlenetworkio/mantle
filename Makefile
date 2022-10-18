@@ -23,10 +23,18 @@ submodules:
 # Remove the baseline-commit to generate a base reading & show all issues
 #semgrep:
 #	$(eval DEV_REF := $(shell git rev-parse develop))
-#	SEMGREP_REPO_NAME=bitdao-io/bitnetwork semgrep ci --baseline-commit=$(DEV_REF)
+#	SEMGREP_REPO_NAME=bitdao-io/mantle semgrep ci --baseline-commit=$(DEV_REF)
 #.PHONY: semgrep
 
 
 clean-node-modules:
 	rm -rf node_modules
 	rm -rf packages/**/node_modules
+
+mod-tidy:
+	cd ./batch-submitter && go mod tidy && cd .. && \
+	cd ./bss-core && go mod tidy && cd ..  && \
+	cd ./gas-oracle && go mod tidy && cd ..  && \
+	cd ./l2geth && go mod tidy && cd ..  && \
+	cd ./l2geth-exporter && go mod tidy && cd ..
+.PHONY: mod-tidy

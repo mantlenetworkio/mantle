@@ -24,14 +24,14 @@ import (
 	"testing"
 	"time"
 
-	ethereum "github.com/bitdao-io/bitnetwork/l2geth"
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/abi"
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/abi/bind"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/core"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
+	ethereum "github.com/bitdao-io/mantle/l2geth"
+	"github.com/bitdao-io/mantle/l2geth/accounts/abi"
+	"github.com/bitdao-io/mantle/l2geth/accounts/abi/bind"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/core"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/params"
 )
 
 func TestSimulatedBackend(t *testing.T) {

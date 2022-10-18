@@ -4,7 +4,7 @@ This README describes how to use the actor testing library to write new tests. I
 
 ## Introduction
 
-An "actor test" is a test case that simulates how a user might interact with Bitnetwork. For example, an actor test might automate a user minting NFTs or swapping on Uniswap. Multiple actor tests are composed together in order to simulate real-world usage and help us optimize network performance under realistic load.
+An "actor test" is a test case that simulates how a user might interact with Mantle. For example, an actor test might automate a user minting NFTs or swapping on Uniswap. Multiple actor tests are composed together in order to simulate real-world usage and help us optimize network performance under realistic load.
 
 Actor tests are designed to catch race conditions, resource leaks, and performance regressions. They aren't a replacement for standard unit/integration tests, and aren't executed on every pull request since they take time to run.
 
@@ -41,10 +41,10 @@ interface Context {
 }
 
 actor('Value sender', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
 
   setupActor(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
   })
 
   setupRun(async () => {

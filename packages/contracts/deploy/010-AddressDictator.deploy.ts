@@ -50,6 +50,11 @@ const deployFn: DeployFunction = async (hre) => {
       name: names.managed.accounts.BVM_Proposer,
       address: hre.deployConfig.bvmProposerAddress,
     },
+    // L1_BIT_ADDRESS indicate l1 bit token erc20 contract address
+    {
+      name: names.managed.configs.L1_BIT_ADDRESS,
+      address: hre.deployConfig.l1BitAddress,
+    },
   ]
 
   // Filter out all addresses that will not change, so that the log statement is maximally

@@ -19,7 +19,7 @@ package bloombits
 import (
 	"errors"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
 )
 
 var (

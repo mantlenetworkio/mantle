@@ -23,10 +23,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/rlp"
-	whisper "github.com/bitdao-io/bitnetwork/l2geth/whisper/whisperv6"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/rlp"
+	whisper "github.com/bitdao-io/mantle/l2geth/whisper/whisperv6"
 )
 
 // A Nonce is a 64-bit hash which proves (combined with the mix-hash) that

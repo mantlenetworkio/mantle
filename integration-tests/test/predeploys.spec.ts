@@ -4,12 +4,12 @@ import { predeploys, getContractInterface } from '@bitdaoio/contracts'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 
 describe('predeploys', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
   before(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
   })
 
   describe('WETH9', () => {

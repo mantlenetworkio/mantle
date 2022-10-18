@@ -4,4 +4,4 @@ settings:
   speculativeBranchSelection: false
   branches:
     - develop
-    - master
+    - main

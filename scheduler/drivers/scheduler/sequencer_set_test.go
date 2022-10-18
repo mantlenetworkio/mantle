@@ -13,7 +13,7 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -377,7 +377,7 @@ func randAddress() common.Address {
 }
 
 func randSequencer(totalVotingPower int64) *Sequencer {
-	// this modulo limits the ProducerPriority/VotingPower to stay in the
+	// this modulo limits the ProducerPriority/Power to stay in the
 	// bounds of MaxTotalVotingPower minus the already existing voting power:
 	seq := NewSequencer(randAddress(), randNodeID(), int64(rand.Uint64()%uint64(MaxTotalVotingPower-totalVotingPower)))
 	seq.ProducerPriority = rand.Int63() % (MaxTotalVotingPower - totalVotingPower)
@@ -405,7 +405,7 @@ func randSequencerSet(numSequencers int) *SequencerSet {
 //-------------------------------------------------------------------
 
 func TestSequencerSetTotalVotingPowerPanicsOnOverflow(t *testing.T) {
-	// NewSequencerSet calls IncrementProducerPriority which calls TotalVotingPower()
+	// NewSequencerSet calls IncrementProducerPriority which calls TotalPower()
 	// which should panic on overflows:
 	shouldPanic := func() {
 		NewSequencerSet([]*Sequencer{
@@ -528,7 +528,7 @@ func TestAveragingInIncrementProducerPriorityWithVotingPower(t *testing.T) {
 		0: {
 			seqs.Copy(),
 			[]int64{
-				// Acumm+VotingPower-Avg:
+				// Acumm+Power-Avg:
 				0 + vp0 - total - avg, // mostest will be subtracted by total voting power (12)
 				0 + vp1,
 				0 + vp2,

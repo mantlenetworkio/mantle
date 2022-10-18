@@ -19,10 +19,10 @@ package keystore
 import (
 	"math/big"
 
-	ethereum "github.com/bitdao-io/bitnetwork/l2geth"
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
+	ethereum "github.com/bitdao-io/mantle/l2geth"
+	"github.com/bitdao-io/mantle/l2geth/accounts"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
 )
 
 // keystoreWallet implements the accounts.Wallet interface for the original

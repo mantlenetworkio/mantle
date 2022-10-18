@@ -1,6 +1,6 @@
 # docker-compose
 
-The docker-compose project runs a local bitnetwork stack.
+The docker-compose project runs a local mantle stack.
 
 ## prerequisites
 
@@ -86,7 +86,7 @@ Influxdb has authentication disabled.
 Grafana requires a login. The defaults are:
 ```
 user: admin
-password: bitnetwork
+password: mantle
 ```
 
 ## Data persistance

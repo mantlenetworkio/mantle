@@ -7,10 +7,10 @@
 
 ## Installation
 
-Clone, install, and build the Bitnetwork monorepo:
+Clone, install, and build the Mantle monorepo:
 
 ```
-git clone https://github.com/bitnetworkio/bitnetwork.git
+git clone https://github.com/mantleio/mantle.git
 yarn install
 yarn build
 ```
