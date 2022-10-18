@@ -48,8 +48,8 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         require(_amount > 0, "Invild amount");
         require(_mintAddress != address(0), "Invild address, address can not be 0");
         // check already have sequencer
-        require(sequencers[msg.sender].mintAddress == address(0), "Already have deposit");
-        require(rel[_mintAddress] == address(0), "This mint address already have sender");
+        require(sequencers[msg.sender].mintAddress == address(0), "Already has been created");
+        require(rel[_mintAddress] == address(0), "This mint address already has owner");
         IERC20(bitToken).safeTransferFrom(msg.sender, address(this), _amount);
 
         uint256 index = owners.length;
@@ -122,12 +122,14 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
 
         // transfer
         IERC20(bitToken).safeTransfer(msg.sender, withdrawAmount);
+
+        emit SequencerUpdate(sequencers[msg.sender].mintAddress, sequencers[msg.sender].nodeID, 0);
         deleteSequencer(msg.sender);
     }
 
     // Return all sequencer infos
     function getSequencers() external view returns (SequencerInfo[] memory) {
-        SequencerInfo[] memory  seqs = new SequencerInfo[](owners.length);
+        SequencerInfo[] memory seqs = new SequencerInfo[](owners.length);
         for (uint256 i = 0; i < owners.length; i++) {
             address key = owners[i];
             seqs[i] = sequencers[key];

@@ -352,15 +352,6 @@
   resolved "https://registry.yarnpkg.com/@bitdaoio/contracts-periphery/-/contracts-periphery-1.0.0.tgz#4f1ed7d5c22f4f229ae244bb81dac0dbad2a141f"
   integrity sha512-zkrqdeZaNic4pXHc9CFg5wFUtApntWr6md2ePvWwGCf7xFDkIssIup1c9mpvvFwgwBRQgXWHWlFYSM9iRv89vQ==
 
-"@bitdaoio/contracts@^1.0.4":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@bitdaoio/contracts/-/contracts-1.0.5.tgz#598840aa118255e15861c001b6d53990a8fb1108"
-  integrity sha512-cx9/xGTyoj4v5lyu3zIhJojiCCC3m4recMX2Yh50Bn6VngSClT6fxmIny7wpHBVooms+r/uwfMWnMtLLn/9Iyw==
-  dependencies:
-    "@bitdaoio/core-utils" "1.0.3"
-    "@ethersproject/abstract-provider" "^5.6.1"
-    "@ethersproject/abstract-signer" "^5.6.2"
-
 "@changesets/apply-release-plan@^5.0.0":
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@changesets/apply-release-plan/-/apply-release-plan-5.0.0.tgz#11bf168acecbf4cfa2b0e6425160bac5ceeec1c3"

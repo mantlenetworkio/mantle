@@ -44,14 +44,14 @@ describe('Sequencer', () => {
     expect(owners.length).to.eq(1)
     expect(owners[0]).to.eq(await accounts[0].getAddress())
     expect(await sequencer.owners(0)).to.eq(await accounts[0].getAddress())
-    // err case: Already have deposit
+    // err case: Already has been created
     await expect(
       sequencer.connect(accounts[0]).createSequencer(100, mintAddress, nodeID)
-    ).to.be.revertedWith('Already have deposit')
-    // err case: Already have deposit
+    ).to.be.revertedWith('Already has been created')
+    // err case: Already has been created
     await expect(
       sequencer.connect(accounts[1]).createSequencer(100, mintAddress, nodeID)
-    ).to.be.revertedWith('This mint address already have sender')
+    ).to.be.revertedWith('This mint address already has owner')
 
     // create sequencer by account[1]
     await bitToken.connect(accounts[1]).approve(sequencer.address, 100)
