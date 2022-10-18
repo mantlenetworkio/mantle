@@ -233,8 +233,7 @@ contract TssGroupManager is
      */
     // slither-disable-next-line external-function
     function verifySign(bytes32 _message, bytes memory _sig) public view override returns (bool) {
-        bytes32 ethSignedMessageHash = getEthSignedMessageHash(_message);
-        return (recover(ethSignedMessageHash, _sig) == confirmGroupAddress);
+        return (recover(_message, _sig) == confirmGroupAddress);
     }
 
     /**
@@ -270,10 +269,6 @@ contract TssGroupManager is
         confirmGroupPublicKey = _groupPublicKey;
         confirmGroupAddress = publicKeyToAddress(_groupPublicKey);
         emit tssActiveMemberAppended(gRoundId, _groupPublicKey, activeTssMembers);
-    }
-
-    function getEthSignedMessageHash(bytes32 _messageHash) public pure returns (bytes32) {
-        return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", _messageHash));
     }
 
     function recover(bytes32 _ethSignedMessageHash, bytes memory _sig)
