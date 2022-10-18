@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -227,6 +228,7 @@ func (m Manager) afterSignStateBatch(ctx types.Context, stateBatch [][32]byte, a
 		AbsentNodes:  absentNodes,
 		WorkingNodes: ctx.AvailableNodes(),
 	}
+	log.Info("Store the signed state batch", "batchRoot", hex.EncodeToString(batchRoot[:]))
 	if err = m.store.SetStateBatch(sbi); err != nil {
 		return err
 	}

@@ -92,8 +92,8 @@ func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
 			if len(events) != 0 {
 				for _, event := range events {
 					for stateBatchRoot, batchIndex := range event {
-						var retry bool
-						for !retry {
+						retry := true
+						for retry {
 							retry = indexBatch(o.store, stateBatchRoot, batchIndex)
 						}
 						if err := o.hook.AfterStateBatchIndexed(stateBatchRoot); err != nil {
