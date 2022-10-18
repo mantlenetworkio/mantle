@@ -93,11 +93,14 @@ func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
 				for _, event := range events {
 					for stateBatchRoot, batchIndex := range event {
 						retry := true
+						var found bool
 						for retry {
-							retry = indexBatch(o.store, stateBatchRoot, batchIndex)
+							retry, found = indexBatch(o.store, stateBatchRoot, batchIndex)
 						}
-						if err := o.hook.AfterStateBatchIndexed(stateBatchRoot); err != nil {
-							log.Error("errors occur when executed hook AfterStateBatchIndexed", "err", err)
+						if found {
+							if err = o.hook.AfterStateBatchIndexed(stateBatchRoot); err != nil {
+								log.Error("errors occur when executed hook AfterStateBatchIndexed", "err", err)
+							}
 						}
 					}
 				}
@@ -121,23 +124,23 @@ func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
 	}
 }
 
-func indexBatch(store StateBatchStore, stateBatchRoot [32]byte, batchIndex uint64) (retry bool) {
+func indexBatch(store StateBatchStore, stateBatchRoot [32]byte, batchIndex uint64) (retry bool, found bool) {
 	found, stateBatch := store.GetStateBatch(stateBatchRoot)
 	if !found {
 		log.Error("can not find the state batch with root, skip this batch", "root", hexutil.Encode(stateBatchRoot[:]))
-		return false
+		return false, found
 	}
 	stateBatch.BatchIndex = batchIndex
 	if err := store.SetStateBatch(stateBatch); err != nil { // update stateBatch with index
 		log.Error("failed to SetStateBatch with index", err)
 		time.Sleep(2 * time.Second)
-		return true
+		return true, found
 	}
 
 	if err := store.IndexStateBatch(batchIndex, stateBatchRoot); err != nil {
 		log.Error("failed to IndexStateBatch", err)
 		time.Sleep(2 * time.Second)
-		return true
+		return true, found
 	}
-	return false
+	return false, found
 }

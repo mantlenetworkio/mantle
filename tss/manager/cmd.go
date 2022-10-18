@@ -47,7 +47,7 @@ func run(cmd *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-	observer.SetHook(slash.NewSlashing(managerStore, managerStore, config.SignedBatchesWindow, config.MinSignedInWindow))
+	observer = observer.SetHook(slash.NewSlashing(managerStore, managerStore, config.SignedBatchesWindow, config.MinSignedInWindow))
 	observer.Start()
 
 	queryService := l1chain.NewQueryService(config.L1Url, config.TssGroupContractAddress, config.L1ConfirmBlocks, managerStore)

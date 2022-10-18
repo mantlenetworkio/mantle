@@ -62,7 +62,7 @@ func runNode(cmd *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-	observer.SetHook(slash.NewSlashing(store, store, cfg.SignedBatchesWindow, cfg.MinSignedInWindow))
+	observer = observer.SetHook(slash.NewSlashing(store, store, cfg.SignedBatchesWindow, cfg.MinSignedInWindow))
 	observer.Start()
 
 	//new tss server instance
