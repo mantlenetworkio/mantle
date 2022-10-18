@@ -72,3 +72,15 @@ func (registry *Registry) ResetHeightHandler() gin.HandlerFunc {
 		}
 	}
 }
+
+func (registry *Registry) GetHeightHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		height, err := registry.adminService.GetScannedHeight()
+		if err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+			log.Error("failed to get height", "error", err)
+			return
+		}
+		c.String(http.StatusOK, strconv.FormatUint(height, 10))
+	}
+}

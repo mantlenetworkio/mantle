@@ -112,6 +112,7 @@ func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
 					log.Error("failed to update scannedHeight, retry", err)
 					time.Sleep(2 * time.Second)
 				}
+				log.Info("updated height", "scannedHeight", scannedHeight)
 			}
 		}()
 

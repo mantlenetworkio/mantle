@@ -13,6 +13,7 @@ type SignService interface {
 
 type AdminService interface {
 	ResetScanHeight(height uint64) error
+	GetScannedHeight() (uint64, error)
 }
 
 type TssQueryService interface {
