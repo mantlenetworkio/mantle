@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/metrics"
-	"github.com/bitdao-io/bitnetwork/l2geth/metrics/prometheus"
+	"github.com/bitdao-io/mantle/l2geth/metrics"
+	"github.com/bitdao-io/mantle/l2geth/metrics/prometheus"
 )
 
 type exp struct {

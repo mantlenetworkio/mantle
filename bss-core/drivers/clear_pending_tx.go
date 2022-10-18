@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/bitdao-io/bitnetwork/bss-core/txmgr"
+	"github.com/bitdao-io/mantle/bss-core/txmgr"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"

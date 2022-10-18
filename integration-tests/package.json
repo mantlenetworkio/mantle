@@ -2,37 +2,36 @@
   "private": true,
   "name": "@bitdao/integration-tests",
   "version": "1.0.0",
-  "description": "[Bitnetwork] Integration tests",
+  "description": "[Mantle] Integration tests",
   "scripts": {
     "lint": "yarn lint:fix && yarn lint:check",
     "lint:fix": "yarn lint:check --fix",
     "lint:check": "eslint . --max-warnings=0",
     "build": "hardhat compile",
-    "test:integration": "hardhat --network bitnetwork test",
+    "test:integration": "hardhat --network mantle test",
     "test:actor": "IS_LIVE_NETWORK=true ts-node actor-tests/lib/runner.ts",
-    "test:integration:live": "NO_NETWORK=true IS_LIVE_NETWORK=true hardhat --network bitnetwork test",
+    "test:integration:live": "NO_NETWORK=true IS_LIVE_NETWORK=true hardhat --network mantle test",
     "clean": "rimraf cache artifacts",
     "pre-commit": "lint-staged"
   },
   "keywords": [
-    "bitnetwork",
+    "mantle",
     "ethereum",
     "integration",
     "tests"
   ],
-  "homepage": "https://github.com/bitdao-io/bitnetwork/tree/develop/packages/integration-tests#readme",
+  "homepage": "https://github.com/bitdao-io/mantle/tree/develop/packages/integration-tests#readme",
   "license": "MIT",
-  "author": "Bitnetwork PBC",
+  "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitdao-io/bitnetwork.git"
+    "url": "https://github.com/bitdao-io/mantle.git"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.5.4",
     "@bitdaoio/contracts": "1.0.2",
-    "@bitdaoio/contracts-periphery": "1.0.0",
     "@bitdaoio/core-utils": "1.0.3",
-    "@bitdaoio/sdk": "1.0.7",
+    "@bitdaoio/sdk": "1.0.8",
     "@ethersproject/abstract-provider": "^5.6.1",
     "@ethersproject/providers": "^5.6.8",
     "@ethersproject/transactions": "^5.6.2",

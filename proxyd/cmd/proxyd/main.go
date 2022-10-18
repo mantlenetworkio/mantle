@@ -6,7 +6,7 @@ import (
 	"syscall"
 
 	"github.com/BurntSushi/toml"
-	"github.com/bitdao-io/bitnetwork/proxyd"
+	"github.com/bitdao-io/mantle/proxyd"
 	"github.com/ethereum/go-ethereum/log"
 )
 

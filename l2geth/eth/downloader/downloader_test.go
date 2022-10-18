@@ -26,13 +26,13 @@ import (
 	"testing"
 	"time"
 
-	ethereum "github.com/bitdao-io/bitnetwork/l2geth"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/rawdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/ethdb"
-	"github.com/bitdao-io/bitnetwork/l2geth/event"
-	"github.com/bitdao-io/bitnetwork/l2geth/trie"
+	ethereum "github.com/bitdao-io/mantle/l2geth"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/core/rawdb"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/ethdb"
+	"github.com/bitdao-io/mantle/l2geth/event"
+	"github.com/bitdao-io/mantle/l2geth/trie"
 )
 
 // Reduce some of the parameters to make the tester faster.
@@ -666,7 +666,7 @@ func TestBoundedForkedSync64Fast(t *testing.T)  { testBoundedForkedSync(t, 64, F
 func TestBoundedForkedSync64Light(t *testing.T) { testBoundedForkedSync(t, 64, LightSync) }
 
 func testBoundedForkedSync(t *testing.T, protocol int, mode SyncMode) {
-	t.Skip("Unused in Bitnetwork")
+	t.Skip("Unused in Mantle")
 	t.Parallel()
 
 	tester := newTester()
@@ -1391,7 +1391,7 @@ func TestFakedSyncProgress64Fast(t *testing.T)  { testFakedSyncProgress(t, 64, F
 func TestFakedSyncProgress64Light(t *testing.T) { testFakedSyncProgress(t, 64, LightSync) }
 
 func testFakedSyncProgress(t *testing.T, protocol int, mode SyncMode) {
-	t.Skip("Flakey tests unused by Bitnetwork")
+	t.Skip("Flakey tests unused by Mantle")
 	t.Parallel()
 
 	tester := newTester()

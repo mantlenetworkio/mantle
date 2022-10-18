@@ -31,19 +31,19 @@ const config: HardhatUserConfig = {
       saveDeployments: false,
       tags: ['local'],
     },
-    bitnetwork: {
+    mantle: {
       url: 'http://127.0.0.1:8545',
       saveDeployments: false,
     },
-    'bitnetwork-kovan': {
+    'mantle-kovan': {
       chainId: 69,
-      url: 'https://kovan.bitnetwork.io',
+      url: 'https://kovan.mantle.io',
       deploy,
       accounts: [privateKey],
     },
-    'bitnetwork-mainnet': {
+    'mantle-mainnet': {
       chainId: 10,
-      url: 'https://mainnet.bitnetwork.io',
+      url: 'https://mainnet.mantle.io',
       deploy,
       accounts: [privateKey],
     },
@@ -52,11 +52,19 @@ const config: HardhatUserConfig = {
       url: 'http://127.0.0.1:8545',
       accounts: [privateKey],
     },
-    'goerlibn': {
+    goerlibn: {
       chainId: 5,
       url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
       deploy,
-      accounts: ['6395a7c842a08515961888d21d72f409b61fbce96af1e520384e375f301a8297'],
+      accounts: [
+        '6395a7c842a08515961888d21d72f409b61fbce96af1e520384e375f301a8297',
+      ],
+    },
+    'goerli-qa': {
+      chainId: 5,
+      url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
+      deploy,
+      accounts: [privateKey],
     },
     kovan: {
       chainId: 42,

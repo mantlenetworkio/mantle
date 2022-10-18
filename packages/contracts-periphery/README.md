@@ -1,1 +1,0 @@
-# Bitnetwork Peripheral Smart Contracts

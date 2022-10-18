@@ -1,7 +1,7 @@
 package sequencer
 
 import (
-	"github.com/bitdao-io/bitnetwork/bss-core/metrics"
+	"github.com/bitdao-io/mantle/bss-core/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )

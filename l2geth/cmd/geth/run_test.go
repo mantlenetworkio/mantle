@@ -24,8 +24,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/internal/cmdtest"
-	"github.com/bitdao-io/bitnetwork/l2geth/rpc"
+	"github.com/bitdao-io/mantle/l2geth/internal/cmdtest"
+	"github.com/bitdao-io/mantle/l2geth/rpc"
 	"github.com/docker/docker/pkg/reexec"
 )
 

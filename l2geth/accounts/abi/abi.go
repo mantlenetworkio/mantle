@@ -23,8 +23,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/crypto"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/crypto"
 )
 
 // The ABI holds information about a contract's context and available

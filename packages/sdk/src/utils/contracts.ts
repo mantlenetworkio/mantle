@@ -54,7 +54,7 @@ const NAME_REMAPPING = {
 export const CONTRACT_ADDRESSES: {
   [ChainID in L2ChainID]: OEContractsLike
 } = {
-  [L2ChainID.BITNETWORK]: {
+  [L2ChainID.MANTLE]: {
     l1: {
       AddressManager: '0xdE1FCfB0851916CA5101820A69b13a4E276bd81F' as const,
       L1CrossDomainMessenger:
@@ -68,7 +68,7 @@ export const CONTRACT_ADDRESSES: {
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.BITNETWORK_KOVAN]: {
+  [L2ChainID.MANTLE_KOVAN]: {
     l1: {
       AddressManager: '0x100Dd3b414Df5BbA2B542864fF94aF8024aFdf3a' as const,
       L1CrossDomainMessenger:
@@ -82,7 +82,7 @@ export const CONTRACT_ADDRESSES: {
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.BITNETWORK_GOERLI]: {
+  [L2ChainID.MANTLE_GOERLI]: {
     l1: {
       AddressManager: '0xfA5b622409E1782597952a4A78c1D34CF32fF5e2' as const,
       L1CrossDomainMessenger:
@@ -96,21 +96,21 @@ export const CONTRACT_ADDRESSES: {
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.BITNETWORK_GOERLIQA]: {
+  [L2ChainID.MANTLE_GOERLIQA]: {
     l1: {
-      AddressManager: '0x814f96200465c7E0567E29E47B48fBD84E26c8bC' as const,
+      AddressManager: '0xcBE8BE5C1B8c592cCb85987672B316a2c4e86d96' as const,
       L1CrossDomainMessenger:
-        '0x0De8cB7b76E7dc0b9AD597975952236c16727E73' as const,
-      L1StandardBridge: '0x1563316bB249e4071C0e748779c7d713CB0CE930' as const,
+        '0xAf61D8ce46603c9AE729A4e2E67D8353e1d95355' as const,
+      L1StandardBridge: '0x5Be4513Cd5A90f473321450a1091C8B5dB4F4Bc5' as const,
       StateCommitmentChain:
-        '0x48ecF751613E1EE471B6645B474B6407214E9992' as const,
+        '0xED784d2923DB9CeC0AADa4c315278cE53c69036b' as const,
       CanonicalTransactionChain:
-        '0x54b8957F8027D300922C6AfE1565421b5869DE63' as const,
-      BondManager: '0x44516aAcBA92503e6013863986e615a52447731e' as const,
+        '0xBa59029110487802a43397FAB9d3641CD4b5578A' as const,
+      BondManager: '0xBcAB2B019a9186520FA230a81CceB54868018898' as const,
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.BITNETWORK_HARDHAT_LOCAL]: {
+  [L2ChainID.MANTLE_HARDHAT_LOCAL]: {
     l1: {
       AddressManager: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as const,
       L1CrossDomainMessenger:
@@ -124,7 +124,7 @@ export const CONTRACT_ADDRESSES: {
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.BITNETWORK_HARDHAT_DEVNET]: {
+  [L2ChainID.MANTLE_HARDHAT_DEVNET]: {
     l1: {
       AddressManager: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as const,
       L1CrossDomainMessenger:
@@ -146,7 +146,7 @@ export const CONTRACT_ADDRESSES: {
 export const BRIDGE_ADAPTER_DATA: {
   [ChainID in L2ChainID]?: BridgeAdapterData
 } = {
-  [L2ChainID.BITNETWORK]: {
+  [L2ChainID.MANTLE]: {
     BitBTC: {
       Adapter: StandardBridgeAdapter,
       l1Bridge: '0xaBA2c5F108F7E820C049D5Af70B16ac266c8f128' as const,
@@ -158,7 +158,7 @@ export const BRIDGE_ADAPTER_DATA: {
       l2Bridge: '0x467194771dAe2967Aef3ECbEDD3Bf9a310C76C65' as const,
     },
   },
-  [L2ChainID.BITNETWORK_KOVAN]: {
+  [L2ChainID.MANTLE_KOVAN]: {
     wstETH: {
       Adapter: DAIBridgeAdapter,
       l1Bridge: '0xa88751C0a08623E11ff38c6B70F2BbEe7865C17c' as const,

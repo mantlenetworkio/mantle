@@ -23,8 +23,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts/abi"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/accounts/abi"
+	"github.com/bitdao-io/mantle/l2geth/common"
 )
 
 // decodedCallData is an internal type to represent a method call parsed according

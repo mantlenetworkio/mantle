@@ -19,9 +19,9 @@ package vm
 import (
 	"errors"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/math"
-	"github.com/bitdao-io/bitnetwork/l2geth/params"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/math"
+	"github.com/bitdao-io/mantle/l2geth/params"
 )
 
 // memoryGasCost calculates the quadratic gas for memory expansion. It does so

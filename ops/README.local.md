@@ -20,6 +20,12 @@ make -f Makefile.local up service=l1_chain
 make -f Makefile.local down
 ````
 
+### Stop All Service And Clear Data
+
+```bash
+make -f Makefile.local clean
+````
+
 ### Start/Stop All Services
 
 ```shell
@@ -63,6 +69,14 @@ make -f Makefile.local build service=l1_chain
 
 ```
 
+### Clean All Local Data
+```shell
+
+# this will stop all services and delete all data in data/
+make -f Makefile.local clean
+
+```
+
 ## Some Key Points
 
 ### Multiple docker compose files
@@ -88,3 +102,8 @@ cp template.local.env .env
 
 vim .env
 ```
+
+### Data Volume Mount
+
+Data of container such as `l1_chain` `l2geth` `verifier` is mapped to `ops/data` directory
+by `volume` directive in docker-compose.yaml

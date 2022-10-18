@@ -7,7 +7,7 @@ import dateformat from 'dateformat'
 
 import {
   findFirstUnfinalizedStateBatchIndex,
-  findEventForStateBatch,
+  findEventForStateBatchByFromAndTo,
 } from './helpers'
 
 type Options = {
@@ -100,7 +100,8 @@ export class FaultDetector extends BaseServiceV2<Options, Metrics, State> {
       this.state.highestCheckedBatchIndex =
         await findFirstUnfinalizedStateBatchIndex(this.state.scc)
     } else {
-      this.state.highestCheckedBatchIndex = this.options.startBatchIndex
+      const totalBatches = (await this.state.scc.getTotalBatches()).toNumber()
+      this.state.highestCheckedBatchIndex = totalBatches
     }
 
     this.logger.info(`starting height`, {
@@ -137,9 +138,12 @@ export class FaultDetector extends BaseServiceV2<Options, Metrics, State> {
 
     let event: ethers.Event
     try {
-      event = await findEventForStateBatch(
+      const recentBlock = await this.options.l1RpcProvider.getBlockNumber()
+      event = await findEventForStateBatchByFromAndTo(
         this.state.scc,
-        this.state.highestCheckedBatchIndex
+        this.state.highestCheckedBatchIndex,
+        recentBlock - 100,
+        recentBlock
       )
     } catch (err) {
       this.logger.error(`got error when connecting to node`, {
@@ -189,7 +193,7 @@ export class FaultDetector extends BaseServiceV2<Options, Metrics, State> {
       return
     }
 
-    if (latestBlock < batchEnd) {
+    if (latestBlock < batchEnd - 1) {
       this.logger.info(`node is behind, waiting for sync`, {
         batchEnd,
         latestBlock,

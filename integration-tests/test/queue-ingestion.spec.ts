@@ -6,14 +6,14 @@ import { getContractInterface } from '@bitdaoio/contracts'
 
 /* Imports: External */
 import { expect } from './shared/setup'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 import { DEFAULT_TEST_GAS_L1, envConfig } from './shared/utils'
 
 describe('Queue Ingestion', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
   let l2Provider: providers.JsonRpcProvider
   before(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
     l2Provider = asL2Provider(env.l2Wallet.provider as any)
   })
 

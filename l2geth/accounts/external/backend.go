@@ -21,16 +21,16 @@ import (
 	"math/big"
 	"sync"
 
-	ethereum "github.com/bitdao-io/bitnetwork/l2geth"
-	"github.com/bitdao-io/bitnetwork/l2geth/accounts"
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
-	"github.com/bitdao-io/bitnetwork/l2geth/core/types"
-	"github.com/bitdao-io/bitnetwork/l2geth/event"
-	"github.com/bitdao-io/bitnetwork/l2geth/internal/ethapi"
-	"github.com/bitdao-io/bitnetwork/l2geth/log"
-	"github.com/bitdao-io/bitnetwork/l2geth/rpc"
-	"github.com/bitdao-io/bitnetwork/l2geth/signer/core"
+	ethereum "github.com/bitdao-io/mantle/l2geth"
+	"github.com/bitdao-io/mantle/l2geth/accounts"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
+	"github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/bitdao-io/mantle/l2geth/event"
+	"github.com/bitdao-io/mantle/l2geth/internal/ethapi"
+	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/bitdao-io/mantle/l2geth/rpc"
+	"github.com/bitdao-io/mantle/l2geth/signer/core"
 )
 
 type ExternalBackend struct {

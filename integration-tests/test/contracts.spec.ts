@@ -8,7 +8,7 @@ import { abi as RouterABI } from '@uniswap/v3-periphery/artifacts/contracts/Swap
 
 /* Imports: Internal */
 import { expect } from './shared/setup'
-import { BitnetworkEnv } from './shared/env'
+import { MantleEnv } from './shared/env'
 
 // Below methods taken from the Uniswap test suite, see
 // https://github.com/Uniswap/v3-periphery/blob/main/test/shared/ticks.ts
@@ -18,14 +18,14 @@ const getMaxTick = (tickSpacing: number) =>
   Math.floor(887272 / tickSpacing) * tickSpacing
 
 describe('Contract interactions', () => {
-  let env: BitnetworkEnv
+  let env: MantleEnv
 
   let Factory__ERC20: ContractFactory
 
   let otherWallet: Wallet
 
   before(async () => {
-    env = await BitnetworkEnv.new()
+    env = await MantleEnv.new()
 
     Factory__ERC20 = await ethers.getContractFactory('ERC20', env.l2Wallet)
 

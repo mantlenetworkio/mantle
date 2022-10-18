@@ -1,4 +1,4 @@
-module github.com/bitdao-io/bitnetwork/gas-oracle
+module github.com/bitdao-io/mantle/gas-oracle
 
 go 1.18
 

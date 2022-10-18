@@ -24,8 +24,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bitdao-io/bitnetwork/l2geth/common"
-	"github.com/bitdao-io/bitnetwork/l2geth/common/hexutil"
+	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
 )
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.

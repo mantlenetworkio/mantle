@@ -1,3 +1,3 @@
-# @eth-bitnetwork/foundry
+# @bitdaoio/foundry
 
 

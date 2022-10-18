@@ -2,7 +2,7 @@
   "private": true,
   "name": "@bitdaoio/fault-detector",
   "version": "1.0.0",
-  "description": "[BitNetwork] Service for detecting faulty L2 output proposals",
+  "description": "[Mantle] Service for detecting faulty L2 output proposals",
   "main": "dist/index",
   "types": "dist/index",
   "files": [
@@ -20,17 +20,17 @@
     "lint:check": "eslint . --max-warnings=0"
   },
   "keywords": [
-    "bitnetwork",
+    "mantle",
     "ethereum",
     "fault",
     "detector"
   ],
-  "homepage": "https://github.com/bitnetworkio/bitnetworkio/tree/main/packages/fault-detector#readme",
+  "homepage": "https://github.com/mantleio/mantleio/tree/main/packages/fault-detector#readme",
   "license": "MIT",
-  "author": "BitNetwork PBC",
+  "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitnetworkio/bitnetwork.git"
+    "url": "https://github.com/mantleio/mantle.git"
   },
   "devDependencies": {
     "@defi-wonderland/smock": "^2.0.7",
@@ -50,7 +50,7 @@
     "@bitdaoio/common-ts": "^1.0.0",
     "@bitdaoio/contracts": "^1.0.2",
     "@bitdaoio/core-utils": "^1.0.3",
-    "@bitdaoio/sdk": "^1.0.6",
+    "@bitdaoio/sdk": "^1.0.8",
     "@ethersproject/abstract-provider": "^5.6.1"
   }
 }

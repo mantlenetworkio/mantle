@@ -2,7 +2,7 @@
   "private": true,
   "name": "@bitdaoio/message-relayer",
   "version": "1.0.0",
-  "description": "[Bitnetwork] Service for automatically relaying L2 to L1 transactions",
+  "description": "[Mantle] Service for automatically relaying L2 to L1 transactions",
   "main": "dist/index",
   "types": "dist/index",
   "files": [
@@ -19,21 +19,21 @@
     "lint:check": "eslint . --max-warnings=0"
   },
   "keywords": [
-    "bitnetwork",
+    "mantle",
     "ethereum",
     "relayer"
   ],
-  "homepage": "https://github.com/bitdao-io/bitnetwork/tree/develop/packages/message-relayer#readme",
+  "homepage": "https://github.com/bitdao-io/mantle/tree/develop/packages/message-relayer#readme",
   "license": "MIT",
-  "author": "Bitnetwork PBC",
+  "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitdao-io/bitnetwork.git"
+    "url": "https://github.com/bitdao-io/mantle.git"
   },
   "dependencies": {
     "@bitdaoio/common-ts": "1.0.0",
     "@bitdaoio/core-utils": "1.0.3",
-    "@bitdaoio/sdk": "1.0.7",
+    "@bitdaoio/sdk": "1.0.8",
     "ethers": "^5.6.8"
   },
   "devDependencies": {
