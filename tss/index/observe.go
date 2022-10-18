@@ -107,7 +107,7 @@ func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
 			}
 
 			scannedHeight = endHeight
-			for err != nil { // retry until update successfully
+			for err == nil { // retry until update successfully
 				if err = o.store.UpdateHeight(scannedHeight); err != nil {
 					log.Error("failed to update scannedHeight, retry", err)
 					time.Sleep(2 * time.Second)
