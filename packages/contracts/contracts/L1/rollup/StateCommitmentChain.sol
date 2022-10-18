@@ -338,7 +338,11 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         );
 
         // send call data into L2, hardcode address
-        sendCrossDomainMessage(address(0x4200000000000000000000000000000000000020), 200_000, message);
+        sendCrossDomainMessage(
+            address(0x4200000000000000000000000000000000000020),
+            200_000,
+            message
+        );
 
         // emit message
         emit DistributeTssReward(
