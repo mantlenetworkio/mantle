@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
-	"github.com/mantlenetworkio/mantle/l2geth/ethclient"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
@@ -56,6 +56,7 @@ func (o Indexer) Start() {
 	if err != nil {
 		panic(err)
 	}
+	log.Info("start to observe StateBatchAppended event", "start_height", scannedHeight)
 	go o.ObserveStateBatchAppended(scannedHeight)
 }
 
@@ -78,6 +79,9 @@ func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
 			endHeight := startHeight + scanRange
 			if latestConfirmedBlockHeight < endHeight {
 				endHeight = latestConfirmedBlockHeight
+			}
+			if startHeight > endHeight {
+				endHeight = startHeight
 			}
 			events, err := FilterStateBatchAppendedEvent(o.l1Cli, int64(startHeight), int64(endHeight), o.sccContractAddr)
 			if err != nil {

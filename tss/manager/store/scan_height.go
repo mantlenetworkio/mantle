@@ -17,3 +17,9 @@ func (s *Storage) GetScannedHeight() (uint64, error) {
 	}
 	return binary.BigEndian.Uint64(bz), nil
 }
+
+func (s *Storage) ResetScanHeight(height uint64) error {
+	heightBz := make([]byte, 8)
+	binary.BigEndian.PutUint64(heightBz, height)
+	return s.db.Put(getScannedHeightKey(), heightBz, nil)
+}

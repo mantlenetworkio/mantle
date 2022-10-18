@@ -11,6 +11,10 @@ type SignService interface {
 	SignTxBatch() error
 }
 
+type AdminService interface {
+	ResetScanHeight(height uint64) error
+}
+
 type TssQueryService interface {
 	QueryActiveInfo() (TssCommitteeInfo, error)
 	QueryInactiveInfo() (TssCommitteeInfo, error)

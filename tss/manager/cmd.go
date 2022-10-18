@@ -57,7 +57,7 @@ func run(cmd *cobra.Command) error {
 	}
 	manager.Start()
 
-	registry := router.NewRegistry(manager)
+	registry := router.NewRegistry(manager, managerStore)
 	r := gin.Default()
 	registry.Register(r)
 
