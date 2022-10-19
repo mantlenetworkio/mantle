@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/urfave/cli"
 
-	"github.com/bitdao-io/mantle/scheduler/flags"
+	"github.com/mantlenetworkio/mantle/scheduler/flags"
 )
 
 var (

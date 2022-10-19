@@ -1,7 +1,7 @@
 package coterie
 
 import (
-	"github.com/bitdao-io/mantle/l2geth/consensus"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 )
 
 type API struct {

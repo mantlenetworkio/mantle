@@ -1,13 +1,13 @@
-module github.com/bitdao-io/mantle/scheduler
+module github.com/mantlenetworkio/mantle/scheduler
 
 go 1.18
 
-replace github.com/bitdao-io/mantle/bss-core v0.0.0 => ../bss-core
+replace github.com/mantlenetworkio/mantle/bss-core v0.0.0 => ../bss-core
 
-replace github.com/bitdao-io/mantle/l2geth v0.0.0 => ../l2geth
+replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
 
 require (
-	github.com/bitdao-io/bitnetwork/bss-core v0.0.0
+	github.com/mantlenetworkio/mantle/bss-core v0.0.0
 	github.com/ethereum/go-ethereum v1.10.17
 	github.com/getsentry/sentry-go v0.12.0
 	github.com/stretchr/testify v1.7.0

@@ -7,10 +7,10 @@ replace github.com/mantlenetworkio/mantle/bss-core v0.0.0 => ../bss-core
 replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
 
 require (
-	github.com/mantlenetworkio/mantle/bss-core v0.0.0
-	github.com/mantlenetworkio/mantle/l2geth v0.0.0
 	github.com/ethereum/go-ethereum v1.10.17
 	github.com/getsentry/sentry-go v0.12.0
+	github.com/mantlenetworkio/mantle/bss-core v0.0.0
+	github.com/mantlenetworkio/mantle/l2geth v0.0.0
 	github.com/prometheus/client_golang v1.11.0
 	github.com/stretchr/testify v1.7.0
 	github.com/urfave/cli v1.22.5

@@ -3,11 +3,11 @@ package eth
 import (
 	"fmt"
 
-	"github.com/bitdao-io/mantle/l2geth/consensus/coterie"
-	"github.com/bitdao-io/mantle/l2geth/log"
-	"github.com/bitdao-io/mantle/l2geth/p2p"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
-	"github.com/bitdao-io/mantle/l2geth/rlp"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/coterie"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
 func (pm *ProtocolManager) makeConsensusProtocol(version uint) p2p.Protocol {
