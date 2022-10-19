@@ -13,7 +13,6 @@ import { ICanonicalTransactionChain } from "./ICanonicalTransactionChain.sol";
 import { IBondManager } from "../verification/IBondManager.sol";
 import { IChainStorageContainer } from "./IChainStorageContainer.sol";
 import { ITssGroupManager } from "../tss/ITssGroupManager.sol";
-import { ITssRewardContract } from "../../L2/predeploys/iTssRewardContract.sol";
 
 /**
  * @title StateCommitmentChain
@@ -115,9 +114,6 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         // Pass the block's timestamp and the publisher of the data
         // to be used in the fraud proofs
         _appendBatch(_batch, _signature, abi.encode(block.timestamp, msg.sender));
-
-        // Update distributed state batch, and emit message
-        _distributeTssReward(_batch, _shouldStartAtElement);
     }
 
     /**
@@ -317,35 +313,6 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
 
         // slither-disable-next-line reentrancy-events
         emit StateBatchDeleted(_batchHeader.batchIndex, _batchHeader.batchRoot);
-    }
-
-    /**
-     * Checks that a batch header matches the stored hash for the given index.
-     * @param _batch Submit batch data.
-     * @param _shouldStartAtElement or not the header matches the stored one.
-     */
-    function _distributeTssReward(bytes32[] memory _batch, uint256 _shouldStartAtElement) internal {
-        // get address of tss group member
-        address[] memory tssMembers = ITssGroupManager(resolve("TssGroupManager")).getTssGroupUnJailMembers();
-        require(tssMembers.length > 0, "get tss members in error");
-
-        // construct calldata for claimReward call
-        bytes memory message = abi.encodeWithSelector(
-            ITssRewardContract.claimReward.selector,
-            _shouldStartAtElement,
-            _batch.length,
-            tssMembers
-        );
-
-        // send call data into L2, hardcode address
-        sendCrossDomainMessage(address(0x4200000000000000000000000000000000000020), 200_000, message);
-
-        // emit message
-        emit DistributeTssReward(
-            _shouldStartAtElement,
-            _batch.length,
-            tssMembers
-        );
     }
 
     /**

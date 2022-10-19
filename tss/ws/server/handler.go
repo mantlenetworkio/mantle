@@ -181,8 +181,8 @@ func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	digestBz := crypto.Keccak256Hash([]byte(timeStr)).Bytes()
-	if !crypto.VerifySignature(pubKeyBytes, digestBz, sigBytes) {
-		wm.logger.Error("illegal signature", "err", err)
+	if !crypto.VerifySignature(pubKeyBytes, digestBz, sigBytes[:64]) {
+		wm.logger.Error("illegal signature", "publicKey", pubKey, "time", timeStr, "signature", sig)
 		return
 	}
 

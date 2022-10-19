@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -103,6 +104,7 @@ func NewManager(wsServer server.IWebsocketManager,
 
 // Start launch a manager
 func (m Manager) Start() {
+	log.Info("manager is starting......")
 	go m.observeElection()
 	go m.slashing()
 }
@@ -120,6 +122,11 @@ func (m Manager) recoverGenerateKey() {
 }
 
 func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
+	var stateRoots string
+	for _, st := range request.StateRoots {
+		stateRoots = stateRoots + hex.EncodeToString(st[:]) + ";"
+	}
+	log.Info("received sign state request", "startBlock", request.StartBlock, "offset_starts_at_index", request.OffsetStartsAtIndex, "state roots", stateRoots)
 	offsetStartsAtIndex, _ := new(big.Int).SetString(request.OffsetStartsAtIndex, 10)
 	digestBz, err := tss.StateBatchHash(request.StateRoots, offsetStartsAtIndex)
 	if err != nil {
@@ -179,7 +186,6 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	absents := make([]string, 0)
 	for _, node := range tssInfo.TssMembers {
 		if !slices.ExistsIgnoreCase(ctx.Approvers(), node) {
-			// 并且node不在slashing中
 			addr, _ := tss.NodeToAddress(node)
 			if !m.store.IsInSlashing(addr) {
 				absents = append(absents, node)
@@ -200,6 +206,7 @@ func (m Manager) SignTxBatch() error {
 
 func (m Manager) availableNodes(tssMembers []string) []string {
 	aliveNodes := m.wsServer.AliveNodes()
+	log.Info("check available nodes", "expected", fmt.Sprintf("%v", tssMembers), "alive nodes", fmt.Sprintf("%v", aliveNodes))
 	availableNodes := make([]string, 0)
 	for _, n := range aliveNodes {
 		if slices.ExistsIgnoreCase(tssMembers, n) {
@@ -226,6 +233,7 @@ func (m Manager) afterSignStateBatch(ctx types.Context, stateBatch [][32]byte, a
 		AbsentNodes:  absentNodes,
 		WorkingNodes: ctx.AvailableNodes(),
 	}
+	log.Info("Store the signed state batch", "batchRoot", hex.EncodeToString(batchRoot[:]))
 	if err = m.store.SetStateBatch(sbi); err != nil {
 		return err
 	}

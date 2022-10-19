@@ -5,6 +5,7 @@ RUN apk add --no-cache make gcc musl-dev linux-headers git jq bash
 COPY ./batch-submitter /go/batch-submitter
 COPY ./bss-core /go/bss-core
 COPY ./l2geth /go/l2geth
+COPY ./tss   /go/tss
 COPY ./batch-submitter/docker.go.work /go/go.work
 
 WORKDIR /go/batch-submitter

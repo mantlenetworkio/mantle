@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
-	"github.com/mantlenetworkio/mantle/l2geth/ethclient"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
@@ -56,6 +56,7 @@ func (o Indexer) Start() {
 	if err != nil {
 		panic(err)
 	}
+	log.Info("start to observe StateBatchAppended event", "start_height", scannedHeight)
 	go o.ObserveStateBatchAppended(scannedHeight)
 }
 
@@ -79,6 +80,9 @@ func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
 			if latestConfirmedBlockHeight < endHeight {
 				endHeight = latestConfirmedBlockHeight
 			}
+			if startHeight > endHeight {
+				startHeight = endHeight
+			}
 			events, err := FilterStateBatchAppendedEvent(o.l1Cli, int64(startHeight), int64(endHeight), o.sccContractAddr)
 			if err != nil {
 				log.Error("failed to scan stateBatchAppended event", err)
@@ -88,23 +92,31 @@ func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
 			if len(events) != 0 {
 				for _, event := range events {
 					for stateBatchRoot, batchIndex := range event {
-						var retry bool
-						for !retry {
-							retry = indexBatch(o.store, stateBatchRoot, batchIndex)
+						retry := true
+						var found bool
+						for retry {
+							retry, found = indexBatch(o.store, stateBatchRoot, batchIndex)
 						}
-						if err := o.hook.AfterStateBatchIndexed(stateBatchRoot); err != nil {
-							log.Error("errors occur when executed hook AfterStateBatchIndexed", "err", err)
+						if found {
+							if err = o.hook.AfterStateBatchIndexed(stateBatchRoot); err != nil {
+								log.Error("errors occur when executed hook AfterStateBatchIndexed", "err", err)
+							}
 						}
 					}
 				}
 			}
 
 			scannedHeight = endHeight
-			for err != nil { // retry until update successfully
+			retry := true
+			for retry { // retry until update successfully
 				if err = o.store.UpdateHeight(scannedHeight); err != nil {
 					log.Error("failed to update scannedHeight, retry", err)
 					time.Sleep(2 * time.Second)
+					retry = true
+				} else {
+					retry = false
 				}
+				log.Info("updated height", "scannedHeight", scannedHeight)
 			}
 		}()
 
@@ -117,23 +129,23 @@ func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
 	}
 }
 
-func indexBatch(store StateBatchStore, stateBatchRoot [32]byte, batchIndex uint64) (retry bool) {
+func indexBatch(store StateBatchStore, stateBatchRoot [32]byte, batchIndex uint64) (retry bool, found bool) {
 	found, stateBatch := store.GetStateBatch(stateBatchRoot)
 	if !found {
 		log.Error("can not find the state batch with root, skip this batch", "root", hexutil.Encode(stateBatchRoot[:]))
-		return false
+		return false, found
 	}
 	stateBatch.BatchIndex = batchIndex
 	if err := store.SetStateBatch(stateBatch); err != nil { // update stateBatch with index
 		log.Error("failed to SetStateBatch with index", err)
 		time.Sleep(2 * time.Second)
-		return true
+		return true, found
 	}
 
 	if err := store.IndexStateBatch(batchIndex, stateBatchRoot); err != nil {
 		log.Error("failed to IndexStateBatch", err)
 		time.Sleep(2 * time.Second)
-		return true
+		return true, found
 	}
-	return false
+	return false, found
 }
