@@ -19,9 +19,9 @@ package whisperv6
 import (
 	"bytes"
 
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/rlp"
-	"github.com/bitdao-io/mantle/l2geth/whisper/whisperv6"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/mantlenetworkio/mantle/l2geth/whisper/whisperv6"
 )
 
 type MessageParams struct {

@@ -1,2 +1,2 @@
-# @bitdaoio/integration-tests
+# @mantlenetworkio/integration-tests
 

@@ -1,4 +1,4 @@
-# @bitdaoio/data-transport-layer
+# @mantlenetworkio/data-transport-layer
 
 ## What is this?
 
@@ -18,7 +18,7 @@ We run two sub-services, the [`L1IngestionService`](./src/services/l1-ingestion/
 
 See an example config at [.env.example](.env.example); copy into a `.env` file before running.
 
-`L1_TRANSPORT__L1_RPC_ENDPOINT` can be the JSON RPC endpoint of any L1 Ethereum node. `L1_TRANSPORT__ADDRESS_MANAGER` should be the contract addresss of the Address Manager on the corresponding network; find their values in the [contracts package](https://github.com/mantleio/mantle/tree/main/packages/contracts/deployments).
+`L1_TRANSPORT__L1_RPC_ENDPOINT` can be the JSON RPC endpoint of any L1 Ethereum node. `L1_TRANSPORT__ADDRESS_MANAGER` should be the contract addresss of the Address Manager on the corresponding network; find their values in the [contracts package](https://github.com/mantlenetworkio/mantle/tree/main/packages/contracts/deployments).
 
 ### Building and usage
 
@@ -46,7 +46,7 @@ Here's the list of environment variables you can change:
 | Variable                                                | Default     | Description                                                                                                                                                   |
 | ------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | DATA_TRANSPORT_LAYER__DB_PATH                           | ./db        | Path to the database for this service.                                                                                                                        |
-| DATA_TRANSPORT_LAYER__ADDRESS_MANAGER                   | -           | Address of the AddressManager contract on L1. See [contracts](https://github.com/mantleio/mantle/tree/main/packages/contracts/deployments) package to find this address for mainnet or kovan. |
+| DATA_TRANSPORT_LAYER__ADDRESS_MANAGER                   | -           | Address of the AddressManager contract on L1. See [contracts](https://github.com/mantlenetworkio/mantle/tree/main/packages/contracts/deployments) package to find this address for mainnet or kovan. |
 | DATA_TRANSPORT_LAYER__POLLING_INTERVAL                  | 5000        | Period of time between execution loops.                                                                                                                       |
 | DATA_TRANSPORT_LAYER__DANGEROUSLY_CATCH_ALL_ERRORS      | false       | If true, will catch all errors without throwing.                                                                                                              |
 | DATA_TRANSPORT_LAYER__CONFIRMATIONS                     | 12          | Number of confirmations to wait before accepting transactions as "canonical".                                                                                 |

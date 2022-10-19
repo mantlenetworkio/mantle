@@ -19,7 +19,7 @@ package vm
 import (
 	"fmt"
 
-	"github.com/bitdao-io/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
 )
 
 // EnableEIP enables the given EIP on the config.

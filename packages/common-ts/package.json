@@ -1,6 +1,6 @@
 {
-  "name": "@bitdaoio/common-ts",
-  "version": "1.0.1",
+  "name": "@mantlenetworkio/common-ts",
+  "version": "0.0.1",
   "description": "[Mantle] Advanced typescript tooling used by various services",
   "main": "dist/index",
   "types": "dist/index",
@@ -24,15 +24,15 @@
     "common",
     "typescript"
   ],
-  "homepage": "https://github.com/bitdao-io/mantle/tree/develop/packages/common-ts#readme",
+  "homepage": "https://github.com/mantlenetworkio/mantle/tree/develop/packages/common-ts#readme",
   "license": "MIT",
   "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitdao-io/mantle.git"
+    "url": "https://github.com/mantlenetworkio/mantle.git"
   },
   "dependencies": {
-    "@bitdaoio/core-utils": "1.0.3",
+    "@mantlenetworkio/core-utils": "0.0.1",
     "@sentry/node": "^6.3.1",
     "bcfg": "^0.1.7",
     "body-parser": "^1.20.0",

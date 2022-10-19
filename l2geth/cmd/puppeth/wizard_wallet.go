@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 // deployWallet creates a new web wallet based on some user input.

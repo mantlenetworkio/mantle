@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/mantle/bss-core/metrics"
-	"github.com/bitdao-io/mantle/bss-core/txmgr"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/bss-core/metrics"
+	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
 )
 
 // weiToEth is the conversion rate from wei to ether.

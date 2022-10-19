@@ -18,11 +18,11 @@ else
 	# CIRCLE_PULL_REQUEST is bound here
 	PACKAGE=$1
 	# Craft the URL to the GitHub API. The access token is optional for the monorepo since it's an open-source repo.
-	GITHUB_API_URL="https://api.github.com/repos/bitdao-io/mantle/pulls/${CIRCLE_PULL_REQUEST/https:\/\/github.com\/bitdao-io\/mantle\/pull\//}"
+	GITHUB_API_URL="https://api.github.com/repos/mantlenetworkio/mantle/pulls/${CIRCLE_PULL_REQUEST/https:\/\/github.com\/mantlenetworkio\/mantle\/pull\//}"
 	echoerr "GitHub URL:"
 	echoerr "$GITHUB_API_URL"
 	# Grab the PR's base ref using the GitHub API.
-	PR=$(curl -H "Authorization: token $GITHUB_ACCESS_TOKEN" -H "Accept: application/vnd.github.v3+json" --retry 3 --retry-delay 1 -s "$GITHUB_API_URL")
+	PR=$(curl -H "Authorization: token ${GITHUB_ACCESS_TOKEN:-}" -H "Accept: application/vnd.github.v3+json" --retry 3 --retry-delay 1 -s "$GITHUB_API_URL")
 	echoerr "PR data:"
 	echoerr "$PR"
 	REF=$(echo "$PR" | jq -r ".base.ref")

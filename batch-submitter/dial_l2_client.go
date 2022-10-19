@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/bitdao-io/mantle/bss-core/dial"
-	"github.com/bitdao-io/mantle/l2geth/ethclient"
-	"github.com/bitdao-io/mantle/l2geth/log"
-	"github.com/bitdao-io/mantle/l2geth/rpc"
+	"github.com/mantlenetworkio/mantle/bss-core/dial"
+	"github.com/mantlenetworkio/mantle/l2geth/ethclient"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 )
 
 // DialL2EthClientWithTimeout attempts to dial the L2 provider using the

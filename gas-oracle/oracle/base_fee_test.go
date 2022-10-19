@@ -4,17 +4,18 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/bitdao-io/mantle/gas-oracle/bindings"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
+	"github.com/mantlenetworkio/mantle/gas-oracle/tokenprice"
 )
 
 func TestBaseFeeUpdate(t *testing.T) {
 	key, _ := crypto.GenerateKey()
 	sim, _ := newSimulatedBackend(key)
 	chain := sim.Blockchain()
-
+	tokenPricer := tokenprice.NewClient("https://api.bybit.com", 3)
 	opts, _ := bind.NewKeyedTransactorWithChainID(key, big.NewInt(1337))
 	addr, _, gpo, err := bindings.DeployGasPriceOracle(opts, sim, opts.From)
 	if err != nil {
@@ -48,6 +49,11 @@ func TestBaseFeeUpdate(t *testing.T) {
 	if tip.BaseFee == nil {
 		t.Fatal("no base fee found")
 	}
+	ratio, err := tokenPricer.PriceRatio()
+	if err != nil {
+		t.Fatal(err)
+	}
+	tip.BaseFee = new(big.Int).Mul(tip.BaseFee, big.NewInt(int64(ratio)))
 	// Ensure that there is no false negative by
 	// checking that the values don't start out the same
 	if l1BaseFee.Cmp(tip.BaseFee) == 0 {

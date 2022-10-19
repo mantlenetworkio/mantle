@@ -6,33 +6,35 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/bitdao-io/mantle/gas-oracle/flags"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/gas-oracle/flags"
 	"github.com/urfave/cli"
 )
 
 // Config represents the configuration options for the gas oracle
 type Config struct {
-	l1ChainID                    *big.Int
-	l2ChainID                    *big.Int
-	ethereumHttpUrl              string
-	layerTwoHttpUrl              string
-	gasPriceOracleAddress        common.Address
-	privateKey                   *ecdsa.PrivateKey
-	gasPrice                     *big.Int
-	waitForReceipt               bool
-	floorPrice                   uint64
-	targetGasPerSecond           uint64
-	maxPercentChangePerEpoch     float64
-	averageBlockGasLimitPerEpoch uint64
-	epochLengthSeconds           uint64
-	l1BaseFeeEpochLengthSeconds  uint64
-	l2GasPriceSignificanceFactor float64
-	l1BaseFeeSignificanceFactor  float64
-	enableL1BaseFee              bool
-	enableL2GasPrice             bool
+	l1ChainID                        *big.Int
+	l2ChainID                        *big.Int
+	ethereumHttpUrl                  string
+	layerTwoHttpUrl                  string
+	gasPriceOracleAddress            common.Address
+	privateKey                       *ecdsa.PrivateKey
+	gasPrice                         *big.Int
+	waitForReceipt                   bool
+	floorPrice                       uint64
+	targetGasPerSecond               uint64
+	maxPercentChangePerEpoch         float64
+	averageBlockGasLimitPerEpoch     uint64
+	epochLengthSeconds               uint64
+	l1BaseFeeEpochLengthSeconds      uint64
+	l2GasPriceSignificanceFactor     float64
+	bybitBackendURL                  string
+	tokenPricerUpdateFrequencySecond uint64
+	l1BaseFeeSignificanceFactor      float64
+	enableL1BaseFee                  bool
+	enableL2GasPrice                 bool
 	// Metrics config
 	MetricsEnabled          bool
 	MetricsHTTP             string
@@ -57,6 +59,8 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.epochLengthSeconds = ctx.GlobalUint64(flags.EpochLengthSecondsFlag.Name)
 	cfg.l1BaseFeeEpochLengthSeconds = ctx.GlobalUint64(flags.L1BaseFeeEpochLengthSecondsFlag.Name)
 	cfg.l2GasPriceSignificanceFactor = ctx.GlobalFloat64(flags.L2GasPriceSignificanceFactorFlag.Name)
+	cfg.bybitBackendURL = ctx.GlobalString(flags.BybitBackendURL.Name)
+	cfg.tokenPricerUpdateFrequencySecond = ctx.GlobalUint64(flags.TokenPricerUpdateFrequencySecond.Name)
 	cfg.floorPrice = ctx.GlobalUint64(flags.FloorPriceFlag.Name)
 	cfg.l1BaseFeeSignificanceFactor = ctx.GlobalFloat64(flags.L1BaseFeeSignificanceFactorFlag.Name)
 	cfg.enableL1BaseFee = ctx.GlobalBool(flags.EnableL1BaseFeeFlag.Name)

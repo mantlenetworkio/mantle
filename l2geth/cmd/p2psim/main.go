@@ -45,12 +45,12 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/p2p"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
-	"github.com/bitdao-io/mantle/l2geth/p2p/simulations"
-	"github.com/bitdao-io/mantle/l2geth/p2p/simulations/adapters"
-	"github.com/bitdao-io/mantle/l2geth/rpc"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/simulations"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/simulations/adapters"
+	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 	"gopkg.in/urfave/cli.v1"
 )
 

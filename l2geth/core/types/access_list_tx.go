@@ -17,7 +17,7 @@
 package types
 
 import (
-	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 //go:generate gencodec -type AccessTuple -out gen_access_tuple.go

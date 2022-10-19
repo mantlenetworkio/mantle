@@ -23,7 +23,7 @@ submodules:
 # Remove the baseline-commit to generate a base reading & show all issues
 #semgrep:
 #	$(eval DEV_REF := $(shell git rev-parse develop))
-#	SEMGREP_REPO_NAME=bitdao-io/mantle semgrep ci --baseline-commit=$(DEV_REF)
+#	SEMGREP_REPO_NAME=mantlenetworkio/mantle semgrep ci --baseline-commit=$(DEV_REF)
 #.PHONY: semgrep
 
 

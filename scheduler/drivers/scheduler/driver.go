@@ -6,14 +6,14 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/bitdao-io/mantle/bss-core/metrics"
-	common2 "github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/scheduler/bindings/tgm"
-	"github.com/bitdao-io/mantle/scheduler/bindings/tsh"
-	"github.com/bitdao-io/mantle/scheduler/service"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/mantlenetworkio/mantle/bss-core/metrics"
+	common2 "github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/scheduler/bindings/tgm"
+	"github.com/mantlenetworkio/mantle/scheduler/bindings/tsh"
+	"github.com/mantlenetworkio/mantle/scheduler/service"
 )
 
 // stateRootSize is the size in bytes of a state root.

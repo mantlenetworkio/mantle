@@ -1,1 +1,1 @@
-# @bitdaoio/hardhat-deploy-config
+# @mantlenetworkio/hardhat-deploy-config

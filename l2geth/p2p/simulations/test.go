@@ -19,10 +19,10 @@ package simulations
 import (
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/p2p"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enr"
-	"github.com/bitdao-io/mantle/l2geth/rpc"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enr"
+	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 )
 
 // NoopService is the service that does not do anything

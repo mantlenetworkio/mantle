@@ -26,8 +26,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common/bitutil"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/common/bitutil"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 )
 
 // bloomIndexes represents the bit indexes inside the bloom filter that belong

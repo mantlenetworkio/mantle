@@ -22,8 +22,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common/mclock"
-	"github.com/bitdao-io/mantle/l2geth/common/prque"
+	"github.com/mantlenetworkio/mantle/l2geth/common/mclock"
+	"github.com/mantlenetworkio/mantle/l2geth/common/prque"
 )
 
 // cmNodeFields are ClientNode fields used by the client manager

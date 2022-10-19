@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bitdao-io/mantle/l2geth/cmd/utils"
+	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
 	"gopkg.in/urfave/cli.v1"
 )
 

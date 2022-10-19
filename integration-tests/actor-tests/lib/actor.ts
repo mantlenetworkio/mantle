@@ -1,7 +1,7 @@
 import { performance } from 'perf_hooks'
 
 import { Mutex } from 'async-mutex'
-import { sleep } from '@bitdaoio/core-utils'
+import { sleep } from '@mantlenetworkio/core-utils'
 
 import {
   sanitizeForMetrics,

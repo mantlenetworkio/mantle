@@ -107,6 +107,18 @@ var (
 		Usage:  "only update when the gas price changes by more than this factor",
 		EnvVar: "GAS_PRICE_ORACLE_SIGNIFICANT_FACTOR",
 	}
+	BybitBackendURL = cli.StringFlag{
+		Name:   "bybitBackendURL",
+		Value:  "https://api.bybit.com",
+		Usage:  "bybit exchange backend url",
+		EnvVar: "BYBIT_BACKEND_URL",
+	}
+	TokenPricerUpdateFrequencySecond = cli.Uint64Flag{
+		Name:   "tokenPricerUpdateFrequencySecond",
+		Value:  3,
+		Usage:  "token pricer update frequency",
+		EnvVar: "TOKEN_PRICER_UPDATE_FREQUENCY",
+	}
 	WaitForReceiptFlag = cli.BoolFlag{
 		Name:   "wait-for-receipt",
 		Usage:  "wait for receipts when sending transactions",
@@ -177,6 +189,8 @@ var Flags = []cli.Flag{
 	EpochLengthSecondsFlag,
 	L1BaseFeeEpochLengthSecondsFlag,
 	L2GasPriceSignificanceFactorFlag,
+	BybitBackendURL,
+	TokenPricerUpdateFrequencySecond,
 	WaitForReceiptFlag,
 	EnableL1BaseFeeFlag,
 	EnableL2GasPriceFlag,

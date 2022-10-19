@@ -21,8 +21,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 // typeWithoutStringer is a alias for the Type type which simply doesn't implement

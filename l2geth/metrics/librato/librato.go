@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/metrics"
+	"github.com/mantlenetworkio/mantle/l2geth/metrics"
 )
 
 // a regexp for extracting the unit from time.Duration.String

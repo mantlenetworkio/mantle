@@ -23,10 +23,10 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/metrics"
-	"github.com/bitdao-io/mantle/l2geth/rlp"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/metrics"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)

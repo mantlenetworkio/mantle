@@ -1,4 +1,4 @@
-import { toRpcHexString } from '@bitdaoio/core-utils'
+import { toRpcHexString } from '@mantlenetworkio/core-utils'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from 'ethers'
 import hre from 'hardhat'

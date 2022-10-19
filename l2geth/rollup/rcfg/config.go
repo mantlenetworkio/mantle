@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 // UsingBVM is used to enable or disable functionality necessary for the BVM.

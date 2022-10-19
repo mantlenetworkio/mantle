@@ -3,8 +3,8 @@ package rawdb
 import (
 	"math/big"
 
-	"github.com/bitdao-io/mantle/l2geth/ethdb"
-	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 // ReadHeadIndex will read the known tip of the CTC

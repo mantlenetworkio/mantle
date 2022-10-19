@@ -19,9 +19,9 @@ package types
 import (
 	"bytes"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/rlp"
-	"github.com/bitdao-io/mantle/l2geth/trie"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/mantlenetworkio/mantle/l2geth/trie"
 )
 
 type DerivableList interface {

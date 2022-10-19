@@ -19,7 +19,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
 )
 
 func TestTransaction(t *testing.T) {
