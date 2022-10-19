@@ -41,7 +41,10 @@ func (p *Processor) Verify() {
 				var result = true
 				for index, stateRoot := range askRequest.StateRoots {
 					go func(f_index int, f_stateRoot [32]byte) {
-						result = p.verify(askRequest.StartBlock, f_index, f_stateRoot, logger, wg)
+						result_tmp := p.verify(askRequest.StartBlock, f_index, f_stateRoot, logger, wg)
+						if !result_tmp {
+							result = result_tmp
+						}
 					}(index, stateRoot)
 
 				}
@@ -86,7 +89,7 @@ func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger z
 		return false
 	} else {
 		if hexutil.Encode(stateRoot[:]) != block.Root().String() {
-			logger.Info().Msgf("block number (%s) stateroot doesn't same", blockNumber)
+			logger.Info().Msgf("block number (%w) stateroot doesn't same, stateroot (%s) , block root (%s)", blockNumber, hexutil.Encode(stateRoot[:]), block.Root().String())
 			return false
 		} else {
 			logger.Info().Msgf("block number (%s) verify success", blockNumber)
