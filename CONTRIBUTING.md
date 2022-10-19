@@ -4,13 +4,24 @@
 
 There are plenty of ways to contribute, in particular we appreciate support in the following areas:
 
-- Reporting issues. For security issues see [Security policy](https://github.com/bitdao-io/.github/blob/master/SECURITY.md).
-- Fixing and responding to existing issues. You can start off with those tagged ["good first issue"](https://github.com/bitdao-io/mantle/contribute) which are meant as introductory issues for external contributors.
-- Improving the [community site](https://community.mantle.io/)[documentation](https://github.com/bitdao-io/mantle-documents) and [tutorials](https://github.com/bitdao-io/mantle-tutorial).
+- Reporting issues. For security issues see [Security policy](https://github.com/mantlenetworkio/.github/blob/master/SECURITY.md).
+- Fixing and responding to existing issues. You can start off with those tagged ["good first issue"](https://github.com/mantlenetworkio/mantle/contribute) which are meant as introductory issues for external contributors.
+- Improving the [community site](https://community.mantle.io/)[documentation](https://github.com/mantlenetworkio/documents) and [tutorials](https://github.com/mantlenetworkio/tutorial).
 - Become an "Optimizer" and answer questions in the [mantle Discord](https://discord.com/invite/jrnFEvq).
-- Get involved in the protocol design process by proposing changes or new features or write parts of the spec yourself in the [optimistic-specs repo](https://github.com/bitdao-io/optimistic-specs).
+- Get involved in the protocol design process by proposing changes or new features or write parts of the spec yourself in the [optimistic-specs repo](https://github.com/mantlenetworkio/optimistic-specs).
 
-Note that we have a [Code of Conduct](https://github.com/bitdao-io/.github/blob/master/CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
+Note that we have a [Code of Conduct](https://github.com/mantlenetworkio/.github/blob/master/CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
+
+
+## Contribution Guidelines
+
+We believe one of the things that makes Mantle special is its coherent design and we seek to retain this defining characteristic. From the outset we defined some guidelines to ensure new contributions only ever enhance the project:
+
+- Quality: Code in the Mantle project should meet the style guidelines, with sufficient test-cases, descriptive commit messages, evidence that the contribution does not break any compatibility commitments or cause adverse feature interactions, and evidence of high-quality peer-review
+- Size: The Mantle project’s culture is one of small pull-requests, regularly submitted. The larger a pull-request, the more likely it is that you will be asked to resubmit as a series of self-contained and individually reviewable smaller PRs
+- Maintainability: If the feature will require ongoing maintenance (eg support for a particular brand of database), we may ask you to accept responsibility for maintaining this feature
+
+
 
 
 ## Contribution Guidelines
@@ -29,7 +40,7 @@ We believe one of the things that makes Mantle special is its coherent design an
 
 In general, the smaller the diff the easier it will be for us to review quickly.
 
-In order to contribute, fork the appropriate branch, for non-breaking changes to production that is `develop` and for the next release that is normally `release/X.X.X` branch, see [details about our branching model](https://github.com/bitdao-io/mantle/blob/develop/README.md#branching-model-and-releases).
+In order to contribute, fork the appropriate branch, for non-breaking changes to production that is `develop` and for the next release that is normally `release/X.X.X` branch, see [details about our branching model](https://github.com/mantlenetworkio/mantle/blob/develop/README.md#branching-model-and-releases).
 
 Additionally, if you are writing a new feature, please ensure you add appropriate test cases.
 
@@ -72,7 +83,7 @@ See [this tutorial](https://docs.gitlab.com/ee/topics/git/git_rebase.html) for a
 
 | Branch          | Status                                                                           |
 | --------------- | -------------------------------------------------------------------------------- |
-| [master](https://github.com/bitdao-io/bitnetwork/tree/master/)    | Accepts PRs from other branch  when we intend to deploy to testnet.                                      |
+| [master](https://github.com/mantlenetworkio/bitnetwork/tree/master/)    | Accepts PRs from other branch  when we intend to deploy to testnet.                                      |
 | {username}/{module-name}-{develop-feature}  | Contributors need to build the branch follow the below rules,just like `alice/l2geth-xxx`.Actually,they means the `develop` branch.
 | release/X.X.X                                                                          | For now ,we do not support the release branch util the launch of Mantle TestNet |
 
@@ -89,7 +100,7 @@ Our update process takes the form of a PR merging the `develop` branch into the 
 
 Mantle is the project only
 
-Our primary development branch is [`develop`](https://github.com/bitdao-io/bitnetwork/tree/develop/).
+Our primary development branch is [`develop`](https://github.com/mantlenetworkio/bitnetwork/tree/develop/).
 `develop` contains the most up-to-date software that remains backwards compatible with our latest experimental [network deployments](https://community.bitnetwork.io/docs/useful-tools/networks/).
 If you're making a backwards compatible change, please direct your pull request towards `develop`.
 

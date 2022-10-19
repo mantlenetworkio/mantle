@@ -1,14 +1,14 @@
 /* Imports: External */
 import { BigNumber, ethers, constants } from 'ethers'
 import { serialize, Transaction } from '@ethersproject/transactions'
-import { getContractFactory } from '@bitdaoio/contracts'
+import { getContractFactory } from '@mantlenetworkio/contracts'
 import {
   toHexString,
   toRpcHexString,
   BatchType,
   SequencerBatch,
-} from '@bitdaoio/core-utils'
-import { SequencerBatchAppendedEvent } from '@bitdaoio/contracts/dist/types/contracts/L1/rollup/CanonicalTransactionChain'
+} from '@mantlenetworkio/core-utils'
+import { SequencerBatchAppendedEvent } from '@mantlenetworkio/contracts/dist/types/contracts/L1/rollup/CanonicalTransactionChain'
 
 /* Imports: Internal */
 import { MissingElementError } from './errors'

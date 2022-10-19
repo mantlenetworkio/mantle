@@ -7,13 +7,13 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/bitdao-io/mantle/gas-oracle/bindings"
-	"github.com/bitdao-io/mantle/gas-oracle/gasprices"
-
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
+	"github.com/mantlenetworkio/mantle/gas-oracle/gasprices"
+	"github.com/mantlenetworkio/mantle/gas-oracle/tokenprice"
 )
 
 var (
@@ -178,17 +178,20 @@ func (g *GasPriceOracle) Update() error {
 
 // NewGasPriceOracle creates a new GasPriceOracle based on a Config
 func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
+	tokenPricer := tokenprice.NewClient(cfg.bybitBackendURL, cfg.tokenPricerUpdateFrequencySecond)
+	if tokenPricer == nil {
+		return nil, fmt.Errorf("invalid token price client")
+	}
 	// Create the L2 client
 	l2Client, err := ethclient.Dial(cfg.layerTwoHttpUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	l1Client, err := ethclient.Dial(cfg.ethereumHttpUrl)
+	l1Client, err := NewL1Client(cfg.ethereumHttpUrl, tokenPricer)
 	if err != nil {
 		return nil, err
 	}
-
 	// Ensure that we can actually connect to both backends
 	log.Info("Connecting to layer two")
 	if err := ensureConnection(l2Client); err != nil {
@@ -196,7 +199,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 		return nil, err
 	}
 	log.Info("Connecting to layer one")
-	if err := ensureConnection(l1Client); err != nil {
+	if err := ensureConnection(l1Client.Client); err != nil {
 		log.Error("Unable to connect to layer one")
 		return nil, err
 	}
@@ -223,6 +226,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 	gasPricer, err := gasprices.NewGasPricer(
 		currentPrice.Uint64(),
 		cfg.floorPrice,
+		tokenPricer,
 		func() float64 {
 			return float64(cfg.targetGasPerSecond)
 		},

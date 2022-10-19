@@ -26,17 +26,17 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bitdao-io/mantle/l2geth/accounts"
-	"github.com/bitdao-io/mantle/l2geth/accounts/external"
-	"github.com/bitdao-io/mantle/l2geth/accounts/keystore"
-	"github.com/bitdao-io/mantle/l2geth/accounts/scwallet"
-	"github.com/bitdao-io/mantle/l2geth/accounts/usbwallet"
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/log"
-	"github.com/bitdao-io/mantle/l2geth/p2p"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
-	"github.com/bitdao-io/mantle/l2geth/rpc"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/external"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/scwallet"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/usbwallet"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
+	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 )
 
 const (

@@ -27,10 +27,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/accounts"
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/log"
 	mapset "github.com/deckarep/golang-set"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 // Minimum amount of time between cache reloads. This limit applies if the platform does

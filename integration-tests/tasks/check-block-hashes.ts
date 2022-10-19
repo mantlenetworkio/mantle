@@ -1,6 +1,6 @@
 import { task } from 'hardhat/config'
 import { providers } from 'ethers'
-import { getChainId } from '@bitdaoio/core-utils'
+import { getChainId } from '@mantlenetworkio/core-utils'
 
 import { die, logStderr } from '../test/shared/utils'
 

@@ -5,12 +5,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/bitdao-io/mantle/gas-oracle/flags"
-	ometrics "github.com/bitdao-io/mantle/gas-oracle/metrics"
-	"github.com/bitdao-io/mantle/gas-oracle/oracle"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics/influxdb"
 	"github.com/ethereum/go-ethereum/params"
+	"github.com/mantlenetworkio/mantle/gas-oracle/flags"
+	ometrics "github.com/mantlenetworkio/mantle/gas-oracle/metrics"
+	"github.com/mantlenetworkio/mantle/gas-oracle/oracle"
 	"github.com/urfave/cli"
 )
 

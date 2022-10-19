@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 // dashboardContent is the actual dashboard HTML content to serve up when users

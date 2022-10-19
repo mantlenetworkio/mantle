@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/rpc"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 )
 
 func TestUnmarshalJSONNewFilterArgs(t *testing.T) {

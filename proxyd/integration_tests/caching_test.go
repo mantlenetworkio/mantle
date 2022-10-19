@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/alicebob/miniredis"
-	"github.com/bitdao-io/mantle/proxyd"
+	"github.com/mantlenetworkio/mantle/proxyd"
 	"github.com/stretchr/testify/require"
 )
 

@@ -28,12 +28,12 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/ethdb/leveldb"
-	"github.com/bitdao-io/mantle/l2geth/ethdb/memorydb"
-	"github.com/bitdao-io/mantle/l2geth/rlp"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb/leveldb"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb/memorydb"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
 func init() {

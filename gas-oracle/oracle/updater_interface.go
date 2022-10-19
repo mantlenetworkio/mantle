@@ -6,14 +6,14 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/bitdao-io/mantle/gas-oracle/bindings"
-	ometrics "github.com/bitdao-io/mantle/gas-oracle/metrics"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
+	ometrics "github.com/mantlenetworkio/mantle/gas-oracle/metrics"
 )
 
 var (
@@ -74,11 +74,7 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(ui
 	if err != nil {
 		return nil, err
 	}
-	// Once https://github.com/ethereum/go-ethereum/pull/23062 is released
-	// then we can remove setting the context here
-	if opts.Context == nil {
-		opts.Context = context.Background()
-	}
+
 	// Don't send the transaction using the `contract` so that we can inspect
 	// it beforehand
 	opts.NoSend = true

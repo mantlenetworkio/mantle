@@ -7,10 +7,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth-exporter/l1contracts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/l2geth-exporter/l1contracts"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

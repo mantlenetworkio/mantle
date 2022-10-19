@@ -4,9 +4,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/bitdao-io/mantle/batch-submitter/drivers/sequencer"
-	l2common "github.com/bitdao-io/mantle/l2geth/common"
-	l2types "github.com/bitdao-io/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/sequencer"
+	l2common "github.com/mantlenetworkio/mantle/l2geth/common"
+	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/stretchr/testify/require"
 )
 

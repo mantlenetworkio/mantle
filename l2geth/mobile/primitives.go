@@ -22,7 +22,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 // Strings represents s slice of strs.

@@ -1,6 +1,6 @@
-# @bitdaoio/common-ts
+# @mantlenetworkio/common-ts
 
 ## What is this?
 
-`@bitdaoio/common-ts` contains useful tools for logging, metrics, and other Node stuff.
+`@mantlenetworkio/common-ts` contains useful tools for logging, metrics, and other Node stuff.
 

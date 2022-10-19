@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv'
 import { ethers } from 'ethers'
 
 // Hardhat plugins
-import '@bitdaoio/hardhat-deploy-config'
+import '@mantlenetworkio/hardhat-deploy-config'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
@@ -30,6 +30,11 @@ const config: HardhatUserConfig = {
       live: false,
       saveDeployments: false,
       tags: ['local'],
+    },
+    local: {
+      chainId: 31337,
+      url: 'http://127.0.0.1:9545',
+      accounts: [privateKey],
     },
     mantle: {
       url: 'http://127.0.0.1:8545',
@@ -57,14 +62,16 @@ const config: HardhatUserConfig = {
       url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
       deploy,
       accounts: [
-        '6395a7c842a08515961888d21d72f409b61fbce96af1e520384e375f301a8297',
+        'e4bf8c09fc7bb5c3eb932260b9fcf0f2a3fecb61512b0e979afb4ce1187bfe70',
       ],
     },
     'goerli-qa': {
       chainId: 5,
-      url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
+      url: 'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28',
       deploy,
-      accounts: [privateKey],
+      accounts: [
+        '04586afc8e720e5dbb06f598b056d835bb02cd9743efd438cda8055c90722f33',
+      ],
     },
     kovan: {
       chainId: 42,
@@ -236,7 +243,7 @@ const config: HardhatUserConfig = {
     },
     gasPriceOracleL2GasPrice: {
       type: 'number',
-      default: 1,
+      default: 0,
     },
     hfBerlinBlock: {
       type: 'number',

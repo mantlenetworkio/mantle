@@ -7,7 +7,7 @@ data = process.argv[2]
 data = JSON.parse(data)
 
 for (const i of data) {
-  const name = i.name.replace("@bitdaoio/", "")
+  const name = i.name.replace("@mantlenetworkio/", "")
   const version = i.version
   process.stdout.write(`::set-output name=${name}::${version}` + os.EOL)
 }

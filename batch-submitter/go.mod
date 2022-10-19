@@ -1,14 +1,14 @@
-module github.com/bitdao-io/mantle/batch-submitter
+module github.com/mantlenetworkio/mantle/batch-submitter
 
 go 1.18
 
-replace github.com/bitdao-io/mantle/bss-core v0.0.0 => ../bss-core
+replace github.com/mantlenetworkio/mantle/bss-core v0.0.0 => ../bss-core
 
-replace github.com/bitdao-io/mantle/l2geth v0.0.0 => ../l2geth
+replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
 
 require (
-	github.com/bitdao-io/mantle/bss-core v0.0.0
-	github.com/bitdao-io/mantle/l2geth v0.0.0
+	github.com/mantlenetworkio/mantle/bss-core v0.0.0
+	github.com/mantlenetworkio/mantle/l2geth v0.0.0
 	github.com/ethereum/go-ethereum v1.10.17
 	github.com/getsentry/sentry-go v0.12.0
 	github.com/prometheus/client_golang v1.11.0
@@ -21,7 +21,7 @@ require (
 	github.com/aristanetworks/goarista v0.0.0-20170210015632-ea17b1a17847 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd v0.22.1 // indirect
-	github.com/btcsuite/btcd/btcec/v2 v2.1.2 // indirect
+	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -65,7 +65,8 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/crypto v0.0.0-20220307211146-efcb8507fb70 // indirect
-	golang.org/x/sys v0.0.0-20220310020820-b874c991c1a5 // indirect
+	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6 // indirect
+	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect

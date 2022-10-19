@@ -7,19 +7,19 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/bitdao-io/mantle/batch-submitter/bindings/ctc"
-	"github.com/bitdao-io/mantle/batch-submitter/bindings/scc"
-	"github.com/bitdao-io/mantle/bss-core/drivers"
-	"github.com/bitdao-io/mantle/bss-core/metrics"
-	"github.com/bitdao-io/mantle/bss-core/txmgr"
-	l2ethclient "github.com/bitdao-io/mantle/l2geth/ethclient"
-	"github.com/bitdao-io/mantle/l2geth/log"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/ctc"
+	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/scc"
+	"github.com/mantlenetworkio/mantle/bss-core/drivers"
+	"github.com/mantlenetworkio/mantle/bss-core/metrics"
+	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
+	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 // stateRootSize is the size in bytes of a state root.

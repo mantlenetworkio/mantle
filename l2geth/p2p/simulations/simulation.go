@@ -20,7 +20,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
 )
 
 // Simulation provides a framework for running actions in a simulated network

@@ -19,7 +19,7 @@ x-healthcheck: &healthcheck
 services:
   # this is a helper service used because there's no official hardhat image
   l1_chain:
-    image: ethereummantle/hardhat:${DOCKER_TAG_HARDHAT:-latest}
+    image: mantlenetworkio/hardhat:${DOCKER_TAG_HARDHAT:-latest}
     build:
       context: ./docker/hardhat
       dockerfile: Dockerfile
@@ -41,7 +41,7 @@ services:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.packages
       target: deployer
-    image: ethereummantle/deployer:${DOCKER_TAG_DEPLOYER:-latest}
+    image: mantlenetworkio/deployer:${DOCKER_TAG_DEPLOYER:-latest}
     entrypoint: ./deployer.sh
     environment:
       # Env vars for the deployment script.
@@ -63,7 +63,7 @@ services:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.packages
       target: data-transport-layer
-    image: ethereummantle/data-transport-layer:${DOCKER_TAG_DATA_TRANSPORT_LAYER:-latest}
+    image: mantlenetworkio/data-transport-layer:${DOCKER_TAG_DATA_TRANSPORT_LAYER:-latest}
     # override with the dtl script and the env vars required for it
     entrypoint: ./dtl.sh
     env_file:
@@ -89,7 +89,7 @@ services:
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile
-    image: ethereummantle/l2geth:${DOCKER_TAG_L2GETH:-latest}
+    image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     # override with the geth script and the env vars required for it
     entrypoint: sh ./geth.sh
     env_file:
@@ -109,9 +109,11 @@ services:
       BLOCK_SIGNER_KEY: '6587ae678cf4fc9a33000cdbf9f35226b71dcc6a4684a31203241f9bcfd55d27'
       BLOCK_SIGNER_ADDRESS: '0x00000398232E2064F896018496b4b44b3D62751F'
 
-      ROLLUP_ENFORCE_FEES: ${ROLLUP_ENFORCE_FEES:-true}
+      ROLLUP_ENFORCE_FEES: ${ROLLUP_ENFORCE_FEES:-false}
       ROLLUP_FEE_THRESHOLD_DOWN: 0.9
       ROLLUP_FEE_THRESHOLD_UP: 1.1
+
+      GASPRICE: 0
     ports:
       - ${L2GETH_HTTP_PORT:-8545}:8545
       - ${L2GETH_WS_PORT:-8546}:8546
@@ -127,7 +129,7 @@ services:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.packages
       target: message-relayer
-    image: ethereummantle/message-relayer:${DOCKER_TAG_MESSAGE_RELAYER:-latest}
+    image: mantlenetworkio/message-relayer:${DOCKER_TAG_MESSAGE_RELAYER:-latest}
     entrypoint: ./relayer.sh
     environment:
       MESSAGE_RELAYER__L1_RPC_PROVIDER: http://l1_chain:8545
@@ -146,7 +148,7 @@ services:
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile
-    image: ethereummantle/l2geth:${DOCKER_TAG_L2GETH:-latest}
+    image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     env_file:
       - ./envs/geth.env
@@ -175,7 +177,7 @@ services:
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile
-    image: ethereummantle/l2geth:${DOCKER_TAG_L2GETH:-latest}
+    image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     env_file:
       - ./envs/geth.env
@@ -203,7 +205,7 @@ services:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.packages
       target: replica-healthcheck
-    image: ethereummantle/replica-healthcheck:${DOCKER_TAG_REPLICA_HEALTHCHECK:-latest}
+    image: mantlenetworkio/replica-healthcheck:${DOCKER_TAG_REPLICA_HEALTHCHECK:-latest}
     environment:
       HEALTHCHECK__REFERENCE_RPC_PROVIDER: http://l2geth:8545
       HEALTHCHECK__TARGET_RPC_PROVIDER: http://replica:8545
@@ -217,7 +219,7 @@ services:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.packages
       target: integration-tests
-    image: ethereummantle/integration-tests:${DOCKER_TAG_INTEGRATION_TESTS:-latest}
+    image: mantlenetworkio/integration-tests:${DOCKER_TAG_INTEGRATION_TESTS:-latest}
     entrypoint: ./integration-tests.sh
     environment:
       L1_URL: http://l1_chain:8545
@@ -240,15 +242,17 @@ services:
     build:
       context: ..
       dockerfile: ./gas-oracle/Dockerfile
-    image: ethereummantle/gas-oracle:${DOCKER_TAG_GAS_ORACLE:-latest}
+    image: mantlenetworkio/gas-oracle:${DOCKER_TAG_GAS_ORACLE:-latest}
     environment:
       GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL: http://l1_chain:8545
       GAS_PRICE_ORACLE_LAYER_TWO_HTTP_URL: http://l2geth:8545
+      BYBIT_BACKEND_URL: https://api.bybit.com
+      TOKEN_PRICER_UPDATE_FREQUENCY: 3
       # Default hardhat account 5
       GAS_PRICE_ORACLE_PRIVATE_KEY: '0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba'
       GAS_PRICE_ORACLE_ENABLE_L2_GAS_PRICE: 'false'
-      GAS_PRICE_ORACLE_ENABLE_L1_BASE_FEE: 'false'
-
+      GAS_PRICE_ORACLE_ENABLE_L1_BASE_FEE: 'true'
+      GAS_PRICE_ORACLE_TRANSACTION_GAS_PRICE: 0
 
 
   batch_submitter:
@@ -259,7 +263,7 @@ services:
     build:
       context: ..
       dockerfile: ./batch-submitter/Dockerfile
-    image: ethereummantle/batch-submitter-service:${DOCKER_TAG_BATCH_SUBMITTER_SERVICE:-latest}
+    image: mantlenetworkio/batch-submitter:${DOCKER_TAG_BATCH_SUBMITTER:-latest}
     entrypoint: ./batch-submitter.sh
     env_file:
       - ./envs/batch-submitter.env
@@ -281,7 +285,7 @@ services:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.packages
       target: fault-detector
-    image: ethereummantle/fault-detector:${DOCKER_TAG_FAULT_DETECTOR:-latest}
+    image: mantlenetworkio/fault-detector:${DOCKER_TAG_FAULT_DETECTOR:-latest}
     entrypoint: ./detector.sh
     environment:
       FAULT_DETECTOR__L1_RPC_PROVIDER: http://l1_chain:8545
@@ -298,7 +302,7 @@ services:
     build:
       context: ..
       dockerfile: ./l2geth/Dockerfile
-    image: ethereummantle/l2geth:${DOCKER_TAG_L2GETH:-latest}
+    image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     env_file:
       - ./envs/geth.env
@@ -315,7 +319,7 @@ services:
       BLOCK_SIGNER_KEY: '6587ae678cf4fc9a33000cdbf9f35226b71dcc6a4684a31203241f9bcfd55d27'
       BLOCK_SIGNER_ADDRESS: '0x00000398232E2064F896018496b4b44b3D62751F'
 
-      ROLLUP_ENFORCE_FEES: ${ROLLUP_ENFORCE_FEES:-true}
+      ROLLUP_ENFORCE_FEES: ${ROLLUP_ENFORCE_FEES:-false}
       ROLLUP_FEE_THRESHOLD_DOWN: 0.9
       ROLLUP_FEE_THRESHOLD_UP: 1.1
     ports:

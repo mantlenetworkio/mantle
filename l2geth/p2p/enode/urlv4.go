@@ -26,9 +26,9 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/bitdao-io/mantle/l2geth/common/math"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enr"
+	"github.com/mantlenetworkio/mantle/l2geth/common/math"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enr"
 )
 
 var (

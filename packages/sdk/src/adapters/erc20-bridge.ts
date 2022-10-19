@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Contract } from 'ethers'
-import { hexStringEquals } from '@bitdaoio/core-utils'
+import { hexStringEquals } from '@mantlenetworkio/core-utils'
 
 import { AddressLike } from '../interfaces'
 import { toAddress } from '../utils'
@@ -9,7 +9,7 @@ import { StandardBridgeAdapter } from './standard-bridge'
 /**
  * Bridge adapter for DAI.
  */
-export class DAIBridgeAdapter extends StandardBridgeAdapter {
+export class ERC20BridgeAdapter extends StandardBridgeAdapter {
   public async supportsTokenPair(
     l1Token: AddressLike,
     l2Token: AddressLike

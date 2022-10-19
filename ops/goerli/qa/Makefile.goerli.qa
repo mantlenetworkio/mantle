@@ -1,6 +1,7 @@
 DOCKER_COMPOSE_CMD := docker-compose \
 	-f docker-compose.yml \
-	-f docker-compose.local.yml
+	-f docker-compose.goerli.qa.yml
+COPY_ENV := cp -r envs/deployer.env ./.env
 
 build:
 	DOCKER_BUILDKIT=1 \
@@ -9,6 +10,7 @@ build:
 .PHONY: build
 
 up:
+	$(COPY_ENV)
 	DOCKER_BUILDKIT=1 \
 	$(DOCKER_COMPOSE_CMD) \
 		up --build --detach $(service)

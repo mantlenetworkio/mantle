@@ -7,12 +7,12 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/bitdao-io/mantle/bss-core/txmgr"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
 )
 
 // ErrClearPendingRetry signals that a transaction from a previous running

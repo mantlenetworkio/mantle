@@ -1,7 +1,7 @@
 {
   "private": true,
-  "name": "@bitdao/integration-tests",
-  "version": "1.0.0",
+  "name": "@mantlenetworkio/integration-tests",
+  "version": "0.0.1",
   "description": "[Mantle] Integration tests",
   "scripts": {
     "lint": "yarn lint:fix && yarn lint:check",
@@ -20,18 +20,18 @@
     "integration",
     "tests"
   ],
-  "homepage": "https://github.com/bitdao-io/mantle/tree/develop/packages/integration-tests#readme",
+  "homepage": "https://github.com/mantlenetworkio/mantle/tree/develop/packages/integration-tests#readme",
   "license": "MIT",
   "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitdao-io/mantle.git"
+    "url": "https://github.com/mantlenetworkio/mantle.git"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.5.4",
-    "@bitdaoio/contracts": "1.0.2",
-    "@bitdaoio/core-utils": "1.0.3",
-    "@bitdaoio/sdk": "1.0.8",
+    "@mantlenetworkio/contracts": "0.0.1",
+    "@mantlenetworkio/core-utils": "0.0.1",
+    "@mantlenetworkio/sdk": "0.0.2",
     "@ethersproject/abstract-provider": "^5.6.1",
     "@ethersproject/providers": "^5.6.8",
     "@ethersproject/transactions": "^5.6.2",

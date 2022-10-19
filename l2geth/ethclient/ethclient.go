@@ -24,12 +24,12 @@ import (
 	"fmt"
 	"math/big"
 
-	ethereum "github.com/bitdao-io/mantle/l2geth"
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/common/hexutil"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
-	"github.com/bitdao-io/mantle/l2geth/rlp"
-	"github.com/bitdao-io/mantle/l2geth/rpc"
+	ethereum "github.com/mantlenetworkio/mantle/l2geth"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 )
 
 // Client defines typed wrappers for the Ethereum RPC API.

@@ -1,0 +1,460 @@
+name: Build Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      serviceName:
+        type: choice
+        options:
+        - l2geth
+        - gas-oracle
+        - hardhat-node
+        - ci-builder
+        - foundry
+        - proxyd
+        - l2geth-exporter
+        - message-relayer
+        - fault-detector
+        - data-transport-layer
+        - deployer
+        - integration-tests
+        - replica-healthcheck
+        - batch-submitter
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: ${{ github.event.inputs.serviceName }}
+    outputs:
+      l2geth: ${{ steps.packages.outputs.l2geth }}
+      gas-oracle: ${{ steps.packages.outputs.gas-oracle }}
+      hardhat-node: ${{ steps.packages.outputs.hardhat-node }}
+      ci-builder: ${{ steps.packages.outputs.ci-builder }}
+      foundry: ${{ steps.packages.outputs.foundry }}
+      proxyd: ${{ steps.packages.outputs.proxyd }}
+      l2geth-exporter: ${{ steps.packages.outputs.l2geth-exporter }}
+      message-relayer: ${{ steps.packages.outputs.message-relayer }}
+      fault-detector: ${{ steps.packages.outputs.fault-detector }}
+      data-transport-layer: ${{ steps.packages.outputs.data-transport-layer }}
+      deployer: ${{ steps.packages.outputs.deployer }}
+      integration-tests: ${{ steps.packages.outputs.integration-tests }}
+      replica-healthcheck: ${{ steps.packages.outputs.replica-healthcheck }}
+      batch-submitter: ${{ steps.packages.outputs.batch-submitter }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@master
+        with:
+          fetch-depth: 0
+
+      - name: Get Component Versions
+        id: packages
+        run: |
+          test "${SERVICE_NAME}" = "l2geth"               && echo "::set-output name=l2geth::$(grep version l2geth/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "gas-oracle"           && echo "::set-output name=gas-oracle::$(grep version gas-oracle/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "hardhat-node"         && echo "::set-output name=hardhat-node::$(grep version ops/docker/hardhat/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "ci-builder"           && echo "::set-output name=ci-build::$(grep version ops/docker/ci-builder/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "foundry"              && echo "::set-output name=foundry::$(grep version ops/docker/foundry/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "proxyd"               && echo "::set-output name=proxyd::$(grep version proxyd/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "l2geth-exporter"      && echo "::set-output name=l2geth-exporter::$(grep version l2geth-exporter/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "message-relayer"      && echo "::set-output name=message-relayer::$(grep version packages/message-relayer/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "fault-detector"       && echo "::set-output name=fault-detector::$(grep version packages/fault-detector/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "data-transport-layer" && echo "::set-output name=data-transport-layer::$(grep version packages/data-transport-layer/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "deployer"             && echo "::set-output name=deployer::$(grep version packages/contracts/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "integration-tests"    && echo "::set-output name=integration-tests::$(grep version integration-tests/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "replica-healthcheck"   && echo "::set-output name=replica-healthcheck::$(grep version packages/replica-healthcheck/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "batch-submitter"      && echo "::set-output name=batch-submitter::$(grep version batch-submitter/package.json | egrep -o '[0-9\.]+' )" || true
+
+  l2geth:
+    name: Publish L2Geth Version ${{ needs.release.outputs.l2geth }}
+    needs: release
+    if: needs.release.outputs.l2geth != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Publish L2Geth
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./l2geth/Dockerfile
+          push: true
+          tags: mantlenetworkio/l2geth:${{ needs.release.outputs.l2geth }},mantlenetworkio/l2geth:latest
+
+  gas-oracle:
+    name: Publish Gas Oracle Version ${{ needs.release.outputs.gas-oracle }}
+    needs: release
+    if: needs.release.outputs.gas-oracle != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Publish Gas Oracle
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./gas-oracle/Dockerfile
+          push: true
+          tags: mantlenetworkio/gas-oracle:${{ needs.release.outputs.gas-oracle }},mantlenetworkio/gas-oracle:latest
+
+  hardhat-node:
+    name: Publish Hardhat Node ${{ needs.release.outputs.hardhat-node }}
+    needs: release
+    if: needs.release.outputs.hardhat-node != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Publish Hardhat Node
+        uses: docker/build-push-action@v2
+        with:
+          context: ./ops/docker/hardhat
+          file: ./ops/docker/hardhat/Dockerfile
+          push: true
+          tags: mantlenetworkio/hardhat-node:${{ needs.release.outputs.hardhat-node }},mantlenetworkio/hardhat-node:latest
+
+  ci-builder:
+    name: Publish ci-builder ${{ needs.release.outputs.ci-builder }}
+    needs: release
+    if: needs.release.outputs.ci-builder != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Publish ci-builder
+        uses: docker/build-push-action@v2
+        with:
+          context: ./ops/docker/ci-builder
+          file: ./ops/docker/ci-builder/Dockerfile
+          push: true
+          tags: mantlenetworkio/ci-builder:${{ needs.release.outputs.ci-builder }},mantlenetworkio/ci-builder:latest
+
+  foundry:
+    name: Publish foundry ${{ needs.release.outputs.foundry }}
+    needs: release
+    if: needs.release.outputs.foundry != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Publish foundry
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./ops/docker/foundry/Dockerfile
+          push: true
+          tags: mantlenetworkio/foundry:${{ needs.release.outputs.foundry }},mantlenetworkio/foundry:latest
+
+  proxyd:
+    name: Publish proxyd Version ${{ needs.release.outputs.proxyd }}
+    needs: release
+    if: needs.release.outputs.proxyd != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Set build args
+        id: build_args
+        run: |
+          echo ::set-output name=GITDATE::"$(date +%d-%m-%Y)"
+          echo ::set-output name=GITVERSION::$(jq -r .version ./proxyd/package.json)
+          echo ::set-output name=GITCOMMIT::"$GITHUB_SHA"
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./proxyd/Dockerfile
+          push: true
+          tags: mantlenetworkio/proxyd:${{ needs.release.outputs.proxyd }},mantlenetworkio/proxyd:latest
+          build-args: |
+            GITDATE=${{ steps.build_args.outputs.GITDATE }}
+            GITCOMMIT=${{ steps.build_args.outputs.GITCOMMIT }}
+            GITVERSION=${{ steps.build_args.outputs.GITVERSION }}
+
+  l2geth-exporter:
+    name: Publish l2geth-exporter Version ${{ needs.release.outputs.l2geth-exporter}}
+    needs: release
+    if: needs.release.outputs.l2geth-exporter != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Set build args
+        id: build_args
+        run: |
+          echo ::set-output name=GITDATE::"$(date +%d-%m-%Y)"
+          echo ::set-output name=GITVERSION::$(jq -r .version ./l2geth-exporter/package.json)
+          echo ::set-output name=GITCOMMIT::"$GITHUB_SHA"
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./l2geth-exporter/Dockerfile
+          push: true
+          tags: mantlenetworkio/l2geth-exporter:${{ needs.release.outputs.l2geth-exporter }},mantlenetworkio/l2geth-exporter:latest
+          build-args: |
+            GITDATE=${{ steps.build_args.outputs.GITDATE }}
+            GITCOMMIT=${{ steps.build_args.outputs.GITCOMMIT }}
+            GITVERSION=${{ steps.build_args.outputs.GITVERSION }}
+
+  message-relayer:
+    name: Publish Message Relayer Version ${{ needs.release.outputs.message-relayer }}
+    needs: release
+    if: needs.release.outputs.message-relayer != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./ops/docker/Dockerfile.packages
+          target: message-relayer
+          push: true
+          tags: mantlenetworkio/message-relayer:${{ needs.release.outputs.message-relayer }},mantlenetworkio/message-relayer:latest
+
+  fault-detector:
+    name: Publish Fault Detector Version ${{ needs.release.outputs.fault-detector }}
+    needs: release
+    if: needs.release.outputs.fault-detector != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./ops/docker/Dockerfile.packages
+          target: fault-detector
+          push: true
+          tags: mantlenetworkio/fault-detector:${{ needs.release.outputs.fault-detector }},mantlenetworkio/fault-detector:latest
+
+  data-transport-layer:
+    name: Publish Data Transport Layer Version ${{ needs.release.outputs.data-transport-layer }}
+    needs: release
+    if: needs.release.outputs.data-transport-layer != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./ops/docker/Dockerfile.packages
+          target: data-transport-layer
+          push: true
+          tags: mantlenetworkio/data-transport-layer:${{ needs.release.outputs.data-transport-layer }},mantlenetworkio/data-transport-layer:latest
+
+  deployer:
+    name: Publish Deployer Version ${{ needs.release.outputs.deployer }}
+    needs: release
+    if: needs.release.outputs.deployer != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./ops/docker/Dockerfile.packages
+          target: deployer
+          push: true
+          tags: mantlenetworkio/deployer:${{ needs.release.outputs.deployer }},mantlenetworkio/deployer:latest
+
+  integration-tests:
+    name: Publish Integration tests ${{ needs.release.outputs.integration-tests }}
+    needs: release
+    if: needs.release.outputs.integration-tests != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./ops/docker/Dockerfile.packages
+          target: integration-tests
+          push: true
+          tags: mantlenetworkio/integration-tests:${{ needs.release.outputs.integration-tests }},mantlenetworkio/integration-tests:latest
+
+  replica-healthcheck:
+    name: Publish Replica Healthcheck Version ${{ needs.release.outputs.replica-healthcheck }}
+    needs: release
+    if: needs.release.outputs.replica-healthcheck != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./ops/docker/Dockerfile.packages
+          target: replica-healthcheck
+          push: true
+          tags: mantlenetworkio/replica-healthcheck:${{ needs.release.outputs.replica-healthcheck }},mantlenetworkio/replica-healthcheck:latest
+
+  batch-submitter:
+    name: Publish batch-submitter Version ${{ needs.release.outputs.batch-submitter }}
+    needs: release
+    if: needs.release.outputs.batch-submitter != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./batch-submitter/Dockerfile
+          push: true
+          tags: mantlenetworkio/batch-submitter:${{ needs.release.outputs.batch-submitter }},mantlenetworkio/batch-submitter:latest

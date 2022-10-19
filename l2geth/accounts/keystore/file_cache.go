@@ -24,8 +24,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
 	mapset "github.com/deckarep/golang-set"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 // fileCache is a cache of files seen during scan of keystore.

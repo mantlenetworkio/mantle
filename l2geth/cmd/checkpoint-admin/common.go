@@ -19,15 +19,15 @@ package main
 import (
 	"strconv"
 
-	"github.com/bitdao-io/mantle/l2geth/accounts"
-	"github.com/bitdao-io/mantle/l2geth/accounts/abi/bind"
-	"github.com/bitdao-io/mantle/l2geth/accounts/external"
-	"github.com/bitdao-io/mantle/l2geth/cmd/utils"
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/contracts/checkpointoracle"
-	"github.com/bitdao-io/mantle/l2geth/ethclient"
-	"github.com/bitdao-io/mantle/l2geth/params"
-	"github.com/bitdao-io/mantle/l2geth/rpc"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi/bind"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/external"
+	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/contracts/checkpointoracle"
+	"github.com/mantlenetworkio/mantle/l2geth/ethclient"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 	"gopkg.in/urfave/cli.v1"
 )
 

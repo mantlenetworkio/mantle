@@ -27,9 +27,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bitdao-io/mantle/l2geth/p2p/enode"
-	"github.com/bitdao-io/mantle/l2geth/p2p/enr"
-	"github.com/bitdao-io/mantle/l2geth/rlp"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enr"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"gopkg.in/urfave/cli.v1"
 )
 

@@ -24,8 +24,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/core"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/mantlenetworkio/mantle/l2geth/core"
 )
 
 // Tests the go-ethereum to Aleth chainspec conversion for the Stureby testnet.

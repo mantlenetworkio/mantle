@@ -1,2 +1,2 @@
-# @bitdaoio/l2geth-exporter
+# @mantlenetworkio/l2geth-exporter
 

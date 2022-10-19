@@ -3,20 +3,19 @@ package go_tests
 import (
 	"context"
 	"crypto/ecdsa"
-	"math/big"
-	"testing"
-	"time"
-
-	l1bit "github.com/bitdao-io/mantle/go-test/contracts/L1/local/LocalBitToken.sol"
-	l1bridge "github.com/bitdao-io/mantle/go-test/contracts/L1/messaging/L1StandardBridge.sol"
-	l2bridge "github.com/bitdao-io/mantle/go-test/contracts/L2/messaging/L2StandardBridge.sol"
-	l2eth "github.com/bitdao-io/mantle/go-test/contracts/L2/predeploys/BVM_ETH.sol"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	l1bit "github.com/mantlenetworkio/mantle/go-test/contracts/L1/local/LocalBitToken.sol"
+	l1bridge "github.com/mantlenetworkio/mantle/go-test/contracts/L1/messaging/L1StandardBridge.sol"
+	l2bridge "github.com/mantlenetworkio/mantle/go-test/contracts/L2/messaging/L2StandardBridge.sol"
+	l2eth "github.com/mantlenetworkio/mantle/go-test/contracts/L2/predeploys/BVM_ETH.sol"
 	"github.com/stretchr/testify/require"
+	"math/big"
+	"testing"
+	"time"
 )
 
 const (

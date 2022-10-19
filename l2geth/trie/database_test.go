@@ -19,8 +19,8 @@ package trie
 import (
 	"testing"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/ethdb/memorydb"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb/memorydb"
 )
 
 // Tests that the trie database returns a missing trie node error if attempting
