@@ -124,7 +124,7 @@ func (m Manager) recoverGenerateKey() {
 func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	var stateRoots string
 	for _, st := range request.StateRoots {
-		stateRoots = hex.EncodeToString(st[:]) + ";"
+		stateRoots = stateRoots + hex.EncodeToString(st[:]) + ";"
 	}
 	log.Info("received sign state request", "startBlock", request.StartBlock, "offset_starts_at_index", request.OffsetStartsAtIndex, "state roots", stateRoots)
 	offsetStartsAtIndex, _ := new(big.Int).SetString(request.OffsetStartsAtIndex, 10)
