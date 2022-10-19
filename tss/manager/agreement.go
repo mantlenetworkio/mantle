@@ -26,7 +26,7 @@ func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Me
 	if err != nil {
 		return types.Context{}, err
 	}
-
+	log.Info("agreement begin", "request", string(requestBz))
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
@@ -51,7 +51,7 @@ func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Me
 				if !slices.ExistsIgnoreCase(ctx.AvailableNodes(), resp.SourceNode) { // ignore the message which the sender should not be involved in available node set
 					continue
 				}
-				log.Info("received ask response", "response", resp.RpcResponse.String(), "ndoe", resp.SourceNode)
+				log.Info("received ask response", "response", resp.RpcResponse.String(), "result", string(resp.RpcResponse.Result), "node", resp.SourceNode)
 				if resp.RpcResponse.Error != nil {
 					errResp[resp.SourceNode] = struct{}{}
 					if len(errResp)+errSend > maxAllowedLostCount {
