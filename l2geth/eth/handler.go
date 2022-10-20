@@ -56,7 +56,7 @@ const (
 )
 
 var (
-	syncChallengeTimeout = 15 * time.Second // Time allowance for a node to reply to the sync progress challenge
+	syncChallengeTimeout = 15 * time.Second // Time subsidy for a node to reply to the sync progress challenge
 )
 
 func errResp(code errCode, format string, v ...interface{}) error {

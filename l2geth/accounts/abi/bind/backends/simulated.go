@@ -49,7 +49,7 @@ var (
 	errBlockNumberUnsupported  = errors.New("simulatedBackend cannot access blocks other than the latest block")
 	errBlockDoesNotExist       = errors.New("block does not exist in blockchain")
 	errTransactionDoesNotExist = errors.New("transaction does not exist")
-	errGasEstimationFailed     = errors.New("gas required exceeds allowance or always failing transaction")
+	errGasEstimationFailed     = errors.New("gas required exceeds subsidy or always failing transaction")
 )
 
 // SimulatedBackend implements bind.ContractBackend, simulating a blockchain in
@@ -381,7 +381,7 @@ func (b *SimulatedBackend) EstimateGas(ctx context.Context, call ethereum.CallMs
 	}
 	cap = hi
 
-	// Create a helper to check if a gas allowance results in an executable transaction
+	// Create a helper to check if a gas subsidy results in an executable transaction
 	executable := func(gas uint64) bool {
 		call.Gas = gas
 
@@ -403,7 +403,7 @@ func (b *SimulatedBackend) EstimateGas(ctx context.Context, call ethereum.CallMs
 			hi = mid
 		}
 	}
-	// Reject the transaction as invalid if it still fails at the highest allowance
+	// Reject the transaction as invalid if it still fails at the highest subsidy
 	if hi == cap {
 		if !executable(hi) {
 			return 0, errGasEstimationFailed

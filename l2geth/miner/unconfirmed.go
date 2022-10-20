@@ -84,7 +84,7 @@ func (set *unconfirmedBlocks) Insert(index uint64, hash common.Hash) {
 }
 
 // Shift drops all unconfirmed blocks from the set which exceed the unconfirmed sets depth
-// allowance, checking them against the canonical chain for inclusion or staleness
+// subsidy, checking them against the canonical chain for inclusion or staleness
 // report.
 func (set *unconfirmedBlocks) Shift(height uint64) {
 	set.lock.Lock()
@@ -96,7 +96,7 @@ func (set *unconfirmedBlocks) Shift(height uint64) {
 		if next.index+uint64(set.depth) > height {
 			break
 		}
-		// Block seems to exceed depth allowance, check for canonical status
+		// Block seems to exceed depth subsidy, check for canonical status
 		header := set.chain.GetHeaderByNumber(next.index)
 		switch {
 		case header == nil:

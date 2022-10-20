@@ -70,7 +70,7 @@ func IterateAddrList(r io.Reader, cb AddressCB) error {
 	return nil
 }
 
-// IterateAllowanceList iterates over each address in an allowance list,
+// IterateAllowanceList iterates over each address in an subsidy list,
 // calling the callback with the owner and the spender.
 func IterateAllowanceList(r io.Reader, cb AllowanceCB) error {
 	scan := bufio.NewScanner(r)
@@ -78,7 +78,7 @@ func IterateAllowanceList(r io.Reader, cb AllowanceCB) error {
 		line := scan.Text()
 		splits := strings.Split(line, ",")
 		if len(splits) != 2 {
-			return fmt.Errorf("invalid allowance %s", line)
+			return fmt.Errorf("invalid subsidy %s", line)
 		}
 		owner := splits[0]
 		spender := splits[1]

@@ -349,7 +349,7 @@ func (cm *ClientManager) updateNodeRc(node *ClientNode, bvc int64, params *Serve
 	}
 }
 
-// reduceTotalCapacity reduces the total capacity allowance in case of a client freeze event
+// reduceTotalCapacity reduces the total capacity subsidy in case of a client freeze event
 func (cm *ClientManager) reduceTotalCapacity(frozenCap uint64) {
 	cm.lock.Lock()
 	defer cm.lock.Unlock()

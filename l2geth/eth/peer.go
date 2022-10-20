@@ -23,12 +23,12 @@ import (
 	"sync"
 	"time"
 
+	mapset "github.com/deckarep/golang-set"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
-	mapset "github.com/deckarep/golang-set"
 )
 
 var (
@@ -177,7 +177,7 @@ func (p *peer) SetHead(hash common.Hash, td *big.Int) {
 // MarkBlock marks a block as known for the peer, ensuring that the block will
 // never be propagated to this particular peer.
 func (p *peer) MarkBlock(hash common.Hash) {
-	// If we reached the memory allowance, drop a previously known block hash
+	// If we reached the memory subsidy, drop a previously known block hash
 	for p.knownBlocks.Cardinality() >= maxKnownBlocks {
 		p.knownBlocks.Pop()
 	}
@@ -187,7 +187,7 @@ func (p *peer) MarkBlock(hash common.Hash) {
 // MarkTransaction marks a transaction as known for the peer, ensuring that it
 // will never be propagated to this particular peer.
 func (p *peer) MarkTransaction(hash common.Hash) {
-	// If we reached the memory allowance, drop a previously known transaction hash
+	// If we reached the memory subsidy, drop a previously known transaction hash
 	for p.knownTxs.Cardinality() >= maxKnownTxs {
 		p.knownTxs.Pop()
 	}

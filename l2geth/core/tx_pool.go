@@ -78,7 +78,7 @@ var (
 	ErrIntrinsicGas = errors.New("intrinsic gas too low")
 
 	// ErrGasLimit is returned if a transaction's requested gas limit exceeds the
-	// maximum allowance of the current block.
+	// maximum subsidy of the current block.
 	ErrGasLimit = errors.New("exceeds block gas limit")
 
 	// ErrNegativeValue is a sanity error to ensure noone is able to specify a
@@ -1306,7 +1306,7 @@ func (pool *TxPool) truncatePending() {
 		}
 	}
 
-	// If still above threshold, reduce to limit or min allowance
+	// If still above threshold, reduce to limit or min subsidy
 	if pending > pool.config.GlobalSlots && len(offenders) > 0 {
 		for pending > pool.config.GlobalSlots && uint64(pool.pending[offenders[len(offenders)-1]].Len()) > pool.config.AccountSlots {
 			for _, addr := range offenders {

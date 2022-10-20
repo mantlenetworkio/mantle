@@ -277,7 +277,7 @@ func (p *peerConnection) setIdle(started time.Time, delivered int, throughput *f
 		"miss", len(p.lacking), "rtt", p.rtt)
 }
 
-// HeaderCapacity retrieves the peers header download allowance based on its
+// HeaderCapacity retrieves the peers header download subsidy based on its
 // previously discovered throughput.
 func (p *peerConnection) HeaderCapacity(targetRTT time.Duration) int {
 	p.lock.RLock()
@@ -286,7 +286,7 @@ func (p *peerConnection) HeaderCapacity(targetRTT time.Duration) int {
 	return int(math.Min(1+math.Max(1, p.headerThroughput*float64(targetRTT)/float64(time.Second)), float64(MaxHeaderFetch)))
 }
 
-// BlockCapacity retrieves the peers block download allowance based on its
+// BlockCapacity retrieves the peers block download subsidy based on its
 // previously discovered throughput.
 func (p *peerConnection) BlockCapacity(targetRTT time.Duration) int {
 	p.lock.RLock()
@@ -295,7 +295,7 @@ func (p *peerConnection) BlockCapacity(targetRTT time.Duration) int {
 	return int(math.Min(1+math.Max(1, p.blockThroughput*float64(targetRTT)/float64(time.Second)), float64(MaxBlockFetch)))
 }
 
-// ReceiptCapacity retrieves the peers receipt download allowance based on its
+// ReceiptCapacity retrieves the peers receipt download subsidy based on its
 // previously discovered throughput.
 func (p *peerConnection) ReceiptCapacity(targetRTT time.Duration) int {
 	p.lock.RLock()
@@ -304,7 +304,7 @@ func (p *peerConnection) ReceiptCapacity(targetRTT time.Duration) int {
 	return int(math.Min(1+math.Max(1, p.receiptThroughput*float64(targetRTT)/float64(time.Second)), float64(MaxReceiptFetch)))
 }
 
-// NodeDataCapacity retrieves the peers state download allowance based on its
+// NodeDataCapacity retrieves the peers state download subsidy based on its
 // previously discovered throughput.
 func (p *peerConnection) NodeDataCapacity(targetRTT time.Duration) int {
 	p.lock.RLock()

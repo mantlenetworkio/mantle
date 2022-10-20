@@ -613,7 +613,7 @@ func (db *Database) Cap(limit common.StorageSize) error {
 			}
 		}
 	}
-	// Keep committing nodes from the flush-list until we're below allowance
+	// Keep committing nodes from the flush-list until we're below subsidy
 	oldest := db.oldest
 	for size > limit && oldest != (common.Hash{}) {
 		// Fetch the oldest referenced node and push into the batch

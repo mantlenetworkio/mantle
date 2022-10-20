@@ -60,7 +60,7 @@ func TestBalanceTimeCost(t *testing.T) {
 	tracker.setFactors(false, 1, 1)
 	tracker.setFactors(true, 1, 1)
 
-	tracker.setBalance(uint64(time.Minute), 0) // 1 minute time allowance
+	tracker.setBalance(uint64(time.Minute), 0) // 1 minute time subsidy
 
 	var inputs = []struct {
 		runTime time.Duration
@@ -82,7 +82,7 @@ func TestBalanceTimeCost(t *testing.T) {
 		}
 	}
 
-	tracker.setBalance(uint64(time.Minute), 0) // Refill 1 minute time allowance
+	tracker.setBalance(uint64(time.Minute), 0) // Refill 1 minute time subsidy
 	for _, i := range inputs {
 		clock.Run(i.runTime)
 		if pos, _ := tracker.getBalance(clock.Now()); pos != i.expPos {
@@ -104,7 +104,7 @@ func TestBalanceReqCost(t *testing.T) {
 	tracker.setFactors(false, 1, 1)
 	tracker.setFactors(true, 1, 1)
 
-	tracker.setBalance(uint64(time.Minute), 0) // 1 minute time serving time allowance
+	tracker.setBalance(uint64(time.Minute), 0) // 1 minute time serving time subsidy
 	var inputs = []struct {
 		reqCost uint64
 		expPos  uint64

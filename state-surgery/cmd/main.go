@@ -4,8 +4,8 @@ import (
 	"os"
 	"strings"
 
-	surgery "github.com/mantlenetworkio/mantle/state-surgery"
 	"github.com/ethereum/go-ethereum/log"
+	surgery "github.com/mantlenetworkio/mantle/state-surgery"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v2"
 )
@@ -53,9 +53,9 @@ func main() {
 						Required: true,
 					},
 					&cli.StringFlag{
-						Name:     "allowance-lists",
+						Name:     "subsidy-lists",
 						Aliases:  []string{"l"},
-						Usage:    "comma-separated list of allowance lists to read",
+						Usage:    "comma-separated list of subsidy lists to read",
 						Required: true,
 					},
 					&cli.IntFlag{
@@ -106,7 +106,7 @@ func migrateAction(cliCtx *cli.Context) error {
 	outDir := cliCtx.String("out-dir")
 	genesisPath := cliCtx.String("genesis-file")
 	addressLists := strings.Split(cliCtx.String("address-lists"), ",")
-	allowanceLists := strings.Split(cliCtx.String("allowance-lists"), ",")
+	allowanceLists := strings.Split(cliCtx.String("subsidy-lists"), ",")
 	chainID := cliCtx.Int("chain-id")
 	levelDBCacheSize := cliCtx.Int("leveldb-cache-size-mb")
 	levelDBHandles := cliCtx.Int("leveldb-file-handles")

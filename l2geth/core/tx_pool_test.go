@@ -813,12 +813,12 @@ func testTransactionQueueGlobalLimiting(t *testing.T, nolocals bool) {
 	queued := 0
 	for addr, list := range pool.queue {
 		if list.Len() > int(config.AccountQueue) {
-			t.Errorf("addr %x: queued accounts overflown allowance: %d > %d", addr, list.Len(), config.AccountQueue)
+			t.Errorf("addr %x: queued accounts overflown subsidy: %d > %d", addr, list.Len(), config.AccountQueue)
 		}
 		queued += list.Len()
 	}
 	if queued > int(config.GlobalQueue) {
-		t.Fatalf("total transactions overflow allowance: %d > %d", queued, config.GlobalQueue)
+		t.Fatalf("total transactions overflow subsidy: %d > %d", queued, config.GlobalQueue)
 	}
 	// Generate a batch of transactions from the local account and import them
 	txs = txs[:0]
@@ -832,12 +832,12 @@ func testTransactionQueueGlobalLimiting(t *testing.T, nolocals bool) {
 		queued := 0
 		for addr, list := range pool.queue {
 			if list.Len() > int(config.AccountQueue) {
-				t.Errorf("addr %x: queued accounts overflown allowance: %d > %d", addr, list.Len(), config.AccountQueue)
+				t.Errorf("addr %x: queued accounts overflown subsidy: %d > %d", addr, list.Len(), config.AccountQueue)
 			}
 			queued += list.Len()
 		}
 		if queued > int(config.GlobalQueue) {
-			t.Fatalf("total transactions overflow allowance: %d > %d", queued, config.GlobalQueue)
+			t.Fatalf("total transactions overflow subsidy: %d > %d", queued, config.GlobalQueue)
 		}
 	} else {
 		// Local exemptions are enabled, make sure the local account owned the queue
@@ -1005,7 +1005,7 @@ func TestTransactionPendingGlobalLimiting(t *testing.T) {
 		pending += list.Len()
 	}
 	if pending > int(config.GlobalSlots) {
-		t.Fatalf("total pending transactions overflow allowance: %d > %d", pending, config.GlobalSlots)
+		t.Fatalf("total pending transactions overflow subsidy: %d > %d", pending, config.GlobalSlots)
 	}
 	if err := validateTxPoolInternals(pool); err != nil {
 		t.Fatalf("pool internal state corrupted: %v", err)

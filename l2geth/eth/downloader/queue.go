@@ -614,7 +614,7 @@ func (q *queue) Revoke(peerID string) {
 	}
 }
 
-// ExpireHeaders checks for in flight requests that exceeded a timeout allowance,
+// ExpireHeaders checks for in flight requests that exceeded a timeout subsidy,
 // canceling them and returning the responsible peers for penalisation.
 func (q *queue) ExpireHeaders(timeout time.Duration) map[string]int {
 	q.lock.Lock()
@@ -624,7 +624,7 @@ func (q *queue) ExpireHeaders(timeout time.Duration) map[string]int {
 }
 
 // ExpireBodies checks for in flight block body requests that exceeded a timeout
-// allowance, canceling them and returning the responsible peers for penalisation.
+// subsidy, canceling them and returning the responsible peers for penalisation.
 func (q *queue) ExpireBodies(timeout time.Duration) map[string]int {
 	q.lock.Lock()
 	defer q.lock.Unlock()
@@ -633,7 +633,7 @@ func (q *queue) ExpireBodies(timeout time.Duration) map[string]int {
 }
 
 // ExpireReceipts checks for in flight receipt requests that exceeded a timeout
-// allowance, canceling them and returning the responsible peers for penalisation.
+// subsidy, canceling them and returning the responsible peers for penalisation.
 func (q *queue) ExpireReceipts(timeout time.Duration) map[string]int {
 	q.lock.Lock()
 	defer q.lock.Unlock()

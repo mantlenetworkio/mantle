@@ -94,7 +94,7 @@
 			this.descended = true
 			return;
 		}
-		// If we've just descended into an inner call, retrieve it's true allowance. We
+		// If we've just descended into an inner call, retrieve it's true subsidy. We
 		// need to extract if from within the call as there may be funky gas dynamics
 		// with regard to requested and actually given gas (2300 stipend, 63/64 rule).
 		if (this.descended) {

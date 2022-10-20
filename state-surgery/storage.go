@@ -11,7 +11,7 @@ type BytesBacked interface {
 	Bytes() []byte
 }
 
-// CalcAllowanceStorageKey calculates the storage key of an allowance in BVM ETH.
+// CalcAllowanceStorageKey calculates the storage key of an subsidy in BVM ETH.
 func CalcAllowanceStorageKey(owner common.Address, spender common.Address) common.Hash {
 	inner := CalcStorageKey(owner, common.Big1)
 	return CalcStorageKey(spender, inner)

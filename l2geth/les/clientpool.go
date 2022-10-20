@@ -61,7 +61,7 @@ const (
 //
 // Balance tracking and priority calculation for connected clients is done by
 // balanceTracker. connectedQueue ensures that clients with the lowest positive or
-// highest negative balance get evicted when the total capacity allowance is full
+// highest negative balance get evicted when the total capacity subsidy is full
 // and new clients with a better balance want to connect.
 //
 // Already connected nodes receive a small bias in their favor in order to avoid
@@ -395,7 +395,7 @@ func (f *clientPool) dropClient(e *clientInfo, now mclock.AbsTime, kick bool) {
 	}
 }
 
-// capacityInfo returns the total capacity allowance, the total capacity of connected
+// capacityInfo returns the total capacity subsidy, the total capacity of connected
 // clients and the total capacity of connected and prioritized clients
 func (f *clientPool) capacityInfo() (uint64, uint64, uint64) {
 	f.lock.Lock()

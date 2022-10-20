@@ -74,7 +74,7 @@ describe('WETH9', () => {
   })
 
   describe('transferFrom', () => {
-    it('should revert when there is no allowance', async () => {
+    it('should revert when there is no subsidy', async () => {
       await Mock__WETH9.deposit({ value: 100 })
       await expect(
         Mock__WETH9.connect(otherSigner).transferFrom(

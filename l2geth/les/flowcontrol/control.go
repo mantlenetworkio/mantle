@@ -128,7 +128,7 @@ func (node *ClientNode) OneTimeCost(cost uint64) {
 }
 
 // Freeze notifies the client manager about a client freeze event in which case
-// the total capacity allowance is slightly reduced.
+// the total capacity subsidy is slightly reduced.
 func (node *ClientNode) Freeze() {
 	node.lock.Lock()
 	frozenCap := node.params.MinRecharge
