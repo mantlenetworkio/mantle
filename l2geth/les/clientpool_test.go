@@ -243,7 +243,7 @@ func TestPaidClientKickedOut(t *testing.T) {
 	pool.setDefaultFactors(priceFactors{1, 0, 1}, priceFactors{1, 0, 1})
 
 	for i := 0; i < 10; i++ {
-		pool.addBalance(poolTestPeer(i).ID(), 1000000000, "") // 1 second subsidy
+		pool.addBalance(poolTestPeer(i).ID(), 1000000000, "") // 1 second allowance
 		pool.connect(poolTestPeer(i), 1)
 		clock.Run(time.Millisecond)
 	}

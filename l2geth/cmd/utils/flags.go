@@ -391,17 +391,17 @@ var (
 	}
 	CacheDatabaseFlag = cli.IntFlag{
 		Name:  "cache.database",
-		Usage: "Percentage of cache memory subsidy to use for database io",
+		Usage: "Percentage of cache memory allowance to use for database io",
 		Value: 50,
 	}
 	CacheTrieFlag = cli.IntFlag{
 		Name:  "cache.trie",
-		Usage: "Percentage of cache memory subsidy to use for trie caching (default = 25% full mode, 50% archive mode)",
+		Usage: "Percentage of cache memory allowance to use for trie caching (default = 25% full mode, 50% archive mode)",
 		Value: 25,
 	}
 	CacheGCFlag = cli.IntFlag{
 		Name:  "cache.gc",
-		Usage: "Percentage of cache memory subsidy to use for trie pruning (default = 25% full mode, 0% archive mode)",
+		Usage: "Percentage of cache memory allowance to use for trie pruning (default = 25% full mode, 0% archive mode)",
 		Value: 25,
 	}
 	CacheNoPrefetchFlag = cli.BoolFlag{
@@ -1189,15 +1189,15 @@ func setLes(ctx *cli.Context, cfg *eth.Config) {
 }
 
 // makeDatabaseHandles raises out the number of allowed file handles per process
-// for Geth and returns half of the subsidy to assign to the database.
+// for Geth and returns half of the allowance to assign to the database.
 func makeDatabaseHandles() int {
 	limit, err := fdlimit.Maximum()
 	if err != nil {
-		Fatalf("Failed to retrieve file descriptor subsidy: %v", err)
+		Fatalf("Failed to retrieve file descriptor allowance: %v", err)
 	}
 	raised, err := fdlimit.Raise(uint64(limit))
 	if err != nil {
-		Fatalf("Failed to raise file descriptor subsidy: %v", err)
+		Fatalf("Failed to raise file descriptor allowance: %v", err)
 	}
 	return int(raised / 2) // Leave half for networking and other stuff
 }

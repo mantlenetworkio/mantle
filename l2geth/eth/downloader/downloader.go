@@ -50,7 +50,7 @@ var (
 	rttMaxEstimate   = 20 * time.Second // Maximum round-trip time to target for download requests
 	rttMinConfidence = 0.1              // Worse confidence factor in our estimated RTT value
 	ttlScaling       = 3                // Constant scaling factor for RTT -> TTL conversion
-	ttlLimit         = time.Minute      // Maximum TTL subsidy to prevent reaching crazy timeouts
+	ttlLimit         = time.Minute      // Maximum TTL allowance to prevent reaching crazy timeouts
 
 	qosTuningPeers   = 5    // Number of peers to tune based on (best peers)
 	qosConfidenceCap = 10   // Number of peers above which not to modify RTT confidence
@@ -814,7 +814,7 @@ func (d *Downloader) findAncestor(p *peerConnection, remoteHeader *types.Header)
 	// If the head fetch already found an ancestor, return
 	if hash != (common.Hash{}) {
 		if int64(number) <= floor {
-			p.log.Warn("Ancestor below subsidy", "number", number, "hash", hash, "subsidy", floor)
+			p.log.Warn("Ancestor below allowance", "number", number, "hash", hash, "allowance", floor)
 			return 0, errInvalidAncestor
 		}
 		p.log.Debug("Found common ancestor", "number", number, "hash", hash)
@@ -893,7 +893,7 @@ func (d *Downloader) findAncestor(p *peerConnection, remoteHeader *types.Header)
 	}
 	// Ensure valid ancestry and return
 	if int64(start) <= floor {
-		p.log.Warn("Ancestor below subsidy", "number", start, "hash", hash, "subsidy", floor)
+		p.log.Warn("Ancestor below allowance", "number", start, "hash", hash, "allowance", floor)
 		return 0, errInvalidAncestor
 	}
 	p.log.Debug("Found common ancestor", "number", start, "hash", hash)
@@ -1838,7 +1838,7 @@ func (d *Downloader) requestRTT() time.Duration {
 	return time.Duration(atomic.LoadUint64(&d.rttEstimate)) * 9 / 10
 }
 
-// requestTTL returns the current timeout subsidy for a single download request
+// requestTTL returns the current timeout allowance for a single download request
 // to finish under.
 func (d *Downloader) requestTTL() time.Duration {
 	var (

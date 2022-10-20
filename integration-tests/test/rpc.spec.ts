@@ -142,7 +142,7 @@ describe('Basic RPC tests', () => {
       const factory = await ethers.getContractFactory('TestOOGInConstructor')
 
       await expect(factory.connect(wallet).deploy()).to.be.rejectedWith(
-        'gas required exceeds subsidy'
+        'gas required exceeds allowance'
       )
     })
 

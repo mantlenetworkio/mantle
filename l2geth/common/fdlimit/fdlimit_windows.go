@@ -21,7 +21,7 @@ import "fmt"
 // hardlimit is the number of file descriptors allowed at max by the kernel.
 const hardlimit = 16384
 
-// Raise tries to maximize the file descriptor subsidy of this process
+// Raise tries to maximize the file descriptor allowance of this process
 // to the maximum hard-limit allowed by the OS.
 func Raise(max uint64) (uint64, error) {
 	// This method is NOP by design:

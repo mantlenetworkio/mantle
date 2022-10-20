@@ -25,7 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
@@ -47,6 +46,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/tyler-smith/go-bip39"
 )
 
@@ -870,7 +870,7 @@ func DoCall(ctx context.Context, b Backend, args CallArgs, blockNrOrHash rpc.Blo
 		gas = uint64(*args.Gas)
 	}
 	if globalGasCap != nil && globalGasCap.Uint64() < gas {
-		log.Warn("Caller gas above subsidy, capping", "requested", gas, "cap", globalGasCap)
+		log.Warn("Caller gas above allowance, capping", "requested", gas, "cap", globalGasCap)
 		gas = globalGasCap.Uint64()
 	}
 	gasPrice := new(big.Int)
@@ -1001,7 +1001,7 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNrOrHash 
 		hi = block.GasLimit()
 	}
 	if gasCap != nil && hi > gasCap.Uint64() {
-		log.Warn("Caller gas above subsidy, capping", "requested", hi, "cap", gasCap)
+		log.Warn("Caller gas above allowance, capping", "requested", hi, "cap", gasCap)
 		hi = gasCap.Uint64()
 	}
 	cap = hi
@@ -1020,7 +1020,7 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNrOrHash 
 	if args.From == nil {
 		args.From = &common.Address{}
 	}
-	// Create a helper to check if a gas subsidy results in an executable transaction
+	// Create a helper to check if a gas allowance results in an executable transaction
 	executable := func(gas uint64) (bool, []byte) {
 		args.Gas = (*hexutil.Uint64)(&gas)
 
@@ -1041,7 +1041,7 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNrOrHash 
 			hi = mid
 		}
 	}
-	// Reject the transaction as invalid if it still fails at the highest subsidy
+	// Reject the transaction as invalid if it still fails at the highest allowance
 	if hi == cap {
 		ok, res := executable(hi)
 		if !ok {
@@ -1053,7 +1053,7 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNrOrHash 
 				}
 				return 0, err
 			}
-			return 0, fmt.Errorf("gas required exceeds subsidy (%d)", cap)
+			return 0, fmt.Errorf("gas required exceeds allowance (%d)", cap)
 		}
 	}
 	return hexutil.Uint64(hi), nil

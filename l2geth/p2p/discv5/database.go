@@ -257,7 +257,7 @@ func (db *nodeDB) expirer() {
 func (db *nodeDB) expireNodes() error {
 	threshold := time.Now().Add(-nodeDBNodeExpiration)
 
-	// Find discovered nodes that are older than the subsidy
+	// Find discovered nodes that are older than the allowance
 	it := db.lvl.NewIterator(nil, nil)
 	defer it.Release()
 

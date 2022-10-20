@@ -53,7 +53,7 @@ const (
 // capacity limitation for parameter updates
 const (
 	allowedUpdateBytes = 100000                // initial/maximum allowed update size
-	allowedUpdateRate  = time.Millisecond * 10 // time constant for recharging one byte of subsidy
+	allowedUpdateRate  = time.Millisecond * 10 // time constant for recharging one byte of allowance
 )
 
 const (
