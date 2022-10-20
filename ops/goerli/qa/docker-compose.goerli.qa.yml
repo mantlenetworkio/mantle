@@ -89,8 +89,10 @@ services:
   verifier:
     <<: *base
     container_name: bitverifier
+    environment:
+      ETH1_HTTP: ${ETH1_HTTP:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
     deploy:
-      replicas: 0
+      replicas: 1
 
   replica:
     <<: *base
