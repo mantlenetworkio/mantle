@@ -49,7 +49,7 @@ func DumpAddresses(dataDir string, outFile string) error {
 
 // Migrate performs the actual state migration. It does quite a lot:
 //
-//   1. It uses address lists, subsidy lists, Mint events, and address preimages in
+//   1. It uses address lists, allowance lists, Mint events, and address preimages in
 //      the input state database to create a comprehensive list of storage slots in the
 //      BVM ETH contract.
 //   2. It iterates over the slots in BVM ETH, and compares then against the list in (1).
@@ -65,8 +65,8 @@ func DumpAddresses(dataDir string, outFile string) error {
 //   - genesis:        The new chain's genesis configuration.
 //   - addrLists:      A list of address list file paths. These address lists are used to populate
 //                     balances from previous regenesis events.
-//   - allowanceLists: A list of subsidy list file paths. These subsidy lists are used
-//                     to calculate subsidy storage slots from previous regenesis events.
+//   - allowanceLists: A list of allowance list file paths. These allowance lists are used
+//                     to calculate allowance storage slots from previous regenesis events.
 //   - chainID:        The chain ID of the chain being migrated.
 func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowanceLists []string, chainID, levelDBCacheSize, levelDBHandles int) error {
 	db := MustOpenDBWithCacheOpts(dataDir, levelDBCacheSize, levelDBHandles)
@@ -101,12 +101,12 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 
 	// Same as above, but for allowances.
 	for _, list := range allowanceLists {
-		log.Info("reading subsidy list", "list", list)
+		log.Info("reading allowance list", "list", list)
 		f, err := os.Open(list)
 		if err != nil {
 			return wrapErr(err, "error opening allowances list %s", list)
 		}
-		logProgress := ProgressLogger(10000, "read subsidy")
+		logProgress := ProgressLogger(10000, "read allowance")
 		err = IterateAllowanceList(f, func(owner, spender common.Address) error {
 			addressesToMigrate[owner] = true
 			storageSlotsToMigrate[CalcAllowanceStorageKey(owner, spender)] = 2
@@ -181,7 +181,7 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 			// This slot is a balance, increment totalFound.
 			totalFound = totalFound.Add(totalFound, v.Big())
 		case 2:
-			// This slot is an subsidy, ignore it.
+			// This slot is an allowance, ignore it.
 			continue
 		default:
 			slot := new(big.Int).SetBytes(k.Bytes())
