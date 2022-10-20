@@ -1,6 +1,7 @@
 go 1.18
 
 use (
+    ./allowance
 	./batch-submitter
 	./bss-core
 	./gas-oracle
