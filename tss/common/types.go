@@ -35,9 +35,9 @@ type SignStateRequest struct {
 func (ssr SignStateRequest) String() string {
 	var srs string
 	for _, sr := range ssr.StateRoots {
-		srs = srs + hex.EncodeToString(sr[:]) + "\n"
+		srs = srs + hex.EncodeToString(sr[:]) + " "
 	}
-	return fmt.Sprintf("start_block: %s, offset_starts_at_index: %s, election_id: %d, state_roots: \n%s", ssr.StartBlock, ssr.OffsetStartsAtIndex, ssr.ElectionId, srs)
+	return fmt.Sprintf("start_block: %s, offset_starts_at_index: %s, election_id: %d, state_roots: %s", ssr.StartBlock, ssr.OffsetStartsAtIndex, ssr.ElectionId, srs)
 }
 
 type SlashRequest struct {

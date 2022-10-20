@@ -1130,13 +1130,16 @@ func (s *SyncService) syncToTip(sync syncer, getTip indexGetter) error {
 func (s *SyncService) sync(getLatest indexGetter, getNext nextGetter, syncer rangeSyncer) (*uint64, error) {
 	latestIndex, err := getLatest()
 	if err != nil {
+		log.Error("SyncService failed to getLatest", "err", err)
 		return nil, fmt.Errorf("Cannot sync: %w", err)
 	}
 	if latestIndex == nil {
+		log.Error("SyncService Latest index is not defined")
 		return nil, errors.New("Latest index is not defined")
 	}
 
 	nextIndex := getNext()
+	log.Info("SyncService sync", "nextIndex", nextIndex, "latestIndex", latestIndex)
 	if nextIndex == *latestIndex+1 {
 		return latestIndex, nil
 	}
