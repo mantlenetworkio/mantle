@@ -108,10 +108,13 @@ func (p *Processor) Sign() {
 					Signature: data,
 				}
 				RpcResponse := tdtypes.NewRPCSuccessResponse(req.ID, signResponse)
+				//TODO
+				logger.Info().Msg("---- start to send response to manager ")
 				err = p.wsClient.SendMsg(RpcResponse)
 				if err != nil {
-					logger.Err(err).Msg("failed to sendMsg to bridge ")
+					logger.Err(err).Msg("failed to sendMsg to tss manager ")
 				} else {
+					logger.Info().Msg("send sign response to manager successfully")
 					err := p.storeStateBatch(requestBody.ElectionId, requestBody.StateRoots, nodeSignRequest.Nodes, nodeSignRequest.ClusterPublicKey)
 					if err != nil {
 						logger.Err(err).Msg("failed to store StateBatch to level db")
@@ -125,7 +128,7 @@ func (p *Processor) Sign() {
 
 func (p *Processor) handleSign(sign tsscommon.NodeSignRequest, hashTx []byte, logger zerolog.Logger) ([]byte, []string, error) {
 
-	logger.Info().Msgf(" timestamp (%s) ,dealing sign hex (%s)", sign.Timestamp, hexutil.Encode(hashTx))
+	logger.Info().Msgf(" timestamp (%d) ,dealing sign hex (%s)", sign.Timestamp, hexutil.Encode(hashTx))
 
 	signedData, culpritNodes, err := p.sign(hashTx, sign.Nodes, sign.ClusterPublicKey, logger)
 	if err != nil {
