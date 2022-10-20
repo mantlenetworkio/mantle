@@ -40,8 +40,6 @@ func (p *Processor) Verify() {
 				wg.Add(offset)
 				var result = true
 				for index, stateRoot := range askRequest.StateRoots {
-					//TODO
-					logger.Info().Msgf("---index %d ,state root is %s", index, hexutil.Encode(stateRoot[:]))
 					go func(fIndex int, fStateRoot [32]byte) {
 						resultTmp := p.verify(askRequest.StartBlock, fIndex, fStateRoot, logger, wg)
 						if !resultTmp {
