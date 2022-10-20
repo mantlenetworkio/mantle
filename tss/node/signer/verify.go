@@ -76,7 +76,7 @@ func (p *Processor) Verify() {
 
 func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger zerolog.Logger, wg *sync.WaitGroup) bool {
 	defer wg.Done()
-	defer logger.Info().Msgf("start block number:(%d),index (%d), verify done", start, index)
+	defer logger.Info().Msgf("start block number:(%s),index (%d), verify done", start, index)
 
 	offset := new(big.Int).SetInt64(int64(index))
 	startBig, _ := new(big.Int).SetString(start, 10)

@@ -66,7 +66,7 @@ func NewCommunication(bootstrapPeers []maddr.Multiaddr, port int, externalIP str
 	}
 	return &Communication{
 		bootstrapPeers:    bootstrapPeers,
-		logger:            log.With().Str("module", "communication").Logger().Level(zerolog.InfoLevel),
+		logger:            log.With().Str("module", "communication").Logger(),
 		listenAddr:        addr,
 		wg:                &sync.WaitGroup{},
 		stopChan:          make(chan struct{}),
