@@ -108,8 +108,8 @@ func (p *Processor) Sign() {
 					Signature: data,
 				}
 				RpcResponse := tdtypes.NewRPCSuccessResponse(req.ID, signResponse)
-				//TODO
 				logger.Info().Msg("start to send response to manager ")
+
 				err = p.wsClient.SendMsg(RpcResponse)
 				if err != nil {
 					logger.Err(err).Msg("failed to sendMsg to tss manager ")
