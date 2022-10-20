@@ -15,8 +15,8 @@ import {
   toHexString,
   encodeCrossDomainMessageV0,
   hashCrossDomainMessage,
-} from '@bitdaoio/core-utils'
-import { getContractInterface, predeploys } from '@bitdaoio/contracts'
+} from '@mantlenetworkio/core-utils'
+import { getContractInterface, predeploys } from '@mantlenetworkio/contracts'
 import * as rlp from 'rlp'
 
 import {
@@ -846,7 +846,7 @@ export class CrossChainMessenger implements ICrossChainMessenger {
     // We need to calculate the specific storage slot that demonstrates that this message was
     // actually included in the L2 chain. The following calculation is based on the fact that
     // messages are stored in the following mapping on L2:
-    // https://github.com/bitdao-io/mantle/blob/c84d3450225306abbb39b4e7d6d82424341df2be/packages/contracts/contracts/L2/predeploys/BVM_L2ToL1MessagePasser.sol#L23
+    // https://github.com/mantlenetworkio/mantle/blob/c84d3450225306abbb39b4e7d6d82424341df2be/packages/contracts/contracts/L2/predeploys/BVM_L2ToL1MessagePasser.sol#L23
     // You can read more about how Solidity storage slots are computed for mappings here:
     // https://docs.soliditylang.org/en/v0.8.4/internals/layout_in_storage.html#mappings-and-dynamic-arrays
     const messageSlot = ethers.utils.keccak256(

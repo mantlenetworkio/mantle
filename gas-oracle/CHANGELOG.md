@@ -1,2 +1,2 @@
-# @bitdaoio/gas-oracle
+# @mantlenetworkio/gas-oracle
 

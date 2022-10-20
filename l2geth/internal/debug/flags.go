@@ -24,10 +24,10 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
-	"github.com/bitdao-io/mantle/l2geth/metrics"
-	"github.com/bitdao-io/mantle/l2geth/metrics/exp"
 	"github.com/fjl/memsize/memsizeui"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/metrics"
+	"github.com/mantlenetworkio/mantle/l2geth/metrics/exp"
 	colorable "github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"gopkg.in/urfave/cli.v1"

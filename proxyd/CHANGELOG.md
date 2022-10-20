@@ -1,2 +1,2 @@
-# @bitdaoio/proxyd
+# @mantlenetworkio/proxyd
 

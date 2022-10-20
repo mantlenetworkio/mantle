@@ -24,9 +24,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/internal/cmdtest"
-	"github.com/bitdao-io/mantle/l2geth/rpc"
 	"github.com/docker/docker/pkg/reexec"
+	"github.com/mantlenetworkio/mantle/l2geth/internal/cmdtest"
+	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 )
 
 func tmpdir(t *testing.T) string {

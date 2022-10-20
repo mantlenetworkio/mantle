@@ -25,8 +25,8 @@ import (
 	"crypto/sha512"
 	"fmt"
 
-	"github.com/bitdao-io/mantle/l2geth/crypto"
 	pcsc "github.com/gballet/go-libpcsclite"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/wsddn/go-ecdh"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/text/unicode/norm"

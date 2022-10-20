@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/gas-oracle/tokenprice"
 )
 
 type GetTargetGasPerSecond func() float64
@@ -14,6 +15,7 @@ type GasPricer struct {
 	curPrice                 uint64
 	avgGasPerSecondLastEpoch float64
 	floorPrice               uint64
+	tokenPricer              *tokenprice.Client
 	getTargetGasPerSecond    GetTargetGasPerSecond
 	maxChangePerEpoch        float64
 }
@@ -26,7 +28,7 @@ func GetLinearInterpolationFn(getX func() float64, x1 float64, x2 float64, y1 fl
 }
 
 // NewGasPricer creates a GasPricer and checks its config beforehand
-func NewGasPricer(curPrice, floorPrice uint64, getTargetGasPerSecond GetTargetGasPerSecond, maxPercentChangePerEpoch float64) (*GasPricer, error) {
+func NewGasPricer(curPrice, floorPrice uint64, tokenPricer *tokenprice.Client, getTargetGasPerSecond GetTargetGasPerSecond, maxPercentChangePerEpoch float64) (*GasPricer, error) {
 	if floorPrice < 1 {
 		return nil, errors.New("floorPrice must be greater than or equal to 1")
 	}
@@ -34,6 +36,7 @@ func NewGasPricer(curPrice, floorPrice uint64, getTargetGasPerSecond GetTargetGa
 		return nil, errors.New("maxPercentChangePerEpoch must be between (0,100]")
 	}
 	return &GasPricer{
+		tokenPricer:           tokenPricer,
 		curPrice:              max(curPrice, floorPrice),
 		floorPrice:            floorPrice,
 		getTargetGasPerSecond: getTargetGasPerSecond,
@@ -64,8 +67,11 @@ func (p *GasPricer) CalcNextEpochGasPrice(avgGasPerSecondLastEpoch float64) (uin
 	} else {
 		proportionToChangeBy = math.Max(proportionOfTarget, 1-p.maxChangePerEpoch)
 	}
-
-	updated := float64(max(1, p.curPrice)) * proportionToChangeBy
+	ratio, err := p.tokenPricer.PriceRatio()
+	if err != nil {
+		return 0.0, err
+	}
+	updated := float64(max(1, p.curPrice)) * proportionToChangeBy * ratio
 	result := max(p.floorPrice, uint64(math.Ceil(updated)))
 
 	log.Debug("Calculated next epoch gas price", "proportionToChangeBy", proportionToChangeBy,

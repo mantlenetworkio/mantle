@@ -22,7 +22,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 // A BigInt represents a signed multi-precision integer.

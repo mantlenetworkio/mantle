@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/bitdao-io/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 // ensureVirtualHost checks whether a reverse-proxy is running on the specified

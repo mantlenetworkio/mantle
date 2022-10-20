@@ -1,6 +1,6 @@
 import { createInterface } from 'readline'
 
-import { hexStringEquals } from '@bitdaoio/core-utils'
+import { hexStringEquals } from '@mantlenetworkio/core-utils'
 
 export const getInput = (query) => {
   const rl = createInterface({

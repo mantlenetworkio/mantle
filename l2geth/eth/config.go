@@ -24,14 +24,14 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/consensus/ethash"
-	"github.com/bitdao-io/mantle/l2geth/core"
-	"github.com/bitdao-io/mantle/l2geth/eth/downloader"
-	"github.com/bitdao-io/mantle/l2geth/eth/gasprice"
-	"github.com/bitdao-io/mantle/l2geth/miner"
-	"github.com/bitdao-io/mantle/l2geth/params"
-	"github.com/bitdao-io/mantle/l2geth/rollup"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/ethash"
+	"github.com/mantlenetworkio/mantle/l2geth/core"
+	"github.com/mantlenetworkio/mantle/l2geth/eth/downloader"
+	"github.com/mantlenetworkio/mantle/l2geth/eth/gasprice"
+	"github.com/mantlenetworkio/mantle/l2geth/miner"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 )
 
 // DefaultConfig contains default settings for use on the Ethereum main net.
@@ -64,7 +64,7 @@ var DefaultConfig = Config{
 	},
 	Rollup: rollup.Config{
 		// The max size of a transaction that is sent over the p2p network is 128kb
-		// https://github.com/bitdao-io/mantle/l2geth/blob/c2d2f4ed8f232bb11663a1b01a2e578aa22f24bd/core/tx_pool.go#L51
+		// https://github.com/mantlenetworkio/mantle/l2geth/blob/c2d2f4ed8f232bb11663a1b01a2e578aa22f24bd/core/tx_pool.go#L51
 		// The batch overhead is:
 		// 4 bytes function selector
 		// 5 bytes shouldStartAtElement

@@ -12,8 +12,8 @@ import {
   TransactionResponse,
   BlockTag,
 } from '@ethersproject/abstract-provider'
-import { predeploys, getContractInterface } from '@bitdaoio/contracts'
-import { hexStringEquals } from '@bitdaoio/core-utils'
+import { predeploys, getContractInterface } from '@mantlenetworkio/contracts'
+import { hexStringEquals } from '@mantlenetworkio/core-utils'
 
 import {
   IBridgeAdapter,
@@ -167,18 +167,23 @@ export class StandardBridgeAdapter implements IBridgeAdapter {
         return false
       }
 
-      // Make sure the L1 token matches.
-      const remoteL1Token = await contract.l1Token()
-
-      if (!hexStringEquals(remoteL1Token, toAddress(l1Token))) {
-        return false
-      }
-
       // Make sure the L2 bridge matches.
       const remoteL2Bridge = await contract.l2Bridge()
       if (!hexStringEquals(remoteL2Bridge, this.l2Bridge.address)) {
         return false
       }
+
+      // Make sure the L1 token matches.
+      const remoteL1Token = await contract.l1Token()
+
+      if (hexStringEquals(remoteL1Token, toAddress('0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5'))){
+        return true
+      }
+
+        if (!hexStringEquals(remoteL1Token, toAddress(l1Token))) {
+        return false
+      }
+
 
       return true
     } catch (err) {

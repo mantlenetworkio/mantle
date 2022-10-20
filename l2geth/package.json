@@ -1,5 +1,5 @@
 {
-  "name": "@bitdaoio/l2geth",
+  "name": "@mantlenetworkio/l2geth",
   "version": "0.5.23",
   "private": true,
   "devDependencies": {}

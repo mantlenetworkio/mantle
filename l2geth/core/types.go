@@ -17,9 +17,9 @@
 package core
 
 import (
-	"github.com/bitdao-io/mantle/l2geth/core/state"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
-	"github.com/bitdao-io/mantle/l2geth/core/vm"
+	"github.com/mantlenetworkio/mantle/l2geth/core/state"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 )
 
 // Validator is an interface which defines the standard for block validation. It

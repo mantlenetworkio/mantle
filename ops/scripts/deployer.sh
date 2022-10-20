@@ -30,8 +30,17 @@ if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
   echo "Deploying contracts. Deployment command:"
   echo "$DEPLOY_CMD"
   eval "$DEPLOY_CMD"
-else
-    echo "skipping deploy contract"
+elif [ $SKIP_CONTRACT_DEPLOY == "NO" ] ; then
+  DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
+  echo $PWD
+  rm -rf deployments/goerli-qa
+  rm -rf deployments/goerlibn
+
+  echo "Deploying contracts. Deployment command:"
+  echo "$DEPLOY_CMD"
+  eval "$DEPLOY_CMD"
+else [ $SKIP_CONTRACT_DEPLOY == "YES" ]
+   sleep 30
 fi
 
 echo "Building addresses.json."

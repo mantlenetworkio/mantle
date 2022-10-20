@@ -19,7 +19,7 @@ package params
 import (
 	"math/big"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 // DAOForkBlockExtra is the block header extra-data field to set for the DAO fork

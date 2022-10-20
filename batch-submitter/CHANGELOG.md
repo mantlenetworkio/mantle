@@ -1,1 +1,1 @@
-# @bitdaoio/batch-submitter-service
+# @mantlenetworkio/batch-submitter

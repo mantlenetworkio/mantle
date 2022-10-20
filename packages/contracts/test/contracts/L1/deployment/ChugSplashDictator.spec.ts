@@ -30,6 +30,8 @@ describe('ChugSplashDictator', () => {
         ethers.utils.keccak256('0x5678'),
         ethers.utils.keccak256('0x1234'),
         ethers.utils.keccak256('0x1234'),
+        ethers.utils.keccak256('0x1234'),
+        ethers.utils.keccak256('0x1234'),
       ],
     })
 

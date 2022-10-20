@@ -21,8 +21,8 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/event"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/event"
 )
 
 // Config contains the settings of the global account manager.

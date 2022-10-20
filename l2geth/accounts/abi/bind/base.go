@@ -22,12 +22,12 @@ import (
 	"fmt"
 	"math/big"
 
-	ethereum "github.com/bitdao-io/mantle/l2geth"
-	"github.com/bitdao-io/mantle/l2geth/accounts/abi"
-	"github.com/bitdao-io/mantle/l2geth/common"
-	"github.com/bitdao-io/mantle/l2geth/core/types"
-	"github.com/bitdao-io/mantle/l2geth/crypto"
-	"github.com/bitdao-io/mantle/l2geth/event"
+	ethereum "github.com/mantlenetworkio/mantle/l2geth"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/event"
 )
 
 // SignerFn is a signer function callback when a contract requires a method to

@@ -23,10 +23,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bitdao-io/mantle/l2geth/accounts"
-	"github.com/bitdao-io/mantle/l2geth/event"
-	"github.com/bitdao-io/mantle/l2geth/log"
 	"github.com/karalabe/usb"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts"
+	"github.com/mantlenetworkio/mantle/l2geth/event"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 // LedgerScheme is the protocol scheme prefixing account and wallet URLs.
