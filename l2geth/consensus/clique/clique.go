@@ -125,15 +125,15 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 
 	number := header.Number.Uint64()
 
-	if header.Number.Uint64() >= c.producers.Number+c.producers.Epoch {
-		return errUnknownBlock
-	}
+	// if number > c.producers.Number+c.producers.Epoch {
+	// 	return errUnknownBlock
+	// }
 
-	if header.Number.Uint64() < c.producers.Number {
-		return errUnknownBlock
-	}
+	// if number < c.producers.Number {
+	// 	return errUnknownBlock
+	// }
 
-	header.Coinbase = c.producers.SequencerSet.GetProducer().Address
+	// header.Coinbase = c.producers.SequencerSet.GetProducer().Address
 
 	// Ensure the extra data has all its components
 	if len(header.Extra) < extraVanity {
