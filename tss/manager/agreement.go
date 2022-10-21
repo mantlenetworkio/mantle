@@ -18,7 +18,7 @@ import (
 func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Method) (types.Context, error) {
 	respChan := make(chan server.ResponseMsg)
 	stopChan := make(chan struct{})
-	if err := m.wsServer.RegisterResChannel(ctx.RequestId(), respChan, stopChan); err != nil {
+	if err := m.wsServer.RegisterResChannel("ASK_"+ctx.RequestId(), respChan, stopChan); err != nil {
 		log.Error("failed to register response channel", "step", "agreement", "err", err)
 		return types.Context{}, err
 	}
@@ -128,10 +128,10 @@ func (m Manager) askNodes(ctx types.Context, request []byte, method tss.Method, 
 			default:
 				requestMsg := server.RequestMsg{
 					TargetNode: node,
-					RpcRequest: tmtypes.NewRPCRequest(tmtypes.JSONRPCStringID(ctx.RequestId()), method.String(), request),
+					RpcRequest: tmtypes.NewRPCRequest(tmtypes.JSONRPCStringID("ASK_"+ctx.RequestId()), method.String(), request),
 				}
 				if err := m.wsServer.SendMsg(requestMsg); err != nil {
-					log.Error("fail to send ask request", "requestId", ctx.RequestId(), "node", node, "err", err)
+					log.Error("fail to send ask request", "requestId", "ASK_"+ctx.RequestId(), "node", node, "err", err)
 					errSendChan <- struct{}{}
 				}
 			}
