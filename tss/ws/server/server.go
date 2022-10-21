@@ -71,6 +71,7 @@ func OnConnect(wm *WebsocketManager) func(wsc *wsConnection) {
 			for {
 				select {
 				case res := <-wsc.Output():
+					wsc.Logger.Info("received response", res.String())
 					recvChanMap := wm.recvChanMap
 					if len(recvChanMap) > 0 {
 						id := res.ID.(tmtypes.JSONRPCStringID).String()
@@ -80,8 +81,10 @@ func OnConnect(wm *WebsocketManager) func(wsc *wsConnection) {
 								RpcResponse: res,
 								SourceNode:  wsc.nodePublicKey,
 							}
+							continue
 						}
 					}
+					wsc.Logger.Info("unrecognized response Id", res.ID.(tmtypes.JSONRPCStringID).String())
 				case <-wsc.readRoutineQuit:
 					return
 				}

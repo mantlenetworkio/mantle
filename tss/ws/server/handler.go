@@ -451,6 +451,7 @@ func (wsc *wsConnection) readRoutine() {
 			}
 
 			if response.ID == nil {
+				wsc.Logger.Info("received response with no ID, drop it")
 				continue
 			}
 			if err := wsc.WriteRPCResponse(writeCtx, response); err != nil {
