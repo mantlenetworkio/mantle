@@ -1,12 +1,12 @@
 version: '3.4'
 
 networks:
-  mantle: {}
+  mantle: { }
 
 x-base: &base
   restart: unless-stopped
   networks:
-    mantle: {}
+    mantle: { }
 
 services:
   l1_chain:
@@ -73,7 +73,19 @@ services:
       L1_ETH_RPC: ${L1_ETH_RPC:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
       BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY: ${BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY:-0x114983389b91256e6e26cb0e30371ceb5385e3fb309cd0e7823b86fff27c9ba4}
       BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY: ${BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY:-0x5ef80d706bea918cb4592c4ad9724dbaf9c3818494aa6f4e0803a03013d0a5f4}
+  subsidy:
+    <<: *base
+    container_name: bitsubsidy
+    environment:
+      SUBSIDY_ETHEREUM_HTTP_URL: ${SUBSIDY_ETHEREUM_HTTP_URL:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
+      SUBSIDY_PAYER_PRIVATE_KEY: ${SUBSIDY_PAYER_PRIVATE_KEY:-0x114983389b91256e6e26cb0e30371ceb5385e3fb309cd0e7823b86fff27c9ba4}
+      SUBSIDY_SCC_ADDRESS: ${SUBSIDY_SCC_ADDRESS:-}
+      SUBSIDY_CTC_ADDRESS: ${SUBSIDY_CTC_ADDRESS:-}
+      SUBSIDY_L1_QUERY_EPOCH_LENGTH_SECONDS: ${SUBSIDY_L1_QUERY_EPOCH_LENGTH_SECONDS:-}
+      SUBSIDY_START_BLOCK: ${SUBSIDY_START_BLOCK:-}
 
+    deploy:
+      replicas: 1
   integration_tests:
     <<: *base
     container_name: bititests
