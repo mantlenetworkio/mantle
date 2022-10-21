@@ -51,6 +51,7 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 		log.Error("failed to register response channel at signing step", err)
 		return tss.SignResponse{}, nil, err
 	}
+	log.Info("Registered ResChannel with requestID", "requestID", ctx.RequestId())
 
 	errSendChan := make(chan struct{})
 	responseNodes := make(map[string]struct{})
