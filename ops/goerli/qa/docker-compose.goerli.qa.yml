@@ -70,6 +70,8 @@ services:
 
   batch_submitter:
     <<: *base
+    env_file:
+      - ./envs/gas-oracle.env
     container_name: bitbatchsubmitter
     environment:
       L1_ETH_RPC: ${L1_ETH_RPC:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
