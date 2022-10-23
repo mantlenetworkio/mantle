@@ -74,6 +74,9 @@ services:
     container_name: bitbatchsubmitter
     environment:
       L1_ETH_RPC: ${L1_ETH_RPC:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
+      BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY: ${BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY:-0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d}
+      BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY: ${BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY:-0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a}
+
 
   integration_tests:
     <<: *base
