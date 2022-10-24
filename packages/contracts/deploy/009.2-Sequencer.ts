@@ -61,8 +61,6 @@ const deployFn: DeployFunction = async (hre) => {
     },
   })
   console.log('deploy Sequencer proxy success')
-
-  console.log('deploy sequencer proxy success')
 }
 
 // This is kept during an upgrade. So no upgrade tag.

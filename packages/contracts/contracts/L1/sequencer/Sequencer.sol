@@ -17,14 +17,24 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         uint256 keyIndex;
     }
 
+    // Maps sequencers, set by signer address(signer -> sequencer)
     mapping(address => SequencerInfo) public sequencers;
+
+    // Maps mint address to signer
+    // to check and avoid mintAddress being bound by multiple singers
+    // (Mint address -> signer)
     mapping(address => address) public rel;
 
+    // Store the address of the signer
     address[] public owners;
+    // Store bit token address
     address public bitToken;
 
+    // SequencerCreate(signer, mintAddress, nodeID)
     event SequencerCreate(address, address, bytes);
+    // SequencerUpdate(mintAddress, nodeID, amount)
     event SequencerUpdate(address, bytes, uint256);
+    // SequencerDelete(mintAddress, nodeID)
     event SequencerDelete(address, bytes);
 
     function initialize(address _bitToken) public initializer {
@@ -34,11 +44,20 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         bitToken = _bitToken;
     }
 
+    /**
+     * Change bit token address
+     * @param _bitToken new ERC20 address of bit token
+     */
     function changeBitAddress(address _bitToken) public onlyOwner {
         bitToken = _bitToken;
     }
 
-    // Create a new sequencer info and init amount
+    /**
+     * Create a new sequencer info and init amount
+     * @param _amount amount of bit token, will transfer to this contract when sequencer create
+     * @param _mintAddress sequencer mint address
+     * @param _nodeID sequencer node ID
+     */
     function createSequencer(
         uint256 _amount,
         address _mintAddress,
@@ -65,7 +84,10 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         emit SequencerCreate(msg.sender, _mintAddress, _nodeID);
     }
 
-    // Check sequencer exist then add deposit amount
+    /**
+     * Check sequencer exist then add deposit amount
+     * @param _amount amount of bit token
+     */
     function deposit(uint256 _amount) external nonReentrant {
         // check params
         require(_amount > 0, "Invild amount");
@@ -82,9 +104,12 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         );
     }
 
-    // amount > deposit(signer).amount -> withdraw all
-    // 0 < amount < deposit(signer).amount -> withdraw amount to signer
-    // when deposit(signer).amount = 0, delete the sequencer
+    /**
+     * amount > deposit(signer).amount -> withdraw all
+     * 0 < amount < deposit(signer).amount -> withdraw amount to signer
+     * when deposit(signer).amount = 0, delete the sequencer
+     * @param _amount amount of bit token
+     */
     function withdraw(uint256 _amount) external nonReentrant {
         // check params
         require(_amount > 0, "Invild amount");
@@ -112,8 +137,10 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         }
     }
 
-    // Check sequencer exist then withdraw all.
-    // This action will delete sequencer after withdraw
+    /**
+     * Check sequencer exist then withdraw all.
+     * This action will delete sequencer after withdraw
+     */
     function withdrawAll() external nonReentrant {
         // check already have sequencer
         require(sequencers[msg.sender].mintAddress != address(0), "Do not have create");
@@ -127,7 +154,10 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         deleteSequencer(msg.sender);
     }
 
-    // Return all sequencer infos
+    /**
+     * Return all sequencer infos
+     * @return seqs all sequencers
+     */
     function getSequencers() external view returns (SequencerInfo[] memory) {
         SequencerInfo[] memory seqs = new SequencerInfo[](owners.length);
         for (uint256 i = 0; i < owners.length; i++) {
@@ -137,22 +167,33 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         return seqs;
     }
 
-    // Return sequencer info by signer address
+    /**
+     * Return sequencer info by signer address
+     * @param signer signer address, the key to find sequencer
+     # @return seq sequencer info
+     */
     function getSequencer(address signer) public view returns (SequencerInfo memory) {
         return sequencers[signer];
     }
 
-    // Return owners
+    /**
+     * Return owners
+     # @return owners all owners
+     */
     function getOwners() public view returns (address[] memory) {
         return owners;
     }
 
-    // Return if signer exist
+    /**
+     * Return if signer exist
+     */
     function isSequencer(address signer) public view returns (bool) {
         return sequencers[signer].mintAddress != address(0);
     }
 
-    // Delete sequencer
+    /**
+     * Delete sequencer
+     */
     function deleteSequencer(address signer) internal {
         uint256 index = sequencers[signer].keyIndex;
         uint256 length = owners.length;

@@ -33,7 +33,7 @@ function bitToken() external view returns (address)
 function changeBitAddress(address _bitToken) external nonpayable
 ```
 
-
+Change bit token address
 
 
 
@@ -41,7 +41,7 @@ function changeBitAddress(address _bitToken) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _bitToken | address | undefined
+| _bitToken | address | new ERC20 address of bit token
 
 ### createSequencer
 
@@ -49,7 +49,7 @@ function changeBitAddress(address _bitToken) external nonpayable
 function createSequencer(uint256 _amount, address _mintAddress, bytes _nodeID) external nonpayable
 ```
 
-
+Create a new sequencer info and init amount
 
 
 
@@ -57,9 +57,9 @@ function createSequencer(uint256 _amount, address _mintAddress, bytes _nodeID) e
 
 | Name | Type | Description |
 |---|---|---|
-| _amount | uint256 | undefined
-| _mintAddress | address | undefined
-| _nodeID | bytes | undefined
+| _amount | uint256 | amount of bit token, will transfer to this contract when sequencer create
+| _mintAddress | address | sequencer mint address
+| _nodeID | bytes | sequencer node ID
 
 ### deposit
 
@@ -67,7 +67,7 @@ function createSequencer(uint256 _amount, address _mintAddress, bytes _nodeID) e
 function deposit(uint256 _amount) external nonpayable
 ```
 
-
+Check sequencer exist then add deposit amount
 
 
 
@@ -75,7 +75,7 @@ function deposit(uint256 _amount) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _amount | uint256 | undefined
+| _amount | uint256 | amount of bit token
 
 ### getOwners
 
@@ -83,7 +83,7 @@ function deposit(uint256 _amount) external nonpayable
 function getOwners() external view returns (address[])
 ```
 
-
+Return owners
 
 
 
@@ -92,7 +92,7 @@ function getOwners() external view returns (address[])
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address[] | undefined
+| _0 | address[] | owners all owners
 
 ### getSequencer
 
@@ -100,7 +100,7 @@ function getOwners() external view returns (address[])
 function getSequencer(address signer) external view returns (struct Sequencer.SequencerInfo)
 ```
 
-
+Return sequencer info by signer address
 
 
 
@@ -108,13 +108,13 @@ function getSequencer(address signer) external view returns (struct Sequencer.Se
 
 | Name | Type | Description |
 |---|---|---|
-| signer | address | undefined
+| signer | address | signer address, the key to find sequencer
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | Sequencer.SequencerInfo | undefined
+| _0 | Sequencer.SequencerInfo | seq sequencer info
 
 ### getSequencers
 
@@ -122,7 +122,7 @@ function getSequencer(address signer) external view returns (struct Sequencer.Se
 function getSequencers() external view returns (struct Sequencer.SequencerInfo[])
 ```
 
-
+Return all sequencer infos
 
 
 
@@ -131,7 +131,7 @@ function getSequencers() external view returns (struct Sequencer.SequencerInfo[]
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | Sequencer.SequencerInfo[] | undefined
+| _0 | Sequencer.SequencerInfo[] | seqs all sequencers
 
 ### initialize
 
@@ -155,7 +155,7 @@ function initialize(address _bitToken) external nonpayable
 function isSequencer(address signer) external view returns (bool)
 ```
 
-
+Return if signer exist
 
 
 
@@ -291,7 +291,7 @@ function transferOwnership(address newOwner) external nonpayable
 function withdraw(uint256 _amount) external nonpayable
 ```
 
-
+amount &gt; deposit(signer).amount -&gt; withdraw all 0 &lt; amount &lt; deposit(signer).amount -&gt; withdraw amount to signer when deposit(signer).amount = 0, delete the sequencer
 
 
 
@@ -299,7 +299,7 @@ function withdraw(uint256 _amount) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _amount | uint256 | undefined
+| _amount | uint256 | amount of bit token
 
 ### withdrawAll
 
@@ -307,7 +307,7 @@ function withdraw(uint256 _amount) external nonpayable
 function withdrawAll() external nonpayable
 ```
 
-
+Check sequencer exist then withdraw all. This action will delete sequencer after withdraw
 
 
 
