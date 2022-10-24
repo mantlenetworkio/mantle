@@ -7,15 +7,15 @@ const config = {
   ctcEnqueueGasCost: 60_000,
   sccFaultProofWindowSeconds: 0,
   sccSequencerPublishWindowSeconds: 12592000,
-  bvmSequencerAddress: '0x63EB358137cd06290544e71210c140B345C6FF10',
-  bvmProposerAddress: '0x733e38C8C6fEf12D3916eAc679Ef8f5Ffb39127B',
+  bvmSequencerAddress: process.env.BVM_SEQUENCER_ADDRESS ||  '0x3f4d7673D7F6db148B7AC1F9158845887A9bea16',
+  bvmProposerAddress: process.env.BVM_PROPOSER_ADDRESS || '0x1681119781834bf9D4B4b868600c8498f84ebaDc',
   //default bvmBlockSignerAddress
-  bvmBlockSignerAddress: '0x00000398232E2064F896018496b4b44b3D62751F',
-  bvmFeeWalletAddress: '0x63EB358137cd06290544e71210c140B345C6FF10',
-  bvmAddressManagerOwner: '0x63EB358137cd06290544e71210c140B345C6FF10',
-  bvmGasPriceOracleOwner: '0x63EB358137cd06290544e71210c140B345C6FF10',
-  bvmSequencerFeeWalletOwner: '0x63EB358137cd06290544e71210c140B345C6FF10',
-  l1BitAddress: '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
+  bvmBlockSignerAddress: process.env.BVM_BLOCK_SIGNER_ADDRESS || '0x00000398232E2064F896018496b4b44b3D62751F',
+  bvmFeeWalletAddress: process.env.BVM_FEE_WALLET_ADDRESS || '0xDEc0c7BDf53607cd860c0690b182D9D4C5afE5Bf',
+  bvmAddressManagerOwner: process.env.BVM_ADDRESS_MANAGER_OWNER || '0x3f4d7673D7F6db148B7AC1F9158845887A9bea16',
+  bvmGasPriceOracleOwner: process.env.BVM_GAS_PRICE_ORACLE_OWNER || '0xDEc0c7BDf53607cd860c0690b182D9D4C5afE5Bf',
+  bvmGasPriceOracleOwner: process.env.BVM_GAS_PRICE_ORACLE_OWNER || '0x63EB358137cd06290544e71210c140B345C6FF10',
+  l1BitAddress: process.env.L1_BIT_ADDRESS || '0x320735F74BaA37Bc344a96D4A4EfABBAB06A522C',
 }
 
 export default config

@@ -9,7 +9,6 @@ build:
 .PHONY: build
 
 up:
-	$(COPY_ENV)
 	DOCKER_BUILDKIT=1 \
 	$(DOCKER_COMPOSE_CMD) \
 		up --build --detach $(service)
