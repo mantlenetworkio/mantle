@@ -46,7 +46,6 @@ func (p *Processor) Verify() {
 							result = resultTmp
 						}
 					}(index, stateRoot)
-
 				}
 				wg.Wait()
 				if result {
@@ -83,6 +82,11 @@ func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger z
 	blockNumber := offset.Add(offset, startBig)
 	logger.Info().Msgf("verify block number %d", blockNumber)
 
+	value, ok := p.cacheVerify.Get(blockNumber.String())
+	if ok {
+		return value
+	}
+
 	block, err := p.l2Client.BlockByNumber(p.ctx, blockNumber)
 	if err != nil {
 		logger.Err(err).Msgf("failed to get block by (%d) ", blockNumber)
@@ -90,9 +94,13 @@ func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger z
 	} else {
 		if hexutil.Encode(stateRoot[:]) != block.Root().String() {
 			logger.Info().Msgf("block number (%d) state root doesn't same, state root (%s) , block root (%s)", blockNumber, hexutil.Encode(stateRoot[:]), block.Root().String())
+			bol := p.CacheVerify(blockNumber.String(), false)
+			logger.Info().Msgf("cache verify behavior %s ", bol)
 			return false
 		} else {
 			logger.Info().Msgf("block number (%d) verify success", blockNumber)
+			bol := p.CacheVerify(blockNumber.String(), true)
+			logger.Info().Msgf("cache verify behavior %s ", bol)
 			return true
 		}
 	}
@@ -102,4 +110,10 @@ func (p *Processor) UpdateWaitSignEvents(uniqueId string, msg common.SignStateRe
 	p.waitSignLock.Lock()
 	defer p.waitSignLock.Unlock()
 	p.waitSignMsgs[uniqueId] = msg
+}
+
+func (p *Processor) CacheVerify(key string, value bool) bool {
+	p.cacheVerifyLock.Lock()
+	defer p.cacheVerifyLock.Unlock()
+	return p.cacheVerify.Set(key, value)
 }
