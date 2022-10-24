@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	"net"
 	"net/http"
@@ -71,17 +72,23 @@ func OnConnect(wm *WebsocketManager) func(wsc *wsConnection) {
 			for {
 				select {
 				case res := <-wsc.Output():
-					recvChanMap := wm.recvChanMap
-					if len(recvChanMap) > 0 {
-						id := res.ID.(tmtypes.JSONRPCStringID).String()
-						recvChan, ok := recvChanMap[id]
-						if ok {
-							recvChan <- ResponseMsg{
-								RpcResponse: res,
-								SourceNode:  wsc.nodePublicKey,
+					func() {
+						wm.rcRWLock.Lock()
+						defer wm.rcRWLock.Unlock()
+						if len(wm.recvChanMap) > 0 {
+							id := res.ID.(tmtypes.JSONRPCStringID).String()
+							recvChan, ok := wm.recvChanMap[id]
+							if ok {
+								recvChan <- ResponseMsg{
+									RpcResponse: res,
+									SourceNode:  wsc.nodePublicKey,
+								}
+								return
 							}
 						}
-					}
+						wsc.Logger.Info("[WS]received unrecognized responseID", "ID", res.ID.(tmtypes.JSONRPCStringID).String(), "CurrentMap", fmt.Sprintf("%v", wm.recvChanMap))
+					}()
+
 				case <-wsc.readRoutineQuit:
 					return
 				}
