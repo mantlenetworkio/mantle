@@ -154,8 +154,6 @@ func (t *TssServer) KeySign(req keysign2.Request) (keysign2.Response, error) {
 	var generatedSig keysign2.Response
 	var errGen error
 	keysignStartTime := time.Now()
-	//TODO maybe we need to wait some time for all nodes can set subscribe channel done.
-	time.Sleep(800 * time.Microsecond)
 
 	generatedSig, errGen = t.generateSignature(onlines, req, localStateItem, keysignInstance)
 	if errGen != nil {

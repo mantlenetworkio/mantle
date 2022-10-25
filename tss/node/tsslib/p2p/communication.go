@@ -210,18 +210,20 @@ func (c *Communication) readFromStream(stream network.Stream) {
 		//c.logger.Debug().Msgf(">>>>>>>[%s] %s", wrappedMsg.MessageType, string(wrappedMsg.Payload))
 		c.streamMgr.AddStream(wrappedMsg.MsgID, stream)
 
-		channel := c.getSubscriber(wrappedMsg.MessageType, wrappedMsg.MsgID)
-		c.logger.Debug().Msgf("from peer (%s) ,MsgId (%s), MsgType (%s)", peerID, wrappedMsg.MsgID, wrappedMsg.MessageType)
-		if nil == channel {
-			c.logger.Debug().Msgf("no MsgID %s found for this message", wrappedMsg.MsgID)
-			c.logger.Debug().Msgf("no MsgID %s found for this message", wrappedMsg.MessageType)
-			return
+		for i := 1; i < 4; i++ {
+			channel := c.getSubscriber(wrappedMsg.MessageType, wrappedMsg.MsgID)
+			if channel != nil {
+				c.logger.Debug().Msgf("from peer (%s) ,MsgId (%s), MsgType (%s)", peerID, wrappedMsg.MsgID, wrappedMsg.MessageType)
+				channel <- &Message{
+					PeerID:  stream.Conn().RemotePeer(),
+					Payload: dataBuf,
+				}
+				break
+			} else {
+				c.logger.Debug().Msgf("no MsgID %s found for this message,need to retry %d time", wrappedMsg.MsgID, i)
+				c.logger.Debug().Msgf("no MsgID %s found for this message,need to retry %d time", wrappedMsg.MessageType, i)
+			}
 		}
-		channel <- &Message{
-			PeerID:  stream.Conn().RemotePeer(),
-			Payload: dataBuf,
-		}
-
 	}
 }
 
