@@ -65,7 +65,6 @@ func (p *Processor) SignSlash() {
 					addr, _ := tsscommon.NodeToAddress(node)
 					nodesaddrs[i] = addr
 				}
-				//TODO SlashMsg bytes
 				hashTx, err := tsscommon.SlashMsgHash(requestBody.BatchIndex, requestBody.Address, nodesaddrs, requestBody.SignType)
 
 				if err != nil {

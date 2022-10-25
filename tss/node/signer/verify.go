@@ -40,15 +40,12 @@ func (p *Processor) Verify() {
 				wg.Add(offset)
 				var result = true
 				for index, stateRoot := range askRequest.StateRoots {
-					//TODO
-					logger.Info().Msgf("---index %d ,state root is %s", index, hexutil.Encode(stateRoot[:]))
 					go func(fIndex int, fStateRoot [32]byte) {
 						resultTmp := p.verify(askRequest.StartBlock, fIndex, fStateRoot, logger, wg)
 						if !resultTmp {
 							result = resultTmp
 						}
 					}(index, stateRoot)
-
 				}
 				wg.Wait()
 				if result {
@@ -78,12 +75,17 @@ func (p *Processor) Verify() {
 
 func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger zerolog.Logger, wg *sync.WaitGroup) bool {
 	defer wg.Done()
-	defer logger.Info().Msgf("start block number:(%d),index (%d), verify done", start, index)
+	defer logger.Info().Msgf("start block number:(%s),index (%d), verify done", start, index)
 
 	offset := new(big.Int).SetInt64(int64(index))
 	startBig, _ := new(big.Int).SetString(start, 10)
 	blockNumber := offset.Add(offset, startBig)
 	logger.Info().Msgf("verify block number %d", blockNumber)
+
+	value, ok := p.cacheVerify.Get(blockNumber.String())
+	if ok {
+		return value
+	}
 
 	block, err := p.l2Client.BlockByNumber(p.ctx, blockNumber)
 	if err != nil {
@@ -92,9 +94,13 @@ func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger z
 	} else {
 		if hexutil.Encode(stateRoot[:]) != block.Root().String() {
 			logger.Info().Msgf("block number (%d) state root doesn't same, state root (%s) , block root (%s)", blockNumber, hexutil.Encode(stateRoot[:]), block.Root().String())
+			bol := p.CacheVerify(blockNumber.String(), false)
+			logger.Info().Msgf("cache verify behavior %s ", bol)
 			return false
 		} else {
 			logger.Info().Msgf("block number (%d) verify success", blockNumber)
+			bol := p.CacheVerify(blockNumber.String(), true)
+			logger.Info().Msgf("cache verify behavior %s ", bol)
 			return true
 		}
 	}
@@ -104,4 +110,10 @@ func (p *Processor) UpdateWaitSignEvents(uniqueId string, msg common.SignStateRe
 	p.waitSignLock.Lock()
 	defer p.waitSignLock.Unlock()
 	p.waitSignMsgs[uniqueId] = msg
+}
+
+func (p *Processor) CacheVerify(key string, value bool) bool {
+	p.cacheVerifyLock.Lock()
+	defer p.cacheVerifyLock.Unlock()
+	return p.cacheVerify.Set(key, value)
 }

@@ -107,11 +107,11 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 			p.address)
 		return err
 	}
-	p.logger.Info().Msgf("Current nonce is %s", nonce64)
+	p.logger.Info().Msgf("Current nonce is %d", nonce64)
 	nonce := new(big.Int).SetUint64(nonce64)
 	opts.Nonce = nonce
+	opts.NoSend = true
 
-	// opts.NoSend = true
 	contract, err := tgm.NewTssGroupManager(address, p.l1Client)
 	if err != nil {
 		p.logger.Err(err).Msg("Unable to new tss group manager contract")

@@ -11,6 +11,7 @@ require (
 	github.com/binance-chain/tss-lib v1.3.3
 	github.com/btcsuite/btcd v0.22.1
 	github.com/deckarep/golang-set v1.8.0
+	github.com/elliotchance/orderedmap/v2 v2.2.0
 	github.com/ethereum/go-ethereum v1.10.17
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-kit/kit v0.12.0

@@ -57,7 +57,10 @@ func (p *Processor) Sign() {
 				}
 				nodeSignRequest.RequestBody = requestBody
 
-				err, hash := checkMessages(requestBody, p.waitSignMsgs)
+				var data []byte
+				err, hash, signByte := p.checkMessages(requestBody)
+				hashStr := hexutil.Encode(hash)
+
 				if err != nil {
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 
@@ -66,50 +69,56 @@ func (p *Processor) Sign() {
 					continue
 				}
 
-				data, culprits, err := p.handleSign(nodeSignRequest, hash, logger)
-				hashStr := hexutil.Encode(hash)
+				//cache can not find the sign result by hashStr,we need to handle sign request.
+				if signByte == nil {
+					signData, culprits, err := p.handleSign(nodeSignRequest, hash, logger)
+					if err != nil {
+						logger.Error().Msgf(" %s sign failed ", hashStr)
+						var errorRes tdtypes.RPCResponse
+						if len(culprits) > 0 {
+							respData := strings.Join(culprits, ",")
+							errorRes = tdtypes.NewRPCErrorResponse(req.ID, 100, err.Error(), respData)
+							p.nodeStore.AddCulprits(culprits)
 
-				if err != nil {
-					logger.Error().Msgf(" %s sign failed ", hashStr)
-					var errorRes tdtypes.RPCResponse
-					if len(culprits) > 0 {
-						respData := strings.Join(culprits, ",")
-						errorRes = tdtypes.NewRPCErrorResponse(req.ID, 100, err.Error(), respData)
-						p.nodeStore.AddCulprits(culprits)
-
-						//store slash info
-						for _, culprit := range culprits {
-							addr, err := tsscommon.NodeToAddress(culprit)
-							if err != nil {
-								logger.Error().Msgf("failed to convert node to address %s", culprit)
+							//store slash info
+							for _, culprit := range culprits {
+								addr, err := tsscommon.NodeToAddress(culprit)
+								if err != nil {
+									logger.Error().Msgf("failed to convert node to address %s", culprit)
+								}
+								p.nodeStore.SetSlashingInfo(slash.SlashingInfo{
+									Address:    addr,
+									ElectionId: requestBody.ElectionId,
+									BatchIndex: math.MaxUint64, // not real, just for identifying the specific slashing info.
+									SlashType:  tsscommon.SlashTypeCulprit,
+								})
 							}
-							p.nodeStore.SetSlashingInfo(slash.SlashingInfo{
-								Address:    addr,
-								ElectionId: requestBody.ElectionId,
-								BatchIndex: math.MaxUint64, // not real, just for identifying the specific slashing info.
-								SlashType:  tsscommon.SlashTypeCulprit,
-							})
+
+						} else {
+							errorRes = tdtypes.NewRPCErrorResponse(req.ID, 201, "sign failed", err.Error())
+						}
+						er := p.wsClient.SendMsg(errorRes)
+						if er != nil {
+							logger.Err(er).Msg("failed to send msg to tss manager")
+						} else {
+							p.removeWaitEvent(hashStr)
 						}
 
-					} else {
-						errorRes = tdtypes.NewRPCErrorResponse(req.ID, 201, "sign failed", err.Error())
+						continue
 					}
-					er := p.wsClient.SendMsg(errorRes)
-					if er != nil {
-						logger.Err(er).Msg("failed to send msg to tss manager")
-					} else {
-						p.removeWaitEvent(hashStr)
-					}
-
-					continue
+					bol := p.CacheSign(hashStr, signData)
+					logger.Info().Msgf("cache sign byte behavior %s ", bol)
+					data = signData
+				} else {
+					data = signByte
 				}
 
 				signResponse := tsscommon.SignResponse{
 					Signature: data,
 				}
 				RpcResponse := tdtypes.NewRPCSuccessResponse(req.ID, signResponse)
-				//TODO
-				logger.Info().Msg("---- start to send response to manager ")
+				logger.Info().Msg("start to send response to manager ")
+
 				err = p.wsClient.SendMsg(RpcResponse)
 				if err != nil {
 					logger.Err(err).Msg("failed to sendMsg to tss manager ")
@@ -164,17 +173,22 @@ func (p *Processor) sign(digestBz []byte, signerPubKeys []string, poolPubKey str
 	}
 }
 
-func checkMessages(sign tsscommon.SignStateRequest, waitSignMsgs map[string]tsscommon.SignStateRequest) (error, []byte) {
-	hashByte, err := signMsgToHash(sign)
+func (p *Processor) checkMessages(sign tsscommon.SignStateRequest) (err error, hashByte, signByte []byte) {
+	hashByte, err = signMsgToHash(sign)
 	if err != nil {
-		return err, hashByte
+		return err, hashByte, nil
 	}
 	hashStr := hexutil.Encode(hashByte)
-	_, ok := waitSignMsgs[hashStr]
-	if !ok {
-		return errors.New("sign request has the unverified state batch"), nil
+
+	signByte, ok := p.cacheSign.Get(hashStr)
+	if ok {
+		return nil, hashByte, signByte
 	}
-	return nil, hashByte
+	_, ok = p.waitSignMsgs[hashStr]
+	if !ok {
+		return errors.New("sign request has the unverified state batch"), nil, nil
+	}
+	return nil, hashByte, nil
 }
 
 func signMsgToHash(msg tsscommon.SignStateRequest) ([]byte, error) {
@@ -235,4 +249,10 @@ func (p *Processor) storeStateBatch(electionId uint64, stateBatch [][32]byte, wo
 		return err
 	}
 	return nil
+}
+
+func (p *Processor) CacheSign(key string, value []byte) bool {
+	p.cacheSignLock.Lock()
+	defer p.cacheSignLock.Unlock()
+	return p.cacheSign.Set(key, value)
 }
