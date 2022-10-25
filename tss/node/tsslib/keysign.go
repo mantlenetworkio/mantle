@@ -154,6 +154,7 @@ func (t *TssServer) KeySign(req keysign2.Request) (keysign2.Response, error) {
 	var generatedSig keysign2.Response
 	var errGen error
 	keysignStartTime := time.Now()
+
 	generatedSig, errGen = t.generateSignature(onlines, req, localStateItem, keysignInstance)
 	if errGen != nil {
 		return generatedSig, errGen
