@@ -21,8 +21,8 @@ type Configuration struct {
 	TimedTaskInterval              string        `json:"timed_task_interval" mapstructure:"timed_task_interval"`
 	L1ReceiptConfirmTimeout        string        `json:"l1_receipt_confirm_timeout" mapstructure:"l1_receipt_confirm_timeout"`
 	L1ConfirmBlocks                int           `json:"l1_confirm_blocks" mapstructure:"l1_confirm_blocks"`
-	SignedBatchesWindow            int           `json:"signed_batches_window" mapstructure:"signedBatchesWindow"`
-	MinSignedInWindow              int           `json:"min_signed_in_window" mapstructure:"minSignedInWindow"`
+	SignedBatchesWindow            int           `json:"signed_batches_window" mapstructure:"signed_batches_window"`
+	MinSignedInWindow              int           `json:"min_signed_in_window" mapstructure:"min_signed_in_window"`
 }
 
 type ManagerConfig struct {
