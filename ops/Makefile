@@ -65,20 +65,20 @@ ps-metrics:
 .PHONY: ps
 
 up-tss: down-tss
-        DOCKER_BUILDKIT=1 \
-        $(DOCKER_COMPOSE_CMD) \
-                -f docker-compose-tss.yml \
-                up --build --detach
+	DOCKER_BUILDKIT=1 \
+	$(DOCKER_COMPOSE_CMD) \
+		-f docker-compose-tss.yml \
+		up 
 .PHONY: up-tss
 
 down-tss:
 	$(DOCKER_COMPOSE_CMD) \
-                -f docker-compose-tss.yml \
-                down
+		-f docker-compose-tss.yml \
+		down
 .PHONY: down-tss
 
 ps-tss:
 	$(DOCKER_COMPOSE_CMD) \
-                -f docker-compose-tss.yml \
-                ps
+		-f docker-compose-tss.yml \
+		ps
 .PHONY: ps
