@@ -111,6 +111,8 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 		keygenRequestChan:         make(chan tdtypes.RPCRequest, 1),
 		waitSignLock:              &sync.Mutex{},
 		waitSignMsgs:              make(map[string]common.SignStateRequest),
+		waitSignSlashLock:         &sync.Mutex{},
+		waitSignSlashMsgs:         make(map[string]map[uint64]common.SlashRequest),
 		cacheVerifyLock:           &sync.Mutex{},
 		cacheVerify:               types.NewCache[string, bool](50),
 		cacheSignLock:             &sync.Mutex{},
