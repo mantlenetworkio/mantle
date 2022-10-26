@@ -128,7 +128,7 @@ func (m Manager) handleSlashing(si slash.SlashingInfo) {
 	}
 	digestBz, err := tss.SlashMsgHash(request.BatchIndex, request.Address, approversAddress, request.SignType)
 	if err != nil {
-		log.Error("failed to encode SlashMsg")
+		log.Error("failed to encode SlashMsg", "err", err)
 		return
 	}
 	// store the si with the related transaction bytes
