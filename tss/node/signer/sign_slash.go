@@ -66,7 +66,7 @@ func (p *Processor) SignSlash() {
 					nodesaddrs[i] = addr
 				}
 				hashTx, err := tsscommon.SlashMsgHash(requestBody.BatchIndex, requestBody.Address, nodesaddrs, requestBody.SignType)
-
+				mesTx, err := tsscommon.SlashMsgBytes(requestBody.BatchIndex, requestBody.Address, nodesaddrs, requestBody.SignType)
 				if err != nil {
 					logger.Err(err).Msg("failed to encode SlashMsg")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
@@ -94,7 +94,7 @@ func (p *Processor) SignSlash() {
 					}
 					continue
 				}
-				txData, gasPrice, err := p.txBuilder(hashTx, data)
+				txData, gasPrice, err := p.txBuilder(mesTx, data)
 				if err != nil {
 					logger.Err(err).Msg("failed to txbuilder slash tranction")
 					errorRes := tdtypes.NewRPCErrorResponse(req.ID, 201, "sign failed", err.Error())
