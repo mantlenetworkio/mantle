@@ -7,8 +7,10 @@ LDFLAGSSTRING +=-X main.GitDate=$(GITDATE)
 LDFLAGSSTRING +=-X main.GitVersion=$(GITVERSION)
 LDFLAGS := -ldflags "$(LDFLAGSSTRING)"
 
-CTC_ABI_ARTIFACT := ../../packages/contracts/artifacts/contracts/L1/rollup/CanonicalTransactionChain.sol/CanonicalTransactionChain.json
-SCC_ABI_ARTIFACT := ../../packages/contracts/artifacts/contracts/L1/rollup/StateCommitmentChain.sol/StateCommitmentChain.json
+CTC_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/L1/rollup/CanonicalTransactionChain.sol/CanonicalTransactionChain.json
+SCC_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/L1/rollup/StateCommitmentChain.sol/StateCommitmentChain.json
+
+SEQUENCER_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/L1/sequencer/Sequencer.sol/Sequencer.json
 
 scheduler:
 	env GO111MODULE=on go build -v $(LDFLAGS) ./cmd/scheduler
@@ -22,7 +24,7 @@ test:
 lint:
 	golangci-lint run ./...
 
-bindings: bindings-ctc bindings-scc
+bindings: bindings-ctc bindings-scc bindings-sequencer
 
 bindings-ctc:
 	$(eval temp := $(shell mktemp))
@@ -52,6 +54,22 @@ bindings-scc:
 		--abi - \
 		--out bindings/scc/state_commitment_chain.go \
 		--type StateCommitmentChain \
+		--bin $(temp)
+
+	rm $(temp)
+
+bindings-sequencer:
+	$(eval temp := $(shell mktemp))
+
+	cat $(SEQUENCER_ABI_ARTIFACT) \
+		| jq -r .bytecode > $(temp)
+
+	cat $(SEQUENCER_ABI_ARTIFACT) \
+		| jq .abi \
+		| abigen --pkg seq \
+		--abi - \
+		--out bindings/sequencer/sequencer.go \
+		--type Sequencer \
 		--bin $(temp)
 
 	rm $(temp)
