@@ -30,26 +30,28 @@ func (p *Processor) VerifySlash() {
 					continue
 				}
 
-				var re bool
+				var ret bool
 				if askRequest.SignType == common.SlashTypeCulprit {
 					culprits := p.nodeStore.GetCulprits()
 					if len(culprits) > 0 {
 						for _, v := range culprits {
 							if v == askRequest.Address.String() {
-								re = true
+								ret = true
 								break
 							}
 						}
 					}
 				} else if askRequest.SignType == common.SlashTypeLiveness {
-					result := p.nodeStore.GetNodeMissedBatchBitArray(askRequest.Address, askRequest.BatchIndex)
-					re = result
+					found, info := p.nodeStore.GetSlashingInfo(askRequest.Address, askRequest.BatchIndex)
+					if found && info.SlashType == common.SlashTypeLiveness {
+						ret = true
+					}
 				}
-				if re {
+				if ret {
 					p.UpdateWaitSignSlashMsgs(askRequest)
 				}
 				askResponse := common.AskResponse{
-					Result: re,
+					Result: ret,
 				}
 				RpcResponse = tdtypes.NewRPCSuccessResponse(resId, askResponse)
 				p.wsClient.SendMsg(RpcResponse)

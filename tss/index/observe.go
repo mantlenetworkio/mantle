@@ -81,7 +81,8 @@ func (o Indexer) ObserveStateBatchAppended(scannedHeight uint64) {
 				endHeight = latestConfirmedBlockHeight
 			}
 			if startHeight > endHeight {
-				startHeight = endHeight
+				log.Info("Waiting for L1 block produced", "latest confirmed height", latestConfirmedBlockHeight)
+				return
 			}
 			events, err := FilterStateBatchAppendedEvent(o.l1Cli, int64(startHeight), int64(endHeight), o.sccContractAddr)
 			if err != nil {

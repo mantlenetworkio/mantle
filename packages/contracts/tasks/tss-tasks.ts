@@ -1,7 +1,6 @@
 import {task} from 'hardhat/config'
 import {getContractFactory} from '../src/contract-defs'
 import {HexToBytes} from "../src/deploy-utils";
-import {ethers} from "ethers";
 
 
 task("setTssGroupMember")
@@ -41,6 +40,28 @@ task("setSlashingParams")
     await tssStakingSlashing.connect(accounts[0]).setSlashingParams(slashParams, exIncomes)
   })
 
+task('getSlashingParams')
+  .addParam('contract', 'tss staking slashing contract address')
+  .setAction(async (taskArgs, hre) => {
+    const tssStakingSlashing = getContractFactory('TssStakingSlashing').attach(taskArgs.contract)
+    const params = await tssStakingSlashing.connect(hre.ethers.provider).getSlashingParams()
+    if (params.length === 0) {
+      console.log('slashing params has not been set')
+      return
+    }
+    console.log('minimum deposit amount required: ', params[0][1].toString())
+    console.log('liveness slashing amount: ', params[0][0].toString())
+    console.log('animus slashing amount: ', params[0][1].toString())
+    console.log(
+      'additional rewards for sender by liveness case: ',
+      params[1][0].toString()
+    )
+    console.log(
+      'additional rewards for sender by animus case: ',
+      params[1][1].toString()
+    )
+  })
+
 task("clearQuitRequestList")
   .addParam('contract', "tss staking slashing contract address")
   .setAction(async (taskArgs, hre) => {
@@ -53,12 +74,110 @@ task("staking")
   .addParam('contract', "tss staking slashing contract address")
   .addParam('amount')
   .addParam('pubkey')
-  .addParam('prikey')
   .setAction(async (taskArgs, hre) => {
-    const signer = new hre.ethers.Wallet(
-      taskArgs.prikey,
-      hre.ethers.provider
-    )
+    const accounts = await hre.ethers.getSigners()
     const tssStakingSlashing = getContractFactory('TssStakingSlashing').attach(taskArgs.contract)
-    await tssStakingSlashing.connect(signer).staking(taskArgs.amount, taskArgs.pubkey)
+    await tssStakingSlashing.connect(accounts[0]).staking(taskArgs.amount, taskArgs.pubkey)
   })
+
+task('withdrawToken')
+  .addParam('contract', 'tss staking slashing contract address')
+  .setAction(async (taskArgs, hre) => {
+    const accounts = await hre.ethers.getSigners()
+    const tssStakingSlashing = getContractFactory('TssStakingSlashing').attach(
+      taskArgs.contract
+    )
+    await tssStakingSlashing.connect(accounts[0]).withdrawToken()
+  })
+
+task('unjail')
+  .addParam('contract', 'tss staking slashing contract address')
+  .setAction(async (taskArgs, hre) => {
+    const accounts = await hre.ethers.getSigners()
+    const tssStakingSlashing = getContractFactory('TssStakingSlashing').attach(
+      taskArgs.contract
+    )
+    await tssStakingSlashing.connect(accounts[0]).unJail()
+  })
+
+task(`checkIsTssMember`)
+  .addParam('contract', 'tss group manager contract address')
+  .addParam('pubkey')
+  .setAction(async (taskArgs, hre) => {
+    const tssGroupManager = getContractFactory('TssGroupManager')
+      .attach(taskArgs.contract)
+    const inactiveInfo = await tssGroupManager
+      .connect(hre.ethers.provider)
+      .getTssInactiveGroupInfo()
+    const inactiveMembers = inactiveInfo[3]
+    let found = false
+    for (const i in inactiveMembers) {
+      if (inactiveMembers[i] === taskArgs.pubkey) {
+        found = true
+        break
+      }
+    }
+    if (found) {
+      console.log('true')
+      return
+    }
+
+    const activeInfo = await tssGroupManager
+      .connect(hre.ethers.provider)
+      .getTssGroupInfo()
+    const activeMembers = activeInfo[3]
+    for (const i in activeMembers) {
+      if (activeMembers[i] === taskArgs.pubkey) {
+        found = true
+        break
+      }
+    }
+    console.log(found)
+  })
+
+task(`getTssActiveGroupInfo`)
+  .addParam('contract', 'tss group manager contract address')
+  .setAction(async (taskArgs, hre) => {
+    const tssGroupManager = getContractFactory('TssGroupManager')
+      .attach(taskArgs.contract)
+    const info = await tssGroupManager
+      .connect(hre.ethers.provider)
+      .getTssGroupInfo()
+    console.log(info)
+  })
+
+task(`getTssInactiveGroupInfo`)
+  .addParam('contract', 'tss group manager contract address')
+  .setAction(async (taskArgs, hre) => {
+    const tssGroupManager = getContractFactory('TssGroupManager')
+      .attach(taskArgs.contract)
+    const info = await tssGroupManager
+      .connect(hre.ethers.provider)
+      .getTssInactiveGroupInfo()
+    console.log(info)
+  })
+
+task(`quitRequest`)
+  .addParam('contract', 'tss staking slashing contract address')
+  .setAction(async (taskArgs, hre) => {
+    const accounts = await hre.ethers.getSigners()
+    const tssStakingSlashing = getContractFactory('TssStakingSlashing')
+      .attach(taskArgs.contract)
+    const response = await tssStakingSlashing
+      .connect(accounts[0])
+      .quitRequest()
+    console.log(response)
+  })
+
+task(`getQuitRequestList`)
+  .addParam('contract', 'tss staking slashing contract address')
+  .setAction(async (taskArgs, hre) => {
+    const tssStakingSlashing = getContractFactory('TssStakingSlashing')
+      .attach(taskArgs.contract)
+    const response = await tssStakingSlashing
+      .connect(hre.ethers.provider)
+      .getQuitRequestList()
+    console.log(response)
+  })
+
+
