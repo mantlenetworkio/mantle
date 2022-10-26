@@ -60,6 +60,9 @@ type Config struct {
 	// L2EthRpc is the HTTP provider URL for L1.
 	L2EthRpc string
 
+	// Tss manager client Url
+	TssClientUrl string
+
 	// CTCAddress is the CTC contract address.
 	CTCAddress string
 
@@ -203,6 +206,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		EthNetworkName:            ctx.GlobalString(flags.EthNetworkNameFlag.Name),
 		L1EthRpc:                  ctx.GlobalString(flags.L1EthRpcFlag.Name),
 		L2EthRpc:                  ctx.GlobalString(flags.L2EthRpcFlag.Name),
+		TssClientUrl:              ctx.GlobalString(flags.TssClientUrl.Name),
 		CTCAddress:                ctx.GlobalString(flags.CTCAddressFlag.Name),
 		SCCAddress:                ctx.GlobalString(flags.SCCAddressFlag.Name),
 		MinL1TxSize:               ctx.GlobalUint64(flags.MinL1TxSizeFlag.Name),

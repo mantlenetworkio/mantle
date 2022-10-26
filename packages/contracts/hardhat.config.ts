@@ -1,9 +1,10 @@
-import { HardhatUserConfig } from 'hardhat/types'
+import {HardhatUserConfig} from 'hardhat/types'
 import 'solidity-coverage'
 import * as dotenv from 'dotenv'
-import { ethers } from 'ethers'
+import {ethers} from 'ethers'
 
 // Hardhat plugins
+import '@openzeppelin/hardhat-upgrades'
 import '@mantlenetworkio/hardhat-deploy-config'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
@@ -36,6 +37,13 @@ const config: HardhatUserConfig = {
       url: 'http://127.0.0.1:9545',
       accounts: [privateKey],
     },
+    dev: {
+      chainId: 31337,
+      url: 'https://bitnetwork-l1chain.dev.davionlabs.com',
+      accounts: [
+        'dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97',
+      ],
+    },
     mantle: {
       url: 'http://127.0.0.1:8545',
       saveDeployments: false,
@@ -61,17 +69,13 @@ const config: HardhatUserConfig = {
       chainId: 5,
       url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
       deploy,
-      accounts: [
-        'e4bf8c09fc7bb5c3eb932260b9fcf0f2a3fecb61512b0e979afb4ce1187bfe70',
-      ],
+      accounts: [privateKey],
     },
     'goerli-qa': {
       chainId: 5,
       url: 'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28',
       deploy,
-      accounts: [
-        '04586afc8e720e5dbb06f598b056d835bb02cd9743efd438cda8055c90722f33',
-      ],
+      accounts: [privateKey],
     },
     kovan: {
       chainId: 42,
@@ -94,13 +98,13 @@ const config: HardhatUserConfig = {
       {
         version: '0.8.9',
         settings: {
-          optimizer: { enabled: true, runs: 10_000 },
+          optimizer: {enabled: true, runs: 10_000},
         },
       },
       {
         version: '0.5.17', // Required for WETH9
         settings: {
-          optimizer: { enabled: true, runs: 10_000 },
+          optimizer: {enabled: true, runs: 10_000},
         },
       },
     ],

@@ -18,6 +18,7 @@ artifacts
 cache
 
 l2geth/build/bin
+tss/tss
 packages/contracts/deployments/custom
 packages/contracts/coverage*
 packages/contracts/@ens*
