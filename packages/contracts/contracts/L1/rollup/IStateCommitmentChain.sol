@@ -17,7 +17,7 @@ interface IStateCommitmentChain {
         bytes32 _batchRoot,
         uint256 _batchSize,
         uint256 _prevTotalElements,
-        bytes signature,
+        bytes _signature,
         bytes _extraData
     );
 
