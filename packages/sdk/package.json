@@ -1,6 +1,6 @@
 {
   "name": "@mantlenetworkio/sdk",
-  "version": "0.0.2",
+  "version": "2.0.1",
   "description": "[Mantle] Tools for working with Mantle",
   "main": "dist/index",
   "types": "dist/index",
@@ -47,7 +47,7 @@
     "typedoc": "^0.22.13"
   },
   "dependencies": {
-    "@mantlenetworkio/contracts": "0.0.1",
+    "@mantlenetworkio/contracts": "2.0.0",
     "@mantlenetworkio/core-utils": "0.0.1",
     "lodash": "^4.17.21",
     "merkletreejs": "^0.2.27",
