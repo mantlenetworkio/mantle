@@ -14,7 +14,7 @@ services:
       <<: *base-env
       TSS_NODE_PRIVATE_KEY:
       TSS_NODE_BOOTSTRAP_PEERS: 
-      TSS_NODE_EXTERNAL_IP:
+      TSS_NODE_EXTERNAL_IP: 10.5.0.12
       
     volumes:
       - ./data/tss-1:/data
@@ -34,7 +34,7 @@ services:
       <<: *base-env
       TSS_NODE_PRIVATE_KEY:
       TSS_NODE_BOOTSTRAP_PEERS: 
-      TSS_NODE_EXTERNAL_IP:
+      TSS_NODE_EXTERNAL_IP: 10.5.0.12
     volumes:
       - ./data/tss-2:/data
       - ./config/:/app/config
@@ -54,7 +54,7 @@ services:
       <<: *base-env
       TSS_NODE_PRIVATE_KEY:
       TSS_NODE_BOOTSTRAP_PEERS: 
-      TSS_NODE_EXTERNAL_IP:
+      TSS_NODE_EXTERNAL_IP: 10.5.0.13
     volumes:
       - ./data/tss-3:/data
       - ./config/:/app/config
@@ -75,7 +75,7 @@ services:
       <<: *base-env
       TSS_NODE_PRIVATE_KEY:
       TSS_NODE_BOOTSTRAP_PEERS: 
-      TSS_NODE_EXTERNAL_IP:
+      TSS_NODE_EXTERNAL_IP: 10.5.0.14
     volumes:
       - ./data/tss-4:/data
       - ./config/:/app/config
