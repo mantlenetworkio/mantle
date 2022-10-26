@@ -233,6 +233,7 @@ export interface StateRootBatchHeader {
   batchRoot: string
   batchSize: BigNumber
   prevTotalElements: BigNumber
+  signature: string
   extraData: string
 }
 

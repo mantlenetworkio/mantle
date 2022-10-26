@@ -11,6 +11,7 @@ import { IStateCommitmentChain } from "./IStateCommitmentChain.sol";
 import { ICanonicalTransactionChain } from "./ICanonicalTransactionChain.sol";
 import { IBondManager } from "../verification/IBondManager.sol";
 import { IChainStorageContainer } from "./IChainStorageContainer.sol";
+import { ITssGroupManager } from "../tss/ITssGroupManager.sol";
 
 /**
  * @title StateCommitmentChain
@@ -84,7 +85,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
      * @inheritdoc IStateCommitmentChain
      */
     // slither-disable-next-line external-function
-    function appendStateBatch(bytes32[] memory _batch, uint256 _shouldStartAtElement) public {
+    function appendStateBatch(bytes32[] memory _batch, uint256 _shouldStartAtElement, bytes memory _signature) public {
         // Fail fast in to make sure our batch roots aren't accidentally made fraudulent by the
         // publication of batches by some other user.
         require(
@@ -102,13 +103,16 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
 
         require(
             getTotalElements() + _batch.length <=
-                ICanonicalTransactionChain(resolve("CanonicalTransactionChain")).getTotalElements(),
+            ICanonicalTransactionChain(resolve("CanonicalTransactionChain")).getTotalElements(),
             "Number of state roots cannot exceed the number of canonical transactions."
         );
 
+        // Call tss group register contract to verify the signature
+        _checkClusterSignature(_batch, _shouldStartAtElement, _signature);
+
         // Pass the block's timestamp and the publisher of the data
         // to be used in the fraud proofs
-        _appendBatch(_batch, abi.encode(block.timestamp, msg.sender));
+        _appendBatch(_batch, _signature, abi.encode(block.timestamp, msg.sender));
     }
 
     /**
@@ -160,9 +164,9 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
      * @inheritdoc IStateCommitmentChain
      */
     function insideFraudProofWindow(Lib_BVMCodec.ChainBatchHeader memory _batchHeader)
-        public
-        view
-        returns (bool _inside)
+    public
+    view
+    returns (bool _inside)
     {
         (uint256 timestamp, ) = abi.decode(_batchHeader.extraData, (uint256, address));
 
@@ -188,12 +192,12 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
         assembly {
             extraData := shr(40, extraData)
             totalElements := and(
-                extraData,
-                0x000000000000000000000000000000000000000000000000000000FFFFFFFFFF
+            extraData,
+            0x000000000000000000000000000000000000000000000000000000FFFFFFFFFF
             )
             lastSequencerTimestamp := shr(
-                40,
-                and(extraData, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000)
+            40,
+            and(extraData, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000)
             )
         }
         // solhint-enable max-line-length
@@ -208,9 +212,9 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
      * @return Encoded batch context.
      */
     function _makeBatchExtraData(uint40 _totalElements, uint40 _lastSequencerTimestamp)
-        internal
-        pure
-        returns (bytes27)
+    internal
+    pure
+    returns (bytes27)
     {
         bytes27 extraData;
         assembly {
@@ -225,9 +229,26 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
     /**
      * Appends a batch to the chain.
      * @param _batch Elements within the batch.
+     * @param _shouldStartAtElement Relative rollup block height.
+     * @param _signature Signature of batch roots and rollup start height.
+     */
+    function _checkClusterSignature(bytes32[] memory _batch, uint256 _shouldStartAtElement, bytes memory _signature)
+    internal
+    {
+        // abi hash encode to bytes
+        require(
+            ITssGroupManager(resolve("TssGroupManager")).verifySign(
+                keccak256(abi.encode(_batch, _shouldStartAtElement)), _signature),
+            "verify signature failed"
+        );
+    }
+
+    /**
+     * Appends a batch to the chain.
+     * @param _batch Elements within the batch.
      * @param _extraData Any extra data to append to the batch.
      */
-    function _appendBatch(bytes32[] memory _batch, bytes memory _extraData) internal {
+    function _appendBatch(bytes32[] memory _batch, bytes memory _signature, bytes memory _extraData) internal {
         address sequencer = resolve("BVM_Proposer");
         (uint40 totalElements, uint40 lastSequencerTimestamp) = _getBatchExtraData();
 
@@ -248,11 +269,12 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
         // while calculating the root hash therefore any arguments passed to it must not
         // be used again afterwards
         Lib_BVMCodec.ChainBatchHeader memory batchHeader = Lib_BVMCodec.ChainBatchHeader({
-            batchIndex: getTotalBatches(),
-            batchRoot: Lib_MerkleTree.getMerkleRoot(_batch),
-            batchSize: _batch.length,
-            prevTotalElements: totalElements,
-            extraData: _extraData
+        batchIndex: getTotalBatches(),
+        batchRoot: Lib_MerkleTree.getMerkleRoot(_batch),
+        batchSize: _batch.length,
+        prevTotalElements: totalElements,
+        signature: _signature,
+        extraData: _extraData
         });
 
         emit StateBatchAppended(
@@ -260,6 +282,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
             batchHeader.batchRoot,
             batchHeader.batchSize,
             batchHeader.prevTotalElements,
+            batchHeader.signature,
             batchHeader.extraData
         );
 
@@ -297,9 +320,9 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
      * @return Whether or not the header matches the stored one.
      */
     function _isValidBatchHeader(Lib_BVMCodec.ChainBatchHeader memory _batchHeader)
-        internal
-        view
-        returns (bool)
+    internal
+    view
+    returns (bool)
     {
         return Lib_BVMCodec.hashBatchHeader(_batchHeader) == batches().get(_batchHeader.batchIndex);
     }

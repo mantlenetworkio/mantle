@@ -60,7 +60,7 @@ contract BVM_SequencerFeeVault {
         );
 
         L2StandardBridge(Lib_PredeployAddresses.L2_STANDARD_BRIDGE).withdrawTo(
-            Lib_PredeployAddresses.BVM_ETH,
+            Lib_PredeployAddresses.BVM_BIT,
             l1FeeWallet,
             address(this).balance,
             0,

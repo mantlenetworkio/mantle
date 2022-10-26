@@ -1,0 +1,92 @@
+version: "3.4"
+
+x-base-env: &base-env
+  TSS_NODE_BASE_DIR: /data/tssnode
+  TSS_NODE_DB_DIR: /data/tssnode/db
+
+services:
+  tss-1:
+    image: mantlenetworkio/tss-node:latest
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+    environment:
+      <<: *base-env
+      TSS_NODE_PRIVATE_KEY:
+      TSS_NODE_BOOTSTRAP_PEERS: 
+      TSS_NODE_EXTERNAL_IP: 10.5.0.12
+      
+    volumes:
+      - ./data/tss-1:/data
+      - ./config/:/app/config
+    networks:
+      mantle:
+        ipv4_address: 10.5.0.11
+  
+  tss-2:
+    depends_on:
+      - tss-1
+    image: mantlenetworkio/tss-node:latest
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+    environment:
+      <<: *base-env
+      TSS_NODE_PRIVATE_KEY:
+      TSS_NODE_BOOTSTRAP_PEERS: 
+      TSS_NODE_EXTERNAL_IP: 10.5.0.12
+    volumes:
+      - ./data/tss-2:/data
+      - ./config/:/app/config
+    networks:
+      mantle:
+        ipv4_address: 10.5.0.12
+
+  tss-3:
+    depends_on:
+      - tss-1
+      - tss-2
+    image: mantlenetworkio/hardhat:latest
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+    environment:
+      <<: *base-env
+      TSS_NODE_PRIVATE_KEY:
+      TSS_NODE_BOOTSTRAP_PEERS: 
+      TSS_NODE_EXTERNAL_IP: 10.5.0.13
+    volumes:
+      - ./data/tss-3:/data
+      - ./config/:/app/config
+    networks:
+      mantle:
+        ipv4_address: 10.5.0.13
+    
+  tss-4:
+    depends_on:
+      - tss-1
+      - tss-2
+      - tss-3
+    image: mantlenetworkio/hardhat:latest
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+    environment:
+      <<: *base-env
+      TSS_NODE_PRIVATE_KEY:
+      TSS_NODE_BOOTSTRAP_PEERS: 
+      TSS_NODE_EXTERNAL_IP: 10.5.0.14
+    volumes:
+      - ./data/tss-4:/data
+      - ./config/:/app/config
+    networks:
+      mantle:
+        ipv4_address: 10.5.0.14
+  
+networks:
+  mantle:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
+         gateway: 10.5.0.1

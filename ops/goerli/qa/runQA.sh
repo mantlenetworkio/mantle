@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 cp -r Makefile.goerli.qa ../../
 cp -r docker-compose.goerli.qa.yml ../../
 

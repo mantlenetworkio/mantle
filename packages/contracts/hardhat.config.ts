@@ -1,9 +1,10 @@
-import { HardhatUserConfig } from 'hardhat/types'
+import {HardhatUserConfig} from 'hardhat/types'
 import 'solidity-coverage'
 import * as dotenv from 'dotenv'
-import { ethers } from 'ethers'
+import {ethers} from 'ethers'
 
 // Hardhat plugins
+import '@openzeppelin/hardhat-upgrades'
 import '@mantlenetworkio/hardhat-deploy-config'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
@@ -35,6 +36,13 @@ const config: HardhatUserConfig = {
       chainId: 31337,
       url: 'http://127.0.0.1:9545',
       accounts: [privateKey],
+    },
+    dev: {
+      chainId: 31337,
+      url: 'https://bitnetwork-l1chain.dev.davionlabs.com',
+      accounts: [
+        'dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97',
+      ],
     },
     mantle: {
       url: 'http://127.0.0.1:8545',
@@ -90,13 +98,13 @@ const config: HardhatUserConfig = {
       {
         version: '0.8.9',
         settings: {
-          optimizer: { enabled: true, runs: 10_000 },
+          optimizer: {enabled: true, runs: 10_000},
         },
       },
       {
         version: '0.5.17', // Required for WETH9
         settings: {
-          optimizer: { enabled: true, runs: 10_000 },
+          optimizer: {enabled: true, runs: 10_000},
         },
       },
     ],
