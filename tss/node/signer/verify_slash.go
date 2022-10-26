@@ -43,6 +43,7 @@ func (p *Processor) VerifySlash() {
 					}
 				} else if askRequest.SignType == common.SlashTypeLiveness {
 					found, info := p.nodeStore.GetSlashingInfo(askRequest.Address, askRequest.BatchIndex)
+					logger.Info().Msgf("--------- found value %s ", found)
 					if found && info.SlashType == common.SlashTypeLiveness {
 						ret = true
 					}

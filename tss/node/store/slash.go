@@ -78,7 +78,6 @@ func (s *Storage) SetSlashingInfo(slashingInfo slash.SlashingInfo) {
 func (s *Storage) GetSlashingInfo(address common.Address, batchIndex uint64) (bool, slash.SlashingInfo) {
 	bz, err := s.db.Get(getSlashingInfoKey(address, batchIndex), nil)
 	if err != nil {
-
 		return handleError2(slash.SlashingInfo{}, err)
 	}
 	var slashingInfo slash.SlashingInfo
