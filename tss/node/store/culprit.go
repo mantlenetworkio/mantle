@@ -30,6 +30,9 @@ func (s *Storage) AddCulprits(culprits []string) {
 func (s *Storage) GetCulprits() []string {
 	bz, err := s.db.Get(getCulpritsKey(), nil)
 	if err != nil {
+		if err == leveldb.ErrNotFound {
+			return nil
+		}
 		panic(err)
 	}
 	var ret []string
