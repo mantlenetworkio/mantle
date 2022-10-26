@@ -11,6 +11,8 @@ import {IStateCommitmentChain} from "./IStateCommitmentChain.sol";
 import {ICanonicalTransactionChain} from "./ICanonicalTransactionChain.sol";
 import {IBondManager} from "../verification/IBondManager.sol";
 import {IChainStorageContainer} from "./IChainStorageContainer.sol";
+import {ITssGroupManager} from "../tss/ITssGroupManager.sol";
+import {ITssRewardContract} from "../../L2/predeploys/iTssRewardContract.sol";
 
 /**
  * @title StateCommitmentChain
