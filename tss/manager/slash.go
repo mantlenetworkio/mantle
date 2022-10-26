@@ -37,6 +37,7 @@ func (m Manager) slashing() {
 }
 
 func (m Manager) handleSlashing(si slash.SlashingInfo) {
+	log.Info("start to handleSlashing", "address", si.Address.String(), "batch_index", si.BatchIndex, "slash_type", si.SlashType, "election id", si.ElectionId)
 	currentBlockNumber, err := m.l1Cli.BlockNumber(context.Background())
 	if err != nil {
 		log.Error("failed to query block number", "err", err)
