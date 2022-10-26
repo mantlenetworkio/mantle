@@ -2,6 +2,7 @@ package signer
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"math/big"
@@ -68,7 +69,7 @@ func (p *Processor) SignSlash() {
 				hashTx, err := tsscommon.SlashMsgHash(requestBody.BatchIndex, requestBody.Address, nodesaddrs, requestBody.SignType)
 				mesTx, err := tsscommon.SlashMsgBytes(requestBody.BatchIndex, requestBody.Address, nodesaddrs, requestBody.SignType)
 				logger.Info().Msgf("nodes %s ", nodesaddrs)
-				logger.Info().Msgf("batchindex %d ,address %s ,signtype %d , mesTx %v", requestBody.BatchIndex, requestBody.Address.String(), requestBody.SignType, mesTx)
+				logger.Info().Msgf("batchindex %d ,address %s ,signtype %d , mesTx %s", requestBody.BatchIndex, requestBody.Address.String(), requestBody.SignType, hex.EncodeToString(mesTx))
 				if err != nil {
 					logger.Err(err).Msg("failed to encode SlashMsg")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
