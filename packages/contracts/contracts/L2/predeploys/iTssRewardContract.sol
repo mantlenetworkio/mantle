@@ -12,7 +12,6 @@ interface ITssRewardContract {
 
     event DistributeTssReward(
         uint batchTime,
-        uint256 length,
         address[] tssMembers
     );
 
