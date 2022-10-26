@@ -97,6 +97,7 @@ task('take-dump').setAction(async (args, hre) => {
     TssRewardContract: {
       _owner: hre.deployConfig.bvmTssRewardContractOwner,
       _deadAddress: "0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead",
+      _sendAmountPerYear: 100000000 * 10 ** 18,
     },
   }
 

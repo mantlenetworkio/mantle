@@ -23,13 +23,15 @@ contract TssRewardContract is ITssRewardContract {
     uint256 public dust;
     uint256 public totalAmount;
     uint256 public latsBatchTime;
-    uint256 public sendAmountPerMinute;
+    uint256 public sendAmountPerSecond;
     uint256 public sendAmountPerYear;
 
     // set call address
-    constructor(address _deadAddress, address _owner) {
+    constructor(address _deadAddress, address _owner,uint256 _sendAmountPerYear) {
         deadAddress = _deadAddress;
         owner = _owner;
+        sendAmountPerYear = _sendAmountPerYear;
+        sendAmountPerSecond = _sendAmountPerYear.div(365 * 24 * 60 * 60);
     }
 
     /**
@@ -84,7 +86,7 @@ contract TssRewardContract is ITssRewardContract {
         uint256 batchAmount = 0;
         uint256 accu = 0;
         // sendAmount
-        batchAmount = (_batchTime - latsBatchTime) * sendAmountPerMinute;
+        batchAmount = (_batchTime - latsBatchTime) * sendAmountPerSecond;
         sendAmount = batchAmount.div(_tssMembers.length);
         for (uint256 j = 0; j < _tssMembers.length; j++) {
             address payable addr = payable(_tssMembers[j]);
