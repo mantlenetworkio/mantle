@@ -29,6 +29,12 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
     address[] public owners;
     // Store bit token address
     address public bitToken;
+    // Store the Epoch
+    uint256 public epoch;
+    // Store limit of sequencer
+    uint256 public sequencerLimit;
+    // Store scheduler
+    bytes public scheduler;
 
     // SequencerCreate(signer, mintAddress, nodeID)
     event SequencerCreate(address, address, bytes);
@@ -42,13 +48,39 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         __ReentrancyGuard_init();
 
         bitToken = _bitToken;
+        epoch = 0;
+        sequencerLimit = 0;
     }
 
     /**
-     * Change bit token address
+     * Update Epoch
+     * @param nodeID new scheculer`s nodeID
+     */
+    function updateScheduler(bytes memory nodeID) public onlyOwner {
+        scheduler = nodeID;
+    }
+
+    /**
+     * Update Epoch
+     * @param _limit new limit
+     */
+    function updateSequencerLimit(uint256 _limit) public onlyOwner {
+        sequencerLimit = _limit;
+    }
+
+    /**
+     * Update Epoch
+     * @param _epoch new epoch
+     */
+    function updateEpoch(uint256 _epoch) public onlyOwner {
+        epoch = _epoch;
+    }
+
+    /**
+     * Update bit token address
      * @param _bitToken new ERC20 address of bit token
      */
-    function changeBitAddress(address _bitToken) public onlyOwner {
+    function updateBitAddress(address _bitToken) public onlyOwner {
         bitToken = _bitToken;
     }
 
