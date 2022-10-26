@@ -67,6 +67,8 @@ func (p *Processor) SignSlash() {
 				}
 				hashTx, err := tsscommon.SlashMsgHash(requestBody.BatchIndex, requestBody.Address, nodesaddrs, requestBody.SignType)
 				mesTx, err := tsscommon.SlashMsgBytes(requestBody.BatchIndex, requestBody.Address, nodesaddrs, requestBody.SignType)
+				logger.Info().Msgf("nodes %s ", nodesaddrs)
+				logger.Info().Msgf("batchindex %d ,address %s ,signtype %s , mesTx %s", requestBody.BatchIndex, requestBody.Address.String(), requestBody.SignType, mesTx)
 				if err != nil {
 					logger.Err(err).Msg("failed to encode SlashMsg")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
@@ -176,6 +178,7 @@ func (p *Processor) txBuilder(txData, sig []byte) ([]byte, *big.Int, error) {
 	opts.NoSend = true
 	contract, err := tsh.NewTssStakingSlashing(address, p.l1Client)
 	if err != nil {
+		p.logger.Err(err).Msg("failed to new tss staking slash contract")
 		return nil, nil, err
 	}
 	gasPrice, err := p.l1Client.SuggestGasPrice(context.Background())
