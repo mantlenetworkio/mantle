@@ -75,7 +75,7 @@ func StateBatchHash(stateRoots [][32]byte, offsetStartsAtIndex *big.Int) ([]byte
 }
 
 func SlashMsgBytes(batchIndex uint64, jailNode common.Address, tssNodes []common.Address, slashType byte) ([]byte, error) {
-	return slashMsgArguments.Pack(new(big.Int).SetUint64(batchIndex), jailNode, tssNodes, slashType)
+	return slashMsgArguments.Pack(new(big.Int).SetUint64(batchIndex), jailNode, tssNodes, uint64(slashType))
 }
 
 func SlashMsgHash(batchIndex uint64, jailNode common.Address, tssNodes []common.Address, slashType byte) ([]byte, error) {
