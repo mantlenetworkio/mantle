@@ -88,12 +88,12 @@ func (registry *Registry) GetHeightHandler() gin.HandlerFunc {
 
 func (registry *Registry) DeleteSlashHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		addressStr := c.Param("address")
+		addressStr := c.Query("address")
 		if len(addressStr) == 0 {
 			c.String(http.StatusBadRequest, "empty address")
 			return
 		}
-		batchIndexStr := c.Param("index")
+		batchIndexStr := c.Query("index")
 		if len(batchIndexStr) == 0 {
 			c.String(http.StatusBadRequest, "empty index")
 			return
