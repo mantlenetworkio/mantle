@@ -10,23 +10,6 @@
 
 ## Methods
 
-### bestBlockID
-
-```solidity
-function bestBlockID() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined
-
 ### claimReward
 
 ```solidity
@@ -67,10 +50,6 @@ function deadAddress() external view returns (address)
 ```solidity
 function dust() external view returns (uint256)
 ```
-
-
-
-
 
 
 #### Returns
@@ -152,28 +131,6 @@ function totalAmount() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
-### updateReward
-
-```solidity
-function updateReward(uint256 _blockID, uint256 _amount) external nonpayable returns (bool)
-```
-
-
-
-*update tss member gas reward by every block.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _blockID | uint256 | The block height at L2 which needs to distribute profits
-| _amount | uint256 | undefined
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | _tssMembers Address array of tss group members
 
 ### withdraw
 

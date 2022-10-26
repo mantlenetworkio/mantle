@@ -4,10 +4,6 @@
 
 > ITssRewardContract
 
-
-
-
-
 ## Methods
 
 ### claimReward
@@ -45,28 +41,6 @@ function queryReward() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | Amount of undistributed rewards.
 
-### updateReward
-
-```solidity
-function updateReward(uint256 _blockID, uint256 _amount) external nonpayable returns (bool)
-```
-
-
-
-*Update deposit block gas into contract.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _blockID | uint256 | Update gas reward L2 block ID.
-| _amount | uint256 | undefined
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | Update success.
 
 ### withdraw
 
