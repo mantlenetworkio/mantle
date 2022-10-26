@@ -77,6 +77,12 @@ const config: HardhatUserConfig = {
       deploy,
       accounts: [privateKey],
     },
+    'goerli-testnet': {
+      chainId: 5,
+      url: 'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28',
+      deploy,
+      accounts: [privateKey],
+    },
     kovan: {
       chainId: 42,
       url: process.env.CONTRACTS_RPC_URL || '',
