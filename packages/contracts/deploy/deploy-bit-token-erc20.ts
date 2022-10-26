@@ -4,7 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/dist/types'
 import {awaitCondition, hexStringEquals} from '@mantlenetworkio/core-utils'
 
 /* Imports: Internal */
-import {deployAndVerifyAndThen, getContractFromArtifact,} from '../src/deploy-utils'
+import {deployAndVerifyAndThen, getContractFromArtifact,isHardhatNode, } from '../src/deploy-utils'
 import {names} from '../src/address-names'
 
 const deployFn: DeployFunction = async (hre) => {
@@ -25,13 +25,18 @@ const deployFn: DeployFunction = async (hre) => {
     }
   )
   console.log(`Checking the bit token was correctly set...`)
-  await awaitCondition(
-    async () => {
-      return hexStringEquals(bitContract.address, hre.deployConfig.l1BitAddress)
-    },
-    5000,
-    1
-  )
+  console.log(bitContract.address)
+  console.log(hre.deployConfig.l1BitAddress)
+  if (await isHardhatNode(hre)) {
+    await awaitCondition(
+      async () => {
+        return hexStringEquals(bitContract.address, hre.deployConfig.l1BitAddress)
+      },
+      5000,
+      1
+    )
+    console.log(`Check pass`)
+  }
   console.log(`Check pass`)
 }
 
