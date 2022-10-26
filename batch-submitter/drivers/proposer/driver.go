@@ -217,6 +217,7 @@ func (d *Driver) CraftBatchTx(
 	signature, err := d.cfg.TssClient.GetSignStateBatch(tssReqParams)
 	if err != nil {
 		log.Error("get tss manager signature fail")
+		return nil, err
 	}
 	tx, err := d.sccContract.AppendStateBatch(
 		opts, stateRoots, offsetStartsAtIndex, signature,
