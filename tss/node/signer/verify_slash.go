@@ -65,5 +65,10 @@ func (p *Processor) VerifySlash() {
 func (p *Processor) UpdateWaitSignSlashMsgs(msg common.SlashRequest) {
 	p.waitSignSlashLock.Lock()
 	defer p.waitSignSlashLock.Unlock()
-	p.waitSignSlashMsgs[msg.Address.String()][msg.BatchIndex] = msg
+	mmap, ok := p.waitSignSlashMsgs[msg.Address.String()]
+	if !ok {
+		mmap = map[uint64]common.SlashRequest{}
+	}
+	mmap[msg.BatchIndex] = msg
+	p.waitSignSlashMsgs[msg.Address.String()] = mmap
 }
