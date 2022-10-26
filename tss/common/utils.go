@@ -22,7 +22,7 @@ var (
 func init() {
 	typByte32Array, _ = abi.NewType("bytes32[]", "bytes32[]", nil)
 	typUint256, _ = abi.NewType("uint256", "uint256", nil)
-	typSlashType, _ = abi.NewType("uint256", "enumTssStakingSlashing.SlashType", nil)
+	typSlashType, _ = abi.NewType("uint8", "enumTssStakingSlashing.SlashType", nil)
 	typAddress, _ = abi.NewType("address", "address", nil)
 	typAddresses, _ = abi.NewType("address[]", "address[]", nil)
 	stateBatchArguments = abi.Arguments{
@@ -44,7 +44,7 @@ func init() {
 			Type: typAddresses,
 		},
 		{
-			Type: typSlashType,
+			Type: typUint256,
 		},
 	}
 }
