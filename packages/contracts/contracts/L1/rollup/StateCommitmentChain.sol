@@ -2,15 +2,15 @@
 pragma solidity ^0.8.9;
 
 /* Library Imports */
-import { Lib_BVMCodec } from "../../libraries/codec/Lib_BVMCodec.sol";
-import { Lib_AddressResolver } from "../../libraries/resolver/Lib_AddressResolver.sol";
-import { Lib_MerkleTree } from "../../libraries/utils/Lib_MerkleTree.sol";
+import {Lib_BVMCodec} from "../../libraries/codec/Lib_BVMCodec.sol";
+import {Lib_AddressResolver} from "../../libraries/resolver/Lib_AddressResolver.sol";
+import {Lib_MerkleTree} from "../../libraries/utils/Lib_MerkleTree.sol";
 
 /* Interface Imports */
-import { IStateCommitmentChain } from "./IStateCommitmentChain.sol";
-import { ICanonicalTransactionChain } from "./ICanonicalTransactionChain.sol";
-import { IBondManager } from "../verification/IBondManager.sol";
-import { IChainStorageContainer } from "./IChainStorageContainer.sol";
+import {IStateCommitmentChain} from "./IStateCommitmentChain.sol";
+import {ICanonicalTransactionChain} from "./ICanonicalTransactionChain.sol";
+import {IBondManager} from "../verification/IBondManager.sol";
+import {IChainStorageContainer} from "./IChainStorageContainer.sol";
 
 /**
  * @title StateCommitmentChain
@@ -60,7 +60,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
      * @inheritdoc IStateCommitmentChain
      */
     function getTotalElements() public view returns (uint256 _totalElements) {
-        (uint40 totalElements, ) = _getBatchExtraData();
+        (uint40 totalElements,) = _getBatchExtraData();
         return uint256(totalElements);
     }
 
@@ -102,13 +102,16 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
 
         require(
             getTotalElements() + _batch.length <=
-                ICanonicalTransactionChain(resolve("CanonicalTransactionChain")).getTotalElements(),
+            ICanonicalTransactionChain(resolve("CanonicalTransactionChain")).getTotalElements(),
             "Number of state roots cannot exceed the number of canonical transactions."
         );
 
         // Pass the block's timestamp and the publisher of the data
         // to be used in the fraud proofs
         _appendBatch(_batch, abi.encode(block.timestamp, msg.sender));
+
+        // Update distributed state batch, and emit message
+        _distributeTssReward();
     }
 
     /**
@@ -160,11 +163,11 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
      * @inheritdoc IStateCommitmentChain
      */
     function insideFraudProofWindow(Lib_BVMCodec.ChainBatchHeader memory _batchHeader)
-        public
-        view
-        returns (bool _inside)
+    public
+    view
+    returns (bool _inside)
     {
-        (uint256 timestamp, ) = abi.decode(_batchHeader.extraData, (uint256, address));
+        (uint256 timestamp,) = abi.decode(_batchHeader.extraData, (uint256, address));
 
         require(timestamp != 0, "Batch header timestamp cannot be zero");
         return (timestamp + FRAUD_PROOF_WINDOW) > block.timestamp;
@@ -188,12 +191,12 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
         assembly {
             extraData := shr(40, extraData)
             totalElements := and(
-                extraData,
-                0x000000000000000000000000000000000000000000000000000000FFFFFFFFFF
+            extraData,
+            0x000000000000000000000000000000000000000000000000000000FFFFFFFFFF
             )
             lastSequencerTimestamp := shr(
-                40,
-                and(extraData, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000)
+            40,
+            and(extraData, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000)
             )
         }
         // solhint-enable max-line-length
@@ -208,9 +211,9 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
      * @return Encoded batch context.
      */
     function _makeBatchExtraData(uint40 _totalElements, uint40 _lastSequencerTimestamp)
-        internal
-        pure
-        returns (bytes27)
+    internal
+    pure
+    returns (bytes27)
     {
         bytes27 extraData;
         assembly {
@@ -248,11 +251,11 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
         // while calculating the root hash therefore any arguments passed to it must not
         // be used again afterwards
         Lib_BVMCodec.ChainBatchHeader memory batchHeader = Lib_BVMCodec.ChainBatchHeader({
-            batchIndex: getTotalBatches(),
-            batchRoot: Lib_MerkleTree.getMerkleRoot(_batch),
-            batchSize: _batch.length,
-            prevTotalElements: totalElements,
-            extraData: _extraData
+        batchIndex : getTotalBatches(),
+        batchRoot : Lib_MerkleTree.getMerkleRoot(_batch),
+        batchSize : _batch.length,
+        prevTotalElements : totalElements,
+        extraData : _extraData
         });
 
         emit StateBatchAppended(
@@ -291,15 +294,42 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
         emit StateBatchDeleted(_batchHeader.batchIndex, _batchHeader.batchRoot);
     }
 
+
+    function _distributeTssReward() internal {
+        // get address of tss group member
+        address[] memory tssMembers = ITssGroupManager(resolve("TssGroupManager")).getTssGroupUnJailMembers();
+        require(tssMembers.length > 0, "get tss members in error");
+
+        // construct calldata for claimReward call
+        bytes memory message = abi.encodeWithSelector(
+            ITssRewardContract.claimReward.selector,
+            block.timestamp,
+            tssMembers
+        );
+
+        // send call data into L2, hardcode address
+        sendCrossDomainMessage(
+            address(0x4200000000000000000000000000000000000020),
+            200_000,
+            message
+        );
+
+        // emit message
+        emit DistributeTssReward(
+            block.timestamp,
+            tssMembers
+        );
+    }
+
     /**
      * Checks that a batch header matches the stored hash for the given index.
      * @param _batchHeader Batch header to validate.
      * @return Whether or not the header matches the stored one.
      */
     function _isValidBatchHeader(Lib_BVMCodec.ChainBatchHeader memory _batchHeader)
-        internal
-        view
-        returns (bool)
+    internal
+    view
+    returns (bool)
     {
         return Lib_BVMCodec.hashBatchHeader(_batchHeader) == batches().get(_batchHeader.batchIndex);
     }

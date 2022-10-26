@@ -22,6 +22,11 @@ interface IStateCommitmentChain {
 
     event StateBatchDeleted(uint256 indexed _batchIndex, bytes32 _batchRoot);
 
+    event DistributeTssReward(
+        uint256 indexed _batchTime,
+        address[] _tssMembers
+    );
+
     /********************
      * Public Functions *
      ********************/
