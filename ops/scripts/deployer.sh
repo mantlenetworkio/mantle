@@ -24,6 +24,10 @@ curl \
 echo "Connected to L1."
 echo "Building deployment command."
 
+echo $CONTRACTS_TARGET_NETWORK
+echo $SKIP_CONTRACT_DEPLOY
+echo "test point1"
+
 if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
   DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
 
