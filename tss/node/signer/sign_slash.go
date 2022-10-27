@@ -80,6 +80,8 @@ func (p *Processor) SignSlash() {
 
 				data, culprits, err := p.handleSign(nodeSignRequest, hashTx, logger)
 
+				//TODO
+				logger.Info().Msgf("signature %s ", hex.EncodeToString(data))
 				if err != nil {
 					logger.Error().Msgf("slash %s sign failed ", requestBody.Address)
 					var errorRes tdtypes.RPCResponse
