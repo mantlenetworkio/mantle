@@ -3,7 +3,7 @@ FROM golang:1.18.0-alpine3.15 as builder
 
 RUN apk add --no-cache make gcc musl-dev linux-headers git
 
-COPY ./tss /app/tss
+COPY . /app/
 
 WORKDIR /app/tss
 RUN make build
