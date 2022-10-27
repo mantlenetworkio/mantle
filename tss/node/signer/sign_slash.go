@@ -82,6 +82,7 @@ func (p *Processor) SignSlash() {
 
 				//TODO
 				logger.Info().Msgf("signature %s ", hex.EncodeToString(data))
+				logger.Info().Msgf("signature bytes %v ", data)
 				if err != nil {
 					logger.Error().Msgf("slash %s sign failed ", requestBody.Address)
 					var errorRes tdtypes.RPCResponse
