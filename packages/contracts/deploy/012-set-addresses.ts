@@ -79,6 +79,7 @@ const deployFn: DeployFunction = async (hre) => {
     process.env.AUTOMATICALLY_TRANSFER_OWNERSHIP === 'true'
   ) {
     const owner = await hre.ethers.getSigner(currentOwner)
+    console.log("owner+++++++++++++++++++++++++++=",owner)
     await Lib_AddressManager.connect(owner).transferOwnership(
       AddressDictator.address
     )
@@ -87,6 +88,7 @@ const deployFn: DeployFunction = async (hre) => {
   // Wait for ownership to be transferred to the AddressDictator contract.
   await awaitCondition(
     async () => {
+      console.log("owner+++++++++++++++++++++++++++=",Lib_AddressManager.owner(),AddressDictator.address)
       return hexStringEquals(
         await Lib_AddressManager.owner(),
         AddressDictator.address
