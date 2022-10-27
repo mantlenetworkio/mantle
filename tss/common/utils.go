@@ -12,19 +12,21 @@ import (
 var (
 	typByte32Array      abi.Type
 	typUint256          abi.Type
-	typSlashType        abi.Type
-	typAddress          abi.Type
-	typAddresses        abi.Type
+	typSlashMsg         abi.Type
 	stateBatchArguments abi.Arguments
 	slashMsgArguments   abi.Arguments
 )
 
+type SlashMsg struct {
+	BatchIndex *big.Int
+	JailNode   common.Address
+	TssNodes   []common.Address
+	SlashType  *big.Int
+}
+
 func init() {
 	typByte32Array, _ = abi.NewType("bytes32[]", "bytes32[]", nil)
 	typUint256, _ = abi.NewType("uint256", "uint256", nil)
-	typSlashType, _ = abi.NewType("uint8", "enumTssStakingSlashing.SlashType", nil)
-	typAddress, _ = abi.NewType("address", "address", nil)
-	typAddresses, _ = abi.NewType("address[]", "address[]", nil)
 	stateBatchArguments = abi.Arguments{
 		{
 			Type: typByte32Array,
@@ -33,20 +35,17 @@ func init() {
 		},
 	}
 
-	slashMsgArguments = abi.Arguments{
-		{
-			Type: typUint256,
+	typSlashMsg, _ = abi.NewType(
+		"tuple", "",
+		[]abi.ArgumentMarshaling{
+			{Name: "batch_index", Type: "uint256"},
+			{Name: "jail_node", Type: "address"},
+			{Name: "tss_nodes", Type: "address[]"},
+			{Name: "slash_type", Type: "uint256"},
 		},
-		{
-			Type: typAddress,
-		},
-		{
-			Type: typAddresses,
-		},
-		{
-			Type: typUint256,
-		},
-	}
+	)
+
+	slashMsgArguments = abi.Arguments{{Type: typSlashMsg}}
 }
 
 func has0xPrefix(input string) bool {
@@ -75,7 +74,12 @@ func StateBatchHash(stateRoots [][32]byte, offsetStartsAtIndex *big.Int) ([]byte
 }
 
 func SlashMsgBytes(batchIndex uint64, jailNode common.Address, tssNodes []common.Address, slashType byte) ([]byte, error) {
-	return slashMsgArguments.Pack(new(big.Int).SetUint64(batchIndex), jailNode, tssNodes, new(big.Int).SetUint64(uint64(slashType)))
+	return slashMsgArguments.Pack(SlashMsg{
+		SlashType:  new(big.Int).SetUint64(uint64(slashType)),
+		JailNode:   jailNode,
+		TssNodes:   tssNodes,
+		BatchIndex: new(big.Int).SetUint64(batchIndex),
+	})
 }
 
 func SlashMsgHash(batchIndex uint64, jailNode common.Address, tssNodes []common.Address, slashType byte) ([]byte, error) {
