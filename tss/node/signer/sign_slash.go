@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"github.com/rs/zerolog"
 	"math/big"
 	"strings"
 
@@ -97,7 +98,7 @@ func (p *Processor) SignSlash() {
 					}
 					continue
 				}
-				txData, gasPrice, err := p.txBuilder(mesTx, data)
+				txData, gasPrice, err := p.txBuilder(mesTx, data, logger)
 				if err != nil {
 					logger.Err(err).Msg("failed to txbuilder slash tranction")
 					errorRes := tdtypes.NewRPCErrorResponse(req.ID, 201, "sign failed", err.Error())
@@ -151,26 +152,27 @@ func (p *Processor) removeWaitSlashMsg(msg tsscommon.SlashRequest) {
 	}
 }
 
-func (p *Processor) txBuilder(txData, sig []byte) ([]byte, *big.Int, error) {
-	p.logger.Info().Msg("connecting to layer one")
+func (p *Processor) txBuilder(txData, sig []byte, logger zerolog.Logger) ([]byte, *big.Int, error) {
+	logger.Info().Msg("connecting to layer one")
 	if err := ensureConnection(p.l1Client); err != nil {
-		p.logger.Err(err).Msg("Unable to connect to layer one")
+		logger.Err(err).Msg("Unable to connect to layer one")
 		return nil, nil, err
 	}
 	if len(p.tssStakingSlashingAddress) == 0 {
-		p.logger.Error().Msg("tss staking slashing address is empty ")
+		logger.Error().Msg("tss staking slashing address is empty ")
 		return nil, nil, errors.New("tss staking slashing address is empty")
 	}
 	address := ethc.HexToAddress(p.tssStakingSlashingAddress)
 	chainId, err := p.l1Client.ChainID(p.ctx)
 	if err != nil {
+		logger.Err(err).Msg("failed to get chainId by l1client")
 		return nil, nil, err
 	}
 
 	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, chainId)
 
 	if err != nil {
-		p.logger.Err(err).Msg("failed to new keyed transactor")
+		logger.Err(err).Msg("failed to new keyed transactor")
 		return nil, nil, err
 	}
 	if opts.Context == nil {
@@ -179,17 +181,18 @@ func (p *Processor) txBuilder(txData, sig []byte) ([]byte, *big.Int, error) {
 	opts.NoSend = true
 	contract, err := tsh.NewTssStakingSlashing(address, p.l1Client)
 	if err != nil {
-		p.logger.Err(err).Msg("failed to new tss staking slash contract")
+		logger.Err(err).Msg("failed to new tss staking slash contract")
 		return nil, nil, err
 	}
 	gasPrice, err := p.l1Client.SuggestGasPrice(context.Background())
 	if err != nil {
-		p.logger.Err(err).Msg("cannot fetch gas price")
+		logger.Err(err).Msg("cannot fetch gas price")
 		return nil, nil, err
 	}
 	opts.GasPrice = gasPrice
 	tx, err := contract.Slashing(opts, txData, sig)
 	if err != nil {
+		logger.Err(err).Msg("failed to build slashing transaction tx!")
 		return nil, nil, err
 	}
 
