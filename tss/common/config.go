@@ -37,14 +37,12 @@ type ManagerConfig struct {
 }
 
 type NodeConfig struct {
-	BaseDir                   string `json:"base_dir" mapstructure:"base_dir"`
-	DBDir                     string `json:"db_dir" mapstructure:"db_dir"`
-	WsAddr                    string `json:"ws_addr" mapstructure:"ws_addr"`
-	L2EthRpc                  string `json:"l2_eth_rpc" mapstructure:"l2_eth_rpc"`
-	DisableHTTP2              bool   `json:"disable_http2" mapstructure:"disable_http2"`
-	PrivateKey                string `json:"private_key" mapstructure:"private_key"`
-	TssGroupManagerAddress    string `json:"tss_group_manager_address" mapstructure:"tss_group_manager_address"`
-	TssStakingSlashingAddress string `json:"tss_staking_slashing_address" mapstructure:"tss_staking_slashing_address"`
+	BaseDir      string `json:"base_dir" mapstructure:"base_dir"`
+	DBDir        string `json:"db_dir" mapstructure:"db_dir"`
+	WsAddr       string `json:"ws_addr" mapstructure:"ws_addr"`
+	L2EthRpc     string `json:"l2_eth_rpc" mapstructure:"l2_eth_rpc"`
+	DisableHTTP2 bool   `json:"disable_http2" mapstructure:"disable_http2"`
+	PrivateKey   string `json:"private_key" mapstructure:"private_key"`
 
 	PreParamFile    string        `json:"pre_param_file" mapstructure:"pre_param_file"`
 	P2PPort         string        `json:"p2p_port" mapstructure:"p2p_port"`
