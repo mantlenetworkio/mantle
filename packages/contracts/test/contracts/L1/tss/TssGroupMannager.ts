@@ -28,6 +28,7 @@ describe('TssGroupManager', () => {
     const sig = '0x10573d194d947211720a9294f2d47a4bd4a97926f040ef34e034d75d12fd19551c3dca19ee6f0cf4f0ecd3b4663972b9afef12691de522214d1fd543dc0ce9cc01'
     const expected = '0xB3ffC97f0AcEe8e1D85D42952d81499777746422'
     const actual = await tssGroup.recover(digestHash, sig)
+    console.log("=======>actual: ", actual)
     expect(expected).to.eq(actual)
   })
 
