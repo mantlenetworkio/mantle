@@ -46,6 +46,7 @@ services:
     environment:
       # Env vars for the deployment script.
       CONTRACTS_RPC_URL: http://l1_chain:8545
+      SKIP_CONTRACT_DEPLOY: ${SKIP_CONTRACT_DEPLOY:-YES}
       CONTRACTS_DEPLOYER_KEY: '0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97'
       CONTRACTS_TARGET_NETWORK: 'local'
     ports:
