@@ -6,13 +6,14 @@ import { Lib_PredeployAddresses } from "../../libraries/constants/Lib_PredeployA
 
 /* Contract Imports */
 import { L2StandardBridge } from "../messaging/L2StandardBridge.sol";
+import { IBVM_SequencerFeeVault } from "./iBVM_SequencerFeeVault.sol";
 
 /**
  * @title BVM_SequencerFeeVault
  * @dev Simple holding contract for fees paid to the Sequencer. Likely to be replaced in the future
  * but "good enough for now".
  */
-contract BVM_SequencerFeeVault {
+contract BVM_SequencerFeeVault is IBVM_SequencerFeeVault{
     /*************
      * Constants *
      *************/
@@ -50,8 +51,11 @@ contract BVM_SequencerFeeVault {
     /********************
      * Public Functions *
      ********************/
+    function l1FeeWallet() external view  returns (address){
+        return l1FeeWallet;
+    }
 
-    // slither-disable-next-line external-function
+// slither-disable-next-line external-function
     function withdraw() public {
         require(
             address(this).balance >= MIN_WITHDRAWAL_AMOUNT,
