@@ -277,7 +277,9 @@ contract TssGroupManager is
         returns (address)
     {
         (bytes32 r, bytes32 s, uint8 v) = _split(_sig);
-        return ecrecover(_ethSignedMessageHash, v, r, s);
+        address signer = ecrecover(_ethSignedMessageHash, v, r, s);
+        require(signer != address(0), "ecrecover failed");
+        return signer;
     }
 
     function _split(bytes memory _sig)
@@ -295,6 +297,7 @@ contract TssGroupManager is
             s := mload(add(_sig, 64))
             v := byte(0, mload(add(_sig, 96)))
         }
+        if (v < 27) v += 27;
     }
 
     function isEqual(bytes memory byteListA, bytes memory byteListB) public pure returns (bool) {

@@ -23,11 +23,20 @@ describe('TssGroupManager', () => {
     await initAccount()
   })
 
+  it(`recover`, async () => {
+    const digestHash = '0x8a23d321039f259c854d8746210f87f8d4ab7be011e3b14050ba1998e559a303'
+    const sig = '0x10573d194d947211720a9294f2d47a4bd4a97926f040ef34e034d75d12fd19551c3dca19ee6f0cf4f0ecd3b4663972b9afef12691de522214d1fd543dc0ce9cc01'
+    const expected = '0xB3ffC97f0AcEe8e1D85D42952d81499777746422'
+    const actual = await tssGroup.recover(digestHash, sig)
+    expect(expected).to.eq(actual)
+  })
+
   it("public key to address", async () => {
     const provider = waffle.provider;
     let myWallet = new Wallet("a1724a3be3134c9e64d9243428926088c1f4a236e777c19e3c7a974e0da6dba3", provider)
     let pubKey = "0x" + myWallet.publicKey.substring(4)
     let toAddress = await tssGroup.publicKeyToAddress(pubKey)
+
     expect(toAddress).to.eq(myWallet.address)
   })
 
