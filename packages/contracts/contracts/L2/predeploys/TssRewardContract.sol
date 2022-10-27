@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import {ITssRewardContract} from  "./iTssRewardContract.sol";
-import {IBVM_SequencerFeeVault} from"./IBVM_SequencerFeeVault.sol"
+import { ITssRewardContract } from  "./iTssRewardContract.sol";
+import { IBVM_GasPriceOracle } from "./iBVM_GasPriceOracle.sol";
 
 /* Library Imports */
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -19,7 +19,7 @@ contract TssRewardContract is ITssRewardContract {
     using SafeMath for uint256;
 
     mapping(uint256 => uint256) public ledger;
-    address public sequencerFeeVaultAddress;
+    address public bvmGasPriceOracleAddress;
     address public deadAddress;
     address public owner;
     uint256 public dust;
@@ -31,12 +31,12 @@ contract TssRewardContract is ITssRewardContract {
 
 
     // set call address
-    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _sequencerFeeVaultAddress) {
+    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress) {
         deadAddress = _deadAddress;
         owner = _owner;
         sendAmountPerYear = _sendAmountPerYear;
         sendAmountPerSecond = _sendAmountPerYear.div(365 * 24 * 60 * 60);
-        sequencerFeeVaultAddress = _sequencerFeeVaultAddress;
+        bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
     }
 
     /**
@@ -86,7 +86,7 @@ contract TssRewardContract is ITssRewardContract {
     onlyFromDeadAddress
     checkBalance
     {
-        if (IBVM_SequencerFeeVault(sequencerFeeVaultAddress).l1FeeWallet() == address(0)) {
+        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != true) {
             claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
             return;
         }
@@ -144,7 +144,7 @@ contract TssRewardContract is ITssRewardContract {
                 dust = dust.add(reserved);
             }
         }
-        emit DistributeTssReward(
+        emit DistributeTssRewardByBlock(
             _blockStartHeight,
             _length,
             _tssMembers

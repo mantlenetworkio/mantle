@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 /* External Imports */
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import { IBVM_GasPriceOracle } from "./iBVM_GasPriceOracle.sol";
 
 /**
  * @title BVM_GasPriceOracle
@@ -15,7 +16,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * constructor doesn't run in practice as the L2 state generation script uses
  * the deployed bytecode instead of running the initcode.
  */
-contract BVM_GasPriceOracle is Ownable {
+contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
     /*************
      * Variables *
      *************/
@@ -114,9 +115,13 @@ contract BVM_GasPriceOracle is Ownable {
  * @param _isBurning New isBurning
      */
     // slither-disable-next-line external-function
-    function setIsBurning(uint256 _isBurning) public onlyOwner {
+    function setIsBurning(bool _isBurning) public onlyOwner {
         isBurning = _isBurning;
         emit IsBurningUpdated(_isBurning);
+    }
+
+    function IsBurning() public view returns(bool)  {
+        return isBurning;
     }
 
     /**

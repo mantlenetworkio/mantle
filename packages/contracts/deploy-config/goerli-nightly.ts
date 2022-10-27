@@ -12,7 +12,7 @@ const config = {
   bvmFeeWalletAddress: '0x0000000000000000000000000000000000000000',
   bvmAddressManagerOwner: '0x4F3F400c20448D33ECc12E7d289F49dA7fC51736',
   bvmGasPriceOracleOwner: '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
-  bvmSequencerFeeWalletOwner: '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B'
+  bvmTssRewardContractOwner: ''
 }
 
 export default config

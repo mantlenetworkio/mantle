@@ -5,6 +5,7 @@ pragma solidity ^0.8.9;
 import {Lib_BVMCodec} from "../../libraries/codec/Lib_BVMCodec.sol";
 import {Lib_AddressResolver} from "../../libraries/resolver/Lib_AddressResolver.sol";
 import {Lib_MerkleTree} from "../../libraries/utils/Lib_MerkleTree.sol";
+import {CrossDomainEnabled} from "../../libraries/bridge/CrossDomainEnabled.sol";
 
 /* Interface Imports */
 import {IStateCommitmentChain} from "./IStateCommitmentChain.sol";
@@ -22,7 +23,7 @@ import {ITssRewardContract} from "../../L2/predeploys/iTssRewardContract.sol";
  * state root calculated off-chain by applying the canonical transactions one by one.
  *
  */
-contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
+contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, CrossDomainEnabled {
     /*************
      * Constants *
      *************/
@@ -41,7 +42,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
         address _libAddressManager,
         uint256 _fraudProofWindow,
         uint256 _sequencerPublishWindow
-    ) Lib_AddressResolver(_libAddressManager) {
+    ) Lib_AddressResolver(_libAddressManager)CrossDomainEnabled(address(0))  {
         FRAUD_PROOF_WINDOW = _fraudProofWindow;
         SEQUENCER_PUBLISH_WINDOW = _sequencerPublishWindow;
     }

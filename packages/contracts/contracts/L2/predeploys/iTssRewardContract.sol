@@ -15,6 +15,12 @@ interface ITssRewardContract {
         address[] tssMembers
     );
 
+    event DistributeTssRewardByBlock(
+        uint256   blockStartHeight,
+        uint32     length,
+        address[] tssMembers
+    );
+
     /********************
      * Public Functions *
      ********************/

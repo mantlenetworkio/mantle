@@ -1,16 +1,16 @@
 import * as path from 'path'
 import * as fs from 'fs'
-import { exec } from 'child_process'
-import { promisify } from 'util'
+import {exec} from 'child_process'
+import {promisify} from 'util'
 
 import * as mkdirp from 'mkdirp'
-import { ethers } from 'ethers'
-import { task } from 'hardhat/config'
-import { remove0x } from '@mantlenetworkio/core-utils'
+import {ethers} from 'ethers'
+import {task} from 'hardhat/config'
+import {remove0x} from '@mantlenetworkio/core-utils'
 
-import { predeploys } from '../src/predeploys'
-import { getContractFromArtifact } from '../src/deploy-utils'
-import { names } from '../src/address-names'
+import {predeploys} from '../src/predeploys'
+import {getContractFromArtifact} from '../src/deploy-utils'
+import {names} from '../src/address-names'
 
 task('take-dump').setAction(async (args, hre) => {
   /* eslint-disable @typescript-eslint/no-var-requires */
@@ -25,7 +25,7 @@ task('take-dump').setAction(async (args, hre) => {
   // Needs to be imported here because the artifacts can only be generated after the contracts have
   // been compiled, but compiling the contracts will import the config file which, as a result,
   // will import this file.
-  const { getContractArtifact } = require('../src/contract-artifacts')
+  const {getContractArtifact} = require('../src/contract-artifacts')
 
   /* eslint-enable @typescript-eslint/no-var-requires */
 
@@ -62,7 +62,7 @@ task('take-dump').setAction(async (args, hre) => {
     },
     BVM_SequencerFeeVault: {
       l1FeeWallet: hre.deployConfig.bvmFeeWalletAddress,
-      _owner: hre.deployConfig.bvmSequencerFeeWalletOwner,
+      bvmGasPriceOracleAddress: predeploys.BVM_GasPriceOracle,
     },
     BVM_ETH: {
       l2Bridge: predeploys.L2StandardBridge,
@@ -98,7 +98,8 @@ task('take-dump').setAction(async (args, hre) => {
     TssRewardContract: {
       _owner: hre.deployConfig.bvmTssRewardContractOwner,
       _deadAddress: "0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead",
-      _sendAmountPerYear: 100000000 * 10 ** 18,
+      _sendAmountPerYear: 1000000 * 10 ** 18,
+      _bvmGasPriceOracleAddress: "0x420000000000000000000000000000000000000F",
     },
   }
 
@@ -134,7 +135,7 @@ task('take-dump').setAction(async (args, hre) => {
   // Grab the commit hash so we can stick it in the genesis file.
   let commit: string
   try {
-    const { stdout } = await promisify(exec)('git rev-parse HEAD')
+    const {stdout} = await promisify(exec)('git rev-parse HEAD')
     commit = stdout.replace('\n', '')
   } catch {
     console.log('unable to get commit hash, using empty hash instead')

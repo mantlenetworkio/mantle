@@ -4,7 +4,7 @@ interface IBVM_SequencerFeeVault {
     /**
      * @dev withdraw all balances.
      */
-    function withdraw() public;
+    function withdraw() external;
     /**
      * @dev Query l1 fee wallet address.
      * @return l1 fee wallet address.
