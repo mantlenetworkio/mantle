@@ -27,22 +27,6 @@ function bitToken() external view returns (address)
 |---|---|---|
 | _0 | address | undefined
 
-### changeBitAddress
-
-```solidity
-function changeBitAddress(address _bitToken) external nonpayable
-```
-
-Change bit token address
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _bitToken | address | new ERC20 address of bit token
-
 ### createSequencer
 
 ```solidity
@@ -76,6 +60,23 @@ Check sequencer exist then add deposit amount
 | Name | Type | Description |
 |---|---|---|
 | _amount | uint256 | amount of bit token
+
+### epoch
+
+```solidity
+function epoch() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
 
 ### getOwners
 
@@ -243,6 +244,40 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
 
+### scheduler
+
+```solidity
+function scheduler() external view returns (bytes)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes | undefined
+
+### sequencerLimit
+
+```solidity
+function sequencerLimit() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
 ### sequencers
 
 ```solidity
@@ -284,6 +319,70 @@ function transferOwnership(address newOwner) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newOwner | address | undefined
+
+### updateBitAddress
+
+```solidity
+function updateBitAddress(address _bitToken) external nonpayable
+```
+
+Update bit token address
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _bitToken | address | new ERC20 address of bit token
+
+### updateEpoch
+
+```solidity
+function updateEpoch(uint256 _epoch) external nonpayable
+```
+
+Update Epoch
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _epoch | uint256 | new epoch
+
+### updateScheduler
+
+```solidity
+function updateScheduler(bytes nodeID) external nonpayable
+```
+
+Update Epoch
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| nodeID | bytes | new scheculer`s nodeID
+
+### updateSequencerLimit
+
+```solidity
+function updateSequencerLimit(uint256 _limit) external nonpayable
+```
+
+Update Epoch
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _limit | uint256 | new limit
 
 ### withdraw
 

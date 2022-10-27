@@ -19,9 +19,31 @@ describe('Sequencer', () => {
     await deploySequencer()
   })
 
-  it('Change bit address', async () => {
-    await sequencer.changeBitAddress(bitToken.address)
+  it('Update bit address', async () => {
+    await sequencer.updateBitAddress(bitToken.address)
     expect(await sequencer.bitToken()).to.eq(bitToken.address.toString())
+  })
+
+  it('Update epoch', async () => {
+    await sequencer.updateEpoch(1)
+    expect(await sequencer.epoch()).to.eq(1)
+
+    await sequencer.updateEpoch(2)
+    expect(await sequencer.epoch()).to.eq(2)
+  })
+
+  it('Update epoch', async () => {
+    await sequencer.updateSequencerLimit(1)
+    expect(await sequencer.sequencerLimit()).to.eq(1)
+    await sequencer.updateSequencerLimit(2)
+    expect(await sequencer.sequencerLimit()).to.eq(2)
+  })
+
+  it('Update scheduler', async () => {
+    await sequencer.updateScheduler('0x01')
+    expect(await sequencer.scheduler()).to.eq('0x01')
+    await sequencer.updateScheduler('0x02')
+    expect(await sequencer.scheduler()).to.eq('0x02')
   })
 
   it('CreateSequencer', async () => {
