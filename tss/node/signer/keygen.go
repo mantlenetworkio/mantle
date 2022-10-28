@@ -204,8 +204,8 @@ func (p *Processor) EstimateGas(inputData []byte, toAddress ethc.Address) (*bind
 	} else {
 		gasTipCap, err = p.l1Client.SuggestGasTipCap(context.Background())
 		if err != nil {
-			p.logger.Err(err).Msg("failed to SuggestGasTipCap ")
-			return nil, err
+			p.logger.Err(err).Msg("failed to SuggestGasTipCap, FallbackGasTipCap = big.NewInt(1500000000) ")
+			gasTipCap = big.NewInt(1500000000)
 		}
 		gasFeeCap = new(big.Int).Add(
 			gasTipCap,
