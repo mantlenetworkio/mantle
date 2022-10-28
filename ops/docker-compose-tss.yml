@@ -6,11 +6,23 @@ x-base-env: &base-env
   TSS_NODE_L1_URL: http://l1_chain:8545
   TSS_NODE_L2_ETH_RPC: http://l2geth:8545
 services:
+  tss-manager:
+    image: mantlenetworkio/tss-manager:latest
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss-manager
+    volumes:
+      - ./data/tss-manager:/root/tss-manager/db
+      - ./config:/app/config
+    networks:
+      mantle
   tss-1:
     image: mantlenetworkio/tss-node:latest
     build:
       context: ..
       dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss-node
     environment:
       <<: *base-env
       TSS_NODE_PRIVATE_KEY: 8579041c09247ea30aa30fdc4aad1897505ecfe44b92dc01c6481fae7d5dc705
@@ -31,6 +43,7 @@ services:
     build:
       context: ..
       dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss-node
     environment:
       <<: *base-env
       TSS_NODE_PRIVATE_KEY: 2bdfd71614eb0d2a994ecd96ba5f1dc9774e13ccdaece910992e4818e823e822
@@ -51,6 +64,7 @@ services:
     build:
       context: ..
       dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss-node
     environment:
       <<: *base-env
       TSS_NODE_PRIVATE_KEY: ad55949cb6419c86cd59fb7b36a3d86d4dd7ee9cae5c55d2fd9584c80ea5bacb
@@ -72,6 +86,7 @@ services:
     build:
       context: ..
       dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss-node
     environment:
       <<: *base-env
       TSS_NODE_PRIVATE_KEY: a7e87580b54050212e20ab75fb808ec9c7f759201ec4fe9ea1acad85adaf9b52
