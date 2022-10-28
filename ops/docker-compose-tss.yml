@@ -31,7 +31,7 @@ services:
       
     volumes:
       - ./data/tss-1:/data
-      - ./config/:/app/config
+      - ./config:/app/config
     networks:
       mantle:
         ipv4_address: 10.5.0.11
@@ -51,7 +51,7 @@ services:
       TSS_NODE_EXTERNAL_IP: 10.5.0.12
     volumes:
       - ./data/tss-2:/data
-      - ./config/:/app/config
+      - ./config:/app/config
     networks:
       mantle:
         ipv4_address: 10.5.0.12
@@ -72,7 +72,7 @@ services:
       TSS_NODE_EXTERNAL_IP: 10.5.0.13
     volumes:
       - ./data/tss-3:/data
-      - ./config/:/app/config
+      - ./config:/app/config
     networks:
       mantle:
         ipv4_address: 10.5.0.13
@@ -94,7 +94,7 @@ services:
       TSS_NODE_EXTERNAL_IP: 10.5.0.14
     volumes:
       - ./data/tss-4:/data
-      - ./config/:/app/config
+      - ./config:/app/config
     networks:
       mantle:
         ipv4_address: 10.5.0.14
