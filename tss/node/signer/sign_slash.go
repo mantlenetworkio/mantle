@@ -198,6 +198,10 @@ func (p *Processor) txBuilder(txData, sig []byte, logger zerolog.Logger) ([]byte
 		logger.Err(err).Msg("failed to build slashing transaction tx!")
 		return nil, nil, err
 	}
-
-	return tx.Data(), gasPrice, nil
+	txBinary, err := tx.MarshalBinary()
+	if err != nil {
+		logger.Err(err).Msg("failed to get marshal binary from transaction tx")
+		return nil, nil, err
+	}
+	return txBinary, gasPrice, nil
 }
