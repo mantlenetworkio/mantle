@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/ethereum/go-ethereum"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
 	etht "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	ethereum "github.com/mantlenetworkio/mantle/l2geth"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
 	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
@@ -91,38 +91,24 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 		return errors.New("tss group manager address is empty")
 	}
 	address := ethc.HexToAddress(p.tssGroupManagerAddress)
-	chainId, err := p.l1Client.ChainID(p.ctx)
-	if err != nil {
-		p.logger.Err(err).Msg("Unable to get chainId on l1 chain")
-		return err
-	}
-
-	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, chainId)
-	if opts.Context == nil {
-		opts.Context = context.Background()
-	}
-	nonce64, err := p.l1Client.NonceAt(p.ctx, p.address, nil)
-	if err != nil {
-		p.logger.Err(err).Msgf("%s unable to get current nonce",
-			p.address)
-		return err
-	}
-	p.logger.Info().Msgf("Current nonce is %d", nonce64)
-	nonce := new(big.Int).SetUint64(nonce64)
-	opts.Nonce = nonce
-	opts.NoSend = true
 
 	contract, err := tgm.NewTssGroupManager(address, p.l1Client)
 	if err != nil {
 		p.logger.Err(err).Msg("Unable to new tss group manager contract")
 		return err
 	}
-	gasPrice, err := p.l1Client.SuggestGasPrice(context.Background())
+	groupPubKeyBytes, err := tsscommon.SetGroupPubKeyBytes(localKey, poolPubkey)
 	if err != nil {
-		p.logger.Err(err).Msg("cannot fetch gas price")
+		p.logger.Err(err).Msg("failed to abi encode group public key")
 		return err
 	}
-	opts.GasPrice = gasPrice
+
+	opts, err := p.EstimateGas(groupPubKeyBytes, address)
+	if err != nil {
+		p.logger.Err(err).Msg("failed to create opts ")
+		return err
+	}
+
 	tx, err := contract.SetGroupPublicKey(opts, localKey, poolPubkey)
 	if err != nil {
 		p.logger.Err(err).Msg("Unable to set group public key with contract")
@@ -200,23 +186,73 @@ func ensureConnection(client *ethclient.Client) error {
 	return nil
 }
 
-// Wait for the receipt by polling the backend
-func waitForReceipt(backend *ethclient.Client, tx *etht.Transaction) (*etht.Receipt, error) {
-	t := time.NewTicker(300 * time.Millisecond)
-	receipt := new(etht.Receipt)
-	var err error
-	for range t.C {
-		receipt, err = backend.TransactionReceipt(context.Background(), tx.Hash())
-		if errors.Is(err, ethereum.NotFound) {
-			continue
-		}
+func (p *Processor) EstimateGas(inputData []byte, toAddress ethc.Address) (*bind.TransactOpts, error) {
+	header, err := p.l1Client.HeaderByNumber(context.Background(), nil)
+	if err != nil {
+		p.logger.Err(err).Msg("failed to get header by l1client")
+		return nil, err
+	}
+	var gasPrice *big.Int
+	var gasTipCap *big.Int
+	var gasFeeCap *big.Int
+	if header.BaseFee == nil {
+		gasPrice, err = p.l1Client.SuggestGasPrice(context.Background())
 		if err != nil {
+			p.logger.Err(err).Msg("cannot fetch gas price")
 			return nil, err
 		}
-		if receipt != nil {
-			t.Stop()
-			break
+	} else {
+		gasTipCap, err = p.l1Client.SuggestGasTipCap(context.Background())
+		if err != nil {
+			p.logger.Err(err).Msg("failed to SuggestGasTipCap, FallbackGasTipCap = big.NewInt(1500000000) ")
+			gasTipCap = big.NewInt(1500000000)
 		}
+		gasFeeCap = new(big.Int).Add(
+			gasTipCap,
+			new(big.Int).Mul(header.BaseFee, big.NewInt(2)),
+		)
 	}
-	return receipt, nil
+
+	msg := ethereum.CallMsg{
+		From:      p.address,
+		To:        &toAddress,
+		GasPrice:  gasPrice,
+		GasTipCap: gasTipCap,
+		GasFeeCap: gasFeeCap,
+		Value:     nil,
+		Data:      inputData,
+	}
+
+	gasLimit, err := p.l1Client.EstimateGas(context.Background(), msg)
+	if err != nil {
+		p.logger.Err(err).Msg("failed to EstimateGas")
+		return nil, err
+	}
+	gasLimit = uint64(float64(gasLimit) * 1.2) // add 20% buffer to prevent outOfGas error
+
+	chainId, err := p.l1Client.ChainID(p.ctx)
+	if err != nil {
+		p.logger.Err(err).Msg("Unable to get chainId on l1 chain")
+		return nil, err
+	}
+
+	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, chainId)
+	if opts.Context == nil {
+		opts.Context = context.Background()
+	}
+	nonce64, err := p.l1Client.NonceAt(p.ctx, p.address, nil)
+	if err != nil {
+		p.logger.Err(err).Msgf("%s unable to get current nonce",
+			p.address)
+		return nil, err
+	}
+	p.logger.Info().Msgf("Current nonce is %d", nonce64)
+	nonce := new(big.Int).SetUint64(nonce64)
+	opts.Nonce = nonce
+	opts.GasTipCap = gasTipCap
+	opts.GasFeeCap = gasFeeCap
+	opts.GasLimit = gasLimit
+	opts.NoSend = true
+	return opts, err
+
 }
