@@ -1,7 +1,6 @@
 package signer
 
 import (
-	"context"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -9,7 +8,6 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
 	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
@@ -166,33 +164,19 @@ func (p *Processor) txBuilder(txData, sig []byte, logger zerolog.Logger) ([]byte
 		return nil, nil, errors.New("tss staking slashing address is empty")
 	}
 	address := ethc.HexToAddress(p.tssStakingSlashingAddress)
-	chainId, err := p.l1Client.ChainID(p.ctx)
-	if err != nil {
-		logger.Err(err).Msg("failed to get chainId by l1client")
-		return nil, nil, err
-	}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, chainId)
-
-	if err != nil {
-		logger.Err(err).Msg("failed to new keyed transactor")
-		return nil, nil, err
-	}
-	if opts.Context == nil {
-		opts.Context = context.Background()
-	}
-	opts.NoSend = true
 	contract, err := tsh.NewTssStakingSlashing(address, p.l1Client)
 	if err != nil {
 		logger.Err(err).Msg("failed to new tss staking slash contract")
 		return nil, nil, err
 	}
-	gasPrice, err := p.l1Client.SuggestGasPrice(context.Background())
+	inputData, err := tsscommon.SlashBytes(txData, sig)
 	if err != nil {
-		logger.Err(err).Msg("cannot fetch gas price")
+		logger.Err(err).Msg("failed to abi encode slash ")
 		return nil, nil, err
 	}
-	opts.GasPrice = gasPrice
+	opts, err := p.EstimateGas(inputData, address)
+
 	tx, err := contract.Slashing(opts, txData, sig)
 	if err != nil {
 		logger.Err(err).Msg("failed to build slashing transaction tx!")
@@ -203,5 +187,5 @@ func (p *Processor) txBuilder(txData, sig []byte, logger zerolog.Logger) ([]byte
 		logger.Err(err).Msg("failed to get marshal binary from transaction tx")
 		return nil, nil, err
 	}
-	return txBinary, gasPrice, nil
+	return txBinary, opts.GasPrice, nil
 }
