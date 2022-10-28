@@ -16,7 +16,7 @@ services:
       - ./data/tss-manager:/root/tss-manager/db
       - ./config:/app/config
     networks:
-      mantle
+      mantle: {}
   tss-1:
     image: mantlenetworkio/tss-node:latest
     build:
