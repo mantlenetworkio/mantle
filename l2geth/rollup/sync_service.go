@@ -547,6 +547,16 @@ func (s *SyncService) updateScalar(statedb *state.StateDB) error {
 	return s.RollupGpo.SetScalar(scalar, decimals)
 }
 
+// updateScalar will update the scalar value from the BVM_GasPriceOracle
+// in the local cache
+func (s *SyncService) updateIsBurning(statedb *state.StateDB) error {
+	isBurning, err := s.readGPOStorageSlot(statedb, rcfg.IsBurningSlot)
+	if err != nil {
+		return err
+	}
+	return s.RollupGpo.SetIsBurning(isBurning)
+}
+
 // cacheGasPriceOracleOwner accepts a statedb and caches the gas price oracle
 // owner address locally
 func (s *SyncService) cacheGasPriceOracleOwner(statedb *state.StateDB) error {

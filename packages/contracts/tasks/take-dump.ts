@@ -97,10 +97,10 @@ task('take-dump').setAction(async (args, hre) => {
       decimals: 18,
     },
     TssRewardContract: {
-      _owner: hre.deployConfig.bvmTssRewardContractOwner,
-      _deadAddress: "0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead",
-      _sendAmountPerYear: 1000000 * 10 ** 18,
-      _bvmGasPriceOracleAddress: "0x420000000000000000000000000000000000000F",
+      deadAddress: "0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead",
+      owner: hre.deployConfig.bvmTssRewardContractOwner,
+      sendAmountPerYear: 1000000,
+      bvmGasPriceOracleAddress: "0x420000000000000000000000000000000000000F",
     },
   }
 

@@ -34,7 +34,7 @@ contract TssRewardContract is ITssRewardContract {
     constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress) {
         deadAddress = _deadAddress;
         owner = _owner;
-        sendAmountPerYear = _sendAmountPerYear;
+        sendAmountPerYear = _sendAmountPerYear * 10 ** 18;
         sendAmountPerSecond = _sendAmountPerYear.div(365 * 24 * 60 * 60);
         bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
     }

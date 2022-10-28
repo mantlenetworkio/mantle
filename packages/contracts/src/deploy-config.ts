@@ -203,7 +203,7 @@ const configSpec: {
   },
   gasPriceOracleIsBurning: {
     type: 'boolean',
-    default: false,
+    default: true,
   },
   gasPriceOracleL1BaseFee: {
     type: 'number',

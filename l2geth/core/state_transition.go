@@ -18,7 +18,6 @@ package core
 
 import (
 	"errors"
-	"fmt"
 	"github.com/mantlenetworkio/mantle/l2geth/contracts/gasfee"
 	"github.com/mantlenetworkio/mantle/l2geth/contracts/tssreward"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
@@ -278,9 +277,6 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		// codepath. Add the L1 fee to the L2 fee for the total fee that is sent
 		// to the sequencer.
 		IsBurning := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.IsBurningSlot).Big()
-		if IsBurning.Cmp(big.NewInt(1)) != 0 {
-			panic(fmt.Sprintf("IsBurning:%v", IsBurning))
-		}
 		if IsBurning.Cmp(big.NewInt(1)) == 0 {
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 			fee := new(big.Int).Add(st.l1Fee, l2Fee)
