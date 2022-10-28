@@ -21,7 +21,6 @@ contract TssGroupManager is
     uint256 threshold;
     uint256 gRoundId;
     uint256 confirmNumber;
-    address[] addresses;
     address public stakingSlash;
 
     bytes[] activeTssMembers; // active tss member group
@@ -174,14 +173,22 @@ contract TssGroupManager is
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function getTssGroupUnJailMembers() public override returns (address[] memory) {
-        delete addresses;
+    function getTssGroupUnJailMembers() public view override returns (address[] memory) {
+        uint256 expectedLength;
         for (uint256 i = 0; i < activeTssMembers.length; i++) {
             if (tssActiveMemberInfo[activeTssMembers[i]].status == MemberStatus.unJail) {
-                addresses.push(tssActiveMemberInfo[activeTssMembers[i]].nodeAddress);
+                expectedLength++;
             }
         }
-        return addresses;
+        address[] memory _addresses = new address[](expectedLength);
+        uint256 index;
+        for (uint256 i = 0; i < activeTssMembers.length; i++) {
+            if (tssActiveMemberInfo[activeTssMembers[i]].status == MemberStatus.unJail) {
+                _addresses[index] = tssActiveMemberInfo[activeTssMembers[i]].nodeAddress;
+                index++;
+            }
+        }
+        return _addresses;
     }
 
     /**

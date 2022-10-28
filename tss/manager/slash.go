@@ -177,7 +177,7 @@ func (m Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo
 					"tipHeight", tipHeight,
 					"numConfirmations", m.l1ConfirmBlocks)
 				sendState.set(info.Address, info.BatchIndex, "minted, wait for confirming")
-				if txHeight+uint64(m.l1ConfirmBlocks) < tipHeight {
+				if txHeight+uint64(m.l1ConfirmBlocks) <= tipHeight {
 					reverted := receipt.Status == 0
 					log.Info("Transaction confirmed",
 						"txHash", txHash,
