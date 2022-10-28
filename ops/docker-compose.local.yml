@@ -1,12 +1,23 @@
 version: '3.4'
 
 networks:
-  mantle: {}
+  mantle:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
+         gateway: 10.5.0.1
 
 x-base: &base
   restart: unless-stopped
   networks:
     mantle: {}
+
+x-base-env: &base-env
+  TSS_NODE_BASE_DIR: /data/tssnode
+  TSS_NODE_DB_DIR: /data/tssnode/db
+  TSS_NODE_L1_URL: http://l1_chain:8545
+  TSS_NODE_L2_ETH_RPC: http://l2geth:8545
 
 services:
   l1_chain:
@@ -89,3 +100,108 @@ services:
     container_name: bitl2geth2
     deploy:
       replicas: 0  # disable by default
+
+  tss-manager:
+    <<: *base
+    depends_on:
+      - l2geth
+    image: mantlenetworkio/tss-manager:latest
+    environment:
+      TSS_L1_URL: http://l1_chain:8545
+      TSS_L1_CONFIRM_BLOCKS: 0
+      TSS_L1_RECEIPT_CONFIRM_TIMEOUT: 30s
+      TSS_SCC_CONTRACT_ADDRESS: 0xc039b3B46814D8388e5205D37Dd0D154D806F1f4
+      TSS_TSS_GROUP_CONTRACT_ADDRESS: 0x3495fa1C4C2Ae290CF20ED1745395663b6189911
+      TSS_TSS_STAKING_SLASH_CONTRACT_ADDRESS: 0x446Ae0F4BE2110a900B6506f5E1379C1E4BDfC57
+      TSS_SIGNED_BATCHES_WINDOW: 5
+      TSS_MIN_SIGNED_IN_WINDOW: 2
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss-manager
+    volumes:
+      - ./data/tss-manager:/root/tss-manager/db
+      - ./config:/app/config
+  tss-1:
+    depends_on:
+      - tss-manager
+    image: mantlenetworkio/tss-node:latest
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss-node
+    environment:
+      <<: *base-env
+      TSS_NODE_PRIVATE_KEY: 8579041c09247ea30aa30fdc4aad1897505ecfe44b92dc01c6481fae7d5dc705
+      TSS_NODE_BOOTSTRAP_PEERS: /ip4/10.5.0.12/tcp/8000/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,/ip4/10.5.0.13/tcp/8000/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH,/ip4/10.5.0.14/tcp/8000/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
+      TSS_NODE_EXTERNAL_IP: 10.5.0.11
+      
+    volumes:
+      - ./data/tss-1:/data
+      - ./config:/app/config
+    networks:
+      mantle:
+        ipv4_address: 10.5.0.11
+  
+  tss-2:
+    depends_on:
+      - tss-1
+    image: mantlenetworkio/tss-node:latest
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss-node
+    environment:
+      <<: *base-env
+      TSS_NODE_PRIVATE_KEY: 2bdfd71614eb0d2a994ecd96ba5f1dc9774e13ccdaece910992e4818e823e822
+      TSS_NODE_BOOTSTRAP_PEERS: /ip4/10.5.0.11/tcp/8000/p2p/16Uiu2HAmQWNYM7JXW55Qs5z6mR49eVu5pdRk17dKZ6zRSscdcWve,/ip4/10.5.0.13/tcp/8000/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH,/ip4/10.5.0.14/tcp/8000/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
+      TSS_NODE_EXTERNAL_IP: 10.5.0.12
+    volumes:
+      - ./data/tss-2:/data
+      - ./config:/app/config
+    networks:
+      mantle:
+        ipv4_address: 10.5.0.12
+
+  tss-3:
+    depends_on:
+      - tss-1
+      - tss-2
+    image: mantlenetworkio/tss-node:latest
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss-node
+    environment:
+      <<: *base-env
+      TSS_NODE_PRIVATE_KEY: ad55949cb6419c86cd59fb7b36a3d86d4dd7ee9cae5c55d2fd9584c80ea5bacb
+      TSS_NODE_BOOTSTRAP_PEERS: /ip4/10.5.0.11/tcp/8000/p2p/16Uiu2HAmQWNYM7JXW55Qs5z6mR49eVu5pdRk17dKZ6zRSscdcWve,/ip4/10.5.0.12/tcp/8000/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,/ip4/10.5.0.14/tcp/8000/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
+      TSS_NODE_EXTERNAL_IP: 10.5.0.13
+    volumes:
+      - ./data/tss-3:/data
+      - ./config:/app/config
+    networks:
+      mantle:
+        ipv4_address: 10.5.0.13
+    
+  tss-4:
+    depends_on:
+      - tss-1
+      - tss-2
+      - tss-3
+    image: mantlenetworkio/tss-node:latest
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss-node
+    environment:
+      <<: *base-env
+      TSS_NODE_PRIVATE_KEY: a7e87580b54050212e20ab75fb808ec9c7f759201ec4fe9ea1acad85adaf9b52
+      TSS_NODE_BOOTSTRAP_PEERS: /ip4/10.5.0.11/tcp/8000/p2p/16Uiu2HAmQWNYM7JXW55Qs5z6mR49eVu5pdRk17dKZ6zRSscdcWve,/ip4/10.5.0.12/tcp/8000/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,/ip4/10.5.0.13/tcp/8000/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH
+      TSS_NODE_EXTERNAL_IP: 10.5.0.14
+    volumes:
+      - ./data/tss-4:/data
+      - ./config:/app/config
+    networks:
+      mantle:
+        ipv4_address: 10.5.0.14
