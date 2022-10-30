@@ -27,6 +27,10 @@ const (
 	errMaxPriorityFeePerGasNotFound = "Method eth_maxPriorityFeePerGas not found"
 )
 
+var (
+	FallbackGasTipCap = big.NewInt(1500000000)
+)
+
 func (p *Processor) Keygen() {
 	defer p.wg.Done()
 	logger := p.logger.With().Str("step", "keygen").Logger()
@@ -143,7 +147,14 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	opts.NoSend = true
 	tx, err := rawTgmContract.RawTransact(opts, calldata)
 	if err != nil {
-		if !strings.Contains(err.Error(), errMaxPriorityFeePerGasNotFound) {
+		if strings.Contains(err.Error(), errMaxPriorityFeePerGasNotFound) {
+			opts.GasTipCap = FallbackGasTipCap
+			tx, err = rawTgmContract.RawTransact(opts, calldata)
+			if err != nil {
+				p.logger.Err(err).Msg("Unable to new transaction with raw contract")
+				return err
+			}
+		} else {
 			p.logger.Err(err).Msg("Unable to new transaction with raw contract")
 			return err
 		}

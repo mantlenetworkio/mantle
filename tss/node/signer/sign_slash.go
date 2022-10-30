@@ -215,7 +215,14 @@ func (p *Processor) txBuilder(txData, sig []byte, logger zerolog.Logger) ([]byte
 
 	tx, err := rawSlashContract.RawTransact(opts, calldata)
 	if err != nil {
-		if !strings.Contains(err.Error(), errMaxPriorityFeePerGasNotFound) {
+		if strings.Contains(err.Error(), errMaxPriorityFeePerGasNotFound) {
+			opts.GasTipCap = FallbackGasTipCap
+			tx, err = rawSlashContract.RawTransact(opts, calldata)
+			if err != nil {
+				logger.Err(err).Msg("failed to build slashing transaction tx!")
+				return nil, nil, err
+			}
+		} else {
 			logger.Err(err).Msg("failed to build slashing transaction tx!")
 			return nil, nil, err
 		}
