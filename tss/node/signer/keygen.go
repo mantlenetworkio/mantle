@@ -286,6 +286,7 @@ func (p *Processor) EstimateGas(ctx context.Context, tx *etht.Transaction, rawCo
 		return nil, err
 	}
 	opts.Context = ctx
+	opts.NoSend = true
 	opts.Nonce = new(big.Int).SetUint64(tx.Nonce())
 
 	opts.GasTipCap = gasTipCap
