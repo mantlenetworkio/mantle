@@ -215,8 +215,10 @@ func (p *Processor) txBuilder(txData, sig []byte, logger zerolog.Logger) ([]byte
 
 	tx, err := rawSlashContract.RawTransact(opts, calldata)
 	if err != nil {
-		logger.Err(err).Msg("failed to build slashing transaction tx!")
-		return nil, nil, err
+		if !strings.Contains(err.Error(), errMaxPriorityFeePerGasNotFound) {
+			logger.Err(err).Msg("failed to build slashing transaction tx!")
+			return nil, nil, err
+		}
 	}
 
 	newTx, err := p.EstimateGas(p.ctx, tx, rawSlashContract, address)

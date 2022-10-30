@@ -23,7 +23,8 @@ import (
 )
 
 const (
-	setGroupPublicKeyMethodName = "setGroupPublicKey"
+	setGroupPublicKeyMethodName     = "setGroupPublicKey"
+	errMaxPriorityFeePerGasNotFound = "Method eth_maxPriorityFeePerGas not found"
 )
 
 func (p *Processor) Keygen() {
@@ -142,8 +143,10 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	opts.NoSend = true
 	tx, err := rawTgmContract.RawTransact(opts, calldata)
 	if err != nil {
-		p.logger.Err(err).Msg("---Unable to set group public key with contract")
-		return err
+		if !strings.Contains(err.Error(), errMaxPriorityFeePerGasNotFound) {
+			p.logger.Err(err).Msg("Unable to new transaction with raw contract")
+			return err
+		}
 	}
 
 	newTx, err := p.EstimateGas(p.ctx, tx, rawTgmContract, address)
