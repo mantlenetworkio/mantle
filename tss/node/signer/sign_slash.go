@@ -16,6 +16,10 @@ import (
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
+const (
+	slashingMethodName = "slashing"
+)
+
 func (p *Processor) SignSlash() {
 	defer p.wg.Done()
 	logger := p.logger.With().Str("step", "sign Slash Message").Logger()
@@ -167,19 +171,27 @@ func (p *Processor) txBuilder(txData, sig []byte, logger zerolog.Logger) ([]byte
 	}
 	address := ethc.HexToAddress(p.tssStakingSlashingAddress)
 
-	//new contract
-	contract, err := tsh.NewTssStakingSlashing(address, p.l1Client)
-	if err != nil {
-		logger.Err(err).Msg("failed to new tss staking slash contract")
-		return nil, nil, err
-	}
 	//new raw contract
 	parsed, err := abi.JSON(strings.NewReader(tsh.TssStakingSlashingABI))
 	if err != nil {
 		logger.Err(err).Msg("Unable to new parsed from slash contract abi")
 		return nil, nil, err
 	}
+	//get staking slash contract abi
+	tshABI, err := tsh.TssStakingSlashingMetaData.GetAbi()
+	if err != nil {
+		logger.Err(err).Msg("Unable to get tss staking slashing ABI")
+		return nil, nil, err
+	}
+
 	rawSlashContract := bind.NewBoundContract(address, parsed, p.l1Client, p.l1Client, p.l1Client)
+	dataBytes, err := tsscommon.SlashBytes(txData, sig)
+	if err != nil {
+		logger.Err(err).Msg("failed to pack slash bytes")
+		return nil, nil, err
+	}
+	slashingID := tshABI.Methods[slashingMethodName].ID
+	calldata := append(slashingID, dataBytes...)
 
 	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, p.chainId)
 	if err != nil {
@@ -201,7 +213,7 @@ func (p *Processor) txBuilder(txData, sig []byte, logger zerolog.Logger) ([]byte
 	opts.Nonce = nonce
 	opts.NoSend = true
 
-	tx, err := contract.Slashing(opts, txData, sig)
+	tx, err := rawSlashContract.RawTransact(opts, calldata)
 	if err != nil {
 		logger.Err(err).Msg("failed to build slashing transaction tx!")
 		return nil, nil, err

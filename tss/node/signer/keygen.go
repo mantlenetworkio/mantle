@@ -22,6 +22,10 @@ import (
 	"time"
 )
 
+const (
+	setGroupPublicKeyMethodName = "setGroupPublicKey"
+)
+
 func (p *Processor) Keygen() {
 	defer p.wg.Done()
 	logger := p.logger.With().Str("step", "keygen").Logger()
@@ -92,13 +96,7 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 		return errors.New("tss group manager address is empty")
 	}
 	address := ethc.HexToAddress(p.tssGroupManagerAddress)
-
-	contract, err := tgm.NewTssGroupManager(address, p.l1Client)
-	if err != nil {
-		p.logger.Err(err).Msg("Unable to new tss group manager contract")
-		return err
-	}
-
+	//new tss group manager contract parsed
 	parsed, err := abi.JSON(strings.NewReader(
 		tgm.TssGroupManagerABI,
 	))
@@ -106,7 +104,22 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 		p.logger.Err(err).Msg("Unable to new parsed from tss group manager contract abi")
 		return err
 	}
+	//get tss group manager abi
+	tgmABI, err := tgm.TssGroupManagerMetaData.GetAbi()
+	if err != nil {
+		p.logger.Err(err).Msg("Unable to get tss group manager contract abi")
+		return err
+	}
+
 	rawTgmContract := bind.NewBoundContract(address, parsed, p.l1Client, p.l1Client, p.l1Client)
+
+	dataBytes, err := tsscommon.SetGroupPubKeyBytes(localKey, poolPubkey)
+	if err != nil {
+		p.logger.Err(err).Msg("failed to pack set group pub key params")
+		return err
+	}
+	setGroupPublicKeuID := tgmABI.Methods[setGroupPublicKeyMethodName].ID
+	calldata := append(setGroupPublicKeuID, dataBytes...)
 
 	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, p.chainId)
 	if err != nil {
@@ -127,7 +140,7 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	nonce := new(big.Int).SetUint64(nonce64)
 	opts.Nonce = nonce
 	opts.NoSend = true
-	tx, err := contract.SetGroupPublicKey(opts, localKey, poolPubkey)
+	tx, err := rawTgmContract.RawTransact(opts, calldata)
 	if err != nil {
 		p.logger.Err(err).Msg("Unable to set group public key with contract")
 		return err
