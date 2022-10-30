@@ -5,8 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/ethereum/go-ethereum"
-	"math/big"
-
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
 	etht "github.com/ethereum/go-ethereum/core/types"
@@ -17,6 +16,8 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keygen"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+	"math/big"
+	"strings"
 
 	"time"
 )
@@ -97,24 +98,48 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 		p.logger.Err(err).Msg("Unable to new tss group manager contract")
 		return err
 	}
-	groupPubKeyBytes, err := tsscommon.SetGroupPubKeyBytes(localKey, poolPubkey)
+
+	parsed, err := abi.JSON(strings.NewReader(
+		tgm.TssGroupManagerABI,
+	))
 	if err != nil {
-		p.logger.Err(err).Msg("failed to abi encode group public key")
+		p.logger.Err(err).Msg("Unable to new parsed from tss group manager contract abi")
 		return err
 	}
+	rawTgmContract := bind.NewBoundContract(address, parsed, p.l1Client, p.l1Client, p.l1Client)
 
-	opts, err := p.EstimateGas(groupPubKeyBytes, address)
+	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, p.chainId)
 	if err != nil {
-		p.logger.Err(err).Msg("failed to create opts ")
+		p.logger.Err(err).Msg("Unable to new option from chainId ")
+		return err
+
+	}
+	if opts.Context == nil {
+		opts.Context = p.ctx
+	}
+	nonce64, err := p.l1Client.NonceAt(p.ctx, p.address, nil)
+	if err != nil {
+		p.logger.Err(err).Msgf("%s unable to get current nonce",
+			p.address)
 		return err
 	}
-
+	p.logger.Info().Msgf("Current nonce is %d", nonce64)
+	nonce := new(big.Int).SetUint64(nonce64)
+	opts.Nonce = nonce
+	opts.NoSend = true
 	tx, err := contract.SetGroupPublicKey(opts, localKey, poolPubkey)
 	if err != nil {
 		p.logger.Err(err).Msg("Unable to set group public key with contract")
 		return err
 	}
-	if err := p.l1Client.SendTransaction(p.ctx, tx); err != nil {
+
+	newTx, err := p.EstimateGas(p.ctx, tx, rawTgmContract, address)
+	if err != nil {
+		p.logger.Err(err).Msg("got failed in estimate gas function ")
+		return err
+	}
+
+	if err := p.l1Client.SendTransaction(p.ctx, newTx); err != nil {
 		p.logger.Err(err).Msg("Unable to send transaction to l1 chain")
 		return err
 	}
@@ -186,8 +211,8 @@ func ensureConnection(client *ethclient.Client) error {
 	return nil
 }
 
-func (p *Processor) EstimateGas(inputData []byte, toAddress ethc.Address) (*bind.TransactOpts, error) {
-	header, err := p.l1Client.HeaderByNumber(context.Background(), nil)
+func (p *Processor) EstimateGas(ctx context.Context, tx *etht.Transaction, rawContract *bind.BoundContract, address ethc.Address) (*etht.Transaction, error) {
+	header, err := p.l1Client.HeaderByNumber(ctx, nil)
 	if err != nil {
 		p.logger.Err(err).Msg("failed to get header by l1client")
 		return nil, err
@@ -196,15 +221,15 @@ func (p *Processor) EstimateGas(inputData []byte, toAddress ethc.Address) (*bind
 	var gasTipCap *big.Int
 	var gasFeeCap *big.Int
 	if header.BaseFee == nil {
-		gasPrice, err = p.l1Client.SuggestGasPrice(context.Background())
+		gasPrice, err = p.l1Client.SuggestGasPrice(ctx)
 		if err != nil {
 			p.logger.Err(err).Msg("cannot fetch gas price")
 			return nil, err
 		}
 	} else {
-		gasTipCap, err = p.l1Client.SuggestGasTipCap(context.Background())
+		gasTipCap, err = p.l1Client.SuggestGasTipCap(ctx)
 		if err != nil {
-			p.logger.Err(err).Msg("failed to SuggestGasTipCap, FallbackGasTipCap = big.NewInt(1500000000) ")
+			p.logger.Debug().Msg("failed to SuggestGasTipCap, FallbackGasTipCap = big.NewInt(1500000000) ")
 			gasTipCap = big.NewInt(1500000000)
 		}
 		gasFeeCap = new(big.Int).Add(
@@ -215,44 +240,31 @@ func (p *Processor) EstimateGas(inputData []byte, toAddress ethc.Address) (*bind
 
 	msg := ethereum.CallMsg{
 		From:      p.address,
-		To:        &toAddress,
+		To:        &address,
 		GasPrice:  gasPrice,
 		GasTipCap: gasTipCap,
 		GasFeeCap: gasFeeCap,
 		Value:     nil,
-		Data:      inputData,
+		Data:      tx.Data(),
 	}
 
-	gasLimit, err := p.l1Client.EstimateGas(context.Background(), msg)
+	gasLimit, err := p.l1Client.EstimateGas(ctx, msg)
 	if err != nil {
 		p.logger.Err(err).Msg("failed to EstimateGas")
 		return nil, err
 	}
-	gasLimit = uint64(float64(gasLimit) * 1.2) // add 20% buffer to prevent outOfGas error
-
-	chainId, err := p.l1Client.ChainID(p.ctx)
+	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, p.chainId)
 	if err != nil {
-		p.logger.Err(err).Msg("Unable to get chainId on l1 chain")
+		p.logger.Err(err).Msg("failed to new ops in estimate gas function")
 		return nil, err
 	}
+	opts.Context = ctx
+	opts.Nonce = new(big.Int).SetUint64(tx.Nonce())
 
-	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, chainId)
-	if opts.Context == nil {
-		opts.Context = context.Background()
-	}
-	nonce64, err := p.l1Client.NonceAt(p.ctx, p.address, nil)
-	if err != nil {
-		p.logger.Err(err).Msgf("%s unable to get current nonce",
-			p.address)
-		return nil, err
-	}
-	p.logger.Info().Msgf("Current nonce is %d", nonce64)
-	nonce := new(big.Int).SetUint64(nonce64)
-	opts.Nonce = nonce
 	opts.GasTipCap = gasTipCap
 	opts.GasFeeCap = gasFeeCap
-	opts.GasLimit = gasLimit
-	opts.NoSend = true
-	return opts, err
+	opts.GasLimit = 6 * gasLimit / 5 //add 20% buffer to gas limit
+
+	return rawContract.RawTransact(opts, tx.Data())
 
 }

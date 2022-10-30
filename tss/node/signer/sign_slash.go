@@ -4,6 +4,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/rs/zerolog"
 	"math/big"
 	"strings"
@@ -165,27 +167,52 @@ func (p *Processor) txBuilder(txData, sig []byte, logger zerolog.Logger) ([]byte
 	}
 	address := ethc.HexToAddress(p.tssStakingSlashingAddress)
 
+	//new contract
 	contract, err := tsh.NewTssStakingSlashing(address, p.l1Client)
 	if err != nil {
 		logger.Err(err).Msg("failed to new tss staking slash contract")
 		return nil, nil, err
 	}
-	inputData, err := tsscommon.SlashBytes(txData, sig)
+	//new raw contract
+	parsed, err := abi.JSON(strings.NewReader(tsh.TssStakingSlashingABI))
 	if err != nil {
-		logger.Err(err).Msg("failed to abi encode slash ")
+		logger.Err(err).Msg("Unable to new parsed from slash contract abi")
 		return nil, nil, err
 	}
-	opts, err := p.EstimateGas(inputData, address)
+	rawSlashContract := bind.NewBoundContract(address, parsed, p.l1Client, p.l1Client, p.l1Client)
+
+	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, p.chainId)
+	if err != nil {
+		p.logger.Err(err).Msg("failed to new keyed transactor")
+		return nil, nil, err
+	}
+	if opts.Context == nil {
+		opts.Context = p.ctx
+	}
+
+	nonce64, err := p.l1Client.NonceAt(p.ctx, p.address, nil)
+	if err != nil {
+		p.logger.Err(err).Msgf("%s unable to get current nonce",
+			p.address)
+		return nil, nil, err
+	}
+	p.logger.Info().Msgf("Current nonce is %d", nonce64)
+	nonce := new(big.Int).SetUint64(nonce64)
+	opts.Nonce = nonce
+	opts.NoSend = true
 
 	tx, err := contract.Slashing(opts, txData, sig)
 	if err != nil {
 		logger.Err(err).Msg("failed to build slashing transaction tx!")
 		return nil, nil, err
 	}
-	txBinary, err := tx.MarshalBinary()
+
+	newTx, err := p.EstimateGas(p.ctx, tx, rawSlashContract, address)
+
+	txBinary, err := newTx.MarshalBinary()
 	if err != nil {
 		logger.Err(err).Msg("failed to get marshal binary from transaction tx")
 		return nil, nil, err
 	}
-	return txBinary, opts.GasPrice, nil
+	return txBinary, newTx.GasPrice(), nil
 }

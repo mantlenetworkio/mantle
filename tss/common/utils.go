@@ -13,7 +13,6 @@ var (
 	typByte32Array          abi.Type
 	typUint256              abi.Type
 	typSlashMsg             abi.Type
-	typBytes                abi.Type
 	stateBatchArguments     abi.Arguments
 	slashMsgArguments       abi.Arguments
 	groupPublicKeyArguments abi.Arguments
@@ -30,7 +29,6 @@ type SlashMsg struct {
 func init() {
 	typByte32Array, _ = abi.NewType("bytes32[]", "bytes32[]", nil)
 	typUint256, _ = abi.NewType("uint256", "uint256", nil)
-	typBytes, _ = abi.NewType("bytes", "bytes", nil)
 	stateBatchArguments = abi.Arguments{
 		{
 			Type: typByte32Array,
@@ -50,20 +48,7 @@ func init() {
 	)
 
 	slashMsgArguments = abi.Arguments{{Type: typSlashMsg}}
-	groupPublicKeyArguments = abi.Arguments{
-		{
-			Type: typBytes,
-		}, {
-			Type: typBytes,
-		},
-	}
-	slashArguments = abi.Arguments{
-		{
-			Type: typBytes,
-		}, {
-			Type: typBytes,
-		},
-	}
+
 }
 
 func has0xPrefix(input string) bool {
@@ -106,12 +91,4 @@ func SlashMsgHash(batchIndex uint64, jailNode common.Address, tssNodes []common.
 		return nil, err
 	}
 	return crypto.Keccak256Hash(abiEncodedRaw).Bytes(), nil
-}
-
-func SetGroupPubKeyBytes(localKey, poolPubKey []byte) ([]byte, error) {
-	return groupPublicKeyArguments.Pack(localKey, poolPubKey)
-}
-
-func SlashBytes(msg, sig []byte) ([]byte, error) {
-	return slashArguments.Pack(msg, sig)
 }
