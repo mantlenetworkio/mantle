@@ -142,7 +142,7 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	opts.NoSend = true
 	tx, err := rawTgmContract.RawTransact(opts, calldata)
 	if err != nil {
-		p.logger.Err(err).Msg("Unable to set group public key with contract")
+		p.logger.Err(err).Msg("---Unable to set group public key with contract")
 		return err
 	}
 
