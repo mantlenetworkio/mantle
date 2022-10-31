@@ -129,6 +129,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		return nil, err
 	}
 	if sig := m.getStateSignature(digestBz); len(sig) > 0 {
+		log.Info("get stored signature ", "digest", hex.EncodeToString(digestBz), "sig", hex.EncodeToString(sig))
 		return sig, nil
 	}
 
