@@ -1,6 +1,7 @@
 import {task} from 'hardhat/config'
 import {getContractFactory} from '../src/contract-defs'
 import {HexToBytes} from "../src/deploy-utils";
+import {utils} from "ethers";
 
 
 task("setTssGroupMember")
@@ -157,6 +158,17 @@ task(`getTssInactiveGroupInfo`)
     console.log(info)
   })
 
+task(`getTssGroupUnJailMembers`)
+  .addParam(`contract`)
+  .setAction(async (taskArgs, hre) => {
+    const tssGroupManager = getContractFactory('TssGroupManager')
+      .attach(taskArgs.contract)
+    const addresses = await tssGroupManager
+      .connect(hre.ethers.provider)
+      .getTssGroupUnJailMembers()
+    console.log(addresses)
+  })
+
 task(`quitRequest`)
   .addParam('contract', 'tss staking slashing contract address')
   .setAction(async (taskArgs, hre) => {
@@ -180,4 +192,20 @@ task(`getQuitRequestList`)
     console.log(response)
   })
 
+task(`upgradeTssManager`)
+  .addParam('proxy', '')
+  .setAction(async (taskArgs, hre) => {
+    console.log('Upgrading TssGroupManager')
+    const accounts = await hre.ethers.getSigners()
+    const NewTssManager = await hre.ethers.getContractFactory('TssGroupManager')
+    const newTssManager = await NewTssManager.deploy()
+    await newTssManager.deployed()
+    console.log('newTssManager deployed to: ', newTssManager.address)
 
+    const proxy = await getContractFactory(
+      'TransparentUpgradeableProxy'
+    ).attach(taskArgs.proxy)
+    await proxy.connect(accounts[1]).upgradeTo(newTssManager.address)
+    console.log('TssGroupManager Upgraded')
+
+  })
