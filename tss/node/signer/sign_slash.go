@@ -1,17 +1,23 @@
 package signer
 
 import (
-	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/rs/zerolog"
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
 	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+)
+
+const (
+	slashingMethodName = "slashing"
 )
 
 func (p *Processor) SignSlash() {
@@ -66,7 +72,9 @@ func (p *Processor) SignSlash() {
 					nodesaddrs[i] = addr
 				}
 				hashTx, err := tsscommon.SlashMsgHash(requestBody.BatchIndex, requestBody.Address, nodesaddrs, requestBody.SignType)
-
+				mesTx, err := tsscommon.SlashMsgBytes(requestBody.BatchIndex, requestBody.Address, nodesaddrs, requestBody.SignType)
+				logger.Info().Msgf("nodes %s ", nodesaddrs)
+				logger.Info().Msgf("batchindex %d ,address %s ,signtype %d , mesTx %s", requestBody.BatchIndex, requestBody.Address.String(), requestBody.SignType, hex.EncodeToString(mesTx))
 				if err != nil {
 					logger.Err(err).Msg("failed to encode SlashMsg")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
@@ -76,6 +84,9 @@ func (p *Processor) SignSlash() {
 
 				data, culprits, err := p.handleSign(nodeSignRequest, hashTx, logger)
 
+				//TODO
+				logger.Info().Msgf("signature %s ", hex.EncodeToString(data))
+				logger.Info().Msgf("signature bytes %v ", data)
 				if err != nil {
 					logger.Error().Msgf("slash %s sign failed ", requestBody.Address)
 					var errorRes tdtypes.RPCResponse
@@ -94,7 +105,7 @@ func (p *Processor) SignSlash() {
 					}
 					continue
 				}
-				txData, gasPrice, err := p.txBuilder(hashTx, data)
+				txData, gasPrice, err := p.txBuilder(mesTx, data, logger)
 				if err != nil {
 					logger.Err(err).Msg("failed to txbuilder slash tranction")
 					errorRes := tdtypes.NewRPCErrorResponse(req.ID, 201, "sign failed", err.Error())
@@ -148,46 +159,81 @@ func (p *Processor) removeWaitSlashMsg(msg tsscommon.SlashRequest) {
 	}
 }
 
-func (p *Processor) txBuilder(txData, sig []byte) ([]byte, *big.Int, error) {
-	p.logger.Info().Msg("connecting to layer one")
+func (p *Processor) txBuilder(txData, sig []byte, logger zerolog.Logger) ([]byte, *big.Int, error) {
+	logger.Info().Msg("connecting to layer one")
 	if err := ensureConnection(p.l1Client); err != nil {
-		p.logger.Err(err).Msg("Unable to connect to layer one")
+		logger.Err(err).Msg("Unable to connect to layer one")
 		return nil, nil, err
 	}
 	if len(p.tssStakingSlashingAddress) == 0 {
-		p.logger.Error().Msg("tss staking slashing address is empty ")
+		logger.Error().Msg("tss staking slashing address is empty ")
 		return nil, nil, errors.New("tss staking slashing address is empty")
 	}
 	address := ethc.HexToAddress(p.tssStakingSlashingAddress)
-	chainId, err := p.l1Client.ChainID(p.ctx)
+
+	//new raw contract
+	parsed, err := abi.JSON(strings.NewReader(tsh.TssStakingSlashingABI))
 	if err != nil {
+		logger.Err(err).Msg("Unable to new parsed from slash contract abi")
+		return nil, nil, err
+	}
+	//get staking slash contract abi
+	tshABI, err := tsh.TssStakingSlashingMetaData.GetAbi()
+	if err != nil {
+		logger.Err(err).Msg("Unable to get tss staking slashing ABI")
 		return nil, nil, err
 	}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, chainId)
+	rawSlashContract := bind.NewBoundContract(address, parsed, p.l1Client, p.l1Client, p.l1Client)
+	dataBytes, err := tsscommon.SlashBytes(txData, sig)
+	if err != nil {
+		logger.Err(err).Msg("failed to pack slash bytes")
+		return nil, nil, err
+	}
+	slashingID := tshABI.Methods[slashingMethodName].ID
+	calldata := append(slashingID, dataBytes...)
 
+	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, p.chainId)
 	if err != nil {
 		p.logger.Err(err).Msg("failed to new keyed transactor")
 		return nil, nil, err
 	}
 	if opts.Context == nil {
-		opts.Context = context.Background()
-	}
-	opts.NoSend = true
-	contract, err := tsh.NewTssStakingSlashing(address, p.l1Client)
-	if err != nil {
-		return nil, nil, err
-	}
-	gasPrice, err := p.l1Client.SuggestGasPrice(context.Background())
-	if err != nil {
-		p.logger.Err(err).Msg("cannot fetch gas price")
-		return nil, nil, err
-	}
-	opts.GasPrice = gasPrice
-	tx, err := contract.Slashing(opts, txData, sig)
-	if err != nil {
-		return nil, nil, err
+		opts.Context = p.ctx
 	}
 
-	return tx.Data(), gasPrice, nil
+	nonce64, err := p.l1Client.NonceAt(p.ctx, p.address, nil)
+	if err != nil {
+		p.logger.Err(err).Msgf("%s unable to get current nonce",
+			p.address)
+		return nil, nil, err
+	}
+	p.logger.Info().Msgf("Current nonce is %d", nonce64)
+	nonce := new(big.Int).SetUint64(nonce64)
+	opts.Nonce = nonce
+	opts.NoSend = true
+
+	tx, err := rawSlashContract.RawTransact(opts, calldata)
+	if err != nil {
+		if strings.Contains(err.Error(), errMaxPriorityFeePerGasNotFound) {
+			opts.GasTipCap = FallbackGasTipCap
+			tx, err = rawSlashContract.RawTransact(opts, calldata)
+			if err != nil {
+				logger.Err(err).Msg("failed to build slashing transaction tx!")
+				return nil, nil, err
+			}
+		} else {
+			logger.Err(err).Msg("failed to build slashing transaction tx!")
+			return nil, nil, err
+		}
+	}
+
+	newTx, err := p.EstimateGas(p.ctx, tx, rawSlashContract, address)
+
+	txBinary, err := newTx.MarshalBinary()
+	if err != nil {
+		logger.Err(err).Msg("failed to get marshal binary from transaction tx")
+		return nil, nil, err
+	}
+	return txBinary, newTx.GasPrice(), nil
 }

@@ -30,26 +30,29 @@ func (p *Processor) VerifySlash() {
 					continue
 				}
 
-				var re bool
+				var ret bool
 				if askRequest.SignType == common.SlashTypeCulprit {
 					culprits := p.nodeStore.GetCulprits()
 					if len(culprits) > 0 {
 						for _, v := range culprits {
 							if v == askRequest.Address.String() {
-								re = true
+								ret = true
 								break
 							}
 						}
 					}
 				} else if askRequest.SignType == common.SlashTypeLiveness {
-					result := p.nodeStore.GetNodeMissedBatchBitArray(askRequest.Address, askRequest.BatchIndex)
-					re = result
+					found, info := p.nodeStore.GetSlashingInfo(askRequest.Address, askRequest.BatchIndex)
+					logger.Info().Msgf("--------- found value %s ", found)
+					if found && info.SlashType == common.SlashTypeLiveness {
+						ret = true
+					}
 				}
-				if re {
+				if ret {
 					p.UpdateWaitSignSlashMsgs(askRequest)
 				}
 				askResponse := common.AskResponse{
-					Result: re,
+					Result: ret,
 				}
 				RpcResponse = tdtypes.NewRPCSuccessResponse(resId, askResponse)
 				p.wsClient.SendMsg(RpcResponse)
@@ -62,5 +65,10 @@ func (p *Processor) VerifySlash() {
 func (p *Processor) UpdateWaitSignSlashMsgs(msg common.SlashRequest) {
 	p.waitSignSlashLock.Lock()
 	defer p.waitSignSlashLock.Unlock()
-	p.waitSignSlashMsgs[msg.Address.String()][msg.BatchIndex] = msg
+	mmap, ok := p.waitSignSlashMsgs[msg.Address.String()]
+	if !ok {
+		mmap = map[uint64]common.SlashRequest{}
+	}
+	mmap[msg.BatchIndex] = msg
+	p.waitSignSlashMsgs[msg.Address.String()] = mmap
 }

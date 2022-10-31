@@ -1,9 +1,11 @@
 package l1chain
 
 import (
+	"bytes"
 	"context"
 	"encoding/hex"
 	"errors"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/influxdata/influxdb/pkg/slices"
 	"github.com/mantlenetworkio/mantle/tss/slash"
 	"math/big"
@@ -11,7 +13,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
 	"github.com/mantlenetworkio/mantle/tss/manager/types"
@@ -59,9 +60,22 @@ func (q QueryService) QueryActiveInfo() (types.TssCommitteeInfo, error) {
 		return types.TssCommitteeInfo{}, nil
 	}
 	compressCPK := crypto.CompressPubkey(unmarshalledCPK)
+
+	unjailMembers, err := q.tssGroupManagerCaller.GetTssGroupUnJailMembers(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - q.confirmBlocks)})
+	if err != nil {
+		log.Error("fail to GetTssGroupUnJailMembers", "err", err)
+		return types.TssCommitteeInfo{}, nil
+	}
+
+	var hasJailMembers bool
+	if len(unjailMembers) < len(activeTssMembers) {
+		log.Info("found jailed members from L1", "jailed number", len(activeTssMembers)-len(unjailMembers))
+		hasJailMembers = true
+	}
 	// need to exclude the culprits
 	culprits := q.slashingStore.GetCulprits()
 	tssMembers := make([]string, 0)
+
 	for _, m := range activeTssMembers {
 		unmarshalled, err := crypto.UnmarshalPubkey(append([]byte{0x04}, m...))
 		if err != nil {
@@ -73,14 +87,31 @@ func (q QueryService) QueryActiveInfo() (types.TssCommitteeInfo, error) {
 		if slices.Exists(culprits, hexEncoded) { // exclude culprits
 			continue
 		}
+
+		if hasJailMembers {
+			addr := crypto.PubkeyToAddress(*unmarshalled)
+			if !isAddrExist(unjailMembers, addr) { // exclude jailed address
+				continue
+			}
+		}
 		tssMembers = append(tssMembers, hexEncoded)
 	}
+
 	return types.TssCommitteeInfo{
 		ElectionId:    electionId.Uint64(),
 		Threshold:     int(threshold.Int64()),
 		ClusterPubKey: hex.EncodeToString(compressCPK),
 		TssMembers:    tssMembers,
 	}, nil
+}
+
+func isAddrExist(set []common.Address, find common.Address) bool {
+	for _, s := range set {
+		if bytes.Compare(s.Bytes(), find.Bytes()) == 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func (q QueryService) QueryInactiveInfo() (types.TssCommitteeInfo, error) {
