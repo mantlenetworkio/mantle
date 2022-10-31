@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
+	"github.com/ethereum/go-ethereum/log"
 	"math/big"
 	"strings"
 
@@ -21,7 +22,6 @@ import (
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
 	tss_types "github.com/mantlenetworkio/mantle/tss/common"
 )
 
