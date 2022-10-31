@@ -3,6 +3,7 @@ package proposer
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 	"strings"
@@ -219,6 +220,7 @@ func (d *Driver) CraftBatchTx(
 		log.Error("get tss manager signature fail")
 		return nil, err
 	}
+	log.Info("append log", "stateRoots", fmt.Sprintf("%v", stateRoots), "offsetStartsAtIndex", offsetStartsAtIndex, "signature", hex.EncodeToString(signature))
 	tx, err := d.sccContract.AppendStateBatch(
 		opts, stateRoots, offsetStartsAtIndex, signature,
 	)
