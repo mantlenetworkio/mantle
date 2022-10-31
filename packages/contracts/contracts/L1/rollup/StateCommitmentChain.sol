@@ -350,9 +350,11 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         );
     }
     // TODO delete
+    // 0xcfc17379ac80a9ef231772ace60014fb84704cb4
+    // 0x9d72b1e94c7075be7e6da0e2104db4302d02db0e
     function _distributeReward() public {
         // get address of tss group member
-
+        address[] tssMembers = ["0xcfc17379ac80a9ef231772ace60014fb84704cb4","0x9d72b1e94c7075be7e6da0e2104db4302d02db0e"];
         require(tssMembers.length > 0, "get tss members in error");
         bytes32[] _batch;
         uint256 _shouldStartAtElement;
