@@ -354,10 +354,12 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
     // 0x9d72b1e94c7075be7e6da0e2104db4302d02db0e
     function _distributeReward() public {
         // get address of tss group member
-        address addr1 = address("0xcfc17379ac80a9ef231772ace60014fb84704cb4");
-        address addr2 = address("0x9d72b1e94c7075be7e6da0e2104db4302d02db0e");
-        address[] memory  tssMembers = [addr1,addr2];
-        require(tssMembers.length > 0, "get tss members in error");
+        address[] memory tssMembers = new address[](2);
+        tssMembers[0] = address(0xCFc17379Ac80A9EF231772ACE60014fb84704cB4);
+        tssMembers[1] = address(0x9D72b1e94C7075Be7E6da0E2104DB4302d02DB0E);
+//        tssMembers.push(0XCFC17379AC80A9EF231772ACE60014FB84704CB4);
+//        tssMembers.push(0x9d72b1e94c7075be7e6da0e2104db4302d02db0e);
+//        require(tssMembers.length > 0, "get tss members in error");
         bytes32[] memory _batch;
         uint256 _shouldStartAtElement;
         // construct calldata for claimReward call
