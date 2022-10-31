@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"bytes"
 	"context"
 	"encoding/binary"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -57,6 +58,17 @@ func (m Manager) handleSlashing(si slash.SlashingInfo) {
 		if found { // this slashing is confirmed on ethereum
 			m.store.RemoveSlashingInfo(si.Address, si.BatchIndex)
 		}
+		return
+	}
+
+	unJailMembers, err := m.tssGroupManagerCaller.GetTssGroupUnJailMembers(nil)
+	if err != nil {
+		log.Error("failed to GetTssGroupUnJailMembers", "err", err)
+		return
+	}
+	if !isAddrExist(unJailMembers, si.Address) {
+		log.Warn("can not slash the address are not unJailed", "address", si.Address.String())
+		m.store.RemoveSlashingInfo(si.Address, si.BatchIndex)
 		return
 	}
 
@@ -235,4 +247,13 @@ func (ss SendState) remove(address common.Address, batchIndex uint64) {
 	var key [28]byte
 	copy(key[:], append(address.Hash().Bytes(), indexBz...))
 	delete(ss.states, key)
+}
+
+func isAddrExist(set []common.Address, find common.Address) bool {
+	for _, s := range set {
+		if bytes.Compare(s.Bytes(), find.Bytes()) == 0 {
+			return true
+		}
+	}
+	return false
 }

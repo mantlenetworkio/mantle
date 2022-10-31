@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
 	"math"
 	"math/big"
@@ -28,6 +29,7 @@ type Manager struct {
 	store                    types.ManagerStore
 	l1Cli                    *ethclient.Client
 	tssStakingSlashingCaller *tsh.TssStakingSlashingCaller
+	tssGroupManagerCaller    *tgm.TssGroupManagerCaller
 	l1ConfirmBlocks          int
 
 	taskInterval          time.Duration
@@ -77,7 +79,10 @@ func NewManager(wsServer server.IWebsocketManager,
 		return Manager{}, err
 	}
 	tssStakingSlashingCaller, err := tsh.NewTssStakingSlashingCaller(common.HexToAddress(config.TssStakingSlashContractAddress), l1Cli)
-
+	if err != nil {
+		return Manager{}, err
+	}
+	tssGroupManagerCaller, err := tgm.NewTssGroupManagerCaller(common.HexToAddress(config.TssGroupContractAddress), l1Cli)
 	if err != nil {
 		return Manager{}, err
 	}
@@ -88,6 +93,7 @@ func NewManager(wsServer server.IWebsocketManager,
 		l1Cli:                    l1Cli,
 		l1ConfirmBlocks:          config.L1ConfirmBlocks,
 		tssStakingSlashingCaller: tssStakingSlashingCaller,
+		tssGroupManagerCaller:    tssGroupManagerCaller,
 
 		taskInterval:          taskIntervalDur,
 		confirmReceiptTimeout: receiptConfirmTimeoutDur,
