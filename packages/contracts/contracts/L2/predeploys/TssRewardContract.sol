@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import { ITssRewardContract } from  "./iTssRewardContract.sol";
-import { IBVM_GasPriceOracle } from "./iBVM_GasPriceOracle.sol";
+import {ITssRewardContract} from  "./iTssRewardContract.sol";
+import {IBVM_GasPriceOracle} from "./iBVM_GasPriceOracle.sol";
 
 /* Library Imports */
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -95,6 +95,10 @@ contract TssRewardContract is ITssRewardContract {
         uint256 batchAmount = 0;
         uint256 accu = 0;
         // sendAmount
+        if (latsBatchTime == 0) {
+            latsBatchTime = _batchTime;
+            return;
+        }
         batchAmount = (_batchTime - latsBatchTime) * sendAmountPerSecond;
         sendAmount = batchAmount.div(_tssMembers.length);
         for (uint256 j = 0; j < _tssMembers.length; j++) {
