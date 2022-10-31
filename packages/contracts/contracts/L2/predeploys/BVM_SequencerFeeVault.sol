@@ -2,11 +2,11 @@
 pragma solidity ^0.8.9;
 
 /* Library Imports */
-import { Lib_PredeployAddresses } from "../../libraries/constants/Lib_PredeployAddresses.sol";
+import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAddresses.sol";
 
 /* Contract Imports */
-import { L2StandardBridge } from "../messaging/L2StandardBridge.sol";
-import { IBVM_GasPriceOracle } from "./iBVM_GasPriceOracle.sol";
+import {L2StandardBridge} from "../messaging/L2StandardBridge.sol";
+import {IBVM_GasPriceOracle} from "./iBVM_GasPriceOracle.sol";
 
 /**
  * @title BVM_SequencerFeeVault
@@ -57,16 +57,20 @@ contract BVM_SequencerFeeVault {
      * Public Functions *
      ********************/
 
-// slither-disable-next-line external-function
+    // slither-disable-next-line external-function
     function withdraw() public {
-        require(
-            address(this).balance >= MIN_WITHDRAWAL_AMOUNT,
-        // solhint-disable-next-line max-line-length
-            "BVM_SequencerFeeVault: withdrawal amount must be greater than minimum withdrawal amount"
-        );
         address to = l1FeeWallet;
         if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() == true) {
             to = address(0);
+            if (address(this).balance <= MIN_WITHDRAWAL_AMOUNT) {
+                return;
+            }
+        }else {
+            require(
+                address(this).balance >= MIN_WITHDRAWAL_AMOUNT,
+            // solhint-disable-next-line max-line-length
+                "BVM_SequencerFeeVault: withdrawal amount must be greater than minimum withdrawal amount"
+            );
         }
         L2StandardBridge(Lib_PredeployAddresses.L2_STANDARD_BRIDGE).withdrawTo(
             Lib_PredeployAddresses.BVM_BIT,
