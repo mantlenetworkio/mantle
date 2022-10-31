@@ -19,7 +19,7 @@ db_dir = "/root/.tssnode/db"
 # the base directory for storing the data, tss localSaveData etc. 
 base_dir = "/root/.tssnode"
 # websocket addr of tss manager
-ws_addr = "tcp://bitnetwork-tss-manager:8081"
+ws_addr = "tcp://tss-manager:8081"
 # l2 eth rpc
 l2_eth_rpc = "http://bitnetwork-l2geth"
 tss_group_manager_address = "0x666f755Ff171702702EAc10339A2a613698Cbd2f"

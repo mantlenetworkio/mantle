@@ -385,3 +385,23 @@ func mintBIT(t *testing.T, client *ethclient.Client, privateKey string, amount i
 	require.NoError(t, err)
 	require.NotNil(t, tx)
 }
+
+func TestDecimal(t *testing.T) {
+	client, err := ethclient.Dial(l2url)
+	require.NoError(t, err)
+	require.NotNil(t, client)
+
+	l2EthInstance, err := l2eth.NewBVMETH(common.HexToAddress(l2EthAddress), client)
+	require.NoError(t, err)
+
+	decimal, err := l2EthInstance.Decimals(&bind.CallOpts{})
+	require.NoError(t, err)
+	require.Equal(t, decimal, uint8(0x12))
+
+	symble, err := l2EthInstance.Symbol(&bind.CallOpts{})
+	require.NoError(t, err)
+	require.Equal(t, symble, "WETH")
+
+	t.Log(decimal)
+	t.Log(symble)
+}

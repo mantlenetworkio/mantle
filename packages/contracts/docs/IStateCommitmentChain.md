@@ -148,7 +148,7 @@ Verifies a batch inclusion proof.
 ### StateBatchAppended
 
 ```solidity
-event StateBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint256 _batchSize, uint256 _prevTotalElements, bytes signature, bytes _extraData)
+event StateBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint256 _batchSize, uint256 _prevTotalElements, bytes _signature, bytes _extraData)
 ```
 
 
@@ -163,7 +163,7 @@ event StateBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint25
 | _batchRoot  | bytes32 | undefined |
 | _batchSize  | uint256 | undefined |
 | _prevTotalElements  | uint256 | undefined |
-| signature  | bytes | undefined |
+| _signature  | bytes | undefined |
 | _extraData  | bytes | undefined |
 
 ### StateBatchDeleted
