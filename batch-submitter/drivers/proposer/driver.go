@@ -215,6 +215,7 @@ func (d *Driver) CraftBatchTx(
 		OffsetStartsAtIndex: offsetStartsAtIndex.String(),
 		StateRoots:          stateRoots,
 	}
+	log.Info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Test log")
 	signature, err := d.cfg.TssClient.GetSignStateBatch(tssReqParams)
 	if err != nil {
 		log.Error("get tss manager signature fail")
