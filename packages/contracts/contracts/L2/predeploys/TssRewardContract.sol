@@ -117,6 +117,42 @@ contract TssRewardContract is ITssRewardContract {
         );
     }
 
+    function claimRewardPub(address[] calldata _tssMembers)
+    public
+    checkBalance
+    {
+//        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != true) {
+//            claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
+//            return;
+//        }
+        //
+        uint256 _batchTime = block.timestamp;
+        uint256 sendAmount = 0;
+        uint256 batchAmount = 0;
+        uint256 accu = 0;
+        // sendAmount
+        if (latsBatchTime == 0) {
+            latsBatchTime = _batchTime;
+            return;
+        }
+        batchAmount = (_batchTime - latsBatchTime) * sendAmountPerSecond;
+        sendAmount = batchAmount.div(_tssMembers.length);
+        for (uint256 j = 0; j < _tssMembers.length; j++) {
+            address payable addr = payable(_tssMembers[j]);
+            accu = accu.add(sendAmount);
+            totalAmount = totalAmount.sub(sendAmount);
+            addr.transfer(sendAmount);
+        }
+        uint256 reserved = batchAmount.sub(accu);
+        if (reserved > 0) {
+            dust = dust.add(reserved);
+        }
+        emit DistributeTssReward(
+            _batchTime,
+            _tssMembers
+        );
+    }
+
     /**
      * @dev claimReward distribute reward to tss member.
      * @param _blockStartHeight The block height at L2 which needs to distribute profits
