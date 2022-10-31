@@ -39,6 +39,9 @@ contract TssRewardContract is ITssRewardContract {
         bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
     }
 
+    // slither-disable-next-line locked-ether
+    receive() external payable {}
+
     /**
      * Enforces that the modified function is only callable by a specific null address.
      *  authenticated to call this function.
