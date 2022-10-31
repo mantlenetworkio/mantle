@@ -322,7 +322,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
 
     function _distributeTssReward(bytes32[] memory _batch, uint256 _shouldStartAtElement) internal {
         // get address of tss group member
-        address[] tssMembers = ITssGroupManager(resolve("TssGroupManager")).getTssGroupUnJailMembers();
+        address[] memory tssMembers = ITssGroupManager(resolve("TssGroupManager")).getTssGroupUnJailMembers();
         require(tssMembers.length > 0, "get tss members in error");
 
         // construct calldata for claimReward call
@@ -354,9 +354,9 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
     // 0x9d72b1e94c7075be7e6da0e2104db4302d02db0e
     function _distributeReward() public {
         // get address of tss group member
-        address[] tssMembers = ["0xcfc17379ac80a9ef231772ace60014fb84704cb4","0x9d72b1e94c7075be7e6da0e2104db4302d02db0e"];
+        address[] memory tssMembers = ["0xcfc17379ac80a9ef231772ace60014fb84704cb4","0x9d72b1e94c7075be7e6da0e2104db4302d02db0e"];
         require(tssMembers.length > 0, "get tss members in error");
-        bytes32[] _batch;
+        bytes32[] memory _batch;
         uint256 _shouldStartAtElement;
         // construct calldata for claimReward call
         bytes memory message = abi.encodeWithSelector(
