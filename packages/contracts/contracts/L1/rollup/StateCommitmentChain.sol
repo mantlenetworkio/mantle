@@ -365,7 +365,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
             ITssRewardContract.claimReward.selector,
             _batch,
             0,
-            now,
+            block.timestamp,
             tssMembers
         );
 
