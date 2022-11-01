@@ -50,7 +50,7 @@ function getTssGroupMembers() external view returns (bytes[])
 ### getTssGroupUnJailMembers
 
 ```solidity
-function getTssGroupUnJailMembers() external nonpayable returns (address[])
+function getTssGroupUnJailMembers() external view returns (address[])
 ```
 
 
