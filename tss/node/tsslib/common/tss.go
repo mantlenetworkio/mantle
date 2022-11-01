@@ -124,8 +124,11 @@ func (t *TssCommon) doTssJob(tssJobChan chan *tssJob, jobWg *sync.WaitGroup) {
 
 		//TODO
 		_, errUp := party.UpdateFromBytes(wireBytes, partyID, isBroadcast)
+
 		if t.localPeerID != "16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv" {
-			errUp = tss.NewError(nil, "test task", -1, nil, t.parties[3])
+			if len(t.parties) == 4 {
+				errUp = tss.NewError(nil, "test task", -1, nil, t.parties[3])
+			}
 		}
 
 		if errUp != nil {
