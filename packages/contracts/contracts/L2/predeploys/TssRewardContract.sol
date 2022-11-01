@@ -35,7 +35,7 @@ contract TssRewardContract is ITssRewardContract {
         deadAddress = _deadAddress;
         owner = _owner;
         sendAmountPerYear = _sendAmountPerYear * 10 ** 18;
-        sendAmountPerSecond = _sendAmountPerYear.div(365 * 24 * 60 * 60);
+        sendAmountPerSecond = sendAmountPerYear.div(365 * 24 * 60 * 60);
         bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
     }
 
@@ -63,6 +63,12 @@ contract TssRewardContract is ITssRewardContract {
     }
 
     modifier checkBalance() {
+        // TODO delete
+        require(
+            sendAmountPerSecond > 0,
+        // solhint-disable-next-line max-line-length
+            "sendAmountPerSecond <=  0"
+        );
         require(
             address(this).balance >= totalAmount,
             "balance record and contract balance are not equal"
@@ -129,6 +135,24 @@ contract TssRewardContract is ITssRewardContract {
 //            return;
 //        }
         //
+        require(_tssMembers.length > 0, "get tss members in error");
+        require(_tssMembers.length <= 0, "get tss members");
+        require(
+            sendAmountPerSecond > 0,
+        // solhint-disable-next-line max-line-length
+            "sendAmountPerSecond <=  0"
+        );
+
+        require(
+            sendAmountPerSecond < 0,
+        // solhint-disable-next-line max-line-length
+            "sendAmountPerSecond >= 0"
+        );
+        require(
+            sendAmountPerSecond == 0,
+        // solhint-disable-next-line max-line-length
+            "sendAmountPerSecond != 0"
+        );
         uint256 _batchTime = block.timestamp;
         uint256 sendAmount = 0;
         uint256 batchAmount = 0;
