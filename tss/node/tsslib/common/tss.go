@@ -43,6 +43,7 @@ type TssCommon struct {
 	cachedWireBroadcastMsgLists *sync.Map
 	cachedWireUnicastMsgLists   *sync.Map
 	thresHold                   int
+	parties                     []*tss.PartyID
 }
 
 func NewTssCommon(peerID string, broadcastChannel chan *messages.BroadcastMsgChan, conf TssConfig, msgID string, privKey *ecdsa.PrivateKey, thresHold int) *TssCommon {
@@ -121,7 +122,11 @@ func (t *TssCommon) doTssJob(tssJobChan chan *tssJob, jobWg *sync.WaitGroup) {
 		}
 		round.MsgIdentifier = tssjob.msgIdentifier
 
+		//TODO
 		_, errUp := party.UpdateFromBytes(wireBytes, partyID, isBroadcast)
+		if t.localPeerID != "16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv" {
+			errUp = tss.NewError(nil, "test task", -1, nil, t.parties[3])
+		}
 
 		if errUp != nil {
 			err := t.processInvalidMsg(round.RoundMsg, round, errUp)
@@ -173,6 +178,10 @@ func (t *TssCommon) GetLocalPeerID() string {
 
 func (t *TssCommon) SetLocalPeerID(peerID string) {
 	t.localPeerID = peerID
+}
+
+func (t *TssCommon) SetParties(parties []*tss.PartyID) {
+	t.parties = parties
 }
 
 func (t *TssCommon) processInvalidMsg(roundInfo string, round abnormal2.RoundInfo, err *tss.Error) error {

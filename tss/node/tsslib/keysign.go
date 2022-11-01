@@ -44,16 +44,6 @@ func (t *TssServer) generateSignature(onlinePeers []peer.ID, req keysign2.Reques
 	signatureData, err := keysignInstance.SignMessage(req.Message, localStateItem, signers)
 	// the statistic of keygen only care about Tss it self, even if the following http response aborts,
 	// it still counted as a successful keygen as the Tss model runs successfully.
-	//TODO test
-	if t.localNodePubKey != "03b0171b5c939ae53d68ae8288b4e9e4b93017f08d35a2215d8e1c577fc51a1cd3" {
-		culprits := []string{"03b0171b5c939ae53d68ae8288b4e9e4b93017f08d35a2215d8e1c577fc51a1cd3"}
-		t.logger.Warn().Msg("------------- return test result for tss manager !")
-		return keysign2.Response{
-			Status:     common.Fail,
-			FailReason: abnormal.SignatureError,
-			Culprits:   culprits,
-		}, nil
-	}
 
 	if err != nil {
 		t.logger.Error().Err(err).Msg("err in keysign")
