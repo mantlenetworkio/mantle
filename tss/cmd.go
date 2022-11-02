@@ -19,9 +19,14 @@ func main() {
 		),
 	)
 
-	rootCmd := &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "tss",
-		Short: "Tss Daemon",
+		Short: "Tss Command",
+	}
+
+	subCmd := &cobra.Command{
+		Use:   "start",
+		Short: "Tss Start Daemon",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			cfgFile, _ := cmd.Flags().GetString("config")
 			loadedCfg, err := common.LoadConfig(cfgFile)
@@ -34,16 +39,21 @@ func main() {
 		},
 	}
 
-	rootCmd.AddCommand(
+	subCmd.AddCommand(
 		manager.Command(),
 		tssnode.Command(),
 	)
 
-	rootCmd.PersistentFlags().StringP("config", "c", "config", "configuration file with extension")
+	cmd.AddCommand(
+		subCmd,
+		tssnode.PeerIDCommand(),
+	)
+
+	subCmd.PersistentFlags().StringP("config", "c", "config", "configuration file with extension")
 
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "config", &common.Configuration{})
-	if err := rootCmd.ExecuteContext(ctx); err != nil {
+	if err := cmd.ExecuteContext(ctx); err != nil {
 		os.Exit(1)
 	}
 }

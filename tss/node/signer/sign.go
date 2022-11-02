@@ -100,10 +100,7 @@ func (p *Processor) Sign() {
 						er := p.wsClient.SendMsg(errorRes)
 						if er != nil {
 							logger.Err(er).Msg("failed to send msg to tss manager")
-						} else {
-							p.removeWaitEvent(hashStr)
 						}
-
 						continue
 					}
 					bol := p.CacheSign(hashStr, signData)

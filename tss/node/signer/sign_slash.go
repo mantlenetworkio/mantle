@@ -1,7 +1,6 @@
 package signer
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -73,8 +72,6 @@ func (p *Processor) SignSlash() {
 				}
 				hashTx, err := tsscommon.SlashMsgHash(requestBody.BatchIndex, requestBody.Address, nodesaddrs, requestBody.SignType)
 				mesTx, err := tsscommon.SlashMsgBytes(requestBody.BatchIndex, requestBody.Address, nodesaddrs, requestBody.SignType)
-				logger.Info().Msgf("nodes %s ", nodesaddrs)
-				logger.Info().Msgf("batchindex %d ,address %s ,signtype %d , mesTx %s", requestBody.BatchIndex, requestBody.Address.String(), requestBody.SignType, hex.EncodeToString(mesTx))
 				if err != nil {
 					logger.Err(err).Msg("failed to encode SlashMsg")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
@@ -84,9 +81,6 @@ func (p *Processor) SignSlash() {
 
 				data, culprits, err := p.handleSign(nodeSignRequest, hashTx, logger)
 
-				//TODO
-				logger.Info().Msgf("signature %s ", hex.EncodeToString(data))
-				logger.Info().Msgf("signature bytes %v ", data)
 				if err != nil {
 					logger.Error().Msgf("slash %s sign failed ", requestBody.Address)
 					var errorRes tdtypes.RPCResponse
@@ -124,6 +118,7 @@ func (p *Processor) SignSlash() {
 				if err != nil {
 					logger.Err(err).Msg("failed to sendMsg to bridge ")
 				} else {
+					logger.Info().Msg("send slash sign response successfully")
 					p.removeWaitSlashMsg(requestBody)
 				}
 			}
