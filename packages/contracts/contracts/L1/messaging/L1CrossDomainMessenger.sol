@@ -151,7 +151,7 @@ contract L1CrossDomainMessenger is
         );
 
         // slither-disable-next-line reentrancy-events
-//        _sendXDomainMessage(bvmCanonicalTransactionChain, xDomainCalldata, _gasLimit);
+        _sendXDomainMessage(bvmCanonicalTransactionChain, xDomainCalldata, _gasLimit);
 
         // slither-disable-next-line reentrancy-events
         emit SentMessage(_target, msg.sender, _message, nonce, _gasLimit);
