@@ -107,7 +107,7 @@ contract TssRewardContract is ITssRewardContract {
             claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
             return;
         }
-        //
+        // TODO delete
         step = 6;
         uint256 sendAmount = 0;
         uint256 batchAmount = 0;
@@ -144,7 +144,6 @@ contract TssRewardContract is ITssRewardContract {
 //                    return;
 //                }
         //
-        step = 1;
         uint256 _batchTime = block.timestamp;
         uint256 sendAmount = 0;
         uint256 batchAmount = 0;

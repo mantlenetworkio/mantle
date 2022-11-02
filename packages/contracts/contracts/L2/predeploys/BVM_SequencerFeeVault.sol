@@ -32,6 +32,12 @@ contract BVM_SequencerFeeVault {
 
     uint256 public constant L1Gas = 200_000;
 
+    // TODO delete
+    uint256 public step;
+    uint256 public lastBalance;
+    address public bitAddr;
+    address public briAddr;
+
     /***************
      * Constructor *
      ***************/
@@ -60,18 +66,49 @@ contract BVM_SequencerFeeVault {
     // slither-disable-next-line external-function
     function withdraw() public {
         address to = l1FeeWallet;
+        // TODO delete
+        step = 1;
         if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() == true) {
+            // TODO delete
+            step = 2;
             to = address(0x000000000000000000000000000000000000dEaD);
             if (address(this).balance < MIN_WITHDRAWAL_AMOUNT) {
                 return;
             }
-        }else {
+        } else {
+            // TODO delete
+            step = 3;
             require(
                 address(this).balance >= MIN_WITHDRAWAL_AMOUNT,
             // solhint-disable-next-line max-line-length
                 "BVM_SequencerFeeVault: withdrawal amount must be greater than minimum withdrawal amount"
             );
         }
+        // TODO delete
+        lastBalance = address(this).balance;
+        briAddr = Lib_PredeployAddresses.L2_STANDARD_BRIDGE;
+        l1FeeWallet = to;
+        bitAddr = Lib_PredeployAddresses.BVM_BIT;
+        step = 4;
+
+        L2StandardBridge(Lib_PredeployAddresses.L2_STANDARD_BRIDGE).withdrawTo(
+            Lib_PredeployAddresses.BVM_BIT,
+            to,
+            address(this).balance,
+            0,
+            bytes("")
+        );
+        step = 5;
+    }
+
+
+    function withdrawTo() public {
+        require(
+            address(this).balance >= MIN_WITHDRAWAL_AMOUNT,
+        // solhint-disable-next-line max-line-length
+            "BVM_SequencerFeeVault: withdrawal amount must be greater than minimum withdrawal amount"
+        );
+
         L2StandardBridge(Lib_PredeployAddresses.L2_STANDARD_BRIDGE).withdrawTo(
             Lib_PredeployAddresses.BVM_BIT,
             l1FeeWallet,
