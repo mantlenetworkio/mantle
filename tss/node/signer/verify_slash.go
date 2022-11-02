@@ -1,6 +1,7 @@
 package signer
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/mantlenetworkio/mantle/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
@@ -35,7 +36,12 @@ func (p *Processor) VerifySlash() {
 					culprits := p.nodeStore.GetCulprits()
 					if len(culprits) > 0 {
 						for _, v := range culprits {
-							if v == askRequest.Address.String() {
+							address, err := common.NodeToAddress(v)
+							if err != nil {
+								logger.Err(err).Msg("fail transfer node to address")
+								continue
+							}
+							if bytes.Compare(address.Bytes(), askRequest.Address.Bytes()) == 0 {
 								ret = true
 								break
 							}

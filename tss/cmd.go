@@ -21,22 +21,22 @@ func main() {
 
 	rootCmd := &cobra.Command{
 		Use:   "tss",
-		Short: "Tss Daemon",
+		Short: "Tss Start Daemon",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			cfgFile, _ := cmd.Flags().GetString("config")
 			loadedCfg, err := common.LoadConfig(cfgFile)
-			if err != nil {
-				log.Error("fail to load config", err)
-				return err
+			if err == nil {
+				return common.SetCmdConfig(cmd, loadedCfg)
+			} else {
+				return nil
 			}
-
-			return common.SetCmdConfig(cmd, loadedCfg)
 		},
 	}
 
 	rootCmd.AddCommand(
 		manager.Command(),
 		tssnode.Command(),
+		tssnode.PeerIDCommand(),
 	)
 
 	rootCmd.PersistentFlags().StringP("config", "c", "config", "configuration file with extension")
