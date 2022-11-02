@@ -25,8 +25,15 @@ contract TssRewardContract is ITssRewardContract {
     uint256 public dust;
     uint256 public bestBlockID;
     uint256 public totalAmount;
+    // TODO delete
+    uint256 public step;
+    uint256 public lastSub;
+    uint256 public lastSendAmount;
+    uint256 public lastBatchAmount;
+
+
     uint256 public latsBatchTime;
-    uint256 public sendAmountPerSecond;
+//    uint256 public sendAmountPerSecond;
     uint256 public sendAmountPerYear;
 
 
@@ -34,8 +41,7 @@ contract TssRewardContract is ITssRewardContract {
     constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress) {
         deadAddress = _deadAddress;
         owner = _owner;
-        sendAmountPerYear = _sendAmountPerYear * 10 ** 18;
-        sendAmountPerSecond = sendAmountPerYear.div(365 * 24 * 60 * 60);
+        sendAmountPerYear = _sendAmountPerYear;
         bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
     }
 
@@ -63,17 +69,19 @@ contract TssRewardContract is ITssRewardContract {
     }
 
     modifier checkBalance() {
-        // TODO delete
-        require(
-            sendAmountPerSecond > 0,
-        // solhint-disable-next-line max-line-length
-            "sendAmountPerSecond <=  0"
-        );
         require(
             address(this).balance >= totalAmount,
             "balance record and contract balance are not equal"
         );
         _;
+    }
+
+    function querySendAmountPerSecond() public view returns (uint256){
+        return (sendAmountPerYear * 10 ** 18).div(365 * 24 * 60 * 60);
+    }
+
+    function queryOwner() public view returns (address){
+        return owner;
     }
 
     /**
@@ -108,12 +116,12 @@ contract TssRewardContract is ITssRewardContract {
             latsBatchTime = _batchTime;
             return;
         }
-        batchAmount = (_batchTime - latsBatchTime) * sendAmountPerSecond;
+        batchAmount = (_batchTime - latsBatchTime) * querySendAmountPerSecond() + dust;
+        dust = 0;
         sendAmount = batchAmount.div(_tssMembers.length);
         for (uint256 j = 0; j < _tssMembers.length; j++) {
             address payable addr = payable(_tssMembers[j]);
             accu = accu.add(sendAmount);
-            totalAmount = totalAmount.sub(sendAmount);
             addr.transfer(sendAmount);
         }
         uint256 reserved = batchAmount.sub(accu);
@@ -130,29 +138,12 @@ contract TssRewardContract is ITssRewardContract {
     public
     checkBalance
     {
-//        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != true) {
-//            claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
-//            return;
-//        }
+//                if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != true) {
+//                    claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
+//                    return;
+//                }
         //
-        require(_tssMembers.length > 0, "get tss members in error");
-        require(_tssMembers.length <= 0, "get tss members");
-        require(
-            sendAmountPerSecond > 0,
-        // solhint-disable-next-line max-line-length
-            "sendAmountPerSecond <=  0"
-        );
-
-        require(
-            sendAmountPerSecond < 0,
-        // solhint-disable-next-line max-line-length
-            "sendAmountPerSecond >= 0"
-        );
-        require(
-            sendAmountPerSecond == 0,
-        // solhint-disable-next-line max-line-length
-            "sendAmountPerSecond != 0"
-        );
+        step = 1;
         uint256 _batchTime = block.timestamp;
         uint256 sendAmount = 0;
         uint256 batchAmount = 0;
@@ -162,12 +153,22 @@ contract TssRewardContract is ITssRewardContract {
             latsBatchTime = _batchTime;
             return;
         }
-        batchAmount = (_batchTime - latsBatchTime) * sendAmountPerSecond;
+        batchAmount = (_batchTime - latsBatchTime) * querySendAmountPerSecond() + dust;
+        dust = 0;
+
+        // TODO delete
+        lastBatchAmount = batchAmount;
+
+
         sendAmount = batchAmount.div(_tssMembers.length);
+
+        // TODO delete
+        lastSendAmount = lastSendAmount;
+
+        step = 2;
         for (uint256 j = 0; j < _tssMembers.length; j++) {
             address payable addr = payable(_tssMembers[j]);
             accu = accu.add(sendAmount);
-            totalAmount = totalAmount.sub(sendAmount);
             addr.transfer(sendAmount);
         }
         uint256 reserved = batchAmount.sub(accu);
@@ -199,6 +200,8 @@ contract TssRewardContract is ITssRewardContract {
             delete ledger[_blockStartHeight + i];
         }
         if (batchAmount > 0) {
+            batchAmount = batchAmount + dust;
+            dust = 0;
             sendAmount = batchAmount.div(_tssMembers.length);
             for (uint256 j = 0; j < _tssMembers.length; j++) {
                 address payable addr = payable(_tssMembers[j]);

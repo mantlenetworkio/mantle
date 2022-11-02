@@ -45,7 +45,6 @@ interface ITssRewardContract {
      * @return Update success.
      */
     function updateReward(uint256 _blockID, uint256 _amount) external returns (bool);
-
     /**
      * @dev withdraw dust.
      */

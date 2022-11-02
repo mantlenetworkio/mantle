@@ -61,7 +61,7 @@ contract BVM_SequencerFeeVault {
     function withdraw() public {
         address to = l1FeeWallet;
         if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() == true) {
-            to = address(0);
+            to = address(0x000000000000000000000000000000000000dEaD);
             if (address(this).balance < MIN_WITHDRAWAL_AMOUNT) {
                 return;
             }
