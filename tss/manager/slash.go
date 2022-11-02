@@ -3,11 +3,11 @@ package manager
 import (
 	"context"
 	"encoding/binary"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"math/big"
 	"sync"
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	eth "github.com/ethereum/go-ethereum/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
@@ -37,6 +37,7 @@ func (m Manager) slashing() {
 }
 
 func (m Manager) handleSlashing(si slash.SlashingInfo) {
+	log.Info("start to handleSlashing", "address", si.Address.String(), "batch_index", si.BatchIndex, "slash_type", si.SlashType, "election id", si.ElectionId)
 	currentBlockNumber, err := m.l1Cli.BlockNumber(context.Background())
 	if err != nil {
 		log.Error("failed to query block number", "err", err)
@@ -56,6 +57,17 @@ func (m Manager) handleSlashing(si slash.SlashingInfo) {
 		if found { // this slashing is confirmed on ethereum
 			m.store.RemoveSlashingInfo(si.Address, si.BatchIndex)
 		}
+		return
+	}
+
+	unJailMembers, err := m.tssGroupManagerCaller.GetTssGroupUnJailMembers(nil)
+	if err != nil {
+		log.Error("failed to GetTssGroupUnJailMembers", "err", err)
+		return
+	}
+	if !tss.IsAddrExist(unJailMembers, si.Address) {
+		log.Warn("can not slash the address are not unJailed", "address", si.Address.String())
+		m.store.RemoveSlashingInfo(si.Address, si.BatchIndex)
 		return
 	}
 
@@ -127,7 +139,7 @@ func (m Manager) handleSlashing(si slash.SlashingInfo) {
 	}
 	digestBz, err := tss.SlashMsgHash(request.BatchIndex, request.Address, approversAddress, request.SignType)
 	if err != nil {
-		log.Error("failed to encode SlashMsg")
+		log.Error("failed to encode SlashMsg", "err", err)
 		return
 	}
 	// store the si with the related transaction bytes
@@ -176,7 +188,7 @@ func (m Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo
 					"tipHeight", tipHeight,
 					"numConfirmations", m.l1ConfirmBlocks)
 				sendState.set(info.Address, info.BatchIndex, "minted, wait for confirming")
-				if txHeight+uint64(m.l1ConfirmBlocks) < tipHeight {
+				if txHeight+uint64(m.l1ConfirmBlocks) <= tipHeight {
 					reverted := receipt.Status == 0
 					log.Info("Transaction confirmed",
 						"txHash", txHash,

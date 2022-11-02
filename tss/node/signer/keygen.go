@@ -4,21 +4,31 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"math/big"
-
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
 	etht "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	ethereum "github.com/mantlenetworkio/mantle/l2geth"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
 	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keygen"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+	"math/big"
+	"strings"
 
 	"time"
+)
+
+const (
+	setGroupPublicKeyMethodName     = "setGroupPublicKey"
+	errMaxPriorityFeePerGasNotFound = "Method eth_maxPriorityFeePerGas not found"
+)
+
+var (
+	FallbackGasTipCap = big.NewInt(1500000000)
 )
 
 func (p *Processor) Keygen() {
@@ -91,15 +101,39 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 		return errors.New("tss group manager address is empty")
 	}
 	address := ethc.HexToAddress(p.tssGroupManagerAddress)
-	chainId, err := p.l1Client.ChainID(p.ctx)
+	//new tss group manager contract parsed
+	parsed, err := abi.JSON(strings.NewReader(
+		tgm.TssGroupManagerABI,
+	))
 	if err != nil {
-		p.logger.Err(err).Msg("Unable to get chainId on l1 chain")
+		p.logger.Err(err).Msg("Unable to new parsed from tss group manager contract abi")
+		return err
+	}
+	//get tss group manager abi
+	tgmABI, err := tgm.TssGroupManagerMetaData.GetAbi()
+	if err != nil {
+		p.logger.Err(err).Msg("Unable to get tss group manager contract abi")
 		return err
 	}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, chainId)
+	rawTgmContract := bind.NewBoundContract(address, parsed, p.l1Client, p.l1Client, p.l1Client)
+
+	dataBytes, err := tsscommon.SetGroupPubKeyBytes(localKey, poolPubkey)
+	if err != nil {
+		p.logger.Err(err).Msg("failed to pack set group pub key params")
+		return err
+	}
+	setGroupPublicKeuID := tgmABI.Methods[setGroupPublicKeyMethodName].ID
+	calldata := append(setGroupPublicKeuID, dataBytes...)
+
+	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, p.chainId)
+	if err != nil {
+		p.logger.Err(err).Msg("Unable to new option from chainId ")
+		return err
+
+	}
 	if opts.Context == nil {
-		opts.Context = context.Background()
+		opts.Context = p.ctx
 	}
 	nonce64, err := p.l1Client.NonceAt(p.ctx, p.address, nil)
 	if err != nil {
@@ -111,24 +145,28 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	nonce := new(big.Int).SetUint64(nonce64)
 	opts.Nonce = nonce
 	opts.NoSend = true
+	tx, err := rawTgmContract.RawTransact(opts, calldata)
+	if err != nil {
+		if strings.Contains(err.Error(), errMaxPriorityFeePerGasNotFound) {
+			opts.GasTipCap = FallbackGasTipCap
+			tx, err = rawTgmContract.RawTransact(opts, calldata)
+			if err != nil {
+				p.logger.Err(err).Msg("Unable to new transaction with raw contract")
+				return err
+			}
+		} else {
+			p.logger.Err(err).Msg("Unable to new transaction with raw contract")
+			return err
+		}
+	}
 
-	contract, err := tgm.NewTssGroupManager(address, p.l1Client)
+	newTx, err := p.EstimateGas(p.ctx, tx, rawTgmContract, address)
 	if err != nil {
-		p.logger.Err(err).Msg("Unable to new tss group manager contract")
+		p.logger.Err(err).Msg("got failed in estimate gas function ")
 		return err
 	}
-	gasPrice, err := p.l1Client.SuggestGasPrice(context.Background())
-	if err != nil {
-		p.logger.Err(err).Msg("cannot fetch gas price")
-		return err
-	}
-	opts.GasPrice = gasPrice
-	tx, err := contract.SetGroupPublicKey(opts, localKey, poolPubkey)
-	if err != nil {
-		p.logger.Err(err).Msg("Unable to set group public key with contract")
-		return err
-	}
-	if err := p.l1Client.SendTransaction(p.ctx, tx); err != nil {
+
+	if err := p.l1Client.SendTransaction(p.ctx, newTx); err != nil {
 		p.logger.Err(err).Msg("Unable to send transaction to l1 chain")
 		return err
 	}
@@ -200,23 +238,61 @@ func ensureConnection(client *ethclient.Client) error {
 	return nil
 }
 
-// Wait for the receipt by polling the backend
-func waitForReceipt(backend *ethclient.Client, tx *etht.Transaction) (*etht.Receipt, error) {
-	t := time.NewTicker(300 * time.Millisecond)
-	receipt := new(etht.Receipt)
-	var err error
-	for range t.C {
-		receipt, err = backend.TransactionReceipt(context.Background(), tx.Hash())
-		if errors.Is(err, ethereum.NotFound) {
-			continue
-		}
+func (p *Processor) EstimateGas(ctx context.Context, tx *etht.Transaction, rawContract *bind.BoundContract, address ethc.Address) (*etht.Transaction, error) {
+	header, err := p.l1Client.HeaderByNumber(ctx, nil)
+	if err != nil {
+		p.logger.Err(err).Msg("failed to get header by l1client")
+		return nil, err
+	}
+	var gasPrice *big.Int
+	var gasTipCap *big.Int
+	var gasFeeCap *big.Int
+	if header.BaseFee == nil {
+		gasPrice, err = p.l1Client.SuggestGasPrice(ctx)
 		if err != nil {
+			p.logger.Err(err).Msg("cannot fetch gas price")
 			return nil, err
 		}
-		if receipt != nil {
-			t.Stop()
-			break
+	} else {
+		gasTipCap, err = p.l1Client.SuggestGasTipCap(ctx)
+		if err != nil {
+			p.logger.Debug().Msg("failed to SuggestGasTipCap, FallbackGasTipCap = big.NewInt(1500000000) ")
+			gasTipCap = big.NewInt(1500000000)
 		}
+		gasFeeCap = new(big.Int).Add(
+			gasTipCap,
+			new(big.Int).Mul(header.BaseFee, big.NewInt(2)),
+		)
 	}
-	return receipt, nil
+
+	msg := ethereum.CallMsg{
+		From:      p.address,
+		To:        &address,
+		GasPrice:  gasPrice,
+		GasTipCap: gasTipCap,
+		GasFeeCap: gasFeeCap,
+		Value:     nil,
+		Data:      tx.Data(),
+	}
+
+	gasLimit, err := p.l1Client.EstimateGas(ctx, msg)
+	if err != nil {
+		p.logger.Err(err).Msg("failed to EstimateGas")
+		return nil, err
+	}
+	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, p.chainId)
+	if err != nil {
+		p.logger.Err(err).Msg("failed to new ops in estimate gas function")
+		return nil, err
+	}
+	opts.Context = ctx
+	opts.NoSend = true
+	opts.Nonce = new(big.Int).SetUint64(tx.Nonce())
+
+	opts.GasTipCap = gasTipCap
+	opts.GasFeeCap = gasFeeCap
+	opts.GasLimit = 6 * gasLimit / 5 //add 20% buffer to gas limit
+
+	return rawContract.RawTransact(opts, tx.Data())
+
 }

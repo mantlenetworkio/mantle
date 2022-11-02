@@ -69,7 +69,8 @@ task('take-dump').setAction(async (args, hre) => {
       l2Bridge: predeploys.L2StandardBridge,
       l1Token: ethers.constants.AddressZero,
       _name: 'Ether',
-      _symbol: 'ETH',
+      _symbol: 'WETH',
+      decimal: 18,
     },
     BVM_BIT: {
       l2Bridge: predeploys.L2StandardBridge,
@@ -77,6 +78,7 @@ task('take-dump').setAction(async (args, hre) => {
       l1Token: '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
       _name: 'Bit Token',
       _symbol: 'BIT',
+      decimal: 18,
     },
     L2CrossDomainMessenger: {
       // We default the xDomainMsgSender to this value to save gas.

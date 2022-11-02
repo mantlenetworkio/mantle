@@ -77,7 +77,7 @@ func (p *Processor) Sign() {
 						var errorRes tdtypes.RPCResponse
 						if len(culprits) > 0 {
 							respData := strings.Join(culprits, ",")
-							errorRes = tdtypes.NewRPCErrorResponse(req.ID, 100, err.Error(), respData)
+							errorRes = tdtypes.NewRPCErrorResponse(req.ID, tsscommon.CulpritErrorCode, err.Error(), respData)
 							p.nodeStore.AddCulprits(culprits)
 
 							//store slash info
@@ -100,10 +100,7 @@ func (p *Processor) Sign() {
 						er := p.wsClient.SendMsg(errorRes)
 						if er != nil {
 							logger.Err(er).Msg("failed to send msg to tss manager")
-						} else {
-							p.removeWaitEvent(hashStr)
 						}
-
 						continue
 					}
 					bol := p.CacheSign(hashStr, signData)

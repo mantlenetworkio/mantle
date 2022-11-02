@@ -10,28 +10,6 @@
 
 ## Methods
 
-### getEthSignedMessageHash
-
-```solidity
-function getEthSignedMessageHash(bytes32 _messageHash) external pure returns (bytes32)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _messageHash | bytes32 | undefined
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined
-
 ### getTssGroupInfo
 
 ```solidity
@@ -72,7 +50,7 @@ function getTssGroupMembers() external view returns (bytes[])
 ### getTssGroupUnJailMembers
 
 ```solidity
-function getTssGroupUnJailMembers() external nonpayable returns (address[])
+function getTssGroupUnJailMembers() external view returns (address[])
 ```
 
 

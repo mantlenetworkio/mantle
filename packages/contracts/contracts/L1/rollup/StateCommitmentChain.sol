@@ -242,7 +242,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
     {
         // abi hash encode to bytes
         require(
-            ITssGroupManager(resolve("TssGroupManager")).verifySign(
+            ITssGroupManager(resolve("Proxy__TSS_GroupManager")).verifySign(
                 keccak256(abi.encode(_batch, _shouldStartAtElement)), _signature),
             "verify signature failed"
         );

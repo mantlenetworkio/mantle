@@ -21,7 +21,6 @@ contract TssGroupManager is
     uint256 threshold;
     uint256 gRoundId;
     uint256 confirmNumber;
-    address[] addresses;
     address public stakingSlash;
 
     bytes[] activeTssMembers; // active tss member group
@@ -174,14 +173,22 @@ contract TssGroupManager is
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function getTssGroupUnJailMembers() public override returns (address[] memory) {
-        delete addresses;
+    function getTssGroupUnJailMembers() public view override returns (address[] memory) {
+        uint256 expectedLength;
         for (uint256 i = 0; i < activeTssMembers.length; i++) {
             if (tssActiveMemberInfo[activeTssMembers[i]].status == MemberStatus.unJail) {
-                addresses.push(tssActiveMemberInfo[activeTssMembers[i]].nodeAddress);
+                expectedLength++;
             }
         }
-        return addresses;
+        address[] memory _addresses = new address[](expectedLength);
+        uint256 index;
+        for (uint256 i = 0; i < activeTssMembers.length; i++) {
+            if (tssActiveMemberInfo[activeTssMembers[i]].status == MemberStatus.unJail) {
+                _addresses[index] = tssActiveMemberInfo[activeTssMembers[i]].nodeAddress;
+                index++;
+            }
+        }
+        return _addresses;
     }
 
     /**
@@ -277,7 +284,9 @@ contract TssGroupManager is
         returns (address)
     {
         (bytes32 r, bytes32 s, uint8 v) = _split(_sig);
-        return ecrecover(_ethSignedMessageHash, v, r, s);
+        address signer = ecrecover(_ethSignedMessageHash, v, r, s);
+        require(signer != address(0), "ecrecover failed");
+        return signer;
     }
 
     function _split(bytes memory _sig)
@@ -295,6 +304,7 @@ contract TssGroupManager is
             s := mload(add(_sig, 64))
             v := byte(0, mload(add(_sig, 96)))
         }
+        if (v < 27) v += 27;
     }
 
     function isEqual(bytes memory byteListA, bytes memory byteListB) public pure returns (bool) {
