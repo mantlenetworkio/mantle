@@ -108,6 +108,7 @@ contract TssRewardContract is ITssRewardContract {
             return;
         }
         //
+        step = 6;
         uint256 sendAmount = 0;
         uint256 batchAmount = 0;
         uint256 accu = 0;
