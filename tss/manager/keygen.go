@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/influxdata/influxdb/pkg/slices"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/manager/types"
@@ -27,10 +28,20 @@ func (m Manager) observeElection() {
 					log.Error("failed to query inactive info", "err", err)
 					return
 				}
-				log.Info("query active members", "numbers", len(tssInfo.TssMembers))
+				log.Info("query inactive members", "numbers", len(tssInfo.TssMembers))
 
 				//tssMembers, threshold, electionId := getInactiveMembers()
 				if len(tssInfo.TssMembers) > 0 {
+					culprits := m.store.GetCulprits()
+					if len(culprits) > 0 {
+						for _, tm := range tssInfo.TssMembers {
+							if slices.Exists(culprits, tm) {
+								log.Error("Reject to keygen, culprit is involved in the elected members", "culprit", tm)
+								return
+							}
+						}
+					}
+
 					// the CPK has not been confirmed in the latest election
 					// start to generate CPK
 					cpkData, err := m.store.GetByElectionId(tssInfo.ElectionId)
