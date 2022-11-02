@@ -42,7 +42,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         address _libAddressManager,
         uint256 _fraudProofWindow,
         uint256 _sequencerPublishWindow
-    ) Lib_AddressResolver(_libAddressManager)  {
+    ) Lib_AddressResolver(_libAddressManager) CrossDomainEnabled(address(0)) {
         FRAUD_PROOF_WINDOW = _fraudProofWindow;
         SEQUENCER_PUBLISH_WINDOW = _sequencerPublishWindow;
     }
