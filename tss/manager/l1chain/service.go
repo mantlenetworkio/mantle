@@ -1,21 +1,21 @@
 package l1chain
 
 import (
-	"bytes"
 	"context"
 	"encoding/hex"
 	"errors"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/influxdata/influxdb/pkg/slices"
-	"github.com/mantlenetworkio/mantle/tss/slash"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/influxdata/influxdb/pkg/slices"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
+	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/manager/types"
+	"github.com/mantlenetworkio/mantle/tss/slash"
 )
 
 type QueryService struct {
@@ -90,7 +90,7 @@ func (q QueryService) QueryActiveInfo() (types.TssCommitteeInfo, error) {
 
 		if hasJailMembers {
 			addr := crypto.PubkeyToAddress(*unmarshalled)
-			if !isAddrExist(unjailMembers, addr) { // exclude jailed address
+			if !tss.IsAddrExist(unjailMembers, addr) { // exclude jailed address
 				continue
 			}
 		}
@@ -103,15 +103,6 @@ func (q QueryService) QueryActiveInfo() (types.TssCommitteeInfo, error) {
 		ClusterPubKey: hex.EncodeToString(compressCPK),
 		TssMembers:    tssMembers,
 	}, nil
-}
-
-func isAddrExist(set []common.Address, find common.Address) bool {
-	for _, s := range set {
-		if bytes.Compare(s.Bytes(), find.Bytes()) == 0 {
-			return true
-		}
-	}
-	return false
 }
 
 func (q QueryService) QueryInactiveInfo() (types.TssCommitteeInfo, error) {

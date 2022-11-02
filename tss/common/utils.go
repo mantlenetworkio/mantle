@@ -1,12 +1,14 @@
 package common
 
 import (
+	"bytes"
+	"math/big"
+
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	"math/big"
 )
 
 var (
@@ -116,4 +118,13 @@ func SetGroupPubKeyBytes(localKey, poolPubKey []byte) ([]byte, error) {
 
 func SlashBytes(msg, sig []byte) ([]byte, error) {
 	return slashArguments.Pack(msg, sig)
+}
+
+func IsAddrExist(set []common.Address, find common.Address) bool {
+	for _, s := range set {
+		if bytes.Compare(s.Bytes(), find.Bytes()) == 0 {
+			return true
+		}
+	}
+	return false
 }
