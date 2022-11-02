@@ -42,7 +42,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         address _libAddressManager,
         uint256 _fraudProofWindow,
         uint256 _sequencerPublishWindow
-    ) Lib_AddressResolver(_libAddressManager)CrossDomainEnabled(address(0))  {
+    ) Lib_AddressResolver(_libAddressManager)  {
         FRAUD_PROOF_WINDOW = _fraudProofWindow;
         SEQUENCER_PUBLISH_WINDOW = _sequencerPublishWindow;
     }
@@ -322,7 +322,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
 
     function _distributeTssReward(bytes32[] memory _batch, uint256 _shouldStartAtElement) internal {
         // get address of tss group member
-        address[] memory tssMembers = ITssGroupManager(resolve("TssGroupManager")).getTssGroupUnJailMembers();
+        address[] memory tssMembers = ITssGroupManager(resolve("Proxy__TSS_GroupManager")).getTssGroupUnJailMembers();
         require(tssMembers.length > 0, "get tss members in error");
 
         // construct calldata for claimReward call
