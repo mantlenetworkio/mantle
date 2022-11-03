@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/crypto/sha3"
 
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
@@ -26,6 +27,14 @@ import (
 )
 
 var SequencerSetKey = []byte{0x00}
+
+const (
+	checkpointInterval = 1024 // Number of blocks after which to save the vote snapshot to the database
+	inmemorySnapshots  = 128  // Number of recent vote snapshots to keep in memory
+	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
+
+	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
+)
 
 var (
 	extraVanity = 32                       // Fixed number of extra-data prefix bytes reserved for signer vanity
@@ -47,12 +56,14 @@ var (
 type SignerFn func(accounts.Account, string, []byte) ([]byte, error)
 
 type Clique struct {
-	config      *params.CliqueConfig // Consensus engine configuration parameters
-	db          ethdb.Database
+	config *params.CliqueConfig // Consensus engine configuration parameters
+	db     ethdb.Database
+
+	signatures  *lru.ARCCache // Signatures of recent blocks to speed up mining
 	producers   Producers
 	signer      common.Address
 	signFn      SignerFn
-	schedulerID string
+	schedulerID []byte
 	lock        sync.RWMutex
 }
 
@@ -125,6 +136,14 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 
 	number := header.Number.Uint64()
 
+	snap, err := c.snapshot(chain, number-1, header.ParentHash, nil)
+	if number == 1 {
+		c.producers = snap.Producers
+	}
+	if err != nil {
+		return err
+	}
+
 	// if number > c.producers.Number+c.producers.Epoch {
 	// 	return errUnknownBlock
 	// }
@@ -140,6 +159,12 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, extraVanity-len(header.Extra))...)
 	}
 	header.Extra = header.Extra[:extraVanity]
+
+	if number%c.config.Epoch == 0 {
+		header.Extra = append(header.Extra, snap.Producers.serialize()...)
+	}
+
+	header.Extra = append(header.Extra, make([]byte, extraSeal)...)
 
 	// Mix digest is reserved for now, set to empty
 	header.MixDigest = common.Hash{}
@@ -237,10 +262,14 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 		}
 	}()
 
+	if number%c.config.Epoch == 0 {
+		producers := deserialize(header.Extra[extraVanity : len(header.Extra)-extraSeal])
+		c.producers = *producers
+	}
+
 	c.producers.SequencerSet.IncrementProducerPriority(1)
 
 	return nil
-
 }
 
 func (c *Clique) SealHash(header *types.Header) common.Hash {
@@ -331,6 +360,73 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 	}
 
 	return c.verifySeal(chain, header, parents)
+}
+
+// snapshot retrieves the authorization snapshot at a given point in time.
+func (c *Clique) snapshot(chain consensus.ChainReader, number uint64, hash common.Hash, parents []*types.Header) (*Snapshot, error) {
+	// Search for a snapshot in memory or on disk for checkpoints
+	var (
+		headers []*types.Header
+		snap    *Snapshot
+	)
+	for snap == nil {
+		// If we're at the genesis, snapshot the initial state. Alternatively if we're
+		// at a checkpoint block without a parent (light client CHT), or we have piled
+		// up more headers than allowed to be reorged (chain reinit from a freezer),
+		// consider the checkpoint trusted and snapshot it.
+		if number == 0 || (number%c.config.Epoch == 0 && (len(headers) > params.ImmutabilityThreshold || chain.GetHeaderByNumber(number-1) == nil)) {
+			checkpoint := chain.GetHeaderByNumber(number)
+			if checkpoint != nil {
+				hash := checkpoint.Hash()
+
+				producers := deserialize(checkpoint.Extra[extraVanity : len(checkpoint.Extra)-extraSeal])
+
+				snap = newSnapshot(c.config, c.signatures, number, hash, *producers)
+				if err := snap.store(c.db); err != nil {
+					return nil, err
+				}
+				log.Info("Stored checkpoint snapshot to disk", "number", number, "hash", hash)
+				break
+			}
+		}
+		// No snapshot for this header, gather the header and move backward
+		// var header *types.Header
+		// if len(parents) > 0 {
+		// 	// If we have explicit parents, pick from there (enforced)
+		// 	header = parents[len(parents)-1]
+		// 	if header.Hash() != hash || header.Number.Uint64() != number {
+		// 		return nil, consensus.ErrUnknownAncestor
+		// 	}
+		// 	parents = parents[:len(parents)-1]
+		// } else {
+		// 	// No explicit parents (or no more left), reach out to the database
+		// 	header = chain.GetHeader(hash, number)
+		// 	if header == nil {
+		// 		return nil, consensus.ErrUnknownAncestor
+		// 	}
+		// }
+		// headers = append(headers, header)
+		// number, hash = number-1, header.ParentHash
+	}
+
+	// Previous snapshot found, apply any pending headers on top of it
+	// for i := 0; i < len(headers)/2; i++ {
+	// 	headers[i], headers[len(headers)-1-i] = headers[len(headers)-1-i], headers[i]
+	// }
+	// snap, err := snap.apply(headers)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// // If we've generated a new checkpoint snapshot, save to disk
+	// if snap.Number%checkpointInterval == 0 && len(headers) > 0 {
+	// 	if err = snap.store(c.db); err != nil {
+	// 		return nil, err
+	// 	}
+	// 	log.Trace("Stored voting snapshot to disk", "number", snap.Number, "hash", snap.Hash)
+	// }
+
+	return snap, nil
 }
 
 func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
