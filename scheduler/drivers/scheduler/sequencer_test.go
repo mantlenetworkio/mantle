@@ -20,14 +20,13 @@ func TestSequencerValidateBasic(t *testing.T) {
 	var addr common.Address
 	copy(addr[:], seed)
 	priv, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	pubKey := priv.PublicKey
 	testCases := []struct {
 		seq *Sequencer
 		err bool
 		msg string
 	}{
 		{
-			seq: NewSequencer(addr, pubKey, 1),
+			seq: NewSequencer(addr, priv.D.Bytes(), 1),
 			err: false,
 			msg: "",
 		},
@@ -38,17 +37,13 @@ func TestSequencerValidateBasic(t *testing.T) {
 		},
 		{
 			seq: &Sequencer{
-				PubKey: ecdsa.PublicKey{
-					Curve: nil,
-					X:     nil,
-					Y:     nil,
-				},
+				NodeID: nil,
 			},
 			err: true,
-			msg: "sequencer does not have a public key",
+			msg: "sequencer does not have a node id",
 		},
 		{
-			seq: NewSequencer(addr, pubKey, -1),
+			seq: NewSequencer(addr, priv.D.Bytes(), -1),
 			err: true,
 			msg: "sequencer has negative voting power",
 		},

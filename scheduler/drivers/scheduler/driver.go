@@ -3,16 +3,16 @@ package scheduler
 import (
 	"bytes"
 	"context"
+	"errors"
 	"math"
 	"math/big"
+	"sort"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
-	common2 "github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	"github.com/mantlenetworkio/mantle/scheduler/bindings/tgm"
-	"github.com/mantlenetworkio/mantle/scheduler/bindings/tsh"
+	seq "github.com/mantlenetworkio/mantle/scheduler/bindings/sequencer"
 	"github.com/mantlenetworkio/mantle/scheduler/service"
 )
 
@@ -25,49 +25,40 @@ type Config struct {
 	Name          string
 	L1Client      *ethclient.Client
 	SequencerAddr common.Address // sequencer contract address
-	TSHAddr       common.Address // sequencer staking address
+	SequencerNum  int
 }
 
 // Driver implements the service.Driver interface.
 var _ service.Driver = &Driver{}
 
 type Driver struct {
-	cfg         Config
-	tgmContract *tgm.TssGroupManager
-	tshContract *tsh.TssStakingSlashing
-	seqz        *SequencerSet
-	block       uint64     // current block height
-	producer    *Sequencer // currenct producer
-	metrics     *metrics.Base
+	cfg               Config
+	sequencerContract *seq.Sequencer
+	seqz              *SequencerSet
+	block             uint64     // current block height
+	producer          *Sequencer // currenct producer
+	metrics           *metrics.Base
 }
 
 func NewDriver(cfg Config) (*Driver, error) {
-	tgmContract, err := tgm.NewTssGroupManager(
+	seqContract, err := seq.NewSequencer(
 		cfg.SequencerAddr, cfg.L1Client,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	tshContract, err := tsh.NewTssStakingSlashing(
-		cfg.TSHAddr, cfg.L1Client,
-	)
-	if err != nil {
-		return nil, err
-	}
-
 	// get sequencers from Sequencer contract
-	seqz, err := GetSequencerSet(tgmContract, tshContract)
+	seqz, err := GetSequencerSet(seqContract, cfg.SequencerNum)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Driver{
-		cfg:         cfg,
-		tgmContract: tgmContract,
-		tshContract: tshContract,
-		seqz:        NewSequencerSet(seqz),
-		metrics:     metrics.NewBase("scheduler", cfg.Name),
+		cfg:               cfg,
+		sequencerContract: seqContract,
+		seqz:              NewSequencerSet(seqz),
+		metrics:           metrics.NewBase("scheduler", cfg.Name),
 	}, nil
 }
 
@@ -83,7 +74,7 @@ func (d *Driver) Metrics() metrics.Metrics {
 
 // ExecuteProcess executes a process on this driver.
 func (d *Driver) ExecuteProcess(ctx context.Context) error {
-	seqz, err := GetSequencerSet(d.tgmContract, d.tshContract)
+	seqz, err := GetSequencerSet(d.sequencerContract, d.cfg.SequencerNum)
 	if err != nil {
 		return err
 	}
@@ -100,41 +91,47 @@ func (d *Driver) SwitchProducer(ctx context.Context) error {
 	return nil
 }
 
+type SequencerSequencerInfos []seq.SequencerSequencerInfo
+
+func (seqs SequencerSequencerInfos) Len() int {
+	return len(seqs)
+}
+
+func (s SequencerSequencerInfos) Less(i, j int) bool {
+	return s[i].Amount.Int64() < s[j].Amount.Int64()
+}
+
+func (s SequencerSequencerInfos) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
 // GetSequencerSet will return the validator set
-func GetSequencerSet(tgmContract *tgm.TssGroupManager, tshContract *tsh.TssStakingSlashing) ([]*Sequencer, error) {
-	// get activeTssMembers public keys from tss group contract
-	pubKeys, err := tgmContract.GetTssGroupMembers(nil)
+func GetSequencerSet(seqContract *seq.Sequencer, num int) ([]*Sequencer, error) {
+	// get sequencers from sequencer contract
+	var seqInfos SequencerSequencerInfos
+	seqInfos, err := seqContract.GetSequencers(nil)
 	if err != nil {
 		return nil, err
 	}
-
+	if len(seqInfos) == 0 {
+		return nil, errors.New("Do not have sequencers")
+	}
+	sort.Stable(seqInfos)
 	// find users deposit and infos
-	var users []common.Address
-	for _, v := range pubKeys {
-		ecdsaPubKey, err := crypto.UnmarshalPubkey(v)
-		if err != nil {
-			return nil, err
-		}
-		addr := crypto.PubkeyToAddress(*ecdsaPubKey)
-		users = append(users, common.BytesToAddress(addr.Bytes()))
+	if seqInfos.Len() > num {
+		seqInfos = seqInfos[seqInfos.Len()-num:]
 	}
-	valSetInfo, err := tshContract.BatchGetDeposits(nil, users)
-	if err != nil {
-		return nil, err
-	}
-
 	// set sequencer, voting power = deposit / 10^18
 	scale := int64(math.Pow10(18))
 	var seqz []*Sequencer
-	for _, v := range valSetInfo {
-		ecdsaPubKey, err := crypto.UnmarshalPubkey(v.PubKey)
-		if err != nil {
-			return nil, err
-		}
+	for _, v := range seqInfos {
 		seq := &Sequencer{
-			Address:     common2.BytesToAddress(v.Pledgor.Bytes()),
-			PubKey:      *ecdsaPubKey,
+			Address:     v.MintAddress,
+			NodeID:      v.NodeID,
 			VotingPower: v.Amount.Div(v.Amount, big.NewInt(scale)).Int64(),
+		}
+		if err = seq.SequencerBasic(); err != nil {
+			return nil, err
 		}
 		seqz = append(seqz, seq)
 	}

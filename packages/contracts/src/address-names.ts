@@ -9,9 +9,11 @@ export const names = {
       CanonicalTransactionChain: 'CanonicalTransactionChain',
       StateCommitmentChain: 'StateCommitmentChain',
       BondManager: 'BondManager',
+      Sequencer: 'Sequencer',
       BVM_L1CrossDomainMessenger: 'BVM_L1CrossDomainMessenger',
       Proxy__BVM_L1CrossDomainMessenger: 'Proxy__BVM_L1CrossDomainMessenger',
       Proxy__BVM_L1StandardBridge: 'Proxy__BVM_L1StandardBridge',
+      Proxy__Sequencer: 'Proxy__Sequencer',
     },
     accounts: { BVM_Sequencer: 'BVM_Sequencer', BVM_Proposer: 'BVM_Proposer' },
     configs: {
