@@ -44,6 +44,7 @@ func (t *TssServer) generateSignature(onlinePeers []peer.ID, req keysign2.Reques
 	signatureData, err := keysignInstance.SignMessage(req.Message, localStateItem, signers)
 	// the statistic of keygen only care about Tss it self, even if the following http response aborts,
 	// it still counted as a successful keygen as the Tss model runs successfully.
+
 	if err != nil {
 		t.logger.Error().Err(err).Msg("err in keysign")
 		culprits := keysignInstance.GetTssCommonStruct().GetAbnormalMgr().TssCulpritsNodes()

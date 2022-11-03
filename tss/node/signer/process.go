@@ -3,6 +3,7 @@ package signer
 import (
 	"context"
 	"crypto/ecdsa"
+	"math/big"
 
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/bss-core/dial"
@@ -30,6 +31,7 @@ type Processor struct {
 	localPubKeyByte           []byte
 	address                   ethc.Address
 	privateKey                *ecdsa.PrivateKey
+	chainId                   *big.Int
 	tssServer                 tsslib.Server
 	wsClient                  *client.WSClients
 	l2Client                  *l2ethclient.Client
@@ -78,6 +80,12 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 	if err != nil {
 		return nil, err
 	}
+
+	chainId, err := l1Cli.ChainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	wsClient, err := client.NewWSClient(cfg.Node.WsAddr, "/ws", privKey, pubKeyHex)
 	if err != nil {
 		return nil, err
@@ -95,6 +103,7 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 		localPubKeyByte:           pubkeyByte,
 		address:                   address,
 		privateKey:                privKey,
+		chainId:                   chainId,
 		tssServer:                 tssInstance,
 		stopChan:                  make(chan struct{}),
 		wg:                        &sync.WaitGroup{},
@@ -111,13 +120,15 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 		keygenRequestChan:         make(chan tdtypes.RPCRequest, 1),
 		waitSignLock:              &sync.Mutex{},
 		waitSignMsgs:              make(map[string]common.SignStateRequest),
+		waitSignSlashLock:         &sync.Mutex{},
+		waitSignSlashMsgs:         make(map[string]map[uint64]common.SlashRequest),
 		cacheVerifyLock:           &sync.Mutex{},
 		cacheVerify:               types.NewCache[string, bool](50),
 		cacheSignLock:             &sync.Mutex{},
 		cacheSign:                 types.NewCache[string, []byte](10),
 		nodeStore:                 nodeStore,
-		tssGroupManagerAddress:    cfg.Node.TssGroupManagerAddress,
-		tssStakingSlashingAddress: cfg.Node.TssStakingSlashingAddress,
+		tssGroupManagerAddress:    cfg.TssGroupContractAddress,
+		tssStakingSlashingAddress: cfg.TssStakingSlashContractAddress,
 		taskInterval:              taskIntervalDur,
 		tssStakingSlashingCaller:  tssStakingSlashingCaller,
 		tssQueryService:           queryService,

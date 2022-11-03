@@ -86,6 +86,7 @@ func (tKeySign *TssKeySign) SignMessage(msgToSign []byte, localStateItem storage
 	if err != nil {
 		return emptySignatureData, fmt.Errorf("error to create parties in batch signging %w\n", err)
 	}
+
 	tKeySign.logger.Info().Msgf("message: (%s) keysign parties: %+v", m.String(), parties)
 	eachLocalPartyID.Moniker = moniker
 	tKeySign.localParties = nil

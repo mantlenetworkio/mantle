@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	"os"
 	"os/signal"
 	"strconv"
@@ -34,6 +36,7 @@ func Command() *cobra.Command {
 			return runNode(cmd)
 		},
 	}
+
 	return cmd
 }
 
@@ -134,4 +137,43 @@ func runNode(cmd *cobra.Command) error {
 	log.Info().Msg("server stopped")
 
 	return nil
+}
+
+func PeerIDCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "parse-peer-id",
+		Short: "parse peer id of the key",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			publicKey, _ := cmd.Flags().GetString("pub-key")
+			privateKey, _ := cmd.Flags().GetString("pri-key")
+			var publicBz []byte
+			if len(publicKey) != 0 {
+				decoded, err := hex.DecodeString(publicKey)
+				if err != nil {
+					return err
+				}
+				publicBz = decoded
+			} else if len(privateKey) != 0 {
+				privKey, err := crypto.HexToECDSA(privateKey)
+				if err != nil {
+					return err
+				}
+				pubkeybytes := crypto.CompressPubkey(&privKey.PublicKey)
+				publicBz = pubkeybytes
+			} else {
+				return errors.New("name|pub-key|pri-key at least one needs to be specified")
+			}
+
+			peerId, err := conversion.GetPeerIDFromSecp256PubKey(publicBz)
+			if err != nil {
+				return err
+			}
+			fmt.Println(peerId)
+
+			return nil
+		},
+	}
+	cmd.Flags().String("pub-key", "", "hex-encoded Ethereum public key with prefix")
+	cmd.Flags().String("pri-key", "", "hex-encoded Ethereum private key")
+	return cmd
 }

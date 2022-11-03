@@ -6,6 +6,7 @@ contract MockSCC {
         bytes32 _batchRoot,
         uint256 _batchSize,
         uint256 _prevTotalElements,
+        bytes _signature,
         bytes _extraData
     );
 
@@ -14,6 +15,7 @@ contract MockSCC {
         bytes32 batchRoot;
         uint256 batchSize;
         uint256 prevTotalElements;
+        bytes signature;
         bytes extraData;
     }
 
@@ -34,7 +36,8 @@ contract MockSCC {
 
     function appendStateBatch(
         bytes32[] memory _roots,
-        uint256 _shouldStartAtIndex
+        uint256 _shouldStartAtIndex,
+        bytes memory _signature
     ) public {
         batches++;
         emit StateBatchAppended(
@@ -42,6 +45,7 @@ contract MockSCC {
             sbaParams.batchRoot,
             sbaParams.batchSize,
             sbaParams.prevTotalElements,
+            sbaParams.signature,
             sbaParams.extraData
         );
     }

@@ -1,0 +1,21 @@
+l1_url = ""
+l1_receipt_confirm_timeout = "30s"
+l1_confirm_blocks = 1
+scc_contract_address = ""
+tss_group_contract_address = ""
+tss_staking_slash_contract_address = ""
+
+timed_task_interval = "10s"
+signed_batches_window = 5
+min_signed_in_window = 2
+
+[manager]
+
+ws_addr = "tcp://0.0.0.0:8081"
+http_addr = ":8080"
+db_dir = "/root/tss-manager/db"
+
+keygen_timeout = "1m"
+cpk_confirm_timeout = "5m"
+ask_timeout = "10s"
+sign_timeout = "1m"

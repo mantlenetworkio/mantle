@@ -15,6 +15,7 @@ func (p *Processor) deleteSlashing() {
 	for {
 		signingInfos := p.nodeStore.ListSlashingInfo()
 		for _, si := range signingInfos {
+			log.Info("start to handleSlashing", "address", si.Address.String(), "batch_index", si.BatchIndex, "slash_type", si.SlashType, "election id", si.ElectionId)
 			p.handleSlashing(si)
 		}
 		select {

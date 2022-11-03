@@ -39,9 +39,10 @@ const config: HardhatUserConfig = {
     },
     dev: {
       chainId: 31337,
-      url: 'https://bitnetwork-l1chain.dev.davionlabs.com',
+      url: 'https://mantle-l1chain.dev.davionlabs.com',
       accounts: [
         'dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97',
+        'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
       ],
     },
     mantle: {

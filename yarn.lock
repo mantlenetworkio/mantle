@@ -2346,21 +2346,12 @@
     npmlog "^4.1.2"
     write-file-atomic "^3.0.3"
 
-"@mantlenetworkio/contracts@0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@mantlenetworkio/contracts/-/contracts-0.0.1.tgz#09caf4888f855b4a955408ce41e4e6258b15e52c"
-  integrity sha512-s2TU1QwtycOZnRhmICE1fiM4Xo/oaUBWCS1xMV1Z0H/AuWUa+C7UsWuW61mlLCRfOhZ7ACeRGeOss2Ke9DhqSg==
+"@mantlenetworkio/sdk@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@mantlenetworkio/sdk/-/sdk-2.0.1.tgz#517c545793af1f3de90e5140bc352b451d3d79bf"
+  integrity sha512-UoZ3LTWVS+FAU7FFk1+RE1W0Es4JnZE8elY4SNIBnwVl2OKILF8cf5GqZ34lMJToN0lrNHs24ZkZbHkcZWtvfA==
   dependencies:
-    "@ethersproject/abstract-provider" "^5.6.1"
-    "@ethersproject/abstract-signer" "^5.6.2"
-    "@mantlenetworkio/core-utils" "0.0.1"
-
-"@mantlenetworkio/sdk@0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@mantlenetworkio/sdk/-/sdk-0.0.2.tgz#857488b363e18a3b214695708a942276a7ca8bc5"
-  integrity sha512-wYI9mDtZZvzH+sh4OZ271T8uh5+lka3ro5r89T5cqhefYzHARX4eubcGNMbM1VAQWkqT2RlfLiNTpau8337/zQ==
-  dependencies:
-    "@mantlenetworkio/contracts" "0.0.1"
+    "@mantlenetworkio/contracts" "2.0.0"
     "@mantlenetworkio/core-utils" "0.0.1"
     lodash "^4.17.21"
     merkletreejs "^0.2.27"
