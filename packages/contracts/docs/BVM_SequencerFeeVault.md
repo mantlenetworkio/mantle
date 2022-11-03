@@ -10,6 +10,23 @@
 
 ## Methods
 
+### L1Gas
+
+```solidity
+function L1Gas() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
 ### MIN_WITHDRAWAL_AMOUNT
 
 ```solidity
@@ -26,6 +43,57 @@ function MIN_WITHDRAWAL_AMOUNT() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined
+
+### bitAddr
+
+```solidity
+function bitAddr() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
+
+### briAddr
+
+```solidity
+function briAddr() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
+
+### bvmGasPriceOracleAddress
+
+```solidity
+function bvmGasPriceOracleAddress() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
 
 ### l1FeeWallet
 
@@ -44,10 +112,55 @@ function l1FeeWallet() external view returns (address)
 |---|---|---|
 | _0 | address | undefined
 
+### lastBalance
+
+```solidity
+function lastBalance() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+### step
+
+```solidity
+function step() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
 ### withdraw
 
 ```solidity
 function withdraw() external nonpayable
+```
+
+
+
+
+
+
+### withdrawTo
+
+```solidity
+function withdrawTo() external nonpayable
 ```
 
 

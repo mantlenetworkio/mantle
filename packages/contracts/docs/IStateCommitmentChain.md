@@ -1,6 +1,12 @@
 # IStateCommitmentChain
 
+
+
 > IStateCommitmentChain
+
+
+
+
 
 ## Methods
 
@@ -11,6 +17,8 @@ function appendStateBatch(bytes32[] _batch, uint256 _shouldStartAtElement, bytes
 ```
 
 Appends a batch of state roots to the chain.
+
+
 
 #### Parameters
 
@@ -28,6 +36,8 @@ function deleteStateBatch(Lib_BVMCodec.ChainBatchHeader _batchHeader) external n
 
 Deletes all state roots after (and including) a given batch.
 
+
+
 #### Parameters
 
 | Name | Type | Description |
@@ -41,6 +51,9 @@ function getLastSequencerTimestamp() external view returns (uint256 _lastSequenc
 ```
 
 Retrieves the timestamp of the last batch submitted by the sequencer.
+
+
+
 
 #### Returns
 
@@ -56,6 +69,9 @@ function getTotalBatches() external view returns (uint256 _totalBatches)
 
 Retrieves the total number of batches submitted.
 
+
+
+
 #### Returns
 
 | Name | Type | Description |
@@ -70,6 +86,9 @@ function getTotalElements() external view returns (uint256 _totalElements)
 
 Retrieves the total number of elements submitted.
 
+
+
+
 #### Returns
 
 | Name | Type | Description |
@@ -83,6 +102,8 @@ function insideFraudProofWindow(Lib_BVMCodec.ChainBatchHeader _batchHeader) exte
 ```
 
 Checks whether a given batch is still inside its fraud proof window.
+
+
 
 #### Parameters
 
@@ -104,6 +125,8 @@ function verifyStateCommitment(bytes32 _element, Lib_BVMCodec.ChainBatchHeader _
 
 Verifies a batch inclusion proof.
 
+
+
 #### Parameters
 
 | Name | Type | Description |
@@ -118,26 +141,38 @@ Verifies a batch inclusion proof.
 |---|---|---|
 | _verified | bool | undefined
 
+
+
 ## Events
 
 ### DistributeTssReward
 
 ```solidity
-event DistributeTssReward(uint256 indexed _batchTime, address[] _tssMembers)
+event DistributeTssReward(uint256 indexed _startBlockNumber, uint256 _length, uint256 indexed _batchTime, address[] _tssMembers)
 ```
+
+
+
+
 
 #### Parameters
 
-| Name                 | Type | Description |
-|----------------------|---|---|
+| Name | Type | Description |
+|---|---|---|
+| _startBlockNumber `indexed` | uint256 | undefined |
+| _length  | uint256 | undefined |
 | _batchTime `indexed` | uint256 | undefined |
-| _tssMembers          | address[] | undefined |
+| _tssMembers  | address[] | undefined |
 
 ### StateBatchAppended
 
 ```solidity
 event StateBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint256 _batchSize, uint256 _prevTotalElements, bytes _signature, bytes _extraData)
 ```
+
+
+
+
 
 #### Parameters
 
@@ -155,6 +190,10 @@ event StateBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint25
 ```solidity
 event StateBatchDeleted(uint256 indexed _batchIndex, bytes32 _batchRoot)
 ```
+
+
+
+
 
 #### Parameters
 
