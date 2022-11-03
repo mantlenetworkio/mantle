@@ -2346,7 +2346,7 @@
     npmlog "^4.1.2"
     write-file-atomic "^3.0.3"
 
-"@mantlenetworkio/sdk@2.0.1":
+"@mantlenetworkio/sdk@2.0.3":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@mantlenetworkio/sdk/-/sdk-2.0.1.tgz#517c545793af1f3de90e5140bc352b451d3d79bf"
   integrity sha512-UoZ3LTWVS+FAU7FFk1+RE1W0Es4JnZE8elY4SNIBnwVl2OKILF8cf5GqZ34lMJToN0lrNHs24ZkZbHkcZWtvfA==
