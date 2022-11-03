@@ -176,6 +176,9 @@ type Clique struct {
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
 
+	schedulerID []byte    // Identifier of the current scheduler
+	producers   Producers // Current list of producers
+
 	proposals map[common.Address]bool // Current list of proposals we are pushing
 
 	signer common.Address // Ethereum address of the signing key
@@ -205,6 +208,16 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 		signatures: signatures,
 		proposals:  make(map[common.Address]bool),
 	}
+}
+
+func (c *Clique) SetProducers(data Producers) {
+	c.producers = data
+	c.schedulerID = data.SchedulerID
+	data.store(c.db)
+}
+
+func (c *Clique) GetProducers(data GetProducers) Producers {
+	return c.producers
 }
 
 // Author implements consensus.Engine, returning the Ethereum address recovered
@@ -384,11 +397,14 @@ func (c *Clique) snapshot(chain consensus.ChainReader, number uint64, hash commo
 			if checkpoint != nil {
 				hash := checkpoint.Hash()
 
-				signers := make([]common.Address, (len(checkpoint.Extra)-extraVanity-extraSeal)/common.AddressLength)
-				for i := 0; i < len(signers); i++ {
-					copy(signers[i][:], checkpoint.Extra[extraVanity+i*common.AddressLength:])
+				producers := deserialize(checkpoint.Extra[extraVanity : len(checkpoint.Extra)-extraSeal])
+
+				signers := make([]common.Address, len(producers.SequencerSet.Sequencers))
+				for i := 0; i < len(producers.SequencerSet.Sequencers); i++ {
+					signers[i] = producers.SequencerSet.Sequencers[i].Address
 				}
-				snap = newSnapshot(c.config, c.signatures, number, hash, signers)
+
+				snap = newSnapshot(c.config, c.signatures, number, hash, signers, *producers)
 				if err := snap.store(c.db); err != nil {
 					return nil, err
 				}
@@ -508,6 +524,11 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	if err != nil {
 		return err
 	}
+
+	if number == 1 {
+		c.producers = snap.Producers
+	}
+
 	if number%c.config.Epoch != 0 {
 		c.lock.RLock()
 
@@ -539,9 +560,10 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	header.Extra = header.Extra[:extraVanity]
 
 	if number%c.config.Epoch == 0 {
-		for _, signer := range snap.signers() {
-			header.Extra = append(header.Extra, signer[:]...)
-		}
+		// for _, signer := range snap.signers() {
+		// 	header.Extra = append(header.Extra, signer[:]...)
+		// }
+		header.Extra = append(header.Extra, snap.Producers.serialize()...)
 	}
 	header.Extra = append(header.Extra, make([]byte, extraSeal)...)
 
@@ -667,6 +689,13 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 			log.Warn("Sealing result is not read by miner", "sealhash", SealHash(header))
 		}
 	}()
+
+	if number%c.config.Epoch == 0 {
+		producers := deserialize(header.Extra[extraVanity : len(header.Extra)-extraSeal])
+		c.producers = *producers
+	}
+
+	c.producers.SequencerSet.IncrementProducerPriority(1)
 
 	return nil
 }

@@ -3,7 +3,7 @@ package eth
 import (
 	"fmt"
 
-	"github.com/mantlenetworkio/mantle/l2geth/consensus/coterie"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
@@ -63,7 +63,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 	switch {
 	case msg.Code == ProducersMsg:
 		// A batch of block bodies arrived to one of our previous requests
-		var request coterie.Producers
+		var request clique.Producers
 		if err := msg.Decode(&request); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
@@ -74,7 +74,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			producers = append(producers, encoded)
 		}
 
-		if eg, ok := pm.blockchain.Engine().(*coterie.Coterie); ok {
+		if eg, ok := pm.blockchain.Engine().(*clique.Clique); ok {
 			eg.SetProducers(request)
 		}
 
@@ -86,11 +86,11 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		}
 		// Gather state data until the fetch or network limits is reached
 		var producers []rlp.RawValue
-		var results coterie.Producers
+		var results clique.Producers
 
-		var getProducers coterie.GetProducers
+		var getProducers clique.GetProducers
 
-		if eg, ok := pm.blockchain.Engine().(*coterie.Coterie); ok {
+		if eg, ok := pm.blockchain.Engine().(*clique.Clique); ok {
 			results = eg.GetProducers(getProducers)
 		}
 
