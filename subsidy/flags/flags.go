@@ -18,7 +18,7 @@ var (
 	SCCAddressFlag = cli.StringFlag{
 		Name:   "scc-address",
 		Usage:  "Address of SCC_CONTRACT",
-		Value:  "",
+		Value:  "0xc039b3B46814D8388e5205D37Dd0D154D806F1f4",
 		EnvVar: "SUBSIDY_SCC_ADDRESS",
 	}
 
@@ -30,14 +30,14 @@ var (
 	}
 
 	CTCAddressFlag = cli.StringFlag{
-		Name:   "scc-address",
+		Name:   "ctc-address",
 		Usage:  "Address of CTC_CONTRACT",
-		Value:  "",
+		Value:  "0xcA8b49076D1A8039599e24979abf819af784c27a",
 		EnvVar: "SUBSIDY_CTC_ADDRESS",
 	}
 
 	CTCTopicFlag = cli.StringFlag{
-		Name:   "scc-topic",
+		Name:   "ctc-topic",
 		Usage:  "Address of CTC_CONTRACT",
 		Value:  "SequencerBatchAppended(uint256,uint256,uint256)",
 		EnvVar: "SUBSIDY_CTC_TOPIC",
@@ -46,6 +46,7 @@ var (
 		Name:   "private-key",
 		Usage:  "Private Key corresponding to SUBSIDY Owner",
 		EnvVar: "SUBSIDY_PAYER_PRIVATE_KEY",
+		Value:  "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
 	}
 	LogLevelFlag = cli.IntFlag{
 		Name:   "loglevel",
@@ -55,7 +56,7 @@ var (
 	}
 	L1QueryEpochLengthSecondsFlag = cli.Uint64Flag{
 		Name:   "l1-query-epoch-length-seconds",
-		Value:  60 * 60 * 24,
+		Value:  3,
 		Usage:  "query rollup cost epoch length seconds",
 		EnvVar: "SUBSIDY_L1_QUERY_EPOCH_LENGTH_SECONDS",
 	}

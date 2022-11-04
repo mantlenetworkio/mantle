@@ -55,6 +55,9 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.FileName = ctx.GlobalString(flags.FileNameFlag.Name)
 	cfg.StartBlock = ctx.GlobalUint64(flags.StartBlockFlag.Name)
 	cfg.RevisedBlock = ctx.GlobalUint64(flags.RevisedBlockFlag.Name)
+
+	hex := ctx.GlobalString(flags.PrivateKeyFlag.Name)
+	fmt.Println(hex)
 	if ctx.GlobalIsSet(flags.PrivateKeyFlag.Name) {
 		hex := ctx.GlobalString(flags.PrivateKeyFlag.Name)
 		hex = strings.TrimPrefix(hex, "0x")

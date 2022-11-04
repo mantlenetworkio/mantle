@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/subsidy/types"
 	"math/big"
 	"time"
 
@@ -14,13 +15,13 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/mantlenetworkio/mantle/subsidy/cache-file"
-	"github.com/mantlenetworkio/mantle/subsidy/types"
 )
 
 type Payer struct {
 	ctx                       context.Context
 	config                    *Config
-	L1Client                  *ethclient.Client
+	queryClient               *ethclient.Client
+	payClient                 *ethclient.Client
 	payerStateFileWriter      *cache_file.PayerStateFileWriter
 	l1QueryEpochLengthSeconds uint64
 	waitForReceipt            bool
@@ -32,13 +33,18 @@ type Payer struct {
 }
 
 func NewPayer(cfg *Config) *Payer {
-	l1Client, err := ethclient.Dial(cfg.ethereumHttpUrl)
+	queryClient, err := ethclient.Dial(cfg.ethereumHttpUrl)
+	if err != nil {
+		panic(err)
+	}
+	payClient, err := ethclient.Dial(cfg.ethereumHttpUrl)
 	if err != nil {
 		panic(err)
 	}
 	state := cache_file.NewPayerStateFileWriter(cfg.HomeDir, cfg.CacheDir, cfg.FileName)
 	return &Payer{
-		L1Client:                  l1Client,
+		payClient:                 payClient,
+		queryClient:               queryClient,
 		config:                    cfg,
 		l1QueryEpochLengthSeconds: cfg.l1QueryEpochLengthSeconds,
 		ctx:                       context.Background(),
@@ -59,19 +65,30 @@ func (ob *Payer) getLogs(address common.Address, topic string, fromBlock, toBloc
 		Addresses: []common.Address{address},
 		Topics:    [][]common.Hash{{ethcrypto.Keccak256Hash([]byte(topic))}},
 	}
-	return ob.L1Client.FilterLogs(context.Background(), filter)
+	return ob.queryClient.FilterLogs(context.Background(), filter)
 }
 
 // PayRollupCost from block
 func (ob *Payer) PayRollupCost() error {
 	endBlock := ob.EndBlock()
 	fromBlock := endBlock + 1
-	tip, err := ob.L1Client.HeaderByNumber(context.Background(), nil)
+	tip, err := ob.queryClient.HeaderByNumber(context.Background(), nil)
 	if err != nil {
 		return err
 	}
 	toBlock := tip.Number.Uint64()
 	if fromBlock <= toBlock {
+		payerState := types.PayerState{
+			LastPayTime: time.Now(),
+			EndBlock:    toBlock,
+			//PayTxHash:   hash,
+		}
+		if err := ob.payerStateFileWriter.Write(&payerState); err != nil {
+			panic(err)
+		}
+		fmt.Println("fromBlock <= toBlock")
+		fmt.Println("fromBlock:", fromBlock)
+		fmt.Println("endBlock:", toBlock)
 		return nil
 	}
 	sccAddress := common.HexToAddress(ob.sccAddrStr)
@@ -81,7 +98,7 @@ func (ob *Payer) PayRollupCost() error {
 	}
 	totalCost := big.NewInt(0)
 	for _, l := range sccLogs {
-		tx, err := ob.L1Client.TransactionInBlock(context.Background(), l.BlockHash, l.TxIndex)
+		tx, err := ob.queryClient.TransactionInBlock(context.Background(), l.BlockHash, l.TxIndex)
 		if err != nil {
 			return err
 		}
@@ -90,11 +107,16 @@ func (ob *Payer) PayRollupCost() error {
 	ctcAddress := common.HexToAddress(ob.sccAddrStr)
 	ctcLogs, err := ob.getLogs(ctcAddress, ob.ctcTopic, fromBlock, toBlock)
 	for _, l := range ctcLogs {
-		tx, err := ob.L1Client.TransactionInBlock(context.Background(), l.BlockHash, l.TxIndex)
+		tx, err := ob.queryClient.TransactionInBlock(context.Background(), l.BlockHash, l.TxIndex)
 		if err != nil {
 			return err
 		}
 		totalCost = totalCost.Add(totalCost, tx.Cost())
+	}
+	fmt.Println("cost", totalCost)
+	if totalCost.Cmp(big.NewInt(0)) == 1 {
+		fmt.Println("total cost = 0 ")
+		return nil
 	}
 	hash, err := ob.Transfer(totalCost)
 	if err != nil {
@@ -135,12 +157,12 @@ func (ob *Payer) Wait() {
 
 func (ob *Payer) Transfer(amount *big.Int) (string, error) {
 	senderAddr := ethcrypto.PubkeyToAddress(ob.config.privateKey.PublicKey)
-	nonce, err := ob.L1Client.PendingNonceAt(context.Background(), senderAddr)
+	nonce, err := ob.payClient.PendingNonceAt(context.Background(), senderAddr)
 	if err != nil {
 		return "", err
 	}
 	gasLimit := uint64(21000) // in units
-	gasPrice, err := ob.L1Client.SuggestGasPrice(context.Background())
+	gasPrice, err := ob.payClient.SuggestGasPrice(context.Background())
 	if err != nil {
 		return "", err
 	}
@@ -153,7 +175,7 @@ func (ob *Payer) Transfer(amount *big.Int) (string, error) {
 		Data:     nil,
 	}
 	tx := ethtypes.NewTx(baseTx)
-	chainID, err := ob.L1Client.NetworkID(context.Background())
+	chainID, err := ob.payClient.NetworkID(context.Background())
 	if err != nil {
 		return "", err
 	}
@@ -163,7 +185,7 @@ func (ob *Payer) Transfer(amount *big.Int) (string, error) {
 		return "", err
 	}
 
-	err = ob.L1Client.SendTransaction(context.Background(), signedTx)
+	err = ob.payClient.SendTransaction(context.Background(), signedTx)
 	if err != nil {
 		return "", err
 	}
@@ -171,7 +193,7 @@ func (ob *Payer) Transfer(amount *big.Int) (string, error) {
 	fmt.Printf("tx sent: %s", signedTx.Hash().Hex())
 	if ob.waitForReceipt {
 		// Wait for the receipt
-		receipt, err := waitForReceipt(ob.L1Client, tx)
+		receipt, err := waitForReceipt(ob.payClient, tx)
 		if err != nil {
 			return signedTx.Hash().Hex(), err
 		}

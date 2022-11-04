@@ -30,7 +30,7 @@ func main() {
 	// TODO
 	app.Usage = "subsidize Submitter"
 	app.Description = "Configure with a private key and an Mantle HTTP endpoint " +
-		"to send transactions that update the L2 gas price."
+		"to send transactions that transfer Bit to address."
 
 	// Configure the logging
 	app.Before = func(ctx *cli.Context) error {
