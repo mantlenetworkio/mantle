@@ -56,9 +56,9 @@ find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | xarg
 find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | sed -e "s/.\/deployments\/$CONTRACTS_TARGET_NETWORK\///g" | sed -e 's/.json//g' > filenames.txt
 
 # Start building addresses.json.
-echo "{" >> addresses.json
+echo "{" > addresses.json
 # Zip the two files describe above together, then, switch their order and format as JSON.
-paste addresses.txt filenames.txt | sed -e "s/^\([^ ]\+\)\s\+\([^ ]\+\)/\"\2\": \"\1\",/" >> addresses.json
+paste addresses.txt filenames.txt | awk '{printf "  \"%s\": \"%s\",\n", $2, $1}' >> addresses.json
 # Add the address manager alias.
 echo "\"AddressManager\": \"$ADDRESS_MANAGER_ADDRESS\"" >> addresses.json
 # End addresses.json
