@@ -27,7 +27,6 @@ echo "Building deployment command."
 echo $CONTRACTS_TARGET_NETWORK
 echo $SKIP_CONTRACT_DEPLOY
 echo "test point1"
-pwd
 
 if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
   DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
