@@ -222,7 +222,7 @@ func (c *Communication) readFromStream(stream network.Stream) {
 			} else {
 				c.logger.Debug().Msgf("no MsgID %s found for this message,need to retry %d time", wrappedMsg.MsgID, i)
 				c.logger.Debug().Msgf("no MsgID %s found for this message,need to retry %d time", wrappedMsg.MessageType, i)
-				time.Sleep(500 * time.Millisecond)
+				time.Sleep(1000 * time.Millisecond)
 			}
 		}
 	}
