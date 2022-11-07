@@ -43,7 +43,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         address _l1messenger,
         uint256 _fraudProofWindow,
         uint256 _sequencerPublishWindow
-    ) Lib_AddressResolver(_libAddressManager) CrossDomainEnabled(address(0xc48078a734c2e22D43F54B47F7a8fB314Fa5A601)) {
+    ) Lib_AddressResolver(_libAddressManager) CrossDomainEnabled(address(0)) {
         messenger = _l1messenger;
         FRAUD_PROOF_WINDOW = _fraudProofWindow;
         SEQUENCER_PUBLISH_WINDOW = _sequencerPublishWindow;
@@ -321,7 +321,11 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         emit StateBatchDeleted(_batchHeader.batchIndex, _batchHeader.batchRoot);
     }
 
-
+    /**
+     * Distribute Reward to tss node.
+     * @param _batch rollup batch.
+     * @param  _shouldStartAtElement.
+     */
     function _distributeTssReward(bytes32[] memory _batch, uint256 _shouldStartAtElement) internal {
         // get address of tss group member
         address[] memory tssMembers = ITssGroupManager(resolve("Proxy__TSS_GroupManager")).getTssGroupUnJailMembers();
@@ -332,42 +336,6 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
             ITssRewardContract.claimReward.selector,
             _shouldStartAtElement,
             _batch.length,
-            block.timestamp,
-            tssMembers
-        );
-
-        // send call data into L2, hardcode address
-        sendCrossDomainMessage(
-            address(0x4200000000000000000000000000000000000020),
-            200_000,
-            message
-        );
-
-        // emit message
-        emit DistributeTssReward(
-            _shouldStartAtElement,
-            _batch.length,
-            block.timestamp,
-            tssMembers
-        );
-    }
-    // TODO delete
-    // 0xcfc17379ac80a9ef231772ace60014fb84704cb4
-    // 0x9d72b1e94c7075be7e6da0e2104db4302d02db0e
-    function _distributeReward() public {
-        // get address of tss group member
-//        address[] memory tssMembers = new address[](2);
-//        tssMembers[0] = address(0xCFc17379Ac80A9EF231772ACE60014fb84704cB4);
-//        tssMembers[1] = address(0x9D72b1e94C7075Be7E6da0E2104DB4302d02DB0E);
-        address[] memory tssMembers = ITssGroupManager(resolve("Proxy__TssGroupManager")).getTssGroupUnJailMembers();
-        require(tssMembers.length > 0, "get tss members in error");
-        bytes32[] memory _batch;
-        uint256 _shouldStartAtElement;
-        // construct calldata for claimReward call
-        bytes memory message = abi.encodeWithSelector(
-            ITssRewardContract.claimReward.selector,
-            _batch,
-            0,
             block.timestamp,
             tssMembers
         );

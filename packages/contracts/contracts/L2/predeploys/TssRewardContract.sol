@@ -25,15 +25,7 @@ contract TssRewardContract is ITssRewardContract {
     uint256 public dust;
     uint256 public bestBlockID;
     uint256 public totalAmount;
-    // TODO delete
-    uint256 public step;
-    uint256 public lastSub;
-    uint256 public lastSendAmount;
-    uint256 public lastBatchAmount;
-
-
     uint256 public latsBatchTime;
-//    uint256 public sendAmountPerSecond;
     uint256 public sendAmountPerYear;
 
 
@@ -107,8 +99,6 @@ contract TssRewardContract is ITssRewardContract {
             claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
             return;
         }
-        // TODO delete
-        step = 6;
         uint256 sendAmount = 0;
         uint256 batchAmount = 0;
         uint256 accu = 0;
@@ -120,52 +110,6 @@ contract TssRewardContract is ITssRewardContract {
         batchAmount = (_batchTime - latsBatchTime) * querySendAmountPerSecond() + dust;
         dust = 0;
         sendAmount = batchAmount.div(_tssMembers.length);
-        for (uint256 j = 0; j < _tssMembers.length; j++) {
-            address payable addr = payable(_tssMembers[j]);
-            accu = accu.add(sendAmount);
-            addr.transfer(sendAmount);
-        }
-        uint256 reserved = batchAmount.sub(accu);
-        if (reserved > 0) {
-            dust = dust.add(reserved);
-        }
-        emit DistributeTssReward(
-            _batchTime,
-            _tssMembers
-        );
-    }
-
-    function claimRewardPub(address[] calldata _tssMembers)
-    public
-    checkBalance
-    {
-//                if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != true) {
-//                    claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
-//                    return;
-//                }
-        //
-        uint256 _batchTime = block.timestamp;
-        uint256 sendAmount = 0;
-        uint256 batchAmount = 0;
-        uint256 accu = 0;
-        // sendAmount
-        if (latsBatchTime == 0) {
-            latsBatchTime = _batchTime;
-            return;
-        }
-        batchAmount = (_batchTime - latsBatchTime) * querySendAmountPerSecond() + dust;
-        dust = 0;
-
-        // TODO delete
-        lastBatchAmount = batchAmount;
-
-
-        sendAmount = batchAmount.div(_tssMembers.length);
-
-        // TODO delete
-        lastSendAmount = lastSendAmount;
-
-        step = 2;
         for (uint256 j = 0; j < _tssMembers.length; j++) {
             address payable addr = payable(_tssMembers[j]);
             accu = accu.add(sendAmount);
