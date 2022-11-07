@@ -40,9 +40,11 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
      */
     constructor(
         address _libAddressManager,
+        address _l1messenger,
         uint256 _fraudProofWindow,
         uint256 _sequencerPublishWindow
-    ) Lib_AddressResolver(_libAddressManager) CrossDomainEnabled(address(0)) {
+    ) Lib_AddressResolver(_libAddressManager) CrossDomainEnabled(address(0xc48078a734c2e22D43F54B47F7a8fB314Fa5A601)) {
+        messenger = _l1messenger;
         FRAUD_PROOF_WINDOW = _fraudProofWindow;
         SEQUENCER_PUBLISH_WINDOW = _sequencerPublishWindow;
     }
@@ -357,7 +359,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
 //        address[] memory tssMembers = new address[](2);
 //        tssMembers[0] = address(0xCFc17379Ac80A9EF231772ACE60014fb84704cB4);
 //        tssMembers[1] = address(0x9D72b1e94C7075Be7E6da0E2104DB4302d02DB0E);
-        address[] memory tssMembers = ITssGroupManager(resolve("TssGroupManager")).getTssGroupUnJailMembers();
+        address[] memory tssMembers = ITssGroupManager(resolve("Proxy__TssGroupManager")).getTssGroupUnJailMembers();
         require(tssMembers.length > 0, "get tss members in error");
         bytes32[] memory _batch;
         uint256 _shouldStartAtElement;
