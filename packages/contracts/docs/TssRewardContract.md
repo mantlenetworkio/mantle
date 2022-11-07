@@ -6,14 +6,48 @@
 
 
 
-*Collect L2 block gas reward per block and release to batch roll up tss members.*
+*Release to batch roll up tss members.*
 
 ## Methods
+
+### bestBlockID
+
+```solidity
+function bestBlockID() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+### bvmGasPriceOracleAddress
+
+```solidity
+function bvmGasPriceOracleAddress() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
 
 ### claimReward
 
 ```solidity
-function claimReward(uint256 _blockStartHeight, uint32 _length, address[] _tssMembers) external nonpayable
+function claimReward(uint256 _blockStartHeight, uint32 _length, uint256 _batchTime, address[] _tssMembers) external nonpayable
 ```
 
 
@@ -24,9 +58,26 @@ function claimReward(uint256 _blockStartHeight, uint32 _length, address[] _tssMe
 
 | Name | Type | Description |
 |---|---|---|
-| _blockStartHeight | uint256 | The block height at L2 which needs to distribute profits
+| _blockStartHeight | uint256 | undefined
 | _length | uint32 | The distribute batch block number
+| _batchTime | uint256 | Batch corresponds to L1 Block Timestamp
 | _tssMembers | address[] | The address array of tss group members
+
+### claimRewardPub
+
+```solidity
+function claimRewardPub(address[] _tssMembers) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _tssMembers | address[] | undefined
 
 ### deadAddress
 
@@ -50,6 +101,78 @@ function deadAddress() external view returns (address)
 ```solidity
 function dust() external view returns (uint256)
 ```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+### lastBatchAmount
+
+```solidity
+function lastBatchAmount() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+### lastSendAmount
+
+```solidity
+function lastSendAmount() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+### lastSub
+
+```solidity
+function lastSub() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+### latsBatchTime
+
+```solidity
+function latsBatchTime() external view returns (uint256)
+```
+
+
+
+
 
 
 #### Returns
@@ -97,6 +220,23 @@ function owner() external view returns (address)
 |---|---|---|
 | _0 | address | undefined
 
+### queryOwner
+
+```solidity
+function queryOwner() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
+
 ### queryReward
 
 ```solidity
@@ -106,6 +246,57 @@ function queryReward() external view returns (uint256)
 
 
 *return the total undistributed amount*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+### querySendAmountPerSecond
+
+```solidity
+function querySendAmountPerSecond() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+### sendAmountPerYear
+
+```solidity
+function sendAmountPerYear() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+### step
+
+```solidity
+function step() external view returns (uint256)
+```
+
+
+
+
 
 
 #### Returns
@@ -131,6 +322,28 @@ function totalAmount() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
+### updateReward
+
+```solidity
+function updateReward(uint256 _blockID, uint256 _amount) external nonpayable returns (bool)
+```
+
+
+
+*update tss member gas reward by every block.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _blockID | uint256 | The block height at L2 which needs to distribute profits
+| _amount | uint256 | undefined
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | _tssMembers Address array of tss group members
 
 ### withdraw
 
@@ -161,7 +374,24 @@ function withdrawDust() external nonpayable
 ### DistributeTssReward
 
 ```solidity
-event DistributeTssReward(uint256 blockStartHeight, uint256 length, address[] tssMembers)
+event DistributeTssReward(uint256 batchTime, address[] tssMembers)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| batchTime  | uint256 | undefined |
+| tssMembers  | address[] | undefined |
+
+### DistributeTssRewardByBlock
+
+```solidity
+event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, address[] tssMembers)
 ```
 
 
@@ -173,7 +403,7 @@ event DistributeTssReward(uint256 blockStartHeight, uint256 length, address[] ts
 | Name | Type | Description |
 |---|---|---|
 | blockStartHeight  | uint256 | undefined |
-| length  | uint256 | undefined |
+| length  | uint32 | undefined |
 | tssMembers  | address[] | undefined |
 
 

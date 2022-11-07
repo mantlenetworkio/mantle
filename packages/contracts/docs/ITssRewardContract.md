@@ -4,12 +4,16 @@
 
 > ITssRewardContract
 
+
+
+
+
 ## Methods
 
 ### claimReward
 
 ```solidity
-function claimReward(uint256 _blockStartHeight, uint32 _length, address[] _tssMembers) external nonpayable
+function claimReward(uint256 _blockStartHeight, uint32 _length, uint256 _batchTime, address[] _tssMembers) external nonpayable
 ```
 
 
@@ -22,6 +26,7 @@ function claimReward(uint256 _blockStartHeight, uint32 _length, address[] _tssMe
 |---|---|---|
 | _blockStartHeight | uint256 | L2 rollup batch block start height.
 | _length | uint32 | Rollup batch length.
+| _batchTime | uint256 | undefined
 | _tssMembers | address[] | Tss member address array.
 
 ### queryReward
@@ -41,6 +46,28 @@ function queryReward() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | Amount of undistributed rewards.
 
+### updateReward
+
+```solidity
+function updateReward(uint256 _blockID, uint256 _amount) external nonpayable returns (bool)
+```
+
+
+
+*Update deposit block gas into contract.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _blockID | uint256 | Update gas reward L2 block ID.
+| _amount | uint256 | undefined
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | Update success.
 
 ### withdraw
 
@@ -71,7 +98,24 @@ function withdrawDust() external nonpayable
 ### DistributeTssReward
 
 ```solidity
-event DistributeTssReward(uint256 blockStartHeight, uint256 length, address[] tssMembers)
+event DistributeTssReward(uint256 batchTime, address[] tssMembers)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| batchTime  | uint256 | undefined |
+| tssMembers  | address[] | undefined |
+
+### DistributeTssRewardByBlock
+
+```solidity
+event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, address[] tssMembers)
 ```
 
 
@@ -83,7 +127,7 @@ event DistributeTssReward(uint256 blockStartHeight, uint256 length, address[] ts
 | Name | Type | Description |
 |---|---|---|
 | blockStartHeight  | uint256 | undefined |
-| length  | uint256 | undefined |
+| length  | uint32 | undefined |
 | tssMembers  | address[] | undefined |
 
 
