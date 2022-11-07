@@ -159,6 +159,22 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		bloomIndexer:   NewBloomIndexer(chainDb, params.BloomBitsBlocks, params.BloomConfirms),
 	}
 
+	// todo get peer ID then check equal with schedulerID
+	// var seqServer *clique.SequencerServer
+	// if chainConfig.Clique != nil {
+	// 	seqServer = clique.NewSequencerServer(
+	// 		time.Duration(chainConfig.Clique.Epoch),
+	// 		eth.engine.(*clique.Clique),
+	// 		eth.eventMux,
+	// 	)
+	// }
+	// schedulerID, err := seqServer.GetScheduler()
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Cannot get scheduler: %w", err)
+	// }
+	// check if is specduler
+	// seqServer.Start()
+
 	bcVersion := rawdb.ReadDatabaseVersion(chainDb)
 	var dbVer = "<nil>"
 	if bcVersion != nil {

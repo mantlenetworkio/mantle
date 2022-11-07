@@ -32,7 +32,7 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
     // Store the Epoch
     uint256 public epoch;
     // Store limit of sequencer
-    uint256 public sequencerLimit;
+    uint8 public sequencerLimit;
     // Store scheduler
     bytes public scheduler;
 
@@ -64,7 +64,7 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
      * Update Epoch
      * @param _limit new limit
      */
-    function updateSequencerLimit(uint256 _limit) public onlyOwner {
+    function updateSequencerLimit(uint8 _limit) public onlyOwner {
         sequencerLimit = _limit;
     }
 

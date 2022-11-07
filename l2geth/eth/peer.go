@@ -23,12 +23,13 @@ import (
 	"sync"
 	"time"
 
+	mapset "github.com/deckarep/golang-set"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
-	mapset "github.com/deckarep/golang-set"
 )
 
 var (
@@ -40,6 +41,9 @@ var (
 const (
 	maxKnownTxs    = 32768 // Maximum transactions hashes to keep in the known list (prevent DOS)
 	maxKnownBlocks = 1024  // Maximum block hashes to keep in the known list (prevent DOS)
+	maxKnownPrs    = 1024
+
+	maxQueuedPrs = 128
 
 	// maxQueuedTxs is the maximum number of transaction lists to queue up before
 	// dropping broadcasts. This is a sensitive number as a transaction list might
@@ -88,9 +92,11 @@ type peer struct {
 
 	knownTxs    mapset.Set                // Set of transaction hashes known to be known by this peer
 	knownBlocks mapset.Set                // Set of block hashes known to be known by this peer
+	knowPrs     mapset.Set                // Set of Producers height to be known by this peer
 	queuedTxs   chan []*types.Transaction // Queue of transactions to broadcast to the peer
 	queuedProps chan *propEvent           // Queue of blocks to broadcast to the peer
 	queuedAnns  chan *types.Block         // Queue of blocks to announce to the peer
+	queuedPrs   chan *clique.Producers    // Queue of producers to announce to the peer
 	term        chan struct{}             // Termination channel to stop the broadcaster
 }
 
@@ -102,9 +108,11 @@ func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 		id:          fmt.Sprintf("%x", p.ID().Bytes()[:8]),
 		knownTxs:    mapset.NewSet(),
 		knownBlocks: mapset.NewSet(),
+		knowPrs:     mapset.NewSet(),
 		queuedTxs:   make(chan []*types.Transaction, maxQueuedTxs),
 		queuedProps: make(chan *propEvent, maxQueuedProps),
 		queuedAnns:  make(chan *types.Block, maxQueuedAnns),
+		queuedPrs:   make(chan *clique.Producers, maxQueuedPrs),
 		term:        make(chan struct{}),
 	}
 }
@@ -132,6 +140,12 @@ func (p *peer) broadcast() {
 				return
 			}
 			p.Log().Trace("Announced block", "number", block.Number(), "hash", block.Hash())
+
+		case producers := <-p.queuedPrs:
+			if err := p.SendProducers(*producers); err != nil {
+				return
+			}
+			p.Log().Trace("Broadcast producers", "number", producers.Number)
 
 		case <-p.term:
 			return
@@ -546,6 +560,21 @@ func (ps *peerSet) Len() int {
 	defer ps.lock.RUnlock()
 
 	return len(ps.peers)
+}
+
+// PeersWithoutProducer retrieves a list of peers that do not have a given producer in
+// their set of known index.
+func (ps *peerSet) PeersWithoutProducer(index uint64) []*peer {
+	ps.lock.RLock()
+	defer ps.lock.RUnlock()
+
+	list := make([]*peer, 0, len(ps.peers))
+	for _, p := range ps.peers {
+		if !p.knowPrs.Contains(index) {
+			list = append(list, p)
+		}
+	}
+	return list
 }
 
 // PeersWithoutBlock retrieves a list of peers that do not have a given block in

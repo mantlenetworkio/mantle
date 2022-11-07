@@ -264,7 +264,7 @@ function scheduler() external view returns (bytes)
 ### sequencerLimit
 
 ```solidity
-function sequencerLimit() external view returns (uint256)
+function sequencerLimit() external view returns (uint8)
 ```
 
 
@@ -276,7 +276,7 @@ function sequencerLimit() external view returns (uint256)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined
+| _0 | uint8 | undefined
 
 ### sequencers
 
@@ -371,7 +371,7 @@ Update Epoch
 ### updateSequencerLimit
 
 ```solidity
-function updateSequencerLimit(uint256 _limit) external nonpayable
+function updateSequencerLimit(uint8 _limit) external nonpayable
 ```
 
 Update Epoch
@@ -382,7 +382,7 @@ Update Epoch
 
 | Name | Type | Description |
 |---|---|---|
-| _limit | uint256 | new limit
+| _limit | uint8 | new limit
 
 ### withdraw
 

@@ -4,10 +4,8 @@ import (
 	"fmt"
 
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
 func (pm *ProtocolManager) makeConsensusProtocol(version uint) p2p.Protocol {
@@ -63,43 +61,26 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 	switch {
 	case msg.Code == ProducersMsg:
 		// A batch of block bodies arrived to one of our previous requests
-		var request clique.Producers
-		if err := msg.Decode(&request); err != nil {
+		var producers clique.Producers
+		if err := msg.Decode(&producers); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
-		}
-		var producers []rlp.RawValue
-		if encoded, err := rlp.EncodeToBytes(request); err != nil {
-			log.Error("Failed to encode receipt", "err", err)
-		} else {
-			producers = append(producers, encoded)
 		}
 
 		if eg, ok := pm.blockchain.Engine().(*clique.Clique); ok {
-			eg.SetProducers(request)
+			eg.SetProducers(producers)
 		}
 
 	case msg.Code == GetProducersMsg:
-		// Decode the retrieval message
-		msgStream := rlp.NewStream(msg.Payload, uint64(msg.Size))
-		if _, err := msgStream.List(); err != nil {
-			return err
-		}
-		// Gather state data until the fetch or network limits is reached
-		var producers []rlp.RawValue
-		var results clique.Producers
-
+		var producers clique.Producers
 		var getProducers clique.GetProducers
-
+		if err := msg.Decode(&getProducers); err != nil {
+			return errResp(ErrDecode, "msg %v: %v", msg, err)
+		}
 		if eg, ok := pm.blockchain.Engine().(*clique.Clique); ok {
-			results = eg.GetProducers(getProducers)
+			producers = eg.GetProducers(getProducers)
 		}
 
-		if encoded, err := rlp.EncodeToBytes(results); err != nil {
-			log.Error("Failed to encode receipt", "err", err)
-		} else {
-			producers = append(producers, encoded)
-		}
-		return p.SendProducerRLP(producers)
+		return p.SendProducers(producers)
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
 	}
@@ -107,12 +88,28 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 	return nil
 }
 
-// SendProducerRLP sends a batch of transaction receipts, corresponding to the
+func (p *peer) AsyncSendProducers(prs *clique.Producers) {
+	// todo add producers to peer: check? index
+	select {
+	case p.queuedPrs <- prs:
+		p.knowPrs.Add(prs.Index)
+		// Mark all the producers as known, but ensure we don't overflow our limits
+		for p.knowPrs.Cardinality() >= maxKnownPrs {
+			p.knowPrs.Pop()
+		}
+
+	default:
+		p.Log().Debug("Dropping producers propagation", "block number", prs.Number)
+	}
+}
+
+// SendProducers sends a batch of transaction receipts, corresponding to the
 // ones requested from an already RLP encoded format.
-func (p *peer) SendProducerRLP(producers []rlp.RawValue) error {
+func (p *peer) SendProducers(producers clique.Producers) error {
+	// todo send producers with signature
 	return p2p.Send(p.rw, ProducersMsg, producers)
 }
 
-func (p *peer) RequestProducerRLP(producers []rlp.RawValue) error {
+func (p *peer) RequestProducers(producers clique.Producers) error {
 	return p2p.Send(p.rw, GetProducersMsg, producers)
 }

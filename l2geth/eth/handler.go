@@ -28,6 +28,7 @@ import (
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
@@ -85,6 +86,7 @@ type ProtocolManager struct {
 	txsCh         chan core.NewTxsEvent
 	txsSub        event.Subscription
 	minedBlockSub *event.TypeMuxSubscription
+	producersSub  *event.TypeMuxSubscription
 
 	whitelist map[uint64]common.Hash
 
@@ -256,6 +258,10 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 	pm.minedBlockSub = pm.eventMux.Subscribe(core.NewMinedBlockEvent{})
 	go pm.minedBroadcastLoop()
 
+	// broadcast producers
+	pm.producersSub = pm.eventMux.Subscribe(clique.ProducersUpdateEvent{})
+	go pm.producersBroadcastLoop()
+
 	// start sync handlers
 	go pm.syncer()
 	go pm.txsyncLoop()
@@ -266,6 +272,7 @@ func (pm *ProtocolManager) Stop() {
 
 	pm.txsSub.Unsubscribe()        // quits txBroadcastLoop
 	pm.minedBlockSub.Unsubscribe() // quits blockBroadcastLoop
+	pm.producersSub.Unsubscribe()  // quits producersBroadcastLoop
 
 	// Quit the sync loop.
 	// After this send has completed, no new peers will be accepted.
@@ -817,6 +824,25 @@ func (pm *ProtocolManager) minedBroadcastLoop() {
 			pm.BroadcastBlock(ev.Block, false) // Only then announce to the rest
 		}
 	}
+}
+
+// Sequencer set broadcast loop
+func (pm *ProtocolManager) producersBroadcastLoop() {
+	// automatically stops if unsubscribe
+	for obj := range pm.producersSub.Chan() {
+		if prs, ok := obj.Data.(clique.ProducersUpdateEvent); ok {
+			pm.BroadcastProducers(prs.Producers) // First propagate block to peers
+		}
+	}
+}
+
+func (pm *ProtocolManager) BroadcastProducers(producers *clique.Producers) {
+	peers := pm.peers.PeersWithoutProducer(producers.Index)
+	for _, p := range peers {
+		p.AsyncSendProducers(producers)
+	}
+
+	log.Trace("Broadcast producers", "block number", producers.Number, "recipients", len(pm.peers.peers))
 }
 
 func (pm *ProtocolManager) txBroadcastLoop() {
