@@ -4,10 +4,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"math"
-	"math/big"
-	"strings"
-
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/influxdata/influxdb/pkg/slices"
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
@@ -18,6 +14,9 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/slash"
 	"github.com/rs/zerolog"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+	"math"
+	"math/big"
+	"strings"
 )
 
 func (p *Processor) Sign() {
@@ -57,79 +56,88 @@ func (p *Processor) Sign() {
 				}
 				nodeSignRequest.RequestBody = requestBody
 
-				var data []byte
-				err, hash, signByte := p.checkMessages(requestBody)
-				hashStr := hexutil.Encode(hash)
+				go p.SignGo(req.ID.(tdtypes.JSONRPCStringID), nodeSignRequest, logger)
 
-				if err != nil {
-					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-
-					p.wsClient.SendMsg(RpcResponse)
-					logger.Err(err).Msg("check event failed")
-					continue
-				}
-
-				//cache can not find the sign result by hashStr,we need to handle sign request.
-				if signByte == nil {
-					signData, culprits, err := p.handleSign(nodeSignRequest, hash, logger)
-					if err != nil {
-						logger.Error().Msgf(" %s sign failed ", hashStr)
-						var errorRes tdtypes.RPCResponse
-						if len(culprits) > 0 {
-							respData := strings.Join(culprits, ",")
-							errorRes = tdtypes.NewRPCErrorResponse(req.ID, tsscommon.CulpritErrorCode, err.Error(), respData)
-							p.nodeStore.AddCulprits(culprits)
-
-							//store slash info
-							for _, culprit := range culprits {
-								addr, err := tsscommon.NodeToAddress(culprit)
-								if err != nil {
-									logger.Error().Msgf("failed to convert node to address %s", culprit)
-								}
-								p.nodeStore.SetSlashingInfo(slash.SlashingInfo{
-									Address:    addr,
-									ElectionId: requestBody.ElectionId,
-									BatchIndex: math.MaxUint64, // not real, just for identifying the specific slashing info.
-									SlashType:  tsscommon.SlashTypeCulprit,
-								})
-							}
-
-						} else {
-							errorRes = tdtypes.NewRPCErrorResponse(req.ID, 201, "sign failed", err.Error())
-						}
-						er := p.wsClient.SendMsg(errorRes)
-						if er != nil {
-							logger.Err(er).Msg("failed to send msg to tss manager")
-						}
-						continue
-					}
-					bol := p.CacheSign(hashStr, signData)
-					logger.Info().Msgf("cache sign byte behavior %s ", bol)
-					data = signData
-				} else {
-					data = signByte
-				}
-
-				signResponse := tsscommon.SignResponse{
-					Signature: data,
-				}
-				RpcResponse := tdtypes.NewRPCSuccessResponse(req.ID, signResponse)
-				logger.Info().Msg("start to send response to manager ")
-
-				err = p.wsClient.SendMsg(RpcResponse)
-				if err != nil {
-					logger.Err(err).Msg("failed to sendMsg to tss manager ")
-				} else {
-					logger.Info().Msg("send sign response to manager successfully")
-					err := p.storeStateBatch(requestBody.ElectionId, requestBody.StateRoots, nodeSignRequest.Nodes, nodeSignRequest.ClusterPublicKey)
-					if err != nil {
-						logger.Err(err).Msg("failed to store StateBatch to level db")
-					}
-					p.removeWaitEvent(hashStr)
-				}
 			}
 		}
 	}()
+}
+
+func (p *Processor) SignGo(resId tdtypes.JSONRPCStringID, sign tsscommon.NodeSignRequest, logger zerolog.Logger) error {
+	var data []byte
+	requestBody := sign.RequestBody.(tsscommon.SignStateRequest)
+	err, hash, signByte := p.checkMessages(requestBody)
+	hashStr := hexutil.Encode(hash)
+
+	if err != nil {
+		RpcResponse := tdtypes.NewRPCErrorResponse(resId, 201, "failed", err.Error())
+
+		p.wsClient.SendMsg(RpcResponse)
+		logger.Err(err).Msg("check event failed")
+		return err
+	}
+
+	//cache can not find the sign result by hashStr,we need to handle sign request.
+	if signByte == nil {
+		signData, culprits, err := p.handleSign(sign, hash, logger)
+		if err != nil {
+			logger.Error().Msgf(" %s sign failed ", hashStr)
+			var errorRes tdtypes.RPCResponse
+			if len(culprits) > 0 {
+				respData := strings.Join(culprits, ",")
+				errorRes = tdtypes.NewRPCErrorResponse(resId, tsscommon.CulpritErrorCode, err.Error(), respData)
+				p.nodeStore.AddCulprits(culprits)
+
+				//store slash info
+				for _, culprit := range culprits {
+					addr, err := tsscommon.NodeToAddress(culprit)
+					if err != nil {
+						logger.Error().Msgf("failed to convert node to address %s", culprit)
+					}
+					p.nodeStore.SetSlashingInfo(slash.SlashingInfo{
+						Address:    addr,
+						ElectionId: requestBody.ElectionId,
+						BatchIndex: math.MaxUint64, // not real, just for identifying the specific slashing info.
+						SlashType:  tsscommon.SlashTypeCulprit,
+					})
+				}
+
+			} else {
+				errorRes = tdtypes.NewRPCErrorResponse(resId, 201, "sign failed", err.Error())
+			}
+			er := p.wsClient.SendMsg(errorRes)
+			if er != nil {
+				logger.Err(er).Msg("failed to send msg to tss manager")
+			}
+			return err
+		}
+		bol := p.CacheSign(hashStr, signData)
+		logger.Info().Msgf("cache sign byte behavior %s ", bol)
+		data = signData
+	} else {
+		data = signByte
+	}
+
+	signResponse := tsscommon.SignResponse{
+		Signature: data,
+	}
+	RpcResponse := tdtypes.NewRPCSuccessResponse(resId, signResponse)
+	logger.Info().Msg("start to send response to manager ")
+
+	err = p.wsClient.SendMsg(RpcResponse)
+	if err != nil {
+		logger.Err(err).Msg("failed to sendMsg to tss manager ")
+		return err
+	} else {
+		logger.Info().Msg("send sign response to manager successfully")
+		err := p.storeStateBatch(requestBody.ElectionId, requestBody.StateRoots, sign.Nodes, sign.ClusterPublicKey)
+		if err != nil {
+			logger.Err(err).Msg("failed to store StateBatch to level db")
+		}
+		p.removeWaitEvent(hashStr)
+		return nil
+	}
+
 }
 
 func (p *Processor) handleSign(sign tsscommon.NodeSignRequest, hashTx []byte, logger zerolog.Logger) ([]byte, []string, error) {
