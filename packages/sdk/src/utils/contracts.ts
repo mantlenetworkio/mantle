@@ -114,29 +114,29 @@ export const CONTRACT_ADDRESSES: {
   },
   [L2ChainID.MANTLE_HARDHAT_LOCAL]: {
     l1: {
-      AddressManager: '0x95bD8D42f30351685e96C62EDdc0d0613bf9a87A' as const,
+      AddressManager: '0x92aBAD50368175785e4270ca9eFd169c949C4ce1' as const,
       L1CrossDomainMessenger:
-        '0xc48078a734c2e22D43F54B47F7a8fB314Fa5A601' as const,
-      L1StandardBridge: '0x1B0Fd9Df9c444A4CeEC9863B88e1D7Cb3db621c0' as const,
+        '0x7959CF3b8ffC87Faca8aD8a1B5D95c0f58C0BEf8' as const,
+      L1StandardBridge: '0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9' as const,
       StateCommitmentChain:
-        '0xc039b3B46814D8388e5205D37Dd0D154D806F1f4' as const,
+        '0xd9e2F450525079e1e29fB23Bc7Caca6F61f8fD4a' as const,
       CanonicalTransactionChain:
-        '0xcA8b49076D1A8039599e24979abf819af784c27a' as const,
-      BondManager: '0x2B15063A6F8a11d18404C801F295b1d19dCC8574' as const,
+        '0x0090171f848B2aa86918E5Ef2406Ab3d424fdd83' as const,
+      BondManager: '0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const,
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
   [L2ChainID.MANTLE_HARDHAT_DEVNET]: {
     l1: {
-      AddressManager: '0x95bD8D42f30351685e96C62EDdc0d0613bf9a87A' as const,
+      AddressManager: '0x92aBAD50368175785e4270ca9eFd169c949C4ce1' as const,
       L1CrossDomainMessenger:
-        '0xc48078a734c2e22D43F54B47F7a8fB314Fa5A601' as const,
-      L1StandardBridge: '0x1B0Fd9Df9c444A4CeEC9863B88e1D7Cb3db621c0' as const,
+        '0x7959CF3b8ffC87Faca8aD8a1B5D95c0f58C0BEf8' as const,
+      L1StandardBridge: '0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9' as const,
       StateCommitmentChain:
-        '0xc039b3B46814D8388e5205D37Dd0D154D806F1f4' as const,
+        '0xd9e2F450525079e1e29fB23Bc7Caca6F61f8fD4a' as const,
       CanonicalTransactionChain:
-        '0xcA8b49076D1A8039599e24979abf819af784c27a' as const,
-      BondManager: '0x2B15063A6F8a11d18404C801F295b1d19dCC8574' as const,
+        '0x0090171f848B2aa86918E5Ef2406Ab3d424fdd83' as const,
+      BondManager: '0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const,
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
