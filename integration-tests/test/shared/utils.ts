@@ -102,9 +102,6 @@ const procEnv = cleanEnv(process.env, {
   RUN_VERIFIER_TESTS: bool({
     default: true,
   }),
-  RUN_SYSTEM_ADDRESS_TESTS: bool({
-    default: false,
-  }),
 
   MOCHA_TIMEOUT: num({
     default: 120_000,
