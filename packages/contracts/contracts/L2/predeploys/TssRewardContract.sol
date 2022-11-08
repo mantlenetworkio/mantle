@@ -32,7 +32,8 @@ contract TssRewardContract is ITssRewardContract {
     uint256 public blockStartHeight;
     uint32 public length;
     uint256 public batchTime;
-    address[] public _tssMembers;
+    address[] public tssMembers;
+    address public  sender;
 
 
 
@@ -99,13 +100,14 @@ contract TssRewardContract is ITssRewardContract {
     function claimReward(uint256 _blockStartHeight, uint32 _length, uint256 _batchTime, address[] calldata _tssMembers)
     external
     virtual
-    onlyFromDeadAddress
+//    onlyFromDeadAddress
     checkBalance
     {
         blockStartHeight = _blockStartHeight;
         length = _length;
         batchTime = _batchTime;
-        _tssMembers = _tssMembers;
+        tssMembers = _tssMembers;
+        sender  = msg.sender;
         //        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != true) {
         //            claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
         //            return;
