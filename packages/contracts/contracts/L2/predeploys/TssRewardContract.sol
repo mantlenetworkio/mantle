@@ -28,6 +28,13 @@ contract TssRewardContract is ITssRewardContract {
     uint256 public latsBatchTime;
     uint256 public sendAmountPerYear;
 
+    // TODO delete
+    uint256 public blockStartHeight;
+    uint32 public length;
+    uint256 public batchTime;
+    address[] public _tssMembers;
+
+
 
     // set call address
     constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress) {
@@ -95,34 +102,38 @@ contract TssRewardContract is ITssRewardContract {
     onlyFromDeadAddress
     checkBalance
     {
-        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != true) {
-            claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
-            return;
-        }
-        uint256 sendAmount = 0;
-        uint256 batchAmount = 0;
-        uint256 accu = 0;
-        // sendAmount
-        if (latsBatchTime == 0) {
-            latsBatchTime = _batchTime;
-            return;
-        }
-        batchAmount = (_batchTime - latsBatchTime) * querySendAmountPerSecond() + dust;
-        dust = 0;
-        sendAmount = batchAmount.div(_tssMembers.length);
-        for (uint256 j = 0; j < _tssMembers.length; j++) {
-            address payable addr = payable(_tssMembers[j]);
-            accu = accu.add(sendAmount);
-            addr.transfer(sendAmount);
-        }
-        uint256 reserved = batchAmount.sub(accu);
-        if (reserved > 0) {
-            dust = dust.add(reserved);
-        }
-        emit DistributeTssReward(
-            _batchTime,
-            _tssMembers
-        );
+        blockStartHeight = _blockStartHeight;
+        length = _length;
+        batchTime = _batchTime;
+        _tssMembers = _tssMembers;
+        //        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != true) {
+        //            claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
+        //            return;
+        //        }
+        //        uint256 sendAmount = 0;
+        //        uint256 batchAmount = 0;
+        //        uint256 accu = 0;
+        //        // sendAmount
+        //        if (latsBatchTime == 0) {
+        //            latsBatchTime = _batchTime;
+        //            return;
+        //        }
+        //        batchAmount = (_batchTime - latsBatchTime) * querySendAmountPerSecond() + dust;
+        //        dust = 0;
+        //        sendAmount = batchAmount.div(_tssMembers.length);
+        //        for (uint256 j = 0; j < _tssMembers.length; j++) {
+        //            address payable addr = payable(_tssMembers[j]);
+        //            accu = accu.add(sendAmount);
+        //            addr.transfer(sendAmount);
+        //        }
+        //        uint256 reserved = batchAmount.sub(accu);
+        //        if (reserved > 0) {
+        //            dust = dust.add(reserved);
+        //        }
+        //        emit DistributeTssReward(
+        //            _batchTime,
+        //            _tssMembers
+        //        );
     }
 
     /**
