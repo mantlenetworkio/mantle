@@ -103,6 +103,13 @@ task('take-dump').setAction(async (args, hre) => {
       owner: hre.deployConfig.bvmTssRewardContractOwner,
       sendAmountPerYear: 1000000,
       bvmGasPriceOracleAddress: '0x420000000000000000000000000000000000000F',
+      sccAddress: (
+        await getContractFromArtifact(
+          hre,
+          names.managed.contracts.StateCommitmentChain
+        )
+      ).address,
+      messenger: predeploys.L2CrossDomainMessenger,
     },
   }
 

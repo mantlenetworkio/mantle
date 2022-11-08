@@ -3,6 +3,8 @@ pragma solidity ^0.8.9;
 
 import {ITssRewardContract} from  "./iTssRewardContract.sol";
 import {IBVM_GasPriceOracle} from "./iBVM_GasPriceOracle.sol";
+import { CrossDomainEnabled } from "../../libraries/bridge/CrossDomainEnabled.sol";
+import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAddresses.sol";
 
 /* Library Imports */
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -15,7 +17,7 @@ import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
  * @title TssRewardContract
  * @dev Release to batch roll up tss members.
  */
-contract TssRewardContract is ITssRewardContract {
+contract TssRewardContract is ITssRewardContract,CrossDomainEnabled {
     using SafeMath for uint256;
 
     mapping(uint256 => uint256) public ledger;
@@ -27,6 +29,8 @@ contract TssRewardContract is ITssRewardContract {
     uint256 public totalAmount;
     uint256 public latsBatchTime;
     uint256 public sendAmountPerYear;
+    address public sccAddress;
+//    address public messenger;
 
     // TODO delete
     uint256 public blockStartHeight;
@@ -38,11 +42,14 @@ contract TssRewardContract is ITssRewardContract {
 
 
     // set call address
-    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress) {
+    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress,address _sccAddress,address _l2CrossDomainMessenger)
+        CrossDomainEnabled(_l2CrossDomainMessenger) {
         deadAddress = _deadAddress;
         owner = _owner;
         sendAmountPerYear = _sendAmountPerYear;
         bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
+        sccAddress = _sccAddress;
+//        messenger = _l2messenger;
     }
 
     // slither-disable-next-line locked-ether
@@ -101,6 +108,7 @@ contract TssRewardContract is ITssRewardContract {
     external
     virtual
 //    onlyFromDeadAddress
+    onlyFromCrossDomainAccount(sccAddress)
     checkBalance
     {
         blockStartHeight = _blockStartHeight;
