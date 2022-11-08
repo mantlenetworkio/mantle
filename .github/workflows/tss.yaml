@@ -1,0 +1,35 @@
+name: Mantle App Tss Image Building
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'tss/*'
+    types:
+      - closed
+
+jobs:
+  deployer:
+    name: Publish Deployer Version ${{ github.event.pull_request.number }}
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./ops/docker/tss/Dockerfile
+          target: tss
+          push: true
+          tags: mantlenetworkio/tss:${{ github.event.pull_request.number }}
