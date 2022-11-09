@@ -44,13 +44,13 @@ out_of_service_seconds = 600
 
 [backends]
 # A map of backends by name.
-[backends.dev]
+[backends.infura]
 # The URL to contact the backend at. Will be read from the environment
 # if an environment variable prefixed with $ is provided.
-rpc_url = "https://mantle-l2geth.dev.davionlabs.com"
+rpc_url = ""
 # The WS URL to contact the backend at. Will be read from the environment
 # if an environment variable prefixed with $ is provided.
-ws_url = "wss://mantle-l2geth.dev.davionlabs.com"
+ws_url = ""
 username = ""
 # An HTTP Basic password to authenticate with the backend. Will be read from
 # the environment if an environment variable prefixed with $ is provided.
@@ -64,20 +64,20 @@ client_cert_file = ""
 # Path to a custom client key file.
 client_key_file = ""
 
-#[backends.alchemy]
-#rpc_url = ""
-#ws_url = ""
-#username = ""
-#password = ""
-#max_rps = 3
-#max_ws_conns = 1
+[backends.alchemy]
+rpc_url = ""
+ws_url = ""
+username = ""
+password = ""
+max_rps = 3
+max_ws_conns = 1
 
 [backend_groups]
 [backend_groups.main]
-backends = ["dev"]
+backends = ["infura"]
 
-#[backend_groups.alchemy]
-#backends = ["alchemy"]
+[backend_groups.alchemy]
+backends = ["alchemy"]
 
 # If the authentication group below is in the config,
 # proxyd will only accept authenticated requests.
@@ -93,4 +93,4 @@ secret = "test"
 [rpc_method_mappings]
 eth_call = "main"
 eth_chainId = "main"
-eth_blockNumber = "main"
+eth_blockNumber = "alchemy"
