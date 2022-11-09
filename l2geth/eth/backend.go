@@ -18,6 +18,7 @@
 package eth
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -25,6 +26,7 @@ import (
 	"runtime"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi/bind"
@@ -158,22 +160,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		bloomRequests:  make(chan chan *bloombits.Retrieval),
 		bloomIndexer:   NewBloomIndexer(chainDb, params.BloomBitsBlocks, params.BloomConfirms),
 	}
-
-	// todo get peer ID then check equal with schedulerID
-	// var seqServer *clique.SequencerServer
-	// if chainConfig.Clique != nil {
-	// 	seqServer = clique.NewSequencerServer(
-	// 		time.Duration(chainConfig.Clique.Epoch),
-	// 		eth.engine.(*clique.Clique),
-	// 		eth.eventMux,
-	// 	)
-	// }
-	// schedulerID, err := seqServer.GetScheduler()
-	// if err != nil {
-	// 	return nil, fmt.Errorf("Cannot get scheduler: %w", err)
-	// }
-	// check if is specduler
-	// seqServer.Start()
 
 	bcVersion := rawdb.ReadDatabaseVersion(chainDb)
 	var dbVer = "<nil>"
@@ -496,8 +482,11 @@ func (s *Ethereum) StartMining(threads int) error {
 			log.Error("Cannot start mining without etherbase", "err", err)
 			return fmt.Errorf("etherbase missing: %v", err)
 		}
+		var wallet accounts.Wallet
+		var account accounts.Account
 		if clique, ok := s.engine.(*clique.Clique); ok {
-			wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
+			account = accounts.Account{Address: eb}
+			wallet, err := s.accountManager.Find(account)
 			if wallet == nil || err != nil {
 				log.Error("Etherbase account unavailable locally", "err", err)
 				return fmt.Errorf("signer missing: %v", err)
@@ -509,6 +498,35 @@ func (s *Ethereum) StartMining(threads int) error {
 		atomic.StoreUint32(&s.protocolManager.acceptTxs, 1)
 
 		go s.miner.Start(eb)
+
+		// set sequencer server and get scheduler address
+		var seqServer *clique.SequencerServer
+		var scheduler common.Address
+		config := s.config.Genesis.Config
+		// check method for sequencer server check if miner is already start
+		check := func() bool {
+			return s.IsMining()
+		}
+		// only start when Clique consensus
+		if config.Clique != nil {
+			seqServer = clique.NewSequencerServer(
+				time.Duration(config.Clique.Epoch),
+				s.engine.(*clique.Clique),
+				s.eventMux,
+				check,
+			)
+		}
+		scheduler, err = seqServer.GetScheduler()
+		if err != nil {
+			return fmt.Errorf("Cannot get scheduler: %w", err)
+		}
+		// check eb to equal scheduler then start sequencer server after miner start
+		if bytes.Equal(scheduler.Bytes(), eb.Bytes()) {
+			// set wallet for sign msgs
+			seqServer.SetWallet(wallet, account)
+			// start sequencer server
+			seqServer.Start()
+		}
 	}
 	return nil
 }

@@ -61,26 +61,26 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 	switch {
 	case msg.Code == ProducersMsg:
 		// A batch of block bodies arrived to one of our previous requests
-		var producers clique.Producers
-		if err := msg.Decode(&producers); err != nil {
+		var proUpdate clique.ProducerUpdate
+		if err := msg.Decode(&proUpdate); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 
 		if eg, ok := pm.blockchain.Engine().(*clique.Clique); ok {
-			eg.SetProducers(producers)
+			eg.SetProducers(proUpdate)
 		}
 
 	case msg.Code == GetProducersMsg:
-		var producers clique.Producers
+		var proupdate clique.ProducerUpdate
 		var getProducers clique.GetProducers
 		if err := msg.Decode(&getProducers); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		if eg, ok := pm.blockchain.Engine().(*clique.Clique); ok {
-			producers = eg.GetProducers(getProducers)
+			proupdate = eg.GetProducers(getProducers)
 		}
 
-		return p.SendProducers(producers)
+		return p.SendProducers(proupdate)
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
 	}
@@ -88,26 +88,26 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 	return nil
 }
 
-func (p *peer) AsyncSendProducers(prs *clique.Producers) {
+func (p *peer) AsyncSendProducers(prs *clique.ProducerUpdate) {
 	// todo add producers to peer: check? index
 	select {
 	case p.queuedPrs <- prs:
-		p.knowPrs.Add(prs.Index)
+		p.knowPrs.Add(prs.Producers.Index)
 		// Mark all the producers as known, but ensure we don't overflow our limits
 		for p.knowPrs.Cardinality() >= maxKnownPrs {
 			p.knowPrs.Pop()
 		}
 
 	default:
-		p.Log().Debug("Dropping producers propagation", "block number", prs.Number)
+		p.Log().Debug("Dropping producers propagation", "block number", prs.Producers.Number)
 	}
 }
 
 // SendProducers sends a batch of transaction receipts, corresponding to the
 // ones requested from an already RLP encoded format.
-func (p *peer) SendProducers(producers clique.Producers) error {
+func (p *peer) SendProducers(proUpdate clique.ProducerUpdate) error {
 	// todo send producers with signature
-	return p2p.Send(p.rw, ProducersMsg, producers)
+	return p2p.Send(p.rw, ProducersMsg, proUpdate)
 }
 
 func (p *peer) RequestProducers(producers clique.Producers) error {

@@ -178,6 +178,7 @@ type Clique struct {
 
 	schedulerID []byte    // Identifier of the current scheduler
 	producers   Producers // Current list of producers
+	signature   []byte    // Current signature of producers
 
 	proposals map[common.Address]bool // Current list of proposals we are pushing
 
@@ -210,14 +211,17 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 	}
 }
 
-func (c *Clique) SetProducers(data Producers) {
-	c.producers = data
-	c.schedulerID = data.SchedulerID
-	data.store(c.db)
+func (c *Clique) SetProducers(data ProducerUpdate) {
+	c.producers = data.Producers
+	c.schedulerID = data.Producers.SchedulerID
+	c.signature = data.Signature
 }
 
-func (c *Clique) GetProducers(data GetProducers) Producers {
-	return c.producers
+func (c *Clique) GetProducers(data GetProducers) ProducerUpdate {
+	return ProducerUpdate{
+		c.producers,
+		c.signature,
+	}
 }
 
 // Author implements consensus.Engine, returning the Ethereum address recovered

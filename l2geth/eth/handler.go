@@ -831,18 +831,18 @@ func (pm *ProtocolManager) producersBroadcastLoop() {
 	// automatically stops if unsubscribe
 	for obj := range pm.producersSub.Chan() {
 		if prs, ok := obj.Data.(clique.ProducersUpdateEvent); ok {
-			pm.BroadcastProducers(prs.Producers) // First propagate block to peers
+			pm.BroadcastProducers(prs.Update) // First propagate block to peers
 		}
 	}
 }
 
-func (pm *ProtocolManager) BroadcastProducers(producers *clique.Producers) {
-	peers := pm.peers.PeersWithoutProducer(producers.Index)
+func (pm *ProtocolManager) BroadcastProducers(producersUpdate *clique.ProducerUpdate) {
+	peers := pm.peers.PeersWithoutProducer(producersUpdate.Producers.Index)
 	for _, p := range peers {
-		p.AsyncSendProducers(producers)
+		p.AsyncSendProducers(producersUpdate)
 	}
 
-	log.Trace("Broadcast producers", "block number", producers.Number, "recipients", len(pm.peers.peers))
+	log.Trace("Broadcast producers", "block number", producersUpdate.Producers.Number, "recipients", len(pm.peers.peers))
 }
 
 func (pm *ProtocolManager) txBroadcastLoop() {

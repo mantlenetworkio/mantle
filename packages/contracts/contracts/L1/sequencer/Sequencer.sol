@@ -34,7 +34,7 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
     // Store limit of sequencer
     uint8 public sequencerLimit;
     // Store scheduler
-    bytes public scheduler;
+    address public scheduler;
 
     // SequencerCreate(signer, mintAddress, nodeID)
     event SequencerCreate(address, address, bytes);
@@ -54,10 +54,10 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
 
     /**
      * Update Epoch
-     * @param nodeID new scheculer`s nodeID
+     * @param _scheduler new scheculer`s address
      */
-    function updateScheduler(bytes memory nodeID) public onlyOwner {
-        scheduler = nodeID;
+    function updateScheduler(address _scheduler) public onlyOwner {
+        scheduler = _scheduler;
     }
 
     /**

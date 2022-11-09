@@ -62,7 +62,7 @@ func (s SequencerSequencerInfos) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func GetScheduler() ([]byte, error) {
+func GetScheduler() (common.Address, error) {
 	return seqContract.Scheduler(nil)
 }
 

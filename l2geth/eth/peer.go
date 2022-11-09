@@ -90,14 +90,14 @@ type peer struct {
 	td   *big.Int
 	lock sync.RWMutex
 
-	knownTxs    mapset.Set                // Set of transaction hashes known to be known by this peer
-	knownBlocks mapset.Set                // Set of block hashes known to be known by this peer
-	knowPrs     mapset.Set                // Set of Producers height to be known by this peer
-	queuedTxs   chan []*types.Transaction // Queue of transactions to broadcast to the peer
-	queuedProps chan *propEvent           // Queue of blocks to broadcast to the peer
-	queuedAnns  chan *types.Block         // Queue of blocks to announce to the peer
-	queuedPrs   chan *clique.Producers    // Queue of producers to announce to the peer
-	term        chan struct{}             // Termination channel to stop the broadcaster
+	knownTxs    mapset.Set                  // Set of transaction hashes known to be known by this peer
+	knownBlocks mapset.Set                  // Set of block hashes known to be known by this peer
+	knowPrs     mapset.Set                  // Set of Producers height to be known by this peer
+	queuedTxs   chan []*types.Transaction   // Queue of transactions to broadcast to the peer
+	queuedProps chan *propEvent             // Queue of blocks to broadcast to the peer
+	queuedAnns  chan *types.Block           // Queue of blocks to announce to the peer
+	queuedPrs   chan *clique.ProducerUpdate // Queue of ProducerUpdate to announce to the peer
+	term        chan struct{}               // Termination channel to stop the broadcaster
 }
 
 func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
@@ -112,7 +112,7 @@ func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 		queuedTxs:   make(chan []*types.Transaction, maxQueuedTxs),
 		queuedProps: make(chan *propEvent, maxQueuedProps),
 		queuedAnns:  make(chan *types.Block, maxQueuedAnns),
-		queuedPrs:   make(chan *clique.Producers, maxQueuedPrs),
+		queuedPrs:   make(chan *clique.ProducerUpdate, maxQueuedPrs),
 		term:        make(chan struct{}),
 	}
 }
@@ -141,11 +141,11 @@ func (p *peer) broadcast() {
 			}
 			p.Log().Trace("Announced block", "number", block.Number(), "hash", block.Hash())
 
-		case producers := <-p.queuedPrs:
-			if err := p.SendProducers(*producers); err != nil {
+		case proUpdate := <-p.queuedPrs:
+			if err := p.SendProducers(*proUpdate); err != nil {
 				return
 			}
-			p.Log().Trace("Broadcast producers", "number", producers.Number)
+			p.Log().Trace("Broadcast producers", "number:", proUpdate.Producers.Number, "index", proUpdate.Producers.Index)
 
 		case <-p.term:
 			return
