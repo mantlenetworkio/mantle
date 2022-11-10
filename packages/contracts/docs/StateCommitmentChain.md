@@ -44,28 +44,6 @@ function SEQUENCER_PUBLISH_WINDOW() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
-### _distributeR
-
-```solidity
-function _distributeR() external nonpayable
-```
-
-
-
-
-
-
-### _distributeReward
-
-```solidity
-function _distributeReward() external nonpayable
-```
-
-
-
-
-
-
 ### appendStateBatch
 
 ```solidity
@@ -245,40 +223,6 @@ Resolves the address associated with a given name.
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | Address associated with the given name.
-
-### step
-
-```solidity
-function step() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined
-
-### step1
-
-```solidity
-function step1() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined
 
 ### verifyStateCommitment
 

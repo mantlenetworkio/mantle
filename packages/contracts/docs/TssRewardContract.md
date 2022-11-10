@@ -10,44 +10,10 @@
 
 ## Methods
 
-### batchTime
-
-```solidity
-function batchTime() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined
-
 ### bestBlockID
 
 ```solidity
 function bestBlockID() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined
-
-### blockStartHeight
-
-```solidity
-function blockStartHeight() external view returns (uint256)
 ```
 
 
@@ -131,6 +97,23 @@ function dust() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
+### l2Message
+
+```solidity
+function l2Message() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
+
 ### latsBatchTime
 
 ```solidity
@@ -169,40 +152,6 @@ function ledger(uint256) external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined
-
-### length
-
-```solidity
-function length() external view returns (uint32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint32 | undefined
-
-### messenger
-
-```solidity
-function messenger() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined
 
 ### owner
 
@@ -272,23 +221,6 @@ function querySendAmountPerSecond() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
-### sccAddress
-
-```solidity
-function sccAddress() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined
-
 ### sendAmountPerYear
 
 ```solidity
@@ -306,23 +238,6 @@ function sendAmountPerYear() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
-### sender
-
-```solidity
-function sender() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined
-
 ### totalAmount
 
 ```solidity
@@ -339,28 +254,6 @@ function totalAmount() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined
-
-### tssMembers
-
-```solidity
-function tssMembers(uint256) external view returns (address)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined
 
 ### updateReward
 

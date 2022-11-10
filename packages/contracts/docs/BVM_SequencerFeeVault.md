@@ -78,17 +78,6 @@ function l1FeeWallet() external view returns (address)
 |---|---|---|
 | _0 | address | undefined
 
-### tssClaim
-
-```solidity
-function tssClaim() external nonpayable
-```
-
-
-
-
-
-
 ### withdraw
 
 ```solidity

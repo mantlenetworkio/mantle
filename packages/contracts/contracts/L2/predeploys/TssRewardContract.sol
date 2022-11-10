@@ -3,7 +3,6 @@ pragma solidity ^0.8.9;
 
 import {ITssRewardContract} from  "./iTssRewardContract.sol";
 import {IBVM_GasPriceOracle} from "./iBVM_GasPriceOracle.sol";
-import {CrossDomainEnabled} from "../../libraries/bridge/CrossDomainEnabled.sol";
 import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAddresses.sol";
 
 /* Library Imports */
@@ -17,7 +16,7 @@ import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
  * @title TssRewardContract
  * @dev Release to batch roll up tss members.
  */
-contract TssRewardContract is ITssRewardContract, CrossDomainEnabled {
+contract TssRewardContract is ITssRewardContract {
     using SafeMath for uint256;
 
     mapping(uint256 => uint256) public ledger;
@@ -29,27 +28,18 @@ contract TssRewardContract is ITssRewardContract, CrossDomainEnabled {
     uint256 public totalAmount;
     uint256 public latsBatchTime;
     uint256 public sendAmountPerYear;
-    address public sccAddress;
-    //    address public messenger;
-
-    // TODO delete
-    uint256 public blockStartHeight;
-    uint32 public length;
-    uint256 public batchTime;
-    address[] public tssMembers;
-    address public  sender;
+    address public l2Message;
 
 
 
     // set call address
-    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress, address _sccAddress, address _l2CrossDomainMessenger)
-    CrossDomainEnabled(_l2CrossDomainMessenger) {
+    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress, address _l2Message)
+    {
         deadAddress = _deadAddress;
         owner = _owner;
         sendAmountPerYear = _sendAmountPerYear;
         bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
-        sccAddress = _sccAddress;
-        //        messenger = _l2messenger;
+        l2Message = _l2Message;
     }
 
     // slither-disable-next-line locked-ether
@@ -62,6 +52,14 @@ contract TssRewardContract is ITssRewardContract, CrossDomainEnabled {
     modifier onlyFromDeadAddress() {
         require(
             msg.sender == deadAddress,
+            "tss reward call message unauthenticated"
+        );
+        _;
+    }
+
+    modifier onlyL2Message() {
+        require(
+            msg.sender == l2Message,
             "tss reward call message unauthenticated"
         );
         _;
@@ -107,15 +105,8 @@ contract TssRewardContract is ITssRewardContract, CrossDomainEnabled {
     function claimReward(uint256 _blockStartHeight, uint32 _length, uint256 _batchTime, address[] calldata _tssMembers)
     external
     virtual
-        //    onlyFromDeadAddress
-        //    onlyFromCrossDomainAccount(sccAddress)
-        //    checkBalance
+    onlyL2Message
     {
-        blockStartHeight = _blockStartHeight;
-        length = _length;
-        batchTime = _batchTime;
-        tssMembers = _tssMembers;
-        sender = msg.sender;
         if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != true) {
             claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
             return;

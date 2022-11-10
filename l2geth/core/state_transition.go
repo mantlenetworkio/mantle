@@ -18,7 +18,6 @@ package core
 
 import (
 	"errors"
-	"fmt"
 	"github.com/mantlenetworkio/mantle/l2geth/contracts/gasfee"
 	"github.com/mantlenetworkio/mantle/l2geth/contracts/tssreward"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
@@ -229,10 +228,6 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 	}
 	msg := st.msg
 	sender := vm.AccountRef(msg.From())
-	fmt.Println("=================")
-	fmt.Println("sender:", sender.Address().Hex())
-	fmt.Println("to:", msg.To().Hex())
-	fmt.Println("=================")
 	homestead := st.evm.ChainConfig().IsHomestead(st.evm.BlockNumber)
 	istanbul := st.evm.ChainConfig().IsIstanbul(st.evm.BlockNumber)
 	contractCreation := msg.To() == nil
