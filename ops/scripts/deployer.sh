@@ -75,7 +75,7 @@ cp ./genesis/$CONTRACTS_TARGET_NETWORK.json ./genesis/state-dump.latest.json
 # init balance
 if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
   jq -n 'reduce inputs as $item ({}; . *= $item)' ./genesis/state-dump.latest.json ./balance.json > genesis2.json
-else [ $CONTRACTS_TARGET_NETWORK == "goerli-qa" ]
+else
   jq -n 'reduce inputs as $item ({}; . *= $item)' ./genesis/state-dump.latest.json ./balance.json > genesis2.json
 fi
 
