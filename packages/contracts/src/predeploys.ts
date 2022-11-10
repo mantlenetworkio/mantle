@@ -27,9 +27,3 @@ export const predeploys = {
   // Tss rewards default contract
   TssRewardContract: '0x4200000000000000000000000000000000000020',
 }
-
-export const futurePredeploys = {
-  // System addresses, for use later
-  System0: '0x4200000000000000000000000000000000000042',
-  System1: '0x4200000000000000000000000000000000000014',
-}

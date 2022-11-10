@@ -100,43 +100,70 @@ export const CONTRACT_ADDRESSES: {
   },
   [L2ChainID.MANTLE_GOERLIQA]: {
     l1: {
-      AddressManager: '0x68F1128d39b28C49D4fbe703f806734C01809A66' as const,
+      AddressManager:
+        process.env.ADDRESS_MANAGER_ADDRESS ||
+        ('0x68F1128d39b28C49D4fbe703f806734C01809A66' as const),
       L1CrossDomainMessenger:
-        '0x7B13E571a4526326d8D07FF8A93Cd0F92A72202B' as const,
-      L1StandardBridge: '0x45574aCac0c12Ec6f3AAa1b2fBfA0F69A818D7D1' as const,
+        process.env.L1_CROSS_DOMAIN_MESSENGER_ADDRESS ||
+        ('0x7B13E571a4526326d8D07FF8A93Cd0F92A72202B' as const),
+      L1StandardBridge:
+        process.env.L1_STANDARD_BRIDGE_ADDRESS ||
+        ('0x45574aCac0c12Ec6f3AAa1b2fBfA0F69A818D7D1' as const),
       StateCommitmentChain:
-        '0x56Fab8B6bceB262fC6E17cA142d1b3e611aE076F' as const,
+        process.env.STATE_COMMITMENT_CHAIN_ADDRESS ||
+        ('0x56Fab8B6bceB262fC6E17cA142d1b3e611aE076F' as const),
       CanonicalTransactionChain:
-        '0x2E816dC5A21868f160bDad407a740a580245251C' as const,
-      BondManager: '0x1314822B932acC95Aa2B04F6b5CfC33e39aFfB2a' as const,
+        process.env.CANONICAL_TRANSACTION_CHAIN_ADDRESS ||
+        ('0x2E816dC5A21868f160bDad407a740a580245251C' as const),
+      BondManager:
+        process.env.BOND_MANAGER_ADDRESS ||
+        ('0x1314822B932acC95Aa2B04F6b5CfC33e39aFfB2a' as const),
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
   [L2ChainID.MANTLE_HARDHAT_LOCAL]: {
     l1: {
-      AddressManager: '0x92aBAD50368175785e4270ca9eFd169c949C4ce1' as const,
+      AddressManager:
+        process.env.ADDRESS_MANAGER_ADDRESS ||
+        ('0x92aBAD50368175785e4270ca9eFd169c949C4ce1' as const),
       L1CrossDomainMessenger:
-        '0x7959CF3b8ffC87Faca8aD8a1B5D95c0f58C0BEf8' as const,
-      L1StandardBridge: '0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9' as const,
+        process.env.L1_CROSS_DOMAIN_MESSENGER_ADDRESS ||
+        ('0x7959CF3b8ffC87Faca8aD8a1B5D95c0f58C0BEf8' as const),
+      L1StandardBridge:
+        process.env.L1_STANDARD_BRIDGE_ADDRESS ||
+        ('0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9' as const),
       StateCommitmentChain:
-        '0xd9e2F450525079e1e29fB23Bc7Caca6F61f8fD4a' as const,
+        process.env.STATE_COMMITMENT_CHAIN_ADDRESS ||
+        ('0xd9e2F450525079e1e29fB23Bc7Caca6F61f8fD4a' as const),
       CanonicalTransactionChain:
-        '0x0090171f848B2aa86918E5Ef2406Ab3d424fdd83' as const,
-      BondManager: '0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const,
+        process.env.CANONICAL_TRANSACTION_CHAIN_ADDRESS ||
+        ('0x0090171f848B2aa86918E5Ef2406Ab3d424fdd83' as const),
+      BondManager:
+        process.env.BOND_MANAGER_ADDRESS ||
+        ('0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const),
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
   [L2ChainID.MANTLE_HARDHAT_DEVNET]: {
     l1: {
-      AddressManager: '0x92aBAD50368175785e4270ca9eFd169c949C4ce1' as const,
+      AddressManager:
+        process.env.ADDRESS_MANAGER_ADDRESS ||
+        ('0x92aBAD50368175785e4270ca9eFd169c949C4ce1' as const),
       L1CrossDomainMessenger:
-        '0x7959CF3b8ffC87Faca8aD8a1B5D95c0f58C0BEf8' as const,
-      L1StandardBridge: '0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9' as const,
+        process.env.L1_CROSS_DOMAIN_MESSENGER_ADDRESS ||
+        ('0x7959CF3b8ffC87Faca8aD8a1B5D95c0f58C0BEf8' as const),
+      L1StandardBridge:
+        process.env.L1_STANDARD_BRIDGE_ADDRESS ||
+        ('0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9' as const),
       StateCommitmentChain:
-        '0xd9e2F450525079e1e29fB23Bc7Caca6F61f8fD4a' as const,
+        process.env.STATE_COMMITMENT_CHAIN_ADDRESS ||
+        ('0xd9e2F450525079e1e29fB23Bc7Caca6F61f8fD4a' as const),
       CanonicalTransactionChain:
-        '0x0090171f848B2aa86918E5Ef2406Ab3d424fdd83' as const,
-      BondManager: '0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const,
+        process.env.CANONICAL_TRANSACTION_CHAIN_ADDRESS ||
+        ('0x0090171f848B2aa86918E5Ef2406Ab3d424fdd83' as const),
+      BondManager:
+        process.env.BOND_MANAGER_ADDRESS ||
+        ('0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const),
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
