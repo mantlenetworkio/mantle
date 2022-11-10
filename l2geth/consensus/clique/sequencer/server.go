@@ -34,7 +34,7 @@ func init() {
 	defer cancel()
 	rpcClient, err := rpc.DialContext(ctx, rpcUrl)
 	if err != nil {
-		panic(err)
+		return
 	}
 	ethClient := ethclient.NewClient(rpcClient)
 
@@ -43,7 +43,7 @@ func init() {
 		addr, ethClient,
 	)
 	if err != nil {
-		panic(err)
+		return
 	}
 }
 
@@ -68,6 +68,9 @@ func GetScheduler() (common.Address, error) {
 
 // GetSequencerSet will return the validator set
 func GetSequencerSet() (SequencerSequencerInfos, error) {
+	if os.Getenv(ENV_SEQUENCER_CONTRACT_ADDRESS) == "" || os.Getenv(ENV_SEQUENCER_L1_RPC) == "" {
+		panic("need os ENV")
+	}
 	// get sequencer limit from sequencer contract
 	num, err := seqContract.SequencerLimit(nil)
 	if err != nil {
