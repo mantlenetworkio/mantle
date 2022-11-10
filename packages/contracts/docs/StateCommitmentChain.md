@@ -44,6 +44,17 @@ function SEQUENCER_PUBLISH_WINDOW() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
+### _distributeR
+
+```solidity
+function _distributeR() external nonpayable
+```
+
+
+
+
+
+
 ### _distributeReward
 
 ```solidity
