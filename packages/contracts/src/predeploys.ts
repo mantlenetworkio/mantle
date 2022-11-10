@@ -15,6 +15,9 @@ export const predeploys = {
   BVM_SequencerFeeVault: '0x4200000000000000000000000000000000000011',
   L2StandardTokenFactory: '0x4200000000000000000000000000000000000012',
   BVM_L1BlockNumber: '0x4200000000000000000000000000000000000013',
+  //ERC721
+  L2ERC721Bridge: '0x4200000000000000000000000000000000000015',
+  MintableERC721Factory: '0x4200000000000000000000000000000000000016',
 
   // We're temporarily disabling BVM_BIT because the jury is still out on whether BIT as an
   // ERC20 is desirable. ETH on Layer 2 will be the standard ERC20 token

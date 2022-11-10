@@ -1,3 +1,5 @@
+import assert from 'assert'
+
 import {Contract, ethers} from 'ethers'
 import {Provider} from '@ethersproject/abstract-provider'
 import {Signer} from '@ethersproject/abstract-signer'
@@ -273,4 +275,28 @@ export const HexToBytes = async (hex: string) => {
     bytes.push(parseInt(hex.substr(c, 2), 16))
   }
   return bytes
+}
+
+
+export const assertContractVariable = async (
+  contract: ethers.Contract,
+  variable: string,
+  expected: any
+) => {
+  // Need to make a copy that doesn't have a signer or we get the error that contracts with
+  // signers cannot override the from address.
+  const temp = new ethers.Contract(
+    contract.address,
+    contract.interface,
+    contract.provider
+  )
+
+  const actual = await temp.callStatic[variable]({
+    from: ethers.constants.AddressZero,
+  })
+
+  assert(
+    actual === expected || (actual.eq && actual.eq(expected)),
+    `[FATAL] ${variable} is ${actual} but should be ${expected}`
+  )
 }

@@ -96,6 +96,16 @@ task('take-dump').setAction(async (args, hre) => {
       symbol: 'WETH',
       decimals: 18,
     },
+    L2ERC721Bridge: {
+      _messenger: predeploys.L2CrossDomainMessenger,
+      _otherBridge: (await getContractFromArtifact(hre, 'L1ERC721BridgeProxy'))
+        .address,
+    },
+    MintableERC721Factory: {
+      _bridge: (await getContractFromArtifact(hre, 'L1ERC721BridgeProxy'))
+        .address,
+      _remoteChainId: hre.deployConfig.chainId,
+    },
   }
 
   const dump = {}

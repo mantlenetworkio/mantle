@@ -1,7 +1,7 @@
-import {HardhatUserConfig} from 'hardhat/types'
+import { HardhatUserConfig } from 'hardhat/types'
 import 'solidity-coverage'
 import * as dotenv from 'dotenv'
-import {ethers} from 'ethers'
+import { ethers } from 'ethers'
 
 // Hardhat plugins
 import '@openzeppelin/hardhat-upgrades'
@@ -105,13 +105,13 @@ const config: HardhatUserConfig = {
       {
         version: '0.8.9',
         settings: {
-          optimizer: {enabled: true, runs: 10_000},
+          optimizer: { enabled: true, runs: 10_000 },
         },
       },
       {
         version: '0.5.17', // Required for WETH9
         settings: {
-          optimizer: {enabled: true, runs: 10_000},
+          optimizer: { enabled: true, runs: 10_000 },
         },
       },
     ],
