@@ -20,6 +20,7 @@ package clique
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"math/big"
 	"math/rand"
@@ -491,6 +492,11 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	if err != nil {
 		return err
 	}
+	log.Info(fmt.Sprintf("signer is : %v", signer.String()))
+	for k, _ := range snap.Signers {
+		log.Info(fmt.Sprintf("has signer: %v", k))
+	}
+
 	if _, ok := snap.Signers[signer]; !ok {
 		return errUnauthorizedSigner
 	}
@@ -644,6 +650,12 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 	if err != nil {
 		return err
 	}
+
+	log.Info(fmt.Sprintf("here0 signer is : %v", signer.String()))
+	for k, _ := range snap.Signers {
+		log.Info(fmt.Sprintf("has signer: %v", k.String()))
+	}
+
 	if _, authorized := snap.Signers[signer]; !authorized {
 		return errUnauthorizedSigner
 	}

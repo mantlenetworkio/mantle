@@ -87,7 +87,7 @@ func Uint64ToBytes(i uint64) []byte {
 func (s *Producers) serialize() []byte {
 	var buf = make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, s.Number)
-
+	buf = binary.BigEndian.AppendUint64(buf, s.Index)
 	buf = binary.BigEndian.AppendUint64(buf, s.Epoch)
 	buf = append(buf, s.SchedulerID...)
 
@@ -101,11 +101,11 @@ func (s *Producers) serialize() []byte {
 }
 
 func deserialize(buf []byte) *Producers {
-	if len(buf) < extraNumberLength+extraEpochLength+extraSchedulerLength {
+	if len(buf) < extraNumberLength+extraIndexLength+extraEpochLength+extraSchedulerLength {
 		return nil
 	}
 
-	if (len(buf)-extraNumberLength-extraEpochLength-extraSchedulerLength)%extraSequencerLength != 0 {
+	if (len(buf)-extraNumberLength-extraIndexLength-extraEpochLength-extraSchedulerLength)%extraSequencerLength != 0 {
 		return nil
 	}
 

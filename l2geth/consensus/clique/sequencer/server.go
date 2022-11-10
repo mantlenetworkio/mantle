@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 
 	binding "github.com/mantlenetworkio/mantle/l2geth/consensus/clique/sequencer/bindings"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 const ENV_SEQUENCER_CONTRACT_ADDRESS = "SEQUENCER_CONTRACT_ADDRESS"
@@ -34,6 +35,7 @@ func init() {
 	defer cancel()
 	rpcClient, err := rpc.DialContext(ctx, rpcUrl)
 	if err != nil {
+		log.Error("create rpcClient failed: ", err)
 		return
 	}
 	ethClient := ethclient.NewClient(rpcClient)
@@ -43,6 +45,7 @@ func init() {
 		addr, ethClient,
 	)
 	if err != nil {
+		log.Error("create seqContract failed: ", err)
 		return
 	}
 }
@@ -68,9 +71,6 @@ func GetScheduler() (common.Address, error) {
 
 // GetSequencerSet will return the validator set
 func GetSequencerSet() (SequencerSequencerInfos, error) {
-	if os.Getenv(ENV_SEQUENCER_CONTRACT_ADDRESS) == "" || os.Getenv(ENV_SEQUENCER_L1_RPC) == "" {
-		panic("need os ENV")
-	}
 	// get sequencer limit from sequencer contract
 	num, err := seqContract.SequencerLimit(nil)
 	if err != nil {

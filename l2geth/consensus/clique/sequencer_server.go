@@ -35,6 +35,7 @@ type SequencerServer struct {
 }
 
 func NewSequencerServer(epoch time.Duration, clique *Clique, mux *event.TypeMux, check func() bool) *SequencerServer {
+	log.Info("Create Sequencer Server")
 	return &SequencerServer{
 		ticker: time.NewTicker(epoch),
 		engine: clique,
@@ -57,6 +58,7 @@ func (seqS *SequencerServer) GetScheduler() (common.Address, error) {
 }
 
 func (seqS *SequencerServer) Start() {
+	log.Info("Sequencer Server start \n\n\n")
 	// check
 	if seqS.check == nil {
 		panic("Sequencer server need method to check pre-preparation status")
@@ -88,6 +90,8 @@ func (seqS *SequencerServer) readLoop() {
 			pros := proUpdate.Producers
 			// get changes
 			changes := CompareSequencerSet(pros.SequencerSet.Sequencers, seqSet)
+			log.Info("Get sequencer set success, have changes: ", len(changes))
+
 			// update sequencer set and engine
 			pros.SequencerSet.UpdateWithChangeSet(changes)
 			pros.increment()
