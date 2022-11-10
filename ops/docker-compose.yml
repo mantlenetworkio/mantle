@@ -1,14 +1,5 @@
 version: '3.4'
 
-x-system-addr-env: &system-addr-env
-  # private key: a6aecc98b63bafb0de3b29ae9964b14acb4086057808be29f90150214ebd4a0f
-  # OK to publish this since it will only ever be used in itests
-  SYSTEM_ADDRESS_0_DEPLOYER: '0xa961b0d6dce82db098cf70a42a14add3ee3db2d5'
-
-  # private key: 3b8d2345102cce2443acb240db6e87c8edd4bb3f821b17fab8ea2c9da08ea132
-  # OK to publish this since it will only ever be used in itests
-  SYSTEM_ADDRESS_1_DEPLOYER: '0xdfc82d475833a50de90c642770f34a9db7deb725'
-
 x-healthcheck: &healthcheck
   test: [ "CMD", "curl", "-sf", "http://localhost:8545" ]
   interval: 5s
@@ -98,7 +89,6 @@ services:
     volumes:
       - ./data/l2geth:/root/.ethereum/geth/
     environment:
-      <<: *system-addr-env
       ETH1_HTTP: http://l1_chain:8545
       ROLLUP_TIMESTAMP_REFRESH: 5s
       ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
@@ -156,7 +146,6 @@ services:
     volumes:
       - ./data/verifier:/root/.ethereum/geth/
     environment:
-      <<: *system-addr-env
       ETH1_HTTP: http://l1_chain:8545
       SEQUENCER_CLIENT_HTTP: http://l2geth:8545
       ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
@@ -183,7 +172,6 @@ services:
     env_file:
       - ./envs/geth.env
     environment:
-      <<: *system-addr-env
       ETH1_HTTP: http://l1_chain:8545
       SEQUENCER_CLIENT_HTTP: http://l2geth:8545
       ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
@@ -233,11 +221,6 @@ services:
       NO_NETWORK: 1
       BATCH_SUBMITTER_SEQUENCER_BATCH_TYPE: ${BATCH_SUBMITTER_SEQUENCER_BATCH_TYPE:-zlib}
 
-      RUN_SYSTEM_ADDRESS_TESTS: 'true'
-
-      # must match l2geth environment, see above for why it's safe to publish these
-      SYSTEM_ADDRESS_0_DEPLOYER_KEY: 'a6aecc98b63bafb0de3b29ae9964b14acb4086057808be29f90150214ebd4a0f'
-      SYSTEM_ADDRESS_1_DEPLOYER_KEY: '3b8d2345102cce2443acb240db6e87c8edd4bb3f821b17fab8ea2c9da08ea132'
 
   gas_oracle:
     build:
@@ -308,7 +291,6 @@ services:
     env_file:
       - ./envs/geth.env
     environment:
-      <<: *system-addr-env
       ETH1_HTTP: http://l1_chain:8545
       ROLLUP_TIMESTAMP_REFRESH: 5s
       ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
