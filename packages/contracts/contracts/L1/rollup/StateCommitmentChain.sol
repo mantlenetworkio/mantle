@@ -30,6 +30,8 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
 
     uint256 public FRAUD_PROOF_WINDOW;
     uint256 public SEQUENCER_PUBLISH_WINDOW;
+    uint256 public  step;
+    uint256 public  step1;
 
     /***************
      * Constructor *
@@ -119,7 +121,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         _appendBatch(_batch, _signature, abi.encode(block.timestamp, msg.sender));
 
         // Update distributed state batch, and emit message
-        _distributeTssReward(_batch, _shouldStartAtElement);
+//        _distributeTssReward(_batch, _shouldStartAtElement);
     }
 
     /**
@@ -343,7 +345,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         // send call data into L2, hardcode address
         sendCrossDomainMessage(
             address(0x4200000000000000000000000000000000000020),
-            200_000,
+            2000000,
             message
         );
 
@@ -354,6 +356,44 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
             block.timestamp,
             tssMembers
         );
+         step1 = 888;
+    }
+
+    function _distributeReward() public {
+        // get address of tss group member
+//        address[] memory tssMembers = ITssGroupManager(resolve("Proxy__TSS_GroupManager")).getTssGroupUnJailMembers();
+//        require(tssMembers.length > 0, "get tss members in error");
+        address[] memory tssMembers = new address[](2);
+        tssMembers[0] = address(0xCFc17379Ac80A9EF231772ACE60014fb84704cB4);
+        tssMembers[1] = address(0x9D72b1e94C7075Be7E6da0E2104DB4302d02DB0E);
+
+        bytes32[] memory _batch;
+        uint256 _shouldStartAtElement;
+
+        // construct calldata for claimReward call
+        bytes memory message = abi.encodeWithSelector(
+            ITssRewardContract.claimReward.selector,
+            _shouldStartAtElement,
+            250,
+            block.timestamp,
+            tssMembers
+        );
+
+        // send call data into L2, hardcode address
+        sendCrossDomainMessage(
+            address(0x4200000000000000000000000000000000000020),
+            2000000,
+            message
+        );
+
+        // emit message
+        emit DistributeTssReward(
+            _shouldStartAtElement,
+            _batch.length,
+            block.timestamp,
+            tssMembers
+        );
+        step = 999;
     }
 
     /**

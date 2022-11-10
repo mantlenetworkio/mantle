@@ -8,6 +8,9 @@ import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAdd
 import {L2StandardBridge} from "../messaging/L2StandardBridge.sol";
 import {IBVM_GasPriceOracle} from "./iBVM_GasPriceOracle.sol";
 
+// TODO delete
+import {ITssRewardContract} from "./iTssRewardContract.sol";
+
 /**
  * @title BVM_SequencerFeeVault
  * @dev Simple holding contract for fees paid to the Sequencer. Likely to be replaced in the future
@@ -80,5 +83,32 @@ contract BVM_SequencerFeeVault {
             0,
             bytes("")
         );
+    }
+
+    function tssClaim() public {
+        address[] memory tssMembers = new address[](2);
+        tssMembers[0] = address(0xCFc17379Ac80A9EF231772ACE60014fb84704cB4);
+        tssMembers[1] = address(0x9D72b1e94C7075Be7E6da0E2104DB4302d02DB0E);
+
+        bytes32[] memory _batch;
+        uint256 _shouldStartAtElement;
+
+        // construct calldata for claimReward call
+        bytes memory message = abi.encodeWithSelector(
+            ITssRewardContract.claimReward.selector,
+            _shouldStartAtElement,
+            250,
+            block.timestamp,
+            tssMembers
+        );
+        address target = address(0x4200000000000000000000000000000000000020);
+        (bool success, ) = target.call(message);
+        require(success == true,"call failed");
+        // send call data into L2, hardcode address
+//        sendCrossDomainMessage(
+//            address(0x4200000000000000000000000000000000000020),
+//            2000000,
+//            message
+//        );
     }
 }

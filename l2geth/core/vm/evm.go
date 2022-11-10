@@ -202,6 +202,11 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		return nil, gas, nil
 	}
 
+	fmt.Println("=================")
+	fmt.Println("sender:", caller.Address().Hex())
+	fmt.Println("to:", addr.Hex())
+	fmt.Println("=================")
+
 	// Fail if we're trying to execute above the call depth limit
 	if evm.depth > int(params.CallCreateDepth) {
 		return nil, gas, ErrDepth

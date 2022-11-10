@@ -10,10 +10,44 @@
 
 ## Methods
 
+### batchTime
+
+```solidity
+function batchTime() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
 ### bestBlockID
 
 ```solidity
 function bestBlockID() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+### blockStartHeight
+
+```solidity
+function blockStartHeight() external view returns (uint256)
 ```
 
 
@@ -63,22 +97,6 @@ function claimReward(uint256 _blockStartHeight, uint32 _length, uint256 _batchTi
 | _batchTime | uint256 | Batch corresponds to L1 Block Timestamp
 | _tssMembers | address[] | The address array of tss group members
 
-### claimRewardPub
-
-```solidity
-function claimRewardPub(address[] _tssMembers) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _tssMembers | address[] | undefined
-
 ### deadAddress
 
 ```solidity
@@ -100,57 +118,6 @@ function deadAddress() external view returns (address)
 
 ```solidity
 function dust() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined
-
-### lastBatchAmount
-
-```solidity
-function lastBatchAmount() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined
-
-### lastSendAmount
-
-```solidity
-function lastSendAmount() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined
-
-### lastSub
-
-```solidity
-function lastSub() external view returns (uint256)
 ```
 
 
@@ -202,6 +169,40 @@ function ledger(uint256) external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined
+
+### length
+
+```solidity
+function length() external view returns (uint32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint32 | undefined
+
+### messenger
+
+```solidity
+function messenger() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
 
 ### owner
 
@@ -271,6 +272,23 @@ function querySendAmountPerSecond() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
+### sccAddress
+
+```solidity
+function sccAddress() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
+
 ### sendAmountPerYear
 
 ```solidity
@@ -288,10 +306,10 @@ function sendAmountPerYear() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
-### step
+### sender
 
 ```solidity
-function step() external view returns (uint256)
+function sender() external view returns (address)
 ```
 
 
@@ -303,7 +321,7 @@ function step() external view returns (uint256)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined
+| _0 | address | undefined
 
 ### totalAmount
 
@@ -321,6 +339,28 @@ function totalAmount() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined
+
+### tssMembers
+
+```solidity
+function tssMembers(uint256) external view returns (address)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
 
 ### updateReward
 

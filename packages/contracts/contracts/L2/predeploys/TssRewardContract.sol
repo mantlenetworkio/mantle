@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 
 import {ITssRewardContract} from  "./iTssRewardContract.sol";
 import {IBVM_GasPriceOracle} from "./iBVM_GasPriceOracle.sol";
-import { CrossDomainEnabled } from "../../libraries/bridge/CrossDomainEnabled.sol";
+import {CrossDomainEnabled} from "../../libraries/bridge/CrossDomainEnabled.sol";
 import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAddresses.sol";
 
 /* Library Imports */
@@ -17,7 +17,7 @@ import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
  * @title TssRewardContract
  * @dev Release to batch roll up tss members.
  */
-contract TssRewardContract is ITssRewardContract,CrossDomainEnabled {
+contract TssRewardContract is ITssRewardContract, CrossDomainEnabled {
     using SafeMath for uint256;
 
     mapping(uint256 => uint256) public ledger;
@@ -30,7 +30,7 @@ contract TssRewardContract is ITssRewardContract,CrossDomainEnabled {
     uint256 public latsBatchTime;
     uint256 public sendAmountPerYear;
     address public sccAddress;
-//    address public messenger;
+    //    address public messenger;
 
     // TODO delete
     uint256 public blockStartHeight;
@@ -42,14 +42,14 @@ contract TssRewardContract is ITssRewardContract,CrossDomainEnabled {
 
 
     // set call address
-    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress,address _sccAddress,address _l2CrossDomainMessenger)
-        CrossDomainEnabled(_l2CrossDomainMessenger) {
+    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress, address _sccAddress, address _l2CrossDomainMessenger)
+    CrossDomainEnabled(_l2CrossDomainMessenger) {
         deadAddress = _deadAddress;
         owner = _owner;
         sendAmountPerYear = _sendAmountPerYear;
         bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
         sccAddress = _sccAddress;
-//        messenger = _l2messenger;
+        //        messenger = _l2messenger;
     }
 
     // slither-disable-next-line locked-ether
@@ -107,43 +107,43 @@ contract TssRewardContract is ITssRewardContract,CrossDomainEnabled {
     function claimReward(uint256 _blockStartHeight, uint32 _length, uint256 _batchTime, address[] calldata _tssMembers)
     external
     virtual
-//    onlyFromDeadAddress
-    onlyFromCrossDomainAccount(sccAddress)
-    checkBalance
+        //    onlyFromDeadAddress
+        //    onlyFromCrossDomainAccount(sccAddress)
+        //    checkBalance
     {
         blockStartHeight = _blockStartHeight;
         length = _length;
         batchTime = _batchTime;
         tssMembers = _tssMembers;
-        sender  = msg.sender;
-        //        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != true) {
-        //            claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
-        //            return;
-        //        }
-        //        uint256 sendAmount = 0;
-        //        uint256 batchAmount = 0;
-        //        uint256 accu = 0;
-        //        // sendAmount
-        //        if (latsBatchTime == 0) {
-        //            latsBatchTime = _batchTime;
-        //            return;
-        //        }
-        //        batchAmount = (_batchTime - latsBatchTime) * querySendAmountPerSecond() + dust;
-        //        dust = 0;
-        //        sendAmount = batchAmount.div(_tssMembers.length);
-        //        for (uint256 j = 0; j < _tssMembers.length; j++) {
-        //            address payable addr = payable(_tssMembers[j]);
-        //            accu = accu.add(sendAmount);
-        //            addr.transfer(sendAmount);
-        //        }
-        //        uint256 reserved = batchAmount.sub(accu);
-        //        if (reserved > 0) {
-        //            dust = dust.add(reserved);
-        //        }
-        //        emit DistributeTssReward(
-        //            _batchTime,
-        //            _tssMembers
-        //        );
+        sender = msg.sender;
+        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != true) {
+            claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
+            return;
+        }
+        uint256 sendAmount = 0;
+        uint256 batchAmount = 0;
+        uint256 accu = 0;
+        // sendAmount
+        if (latsBatchTime == 0) {
+            latsBatchTime = _batchTime;
+            return;
+        }
+        batchAmount = (_batchTime - latsBatchTime) * querySendAmountPerSecond() + dust;
+        dust = 0;
+        sendAmount = batchAmount.div(_tssMembers.length);
+        for (uint256 j = 0; j < _tssMembers.length; j++) {
+            address payable addr = payable(_tssMembers[j]);
+            accu = accu.add(sendAmount);
+            addr.transfer(sendAmount);
+        }
+        uint256 reserved = batchAmount.sub(accu);
+        if (reserved > 0) {
+            dust = dust.add(reserved);
+        }
+        emit DistributeTssReward(
+            _batchTime,
+            _tssMembers
+        );
     }
 
     /**

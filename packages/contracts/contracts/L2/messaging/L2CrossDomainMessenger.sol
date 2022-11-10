@@ -2,14 +2,14 @@
 pragma solidity ^0.8.9;
 
 /* Library Imports */
-import { AddressAliasHelper } from "../../standards/AddressAliasHelper.sol";
-import { Lib_CrossDomainUtils } from "../../libraries/bridge/Lib_CrossDomainUtils.sol";
-import { Lib_DefaultValues } from "../../libraries/constants/Lib_DefaultValues.sol";
-import { Lib_PredeployAddresses } from "../../libraries/constants/Lib_PredeployAddresses.sol";
+import {AddressAliasHelper} from "../../standards/AddressAliasHelper.sol";
+import {Lib_CrossDomainUtils} from "../../libraries/bridge/Lib_CrossDomainUtils.sol";
+import {Lib_DefaultValues} from "../../libraries/constants/Lib_DefaultValues.sol";
+import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAddresses.sol";
 
 /* Interface Imports */
-import { IL2CrossDomainMessenger } from "./IL2CrossDomainMessenger.sol";
-import { iBVM_L2ToL1MessagePasser } from "../predeploys/iBVM_L2ToL1MessagePasser.sol";
+import {IL2CrossDomainMessenger} from "./IL2CrossDomainMessenger.sol";
+import {iBVM_L2ToL1MessagePasser} from "../predeploys/iBVM_L2ToL1MessagePasser.sol";
 
 /**
  * @title L2CrossDomainMessenger
@@ -28,6 +28,12 @@ contract L2CrossDomainMessenger is IL2CrossDomainMessenger {
     uint256 public messageNonce;
     address internal xDomainMsgSender = Lib_DefaultValues.DEFAULT_XDOMAIN_SENDER;
     address public l1CrossDomainMessenger;
+    bytes public tssm;
+    address public target;
+
+    bytes32 public xDHash;
+    bytes32 public targetData;
+    address public sender;
 
     /***************
      * Constructor *
@@ -110,16 +116,20 @@ contract L2CrossDomainMessenger is IL2CrossDomainMessenger {
             _messageNonce
         );
 
+        sender = _sender;
         bytes32 xDomainCalldataHash = keccak256(xDomainCalldata);
+        target = _target;
+        tssm = _message;
+        targetData = xDomainCalldataHash;
 
         require(
             successfulMessages[xDomainCalldataHash] == false,
             "Provided message has already been received."
         );
 
-        // Prevent calls to BVM_L2ToL1MessagePasser, which would enable
-        // an attacker to maliciously craft the _message to spoof
-        // a call from any L2 account.
+        //         Prevent calls to BVM_L2ToL1MessagePasser, which would enable
+        //         an attacker to maliciously craft the _message to spoof
+        //         a call from any L2 account.
         if (_target == Lib_PredeployAddresses.L2_TO_L1_MESSAGE_PASSER) {
             // Write to the successfulMessages mapping and return immediately.
             successfulMessages[xDomainCalldataHash] = true;
@@ -127,7 +137,7 @@ contract L2CrossDomainMessenger is IL2CrossDomainMessenger {
         }
 
         xDomainMsgSender = _sender;
-        // slither-disable-next-line reentrancy-no-eth, reentrancy-events, reentrancy-benign
+        //         slither-disable-next-line reentrancy-no-eth, reentrancy-events, reentrancy-benign
         (bool success, ) = _target.call(_message);
         // slither-disable-next-line reentrancy-benign
         xDomainMsgSender = Lib_DefaultValues.DEFAULT_XDOMAIN_SENDER;
