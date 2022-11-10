@@ -2347,9 +2347,9 @@
     write-file-atomic "^3.0.3"
 
 "@mantlenetworkio/sdk@2.0.3":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@mantlenetworkio/sdk/-/sdk-2.0.1.tgz#517c545793af1f3de90e5140bc352b451d3d79bf"
-  integrity sha512-UoZ3LTWVS+FAU7FFk1+RE1W0Es4JnZE8elY4SNIBnwVl2OKILF8cf5GqZ34lMJToN0lrNHs24ZkZbHkcZWtvfA==
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@mantlenetworkio/sdk/-/sdk-2.0.3.tgz#353b43eb353b8425a3b2739e4b20c5086e913d1a"
+  integrity sha512-9dclQ17w8Vhg6ihWXIGzFF61c4NELYRJ7U79ssahHJ6yg9DN6IYcZsuDklX1hJ7u7EJFNrPIP218PzufmCjwNQ==
   dependencies:
     "@mantlenetworkio/contracts" "2.0.0"
     "@mantlenetworkio/core-utils" "0.0.1"
