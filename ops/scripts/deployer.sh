@@ -73,12 +73,7 @@ mv addresses.json ./genesis
 cp ./genesis/$CONTRACTS_TARGET_NETWORK.json ./genesis/state-dump.latest.json
 
 # init balance
-if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
-  jq -n 'reduce inputs as $item ({}; . *= $item)' ./genesis/state-dump.latest.json ./balance.json > genesis2.json
-else [ $CONTRACTS_TARGET_NETWORK == "goerli-qa" ]
-  jq -n 'reduce inputs as $item ({}; . *= $item)' ./genesis/state-dump.latest.json ./balance.json > genesis2.json
-fi
-
+jq -n 'reduce inputs as $item ({}; . *= $item)' ./genesis/state-dump.latest.json ./balance.json > genesis2.json
 
 mv ./genesis/state-dump.latest.json ./genesis/state-dump1.latest.json
 mv ./genesis2.json ./genesis/state-dump.latest.json
