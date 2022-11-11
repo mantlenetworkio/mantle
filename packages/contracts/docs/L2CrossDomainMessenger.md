@@ -103,23 +103,6 @@ Sends a cross domain message to the target messenger.
 | _message | bytes | Message to send to the target.
 | _gasLimit | uint32 | Gas limit for the provided message.
 
-### sender
-
-```solidity
-function sender() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined
-
 ### sentMessages
 
 ```solidity
@@ -163,74 +146,6 @@ function successfulMessages(bytes32) external view returns (bool)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined
-
-### target
-
-```solidity
-function target() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined
-
-### targetData
-
-```solidity
-function targetData() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined
-
-### tssm
-
-```solidity
-function tssm() external view returns (bytes)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined
-
-### xDHash
-
-```solidity
-function xDHash() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined
 
 ### xDomainMessageSender
 

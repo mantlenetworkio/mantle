@@ -111,7 +111,6 @@ contract L2CrossDomainMessenger is IL2CrossDomainMessenger {
         );
 
         bytes32 xDomainCalldataHash = keccak256(xDomainCalldata);
-        targetData = xDomainCalldataHash;
 
         require(
             successfulMessages[xDomainCalldataHash] == false,
