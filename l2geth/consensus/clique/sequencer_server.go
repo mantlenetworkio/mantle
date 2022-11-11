@@ -2,6 +2,7 @@ package clique
 
 import (
 	"bytes"
+	"fmt"
 	"math"
 	"math/big"
 	"sync"
@@ -36,17 +37,18 @@ type SequencerServer struct {
 
 func NewSequencerServer(epoch time.Duration, clique *Clique, mux *event.TypeMux, check func() bool) *SequencerServer {
 	log.Info("Create Sequencer Server")
+	sequencer.Initialize()
 	return &SequencerServer{
-		ticker: time.NewTicker(epoch),
+		ticker: time.NewTicker(epoch * time.Second),
 		engine: clique,
 		mux:    mux,
 		check:  check,
 	}
 }
 
-func (seqS *SequencerServer) SetWallet(wallet accounts.Wallet, address accounts.Account) {
+func (seqS *SequencerServer) SetWallet(wallet accounts.Wallet, acc accounts.Account) {
 	seqS.wallet = wallet
-	seqS.signAccount = address
+	seqS.signAccount = acc
 }
 
 func (seqS *SequencerServer) GetScheduler() (common.Address, error) {
@@ -58,7 +60,6 @@ func (seqS *SequencerServer) GetScheduler() (common.Address, error) {
 }
 
 func (seqS *SequencerServer) Start() {
-	log.Info("Sequencer Server start \n\n\n")
 	// check
 	if seqS.check == nil {
 		panic("Sequencer server need method to check pre-preparation status")
@@ -90,21 +91,26 @@ func (seqS *SequencerServer) readLoop() {
 			pros := proUpdate.Producers
 			// get changes
 			changes := CompareSequencerSet(pros.SequencerSet.Sequencers, seqSet)
-			log.Info("Get sequencer set success, have changes: ", len(changes))
+			log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
 
+			// todo : should it post every times? or post only have changes
 			// update sequencer set and engine
-			pros.SequencerSet.UpdateWithChangeSet(changes)
-			pros.increment()
-			signature, err := seqS.wallet.SignData(seqS.signAccount, accounts.MimetypeClique, pros.serialize())
+			err = pros.SequencerSet.UpdateWithChangeSet(changes)
 			if err != nil {
-				log.Error("Sign data error, err : ", err, "Account address :", seqS.signAccount.Address)
+				log.Error(fmt.Sprintf("update sequencer set failed, err :%v ", err))
+				continue
+			}
+			pros.increment()
+			signature, err := seqS.engine.signFn(seqS.signAccount, accounts.MimetypeClique, pros.serialize())
+			if err != nil {
+				log.Error(fmt.Sprintf("Sign data error, err : %v ,Account address : %v ", err, seqS.signAccount.Address.String()))
 				continue
 			}
 			seqS.engine.producers = pros
 			seqS.engine.signature = signature
 			// Broadcast the producer and announce event by post event
 			seqS.mux.Post(
-				&ProducersUpdateEvent{
+				ProducersUpdateEvent{
 					&ProducerUpdate{
 						Producers: pros,
 						Signature: signature,
@@ -124,8 +130,9 @@ func CompareSequencerSet(old []*Sequencer, newSeq sequencer.SequencerSequencerIn
 	for i, v := range newSeq {
 		changed := true
 		for _, seq := range old {
-			power := v.Amount.Div(v.Amount, big.NewInt(scale)).Int64()
-			if bytes.Equal(seq.Address.Bytes(), v.MintAddress.Bytes()) && power == seq.Power {
+			power := big.NewInt(v.Amount.Int64())
+			power = power.Div(power, big.NewInt(scale))
+			if bytes.Equal(seq.Address.Bytes(), v.MintAddress.Bytes()) && power.Int64() == seq.Power {
 				changed = false
 				break
 			}

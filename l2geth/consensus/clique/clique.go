@@ -493,10 +493,6 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 		return err
 	}
 	log.Info(fmt.Sprintf("signer is : %v", signer.String()))
-	for k, _ := range snap.Signers {
-		log.Info(fmt.Sprintf("has signer: %v", k))
-	}
-
 	if _, ok := snap.Signers[signer]; !ok {
 		return errUnauthorizedSigner
 	}
@@ -651,7 +647,6 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 		return err
 	}
 
-	log.Info(fmt.Sprintf("here0 signer is : %v", signer.String()))
 	for k, _ := range snap.Signers {
 		log.Info(fmt.Sprintf("has signer: %v", k.String()))
 	}

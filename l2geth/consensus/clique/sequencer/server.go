@@ -23,8 +23,8 @@ var rpcUrl string
 var seqAddr string
 var seqContract *binding.Sequencer
 
-// init will get Sequencer contract address and rpc url from os env, then init seqContract.
-func init() {
+// Initialize will get Sequencer contract address and rpc url from os env, then init seqContract.
+func Initialize() {
 	// get params from os env
 	seqAddr = os.Getenv(ENV_SEQUENCER_CONTRACT_ADDRESS)
 	rpcUrl = os.Getenv(ENV_SEQUENCER_L1_RPC)

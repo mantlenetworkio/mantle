@@ -89,7 +89,6 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 }
 
 func (p *peer) AsyncSendProducers(prs *clique.ProducerUpdate) {
-	// todo add producers to peer: check? index
 	select {
 	case p.queuedPrs <- prs:
 		p.knowPrs.Add(prs.Producers.Index)

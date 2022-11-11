@@ -486,7 +486,7 @@ func (s *Ethereum) StartMining(threads int) error {
 		var account accounts.Account
 		if clique, ok := s.engine.(*clique.Clique); ok {
 			account = accounts.Account{Address: eb}
-			wallet, err := s.accountManager.Find(account)
+			wallet, err = s.accountManager.Find(account)
 			if wallet == nil || err != nil {
 				log.Error("Etherbase account unavailable locally", "err", err)
 				return fmt.Errorf("signer missing: %v", err)
