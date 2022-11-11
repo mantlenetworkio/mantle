@@ -10,6 +10,23 @@
 
 ## Methods
 
+### IsBurning
+
+```solidity
+function IsBurning() external view returns (bool)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined
+
 ### decimals
 
 ```solidity
@@ -87,6 +104,23 @@ Computes the amount of L1 gas used for a transaction The overhead represents the
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | Amount of L1 gas used for a transaction
+
+### isBurning
+
+```solidity
+function isBurning() external view returns (bool)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined
 
 ### l1BaseFee
 
@@ -199,6 +233,22 @@ Allows the owner to modify the l2 gas price.
 |---|---|---|
 | _gasPrice | uint256 | New l2 gas price.
 
+### setIsBurning
+
+```solidity
+function setIsBurning(bool _isBurning) external nonpayable
+```
+
+Allows the owner to modify the isBurning.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _isBurning | bool | New isBurning
+
 ### setL1BaseFee
 
 ```solidity
@@ -298,6 +348,22 @@ event GasPriceUpdated(uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0  | uint256 | undefined |
+
+### IsBurningUpdated
+
+```solidity
+event IsBurningUpdated(bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0  | bool | undefined |
 
 ### L1BaseFeeUpdated
 

@@ -145,6 +145,25 @@ Verifies a batch inclusion proof.
 
 ## Events
 
+### DistributeTssReward
+
+```solidity
+event DistributeTssReward(uint256 indexed _startBlockNumber, uint256 _length, uint256 indexed _batchTime, address[] _tssMembers)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _startBlockNumber `indexed` | uint256 | undefined |
+| _length  | uint256 | undefined |
+| _batchTime `indexed` | uint256 | undefined |
+| _tssMembers  | address[] | undefined |
+
 ### StateBatchAppended
 
 ```solidity

@@ -18,6 +18,9 @@ package core
 
 import (
 	"errors"
+	"github.com/mantlenetworkio/mantle/l2geth/contracts/gasfee"
+	"github.com/mantlenetworkio/mantle/l2geth/contracts/tssreward"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"math"
 	"math/big"
 
@@ -273,9 +276,34 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		// The L2 Fee is the same as the fee that is charged in the normal geth
 		// codepath. Add the L1 fee to the L2 fee for the total fee that is sent
 		// to the sequencer.
-		l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
-		fee := new(big.Int).Add(st.l1Fee, l2Fee)
-		st.state.AddBalance(evm.Coinbase, fee)
+		IsBurning := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.IsBurningSlot).Big()
+		if IsBurning.Cmp(big.NewInt(1)) == 0 {
+			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
+			fee := new(big.Int).Add(st.l1Fee, l2Fee)
+			st.state.AddBalance(evm.Coinbase, fee)
+			// burning
+			data, err := gasfee.PacketData()
+			if err != nil {
+				return nil, 0, false, err
+			}
+			deadAddress := vm.AccountRef(dump.DeadAddress)
+			evm.Call(deadAddress, dump.BvmFeeWallet, data, 210000, big.NewInt(0))
+		} else {
+			st.state.AddBalance(dump.BvmFeeWallet, st.l1Fee)
+			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
+			st.state.AddBalance(dump.TssRewardAddress, l2Fee)
+			data, err := tssreward.PacketData(evm.BlockNumber, l2Fee)
+			if err != nil {
+				return nil, 0, false, err
+			}
+			deadAddress := vm.AccountRef(dump.DeadAddress)
+			log.Info("update reward ........")
+			_, _, err = evm.Call(deadAddress, dump.TssRewardAddress, data, 210000, big.NewInt(0))
+			if err != nil {
+				log.Error("update reward in error: ", err)
+				return nil, 0, false, err
+			}
+		}
 	} else {
 		st.state.AddBalance(evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
 	}

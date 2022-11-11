@@ -13,12 +13,17 @@ const deployFn: DeployFunction = async (hre) => {
     hre,
     names.unmanaged.Lib_AddressManager
   )
+  const Proxy__BVM_L1CrossDomainMessenger = await getContractFromArtifact(
+    hre,
+    names.managed.contracts.Proxy__BVM_L1CrossDomainMessenger
+  )
 
   await deployAndVerifyAndThen({
     hre,
     name: names.managed.contracts.StateCommitmentChain,
     args: [
       Lib_AddressManager.address,
+      Proxy__BVM_L1CrossDomainMessenger.address,
       hre.deployConfig.sccFaultProofWindowSeconds,
       hre.deployConfig.sccSequencerPublishWindowSeconds,
     ],
