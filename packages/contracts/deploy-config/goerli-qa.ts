@@ -11,7 +11,7 @@ const config = {
   bvmProposerAddress: process.env.BVM_PROPOSER_ADDRESS || '0x4e1614113AF6a1a41cA85d1a5Fe41De105BD65fA',
   //default bvmBlockSignerAddress
   bvmBlockSignerAddress: process.env.BVM_BLOCK_SIGNER_ADDRESS || '0x00000398232E2064F896018496b4b44b3D62751F',
-  bvmFeeWalletAddress: process.env.BVM_FEE_WALLET_ADDRESS || '0x0000000000000000000000000000000000000000',
+  bvmFeeWalletAddress: process.env.BVM_FEE_WALLET_ADDRESS || '0xeEbceB07eA7D2339895Dd492B3B5960641302830',
   bvmAddressManagerOwner: process.env.BVM_ADDRESS_MANAGER_OWNER || '0x2B1D033ddCc36cd6f4DE10A9a9C2Bc329a443bEB',
   bvmGasPriceOracleOwner: process.env.BVM_GAS_PRICE_ORACLE_OWNER || '0xeEbceB07eA7D2339895Dd492B3B5960641302830',
   l1BitAddress: process.env.L1_BIT_ADDRESS || '0xC40C655a91ef15c8eAd818B840CFC08C755D2C0F',
