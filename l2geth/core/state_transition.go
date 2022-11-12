@@ -130,7 +130,8 @@ func IntrinsicGas(data []byte, contractCreation, isHomestead bool, isEIP2028 boo
 func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition {
 	l1Fee := new(big.Int)
 	if rcfg.UsingBVM {
-		if msg.GasPrice().Cmp(common.Big0) != 0 {
+		var zeroAddress common.Address
+		if msg.QueueOrigin() == types.QueueOriginSequencer && msg.From() != zeroAddress {
 			// Compute the L1 fee before the state transition
 			// so it only has to be read from state one time.
 			l1Fee, _ = fees.CalculateL1MsgFee(msg, evm.StateDB, nil)
