@@ -1,6 +1,6 @@
 {
   "name": "@mantlenetworkio/contracts",
-  "version": "2.2.0",
+  "version": "2.1.0",
   "description": "[Mantle] L1 and L2 smart contracts for Mantle",
   "main": "dist/index",
   "types": "dist/index",
