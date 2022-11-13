@@ -9,6 +9,37 @@
         {
           "indexed": true,
           "internalType": "uint256",
+          "name": "_startBlockNumber",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "_length",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "_batchTime",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address[]",
+          "name": "_tssMembers",
+          "type": "address[]"
+        }
+      ],
+      "name": "DistributeTssReward",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
           "name": "_batchIndex",
           "type": "uint256"
         },
@@ -29,6 +60,12 @@
           "internalType": "uint256",
           "name": "_prevTotalElements",
           "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "_signature",
+          "type": "bytes"
         },
         {
           "indexed": false,
@@ -70,6 +107,11 @@
           "internalType": "uint256",
           "name": "_shouldStartAtElement",
           "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_signature",
+          "type": "bytes"
         }
       ],
       "name": "appendStateBatch",
@@ -100,6 +142,11 @@
               "internalType": "uint256",
               "name": "prevTotalElements",
               "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signature",
+              "type": "bytes"
             },
             {
               "internalType": "bytes",
@@ -182,6 +229,11 @@
             },
             {
               "internalType": "bytes",
+              "name": "signature",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
               "name": "extraData",
               "type": "bytes"
             }
@@ -230,6 +282,11 @@
               "internalType": "uint256",
               "name": "prevTotalElements",
               "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signature",
+              "type": "bytes"
             },
             {
               "internalType": "bytes",
