@@ -2346,12 +2346,12 @@
     npmlog "^4.1.2"
     write-file-atomic "^3.0.3"
 
-"@mantlenetworkio/sdk@2.0.3":
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/@mantlenetworkio/sdk/-/sdk-2.0.3.tgz#353b43eb353b8425a3b2739e4b20c5086e913d1a"
-  integrity sha512-9dclQ17w8Vhg6ihWXIGzFF61c4NELYRJ7U79ssahHJ6yg9DN6IYcZsuDklX1hJ7u7EJFNrPIP218PzufmCjwNQ==
+"@mantlenetworkio/sdk@2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@mantlenetworkio/sdk/-/sdk-2.1.1.tgz#8a04a62b17e1dc3c68211be189767d04076e10ac"
+  integrity sha512-hw+deASEW+SUNEeQ4m5aBo/lnUlWXpGpx3uScCQQwLqIDvIzcbbxaw2Sfz244XtrpUQ3/Vhz/14EcIhvjoBMkw==
   dependencies:
-    "@mantlenetworkio/contracts" "2.0.0"
+    "@mantlenetworkio/contracts" "2.1.0"
     "@mantlenetworkio/core-utils" "0.0.1"
     lodash "^4.17.21"
     merkletreejs "^0.2.27"
