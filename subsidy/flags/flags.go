@@ -12,21 +12,28 @@ var (
 	QueryerHttpUrlFlag = cli.StringFlag{
 		Name:   "queryer-http-url",
 		Value:  "http://127.0.0.1:9545",
-		Usage:  "L1 HTTP Endpoint",
+		Usage:  "QUERYER HTTP Endpoint",
 		EnvVar: "SUBSIDY_QUERYER_HTTP_URL",
 	}
 
 	PayerHttpUrlFlag = cli.StringFlag{
 		Name:   "payer-http-url",
 		Value:  "http://127.0.0.1:9545",
-		Usage:  "L1 HTTP Endpoint",
+		Usage:  "PAYER HTTP Endpoint",
 		EnvVar: "SUBSIDY_PAYER_HTTP_URL",
+	}
+
+	L2HttpUrlFlag = cli.StringFlag{
+		Name:   "l2-http-url",
+		Value:  "http://127.0.0.1:8545",
+		Usage:  "PAYER HTTP Endpoint",
+		EnvVar: "SUBSIDY_L2_HTTP_URL",
 	}
 
 	SCCAddressFlag = cli.StringFlag{
 		Name:   "scc-address",
 		Usage:  "Address of SCC_CONTRACT",
-		Value:  "0x56Fab8B6bceB262fC6E17cA142d1b3e611aE076F",
+		Value:  "0xd9e2F450525079e1e29fB23Bc7Caca6F61f8fD4a",
 		EnvVar: "SUBSIDY_SCC_ADDRESS",
 	}
 
@@ -40,7 +47,7 @@ var (
 	CTCAddressFlag = cli.StringFlag{
 		Name:   "ctc-address",
 		Usage:  "Address of CTC_CONTRACT",
-		Value:  "0x2E816dC5A21868f160bDad407a740a580245251C",
+		Value:  "0x0090171f848B2aa86918E5Ef2406Ab3d424fdd83",
 		EnvVar: "SUBSIDY_CTC_ADDRESS",
 	}
 

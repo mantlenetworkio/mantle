@@ -13,7 +13,6 @@ import (
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
 	"github.com/mantlenetworkio/mantle/subsidy/cache-file"
 	"github.com/mantlenetworkio/mantle/subsidy/types"
 )
@@ -41,14 +40,6 @@ func NewPayer(cfg *Config) *Payer {
 	payClient, err := ethclient.Dial(cfg.payerHttpUrl)
 	if err != nil {
 		panic(err)
-	}
-	gpo, err := bindings.NewBVMGasPriceOracleCaller(cfg.gpoAddress, payClient)
-	isBurning, err := gpo.IsBurning(nil)
-	if err != nil {
-		panic(err)
-	}
-	if !isBurning {
-		panic(fmt.Errorf("isBurning is false,no need to pay for rollup"))
 	}
 	state := cache_file.NewPayerStateFileWriter(cfg.HomeDir, cfg.CacheDir, cfg.FileName)
 	return &Payer{
@@ -85,10 +76,9 @@ func (ob *Payer) PayRollupCost() error {
 	if err != nil {
 		return err
 	}
-
 	toBlock := tip.Number.Uint64()
 	if fromBlock > toBlock {
-		fmt.Printf("to:%v less than from:%v\n", toBlock, fromBlock)
+		fmt.Printf("to:%v less than from:%v,no new block\n", toBlock, fromBlock)
 		return nil
 	}
 	if toBlock-fromBlock > 1000 {

@@ -16,6 +16,7 @@ import (
 type Config struct {
 	queryerHttpUrl            string
 	payerHttpUrl              string
+	l2HttpUrl                 string
 	SCCAddress                common.Address
 	SCCTopic                  string
 	CTCAddress                common.Address
@@ -52,6 +53,7 @@ func NewConfig(ctx *cli.Context) *Config {
 	ctcAddr := ctx.GlobalString(flags.CTCAddressFlag.Name)
 	cfg.CTCAddress = common.HexToAddress(ctcAddr)
 	cfg.CTCTopic = ctx.GlobalString(flags.CTCTopicFlag.Name)
+	cfg.l2HttpUrl = ctx.GlobalString(flags.L2HttpUrlFlag.Name)
 	gpoAddr := ctx.GlobalString(flags.GPOAddressFlag.Name)
 	cfg.gpoAddress = common.HexToAddress(gpoAddr)
 	cfg.l1QueryEpochLengthSeconds = ctx.GlobalUint64(flags.L1QueryEpochLengthSecondsFlag.Name)
