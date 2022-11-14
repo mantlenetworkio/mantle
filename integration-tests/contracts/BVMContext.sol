@@ -21,7 +21,7 @@ copies or substantial portions of the Software.
 pragma solidity ^0.8.9;
 
 // Can't do this until the package is published.
-//import { iBVM_L1BlockNumber } from "@mantlenetworkio/contracts/iBVM_L1BlockNumber";
+//import { iBVM_L1BlockNumber } from "@mantleio/contracts/iBVM_L1BlockNumber";
 
 interface iBVM_L1BlockNumber {
     function getL1BlockNumber() external view returns (uint256);

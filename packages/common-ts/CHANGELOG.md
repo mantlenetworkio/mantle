@@ -1,2 +1,2 @@
-# @mantlenetworkio/common-ts
+# @mantleio/common-ts
 

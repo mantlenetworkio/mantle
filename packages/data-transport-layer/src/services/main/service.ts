@@ -1,5 +1,5 @@
 /* Imports: External */
-import { BaseService, Metrics } from '@mantlenetworkio/common-ts'
+import { BaseService, Metrics } from '@mantleio/common-ts'
 import { LevelUp } from 'levelup'
 import level from 'level'
 import { Counter } from 'prom-client'

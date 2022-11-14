@@ -1,7 +1,7 @@
 /* Imports: External */
-import { BaseService, Metrics } from '@mantlenetworkio/common-ts'
+import { BaseService, Metrics } from '@mantleio/common-ts'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
-import { getChainId, sleep, toRpcHexString } from '@mantlenetworkio/core-utils'
+import { getChainId, sleep, toRpcHexString } from '@mantleio/core-utils'
 import { BigNumber } from 'ethers'
 import { LevelUp } from 'levelup'
 import axios from 'axios'

@@ -1,6 +1,6 @@
 import { Provider } from '@ethersproject/abstract-provider'
-import { expectApprox, hashCrossDomainMessage } from '@mantlenetworkio/core-utils'
-import { predeploys } from '@mantlenetworkio/contracts'
+import { expectApprox, hashCrossDomainMessage } from '@mantleio/core-utils'
+import { predeploys } from '@mantleio/contracts'
 import { Contract } from 'ethers'
 import { ethers } from 'hardhat'
 

@@ -1,7 +1,7 @@
 import {Contract, ethers} from 'ethers'
 import {Provider} from '@ethersproject/abstract-provider'
 import {Signer} from '@ethersproject/abstract-signer'
-import {awaitCondition, getChainId, sleep} from '@mantlenetworkio/core-utils'
+import {awaitCondition, getChainId, sleep} from '@mantleio/core-utils'
 import {HttpNetworkConfig} from 'hardhat/types'
 
 /**

@@ -1,5 +1,5 @@
 /* Imports: External */
-import { expectApprox, getChainId, sleep } from '@mantlenetworkio/core-utils'
+import { expectApprox, getChainId, sleep } from '@mantleio/core-utils'
 import { Wallet, BigNumber, Contract, ContractFactory, constants } from 'ethers'
 import { serialize } from '@ethersproject/transactions'
 import { ethers } from 'hardhat'

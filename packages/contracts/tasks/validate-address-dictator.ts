@@ -3,7 +3,7 @@
 import { ethers } from 'ethers'
 import { task } from 'hardhat/config'
 import * as types from 'hardhat/internal/core/params/argumentTypes'
-import { hexStringEquals } from '@mantlenetworkio/core-utils'
+import { hexStringEquals } from '@mantleio/core-utils'
 
 import { getContractFactory, getContractDefinition } from '../src/contract-defs'
 import { names } from '../src/address-names'

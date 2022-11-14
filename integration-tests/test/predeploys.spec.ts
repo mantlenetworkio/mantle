@@ -1,6 +1,6 @@
 /* Imports: External */
 import { ethers } from 'ethers'
-import { predeploys, getContractInterface } from '@mantlenetworkio/contracts'
+import { predeploys, getContractInterface } from '@mantleio/contracts'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'
