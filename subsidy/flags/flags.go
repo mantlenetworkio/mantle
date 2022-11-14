@@ -18,27 +18,27 @@ var (
 	SCCAddressFlag = cli.StringFlag{
 		Name:   "scc-address",
 		Usage:  "Address of SCC_CONTRACT",
-		Value:  "0xc039b3B46814D8388e5205D37Dd0D154D806F1f4",
+		Value:  "0x56Fab8B6bceB262fC6E17cA142d1b3e611aE076F",
 		EnvVar: "SUBSIDY_SCC_ADDRESS",
 	}
 
 	SCCTopicFlag = cli.StringFlag{
 		Name:   "scc-topic",
 		Usage:  "Address of SCC_CONTRACT",
-		Value:  "StateBatchAppended(uint256,bytes32,uint256,uint256,bytes)",
+		Value:  "StateBatchAppended(uint256,bytes32,uint256,uint256,bytes,bytes)",
 		EnvVar: "SUBSIDY_SCC_TOPIC",
 	}
 
 	CTCAddressFlag = cli.StringFlag{
 		Name:   "ctc-address",
 		Usage:  "Address of CTC_CONTRACT",
-		Value:  "0xcA8b49076D1A8039599e24979abf819af784c27a",
+		Value:  "0x2E816dC5A21868f160bDad407a740a580245251C",
 		EnvVar: "SUBSIDY_CTC_ADDRESS",
 	}
 
 	CTCTopicFlag = cli.StringFlag{
 		Name:   "ctc-topic",
-		Usage:  "Address of CTC_CONTRACT",
+		Usage:  "topic of CTC_CONTRACT",
 		Value:  "SequencerBatchAppended(uint256,uint256,uint256)",
 		EnvVar: "SUBSIDY_CTC_TOPIC",
 	}

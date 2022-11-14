@@ -14,7 +14,7 @@ func TestPayer(t *testing.T) {
 	key, _ := crypto.HexToECDSA("ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
 	UserDir, _ := os.UserHomeDir()
 	p := NewPayer(&Config{
-		ethereumHttpUrl:           "http://localhost:8545",
+		ethereumHttpUrl:           "https://rpc.ankr.com/eth_goerli",
 		SCCAddress:                common.HexToAddress(""),
 		SCCTopic:                  "",
 		CTCAddress:                common.HexToAddress(""),
@@ -47,3 +47,5 @@ func TestPayer(t *testing.T) {
 	}
 	fmt.Println("tx:", tx)
 }
+
+func

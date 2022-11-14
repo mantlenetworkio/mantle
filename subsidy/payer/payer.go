@@ -33,7 +33,7 @@ type Payer struct {
 }
 
 func NewPayer(cfg *Config) *Payer {
-	queryClient, err := ethclient.Dial(cfg.ethereumHttpUrl)
+	queryClient, err := ethclient.Dial("https://rpc.ankr.com/eth_goerli")
 	if err != nil {
 		panic(err)
 	}
@@ -51,7 +51,7 @@ func NewPayer(cfg *Config) *Payer {
 		payerStateFileWriter:      state,
 		sccTopic:                  cfg.SCCTopic,
 		sccAddrStr:                cfg.SCCAddress.Hex(),
-		ctcTopic:                  cfg.SCCTopic,
+		ctcTopic:                  cfg.CTCTopic,
 		ctcAddrStr:                cfg.CTCAddress.Hex(),
 		waitForReceipt:            cfg.waitForReceipt,
 		stop:                      make(chan struct{}),
@@ -76,52 +76,58 @@ func (ob *Payer) PayRollupCost() error {
 	if err != nil {
 		return err
 	}
+
 	toBlock := tip.Number.Uint64()
-	if fromBlock <= toBlock {
-		payerState := types.PayerState{
-			LastPayTime: time.Now(),
-			EndBlock:    toBlock,
-			//PayTxHash:   hash,
-		}
-		if err := ob.payerStateFileWriter.Write(&payerState); err != nil {
-			panic(err)
-		}
-		fmt.Println("fromBlock <= toBlock")
-		fmt.Println("fromBlock:", fromBlock)
-		fmt.Println("endBlock:", toBlock)
+	if fromBlock > toBlock {
+		fmt.Printf("to:%v less than from:%v\n", toBlock, fromBlock)
 		return nil
 	}
+	//if fromBlock <= toBlock {
+	//	payerState := types.PayerState{
+	//		LastPayTime: time.Now(),
+	//		EndBlock:    toBlock,
+	//	}
+	//	if err := ob.payerStateFileWriter.Write(&payerState); err != nil {
+	//		panic(err)
+	//	}
+	//	return nil
+	//}
 	sccAddress := common.HexToAddress(ob.sccAddrStr)
 	sccLogs, err := ob.getLogs(sccAddress, ob.sccTopic, fromBlock, toBlock)
 	if err != nil {
 		return err
 	}
-	totalCost := big.NewInt(0)
+
+	totalFee := big.NewInt(0)
 	for _, l := range sccLogs {
-		tx, err := ob.queryClient.TransactionInBlock(context.Background(), l.BlockHash, l.TxIndex)
+		tx, _, err := ob.queryClient.TransactionByHash(context.Background(), l.TxHash)
 		if err != nil {
 			return err
 		}
-		totalCost = totalCost.Add(totalCost, tx.Cost())
+		fee := tx.Cost().Mul(tx.Cost(), tx.GasPrice())
+		totalFee = totalFee.Add(totalFee, fee)
 	}
-	ctcAddress := common.HexToAddress(ob.sccAddrStr)
+
+	ctcAddress := common.HexToAddress(ob.ctcAddrStr)
 	ctcLogs, err := ob.getLogs(ctcAddress, ob.ctcTopic, fromBlock, toBlock)
 	for _, l := range ctcLogs {
-		tx, err := ob.queryClient.TransactionInBlock(context.Background(), l.BlockHash, l.TxIndex)
+		tx, _, err := ob.queryClient.TransactionByHash(context.Background(), l.TxHash)
 		if err != nil {
 			return err
 		}
-		totalCost = totalCost.Add(totalCost, tx.Cost())
+		fee := tx.Cost().Mul(tx.Cost(), tx.GasPrice())
+		totalFee = totalFee.Add(totalFee, fee)
 	}
-	fmt.Println("cost", totalCost)
-	if totalCost.Cmp(big.NewInt(0)) == 1 {
-		fmt.Println("total cost = 0 ")
-		return nil
+	var hash string
+	if totalFee.Cmp(big.NewInt(0)) == 0 {
+		log.Info(fmt.Sprintf("block height form %v to %v totalFee is zero", fromBlock, toBlock))
+	} else {
+		hash, err = ob.Transfer(totalFee)
+		if err != nil {
+			return err
+		}
 	}
-	hash, err := ob.Transfer(totalCost)
-	if err != nil {
-		return err
-	}
+	log.Info(fmt.Sprintf("block height form %v to %v,amount:%v,transfer hash:%v", fromBlock, toBlock, totalFee, hash))
 	payerState := types.PayerState{
 		LastPayTime: time.Now(),
 		EndBlock:    toBlock,
@@ -159,11 +165,13 @@ func (ob *Payer) Transfer(amount *big.Int) (string, error) {
 	senderAddr := ethcrypto.PubkeyToAddress(ob.config.privateKey.PublicKey)
 	nonce, err := ob.payClient.PendingNonceAt(context.Background(), senderAddr)
 	if err != nil {
+		log.Error("PendingNonceAt error:", err)
 		return "", err
 	}
 	gasLimit := uint64(21000) // in units
 	gasPrice, err := ob.payClient.SuggestGasPrice(context.Background())
 	if err != nil {
+		log.Error("SuggestGasPrice error:", err)
 		return "", err
 	}
 	baseTx := &ethtypes.LegacyTx{
@@ -177,16 +185,19 @@ func (ob *Payer) Transfer(amount *big.Int) (string, error) {
 	tx := ethtypes.NewTx(baseTx)
 	chainID, err := ob.payClient.NetworkID(context.Background())
 	if err != nil {
+		log.Error("payClient.NetworkID error:", err)
 		return "", err
 	}
 
 	signedTx, err := ethtypes.SignTx(tx, ethtypes.NewEIP155Signer(chainID), ob.config.privateKey)
 	if err != nil {
+		log.Error("ethtypes.SignTx error:", err)
 		return "", err
 	}
 
 	err = ob.payClient.SendTransaction(context.Background(), signedTx)
 	if err != nil {
+		log.Error("SendTransaction error:", err)
 		return "", err
 	}
 

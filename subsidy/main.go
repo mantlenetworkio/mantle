@@ -27,7 +27,6 @@ func main() {
 
 	app.Version = GitVersion + "-" + params.VersionWithCommit(GitCommit, GitDate)
 	app.Name = "subsidize"
-	// TODO
 	app.Usage = "subsidize Submitter"
 	app.Description = "Configure with a private key and an Mantle HTTP endpoint " +
 		"to send transactions that transfer Bit to address."
