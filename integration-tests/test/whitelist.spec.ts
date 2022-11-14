@@ -1,7 +1,7 @@
 /* Imports: External */
 import { ContractFactory } from 'ethers'
 import { ethers } from 'hardhat'
-import { predeploys } from '@mantlenetworkio/contracts'
+import { predeploys } from '@mantleio/contracts'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'

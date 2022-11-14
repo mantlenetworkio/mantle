@@ -1,4 +1,4 @@
-import { SequencerBatch, BatchType } from '@mantlenetworkio/core-utils'
+import { SequencerBatch, BatchType } from '@mantleio/core-utils'
 
 import { expect } from './shared/setup'
 import { MantleEnv } from './shared/env'

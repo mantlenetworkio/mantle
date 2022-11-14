@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat'
 import { Contract, BigNumber } from 'ethers'
 import { MerkleTree } from 'merkletreejs'
-import { fromHexString, toHexString } from '@mantlenetworkio/core-utils'
+import { fromHexString, toHexString } from '@mantleio/core-utils'
 import { smock, FakeContract } from '@defi-wonderland/smock'
 
 import { expect } from '../../../setup'

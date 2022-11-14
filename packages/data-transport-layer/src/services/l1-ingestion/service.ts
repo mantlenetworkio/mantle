@@ -1,7 +1,7 @@
 /* Imports: External */
-import { fromHexString, sleep } from '@mantlenetworkio/core-utils'
-import { BaseService, Metrics } from '@mantlenetworkio/common-ts'
-import { TypedEvent } from '@mantlenetworkio/contracts/dist/types/common'
+import { fromHexString, sleep } from '@mantleio/core-utils'
+import { BaseService, Metrics } from '@mantleio/common-ts'
+import { TypedEvent } from '@mantleio/contracts/dist/types/common'
 import { BaseProvider, StaticJsonRpcProvider } from '@ethersproject/providers'
 import { LevelUp } from 'levelup'
 import { constants } from 'ethers'

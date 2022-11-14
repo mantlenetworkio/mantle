@@ -1,1 +1,1 @@
-# @mantlenetworkio/core-utils
+# @mantleio/core-utils

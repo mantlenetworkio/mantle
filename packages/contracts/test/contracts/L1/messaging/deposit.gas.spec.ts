@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat'
 import { Contract } from 'ethers'
 import { MockContract, smock } from '@defi-wonderland/smock'
-import { expectApprox } from '@mantlenetworkio/core-utils'
+import { expectApprox } from '@mantleio/core-utils'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
 import {

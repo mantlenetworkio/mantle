@@ -1,7 +1,7 @@
 {
   "private": true,
-  "name": "@mantlenetworkio/data-transport-layer",
-  "version": "0.3.0",
+  "name": "@mantleio/data-transport-layer",
+  "version": "0.1.0",
   "description": "[Mantle] Service for shuttling data from L1 into L2",
   "main": "dist/index",
   "types": "dist/index",
@@ -36,9 +36,9 @@
     "url": "git+https://github.com/mantlenetworkio/mantle.git"
   },
   "dependencies": {
-    "@mantlenetworkio/common-ts": "0.0.1",
-    "@mantlenetworkio/contracts": "2.1.0",
-    "@mantlenetworkio/core-utils": "0.0.1",
+    "@mantleio/common-ts": "0.1.0",
+    "@mantleio/contracts": "0.1.0",
+    "@mantleio/core-utils": "0.1.0",
     "@ethersproject/providers": "^5.6.8",
     "@ethersproject/transactions": "^5.6.2",
     "@sentry/node": "^6.3.1",

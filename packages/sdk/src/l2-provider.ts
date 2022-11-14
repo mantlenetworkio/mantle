@@ -3,7 +3,7 @@ import assert from 'assert'
 import { Provider, TransactionRequest } from '@ethersproject/abstract-provider'
 import { serialize } from '@ethersproject/transactions'
 import { Contract, BigNumber } from 'ethers'
-import { predeploys, getContractInterface } from '@mantlenetworkio/contracts'
+import { predeploys, getContractInterface } from '@mantleio/contracts'
 import cloneDeep from 'lodash/cloneDeep'
 
 import { L2Provider, ProviderLike, NumberLike } from './interfaces'
