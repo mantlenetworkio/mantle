@@ -34,11 +34,11 @@ type Payer struct {
 }
 
 func NewPayer(cfg *Config) *Payer {
-	queryClient, err := ethclient.Dial(cfg.ethereumHttpUrl)
+	queryClient, err := ethclient.Dial(cfg.queryerHttpUrl)
 	if err != nil {
 		panic(err)
 	}
-	payClient, err := ethclient.Dial(cfg.l2gethHttpUrl)
+	payClient, err := ethclient.Dial(cfg.payerHttpUrl)
 	if err != nil {
 		panic(err)
 	}

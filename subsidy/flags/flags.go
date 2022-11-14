@@ -8,20 +8,21 @@ import (
 )
 
 var (
-	UserDir, _          = os.UserHomeDir()
-	EthereumHttpUrlFlag = cli.StringFlag{
-		Name:   "ethereum-http-url",
+	UserDir, _         = os.UserHomeDir()
+	QueryerHttpUrlFlag = cli.StringFlag{
+		Name:   "queryer-http-url",
 		Value:  "http://127.0.0.1:9545",
 		Usage:  "L1 HTTP Endpoint",
-		EnvVar: "SUBSIDY_ETHEREUM_HTTP_URL",
+		EnvVar: "SUBSIDY_QUERYER_HTTP_URL",
 	}
 
-	L2gethHttpUrlFlag = cli.StringFlag{
-		Name:   "l2geth-http-url",
-		Value:  "http://127.0.0.1:8545",
+	PayerHttpUrlFlag = cli.StringFlag{
+		Name:   "payer-http-url",
+		Value:  "http://127.0.0.1:9545",
 		Usage:  "L1 HTTP Endpoint",
-		EnvVar: "SUBSIDY_L2GETH_HTTP_URL",
+		EnvVar: "SUBSIDY_PAYER_HTTP_URL",
 	}
+
 	SCCAddressFlag = cli.StringFlag{
 		Name:   "scc-address",
 		Usage:  "Address of SCC_CONTRACT",
@@ -156,8 +157,8 @@ var (
 )
 
 var Flags = []cli.Flag{
-	EthereumHttpUrlFlag,
-	L2gethHttpUrlFlag,
+	PayerHttpUrlFlag,
+	QueryerHttpUrlFlag,
 	SCCAddressFlag,
 	CTCAddressFlag,
 	SCCTopicFlag,

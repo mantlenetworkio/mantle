@@ -14,8 +14,8 @@ import (
 
 // Config represents the configuration options for the gas oracle
 type Config struct {
-	ethereumHttpUrl           string
-	l2gethHttpUrl             string
+	queryerHttpUrl            string
+	payerHttpUrl              string
 	SCCAddress                common.Address
 	SCCTopic                  string
 	CTCAddress                common.Address
@@ -44,8 +44,8 @@ type Config struct {
 // NewConfig creates a new Config
 func NewConfig(ctx *cli.Context) *Config {
 	cfg := Config{}
-	cfg.ethereumHttpUrl = ctx.GlobalString(flags.EthereumHttpUrlFlag.Name)
-	cfg.l2gethHttpUrl = ctx.GlobalString(flags.L2gethHttpUrlFlag.Name)
+	cfg.queryerHttpUrl = ctx.GlobalString(flags.QueryerHttpUrlFlag.Name)
+	cfg.payerHttpUrl = ctx.GlobalString(flags.PayerHttpUrlFlag.Name)
 	sccAddr := ctx.GlobalString(flags.SCCAddressFlag.Name)
 	cfg.SCCAddress = common.HexToAddress(sccAddr)
 	cfg.SCCTopic = ctx.GlobalString(flags.SCCTopicFlag.Name)
