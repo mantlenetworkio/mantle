@@ -88,22 +88,22 @@ export const CONTRACT_ADDRESSES: {
     l1: {
       AddressManager:
         process.env.ADDRESS_MANAGER_ADDRESS ||
-        ('0x68F1128d39b28C49D4fbe703f806734C01809A66' as const),
+        ('0xD78490c9051Db494c242d340963E7C9F70c6A8e1' as const),
       L1CrossDomainMessenger:
         process.env.L1_CROSS_DOMAIN_MESSENGER_ADDRESS ||
-        ('0x7B13E571a4526326d8D07FF8A93Cd0F92A72202B' as const),
+        ('0x503199dB6BE4Ab87f32c68F66DFc38892ace63F5' as const),
       L1StandardBridge:
         process.env.L1_STANDARD_BRIDGE_ADDRESS ||
-        ('0x45574aCac0c12Ec6f3AAa1b2fBfA0F69A818D7D1' as const),
+        ('0xB00941821c13a6fFb31008a0b6c01A5115ae9656' as const),
       StateCommitmentChain:
         process.env.STATE_COMMITMENT_CHAIN_ADDRESS ||
-        ('0x56Fab8B6bceB262fC6E17cA142d1b3e611aE076F' as const),
+        ('0xC91365DD9708b62dBdc7B6C543FB3920C58c18Df' as const),
       CanonicalTransactionChain:
         process.env.CANONICAL_TRANSACTION_CHAIN_ADDRESS ||
-        ('0x2E816dC5A21868f160bDad407a740a580245251C' as const),
+        ('0x38A0177171DABb008B8b4c66AAB182cC259Fb8c9' as const),
       BondManager:
         process.env.BOND_MANAGER_ADDRESS ||
-        ('0x1314822B932acC95Aa2B04F6b5CfC33e39aFfB2a' as const),
+        ('0x3E9Ec96A1331532586966f185104f93B34035d38' as const),
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
