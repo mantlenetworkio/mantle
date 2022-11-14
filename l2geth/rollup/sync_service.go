@@ -965,17 +965,18 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	// Prevent transactions without enough balance from
 	// being accepted by the chain but allow through 0
 	// gas price transactions
+	from, err := types.Sender(s.signer, tx)
+	if err != nil {
+		return fmt.Errorf("invalid transaction: %w", core.ErrInvalidSender)
+	}
 	cost := tx.Value()
-	if tx.GasPrice().Cmp(common.Big0) != 0 {
+	var zeroAddress common.Address
+	if tx.QueueOrigin() == types.QueueOriginSequencer && from != zeroAddress {
 		cost = cost.Add(cost, fee)
 	}
 	state, err := s.bc.State()
 	if err != nil {
 		return err
-	}
-	from, err := types.Sender(s.signer, tx)
-	if err != nil {
-		return fmt.Errorf("invalid transaction: %w", core.ErrInvalidSender)
 	}
 	if state.GetBalance(from).Cmp(cost) < 0 {
 		return fmt.Errorf("invalid transaction: %w", core.ErrInsufficientFunds)
