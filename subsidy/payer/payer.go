@@ -78,7 +78,7 @@ func (ob *Payer) PayRollupCost() error {
 	}
 	toBlock := tip.Number.Uint64()
 	if fromBlock > toBlock {
-		fmt.Printf("to:%v less than from:%v,no new block\n", toBlock, fromBlock)
+		log.Info("to:%v less than from:%v,no new block\n", toBlock, fromBlock)
 		return nil
 	}
 	if toBlock-fromBlock > 1000 {
@@ -122,8 +122,7 @@ func (ob *Payer) CalculateCost(logs []ethtypes.Log) *big.Int {
 		if err != nil {
 			return big.NewInt(0)
 		}
-		fee := tx.Cost().Mul(tx.Cost(), tx.GasPrice())
-		totalFee = totalFee.Add(totalFee, fee)
+		totalFee = totalFee.Add(totalFee, tx.Cost())
 	}
 	return totalFee
 }
@@ -177,13 +176,11 @@ func (ob *Payer) Transfer(amount *big.Int) (string, error) {
 		log.Error("payClient.NetworkID error:", err)
 		return "", err
 	}
-
-	signedTx, err := ethtypes.SignTx(tx, ethtypes.NewEIP155Signer(chainID), ob.config.privateKey)
+	signedTx, err := ethtypes.SignTx(tx, ethtypes.NewLondonSigner(chainID), ob.config.privateKey)
 	if err != nil {
 		log.Error("ethtypes.SignTx error:", err)
 		return "", err
 	}
-
 	err = ob.payClient.SendTransaction(context.Background(), signedTx)
 	if err != nil {
 		log.Error("SendTransaction error:", err)
