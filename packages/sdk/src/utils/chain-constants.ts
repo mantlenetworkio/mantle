@@ -7,6 +7,7 @@ export const DEPOSIT_CONFIRMATION_BLOCKS: {
   [L2ChainID.MANTLE_GOERLI]: 12 as const,
   [L2ChainID.MANTLE_KOVAN]: 12 as const,
   [L2ChainID.MANTLE_GOERLIQA]: 12 as const,
+  [L2ChainID.MANTLE_TESTNET]: 12 as const,
   [L2ChainID.MANTLE_HARDHAT_LOCAL]: 2 as const,
   [L2ChainID.MANTLE_HARDHAT_DEVNET]: 2 as const,
 }
