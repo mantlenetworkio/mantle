@@ -100,7 +100,7 @@ task('take-dump').setAction(async (args, hre) => {
     },
     TssRewardContract: {
       deadAddress: '0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead',
-      owner: hre.deployConfig.bvmTssRewardContractOwner,
+      _owner: hre.deployConfig.bvmTssRewardContractOwner,
       sendAmountPerYear: 1000000,
       bvmGasPriceOracleAddress: '0x420000000000000000000000000000000000000F',
       l2Message: predeploys.L2CrossDomainMessenger,
