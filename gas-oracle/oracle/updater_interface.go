@@ -81,7 +81,7 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(ui
 
 	// Create a new contract bindings in scope of the updateL2GasPriceFn
 	// that is returned from this function
-	contract, err := bindings.NewGasPriceOracle(cfg.gasPriceOracleAddress, backend)
+	contract, err := bindings.NewBVMGasPriceOracle(cfg.gasPriceOracleAddress, backend)
 	if err != nil {
 		return nil, err
 	}

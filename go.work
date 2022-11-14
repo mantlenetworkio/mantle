@@ -1,6 +1,7 @@
 go 1.18
 
 use (
+    ./subsidy
 	./batch-submitter
 	./bss-core
 	./gas-oracle
