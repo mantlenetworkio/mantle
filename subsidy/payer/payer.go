@@ -189,7 +189,7 @@ func (ob *Payer) Transfer(amount *big.Int) (string, error) {
 		return "", err
 	}
 
-	log.Info("tx sent: %s", signedTx.Hash().Hex())
+	log.Info(fmt.Sprintf("tx sent: %s", signedTx.Hash().Hex()))
 	if ob.waitForReceipt {
 		// Wait for the receipt
 		receipt, err := waitForReceipt(ob.payClient, tx)
