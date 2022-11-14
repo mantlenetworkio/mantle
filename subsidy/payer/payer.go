@@ -132,7 +132,7 @@ func (ob *Payer) EndBlock() uint64 {
 	if endBlock == 0 {
 		endBlock = ob.config.StartBlock
 	}
-	return ob.payerStateFileWriter.LoadCache().EndBlock
+	return endBlock
 }
 
 // Start runs the Payer
