@@ -1,6 +1,6 @@
 /* Imports: External */
 import { DeployFunction } from 'hardhat-deploy/dist/types'
-import { hexStringEquals, awaitCondition } from '@mantlenetworkio/core-utils'
+import { hexStringEquals, awaitCondition } from '@mantleio/core-utils'
 
 /* Imports: Internal */
 import {

@@ -1,23 +1,23 @@
 # Mantle Smart Contracts
 
-`@mantlenetworkio/contracts` contains the various Solidity smart contracts used within the Mantle system.
+`@mantleio/contracts` contains the various Solidity smart contracts used within the Mantle system.
 Some of these contracts are [meant to be deployed to Ethereum ("Layer 1")](https://github.com/mantlenetworkio/mantle/tree/main/packages/contracts/contracts/L1), while others are [meant to be deployed to Mantle ("Layer 2")](https://github.com/mantlenetworkio/mantle/tree/main/packages/contracts/contracts/L2).
 Within each contract file you'll find the network upon which the contract is meant to be deloyed, listed as either `EVM` (for Ethereum) or `BVM` (for Mantle).
 If neither `EVM` nor `BVM` are listed, the contract is likely intended to be used on either network.
 
 ## Usage (npm)
 
-You can import `@mantlenetworkio/contracts` to use the Mantle contracts within your own codebase.
+You can import `@mantleio/contracts` to use the Mantle contracts within your own codebase.
 Install via `npm` or `yarn`:
 
 ```shell
-npm install @mantlenetworkio/contracts
+npm install @mantleio/contracts
 ```
 
 Within your contracts:
 
 ```solidity
-import { SomeContract } from "@mantlenetworkio/contracts/path/to/SomeContract.sol";
+import { SomeContract } from "@mantleio/contracts/path/to/SomeContract.sol";
 ```
 
 Note that the `/path/to/SomeContract.sol` is the path to the target contract within the [contracts folder](https://github.com/mantlenetworkio/mantle/tree/main/packages/contracts/contracts) inside of this package.
@@ -26,7 +26,7 @@ You would therefore import the contract as:
 
 
 ```solidity
-import { L1CrossDomainMessenger } from "@mantlenetworkio/contracts/L1/messaging/L1CrossDomainMessenger.sol";
+import { L1CrossDomainMessenger } from "@mantleio/contracts/L1/messaging/L1CrossDomainMessenger.sol";
 ```
 
 ## Guide for Developers

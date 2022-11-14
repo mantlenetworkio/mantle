@@ -4,7 +4,7 @@ import { smock, FakeContract } from '@defi-wonderland/smock'
 import {
   AppendSequencerBatchParams,
   encodeAppendSequencerBatch,
-} from '@mantlenetworkio/core-utils'
+} from '@mantleio/core-utils'
 import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import _ from 'lodash'

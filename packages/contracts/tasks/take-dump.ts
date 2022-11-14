@@ -6,7 +6,7 @@ import {promisify} from 'util'
 import * as mkdirp from 'mkdirp'
 import {ethers} from 'ethers'
 import {task} from 'hardhat/config'
-import {remove0x} from '@mantlenetworkio/core-utils'
+import {remove0x} from '@mantleio/core-utils'
 
 import {predeploys} from '../src/predeploys'
 import {getContractFromArtifact} from '../src/deploy-utils'
@@ -100,7 +100,7 @@ task('take-dump').setAction(async (args, hre) => {
     },
     TssRewardContract: {
       deadAddress: '0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead',
-      owner: hre.deployConfig.bvmTssRewardContractOwner,
+      _owner: hre.deployConfig.bvmTssRewardContractOwner,
       sendAmountPerYear: 1000000,
       bvmGasPriceOracleAddress: '0x420000000000000000000000000000000000000F',
       l2Message: predeploys.L2CrossDomainMessenger,

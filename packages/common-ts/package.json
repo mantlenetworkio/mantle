@@ -1,6 +1,6 @@
 {
-  "name": "@mantlenetworkio/common-ts",
-  "version": "0.0.1",
+  "name": "@mantleio/common-ts",
+  "version": "0.1.0",
   "description": "[Mantle] Advanced typescript tooling used by various services",
   "main": "dist/index",
   "types": "dist/index",
@@ -32,7 +32,7 @@
     "url": "https://github.com/mantlenetworkio/mantle.git"
   },
   "dependencies": {
-    "@mantlenetworkio/core-utils": "0.0.1",
+    "@mantleio/core-utils": "0.1.0",
     "@sentry/node": "^6.3.1",
     "bcfg": "^0.1.7",
     "body-parser": "^1.20.0",

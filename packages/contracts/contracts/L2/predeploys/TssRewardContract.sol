@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import {ITssRewardContract} from  "./iTssRewardContract.sol";
 import {IBVM_GasPriceOracle} from "./iBVM_GasPriceOracle.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAddresses.sol";
 
 /* Library Imports */
@@ -16,13 +17,12 @@ import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
  * @title TssRewardContract
  * @dev Release to batch roll up tss members.
  */
-contract TssRewardContract is ITssRewardContract {
+contract TssRewardContract is Ownable,ITssRewardContract {
     using SafeMath for uint256;
 
     mapping(uint256 => uint256) public ledger;
     address public bvmGasPriceOracleAddress;
     address public deadAddress;
-    address public owner;
     uint256 public dust;
     uint256 public bestBlockID;
     uint256 public totalAmount;
@@ -34,9 +34,10 @@ contract TssRewardContract is ITssRewardContract {
 
     // set call address
     constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress, address _l2Message)
+    Ownable()
     {
+        transferOwnership(_owner);
         deadAddress = _deadAddress;
-        owner = _owner;
         sendAmountPerYear = _sendAmountPerYear;
         bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
         l2Message = _l2Message;
@@ -65,13 +66,6 @@ contract TssRewardContract is ITssRewardContract {
         _;
     }
 
-    modifier onlyOwner() {
-        require(
-            msg.sender == owner,
-            "only be called by the owner of this contract"
-        );
-        _;
-    }
 
     modifier checkBalance() {
         require(
@@ -81,12 +75,12 @@ contract TssRewardContract is ITssRewardContract {
         _;
     }
 
-    function querySendAmountPerSecond() public view returns (uint256){
-        return (sendAmountPerYear * 10 ** 18).div(365 * 24 * 60 * 60);
+    function setSendAmountPerYear(uint256 _sendAmountPerYear) public onlyOwner {
+        sendAmountPerYear = _sendAmountPerYear;
     }
 
-    function queryOwner() public view returns (address){
-        return owner;
+    function querySendAmountPerSecond() public view returns (uint256){
+        return (sendAmountPerYear * 10 ** 18).div(365 * 24 * 60 * 60);
     }
 
     /**
@@ -205,7 +199,7 @@ contract TssRewardContract is ITssRewardContract {
         totalAmount = totalAmount.sub(dust);
         dust = 0;
         if (amount > 0) {
-            payable(owner).transfer(dust);
+        payable(owner()).transfer(dust);
         }
     }
 
@@ -215,7 +209,7 @@ contract TssRewardContract is ITssRewardContract {
     function withdraw() external onlyOwner checkBalance {
         totalAmount = 0;
         if (address(this).balance > 0) {
-            payable(owner).transfer(address(this).balance);
+            payable(owner()).transfer(address(this).balance);
         }
     }
 }
