@@ -78,7 +78,7 @@ func (ob *Payer) PayRollupCost() error {
 	}
 	toBlock := tip.Number.Uint64()
 	if fromBlock > toBlock {
-		log.Info("to:%v less than from:%v,no new block\n", toBlock, fromBlock)
+		log.Info(fmt.Sprintf("to:%v less than from:%v,no new block\n", toBlock, fromBlock))
 		return nil
 	}
 	if toBlock-fromBlock > 1000 {
