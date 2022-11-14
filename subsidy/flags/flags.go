@@ -75,7 +75,7 @@ var (
 		Name:   "receive-address",
 		Usage:  "Private Key corresponding to SUBSIDY Owner",
 		EnvVar: "RECEIVE-ADDRESS",
-		Value:  "",
+		Value:  "0x00000398232E2064F896018496b4b44b3D62751F",
 	}
 	LogLevelFlag = cli.IntFlag{
 		Name:   "loglevel",
