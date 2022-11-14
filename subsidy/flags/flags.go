@@ -33,7 +33,7 @@ var (
 	SCCAddressFlag = cli.StringFlag{
 		Name:   "scc-address",
 		Usage:  "Address of SCC_CONTRACT",
-		Value:  "0x56Fab8B6bceB262fC6E17cA142d1b3e611aE076F",
+		Value:  "0xC91365DD9708b62dBdc7B6C543FB3920C58c18Df",
 		EnvVar: "SUBSIDY_SCC_ADDRESS",
 	}
 
@@ -47,7 +47,7 @@ var (
 	CTCAddressFlag = cli.StringFlag{
 		Name:   "ctc-address",
 		Usage:  "Address of CTC_CONTRACT",
-		Value:  "0x2E816dC5A21868f160bDad407a740a580245251C",
+		Value:  "0x38A0177171DABb008B8b4c66AAB182cC259Fb8c9",
 		EnvVar: "SUBSIDY_CTC_ADDRESS",
 	}
 
