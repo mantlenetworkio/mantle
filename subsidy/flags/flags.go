@@ -11,7 +11,7 @@ var (
 	UserDir, _         = os.UserHomeDir()
 	QueryerHttpUrlFlag = cli.StringFlag{
 		Name:   "queryer-http-url",
-		Value:  "http://127.0.0.1:9545",
+		Value:  "https://rpc.ankr.com/eth_goerli",
 		Usage:  "QUERYER HTTP Endpoint",
 		EnvVar: "SUBSIDY_QUERYER_HTTP_URL",
 	}
@@ -33,7 +33,7 @@ var (
 	SCCAddressFlag = cli.StringFlag{
 		Name:   "scc-address",
 		Usage:  "Address of SCC_CONTRACT",
-		Value:  "0xd9e2F450525079e1e29fB23Bc7Caca6F61f8fD4a",
+		Value:  "0x56Fab8B6bceB262fC6E17cA142d1b3e611aE076F",
 		EnvVar: "SUBSIDY_SCC_ADDRESS",
 	}
 
@@ -47,7 +47,7 @@ var (
 	CTCAddressFlag = cli.StringFlag{
 		Name:   "ctc-address",
 		Usage:  "Address of CTC_CONTRACT",
-		Value:  "0x0090171f848B2aa86918E5Ef2406Ab3d424fdd83",
+		Value:  "0x2E816dC5A21868f160bDad407a740a580245251C",
 		EnvVar: "SUBSIDY_CTC_ADDRESS",
 	}
 
@@ -109,6 +109,7 @@ var (
 		Name:   "start-block",
 		Usage:  "payer start block",
 		EnvVar: "SUBSIDY_START_BLOCK",
+		Value:  7933270,
 	}
 	RevisedBlockFlag = cli.Uint64Flag{
 		Name:   "revised-block",
