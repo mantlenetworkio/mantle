@@ -55,11 +55,6 @@ services:
     deploy:
       replicas: 1
 
-  subsidy:
-    <<: *base
-    container_name: bitsubsidy
-    deploy:
-      replicas: 1
 
   batch_submitter:
     <<: *base
