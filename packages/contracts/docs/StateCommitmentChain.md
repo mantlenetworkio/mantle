@@ -185,6 +185,23 @@ function libAddressManager() external view returns (contract Lib_AddressManager)
 |---|---|---|
 | _0 | contract Lib_AddressManager | undefined
 
+### messenger
+
+```solidity
+function messenger() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
+
 ### resolve
 
 ```solidity
@@ -234,6 +251,25 @@ Verifies a batch inclusion proof.
 
 
 ## Events
+
+### DistributeTssReward
+
+```solidity
+event DistributeTssReward(uint256 indexed _startBlockNumber, uint256 _length, uint256 indexed _batchTime, address[] _tssMembers)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _startBlockNumber `indexed` | uint256 | undefined |
+| _length  | uint256 | undefined |
+| _batchTime `indexed` | uint256 | undefined |
+| _tssMembers  | address[] | undefined |
 
 ### StateBatchAppended
 
