@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
 )
@@ -91,6 +92,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 func (p *peer) AsyncSendProducers(prs *clique.ProducerUpdate) {
 	select {
 	case p.queuedPrs <- prs:
+		log.Info(fmt.Sprintf("in len : %v", len(p.queuedPrs)))
 		p.knowPrs.Add(prs.Producers.Index)
 		// Mark all the producers as known, but ensure we don't overflow our limits
 		for p.knowPrs.Cardinality() >= maxKnownPrs {

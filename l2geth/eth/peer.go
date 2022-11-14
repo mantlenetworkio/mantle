@@ -28,6 +28,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
@@ -122,6 +123,7 @@ func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 // writer that does not lock up node internals.
 func (p *peer) broadcast() {
 	for {
+		log.Info(fmt.Sprintf("start  broadcast \n\n"))
 		select {
 		case txs := <-p.queuedTxs:
 			if err := p.SendTransactions(txs); err != nil {
@@ -142,6 +144,7 @@ func (p *peer) broadcast() {
 			p.Log().Trace("Announced block", "number", block.Number(), "hash", block.Hash())
 
 		case proUpdate := <-p.queuedPrs:
+			log.Info(fmt.Sprintf("out len : %v", len(p.queuedPrs)))
 			if err := p.SendProducers(*proUpdate); err != nil {
 				return
 			}

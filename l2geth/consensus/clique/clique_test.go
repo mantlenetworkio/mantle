@@ -44,13 +44,33 @@ func TestReimportMirroredState(t *testing.T) {
 		engine = New(params.AllCliqueProtocolChanges.Clique, db)
 		signer = new(types.HomesteadSigner)
 	)
+	address := addr
+	Producer := Sequencer{
+		Address:          address,
+		Power:            100,
+		ProducerPriority: -100,
+	}
+	producers := Producers{
+		Number:      0,
+		Index:       0,
+		Epoch:       100,
+		SchedulerID: address.Bytes(),
+		SequencerSet: SequencerSet{
+			Sequencers: []*Sequencer{
+				&Producer,
+			},
+			Producer:   &Producer,
+			totalPower: 100,
+		},
+	}
+	buf := producers.serialize()
 	genspec := &core.Genesis{
-		ExtraData: make([]byte, extraVanity+common.AddressLength+extraSeal),
+		ExtraData: make([]byte, extraVanity+len(buf)+extraSeal),
 		Alloc: map[common.Address]core.GenesisAccount{
 			addr: {Balance: big.NewInt(1)},
 		},
 	}
-	copy(genspec.ExtraData[extraVanity:], addr[:])
+	copy(genspec.ExtraData[extraVanity:], buf[:])
 	genesis := genspec.MustCommit(db)
 
 	// Generate a batch of blocks, each properly signed
