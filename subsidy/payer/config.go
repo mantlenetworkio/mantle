@@ -15,10 +15,12 @@ import (
 // Config represents the configuration options for the gas oracle
 type Config struct {
 	ethereumHttpUrl           string
+	l2gethHttpUrl             string
 	SCCAddress                common.Address
 	SCCTopic                  string
 	CTCAddress                common.Address
 	CTCTopic                  string
+	gpoAddress                common.Address
 	privateKey                *ecdsa.PrivateKey
 	receiverAddr              common.Address
 	l1QueryEpochLengthSeconds uint64
@@ -43,12 +45,15 @@ type Config struct {
 func NewConfig(ctx *cli.Context) *Config {
 	cfg := Config{}
 	cfg.ethereumHttpUrl = ctx.GlobalString(flags.EthereumHttpUrlFlag.Name)
+	cfg.l2gethHttpUrl = ctx.GlobalString(flags.L2gethHttpUrlFlag.Name)
 	sccAddr := ctx.GlobalString(flags.SCCAddressFlag.Name)
 	cfg.SCCAddress = common.HexToAddress(sccAddr)
 	cfg.SCCTopic = ctx.GlobalString(flags.SCCTopicFlag.Name)
 	ctcAddr := ctx.GlobalString(flags.CTCAddressFlag.Name)
 	cfg.CTCAddress = common.HexToAddress(ctcAddr)
 	cfg.CTCTopic = ctx.GlobalString(flags.CTCTopicFlag.Name)
+	gpoAddr := ctx.GlobalString(flags.GPOAddressFlag.Name)
+	cfg.gpoAddress = common.HexToAddress(gpoAddr)
 	cfg.l1QueryEpochLengthSeconds = ctx.GlobalUint64(flags.L1QueryEpochLengthSecondsFlag.Name)
 	cfg.HomeDir = ctx.GlobalString(flags.HomeDirFlag.Name)
 	cfg.CacheDir = ctx.GlobalString(flags.CacheDirFlag.Name)

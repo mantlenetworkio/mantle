@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/mantlenetworkio/mantle/subsidy/types"
 	"math/big"
 	"time"
 
@@ -14,7 +13,9 @@ import (
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
 	"github.com/mantlenetworkio/mantle/subsidy/cache-file"
+	"github.com/mantlenetworkio/mantle/subsidy/types"
 )
 
 type Payer struct {
@@ -27,19 +28,27 @@ type Payer struct {
 	waitForReceipt            bool
 	stop                      chan struct{}
 	sccTopic                  string
-	sccAddrStr                string
+	sccAddrStr                common.Address
 	ctcTopic                  string
-	ctcAddrStr                string
+	ctcAddrStr                common.Address
 }
 
 func NewPayer(cfg *Config) *Payer {
-	queryClient, err := ethclient.Dial("https://rpc.ankr.com/eth_goerli")
+	queryClient, err := ethclient.Dial(cfg.ethereumHttpUrl)
 	if err != nil {
 		panic(err)
 	}
-	payClient, err := ethclient.Dial(cfg.ethereumHttpUrl)
+	payClient, err := ethclient.Dial(cfg.l2gethHttpUrl)
 	if err != nil {
 		panic(err)
+	}
+	gpo, err := bindings.NewBVMGasPriceOracleCaller(cfg.gpoAddress, payClient)
+	isBurning, err := gpo.IsBurning(nil)
+	if err != nil {
+		panic(err)
+	}
+	if !isBurning {
+		panic(fmt.Errorf("isBurning is false,no need to pay for rollup"))
 	}
 	state := cache_file.NewPayerStateFileWriter(cfg.HomeDir, cfg.CacheDir, cfg.FileName)
 	return &Payer{
@@ -50,9 +59,9 @@ func NewPayer(cfg *Config) *Payer {
 		ctx:                       context.Background(),
 		payerStateFileWriter:      state,
 		sccTopic:                  cfg.SCCTopic,
-		sccAddrStr:                cfg.SCCAddress.Hex(),
+		sccAddrStr:                cfg.SCCAddress,
 		ctcTopic:                  cfg.CTCTopic,
-		ctcAddrStr:                cfg.CTCAddress.Hex(),
+		ctcAddrStr:                cfg.CTCAddress,
 		waitForReceipt:            cfg.waitForReceipt,
 		stop:                      make(chan struct{}),
 	}
@@ -82,18 +91,10 @@ func (ob *Payer) PayRollupCost() error {
 		fmt.Printf("to:%v less than from:%v\n", toBlock, fromBlock)
 		return nil
 	}
-	//if fromBlock <= toBlock {
-	//	payerState := types.PayerState{
-	//		LastPayTime: time.Now(),
-	//		EndBlock:    toBlock,
-	//	}
-	//	if err := ob.payerStateFileWriter.Write(&payerState); err != nil {
-	//		panic(err)
-	//	}
-	//	return nil
-	//}
-	sccAddress := common.HexToAddress(ob.sccAddrStr)
-	sccLogs, err := ob.getLogs(sccAddress, ob.sccTopic, fromBlock, toBlock)
+	if toBlock-fromBlock > 1000 {
+		toBlock = fromBlock + 1000
+	}
+	sccLogs, err := ob.getLogs(ob.sccAddrStr, ob.sccTopic, fromBlock, toBlock)
 	if err != nil {
 		return err
 	}
@@ -108,8 +109,7 @@ func (ob *Payer) PayRollupCost() error {
 		totalFee = totalFee.Add(totalFee, fee)
 	}
 
-	ctcAddress := common.HexToAddress(ob.ctcAddrStr)
-	ctcLogs, err := ob.getLogs(ctcAddress, ob.ctcTopic, fromBlock, toBlock)
+	ctcLogs, err := ob.getLogs(ob.ctcAddrStr, ob.ctcTopic, fromBlock, toBlock)
 	for _, l := range ctcLogs {
 		tx, _, err := ob.queryClient.TransactionByHash(context.Background(), l.TxHash)
 		if err != nil {

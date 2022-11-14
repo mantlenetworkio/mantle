@@ -11,9 +11,16 @@ var (
 	UserDir, _          = os.UserHomeDir()
 	EthereumHttpUrlFlag = cli.StringFlag{
 		Name:   "ethereum-http-url",
-		Value:  "http://127.0.0.1:8545",
+		Value:  "https://rpc.ankr.com/eth_goerli",
 		Usage:  "L1 HTTP Endpoint",
 		EnvVar: "SUBSIDY_ETHEREUM_HTTP_URL",
+	}
+
+	L2gethHttpUrlFlag = cli.StringFlag{
+		Name:   "l2geth-http-url",
+		Value:  "http://127.0.0.1:8545",
+		Usage:  "L1 HTTP Endpoint",
+		EnvVar: "SUBSIDY_L2GETH_HTTP_URL",
 	}
 	SCCAddressFlag = cli.StringFlag{
 		Name:   "scc-address",
@@ -42,6 +49,13 @@ var (
 		Value:  "SequencerBatchAppended(uint256,uint256,uint256)",
 		EnvVar: "SUBSIDY_CTC_TOPIC",
 	}
+	GPOAddressFlag = cli.StringFlag{
+		Name:   "gpo-address",
+		Usage:  "Address of GPO_CONTRACT",
+		Value:  "0x420000000000000000000000000000000000000F",
+		EnvVar: "SUBSIDY_GPO_ADDRESS",
+	}
+
 	PrivateKeyFlag = cli.StringFlag{
 		Name:   "private-key",
 		Usage:  "Private Key corresponding to SUBSIDY Owner",
@@ -143,10 +157,12 @@ var (
 
 var Flags = []cli.Flag{
 	EthereumHttpUrlFlag,
+	L2gethHttpUrlFlag,
 	SCCAddressFlag,
 	CTCAddressFlag,
 	SCCTopicFlag,
 	CTCTopicFlag,
+	GPOAddressFlag,
 	PrivateKeyFlag,
 	LogLevelFlag,
 	L1QueryEpochLengthSecondsFlag,
