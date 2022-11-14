@@ -18,6 +18,7 @@ package core
 
 import (
 	"errors"
+	"fmt"
 	"github.com/mantlenetworkio/mantle/l2geth/contracts/gasfee"
 	"github.com/mantlenetworkio/mantle/l2geth/contracts/tssreward"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
@@ -131,9 +132,13 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 	l1Fee := new(big.Int)
 	if rcfg.UsingBVM {
 		var zeroAddress common.Address
-		if msg.QueueOrigin() == types.QueueOriginSequencer && msg.From() != zeroAddress {
+		gpo := &rcfg.L2GasPriceOracleAddress
+		value := evm.StateDB.GetState(*gpo, rcfg.L2GasPriceOracleOwnerSlot)
+		gpoOwner := common.BigToAddress(value.Big())
+		if msg.QueueOrigin() == types.QueueOriginSequencer && msg.From() != zeroAddress && msg.From() != gpoOwner {
 			// Compute the L1 fee before the state transition
 			// so it only has to be read from state one time.
+
 			l1Fee, _ = fees.CalculateL1MsgFee(msg, evm.StateDB, nil)
 		}
 	}
@@ -288,7 +293,10 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 				return nil, 0, false, err
 			}
 			deadAddress := vm.AccountRef(dump.DeadAddress)
-			evm.Call(deadAddress, dump.BvmFeeWallet, data, 210000, big.NewInt(0))
+			_, _, callErr := evm.Call(deadAddress, dump.BvmFeeWallet, data, 210000, big.NewInt(0))
+			if callErr != nil {
+				return nil, 0, false, fmt.Errorf("evm call bvmFeeWallet error:%v", callErr)
+			}
 		} else {
 			st.state.AddBalance(dump.BvmFeeWallet, st.l1Fee)
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
