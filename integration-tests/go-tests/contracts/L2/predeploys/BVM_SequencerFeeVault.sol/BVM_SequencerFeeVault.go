@@ -30,7 +30,7 @@ var (
 
 // BVMSequencerFeeVaultMetaData contains all meta data concerning the BVMSequencerFeeVault contract.
 var BVMSequencerFeeVaultMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_l1FeeWallet\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"MIN_WITHDRAWAL_AMOUNT\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"l1FeeWallet\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_l1FeeWallet\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_bvmGasPriceOracleAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"L1Gas\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"MIN_WITHDRAWAL_AMOUNT\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"bvmGasPriceOracleAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"l1FeeWallet\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
 }
 
 // BVMSequencerFeeVaultABI is the input ABI used to generate the binding from.
@@ -179,6 +179,37 @@ func (_BVMSequencerFeeVault *BVMSequencerFeeVaultTransactorRaw) Transact(opts *b
 	return _BVMSequencerFeeVault.Contract.contract.Transact(opts, method, params...)
 }
 
+// L1Gas is a free data retrieval call binding the contract method 0x5558979e.
+//
+// Solidity: function L1Gas() view returns(uint256)
+func (_BVMSequencerFeeVault *BVMSequencerFeeVaultCaller) L1Gas(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _BVMSequencerFeeVault.contract.Call(opts, &out, "L1Gas")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// L1Gas is a free data retrieval call binding the contract method 0x5558979e.
+//
+// Solidity: function L1Gas() view returns(uint256)
+func (_BVMSequencerFeeVault *BVMSequencerFeeVaultSession) L1Gas() (*big.Int, error) {
+	return _BVMSequencerFeeVault.Contract.L1Gas(&_BVMSequencerFeeVault.CallOpts)
+}
+
+// L1Gas is a free data retrieval call binding the contract method 0x5558979e.
+//
+// Solidity: function L1Gas() view returns(uint256)
+func (_BVMSequencerFeeVault *BVMSequencerFeeVaultCallerSession) L1Gas() (*big.Int, error) {
+	return _BVMSequencerFeeVault.Contract.L1Gas(&_BVMSequencerFeeVault.CallOpts)
+}
+
 // MINWITHDRAWALAMOUNT is a free data retrieval call binding the contract method 0xd3e5792b.
 //
 // Solidity: function MIN_WITHDRAWAL_AMOUNT() view returns(uint256)
@@ -208,6 +239,37 @@ func (_BVMSequencerFeeVault *BVMSequencerFeeVaultSession) MINWITHDRAWALAMOUNT() 
 // Solidity: function MIN_WITHDRAWAL_AMOUNT() view returns(uint256)
 func (_BVMSequencerFeeVault *BVMSequencerFeeVaultCallerSession) MINWITHDRAWALAMOUNT() (*big.Int, error) {
 	return _BVMSequencerFeeVault.Contract.MINWITHDRAWALAMOUNT(&_BVMSequencerFeeVault.CallOpts)
+}
+
+// BvmGasPriceOracleAddress is a free data retrieval call binding the contract method 0x110b7eb0.
+//
+// Solidity: function bvmGasPriceOracleAddress() view returns(address)
+func (_BVMSequencerFeeVault *BVMSequencerFeeVaultCaller) BvmGasPriceOracleAddress(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _BVMSequencerFeeVault.contract.Call(opts, &out, "bvmGasPriceOracleAddress")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// BvmGasPriceOracleAddress is a free data retrieval call binding the contract method 0x110b7eb0.
+//
+// Solidity: function bvmGasPriceOracleAddress() view returns(address)
+func (_BVMSequencerFeeVault *BVMSequencerFeeVaultSession) BvmGasPriceOracleAddress() (common.Address, error) {
+	return _BVMSequencerFeeVault.Contract.BvmGasPriceOracleAddress(&_BVMSequencerFeeVault.CallOpts)
+}
+
+// BvmGasPriceOracleAddress is a free data retrieval call binding the contract method 0x110b7eb0.
+//
+// Solidity: function bvmGasPriceOracleAddress() view returns(address)
+func (_BVMSequencerFeeVault *BVMSequencerFeeVaultCallerSession) BvmGasPriceOracleAddress() (common.Address, error) {
+	return _BVMSequencerFeeVault.Contract.BvmGasPriceOracleAddress(&_BVMSequencerFeeVault.CallOpts)
 }
 
 // L1FeeWallet is a free data retrieval call binding the contract method 0xd4ff9218.

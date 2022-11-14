@@ -105,23 +105,6 @@ Computes the amount of L1 gas used for a transaction The overhead represents the
 |---|---|---|
 | _0 | uint256 | Amount of L1 gas used for a transaction
 
-### isBurning
-
-```solidity
-function isBurning() external view returns (bool)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined
-
 ### l1BaseFee
 
 ```solidity
