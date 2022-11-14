@@ -48,12 +48,6 @@ func (w *PayerStateFileWriter) Write(data *types.PayerState) error {
 	filename := path.Join(cacheDir, w.cacheFilename)
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		// And the home folder doesn't exist
-		//if _, err := os.Stat(w.homeDir); os.IsNotExist(err) {
-		//	// Create the home folder
-		//	if err = os.MkdirAll(w.homeDir, os.ModePerm); err != nil {
-		//		return err
-		//	}
-		//}
 		// Create the home config folder
 		if _, err := os.Stat(cacheDir); os.IsNotExist(err) {
 			// Create the home folder

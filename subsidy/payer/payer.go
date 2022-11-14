@@ -94,30 +94,16 @@ func (ob *Payer) PayRollupCost() error {
 	if toBlock-fromBlock > 1000 {
 		toBlock = fromBlock + 1000
 	}
+	totalFee := big.NewInt(0)
 	sccLogs, err := ob.getLogs(ob.sccAddrStr, ob.sccTopic, fromBlock, toBlock)
 	if err != nil {
 		return err
 	}
-
-	totalFee := big.NewInt(0)
-	for _, l := range sccLogs {
-		tx, _, err := ob.queryClient.TransactionByHash(context.Background(), l.TxHash)
-		if err != nil {
-			return err
-		}
-		fee := tx.Cost().Mul(tx.Cost(), tx.GasPrice())
-		totalFee = totalFee.Add(totalFee, fee)
-	}
-
 	ctcLogs, err := ob.getLogs(ob.ctcAddrStr, ob.ctcTopic, fromBlock, toBlock)
-	for _, l := range ctcLogs {
-		tx, _, err := ob.queryClient.TransactionByHash(context.Background(), l.TxHash)
-		if err != nil {
-			return err
-		}
-		fee := tx.Cost().Mul(tx.Cost(), tx.GasPrice())
-		totalFee = totalFee.Add(totalFee, fee)
+	if err != nil {
+		return err
 	}
+	totalFee = totalFee.Add(ob.CalculateCost(sccLogs), ob.CalculateCost(ctcLogs))
 	var hash string
 	if totalFee.Cmp(big.NewInt(0)) == 0 {
 		log.Info(fmt.Sprintf("block height form %v to %v totalFee is zero", fromBlock, toBlock))
@@ -137,6 +123,19 @@ func (ob *Payer) PayRollupCost() error {
 		panic(err)
 	}
 	return nil
+}
+
+func (ob *Payer) CalculateCost(logs []ethtypes.Log) *big.Int {
+	totalFee := big.NewInt(0)
+	for _, l := range logs {
+		tx, _, err := ob.queryClient.TransactionByHash(context.Background(), l.TxHash)
+		if err != nil {
+			return big.NewInt(0)
+		}
+		fee := tx.Cost().Mul(tx.Cost(), tx.GasPrice())
+		totalFee = totalFee.Add(totalFee, fee)
+	}
+	return totalFee
 }
 
 func (ob *Payer) EndBlock() uint64 {
