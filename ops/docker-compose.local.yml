@@ -55,7 +55,6 @@ services:
     deploy:
       replicas: 1
 
-
   batch_submitter:
     <<: *base
     container_name: bitbatchsubmitter
