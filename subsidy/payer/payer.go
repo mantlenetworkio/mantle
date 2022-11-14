@@ -105,7 +105,7 @@ func (ob *Payer) PayRollupCost() error {
 			return err
 		}
 	}
-	log.Info(fmt.Sprintf("block height form %v to %v,amount:%v,transfer hash:%v", fromBlock, toBlock, totalFee, hash))
+	log.Info(fmt.Sprintf("block height form %v to %v,amount:%v,transfer hash:%v,reveiver:%v", fromBlock, toBlock, totalFee, hash, ob.config.receiverAddr))
 	payerState := types.PayerState{
 		LastPayTime: time.Now(),
 		EndBlock:    toBlock,
@@ -152,7 +152,7 @@ func (ob *Payer) Wait() {
 }
 
 func (ob *Payer) Transfer(amount *big.Int) (string, error) {
-	senderAddr := ob.receiveAddress
+	senderAddr := ethcrypto.PubkeyToAddress(ob.config.privateKey.PublicKey)
 	nonce, err := ob.payClient.PendingNonceAt(context.Background(), senderAddr)
 	if err != nil {
 		log.Error("PendingNonceAt error:", err)
