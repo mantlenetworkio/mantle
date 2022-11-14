@@ -121,7 +121,7 @@ export const CONTRACT_ADDRESSES: {
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
-  [L2ChainID.MANTLE_GOERLI]: {
+  [L2ChainID.MANTLE_TESTNET]: {
     l1: {
       AddressManager: '0xfA5b622409E1782597952a4A78c1D34CF32fF5e2' as const,
       L1CrossDomainMessenger:
