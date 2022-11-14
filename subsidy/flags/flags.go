@@ -70,6 +70,13 @@ var (
 		EnvVar: "SUBSIDY_PAYER_PRIVATE_KEY",
 		Value:  "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
 	}
+
+	ReceiveAddressFlag = cli.StringFlag{
+		Name:   "receive-address",
+		Usage:  "Private Key corresponding to SUBSIDY Owner",
+		EnvVar: "RECEIVE-ADDRESS",
+		Value:  "",
+	}
 	LogLevelFlag = cli.IntFlag{
 		Name:   "loglevel",
 		Value:  3,
@@ -109,7 +116,7 @@ var (
 		Name:   "start-block",
 		Usage:  "payer start block",
 		EnvVar: "SUBSIDY_START_BLOCK",
-		Value:  7933270,
+		Value:  7939103,
 	}
 	RevisedBlockFlag = cli.Uint64Flag{
 		Name:   "revised-block",
@@ -165,6 +172,7 @@ var (
 )
 
 var Flags = []cli.Flag{
+	ReceiveAddressFlag,
 	PayerHttpUrlFlag,
 	QueryerHttpUrlFlag,
 	SCCAddressFlag,

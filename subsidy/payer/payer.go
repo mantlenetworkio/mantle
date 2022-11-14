@@ -30,6 +30,7 @@ type Payer struct {
 	sccAddrStr                common.Address
 	ctcTopic                  string
 	ctcAddrStr                common.Address
+	receiveAddress            common.Address
 }
 
 func NewPayer(cfg *Config) *Payer {
@@ -55,6 +56,7 @@ func NewPayer(cfg *Config) *Payer {
 		ctcAddrStr:                cfg.CTCAddress,
 		waitForReceipt:            cfg.waitForReceipt,
 		stop:                      make(chan struct{}),
+		receiveAddress:            cfg.receiverAddr,
 	}
 }
 
@@ -150,7 +152,7 @@ func (ob *Payer) Wait() {
 }
 
 func (ob *Payer) Transfer(amount *big.Int) (string, error) {
-	senderAddr := ethcrypto.PubkeyToAddress(ob.config.privateKey.PublicKey)
+	senderAddr := ob.receiveAddress
 	nonce, err := ob.payClient.PendingNonceAt(context.Background(), senderAddr)
 	if err != nil {
 		log.Error("PendingNonceAt error:", err)

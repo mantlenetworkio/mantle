@@ -31,6 +31,7 @@ type Config struct {
 	FileName                  string
 	RevisedBlock              uint64
 	StartBlock                uint64
+	//receivable                common.Address
 	// Metrics config
 	MetricsEnabled          bool
 	MetricsHTTP             string
@@ -63,8 +64,6 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.StartBlock = ctx.GlobalUint64(flags.StartBlockFlag.Name)
 	cfg.RevisedBlock = ctx.GlobalUint64(flags.RevisedBlockFlag.Name)
 
-	hex := ctx.GlobalString(flags.PrivateKeyFlag.Name)
-	fmt.Println(hex)
 	if ctx.GlobalIsSet(flags.PrivateKeyFlag.Name) {
 		hex := ctx.GlobalString(flags.PrivateKeyFlag.Name)
 		hex = strings.TrimPrefix(hex, "0x")
@@ -76,6 +75,9 @@ func NewConfig(ctx *cli.Context) *Config {
 	} else {
 		log.Crit("No private key configured")
 	}
+
+	receiveHex := ctx.GlobalString(flags.ReceiveAddressFlag.Name)
+	cfg.receiverAddr = common.HexToAddress(receiveHex)
 
 	if ctx.GlobalIsSet(flags.WaitForReceiptFlag.Name) {
 		cfg.waitForReceipt = true
