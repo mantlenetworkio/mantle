@@ -24,7 +24,6 @@ export enum L1ChainID {
  */
 export enum L2ChainID {
   MANTLE = 10,
-  MANTLE_GOERLI = 420,
   MANTLE_TESTNET = 5001,
   MANTLE_GOERLIQA = 1705003,
   MANTLE_KOVAN = 69,
