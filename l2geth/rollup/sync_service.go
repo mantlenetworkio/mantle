@@ -972,7 +972,12 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	cost := tx.Value()
 	var zeroAddress common.Address
 	if tx.QueueOrigin() == types.QueueOriginSequencer && from != zeroAddress {
-		cost = cost.Add(cost, fee)
+		gpoOwner := s.GasPriceOracleOwnerAddress()
+		if gpoOwner != nil {
+			if from != *gpoOwner {
+				cost = cost.Add(cost, fee)
+			}
+		}
 	}
 	state, err := s.bc.State()
 	if err != nil {
