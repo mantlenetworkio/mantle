@@ -111,7 +111,7 @@ export const CONTRACT_ADDRESSES: {
     l1: {
       AddressManager: '0x91e0278895545cc32b9DCa456C4F71De72024319' as const,
       L1CrossDomainMessenger:
-        '0x7c2147E5b1415722C74Bc4Af1902B0F57e50B952' as const,
+        '0x9FEFDBE2c654eD36c335B03c5A525555D27A235f' as const,
       L1StandardBridge: '0x2eFa15fC36B050fDf4B124c3eeb0ea23cf2395b4' as const,
       StateCommitmentChain:
         '0x931C0D108d21AE6aC19A209bB881d054a0E35d7b' as const,
