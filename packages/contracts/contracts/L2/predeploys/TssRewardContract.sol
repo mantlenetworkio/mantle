@@ -199,8 +199,7 @@ contract TssRewardContract is Ownable,ITssRewardContract {
         totalAmount = totalAmount.sub(dust);
         dust = 0;
         if (amount > 0) {
-        address owner = owner();
-        payable(owner).transfer(dust);
+        payable(owner()).transfer(dust);
         }
     }
 
@@ -210,8 +209,7 @@ contract TssRewardContract is Ownable,ITssRewardContract {
     function withdraw() external onlyOwner checkBalance {
         totalAmount = 0;
         if (address(this).balance > 0) {
-            address owner = owner();
-            payable(owner).transfer(address(this).balance);
+            payable(owner()).transfer(address(this).balance);
         }
     }
 }
