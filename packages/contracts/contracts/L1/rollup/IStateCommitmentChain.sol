@@ -17,10 +17,18 @@ interface IStateCommitmentChain {
         bytes32 _batchRoot,
         uint256 _batchSize,
         uint256 _prevTotalElements,
+        bytes _signature,
         bytes _extraData
     );
 
     event StateBatchDeleted(uint256 indexed _batchIndex, bytes32 _batchRoot);
+
+    event DistributeTssReward(
+        uint256 indexed _startBlockNumber,
+        uint256 _length,
+        uint256 indexed _batchTime,
+        address[] _tssMembers
+    );
 
     /********************
      * Public Functions *
@@ -49,7 +57,7 @@ interface IStateCommitmentChain {
      * @param _batch Batch of state roots.
      * @param _shouldStartAtElement Index of the element at which this batch should start.
      */
-    function appendStateBatch(bytes32[] calldata _batch, uint256 _shouldStartAtElement) external;
+    function appendStateBatch(bytes32[] calldata _batch, uint256 _shouldStartAtElement, bytes memory _signature) external;
 
     /**
      * Deletes all state roots after (and including) a given batch.
@@ -75,7 +83,7 @@ interface IStateCommitmentChain {
      * @return _inside Whether or not the batch is inside the fraud proof window.
      */
     function insideFraudProofWindow(Lib_BVMCodec.ChainBatchHeader memory _batchHeader)
-        external
-        view
-        returns (bool _inside);
+    external
+    view
+    returns (bool _inside);
 }

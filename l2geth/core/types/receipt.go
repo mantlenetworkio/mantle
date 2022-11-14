@@ -24,8 +24,6 @@ import (
 	"math/big"
 	"unsafe"
 
-	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
-
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
@@ -354,20 +352,7 @@ func (r Receipts) DeriveFields(config *params.ChainConfig, hash common.Hash, num
 		if txs[i].To() == nil {
 			// Deriving the signer is expensive, only do if it's actually needed
 			from, _ := Sender(signer, txs[i])
-			nonce := txs[i].Nonce()
-
-			if rcfg.UsingBVM {
-				sysAddress := rcfg.SystemAddressFor(config.ChainID, from)
-				// If nonce is zero, and the deployer is a system address deployer,
-				// set the provided system contract address.
-				if sysAddress != rcfg.ZeroSystemAddress && nonce == 0 && txs[i].To() == nil {
-					r[i].ContractAddress = sysAddress
-				} else {
-					r[i].ContractAddress = crypto.CreateAddress(from, nonce)
-				}
-			} else {
-				r[i].ContractAddress = crypto.CreateAddress(from, nonce)
-			}
+			r[i].ContractAddress = crypto.CreateAddress(from, txs[i].Nonce())
 		}
 		// The used gas can be calculated based on previous r
 		if i == 0 {

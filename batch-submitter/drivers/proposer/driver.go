@@ -3,7 +3,9 @@ package proposer
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"fmt"
+	"github.com/ethereum/go-ethereum/log"
 	"math/big"
 	"strings"
 
@@ -15,11 +17,12 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/ctc"
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/scc"
+	tssClient "github.com/mantlenetworkio/mantle/batch-submitter/tss-client"
 	"github.com/mantlenetworkio/mantle/bss-core/drivers"
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+	tss_types "github.com/mantlenetworkio/mantle/tss/common"
 )
 
 // stateRootSize is the size in bytes of a state root.
@@ -31,6 +34,7 @@ type Config struct {
 	Name                 string
 	L1Client             *ethclient.Client
 	L2Client             *l2ethclient.Client
+	TssClient            *tssClient.Client
 	BlockOffset          uint64
 	MaxStateRootElements uint64
 	MinStateRootElements uint64
@@ -163,8 +167,7 @@ func (d *Driver) CraftBatchTx(
 
 	name := d.cfg.Name
 
-	log.Info(name+" crafting batch tx", "start", start, "end", end,
-		"nonce", nonce)
+	log.Info(name+" crafting batch tx", "start", start, "end", end, "nonce", nonce)
 
 	var stateRoots [][stateRootSize]byte
 	for i := new(big.Int).Set(start); i.Cmp(end) < 0; i.Add(i, bigOne) {
@@ -206,14 +209,24 @@ func (d *Driver) CraftBatchTx(
 
 	blockOffset := new(big.Int).SetUint64(d.cfg.BlockOffset)
 	offsetStartsAtIndex := new(big.Int).Sub(start, blockOffset)
-
+	// Assembly data request tss node signature
+	tssReqParams := tss_types.SignStateRequest{
+		StartBlock:          start.String(),
+		OffsetStartsAtIndex: offsetStartsAtIndex.String(),
+		StateRoots:          stateRoots,
+	}
+	signature, err := d.cfg.TssClient.GetSignStateBatch(tssReqParams)
+	if err != nil {
+		log.Error("get tss manager signature fail")
+		return nil, err
+	}
+	log.Info("append log", "stateRoots", fmt.Sprintf("%v", stateRoots), "offsetStartsAtIndex", offsetStartsAtIndex, "signature", hex.EncodeToString(signature))
 	tx, err := d.sccContract.AppendStateBatch(
-		opts, stateRoots, offsetStartsAtIndex,
+		opts, stateRoots, offsetStartsAtIndex, signature,
 	)
 	switch {
 	case err == nil:
 		return tx, nil
-
 	// If the transaction failed because the backend does not support
 	// eth_maxPriorityFeePerGas, fallback to using the default constant.
 	// Currently Alchemy is the only backend provider that exposes this method,
@@ -225,9 +238,8 @@ func (d *Driver) CraftBatchTx(
 			"by current backend, using fallback gasTipCap")
 		opts.GasTipCap = drivers.FallbackGasTipCap
 		return d.sccContract.AppendStateBatch(
-			opts, stateRoots, offsetStartsAtIndex,
+			opts, stateRoots, offsetStartsAtIndex, signature,
 		)
-
 	default:
 		return nil, err
 	}

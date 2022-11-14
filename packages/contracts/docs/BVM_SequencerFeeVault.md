@@ -10,6 +10,23 @@
 
 ## Methods
 
+### L1Gas
+
+```solidity
+function L1Gas() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
 ### MIN_WITHDRAWAL_AMOUNT
 
 ```solidity
@@ -26,6 +43,23 @@ function MIN_WITHDRAWAL_AMOUNT() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined
+
+### bvmGasPriceOracleAddress
+
+```solidity
+function bvmGasPriceOracleAddress() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
 
 ### l1FeeWallet
 

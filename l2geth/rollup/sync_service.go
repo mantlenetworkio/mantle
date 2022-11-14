@@ -547,6 +547,16 @@ func (s *SyncService) updateScalar(statedb *state.StateDB) error {
 	return s.RollupGpo.SetScalar(scalar, decimals)
 }
 
+// updateScalar will update the scalar value from the BVM_GasPriceOracle
+// in the local cache
+func (s *SyncService) updateIsBurning(statedb *state.StateDB) error {
+	isBurning, err := s.readGPOStorageSlot(statedb, rcfg.IsBurningSlot)
+	if err != nil {
+		return err
+	}
+	return s.RollupGpo.SetIsBurning(isBurning)
+}
+
 // cacheGasPriceOracleOwner accepts a statedb and caches the gas price oracle
 // owner address locally
 func (s *SyncService) cacheGasPriceOracleOwner(statedb *state.StateDB) error {
@@ -955,17 +965,23 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	// Prevent transactions without enough balance from
 	// being accepted by the chain but allow through 0
 	// gas price transactions
+	from, err := types.Sender(s.signer, tx)
+	if err != nil {
+		return fmt.Errorf("invalid transaction: %w", core.ErrInvalidSender)
+	}
 	cost := tx.Value()
-	if tx.GasPrice().Cmp(common.Big0) != 0 {
-		cost = cost.Add(cost, fee)
+	var zeroAddress common.Address
+	if tx.QueueOrigin() == types.QueueOriginSequencer && from != zeroAddress {
+		gpoOwner := s.GasPriceOracleOwnerAddress()
+		if gpoOwner != nil {
+			if from != *gpoOwner {
+				cost = cost.Add(cost, fee)
+			}
+		}
 	}
 	state, err := s.bc.State()
 	if err != nil {
 		return err
-	}
-	from, err := types.Sender(s.signer, tx)
-	if err != nil {
-		return fmt.Errorf("invalid transaction: %w", core.ErrInvalidSender)
 	}
 	if state.GetBalance(from).Cmp(cost) < 0 {
 		return fmt.Errorf("invalid transaction: %w", core.ErrInsufficientFunds)
@@ -1130,13 +1146,16 @@ func (s *SyncService) syncToTip(sync syncer, getTip indexGetter) error {
 func (s *SyncService) sync(getLatest indexGetter, getNext nextGetter, syncer rangeSyncer) (*uint64, error) {
 	latestIndex, err := getLatest()
 	if err != nil {
+		log.Error("SyncService failed to getLatest", "err", err)
 		return nil, fmt.Errorf("Cannot sync: %w", err)
 	}
 	if latestIndex == nil {
+		log.Error("SyncService Latest index is not defined")
 		return nil, errors.New("Latest index is not defined")
 	}
 
 	nextIndex := getNext()
+	log.Info("SyncService sync", "nextIndex", nextIndex, "latestIndex", *latestIndex)
 	if nextIndex == *latestIndex+1 {
 		return latestIndex, nil
 	}

@@ -23,10 +23,7 @@ export const predeploys = {
 
   // We're also putting WETH9 at the old BVM_ETH address.
   WETH9: '0x4200000000000000000000000000000000000006',
-}
 
-export const futurePredeploys = {
-  // System addresses, for use later
-  System0: '0x4200000000000000000000000000000000000042',
-  System1: '0x4200000000000000000000000000000000000014',
+  // Tss rewards default contract
+  TssRewardContract: '0x4200000000000000000000000000000000000020',
 }

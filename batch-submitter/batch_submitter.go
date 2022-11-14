@@ -9,6 +9,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/proposer"
 	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/sequencer"
+	tss "github.com/mantlenetworkio/mantle/batch-submitter/tss-client"
 	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/bss-core/dial"
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
@@ -102,6 +103,9 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			return err
 		}
 
+		tssClient := tss.NewClient(cfg.TssClientUrl)
+		log.Info("Configured tss client", "url", cfg.TssClientUrl)
+
 		if cfg.MetricsServerEnable {
 			go metrics.RunServer(cfg.MetricsHostname, cfg.MetricsPort)
 		}
@@ -152,6 +156,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				Name:                 "Proposer",
 				L1Client:             l1Client,
 				L2Client:             l2Client,
+				TssClient:            tssClient,
 				BlockOffset:          cfg.BlockOffset,
 				MinStateRootElements: cfg.MinStateRootElements,
 				MaxStateRootElements: cfg.MaxStateRootElements,

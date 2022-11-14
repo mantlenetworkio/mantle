@@ -115,8 +115,8 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
         break
       } catch (e) {
         retries++
-        this.logger.info(`Cannot connect to L2, retrying ${retries}/20`)
-        if (retries >= 20) {
+        this.logger.info(`Cannot connect to L2, retrying ${retries}/1000`)
+        if (retries >= 1000) {
           this.logger.info('Cannot connect to L2, shutting down')
           await this.stop()
           process.exit()

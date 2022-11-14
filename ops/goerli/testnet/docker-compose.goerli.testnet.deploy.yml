@@ -1,0 +1,38 @@
+version: '3.4'
+
+networks:
+  mantle: {}
+
+x-base: &base
+  restart: unless-stopped
+  networks:
+    mantle: {}
+
+services:
+  deployer:
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.packages
+      target: deployer
+    image: mantlenetworkio/deployer:${DOCKER_TAG_DEPLOYER:-latest}
+    entrypoint: ./deployer.sh
+    <<: *base
+    container_name: mantledeployer
+    environment:
+      CONTRACTS_RPC_URL: ${CONTRACTS_RPC_URL:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
+      CONTRACTS_DEPLOYER_KEY: ${CONTRACTS_DEPLOYER_KEY:-04586afc8e720e5dbb06f598b056d835bb02cd9743efd438cda8055c90722f33}
+      CONTRACTS_TARGET_NETWORK: ${CONTRACTS_TARGET_NETWORK:-goerli-testnet}
+      ETHERSCAN_API_KEY: ${ETHERSCAN_API_KEY:-B1XAN986315AME96W9QK7X1RGQ6WJMWEPW}
+      BVM_SEQUENCER_ADDRESS: ${BVM_SEQUENCER_ADDRESS:-}
+      BVM_PROPOSER_ADDRESS: ${BVM_PROPOSER_ADDRESS:-}
+      SKIP_CONTRACT_DEPLOY: ${SKIP_CONTRACT_DEPLOY:-NO}
+      BVM_BLOCK_SIGNER_ADDRESS: ${BVM_BLOCK_SIGNER_ADDRESS:-}
+      BVM_FEE_WALLET_ADDRESS: ${BVM_FEE_WALLET_ADDRESS:-}
+      BVM_ADDRESS_MANAGER_OWNER: ${BVM_ADDRESS_MANAGER_OWNER:-}
+      BVM_GAS_PRICE_ORACLE_OWNER: ${BVM_GAS_PRICE_ORACLE_OWNER:-}
+      AUTOMATICALLY_TRANSFER_OWNERSHIP: ${AUTOMATICALLY_TRANSFER_OWNERSHIP:-true}
+      L1_BIT_ADDRESS: ${L1_BIT_ADDRESS:-0x2f633e75b97569Bb1Ad1A646C736E82402Bb17cf}
+    ports:
+      # expose the service to the host for getting the contract addrs
+      - ${DEPLOYER_PORT:-8080}:8081
+

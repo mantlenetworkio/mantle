@@ -1,6 +1,6 @@
 {
   "name": "@mantlenetworkio/contracts",
-  "version": "0.0.1",
+  "version": "2.1.0",
   "description": "[Mantle] L1 and L2 smart contracts for Mantle",
   "main": "dist/index",
   "types": "dist/index",
@@ -73,6 +73,7 @@
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@openzeppelin/hardhat-upgrades": "1.13.0",
     "@openzeppelin/contracts": "4.3.2",
     "@openzeppelin/contracts-upgradeable": "4.7.1",
     "@primitivefi/hardhat-dodoc": "^0.1.3",

@@ -35,6 +35,7 @@ export const DEFAULT_L2_CONTRACT_ADDRESSES: OEL2ContractsLike = {
   BVM_GasPriceOracle: predeploys.BVM_GasPriceOracle,
   BVM_SequencerFeeVault: predeploys.BVM_SequencerFeeVault,
   WETH: predeploys.WETH9,
+  TssRewardContract: predeploys.TssRewardContract,
 }
 
 /**
@@ -99,43 +100,84 @@ export const CONTRACT_ADDRESSES: {
   },
   [L2ChainID.MANTLE_GOERLIQA]: {
     l1: {
-      AddressManager: '0xcBE8BE5C1B8c592cCb85987672B316a2c4e86d96' as const,
+      AddressManager:
+        process.env.ADDRESS_MANAGER_ADDRESS ||
+        ('0x68F1128d39b28C49D4fbe703f806734C01809A66' as const),
       L1CrossDomainMessenger:
-        '0xAf61D8ce46603c9AE729A4e2E67D8353e1d95355' as const,
-      L1StandardBridge: '0x5Be4513Cd5A90f473321450a1091C8B5dB4F4Bc5' as const,
+        process.env.L1_CROSS_DOMAIN_MESSENGER_ADDRESS ||
+        ('0x7B13E571a4526326d8D07FF8A93Cd0F92A72202B' as const),
+      L1StandardBridge:
+        process.env.L1_STANDARD_BRIDGE_ADDRESS ||
+        ('0x45574aCac0c12Ec6f3AAa1b2fBfA0F69A818D7D1' as const),
       StateCommitmentChain:
-        '0xED784d2923DB9CeC0AADa4c315278cE53c69036b' as const,
+        process.env.STATE_COMMITMENT_CHAIN_ADDRESS ||
+        ('0x56Fab8B6bceB262fC6E17cA142d1b3e611aE076F' as const),
       CanonicalTransactionChain:
-        '0xBa59029110487802a43397FAB9d3641CD4b5578A' as const,
-      BondManager: '0xBcAB2B019a9186520FA230a81CceB54868018898' as const,
+        process.env.CANONICAL_TRANSACTION_CHAIN_ADDRESS ||
+        ('0x2E816dC5A21868f160bDad407a740a580245251C' as const),
+      BondManager:
+        process.env.BOND_MANAGER_ADDRESS ||
+        ('0x1314822B932acC95Aa2B04F6b5CfC33e39aFfB2a' as const),
+    },
+    l2: DEFAULT_L2_CONTRACT_ADDRESSES,
+  },
+  [L2ChainID.MANTLE_TESTNET]: {
+    l1: {
+      AddressManager: '0xfA5b622409E1782597952a4A78c1D34CF32fF5e2' as const,
+      L1CrossDomainMessenger:
+        '0x5086d1eEF304eb5284A0f6720f79403b4e9bE294' as const,
+      L1StandardBridge: '0x636Af16bf2f682dD3109e60102b8E1A089FedAa8' as const,
+      StateCommitmentChain:
+        '0x9c945aC97Baf48cB784AbBB61399beB71aF7A378' as const,
+      CanonicalTransactionChain:
+        '0x607F755149cFEB3a14E1Dc3A4E2450Cde7dfb04D' as const,
+      BondManager: '0xfC2ab6987C578218f99E85d61Dcf4814A26637Bd' as const,
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
   [L2ChainID.MANTLE_HARDHAT_LOCAL]: {
     l1: {
-      AddressManager: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as const,
+      AddressManager:
+        process.env.ADDRESS_MANAGER_ADDRESS ||
+        ('0x92aBAD50368175785e4270ca9eFd169c949C4ce1' as const),
       L1CrossDomainMessenger:
-        '0x8A791620dd6260079BF849Dc5567aDC3F2FdC318' as const,
-      L1StandardBridge: '0x610178dA211FEF7D417bC0e6FeD39F05609AD788' as const,
+        process.env.L1_CROSS_DOMAIN_MESSENGER_ADDRESS ||
+        ('0x7959CF3b8ffC87Faca8aD8a1B5D95c0f58C0BEf8' as const),
+      L1StandardBridge:
+        process.env.L1_STANDARD_BRIDGE_ADDRESS ||
+        ('0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9' as const),
       StateCommitmentChain:
-        '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9' as const,
+        process.env.STATE_COMMITMENT_CHAIN_ADDRESS ||
+        ('0xd9e2F450525079e1e29fB23Bc7Caca6F61f8fD4a' as const),
       CanonicalTransactionChain:
-        '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9' as const,
-      BondManager: '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707' as const,
+        process.env.CANONICAL_TRANSACTION_CHAIN_ADDRESS ||
+        ('0x0090171f848B2aa86918E5Ef2406Ab3d424fdd83' as const),
+      BondManager:
+        process.env.BOND_MANAGER_ADDRESS ||
+        ('0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const),
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
   [L2ChainID.MANTLE_HARDHAT_DEVNET]: {
     l1: {
-      AddressManager: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as const,
+      AddressManager:
+        process.env.ADDRESS_MANAGER_ADDRESS ||
+        ('0x92aBAD50368175785e4270ca9eFd169c949C4ce1' as const),
       L1CrossDomainMessenger:
-        '0x8A791620dd6260079BF849Dc5567aDC3F2FdC318' as const,
-      L1StandardBridge: '0x610178dA211FEF7D417bC0e6FeD39F05609AD788' as const,
+        process.env.L1_CROSS_DOMAIN_MESSENGER_ADDRESS ||
+        ('0x7959CF3b8ffC87Faca8aD8a1B5D95c0f58C0BEf8' as const),
+      L1StandardBridge:
+        process.env.L1_STANDARD_BRIDGE_ADDRESS ||
+        ('0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9' as const),
       StateCommitmentChain:
-        '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9' as const,
+        process.env.STATE_COMMITMENT_CHAIN_ADDRESS ||
+        ('0xd9e2F450525079e1e29fB23Bc7Caca6F61f8fD4a' as const),
       CanonicalTransactionChain:
-        '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9' as const,
-      BondManager: '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707' as const,
+        process.env.CANONICAL_TRANSACTION_CHAIN_ADDRESS ||
+        ('0x0090171f848B2aa86918E5Ef2406Ab3d424fdd83' as const),
+      BondManager:
+        process.env.BOND_MANAGER_ADDRESS ||
+        ('0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const),
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },

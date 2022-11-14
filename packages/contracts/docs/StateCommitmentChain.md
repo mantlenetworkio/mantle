@@ -47,7 +47,7 @@ function SEQUENCER_PUBLISH_WINDOW() external view returns (uint256)
 ### appendStateBatch
 
 ```solidity
-function appendStateBatch(bytes32[] _batch, uint256 _shouldStartAtElement) external nonpayable
+function appendStateBatch(bytes32[] _batch, uint256 _shouldStartAtElement, bytes _signature) external nonpayable
 ```
 
 Appends a batch of state roots to the chain.
@@ -60,6 +60,7 @@ Appends a batch of state roots to the chain.
 |---|---|---|
 | _batch | bytes32[] | Batch of state roots.
 | _shouldStartAtElement | uint256 | Index of the element at which this batch should start.
+| _signature | bytes | undefined
 
 ### batches
 
@@ -184,6 +185,23 @@ function libAddressManager() external view returns (contract Lib_AddressManager)
 |---|---|---|
 | _0 | contract Lib_AddressManager | undefined
 
+### messenger
+
+```solidity
+function messenger() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
+
 ### resolve
 
 ```solidity
@@ -234,10 +252,29 @@ Verifies a batch inclusion proof.
 
 ## Events
 
+### DistributeTssReward
+
+```solidity
+event DistributeTssReward(uint256 indexed _startBlockNumber, uint256 _length, uint256 indexed _batchTime, address[] _tssMembers)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _startBlockNumber `indexed` | uint256 | undefined |
+| _length  | uint256 | undefined |
+| _batchTime `indexed` | uint256 | undefined |
+| _tssMembers  | address[] | undefined |
+
 ### StateBatchAppended
 
 ```solidity
-event StateBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint256 _batchSize, uint256 _prevTotalElements, bytes _extraData)
+event StateBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint256 _batchSize, uint256 _prevTotalElements, bytes _signature, bytes _extraData)
 ```
 
 
@@ -252,6 +289,7 @@ event StateBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint25
 | _batchRoot  | bytes32 | undefined |
 | _batchSize  | uint256 | undefined |
 | _prevTotalElements  | uint256 | undefined |
+| _signature  | bytes | undefined |
 | _extraData  | bytes | undefined |
 
 ### StateBatchDeleted
