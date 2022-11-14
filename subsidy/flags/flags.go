@@ -11,7 +11,7 @@ var (
 	UserDir, _          = os.UserHomeDir()
 	EthereumHttpUrlFlag = cli.StringFlag{
 		Name:   "ethereum-http-url",
-		Value:  "https://rpc.ankr.com/eth_goerli",
+		Value:  "http://127.0.0.1:9545",
 		Usage:  "L1 HTTP Endpoint",
 		EnvVar: "SUBSIDY_ETHEREUM_HTTP_URL",
 	}
