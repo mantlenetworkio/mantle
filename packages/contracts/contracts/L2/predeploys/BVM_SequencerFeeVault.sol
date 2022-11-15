@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 /* Library Imports */
 import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAddresses.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /* Contract Imports */
 import {L2StandardBridge} from "../messaging/L2StandardBridge.sol";
@@ -14,13 +15,11 @@ import {IBVM_GasPriceOracle} from "./iBVM_GasPriceOracle.sol";
  * @dev Simple holding contract for fees paid to the Sequencer. Likely to be replaced in the future
  * but "good enough for now".
  */
-contract BVM_SequencerFeeVault {
+contract BVM_SequencerFeeVault is Ownable {
     /*************
      * Constants *
      *************/
 
-    // Minimum ETH balance that can be withdrawn in a single withdrawal.
-    uint256 public constant MIN_WITHDRAWAL_AMOUNT = 15 ether;
 
     /*************
      * Variables *
@@ -33,6 +32,10 @@ contract BVM_SequencerFeeVault {
 
     uint256 public constant L1Gas = 200_000;
 
+    address public burner;
+    // Minimum ETH balance that can be withdrawn in a single withdrawal.
+    uint256 public minWithdrawalAmount;
+
     /***************
      * Constructor *
      ***************/
@@ -42,9 +45,14 @@ contract BVM_SequencerFeeVault {
      * Currently HAS NO EFFECT in production because l2geth will mutate this storage slot during
      * the genesis block. This is ONLY for testing purposes.
      */
-    constructor(address _l1FeeWallet, address _bvmGasPriceOracleAddress) {
+    constructor(address _owner,address _l1FeeWallet, address _bvmGasPriceOracleAddress,address _burner,uint256 _minWithdrawalAmount)
+    Ownable()
+    {
+        transferOwnership(_owner);
         l1FeeWallet = _l1FeeWallet;
         bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
+        burner = _burner;
+        minWithdrawalAmount = _minWithdrawalAmount;
     }
 
     /************
@@ -62,13 +70,13 @@ contract BVM_SequencerFeeVault {
     function withdraw() public {
         address to = l1FeeWallet;
         if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() == true) {
-            to = address(0x000000000000000000000000000000000000dEaD);
-            if (address(this).balance < MIN_WITHDRAWAL_AMOUNT) {
+            to = burner;
+            if (address(this).balance < minWithdrawalAmount * 1 ether) {
                 return;
             }
         } else {
             require(
-                address(this).balance >= MIN_WITHDRAWAL_AMOUNT,
+                address(this).balance >= minWithdrawalAmount * 1 ether,
             // solhint-disable-next-line max-line-length
                 "BVM_SequencerFeeVault: withdrawal amount must be greater than minimum withdrawal amount"
             );
@@ -81,5 +89,9 @@ contract BVM_SequencerFeeVault {
             0,
             bytes("")
         );
+    }
+
+    function setReceiver(address _burner) public {
+        burner = _burner;
     }
 }

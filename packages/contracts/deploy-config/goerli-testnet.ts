@@ -14,6 +14,7 @@ const config = {
   bvmFeeWalletAddress: process.env.BVM_FEE_WALLET_ADDRESS || '0xDfCDD683728F83A5da850a210db828e6f35DCfA6',
   bvmAddressManagerOwner: process.env.BVM_ADDRESS_MANAGER_OWNER || '0xD6b4145dEAbE1b66dD3213080b89AF06EC8828cF',
   bvmGasPriceOracleOwner: process.env.BVM_GAS_PRICE_ORACLE_OWNER || '0xDfCDD683728F83A5da850a210db828e6f35DCfA6',
+  bvmFeeWalletOwner: process.env.BVM_FEE_WALLETOWNER_OWNER ||'0xDfCDD683728F83A5da850a210db828e6f35DCfA6',
   bvmTssRewardContractOwner: process.env.TssRewardContractOwner || '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
   l1BitAddress: process.env.L1_BIT_ADDRESS || '0x2f633e75b97569Bb1Ad1A646C736E82402Bb17cf',
 }

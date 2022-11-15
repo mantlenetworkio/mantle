@@ -232,6 +232,9 @@ const config: HardhatUserConfig = {
     bvmGasPriceOracleOwner: {
       type: 'address',
     },
+    bvmFeeWalletOwner: {
+      type: 'address',
+    },
     bvmWhitelistOwner: {
       type: 'address',
       default: ethers.constants.AddressZero,

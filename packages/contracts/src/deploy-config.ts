@@ -82,6 +82,11 @@ export interface DeployConfig {
   /**
    * Address of the owner of the GasPriceOracle contract on L2.
    */
+  bvmFeeWalletOwner: string
+
+  /**
+   * Address of the owner of the GasPriceOracle contract on L2.
+   */
   bvmGasPriceOracleOwner: string
 
   /**
@@ -183,6 +188,9 @@ const configSpec: {
     type: 'address',
   },
   bvmGasPriceOracleOwner: {
+    type: 'address',
+  },
+  bvmFeeWalletOwner: {
     type: 'address',
   },
   bvmWhitelistOwner: {
