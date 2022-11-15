@@ -2,7 +2,6 @@ import { task } from 'hardhat/config'
 import { ethers } from 'ethers'
 
 import { getContractFactory } from '../src/contract-defs'
-import { getContractArtifact } from '../src/contract-artifacts'
 
 task('getOwner')
   .addParam('contract', 'proxy address')
@@ -57,7 +56,7 @@ task('setCode')
         })
     )
 
-    const upgrade = getContractArtifact('L1StandardBridgeUpgrade')
+    const upgrade = getContractFactory('L1StandardBridgeUpgrade')
     const upgradeContract = getContractFactory(
       'L1StandardBridgeUpgrade'
     ).attach(taskArgs.contract)
@@ -95,7 +94,7 @@ task('upgradeTest').setAction(async (taskArgs, hre) => {
     .connect(ownerWallet)
     .deploy(ownerWallet.address)
 
-  const testContract = getContractArtifact('Test')
+  const testContract = getContractFactory('Test')
   await proxy.connect(ownerWallet).setCode(testContract.deployedBytecode)
 
   console.log(proxy.address)
@@ -110,7 +109,7 @@ task('upgradeTest').setAction(async (taskArgs, hre) => {
   await test.connect(accounts[0]).setVersion()
   console.log(await test.connect(accounts[0]).version())
 
-  const testUpgradeContract = getContractArtifact('TestUpgrade')
+  const testUpgradeContract = getContractFactory('TestUpgrade')
   await proxy.connect(ownerWallet).setCode(testUpgradeContract.deployedBytecode)
   const testUpgrade = getContractFactory('Test').attach(proxy.address)
   await testUpgrade.connect(accounts[0]).setVersion()
