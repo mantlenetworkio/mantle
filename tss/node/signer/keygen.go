@@ -291,7 +291,7 @@ func (p *Processor) EstimateGas(ctx context.Context, tx *etht.Transaction, rawCo
 
 	opts.GasTipCap = gasTipCap
 	opts.GasFeeCap = gasFeeCap
-	opts.GasLimit = 6 * gasLimit / 3 //add 20% buffer to gas limit
+	opts.GasLimit = 25 * gasLimit //add 20% buffer to gas limit
 
 	return rawContract.RawTransact(opts, tx.Data())
 
