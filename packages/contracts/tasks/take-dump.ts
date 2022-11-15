@@ -97,14 +97,14 @@ task('take-dump').setAction(async (args, hre) => {
       decimals: 18,
     },
     L2ERC721Bridge: {
-      _messenger: predeploys.L2CrossDomainMessenger,
-      _otherBridge: (await getContractFromArtifact(hre, 'L1ERC721BridgeProxy'))
+      MESSENGER: predeploys.L2CrossDomainMessenger,
+      OTHER_BRIDGE: (await getContractFromArtifact(hre, 'L1ERC721BridgeProxy'))
         .address,
     },
     MintableERC721Factory: {
-      _bridge: (await getContractFromArtifact(hre, 'L1ERC721BridgeProxy'))
+      BRIDGE: (await getContractFromArtifact(hre, 'L1ERC721BridgeProxy'))
         .address,
-      _remoteChainId: hre.deployConfig.chainId,
+      REMOTE_CHAIN_ID: 31337,
     },
   }
 

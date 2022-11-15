@@ -1,3 +1,4 @@
+L1ERC721Bridge
 ChainStorageContainer-SCC-batches
 StateCommitmentChain
 TestBitToken
@@ -5,6 +6,7 @@ ChainStorageContainer-CTC-batches
 Proxy__BVM_L1StandardBridge
 TssStakingSlashing
 BVM_L1CrossDomainMessenger
+L1ERC721BridgeProxy
 Proxy__TSS_GroupManager
 Lib_AddressManager
 AddressDictator

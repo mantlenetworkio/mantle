@@ -12,12 +12,12 @@ abstract contract ERC721Bridge {
     /**
      * @notice Messenger contract on this domain.
      */
-    CrossDomainMessenger public immutable MESSENGER;
+    CrossDomainMessenger public MESSENGER;
 
     /**
      * @notice Address of the bridge on the other network.
      */
-    address public immutable OTHER_BRIDGE;
+    address public OTHER_BRIDGE;
 
     /**
      * @notice Reserve extra slots (to a total of 50) in the storage layout for future upgrades.

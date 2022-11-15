@@ -12,12 +12,12 @@ contract MintableERC721Factory is Semver {
     /**
      * @notice Address of the ERC721 bridge on this network.
      */
-    address public immutable BRIDGE;
+    address public BRIDGE;
 
     /**
      * @notice Chain ID for the remote network.
      */
-    uint256 public immutable REMOTE_CHAIN_ID;
+    uint256 public REMOTE_CHAIN_ID;
 
     /**
      * @notice Tracks addresses created by this factory.
