@@ -15,7 +15,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
-// NewSequencerBlockEvent is posted when sequencer set has been imported.
+// ProducersUpdateEvent is posted when sequencer set has been imported.
 type ProducersUpdateEvent struct{ Update *ProducerUpdate }
 
 type ProducerUpdate struct {
@@ -79,6 +79,11 @@ func (seqS *SequencerServer) Start() {
 func (seqS *SequencerServer) readLoop() {
 	defer seqS.wg.Done()
 	for {
+		// we need pre-preparation is ready first then we can restart the server
+		if !seqS.check() {
+			log.Debug("Sequencer server pre-preparation is not ready")
+			return
+		}
 		select {
 		case <-seqS.ticker.C:
 			seqSet, err := sequencer.GetSequencerSet()
