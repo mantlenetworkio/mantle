@@ -80,9 +80,12 @@ const config: HardhatUserConfig = {
     },
     'goerli-testnet': {
       chainId: 5,
-      url: 'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28',
+      //url: 'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28',
+      url: 'https://goerli.davionlabs.com',
       deploy,
       accounts: [privateKey],
+      gas: 'auto',
+      gasPrice: 'auto',
     },
     kovan: {
       chainId: 42,
