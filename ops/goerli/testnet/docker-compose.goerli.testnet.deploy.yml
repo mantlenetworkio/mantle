@@ -19,7 +19,7 @@ services:
     <<: *base
     container_name: mantledeployer
     environment:
-      CONTRACTS_RPC_URL: ${CONTRACTS_RPC_URL:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
+      CONTRACTS_RPC_URL: ${CONTRACTS_RPC_URL:-https://eth-goerli.g.alchemy.com/v2/g4xaCKoNBGNcikWM_FdWfWzMbGWqkNjE}
       CONTRACTS_DEPLOYER_KEY: ${CONTRACTS_DEPLOYER_KEY:-04586afc8e720e5dbb06f598b056d835bb02cd9743efd438cda8055c90722f33}
       CONTRACTS_TARGET_NETWORK: ${CONTRACTS_TARGET_NETWORK:-goerli-testnet}
       ETHERSCAN_API_KEY: ${ETHERSCAN_API_KEY:-B1XAN986315AME96W9QK7X1RGQ6WJMWEPW}
