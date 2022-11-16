@@ -91,7 +91,15 @@ contract BVM_SequencerFeeVault is Ownable {
         );
     }
 
-    function setReceiver(address _burner) public {
+    function setBurner(address _burner) public onlyOwner{
         burner = _burner;
+    }
+
+    function setMinWithdrawalAmount(uint256 _minWithdrawalAmount) public onlyOwner{
+        minWithdrawalAmount = _minWithdrawalAmount;
+    }
+
+    function setL1FeeWallet(address _l1FeeWallet) public onlyOwner{
+        l1FeeWallet = _l1FeeWallet;
     }
 }

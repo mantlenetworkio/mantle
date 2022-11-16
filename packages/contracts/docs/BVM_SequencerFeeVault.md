@@ -123,10 +123,10 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
 
-### setReceiver
+### setBurner
 
 ```solidity
-function setReceiver(address _burner) external nonpayable
+function setBurner(address _burner) external nonpayable
 ```
 
 
@@ -138,6 +138,38 @@ function setReceiver(address _burner) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | _burner | address | undefined
+
+### setL1FeeWallet
+
+```solidity
+function setL1FeeWallet(address _l1FeeWallet) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _l1FeeWallet | address | undefined
+
+### setMinWithdrawalAmount
+
+```solidity
+function setMinWithdrawalAmount(uint256 _minWithdrawalAmount) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _minWithdrawalAmount | uint256 | undefined
 
 ### transferOwnership
 

@@ -65,8 +65,8 @@ task('take-dump').setAction(async (args, hre) => {
       owner: hre.deployConfig.bvmFeeWalletOwner,
       l1FeeWallet: hre.deployConfig.bvmFeeWalletAddress,
       bvmGasPriceOracleAddress: predeploys.BVM_GasPriceOracle,
-      burner :'0x000000000000000000000000000000000000dEaD',
-      minWithdrawalAmount:15,
+      burner: '0x000000000000000000000000000000000000dEaD',
+      minWithdrawalAmount: 15,
     },
     BVM_ETH: {
       l2Bridge: predeploys.L2StandardBridge,
