@@ -70,6 +70,7 @@ jobs:
           test "${SERVICE_NAME}" = "replica-healthcheck"  && echo "::set-output name=replica-healthcheck::$(grep version packages/replica-healthcheck/package.json | egrep -o '[0-9\.]+' )" || true
           test "${SERVICE_NAME}" = "batch-submitter"      && echo "::set-output name=batch-submitter::$(grep version batch-submitter/package.json | egrep -o '[0-9\.]+' )" || true
           test "${SERVICE_NAME}" = "tss"                  && echo "::set-output name=tss::$(grep version tss/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "subsidy"              && echo "::set-output name=tss::$(grep version subsidy/package.json | egrep -o '[0-9\.]+' )" || true
 
   l2geth:
     name: Publish L2Geth Version ${{ needs.release.outputs.l2geth }}
@@ -507,10 +508,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Publish tss
+      - name: Publish subsidy
         uses: docker/build-push-action@v2
         with:
           context: .
           file: ./subsidy/Dockerfile
           push: true
-          tags: mantlenetworkio/subsidy:${{ needs.release.outputs.tss }},mantlenetworkio/subsidy:latest
+          tags: mantlenetworkio/subsidy:${{ needs.release.outputs.subsidy }},mantlenetworkio/subsidy:latest
