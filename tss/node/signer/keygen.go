@@ -161,13 +161,24 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	}
 
 	newTx, err := p.EstimateGas(p.ctx, tx, rawTgmContract, address)
+
 	if err != nil {
 		p.logger.Err(err).Msg("got failed in estimate gas function ")
 		return err
 	}
 
 	if err := p.l1Client.SendTransaction(p.ctx, newTx); err != nil {
-		p.logger.Err(err).Msg("Unable to send transaction to l1 chain")
+		p.logger.Err(err).Msg("Unable to send transaction to l1 chain, need to retry ")
+		for i := 0; i < 3; i++ {
+			p.logger.Info().Msgf("commit transaction retry %d times", i)
+			newTx, err = p.RetryTransaction(newTx, rawTgmContract)
+			if err == nil {
+				err = p.l1Client.SendTransaction(p.ctx, newTx)
+				if err == nil {
+					break
+				}
+			}
+		}
 		return err
 	}
 
@@ -211,7 +222,7 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 			}
 		}
 	}
-	go confirmTxReceipt(tx.Hash())
+	go confirmTxReceipt(newTx.Hash())
 	if err != nil {
 		return err
 	}
@@ -256,7 +267,7 @@ func (p *Processor) EstimateGas(ctx context.Context, tx *etht.Transaction, rawCo
 	} else {
 		gasTipCap, err = p.l1Client.SuggestGasTipCap(ctx)
 		if err != nil {
-			p.logger.Debug().Msg("failed to SuggestGasTipCap, FallbackGasTipCap = big.NewInt(1500000000) ")
+			p.logger.Warn().Msg("failed to SuggestGasTipCap, FallbackGasTipCap = big.NewInt(1500000000) ")
 			gasTipCap = big.NewInt(1500000000)
 		}
 		gasFeeCap = new(big.Int).Add(
@@ -293,6 +304,31 @@ func (p *Processor) EstimateGas(ctx context.Context, tx *etht.Transaction, rawCo
 	opts.GasFeeCap = gasFeeCap
 	opts.GasLimit = 25 * gasLimit //add 20% buffer to gas limit
 
+	return rawContract.RawTransact(opts, tx.Data())
+
+}
+
+func (p *Processor) RetryTransaction(tx *etht.Transaction, rawContract *bind.BoundContract) (*etht.Transaction, error) {
+	p.logger.Info().Msg("start to retry commit transaction to l1chain")
+	nonce64, err := p.l1Client.NonceAt(p.ctx, p.address, nil)
+	if err != nil {
+		p.logger.Err(err).Msgf("%s unable to get current nonce",
+			p.address)
+		return nil, err
+	}
+	p.logger.Info().Msgf("Current nonce is %d", nonce64)
+
+	opts, err := bind.NewKeyedTransactorWithChainID(p.privateKey, p.chainId)
+	if err != nil {
+		p.logger.Err(err).Msg("failed to new ops in estimate gas function")
+		return nil, err
+	}
+	opts.Context = context.Background()
+	opts.NoSend = true
+	opts.Nonce = new(big.Int).SetUint64(nonce64)
+	opts.GasTipCap = tx.GasTipCap()
+	opts.GasFeeCap = tx.GasFeeCap()
+	opts.GasLimit = tx.Gas()
 	return rawContract.RawTransact(opts, tx.Data())
 
 }
