@@ -14,6 +14,7 @@ const config = {
   bvmFeeWalletAddress: '0x391716d440c151c42cdf1c95c1d83a5427bca52c',
   bvmAddressManagerOwner: '0x9BA6e03D8B90dE867373Db8cF1A58d2F7F006b3A',
   bvmGasPriceOracleOwner: '0x7107142636C85c549690b1Aca12Bdb8052d26Ae6',
+  bvmFeeWalletOwner: '0x7107142636C85c549690b1Aca12Bdb8052d26Ae6',
   bvmWhitelistOwner: '0x648E3e8101BFaB7bf5997Bd007Fb473786019159',
 }
 
