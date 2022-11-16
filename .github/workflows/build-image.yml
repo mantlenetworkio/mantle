@@ -21,6 +21,7 @@ on:
         - replica-healthcheck
         - batch-submitter
         - tss
+        - subsidy
 
 jobs:
   release:
