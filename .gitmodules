@@ -4,3 +4,6 @@
 [submodule "datalayr-mantle"]
 	path = datalayr-mantle
 	url = https://github.com/Layr-Labs/datalayr-mantle
+[submodule "eignlayr-contracts-mantle"]
+	path = eignlayr-contracts-mantle
+	url = https://github.com/Layr-Labs/eignlayr-contracts-mantle
