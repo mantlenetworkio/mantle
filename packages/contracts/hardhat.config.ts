@@ -1,7 +1,7 @@
-import {HardhatUserConfig} from 'hardhat/types'
+import { HardhatUserConfig } from 'hardhat/types'
 import 'solidity-coverage'
 import * as dotenv from 'dotenv'
-import {ethers} from 'ethers'
+import { ethers } from 'ethers'
 
 // Hardhat plugins
 import '@openzeppelin/hardhat-upgrades'
@@ -24,6 +24,31 @@ dotenv.config()
 const enableGasReport = !!process.env.ENABLE_GAS_REPORT
 const privateKey = process.env.PRIVATE_KEY || '0x' + '11'.repeat(32) // this is to avoid hardhat error
 const deploy = process.env.DEPLOY_DIRECTORY || 'deploy'
+
+import { copySync, remove } from 'fs-extra'
+import { subtask } from 'hardhat/config'
+import { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } from 'hardhat/builtin-tasks/task-names'
+
+const copyFilter = function (src, dest) {
+  console.log(src)
+}
+
+subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
+  async (_, __, runSuper) => {
+    console.log('running task')
+    const source =
+      '../../datalayr-mantle/contracts/datalayr-rollup-example-contracts/src'
+    copySync(source, './contracts/data-availability', { filter: copyFilter })
+
+    await remove('./contracts/data-availability/Parser.sol')
+    await remove('./contracts/data-availability/DataLayrRollup.sol')
+    await remove('./contracts/data-availability/libraries/BNHelper.sol')
+
+    const paths = await runSuper()
+
+    return paths
+  }
+)
 
 const config: HardhatUserConfig = {
   networks: {
@@ -108,13 +133,13 @@ const config: HardhatUserConfig = {
       {
         version: '0.8.9',
         settings: {
-          optimizer: {enabled: true, runs: 10_000},
+          optimizer: { enabled: true, runs: 10_000 },
         },
       },
       {
         version: '0.5.17', // Required for WETH9
         settings: {
-          optimizer: {enabled: true, runs: 10_000},
+          optimizer: { enabled: true, runs: 10_000 },
         },
       },
     ],

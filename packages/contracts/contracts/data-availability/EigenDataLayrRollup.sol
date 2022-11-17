@@ -2,8 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../../../../datalayr-mantle/contracts/datalayr-rollup-example-contracts/src/libraries/DataLayrDisclosureLogic.sol";
-import "../../../../datalayr-mantle/contracts/datalayr-rollup-example-contracts/src/Parser.sol";
+import "./libraries/DataLayrDisclosureLogic.sol";
 
 // This contract is a rollup built on top of datalayr that allows an enshrined sequencer to store data
 // on datalayr, but slashes them if the data they store ever contains a certain unallowed message
@@ -115,7 +114,10 @@ contract DataLayrRollup is Parser {
         IDataLayrServiceManager.DataStoreSearchData memory searchData
     ) external {
         require(msg.sender == sequencer, "Only the sequencer can store data");
-
+        require(
+            sequencerStatus == SequencerStatus.STAKED,
+            "Sequencer can only confirm if they are staked"
+        );
         require(
             dataStoreIdToRollupStoreNumber[searchData.metadata.globalDataStoreId] ==
                 DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED,
