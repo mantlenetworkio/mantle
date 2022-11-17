@@ -30,6 +30,23 @@ func (pm *ProtocolManager) makeConsensusProtocol(version uint) p2p.Protocol {
 	}
 }
 
+func (pm *ProtocolManager) removePeerTmp(id string) {
+	// Short circuit if the peer was already removed
+	peer := pm.peersTmp.Peer(id)
+	if peer == nil {
+		return
+	}
+	log.Debug("Removing Ethereum consensus peer", "peer", id)
+
+	if err := pm.peersTmp.Unregister(id); err != nil {
+		log.Error("Consensus Peer removal failed", "peer", id, "err", err)
+	}
+	// Hard disconnect at the networking layer
+	if peer != nil {
+		peer.Peer.Disconnect(p2p.DiscUselessPeer)
+	}
+}
+
 func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter) error {
 	p := pm.newPeer(int(eth64), peer, rw)
 	select {
@@ -61,12 +78,12 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 			p.Log().Error("Ethereum peer registration failed", "err", err)
 			return err
 		}
-		defer pm.removePeer(p.id)
+		defer pm.removePeerTmp(p.id)
 
 		// Handle incoming messages until the connection is torn down
 		for {
 			if err := pm.handleConsensusMsg(p); err != nil {
-				p.Log().Debug("Ethereum message handling failed", "err", err)
+				p.Log().Debug("Ethereum consensus message handling failed", "err", err)
 				return err
 			}
 		}

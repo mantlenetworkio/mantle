@@ -367,6 +367,7 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 		if !bytes.Equal(header.Extra[extraVanity:extraSuffix], signers) {
 			return errMismatchingCheckpointSigners
 		}
+		// todo verify producer
 	}
 	// All basic checks passed, verify the seal and return
 	return c.verifySeal(chain, header, parents)

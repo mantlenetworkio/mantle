@@ -83,7 +83,8 @@ type ProtocolManager struct {
 	peers      *peerSet
 
 	// tmp test
-	peersTmp      *peerSet
+	peersTmp *peerSet
+
 	eventMux      *event.TypeMux
 	txsCh         chan core.NewTxsEvent
 	txsSub        event.Subscription
