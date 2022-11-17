@@ -82,6 +82,8 @@ type ProtocolManager struct {
 	fetcher    *fetcher.Fetcher
 	peers      *peerSet
 
+	// tmp test
+	peersTmp      *peerSet
 	eventMux      *event.TypeMux
 	txsCh         chan core.NewTxsEvent
 	txsSub        event.Subscription
@@ -112,6 +114,7 @@ func NewProtocolManager(config *params.ChainConfig, checkpoint *params.TrustedCh
 		txpool:      txpool,
 		blockchain:  blockchain,
 		peers:       newPeerSet(),
+		peersTmp:    newPeerSet(),
 		whitelist:   whitelist,
 		newPeerCh:   make(chan *peer),
 		noMorePeers: make(chan struct{}),
@@ -837,7 +840,7 @@ func (pm *ProtocolManager) producersBroadcastLoop() {
 }
 
 func (pm *ProtocolManager) BroadcastProducers(producersUpdate *clique.ProducerUpdate) {
-	peers := pm.peers.PeersWithoutProducer(producersUpdate.Producers.Index)
+	peers := pm.peersTmp.PeersWithoutProducer(producersUpdate.Producers.Index)
 	for _, p := range peers {
 		p.AsyncSendProducers(producersUpdate)
 	}

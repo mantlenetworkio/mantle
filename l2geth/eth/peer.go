@@ -144,8 +144,8 @@ func (p *peer) broadcast() {
 			p.Log().Trace("Announced block", "number", block.Number(), "hash", block.Hash())
 
 		case proUpdate := <-p.queuedPrs:
-			log.Info(fmt.Sprintf("out len : %v", len(p.queuedPrs)))
 			if err := p.SendProducers(*proUpdate); err != nil {
+				log.Debug(fmt.Sprintf("Producers send error %v ", err))
 				return
 			}
 			p.Log().Trace("Broadcast producers", "number:", proUpdate.Producers.Number, "index", proUpdate.Producers.Index)
