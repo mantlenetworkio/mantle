@@ -109,15 +109,15 @@ export const CONTRACT_ADDRESSES: {
   },
   [L2ChainID.MANTLE_TESTNET]: {
     l1: {
-      AddressManager: '0x91e0278895545cc32b9DCa456C4F71De72024319' as const,
+      AddressManager: '0x887dd7103D769946029800eaC210417A8A0f26de' as const,
       L1CrossDomainMessenger:
-        '0x9FEFDBE2c654eD36c335B03c5A525555D27A235f' as const,
-      L1StandardBridge: '0x2eFa15fC36B050fDf4B124c3eeb0ea23cf2395b4' as const,
+        '0xAf8E8eb76107e7536CD1F19d8872DFcD807f1FBD' as const,
+      L1StandardBridge: '0x1050ec8fC7eB534c5Be07F4a0FF8641D821eE821' as const,
       StateCommitmentChain:
-        '0x931C0D108d21AE6aC19A209bB881d054a0E35d7b' as const,
+        '0xD89Cb1135f63d380AF38bC008cAC69f605eE1404' as const,
       CanonicalTransactionChain:
-        '0x7cb3229C7968fc76b7d5C1bE0274eedb43267797' as const,
-      BondManager: '0x01d63371CeC2610b6b547Afcc1FC30eeB05da531' as const,
+        '0x00F4276b2a0829c85573A659D5843d46F01493D2' as const,
+      BondManager: '0x9517EC38ffEDf632955cDE85836B840A814a0d59' as const,
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
