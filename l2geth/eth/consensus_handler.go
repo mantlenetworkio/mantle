@@ -97,7 +97,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		proUpdate.Deserialize(tmp)
-		if eg, ok := pm.blockchain.Engine().(*clique.Clique); ok {
+		if eg, ok := pm.blockchain.Engine().(*clique.Clique); ok && len(proUpdate.Signature) != 0 {
 			eg.SetProducers(proUpdate)
 		}
 

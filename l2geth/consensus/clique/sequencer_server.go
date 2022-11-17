@@ -28,8 +28,13 @@ func (pro *ProducerUpdate) Serialize() []byte {
 }
 
 func (pro *ProducerUpdate) Deserialize(buf []byte) {
-	pro.Producers = *deserialize(buf[:len(buf)-65])
-	pro.Signature = buf[len(buf)-65:]
+	tmp := deserialize(buf[:len(buf)-65])
+	if tmp != nil {
+		pro.Producers = *tmp
+		pro.Signature = buf[len(buf)-65:]
+	} else {
+		log.Error("Deserialize producerUpdate err got nil")
+	}
 }
 
 type SequencerServer struct {

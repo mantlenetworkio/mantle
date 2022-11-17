@@ -409,7 +409,7 @@ func (c *Clique) snapshot(chain consensus.ChainReader, number uint64, hash commo
 					signers[i] = producers.SequencerSet.Sequencers[i].Address
 				}
 
-				snap = newSnapshot(c.config, c.signatures, number, hash, signers, producers)
+				snap = newSnapshot(c.config, c.signatures, number, hash, signers, *producers)
 				if err := snap.store(c.db); err != nil {
 					return nil, err
 				}
@@ -532,7 +532,7 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	}
 
 	if number == 1 {
-		c.producers = *snap.Producers
+		c.producers = snap.Producers
 	}
 
 	if number%c.config.Epoch != 0 {
