@@ -1,6 +1,6 @@
 {
   "name": "@mantleio/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "[Mantle] Tools for working with Mantle",
   "main": "dist/index",
   "types": "dist/index",
