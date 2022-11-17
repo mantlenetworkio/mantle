@@ -29,23 +29,25 @@ import { copySync, remove } from 'fs-extra'
 import { subtask } from 'hardhat/config'
 import { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } from 'hardhat/builtin-tasks/task-names'
 
-const copyFilter = function (src, dest) {
-  console.log(src)
-}
-
 subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
   async (_, __, runSuper) => {
     console.log('running task')
     const source =
       '../../datalayr-mantle/contracts/datalayr-rollup-example-contracts/src'
-    copySync(source, './contracts/data-availability', { filter: copyFilter })
+    copySync(source, './contracts/data-availability')
 
     await remove('./contracts/data-availability/Parser.sol')
     await remove('./contracts/data-availability/DataLayrRollup.sol')
     await remove('./contracts/data-availability/libraries/BNHelper.sol')
 
+    copySync(
+      '../../datalayr-mantle/contracts/eignlayr-contracts/src',
+      'node_modules/@eigenlayer'
+    )
+
     const paths = await runSuper()
 
+    console.log(paths)
     return paths
   }
 )
