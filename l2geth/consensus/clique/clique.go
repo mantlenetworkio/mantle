@@ -177,9 +177,9 @@ type Clique struct {
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
 
-	schedulerID []byte     // Identifier of the current scheduler
-	producers   *Producers // Current list of producers
-	signature   []byte     // Current signature of producers
+	schedulerID []byte    // Identifier of the current scheduler
+	producers   Producers // Current list of producers
+	signature   []byte    // Current signature of producers
 
 	proposals map[common.Address]bool // Current list of proposals we are pushing
 
@@ -532,7 +532,7 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	}
 
 	if number == 1 {
-		c.producers = snap.Producers
+		c.producers = *snap.Producers
 	}
 
 	if number%c.config.Epoch != 0 {
@@ -703,7 +703,7 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 
 	if number%c.config.Epoch == 0 {
 		producers := deserialize(header.Extra[extraVanity : len(header.Extra)-extraSeal])
-		c.producers = producers
+		c.producers = *producers
 	}
 
 	c.producers.SequencerSet.IncrementProducerPriority(1)

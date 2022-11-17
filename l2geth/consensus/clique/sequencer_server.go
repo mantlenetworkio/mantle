@@ -19,7 +19,7 @@ import (
 type ProducersUpdateEvent struct{ Update *ProducerUpdate }
 
 type ProducerUpdate struct {
-	Producers *Producers
+	Producers Producers
 	Signature []byte
 }
 
@@ -28,7 +28,7 @@ func (pro *ProducerUpdate) Serialize() []byte {
 }
 
 func (pro *ProducerUpdate) Deserialize(buf []byte) {
-	pro.Producers = deserialize(buf[:len(buf)-65])
+	pro.Producers = *deserialize(buf[:len(buf)-65])
 	pro.Signature = buf[len(buf)-65:]
 }
 
