@@ -9,7 +9,7 @@ import '@mantleio/hardhat-deploy-config'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
-import '@primitivefi/hardhat-dodoc'
+// import '@primitivefi/hardhat-dodoc'
 import '@typechain/hardhat'
 import 'hardhat-deploy'
 import 'hardhat-gas-reporter'
@@ -30,6 +30,7 @@ import { subtask } from 'hardhat/config'
 import {
   TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS,
   TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT,
+  TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE
 } from 'hardhat/builtin-tasks/task-names'
 
 import { readFileSync, writeFileSync } from 'fs'
@@ -40,11 +41,11 @@ subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
     console.log('running task')
     const source =
       '../../datalayr-mantle/contracts/datalayr-rollup-example-contracts/src'
-    copySync(source, './contracts/data-availability')
+    copySync(source, './contracts/data-availability/')
 
     copySync(
-      '../../datalayr-mantle/contracts/eignlayr-contracts',
-      './contracts/data-availability/eignlayr-contracts'
+      '../../datalayr-mantle/contracts/eignlayr-contracts/src',
+      './contracts/data-availability/eignlayr-contracts/'
     )
 
     await remove('./contracts/data-availability/Parser.sol')
@@ -72,7 +73,20 @@ subtask(TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT).setAction(
     console.log('running TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT')
 
     // delete
+    await remove('./contracts/data-availability/libraries/')
     await remove('./contracts/data-availability/eignlayr-contracts/')
+    runSuper()
+  }
+)
+
+subtask(TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE).setAction(
+  async (_, __, runSuper) => {
+    console.log('running TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE')
+
+    // delete
+    await remove('./contracts/data-availability/libraries/')
+    await remove('./contracts/data-availability/eignlayr-contracts/')
+    runSuper()
   }
 )
 

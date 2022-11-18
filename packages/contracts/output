@@ -1,0 +1,78 @@
+yarn run v1.22.19
+$ hardhat compile --show-stack-traces
+running task
+Compiling 19 files with 0.8.17
+Solc 0.8.17 finished in 17.88ms
+end task
+Generating typings for: 102 artifacts in dir: dist/types for target: ethers-v5
+Successfully generated 260 typings!
+running TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT
+Compiled 101 Solidity files successfully
+<<< Starting Output Checks >>> 
+qualifiedNames [
+  'contracts/L1/deployment/AddressDictator.sol:AddressDictator',
+  'contracts/L1/deployment/ChugSplashDictator.sol:ChugSplashDictator',
+  'contracts/L1/local/TestBitToken.sol:BitTokenERC20',
+  'contracts/L1/messaging/IL1CrossDomainMessenger.sol:IL1CrossDomainMessenger',
+  'contracts/L1/messaging/IL1ERC20Bridge.sol:IL1ERC20Bridge',
+  'contracts/L1/messaging/IL1StandardBridge.sol:IL1StandardBridge',
+  'contracts/L1/messaging/L1CrossDomainMessenger.sol:L1CrossDomainMessenger',
+  'contracts/L1/messaging/L1StandardBridge.sol:L1StandardBridge',
+  'contracts/L1/rollup/CanonicalTransactionChain.sol:CanonicalTransactionChain',
+  'contracts/L1/rollup/ChainStorageContainer.sol:ChainStorageContainer',
+  'contracts/L1/rollup/ICanonicalTransactionChain.sol:ICanonicalTransactionChain',
+  'contracts/L1/rollup/IChainStorageContainer.sol:IChainStorageContainer',
+  'contracts/L1/rollup/IStateCommitmentChain.sol:IStateCommitmentChain',
+  'contracts/L1/rollup/StateCommitmentChain.sol:StateCommitmentChain',
+  'contracts/L1/teleportr/TeleportrDeposit.sol:TeleportrDeposit',
+  'contracts/L1/tss/ITssGroupManager.sol:ITssGroupManager',
+  'contracts/L1/tss/ITssStakingSlashing.sol:IStakingSlashing',
+  'contracts/L1/tss/TssGroupManager.sol:TssGroupManager',
+  'contracts/L1/tss/TssStakingSlashing.sol:TssStakingSlashing',
+  'contracts/L1/verification/BondManager.sol:BondManager',
+  'contracts/L1/verification/IBondManager.sol:IBondManager',
+  'contracts/L2/messaging/IL2CrossDomainMessenger.sol:IL2CrossDomainMessenger',
+  'contracts/L2/messaging/IL2ERC20Bridge.sol:IL2ERC20Bridge',
+  'contracts/L2/messaging/L2CrossDomainMessenger.sol:L2CrossDomainMessenger',
+  'contracts/L2/messaging/L2StandardBridge.sol:L2StandardBridge',
+  'contracts/L2/messaging/L2StandardTokenFactory.sol:L2StandardTokenFactory',
+  'contracts/L2/predeploys/BVM_BIT.sol:BVM_BIT',
+  'contracts/L2/predeploys/BVM_DeployerWhitelist.sol:BVM_DeployerWhitelist',
+  'contracts/L2/predeploys/BVM_ETH.sol:BVM_ETH',
+  'contracts/L2/predeploys/BVM_GasPriceOracle.sol:BVM_GasPriceOracle',
+  'contracts/L2/predeploys/BVM_L2ToL1MessagePasser.sol:BVM_L2ToL1MessagePasser',
+  'contracts/L2/predeploys/BVM_SequencerFeeVault.sol:BVM_SequencerFeeVault',
+  'contracts/L2/predeploys/TssRewardContract.sol:TssRewardContract',
+  'contracts/L2/predeploys/WETH9.sol:WETH9',
+  'contracts/L2/predeploys/iBVM_GasPriceOracle.sol:IBVM_GasPriceOracle',
+  'contracts/L2/predeploys/iBVM_L1BlockNumber.sol:iBVM_L1BlockNumber',
+  'contracts/L2/predeploys/iBVM_L2ToL1MessagePasser.sol:iBVM_L2ToL1MessagePasser',
+  'contracts/L2/predeploys/iTssRewardContract.sol:ITssRewardContract',
+  'contracts/L2/teleportr/TeleportrDisburser.sol:TeleportrDisburser',
+  'contracts/chugsplash/L1ChugSplashProxy.sol:L1ChugSplashProxy',
+  'contracts/chugsplash/TransparentUpgradeableProxy.sol:TransparentUpgradeableProxy',
+  'contracts/chugsplash/interfaces/iL1ChugSplashDeployer.sol:iL1ChugSplashDeployer',
+  'contracts/libraries/bridge/CrossDomainEnabled.sol:CrossDomainEnabled',
+  'contracts/libraries/bridge/ICrossDomainMessenger.sol:ICrossDomainMessenger',
+  'contracts/libraries/bridge/Lib_CrossDomainUtils.sol:Lib_CrossDomainUtils',
+  'contracts/libraries/codec/Lib_BVMCodec.sol:Lib_BVMCodec',
+  'contracts/libraries/constants/Lib_DefaultValues.sol:Lib_DefaultValues',
+  'contracts/libraries/constants/Lib_PredeployAddresses.sol:Lib_PredeployAddresses',
+  'contracts/libraries/resolver/Lib_AddressManager.sol:Lib_AddressManager',
+  'contracts/libraries/resolver/Lib_AddressResolver.sol:Lib_AddressResolver',
+  'contracts/libraries/resolver/Lib_ResolvedDelegateProxy.sol:Lib_ResolvedDelegateProxy',
+  'contracts/libraries/rlp/Lib_RLPReader.sol:Lib_RLPReader',
+  'contracts/libraries/rlp/Lib_RLPWriter.sol:Lib_RLPWriter',
+  'contracts/libraries/trie/Lib_MerkleTrie.sol:Lib_MerkleTrie',
+  'contracts/libraries/trie/Lib_SecureMerkleTrie.sol:Lib_SecureMerkleTrie',
+  'contracts/libraries/utils/Lib_Buffer.sol:Lib_Buffer',
+  'contracts/libraries/utils/Lib_Bytes32Utils.sol:Lib_Bytes32Utils',
+  'contracts/libraries/utils/Lib_BytesUtils.sol:Lib_BytesUtils',
+  'contracts/libraries/utils/Lib_MerkleTree.sol:Lib_MerkleTree',
+  'contracts/standards/AddressAliasHelper.sol:AddressAliasHelper',
+  'contracts/standards/IL2StandardERC20.sol:IL2StandardERC20',
+  'contracts/standards/L2StandardERC20.sol:L2StandardERC20'
+]
+<<< Checking for Errors >>> 
+✅ All Contracts have been checked for missing Natspec comments
+Done in 26.06s.
