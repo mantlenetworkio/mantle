@@ -34,6 +34,18 @@ import "@openzeppelin/contracts/utils/StorageSlot.sol";
      */
     event Upgraded(address indexed implementation, bytes32 indexed slot);
 
+
+    /**
+     * @dev Initializes the upgradeable proxy with an initial implementation specified by `_logic`.
+     *
+     * If `_data` is nonempty, it's used as data in a delegate call to `_logic`. This will typically be an encoded
+     * function call, and allows initializing the storage of the proxy like a Solidity constructor.
+     */
+    constructor(address _logicOne, _logicTwo, bytes memory _dataOne, bytes memory _dataTwo) payable {
+        _upgradeToAndCall(_logicOne, _dataOne, false);
+        _upgradeToAndCall(_logicTwo, _dataTwo, false);
+    }
+
     /**
      * @dev Returns the current implementation address in accordance with the slot.
      */
