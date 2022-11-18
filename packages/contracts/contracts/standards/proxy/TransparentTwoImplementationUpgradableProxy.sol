@@ -94,8 +94,8 @@ contract TransparentUpgradeableProxy is TwoImplementationProxyUpgradable {
      *
      * NOTE: Only the admin can call this function. See {ProxyAdmin-upgrade}.
      */
-    function upgradeTo(address newImplementation) external ifAdmin {
-        _upgradeToAndCall(newImplementation, bytes(""), false);
+    function upgradeTo(address newImplementation, bytes32 slot) external ifAdmin {
+        _upgradeToAndCall(newImplementation,slot, bytes(""), false);
     }
 
     /**
@@ -105,8 +105,8 @@ contract TransparentUpgradeableProxy is TwoImplementationProxyUpgradable {
      *
      * NOTE: Only the admin can call this function. See {ProxyAdmin-upgradeAndCall}.
      */
-    function upgradeToAndCall(address newImplementation, bytes calldata data) external payable ifAdmin {
-        _upgradeToAndCall(newImplementation, data, true);
+    function upgradeToAndCall(address newImplementation, bytes32 slot, bytes calldata data) external payable ifAdmin {
+        _upgradeToAndCall(newImplementation, slot, data, true);
     }
 
     /**

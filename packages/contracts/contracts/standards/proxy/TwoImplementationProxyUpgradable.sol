@@ -41,9 +41,9 @@ import "@openzeppelin/contracts/utils/StorageSlot.sol";
      * If `_data` is nonempty, it's used as data in a delegate call to `_logic`. This will typically be an encoded
      * function call, and allows initializing the storage of the proxy like a Solidity constructor.
      */
-    constructor(address _logicOne, _logicTwo, bytes memory _dataOne, bytes memory _dataTwo) payable {
-        _upgradeToAndCall(_logicOne, _dataOne, false);
-        _upgradeToAndCall(_logicTwo, _dataTwo, false);
+    constructor(address _logicOne, address _logicTwo, bytes memory _dataOne, bytes memory _dataTwo) payable {
+        _upgradeToAndCall(_logicOne,_IMPLEMENTATION_ONE_SLOT, _dataOne, false);
+        _upgradeToAndCall(_logicTwo,_IMPLEMENTATION_TWO_SLOT, _dataTwo, false);
     }
 
     /**
