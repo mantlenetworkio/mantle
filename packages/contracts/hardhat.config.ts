@@ -48,14 +48,12 @@ subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
       './contracts/data-availability/eignlayr-contracts/'
     )
 
-    await remove('./contracts/data-availability/Parser.sol')
-    await remove('./contracts/data-availability/DataLayrRollup.sol')
-    await remove('./contracts/data-availability/libraries/BNHelper.sol')
-
+    console.log("FORGE BUILD")
     spawnSync('cd ./contracts/data-availability && forge build', [], {
       shell: true,
       stdio: 'inherit',
     })
+    console.log("FORGE BUILD END")
 
     const paths = await runSuper()
     const filteredPaths = paths.filter(function (p) {
@@ -75,6 +73,10 @@ subtask(TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT).setAction(
     // delete
     await remove('./contracts/data-availability/libraries/')
     await remove('./contracts/data-availability/eignlayr-contracts/')
+    await remove('./contracts/data-availability/Parser.sol')
+    await remove('./contracts/data-availability/DataLayrRollup.sol')
+    await remove('./contracts/data-availability/mock')
+
     runSuper()
   }
 )
@@ -86,6 +88,9 @@ subtask(TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE).setAction(
     // delete
     await remove('./contracts/data-availability/libraries/')
     await remove('./contracts/data-availability/eignlayr-contracts/')
+    await remove('./contracts/data-availability/Parser.sol')
+    await remove('./contracts/data-availability/DataLayrRollup.sol')
+    await remove('./contracts/data-availability/mock')
     runSuper()
   }
 )

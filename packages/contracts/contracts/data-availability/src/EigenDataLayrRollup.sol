@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./libraries/DataLayrDisclosureLogic.sol";
+import "../libraries/DataLayrDisclosureLogic.sol";
 
 // This contract is a rollup built on top of datalayr that allows an enshrined sequencer to store data
 // on datalayr, but slashes them if the data they store ever contains a certain unallowed message
