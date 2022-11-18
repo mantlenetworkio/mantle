@@ -27,7 +27,13 @@ const deploy = process.env.DEPLOY_DIRECTORY || 'deploy'
 
 import { copySync, remove } from 'fs-extra'
 import { subtask } from 'hardhat/config'
-import { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } from 'hardhat/builtin-tasks/task-names'
+import {
+  TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS,
+  TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT,
+} from 'hardhat/builtin-tasks/task-names'
+
+import { readFileSync, writeFileSync } from 'fs'
+import { spawnSync } from 'child_process'
 
 subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
   async (_, __, runSuper) => {
@@ -36,19 +42,37 @@ subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
       '../../datalayr-mantle/contracts/datalayr-rollup-example-contracts/src'
     copySync(source, './contracts/data-availability')
 
+    copySync(
+      '../../datalayr-mantle/contracts/eignlayr-contracts',
+      './contracts/data-availability/eignlayr-contracts'
+    )
+
     await remove('./contracts/data-availability/Parser.sol')
     await remove('./contracts/data-availability/DataLayrRollup.sol')
     await remove('./contracts/data-availability/libraries/BNHelper.sol')
 
-    copySync(
-      '../../datalayr-mantle/contracts/eignlayr-contracts/src',
-      'node_modules/@eigenlayer'
-    )
+    spawnSync('cd ./contracts/data-availability && forge build', [], {
+      shell: true,
+      stdio: 'inherit',
+    })
 
     const paths = await runSuper()
+    const filteredPaths = paths.filter(function (p) {
+      return !p.includes('data-availability')
+    })
 
-    console.log(paths)
-    return paths
+    console.log('end task')
+
+    return filteredPaths
+  }
+)
+
+subtask(TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT).setAction(
+  async (_, __, runSuper) => {
+    console.log('running TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT')
+
+    // delete
+    await remove('./contracts/data-availability/eignlayr-contracts/')
   }
 )
 
