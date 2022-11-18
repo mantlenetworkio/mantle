@@ -6,7 +6,7 @@ import "../libraries/DataLayrDisclosureLogic.sol";
 
 // This contract is a rollup built on top of datalayr that allows an enshrined sequencer to store data
 // on datalayr, but slashes them if the data they store ever contains a certain unallowed message
-contract DataLayrRollup {
+contract EigenDataLayrRollup {
     enum RollupStoreStatus {
         UNCOMMITTED,
         COMMITTED,
