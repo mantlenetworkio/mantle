@@ -1,0 +1,315 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "repository",
+      "outputs": [
+        {
+          "internalType": "contract IRepository",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "repository()": "e9176c60"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"repository\",\"outputs\":[{\"internalType\":\"contract IRepository\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Layr Labs, Inc.\",\"kind\":\"dev\",\"methods\":{},\"title\":\"This is the interface for the `RepositoryAccess` contract.\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"eignlayr-contracts/contracts/interfaces/IRepositoryAccess.sol\":\"IRepositoryAccess\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@eigenlayer/=eignlayr-contracts/\",\":@openzeppelin-upgrades/=lib/openzeppelin-contracts-upgradeable/\",\":@openzeppelin/=lib/openzeppelin-contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\"]},\"sources\":{\"eignlayr-contracts/contracts/interfaces/IDelegationTerms.sol\":{\"keccak256\":\"0x5e7db2c8e3cb2cf7d7a19f8f7be16efacfd1b709dfcd2f5bd2b32174812acc37\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://e4570f2eca5c5d3f0c09904326961b23a63814cf79c035929c040c652e4edbe2\",\"dweb:/ipfs/QmcSfznjU56j1B7kqy6zYQeYwjPND1GqLfUyth7EQHDQ9c\"]},\"eignlayr-contracts/contracts/interfaces/IEigenLayrDelegation.sol\":{\"keccak256\":\"0xd155bcd62c3c7a2a01eb57a729ef62fd817f968a8bc322e7e5b47a3008bf84ad\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://49572554bdb92998c8c6a81ec338fa605d8af52fb3326c6597c609b0d25fd9b5\",\"dweb:/ipfs/QmXQE7prGTepct57bYHjZh2iWifR7EMc5rrgoednCMfyq4\"]},\"eignlayr-contracts/contracts/interfaces/IInvestmentStrategy.sol\":{\"keccak256\":\"0x69eb667cc856ee1fe783243b6db21a43a9dadd29bf6761727b334fca4366bceb\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://224e8f6def4e53a1065f0c4ce26d8ffff15276944e2351753065aeb5bd265f52\",\"dweb:/ipfs/QmSu8iUPCnwza4SdE5jVSZLnQjMRXJg3VAGc8pHqbaMLob\"]},\"eignlayr-contracts/contracts/interfaces/IRegistry.sol\":{\"keccak256\":\"0x5bd8be0f70b0e69f94e069c52417079ba2b9e73acd5f659c09b22142dc6c59f5\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://e32791f0147f40738d8a27c86e83c2207d5c1d1654c2f730629b3be587963cc4\",\"dweb:/ipfs/Qma4VYzA9jkLxWQCgCFm911rQodoSboaJxnNqi4AaSzftp\"]},\"eignlayr-contracts/contracts/interfaces/IRepository.sol\":{\"keccak256\":\"0x9c1f6f909a88a8d580617e260c3d7dc7aa4a8e98b7c6ca9ea0e662f9cf7b2f6b\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://f1e4be1bd82e94d8acb04f17ca140092e026cca506f0077532e01e4af4c0f1e4\",\"dweb:/ipfs/QmbDKszHE1fr7rFLzFZ7REewAoGVqCZf1SEMFHQKAQzgz8\"]},\"eignlayr-contracts/contracts/interfaces/IRepositoryAccess.sol\":{\"keccak256\":\"0x9d514d7faa77ef3ffba1c446db5542d4fad0287575e7f7bcf9337b1fc268fc6d\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://0427bea986798eca66fb43b59692772901b64d7d63bb4bc09f03068334471547\",\"dweb:/ipfs/QmW2ACnKkJxQJRDQ7YkbZQJhwr7ScorjFGB7S9si5w8D5Z\"]},\"eignlayr-contracts/contracts/interfaces/IServiceManager.sol\":{\"keccak256\":\"0x341ebf04eb799f695ce411087538ea8678268d58819b2640c73d01a0f245258f\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://aa3215133afda1dcc29148c3772472d7ea1bb982896ee58d0485ace965bf2427\",\"dweb:/ipfs/QmPkquzv7UzNVgMNeppaVZkxjSv3yAENDu11ZFWbMh4x8T\"]},\"eignlayr-contracts/contracts/interfaces/IVoteWeigher.sol\":{\"keccak256\":\"0x4d8068106dc1bc924e15cb4f8ae1c2f1b86bd3c6de1ce947081774225da63ad0\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://b252272b18e9a9480568a2f96cbf17e41d7d61e42e30edaef9633ca4e7149fef\",\"dweb:/ipfs/QmSh9uPEpkT4QbT83vHgXuXCE8DhJpCZh1typa97tD4zZ4\"]},\"lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34\",\"dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.17+commit.8df45f5f"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "repository",
+          "outputs": [
+            {
+              "internalType": "contract IRepository",
+              "name": "",
+              "type": "address"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@eigenlayer/=eignlayr-contracts/",
+        ":@openzeppelin-upgrades/=lib/openzeppelin-contracts-upgradeable/",
+        ":@openzeppelin/=lib/openzeppelin-contracts/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/forge-std/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "eignlayr-contracts/contracts/interfaces/IRepositoryAccess.sol": "IRepositoryAccess"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "eignlayr-contracts/contracts/interfaces/IDelegationTerms.sol": {
+        "keccak256": "0x5e7db2c8e3cb2cf7d7a19f8f7be16efacfd1b709dfcd2f5bd2b32174812acc37",
+        "urls": [
+          "bzz-raw://e4570f2eca5c5d3f0c09904326961b23a63814cf79c035929c040c652e4edbe2",
+          "dweb:/ipfs/QmcSfznjU56j1B7kqy6zYQeYwjPND1GqLfUyth7EQHDQ9c"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IEigenLayrDelegation.sol": {
+        "keccak256": "0xd155bcd62c3c7a2a01eb57a729ef62fd817f968a8bc322e7e5b47a3008bf84ad",
+        "urls": [
+          "bzz-raw://49572554bdb92998c8c6a81ec338fa605d8af52fb3326c6597c609b0d25fd9b5",
+          "dweb:/ipfs/QmXQE7prGTepct57bYHjZh2iWifR7EMc5rrgoednCMfyq4"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IInvestmentStrategy.sol": {
+        "keccak256": "0x69eb667cc856ee1fe783243b6db21a43a9dadd29bf6761727b334fca4366bceb",
+        "urls": [
+          "bzz-raw://224e8f6def4e53a1065f0c4ce26d8ffff15276944e2351753065aeb5bd265f52",
+          "dweb:/ipfs/QmSu8iUPCnwza4SdE5jVSZLnQjMRXJg3VAGc8pHqbaMLob"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IRegistry.sol": {
+        "keccak256": "0x5bd8be0f70b0e69f94e069c52417079ba2b9e73acd5f659c09b22142dc6c59f5",
+        "urls": [
+          "bzz-raw://e32791f0147f40738d8a27c86e83c2207d5c1d1654c2f730629b3be587963cc4",
+          "dweb:/ipfs/Qma4VYzA9jkLxWQCgCFm911rQodoSboaJxnNqi4AaSzftp"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IRepository.sol": {
+        "keccak256": "0x9c1f6f909a88a8d580617e260c3d7dc7aa4a8e98b7c6ca9ea0e662f9cf7b2f6b",
+        "urls": [
+          "bzz-raw://f1e4be1bd82e94d8acb04f17ca140092e026cca506f0077532e01e4af4c0f1e4",
+          "dweb:/ipfs/QmbDKszHE1fr7rFLzFZ7REewAoGVqCZf1SEMFHQKAQzgz8"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IRepositoryAccess.sol": {
+        "keccak256": "0x9d514d7faa77ef3ffba1c446db5542d4fad0287575e7f7bcf9337b1fc268fc6d",
+        "urls": [
+          "bzz-raw://0427bea986798eca66fb43b59692772901b64d7d63bb4bc09f03068334471547",
+          "dweb:/ipfs/QmW2ACnKkJxQJRDQ7YkbZQJhwr7ScorjFGB7S9si5w8D5Z"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IServiceManager.sol": {
+        "keccak256": "0x341ebf04eb799f695ce411087538ea8678268d58819b2640c73d01a0f245258f",
+        "urls": [
+          "bzz-raw://aa3215133afda1dcc29148c3772472d7ea1bb982896ee58d0485ace965bf2427",
+          "dweb:/ipfs/QmPkquzv7UzNVgMNeppaVZkxjSv3yAENDu11ZFWbMh4x8T"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IVoteWeigher.sol": {
+        "keccak256": "0x4d8068106dc1bc924e15cb4f8ae1c2f1b86bd3c6de1ce947081774225da63ad0",
+        "urls": [
+          "bzz-raw://b252272b18e9a9480568a2f96cbf17e41d7d61e42e30edaef9633ca4e7149fef",
+          "dweb:/ipfs/QmSh9uPEpkT4QbT83vHgXuXCE8DhJpCZh1typa97tD4zZ4"
+        ],
+        "license": "UNLICENSED"
+      },
+      "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol": {
+        "keccak256": "0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b",
+        "urls": [
+          "bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34",
+          "dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "eignlayr-contracts/contracts/interfaces/IRepositoryAccess.sol",
+    "id": 732,
+    "exportedSymbols": {
+      "IDelegationTerms": [
+        233
+      ],
+      "IERC20": [
+        2773
+      ],
+      "IEigenLayrDelegation": [
+        361
+      ],
+      "IInvestmentStrategy": [
+        455
+      ],
+      "IRegistry": [
+        686
+      ],
+      "IRepository": [
+        720
+      ],
+      "IRepositoryAccess": [
+        731
+      ],
+      "IServiceManager": [
+        787
+      ],
+      "IVoteWeigher": [
+        815
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:253:8",
+    "nodes": [
+      {
+        "id": 722,
+        "nodeType": "PragmaDirective",
+        "src": "39:23:8",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".9"
+        ]
+      },
+      {
+        "id": 723,
+        "nodeType": "ImportDirective",
+        "src": "64:27:8",
+        "nodes": [],
+        "absolutePath": "eignlayr-contracts/contracts/interfaces/IRepository.sol",
+        "file": "./IRepository.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 732,
+        "sourceUnit": 721,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 731,
+        "nodeType": "ContractDefinition",
+        "src": "197:94:8",
+        "nodes": [
+          {
+            "id": 730,
+            "nodeType": "FunctionDefinition",
+            "src": "231:58:8",
+            "nodes": [],
+            "functionSelector": "e9176c60",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "repository",
+            "nameLocation": "240:10:8",
+            "parameters": {
+              "id": 725,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "250:2:8"
+            },
+            "returnParameters": {
+              "id": 729,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 728,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 730,
+                  "src": "276:11:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IRepository_$720",
+                    "typeString": "contract IRepository"
+                  },
+                  "typeName": {
+                    "id": 727,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 726,
+                      "name": "IRepository",
+                      "nameLocations": [
+                        "276:11:8"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 720,
+                      "src": "276:11:8"
+                    },
+                    "referencedDeclaration": 720,
+                    "src": "276:11:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IRepository_$720",
+                      "typeString": "contract IRepository"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "275:13:8"
+            },
+            "scope": 731,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IRepositoryAccess",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 724,
+          "nodeType": "StructuredDocumentation",
+          "src": "93:103:8",
+          "text": " @title This is the interface for the `RepositoryAccess` contract.\n @author Layr Labs, Inc."
+        },
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          731
+        ],
+        "name": "IRepositoryAccess",
+        "nameLocation": "207:17:8",
+        "scope": 732,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  },
+  "id": 8
+}
