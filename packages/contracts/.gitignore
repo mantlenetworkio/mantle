@@ -1,3 +1,5 @@
 src/contract-artifacts.ts
 src/contract-deployed-artifacts.ts
-src/data-availability/out/
+contracts/data-availability/out/
+contracts/data-availability/bindings/
+contracts/data-availability/data/
