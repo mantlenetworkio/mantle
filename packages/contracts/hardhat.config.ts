@@ -258,6 +258,10 @@ const config: HardhatUserConfig = {
       type: 'boolean',
       default: true,
     },
+    gasPriceOracleCharge: {
+      type: 'boolean',
+      default: true,
+    },
     gasPriceOracleL1BaseFee: {
       type: 'number',
       default: 1,

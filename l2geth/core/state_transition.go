@@ -50,8 +50,10 @@ The state transitioning model does all the necessary work to work out a valid ne
 3) Create a new state object if the recipient is \0*32
 4) Value transfer
 == If contract creation ==
-  4a) Attempt to run transaction data
-  4b) If valid, use result as code for the new state object
+
+	4a) Attempt to run transaction data
+	4b) If valid, use result as code for the new state object
+
 == end ==
 5) Run Script section
 6) Derive new state root
@@ -130,16 +132,16 @@ func IntrinsicGas(data []byte, contractCreation, isHomestead bool, isEIP2028 boo
 // NewStateTransition initialises and returns a new state transition object.
 func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition {
 	l1Fee := new(big.Int)
+	gasPrice := msg.GasPrice()
 	if rcfg.UsingBVM {
-		var zeroAddress common.Address
-		gpo := &rcfg.L2GasPriceOracleAddress
-		value := evm.StateDB.GetState(*gpo, rcfg.L2GasPriceOracleOwnerSlot)
-		gpoOwner := common.BigToAddress(value.Big())
-		if msg.QueueOrigin() == types.QueueOriginSequencer && msg.From() != zeroAddress && msg.From() != gpoOwner {
+		if msg.GasPrice().Cmp(common.Big0) != 0 {
 			// Compute the L1 fee before the state transition
 			// so it only has to be read from state one time.
-
 			l1Fee, _ = fees.CalculateL1MsgFee(msg, evm.StateDB, nil)
+			charge := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.ChargeSlot).Big()
+			if charge.Cmp(common.Big0) == 0 {
+				gasPrice = common.Big0
+			}
 		}
 	}
 
@@ -147,7 +149,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 		gp:       gp,
 		evm:      evm,
 		msg:      msg,
-		gasPrice: msg.GasPrice(),
+		gasPrice: gasPrice,
 		value:    msg.Value(),
 		data:     msg.Data(),
 		state:    evm.StateDB,
@@ -293,7 +295,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 				return nil, 0, false, err
 			}
 			deadAddress := vm.AccountRef(dump.DeadAddress)
-			_, _, callErr := evm.Call(deadAddress, dump.BvmFeeWallet, data, 210000, big.NewInt(0))
+			_, _, callErr := evm.Call(deadAddress, dump.BvmFeeWallet, data, 210000, common.Big0)
 			if callErr != nil {
 				return nil, 0, false, fmt.Errorf("evm call bvmFeeWallet error:%v", callErr)
 			}
@@ -307,7 +309,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 			}
 			deadAddress := vm.AccountRef(dump.DeadAddress)
 			log.Info("update reward ........")
-			_, _, err = evm.Call(deadAddress, dump.TssRewardAddress, data, 210000, big.NewInt(0))
+			_, _, err = evm.Call(deadAddress, dump.TssRewardAddress, data, 210000, common.Big0)
 			if err != nil {
 				log.Error("update reward in error: ", err)
 				return nil, 0, false, err
