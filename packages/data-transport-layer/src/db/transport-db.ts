@@ -1,7 +1,7 @@
 /* Imports: External */
 import { LevelUp } from 'levelup'
 import { BigNumber } from 'ethers'
-import { BatchType } from '@mantlenetworkio/core-utils'
+import { BatchType } from '@mantleio/core-utils'
 
 /* Imports: Internal */
 import { SimpleDB } from './simple-db'

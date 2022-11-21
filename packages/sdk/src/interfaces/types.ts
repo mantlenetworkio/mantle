@@ -24,7 +24,7 @@ export enum L1ChainID {
  */
 export enum L2ChainID {
   MANTLE = 10,
-  MANTLE_GOERLI = 420,
+  MANTLE_TESTNET = 5001,
   MANTLE_GOERLIQA = 1705003,
   MANTLE_KOVAN = 69,
   MANTLE_HARDHAT_LOCAL = 31337,
@@ -57,6 +57,7 @@ export interface OEL2Contracts {
   BVM_GasPriceOracle: Contract
   BVM_SequencerFeeVault: Contract
   WETH: Contract
+  TssRewardContract: Contract
 }
 
 /**

@@ -1,5 +1,5 @@
 /* Imports: External */
-import { sleep } from '@mantlenetworkio/core-utils'
+import { sleep } from '@mantleio/core-utils'
 import { DeployFunction } from 'hardhat-deploy/dist/types'
 import { defaultHardhatNetworkHdAccountsConfigParams } from 'hardhat/internal/core/config/default-config'
 import { normalizeHardhatNetworkAccountsConfig } from 'hardhat/internal/core/providers/util'

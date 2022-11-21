@@ -21,6 +21,7 @@ on:
         - replica-healthcheck
         - batch-submitter
         - tss
+        - subsidy
 
 jobs:
   release:
@@ -44,6 +45,7 @@ jobs:
       replica-healthcheck: ${{ steps.packages.outputs.replica-healthcheck }}
       batch-submitter: ${{ steps.packages.outputs.batch-submitter }}
       tss: ${{ steps.packages.outputs.tss }}
+      subsidy: ${{ steps.packages.outputs.subsidy }}
 
     steps:
       - name: Checkout Repo
@@ -69,6 +71,7 @@ jobs:
           test "${SERVICE_NAME}" = "replica-healthcheck"  && echo "::set-output name=replica-healthcheck::$(grep version packages/replica-healthcheck/package.json | egrep -o '[0-9\.]+' )" || true
           test "${SERVICE_NAME}" = "batch-submitter"      && echo "::set-output name=batch-submitter::$(grep version batch-submitter/package.json | egrep -o '[0-9\.]+' )" || true
           test "${SERVICE_NAME}" = "tss"                  && echo "::set-output name=tss::$(grep version tss/package.json | egrep -o '[0-9\.]+' )" || true
+          test "${SERVICE_NAME}" = "subsidy"              && echo "::set-output name=tss::$(grep version subsidy/package.json | egrep -o '[0-9\.]+' )" || true
 
   l2geth:
     name: Publish L2Geth Version ${{ needs.release.outputs.l2geth }}
@@ -82,7 +85,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Set up Docker Buildx
@@ -108,7 +111,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Set up Docker Buildx
@@ -134,7 +137,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Set up Docker Buildx
@@ -160,7 +163,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Set up Docker Buildx
@@ -186,7 +189,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Set up Docker Buildx
@@ -215,7 +218,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Set build args
@@ -252,7 +255,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Set build args
@@ -289,7 +292,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Build and push
@@ -316,7 +319,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Build and push
@@ -343,7 +346,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Build and push
@@ -370,7 +373,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Build and push
@@ -397,7 +400,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Build and push
@@ -424,7 +427,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Build and push
@@ -451,7 +454,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Build and push
@@ -474,7 +477,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
       - name: Set up Docker Buildx
@@ -487,3 +490,29 @@ jobs:
           file: ./tss/Dockerfile
           push: true
           tags: mantlenetworkio/tss:${{ needs.release.outputs.tss }},mantlenetworkio/tss:latest
+
+  subsidy:
+    name: Publish subsidy Version ${{ needs.release.outputs.subsidy }}
+    needs: release
+    if: needs.release.outputs.subsidy != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Publish subsidy
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./subsidy/Dockerfile
+          push: true
+          tags: mantlenetworkio/subsidy:${{ needs.release.outputs.subsidy }},mantlenetworkio/subsidy:latest

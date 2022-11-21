@@ -12,8 +12,8 @@ import {
   TransactionResponse,
   BlockTag,
 } from '@ethersproject/abstract-provider'
-import { predeploys, getContractInterface } from '@mantlenetworkio/contracts'
-import { hexStringEquals } from '@mantlenetworkio/core-utils'
+import { predeploys, getContractInterface } from '@mantleio/contracts'
+import { hexStringEquals } from '@mantleio/core-utils'
 
 import {
   IBridgeAdapter,

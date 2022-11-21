@@ -5,7 +5,7 @@ import { ethers } from 'ethers'
 
 // Hardhat plugins
 import '@openzeppelin/hardhat-upgrades'
-import '@mantlenetworkio/hardhat-deploy-config'
+import '@mantleio/hardhat-deploy-config'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
@@ -80,9 +80,12 @@ const config: HardhatUserConfig = {
     },
     'goerli-testnet': {
       chainId: 5,
-      url: 'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28',
+      //url: 'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28',
+      url: 'https://goerli.davionlabs.com',
       deploy,
       accounts: [privateKey],
+      gas: 'auto',
+      gasPrice: 'auto',
     },
     kovan: {
       chainId: 42,
@@ -232,6 +235,9 @@ const config: HardhatUserConfig = {
     bvmGasPriceOracleOwner: {
       type: 'address',
     },
+    bvmFeeWalletOwner: {
+      type: 'address',
+    },
     bvmWhitelistOwner: {
       type: 'address',
       default: ethers.constants.AddressZero,
@@ -247,6 +253,10 @@ const config: HardhatUserConfig = {
     gasPriceOracleDecimals: {
       type: 'number',
       default: 6,
+    },
+    gasPriceOracleIsBurning: {
+      type: 'boolean',
+      default: true,
     },
     gasPriceOracleL1BaseFee: {
       type: 'number',

@@ -30,7 +30,7 @@ var (
 
 // BVMGasPriceOracleMetaData contains all meta data concerning the BVMGasPriceOracle contract.
 var BVMGasPriceOracleMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"DecimalsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"GasPriceUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"L1BaseFeeUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"OverheadUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"ScalarUpdated\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"gasPrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"getL1Fee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"getL1GasUsed\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"l1BaseFee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"overhead\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"scalar\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_decimals\",\"type\":\"uint256\"}],\"name\":\"setDecimals\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_gasPrice\",\"type\":\"uint256\"}],\"name\":\"setGasPrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_baseFee\",\"type\":\"uint256\"}],\"name\":\"setL1BaseFee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_overhead\",\"type\":\"uint256\"}],\"name\":\"setOverhead\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_scalar\",\"type\":\"uint256\"}],\"name\":\"setScalar\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"DecimalsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"GasPriceUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"name\":\"IsBurningUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"L1BaseFeeUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"OverheadUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"ScalarUpdated\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"IsBurning\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"gasPrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"getL1Fee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"getL1GasUsed\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"l1BaseFee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"overhead\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"scalar\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_decimals\",\"type\":\"uint256\"}],\"name\":\"setDecimals\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_gasPrice\",\"type\":\"uint256\"}],\"name\":\"setGasPrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bool\",\"name\":\"_isBurning\",\"type\":\"bool\"}],\"name\":\"setIsBurning\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_baseFee\",\"type\":\"uint256\"}],\"name\":\"setL1BaseFee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_overhead\",\"type\":\"uint256\"}],\"name\":\"setOverhead\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_scalar\",\"type\":\"uint256\"}],\"name\":\"setScalar\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // BVMGasPriceOracleABI is the input ABI used to generate the binding from.
@@ -177,6 +177,37 @@ func (_BVMGasPriceOracle *BVMGasPriceOracleTransactorRaw) Transfer(opts *bind.Tr
 // Transact invokes the (paid) contract method with params as input values.
 func (_BVMGasPriceOracle *BVMGasPriceOracleTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 	return _BVMGasPriceOracle.Contract.contract.Transact(opts, method, params...)
+}
+
+// IsBurning is a free data retrieval call binding the contract method 0x0d1e43a0.
+//
+// Solidity: function IsBurning() view returns(bool)
+func (_BVMGasPriceOracle *BVMGasPriceOracleCaller) IsBurning(opts *bind.CallOpts) (bool, error) {
+	var out []interface{}
+	err := _BVMGasPriceOracle.contract.Call(opts, &out, "IsBurning")
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// IsBurning is a free data retrieval call binding the contract method 0x0d1e43a0.
+//
+// Solidity: function IsBurning() view returns(bool)
+func (_BVMGasPriceOracle *BVMGasPriceOracleSession) IsBurning() (bool, error) {
+	return _BVMGasPriceOracle.Contract.IsBurning(&_BVMGasPriceOracle.CallOpts)
+}
+
+// IsBurning is a free data retrieval call binding the contract method 0x0d1e43a0.
+//
+// Solidity: function IsBurning() view returns(bool)
+func (_BVMGasPriceOracle *BVMGasPriceOracleCallerSession) IsBurning() (bool, error) {
+	return _BVMGasPriceOracle.Contract.IsBurning(&_BVMGasPriceOracle.CallOpts)
 }
 
 // Decimals is a free data retrieval call binding the contract method 0x313ce567.
@@ -488,6 +519,27 @@ func (_BVMGasPriceOracle *BVMGasPriceOracleSession) SetGasPrice(_gasPrice *big.I
 // Solidity: function setGasPrice(uint256 _gasPrice) returns()
 func (_BVMGasPriceOracle *BVMGasPriceOracleTransactorSession) SetGasPrice(_gasPrice *big.Int) (*types.Transaction, error) {
 	return _BVMGasPriceOracle.Contract.SetGasPrice(&_BVMGasPriceOracle.TransactOpts, _gasPrice)
+}
+
+// SetIsBurning is a paid mutator transaction binding the contract method 0xbc3f4f54.
+//
+// Solidity: function setIsBurning(bool _isBurning) returns()
+func (_BVMGasPriceOracle *BVMGasPriceOracleTransactor) SetIsBurning(opts *bind.TransactOpts, _isBurning bool) (*types.Transaction, error) {
+	return _BVMGasPriceOracle.contract.Transact(opts, "setIsBurning", _isBurning)
+}
+
+// SetIsBurning is a paid mutator transaction binding the contract method 0xbc3f4f54.
+//
+// Solidity: function setIsBurning(bool _isBurning) returns()
+func (_BVMGasPriceOracle *BVMGasPriceOracleSession) SetIsBurning(_isBurning bool) (*types.Transaction, error) {
+	return _BVMGasPriceOracle.Contract.SetIsBurning(&_BVMGasPriceOracle.TransactOpts, _isBurning)
+}
+
+// SetIsBurning is a paid mutator transaction binding the contract method 0xbc3f4f54.
+//
+// Solidity: function setIsBurning(bool _isBurning) returns()
+func (_BVMGasPriceOracle *BVMGasPriceOracleTransactorSession) SetIsBurning(_isBurning bool) (*types.Transaction, error) {
+	return _BVMGasPriceOracle.Contract.SetIsBurning(&_BVMGasPriceOracle.TransactOpts, _isBurning)
 }
 
 // SetL1BaseFee is a paid mutator transaction binding the contract method 0xbede39b5.
@@ -836,6 +888,140 @@ func (_BVMGasPriceOracle *BVMGasPriceOracleFilterer) WatchGasPriceUpdated(opts *
 func (_BVMGasPriceOracle *BVMGasPriceOracleFilterer) ParseGasPriceUpdated(log types.Log) (*BVMGasPriceOracleGasPriceUpdated, error) {
 	event := new(BVMGasPriceOracleGasPriceUpdated)
 	if err := _BVMGasPriceOracle.contract.UnpackLog(event, "GasPriceUpdated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// BVMGasPriceOracleIsBurningUpdatedIterator is returned from FilterIsBurningUpdated and is used to iterate over the raw logs and unpacked data for IsBurningUpdated events raised by the BVMGasPriceOracle contract.
+type BVMGasPriceOracleIsBurningUpdatedIterator struct {
+	Event *BVMGasPriceOracleIsBurningUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *BVMGasPriceOracleIsBurningUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(BVMGasPriceOracleIsBurningUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(BVMGasPriceOracleIsBurningUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *BVMGasPriceOracleIsBurningUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *BVMGasPriceOracleIsBurningUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// BVMGasPriceOracleIsBurningUpdated represents a IsBurningUpdated event raised by the BVMGasPriceOracle contract.
+type BVMGasPriceOracleIsBurningUpdated struct {
+	Arg0 bool
+	Raw  types.Log // Blockchain specific contextual infos
+}
+
+// FilterIsBurningUpdated is a free log retrieval operation binding the contract event 0xaebc6141d146fd8cd65faa1802c49c918226a8c0e4fba3409fb4114392e6ba7a.
+//
+// Solidity: event IsBurningUpdated(bool arg0)
+func (_BVMGasPriceOracle *BVMGasPriceOracleFilterer) FilterIsBurningUpdated(opts *bind.FilterOpts) (*BVMGasPriceOracleIsBurningUpdatedIterator, error) {
+
+	logs, sub, err := _BVMGasPriceOracle.contract.FilterLogs(opts, "IsBurningUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &BVMGasPriceOracleIsBurningUpdatedIterator{contract: _BVMGasPriceOracle.contract, event: "IsBurningUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchIsBurningUpdated is a free log subscription operation binding the contract event 0xaebc6141d146fd8cd65faa1802c49c918226a8c0e4fba3409fb4114392e6ba7a.
+//
+// Solidity: event IsBurningUpdated(bool arg0)
+func (_BVMGasPriceOracle *BVMGasPriceOracleFilterer) WatchIsBurningUpdated(opts *bind.WatchOpts, sink chan<- *BVMGasPriceOracleIsBurningUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _BVMGasPriceOracle.contract.WatchLogs(opts, "IsBurningUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(BVMGasPriceOracleIsBurningUpdated)
+				if err := _BVMGasPriceOracle.contract.UnpackLog(event, "IsBurningUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseIsBurningUpdated is a log parse operation binding the contract event 0xaebc6141d146fd8cd65faa1802c49c918226a8c0e4fba3409fb4114392e6ba7a.
+//
+// Solidity: event IsBurningUpdated(bool arg0)
+func (_BVMGasPriceOracle *BVMGasPriceOracleFilterer) ParseIsBurningUpdated(log types.Log) (*BVMGasPriceOracleIsBurningUpdated, error) {
+	event := new(BVMGasPriceOracleIsBurningUpdated)
+	if err := _BVMGasPriceOracle.contract.UnpackLog(event, "IsBurningUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

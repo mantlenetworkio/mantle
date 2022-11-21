@@ -1,7 +1,7 @@
 /* Imports: External */
 import {DeployFunction} from 'hardhat-deploy/dist/types'
 
-import {awaitCondition, hexStringEquals} from '@mantlenetworkio/core-utils'
+import {awaitCondition, hexStringEquals} from '@mantleio/core-utils'
 
 /* Imports: Internal */
 import {deployAndVerifyAndThen, getContractFromArtifact,isHardhatNode, } from '../src/deploy-utils'

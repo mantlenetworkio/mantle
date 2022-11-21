@@ -1,1 +1,1 @@
-# @mantlenetworkio/hardhat-deploy-config
+# @mantleio/hardhat-deploy-config

@@ -40,7 +40,7 @@ type GasPriceOracle struct {
 	l2ChainID       *big.Int
 	ctx             context.Context
 	stop            chan struct{}
-	contract        *bindings.GasPriceOracle
+	contract        *bindings.BVMGasPriceOracle
 	l2Backend       DeployContractBackend
 	l1Backend       bind.ContractTransactor
 	gasPriceUpdater *gasprices.GasPriceUpdater
@@ -205,7 +205,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 	}
 
 	address := cfg.gasPriceOracleAddress
-	contract, err := bindings.NewGasPriceOracle(address, l2Client)
+	contract, err := bindings.NewBVMGasPriceOracle(address, l2Client)
 	if err != nil {
 		return nil, err
 	}

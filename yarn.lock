@@ -2346,6 +2346,15 @@
     npmlog "^4.1.2"
     write-file-atomic "^3.0.3"
 
+"@mantleio/contracts@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@mantleio/contracts/-/contracts-0.1.0.tgz#710f372f6b4b25bc499d599d9b7f644978c3ffd4"
+  integrity sha512-X79+qigsX55T88Xb9hN53gk1TAO7C67Q8NDVYg3/a566itmze2yXpd4uR9Gl1xK9uTmm2x6A+cYrnTPY9g2SOg==
+  dependencies:
+    "@ethersproject/abstract-provider" "^5.6.1"
+    "@ethersproject/abstract-signer" "^5.6.2"
+    "@mantleio/core-utils" "0.1.0"
+
 "@manypkg/find-root@^1.1.0":
   version "1.1.0"
   resolved "https://registry.npmjs.org/@manypkg/find-root/-/find-root-1.1.0.tgz"

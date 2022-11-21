@@ -17,7 +17,8 @@ import (
 )
 
 func (m Manager) observeElection() {
-	queryTicker := time.NewTicker(m.taskInterval)
+
+	queryTicker := time.NewTicker(m.taskInterval + 30*time.Second)
 	for {
 		log.Info("trying to handle new election...", "stopGenKey", m.stopGenKey)
 		if !m.stopGenKey {

@@ -1,7 +1,7 @@
 /* Imports: External */
 import { BigNumber, utils } from 'ethers'
 import { serialize } from '@ethersproject/transactions'
-import { predeploys, getContractFactory } from '@mantlenetworkio/contracts'
+import { predeploys, getContractFactory } from '@mantleio/contracts'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'

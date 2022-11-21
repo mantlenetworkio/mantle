@@ -2,16 +2,18 @@
 pragma solidity ^0.8.9;
 
 /* Library Imports */
-import { Lib_BVMCodec } from "../../libraries/codec/Lib_BVMCodec.sol";
-import { Lib_AddressResolver } from "../../libraries/resolver/Lib_AddressResolver.sol";
-import { Lib_MerkleTree } from "../../libraries/utils/Lib_MerkleTree.sol";
+import {Lib_BVMCodec} from "../../libraries/codec/Lib_BVMCodec.sol";
+import {Lib_AddressResolver} from "../../libraries/resolver/Lib_AddressResolver.sol";
+import {Lib_MerkleTree} from "../../libraries/utils/Lib_MerkleTree.sol";
+import {CrossDomainEnabled} from "../../libraries/bridge/CrossDomainEnabled.sol";
 
 /* Interface Imports */
-import { IStateCommitmentChain } from "./IStateCommitmentChain.sol";
-import { ICanonicalTransactionChain } from "./ICanonicalTransactionChain.sol";
-import { IBondManager } from "../verification/IBondManager.sol";
-import { IChainStorageContainer } from "./IChainStorageContainer.sol";
-import { ITssGroupManager } from "../tss/ITssGroupManager.sol";
+import {IStateCommitmentChain} from "./IStateCommitmentChain.sol";
+import {ICanonicalTransactionChain} from "./ICanonicalTransactionChain.sol";
+import {IBondManager} from "../verification/IBondManager.sol";
+import {IChainStorageContainer} from "./IChainStorageContainer.sol";
+import {ITssGroupManager} from "../tss/ITssGroupManager.sol";
+import {ITssRewardContract} from "../../L2/predeploys/iTssRewardContract.sol";
 
 /**
  * @title StateCommitmentChain
@@ -21,7 +23,7 @@ import { ITssGroupManager } from "../tss/ITssGroupManager.sol";
  * state root calculated off-chain by applying the canonical transactions one by one.
  *
  */
-contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
+contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, CrossDomainEnabled {
     /*************
      * Constants *
      *************/
@@ -38,9 +40,11 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
      */
     constructor(
         address _libAddressManager,
+        address _l1messenger,
         uint256 _fraudProofWindow,
         uint256 _sequencerPublishWindow
-    ) Lib_AddressResolver(_libAddressManager) {
+    ) Lib_AddressResolver(_libAddressManager) CrossDomainEnabled(address(0)) {
+        messenger = _l1messenger;
         FRAUD_PROOF_WINDOW = _fraudProofWindow;
         SEQUENCER_PUBLISH_WINDOW = _sequencerPublishWindow;
     }
@@ -61,7 +65,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
      * @inheritdoc IStateCommitmentChain
      */
     function getTotalElements() public view returns (uint256 _totalElements) {
-        (uint40 totalElements, ) = _getBatchExtraData();
+        (uint40 totalElements,) = _getBatchExtraData();
         return uint256(totalElements);
     }
 
@@ -113,6 +117,9 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
         // Pass the block's timestamp and the publisher of the data
         // to be used in the fraud proofs
         _appendBatch(_batch, _signature, abi.encode(block.timestamp, msg.sender));
+
+        // Update distributed state batch, and emit message
+        _distributeTssReward(_batch, _shouldStartAtElement);
     }
 
     /**
@@ -168,7 +175,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
     view
     returns (bool _inside)
     {
-        (uint256 timestamp, ) = abi.decode(_batchHeader.extraData, (uint256, address));
+        (uint256 timestamp,) = abi.decode(_batchHeader.extraData, (uint256, address));
 
         require(timestamp != 0, "Batch header timestamp cannot be zero");
         return (timestamp + FRAUD_PROOF_WINDOW) > block.timestamp;
@@ -269,12 +276,12 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
         // while calculating the root hash therefore any arguments passed to it must not
         // be used again afterwards
         Lib_BVMCodec.ChainBatchHeader memory batchHeader = Lib_BVMCodec.ChainBatchHeader({
-        batchIndex: getTotalBatches(),
-        batchRoot: Lib_MerkleTree.getMerkleRoot(_batch),
-        batchSize: _batch.length,
-        prevTotalElements: totalElements,
-        signature: _signature,
-        extraData: _extraData
+        batchIndex : getTotalBatches(),
+        batchRoot : Lib_MerkleTree.getMerkleRoot(_batch),
+        batchSize : _batch.length,
+        prevTotalElements : totalElements,
+        signature : _signature,
+        extraData : _extraData
         });
 
         emit StateBatchAppended(
@@ -312,6 +319,41 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver {
 
         // slither-disable-next-line reentrancy-events
         emit StateBatchDeleted(_batchHeader.batchIndex, _batchHeader.batchRoot);
+    }
+
+    /**
+     * Distribute Reward to tss node.
+     * @param _batch rollup batch.
+     * @param  _shouldStartAtElement.
+     */
+    function _distributeTssReward(bytes32[] memory _batch, uint256 _shouldStartAtElement) internal {
+        // get address of tss group member
+        address[] memory tssMembers = ITssGroupManager(resolve("Proxy__TSS_GroupManager")).getTssGroupUnJailMembers();
+        require(tssMembers.length > 0, "get tss members in error");
+
+        // construct calldata for claimReward call
+        bytes memory message = abi.encodeWithSelector(
+            ITssRewardContract.claimReward.selector,
+            _shouldStartAtElement,
+            _batch.length,
+            block.timestamp,
+            tssMembers
+        );
+
+        // send call data into L2, hardcode address
+        sendCrossDomainMessage(
+            address(0x4200000000000000000000000000000000000020),
+            2000000,
+            message
+        );
+
+        // emit message
+        emit DistributeTssReward(
+            _shouldStartAtElement,
+            _batch.length,
+            block.timestamp,
+            tssMembers
+        );
     }
 
     /**

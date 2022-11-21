@@ -119,6 +119,11 @@
                 },
                 {
                   "internalType": "bytes",
+                  "name": "signature",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes",
                   "name": "extraData",
                   "type": "bytes"
                 }

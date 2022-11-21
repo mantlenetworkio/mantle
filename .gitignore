@@ -20,6 +20,7 @@ cache
 l2geth/build/bin
 tss/tss
 packages/contracts/deployments/custom
+packages/contracts/deployments/local
 packages/contracts/coverage*
 packages/contracts/@ens*
 packages/contracts/@openzeppelin*

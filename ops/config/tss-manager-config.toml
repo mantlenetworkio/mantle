@@ -16,6 +16,6 @@ http_addr = ":8080"
 db_dir = "/root/tss-manager/db"
 
 keygen_timeout = "1m"
-cpk_confirm_timeout = "5m"
+cpk_confirm_timeout = "10s"
 ask_timeout = "10s"
 sign_timeout = "1m"

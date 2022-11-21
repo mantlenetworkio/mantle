@@ -2,7 +2,7 @@
 import { ethers } from 'hardhat'
 import { ContractFactory, Contract } from 'ethers'
 import { smock, FakeContract } from '@defi-wonderland/smock'
-import { remove0x } from '@mantlenetworkio/core-utils'
+import { remove0x } from '@mantleio/core-utils'
 import { keccak256 } from 'ethers/lib/utils'
 
 /* Internal Imports */

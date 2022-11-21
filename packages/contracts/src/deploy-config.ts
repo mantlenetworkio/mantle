@@ -82,6 +82,11 @@ export interface DeployConfig {
   /**
    * Address of the owner of the GasPriceOracle contract on L2.
    */
+  bvmFeeWalletOwner: string
+
+  /**
+   * Address of the owner of the GasPriceOracle contract on L2.
+   */
   bvmGasPriceOracleOwner: string
 
   /**
@@ -103,6 +108,11 @@ export interface DeployConfig {
    * Optional initial decimals for GPO (default: 6).
    */
   gasPriceOracleDecimals?: number
+
+  /**
+   * Optional initial isBurning for GPO (default: false).
+   */
+  gasPriceOracleIsBurning?: boolean
 
   /**
    * Optional initial L1 base fee for GPO (default: 1).
@@ -180,6 +190,9 @@ const configSpec: {
   bvmGasPriceOracleOwner: {
     type: 'address',
   },
+  bvmFeeWalletOwner: {
+    type: 'address',
+  },
   bvmWhitelistOwner: {
     type: 'address',
     default: ethers.constants.AddressZero,
@@ -195,6 +208,10 @@ const configSpec: {
   gasPriceOracleDecimals: {
     type: 'number',
     default: 6,
+  },
+  gasPriceOracleIsBurning: {
+    type: 'boolean',
+    default: true,
   },
   gasPriceOracleL1BaseFee: {
     type: 'number',

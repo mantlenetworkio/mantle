@@ -6,7 +6,7 @@
 
 
 
-*Collect L2 block gas reward per block and release to batch roll up tss members.*
+*Release to batch roll up tss members.*
 
 ## Methods
 
@@ -27,10 +27,27 @@ function bestBlockID() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
+### bvmGasPriceOracleAddress
+
+```solidity
+function bvmGasPriceOracleAddress() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
+
 ### claimReward
 
 ```solidity
-function claimReward(uint256 _blockStartHeight, uint32 _length, address[] _tssMembers) external nonpayable
+function claimReward(uint256 _blockStartHeight, uint32 _length, uint256 _batchTime, address[] _tssMembers) external nonpayable
 ```
 
 
@@ -41,8 +58,9 @@ function claimReward(uint256 _blockStartHeight, uint32 _length, address[] _tssMe
 
 | Name | Type | Description |
 |---|---|---|
-| _blockStartHeight | uint256 | The block height at L2 which needs to distribute profits
+| _blockStartHeight | uint256 | undefined
 | _length | uint32 | The distribute batch block number
+| _batchTime | uint256 | Batch corresponds to L1 Block Timestamp
 | _tssMembers | address[] | The address array of tss group members
 
 ### deadAddress
@@ -66,6 +84,40 @@ function deadAddress() external view returns (address)
 
 ```solidity
 function dust() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+### l2Message
+
+```solidity
+function l2Message() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
+
+### latsBatchTime
+
+```solidity
+function latsBatchTime() external view returns (uint256)
 ```
 
 
@@ -109,7 +161,7 @@ function owner() external view returns (address)
 
 
 
-
+*Returns the address of the current owner.*
 
 
 #### Returns
@@ -135,6 +187,67 @@ function queryReward() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
+### querySendAmountPerSecond
+
+```solidity
+function querySendAmountPerSecond() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+### renounceOwnership
+
+```solidity
+function renounceOwnership() external nonpayable
+```
+
+
+
+*Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
+
+
+### sendAmountPerYear
+
+```solidity
+function sendAmountPerYear() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
+### setSendAmountPerYear
+
+```solidity
+function setSendAmountPerYear(uint256 _sendAmountPerYear) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _sendAmountPerYear | uint256 | undefined
+
 ### totalAmount
 
 ```solidity
@@ -151,6 +264,22 @@ function totalAmount() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined
+
+### transferOwnership
+
+```solidity
+function transferOwnership(address newOwner) external nonpayable
+```
+
+
+
+*Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newOwner | address | undefined
 
 ### updateReward
 
@@ -204,7 +333,24 @@ function withdrawDust() external nonpayable
 ### DistributeTssReward
 
 ```solidity
-event DistributeTssReward(uint256 blockStartHeight, uint256 length, address[] tssMembers)
+event DistributeTssReward(uint256 batchTime, address[] tssMembers)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| batchTime  | uint256 | undefined |
+| tssMembers  | address[] | undefined |
+
+### DistributeTssRewardByBlock
+
+```solidity
+event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, address[] tssMembers)
 ```
 
 
@@ -216,8 +362,25 @@ event DistributeTssReward(uint256 blockStartHeight, uint256 length, address[] ts
 | Name | Type | Description |
 |---|---|---|
 | blockStartHeight  | uint256 | undefined |
-| length  | uint256 | undefined |
+| length  | uint32 | undefined |
 | tssMembers  | address[] | undefined |
+
+### OwnershipTransferred
+
+```solidity
+event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| previousOwner `indexed` | address | undefined |
+| newOwner `indexed` | address | undefined |
 
 
 

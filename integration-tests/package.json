@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@mantlenetworkio/integration-tests",
+  "name": "@mantleio/integration-tests",
   "version": "0.0.1",
   "description": "[Mantle] Integration tests",
   "scripts": {
@@ -29,9 +29,9 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.5.4",
-    "@mantlenetworkio/contracts": "2.0.0",
-    "@mantlenetworkio/core-utils": "0.0.1",
-    "@mantlenetworkio/sdk": "2.0.4",
+    "@mantleio/contracts": "0.1.0",
+    "@mantleio/core-utils": "0.1.0",
+    "@mantleio/sdk": "0.1.1",
     "@ethersproject/abstract-provider": "^5.6.1",
     "@ethersproject/providers": "^5.6.8",
     "@ethersproject/transactions": "^5.6.2",
