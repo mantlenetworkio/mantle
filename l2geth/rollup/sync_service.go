@@ -625,8 +625,8 @@ func (s *SyncService) GasPriceOracleOwnerAddress() *common.Address {
 	return &s.gasPriceOracleOwnerAddress
 }
 
-/// Update the execution context's timestamp and blocknumber
-/// over time. This is only necessary for the sequencer.
+// / Update the execution context's timestamp and blocknumber
+// / over time. This is only necessary for the sequencer.
 func (s *SyncService) updateL1BlockNumber() error {
 	context, err := s.client.GetLatestEthContext()
 	if err != nil {
@@ -965,28 +965,21 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	// Prevent transactions without enough balance from
 	// being accepted by the chain but allow through 0
 	// gas price transactions
-	from, err := types.Sender(s.signer, tx)
-	if err != nil {
-		return fmt.Errorf("invalid transaction: %w", core.ErrInvalidSender)
-	}
 	cost := tx.Value()
-	var zeroAddress common.Address
-	if tx.QueueOrigin() == types.QueueOriginSequencer && from != zeroAddress {
-		gpoOwner := s.GasPriceOracleOwnerAddress()
-		if gpoOwner != nil {
-			if from != *gpoOwner {
-				cost = cost.Add(cost, fee)
-			}
-		}
+	if tx.GasPrice().Cmp(common.Big0) != 0 {
+		cost = cost.Add(cost, fee)
 	}
 	state, err := s.bc.State()
 	if err != nil {
 		return err
 	}
+	from, err := types.Sender(s.signer, tx)
+	if err != nil {
+		return fmt.Errorf("invalid transaction: %w", core.ErrInvalidSender)
+	}
 	if state.GetBalance(from).Cmp(cost) < 0 {
 		return fmt.Errorf("invalid transaction: %w", core.ErrInsufficientFunds)
 	}
-
 	if tx.GasPrice().Cmp(common.Big0) == 0 {
 		// Allow 0 gas price transactions only if it is the owner of the gas
 		// price oracle

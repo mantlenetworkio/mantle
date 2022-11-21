@@ -27,6 +27,23 @@ function IsBurning() external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined
 
+### charge
+
+```solidity
+function charge() external view returns (bool)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined
+
 ### decimals
 
 ```solidity
@@ -184,6 +201,22 @@ function scalar() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
+### setCharge
+
+```solidity
+function setCharge(bool _charge) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _charge | bool | undefined
+
 ### setDecimals
 
 ```solidity
@@ -299,6 +332,22 @@ function transferOwnership(address newOwner) external nonpayable
 
 
 ## Events
+
+### ChargeUpdated
+
+```solidity
+event ChargeUpdated(bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0  | bool | undefined |
 
 ### DecimalsUpdated
 

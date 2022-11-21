@@ -33,6 +33,8 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
     uint256 public decimals;
     // Switch controls whether GasFee is burn
     bool    isBurning;
+    // Switch controls whether GasFee is burn
+    bool    public charge;
 
     /***************
      * Constructor *
@@ -55,7 +57,7 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
     event ScalarUpdated(uint256);
     event DecimalsUpdated(uint256);
     event IsBurningUpdated(bool);
-
+    event ChargeUpdated(bool);
     /********************
      * Public Functions *
      ********************/
@@ -123,6 +125,12 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
     function IsBurning() public view returns(bool)  {
         return isBurning;
     }
+
+    function setCharge(bool _charge) public onlyOwner {
+        charge = _charge;
+        emit ChargeUpdated(_charge);
+    }
+
 
     /**
      * Computes the L1 portion of the fee
