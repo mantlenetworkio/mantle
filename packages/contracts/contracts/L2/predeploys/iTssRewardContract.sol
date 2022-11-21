@@ -11,13 +11,16 @@ interface ITssRewardContract {
      **********/
 
     event DistributeTssReward(
-        uint batchTime,
+        uint256 lastBatchTime,
+        uint256 batchTime,
+        uint256 amount,
         address[] tssMembers
     );
 
     event DistributeTssRewardByBlock(
         uint256   blockStartHeight,
         uint32     length,
+        uint256    amount,
         address[] tssMembers
     );
 

@@ -97,27 +97,10 @@ function dust() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
-### l2Message
+### lastBatchTime
 
 ```solidity
-function l2Message() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined
-
-### latsBatchTime
-
-```solidity
-function latsBatchTime() external view returns (uint256)
+function lastBatchTime() external view returns (uint256)
 ```
 
 
@@ -152,6 +135,23 @@ function ledger(uint256) external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined
+
+### messenger
+
+```solidity
+function messenger() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
 
 ### owner
 
@@ -214,6 +214,23 @@ function renounceOwnership() external nonpayable
 
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
+
+### sccAddress
+
+```solidity
+function sccAddress() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined
 
 ### sendAmountPerYear
 
@@ -333,7 +350,7 @@ function withdrawDust() external nonpayable
 ### DistributeTssReward
 
 ```solidity
-event DistributeTssReward(uint256 batchTime, address[] tssMembers)
+event DistributeTssReward(uint256 lastBatchTime, uint256 batchTime, uint256 amount, address[] tssMembers)
 ```
 
 
@@ -344,13 +361,15 @@ event DistributeTssReward(uint256 batchTime, address[] tssMembers)
 
 | Name | Type | Description |
 |---|---|---|
+| lastBatchTime  | uint256 | undefined |
 | batchTime  | uint256 | undefined |
+| amount  | uint256 | undefined |
 | tssMembers  | address[] | undefined |
 
 ### DistributeTssRewardByBlock
 
 ```solidity
-event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, address[] tssMembers)
+event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, uint256 amount, address[] tssMembers)
 ```
 
 
@@ -363,6 +382,7 @@ event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, addres
 |---|---|---|
 | blockStartHeight  | uint256 | undefined |
 | length  | uint32 | undefined |
+| amount  | uint256 | undefined |
 | tssMembers  | address[] | undefined |
 
 ### OwnershipTransferred
