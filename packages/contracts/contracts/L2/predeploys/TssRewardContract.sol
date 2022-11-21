@@ -93,7 +93,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     virtual
     onlyFromCrossDomainAccount(sccAddress)
     {
-        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != true) {
+        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != 1) {
             claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
             return;
         }

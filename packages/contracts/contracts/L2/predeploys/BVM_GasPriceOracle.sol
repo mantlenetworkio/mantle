@@ -32,9 +32,9 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
     // Number of decimals of the scalar
     uint256 public decimals;
     // Switch controls whether GasFee is burn
-    bool    isBurning;
+    uint256    isBurning;
     // Switch controls whether GasFee is burn
-    bool    public charge;
+    uint256    public charge;
 
     /***************
      * Constructor *
@@ -47,6 +47,14 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
         transferOwnership(_owner);
     }
 
+    modifier checkValue(uint256 value) {
+        require(
+            value == 0 || value == 1,
+            "balance record and contract balance are not equal"
+        );
+        _;
+    }
+
     /**********
      * Events *
      **********/
@@ -56,8 +64,8 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
     event OverheadUpdated(uint256);
     event ScalarUpdated(uint256);
     event DecimalsUpdated(uint256);
-    event IsBurningUpdated(bool);
-    event ChargeUpdated(bool);
+    event IsBurningUpdated(uint256);
+    event ChargeUpdated(uint256);
     /********************
      * Public Functions *
      ********************/
@@ -117,16 +125,16 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
  * @param _isBurning New isBurning
      */
     // slither-disable-next-line external-function
-    function setIsBurning(bool _isBurning) public onlyOwner {
+    function setIsBurning(uint256 _isBurning) public onlyOwner checkValue(_isBurning)  {
         isBurning = _isBurning;
         emit IsBurningUpdated(_isBurning);
     }
 
-    function IsBurning() public view returns(bool)  {
+    function IsBurning() public view returns(uint256)  {
         return isBurning;
     }
 
-    function setCharge(bool _charge) public onlyOwner {
+    function setCharge(uint256 _charge) public onlyOwner checkValue(_charge){
         charge = _charge;
         emit ChargeUpdated(_charge);
     }

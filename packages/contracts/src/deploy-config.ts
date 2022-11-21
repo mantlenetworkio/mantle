@@ -112,12 +112,12 @@ export interface DeployConfig {
   /**
    * Optional initial isBurning for GPO (default: false).
    */
-  gasPriceOracleIsBurning?: boolean
+  gasPriceOracleIsBurning?: number
 
   /**
    * Optional initial charge for GPO (default: false).
    */
-  gasPriceOracleCharge?: boolean
+  gasPriceOracleCharge?: number
 
   /**
    * Optional initial L1 base fee for GPO (default: 1).
@@ -215,8 +215,12 @@ const configSpec: {
     default: 6,
   },
   gasPriceOracleIsBurning: {
-    type: 'boolean',
-    default: true,
+    type: 'number',
+    default: 1,
+  },
+  gasPriceOracleCharge: {
+    type: 'number',
+    default: 0,
   },
   gasPriceOracleL1BaseFee: {
     type: 'number',

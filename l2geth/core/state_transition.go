@@ -19,18 +19,18 @@ package core
 import (
 	"errors"
 	"fmt"
-	"github.com/mantlenetworkio/mantle/l2geth/contracts/gasfee"
-	"github.com/mantlenetworkio/mantle/l2geth/contracts/tssreward"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"math"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/contracts/gasfee"
+	"github.com/mantlenetworkio/mantle/l2geth/contracts/tssreward"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 )
@@ -141,6 +141,8 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 			charge := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.ChargeSlot).Big()
 			if charge.Cmp(common.Big0) == 0 {
 				gasPrice = common.Big0
+			} else if charge.Cmp(common.Big1) == 1 {
+				panic(fmt.Sprintf("charge:%v is invaild", charge))
 			}
 		}
 	}
@@ -284,8 +286,8 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		// The L2 Fee is the same as the fee that is charged in the normal geth
 		// codepath. Add the L1 fee to the L2 fee for the total fee that is sent
 		// to the sequencer.
-		IsBurning := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.IsBurningSlot).Big()
-		if IsBurning.Cmp(big.NewInt(1)) == 0 {
+		isBurning := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.IsBurningSlot).Big()
+		if isBurning.Cmp(big.NewInt(1)) == 0 {
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 			fee := new(big.Int).Add(st.l1Fee, l2Fee)
 			st.state.AddBalance(evm.Coinbase, fee)
@@ -299,7 +301,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 			if callErr != nil {
 				return nil, 0, false, fmt.Errorf("evm call bvmFeeWallet error:%v", callErr)
 			}
-		} else {
+		} else if isBurning.Cmp(big.NewInt(0)) == 0 {
 			st.state.AddBalance(dump.BvmFeeWallet, st.l1Fee)
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 			st.state.AddBalance(dump.TssRewardAddress, l2Fee)
@@ -314,6 +316,8 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 				log.Error("update reward in error: ", err)
 				return nil, 0, false, err
 			}
+		} else {
+			panic(fmt.Sprintf("IsBurning:%v is invaild", isBurning))
 		}
 	} else {
 		st.state.AddBalance(evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
