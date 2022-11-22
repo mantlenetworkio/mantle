@@ -18,8 +18,6 @@ package core
 
 import (
 	"errors"
-	"fmt"
-	"github.com/mantlenetworkio/mantle/l2geth/contracts/gasfee"
 	"github.com/mantlenetworkio/mantle/l2geth/contracts/tssreward"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"math"
@@ -50,8 +48,10 @@ The state transitioning model does all the necessary work to work out a valid ne
 3) Create a new state object if the recipient is \0*32
 4) Value transfer
 == If contract creation ==
-  4a) Attempt to run transaction data
-  4b) If valid, use result as code for the new state object
+
+	4a) Attempt to run transaction data
+	4b) If valid, use result as code for the new state object
+
 == end ==
 5) Run Script section
 6) Derive new state root
@@ -287,16 +287,6 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 			fee := new(big.Int).Add(st.l1Fee, l2Fee)
 			st.state.AddBalance(evm.Coinbase, fee)
-			// burning
-			data, err := gasfee.PacketData()
-			if err != nil {
-				return nil, 0, false, err
-			}
-			deadAddress := vm.AccountRef(dump.DeadAddress)
-			_, _, callErr := evm.Call(deadAddress, dump.BvmFeeWallet, data, 210000, big.NewInt(0))
-			if callErr != nil {
-				return nil, 0, false, fmt.Errorf("evm call bvmFeeWallet error:%v", callErr)
-			}
 		} else {
 			st.state.AddBalance(dump.BvmFeeWallet, st.l1Fee)
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
@@ -306,7 +296,6 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 				return nil, 0, false, err
 			}
 			deadAddress := vm.AccountRef(dump.DeadAddress)
-			log.Info("update reward ........")
 			_, _, err = evm.Call(deadAddress, dump.TssRewardAddress, data, 210000, big.NewInt(0))
 			if err != nil {
 				log.Error("update reward in error: ", err)
