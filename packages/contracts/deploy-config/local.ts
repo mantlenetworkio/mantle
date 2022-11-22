@@ -13,7 +13,7 @@ const config = {
   bvmAddressManagerOwner: process.env.BVM_ADDRESS_MANAGER_OWNER || '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
   bvmGasPriceOracleOwner: process.env.BVM_GAS_PRICE_ORACLE_OWNER || '0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc',
   bvmFeeWalletOwner: process.env.BVM_FEE_WALLETOWNER_OWNER ||'0xDfCDD683728F83A5da850a210db828e6f35DCfA6',
-  l1BitAddress: process.env.L1_BIT_ADDRESS || '0x5a0069E211A28cBD1a7dbD585877596FeD07805b',
+  l1BitAddress: process.env.L1_BIT_ADDRESS || '0xdf3BD218A936A92be5e43592143ecc7a33cef514',
   bvmTssRewardContractOwner: process.env.TssRewardContractOwner || '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B'
 }
 

@@ -3,14 +3,13 @@ import { DeployFunction } from 'hardhat-deploy/dist/types'
 
 /* Imports: Internal */
 import { deployAndVerifyAndThen } from '../src/deploy-utils'
-import { names } from '../src/address-names'
 
 const deployFn: DeployFunction = async (hre) => {
   const { deployer } = await hre.getNamedAccounts()
 
   await deployAndVerifyAndThen({
     hre,
-    name: names.managed.contracts.L1ERC721BridgeProxy,
+    name: 'L1ERC721BridgeProxy',
     contract: 'MantleProxy',
     iface: 'L1ERC721Bridge',
     args: [deployer],

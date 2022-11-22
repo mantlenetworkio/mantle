@@ -16,8 +16,6 @@ export const names = {
       Proxy__BVM_L1StandardBridge: 'Proxy__BVM_L1StandardBridge',
       Proxy__TSS_GroupManager: 'Proxy__TSS_GroupManager',
       Proxy__TSS_StakingSlashing: 'Proxy__TSS_StakingSlashing',
-      L1ERC721BridgeProxy: 'L1ERC721BridgeProxy',
-      L1ERC721Bridge: 'L1ERC721Bridge',
     },
     accounts: { BVM_Sequencer: 'BVM_Sequencer', BVM_Proposer: 'BVM_Proposer' },
     configs: {

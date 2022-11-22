@@ -176,7 +176,7 @@ export class StandardBridgeAdapter implements IBridgeAdapter {
       // Make sure the L1 token matches.
       const remoteL1Token = await contract.l1Token()
 
-      if (hexStringEquals(remoteL1Token, toAddress('0x5a0069E211A28cBD1a7dbD585877596FeD07805b'))){
+      if (hexStringEquals(remoteL1Token, toAddress('0xdf3BD218A936A92be5e43592143ecc7a33cef514'))){
         return true
       }
 

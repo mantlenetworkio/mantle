@@ -12,7 +12,7 @@ const config = {
   bvmFeeWalletAddress: '0x391716d440c151c42cdf1c95c1d83a5427bca52c',
   bvmAddressManagerOwner: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
   bvmGasPriceOracleOwner: '0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc',
-  l1BitAddress: '0x5a0069E211A28cBD1a7dbD585877596FeD07805b',
+  l1BitAddress: '0xdf3BD218A936A92be5e43592143ecc7a33cef514',
   bvmTssRewardContractOwner: '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
   bvmFeeWalletOwner:'0xc8910a1957d276cE5634B978d908B5ef9fB0e05B'
 }
