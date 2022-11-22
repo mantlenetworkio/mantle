@@ -50,7 +50,7 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
     modifier checkValue(uint256 value) {
         require(
             value == 0 || value == 1,
-            "balance record and contract balance are not equal"
+            "invalid value,must be 0 or 1"
         );
         _;
     }
