@@ -18,17 +18,19 @@ package core
 
 import (
 	"errors"
-	"github.com/mantlenetworkio/mantle/l2geth/contracts/tssreward"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
+	"fmt"
 	"math"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/contracts/gasfee"
+	"github.com/mantlenetworkio/mantle/l2geth/contracts/tssreward"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 )
@@ -130,16 +132,18 @@ func IntrinsicGas(data []byte, contractCreation, isHomestead bool, isEIP2028 boo
 // NewStateTransition initialises and returns a new state transition object.
 func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition {
 	l1Fee := new(big.Int)
+	gasPrice := msg.GasPrice()
 	if rcfg.UsingBVM {
-		var zeroAddress common.Address
-		gpo := &rcfg.L2GasPriceOracleAddress
-		value := evm.StateDB.GetState(*gpo, rcfg.L2GasPriceOracleOwnerSlot)
-		gpoOwner := common.BigToAddress(value.Big())
-		if msg.QueueOrigin() == types.QueueOriginSequencer && msg.From() != zeroAddress && msg.From() != gpoOwner {
+		if msg.GasPrice().Cmp(common.Big0) != 0 {
 			// Compute the L1 fee before the state transition
 			// so it only has to be read from state one time.
-
 			l1Fee, _ = fees.CalculateL1MsgFee(msg, evm.StateDB, nil)
+			charge := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.ChargeSlot).Big()
+			if charge.Cmp(common.Big0) == 0 {
+				gasPrice = common.Big0
+			} else if charge.Cmp(common.Big1) == 1 {
+				panic(fmt.Sprintf("charge:%v is invaild", charge))
+			}
 		}
 	}
 
@@ -147,7 +151,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 		gp:       gp,
 		evm:      evm,
 		msg:      msg,
-		gasPrice: msg.GasPrice(),
+		gasPrice: gasPrice,
 		value:    msg.Value(),
 		data:     msg.Data(),
 		state:    evm.StateDB,
@@ -282,11 +286,22 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		// The L2 Fee is the same as the fee that is charged in the normal geth
 		// codepath. Add the L1 fee to the L2 fee for the total fee that is sent
 		// to the sequencer.
-		IsBurning := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.IsBurningSlot).Big()
-		if IsBurning.Cmp(big.NewInt(1)) == 0 {
+		isBurning := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.IsBurningSlot).Big()
+		if isBurning.Cmp(big.NewInt(1)) == 0 {
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 			fee := new(big.Int).Add(st.l1Fee, l2Fee)
 			st.state.AddBalance(evm.Coinbase, fee)
+			// burning
+			data, err := gasfee.PacketData()
+			if err != nil {
+				return nil, 0, false, err
+			}
+			deadAddress := vm.AccountRef(dump.DeadAddress)
+			_, _, callErr := evm.Call(deadAddress, dump.BvmFeeWallet, data, 210000, common.Big0)
+			if callErr != nil {
+				return nil, 0, false, fmt.Errorf("evm call bvmFeeWallet error:%v", callErr)
+			}
+		} else if isBurning.Cmp(big.NewInt(0)) == 0 {
 		} else {
 			st.state.AddBalance(dump.BvmFeeWallet, st.l1Fee)
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
@@ -301,6 +316,8 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 				log.Error("update reward in error: ", err)
 				return nil, 0, false, err
 			}
+		} else {
+			panic(fmt.Sprintf("IsBurning:%v is invaild", isBurning))
 		}
 	} else {
 		st.state.AddBalance(evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))

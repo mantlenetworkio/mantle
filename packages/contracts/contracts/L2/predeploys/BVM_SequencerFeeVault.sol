@@ -69,7 +69,7 @@ contract BVM_SequencerFeeVault is Ownable {
     // slither-disable-next-line external-function
     function withdraw() public {
         address to = l1FeeWallet;
-        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() == true) {
+        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() == 1) {
             to = burner;
             if (address(this).balance < minWithdrawalAmount * 1 ether) {
                 return;
