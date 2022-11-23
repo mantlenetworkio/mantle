@@ -77,7 +77,7 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 		if err := l2Backend.SendTransaction(context.Background(), tx); err != nil {
 			return fmt.Errorf("cannot update base fee: %w", err)
 		}
-		log.Info("L1 base fee transaction sent", "hash", tx.Hash().Hex())
+		log.Info("L1 base fee transaction sent", "hash", tx.Hash().Hex(), "baseFee", tip.BaseFee)
 
 		if cfg.waitForReceipt {
 			// Wait for the receipt

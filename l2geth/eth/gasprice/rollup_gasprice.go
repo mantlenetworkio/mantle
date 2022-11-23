@@ -16,11 +16,13 @@ type RollupOracle struct {
 	overhead       *big.Int
 	scalar         *big.Float
 	isBurning      *big.Int
+	charge         *big.Int
 	l1GasPriceLock sync.RWMutex
 	l2GasPriceLock sync.RWMutex
 	overheadLock   sync.RWMutex
 	scalarLock     sync.RWMutex
 	isBurningLock  sync.RWMutex
+	chargeLock     sync.RWMutex
 }
 
 // NewRollupOracle returns an initialized RollupOracle
@@ -31,6 +33,7 @@ func NewRollupOracle() *RollupOracle {
 		overhead:   new(big.Int),
 		scalar:     new(big.Float),
 		isBurning:  new(big.Int),
+		charge:     new(big.Int),
 	}
 }
 
@@ -103,11 +106,20 @@ func (gpo *RollupOracle) SetScalar(scalar *big.Int, decimals *big.Int) error {
 	return nil
 }
 
-// SetIsBurning sets the scalar value held in the BVM_GasPriceOracle
+// SetIsBurning sets the isBurning value held in the BVM_GasPriceOracle
 func (gpo *RollupOracle) SetIsBurning(isBurning *big.Int) error {
 	gpo.isBurningLock.Lock()
 	defer gpo.isBurningLock.Unlock()
 	gpo.isBurning = isBurning
 	log.Info("Set isBurning", "isBurning", isBurning)
+	return nil
+}
+
+// SetCharge sets the charge value held in the BVM_GasPriceOracle
+func (gpo *RollupOracle) SetCharge(charge *big.Int) error {
+	gpo.chargeLock.Lock()
+	defer gpo.chargeLock.Unlock()
+	gpo.charge = charge
+	log.Info("Set charge", "charge", charge)
 	return nil
 }
