@@ -299,7 +299,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 				return nil, 0, false, err
 			}
 			deadAddress := vm.AccountRef(dump.DeadAddress)
-			_, _, err = evm.Call(deadAddress, dump.TssRewardAddress, data, 210000, big.NewInt(0))
+			_, _, err = evm.Call(deadAddress, dump.TssRewardAddress, data, 210000, common.Big0)
 			if err != nil {
 				log.Error("update reward in error: ", err)
 				return nil, 0, false, err
