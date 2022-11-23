@@ -1,4 +1,4 @@
-package sequencer
+package common
 
 import "math/big"
 

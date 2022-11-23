@@ -4,9 +4,6 @@ go 1.18
 
 replace github.com/Layr-Labs/datalayr/common => ../datalayr-mantle/common
 
-replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr-mantle/lib/merkzg
-
-replace github.com/Layr-Labs/datalayr/middleware/rollup-example/utils => ../datalayr-mantle/middleware/rollup-example/utils
 
 require (
 	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
@@ -15,11 +12,9 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	github.com/urfave/cli v1.22.10
 	google.golang.org/grpc v1.49.0
-	google.golang.org/protobuf v1.28.1
 )
 
 require (
-	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0-00010101000000-000000000000 // indirect
 	github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/consensys/bavard v0.1.13 // indirect

@@ -18,14 +18,12 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 
 		log.Info("Config parsed",
 			"disperser", cfg.DisperserEndpoint,
-			"mtlrpc", cfg.MtlRpc)
+			"mtlrpc", cfg.L2MtlRpc)
 
 		if cfg.SentryEnable {
 			defer sentry.Flush(2 * time.Second)
 		}
-
 		log.Info("Initializing batch submitter")
-
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 		var logHandler log.Handler
@@ -34,7 +32,6 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			return err
 		}
 		log.Root().SetHandler(log.LvlFilterHandler(logLevel, logHandler))
-
 		fmt.Println(ctx)
 		return nil
 	}

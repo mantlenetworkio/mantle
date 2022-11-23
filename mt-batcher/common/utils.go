@@ -1,4 +1,4 @@
-package sequencer
+package common
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func createUploadHeader(params StoreParams) ([]byte, error) {
+func CreateUploadHeader(params StoreParams) ([]byte, error) {
 	var kzgCommitArray [64]byte
 	copy(kzgCommitArray[:], params.KzgCommit)
 	var lowDegreeProof [64]byte
@@ -33,7 +33,7 @@ func createUploadHeader(params StoreParams) ([]byte, error) {
 	return uploadHeader, nil
 }
 
-func getMessageHash(event graphView.DataStoreInit) []byte {
+func GetMessageHash(event graphView.DataStoreInit) []byte {
 	msg := make([]byte, 0)
 	msg = append(msg, uint32ToByteSlice(event.StoreNumber)...)
 	msg = append(msg, event.DataCommitment[:]...)
@@ -60,7 +60,7 @@ func packTo(x []byte, n int) []byte {
 	return x
 }
 
-func makeCalldata(
+func MakeCalldata(
 	params StoreParams,
 	meta DisperseMeta,
 	storeNumber uint32,

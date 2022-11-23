@@ -11,7 +11,10 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
+	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	rc "github.com/mantlenetworkio/mantle/mt-batcher/bindings/DataLayrRollup"
+
+	common2 "github.com/mantlenetworkio/mantle/mt-batcher/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/dial"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"google.golang.org/grpc"
@@ -42,48 +45,51 @@ type SequencerSettings struct {
 	DisperserSettings DisperserSettings
 	RollupSettings    RollupSettings
 	ChainSettings     dial.ChainSettings
-
-	GraphEndpoint string
+	GraphEndpoint     string
 }
 
-type MtBatcher struct {
+type EigenSequencer struct {
 	ctx context.Context
 	SequencerSettings
 	ChainClient *dial.ChainClient
+	L2MtlCilent *l2ethclient.Client
 	GraphClient *graphView.GraphClient
 }
 
-func NewMtBatcher(
+func NewEigenSequencer(
 	ctx context.Context,
 	chainClient *dial.ChainClient,
 	graphClient *graphView.GraphClient,
 	settings SequencerSettings,
-) *MtBatcher {
-	return &MtBatcher{
+	l2cli *l2ethclient.Client,
+) *EigenSequencer {
+	return &EigenSequencer{
 		ctx:               ctx,
 		SequencerSettings: settings,
 		ChainClient:       chainClient,
+		L2MtlCilent:       l2cli,
 		GraphClient:       graphClient,
 	}
 }
 
-func (mt *MtBatcher) Start() error {
-	err := mt.Stake()
+func (es *EigenSequencer) Start() error {
+	err := es.Stake()
 	if err != nil {
 		return err
 	}
-	err = mt.FetchBlock(mt.ctx)
+	err = es.FetchBlock(es.ctx)
 	if err != nil {
 		log.Error("")
 	}
 	return nil
 }
 
-func (mt *MtBatcher) FetchBlock(ctx context.Context) error {
+func (es *EigenSequencer) FetchBlock(ctx context.Context) error {
+
 	return nil
 }
 
-func (s *MtBatcher) Stake() error {
+func (s *EigenSequencer) Stake() error {
 	rollup, err := s.getRollupContractBinding()
 	if err != nil {
 		return err
@@ -107,27 +113,27 @@ func (s *MtBatcher) Stake() error {
 	return nil
 }
 
-func (mt *MtBatcher) Disperse(data []byte) error {
-	params, err := mt.callEncode(data)
+func (es *EigenSequencer) Disperse(data []byte) error {
+	params, err := es.callEncode(data)
 	if err != nil {
 		return err
 	}
 	log.Info("after encode")
 
-	uploadHeader, err := createUploadHeader(params)
+	uploadHeader, err := common2.CreateUploadHeader(params)
 	if err != nil {
 		return err
 	}
-	rollup, err := mt.getRollupContractBinding()
+	rollup, err := es.getRollupContractBinding()
 	if err != nil {
 		return err
 	}
-	auth := mt.ChainClient.PrepareAuthTransactor()
+	auth := es.ChainClient.PrepareAuthTransactor()
 	tx, err := rollup.StoreData(auth, uploadHeader, uint8(params.Duration), params.BlockNumber, params.TotalOperatorsIndex)
 	if err != nil {
 		return err
 	}
-	err = mt.ChainClient.EnsureTransactionEvaled(tx)
+	err = es.ChainClient.EnsureTransactionEvaled(tx)
 	if err != nil {
 		return err
 	}
@@ -140,14 +146,14 @@ func (mt *MtBatcher) Disperse(data []byte) error {
 	if !ok {
 		return errors.New("could not get initDataStore")
 	}
-	meta, err := mt.callDisperse(
+	meta, err := es.callDisperse(
 		params.HeaderHash,
 		event.MsgHash[:],
 	)
 	if err != nil {
 		return err
 	}
-	calldata := makeCalldata(params, meta, event.StoreNumber, event.MsgHash)
+	calldata := common2.MakeCalldata(params, meta, event.StoreNumber, event.MsgHash)
 	searchData := rc.IDataLayrServiceManagerDataStoreSearchData{
 		Duration:  event.Duration,
 		Timestamp: new(big.Int).SetUint64(uint64(event.InitTime)),
@@ -173,32 +179,32 @@ func (mt *MtBatcher) Disperse(data []byte) error {
 	log.Info("SearchData: " + string(obj))
 	log.Info("HeaderHash: " + hex.EncodeToString(event.DataCommitment[:]))
 	log.Info("MsgHash: " + hex.EncodeToString(event.MsgHash[:]))
-	auth = mt.ChainClient.PrepareAuthTransactor()
+	auth = es.ChainClient.PrepareAuthTransactor()
 	tx, err = rollup.ConfirmData(auth, calldata, searchData)
 	if err != nil {
 		return err
 	}
 	fmt.Printf("ConfirmDataStore tx sent. TxHash: %v\n", tx.Hash().Hex())
-	err = mt.ChainClient.EnsureTransactionEvaled(tx)
+	err = es.ChainClient.EnsureTransactionEvaled(tx)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (mt *MtBatcher) callEncode(data []byte) (StoreParams, error) {
+func (es *EigenSequencer) callEncode(data []byte) (common2.StoreParams, error) {
 	// ToDo divide file to chunks and send via stream if file is too large
 	conn, err := grpc.Dial(s.DisperserSettings.Socket, grpc.WithInsecure())
 	if err != nil {
-		log.Error("Err. Disperser Cannot connect to", "socket", mt.DisperserSettings.Socket)
-		return StoreParams{}, err
+		log.Error("Err. Disperser Cannot connect to", "socket", es.DisperserSettings.Socket)
+		return common2.StoreParams{}, err
 	}
 	defer conn.Close()
 	c := pb.NewDataDispersalClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(s.DataStoreSettings.Timeout))
 	defer cancel()
 	request := &pb.EncodeStoreRequest{
-		Duration: mt.DataStoreSettings.Duration,
+		Duration: es.DataStoreSettings.Duration,
 		Data:     data,
 	}
 	opt := grpc.MaxCallSendMsgSize(1024 * 1024 * 300)
@@ -206,12 +212,12 @@ func (mt *MtBatcher) callEncode(data []byte) (StoreParams, error) {
 	log.Info("get store")
 	if err != nil {
 		log.Error("get store err", err)
-		return StoreParams{}, err
+		return common2.StoreParams{}, err
 	}
 	log.Info("get store end")
 	g := reply.GetStore()
 	feeBigInt := new(big.Int).SetBytes(g.Fee)
-	params := StoreParams{
+	params := common2.StoreParams{
 		BlockNumber:         g.BlockNumber,
 		TotalOperatorsIndex: g.TotalOperatorsIndex,
 		OrigDataSize:        g.OrigDataSize,
@@ -232,11 +238,11 @@ func (mt *MtBatcher) callEncode(data []byte) (StoreParams, error) {
 	return params, nil
 }
 
-func (mt *MtBatcher) callDisperse(headerHash []byte, messageHash []byte) (DisperseMeta, error) {
-	conn, err := grpc.Dial(mt.DisperserSettings.Socket, grpc.WithInsecure())
+func (es *EigenSequencer) callDisperse(headerHash []byte, messageHash []byte) (common2.DisperseMeta, error) {
+	conn, err := grpc.Dial(es.DisperserSettings.Socket, grpc.WithInsecure())
 	if err != nil {
-		log.Error("mt.DisperserSettings.Socket", "err", err)
-		return DisperseMeta{}, err
+		log.Error("es.DisperserSettings.Socket", "err", err)
+		return common2.DisperseMeta{}, err
 	}
 	defer conn.Close()
 	c := pb.NewDataDispersalClient(conn)
@@ -248,15 +254,15 @@ func (mt *MtBatcher) callDisperse(headerHash []byte, messageHash []byte) (Disper
 	}
 	reply, err := c.DisperseStore(ctx, request)
 	if err != nil {
-		return DisperseMeta{}, err
+		return common2.DisperseMeta{}, err
 	}
 	sigs := reply.GetSigs()
-	aggSig := AggregateSignature{
+	aggSig := common2.AggregateSignature{
 		AggSig:           sigs.AggSig,
 		AggPubKey:        sigs.AggPubKey,
 		NonSignerPubKeys: sigs.NonSignerPubKeys,
 	}
-	meta := DisperseMeta{
+	meta := common2.DisperseMeta{
 		Sigs:            aggSig,
 		ApkIndex:        reply.GetApkIndex(),
 		TotalStakeIndex: reply.GetTotalStakeIndex(),
@@ -264,8 +270,8 @@ func (mt *MtBatcher) callDisperse(headerHash []byte, messageHash []byte) (Disper
 	return meta, nil
 }
 
-func (mt *MtBatcher) getRollupContractBinding() (*rc.ContractDataLayrRollup, error) {
-	rollup, err := rc.NewContractDataLayrRollup(mt.RollupSettings.Address, mt.ChainClient.Client)
+func (es *EigenSequencer) getRollupContractBinding() (*rc.ContractDataLayrRollup, error) {
+	rollup, err := rc.NewContractDataLayrRollup(es.RollupSettings.Address, es.ChainClient.Client)
 	if err != nil {
 		return nil, err
 	}
