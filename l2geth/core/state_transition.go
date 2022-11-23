@@ -24,7 +24,6 @@ import (
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
-	"github.com/mantlenetworkio/mantle/l2geth/contracts/gasfee"
 	"github.com/mantlenetworkio/mantle/l2geth/contracts/tssreward"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
@@ -291,16 +290,6 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 			fee := new(big.Int).Add(st.l1Fee, l2Fee)
 			st.state.AddBalance(evm.Coinbase, fee)
-			// burning
-			data, err := gasfee.PacketData()
-			if err != nil {
-				return nil, 0, false, err
-			}
-			deadAddress := vm.AccountRef(dump.DeadAddress)
-			_, _, callErr := evm.Call(deadAddress, dump.BvmFeeWallet, data, 210000, common.Big0)
-			if callErr != nil {
-				return nil, 0, false, fmt.Errorf("evm call bvmFeeWallet error:%v", callErr)
-			}
 		} else if isBurning.Cmp(big.NewInt(0)) == 0 {
 			st.state.AddBalance(dump.BvmFeeWallet, st.l1Fee)
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
@@ -310,7 +299,6 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 				return nil, 0, false, err
 			}
 			deadAddress := vm.AccountRef(dump.DeadAddress)
-			log.Info("update reward ........")
 			_, _, err = evm.Call(deadAddress, dump.TssRewardAddress, data, 210000, common.Big0)
 			if err != nil {
 				log.Error("update reward in error: ", err)
