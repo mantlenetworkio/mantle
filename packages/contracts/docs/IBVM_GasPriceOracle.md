@@ -13,7 +13,7 @@
 ### IsBurning
 
 ```solidity
-function IsBurning() external view returns (bool)
+function IsBurning() external view returns (uint256)
 ```
 
 
@@ -25,7 +25,7 @@ function IsBurning() external view returns (bool)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | undefined
+| _0 | uint256 | undefined
 
 
 

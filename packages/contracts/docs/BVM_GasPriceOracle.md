@@ -13,7 +13,7 @@
 ### IsBurning
 
 ```solidity
-function IsBurning() external view returns (bool)
+function IsBurning() external view returns (uint256)
 ```
 
 
@@ -25,7 +25,24 @@ function IsBurning() external view returns (bool)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | undefined
+| _0 | uint256 | undefined
+
+### charge
+
+```solidity
+function charge() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
 
 ### decimals
 
@@ -184,6 +201,22 @@ function scalar() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined
 
+### setCharge
+
+```solidity
+function setCharge(uint256 _charge) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _charge | uint256 | undefined
+
 ### setDecimals
 
 ```solidity
@@ -219,7 +252,7 @@ Allows the owner to modify the l2 gas price.
 ### setIsBurning
 
 ```solidity
-function setIsBurning(bool _isBurning) external nonpayable
+function setIsBurning(uint256 _isBurning) external nonpayable
 ```
 
 Allows the owner to modify the isBurning.
@@ -230,7 +263,7 @@ Allows the owner to modify the isBurning.
 
 | Name | Type | Description |
 |---|---|---|
-| _isBurning | bool | New isBurning
+| _isBurning | uint256 | New isBurning
 
 ### setL1BaseFee
 
@@ -300,6 +333,22 @@ function transferOwnership(address newOwner) external nonpayable
 
 ## Events
 
+### ChargeUpdated
+
+```solidity
+event ChargeUpdated(uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0  | uint256 | undefined |
+
 ### DecimalsUpdated
 
 ```solidity
@@ -335,7 +384,7 @@ event GasPriceUpdated(uint256)
 ### IsBurningUpdated
 
 ```solidity
-event IsBurningUpdated(bool)
+event IsBurningUpdated(uint256)
 ```
 
 
@@ -346,7 +395,7 @@ event IsBurningUpdated(bool)
 
 | Name | Type | Description |
 |---|---|---|
-| _0  | bool | undefined |
+| _0  | uint256 | undefined |
 
 ### L1BaseFeeUpdated
 
