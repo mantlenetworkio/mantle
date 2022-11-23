@@ -33,7 +33,7 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
     uint256 public decimals;
     // Switch controls whether GasFee is burn
     uint256    isBurning;
-    // Switch controls whether GasFee is burn
+    // Switch controls whether charge L2 GasFee
     uint256    public charge;
 
     /***************
