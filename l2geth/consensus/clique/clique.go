@@ -20,6 +20,7 @@ package clique
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"math/big"
 	"math/rand"
@@ -178,6 +179,7 @@ type Clique struct {
 
 	schedulerID []byte    // Identifier of the current scheduler
 	producers   Producers // Current list of producers
+	signature   []byte    // Current signature of producers
 
 	proposals map[common.Address]bool // Current list of proposals we are pushing
 
@@ -210,14 +212,17 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 	}
 }
 
-func (c *Clique) SetProducers(data Producers) {
-	c.producers = data
-	c.schedulerID = data.SchedulerID
-	data.store(c.db)
+func (c *Clique) SetProducers(data ProducerUpdate) {
+	c.producers = data.Producers
+	c.schedulerID = data.Producers.SchedulerID
+	c.signature = data.Signature
 }
 
-func (c *Clique) GetProducers(data GetProducers) Producers {
-	return c.producers
+func (c *Clique) GetProducers(data GetProducers) ProducerUpdate {
+	return ProducerUpdate{
+		c.producers,
+		c.signature,
+	}
 }
 
 // Author implements consensus.Engine, returning the Ethereum address recovered
@@ -362,6 +367,7 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 		if !bytes.Equal(header.Extra[extraVanity:extraSuffix], signers) {
 			return errMismatchingCheckpointSigners
 		}
+		// todo verify producer
 	}
 	// All basic checks passed, verify the seal and return
 	return c.verifySeal(chain, header, parents)
@@ -487,6 +493,7 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	if err != nil {
 		return err
 	}
+	log.Info(fmt.Sprintf("signer is : %v", signer.String()))
 	if _, ok := snap.Signers[signer]; !ok {
 		return errUnauthorizedSigner
 	}
@@ -640,6 +647,11 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 	if err != nil {
 		return err
 	}
+
+	for k, _ := range snap.Signers {
+		log.Info(fmt.Sprintf("has signer: %v", k.String()))
+	}
+
 	if _, authorized := snap.Signers[signer]; !authorized {
 		return errUnauthorizedSigner
 	}

@@ -18,6 +18,7 @@
 package eth
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -25,6 +26,7 @@ import (
 	"runtime"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi/bind"
@@ -480,8 +482,11 @@ func (s *Ethereum) StartMining(threads int) error {
 			log.Error("Cannot start mining without etherbase", "err", err)
 			return fmt.Errorf("etherbase missing: %v", err)
 		}
+		var wallet accounts.Wallet
+		var account accounts.Account
 		if clique, ok := s.engine.(*clique.Clique); ok {
-			wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
+			account = accounts.Account{Address: eb}
+			wallet, err = s.accountManager.Find(account)
 			if wallet == nil || err != nil {
 				log.Error("Etherbase account unavailable locally", "err", err)
 				return fmt.Errorf("signer missing: %v", err)
@@ -491,8 +496,37 @@ func (s *Ethereum) StartMining(threads int) error {
 		// If mining is started, we can disable the transaction rejection mechanism
 		// introduced to speed sync times.
 		atomic.StoreUint32(&s.protocolManager.acceptTxs, 1)
-
 		go s.miner.Start(eb)
+
+		// set sequencer server and get scheduler address
+		var seqServer *clique.SequencerServer
+		var scheduler common.Address
+
+		// check method for sequencer server check if miner is already start
+		check := func() bool {
+			return s.IsMining()
+		}
+		// only start when Clique consensus
+		if _, ok := s.engine.(*clique.Clique); ok {
+			seqServer = clique.NewSequencerServer(
+				time.Duration(s.blockchain.Config().Clique.Epoch),
+				s.engine.(*clique.Clique),
+				s.eventMux,
+				check,
+			)
+			scheduler, err = seqServer.GetScheduler()
+			if err != nil {
+				return fmt.Errorf("Cannot get scheduler: %w", err)
+			}
+			// check eb to equal scheduler then start sequencer server after miner start
+			if bytes.Equal(scheduler.Bytes(), eb.Bytes()) {
+				// set wallet for sign msgs
+				seqServer.SetWallet(wallet, account)
+				// start sequencer server
+				seqServer.Start()
+			}
+		}
+
 	}
 	return nil
 }

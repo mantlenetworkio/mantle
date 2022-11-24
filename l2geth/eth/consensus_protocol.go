@@ -22,10 +22,10 @@ var consensusProtocolLength = uint64(2)
 const consensusMaxMsgSize = 10 * 1024 * 1024 // Maximum cap on the size of a protocol message
 
 // protocolName is the official short name of the protocol used during capability negotiation.
-const consensusProtocolName = "coterie"
+const consensusProtocolName = "clique"
 
 // eth protocol message codes
 const (
-	GetProducersMsg = 0x01
-	ProducersMsg    = 0x02
+	GetProducersMsg = 0x00
+	ProducersMsg    = 0x01
 )

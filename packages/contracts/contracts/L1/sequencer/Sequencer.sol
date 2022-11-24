@@ -1,14 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >0.5.0 <0.9.0;
 
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
-    using SafeERC20 for IERC20;
-
     struct SequencerInfo {
         address owner;
         address mintAddress;
@@ -32,9 +29,9 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
     // Store the Epoch
     uint256 public epoch;
     // Store limit of sequencer
-    uint256 public sequencerLimit;
+    uint8 public sequencerLimit;
     // Store scheduler
-    bytes public scheduler;
+    address public scheduler;
 
     // SequencerCreate(signer, mintAddress, nodeID)
     event SequencerCreate(address, address, bytes);
@@ -54,17 +51,17 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
 
     /**
      * Update Epoch
-     * @param nodeID new scheculer`s nodeID
+     * @param _scheduler new scheculer`s address
      */
-    function updateScheduler(bytes memory nodeID) public onlyOwner {
-        scheduler = nodeID;
+    function updateScheduler(address _scheduler) public onlyOwner {
+        scheduler = _scheduler;
     }
 
     /**
      * Update Epoch
      * @param _limit new limit
      */
-    function updateSequencerLimit(uint256 _limit) public onlyOwner {
+    function updateSequencerLimit(uint8 _limit) public onlyOwner {
         sequencerLimit = _limit;
     }
 
@@ -101,7 +98,7 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         // check already have sequencer
         require(sequencers[msg.sender].mintAddress == address(0), "Already has been created");
         require(rel[_mintAddress] == address(0), "This mint address already has owner");
-        IERC20(bitToken).safeTransferFrom(msg.sender, address(this), _amount);
+        IERC20(bitToken).transferFrom(msg.sender, address(this), _amount);
 
         uint256 index = owners.length;
         sequencers[msg.sender] = SequencerInfo({
@@ -127,7 +124,7 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         require(sequencers[msg.sender].mintAddress != address(0), "Sequencer not exist");
 
         // transfer
-        IERC20(bitToken).safeTransferFrom(msg.sender, address(this), _amount);
+        IERC20(bitToken).transferFrom(msg.sender, address(this), _amount);
         sequencers[msg.sender].amount += _amount;
         emit SequencerUpdate(
             sequencers[msg.sender].mintAddress,
@@ -155,7 +152,7 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         }
 
         // transfer
-        IERC20(bitToken).safeTransfer(msg.sender, withdrawAmount);
+        IERC20(bitToken).transfer(msg.sender, withdrawAmount);
 
         sequencers[msg.sender].amount -= withdrawAmount;
         emit SequencerUpdate(
@@ -180,7 +177,7 @@ contract Sequencer is ReentrancyGuardUpgradeable, OwnableUpgradeable {
         uint256 withdrawAmount = sequencers[msg.sender].amount;
 
         // transfer
-        IERC20(bitToken).safeTransfer(msg.sender, withdrawAmount);
+        IERC20(bitToken).transfer(msg.sender, withdrawAmount);
 
         emit SequencerUpdate(sequencers[msg.sender].mintAddress, sequencers[msg.sender].nodeID, 0);
         deleteSequencer(msg.sender);

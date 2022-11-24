@@ -10,13 +10,16 @@ import (
 
 var (
 	extraNumberLength    = 8
+	extraIndexLength     = 8
 	extraEpochLength     = 8
 	extraSchedulerLength = common.AddressLength
 	extraSequencerLength = common.AddressLength + 8 + 8 // each sequencer serialize by address + power + priority
 )
 
+// todo Add index param
 type Producers struct {
 	Number       uint64       `json:"number"`       // Block number where the snapshot was created
+	Index        uint64       `json:"index"`        // Index of producers update times
 	Epoch        uint64       `json:"epoch"`        // Epoch represents the block number for each producer
 	SchedulerID  []byte       `json:"schedulerID"`  // SchedulerID represents scheduler's peer.id
 	SequencerSet SequencerSet `json:"sequencerSet"` // Set of sequencers
@@ -26,9 +29,10 @@ type Producers struct {
 type GetProducers struct{}
 
 // newProducers creates a new ProducersData.
-func newProducers(number uint64, epoch uint64, schedulerID []byte, sequencerSet SequencerSet) *Producers {
+func newProducers(number, index, epoch uint64, schedulerID []byte, sequencerSet SequencerSet) *Producers {
 	data := &Producers{
 		Number:       number,
+		Index:        index,
 		Epoch:        epoch,
 		SchedulerID:  schedulerID,
 		SequencerSet: sequencerSet,
@@ -68,6 +72,12 @@ func (s *Producers) inturn(signer common.Address) bool {
 	return s.SequencerSet.GetProducer().Address == signer
 }
 
+// increment index
+func (s *Producers) increment() {
+	// todo clear index each epoch?
+	s.Index++
+}
+
 func Uint64ToBytes(i uint64) []byte {
 	var buf = make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, i)
@@ -77,7 +87,7 @@ func Uint64ToBytes(i uint64) []byte {
 func (s *Producers) serialize() []byte {
 	var buf = make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, s.Number)
-
+	buf = binary.BigEndian.AppendUint64(buf, s.Index)
 	buf = binary.BigEndian.AppendUint64(buf, s.Epoch)
 	buf = append(buf, s.SchedulerID...)
 
@@ -91,20 +101,21 @@ func (s *Producers) serialize() []byte {
 }
 
 func deserialize(buf []byte) *Producers {
-	if len(buf) < extraNumberLength+extraEpochLength+extraSchedulerLength {
+	if len(buf) < extraNumberLength+extraIndexLength+extraEpochLength+extraSchedulerLength {
 		return nil
 	}
 
-	if (len(buf)-extraNumberLength-extraEpochLength-extraSchedulerLength)%extraSequencerLength != 0 {
+	if (len(buf)-extraNumberLength-extraIndexLength-extraEpochLength-extraSchedulerLength)%extraSequencerLength != 0 {
 		return nil
 	}
 
 	number := binary.BigEndian.Uint64(buf[:extraNumberLength])
-	epoch := binary.BigEndian.Uint64(buf[extraNumberLength : extraNumberLength+extraEpochLength])
-	schedulerID := buf[extraNumberLength+extraEpochLength : extraNumberLength+extraEpochLength+extraSchedulerLength]
+	index := binary.BigEndian.Uint64(buf[extraNumberLength : extraNumberLength+extraIndexLength])
+	epoch := binary.BigEndian.Uint64(buf[extraNumberLength+extraIndexLength : extraNumberLength+extraIndexLength+extraEpochLength])
+	schedulerID := buf[extraNumberLength+extraIndexLength+extraEpochLength : extraNumberLength+extraIndexLength+extraEpochLength+extraSchedulerLength]
 
 	sequencers := make([]*Sequencer, 0)
-	for i := extraNumberLength + extraEpochLength + extraSchedulerLength; i < len(buf); i += extraSequencerLength {
+	for i := extraNumberLength + extraIndexLength + extraEpochLength + extraSchedulerLength; i < len(buf); i += extraSequencerLength {
 		sequencer := &Sequencer{
 			Address:          common.BytesToAddress(buf[i : i+common.AddressLength]),
 			Power:            int64(binary.BigEndian.Uint64(buf[i+common.AddressLength : i+common.AddressLength+8])),
@@ -120,5 +131,5 @@ func deserialize(buf []byte) *Producers {
 	sequencerSet.updateTotalPower()
 	sequencerSet.Producer = sequencerSet.findProducer()
 
-	return newProducers(number, epoch, schedulerID, *sequencerSet)
+	return newProducers(number, index, epoch, schedulerID, *sequencerSet)
 }
