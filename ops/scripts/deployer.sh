@@ -56,12 +56,14 @@ if [ $SKIP_CONTRACT_DEPLOY == "NO" ] ;then
   echo "Re-generate addresses.txt"
   # First, create two files. One of them contains a list of addresses, the other contains a list of contract names.
   find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | xargs cat | jq -r '.address' > addresses.txt
+  find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | sed -e "s/.\/deployments\/$CONTRACTS_TARGET_NETWORK\///g" | sed -e 's/.json//g' > filenames.txt
 elif [ $CONTRACTS_TARGET_NETWORK == "goerli-qa" ] ; then
   cp -r addresses-qa.txt addresses.txt
+  cp -r filenames-qa.txt filenames.txt
 else [ $CONTRACTS_TARGET_NETWORK == "goerli-testnet" ]
   cp -r addresses-testnet.txt addresses.txt
+  cp -r filenames-testnet.txt filenames.txt
 fi
-find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | sed -e "s/.\/deployments\/$CONTRACTS_TARGET_NETWORK\///g" | sed -e 's/.json//g' > filenames.txt
 
 # Start building addresses.json.
 echo "{" > addresses.json
