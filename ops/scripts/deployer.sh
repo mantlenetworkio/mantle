@@ -51,8 +51,16 @@ fi
 echo "Building addresses.json."
 export ADDRESS_MANAGER_ADDRESS=$(cat "./deployments/$CONTRACTS_TARGET_NETWORK/Lib_AddressManager.json" | jq -r .address)
 
-# First, create two files. One of them contains a list of addresses, the other contains a list of contract names.
-find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | xargs cat | jq -r '.address' > addresses.txt
+
+if [ $SKIP_CONTRACT_DEPLOY == "NO" ] ;then
+  echo "Re-generate addresses.txt"
+  # First, create two files. One of them contains a list of addresses, the other contains a list of contract names.
+  find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | xargs cat | jq -r '.address' > addresses.txt
+elif [ $CONTRACTS_TARGET_NETWORK == "goerli-qa" ] ; then
+  cp -r addresses-qa.txt addresses.txt
+else [ $CONTRACTS_TARGET_NETWORK == "goerli-testnet" ]
+  cp -r addresses-testnet.txt addresses.txt
+fi
 find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | sed -e "s/.\/deployments\/$CONTRACTS_TARGET_NETWORK\///g" | sed -e 's/.json//g' > filenames.txt
 
 # Start building addresses.json.
