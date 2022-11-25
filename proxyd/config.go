@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 type ServerConfig struct {
@@ -13,6 +14,7 @@ type ServerConfig struct {
 	WSPort            int    `toml:"ws_port"`
 	MaxBodySizeBytes  int64  `toml:"max_body_size_bytes"`
 	MaxConcurrentRPCs int64  `toml:"max_concurrent_rpcs"`
+	LogLevel          string `toml:"log_level"`
 
 	// TimeoutSeconds specifies the maximum time spent serving an HTTP request. Note that isn't used for websocket connections
 	TimeoutSeconds int `toml:"timeout_seconds"`
@@ -40,10 +42,31 @@ type MetricsConfig struct {
 }
 
 type RateLimitConfig struct {
-	RatePerSecond    int      `toml:"rate_per_second"`
-	ExemptOrigins    []string `toml:"exempt_origins"`
-	ExemptUserAgents []string `toml:"exempt_user_agents"`
-	ErrorMessage     string   `toml:"error_message"`
+	UseRedis                 bool                                `toml:"use_redis"`
+	EnableBackendRateLimiter bool                                `toml:"enable_backend_rate_limiter"`
+	BaseRate                 int                                 `toml:"base_rate"`
+	BaseInterval             TOMLDuration                        `toml:"base_interval"`
+	ExemptOrigins            []string                            `toml:"exempt_origins"`
+	ExemptUserAgents         []string                            `toml:"exempt_user_agents"`
+	ErrorMessage             string                              `toml:"error_message"`
+	MethodOverrides          map[string]*RateLimitMethodOverride `toml:"method_overrides"`
+}
+
+type RateLimitMethodOverride struct {
+	Limit    int          `toml:"limit"`
+	Interval TOMLDuration `toml:"interval"`
+}
+
+type TOMLDuration time.Duration
+
+func (t *TOMLDuration) UnmarshalText(b []byte) error {
+	d, err := time.ParseDuration(string(b))
+	if err != nil {
+		return err
+	}
+
+	*t = TOMLDuration(d)
+	return nil
 }
 
 type BackendOptions struct {
@@ -76,19 +99,26 @@ type BackendGroupsConfig map[string]*BackendGroupConfig
 
 type MethodMappingsConfig map[string]string
 
+type BatchConfig struct {
+	MaxSize      int    `toml:"max_size"`
+	ErrorMessage string `toml:"error_message"`
+}
+
 type Config struct {
-	WSBackendGroup    string              `toml:"ws_backend_group"`
-	Server            ServerConfig        `toml:"server"`
-	Cache             CacheConfig         `toml:"cache"`
-	Redis             RedisConfig         `toml:"redis"`
-	Metrics           MetricsConfig       `toml:"metrics"`
-	RateLimit         RateLimitConfig     `toml:"rate_limit"`
-	BackendOptions    BackendOptions      `toml:"backend"`
-	Backends          BackendsConfig      `toml:"backends"`
-	Authentication    map[string]string   `toml:"authentication"`
-	BackendGroups     BackendGroupsConfig `toml:"backend_groups"`
-	RPCMethodMappings map[string]string   `toml:"rpc_method_mappings"`
-	WSMethodWhitelist []string            `toml:"ws_method_whitelist"`
+	WSBackendGroup        string              `toml:"ws_backend_group"`
+	Server                ServerConfig        `toml:"server"`
+	Cache                 CacheConfig         `toml:"cache"`
+	Redis                 RedisConfig         `toml:"redis"`
+	Metrics               MetricsConfig       `toml:"metrics"`
+	RateLimit             RateLimitConfig     `toml:"rate_limit"`
+	BackendOptions        BackendOptions      `toml:"backend"`
+	Backends              BackendsConfig      `toml:"backends"`
+	BatchConfig           BatchConfig         `toml:"batch"`
+	Authentication        map[string]string   `toml:"authentication"`
+	BackendGroups         BackendGroupsConfig `toml:"backend_groups"`
+	RPCMethodMappings     map[string]string   `toml:"rpc_method_mappings"`
+	WSMethodWhitelist     []string            `toml:"ws_method_whitelist"`
+	WhitelistErrorMessage string              `toml:"whitelist_error_message"`
 }
 
 func ReadFromEnvOrConfig(value string) (string, error) {
