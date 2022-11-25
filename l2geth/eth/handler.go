@@ -90,6 +90,10 @@ type ProtocolManager struct {
 	txsSub        event.Subscription
 	minedBlockSub *event.TypeMuxSubscription
 	producersSub  *event.TypeMuxSubscription
+	// consensus control messages
+	batchStartMsgSub      *event.TypeMuxSubscription
+	batchEndMsgSub        *event.TypeMuxSubscription
+	fraudProofReorgMsgSub *event.TypeMuxSubscription
 
 	whitelist map[uint64]common.Hash
 
@@ -828,25 +832,6 @@ func (pm *ProtocolManager) minedBroadcastLoop() {
 			pm.BroadcastBlock(ev.Block, false) // Only then announce to the rest
 		}
 	}
-}
-
-// Sequencer set broadcast loop
-func (pm *ProtocolManager) producersBroadcastLoop() {
-	// automatically stops if unsubscribe
-	for obj := range pm.producersSub.Chan() {
-		if prs, ok := obj.Data.(clique.ProducersUpdateEvent); ok {
-			pm.BroadcastProducers(prs.Update) // First propagate block to peers
-		}
-	}
-}
-
-func (pm *ProtocolManager) BroadcastProducers(producersUpdate *clique.ProducerUpdate) {
-	peers := pm.peersTmp.PeersWithoutProducer(producersUpdate.Producers.Index)
-	for _, p := range peers {
-		p.AsyncSendProducers(producersUpdate)
-	}
-
-	log.Trace("Broadcast producers", "block number", producersUpdate.Producers.Number, "recipients", len(pm.peers.peers))
 }
 
 func (pm *ProtocolManager) txBroadcastLoop() {

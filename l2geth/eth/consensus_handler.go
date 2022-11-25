@@ -129,11 +129,72 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		}
 
 		return p.SendProducers(proupdate)
+
+	case msg.Code == BatchPeriodStartMsg:
+		// todo: BatchPeriodStartMsg handle
+	case msg.Code == BatchPeriodEndMsg:
+		// todo: BatchPeriodEndMsg handle
+	case msg.Code == FraudProofReorgMsg:
+		// todo: FraudProofReorgMsg handle
+
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
 	}
 
 	return nil
+}
+
+// ---------------------------- Consensus Control Messages ----------------------------
+
+func (pm *ProtocolManager) batchPeriodStartMsgBroadcastLoop() {
+}
+
+func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg() {
+	log.Trace("Broadcast batch period start msg")
+}
+
+func (p *peer) AsyncSendBatchPeriodStartMsg() {
+}
+
+func (pm *ProtocolManager) batchPeriodEndMsgBroadcastLoop() {
+}
+
+func (pm *ProtocolManager) BroadcastBatchPeriodEndMsg() {
+	log.Trace("Broadcast batch period end msg")
+}
+
+func (p *peer) AsyncSendBatchPeriodEndMsg() {
+}
+
+func (pm *ProtocolManager) fraudProofReorgMsgBroadcastLoop() {
+}
+
+func (pm *ProtocolManager) BroadcastFraudProofReorgMsg() {
+	log.Trace("Broadcast fraud proof reorg msg")
+}
+
+func (p *peer) AsyncSendFraudProofReorgMsg() {
+}
+
+// ---------------------------- Producers ----------------------------
+
+// Sequencer set broadcast loop
+func (pm *ProtocolManager) producersBroadcastLoop() {
+	// automatically stops if unsubscribe
+	for obj := range pm.producersSub.Chan() {
+		if prs, ok := obj.Data.(clique.ProducersUpdateEvent); ok {
+			pm.BroadcastProducers(prs.Update) // First propagate block to peers
+		}
+	}
+}
+
+func (pm *ProtocolManager) BroadcastProducers(producersUpdate *clique.ProducerUpdate) {
+	peers := pm.peersTmp.PeersWithoutProducer(producersUpdate.Producers.Index)
+	for _, p := range peers {
+		p.AsyncSendProducers(producersUpdate)
+	}
+
+	log.Trace("Broadcast producers", "block number", producersUpdate.Producers.Number, "recipients", len(pm.peers.peers))
 }
 
 func (p *peer) AsyncSendProducers(prs *clique.ProducerUpdate) {
