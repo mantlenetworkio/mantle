@@ -89,7 +89,6 @@ type ProtocolManager struct {
 	txsCh         chan core.NewTxsEvent
 	txsSub        event.Subscription
 	minedBlockSub *event.TypeMuxSubscription
-	producersSub  *event.TypeMuxSubscription
 	// consensus control messages
 	batchStartMsgSub      *event.TypeMuxSubscription
 	batchEndMsgSub        *event.TypeMuxSubscription
@@ -267,8 +266,14 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 	go pm.minedBroadcastLoop()
 
 	// broadcast producers
-	pm.producersSub = pm.eventMux.Subscribe(clique.ProposersUpdateEvent{})
-	go pm.producersBroadcastLoop()
+	pm.batchStartMsgSub = pm.eventMux.Subscribe(clique.BatchPeriodStartEvent{})
+	go pm.batchPeriodStartMsgBroadcastLoop()
+
+	pm.batchEndMsgSub = pm.eventMux.Subscribe(clique.BatchPeriodEndEvent{})
+	go pm.batchPeriodEndMsgBroadcastLoop()
+
+	pm.fraudProofReorgMsgSub = pm.eventMux.Subscribe(clique.FraudProofReorgEvent{})
+	go pm.fraudProofReorgMsgBroadcastLoop()
 
 	// start sync handlers
 	go pm.syncer()
@@ -280,7 +285,10 @@ func (pm *ProtocolManager) Stop() {
 
 	pm.txsSub.Unsubscribe()        // quits txBroadcastLoop
 	pm.minedBlockSub.Unsubscribe() // quits blockBroadcastLoop
-	pm.producersSub.Unsubscribe()  // quits producersBroadcastLoop
+
+	pm.batchStartMsgSub.Unsubscribe()
+	pm.batchEndMsgSub.Unsubscribe()
+	pm.fraudProofReorgMsgSub.Unsubscribe()
 
 	// Quit the sync loop.
 	// After this send has completed, no new peers will be accepted.

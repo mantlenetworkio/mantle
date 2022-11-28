@@ -105,31 +105,6 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 
 	// Handle the message depending on its contents
 	switch {
-	case msg.Code == ProposersMsg:
-		log.Debug(fmt.Sprintf("Get ProposersMsg from %v", p.id))
-		// A batch of block bodies arrived to one of our previous requests
-		var tmp []byte
-		var proUpdate clique.ProposerUpdate
-		if err := msg.Decode(&tmp); err != nil {
-			return errResp(ErrDecode, "msg %v: %v", msg, err)
-		}
-		proUpdate.Deserialize(tmp)
-		if eg, ok := pm.blockchain.Engine().(*clique.Clique); ok && len(proUpdate.Signature) != 0 {
-			eg.SetProducers(proUpdate)
-		}
-
-	case msg.Code == GetProposersMsg:
-		var proupdate clique.ProposerUpdate
-		var getProducers clique.GetProducers
-		if err := msg.Decode(&getProducers); err != nil {
-			return errResp(ErrDecode, "msg %v: %v", msg, err)
-		}
-		if eg, ok := pm.blockchain.Engine().(*clique.Clique); ok {
-			proupdate = eg.GetProducers(getProducers)
-		}
-
-		return p.SendProducers(proupdate)
-
 	case msg.Code == BatchPeriodStartMsg:
 		// todo: BatchPeriodStartMsg handle
 		log.Info("Batch Period Start Msg")
@@ -183,7 +158,7 @@ func (p *peer) AsyncSendBatchPeriodStartMsg(msg *clique.BatchPeriodStart) {
 // BatchPeriodEndMsg
 func (pm *ProtocolManager) batchPeriodEndMsgBroadcastLoop() {
 	// automatically stops if unsubscribe
-	for obj := range pm.batchStartMsgSub.Chan() {
+	for obj := range pm.batchEndMsgSub.Chan() {
 		if ee, ok := obj.Data.(clique.BatchPeriodEndEvent); ok {
 			pm.BroadcastBatchPeriodEndMsg(ee.Msg) // First propagate block to peers
 		}
@@ -243,54 +218,6 @@ func (p *peer) AsyncSendFraudProofReorgMsg(reorg *clique.FraudProofReorg) {
 }
 
 // ---------------------------- Proposers ----------------------------
-
-// Sequencer set broadcast loop
-func (pm *ProtocolManager) producersBroadcastLoop() {
-	// automatically stops if unsubscribe
-	for obj := range pm.producersSub.Chan() {
-		if prs, ok := obj.Data.(clique.ProposersUpdateEvent); ok {
-			pm.BroadcastProducers(prs.Update) // First propagate block to peers
-		}
-	}
-}
-
-func (pm *ProtocolManager) BroadcastProducers(producersUpdate *clique.ProposerUpdate) {
-	peers := pm.peersTmp.PeersWithoutProducer(producersUpdate.Proposers.Index)
-	for _, p := range peers {
-		p.AsyncSendProducers(producersUpdate)
-	}
-
-	log.Trace("Broadcast producers", "block number", producersUpdate.Proposers.Number, "recipients", len(pm.peers.peers))
-}
-
-func (p *peer) AsyncSendProducers(prs *clique.ProposerUpdate) {
-	select {
-	case p.queuedPrs <- prs:
-		p.knowPrs.Add(prs.Proposers.Index)
-		// Mark all the producers as known, but ensure we don't overflow our limits
-		for p.knowPrs.Cardinality() >= maxKnownPrs {
-			p.knowPrs.Pop()
-		}
-
-	default:
-		p.Log().Debug("Dropping producers propagation", "block number", prs.Proposers.Number)
-	}
-}
-
-// SendProducers sends a batch of transaction receipts, corresponding to the
-// ones requested from an already RLP encoded format.
-func (p *peer) SendProducers(proUpdate clique.ProposerUpdate) error {
-	p.knowPrs.Add(proUpdate.Proposers.Index)
-	// Mark all the producers as known, but ensure we don't overflow our limits
-	for p.knowPrs.Cardinality() >= maxKnownPrs {
-		p.knowPrs.Pop()
-	}
-	return p2p.Send(p.rw, ProposersMsg, proUpdate.Serialize())
-}
-
-func (p *peer) RequestProducers(producers clique.Proposers) error {
-	return p2p.Send(p.rw, GetProposersMsg, producers)
-}
 
 // SendBatchPeriodStart sends a batch of transaction receipts, corresponding to the
 // ones requested from an already RLP encoded format.

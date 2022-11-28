@@ -93,14 +93,12 @@ type peer struct {
 
 	knownTxs              mapset.Set                    // Set of transaction hashes known to be known by this peer
 	knownBlocks           mapset.Set                    // Set of block hashes known to be known by this peer
-	knowPrs               mapset.Set                    // Set of Proposers height to be known by this peer
 	knowStartMsg          mapset.Set                    // Set of start msg index to be known by this peer
 	knowEndMsg            mapset.Set                    // Set of end msg index to be known by this peer
 	knowFraudProofReorg   mapset.Set                    // Set of end msg index to be known by this peer
 	queuedTxs             chan []*types.Transaction     // Queue of transactions to broadcast to the peer
 	queuedProps           chan *propEvent               // Queue of blocks to broadcast to the peer
 	queuedAnns            chan *types.Block             // Queue of blocks to announce to the peer
-	queuedPrs             chan *clique.ProposerUpdate   // Queue of ProposerUpdate to announce to the peer
 	queuedStartMsg        chan *clique.BatchPeriodStart // Queue of BatchPeriodStart to announce to the peer
 	queuedEndMsg          chan *clique.BatchPeriodEnd   // Queue of BatchPeriodEnd to announce to the peer
 	queuedFraudProofReorg chan *clique.FraudProofReorg  // Queue of FraudProofReorg to announce to the peer
@@ -115,11 +113,9 @@ func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 		id:          fmt.Sprintf("%x", p.ID().Bytes()[:8]),
 		knownTxs:    mapset.NewSet(),
 		knownBlocks: mapset.NewSet(),
-		knowPrs:     mapset.NewSet(),
 		queuedTxs:   make(chan []*types.Transaction, maxQueuedTxs),
 		queuedProps: make(chan *propEvent, maxQueuedProps),
 		queuedAnns:  make(chan *types.Block, maxQueuedAnns),
-		queuedPrs:   make(chan *clique.ProposerUpdate, maxQueuedPrs),
 		term:        make(chan struct{}),
 	}
 }
@@ -148,13 +144,6 @@ func (p *peer) broadcast() {
 				return
 			}
 			p.Log().Trace("Announced block", "number", block.Number(), "hash", block.Hash())
-
-		case proUpdate := <-p.queuedPrs:
-			if err := p.SendProducers(*proUpdate); err != nil {
-				log.Debug(fmt.Sprintf("Proposers send error %v ", err))
-				return
-			}
-			p.Log().Trace("Broadcast producers", "number:", proUpdate.Proposers.Number, "index", proUpdate.Proposers.Index)
 
 		case <-p.term:
 			return
@@ -610,21 +599,6 @@ func (ps *peerSet) PeersWithoutStartMsg(index uint64) []*peer {
 	list := make([]*peer, 0, len(ps.peers))
 	for _, p := range ps.peers {
 		if !p.knowStartMsg.Contains(index) {
-			list = append(list, p)
-		}
-	}
-	return list
-}
-
-// PeersWithoutProducer retrieves a list of peers that do not have a given producer in
-// their set of known index.
-func (ps *peerSet) PeersWithoutProducer(index uint64) []*peer {
-	ps.lock.RLock()
-	defer ps.lock.RUnlock()
-
-	list := make([]*peer, 0, len(ps.peers))
-	for _, p := range ps.peers {
-		if !p.knowPrs.Contains(index) {
 			list = append(list, p)
 		}
 	}
