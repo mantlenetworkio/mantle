@@ -285,7 +285,7 @@ func (p *peer) SendProducers(proUpdate clique.ProducerUpdate) error {
 	return p2p.Send(p.rw, ProducersMsg, proUpdate.Serialize())
 }
 
-func (p *peer) RequestProducers(producers clique.Producers) error {
+func (p *peer) RequestProducers(producers clique.Proposers) error {
 	return p2p.Send(p.rw, GetProducersMsg, producers)
 }
 

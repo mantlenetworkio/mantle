@@ -17,20 +17,20 @@ var (
 )
 
 // todo Add index param
-type Producers struct {
+type Proposers struct {
 	Number       uint64       `json:"number"`       // Block number where the snapshot was created
-	Index        uint64       `json:"index"`        // Index of producers update times
+	Index        uint64       `json:"index"`        // Index of proposers update times
 	Epoch        uint64       `json:"epoch"`        // Epoch represents the block number for each producer
 	SchedulerID  []byte       `json:"schedulerID"`  // SchedulerID represents scheduler's peer.id
 	SequencerSet SequencerSet `json:"sequencerSet"` // Set of sequencers
 }
 
-// GetProducers represents a producers query.
+// GetProducers represents a proposers query.
 type GetProducers struct{}
 
-// newProducers creates a new ProducersData.
-func newProducers(number, index, epoch uint64, schedulerID []byte, sequencerSet SequencerSet) *Producers {
-	data := &Producers{
+// newProposers creates a new ProducersData.
+func newProposers(number, index, epoch uint64, schedulerID []byte, sequencerSet SequencerSet) *Proposers {
+	data := &Proposers{
 		Number:       number,
 		Index:        index,
 		Epoch:        epoch,
@@ -40,14 +40,14 @@ func newProducers(number, index, epoch uint64, schedulerID []byte, sequencerSet 
 	return data
 }
 
-// loadProducers loads an existing producers from the database.
-func loadProducers(db ethdb.Database, number uint64) (*Producers, error) {
+// loadProducers loads an existing proposers from the database.
+func loadProducers(db ethdb.Database, number uint64) (*Proposers, error) {
 
 	blob, err := db.Get(append([]byte("coterie-"), Uint64ToBytes(number)[:]...))
 	if err != nil {
 		return nil, err
 	}
-	snap := new(Producers)
+	snap := new(Proposers)
 	if err := json.Unmarshal(blob, snap); err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func loadProducers(db ethdb.Database, number uint64) (*Producers, error) {
 }
 
 // store inserts the producersData into the database.
-func (s *Producers) store(db ethdb.Database) error {
+func (s *Proposers) store(db ethdb.Database) error {
 	blob, err := json.Marshal(s)
 	if err != nil {
 		return err
@@ -63,17 +63,17 @@ func (s *Producers) store(db ethdb.Database) error {
 	return db.Put(append([]byte("coterie-"), Uint64ToBytes(s.Number)[:]...), blob)
 }
 
-func (s *Producers) GetSequencerSet() SequencerSet {
+func (s *Proposers) GetSequencerSet() SequencerSet {
 	return s.SequencerSet
 }
 
 // inturn returns if a signer at a given block height is in-turn or not.
-func (s *Producers) inturn(signer common.Address) bool {
+func (s *Proposers) inturn(signer common.Address) bool {
 	return s.SequencerSet.GetProducer().Address == signer
 }
 
 // increment index
-func (s *Producers) increment() {
+func (s *Proposers) increment() {
 	// todo clear index each epoch?
 	s.Index++
 }
@@ -84,7 +84,7 @@ func Uint64ToBytes(i uint64) []byte {
 	return buf
 }
 
-func (s *Producers) serialize() []byte {
+func (s *Proposers) serialize() []byte {
 	var buf = make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, s.Number)
 	buf = binary.BigEndian.AppendUint64(buf, s.Index)
@@ -100,7 +100,7 @@ func (s *Producers) serialize() []byte {
 	return buf
 }
 
-func deserialize(buf []byte) *Producers {
+func deserialize(buf []byte) *Proposers {
 	if len(buf) < extraNumberLength+extraIndexLength+extraEpochLength+extraSchedulerLength {
 		return nil
 	}
@@ -129,7 +129,7 @@ func deserialize(buf []byte) *Producers {
 	}
 
 	sequencerSet.updateTotalPower()
-	sequencerSet.Producer = sequencerSet.findProducer()
+	sequencerSet.Proposer = sequencerSet.findProducer()
 
-	return newProducers(number, index, epoch, schedulerID, *sequencerSet)
+	return newProposers(number, index, epoch, schedulerID, *sequencerSet)
 }

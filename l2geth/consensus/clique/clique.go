@@ -178,8 +178,8 @@ type Clique struct {
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
 
 	schedulerID []byte    // Identifier of the current scheduler
-	producers   Producers // Current list of producers
-	signature   []byte    // Current signature of producers
+	proposers   Proposers // Current list of proposers
+	signature   []byte    // Current signature of proposers
 
 	proposals map[common.Address]bool // Current list of proposals we are pushing
 
@@ -213,14 +213,14 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 }
 
 func (c *Clique) SetProducers(data ProducerUpdate) {
-	c.producers = data.Producers
+	c.proposers = data.Producers
 	c.schedulerID = data.Producers.SchedulerID
 	c.signature = data.Signature
 }
 
 func (c *Clique) GetProducers(data GetProducers) ProducerUpdate {
 	return ProducerUpdate{
-		c.producers,
+		c.proposers,
 		c.signature,
 	}
 }
@@ -533,7 +533,7 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	}
 
 	if number == 1 {
-		c.producers = snap.Producers
+		c.proposers = snap.Producers
 	}
 
 	if number%c.config.Epoch != 0 {
@@ -704,10 +704,10 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 
 	if number%c.config.Epoch == 0 {
 		producers := deserialize(header.Extra[extraVanity : len(header.Extra)-extraSeal])
-		c.producers = *producers
+		c.proposers = *producers
 	}
 
-	c.producers.SequencerSet.IncrementProducerPriority(1)
+	c.proposers.SequencerSet.IncrementProducerPriority(1)
 
 	return nil
 }

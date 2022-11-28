@@ -50,7 +50,7 @@ func TestReimportMirroredState(t *testing.T) {
 		Power:            100,
 		ProducerPriority: -100,
 	}
-	producers := Producers{
+	producers := Proposers{
 		Number:      0,
 		Index:       0,
 		Epoch:       100,
@@ -59,7 +59,7 @@ func TestReimportMirroredState(t *testing.T) {
 			Sequencers: []*Sequencer{
 				&Producer,
 			},
-			Producer:   &Producer,
+			Proposer:   &Producer,
 			totalPower: 100,
 		},
 	}

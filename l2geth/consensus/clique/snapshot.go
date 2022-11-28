@@ -53,7 +53,7 @@ type Snapshot struct {
 
 	Number    uint64                      `json:"number"`    // Block number where the snapshot was created
 	Hash      common.Hash                 `json:"hash"`      // Block hash where the snapshot was created
-	Producers Producers                   `json:"producers"` // Set of authorized producers at this moment
+	Producers Proposers                   `json:"proposers"` // Set of authorized proposers at this moment
 	Signers   map[common.Address]struct{} `json:"signers"`   // Set of authorized signers at this moment
 	Recents   map[uint64]common.Address   `json:"recents"`   // Set of recent signers for spam protections
 	Votes     []*Vote                     `json:"votes"`     // List of votes cast in chronological order
@@ -70,7 +70,7 @@ func (s signersAscending) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 // newSnapshot creates a new snapshot with the specified startup parameters. This
 // method does not initialize the set of recent signers, so only ever use if for
 // the genesis block.
-func newSnapshot(config *params.CliqueConfig, sigcache *lru.ARCCache, number uint64, hash common.Hash, signers []common.Address, prodcuer Producers) *Snapshot {
+func newSnapshot(config *params.CliqueConfig, sigcache *lru.ARCCache, number uint64, hash common.Hash, signers []common.Address, prodcuer Proposers) *Snapshot {
 	snap := &Snapshot{
 		config:    config,
 		sigcache:  sigcache,

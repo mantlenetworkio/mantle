@@ -115,7 +115,7 @@ func TestSequencerSetSequencerBasic(t *testing.T) {
 		{
 			seqs: SequencerSet{
 				Sequencers: []*Sequencer{seq},
-				Producer:   seq,
+				Proposer:   seq,
 			},
 			err: false,
 			msg: "",
@@ -322,7 +322,7 @@ func TestProducerSelection3(t *testing.T) {
 		got := sset.GetProducer().Address
 		expected := producerOrder[j%4].Address
 		if !bytes.Equal(got.Bytes(), expected.Bytes()) {
-			t.Fatalf(fmt.Sprintf("sset.Producer (%X) does not match expected producer (%X) for (%d, %d)", got, expected, i, j))
+			t.Fatalf(fmt.Sprintf("sset.Proposer (%X) does not match expected producer (%X) for (%d, %d)", got, expected, i, j))
 		}
 
 		// serialize, deserialize, check producer
@@ -334,7 +334,7 @@ func TestProducerSelection3(t *testing.T) {
 			if !bytes.Equal(got.Bytes(), computed.Address.Bytes()) {
 				t.Fatalf(
 					fmt.Sprintf(
-						"sset.Producer (%X) does not match computed proposer (%X) for (%d, %d)",
+						"sset.Proposer (%X) does not match computed proposer (%X) for (%d, %d)",
 						got,
 						computed.Address,
 						i,
