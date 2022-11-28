@@ -10,7 +10,7 @@ import (
 
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique/sequencer"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique/synchronizer"
 	"github.com/mantlenetworkio/mantle/l2geth/event"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
@@ -45,29 +45,29 @@ type FraudProofReorg struct {
 	tssSignature  []byte
 }
 
-// ProducersUpdateEvent is posted when sequencer set has been imported.
-type ProducersUpdateEvent struct{ Update *ProducerUpdate }
+// ProposersUpdateEvent is posted when sequencer set has been imported.
+type ProposersUpdateEvent struct{ Update *ProposerUpdate }
 
-type ProducerUpdate struct {
-	Producers Producers
+type ProposerUpdate struct {
+	Proposers Proposers
 	Signature []byte
 }
 
-func (pro *ProducerUpdate) Serialize() []byte {
-	return append(pro.Producers.serialize(), pro.Signature...)
+func (pro *ProposerUpdate) Serialize() []byte {
+	return append(pro.Proposers.serialize(), pro.Signature...)
 }
 
-func (pro *ProducerUpdate) Deserialize(buf []byte) {
+func (pro *ProposerUpdate) Deserialize(buf []byte) {
 	tmp := deserialize(buf[:len(buf)-65])
 	if tmp != nil {
-		pro.Producers = *tmp
+		pro.Proposers = *tmp
 		pro.Signature = buf[len(buf)-65:]
 	} else {
 		log.Error("Deserialize producerUpdate err got nil")
 	}
 }
 
-type SequencerServer struct {
+type Scheduler struct {
 	wg  sync.WaitGroup
 	mux *event.TypeMux
 
@@ -77,67 +77,69 @@ type SequencerServer struct {
 
 	wallet      accounts.Wallet
 	signAccount accounts.Account
+
+	syncer *synchronizer.Synchronizer
 }
 
-func NewSequencerServer(epoch time.Duration, clique *Clique, mux *event.TypeMux, check func() bool) *SequencerServer {
+func NewSequencerServer(epoch time.Duration, clique *Clique, mux *event.TypeMux, check func() bool) *Scheduler {
 	log.Info("Create Sequencer Server")
-	sequencer.Initialize()
-	return &SequencerServer{
+	return &Scheduler{
 		ticker: time.NewTicker(epoch * time.Second),
 		engine: clique,
 		mux:    mux,
 		check:  check,
+		syncer: synchronizer.NewSynchronizer(),
 	}
 }
 
-func (seqS *SequencerServer) SetWallet(wallet accounts.Wallet, acc accounts.Account) {
-	seqS.wallet = wallet
-	seqS.signAccount = acc
+func (schedulerInst *Scheduler) SetWallet(wallet accounts.Wallet, acc accounts.Account) {
+	schedulerInst.wallet = wallet
+	schedulerInst.signAccount = acc
 }
 
-func (seqS *SequencerServer) GetScheduler() (common.Address, error) {
-	scheduler, err := sequencer.GetScheduler()
+func (schedulerInst *Scheduler) GetScheduler() (common.Address, error) {
+	scheduler, err := schedulerInst.syncer.GetSchedulerAddr()
 	if err != nil {
 		return common.BigToAddress(common.Big0), err
 	}
 	return common.BytesToAddress(scheduler.Bytes()), nil
 }
 
-func (seqS *SequencerServer) Start() {
+func (schedulerInst *Scheduler) Start() {
 	// check
-	if seqS.check == nil {
+	if schedulerInst.check == nil {
 		panic("Sequencer server need method to check pre-preparation status")
 	}
-	if seqS.wallet == nil || len(seqS.signAccount.Address.Bytes()) == 0 {
+	if schedulerInst.wallet == nil || len(schedulerInst.signAccount.Address.Bytes()) == 0 {
 		panic("Sequencer server need wallet to sign msgs")
 	}
 
 	// we need pre-preparation is ready first then we can start the server
-	for times := 0; !seqS.check(); times++ {
+	for times := 0; !schedulerInst.check(); times++ {
 		log.Debug("Sequencer server pre-preparation is not ready, times : ", times)
 	}
-	seqS.wg.Add(1)
-	go seqS.readLoop()
+	schedulerInst.wg.Add(1)
+	go schedulerInst.readLoop()
 }
 
-func (seqS *SequencerServer) readLoop() {
-	defer seqS.wg.Done()
+func (schedulerInst *Scheduler) readLoop() {
+	defer schedulerInst.wg.Done()
 	for {
 		// we need pre-preparation is ready first then we can restart the server
-		if !seqS.check() {
+		if !schedulerInst.check() {
 			log.Debug("Sequencer server pre-preparation is not ready")
 			return
 		}
 		select {
-		case <-seqS.ticker.C:
-			seqSet, err := sequencer.GetSequencerSet()
+		case <-schedulerInst.ticker.C:
+			seqSet, err := schedulerInst.syncer.GetSequencerSet()
 			if err != nil {
 				log.Error("Get sequencer set failed, err : ", err)
 				continue
 			}
 			var request GetProducers
-			proUpdate := seqS.engine.GetProducers(request)
-			pros := proUpdate.Producers
+			proUpdate := schedulerInst.engine.GetProducers(request)
+			pros := proUpdate.Proposers
 			// get changes
 			changes := CompareSequencerSet(pros.SequencerSet.Sequencers, seqSet)
 			log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
@@ -150,18 +152,18 @@ func (seqS *SequencerServer) readLoop() {
 				continue
 			}
 			pros.increment()
-			signature, err := seqS.engine.signFn(seqS.signAccount, accounts.MimetypeClique, pros.serialize())
+			signature, err := schedulerInst.engine.signFn(schedulerInst.signAccount, accounts.MimetypeClique, pros.serialize())
 			if err != nil {
-				log.Error(fmt.Sprintf("Sign data error, err : %v ,Account address : %v ", err, seqS.signAccount.Address.String()))
+				log.Error(fmt.Sprintf("Sign data error, err : %v ,Account address : %v ", err, schedulerInst.signAccount.Address.String()))
 				continue
 			}
-			seqS.engine.producers = pros
-			seqS.engine.signature = signature
+			schedulerInst.engine.proposers = pros
+			schedulerInst.engine.signature = signature
 			// Broadcast the producer and announce event by post event
-			seqS.mux.Post(
-				ProducersUpdateEvent{
-					&ProducerUpdate{
-						Producers: pros,
+			schedulerInst.mux.Post(
+				ProposersUpdateEvent{
+					&ProposerUpdate{
+						Proposers: pros,
 						Signature: signature,
 					},
 				},
@@ -172,8 +174,8 @@ func (seqS *SequencerServer) readLoop() {
 }
 
 // CompareSequencerSet will return the update with Driver.seqz
-func CompareSequencerSet(old []*Sequencer, newSeq sequencer.SequencerSequencerInfos) []*Sequencer {
-	var tmp sequencer.SequencerSequencerInfos
+func CompareSequencerSet(old []*Sequencer, newSeq synchronizer.SequencerSequencerInfos) []*Sequencer {
+	var tmp synchronizer.SequencerSequencerInfos
 	// voting power = deposit / scale (10^18)
 	scale := int64(math.Pow10(18))
 	for i, v := range newSeq {
@@ -194,11 +196,10 @@ func CompareSequencerSet(old []*Sequencer, newSeq sequencer.SequencerSequencerIn
 	return changes
 }
 
-func bindToSeq(binds sequencer.SequencerSequencerInfos) []*Sequencer {
+func bindToSeq(binds synchronizer.SequencerSequencerInfos) []*Sequencer {
 	scale := int64(math.Pow10(18))
 	var seqs []*Sequencer
 	for _, v := range binds {
-		// todo: pubkey check
 		seq := &Sequencer{
 			Address: common.BytesToAddress(v.MintAddress.Bytes()),
 			// PubKey:  nil,

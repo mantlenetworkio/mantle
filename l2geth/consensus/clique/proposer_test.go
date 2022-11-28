@@ -15,14 +15,14 @@ func TestProducerSerialize(t *testing.T) {
 		Power:            100,
 		ProducerPriority: -100,
 	}
-	producers := Producers{
+	producers := Proposers{
 		Epoch:       100,
 		SchedulerID: address.Bytes(),
 		SequencerSet: SequencerSet{
 			Sequencers: []*Sequencer{
 				&Producer,
 			},
-			Producer:   &Producer,
+			Proposer:   &Producer,
 			totalPower: 100,
 		},
 	}
@@ -40,7 +40,7 @@ func TestProducerSerializeB(t *testing.T) {
 		Power:            100,
 		ProducerPriority: -100,
 	}
-	producers := Producers{
+	producers := Proposers{
 		Number:      0,
 		Index:       0,
 		Epoch:       100,
@@ -49,7 +49,7 @@ func TestProducerSerializeB(t *testing.T) {
 			Sequencers: []*Sequencer{
 				&Producer,
 			},
-			Producer:   &Producer,
+			Proposer:   &Producer,
 			totalPower: 100,
 		},
 	}

@@ -105,11 +105,11 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 
 	// Handle the message depending on its contents
 	switch {
-	case msg.Code == ProducersMsg:
-		log.Debug(fmt.Sprintf("Get ProducersMsg from %v", p.id))
+	case msg.Code == ProposersMsg:
+		log.Debug(fmt.Sprintf("Get ProposersMsg from %v", p.id))
 		// A batch of block bodies arrived to one of our previous requests
 		var tmp []byte
-		var proUpdate clique.ProducerUpdate
+		var proUpdate clique.ProposerUpdate
 		if err := msg.Decode(&tmp); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
@@ -118,8 +118,8 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			eg.SetProducers(proUpdate)
 		}
 
-	case msg.Code == GetProducersMsg:
-		var proupdate clique.ProducerUpdate
+	case msg.Code == GetProposersMsg:
+		var proupdate clique.ProposerUpdate
 		var getProducers clique.GetProducers
 		if err := msg.Decode(&getProducers); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
@@ -132,10 +132,13 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 
 	case msg.Code == BatchPeriodStartMsg:
 		// todo: BatchPeriodStartMsg handle
+		log.Info("Batch Period Start Msg")
 	case msg.Code == BatchPeriodEndMsg:
 		// todo: BatchPeriodEndMsg handle
+		log.Info("Batch Period End Msg")
 	case msg.Code == FraudProofReorgMsg:
 		// todo: FraudProofReorgMsg handle
+		log.Info("Fraud Proof Reorg Msg")
 
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
@@ -239,54 +242,54 @@ func (p *peer) AsyncSendFraudProofReorgMsg(reorg *clique.FraudProofReorg) {
 	}
 }
 
-// ---------------------------- Producers ----------------------------
+// ---------------------------- Proposers ----------------------------
 
 // Sequencer set broadcast loop
 func (pm *ProtocolManager) producersBroadcastLoop() {
 	// automatically stops if unsubscribe
 	for obj := range pm.producersSub.Chan() {
-		if prs, ok := obj.Data.(clique.ProducersUpdateEvent); ok {
+		if prs, ok := obj.Data.(clique.ProposersUpdateEvent); ok {
 			pm.BroadcastProducers(prs.Update) // First propagate block to peers
 		}
 	}
 }
 
-func (pm *ProtocolManager) BroadcastProducers(producersUpdate *clique.ProducerUpdate) {
-	peers := pm.peersTmp.PeersWithoutProducer(producersUpdate.Producers.Index)
+func (pm *ProtocolManager) BroadcastProducers(producersUpdate *clique.ProposerUpdate) {
+	peers := pm.peersTmp.PeersWithoutProducer(producersUpdate.Proposers.Index)
 	for _, p := range peers {
 		p.AsyncSendProducers(producersUpdate)
 	}
 
-	log.Trace("Broadcast producers", "block number", producersUpdate.Producers.Number, "recipients", len(pm.peers.peers))
+	log.Trace("Broadcast producers", "block number", producersUpdate.Proposers.Number, "recipients", len(pm.peers.peers))
 }
 
-func (p *peer) AsyncSendProducers(prs *clique.ProducerUpdate) {
+func (p *peer) AsyncSendProducers(prs *clique.ProposerUpdate) {
 	select {
 	case p.queuedPrs <- prs:
-		p.knowPrs.Add(prs.Producers.Index)
+		p.knowPrs.Add(prs.Proposers.Index)
 		// Mark all the producers as known, but ensure we don't overflow our limits
 		for p.knowPrs.Cardinality() >= maxKnownPrs {
 			p.knowPrs.Pop()
 		}
 
 	default:
-		p.Log().Debug("Dropping producers propagation", "block number", prs.Producers.Number)
+		p.Log().Debug("Dropping producers propagation", "block number", prs.Proposers.Number)
 	}
 }
 
 // SendProducers sends a batch of transaction receipts, corresponding to the
 // ones requested from an already RLP encoded format.
-func (p *peer) SendProducers(proUpdate clique.ProducerUpdate) error {
-	p.knowPrs.Add(proUpdate.Producers.Index)
+func (p *peer) SendProducers(proUpdate clique.ProposerUpdate) error {
+	p.knowPrs.Add(proUpdate.Proposers.Index)
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowPrs.Cardinality() >= maxKnownPrs {
 		p.knowPrs.Pop()
 	}
-	return p2p.Send(p.rw, ProducersMsg, proUpdate.Serialize())
+	return p2p.Send(p.rw, ProposersMsg, proUpdate.Serialize())
 }
 
-func (p *peer) RequestProducers(producers clique.Producers) error {
-	return p2p.Send(p.rw, GetProducersMsg, producers)
+func (p *peer) RequestProducers(producers clique.Proposers) error {
+	return p2p.Send(p.rw, GetProposersMsg, producers)
 }
 
 // SendBatchPeriodStart sends a batch of transaction receipts, corresponding to the

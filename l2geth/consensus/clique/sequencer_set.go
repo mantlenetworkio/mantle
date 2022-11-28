@@ -51,7 +51,7 @@ var ErrTotalPowerOverflow = fmt.Errorf("total power of resulting seqset exceeds 
 type SequencerSet struct {
 	// NOTE: persisted via reflect, must be exported.
 	Sequencers []*Sequencer `json:"sequencers"`
-	Producer   *Sequencer   `json:"producer"`
+	Proposer   *Sequencer   `json:"proposer"`
 
 	// cached (unexported)
 	totalPower int64
@@ -90,7 +90,7 @@ func (seqs *SequencerSet) ValidateBasic() error {
 		}
 	}
 
-	if err := seqs.Producer.SequencerBasic(); err != nil {
+	if err := seqs.Proposer.SequencerBasic(); err != nil {
 		return fmt.Errorf("producer failed validate basic, error: %w", err)
 	}
 
@@ -134,7 +134,7 @@ func (seqs *SequencerSet) IncrementProducerPriority(times int32) {
 		producer = seqs.incrementProducerPriority()
 	}
 
-	seqs.Producer = producer
+	seqs.Proposer = producer
 }
 
 // RescalePriorities rescales the priorities such that the distance between the
@@ -249,7 +249,7 @@ func sequencerListCopy(seqsList []*Sequencer) []*Sequencer {
 func (seqs *SequencerSet) Copy() *SequencerSet {
 	return &SequencerSet{
 		Sequencers: sequencerListCopy(seqs.Sequencers),
-		Producer:   seqs.Producer,
+		Proposer:   seqs.Proposer,
 		totalPower: seqs.totalPower,
 	}
 }
@@ -326,20 +326,20 @@ func (seqs *SequencerSet) GetProducer() (producer *Sequencer) {
 	if len(seqs.Sequencers) == 0 {
 		return nil
 	}
-	if seqs.Producer == nil {
-		seqs.Producer = seqs.findProducer()
+	if seqs.Proposer == nil {
+		seqs.Proposer = seqs.findProducer()
 	}
-	return seqs.Producer.Copy()
+	return seqs.Proposer.Copy()
 }
 
 func (seqs *SequencerSet) findProducer() *Sequencer {
-	var producer *Sequencer
+	var proposer *Sequencer
 	for _, seq := range seqs.Sequencers {
-		if producer == nil || !bytes.Equal(seq.Address.Bytes(), producer.Address.Bytes()) {
-			producer = producer.CompareProducerPriority(seq)
+		if proposer == nil || !bytes.Equal(seq.Address.Bytes(), proposer.Address.Bytes()) {
+			proposer = proposer.CompareProducerPriority(seq)
 		}
 	}
-	return producer
+	return proposer
 }
 
 // Hash returns the Merkle root hash build using sequencers (as leaves) in the

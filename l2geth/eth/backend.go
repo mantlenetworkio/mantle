@@ -499,7 +499,7 @@ func (s *Ethereum) StartMining(threads int) error {
 		go s.miner.Start(eb)
 
 		// set sequencer server and get scheduler address
-		var seqServer *clique.SequencerServer
+		var seqServer *clique.Scheduler
 		var scheduler common.Address
 
 		// check method for sequencer server check if miner is already start

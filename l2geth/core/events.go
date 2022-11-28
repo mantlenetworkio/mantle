@@ -21,6 +21,16 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 )
 
+// ProduceBlockEvent is posted when a batch of block will be produced
+type ProduceBlockEvent struct {
+	BatchIdx    uint64
+	StartHeight uint64
+	MaxHeight   uint64
+	ExpireTime  uint64
+
+	ErrCh chan error
+}
+
 // NewTxsEvent is posted when a batch of transactions enter the transaction pool.
 type NewTxsEvent struct {
 	Txs   []*types.Transaction
