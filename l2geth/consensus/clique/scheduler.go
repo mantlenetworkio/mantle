@@ -45,22 +45,22 @@ type FraudProofReorg struct {
 	tssSignature  []byte
 }
 
-// ProducersUpdateEvent is posted when sequencer set has been imported.
-type ProducersUpdateEvent struct{ Update *ProducerUpdate }
+// ProposersUpdateEvent is posted when sequencer set has been imported.
+type ProposersUpdateEvent struct{ Update *ProposerUpdate }
 
-type ProducerUpdate struct {
-	Producers Proposers
+type ProposerUpdate struct {
+	Proposers Proposers
 	Signature []byte
 }
 
-func (pro *ProducerUpdate) Serialize() []byte {
-	return append(pro.Producers.serialize(), pro.Signature...)
+func (pro *ProposerUpdate) Serialize() []byte {
+	return append(pro.Proposers.serialize(), pro.Signature...)
 }
 
-func (pro *ProducerUpdate) Deserialize(buf []byte) {
+func (pro *ProposerUpdate) Deserialize(buf []byte) {
 	tmp := deserialize(buf[:len(buf)-65])
 	if tmp != nil {
-		pro.Producers = *tmp
+		pro.Proposers = *tmp
 		pro.Signature = buf[len(buf)-65:]
 	} else {
 		log.Error("Deserialize producerUpdate err got nil")
@@ -139,7 +139,7 @@ func (schedulerInst *Scheduler) readLoop() {
 			}
 			var request GetProducers
 			proUpdate := schedulerInst.engine.GetProducers(request)
-			pros := proUpdate.Producers
+			pros := proUpdate.Proposers
 			// get changes
 			changes := CompareSequencerSet(pros.SequencerSet.Sequencers, seqSet)
 			log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
@@ -161,9 +161,9 @@ func (schedulerInst *Scheduler) readLoop() {
 			schedulerInst.engine.signature = signature
 			// Broadcast the producer and announce event by post event
 			schedulerInst.mux.Post(
-				ProducersUpdateEvent{
-					&ProducerUpdate{
-						Producers: pros,
+				ProposersUpdateEvent{
+					&ProposerUpdate{
+						Proposers: pros,
 						Signature: signature,
 					},
 				},

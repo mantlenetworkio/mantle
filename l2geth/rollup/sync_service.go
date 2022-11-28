@@ -48,6 +48,7 @@ type SyncService struct {
 	db                             ethdb.Database
 	scope                          event.SubscriptionScope
 	txFeed                         event.Feed
+	produceBlock                   event.Feed
 	txLock                         sync.Mutex
 	loopLock                       sync.Mutex
 	enable                         bool
@@ -1238,6 +1239,17 @@ func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) e
 // starts sending event to the given channel.
 func (s *SyncService) SubscribeNewTxsEvent(ch chan<- core.NewTxsEvent) event.Subscription {
 	return s.scope.Track(s.txFeed.Subscribe(ch))
+}
+
+// SubscribeProduceBlockEvent registers a subscription of ProduceBlockEvent and
+// starts sending event to the given channel.
+func (s *SyncService) SubscribeProduceBlockEvent(ch chan<- core.ProduceBlockEvent) event.Subscription {
+	return s.scope.Track(s.produceBlock.Subscribe(ch))
+}
+
+func (s *SyncService) ProcessProduceBlockMsg() error {
+	s.produceBlock.Send(nil) // TODO
+	return nil
 }
 
 func stringify(i *uint64) string {

@@ -212,14 +212,14 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 	}
 }
 
-func (c *Clique) SetProducers(data ProducerUpdate) {
-	c.proposers = data.Producers
-	c.schedulerID = data.Producers.SchedulerID
+func (c *Clique) SetProducers(data ProposerUpdate) {
+	c.proposers = data.Proposers
+	c.schedulerID = data.Proposers.SchedulerID
 	c.signature = data.Signature
 }
 
-func (c *Clique) GetProducers(data GetProducers) ProducerUpdate {
-	return ProducerUpdate{
+func (c *Clique) GetProducers(data GetProducers) ProposerUpdate {
+	return ProposerUpdate{
 		c.proposers,
 		c.signature,
 	}

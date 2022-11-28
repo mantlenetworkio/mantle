@@ -267,7 +267,7 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 	go pm.minedBroadcastLoop()
 
 	// broadcast producers
-	pm.producersSub = pm.eventMux.Subscribe(clique.ProducersUpdateEvent{})
+	pm.producersSub = pm.eventMux.Subscribe(clique.ProposersUpdateEvent{})
 	go pm.producersBroadcastLoop()
 
 	// start sync handlers
