@@ -221,7 +221,7 @@ func (p *peer) AsyncSendFraudProofReorgMsg(reorg *clique.FraudProofReorg) {
 
 // SendBatchPeriodStart sends a batch of transaction receipts, corresponding to the
 // ones requested from an already RLP encoded format.
-func (p *peer) SendBatchPeriodStart(bs clique.BatchPeriodStart) error {
+func (p *peer) SendBatchPeriodStart(bs *clique.BatchPeriodStart) error {
 	p.knowStartMsg.Add(bs.BatchIndex)
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowStartMsg.Cardinality() >= maxKnownPrs {
@@ -230,7 +230,7 @@ func (p *peer) SendBatchPeriodStart(bs clique.BatchPeriodStart) error {
 	return p2p.Send(p.rw, BatchPeriodStartMsg, bs)
 }
 
-func (p *peer) SendBatchPeriodEnd(be clique.BatchPeriodEnd) error {
+func (p *peer) SendBatchPeriodEnd(be *clique.BatchPeriodEnd) error {
 	p.knowEndMsg.Add(be.BatchIndex)
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowEndMsg.Cardinality() >= maxKnownPrs {
@@ -239,7 +239,7 @@ func (p *peer) SendBatchPeriodEnd(be clique.BatchPeriodEnd) error {
 	return p2p.Send(p.rw, BatchPeriodEndMsg, be)
 }
 
-func (p *peer) SendFraudProofReorg(fpr clique.FraudProofReorg) error {
+func (p *peer) SendFraudProofReorg(fpr *clique.FraudProofReorg) error {
 	p.knowFraudProofReorg.Add(fpr.Index)
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowFraudProofReorg.Cardinality() >= maxKnownPrs {

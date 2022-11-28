@@ -61,6 +61,10 @@ const (
 	// above some healthy uncle limit, so use that.
 	maxQueuedAnns = 4
 
+	maxQueuedBatchPeriodStart = 4
+	maxQueuedBatchPeriodEnd   = 4
+	maxQueuedFraudProofReorg  = 4
+
 	handshakeTimeout = 5 * time.Second
 )
 
@@ -107,16 +111,19 @@ type peer struct {
 
 func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 	return &peer{
-		Peer:        p,
-		rw:          rw,
-		version:     version,
-		id:          fmt.Sprintf("%x", p.ID().Bytes()[:8]),
-		knownTxs:    mapset.NewSet(),
-		knownBlocks: mapset.NewSet(),
-		queuedTxs:   make(chan []*types.Transaction, maxQueuedTxs),
-		queuedProps: make(chan *propEvent, maxQueuedProps),
-		queuedAnns:  make(chan *types.Block, maxQueuedAnns),
-		term:        make(chan struct{}),
+		Peer:                  p,
+		rw:                    rw,
+		version:               version,
+		id:                    fmt.Sprintf("%x", p.ID().Bytes()[:8]),
+		knownTxs:              mapset.NewSet(),
+		knownBlocks:           mapset.NewSet(),
+		queuedTxs:             make(chan []*types.Transaction, maxQueuedTxs),
+		queuedProps:           make(chan *propEvent, maxQueuedProps),
+		queuedAnns:            make(chan *types.Block, maxQueuedAnns),
+		queuedStartMsg:        make(chan *clique.BatchPeriodStart, maxQueuedBatchPeriodStart),
+		queuedEndMsg:          make(chan *clique.BatchPeriodEnd, maxQueuedBatchPeriodEnd),
+		queuedFraudProofReorg: make(chan *clique.FraudProofReorg, maxQueuedFraudProofReorg),
+		term:                  make(chan struct{}),
 	}
 }
 
@@ -144,7 +151,21 @@ func (p *peer) broadcast() {
 				return
 			}
 			p.Log().Trace("Announced block", "number", block.Number(), "hash", block.Hash())
-
+		case sm := <-p.queuedStartMsg:
+			if err := p.SendBatchPeriodStart(sm); err != nil {
+				return
+			}
+			p.Log().Trace("Batch period start msg", "batch_index", sm.BatchIndex, "start_height", sm.StartHeight)
+		case em := <-p.queuedEndMsg:
+			if err := p.SendBatchPeriodEnd(em); err != nil {
+				return
+			}
+			p.Log().Trace("Batch period end msg", "batch_index", em.BatchIndex, "start_height", em.StartHeight)
+		case fpr := <-p.queuedFraudProofReorg:
+			if err := p.SendFraudProofReorg(fpr); err != nil {
+				return
+			}
+			p.Log().Trace("Fraud proof reorg msg", "index", fpr.Index, "reorg_height", fpr.ReorgToHeight)
 		case <-p.term:
 			return
 		}

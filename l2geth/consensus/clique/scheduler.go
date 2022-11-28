@@ -41,8 +41,8 @@ type FraudProofReorgEvent struct{ Msg *FraudProofReorg }
 
 type FraudProofReorg struct {
 	Index         uint64
-	reorgToHeight uint64
-	tssSignature  []byte
+	ReorgToHeight uint64
+	TssSignature  []byte
 }
 
 // ProposersUpdateEvent is posted when sequencer set has been imported.
