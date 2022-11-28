@@ -16,8 +16,6 @@ const config = {
   bvmGasPriceOracleOwner: process.env.BVM_GAS_PRICE_ORACLE_OWNER || '0xeEbceB07eA7D2339895Dd492B3B5960641302830',
   bvmFeeWalletOwner: process.env.BVM_FEE_WALLETOWNER_OWNER ||'0xeEbceB07eA7D2339895Dd492B3B5960641302830',
   l1BitAddress: process.env.L1_BIT_ADDRESS || '0xC40C655a91ef15c8eAd818B840CFC08C755D2C0F',
-
-
   //on l2, same as l1 address manager.
   bvmTssRewardContractOwner: process.env.TssRewardContractOwner || '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 }
