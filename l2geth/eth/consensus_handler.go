@@ -105,8 +105,8 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 
 	// Handle the message depending on its contents
 	switch {
-	case msg.Code == ProducersMsg:
-		log.Debug(fmt.Sprintf("Get ProducersMsg from %v", p.id))
+	case msg.Code == ProposersMsg:
+		log.Debug(fmt.Sprintf("Get ProposersMsg from %v", p.id))
 		// A batch of block bodies arrived to one of our previous requests
 		var tmp []byte
 		var proUpdate clique.ProposerUpdate
@@ -118,7 +118,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			eg.SetProducers(proUpdate)
 		}
 
-	case msg.Code == GetProducersMsg:
+	case msg.Code == GetProposersMsg:
 		var proupdate clique.ProposerUpdate
 		var getProducers clique.GetProducers
 		if err := msg.Decode(&getProducers); err != nil {
@@ -132,10 +132,13 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 
 	case msg.Code == BatchPeriodStartMsg:
 		// todo: BatchPeriodStartMsg handle
+		log.Info("Batch Period Start Msg")
 	case msg.Code == BatchPeriodEndMsg:
 		// todo: BatchPeriodEndMsg handle
+		log.Info("Batch Period End Msg")
 	case msg.Code == FraudProofReorgMsg:
 		// todo: FraudProofReorgMsg handle
+		log.Info("Fraud Proof Reorg Msg")
 
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
@@ -282,11 +285,11 @@ func (p *peer) SendProducers(proUpdate clique.ProposerUpdate) error {
 	for p.knowPrs.Cardinality() >= maxKnownPrs {
 		p.knowPrs.Pop()
 	}
-	return p2p.Send(p.rw, ProducersMsg, proUpdate.Serialize())
+	return p2p.Send(p.rw, ProposersMsg, proUpdate.Serialize())
 }
 
 func (p *peer) RequestProducers(producers clique.Proposers) error {
-	return p2p.Send(p.rw, GetProducersMsg, producers)
+	return p2p.Send(p.rw, GetProposersMsg, producers)
 }
 
 // SendBatchPeriodStart sends a batch of transaction receipts, corresponding to the
