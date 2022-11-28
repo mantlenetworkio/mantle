@@ -19,6 +19,7 @@ package eth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
@@ -299,24 +300,24 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 		return err
 	}
 
-	//if b.UsingBVM {
-	//	to := signedTx.To()
-	//	if to != nil {
-	//		// Prevent QueueOriginSequencer transactions that are too large to
-	//		// be included in a batch. The `MaxCallDataSize` should be set to
-	//		// the layer one consensus max transaction size in bytes minus the
-	//		// constant sized overhead of a batch. This will prevent
-	//		// a layer two transaction from not being able to be batch submitted
-	//		// to layer one.
-	//		if len(signedTx.Data()) > b.MaxCallDataSize {
-	//			return fmt.Errorf("Calldata cannot be larger than %d, sent %d", b.MaxCallDataSize, len(signedTx.Data()))
-	//		}
-	//	}
-	//if err := b.eth.syncService.ValidateAndApplySequencerTransaction(signedTx); err != nil {
-	//	return err
-	//}
-	//}
-	// BVM Disabled txPool
+	if b.UsingBVM {
+		to := signedTx.To()
+		if to != nil {
+			// Prevent QueueOriginSequencer transactions that are too large to
+			// be included in a batch. The `MaxCallDataSize` should be set to
+			// the layer one consensus max transaction size in bytes minus the
+			// constant sized overhead of a batch. This will prevent
+			// a layer two transaction from not being able to be batch submitted
+			// to layer one.
+			if len(signedTx.Data()) > b.MaxCallDataSize {
+				return fmt.Errorf("Calldata cannot be larger than %d, sent %d", b.MaxCallDataSize, len(signedTx.Data()))
+			}
+		}
+		if err := b.eth.syncService.ValidateAndApplySequencerTransaction(signedTx); err != nil {
+			return err
+		}
+	}
+	// BVM Disabled
 	return nil
 }
 

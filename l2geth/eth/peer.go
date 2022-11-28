@@ -91,14 +91,20 @@ type peer struct {
 	td   *big.Int
 	lock sync.RWMutex
 
-	knownTxs    mapset.Set                  // Set of transaction hashes known to be known by this peer
-	knownBlocks mapset.Set                  // Set of block hashes known to be known by this peer
-	knowPrs     mapset.Set                  // Set of Producers height to be known by this peer
-	queuedTxs   chan []*types.Transaction   // Queue of transactions to broadcast to the peer
-	queuedProps chan *propEvent             // Queue of blocks to broadcast to the peer
-	queuedAnns  chan *types.Block           // Queue of blocks to announce to the peer
-	queuedPrs   chan *clique.ProducerUpdate // Queue of ProducerUpdate to announce to the peer
-	term        chan struct{}               // Termination channel to stop the broadcaster
+	knownTxs              mapset.Set                    // Set of transaction hashes known to be known by this peer
+	knownBlocks           mapset.Set                    // Set of block hashes known to be known by this peer
+	knowPrs               mapset.Set                    // Set of Producers height to be known by this peer
+	knowStartMsg          mapset.Set                    // Set of start msg index to be known by this peer
+	knowEndMsg            mapset.Set                    // Set of end msg index to be known by this peer
+	knowFraudProofReorg   mapset.Set                    // Set of end msg index to be known by this peer
+	queuedTxs             chan []*types.Transaction     // Queue of transactions to broadcast to the peer
+	queuedProps           chan *propEvent               // Queue of blocks to broadcast to the peer
+	queuedAnns            chan *types.Block             // Queue of blocks to announce to the peer
+	queuedPrs             chan *clique.ProducerUpdate   // Queue of ProducerUpdate to announce to the peer
+	queuedStartMsg        chan *clique.BatchPeriodStart // Queue of BatchPeriodStart to announce to the peer
+	queuedEndMsg          chan *clique.BatchPeriodEnd   // Queue of BatchPeriodEnd to announce to the peer
+	queuedFraudProofReorg chan *clique.FraudProofReorg  // Queue of FraudProofReorg to announce to the peer
+	term                  chan struct{}                 // Termination channel to stop the broadcaster
 }
 
 func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
@@ -563,6 +569,51 @@ func (ps *peerSet) Len() int {
 	defer ps.lock.RUnlock()
 
 	return len(ps.peers)
+}
+
+// PeersWithoutFraudProofReorgMsg retrieves a list of peers that do not have a given producer in
+// their set of known index.
+func (ps *peerSet) PeersWithoutFraudProofReorgMsg(index uint64) []*peer {
+	ps.lock.RLock()
+	defer ps.lock.RUnlock()
+
+	list := make([]*peer, 0, len(ps.peers))
+	for _, p := range ps.peers {
+		if !p.knowFraudProofReorg.Contains(index) {
+			list = append(list, p)
+		}
+	}
+	return list
+}
+
+// PeersWithoutEndMsg retrieves a list of peers that do not have a given producer in
+// their set of known index.
+func (ps *peerSet) PeersWithoutEndMsg(index uint64) []*peer {
+	ps.lock.RLock()
+	defer ps.lock.RUnlock()
+
+	list := make([]*peer, 0, len(ps.peers))
+	for _, p := range ps.peers {
+		if !p.knowEndMsg.Contains(index) {
+			list = append(list, p)
+		}
+	}
+	return list
+}
+
+// PeersWithoutStartMsg retrieves a list of peers that do not have a given producer in
+// their set of known index.
+func (ps *peerSet) PeersWithoutStartMsg(index uint64) []*peer {
+	ps.lock.RLock()
+	defer ps.lock.RUnlock()
+
+	list := make([]*peer, 0, len(ps.peers))
+	for _, p := range ps.peers {
+		if !p.knowStartMsg.Contains(index) {
+			list = append(list, p)
+		}
+	}
+	return list
 }
 
 // PeersWithoutProducer retrieves a list of peers that do not have a given producer in

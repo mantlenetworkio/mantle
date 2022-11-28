@@ -15,6 +15,36 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
+type BatchPeriodStartEvent struct{ Msg *BatchPeriodStart }
+
+type BatchPeriodStart struct {
+	BatchIndex   uint64
+	MinerAddress common.Address
+	StartHeight  uint64
+	MaxHeight    uint64
+	ExpireTime   uint64
+	Signature    []byte
+}
+
+type BatchPeriodEndEvent struct{ Msg *BatchPeriodEnd }
+
+type BatchPeriodEnd struct {
+	BatchIndex   uint64
+	MinerAddress common.Address
+	StartHeight  uint64
+	EndHeight    uint64
+	Signatures   [][]byte
+	Signature    []byte
+}
+
+type FraudProofReorgEvent struct{ Msg *FraudProofReorg }
+
+type FraudProofReorg struct {
+	Index         uint64
+	reorgToHeight uint64
+	tssSignature  []byte
+}
+
 // ProducersUpdateEvent is posted when sequencer set has been imported.
 type ProducersUpdateEvent struct{ Update *ProducerUpdate }
 
