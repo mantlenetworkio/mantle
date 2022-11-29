@@ -19,8 +19,6 @@ package eth
 import (
 	"context"
 	"errors"
-	"math/big"
-
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/common/math"
@@ -38,6 +36,8 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
+	"math/big"
+	"time"
 )
 
 // EthAPIBackend implements ethapi.Backend for full nodes
@@ -292,11 +292,26 @@ func (b *EthAPIBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscri
 	return b.eth.BlockChain().SubscribeLogsEvent(ch)
 }
 
-// Transactions originating from the RPC endpoints are added to remotes so that
+// SendTx Transactions originating from the RPC endpoints are added to remotes so that
 // a lock can be used around the remotes for when the sequencer is reorganizing.
 func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
 	if err := b.eth.txPool.AddLocal(signedTx); err != nil {
 		return err
+	}
+	// mock
+	if b.eth.miner.Mining() {
+		start := b.eth.blockchain.CurrentBlock().NumberU64() + 1
+		pending, err := b.eth.TxPool().Pending()
+		if err != nil {
+			return err
+		}
+		end := b.eth.blockchain.CurrentBlock().NumberU64()
+		for _, v := range pending {
+			end += uint64(len(v))
+		}
+		exTime := time.Now().Unix() + 1000
+		erCh := make(chan error)
+		b.eth.miner.MockScheduler(start, end, uint64(exTime), erCh)
 	}
 
 	//if b.UsingBVM {

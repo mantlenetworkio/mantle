@@ -487,7 +487,8 @@ func (w *worker) mainLoop() {
 				log.Warn("No transaction sent to miner from syncservice")
 				continue
 			}
-			if ev.StartHeight != w.current.header.Number.Uint64()+1 {
+			currentHeight := w.chain.CurrentBlock().NumberU64() + 1
+			if ev.StartHeight != currentHeight {
 				log.Warn("Start block height mismatch")
 				continue
 			}
@@ -506,7 +507,7 @@ func (w *worker) mainLoop() {
 			}
 			// Split the pending transactions into locals and remotes
 			localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
-			//TODO
+			// TODO mev
 			var txsQueue types.Transactions
 			for _, account := range w.eth.TxPool().Locals() {
 				if txs := remoteTxs[account]; len(txs) > 0 {
@@ -517,7 +518,7 @@ func (w *worker) mainLoop() {
 			}
 			// ----------------------------------------------------------------------
 			for index, tx := range txsQueue {
-				if ev.StartHeight+uint64(index) >= ev.MaxHeight {
+				if ev.StartHeight+uint64(index) > ev.MaxHeight {
 					break
 				}
 				if ev.ExpireTime < uint64(time.Now().Unix()) {
@@ -546,7 +547,6 @@ func (w *worker) mainLoop() {
 					txn := txs[0]
 					height := head.Block.Number().Uint64()
 					log.Debug("Miner got new head", "height", height, "block-hash", head.Block.Hash().Hex(), "tx-hash", txn.Hash().Hex(), "tx-hash", tx.Hash().Hex())
-
 					// Prevent memory leak by cleaning up pending tasks
 					// This is mostly copied from the `newWorkLoop`
 					// `clearPending` function and must be called
