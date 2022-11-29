@@ -17,7 +17,7 @@
 package eth
 
 // consensusProtocolLength is the number of implemented message.
-var consensusProtocolLength = uint64(5)
+var consensusProtocolLength = uint64(3)
 
 const consensusMaxMsgSize = 10 * 1024 * 1024 // Maximum cap on the size of a protocol message
 

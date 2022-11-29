@@ -132,7 +132,7 @@ func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 // writer that does not lock up node internals.
 func (p *peer) broadcast() {
 	for {
-		log.Info(fmt.Sprintf("start  broadcast \n\n"))
+		log.Debug(fmt.Sprintf("start  broadcast %v ", p.version))
 		select {
 		case txs := <-p.queuedTxs:
 			if err := p.SendTransactions(txs); err != nil {

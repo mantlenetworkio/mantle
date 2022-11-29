@@ -57,7 +57,7 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 		if pm.peersTmp.Len() >= pm.maxPeers && !p.Peer.Info().Network.Trusted {
 			return p2p.DiscTooManyPeers
 		}
-		p.Log().Debug("Ethereum peer connected", "name", p.Name())
+		p.Log().Debug("Ethereum consensus peer connected", "name", p.Name())
 		// Execute the Ethereum handshake
 		var (
 			genesis = pm.blockchain.Genesis()
@@ -98,7 +98,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 	if err != nil {
 		return err
 	}
-	if msg.Size > protocolMaxMsgSize {
+	if msg.Size > consensusMaxMsgSize {
 		return errResp(ErrMsgTooLarge, "%v > %v", msg.Size, protocolMaxMsgSize)
 	}
 	defer msg.Discard()
