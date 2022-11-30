@@ -1,0 +1,970 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "collateralToken",
+      "outputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "eigenLayrDelegation",
+      "outputs": [
+        {
+          "internalType": "contract IEigenLayrDelegation",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "freezeOperator",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestTime",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "unbondedAfter",
+          "type": "uint32"
+        }
+      ],
+      "name": "revokeSlashingAbility",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "internalType": "uint256",
+          "name": "initTimestamp",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "unlockTime",
+          "type": "uint256"
+        }
+      ],
+      "name": "stakeWithdrawalVerification",
+      "outputs": [],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "taskNumber",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "collateralToken()": "b2016bd4",
+    "eigenLayrDelegation()": "33d2433a",
+    "freezeOperator(address)": "38c8ee64",
+    "latestTime()": "7dfd16d7",
+    "revokeSlashingAbility(address,uint32)": "fb3f2922",
+    "stakeWithdrawalVerification(bytes,uint256,uint256)": "a88d92aa",
+    "taskNumber()": "72d18e8d"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"collateralToken\",\"outputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"eigenLayrDelegation\",\"outputs\":[{\"internalType\":\"contract IEigenLayrDelegation\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"freezeOperator\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"latestTime\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"unbondedAfter\",\"type\":\"uint32\"}],\"name\":\"revokeSlashingAbility\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"initTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"unlockTime\",\"type\":\"uint256\"}],\"name\":\"stakeWithdrawalVerification\",\"outputs\":[],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"taskNumber\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Layr Labs, Inc.\",\"kind\":\"dev\",\"methods\":{\"stakeWithdrawalVerification(bytes,uint256,uint256)\":{\"details\":\"Function reverts if the verification fails.\"}},\"title\":\"Interface for a `ServiceManager`-type contract.\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"collateralToken()\":{\"notice\":\"Collateral token used for placing collateral on challenges & payment commits\"},\"eigenLayrDelegation()\":{\"notice\":\"The Delegation contract of EigenLayer.\"},\"freezeOperator(address)\":{\"notice\":\"Permissioned function that causes the ServiceManager to freeze the operator on EigenLayer, through a call to the Slasher contreact\"},\"latestTime()\":{\"notice\":\"Returns the `latestTime` until which operators must serve.\"},\"revokeSlashingAbility(address,uint32)\":{\"notice\":\"Permissioned function that causes the ServiceManager to revoke its ability to slash the operator on EigenLayer, through a call to the Slasher contreact\"},\"stakeWithdrawalVerification(bytes,uint256,uint256)\":{\"notice\":\"Verifies that a task for this middleware exists which was created *at or before* `initTimestamp` *AND* that expires *strictly prior to* the specified `unlockTime`.\"},\"taskNumber()\":{\"notice\":\"Returns the current 'taskNumber' for the middleware\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"eignlayr-contracts/contracts/interfaces/IServiceManager.sol\":\"IServiceManager\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@eigenlayer/=eignlayr-contracts/\",\":@openzeppelin-upgrades/=lib/openzeppelin-contracts-upgradeable/\",\":@openzeppelin/=lib/openzeppelin-contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\"]},\"sources\":{\"eignlayr-contracts/contracts/interfaces/IDelegationTerms.sol\":{\"keccak256\":\"0x5e7db2c8e3cb2cf7d7a19f8f7be16efacfd1b709dfcd2f5bd2b32174812acc37\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://e4570f2eca5c5d3f0c09904326961b23a63814cf79c035929c040c652e4edbe2\",\"dweb:/ipfs/QmcSfznjU56j1B7kqy6zYQeYwjPND1GqLfUyth7EQHDQ9c\"]},\"eignlayr-contracts/contracts/interfaces/IEigenLayrDelegation.sol\":{\"keccak256\":\"0xd155bcd62c3c7a2a01eb57a729ef62fd817f968a8bc322e7e5b47a3008bf84ad\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://49572554bdb92998c8c6a81ec338fa605d8af52fb3326c6597c609b0d25fd9b5\",\"dweb:/ipfs/QmXQE7prGTepct57bYHjZh2iWifR7EMc5rrgoednCMfyq4\"]},\"eignlayr-contracts/contracts/interfaces/IInvestmentStrategy.sol\":{\"keccak256\":\"0x69eb667cc856ee1fe783243b6db21a43a9dadd29bf6761727b334fca4366bceb\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://224e8f6def4e53a1065f0c4ce26d8ffff15276944e2351753065aeb5bd265f52\",\"dweb:/ipfs/QmSu8iUPCnwza4SdE5jVSZLnQjMRXJg3VAGc8pHqbaMLob\"]},\"eignlayr-contracts/contracts/interfaces/IServiceManager.sol\":{\"keccak256\":\"0x341ebf04eb799f695ce411087538ea8678268d58819b2640c73d01a0f245258f\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://aa3215133afda1dcc29148c3772472d7ea1bb982896ee58d0485ace965bf2427\",\"dweb:/ipfs/QmPkquzv7UzNVgMNeppaVZkxjSv3yAENDu11ZFWbMh4x8T\"]},\"lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34\",\"dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.17+commit.8df45f5f"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "collateralToken",
+          "outputs": [
+            {
+              "internalType": "contract IERC20",
+              "name": "",
+              "type": "address"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "eigenLayrDelegation",
+          "outputs": [
+            {
+              "internalType": "contract IEigenLayrDelegation",
+              "name": "",
+              "type": "address"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "freezeOperator"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "latestTime",
+          "outputs": [
+            {
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "internalType": "uint32",
+              "name": "unbondedAfter",
+              "type": "uint32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "revokeSlashingAbility"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "initTimestamp",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "unlockTime",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "stakeWithdrawalVerification"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "taskNumber",
+          "outputs": [
+            {
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "stakeWithdrawalVerification(bytes,uint256,uint256)": {
+            "details": "Function reverts if the verification fails."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "collateralToken()": {
+            "notice": "Collateral token used for placing collateral on challenges & payment commits"
+          },
+          "eigenLayrDelegation()": {
+            "notice": "The Delegation contract of EigenLayer."
+          },
+          "freezeOperator(address)": {
+            "notice": "Permissioned function that causes the ServiceManager to freeze the operator on EigenLayer, through a call to the Slasher contreact"
+          },
+          "latestTime()": {
+            "notice": "Returns the `latestTime` until which operators must serve."
+          },
+          "revokeSlashingAbility(address,uint32)": {
+            "notice": "Permissioned function that causes the ServiceManager to revoke its ability to slash the operator on EigenLayer, through a call to the Slasher contreact"
+          },
+          "stakeWithdrawalVerification(bytes,uint256,uint256)": {
+            "notice": "Verifies that a task for this middleware exists which was created *at or before* `initTimestamp` *AND* that expires *strictly prior to* the specified `unlockTime`."
+          },
+          "taskNumber()": {
+            "notice": "Returns the current 'taskNumber' for the middleware"
+          }
+        },
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@eigenlayer/=eignlayr-contracts/",
+        ":@openzeppelin-upgrades/=lib/openzeppelin-contracts-upgradeable/",
+        ":@openzeppelin/=lib/openzeppelin-contracts/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/forge-std/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "eignlayr-contracts/contracts/interfaces/IServiceManager.sol": "IServiceManager"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "eignlayr-contracts/contracts/interfaces/IDelegationTerms.sol": {
+        "keccak256": "0x5e7db2c8e3cb2cf7d7a19f8f7be16efacfd1b709dfcd2f5bd2b32174812acc37",
+        "urls": [
+          "bzz-raw://e4570f2eca5c5d3f0c09904326961b23a63814cf79c035929c040c652e4edbe2",
+          "dweb:/ipfs/QmcSfznjU56j1B7kqy6zYQeYwjPND1GqLfUyth7EQHDQ9c"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IEigenLayrDelegation.sol": {
+        "keccak256": "0xd155bcd62c3c7a2a01eb57a729ef62fd817f968a8bc322e7e5b47a3008bf84ad",
+        "urls": [
+          "bzz-raw://49572554bdb92998c8c6a81ec338fa605d8af52fb3326c6597c609b0d25fd9b5",
+          "dweb:/ipfs/QmXQE7prGTepct57bYHjZh2iWifR7EMc5rrgoednCMfyq4"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IInvestmentStrategy.sol": {
+        "keccak256": "0x69eb667cc856ee1fe783243b6db21a43a9dadd29bf6761727b334fca4366bceb",
+        "urls": [
+          "bzz-raw://224e8f6def4e53a1065f0c4ce26d8ffff15276944e2351753065aeb5bd265f52",
+          "dweb:/ipfs/QmSu8iUPCnwza4SdE5jVSZLnQjMRXJg3VAGc8pHqbaMLob"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IServiceManager.sol": {
+        "keccak256": "0x341ebf04eb799f695ce411087538ea8678268d58819b2640c73d01a0f245258f",
+        "urls": [
+          "bzz-raw://aa3215133afda1dcc29148c3772472d7ea1bb982896ee58d0485ace965bf2427",
+          "dweb:/ipfs/QmPkquzv7UzNVgMNeppaVZkxjSv3yAENDu11ZFWbMh4x8T"
+        ],
+        "license": "UNLICENSED"
+      },
+      "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol": {
+        "keccak256": "0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b",
+        "urls": [
+          "bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34",
+          "dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "eignlayr-contracts/contracts/interfaces/IServiceManager.sol",
+    "id": 788,
+    "exportedSymbols": {
+      "IDelegationTerms": [
+        233
+      ],
+      "IERC20": [
+        2773
+      ],
+      "IEigenLayrDelegation": [
+        361
+      ],
+      "IInvestmentStrategy": [
+        455
+      ],
+      "IServiceManager": [
+        787
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:1695:9",
+    "nodes": [
+      {
+        "id": 733,
+        "nodeType": "PragmaDirective",
+        "src": "39:23:9",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".9"
+        ]
+      },
+      {
+        "id": 734,
+        "nodeType": "ImportDirective",
+        "src": "64:56:9",
+        "nodes": [],
+        "absolutePath": "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
+        "file": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 788,
+        "sourceUnit": 2774,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 735,
+        "nodeType": "ImportDirective",
+        "src": "121:36:9",
+        "nodes": [],
+        "absolutePath": "eignlayr-contracts/contracts/interfaces/IEigenLayrDelegation.sol",
+        "file": "./IEigenLayrDelegation.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 788,
+        "sourceUnit": 362,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 787,
+        "nodeType": "ContractDefinition",
+        "src": "298:1436:9",
+        "nodes": [
+          {
+            "id": 742,
+            "nodeType": "FunctionDefinition",
+            "src": "398:53:9",
+            "nodes": [],
+            "documentation": {
+              "id": 737,
+              "nodeType": "StructuredDocumentation",
+              "src": "330:63:9",
+              "text": "@notice Returns the current 'taskNumber' for the middleware"
+            },
+            "functionSelector": "72d18e8d",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "taskNumber",
+            "nameLocation": "407:10:9",
+            "parameters": {
+              "id": 738,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "417:2:9"
+            },
+            "returnParameters": {
+              "id": 741,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 740,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 742,
+                  "src": "443:6:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 739,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "443:6:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "442:8:9"
+            },
+            "scope": 787,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 748,
+            "nodeType": "FunctionDefinition",
+            "src": "604:51:9",
+            "nodes": [],
+            "documentation": {
+              "id": 743,
+              "nodeType": "StructuredDocumentation",
+              "src": "457:142:9",
+              "text": "@notice Permissioned function that causes the ServiceManager to freeze the operator on EigenLayer, through a call to the Slasher contreact"
+            },
+            "functionSelector": "38c8ee64",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "freezeOperator",
+            "nameLocation": "613:14:9",
+            "parameters": {
+              "id": 746,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 745,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "636:8:9",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 748,
+                  "src": "628:16:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 744,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "628:7:9",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "627:18:9"
+            },
+            "returnParameters": {
+              "id": 747,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "654:0:9"
+            },
+            "scope": 787,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 756,
+            "nodeType": "FunctionDefinition",
+            "src": "829:80:9",
+            "nodes": [],
+            "documentation": {
+              "id": 749,
+              "nodeType": "StructuredDocumentation",
+              "src": "661:163:9",
+              "text": "@notice Permissioned function that causes the ServiceManager to revoke its ability to slash the operator on EigenLayer, through a call to the Slasher contreact"
+            },
+            "functionSelector": "fb3f2922",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "revokeSlashingAbility",
+            "nameLocation": "838:21:9",
+            "parameters": {
+              "id": 754,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 751,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "868:8:9",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 756,
+                  "src": "860:16:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 750,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "860:7:9",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 753,
+                  "mutability": "mutable",
+                  "name": "unbondedAfter",
+                  "nameLocation": "885:13:9",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 756,
+                  "src": "878:20:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 752,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "878:6:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "859:40:9"
+            },
+            "returnParameters": {
+              "id": 755,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "908:0:9"
+            },
+            "scope": 787,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 763,
+            "nodeType": "FunctionDefinition",
+            "src": "1008:58:9",
+            "nodes": [],
+            "documentation": {
+              "id": 757,
+              "nodeType": "StructuredDocumentation",
+              "src": "915:88:9",
+              "text": "@notice Collateral token used for placing collateral on challenges & payment commits"
+            },
+            "functionSelector": "b2016bd4",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "collateralToken",
+            "nameLocation": "1017:15:9",
+            "parameters": {
+              "id": 758,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1032:2:9"
+            },
+            "returnParameters": {
+              "id": 762,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 761,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 763,
+                  "src": "1058:6:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20_$2773",
+                    "typeString": "contract IERC20"
+                  },
+                  "typeName": {
+                    "id": 760,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 759,
+                      "name": "IERC20",
+                      "nameLocations": [
+                        "1058:6:9"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 2773,
+                      "src": "1058:6:9"
+                    },
+                    "referencedDeclaration": 2773,
+                    "src": "1058:6:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20_$2773",
+                      "typeString": "contract IERC20"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1057:8:9"
+            },
+            "scope": 787,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 770,
+            "nodeType": "FunctionDefinition",
+            "src": "1127:76:9",
+            "nodes": [],
+            "documentation": {
+              "id": 764,
+              "nodeType": "StructuredDocumentation",
+              "src": "1072:50:9",
+              "text": "@notice The Delegation contract of EigenLayer."
+            },
+            "functionSelector": "33d2433a",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "eigenLayrDelegation",
+            "nameLocation": "1136:19:9",
+            "parameters": {
+              "id": 765,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1155:2:9"
+            },
+            "returnParameters": {
+              "id": 769,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 768,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 770,
+                  "src": "1181:20:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IEigenLayrDelegation_$361",
+                    "typeString": "contract IEigenLayrDelegation"
+                  },
+                  "typeName": {
+                    "id": 767,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 766,
+                      "name": "IEigenLayrDelegation",
+                      "nameLocations": [
+                        "1181:20:9"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 361,
+                      "src": "1181:20:9"
+                    },
+                    "referencedDeclaration": 361,
+                    "src": "1181:20:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IEigenLayrDelegation_$361",
+                      "typeString": "contract IEigenLayrDelegation"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1180:22:9"
+            },
+            "scope": 787,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 780,
+            "nodeType": "FunctionDefinition",
+            "src": "1467:131:9",
+            "nodes": [],
+            "documentation": {
+              "id": 771,
+              "nodeType": "StructuredDocumentation",
+              "src": "1209:253:9",
+              "text": " @notice Verifies that a task for this middleware exists which was created *at or before* `initTimestamp` *AND* that expires *strictly prior to* the\n specified `unlockTime`.\n @dev Function reverts if the verification fails."
+            },
+            "functionSelector": "a88d92aa",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "stakeWithdrawalVerification",
+            "nameLocation": "1476:27:9",
+            "parameters": {
+              "id": 778,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 773,
+                  "mutability": "mutable",
+                  "name": "data",
+                  "nameLocation": "1519:4:9",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 780,
+                  "src": "1504:19:9",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_calldata_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 772,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1504:5:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 775,
+                  "mutability": "mutable",
+                  "name": "initTimestamp",
+                  "nameLocation": "1533:13:9",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 780,
+                  "src": "1525:21:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 774,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1525:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 777,
+                  "mutability": "mutable",
+                  "name": "unlockTime",
+                  "nameLocation": "1556:10:9",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 780,
+                  "src": "1548:18:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 776,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1548:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1503:64:9"
+            },
+            "returnParameters": {
+              "id": 779,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1597:0:9"
+            },
+            "scope": 787,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 786,
+            "nodeType": "FunctionDefinition",
+            "src": "1679:53:9",
+            "nodes": [],
+            "documentation": {
+              "id": 781,
+              "nodeType": "StructuredDocumentation",
+              "src": "1604:70:9",
+              "text": "@notice Returns the `latestTime` until which operators must serve."
+            },
+            "functionSelector": "7dfd16d7",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "latestTime",
+            "nameLocation": "1688:10:9",
+            "parameters": {
+              "id": 782,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1698:2:9"
+            },
+            "returnParameters": {
+              "id": 785,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 784,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 786,
+                  "src": "1724:6:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 783,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1724:6:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1723:8:9"
+            },
+            "scope": 787,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IServiceManager",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 736,
+          "nodeType": "StructuredDocumentation",
+          "src": "159:92:9",
+          "text": " @title Interface for a `ServiceManager`-type contract.\n @author Layr Labs, Inc."
+        },
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          787
+        ],
+        "name": "IServiceManager",
+        "nameLocation": "308:15:9",
+        "scope": 788,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  },
+  "id": 9
+}

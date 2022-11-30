@@ -2,11 +2,12 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./libraries/DataLayrDisclosureLogic.sol";
+import "@openzeppelin/contracts/interfaces/draft-IERC1822.sol";
+import "../libraries/DataLayrDisclosureLogic.sol";
 
 // This contract is a rollup built on top of datalayr that allows an enshrined sequencer to store data
 // on datalayr, but slashes them if the data they store ever contains a certain unallowed message
-contract DataLayrRollup {
+contract EigenDataLayrRollup is IERC1822Proxiable {
     enum RollupStoreStatus {
         UNCOMMITTED,
         COMMITTED,
@@ -21,6 +22,8 @@ contract DataLayrRollup {
     uint256 public immutable fraudProofPeriod = 1 days;
 
     uint256 internal constant DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED = type(uint256).max;
+
+    bytes32 internal constant _DESIGNATED_IMPLEMENTATION_SLOT = 0xa1832b4681bf2b3269fd2d0163abf215d243dd098d1ece37dd0775a7f2a8c09d;
 
     struct RollupStore {
         //The corresponding datastore in DataLayr to the rollup block number
@@ -129,5 +132,9 @@ contract DataLayrRollup {
         //store link between dataStoreId and rollupStoreNumber
         dataStoreIdToRollupStoreNumber[searchData.metadata.globalDataStoreId] = rollupStoreNumber;
         emit RollupStoreConfirmed(uint32(rollupStoreNumber++));
+    }
+
+    function proxiableUUID() external view returns (bytes32) {
+        return _DESIGNATED_IMPLEMENTATION_SLOT;
     }
 }

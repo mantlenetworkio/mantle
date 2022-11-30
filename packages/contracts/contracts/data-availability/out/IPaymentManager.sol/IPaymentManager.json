@@ -1,0 +1,3440 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "collateralToken",
+      "outputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "toTaskNumber",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint96",
+          "name": "amount",
+          "type": "uint96"
+        }
+      ],
+      "name": "commitPayment",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "onBehalfOf",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "depositFutureFees",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "getAmount1",
+      "outputs": [
+        {
+          "internalType": "uint96",
+          "name": "",
+          "type": "uint96"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "getAmount2",
+      "outputs": [
+        {
+          "internalType": "uint96",
+          "name": "",
+          "type": "uint96"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "getChallengeStatus",
+      "outputs": [
+        {
+          "internalType": "enum IPaymentManager.ChallengeStatus",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "getDiff",
+      "outputs": [
+        {
+          "internalType": "uint48",
+          "name": "",
+          "type": "uint48"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "getFromTaskNumber",
+      "outputs": [
+        {
+          "internalType": "uint48",
+          "name": "",
+          "type": "uint48"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "getPaymentCollateral",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "getToTaskNumber",
+      "outputs": [
+        {
+          "internalType": "uint48",
+          "name": "",
+          "type": "uint48"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint96",
+          "name": "amount1",
+          "type": "uint96"
+        },
+        {
+          "internalType": "uint96",
+          "name": "amount2",
+          "type": "uint96"
+        }
+      ],
+      "name": "initPaymentChallenge",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "initiator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "payer",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "feeAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "payFee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "paymentFraudproofCollateral",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "paymentFraudproofInterval",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "paymentToken",
+      "outputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "secondHalf",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint96",
+          "name": "amount1",
+          "type": "uint96"
+        },
+        {
+          "internalType": "uint96",
+          "name": "amount2",
+          "type": "uint96"
+        }
+      ],
+      "name": "performChallengeBisectionStep",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "redeemPayment",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "repository",
+      "outputs": [
+        {
+          "internalType": "contract IRepository",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "resolveChallenge",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "allowed",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "setAllowance",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_paymentFraudproofCollateral",
+          "type": "uint256"
+        }
+      ],
+      "name": "setPaymentFraudproofCollateral",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "collateralToken()": "b2016bd4",
+    "commitPayment(uint32,uint96)": "f546a5a9",
+    "depositFutureFees(address,uint256)": "66d97307",
+    "getAmount1(address)": "ed29912d",
+    "getAmount2(address)": "3eb07bed",
+    "getChallengeStatus(address)": "2ce9f4ca",
+    "getDiff(address)": "f98485cd",
+    "getFromTaskNumber(address)": "8de0cc3b",
+    "getPaymentCollateral(address)": "f7c3815c",
+    "getToTaskNumber(address)": "2fae414f",
+    "initPaymentChallenge(address,uint96,uint96)": "610c066f",
+    "payFee(address,address,uint256)": "0adfcd81",
+    "paymentFraudproofCollateral()": "97fa5ce9",
+    "paymentFraudproofInterval()": "637bcb57",
+    "paymentToken()": "3013ce29",
+    "performChallengeBisectionStep(address,bool,uint96,uint96)": "9d3ec23a",
+    "redeemPayment()": "89f3cfd1",
+    "repository()": "e9176c60",
+    "resolveChallenge(address)": "32064dac",
+    "setAllowance(address,uint256)": "310ec4a7",
+    "setPaymentFraudproofCollateral(uint256)": "c1db1680"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"collateralToken\",\"outputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"toTaskNumber\",\"type\":\"uint32\"},{\"internalType\":\"uint96\",\"name\":\"amount\",\"type\":\"uint96\"}],\"name\":\"commitPayment\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"onBehalfOf\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"depositFutureFees\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"getAmount1\",\"outputs\":[{\"internalType\":\"uint96\",\"name\":\"\",\"type\":\"uint96\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"getAmount2\",\"outputs\":[{\"internalType\":\"uint96\",\"name\":\"\",\"type\":\"uint96\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"getChallengeStatus\",\"outputs\":[{\"internalType\":\"enum IPaymentManager.ChallengeStatus\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"getDiff\",\"outputs\":[{\"internalType\":\"uint48\",\"name\":\"\",\"type\":\"uint48\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"getFromTaskNumber\",\"outputs\":[{\"internalType\":\"uint48\",\"name\":\"\",\"type\":\"uint48\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"getPaymentCollateral\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"getToTaskNumber\",\"outputs\":[{\"internalType\":\"uint48\",\"name\":\"\",\"type\":\"uint48\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"uint96\",\"name\":\"amount1\",\"type\":\"uint96\"},{\"internalType\":\"uint96\",\"name\":\"amount2\",\"type\":\"uint96\"}],\"name\":\"initPaymentChallenge\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"initiator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"feeAmount\",\"type\":\"uint256\"}],\"name\":\"payFee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paymentFraudproofCollateral\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paymentFraudproofInterval\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paymentToken\",\"outputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"secondHalf\",\"type\":\"bool\"},{\"internalType\":\"uint96\",\"name\":\"amount1\",\"type\":\"uint96\"},{\"internalType\":\"uint96\",\"name\":\"amount2\",\"type\":\"uint96\"}],\"name\":\"performChallengeBisectionStep\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"redeemPayment\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"repository\",\"outputs\":[{\"internalType\":\"contract IRepository\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"resolveChallenge\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"allowed\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"setAllowance\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_paymentFraudproofCollateral\",\"type\":\"uint256\"}],\"name\":\"setPaymentFraudproofCollateral\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Layr Labs, Inc.\",\"kind\":\"dev\",\"methods\":{\"commitPayment(uint32,uint96)\":{\"details\":\"Once this payment is recorded, a fraud proof period commences during which a challenger can dispute the proposed payment.\"},\"depositFutureFees(address,uint256)\":{\"params\":{\"amount\":\"is amount of futures fees being deposited\",\"onBehalfOf\":\"could be the `msg.sender` themselves, or a different address for whom `msg.sender` is depositing these future fees\"}},\"initPaymentChallenge(address,uint96,uint96)\":{\"params\":{\"amount1\":\"is the reward amount the challenger in that round claims is for the first half of tasks\",\"amount2\":\"is the reward amount the challenger in that round claims is for the second half of tasks\",\"operator\":\"is the operator against whose payment claim the fraudproof is being made\"}},\"performChallengeBisectionStep(address,bool,uint96,uint96)\":{\"params\":{\"amount1\":\"The amount that the caller asserts the operator is entitled to, for the first half *of the challenged half* of the previous bisection.\",\"amount2\":\"The amount that the caller asserts the operator is entitled to, for the second half *of the challenged half* of the previous bisection.\",\"operator\":\"The middleware operator who was challenged (used to look up challenge details)\",\"secondHalf\":\"If true, then the caller wishes to challenge the amount claimed as payment in the *second half* of the previous bisection step. If false then the *first half* is indicated instead.\"}},\"redeemPayment()\":{\"details\":\"This function can only be called after the challenge window for the payment claim has completed.\"},\"setPaymentFraudproofCollateral(uint256)\":{\"params\":{\"_paymentFraudproofCollateral\":\"The new value for `paymentFraudproofCollateral` to take.\"}}},\"title\":\"Interface for a `PaymentManager` contract.\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"collateralToken()\":{\"notice\":\"Collateral token used for placing collateral on challenges & payment commits\"},\"commitPayment(uint32,uint96)\":{\"notice\":\"This is used by an operator to make a claim on the amount that they deserve for their service from their last payment until `toTaskNumber`\"},\"depositFutureFees(address,uint256)\":{\"notice\":\"deposit one-time fees by the `msg.sender` with this contract to pay for future tasks of this middleware\"},\"getAmount1(address)\":{\"notice\":\"Returns the 'amount1' for the `operator`'s payment claim.\"},\"getAmount2(address)\":{\"notice\":\"Returns the 'amount2' for the `operator`'s payment claim.\"},\"getChallengeStatus(address)\":{\"notice\":\"Returns the ChallengeStatus for the `operator`'s payment claim.\"},\"getDiff(address)\":{\"notice\":\"Returns the task number difference for the `operator`'s payment claim.\"},\"getFromTaskNumber(address)\":{\"notice\":\"Returns the 'fromTaskNumber' for the `operator`'s payment claim.\"},\"getPaymentCollateral(address)\":{\"notice\":\"Returns the active collateral of the `operator` placed on their payment claim.\"},\"getToTaskNumber(address)\":{\"notice\":\"Returns the 'toTaskNumber' for the `operator`'s payment claim.\"},\"initPaymentChallenge(address,uint96,uint96)\":{\"notice\":\"This function is called by a fraud prover to challenge a payment, initiating an interactive-type fraudproof.\"},\"payFee(address,address,uint256)\":{\"notice\":\"Used for deducting the fees from the payer to the middleware\"},\"paymentFraudproofCollateral()\":{\"notice\":\"Specifies the payment that has to be made as a collateral for fraudproof during payment challenges.\"},\"paymentFraudproofInterval()\":{\"notice\":\"Challenge window for submitting fraudproof in the case of an incorrect payment claim by a registered operator.\"},\"paymentToken()\":{\"notice\":\"the ERC20 token that will be used by the disperser to pay the service fees to middleware nodes.\"},\"performChallengeBisectionStep(address,bool,uint96,uint96)\":{\"notice\":\"Perform a single bisection step in an existing interactive payment challenge.\"},\"redeemPayment()\":{\"notice\":\"Called by an operator to redeem a payment that they previously 'committed' to by calling `commitPayment`.\"},\"resolveChallenge(address)\":{\"notice\":\"resolve an existing PaymentChallenge for an operator\"},\"setAllowance(address,uint256)\":{\"notice\":\"Allows the `allowed` address to spend up to `amount` of the `msg.sender`'s funds that have been deposited in this contract\"},\"setPaymentFraudproofCollateral(uint256)\":{\"notice\":\"Modifies the `paymentFraudproofCollateral` amount.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"eignlayr-contracts/contracts/interfaces/IPaymentManager.sol\":\"IPaymentManager\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@eigenlayer/=eignlayr-contracts/\",\":@openzeppelin-upgrades/=lib/openzeppelin-contracts-upgradeable/\",\":@openzeppelin/=lib/openzeppelin-contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\"]},\"sources\":{\"eignlayr-contracts/contracts/interfaces/IDelegationTerms.sol\":{\"keccak256\":\"0x5e7db2c8e3cb2cf7d7a19f8f7be16efacfd1b709dfcd2f5bd2b32174812acc37\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://e4570f2eca5c5d3f0c09904326961b23a63814cf79c035929c040c652e4edbe2\",\"dweb:/ipfs/QmcSfznjU56j1B7kqy6zYQeYwjPND1GqLfUyth7EQHDQ9c\"]},\"eignlayr-contracts/contracts/interfaces/IEigenLayrDelegation.sol\":{\"keccak256\":\"0xd155bcd62c3c7a2a01eb57a729ef62fd817f968a8bc322e7e5b47a3008bf84ad\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://49572554bdb92998c8c6a81ec338fa605d8af52fb3326c6597c609b0d25fd9b5\",\"dweb:/ipfs/QmXQE7prGTepct57bYHjZh2iWifR7EMc5rrgoednCMfyq4\"]},\"eignlayr-contracts/contracts/interfaces/IInvestmentStrategy.sol\":{\"keccak256\":\"0x69eb667cc856ee1fe783243b6db21a43a9dadd29bf6761727b334fca4366bceb\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://224e8f6def4e53a1065f0c4ce26d8ffff15276944e2351753065aeb5bd265f52\",\"dweb:/ipfs/QmSu8iUPCnwza4SdE5jVSZLnQjMRXJg3VAGc8pHqbaMLob\"]},\"eignlayr-contracts/contracts/interfaces/IPaymentManager.sol\":{\"keccak256\":\"0xcfc3e77f3fee87f0563f2b9d510b7bd86d40bd79b0c03cb3ff2a0de95ab3edca\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://76afee317212097e73b744a38fc40090ca7632ca3fe90e81644db2ea5276577e\",\"dweb:/ipfs/QmPNwi2eSJtwEDK9imqCDCGyqLABiqMxhvTunjhruXh3jF\"]},\"eignlayr-contracts/contracts/interfaces/IRegistry.sol\":{\"keccak256\":\"0x5bd8be0f70b0e69f94e069c52417079ba2b9e73acd5f659c09b22142dc6c59f5\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://e32791f0147f40738d8a27c86e83c2207d5c1d1654c2f730629b3be587963cc4\",\"dweb:/ipfs/Qma4VYzA9jkLxWQCgCFm911rQodoSboaJxnNqi4AaSzftp\"]},\"eignlayr-contracts/contracts/interfaces/IRepository.sol\":{\"keccak256\":\"0x9c1f6f909a88a8d580617e260c3d7dc7aa4a8e98b7c6ca9ea0e662f9cf7b2f6b\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://f1e4be1bd82e94d8acb04f17ca140092e026cca506f0077532e01e4af4c0f1e4\",\"dweb:/ipfs/QmbDKszHE1fr7rFLzFZ7REewAoGVqCZf1SEMFHQKAQzgz8\"]},\"eignlayr-contracts/contracts/interfaces/IRepositoryAccess.sol\":{\"keccak256\":\"0x9d514d7faa77ef3ffba1c446db5542d4fad0287575e7f7bcf9337b1fc268fc6d\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://0427bea986798eca66fb43b59692772901b64d7d63bb4bc09f03068334471547\",\"dweb:/ipfs/QmW2ACnKkJxQJRDQ7YkbZQJhwr7ScorjFGB7S9si5w8D5Z\"]},\"eignlayr-contracts/contracts/interfaces/IServiceManager.sol\":{\"keccak256\":\"0x341ebf04eb799f695ce411087538ea8678268d58819b2640c73d01a0f245258f\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://aa3215133afda1dcc29148c3772472d7ea1bb982896ee58d0485ace965bf2427\",\"dweb:/ipfs/QmPkquzv7UzNVgMNeppaVZkxjSv3yAENDu11ZFWbMh4x8T\"]},\"eignlayr-contracts/contracts/interfaces/IVoteWeigher.sol\":{\"keccak256\":\"0x4d8068106dc1bc924e15cb4f8ae1c2f1b86bd3c6de1ce947081774225da63ad0\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://b252272b18e9a9480568a2f96cbf17e41d7d61e42e30edaef9633ca4e7149fef\",\"dweb:/ipfs/QmSh9uPEpkT4QbT83vHgXuXCE8DhJpCZh1typa97tD4zZ4\"]},\"lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34\",\"dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.17+commit.8df45f5f"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "collateralToken",
+          "outputs": [
+            {
+              "internalType": "contract IERC20",
+              "name": "",
+              "type": "address"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint32",
+              "name": "toTaskNumber",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint96",
+              "name": "amount",
+              "type": "uint96"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "commitPayment"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "onBehalfOf",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "depositFutureFees"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getAmount1",
+          "outputs": [
+            {
+              "internalType": "uint96",
+              "name": "",
+              "type": "uint96"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getAmount2",
+          "outputs": [
+            {
+              "internalType": "uint96",
+              "name": "",
+              "type": "uint96"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getChallengeStatus",
+          "outputs": [
+            {
+              "internalType": "enum IPaymentManager.ChallengeStatus",
+              "name": "",
+              "type": "uint8"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getDiff",
+          "outputs": [
+            {
+              "internalType": "uint48",
+              "name": "",
+              "type": "uint48"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getFromTaskNumber",
+          "outputs": [
+            {
+              "internalType": "uint48",
+              "name": "",
+              "type": "uint48"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getPaymentCollateral",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getToTaskNumber",
+          "outputs": [
+            {
+              "internalType": "uint48",
+              "name": "",
+              "type": "uint48"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "internalType": "uint96",
+              "name": "amount1",
+              "type": "uint96"
+            },
+            {
+              "internalType": "uint96",
+              "name": "amount2",
+              "type": "uint96"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "initPaymentChallenge"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "initiator",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "feeAmount",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "payFee"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "paymentFraudproofCollateral",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "paymentFraudproofInterval",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "paymentToken",
+          "outputs": [
+            {
+              "internalType": "contract IERC20",
+              "name": "",
+              "type": "address"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "internalType": "bool",
+              "name": "secondHalf",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint96",
+              "name": "amount1",
+              "type": "uint96"
+            },
+            {
+              "internalType": "uint96",
+              "name": "amount2",
+              "type": "uint96"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "performChallengeBisectionStep"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "redeemPayment"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "repository",
+          "outputs": [
+            {
+              "internalType": "contract IRepository",
+              "name": "",
+              "type": "address"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "resolveChallenge"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "allowed",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "setAllowance"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "_paymentFraudproofCollateral",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "setPaymentFraudproofCollateral"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "commitPayment(uint32,uint96)": {
+            "details": "Once this payment is recorded, a fraud proof period commences during which a challenger can dispute the proposed payment."
+          },
+          "depositFutureFees(address,uint256)": {
+            "params": {
+              "amount": "is amount of futures fees being deposited",
+              "onBehalfOf": "could be the `msg.sender` themselves, or a different address for whom `msg.sender` is depositing these future fees"
+            }
+          },
+          "initPaymentChallenge(address,uint96,uint96)": {
+            "params": {
+              "amount1": "is the reward amount the challenger in that round claims is for the first half of tasks",
+              "amount2": "is the reward amount the challenger in that round claims is for the second half of tasks",
+              "operator": "is the operator against whose payment claim the fraudproof is being made"
+            }
+          },
+          "performChallengeBisectionStep(address,bool,uint96,uint96)": {
+            "params": {
+              "amount1": "The amount that the caller asserts the operator is entitled to, for the first half *of the challenged half* of the previous bisection.",
+              "amount2": "The amount that the caller asserts the operator is entitled to, for the second half *of the challenged half* of the previous bisection.",
+              "operator": "The middleware operator who was challenged (used to look up challenge details)",
+              "secondHalf": "If true, then the caller wishes to challenge the amount claimed as payment in the *second half* of the previous bisection step. If false then the *first half* is indicated instead."
+            }
+          },
+          "redeemPayment()": {
+            "details": "This function can only be called after the challenge window for the payment claim has completed."
+          },
+          "setPaymentFraudproofCollateral(uint256)": {
+            "params": {
+              "_paymentFraudproofCollateral": "The new value for `paymentFraudproofCollateral` to take."
+            }
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "collateralToken()": {
+            "notice": "Collateral token used for placing collateral on challenges & payment commits"
+          },
+          "commitPayment(uint32,uint96)": {
+            "notice": "This is used by an operator to make a claim on the amount that they deserve for their service from their last payment until `toTaskNumber`"
+          },
+          "depositFutureFees(address,uint256)": {
+            "notice": "deposit one-time fees by the `msg.sender` with this contract to pay for future tasks of this middleware"
+          },
+          "getAmount1(address)": {
+            "notice": "Returns the 'amount1' for the `operator`'s payment claim."
+          },
+          "getAmount2(address)": {
+            "notice": "Returns the 'amount2' for the `operator`'s payment claim."
+          },
+          "getChallengeStatus(address)": {
+            "notice": "Returns the ChallengeStatus for the `operator`'s payment claim."
+          },
+          "getDiff(address)": {
+            "notice": "Returns the task number difference for the `operator`'s payment claim."
+          },
+          "getFromTaskNumber(address)": {
+            "notice": "Returns the 'fromTaskNumber' for the `operator`'s payment claim."
+          },
+          "getPaymentCollateral(address)": {
+            "notice": "Returns the active collateral of the `operator` placed on their payment claim."
+          },
+          "getToTaskNumber(address)": {
+            "notice": "Returns the 'toTaskNumber' for the `operator`'s payment claim."
+          },
+          "initPaymentChallenge(address,uint96,uint96)": {
+            "notice": "This function is called by a fraud prover to challenge a payment, initiating an interactive-type fraudproof."
+          },
+          "payFee(address,address,uint256)": {
+            "notice": "Used for deducting the fees from the payer to the middleware"
+          },
+          "paymentFraudproofCollateral()": {
+            "notice": "Specifies the payment that has to be made as a collateral for fraudproof during payment challenges."
+          },
+          "paymentFraudproofInterval()": {
+            "notice": "Challenge window for submitting fraudproof in the case of an incorrect payment claim by a registered operator."
+          },
+          "paymentToken()": {
+            "notice": "the ERC20 token that will be used by the disperser to pay the service fees to middleware nodes."
+          },
+          "performChallengeBisectionStep(address,bool,uint96,uint96)": {
+            "notice": "Perform a single bisection step in an existing interactive payment challenge."
+          },
+          "redeemPayment()": {
+            "notice": "Called by an operator to redeem a payment that they previously 'committed' to by calling `commitPayment`."
+          },
+          "resolveChallenge(address)": {
+            "notice": "resolve an existing PaymentChallenge for an operator"
+          },
+          "setAllowance(address,uint256)": {
+            "notice": "Allows the `allowed` address to spend up to `amount` of the `msg.sender`'s funds that have been deposited in this contract"
+          },
+          "setPaymentFraudproofCollateral(uint256)": {
+            "notice": "Modifies the `paymentFraudproofCollateral` amount."
+          }
+        },
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@eigenlayer/=eignlayr-contracts/",
+        ":@openzeppelin-upgrades/=lib/openzeppelin-contracts-upgradeable/",
+        ":@openzeppelin/=lib/openzeppelin-contracts/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/forge-std/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "eignlayr-contracts/contracts/interfaces/IPaymentManager.sol": "IPaymentManager"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "eignlayr-contracts/contracts/interfaces/IDelegationTerms.sol": {
+        "keccak256": "0x5e7db2c8e3cb2cf7d7a19f8f7be16efacfd1b709dfcd2f5bd2b32174812acc37",
+        "urls": [
+          "bzz-raw://e4570f2eca5c5d3f0c09904326961b23a63814cf79c035929c040c652e4edbe2",
+          "dweb:/ipfs/QmcSfznjU56j1B7kqy6zYQeYwjPND1GqLfUyth7EQHDQ9c"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IEigenLayrDelegation.sol": {
+        "keccak256": "0xd155bcd62c3c7a2a01eb57a729ef62fd817f968a8bc322e7e5b47a3008bf84ad",
+        "urls": [
+          "bzz-raw://49572554bdb92998c8c6a81ec338fa605d8af52fb3326c6597c609b0d25fd9b5",
+          "dweb:/ipfs/QmXQE7prGTepct57bYHjZh2iWifR7EMc5rrgoednCMfyq4"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IInvestmentStrategy.sol": {
+        "keccak256": "0x69eb667cc856ee1fe783243b6db21a43a9dadd29bf6761727b334fca4366bceb",
+        "urls": [
+          "bzz-raw://224e8f6def4e53a1065f0c4ce26d8ffff15276944e2351753065aeb5bd265f52",
+          "dweb:/ipfs/QmSu8iUPCnwza4SdE5jVSZLnQjMRXJg3VAGc8pHqbaMLob"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IPaymentManager.sol": {
+        "keccak256": "0xcfc3e77f3fee87f0563f2b9d510b7bd86d40bd79b0c03cb3ff2a0de95ab3edca",
+        "urls": [
+          "bzz-raw://76afee317212097e73b744a38fc40090ca7632ca3fe90e81644db2ea5276577e",
+          "dweb:/ipfs/QmPNwi2eSJtwEDK9imqCDCGyqLABiqMxhvTunjhruXh3jF"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IRegistry.sol": {
+        "keccak256": "0x5bd8be0f70b0e69f94e069c52417079ba2b9e73acd5f659c09b22142dc6c59f5",
+        "urls": [
+          "bzz-raw://e32791f0147f40738d8a27c86e83c2207d5c1d1654c2f730629b3be587963cc4",
+          "dweb:/ipfs/Qma4VYzA9jkLxWQCgCFm911rQodoSboaJxnNqi4AaSzftp"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IRepository.sol": {
+        "keccak256": "0x9c1f6f909a88a8d580617e260c3d7dc7aa4a8e98b7c6ca9ea0e662f9cf7b2f6b",
+        "urls": [
+          "bzz-raw://f1e4be1bd82e94d8acb04f17ca140092e026cca506f0077532e01e4af4c0f1e4",
+          "dweb:/ipfs/QmbDKszHE1fr7rFLzFZ7REewAoGVqCZf1SEMFHQKAQzgz8"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IRepositoryAccess.sol": {
+        "keccak256": "0x9d514d7faa77ef3ffba1c446db5542d4fad0287575e7f7bcf9337b1fc268fc6d",
+        "urls": [
+          "bzz-raw://0427bea986798eca66fb43b59692772901b64d7d63bb4bc09f03068334471547",
+          "dweb:/ipfs/QmW2ACnKkJxQJRDQ7YkbZQJhwr7ScorjFGB7S9si5w8D5Z"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IServiceManager.sol": {
+        "keccak256": "0x341ebf04eb799f695ce411087538ea8678268d58819b2640c73d01a0f245258f",
+        "urls": [
+          "bzz-raw://aa3215133afda1dcc29148c3772472d7ea1bb982896ee58d0485ace965bf2427",
+          "dweb:/ipfs/QmPkquzv7UzNVgMNeppaVZkxjSv3yAENDu11ZFWbMh4x8T"
+        ],
+        "license": "UNLICENSED"
+      },
+      "eignlayr-contracts/contracts/interfaces/IVoteWeigher.sol": {
+        "keccak256": "0x4d8068106dc1bc924e15cb4f8ae1c2f1b86bd3c6de1ce947081774225da63ad0",
+        "urls": [
+          "bzz-raw://b252272b18e9a9480568a2f96cbf17e41d7d61e42e30edaef9633ca4e7149fef",
+          "dweb:/ipfs/QmSh9uPEpkT4QbT83vHgXuXCE8DhJpCZh1typa97tD4zZ4"
+        ],
+        "license": "UNLICENSED"
+      },
+      "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol": {
+        "keccak256": "0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b",
+        "urls": [
+          "bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34",
+          "dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "eignlayr-contracts/contracts/interfaces/IPaymentManager.sol",
+    "id": 675,
+    "exportedSymbols": {
+      "IDelegationTerms": [
+        233
+      ],
+      "IERC20": [
+        2773
+      ],
+      "IEigenLayrDelegation": [
+        361
+      ],
+      "IInvestmentStrategy": [
+        455
+      ],
+      "IPaymentManager": [
+        674
+      ],
+      "IRegistry": [
+        686
+      ],
+      "IRepository": [
+        720
+      ],
+      "IRepositoryAccess": [
+        731
+      ],
+      "IServiceManager": [
+        787
+      ],
+      "IVoteWeigher": [
+        815
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:8007:5",
+    "nodes": [
+      {
+        "id": 457,
+        "nodeType": "PragmaDirective",
+        "src": "39:23:5",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".9"
+        ]
+      },
+      {
+        "id": 458,
+        "nodeType": "ImportDirective",
+        "src": "64:56:5",
+        "nodes": [],
+        "absolutePath": "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
+        "file": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 675,
+        "sourceUnit": 2774,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 459,
+        "nodeType": "ImportDirective",
+        "src": "121:33:5",
+        "nodes": [],
+        "absolutePath": "eignlayr-contracts/contracts/interfaces/IRepositoryAccess.sol",
+        "file": "./IRepositoryAccess.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 675,
+        "sourceUnit": 732,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 674,
+        "nodeType": "ContractDefinition",
+        "src": "244:7801:5",
+        "nodes": [
+          {
+            "id": 466,
+            "nodeType": "EnumDefinition",
+            "src": "297:84:5",
+            "nodes": [],
+            "canonicalName": "IPaymentManager.DissectionType",
+            "members": [
+              {
+                "id": 463,
+                "name": "INVALID",
+                "nameLocation": "327:7:5",
+                "nodeType": "EnumValue",
+                "src": "327:7:5"
+              },
+              {
+                "id": 464,
+                "name": "FIRST_HALF",
+                "nameLocation": "344:10:5",
+                "nodeType": "EnumValue",
+                "src": "344:10:5"
+              },
+              {
+                "id": 465,
+                "name": "SECOND_HALF",
+                "nameLocation": "364:11:5",
+                "nodeType": "EnumValue",
+                "src": "364:11:5"
+              }
+            ],
+            "name": "DissectionType",
+            "nameLocation": "302:14:5"
+          },
+          {
+            "id": 470,
+            "nodeType": "EnumDefinition",
+            "src": "386:82:5",
+            "nodes": [],
+            "canonicalName": "IPaymentManager.PaymentStatus",
+            "members": [
+              {
+                "id": 467,
+                "name": "REDEEMED",
+                "nameLocation": "415:8:5",
+                "nodeType": "EnumValue",
+                "src": "415:8:5"
+              },
+              {
+                "id": 468,
+                "name": "COMMITTED",
+                "nameLocation": "433:9:5",
+                "nodeType": "EnumValue",
+                "src": "433:9:5"
+              },
+              {
+                "id": 469,
+                "name": "CHALLENGED",
+                "nameLocation": "452:10:5",
+                "nodeType": "EnumValue",
+                "src": "452:10:5"
+              }
+            ],
+            "name": "PaymentStatus",
+            "nameLocation": "391:13:5"
+          },
+          {
+            "id": 476,
+            "nodeType": "EnumDefinition",
+            "src": "473:159:5",
+            "nodes": [],
+            "canonicalName": "IPaymentManager.ChallengeStatus",
+            "members": [
+              {
+                "id": 471,
+                "name": "RESOLVED",
+                "nameLocation": "504:8:5",
+                "nodeType": "EnumValue",
+                "src": "504:8:5"
+              },
+              {
+                "id": 472,
+                "name": "OPERATOR_TURN",
+                "nameLocation": "522:13:5",
+                "nodeType": "EnumValue",
+                "src": "522:13:5"
+              },
+              {
+                "id": 473,
+                "name": "CHALLENGER_TURN",
+                "nameLocation": "545:15:5",
+                "nodeType": "EnumValue",
+                "src": "545:15:5"
+              },
+              {
+                "id": 474,
+                "name": "OPERATOR_TURN_ONE_STEP",
+                "nameLocation": "570:22:5",
+                "nodeType": "EnumValue",
+                "src": "570:22:5"
+              },
+              {
+                "id": 475,
+                "name": "CHALLENGER_TURN_ONE_STEP",
+                "nameLocation": "602:24:5",
+                "nodeType": "EnumValue",
+                "src": "602:24:5"
+              }
+            ],
+            "name": "ChallengeStatus",
+            "nameLocation": "478:15:5"
+          },
+          {
+            "id": 492,
+            "nodeType": "StructDefinition",
+            "src": "746:733:5",
+            "nodes": [],
+            "canonicalName": "IPaymentManager.Payment",
+            "members": [
+              {
+                "constant": false,
+                "id": 478,
+                "mutability": "mutable",
+                "name": "fromTaskNumber",
+                "nameLocation": "845:14:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 492,
+                "src": "838:21:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint32",
+                  "typeString": "uint32"
+                },
+                "typeName": {
+                  "id": 477,
+                  "name": "uint32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "838:6:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 480,
+                "mutability": "mutable",
+                "name": "toTaskNumber",
+                "nameLocation": "947:12:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 492,
+                "src": "940:19:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint32",
+                  "typeString": "uint32"
+                },
+                "typeName": {
+                  "id": 479,
+                  "name": "uint32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "940:6:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 482,
+                "mutability": "mutable",
+                "name": "confirmAt",
+                "nameLocation": "1075:9:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 492,
+                "src": "1068:16:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint32",
+                  "typeString": "uint32"
+                },
+                "typeName": {
+                  "id": 481,
+                  "name": "uint32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1068:6:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 485,
+                "mutability": "mutable",
+                "name": "amount",
+                "nameLocation": "1222:6:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 492,
+                "src": "1215:13:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint96",
+                  "typeString": "uint96"
+                },
+                "typeName": {
+                  "id": 484,
+                  "name": "uint96",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1215:6:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint96",
+                    "typeString": "uint96"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 489,
+                "mutability": "mutable",
+                "name": "status",
+                "nameLocation": "1402:6:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 492,
+                "src": "1388:20:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_enum$_PaymentStatus_$470",
+                  "typeString": "enum IPaymentManager.PaymentStatus"
+                },
+                "typeName": {
+                  "id": 488,
+                  "nodeType": "UserDefinedTypeName",
+                  "pathNode": {
+                    "id": 487,
+                    "name": "PaymentStatus",
+                    "nameLocations": [
+                      "1388:13:5"
+                    ],
+                    "nodeType": "IdentifierPath",
+                    "referencedDeclaration": 470,
+                    "src": "1388:13:5"
+                  },
+                  "referencedDeclaration": 470,
+                  "src": "1388:13:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_PaymentStatus_$470",
+                    "typeString": "enum IPaymentManager.PaymentStatus"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 491,
+                "mutability": "mutable",
+                "name": "collateral",
+                "nameLocation": "1426:10:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 492,
+                "src": "1418:18:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 490,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1418:7:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "Payment",
+            "nameLocation": "753:7:5",
+            "scope": 674,
+            "visibility": "public"
+          },
+          {
+            "id": 513,
+            "nodeType": "StructDefinition",
+            "src": "1605:1167:5",
+            "nodes": [],
+            "canonicalName": "IPaymentManager.PaymentChallenge",
+            "members": [
+              {
+                "constant": false,
+                "id": 494,
+                "mutability": "mutable",
+                "name": "operator",
+                "nameLocation": "1708:8:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 513,
+                "src": "1700:16:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                },
+                "typeName": {
+                  "id": 493,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1700:7:5",
+                  "stateMutability": "nonpayable",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 496,
+                "mutability": "mutable",
+                "name": "challenger",
+                "nameLocation": "1788:10:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 513,
+                "src": "1780:18:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                },
+                "typeName": {
+                  "id": 495,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1780:7:5",
+                  "stateMutability": "nonpayable",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 498,
+                "mutability": "mutable",
+                "name": "serviceManager",
+                "nameLocation": "1867:14:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 513,
+                "src": "1859:22:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                },
+                "typeName": {
+                  "id": 497,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1859:7:5",
+                  "stateMutability": "nonpayable",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 500,
+                "mutability": "mutable",
+                "name": "fromTaskNumber",
+                "nameLocation": "1961:14:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 513,
+                "src": "1954:21:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint32",
+                  "typeString": "uint32"
+                },
+                "typeName": {
+                  "id": 499,
+                  "name": "uint32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1954:6:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 502,
+                "mutability": "mutable",
+                "name": "toTaskNumber",
+                "nameLocation": "2059:12:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 513,
+                "src": "2052:19:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint32",
+                  "typeString": "uint32"
+                },
+                "typeName": {
+                  "id": 501,
+                  "name": "uint32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2052:6:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 504,
+                "mutability": "mutable",
+                "name": "amount1",
+                "nameLocation": "2166:7:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 513,
+                "src": "2159:14:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint96",
+                  "typeString": "uint96"
+                },
+                "typeName": {
+                  "id": 503,
+                  "name": "uint96",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2159:6:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint96",
+                    "typeString": "uint96"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 506,
+                "mutability": "mutable",
+                "name": "amount2",
+                "nameLocation": "2269:7:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 513,
+                "src": "2262:14:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint96",
+                  "typeString": "uint96"
+                },
+                "typeName": {
+                  "id": 505,
+                  "name": "uint96",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2262:6:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint96",
+                    "typeString": "uint96"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 508,
+                "mutability": "mutable",
+                "name": "settleAt",
+                "nameLocation": "2359:8:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 513,
+                "src": "2352:15:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint32",
+                  "typeString": "uint32"
+                },
+                "typeName": {
+                  "id": 507,
+                  "name": "uint32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2352:6:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 512,
+                "mutability": "mutable",
+                "name": "status",
+                "nameLocation": "2759:6:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 513,
+                "src": "2743:22:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_enum$_ChallengeStatus_$476",
+                  "typeString": "enum IPaymentManager.ChallengeStatus"
+                },
+                "typeName": {
+                  "id": 511,
+                  "nodeType": "UserDefinedTypeName",
+                  "pathNode": {
+                    "id": 510,
+                    "name": "ChallengeStatus",
+                    "nameLocations": [
+                      "2743:15:5"
+                    ],
+                    "nodeType": "IdentifierPath",
+                    "referencedDeclaration": 476,
+                    "src": "2743:15:5"
+                  },
+                  "referencedDeclaration": 476,
+                  "src": "2743:15:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_ChallengeStatus_$476",
+                    "typeString": "enum IPaymentManager.ChallengeStatus"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "PaymentChallenge",
+            "nameLocation": "1612:16:5",
+            "scope": 674,
+            "visibility": "public"
+          },
+          {
+            "id": 518,
+            "nodeType": "StructDefinition",
+            "src": "2778:107:5",
+            "nodes": [],
+            "canonicalName": "IPaymentManager.TotalStakes",
+            "members": [
+              {
+                "constant": false,
+                "id": 515,
+                "mutability": "mutable",
+                "name": "signedStakeFirstQuorum",
+                "nameLocation": "2815:22:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 518,
+                "src": "2807:30:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 514,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2807:7:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 517,
+                "mutability": "mutable",
+                "name": "signedStakeSecondQuorum",
+                "nameLocation": "2855:23:5",
+                "nodeType": "VariableDeclaration",
+                "scope": 518,
+                "src": "2847:31:5",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 516,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2847:7:5",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "TotalStakes",
+            "nameLocation": "2785:11:5",
+            "scope": 674,
+            "visibility": "public"
+          },
+          {
+            "id": 526,
+            "nodeType": "FunctionDefinition",
+            "src": "3229:72:5",
+            "nodes": [],
+            "documentation": {
+              "id": 519,
+              "nodeType": "StructuredDocumentation",
+              "src": "2891:333:5",
+              "text": " @notice deposit one-time fees by the `msg.sender` with this contract to pay for future tasks of this middleware\n @param onBehalfOf could be the `msg.sender` themselves, or a different address for whom `msg.sender` is depositing these future fees\n @param amount is amount of futures fees being deposited"
+            },
+            "functionSelector": "66d97307",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "depositFutureFees",
+            "nameLocation": "3238:17:5",
+            "parameters": {
+              "id": 524,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 521,
+                  "mutability": "mutable",
+                  "name": "onBehalfOf",
+                  "nameLocation": "3264:10:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 526,
+                  "src": "3256:18:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 520,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3256:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 523,
+                  "mutability": "mutable",
+                  "name": "amount",
+                  "nameLocation": "3284:6:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 526,
+                  "src": "3276:14:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 522,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3276:7:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3255:36:5"
+            },
+            "returnParameters": {
+              "id": 525,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "3300:0:5"
+            },
+            "scope": 674,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 534,
+            "nodeType": "FunctionDefinition",
+            "src": "3446:64:5",
+            "nodes": [],
+            "documentation": {
+              "id": 527,
+              "nodeType": "StructuredDocumentation",
+              "src": "3307:134:5",
+              "text": "@notice Allows the `allowed` address to spend up to `amount` of the `msg.sender`'s funds that have been deposited in this contract"
+            },
+            "functionSelector": "310ec4a7",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setAllowance",
+            "nameLocation": "3455:12:5",
+            "parameters": {
+              "id": 532,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 529,
+                  "mutability": "mutable",
+                  "name": "allowed",
+                  "nameLocation": "3476:7:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 534,
+                  "src": "3468:15:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 528,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3468:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 531,
+                  "mutability": "mutable",
+                  "name": "amount",
+                  "nameLocation": "3493:6:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 534,
+                  "src": "3485:14:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 530,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3485:7:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3467:33:5"
+            },
+            "returnParameters": {
+              "id": 533,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "3509:0:5"
+            },
+            "scope": 674,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 544,
+            "nodeType": "FunctionDefinition",
+            "src": "3593:78:5",
+            "nodes": [],
+            "documentation": {
+              "id": 535,
+              "nodeType": "StructuredDocumentation",
+              "src": "3516:72:5",
+              "text": "@notice Used for deducting the fees from the payer to the middleware"
+            },
+            "functionSelector": "0adfcd81",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "payFee",
+            "nameLocation": "3602:6:5",
+            "parameters": {
+              "id": 542,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 537,
+                  "mutability": "mutable",
+                  "name": "initiator",
+                  "nameLocation": "3617:9:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 544,
+                  "src": "3609:17:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 536,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3609:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 539,
+                  "mutability": "mutable",
+                  "name": "payer",
+                  "nameLocation": "3636:5:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 544,
+                  "src": "3628:13:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 538,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3628:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 541,
+                  "mutability": "mutable",
+                  "name": "feeAmount",
+                  "nameLocation": "3651:9:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 544,
+                  "src": "3643:17:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 540,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3643:7:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3608:53:5"
+            },
+            "returnParameters": {
+              "id": 543,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "3670:0:5"
+            },
+            "scope": 674,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 550,
+            "nodeType": "FunctionDefinition",
+            "src": "3859:87:5",
+            "nodes": [],
+            "documentation": {
+              "id": 545,
+              "nodeType": "StructuredDocumentation",
+              "src": "3677:177:5",
+              "text": " @notice Modifies the `paymentFraudproofCollateral` amount.\n @param _paymentFraudproofCollateral The new value for `paymentFraudproofCollateral` to take."
+            },
+            "functionSelector": "c1db1680",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setPaymentFraudproofCollateral",
+            "nameLocation": "3868:30:5",
+            "parameters": {
+              "id": 548,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 547,
+                  "mutability": "mutable",
+                  "name": "_paymentFraudproofCollateral",
+                  "nameLocation": "3907:28:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 550,
+                  "src": "3899:36:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 546,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3899:7:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3898:38:5"
+            },
+            "returnParameters": {
+              "id": 549,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "3945:0:5"
+            },
+            "scope": 674,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 558,
+            "nodeType": "FunctionDefinition",
+            "src": "4256:68:5",
+            "nodes": [],
+            "documentation": {
+              "id": 551,
+              "nodeType": "StructuredDocumentation",
+              "src": "3952:299:5",
+              "text": " @notice This is used by an operator to make a claim on the amount that they deserve for their service from their last payment until `toTaskNumber`\n @dev Once this payment is recorded, a fraud proof period commences during which a challenger can dispute the proposed payment."
+            },
+            "functionSelector": "f546a5a9",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "commitPayment",
+            "nameLocation": "4265:13:5",
+            "parameters": {
+              "id": 556,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 553,
+                  "mutability": "mutable",
+                  "name": "toTaskNumber",
+                  "nameLocation": "4286:12:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 558,
+                  "src": "4279:19:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 552,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4279:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 555,
+                  "mutability": "mutable",
+                  "name": "amount",
+                  "nameLocation": "4307:6:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 558,
+                  "src": "4300:13:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint96",
+                    "typeString": "uint96"
+                  },
+                  "typeName": {
+                    "id": 554,
+                    "name": "uint96",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4300:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint96",
+                      "typeString": "uint96"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "4278:36:5"
+            },
+            "returnParameters": {
+              "id": 557,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "4323:0:5"
+            },
+            "scope": 674,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 562,
+            "nodeType": "FunctionDefinition",
+            "src": "4576:34:5",
+            "nodes": [],
+            "documentation": {
+              "id": 559,
+              "nodeType": "StructuredDocumentation",
+              "src": "4330:241:5",
+              "text": " @notice Called by an operator to redeem a payment that they previously 'committed' to by calling `commitPayment`.\n @dev This function can only be called after the challenge window for the payment claim has completed."
+            },
+            "functionSelector": "89f3cfd1",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeemPayment",
+            "nameLocation": "4585:13:5",
+            "parameters": {
+              "id": 560,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "4598:2:5"
+            },
+            "returnParameters": {
+              "id": 561,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "4609:0:5"
+            },
+            "scope": 674,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 572,
+            "nodeType": "FunctionDefinition",
+            "src": "5080:89:5",
+            "nodes": [],
+            "documentation": {
+              "id": 563,
+              "nodeType": "StructuredDocumentation",
+              "src": "4616:459:5",
+              "text": " @notice This function is called by a fraud prover to challenge a payment, initiating an interactive-type fraudproof.\n @param operator is the operator against whose payment claim the fraudproof is being made\n @param amount1 is the reward amount the challenger in that round claims is for the first half of tasks\n @param amount2 is the reward amount the challenger in that round claims is for the second half of tasks"
+            },
+            "functionSelector": "610c066f",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "initPaymentChallenge",
+            "nameLocation": "5089:20:5",
+            "parameters": {
+              "id": 570,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 565,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "5118:8:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 572,
+                  "src": "5110:16:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 564,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "5110:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 567,
+                  "mutability": "mutable",
+                  "name": "amount1",
+                  "nameLocation": "5135:7:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 572,
+                  "src": "5128:14:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint96",
+                    "typeString": "uint96"
+                  },
+                  "typeName": {
+                    "id": 566,
+                    "name": "uint96",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "5128:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint96",
+                      "typeString": "uint96"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 569,
+                  "mutability": "mutable",
+                  "name": "amount2",
+                  "nameLocation": "5151:7:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 572,
+                  "src": "5144:14:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint96",
+                    "typeString": "uint96"
+                  },
+                  "typeName": {
+                    "id": 568,
+                    "name": "uint96",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "5144:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint96",
+                      "typeString": "uint96"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "5109:50:5"
+            },
+            "returnParameters": {
+              "id": 571,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "5168:0:5"
+            },
+            "scope": 674,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 584,
+            "nodeType": "FunctionDefinition",
+            "src": "5914:123:5",
+            "nodes": [],
+            "documentation": {
+              "id": 573,
+              "nodeType": "StructuredDocumentation",
+              "src": "5175:734:5",
+              "text": " @notice Perform a single bisection step in an existing interactive payment challenge.\n @param operator The middleware operator who was challenged (used to look up challenge details)\n @param secondHalf If true, then the caller wishes to challenge the amount claimed as payment in the *second half* of the\n previous bisection step. If false then the *first half* is indicated instead.\n @param amount1 The amount that the caller asserts the operator is entitled to, for the first half *of the challenged half* of the previous bisection.\n @param amount2 The amount that the caller asserts the operator is entitled to, for the second half *of the challenged half* of the previous bisection."
+            },
+            "functionSelector": "9d3ec23a",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "performChallengeBisectionStep",
+            "nameLocation": "5923:29:5",
+            "parameters": {
+              "id": 582,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 575,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "5961:8:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 584,
+                  "src": "5953:16:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 574,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "5953:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 577,
+                  "mutability": "mutable",
+                  "name": "secondHalf",
+                  "nameLocation": "5976:10:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 584,
+                  "src": "5971:15:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 576,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "5971:4:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 579,
+                  "mutability": "mutable",
+                  "name": "amount1",
+                  "nameLocation": "5995:7:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 584,
+                  "src": "5988:14:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint96",
+                    "typeString": "uint96"
+                  },
+                  "typeName": {
+                    "id": 578,
+                    "name": "uint96",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "5988:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint96",
+                      "typeString": "uint96"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 581,
+                  "mutability": "mutable",
+                  "name": "amount2",
+                  "nameLocation": "6011:7:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 584,
+                  "src": "6004:14:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint96",
+                    "typeString": "uint96"
+                  },
+                  "typeName": {
+                    "id": 580,
+                    "name": "uint96",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "6004:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint96",
+                      "typeString": "uint96"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "5952:67:5"
+            },
+            "returnParameters": {
+              "id": 583,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "6036:0:5"
+            },
+            "scope": 674,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 590,
+            "nodeType": "FunctionDefinition",
+            "src": "6112:53:5",
+            "nodes": [],
+            "documentation": {
+              "id": 585,
+              "nodeType": "StructuredDocumentation",
+              "src": "6043:64:5",
+              "text": "@notice resolve an existing PaymentChallenge for an operator"
+            },
+            "functionSelector": "32064dac",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "resolveChallenge",
+            "nameLocation": "6121:16:5",
+            "parameters": {
+              "id": 588,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 587,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "6146:8:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 590,
+                  "src": "6138:16:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 586,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "6138:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "6137:18:5"
+            },
+            "returnParameters": {
+              "id": 589,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "6164:0:5"
+            },
+            "scope": 674,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 596,
+            "nodeType": "FunctionDefinition",
+            "src": "6313:69:5",
+            "nodes": [],
+            "documentation": {
+              "id": 591,
+              "nodeType": "StructuredDocumentation",
+              "src": "6171:137:5",
+              "text": " @notice Challenge window for submitting fraudproof in the case of an incorrect payment claim by a registered operator."
+            },
+            "functionSelector": "637bcb57",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "paymentFraudproofInterval",
+            "nameLocation": "6322:25:5",
+            "parameters": {
+              "id": 592,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "6347:2:5"
+            },
+            "returnParameters": {
+              "id": 595,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 594,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 596,
+                  "src": "6373:7:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 593,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "6373:7:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "6372:9:5"
+            },
+            "scope": 674,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 602,
+            "nodeType": "FunctionDefinition",
+            "src": "6519:71:5",
+            "nodes": [],
+            "documentation": {
+              "id": 597,
+              "nodeType": "StructuredDocumentation",
+              "src": "6388:126:5",
+              "text": " @notice Specifies the payment that has to be made as a collateral for fraudproof during payment challenges."
+            },
+            "functionSelector": "97fa5ce9",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "paymentFraudproofCollateral",
+            "nameLocation": "6528:27:5",
+            "parameters": {
+              "id": 598,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "6555:2:5"
+            },
+            "returnParameters": {
+              "id": 601,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 600,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 602,
+                  "src": "6581:7:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 599,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "6581:7:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "6580:9:5"
+            },
+            "scope": 674,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 609,
+            "nodeType": "FunctionDefinition",
+            "src": "6708:55:5",
+            "nodes": [],
+            "documentation": {
+              "id": 603,
+              "nodeType": "StructuredDocumentation",
+              "src": "6596:107:5",
+              "text": "@notice the ERC20 token that will be used by the disperser to pay the service fees to middleware nodes."
+            },
+            "functionSelector": "3013ce29",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "paymentToken",
+            "nameLocation": "6717:12:5",
+            "parameters": {
+              "id": 604,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "6729:2:5"
+            },
+            "returnParameters": {
+              "id": 608,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 607,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 609,
+                  "src": "6755:6:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20_$2773",
+                    "typeString": "contract IERC20"
+                  },
+                  "typeName": {
+                    "id": 606,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 605,
+                      "name": "IERC20",
+                      "nameLocations": [
+                        "6755:6:5"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 2773,
+                      "src": "6755:6:5"
+                    },
+                    "referencedDeclaration": 2773,
+                    "src": "6755:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20_$2773",
+                      "typeString": "contract IERC20"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "6754:8:5"
+            },
+            "scope": 674,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 616,
+            "nodeType": "FunctionDefinition",
+            "src": "6862:58:5",
+            "nodes": [],
+            "documentation": {
+              "id": 610,
+              "nodeType": "StructuredDocumentation",
+              "src": "6769:88:5",
+              "text": "@notice Collateral token used for placing collateral on challenges & payment commits"
+            },
+            "functionSelector": "b2016bd4",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "collateralToken",
+            "nameLocation": "6871:15:5",
+            "parameters": {
+              "id": 611,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "6886:2:5"
+            },
+            "returnParameters": {
+              "id": 615,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 614,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 616,
+                  "src": "6912:6:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20_$2773",
+                    "typeString": "contract IERC20"
+                  },
+                  "typeName": {
+                    "id": 613,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 612,
+                      "name": "IERC20",
+                      "nameLocations": [
+                        "6912:6:5"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 2773,
+                      "src": "6912:6:5"
+                    },
+                    "referencedDeclaration": 2773,
+                    "src": "6912:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20_$2773",
+                      "typeString": "contract IERC20"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "6911:8:5"
+            },
+            "scope": 674,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 625,
+            "nodeType": "FunctionDefinition",
+            "src": "7006:86:5",
+            "nodes": [],
+            "documentation": {
+              "id": 617,
+              "nodeType": "StructuredDocumentation",
+              "src": "6926:75:5",
+              "text": "@notice Returns the ChallengeStatus for the `operator`'s payment claim."
+            },
+            "functionSelector": "2ce9f4ca",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getChallengeStatus",
+            "nameLocation": "7015:18:5",
+            "parameters": {
+              "id": 620,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 619,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "7042:8:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 625,
+                  "src": "7034:16:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 618,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "7034:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "7033:18:5"
+            },
+            "returnParameters": {
+              "id": 624,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 623,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 625,
+                  "src": "7075:15:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_ChallengeStatus_$476",
+                    "typeString": "enum IPaymentManager.ChallengeStatus"
+                  },
+                  "typeName": {
+                    "id": 622,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 621,
+                      "name": "ChallengeStatus",
+                      "nameLocations": [
+                        "7075:15:5"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 476,
+                      "src": "7075:15:5"
+                    },
+                    "referencedDeclaration": 476,
+                    "src": "7075:15:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_ChallengeStatus_$476",
+                      "typeString": "enum IPaymentManager.ChallengeStatus"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "7074:17:5"
+            },
+            "scope": 674,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 633,
+            "nodeType": "FunctionDefinition",
+            "src": "7172:69:5",
+            "nodes": [],
+            "documentation": {
+              "id": 626,
+              "nodeType": "StructuredDocumentation",
+              "src": "7098:69:5",
+              "text": "@notice Returns the 'amount1' for the `operator`'s payment claim."
+            },
+            "functionSelector": "ed29912d",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getAmount1",
+            "nameLocation": "7181:10:5",
+            "parameters": {
+              "id": 629,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 628,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "7200:8:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 633,
+                  "src": "7192:16:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 627,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "7192:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "7191:18:5"
+            },
+            "returnParameters": {
+              "id": 632,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 631,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 633,
+                  "src": "7233:6:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint96",
+                    "typeString": "uint96"
+                  },
+                  "typeName": {
+                    "id": 630,
+                    "name": "uint96",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "7233:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint96",
+                      "typeString": "uint96"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "7232:8:5"
+            },
+            "scope": 674,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 641,
+            "nodeType": "FunctionDefinition",
+            "src": "7321:69:5",
+            "nodes": [],
+            "documentation": {
+              "id": 634,
+              "nodeType": "StructuredDocumentation",
+              "src": "7247:69:5",
+              "text": "@notice Returns the 'amount2' for the `operator`'s payment claim."
+            },
+            "functionSelector": "3eb07bed",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getAmount2",
+            "nameLocation": "7330:10:5",
+            "parameters": {
+              "id": 637,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 636,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "7349:8:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 641,
+                  "src": "7341:16:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 635,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "7341:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "7340:18:5"
+            },
+            "returnParameters": {
+              "id": 640,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 639,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 641,
+                  "src": "7382:6:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint96",
+                    "typeString": "uint96"
+                  },
+                  "typeName": {
+                    "id": 638,
+                    "name": "uint96",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "7382:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint96",
+                      "typeString": "uint96"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "7381:8:5"
+            },
+            "scope": 674,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 649,
+            "nodeType": "FunctionDefinition",
+            "src": "7475:74:5",
+            "nodes": [],
+            "documentation": {
+              "id": 642,
+              "nodeType": "StructuredDocumentation",
+              "src": "7396:74:5",
+              "text": "@notice Returns the 'toTaskNumber' for the `operator`'s payment claim."
+            },
+            "functionSelector": "2fae414f",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getToTaskNumber",
+            "nameLocation": "7484:15:5",
+            "parameters": {
+              "id": 645,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 644,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "7508:8:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 649,
+                  "src": "7500:16:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 643,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "7500:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "7499:18:5"
+            },
+            "returnParameters": {
+              "id": 648,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 647,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 649,
+                  "src": "7541:6:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint48",
+                    "typeString": "uint48"
+                  },
+                  "typeName": {
+                    "id": 646,
+                    "name": "uint48",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "7541:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint48",
+                      "typeString": "uint48"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "7540:8:5"
+            },
+            "scope": 674,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 657,
+            "nodeType": "FunctionDefinition",
+            "src": "7636:76:5",
+            "nodes": [],
+            "documentation": {
+              "id": 650,
+              "nodeType": "StructuredDocumentation",
+              "src": "7555:76:5",
+              "text": "@notice Returns the 'fromTaskNumber' for the `operator`'s payment claim."
+            },
+            "functionSelector": "8de0cc3b",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getFromTaskNumber",
+            "nameLocation": "7645:17:5",
+            "parameters": {
+              "id": 653,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 652,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "7671:8:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 657,
+                  "src": "7663:16:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 651,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "7663:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "7662:18:5"
+            },
+            "returnParameters": {
+              "id": 656,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 655,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 657,
+                  "src": "7704:6:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint48",
+                    "typeString": "uint48"
+                  },
+                  "typeName": {
+                    "id": 654,
+                    "name": "uint48",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "7704:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint48",
+                      "typeString": "uint48"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "7703:8:5"
+            },
+            "scope": 674,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 665,
+            "nodeType": "FunctionDefinition",
+            "src": "7805:66:5",
+            "nodes": [],
+            "documentation": {
+              "id": 658,
+              "nodeType": "StructuredDocumentation",
+              "src": "7718:82:5",
+              "text": "@notice Returns the task number difference for the `operator`'s payment claim."
+            },
+            "functionSelector": "f98485cd",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getDiff",
+            "nameLocation": "7814:7:5",
+            "parameters": {
+              "id": 661,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 660,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "7830:8:5",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 665,
+                  "src": "7822:16:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 659,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "7822:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "7821:18:5"
+            },
+            "returnParameters": {
+              "id": 664,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 663,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 665,
+                  "src": "7863:6:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint48",
+                    "typeString": "uint48"
+                  },
+                  "typeName": {
+                    "id": 662,
+                    "name": "uint48",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "7863:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint48",
+                      "typeString": "uint48"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "7862:8:5"
+            },
+            "scope": 674,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 673,
+            "nodeType": "FunctionDefinition",
+            "src": "7972:71:5",
+            "nodes": [],
+            "documentation": {
+              "id": 666,
+              "nodeType": "StructuredDocumentation",
+              "src": "7877:90:5",
+              "text": "@notice Returns the active collateral of the `operator` placed on their payment claim."
+            },
+            "functionSelector": "f7c3815c",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getPaymentCollateral",
+            "nameLocation": "7981:20:5",
+            "parameters": {
+              "id": 669,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 668,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 673,
+                  "src": "8002:7:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 667,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "8002:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "8001:9:5"
+            },
+            "returnParameters": {
+              "id": 672,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 671,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 673,
+                  "src": "8034:7:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 670,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "8034:7:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "8033:9:5"
+            },
+            "scope": 674,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 461,
+              "name": "IRepositoryAccess",
+              "nameLocations": [
+                "273:17:5"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 731,
+              "src": "273:17:5"
+            },
+            "id": 462,
+            "nodeType": "InheritanceSpecifier",
+            "src": "273:17:5"
+          }
+        ],
+        "canonicalName": "IPaymentManager",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 460,
+          "nodeType": "StructuredDocumentation",
+          "src": "156:87:5",
+          "text": " @title Interface for a `PaymentManager` contract.\n @author Layr Labs, Inc."
+        },
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          674,
+          731
+        ],
+        "name": "IPaymentManager",
+        "nameLocation": "254:15:5",
+        "scope": 675,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  },
+  "id": 5
+}
