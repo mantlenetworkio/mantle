@@ -517,8 +517,8 @@ func (w *worker) mainLoop() {
 				}
 			}
 			// ----------------------------------------------------------------------
-			for index, tx := range txsQueue {
-				if ev.StartHeight+uint64(index) > ev.MaxHeight {
+			for i, tx := range txsQueue {
+				if ev.StartHeight+uint64(i) > ev.MaxHeight {
 					break
 				}
 				if ev.ExpireTime < uint64(time.Now().Unix()) {
@@ -530,7 +530,13 @@ func (w *worker) mainLoop() {
 				// send the block through the `taskCh` and then through the
 				// `resultCh` which ultimately adds the block to the blockchain
 				// through `bc.WriteBlockWithState`
+				err, hook := w.eth.SyncService().ValidateAndApplySequencerTransactionMock(tx)
+				if err != nil || hook == nil {
+					log.Debug("ValidateAndApplySequencerTransactionMock failed")
+					break
+				}
 				if err := w.commitNewTx(tx); err == nil {
+					hook()
 					// `chainHeadCh` is written to when a new block is added to the
 					// tip of the chain. Reading from the channel will block until
 					// the ethereum block is added to the chain downstream of `commitNewTx`.
@@ -668,6 +674,7 @@ func (w *worker) resultLoop() {
 	for {
 		select {
 		case block := <-w.resultCh:
+			log.Debug("worker resultLoop read block", block)
 			// Short circuit when receiving empty result.
 			if block == nil {
 				continue

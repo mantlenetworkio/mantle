@@ -925,6 +925,182 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 	}
 }
 
+// applyTransaction is a higher level API for applying a transaction
+func (s *SyncService) applyTransactionMock(tx *types.Transaction) (error, func() error) {
+	if tx.GetMeta().Index != nil {
+		return s.applyIndexedTransaction(tx), nil
+	}
+	return s.applyTransactionToTipMock(tx)
+}
+
+// Higher level API for applying transactions. Should only be called for
+// queue origin sequencer transactions, as the contracts on L1 manage the same
+// validity checks that are done here.
+func (s *SyncService) ValidateAndApplySequencerTransactionMock(tx *types.Transaction) (error, func() error) {
+	if s.verifier {
+		return errors.New("Verifier does not accept transactions out of band"), nil
+	}
+	if tx == nil {
+		return errors.New("nil transaction passed to ValidateAndApplySequencerTransaction"), nil
+	}
+	s.txLock.Lock()
+	defer s.txLock.Unlock()
+	if err := s.verifyFee(tx); err != nil {
+		return err, nil
+	}
+	log.Trace("Sequencer transaction validation", "hash", tx.Hash().Hex())
+
+	qo := tx.QueueOrigin()
+	if qo != types.QueueOriginSequencer {
+		return fmt.Errorf("invalid transaction with queue origin %s", qo.String()), nil
+	}
+	if err := s.txpool.ValidateTx(tx); err != nil {
+		return fmt.Errorf("invalid transaction: %w", err), nil
+	}
+	err, hook := s.applyTransactionMock(tx)
+	if err != nil {
+		return err, nil
+	}
+
+	return nil, hook
+}
+
+// applyTransactionToTip will do sanity checks on the transaction before
+// applying it to the tip. It blocks until the transaction has been included in
+// the chain. It is assumed that validation around the index has already
+// happened.
+func (s *SyncService) applyTransactionToTipMock(tx *types.Transaction) (error, func() error) {
+	if tx == nil {
+		return errors.New("nil transaction passed to applyTransactionToTip"), nil
+	}
+	// Queue Origin L1 to L2 transactions must have a timestamp that is set by
+	// the L1 block that holds the transaction. This should never happen but is
+	// a sanity check to prevent fraudulent execution.
+	// No need to unlock here as the lock is only taken when its a queue origin
+	// sequencer transaction.
+	if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+		if tx.L1Timestamp() == 0 {
+			return fmt.Errorf("Queue origin L1 to L2 transaction without a timestamp: %s", tx.Hash().Hex()), nil
+		}
+	}
+
+	// If there is no L1 timestamp assigned to the transaction, then assign a
+	// timestamp to it. The property that L1 to L2 transactions have the same
+	// timestamp as the L1 block that it was included in is removed for better
+	// UX. This functionality can be added back in during a future release. For
+	// now, the sequencer will assign a timestamp to each transaction.
+	ts := s.GetLatestL1Timestamp()
+	bn := s.GetLatestL1BlockNumber()
+
+	// The L1Timestamp is 0 for QueueOriginSequencer transactions when
+	// running as the sequencer, the transactions are coming in via RPC.
+	// This code path also runs for replicas/verifiers so any logic involving
+	// `time.Now` can only run for the sequencer. All other nodes must listen
+	// to what the sequencer says is the timestamp, otherwise there will be a
+	// network split.
+	// Note that it should never be possible for the timestamp to be set to
+	// 0 when running as a verifier.
+	shouldMalleateTimestamp := !s.verifier && tx.QueueOrigin() == types.QueueOriginL1ToL2
+	if tx.L1Timestamp() == 0 || shouldMalleateTimestamp {
+		// Get the latest known timestamp
+		current := time.Unix(int64(ts), 0)
+		// Get the current clocktime
+		now := time.Now()
+		// If enough time has passed, then assign the
+		// transaction to have the timestamp now. Otherwise,
+		// use the current timestamp
+		if now.Sub(current) > s.timestampRefreshThreshold {
+			current = now
+		}
+		log.Info("Updating latest timestamp", "timestamp", current, "unix", current.Unix())
+		tx.SetL1Timestamp(uint64(current.Unix()))
+	} else if tx.L1Timestamp() == 0 && s.verifier {
+		// This should never happen
+		log.Error("No tx timestamp found when running as verifier", "hash", tx.Hash().Hex())
+	} else if tx.L1Timestamp() < ts {
+		// This should never happen, but sometimes does
+		log.Error("Timestamp monotonicity violation", "hash", tx.Hash().Hex(), "latest", ts, "tx", tx.L1Timestamp())
+	}
+
+	l1BlockNumber := tx.L1BlockNumber()
+	// Set the L1 blocknumber
+	if l1BlockNumber == nil {
+		tx.SetL1BlockNumber(bn)
+	} else if l1BlockNumber.Uint64() > bn {
+		s.SetLatestL1BlockNumber(l1BlockNumber.Uint64())
+	} else if l1BlockNumber.Uint64() < bn {
+		// l1BlockNumber < latest l1BlockNumber
+		// indicates an error
+		log.Error("Blocknumber monotonicity violation", "hash", tx.Hash().Hex(),
+			"new", l1BlockNumber.Uint64(), "old", bn)
+	}
+
+	// Store the latest timestamp value
+	if tx.L1Timestamp() > ts {
+		s.SetLatestL1Timestamp(tx.L1Timestamp())
+	}
+
+	index := s.GetLatestIndex()
+	if tx.GetMeta().Index == nil {
+		if index == nil {
+			tx.SetIndex(0)
+		} else {
+			tx.SetIndex(*index + 1)
+		}
+	}
+
+	// On restart, these values are repaired to handle
+	// the case where the index is updated but the
+	// transaction isn't yet added to the chain
+	s.SetLatestIndex(tx.GetMeta().Index)
+	if queueIndex := tx.GetMeta().QueueIndex; queueIndex != nil {
+		s.SetLatestEnqueueIndex(queueIndex)
+	}
+
+	// The index was set above so it is safe to dereference
+	log.Debug("Applying transaction to tip mock", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
+
+	//if err := s.txpool.AddLocal(tx); err != nil {
+	//	return err
+	//}
+
+	txs := types.Transactions{tx}
+	errCh := make(chan error, 1)
+	s.txFeed.Send(core.NewTxsEvent{
+		Txs:   txs,
+		ErrCh: errCh,
+	})
+	// Block until the transaction has been added to the chain
+	log.Trace("Waiting for transaction to be added to chain", "hash", tx.Hash().Hex())
+
+	hook := func() error {
+		select {
+		case err := <-errCh:
+			log.Error("Got error waiting for transaction to be added to chain", "msg", err)
+			s.SetLatestL1Timestamp(ts)
+			s.SetLatestL1BlockNumber(bn)
+			s.SetLatestIndex(index)
+			return err
+		case <-s.chainHeadCh:
+			// Update the cache when the transaction is from the owner
+			// of the gas price oracle
+			sender, _ := types.Sender(s.signer, tx)
+			owner := s.GasPriceOracleOwnerAddress()
+			if owner != nil && sender == *owner {
+				if err := s.updateGasPriceOracleCache(nil); err != nil {
+					s.SetLatestL1Timestamp(ts)
+					s.SetLatestL1BlockNumber(bn)
+					s.SetLatestIndex(index)
+					return err
+				}
+			}
+			return nil
+		}
+	}
+
+	return nil, hook
+}
+
 // applyBatchedTransaction applies transactions that were batched to layer one.
 // The sequencer checks for batches over time to make sure that it does not
 // deviate from the L1 state and this is the main method of transaction

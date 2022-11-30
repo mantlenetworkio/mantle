@@ -298,7 +298,7 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 	if err := b.eth.txPool.AddLocal(signedTx); err != nil {
 		return err
 	}
-	// mock
+
 	if b.eth.miner.Mining() {
 		start := b.eth.blockchain.CurrentBlock().NumberU64() + 1
 		pending, err := b.eth.TxPool().Pending()
@@ -313,25 +313,6 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 		erCh := make(chan error)
 		b.eth.miner.MockScheduler(start, end, uint64(exTime), erCh)
 	}
-
-	//if b.UsingBVM {
-	//	to := signedTx.To()
-	//	if to != nil {
-	//		// Prevent QueueOriginSequencer transactions that are too large to
-	//		// be included in a batch. The `MaxCallDataSize` should be set to
-	//		// the layer one consensus max transaction size in bytes minus the
-	//		// constant sized overhead of a batch. This will prevent
-	//		// a layer two transaction from not being able to be batch submitted
-	//		// to layer one.
-	//		if len(signedTx.Data()) > b.MaxCallDataSize {
-	//			return fmt.Errorf("Calldata cannot be larger than %d, sent %d", b.MaxCallDataSize, len(signedTx.Data()))
-	//		}
-	//	}
-	//	if err := b.eth.syncService.ValidateAndApplySequencerTransaction(signedTx); err != nil {
-	//		return err
-	//	}
-	//}
-	// BVM Disabled
 	return nil
 }
 
