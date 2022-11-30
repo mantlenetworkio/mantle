@@ -2,9 +2,9 @@ package eth
 
 import (
 	"fmt"
-	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
@@ -106,7 +106,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 	// Handle the message depending on its contents
 	switch {
 	case msg.Code == BatchPeriodStartMsg:
-		var bs *clique.BatchPeriodStart
+		var bs *types.BatchPeriodStartMsg
 		if err := msg.Decode(&bs); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
@@ -121,14 +121,14 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		})
 		log.Info("Batch Period Start Msg")
 	case msg.Code == BatchPeriodEndMsg:
-		var be *clique.BatchPeriodEnd
+		var be *types.BatchPeriodEndMsg
 		if err := msg.Decode(&be); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		// todo: BatchPeriodEndMsg handle
 		log.Info("Batch Period End Msg")
 	case msg.Code == FraudProofReorgMsg:
-		var fpr *clique.FraudProofReorg
+		var fpr *types.FraudProofReorgMsg
 		if err := msg.Decode(&fpr); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
@@ -148,13 +148,13 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 func (pm *ProtocolManager) batchPeriodStartMsgBroadcastLoop() {
 	// automatically stops if unsubscribe
 	for obj := range pm.batchStartMsgSub.Chan() {
-		if se, ok := obj.Data.(clique.BatchPeriodStartEvent); ok {
+		if se, ok := obj.Data.(core.BatchPeriodStartEvent); ok {
 			pm.BroadcastBatchPeriodStartMsg(se.Msg) // First propagate block to peers
 		}
 	}
 }
 
-func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *clique.BatchPeriodStart) {
+func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 	peers := pm.peersTmp.PeersWithoutStartMsg(msg.BatchIndex)
 	for _, p := range peers {
 		p.AsyncSendBatchPeriodStartMsg(msg)
@@ -162,7 +162,7 @@ func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *clique.BatchPeriodS
 	log.Trace("Broadcast batch period start msg")
 }
 
-func (p *peer) AsyncSendBatchPeriodStartMsg(msg *clique.BatchPeriodStart) {
+func (p *peer) AsyncSendBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 	select {
 	case p.queuedStartMsg <- msg:
 		p.knowStartMsg.Add(msg.BatchIndex)
@@ -179,13 +179,13 @@ func (p *peer) AsyncSendBatchPeriodStartMsg(msg *clique.BatchPeriodStart) {
 func (pm *ProtocolManager) batchPeriodEndMsgBroadcastLoop() {
 	// automatically stops if unsubscribe
 	for obj := range pm.batchEndMsgSub.Chan() {
-		if ee, ok := obj.Data.(clique.BatchPeriodEndEvent); ok {
+		if ee, ok := obj.Data.(core.BatchPeriodEndEvent); ok {
 			pm.BroadcastBatchPeriodEndMsg(ee.Msg) // First propagate block to peers
 		}
 	}
 }
 
-func (pm *ProtocolManager) BroadcastBatchPeriodEndMsg(msg *clique.BatchPeriodEnd) {
+func (pm *ProtocolManager) BroadcastBatchPeriodEndMsg(msg *types.BatchPeriodEndMsg) {
 	peers := pm.peersTmp.PeersWithoutEndMsg(msg.BatchIndex)
 	for _, p := range peers {
 		p.AsyncSendBatchPeriodEndMsg(msg)
@@ -193,7 +193,7 @@ func (pm *ProtocolManager) BroadcastBatchPeriodEndMsg(msg *clique.BatchPeriodEnd
 	log.Trace("Broadcast batch period end msg")
 }
 
-func (p *peer) AsyncSendBatchPeriodEndMsg(msg *clique.BatchPeriodEnd) {
+func (p *peer) AsyncSendBatchPeriodEndMsg(msg *types.BatchPeriodEndMsg) {
 	select {
 	case p.queuedEndMsg <- msg:
 		p.knowEndMsg.Add(msg.BatchIndex)
@@ -210,30 +210,30 @@ func (p *peer) AsyncSendBatchPeriodEndMsg(msg *clique.BatchPeriodEnd) {
 func (pm *ProtocolManager) fraudProofReorgMsgBroadcastLoop() {
 	// automatically stops if unsubscribe
 	for obj := range pm.fraudProofReorgMsgSub.Chan() {
-		if fe, ok := obj.Data.(clique.FraudProofReorgEvent); ok {
+		if fe, ok := obj.Data.(core.FraudProofReorgEvent); ok {
 			pm.BroadcastFraudProofReorgMsg(fe.Msg) // First propagate block to peers
 		}
 	}
 }
 
-func (pm *ProtocolManager) BroadcastFraudProofReorgMsg(reorg *clique.FraudProofReorg) {
-	peers := pm.peersTmp.PeersWithoutFraudProofReorgMsg(reorg.Index)
+func (pm *ProtocolManager) BroadcastFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
+	peers := pm.peersTmp.PeersWithoutFraudProofReorgMsg(reorg.ReorgIndex)
 	for _, p := range peers {
 		p.AsyncSendFraudProofReorgMsg(reorg)
 	}
 	log.Trace("Broadcast fraud proof reorg msg")
 }
 
-func (p *peer) AsyncSendFraudProofReorgMsg(reorg *clique.FraudProofReorg) {
+func (p *peer) AsyncSendFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
 	select {
 	case p.queuedFraudProofReorg <- reorg:
-		p.knowFraudProofReorg.Add(reorg.Index)
+		p.knowFraudProofReorg.Add(reorg.ReorgIndex)
 		for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
 			p.knowFraudProofReorg.Pop()
 		}
 
 	default:
-		p.Log().Debug("Dropping producers propagation", "reorg index", reorg.Index)
+		p.Log().Debug("Dropping producers propagation", "reorg index", reorg.ReorgIndex)
 	}
 }
 
@@ -241,7 +241,7 @@ func (p *peer) AsyncSendFraudProofReorgMsg(reorg *clique.FraudProofReorg) {
 
 // SendBatchPeriodStart sends a batch of transaction receipts, corresponding to the
 // ones requested from an already RLP encoded format.
-func (p *peer) SendBatchPeriodStart(bs *clique.BatchPeriodStart) error {
+func (p *peer) SendBatchPeriodStart(bs *types.BatchPeriodStartMsg) error {
 	p.knowStartMsg.Add(bs.BatchIndex)
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowStartMsg.Cardinality() >= maxKnownStartMsg {
@@ -250,7 +250,7 @@ func (p *peer) SendBatchPeriodStart(bs *clique.BatchPeriodStart) error {
 	return p2p.Send(p.rw, BatchPeriodStartMsg, bs)
 }
 
-func (p *peer) SendBatchPeriodEnd(be *clique.BatchPeriodEnd) error {
+func (p *peer) SendBatchPeriodEnd(be *types.BatchPeriodEndMsg) error {
 	p.knowEndMsg.Add(be.BatchIndex)
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowEndMsg.Cardinality() >= maxKnownEndMsg {
@@ -259,8 +259,8 @@ func (p *peer) SendBatchPeriodEnd(be *clique.BatchPeriodEnd) error {
 	return p2p.Send(p.rw, BatchPeriodEndMsg, be)
 }
 
-func (p *peer) SendFraudProofReorg(fpr *clique.FraudProofReorg) error {
-	p.knowFraudProofReorg.Add(fpr.Index)
+func (p *peer) SendFraudProofReorg(fpr *types.FraudProofReorgMsg) error {
+	p.knowFraudProofReorg.Add(fpr.ReorgIndex)
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
 		p.knowFraudProofReorg.Pop()

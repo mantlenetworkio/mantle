@@ -37,7 +37,7 @@ type Config struct {
 // backends for signing transactions.
 type Manager struct {
 	config   *Config                    // Global account manager configurations
-	backends map[reflect.Type][]Backend // Index of backends currently registered
+	backends map[reflect.Type][]Backend // ReorgIndex of backends currently registered
 	updaters []event.Subscription       // Wallet update subscriptions for all backends
 	updates  chan WalletEvent           // Subscription sink for backend wallet changes
 	wallets  []Wallet                   // Cache of all wallets from all registered backends

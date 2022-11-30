@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package clique implements the proof-of-authority consensus engine.
+// Package clique implements the proof-of-authority consensus consensus_engine.
 package clique
 
 import (
@@ -70,8 +70,8 @@ var (
 )
 
 // Various error messages to mark blocks invalid. These should be private to
-// prevent engine specific errors from being referenced in the remainder of the
-// codebase, inherently breaking if the engine is swapped out. Please put common
+// prevent consensus_engine specific errors from being referenced in the remainder of the
+// codebase, inherently breaking if the consensus_engine is swapped out. Please put common
 // error types into the consensus package.
 var (
 	// errUnknownBlock is returned when the list of signers is requested for a block
@@ -168,18 +168,16 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 	return signer, nil
 }
 
-// Clique is the proof-of-authority consensus engine proposed to support the
+// Clique is the proof-of-authority consensus consensus_engine proposed to support the
 // Ethereum testnet following the Ropsten attacks.
 type Clique struct {
-	config *params.CliqueConfig // Consensus engine configuration parameters
+	config *params.CliqueConfig // Consensus consensus_engine configuration parameters
 	db     ethdb.Database       // Database to store and retrieve snapshot checkpoints
 
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
 
-	schedulerID []byte    // Identifier of the current scheduler
-	proposers   Proposers // Current list of proposers
-	signature   []byte    // Current signature of proposers
+	batchPeriod *types.BatchPeriodStartMsg // Current BatchPeriodStartMsg
 
 	proposals map[common.Address]bool // Current list of proposals we are pushing
 
@@ -191,7 +189,7 @@ type Clique struct {
 	fakeDiff bool // Skip difficulty verifications
 }
 
-// New creates a Clique proof-of-authority consensus engine with the initial
+// New creates a Clique proof-of-authority consensus consensus_engine with the initial
 // signers set to the ones provided by the user.
 func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 	// Set any missing consensus parameters to their defaults
@@ -199,7 +197,7 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 	if conf.Epoch == 0 {
 		conf.Epoch = epochLength
 	}
-	// Allocate the snapshot caches and create the engine
+	// Allocate the snapshot caches and create the consensus_engine
 	recents, _ := lru.NewARC(inmemorySnapshots)
 	signatures, _ := lru.NewARC(inmemorySignatures)
 
@@ -212,23 +210,14 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 	}
 }
 
-func (c *Clique) SetProducers(data ProposerUpdate) {
-	c.proposers = data.Proposers
-	c.schedulerID = data.Proposers.SchedulerID
-	c.signature = data.Signature
-}
-
-func (c *Clique) GetProducers(data GetProducers) ProposerUpdate {
-	return ProposerUpdate{
-		c.proposers,
-		c.signature,
-	}
-}
-
 // Author implements consensus.Engine, returning the Ethereum address recovered
 // from the signature in the header's extra-data section.
 func (c *Clique) Author(header *types.Header) (common.Address, error) {
 	return ecrecover(header, c.signatures)
+}
+
+func (c *Clique) SetBatchPeriod(bps *types.BatchPeriodStartMsg) {
+	c.batchPeriod = bps
 }
 
 // VerifyHeader checks whether a header conforms to the consensus rules.
@@ -403,14 +392,9 @@ func (c *Clique) snapshot(chain consensus.ChainReader, number uint64, hash commo
 			if checkpoint != nil {
 				hash := checkpoint.Hash()
 
-				producers := deserialize(checkpoint.Extra[extraVanity : len(checkpoint.Extra)-extraSeal])
+				batchPeriodStartMsg := types.DeserializeBatchPeriodStartMsg(checkpoint.Extra[extraVanity : len(checkpoint.Extra)-extraSeal])
 
-				signers := make([]common.Address, len(producers.SequencerSet.Sequencers))
-				for i := 0; i < len(producers.SequencerSet.Sequencers); i++ {
-					signers[i] = producers.SequencerSet.Sequencers[i].Address
-				}
-
-				snap = newSnapshot(c.config, c.signatures, number, hash, signers, *producers)
+				snap = newSnapshot(c.config, c.signatures, number, hash, batchPeriodStartMsg.SequencerSet)
 				if err := snap.store(c.db); err != nil {
 					return nil, err
 				}
@@ -532,10 +516,6 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 		return err
 	}
 
-	if number == 1 {
-		c.proposers = snap.Producers
-	}
-
 	if number%c.config.Epoch != 0 {
 		c.lock.RLock()
 
@@ -565,13 +545,7 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, extraVanity-len(header.Extra))...)
 	}
 	header.Extra = header.Extra[:extraVanity]
-
-	if number%c.config.Epoch == 0 {
-		// for _, signer := range snap.signers() {
-		// 	header.Extra = append(header.Extra, signer[:]...)
-		// }
-		header.Extra = append(header.Extra, snap.Producers.serialize()...)
-	}
+	header.Extra = append(header.Extra, c.batchPeriod.SerializeBatchPeriodStartMsg()...)
 	header.Extra = append(header.Extra, make([]byte, extraSeal)...)
 
 	// Mix digest is reserved for now, set to empty
@@ -612,7 +586,7 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainReader, header *types.
 	return types.NewBlock(header, txs, nil, receipts), nil
 }
 
-// Authorize injects a private key into the consensus engine to mint new blocks
+// Authorize injects a private key into the consensus consensus_engine to mint new blocks
 // with.
 func (c *Clique) Authorize(signer common.Address, signFn SignerFn) {
 	c.lock.Lock()
@@ -701,8 +675,6 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 			log.Warn("Sealing result is not read by miner", "sealhash", SealHash(header))
 		}
 	}()
-
-	c.proposers.SequencerSet.IncrementProducerPriority(1)
 
 	return nil
 }

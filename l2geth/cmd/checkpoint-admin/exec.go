@@ -199,7 +199,7 @@ func sign(ctx *cli.Context) error {
 	}
 	// Print to the user the data thy are about to sign
 	fmt.Printf("Oracle     => %s\n", address.Hex())
-	fmt.Printf("Index %4d => %s\n", cindex, chash.Hex())
+	fmt.Printf("ReorgIndex %4d => %s\n", cindex, chash.Hex())
 
 	// Sign checkpoint in clef mode.
 	signer = ctx.String(signerFlag.Name)

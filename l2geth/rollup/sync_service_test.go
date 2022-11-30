@@ -323,7 +323,7 @@ func TestTransactionToTipTimestamps(t *testing.T) {
 		conf := event.Txs[0]
 		// The index should be set to the next
 		if conf.GetMeta().Index == nil {
-			t.Fatal("Index is nil")
+			t.Fatal("ReorgIndex is nil")
 		}
 		// The index that the sync service is tracking should be updated
 		if *conf.GetMeta().Index != *service.GetLatestIndex() {

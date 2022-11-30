@@ -15,65 +15,14 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
-type BatchPeriodStartEvent struct{ Msg *BatchPeriodStart }
-
-type BatchPeriodStart struct {
-	BatchIndex   uint64
-	MinerAddress common.Address
-	StartHeight  uint64
-	MaxHeight    uint64
-	ExpireTime   uint64
-	Signature    []byte
-}
-
-type BatchPeriodEndEvent struct{ Msg *BatchPeriodEnd }
-
-type BatchPeriodEnd struct {
-	BatchIndex   uint64
-	MinerAddress common.Address
-	StartHeight  uint64
-	EndHeight    uint64
-	Signatures   [][]byte
-	Signature    []byte
-}
-
-type FraudProofReorgEvent struct{ Msg *FraudProofReorg }
-
-type FraudProofReorg struct {
-	Index         uint64
-	ReorgToHeight uint64
-	TssSignature  []byte
-}
-
-// ProposersUpdateEvent is posted when sequencer set has been imported.
-type ProposersUpdateEvent struct{ Update *ProposerUpdate }
-
-type ProposerUpdate struct {
-	Proposers Proposers
-	Signature []byte
-}
-
-func (pro *ProposerUpdate) Serialize() []byte {
-	return append(pro.Proposers.serialize(), pro.Signature...)
-}
-
-func (pro *ProposerUpdate) Deserialize(buf []byte) {
-	tmp := deserialize(buf[:len(buf)-65])
-	if tmp != nil {
-		pro.Proposers = *tmp
-		pro.Signature = buf[len(buf)-65:]
-	} else {
-		log.Error("Deserialize producerUpdate err got nil")
-	}
-}
-
 type Scheduler struct {
 	wg  sync.WaitGroup
 	mux *event.TypeMux
 
-	engine *Clique
-	ticker *time.Ticker
-	check  func() bool
+	sequencerSet    *SequencerSet
+	consensusEngine *Clique
+	ticker          *time.Ticker
+	check           func() bool
 
 	wallet      accounts.Wallet
 	signAccount accounts.Account
@@ -81,14 +30,14 @@ type Scheduler struct {
 	syncer *synchronizer.Synchronizer
 }
 
-func NewSequencerServer(epoch time.Duration, clique *Clique, mux *event.TypeMux, check func() bool) *Scheduler {
+func NewScheduler(epoch time.Duration, clique *Clique, mux *event.TypeMux, check func() bool) *Scheduler {
 	log.Info("Create Sequencer Server")
 	return &Scheduler{
-		ticker: time.NewTicker(epoch * time.Second),
-		engine: clique,
-		mux:    mux,
-		check:  check,
-		syncer: synchronizer.NewSynchronizer(),
+		ticker:          time.NewTicker(epoch * time.Second),
+		consensusEngine: clique,
+		mux:             mux,
+		check:           check,
+		syncer:          synchronizer.NewSynchronizer(),
 	}
 }
 
@@ -137,44 +86,23 @@ func (schedulerInst *Scheduler) readLoop() {
 				log.Error("Get sequencer set failed, err : ", err)
 				continue
 			}
-			var request GetProducers
-			proUpdate := schedulerInst.engine.GetProducers(request)
-			pros := proUpdate.Proposers
 			// get changes
-			changes := CompareSequencerSet(pros.SequencerSet.Sequencers, seqSet)
+			changes := compareSequencerSet(schedulerInst.sequencerSet.Sequencers, seqSet)
 			log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
 
 			// todo : should it post every times? or post only have changes
-			// update sequencer set and engine
-			err = pros.SequencerSet.UpdateWithChangeSet(changes)
+			// update sequencer set and consensus_engine
+			err = schedulerInst.sequencerSet.UpdateWithChangeSet(changes)
 			if err != nil {
-				log.Error(fmt.Sprintf("update sequencer set failed, err :%v ", err))
+				log.Error(fmt.Sprintf("update sequencer set failed, err :%v", err))
 				continue
 			}
-			pros.increment()
-			signature, err := schedulerInst.engine.signFn(schedulerInst.signAccount, accounts.MimetypeClique, pros.serialize())
-			if err != nil {
-				log.Error(fmt.Sprintf("Sign data error, err : %v ,Account address : %v ", err, schedulerInst.signAccount.Address.String()))
-				continue
-			}
-			schedulerInst.engine.proposers = pros
-			schedulerInst.engine.signature = signature
-			// Broadcast the producer and announce event by post event
-			schedulerInst.mux.Post(
-				ProposersUpdateEvent{
-					&ProposerUpdate{
-						Proposers: pros,
-						Signature: signature,
-					},
-				},
-			)
-
 		}
 	}
 }
 
-// CompareSequencerSet will return the update with Driver.seqz
-func CompareSequencerSet(old []*Sequencer, newSeq synchronizer.SequencerSequencerInfos) []*Sequencer {
+// compareSequencerSet will return the update with Driver.seqz
+func compareSequencerSet(old []*Sequencer, newSeq synchronizer.SequencerSequencerInfos) []*Sequencer {
 	var tmp synchronizer.SequencerSequencerInfos
 	// voting power = deposit / scale (10^18)
 	scale := int64(math.Pow10(18))
