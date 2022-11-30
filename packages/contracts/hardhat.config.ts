@@ -41,15 +41,15 @@ subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
     console.log('running task')
     const source =
       '../../datalayr-mantle/contracts/datalayr-rollup-example-contracts/src'
-    copySync(source, './contracts/data-availability/')
+    copySync(source, './contracts/da/')
 
     copySync(
       '../../datalayr-mantle/contracts/eignlayr-contracts/src',
-      './contracts/data-availability/eignlayr-contracts/'
+      './contracts/da/eignlayr-contracts/'
     )
 
     console.log("FORGE BUILD")
-    spawnSync('cd ./contracts/data-availability && forge build', [], {
+    spawnSync('cd ./contracts/da && forge build', [], {
       shell: true,
       stdio: 'inherit',
     })
@@ -57,7 +57,7 @@ subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
 
     const paths = await runSuper()
     const filteredPaths = paths.filter(function (p) {
-      return !p.includes('data-availability')
+      return !p.includes('da')
     })
 
     console.log('end task')
@@ -71,11 +71,11 @@ subtask(TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT).setAction(
     console.log('running TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT')
 
     // delete
-    await remove('./contracts/data-availability/libraries/')
-    await remove('./contracts/data-availability/eignlayr-contracts/')
-    await remove('./contracts/data-availability/Parser.sol')
-    await remove('./contracts/data-availability/DataLayrRollup.sol')
-    await remove('./contracts/data-availability/mock')
+    await remove('./contracts/da/libraries/')
+    await remove('./contracts/da/eignlayr-contracts/')
+    await remove('./contracts/da/Parser.sol')
+    await remove('./contracts/da/DataLayrRollup.sol')
+    await remove('./contracts/da/mock')
 
     runSuper()
   }
@@ -86,11 +86,11 @@ subtask(TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE).setAction(
     console.log('running TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE')
 
     // delete
-    await remove('./contracts/data-availability/libraries/')
-    await remove('./contracts/data-availability/eignlayr-contracts/')
-    await remove('./contracts/data-availability/Parser.sol')
-    await remove('./contracts/data-availability/DataLayrRollup.sol')
-    await remove('./contracts/data-availability/mock')
+    await remove('./contracts/da/libraries/')
+    await remove('./contracts/da/eignlayr-contracts/')
+    await remove('./contracts/da/Parser.sol')
+    await remove('./contracts/da/DataLayrRollup.sol')
+    await remove('./contracts/da/mock')
     runSuper()
   }
 )

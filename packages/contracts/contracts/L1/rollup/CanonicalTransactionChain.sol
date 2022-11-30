@@ -9,7 +9,7 @@ import { Lib_AddressResolver } from "../../libraries/resolver/Lib_AddressResolve
 /* Interface Imports */
 import { ICanonicalTransactionChain } from "./ICanonicalTransactionChain.sol";
 import { IChainStorageContainer } from "./IChainStorageContainer.sol";
-import "@openzeppelin/contracts/interfaces/draft-IERC1822.sol";
+import { IERC1822Proxiable } from "../../libraries/eip1822/IERC1822Proxiable.sol";
 
 
 /**
