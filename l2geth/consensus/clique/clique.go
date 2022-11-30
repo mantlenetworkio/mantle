@@ -353,20 +353,20 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 
 	}
 	// Retrieve the snapshot needed to verify this header and cache it
-	snap, err := c.snapshot(chain, number-1, header.ParentHash, parents)
+	_, err := c.snapshot(chain, number-1, header.ParentHash, parents)
 	if err != nil {
 		return err
 	}
 	// If the block is a checkpoint block, verify the signer list
 	if number%c.config.Epoch == 0 {
-		signers := make([]byte, len(snap.Signers)*common.AddressLength)
-		for i, signer := range snap.signers() {
-			copy(signers[i*common.AddressLength:], signer[:])
-		}
-		extraSuffix := len(header.Extra) - extraSeal
-		if !bytes.Equal(header.Extra[extraVanity:extraSuffix], signers) {
-			return errMismatchingCheckpointSigners
-		}
+		//signers := make([]byte, len(snap.Signers)*common.AddressLength)
+		//for i, signer := range snap.signers() {
+		//	copy(signers[i*common.AddressLength:], signer[:])
+		//}
+		//extraSuffix := len(header.Extra) - extraSeal
+		//if !bytes.Equal(header.Extra[extraVanity:extraSuffix], signers) {
+		//	return errMismatchingCheckpointSigners
+		//}
 		// todo verify producer
 	}
 	// All basic checks passed, verify the seal and return
