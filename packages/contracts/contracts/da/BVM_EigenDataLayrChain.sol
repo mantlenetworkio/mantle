@@ -1,40 +1,39 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import { DataLayrDisclosureLogic } from "../libraries/eigenda/DataLayrDisclosureLogic.sol";
 import { IDataLayrServiceManager } from "../libraries/eigenda/lib/contracts/interfaces/IDataLayrServiceManager.sol";
 import { BN254 } from "../libraries/eigenda/BN254.sol";
 
 
-// This contract is a rollup built on top of datalayr that allows an enshrined sequencer to store data
-// on datalayr, but slashes them if the data they store ever contains a certain unallowed message
-contract EigenDataLayrChain {
+contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeable{
+    using SafeMathUpgradeable for uint256;
+    using AddressUpgradeable for address;
+
     enum RollupStoreStatus {
         UNCOMMITTED,
         COMMITTED,
         REVERTED
     }
 
-    //the enshrined address that stores data on datalayr for the rollup
     address public sequencer;
-    IERC20 public immutable stakeToken;
-    uint256 public immutable neededStake;
-    uint256 public immutable BLOCK_STALE_MEASURE;
-    uint256 public immutable fraudProofPeriod = 1 days;
+    address public dataManageAddress;
+    uint256 public BLOCK_STALE_MEASURE;
+    uint256 public fraudProofPeriod = 1 days;
 
     uint256 internal constant DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED = type(uint256).max;
 
-    bytes32 internal constant _DESIGNATED_IMPLEMENTATION_SLOT = 0xa1832b4681bf2b3269fd2d0163abf215d243dd098d1ece37dd0775a7f2a8c09d;
-
     struct RollupStore {
-        //The corresponding datastore in DataLayr to the rollup block number
         uint32 dataStoreId;
-        //The time at which the rollup block will be confirmed if not successfully challenged
         uint32 confirmAt;
-        //the status of the rollup store
         RollupStoreStatus status;
     }
+
     //mapping from the rollup's store id to datastore id
     mapping(uint256 => RollupStore) public rollupStores;
     /**
@@ -44,32 +43,14 @@ contract EigenDataLayrChain {
      */
     mapping(uint32 => uint256) public dataStoreIdToRollupStoreNumber;
     uint256 public rollupStoreNumber;
-    // The datalayr service manager, the contract where datastores are initialized and confirmed
-    IDataLayrServiceManager public dlsm;
-    //TODO: Link this to DataLayr interface instead of redeclaration
-    struct DisclosureProofs {
-        bytes header;
-        uint32 firstChunkNumber;
-        bytes[] polys;
-        DataLayrDisclosureLogic.MultiRevealProof[] multiRevealProofs;
-        BN254.G2Point polyEquivalenceProof;
-    }
 
     event RollupStoreInitialized(uint32 dataStoreId);
     event RollupStoreConfirmed(uint32 rollupStoreNumber);
-    event RollupStoreReverted(uint32 rollupStoreNumber);
 
-    //initialize the storage vars
-    constructor(
-        address _sequencer,
-        IERC20 _stakeToken,
-        uint256 _neededStake,
-        IDataLayrServiceManager _dlsm
-    ) {
+    function initialize(address _sequencer, address _dataManageAddress) public initializer {
+        __Ownable_init();
         sequencer = _sequencer;
-        stakeToken = _stakeToken;
-        dlsm = _dlsm;
-        neededStake = _neededStake;
+        dataManageAddress = _dataManageAddress;
         BLOCK_STALE_MEASURE = 100;
     }
 
@@ -92,9 +73,9 @@ contract EigenDataLayrChain {
         require(msg.sender == sequencer, "Only the sequencer can store data");
 
         require(block.number - blockNumber < BLOCK_STALE_MEASURE, "stakes taken from too long ago");
-        uint32 dataStoreId = dlsm.taskNumber();
+        uint32 dataStoreId = IDataLayrServiceManager(dataManageAddress).taskNumber();
         //Initialize and pay for the datastore
-        dlsm.initDataStore(
+        IDataLayrServiceManager(dataManageAddress).initDataStore(
             msg.sender,
             address(this),
             duration,
@@ -124,12 +105,12 @@ contract EigenDataLayrChain {
             DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED,
             "Data store either was not initialized by the rollup contract, or is already confirmed"
         );
-        dlsm.confirmDataStore(data, searchData);
+        IDataLayrServiceManager(dataManageAddress).confirmDataStore(data, searchData);
         //store the rollups view of the datastore
         rollupStores[rollupStoreNumber] = RollupStore({
-        dataStoreId: searchData.metadata.globalDataStoreId,
-        confirmAt: uint32(block.timestamp + fraudProofPeriod),
-        status: RollupStoreStatus.COMMITTED
+            dataStoreId: searchData.metadata.globalDataStoreId,
+            confirmAt: uint32(block.timestamp + fraudProofPeriod),
+            status: RollupStoreStatus.COMMITTED
         });
         //store link between dataStoreId and rollupStoreNumber
         dataStoreIdToRollupStoreNumber[searchData.metadata.globalDataStoreId] = rollupStoreNumber;
