@@ -12,6 +12,7 @@
 
 ## 0.1.0 (Nov 18, 2022)
 
+### Features
 - MPC validators module in Layer 2 network, to minimize the trust risk of L2 execution results by threshold signature scheme(TSS).
 - Native Token replacement in Layer 2 Network, to empower BitDAO's ecosystem by replacing the native token with BIT.
 - Token Reward, to inspire community, organization and individual to run a l2geth-node and TSS-node.
