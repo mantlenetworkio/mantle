@@ -702,11 +702,6 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 		}
 	}()
 
-	if number%c.config.Epoch == 0 {
-		producers := deserialize(header.Extra[extraVanity : len(header.Extra)-extraSeal])
-		c.proposers = *producers
-	}
-
 	c.proposers.SequencerSet.IncrementProducerPriority(1)
 
 	return nil

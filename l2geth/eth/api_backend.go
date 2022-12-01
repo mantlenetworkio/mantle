@@ -310,8 +310,17 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 			end += uint64(len(v))
 		}
 		exTime := time.Now().Unix() + 1000
-		erCh := make(chan error)
-		b.eth.miner.MockScheduler(start, end, uint64(exTime), erCh)
+		erCh := make(chan error, 1)
+
+		b.eth.eventMux.Post(core.ProduceBlockEvent{
+			BatchIdx:    1,
+			StartHeight: start,
+			MaxHeight:   end,
+			ExpireTime:  uint64(exTime),
+			ErrCh:       erCh,
+		})
+
+		//b.eth.miner.MockScheduler(start, end, uint64(exTime), erCh)
 	}
 	return nil
 }

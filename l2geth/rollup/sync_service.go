@@ -1060,10 +1060,6 @@ func (s *SyncService) applyTransactionToTipMock(tx *types.Transaction) (error, f
 	// The index was set above so it is safe to dereference
 	log.Debug("Applying transaction to tip mock", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
 
-	//if err := s.txpool.AddLocal(tx); err != nil {
-	//	return err
-	//}
-
 	txs := types.Transactions{tx}
 	errCh := make(chan error, 1)
 	s.txFeed.Send(core.NewTxsEvent{

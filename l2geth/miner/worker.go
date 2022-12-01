@@ -150,15 +150,16 @@ type worker struct {
 	pendingLogsFeed event.Feed
 
 	// Subscriptions
-	mux             *event.TypeMux
-	txsCh           chan core.NewTxsEvent
-	txsSub          event.Subscription
-	chainHeadCh     chan core.ChainHeadEvent
-	chainHeadSub    event.Subscription
-	chainSideCh     chan core.ChainSideEvent
-	chainSideSub    event.Subscription
-	produceBlockCh  chan core.ProduceBlockEvent
-	produceBlockSub event.Subscription
+	mux            *event.TypeMux
+	txsCh          chan core.NewTxsEvent
+	txsSub         event.Subscription
+	chainHeadCh    chan core.ChainHeadEvent
+	chainHeadSub   event.Subscription
+	chainSideCh    chan core.ChainSideEvent
+	chainSideSub   event.Subscription
+	produceBlockCh chan core.ProduceBlockEvent
+	//produceBlockSub event.Subscription
+	produceBlockSub *event.TypeMuxSubscription
 
 	// Channels
 	newWorkCh          chan *newWorkReq
@@ -227,7 +228,8 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	// Subscribe NewTxsEvent for tx pool
 	worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
 	// channel directly to the miner
-	worker.produceBlockSub = eth.SyncService().SubscribeProduceBlockEvent(worker.produceBlockCh)
+	//worker.produceBlockSub = eth.SyncService().SubscribeProduceBlockEvent(worker.produceBlockCh)
+	worker.produceBlockSub = worker.mux.Subscribe(core.ProduceBlockEvent{})
 
 	// Subscribe events for blockchain
 	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
@@ -428,12 +430,21 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 	}
 }
 
+func (w *worker) produceBlockLoop() {
+	for obj := range w.produceBlockSub.Chan() {
+		if ev, ok := obj.Data.(core.ProduceBlockEvent); ok {
+			w.produceBlockCh <- ev
+		}
+	}
+}
+
 // mainLoop is a standalone goroutine to regenerate the sealing task based on the received event.
 func (w *worker) mainLoop() {
 	defer w.txsSub.Unsubscribe()
 	defer w.chainHeadSub.Unsubscribe()
 	defer w.chainSideSub.Unsubscribe()
 	defer w.produceBlockSub.Unsubscribe()
+	go w.produceBlockLoop()
 
 	for {
 		select {

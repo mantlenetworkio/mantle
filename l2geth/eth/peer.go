@@ -40,9 +40,11 @@ var (
 )
 
 const (
-	maxKnownTxs    = 32768 // Maximum transactions hashes to keep in the known list (prevent DOS)
-	maxKnownBlocks = 1024  // Maximum block hashes to keep in the known list (prevent DOS)
-	maxKnownPrs    = 1024
+	maxKnownTxs                = 32768 // Maximum transactions hashes to keep in the known list (prevent DOS)
+	maxKnownBlocks             = 1024  // Maximum block hashes to keep in the known list (prevent DOS)
+	maxKnownStartMsg           = 1024
+	maxKnownEndMsg             = 1024
+	maxKnownFraudProofReorgMsg = 1024
 
 	maxQueuedPrs = 128
 

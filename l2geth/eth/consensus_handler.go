@@ -2,8 +2,8 @@ package eth
 
 import (
 	"fmt"
-
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
+	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
@@ -106,12 +106,32 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 	// Handle the message depending on its contents
 	switch {
 	case msg.Code == BatchPeriodStartMsg:
-		// todo: BatchPeriodStartMsg handle
+		var bs *clique.BatchPeriodStart
+		if err := msg.Decode(&bs); err != nil {
+			return errResp(ErrDecode, "msg %v: %v", msg, err)
+		}
+		// todo : verify Signature and index then post ProduceBlockEvent
+		erCh := make(chan error, 1)
+		pm.eventMux.Post(core.ProduceBlockEvent{
+			BatchIdx:    bs.BatchIndex,
+			StartHeight: bs.StartHeight,
+			MaxHeight:   bs.MaxHeight,
+			ExpireTime:  bs.ExpireTime,
+			ErrCh:       erCh,
+		})
 		log.Info("Batch Period Start Msg")
 	case msg.Code == BatchPeriodEndMsg:
+		var be *clique.BatchPeriodEnd
+		if err := msg.Decode(&be); err != nil {
+			return errResp(ErrDecode, "msg %v: %v", msg, err)
+		}
 		// todo: BatchPeriodEndMsg handle
 		log.Info("Batch Period End Msg")
 	case msg.Code == FraudProofReorgMsg:
+		var fpr *clique.FraudProofReorg
+		if err := msg.Decode(&fpr); err != nil {
+			return errResp(ErrDecode, "msg %v: %v", msg, err)
+		}
 		// todo: FraudProofReorgMsg handle
 		log.Info("Fraud Proof Reorg Msg")
 
@@ -146,7 +166,7 @@ func (p *peer) AsyncSendBatchPeriodStartMsg(msg *clique.BatchPeriodStart) {
 	select {
 	case p.queuedStartMsg <- msg:
 		p.knowStartMsg.Add(msg.BatchIndex)
-		for p.knowStartMsg.Cardinality() >= maxKnownPrs {
+		for p.knowStartMsg.Cardinality() >= maxKnownStartMsg {
 			p.knowStartMsg.Pop()
 		}
 
@@ -177,7 +197,7 @@ func (p *peer) AsyncSendBatchPeriodEndMsg(msg *clique.BatchPeriodEnd) {
 	select {
 	case p.queuedEndMsg <- msg:
 		p.knowEndMsg.Add(msg.BatchIndex)
-		for p.knowEndMsg.Cardinality() >= maxKnownPrs {
+		for p.knowEndMsg.Cardinality() >= maxKnownEndMsg {
 			p.knowEndMsg.Pop()
 		}
 
@@ -208,7 +228,7 @@ func (p *peer) AsyncSendFraudProofReorgMsg(reorg *clique.FraudProofReorg) {
 	select {
 	case p.queuedFraudProofReorg <- reorg:
 		p.knowFraudProofReorg.Add(reorg.Index)
-		for p.knowFraudProofReorg.Cardinality() >= maxKnownPrs {
+		for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
 			p.knowFraudProofReorg.Pop()
 		}
 
@@ -224,7 +244,7 @@ func (p *peer) AsyncSendFraudProofReorgMsg(reorg *clique.FraudProofReorg) {
 func (p *peer) SendBatchPeriodStart(bs *clique.BatchPeriodStart) error {
 	p.knowStartMsg.Add(bs.BatchIndex)
 	// Mark all the producers as known, but ensure we don't overflow our limits
-	for p.knowStartMsg.Cardinality() >= maxKnownPrs {
+	for p.knowStartMsg.Cardinality() >= maxKnownStartMsg {
 		p.knowStartMsg.Pop()
 	}
 	return p2p.Send(p.rw, BatchPeriodStartMsg, bs)
@@ -233,7 +253,7 @@ func (p *peer) SendBatchPeriodStart(bs *clique.BatchPeriodStart) error {
 func (p *peer) SendBatchPeriodEnd(be *clique.BatchPeriodEnd) error {
 	p.knowEndMsg.Add(be.BatchIndex)
 	// Mark all the producers as known, but ensure we don't overflow our limits
-	for p.knowEndMsg.Cardinality() >= maxKnownPrs {
+	for p.knowEndMsg.Cardinality() >= maxKnownEndMsg {
 		p.knowEndMsg.Pop()
 	}
 	return p2p.Send(p.rw, BatchPeriodEndMsg, be)
@@ -242,7 +262,7 @@ func (p *peer) SendBatchPeriodEnd(be *clique.BatchPeriodEnd) error {
 func (p *peer) SendFraudProofReorg(fpr *clique.FraudProofReorg) error {
 	p.knowFraudProofReorg.Add(fpr.Index)
 	// Mark all the producers as known, but ensure we don't overflow our limits
-	for p.knowFraudProofReorg.Cardinality() >= maxKnownPrs {
+	for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
 		p.knowFraudProofReorg.Pop()
 	}
 	return p2p.Send(p.rw, FraudProofReorgMsg, fpr)
