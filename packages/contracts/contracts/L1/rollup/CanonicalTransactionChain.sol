@@ -9,8 +9,6 @@ import { Lib_AddressResolver } from "../../libraries/resolver/Lib_AddressResolve
 /* Interface Imports */
 import { ICanonicalTransactionChain } from "./ICanonicalTransactionChain.sol";
 import { IChainStorageContainer } from "./IChainStorageContainer.sol";
-import { IERC1822Proxiable } from "../../libraries/eip1822/IERC1822Proxiable.sol";
-
 
 /**
  * @title CanonicalTransactionChain
@@ -21,7 +19,7 @@ import { IERC1822Proxiable } from "../../libraries/eip1822/IERC1822Proxiable.sol
  * Sequencer will eventually append it to the rollup state.
  *
  */
-contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressResolver, IERC1822Proxiable {
+contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressResolver {
     /*************
      * Constants *
      *************/
@@ -48,9 +46,6 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
     uint256 internal constant TX_DATA_HEADER_SIZE = 3;
     // slither-disable-next-line unused-state
     uint256 internal constant BYTES_TILL_TX_DATA = 65;
-
-    bytes32 internal constant _DESIGNATED_IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
-
 
     /*************
      * Variables *
@@ -204,10 +199,6 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
     // slither-disable-next-line external-function
     function getQueueLength() public view returns (uint40) {
         return uint40(queueElements.length);
-    }
-
-    function proxiableUUID() external view returns (bytes32) {
-        return _DESIGNATED_IMPLEMENTATION_SLOT;
     }
 
     /**

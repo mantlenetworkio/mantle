@@ -1,3 +1,0 @@
-@eigenlayer=eignlayr-contracts/
-@openzeppelin/=lib/openzeppelin-contracts/
-@openzeppelin-upgrades/=lib/openzeppelin-contracts-upgradeable/
