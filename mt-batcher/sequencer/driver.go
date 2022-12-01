@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
-	rc "github.com/mantlenetworkio/mantle/mt-batcher/bindings/DataLayrRollup"
+	rc "github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 
 	common2 "github.com/mantlenetworkio/mantle/mt-batcher/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/dial"
