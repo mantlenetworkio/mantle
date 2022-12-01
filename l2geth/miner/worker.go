@@ -150,15 +150,14 @@ type worker struct {
 	pendingLogsFeed event.Feed
 
 	// Subscriptions
-	mux            *event.TypeMux
-	txsCh          chan core.NewTxsEvent
-	txsSub         event.Subscription
-	chainHeadCh    chan core.ChainHeadEvent
-	chainHeadSub   event.Subscription
-	chainSideCh    chan core.ChainSideEvent
-	chainSideSub   event.Subscription
-	produceBlockCh chan core.ProduceBlockEvent
-	//produceBlockSub event.Subscription
+	mux             *event.TypeMux
+	txsCh           chan core.NewTxsEvent
+	txsSub          event.Subscription
+	chainHeadCh     chan core.ChainHeadEvent
+	chainHeadSub    event.Subscription
+	chainSideCh     chan core.ChainSideEvent
+	chainSideSub    event.Subscription
+	produceBlockCh  chan core.ProduceBlockEvent
 	produceBlockSub *event.TypeMuxSubscription
 
 	// Channels
@@ -228,7 +227,6 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	// Subscribe NewTxsEvent for tx pool
 	worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
 	// channel directly to the miner
-	//worker.produceBlockSub = eth.SyncService().SubscribeProduceBlockEvent(worker.produceBlockCh)
 	worker.produceBlockSub = worker.mux.Subscribe(core.ProduceBlockEvent{})
 
 	// Subscribe events for blockchain
