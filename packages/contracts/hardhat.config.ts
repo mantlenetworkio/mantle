@@ -32,36 +32,20 @@ import {
   TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT,
   TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE
 } from 'hardhat/builtin-tasks/task-names'
-
-import { readFileSync, writeFileSync } from 'fs'
 import { spawnSync } from 'child_process'
 
 subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
   async (_, __, runSuper) => {
     console.log('running task')
-    const source =
-      '../../datalayr-mantle/contracts/datalayr-rollup-example-contracts/src'
-    copySync(source, './contracts/da/')
-
     copySync(
       '../../datalayr-mantle/contracts/eignlayr-contracts/src',
-      './contracts/da/eignlayr-contracts/'
+      './contracts/libraries/eigenda/lib'
     )
-
-    console.log("FORGE BUILD")
-    spawnSync('cd ./contracts/da && forge build', [], {
-      shell: true,
-      stdio: 'inherit',
-    })
-    console.log("FORGE BUILD END")
-
     const paths = await runSuper()
     const filteredPaths = paths.filter(function (p) {
-      return !p.includes('da')
+      return !p.includes('eigenda')
     })
-
     console.log('end task')
-
     return filteredPaths
   }
 )
@@ -71,11 +55,7 @@ subtask(TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT).setAction(
     console.log('running TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT')
 
     // delete
-    await remove('./contracts/da/libraries/')
-    await remove('./contracts/da/eignlayr-contracts/')
-    await remove('./contracts/da/Parser.sol')
-    await remove('./contracts/da/DataLayrRollup.sol')
-    await remove('./contracts/da/mock')
+    // await remove('./contracts/libraries/eigenda')
 
     runSuper()
   }
@@ -86,11 +66,7 @@ subtask(TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE).setAction(
     console.log('running TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE')
 
     // delete
-    await remove('./contracts/da/libraries/')
-    await remove('./contracts/da/eignlayr-contracts/')
-    await remove('./contracts/da/Parser.sol')
-    await remove('./contracts/da/DataLayrRollup.sol')
-    await remove('./contracts/da/mock')
+    // await remove('./contracts/libraries/eigenda')
     runSuper()
   }
 )

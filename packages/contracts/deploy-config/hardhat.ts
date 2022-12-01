@@ -14,7 +14,8 @@ const config = {
   bvmGasPriceOracleOwner: '0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc',
   l1BitAddress: '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
   bvmTssRewardContractOwner: '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
-  bvmFeeWalletOwner:'0xc8910a1957d276cE5634B978d908B5ef9fB0e05B'
+  bvmFeeWalletOwner: '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
+  dataManagerAddress: 'unknown',
 }
 
 export default config
