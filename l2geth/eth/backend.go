@@ -508,12 +508,15 @@ func (s *Ethereum) StartMining(threads int) error {
 		}
 		// only start when Clique consensus
 		if _, ok := s.engine.(*clique.Clique); ok {
-			schedulerInst = clique.NewScheduler(
+			schedulerInst, err = clique.NewScheduler(
 				time.Duration(s.blockchain.Config().Clique.Epoch),
 				s.engine.(*clique.Clique),
 				s.eventMux,
 				check,
 			)
+			if err != nil {
+				return fmt.Errorf("create scheduler instance err: %v", err)
+			}
 			schedulerAddr, err = schedulerInst.GetScheduler()
 			if err != nil {
 				return fmt.Errorf("cannot get schedulerAddr: %w", err)

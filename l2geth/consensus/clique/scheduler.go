@@ -30,15 +30,36 @@ type Scheduler struct {
 	syncer *synchronizer.Synchronizer
 }
 
-func NewScheduler(epoch time.Duration, clique *Clique, mux *event.TypeMux, check func() bool) *Scheduler {
+func NewScheduler(epoch time.Duration, clique *Clique, mux *event.TypeMux, check func() bool) (*Scheduler, error) {
 	log.Info("Create Sequencer Server")
+
+	syncer := synchronizer.NewSynchronizer()
+	seqSet, err := syncer.GetSequencerSet()
+	if err != nil {
+		return nil, err
+	}
+
+	var seqz []*Sequencer
+	for _, item := range seqSet {
+		var addrTemp common.Address
+		copy(addrTemp[:], item.MintAddress[:])
+		votingPower := big.NewInt(0).Div(item.Amount, big.NewInt(1e16))
+		seqz = append(seqz, NewSequencer(addrTemp, votingPower.Int64()))
+		log.Info("sequencer: ", "address", item.MintAddress.String())
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("get sequencer set failed, err: %v", err)
+	}
+
 	return &Scheduler{
 		ticker:          time.NewTicker(epoch * time.Second),
 		consensusEngine: clique,
 		mux:             mux,
 		check:           check,
-		syncer:          synchronizer.NewSynchronizer(),
-	}
+		syncer:          syncer,
+		sequencerSet:    NewSequencerSet(seqz),
+	}, nil
 }
 
 func (schedulerInst *Scheduler) SetWallet(wallet accounts.Wallet, acc accounts.Account) {
