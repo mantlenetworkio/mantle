@@ -23,7 +23,7 @@ type BatchPeriodStartMsg struct {
 }
 
 func (bps *BatchPeriodStartMsg) SerializeBatchPeriodStartMsg() []byte {
-	if bps == nil {
+	if bps == nil || len(bps.SequencerSet) == 0 || len(bps.Signature) != crypto.SignatureLength {
 		return nil
 	}
 	var buf = make([]byte, 8)

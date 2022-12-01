@@ -157,8 +157,8 @@ type worker struct {
 	chainHeadSub    event.Subscription
 	chainSideCh     chan core.ChainSideEvent
 	chainSideSub    event.Subscription
-	produceBlockCh  chan core.ProduceBlockEvent
-	produceBlockSub *event.TypeMuxSubscription
+	produceBlockCh  chan core.BatchPeriodStartEvent
+	produceBlockSub event.Subscription
 
 	// Channels
 	newWorkCh          chan *newWorkReq
@@ -213,7 +213,7 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 		unconfirmed:        newUnconfirmedBlocks(eth.BlockChain(), miningLogAtDepth),
 		pendingTasks:       make(map[common.Hash]*task),
 		txsCh:              make(chan core.NewTxsEvent, txChanSize),
-		produceBlockCh:     make(chan core.ProduceBlockEvent, 1),
+		produceBlockCh:     make(chan core.BatchPeriodStartEvent, 1),
 		chainHeadCh:        make(chan core.ChainHeadEvent, chainHeadChanSize),
 		chainSideCh:        make(chan core.ChainSideEvent, chainSideChanSize),
 		newWorkCh:          make(chan *newWorkReq),
@@ -492,15 +492,20 @@ func (w *worker) mainLoop() {
 		// reading the next tx from the channel when there is
 		// not an error processing the transaction.
 		case ev := <-w.produceBlockCh:
-			if ev.ExpireTime < uint64(time.Now().Unix()) {
+			if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
 				log.Warn("No transaction sent to miner from syncservice")
 				continue
 			}
 			currentHeight := w.chain.CurrentBlock().NumberU64() + 1
-			if ev.StartHeight != currentHeight {
+			if ev.Msg.StartHeight != currentHeight {
 				log.Warn("Start block height mismatch")
 				continue
 			}
+			if !bytes.Equal(ev.Msg.MinerAddress[:], w.coinbase[:]) {
+				log.Warn("Current node is not the miner")
+				continue
+			}
+			w.engine.SetBatchPeriod(ev.Msg)
 
 			// ----------------------------------------------------------------------
 			// Fill the block with all available pending transactions.
@@ -527,10 +532,10 @@ func (w *worker) mainLoop() {
 			}
 			// ----------------------------------------------------------------------
 			for i, tx := range txsQueue {
-				if ev.StartHeight+uint64(i) > ev.MaxHeight {
+				if ev.Msg.StartHeight+uint64(i) > ev.Msg.MaxHeight {
 					break
 				}
-				if ev.ExpireTime < uint64(time.Now().Unix()) {
+				if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
 					log.Warn("No transaction sent to miner from syncservice")
 					continue
 				}

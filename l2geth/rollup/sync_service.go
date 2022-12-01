@@ -1415,7 +1415,7 @@ func (s *SyncService) SubscribeNewTxsEvent(ch chan<- core.NewTxsEvent) event.Sub
 
 // SubscribeProduceBlockEvent registers a subscription of ProduceBlockEvent and
 // starts sending event to the given channel.
-func (s *SyncService) SubscribeProduceBlockEvent(ch chan<- core.ProduceBlockEvent) event.Subscription {
+func (s *SyncService) SubscribeProduceBlockEvent(ch chan<- core.BatchPeriodStartEvent) event.Subscription {
 	return s.scope.Track(s.produceBlock.Subscribe(ch))
 }
 
