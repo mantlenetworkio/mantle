@@ -30,6 +30,8 @@ interface IStateCommitmentChain {
         address[] _tssMembers
     );
 
+    event RollBackL2Chain(uint256 indexed _startBlockNumber);
+
     /********************
      * Public Functions *
      ********************/
@@ -86,4 +88,17 @@ interface IStateCommitmentChain {
     external
     view
     returns (bool _inside);
+
+    /**
+     * Emit event to notify sequencers to roll back.
+     * @param _shouldStartAtElement roll back to should start .
+     */
+    function rollBackL2Chain(uint256 _shouldStartAtElement, bytes memory _signature) external;
+
+    /**
+     * interface for send domain message
+     * @param _shouldStartAtElement roll back to should start .
+     */
+    function rollBackMessage(uint256 _shouldStartAtElement) external;
+
 }

@@ -37,6 +37,32 @@ func TestAgreement(t *testing.T) {
 	require.EqualValues(t, 4, len(approvers))
 }
 
+func TestUnAgreement(t *testing.T) {
+	// all return true
+	afterMsgSent := func(request server.RequestMsg, respCh chan server.ResponseMsg) error {
+		askResp := tss.AskResponse{
+			Result: false,
+		}
+		rpcResp := tmtypes.NewRPCSuccessResponse(request.RpcRequest.ID, askResp)
+		respCh <- server.ResponseMsg{
+			RpcResponse: rpcResp,
+			SourceNode:  request.TargetNode,
+		}
+		return nil
+	}
+	manager, request := setup(afterMsgSent, nil)
+	ctx := types.NewContext().
+		WithAvailableNodes([]string{"a", "b", "c", "d"}).
+		WithTssInfo(types.TssCommitteeInfo{
+			Threshold: 3,
+		})
+	ctx, err := manager.agreement(ctx, request, "ask")
+	require.NoError(t, err)
+	approvers := ctx.Approvers()
+	require.EqualValues(t, 0, len(approvers))
+	require.EqualValues(t, 4, len(ctx.UnApprovers()))
+}
+
 func TestOneRefuseAgreement(t *testing.T) {
 	// one returns false, others return true
 	afterMsgSent := func(request server.RequestMsg, respCh chan server.ResponseMsg) error {

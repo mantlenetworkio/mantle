@@ -25,6 +25,7 @@ type Context struct {
 	tssInfo        TssCommitteeInfo
 	availableNodes []string
 	approvers      []string
+	unApprovers    []string
 	electionId     uint64
 	stateBatchRoot [32]byte
 }
@@ -47,6 +48,11 @@ func (c Context) AvailableNodes() []string {
 func (c Context) Approvers() []string {
 	return c.approvers
 }
+
+func (c Context) UnApprovers() []string {
+	return c.unApprovers
+}
+
 func (c Context) ElectionId() uint64 {
 	return c.electionId
 }
@@ -71,6 +77,11 @@ func (c Context) WithAvailableNodes(nodes []string) Context {
 
 func (c Context) WithApprovers(nodes []string) Context {
 	c.approvers = nodes
+	return c
+}
+
+func (c Context) WithUnApprovers(nodes []string) Context {
+	c.unApprovers = nodes
 	return c
 }
 

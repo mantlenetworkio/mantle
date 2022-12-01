@@ -117,6 +117,39 @@ Checks whether a given batch is still inside its fraud proof window.
 |---|---|---|
 | _inside | bool | Whether or not the batch is inside the fraud proof window.
 
+### rollBackL2Chain
+
+```solidity
+function rollBackL2Chain(uint256 _shouldStartAtElement, bytes _signature) external nonpayable
+```
+
+Emit event to notify sequencers to roll back.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _shouldStartAtElement | uint256 | roll back to should start .
+| _signature | bytes | undefined
+
+### rollBackMessage
+
+```solidity
+function rollBackMessage(uint256 _shouldStartAtElement) external nonpayable
+```
+
+interface for send domain message
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _shouldStartAtElement | uint256 | roll back to should start .
+
 ### verifyStateCommitment
 
 ```solidity
@@ -163,6 +196,22 @@ event DistributeTssReward(uint256 indexed _startBlockNumber, uint256 _length, ui
 | _length  | uint256 | undefined |
 | _batchTime `indexed` | uint256 | undefined |
 | _tssMembers  | address[] | undefined |
+
+### RollBackL2Chain
+
+```solidity
+event RollBackL2Chain(uint256 indexed _startBlockNumber)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _startBlockNumber `indexed` | uint256 | undefined |
 
 ### StateBatchAppended
 

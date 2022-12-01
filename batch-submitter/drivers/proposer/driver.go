@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/log"
 	"math/big"
@@ -215,15 +216,28 @@ func (d *Driver) CraftBatchTx(
 		OffsetStartsAtIndex: offsetStartsAtIndex.String(),
 		StateRoots:          stateRoots,
 	}
-	signature, err := d.cfg.TssClient.GetSignStateBatch(tssReqParams)
+	tssReponseBytes, err := d.cfg.TssClient.GetSignStateBatch(tssReqParams)
 	if err != nil {
-		log.Error("get tss manager signature fail")
+		log.Error("get tss manager signature fail", "err", err)
 		return nil, err
 	}
-	log.Info("append log", "stateRoots", fmt.Sprintf("%v", stateRoots), "offsetStartsAtIndex", offsetStartsAtIndex, "signature", hex.EncodeToString(signature))
-	tx, err := d.sccContract.AppendStateBatch(
-		opts, stateRoots, offsetStartsAtIndex, signature,
-	)
+	var tssResponse tssClient.TssResponse
+	err = json.Unmarshal(tssReponseBytes, &tssResponse)
+	if err != nil {
+		log.Error("failed to unmarshal response from tss", "err", err)
+		return nil, err
+	}
+
+	log.Info("append log", "stateRoots", fmt.Sprintf("%v", stateRoots), "offsetStartsAtIndex", offsetStartsAtIndex, "signature", hex.EncodeToString(tssResponse.Signature), "rollback", tssResponse.RollBack)
+	var tx *types.Transaction
+	if tssResponse.RollBack {
+		tx, err = d.sccContract.RollBackL2Chain(opts, start, tssResponse.Signature)
+	} else {
+		tx, err = d.sccContract.AppendStateBatch(
+			opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
+		)
+	}
+
 	switch {
 	case err == nil:
 		return tx, nil
@@ -237,9 +251,15 @@ func (d *Driver) CraftBatchTx(
 		log.Warn(d.cfg.Name + " eth_maxPriorityFeePerGas is unsupported " +
 			"by current backend, using fallback gasTipCap")
 		opts.GasTipCap = drivers.FallbackGasTipCap
-		return d.sccContract.AppendStateBatch(
-			opts, stateRoots, offsetStartsAtIndex, signature,
-		)
+		if tssResponse.RollBack {
+			return d.sccContract.RollBackL2Chain(
+				opts, start, tssResponse.Signature,
+			)
+		} else {
+			return d.sccContract.AppendStateBatch(
+				opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
+			)
+		}
 	default:
 		return nil, err
 	}

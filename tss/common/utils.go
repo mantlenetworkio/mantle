@@ -20,6 +20,7 @@ var (
 	slashMsgArguments       abi.Arguments
 	groupPublicKeyArguments abi.Arguments
 	slashArguments          abi.Arguments
+	rollBackArguments       abi.Arguments
 )
 
 type SlashMsg struct {
@@ -67,6 +68,7 @@ func init() {
 			Type: typBytes,
 		},
 	}
+	rollBackArguments = abi.Arguments{{Type: typUint256}}
 
 }
 
@@ -110,6 +112,14 @@ func SlashMsgHash(batchIndex uint64, jailNode common.Address, tssNodes []common.
 		return nil, err
 	}
 	return crypto.Keccak256Hash(abiEncodedRaw).Bytes(), nil
+}
+
+func RollBackHash(startBlock *big.Int) ([]byte, error) {
+	abiEncodeRaw, err := rollBackArguments.Pack(startBlock)
+	if err != nil {
+		return nil, err
+	}
+	return crypto.Keccak256Hash(abiEncodeRaw).Bytes(), nil
 }
 
 func SetGroupPubKeyBytes(localKey, poolPubKey []byte) ([]byte, error) {
