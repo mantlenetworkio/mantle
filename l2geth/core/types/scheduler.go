@@ -44,6 +44,14 @@ func (bps *BatchPeriodStartMsg) SerializeBatchPeriodStartMsg() []byte {
 	return buf
 }
 
+func IsValidBatchPeriodStartMsgBuf(buf []byte) bool {
+	sequencerSetLength := len(buf) - (uint64Length*5 + common.AddressLength + crypto.SignatureLength)
+	if sequencerSetLength <= 0 || sequencerSetLength%common.AddressLength != 0 {
+		return false
+	}
+	return true
+}
+
 func DeserializeBatchPeriodStartMsg(buf []byte) BatchPeriodStartMsg {
 	sequencerSetLength := len(buf) - (uint64Length*5 + common.AddressLength + crypto.SignatureLength)
 	if sequencerSetLength <= 0 || sequencerSetLength%common.AddressLength != 0 {
