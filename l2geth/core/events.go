@@ -21,13 +21,18 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 )
 
-// ProduceBlockEvent is posted when a batch of block will be produced
-type ProduceBlockEvent struct {
-	BatchIdx    uint64
-	StartHeight uint64
-	MaxHeight   uint64
-	ExpireTime  uint64
+type BatchPeriodStartEvent struct {
+	Msg   *types.BatchPeriodStartMsg
+	ErrCh chan error
+}
 
+type BatchPeriodEndEvent struct {
+	Msg   *types.BatchPeriodEndMsg
+	ErrCh chan error
+}
+
+type FraudProofReorgEvent struct {
+	Msg   *types.FraudProofReorgMsg
 	ErrCh chan error
 }
 

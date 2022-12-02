@@ -25,7 +25,6 @@ import (
 
 	mapset "github.com/deckarep/golang-set"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
@@ -97,18 +96,18 @@ type peer struct {
 	td   *big.Int
 	lock sync.RWMutex
 
-	knownTxs              mapset.Set                    // Set of transaction hashes known to be known by this peer
-	knownBlocks           mapset.Set                    // Set of block hashes known to be known by this peer
-	knowStartMsg          mapset.Set                    // Set of start msg index to be known by this peer
-	knowEndMsg            mapset.Set                    // Set of end msg index to be known by this peer
-	knowFraudProofReorg   mapset.Set                    // Set of end msg index to be known by this peer
-	queuedTxs             chan []*types.Transaction     // Queue of transactions to broadcast to the peer
-	queuedProps           chan *propEvent               // Queue of blocks to broadcast to the peer
-	queuedAnns            chan *types.Block             // Queue of blocks to announce to the peer
-	queuedStartMsg        chan *clique.BatchPeriodStart // Queue of BatchPeriodStart to announce to the peer
-	queuedEndMsg          chan *clique.BatchPeriodEnd   // Queue of BatchPeriodEnd to announce to the peer
-	queuedFraudProofReorg chan *clique.FraudProofReorg  // Queue of FraudProofReorg to announce to the peer
-	term                  chan struct{}                 // Termination channel to stop the broadcaster
+	knownTxs              mapset.Set                      // Set of transaction hashes known to be known by this peer
+	knownBlocks           mapset.Set                      // Set of block hashes known to be known by this peer
+	knowStartMsg          mapset.Set                      // Set of start msg index to be known by this peer
+	knowEndMsg            mapset.Set                      // Set of end msg index to be known by this peer
+	knowFraudProofReorg   mapset.Set                      // Set of end msg index to be known by this peer
+	queuedTxs             chan []*types.Transaction       // Queue of transactions to broadcast to the peer
+	queuedProps           chan *propEvent                 // Queue of blocks to broadcast to the peer
+	queuedAnns            chan *types.Block               // Queue of blocks to announce to the peer
+	queuedStartMsg        chan *types.BatchPeriodStartMsg // Queue of BatchPeriodStartMsg to announce to the peer
+	queuedEndMsg          chan *types.BatchPeriodEndMsg   // Queue of BatchPeriodEndMsg to announce to the peer
+	queuedFraudProofReorg chan *types.FraudProofReorgMsg  // Queue of FraudProofReorgMsg to announce to the peer
+	term                  chan struct{}                   // Termination channel to stop the broadcaster
 }
 
 func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
@@ -122,9 +121,9 @@ func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 		queuedTxs:             make(chan []*types.Transaction, maxQueuedTxs),
 		queuedProps:           make(chan *propEvent, maxQueuedProps),
 		queuedAnns:            make(chan *types.Block, maxQueuedAnns),
-		queuedStartMsg:        make(chan *clique.BatchPeriodStart, maxQueuedBatchPeriodStart),
-		queuedEndMsg:          make(chan *clique.BatchPeriodEnd, maxQueuedBatchPeriodEnd),
-		queuedFraudProofReorg: make(chan *clique.FraudProofReorg, maxQueuedFraudProofReorg),
+		queuedStartMsg:        make(chan *types.BatchPeriodStartMsg, maxQueuedBatchPeriodStart),
+		queuedEndMsg:          make(chan *types.BatchPeriodEndMsg, maxQueuedBatchPeriodEnd),
+		queuedFraudProofReorg: make(chan *types.FraudProofReorgMsg, maxQueuedFraudProofReorg),
 		term:                  make(chan struct{}),
 	}
 }
@@ -167,7 +166,7 @@ func (p *peer) broadcast() {
 			if err := p.SendFraudProofReorg(fpr); err != nil {
 				return
 			}
-			p.Log().Trace("Fraud proof reorg msg", "index", fpr.Index, "reorg_height", fpr.ReorgToHeight)
+			p.Log().Trace("Fraud proof reorg msg", "index", fpr.ReorgIndex, "reorg_height", fpr.ReorgToHeight)
 		case <-p.term:
 			return
 		}

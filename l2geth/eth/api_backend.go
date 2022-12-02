@@ -19,6 +19,9 @@ package eth
 import (
 	"context"
 	"errors"
+	"math/big"
+	"time"
+
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/common/math"
@@ -36,8 +39,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
-	"math/big"
-	"time"
 )
 
 // EthAPIBackend implements ethapi.Backend for full nodes
@@ -312,12 +313,15 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 		exTime := time.Now().Unix() + 1000
 		erCh := make(chan error, 1)
 
-		b.eth.eventMux.Post(core.ProduceBlockEvent{
-			BatchIdx:    1,
-			StartHeight: start,
-			MaxHeight:   end,
-			ExpireTime:  uint64(exTime),
-			ErrCh:       erCh,
+		b.eth.eventMux.Post(core.BatchPeriodStartEvent{
+			Msg: &types.BatchPeriodStartMsg{
+				ReorgIndex:  0,
+				BatchIndex:  1,
+				StartHeight: start,
+				MaxHeight:   end,
+				ExpireTime:  uint64(exTime),
+			},
+			ErrCh: erCh,
 		})
 
 		//b.eth.miner.MockScheduler(start, end, uint64(exTime), erCh)

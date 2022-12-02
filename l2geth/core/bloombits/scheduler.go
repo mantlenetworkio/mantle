@@ -39,7 +39,7 @@ type response struct {
 // the results to minimize network/database overhead even in complex filtering
 // scenarios.
 type scheduler struct {
-	bit       uint                 // Index of the bit in the bloom filter this scheduler is responsible for
+	bit       uint                 // ReorgIndex of the bit in the bloom filter this scheduler is responsible for
 	responses map[uint64]*response // Currently pending retrieval requests or already cached responses
 	lock      sync.Mutex           // Lock protecting the responses from concurrent access
 }

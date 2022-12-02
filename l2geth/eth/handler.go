@@ -28,7 +28,6 @@ import (
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
-	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
@@ -266,13 +265,13 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 	go pm.minedBroadcastLoop()
 
 	// broadcast producers
-	pm.batchStartMsgSub = pm.eventMux.Subscribe(clique.BatchPeriodStartEvent{})
+	pm.batchStartMsgSub = pm.eventMux.Subscribe(core.BatchPeriodStartEvent{})
 	go pm.batchPeriodStartMsgBroadcastLoop()
 
-	pm.batchEndMsgSub = pm.eventMux.Subscribe(clique.BatchPeriodEndEvent{})
+	pm.batchEndMsgSub = pm.eventMux.Subscribe(core.BatchPeriodEndEvent{})
 	go pm.batchPeriodEndMsgBroadcastLoop()
 
-	pm.fraudProofReorgMsgSub = pm.eventMux.Subscribe(clique.FraudProofReorgEvent{})
+	pm.fraudProofReorgMsgSub = pm.eventMux.Subscribe(core.FraudProofReorgEvent{})
 	go pm.fraudProofReorgMsgBroadcastLoop()
 
 	// start sync handlers

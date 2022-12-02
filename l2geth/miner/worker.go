@@ -157,7 +157,7 @@ type worker struct {
 	chainHeadSub    event.Subscription
 	chainSideCh     chan core.ChainSideEvent
 	chainSideSub    event.Subscription
-	produceBlockCh  chan core.ProduceBlockEvent
+	produceBlockCh  chan core.BatchPeriodStartEvent
 	produceBlockSub *event.TypeMuxSubscription
 
 	// Channels
@@ -213,7 +213,7 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 		unconfirmed:        newUnconfirmedBlocks(eth.BlockChain(), miningLogAtDepth),
 		pendingTasks:       make(map[common.Hash]*task),
 		txsCh:              make(chan core.NewTxsEvent, txChanSize),
-		produceBlockCh:     make(chan core.ProduceBlockEvent, 1),
+		produceBlockCh:     make(chan core.BatchPeriodStartEvent, 1),
 		chainHeadCh:        make(chan core.ChainHeadEvent, chainHeadChanSize),
 		chainSideCh:        make(chan core.ChainSideEvent, chainSideChanSize),
 		newWorkCh:          make(chan *newWorkReq),
@@ -227,7 +227,7 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	// Subscribe NewTxsEvent for tx pool
 	worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
 	// channel directly to the miner
-	worker.produceBlockSub = worker.mux.Subscribe(core.ProduceBlockEvent{})
+	worker.produceBlockSub = worker.mux.Subscribe(core.BatchPeriodStartEvent{})
 
 	// Subscribe events for blockchain
 	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
@@ -374,12 +374,11 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 		// Remove this code for the BVM implementation. It is responsible for
 		// cleaning up memory with the call to `clearPending`, so be sure to
 		// call that in the new hot code path
-		/*
-			case <-w.chainHeadCh:
-				clearPending(head.Block.NumberU64())
-				timestamp = time.Now().Unix()
-				commit(commitInterruptNewHead)
-		*/
+
+		case head := <-w.chainHeadCh:
+			clearPending(head.Block.NumberU64())
+			timestamp = time.Now().Unix()
+			commit(commitInterruptNewHead)
 
 		case <-timer.C:
 			// If mining is running resubmit a new work cycle periodically to pull in
@@ -430,7 +429,7 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 
 func (w *worker) produceBlockLoop() {
 	for obj := range w.produceBlockSub.Chan() {
-		if ev, ok := obj.Data.(core.ProduceBlockEvent); ok {
+		if ev, ok := obj.Data.(core.BatchPeriodStartEvent); ok {
 			w.produceBlockCh <- ev
 		}
 	}
@@ -492,15 +491,20 @@ func (w *worker) mainLoop() {
 		// reading the next tx from the channel when there is
 		// not an error processing the transaction.
 		case ev := <-w.produceBlockCh:
-			if ev.ExpireTime < uint64(time.Now().Unix()) {
+			if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
 				log.Warn("No transaction sent to miner from syncservice")
 				continue
 			}
 			currentHeight := w.chain.CurrentBlock().NumberU64() + 1
-			if ev.StartHeight != currentHeight {
+			if ev.Msg.StartHeight != currentHeight {
 				log.Warn("Start block height mismatch")
 				continue
 			}
+			if !bytes.Equal(ev.Msg.MinerAddress[:], w.coinbase[:]) {
+				log.Warn("Current node is not the miner")
+				continue
+			}
+			w.engine.SetBatchPeriod(ev.Msg)
 
 			// ----------------------------------------------------------------------
 			// Fill the block with all available pending transactions.
@@ -527,10 +531,10 @@ func (w *worker) mainLoop() {
 			}
 			// ----------------------------------------------------------------------
 			for i, tx := range txsQueue {
-				if ev.StartHeight+uint64(i) > ev.MaxHeight {
+				if ev.Msg.StartHeight+uint64(i) > ev.Msg.MaxHeight {
 					break
 				}
-				if ev.ExpireTime < uint64(time.Now().Unix()) {
+				if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
 					log.Warn("No transaction sent to miner from syncservice")
 					continue
 				}
