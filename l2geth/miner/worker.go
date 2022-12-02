@@ -158,7 +158,7 @@ type worker struct {
 	chainSideCh     chan core.ChainSideEvent
 	chainSideSub    event.Subscription
 	produceBlockCh  chan core.BatchPeriodStartEvent
-	produceBlockSub event.Subscription
+	produceBlockSub *event.TypeMuxSubscription
 
 	// Channels
 	newWorkCh          chan *newWorkReq
@@ -227,7 +227,7 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	// Subscribe NewTxsEvent for tx pool
 	worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
 	// channel directly to the miner
-	worker.produceBlockSub = worker.mux.Subscribe(core.ProduceBlockEvent{})
+	worker.produceBlockSub = worker.mux.Subscribe(core.BatchPeriodStartEvent{})
 
 	// Subscribe events for blockchain
 	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
@@ -429,7 +429,7 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 
 func (w *worker) produceBlockLoop() {
 	for obj := range w.produceBlockSub.Chan() {
-		if ev, ok := obj.Data.(core.ProduceBlockEvent); ok {
+		if ev, ok := obj.Data.(core.BatchPeriodStartEvent); ok {
 			w.produceBlockCh <- ev
 		}
 	}

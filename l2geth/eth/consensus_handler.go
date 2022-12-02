@@ -2,6 +2,7 @@ package eth
 
 import (
 	"fmt"
+
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
@@ -112,12 +113,9 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		}
 		// todo : verify Signature and index then post ProduceBlockEvent
 		erCh := make(chan error, 1)
-		pm.eventMux.Post(core.ProduceBlockEvent{
-			BatchIdx:    bs.BatchIndex,
-			StartHeight: bs.StartHeight,
-			MaxHeight:   bs.MaxHeight,
-			ExpireTime:  bs.ExpireTime,
-			ErrCh:       erCh,
+		pm.eventMux.Post(core.BatchPeriodStartEvent{
+			Msg:   bs,
+			ErrCh: erCh,
 		})
 		log.Info("Batch Period Start Msg")
 	case msg.Code == BatchPeriodEndMsg:
