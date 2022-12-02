@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package clique implements the proof-of-authority consensus consensus_engine.
+// Package clique implements the proof-of-authority consensus engine.
 package clique
 
 import (
@@ -74,8 +74,8 @@ var (
 )
 
 // Various error messages to mark blocks invalid. These should be private to
-// prevent consensus_engine specific errors from being referenced in the remainder of the
-// codebase, inherently breaking if the consensus_engine is swapped out. Please put common
+// prevent engine specific errors from being referenced in the remainder of the
+// codebase, inherently breaking if the engine is swapped out. Please put common
 // error types into the consensus package.
 var (
 	// errUnknownBlock is returned when the list of signers is requested for a block
@@ -176,10 +176,10 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 	return signer, nil
 }
 
-// Clique is the proof-of-authority consensus consensus_engine proposed to support the
+// Clique is the proof-of-authority consensus engine proposed to support the
 // Ethereum testnet following the Ropsten attacks.
 type Clique struct {
-	config *params.CliqueConfig // Consensus consensus_engine configuration parameters
+	config *params.CliqueConfig // Consensus engine configuration parameters
 	db     ethdb.Database       // Database to store and retrieve snapshot checkpoints
 
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
@@ -197,7 +197,7 @@ type Clique struct {
 	fakeDiff bool // Skip difficulty verifications
 }
 
-// New creates a Clique proof-of-authority consensus consensus_engine with the initial
+// New creates a Clique proof-of-authority consensus engine with the initial
 // signers set to the ones provided by the user.
 func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 	// Set any missing consensus parameters to their defaults
@@ -205,7 +205,7 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 	if conf.Epoch == 0 {
 		conf.Epoch = epochLength
 	}
-	// Allocate the snapshot caches and create the consensus_engine
+	// Allocate the snapshot caches and create the engine
 	recents, _ := lru.NewARC(inmemorySnapshots)
 	signatures, _ := lru.NewARC(inmemorySignatures)
 
@@ -609,7 +609,7 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainReader, header *types.
 	return types.NewBlock(header, txs, nil, receipts), nil
 }
 
-// Authorize injects a private key into the consensus consensus_engine to mint new blocks
+// Authorize injects a private key into the consensus engine to mint new blocks
 // with.
 func (c *Clique) Authorize(signer common.Address, signFn SignerFn) {
 	c.lock.Lock()

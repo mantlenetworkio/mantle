@@ -33,7 +33,7 @@ import (
 // as well as utility methods to operate on the service environment.
 type ServiceContext struct {
 	config         *Config
-	services       map[reflect.Type]Service // ReorgIndex of the already constructed services
+	services       map[reflect.Type]Service // Index of the already constructed services
 	EventMux       *event.TypeMux           // Event multiplexer used for decoupled notifications
 	AccountManager *accounts.Manager        // Account manager created by the node.
 }

@@ -236,7 +236,7 @@ func TestDeriveFields(t *testing.T) {
 				t.Errorf("receipts[%d].Logs[%d].TransactionIndex = %d, want %d", i, j, receipts[i].Logs[j].TxIndex, i)
 			}
 			if receipts[i].Logs[j].Index != logIndex {
-				t.Errorf("receipts[%d].Logs[%d].ReorgIndex = %d, want %d", i, j, receipts[i].Logs[j].Index, logIndex)
+				t.Errorf("receipts[%d].Logs[%d].Index = %d, want %d", i, j, receipts[i].Logs[j].Index, logIndex)
 			}
 			logIndex++
 		}

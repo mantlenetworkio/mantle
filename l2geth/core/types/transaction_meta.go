@@ -120,7 +120,7 @@ func TxMetaDecode(input []byte) (*TransactionMeta, error) {
 	binary.Read(bytes.NewReader(l), binary.LittleEndian, &l1Timestamp)
 	meta.L1Timestamp = l1Timestamp
 
-	i, err := common.ReadVarBytes(b, 0, 1024, "ReorgIndex")
+	i, err := common.ReadVarBytes(b, 0, 1024, "Index")
 	if err != nil {
 		return nil, err
 	}

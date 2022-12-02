@@ -56,7 +56,7 @@ const schema string = `
 
     # Log is an Ethereum event log.
     type Log {
-        # ReorgIndex is the index of this log in the block.
+        # Index is the index of this log in the block.
         index: Int!
         # Account is the account which generated this log - this will always
         # be a contract account.
@@ -75,7 +75,7 @@ const schema string = `
         hash: Bytes32!
         # Nonce is the nonce of the account this transaction was generated with.
         nonce: Long!
-        # ReorgIndex is the index of this transaction in the parent block. This will
+        # Index is the index of this transaction in the parent block. This will
         # be null if the transaction has not yet been mined.
         index: Int
         # From is the account that sent this transaction - this will always be
