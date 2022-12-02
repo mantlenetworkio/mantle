@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/Layr-Labs/datalayr/common/graphView"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceDL"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
@@ -73,11 +72,7 @@ func NewEigenSequencer(
 }
 
 func (es *EigenSequencer) Start() error {
-	err := es.Stake()
-	if err != nil {
-		return err
-	}
-	err = es.FetchBlock(es.ctx)
+	err := es.FetchBlock(es.ctx)
 	if err != nil {
 		log.Error("")
 	}
@@ -85,31 +80,6 @@ func (es *EigenSequencer) Start() error {
 }
 
 func (es *EigenSequencer) FetchBlock(ctx context.Context) error {
-
-	return nil
-}
-
-func (s *EigenSequencer) Stake() error {
-	rollup, err := s.getRollupContractBinding()
-	if err != nil {
-		return err
-	}
-	status, err := rollup.SequencerStatus(&bind.CallOpts{})
-	if err != nil {
-		return err
-	}
-	if status == 0 {
-		auth := s.ChainClient.PrepareAuthTransactor()
-		tx, err := rollup.Stake(auth)
-		if err != nil {
-			return err
-		}
-		log.Info("Stake Tx: " + tx.Hash().Hex())
-		err = s.ChainClient.EnsureTransactionEvaled(tx)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -138,9 +108,9 @@ func (es *EigenSequencer) Disperse(data []byte) error {
 		return err
 	}
 	event, ok := graphView.PollingInitDataStore(
-		s.GraphClient,
+		es.GraphClient,
 		tx.Hash().Bytes()[:],
-		s.Logger,
+		nil,
 		12,
 	)
 	if !ok {
@@ -194,14 +164,14 @@ func (es *EigenSequencer) Disperse(data []byte) error {
 
 func (es *EigenSequencer) callEncode(data []byte) (common2.StoreParams, error) {
 	// ToDo divide file to chunks and send via stream if file is too large
-	conn, err := grpc.Dial(s.DisperserSettings.Socket, grpc.WithInsecure())
+	conn, err := grpc.Dial(es.DisperserSettings.Socket, grpc.WithInsecure())
 	if err != nil {
 		log.Error("Err. Disperser Cannot connect to", "socket", es.DisperserSettings.Socket)
 		return common2.StoreParams{}, err
 	}
 	defer conn.Close()
 	c := pb.NewDataDispersalClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(s.DataStoreSettings.Timeout))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(es.DataStoreSettings.Timeout))
 	defer cancel()
 	request := &pb.EncodeStoreRequest{
 		Duration: es.DataStoreSettings.Duration,
@@ -246,7 +216,7 @@ func (es *EigenSequencer) callDisperse(headerHash []byte, messageHash []byte) (c
 	}
 	defer conn.Close()
 	c := pb.NewDataDispersalClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(s.DataStoreSettings.Timeout))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(es.DataStoreSettings.Timeout))
 	defer cancel()
 	request := &pb.DisperseStoreRequest{
 		HeaderHash:  headerHash,
@@ -270,8 +240,8 @@ func (es *EigenSequencer) callDisperse(headerHash []byte, messageHash []byte) (c
 	return meta, nil
 }
 
-func (es *EigenSequencer) getRollupContractBinding() (*rc.ContractDataLayrRollup, error) {
-	rollup, err := rc.NewContractDataLayrRollup(es.RollupSettings.Address, es.ChainClient.Client)
+func (es *EigenSequencer) getRollupContractBinding() (*rc.BVMEigenDataLayrChain, error) {
+	rollup, err := rc.NewBVMEigenDataLayrChain(es.RollupSettings.Address, es.ChainClient.Client)
 	if err != nil {
 		return nil, err
 	}

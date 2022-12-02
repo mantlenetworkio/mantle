@@ -17,8 +17,6 @@ var (
 )
 
 func main() {
-	// Set up logger with a default INFO level in case we fail to parse flags.
-	// Otherwise the final critical log won't show what the parsing error was.
 	log.Root().SetHandler(
 		log.LvlFilterHandler(
 			log.LvlInfo,
