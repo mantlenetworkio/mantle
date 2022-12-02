@@ -152,7 +152,8 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	// reorgs and also favors safety over liveliness. If a transaction breaks
 	// things downstream, it is expected that this channel will halt ingestion
 	// of additional transactions by the SyncService.
-	service.chainHeadSub = service.bc.SubscribeChainHeadEvent(service.chainHeadCh)
+	// TODO handle this subscription later
+	//service.chainHeadSub = service.bc.SubscribeChainHeadEvent(service.chainHeadCh)
 
 	// Initial sync service setup if it is enabled. This code depends on
 	// a remote server that indexes the layer one contracts. Place this
@@ -405,7 +406,8 @@ func (s *SyncService) IsSyncing() bool {
 // started by this service.
 func (s *SyncService) Stop() error {
 	s.scope.Close()
-	s.chainHeadSub.Unsubscribe()
+	// TODO handle this subscription later
+	//s.chainHeadSub.Unsubscribe()
 	close(s.chainHeadCh)
 
 	if s.cancel != nil {

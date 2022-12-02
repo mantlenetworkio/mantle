@@ -374,12 +374,11 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 		// Remove this code for the BVM implementation. It is responsible for
 		// cleaning up memory with the call to `clearPending`, so be sure to
 		// call that in the new hot code path
-		/*
-			case <-w.chainHeadCh:
-				clearPending(head.Block.NumberU64())
-				timestamp = time.Now().Unix()
-				commit(commitInterruptNewHead)
-		*/
+
+		case head := <-w.chainHeadCh:
+			clearPending(head.Block.NumberU64())
+			timestamp = time.Now().Unix()
+			commit(commitInterruptNewHead)
 
 		case <-timer.C:
 			// If mining is running resubmit a new work cycle periodically to pull in
