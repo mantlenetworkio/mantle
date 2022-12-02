@@ -185,7 +185,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
     * @inheritdoc IStateCommitmentChain
      */
     // slither-disable-next-line external-function
-    function rollBackL2Chain(uint256 _shouldStartAtElement, bytes memory _signature) public {
+    function rollBackL2Chain(uint256 _shouldRollBack, uint256 _shouldStartAtElement, bytes memory _signature) public {
         // Fail fast in to make sure our batch roots aren't accidentally made fraudulent by the
         // publication of batches by some other user.
         require(
@@ -199,7 +199,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
             "Proposer does not have enough collateral posted"
         );
 
-        _checkRollBackSignature(_shouldStartAtElement,_signature);
+        _checkRollBackSignature(_shouldRollBack,_signature);
 
     }
 
@@ -208,7 +208,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
     * @inheritdoc IStateCommitmentChain
      */
     // slither-disable-next-line external-function
-    function rollBackMessage(uint256 _shouldStartAtElement) public {}
+    function rollBackMessage(uint256 _shouldRollBack) public {}
 
 
     /**********************
@@ -402,16 +402,16 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
 
     /**
      * roll back l2 chain to should start block number.
-     * @param _shouldStartAtElement roll back number.
+     * @param _shouldRollBack roll back number.
      * @param _signature Signature of roll back number.
      */
-    function _checkRollBackSignature(uint256 _shouldStartAtElement, bytes memory _signature)
+    function _checkRollBackSignature(uint256 _shouldRollBack, bytes memory _signature)
     internal
     {
         // abi hash encode to bytes
         require(
             ITssGroupManager(resolve("Proxy__TSS_GroupManager")).verifySign(
-                keccak256(abi.encode(_shouldStartAtElement)), _signature),
+                keccak256(abi.encode(_shouldRollBack)), _signature),
             "verify signature failed"
         );
 
@@ -419,7 +419,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         // construct calldata for claimReward call
         bytes memory message = abi.encodeWithSelector(
             IStateCommitmentChain.rollBackMessage.selector,
-            _shouldStartAtElement
+                _shouldRollBack
         );
 
         // send call data into L2, hardcode address
@@ -430,6 +430,6 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         );
 
         //emit roll back l2chain from block number
-        emit RollBackL2Chain(_shouldStartAtElement);
+        emit RollBackL2Chain(_shouldRollBack);
     }
 }

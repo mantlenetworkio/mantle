@@ -231,7 +231,7 @@ func (d *Driver) CraftBatchTx(
 	log.Info("append log", "stateRoots", fmt.Sprintf("%v", stateRoots), "offsetStartsAtIndex", offsetStartsAtIndex, "signature", hex.EncodeToString(tssResponse.Signature), "rollback", tssResponse.RollBack)
 	var tx *types.Transaction
 	if tssResponse.RollBack {
-		tx, err = d.sccContract.RollBackL2Chain(opts, start, tssResponse.Signature)
+		tx, err = d.sccContract.RollBackL2Chain(opts, start, offsetStartsAtIndex, tssResponse.Signature)
 	} else {
 		tx, err = d.sccContract.AppendStateBatch(
 			opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
@@ -253,7 +253,7 @@ func (d *Driver) CraftBatchTx(
 		opts.GasTipCap = drivers.FallbackGasTipCap
 		if tssResponse.RollBack {
 			return d.sccContract.RollBackL2Chain(
-				opts, start, tssResponse.Signature,
+				opts, start, offsetStartsAtIndex, tssResponse.Signature,
 			)
 		} else {
 			return d.sccContract.AppendStateBatch(

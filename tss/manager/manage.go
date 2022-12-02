@@ -181,7 +181,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		}
 		log.Warn("failed to approval from tss nodes , there is wrong state root in batch state roots.need to roll back l2chain to batch index !")
 		//change unApprovals to approvals to do sign
-		ctx.WithApprovers(ctx.UnApprovers())
+		ctx = ctx.WithApprovers(ctx.UnApprovers())
 		rollback = true
 		startBlock, _ := new(big.Int).SetString(request.StartBlock, 10)
 		rollBackRequest := tss.RollBackRequest{StartBlock: request.StartBlock}
@@ -212,20 +212,20 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		m.store.AddCulprits(culprits)
 		return nil, err
 	}
-	absents := make([]string, 0)
-	for _, node := range tssInfo.TssMembers {
-		if !slices.ExistsIgnoreCase(ctx.Approvers(), node) {
-			addr, _ := tss.NodeToAddress(node)
-			if !m.store.IsInSlashing(addr) {
-				absents = append(absents, node)
-			}
-		}
-	}
-	if err = m.afterSignStateBatch(ctx, request.StateRoots, absents); err != nil {
-		log.Error("failed to execute afterSign", "err", err)
-	}
 
 	if !rollback {
+		absents := make([]string, 0)
+		for _, node := range tssInfo.TssMembers {
+			if !slices.ExistsIgnoreCase(ctx.Approvers(), node) {
+				addr, _ := tss.NodeToAddress(node)
+				if !m.store.IsInSlashing(addr) {
+					absents = append(absents, node)
+				}
+			}
+		}
+		if err = m.afterSignStateBatch(ctx, request.StateRoots, absents); err != nil {
+			log.Error("failed to execute afterSign", "err", err)
+		}
 		m.setStateSignature(digestBz, resp.Signature)
 	}
 	response := tss.BatchSubmitterResponse{

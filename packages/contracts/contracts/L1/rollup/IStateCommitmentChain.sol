@@ -91,14 +91,16 @@ interface IStateCommitmentChain {
 
     /**
      * Emit event to notify sequencers to roll back.
-     * @param _shouldStartAtElement roll back to should start .
+     * @param _shouldRollBack roll back to should start .
+     * @param _shouldStartAtElement Index of the element at which this batch should start
+     * @param _signature signature of rollback message
      */
-    function rollBackL2Chain(uint256 _shouldStartAtElement, bytes memory _signature) external;
+    function rollBackL2Chain(uint256 _shouldRollBack,uint256 _shouldStartAtElement, bytes memory _signature) external;
 
     /**
      * interface for send domain message
-     * @param _shouldStartAtElement roll back to should start .
+     * @param _shouldRollBack roll back to should start .
      */
-    function rollBackMessage(uint256 _shouldStartAtElement) external;
+    function rollBackMessage(uint256 _shouldRollBack) external;
 
 }

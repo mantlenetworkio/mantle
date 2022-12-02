@@ -227,7 +227,7 @@ Resolves the address associated with a given name.
 ### rollBackL2Chain
 
 ```solidity
-function rollBackL2Chain(uint256 _shouldStartAtElement, bytes _signature) external nonpayable
+function rollBackL2Chain(uint256 _shouldRollBack, uint256 _shouldStartAtElement, bytes _signature) external nonpayable
 ```
 
 Emit event to notify sequencers to roll back.
@@ -238,13 +238,14 @@ Emit event to notify sequencers to roll back.
 
 | Name | Type | Description |
 |---|---|---|
-| _shouldStartAtElement | uint256 | roll back to should start .
-| _signature | bytes | undefined
+| _shouldRollBack | uint256 | roll back to should start .
+| _shouldStartAtElement | uint256 | Index of the element at which this batch should start
+| _signature | bytes | signature of rollback message
 
 ### rollBackMessage
 
 ```solidity
-function rollBackMessage(uint256 _shouldStartAtElement) external nonpayable
+function rollBackMessage(uint256 _shouldRollBack) external nonpayable
 ```
 
 interface for send domain message
@@ -255,7 +256,7 @@ interface for send domain message
 
 | Name | Type | Description |
 |---|---|---|
-| _shouldStartAtElement | uint256 | roll back to should start .
+| _shouldRollBack | uint256 | roll back to should start .
 
 ### verifyStateCommitment
 
