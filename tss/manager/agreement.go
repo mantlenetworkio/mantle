@@ -108,7 +108,7 @@ func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Me
 	approvers := make([]string, 0)
 	unApprovers := make([]string, 0)
 	for node, pass := range results {
-		if !pass {
+		if pass {
 			approvers = append(approvers, node)
 		} else {
 			unApprovers = append(unApprovers, node)

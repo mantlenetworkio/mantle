@@ -166,7 +166,6 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 // indicates a core error meaning that the message would always fail for that particular
 // state and would never be accepted within a block.
 func ApplyMessage(evm *vm.EVM, msg Message, gp *GasPool) ([]byte, uint64, bool, error) {
-	log.Info("----------- ApplyMessage ", "from ", msg.From().String(), " to ", msg.To().String(), "msg ", msg)
 	return NewStateTransition(evm, msg, gp).TransitionDb()
 }
 
