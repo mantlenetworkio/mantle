@@ -51,9 +51,19 @@ fi
 echo "Building addresses.json."
 export ADDRESS_MANAGER_ADDRESS=$(cat "./deployments/$CONTRACTS_TARGET_NETWORK/Lib_AddressManager.json" | jq -r .address)
 
-# First, create two files. One of them contains a list of addresses, the other contains a list of contract names.
-find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | xargs cat | jq -r '.address' > addresses.txt
-find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | sed -e "s/.\/deployments\/$CONTRACTS_TARGET_NETWORK\///g" | sed -e 's/.json//g' > filenames.txt
+
+if [ $SKIP_CONTRACT_DEPLOY == "NO" ] ;then
+  echo "Re-generate addresses.txt"
+  # First, create two files. One of them contains a list of addresses, the other contains a list of contract names.
+  find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | xargs cat | jq -r '.address' > addresses.txt
+  find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | sed -e "s/.\/deployments\/$CONTRACTS_TARGET_NETWORK\///g" | sed -e 's/.json//g' > filenames.txt
+elif [ $CONTRACTS_TARGET_NETWORK == "goerli-qa" ] ; then
+  cp -r addresses-qa.txt addresses.txt
+  cp -r filenames-qa.txt filenames.txt
+else [ $CONTRACTS_TARGET_NETWORK == "goerli-testnet" ]
+  cp -r addresses-testnet.txt addresses.txt
+  cp -r filenames-testnet.txt filenames.txt
+fi
 
 # Start building addresses.json.
 echo "{" > addresses.json
@@ -74,10 +84,6 @@ cp ./genesis/$CONTRACTS_TARGET_NETWORK.json ./genesis/state-dump.latest.json
 
 # init balance
 if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
-  jq -n 'reduce inputs as $item ({}; . *= $item)' ./genesis/state-dump.latest.json ./balance.json > genesis2.json
-  mv ./genesis/state-dump.latest.json ./genesis/state-dump.latest.json.bak
-  cp ./genesis2.json ./genesis/state-dump.latest.json
-elif  [ $CONTRACTS_TARGET_NETWORK == "goerli-qa" ] ; then
   jq -n 'reduce inputs as $item ({}; . *= $item)' ./genesis/state-dump.latest.json ./balance.json > genesis2.json
   mv ./genesis/state-dump.latest.json ./genesis/state-dump.latest.json.bak
   cp ./genesis2.json ./genesis/state-dump.latest.json
