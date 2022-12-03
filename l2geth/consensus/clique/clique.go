@@ -295,6 +295,7 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 	var schedulerSignature []byte
 	if strings.HasPrefix(string(header.Extra), schedulerSigFlag) {
 		if len(header.Extra) <= extraVanity+crypto.SignatureLength*2+len(schedulerSigFlag) {
+			log.Error("header extra", "height", header.Number.Uint64(), "length", len(header.Extra), "data", hex.EncodeToString(header.Extra))
 			return errIncompleteExtra
 		}
 		batchPeriodBuffer = header.Extra[extraVanity : len(header.Extra)-len(schedulerSigFlag)-crypto.SignatureLength*2]
@@ -302,6 +303,7 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 		schedulerSignature = header.Extra[len(header.Extra)-len(schedulerSigFlag)-crypto.SignatureLength*1 : len(header.Extra)-len(schedulerSigFlag)]
 	} else {
 		if len(header.Extra) <= extraVanity+crypto.SignatureLength {
+			log.Error("header extra", "height", header.Number.Uint64(), "length", len(header.Extra), "data", hex.EncodeToString(header.Extra))
 			return errIncompleteExtra
 		}
 		batchPeriodBuffer = header.Extra[extraVanity : len(header.Extra)-crypto.SignatureLength]
@@ -568,7 +570,12 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, extraVanity-len(header.Extra))...)
 	}
 	header.Extra = header.Extra[:extraVanity]
-	header.Extra = append(header.Extra, c.batchPeriod.SerializeBatchPeriodStartMsg()...)
+	batchPeriodBytes := c.batchPeriod.SerializeBatchPeriodStartMsg()
+	if batchPeriodBytes == nil {
+		return nil
+	} else {
+		header.Extra = append(header.Extra, batchPeriodBytes...)
+	}
 	header.Extra = append(header.Extra, make([]byte, extraSeal)...)
 
 	// Mix digest is reserved for now, set to empty

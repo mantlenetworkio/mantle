@@ -44,6 +44,13 @@ func (bps *BatchPeriodStartMsg) SerializeBatchPeriodStartMsg() []byte {
 	return buf
 }
 
+func (bps *BatchPeriodStartMsg) Hash() common.Hash {
+	if bps == nil {
+		return common.Hash{}
+	}
+	return rlpHash(bps)
+}
+
 func IsValidBatchPeriodStartMsgBuf(buf []byte) bool {
 	sequencerSetLength := len(buf) - (uint64Length*5 + common.AddressLength + crypto.SignatureLength)
 	if sequencerSetLength <= 0 || sequencerSetLength%common.AddressLength != 0 {
@@ -91,8 +98,22 @@ type BatchPeriodEndMsg struct {
 	Signature    []byte
 }
 
+func (bps *BatchPeriodEndMsg) Hash() common.Hash {
+	if bps == nil {
+		return common.Hash{}
+	}
+	return rlpHash(bps)
+}
+
 type FraudProofReorgMsg struct {
 	ReorgIndex    uint64
 	ReorgToHeight uint64
 	TssSignature  []byte
+}
+
+func (bps *FraudProofReorgMsg) Hash() common.Hash {
+	if bps == nil {
+		return common.Hash{}
+	}
+	return rlpHash(bps)
 }

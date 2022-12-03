@@ -313,13 +313,19 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 		exTime := time.Now().Unix() + 1000
 		erCh := make(chan error, 1)
 
+		// TODO mock data
 		b.eth.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg: &types.BatchPeriodStartMsg{
-				ReorgIndex:  0,
-				BatchIndex:  1,
-				StartHeight: start,
-				MaxHeight:   end,
-				ExpireTime:  uint64(exTime),
+				ReorgIndex:   0,
+				BatchIndex:   1,
+				StartHeight:  start,
+				MaxHeight:    end,
+				ExpireTime:   uint64(exTime),
+				MinerAddress: common.HexToAddress("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"),
+				SequencerSet: []common.Address{
+					common.HexToAddress("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"),
+				},
+				Signature: common.Hex2Bytes("2020a0bbf67b08b1df594333c1ead3a771d9742d2f33798e050da744b1255bb67860d672a5055429cc53d17e6c57550989b39cf997e2fb58d1ec6aae198a471501"),
 			},
 			ErrCh: erCh,
 		})

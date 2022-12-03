@@ -111,6 +111,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bs); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
+		p.knowStartMsg.Add(bs.Hash())
 		// todo : verify Signature and index then post ProduceBlockEvent
 		erCh := make(chan error, 1)
 		pm.eventMux.Post(core.BatchPeriodStartEvent{
@@ -123,6 +124,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&be); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
+		p.knowStartMsg.Add(be.Hash())
 		// todo: BatchPeriodEndMsg handle
 		log.Info("Batch Period End Msg")
 	case msg.Code == FraudProofReorgMsg:
@@ -130,6 +132,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&fpr); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
+		p.knowStartMsg.Add(fpr.Hash())
 		// todo: FraudProofReorgMsg handle
 		log.Info("Fraud Proof Reorg Msg")
 
@@ -153,7 +156,8 @@ func (pm *ProtocolManager) batchPeriodStartMsgBroadcastLoop() {
 }
 
 func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
-	peers := pm.peersTmp.PeersWithoutStartMsg(msg.BatchIndex)
+	peers := pm.peersTmp.PeersWithoutStartMsg(msg.Hash())
+	log.Info("peers", "length", len(peers))
 	for _, p := range peers {
 		p.AsyncSendBatchPeriodStartMsg(msg)
 	}
@@ -163,7 +167,7 @@ func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *types.BatchPeriodSt
 func (p *peer) AsyncSendBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 	select {
 	case p.queuedStartMsg <- msg:
-		p.knowStartMsg.Add(msg.BatchIndex)
+		p.knowStartMsg.Add(msg.Hash())
 		for p.knowStartMsg.Cardinality() >= maxKnownStartMsg {
 			p.knowStartMsg.Pop()
 		}
@@ -184,7 +188,7 @@ func (pm *ProtocolManager) batchPeriodEndMsgBroadcastLoop() {
 }
 
 func (pm *ProtocolManager) BroadcastBatchPeriodEndMsg(msg *types.BatchPeriodEndMsg) {
-	peers := pm.peersTmp.PeersWithoutEndMsg(msg.BatchIndex)
+	peers := pm.peersTmp.PeersWithoutEndMsg(msg.Hash())
 	for _, p := range peers {
 		p.AsyncSendBatchPeriodEndMsg(msg)
 	}
@@ -194,7 +198,7 @@ func (pm *ProtocolManager) BroadcastBatchPeriodEndMsg(msg *types.BatchPeriodEndM
 func (p *peer) AsyncSendBatchPeriodEndMsg(msg *types.BatchPeriodEndMsg) {
 	select {
 	case p.queuedEndMsg <- msg:
-		p.knowEndMsg.Add(msg.BatchIndex)
+		p.knowEndMsg.Add(msg.Hash())
 		for p.knowEndMsg.Cardinality() >= maxKnownEndMsg {
 			p.knowEndMsg.Pop()
 		}
@@ -215,7 +219,7 @@ func (pm *ProtocolManager) fraudProofReorgMsgBroadcastLoop() {
 }
 
 func (pm *ProtocolManager) BroadcastFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
-	peers := pm.peersTmp.PeersWithoutFraudProofReorgMsg(reorg.ReorgIndex)
+	peers := pm.peersTmp.PeersWithoutFraudProofReorgMsg(reorg.Hash())
 	for _, p := range peers {
 		p.AsyncSendFraudProofReorgMsg(reorg)
 	}
@@ -225,7 +229,7 @@ func (pm *ProtocolManager) BroadcastFraudProofReorgMsg(reorg *types.FraudProofRe
 func (p *peer) AsyncSendFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
 	select {
 	case p.queuedFraudProofReorg <- reorg:
-		p.knowFraudProofReorg.Add(reorg.ReorgIndex)
+		p.knowFraudProofReorg.Add(reorg.Hash())
 		for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
 			p.knowFraudProofReorg.Pop()
 		}
@@ -240,7 +244,7 @@ func (p *peer) AsyncSendFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
 // SendBatchPeriodStart sends a batch of transaction receipts, corresponding to the
 // ones requested from an already RLP encoded format.
 func (p *peer) SendBatchPeriodStart(bs *types.BatchPeriodStartMsg) error {
-	p.knowStartMsg.Add(bs.BatchIndex)
+	p.knowStartMsg.Add(bs.Hash())
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowStartMsg.Cardinality() >= maxKnownStartMsg {
 		p.knowStartMsg.Pop()
@@ -249,7 +253,7 @@ func (p *peer) SendBatchPeriodStart(bs *types.BatchPeriodStartMsg) error {
 }
 
 func (p *peer) SendBatchPeriodEnd(be *types.BatchPeriodEndMsg) error {
-	p.knowEndMsg.Add(be.BatchIndex)
+	p.knowEndMsg.Add(be.Hash())
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowEndMsg.Cardinality() >= maxKnownEndMsg {
 		p.knowEndMsg.Pop()
@@ -258,7 +262,7 @@ func (p *peer) SendBatchPeriodEnd(be *types.BatchPeriodEndMsg) error {
 }
 
 func (p *peer) SendFraudProofReorg(fpr *types.FraudProofReorgMsg) error {
-	p.knowFraudProofReorg.Add(fpr.ReorgIndex)
+	p.knowFraudProofReorg.Add(fpr.Hash())
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
 		p.knowFraudProofReorg.Pop()

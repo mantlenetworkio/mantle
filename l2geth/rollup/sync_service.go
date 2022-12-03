@@ -2,6 +2,7 @@ package rollup
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -23,6 +24,11 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/eth/gasprice"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
+)
+
+const (
+	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
+	chainHeadChanSize = 10
 )
 
 var (
@@ -48,7 +54,7 @@ type SyncService struct {
 	db                             ethdb.Database
 	scope                          event.SubscriptionScope
 	txFeed                         event.Feed
-	produceBlock                   event.Feed
+	batchPeriodCh                  event.Feed
 	txLock                         sync.Mutex
 	loopLock                       sync.Mutex
 	enable                         bool
@@ -76,6 +82,8 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	if bc == nil {
 		return nil, errors.New("Must pass BlockChain to SyncService")
 	}
+
+	log.Info(fmt.Sprintf("SyncService config: %v", cfg))
 
 	ctx, cancel := context.WithCancel(ctx)
 	_ = cancel // satisfy govet
@@ -132,7 +140,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		syncing:                        atomic.Value{},
 		bc:                             bc,
 		txpool:                         txpool,
-		chainHeadCh:                    make(chan core.ChainHeadEvent, 1),
+		chainHeadCh:                    make(chan core.ChainHeadEvent, chainHeadChanSize),
 		client:                         client,
 		db:                             db,
 		pollInterval:                   pollInterval,
@@ -153,7 +161,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	// things downstream, it is expected that this channel will halt ingestion
 	// of additional transactions by the SyncService.
 	// TODO handle this subscription later
-	//service.chainHeadSub = service.bc.SubscribeChainHeadEvent(service.chainHeadCh)
+	service.chainHeadSub = service.bc.SubscribeChainHeadEvent(service.chainHeadCh)
 
 	// Initial sync service setup if it is enabled. This code depends on
 	// a remote server that indexes the layer one contracts. Place this
@@ -222,6 +230,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 			service.setSyncStatus(true)
 		}
 	}
+	go service.handleChainHeadEventLoop()
 	return &service, nil
 }
 
@@ -407,7 +416,7 @@ func (s *SyncService) IsSyncing() bool {
 func (s *SyncService) Stop() error {
 	s.scope.Close()
 	// TODO handle this subscription later
-	//s.chainHeadSub.Unsubscribe()
+	s.chainHeadSub.Unsubscribe()
 	close(s.chainHeadCh)
 
 	if s.cancel != nil {
@@ -1062,23 +1071,23 @@ func (s *SyncService) applyTransactionToTipMock(tx *types.Transaction) (error, f
 	// The index was set above so it is safe to dereference
 	log.Debug("Applying transaction to tip mock", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
 
-	txs := types.Transactions{tx}
-	errCh := make(chan error, 1)
-	s.txFeed.Send(core.NewTxsEvent{
-		Txs:   txs,
-		ErrCh: errCh,
-	})
+	//txs := types.Transactions{tx}
+	//errCh := make(chan error, 1)
+	//s.txFeed.Send(core.NewTxsEvent{
+	//	Txs:   txs,
+	//	ErrCh: errCh,
+	//})
 	// Block until the transaction has been added to the chain
 	log.Trace("Waiting for transaction to be added to chain", "hash", tx.Hash().Hex())
 
 	hook := func() error {
 		select {
-		case err := <-errCh:
-			log.Error("Got error waiting for transaction to be added to chain", "msg", err)
-			s.SetLatestL1Timestamp(ts)
-			s.SetLatestL1BlockNumber(bn)
-			s.SetLatestIndex(index)
-			return err
+		//case err := <-errCh:
+		//	log.Error("Got error waiting for transaction to be added to chain", "msg", err)
+		//	s.SetLatestL1Timestamp(ts)
+		//	s.SetLatestL1BlockNumber(bn)
+		//	s.SetLatestIndex(index)
+		//	return err
 		case <-s.chainHeadCh:
 			// Update the cache when the transaction is from the owner
 			// of the gas price oracle
@@ -1415,15 +1424,25 @@ func (s *SyncService) SubscribeNewTxsEvent(ch chan<- core.NewTxsEvent) event.Sub
 	return s.scope.Track(s.txFeed.Subscribe(ch))
 }
 
-// SubscribeProduceBlockEvent registers a subscription of ProduceBlockEvent and
+// SubscribeBatchPeriodStartEvent registers a subscription of ProduceBlockEvent and
 // starts sending event to the given channel.
-func (s *SyncService) SubscribeProduceBlockEvent(ch chan<- core.BatchPeriodStartEvent) event.Subscription {
-	return s.scope.Track(s.produceBlock.Subscribe(ch))
+func (s *SyncService) SubscribeBatchPeriodStartEvent(ch chan<- core.BatchPeriodStartEvent) event.Subscription {
+	return s.scope.Track(s.batchPeriodCh.Subscribe(ch))
 }
 
-func (s *SyncService) ProcessProduceBlockMsg() error {
-	s.produceBlock.Send(nil) // TODO
+func (s *SyncService) ProcessBatchPeriodStartMsg() error {
+	s.batchPeriodCh.Send(nil) // TODO
 	return nil
+}
+
+func (s *SyncService) handleChainHeadEventLoop() {
+	log.Info("Start handle chain head event loop")
+	for {
+		select {
+		case chainHead := <-s.chainHeadCh:
+			log.Info("chainHead", "block number", chainHead.Block.NumberU64(), "extra data", hex.EncodeToString(chainHead.Block.Extra()))
+		}
+	}
 }
 
 func stringify(i *uint64) string {

@@ -18,6 +18,7 @@ package miner
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -150,9 +151,9 @@ type worker struct {
 	pendingLogsFeed event.Feed
 
 	// Subscriptions
-	mux             *event.TypeMux
-	txsCh           chan core.NewTxsEvent
-	txsSub          event.Subscription
+	mux   *event.TypeMux
+	txsCh chan core.NewTxsEvent
+	//txsSub          event.Subscription
 	chainHeadCh     chan core.ChainHeadEvent
 	chainHeadSub    event.Subscription
 	chainSideCh     chan core.ChainSideEvent
@@ -225,7 +226,7 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 		resubmitAdjustCh:   make(chan *intervalAdjust, resubmitAdjustChanSize),
 	}
 	// Subscribe NewTxsEvent for tx pool
-	worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
+	//worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
 	// channel directly to the miner
 	worker.produceBlockSub = worker.mux.Subscribe(core.BatchPeriodStartEvent{})
 
@@ -375,10 +376,11 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 		// cleaning up memory with the call to `clearPending`, so be sure to
 		// call that in the new hot code path
 
-		case head := <-w.chainHeadCh:
-			clearPending(head.Block.NumberU64())
-			timestamp = time.Now().Unix()
-			commit(commitInterruptNewHead)
+		//case head := <-w.chainHeadCh:
+		//	log.Info("newWorkLoop head := <-w.chainHeadCh")
+		//	clearPending(head.Block.NumberU64())
+		//	timestamp = time.Now().Unix()
+		//	commit(commitInterruptNewHead)
 
 		case <-timer.C:
 			// If mining is running resubmit a new work cycle periodically to pull in
@@ -437,7 +439,7 @@ func (w *worker) produceBlockLoop() {
 
 // mainLoop is a standalone goroutine to regenerate the sealing task based on the received event.
 func (w *worker) mainLoop() {
-	defer w.txsSub.Unsubscribe()
+	//defer w.txsSub.Unsubscribe()
 	defer w.chainHeadSub.Unsubscribe()
 	defer w.chainSideSub.Unsubscribe()
 	defer w.produceBlockSub.Unsubscribe()
@@ -491,17 +493,17 @@ func (w *worker) mainLoop() {
 		// reading the next tx from the channel when there is
 		// not an error processing the transaction.
 		case ev := <-w.produceBlockCh:
+			if !bytes.Equal(ev.Msg.MinerAddress[:], w.coinbase[:]) {
+				log.Trace("Current node is not the miner")
+				continue
+			}
 			if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
 				log.Warn("No transaction sent to miner from syncservice")
 				continue
 			}
 			currentHeight := w.chain.CurrentBlock().NumberU64() + 1
 			if ev.Msg.StartHeight != currentHeight {
-				log.Warn("Start block height mismatch")
-				continue
-			}
-			if !bytes.Equal(ev.Msg.MinerAddress[:], w.coinbase[:]) {
-				log.Warn("Current node is not the miner")
+				log.Warn("Start block height mismatch", "currentHeight", currentHeight, "StartHeight", ev.Msg.StartHeight)
 				continue
 			}
 			w.engine.SetBatchPeriod(ev.Msg)
@@ -543,13 +545,13 @@ func (w *worker) mainLoop() {
 				// send the block through the `taskCh` and then through the
 				// `resultCh` which ultimately adds the block to the blockchain
 				// through `bc.WriteBlockWithState`
-				err, hook := w.eth.SyncService().ValidateAndApplySequencerTransactionMock(tx)
-				if err != nil || hook == nil {
-					log.Debug("ValidateAndApplySequencerTransactionMock failed")
+				err, _ := w.eth.SyncService().ValidateAndApplySequencerTransactionMock(tx)
+				if err != nil {
+					log.Error("SyncService err", "errMsg", err.Error())
 					break
 				}
 				if err := w.commitNewTx(tx); err == nil {
-					hook()
+					//hook()
 					// `chainHeadCh` is written to when a new block is added to the
 					// tip of the chain. Reading from the channel will block until
 					// the ethereum block is added to the chain downstream of `commitNewTx`.
@@ -584,48 +586,48 @@ func (w *worker) mainLoop() {
 					}
 				}
 			}
-		//case ev := <-w.txsCh:
-		//	// Apply transactions to the pending state if we're not mining.
-		//	//
-		//	// Note all transactions received may not be continuous with transactions
-		//	// already included in the current mining block. These transactions will
-		//	// be automatically eliminated.
-		//	if !w.isRunning() && w.current != nil {
-		//		// If block is already full, abort
-		//		if gp := w.current.gasPool; gp != nil && gp.Gas() < params.TxGas {
-		//			continue
-		//		}
-		//		w.mu.RLock()
-		//		coinbase := w.coinbase
-		//		w.mu.RUnlock()
-		//
-		//		txs := make(map[common.Address]types.Transactions)
-		//		for _, tx := range ev.Txs {
-		//			acc, _ := types.Sender(w.current.signer, tx)
-		//			txs[acc] = append(txs[acc], tx)
-		//		}
-		//		txset := types.NewTransactionsByPriceAndNonce(w.current.signer, txs)
-		//		tcount := w.current.tcount
-		//		w.commitTransactions(txset, coinbase, nil)
-		//		// Only update the snapshot if any new transactons were added
-		//		// to the pending block
-		//		if tcount != w.current.tcount {
-		//			w.updateSnapshot()
-		//		}
-		//	} else {
-		//		// If clique is running in dev mode(period is 0), disable
-		//		// advance sealing here.
-		//		if w.chainConfig.Clique != nil && w.chainConfig.Clique.Period == 0 {
-		//			w.commitNewWork(nil, time.Now().Unix())
-		//		}
-		//	}
-		//	atomic.AddInt32(&w.newTxs, int32(len(ev.Txs)))
+		case ev := <-w.txsCh:
+			// Apply transactions to the pending state if we're not mining.
+			//
+			// Note all transactions received may not be continuous with transactions
+			// already included in the current mining block. These transactions will
+			// be automatically eliminated.
+			if !w.isRunning() && w.current != nil {
+				// If block is already full, abort
+				if gp := w.current.gasPool; gp != nil && gp.Gas() < params.TxGas {
+					continue
+				}
+				w.mu.RLock()
+				coinbase := w.coinbase
+				w.mu.RUnlock()
+
+				txs := make(map[common.Address]types.Transactions)
+				for _, tx := range ev.Txs {
+					acc, _ := types.Sender(w.current.signer, tx)
+					txs[acc] = append(txs[acc], tx)
+				}
+				txset := types.NewTransactionsByPriceAndNonce(w.current.signer, txs)
+				tcount := w.current.tcount
+				w.commitTransactions(txset, coinbase, nil)
+				// Only update the snapshot if any new transactons were added
+				// to the pending block
+				if tcount != w.current.tcount {
+					w.updateSnapshot()
+				}
+			} else {
+				// If clique is running in dev mode(period is 0), disable
+				// advance sealing here.
+				if w.chainConfig.Clique != nil && w.chainConfig.Clique.Period == 0 {
+					w.commitNewWork(nil, time.Now().Unix())
+				}
+			}
+			atomic.AddInt32(&w.newTxs, int32(len(ev.Txs)))
 
 		// System stopped
 		case <-w.exitCh:
 			return
-		case <-w.txsSub.Err():
-			return
+		//case <-w.txsSub.Err():
+		//	return
 		case <-w.chainHeadSub.Err():
 			return
 		case <-w.chainSideSub.Err():
@@ -656,6 +658,7 @@ func (w *worker) taskLoop() {
 				w.newTaskHook(task)
 			}
 			// Reject duplicate sealing work due to resubmitting.
+			log.Info("block header", "height", task.block.Number().Int64(), "extradata", hex.EncodeToString(task.block.Header().Extra))
 			sealHash := w.engine.SealHash(task.block.Header())
 			if sealHash == prev {
 				continue
