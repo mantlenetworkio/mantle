@@ -653,7 +653,7 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 	}
 
 	for k, _ := range snap.Signers {
-		log.Info(fmt.Sprintf("has signer: %v", k.String()))
+		log.Debug(fmt.Sprintf("has signer: %v", k.String()))
 	}
 
 	if _, authorized := snap.Signers[signer]; !authorized {
@@ -690,7 +690,6 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 		return err
 	}
 	copy(header.Extra[len(header.Extra)-extraSeal:], sighash)
-	log.Info("block header", "extradata", hex.EncodeToString(header.Extra))
 	// Wait until sealing is terminated or delay timeout.
 	log.Trace("Waiting for slot to sign and propagate", "delay", common.PrettyDuration(delay))
 	go func() {

@@ -148,9 +148,14 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 
 // BatchPeriodStartMsg will
 func (pm *ProtocolManager) batchPeriodStartMsgBroadcastLoop() {
+	log.Info("Start batchPeriodStartMsg broadcast routine")
 	// automatically stops if unsubscribe
 	for obj := range pm.batchStartMsgSub.Chan() {
 		if se, ok := obj.Data.(core.BatchPeriodStartEvent); ok {
+			log.Debug("Got BatchPeriodStartEvent, broadcast it",
+				"batchIndex", se.Msg.BatchIndex,
+				"startHeight", se.Msg.StartHeight,
+				"maxHeight", se.Msg.MaxHeight)
 			pm.BroadcastBatchPeriodStartMsg(se.Msg) // First propagate block to peers
 		}
 	}
@@ -180,9 +185,15 @@ func (p *peer) AsyncSendBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 
 // BatchPeriodEndMsg
 func (pm *ProtocolManager) batchPeriodEndMsgBroadcastLoop() {
+	log.Info("Start batchPeriodEndMsg broadcast routine")
 	// automatically stops if unsubscribe
 	for obj := range pm.batchEndMsgSub.Chan() {
 		if ee, ok := obj.Data.(core.BatchPeriodEndEvent); ok {
+			log.Debug("Got BatchPeriodEndEvent, broadcast it",
+				"batchIndex", ee.Msg.BatchIndex,
+				"startHeight", ee.Msg.StartHeight,
+				"maxHeight", ee.Msg.EndHeight)
+
 			pm.BroadcastBatchPeriodEndMsg(ee.Msg) // First propagate block to peers
 		}
 	}
@@ -211,9 +222,14 @@ func (p *peer) AsyncSendBatchPeriodEndMsg(msg *types.BatchPeriodEndMsg) {
 
 // FraudProofReorgMsg
 func (pm *ProtocolManager) fraudProofReorgMsgBroadcastLoop() {
+	log.Info("Start fraudProofReorgMsg broadcast routine")
 	// automatically stops if unsubscribe
 	for obj := range pm.fraudProofReorgMsgSub.Chan() {
 		if fe, ok := obj.Data.(core.FraudProofReorgEvent); ok {
+			log.Debug("Got BatchPeriodEndEvent, broadcast it",
+				"reorgIndex", fe.Msg.ReorgIndex,
+				"reorgToHeight", fe.Msg.ReorgToHeight)
+
 			pm.BroadcastFraudProofReorgMsg(fe.Msg) // First propagate block to peers
 		}
 	}

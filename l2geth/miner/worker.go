@@ -18,7 +18,6 @@ package miner
 
 import (
 	"bytes"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -597,9 +596,9 @@ func (w *worker) mainLoop() {
 						// a transaction that cannot be added to the chain, so this
 						// should be updated to a select statement that can also listen
 						// for errors.
-						log.Info("wait for chainHeadWaitCh")
+						log.Debug("wait for chainHeadWaitCh")
 						head := <-w.chainHeadWaitCh
-						log.Info("get chainHeadWaitCh", "height", head.Block.NumberU64())
+						log.Debug("get chainHeadWaitCh", "height", head.Block.NumberU64())
 						txs := head.Block.Transactions()
 						if len(txs) == 0 {
 							log.Warn("No transactions in block")
@@ -699,7 +698,6 @@ func (w *worker) taskLoop() {
 				w.newTaskHook(task)
 			}
 			// Reject duplicate sealing work due to resubmitting.
-			log.Info("block header", "height", task.block.Number().Int64(), "extradata", hex.EncodeToString(task.block.Header().Extra))
 			sealHash := w.engine.SealHash(task.block.Header())
 			if sealHash == prev {
 				continue
