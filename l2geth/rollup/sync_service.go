@@ -1440,7 +1440,7 @@ func (s *SyncService) handleChainHeadEventLoop() {
 	for {
 		select {
 		case chainHead := <-s.chainHeadCh:
-			log.Info("chainHead", "block number", chainHead.Block.NumberU64(), "extra data", hex.EncodeToString(chainHead.Block.Extra()))
+			log.Debug("chainHead", "block number", chainHead.Block.NumberU64(), "extra data", hex.EncodeToString(chainHead.Block.Extra()))
 		}
 	}
 }

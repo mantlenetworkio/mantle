@@ -111,6 +111,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bs); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
+		log.Info("Batch Period Start Msg", "batchIndex", bs.BatchIndex, "startHeight", bs.StartHeight, "maxHeight", bs.MaxHeight, "expireTime", bs.ExpireTime)
 		p.knowStartMsg.Add(bs.Hash())
 		// todo : verify Signature and index then post ProduceBlockEvent
 		erCh := make(chan error, 1)
@@ -118,23 +119,23 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			Msg:   bs,
 			ErrCh: erCh,
 		})
-		log.Info("Batch Period Start Msg")
 	case msg.Code == BatchPeriodEndMsg:
 		var be *types.BatchPeriodEndMsg
 		if err := msg.Decode(&be); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
+		log.Info("Batch Period End Msg", "batchIndex", be.BatchIndex, "startHeight", be.StartHeight, "maxHeight", be.EndHeight)
 		p.knowStartMsg.Add(be.Hash())
 		// todo: BatchPeriodEndMsg handle
-		log.Info("Batch Period End Msg")
+
 	case msg.Code == FraudProofReorgMsg:
 		var fpr *types.FraudProofReorgMsg
 		if err := msg.Decode(&fpr); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
+		log.Info("Fraud Proof Reorg Msg")
 		p.knowStartMsg.Add(fpr.Hash())
 		// todo: FraudProofReorgMsg handle
-		log.Info("Fraud Proof Reorg Msg")
 
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)

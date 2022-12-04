@@ -502,7 +502,7 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	if err != nil {
 		return err
 	}
-	log.Info(fmt.Sprintf("signer is : %v", signer.String()))
+	log.Debug(fmt.Sprintf("signer is: %v", signer.String()))
 	if _, ok := snap.Signers[signer]; !ok {
 		return errUnauthorizedSigner
 	}

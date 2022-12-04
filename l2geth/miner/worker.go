@@ -250,6 +250,7 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	go worker.newWorkLoop(recommit)
 	go worker.resultLoop()
 	go worker.taskLoop()
+	go worker.feedProduceBlockChannelLoop()
 
 	// Submit first work to initialize pending state.
 	if init {
@@ -393,7 +394,7 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 		select {
 		case <-w.startCh:
 			clearPending(w.chain.CurrentBlock().NumberU64())
-			commit(commitInterruptNewHead)
+			//commit(commitInterruptNewHead)
 
 		// Remove this code for the BVM implementation. It is responsible for
 		// cleaning up memory with the call to `clearPending`, so be sure to
@@ -402,6 +403,7 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 		case head := <-w.chainHeadCh:
 			log.Debug("new chain header", "height", head.Block.NumberU64())
 			if w.isInProducingBlockPhase() {
+				// notification to pick out txs from txpool and produce new blocks
 				w.chainHeadWaitCh <- head
 			}
 
@@ -452,7 +454,7 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 	}
 }
 
-func (w *worker) produceBlockLoop() {
+func (w *worker) feedProduceBlockChannelLoop() {
 	for obj := range w.produceBlockSub.Chan() {
 		if ev, ok := obj.Data.(core.BatchPeriodStartEvent); ok {
 			w.produceBlockCh <- ev
@@ -466,7 +468,6 @@ func (w *worker) mainLoop() {
 	defer w.chainHeadSub.Unsubscribe()
 	defer w.chainSideSub.Unsubscribe()
 	defer w.produceBlockSub.Unsubscribe()
-	go w.produceBlockLoop()
 
 	for {
 		select {
@@ -518,6 +519,10 @@ func (w *worker) mainLoop() {
 		case ev := <-w.produceBlockCh:
 			if !bytes.Equal(ev.Msg.MinerAddress[:], w.coinbase[:]) {
 				log.Trace("Current node is not the miner")
+				continue
+			}
+			if !w.isRunning() {
+				log.Warn("Miner is not started")
 				continue
 			}
 			if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
