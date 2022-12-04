@@ -271,10 +271,16 @@ func (w *worker) isInProducingBlockPhase() bool {
 	return w.inProducingBlockPhase
 }
 
-func (w *worker) updateIsInProducingBlockPhase(value bool) {
+func (w *worker) enterProducingBlockPhase() {
 	w.producingBlockPhaseMux.Lock()
 	defer w.producingBlockPhaseMux.Unlock()
-	w.inProducingBlockPhase = value
+	w.inProducingBlockPhase = true
+}
+
+func (w *worker) exitProducingBlockPhase() {
+	w.producingBlockPhaseMux.Lock()
+	defer w.producingBlockPhaseMux.Unlock()
+	w.inProducingBlockPhase = false
 }
 
 // setExtra sets the content used to initialize the block extra field.
@@ -527,8 +533,8 @@ func (w *worker) mainLoop() {
 			w.engine.SetBatchPeriod(ev.Msg)
 
 			func() {
-				w.updateIsInProducingBlockPhase(true)
-				defer w.updateIsInProducingBlockPhase(false)
+				w.enterProducingBlockPhase()
+				defer w.exitProducingBlockPhase()
 
 				// ----------------------------------------------------------------------
 				// Fill the block with all available pending transactions.
