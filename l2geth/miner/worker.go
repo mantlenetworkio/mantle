@@ -541,7 +541,7 @@ func (w *worker) mainLoop() {
 				defer w.exitProducingBlockPhase()
 
 				// ----------------------------------------------------------------------
-				// Fill the block with all available pending transactions.
+				// TODO for loop to wait for tx until expire time
 				pending, err := w.eth.TxPool().Pending()
 				if err != nil {
 					log.Error("Failed to fetch pending transactions", "err", err)
@@ -549,7 +549,7 @@ func (w *worker) mainLoop() {
 				}
 				// Short circuit if there is no available pending transactions
 				if len(pending) == 0 {
-					w.updateSnapshot()
+					log.Info("no pending tx")
 					return
 				}
 				log.Info("pending size", "size", len(pending))

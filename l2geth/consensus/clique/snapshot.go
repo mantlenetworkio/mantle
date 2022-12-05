@@ -82,6 +82,7 @@ func newSnapshot(config *params.CliqueConfig, sigcache *lru.ARCCache, number uin
 	}
 	for _, signer := range signers {
 		snap.Signers[signer] = struct{}{}
+		log.Info("Add signer to snapshot", "signer_address", signer.String())
 	}
 	return snap
 }
