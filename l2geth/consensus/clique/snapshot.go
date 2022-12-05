@@ -225,11 +225,12 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		if _, ok := snap.Signers[signer]; !ok {
 			return nil, errUnauthorizedSigner
 		}
-		for _, recent := range snap.Recents {
-			if recent == signer {
-				return nil, errRecentlySigned
-			}
-		}
+		// TODO double check
+		//for _, recent := range snap.Recents {
+		//	if recent == signer {
+		//		return nil, errRecentlySigned
+		//	}
+		//}
 		snap.Recents[number] = signer
 
 		// Header authorized, discard any previous votes from the signer

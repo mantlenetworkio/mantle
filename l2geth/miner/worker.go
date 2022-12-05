@@ -604,9 +604,7 @@ func (w *worker) mainLoop() {
 							log.Warn("No transactions in block")
 							continue
 						}
-						txn := txs[0]
-						height := head.Block.Number().Uint64()
-						log.Info("Miner got new head", "height", height, "block-hash", head.Block.Hash().Hex(), "tx-hash", txn.Hash().Hex(), "tx-hash", tx.Hash().Hex())
+						log.Info("Miner got new head", "height", head.Block.Number().Uint64(), "block-hash", head.Block.Hash().Hex(), "miner", head.Block.Coinbase())
 						// Prevent memory leak by cleaning up pending tasks
 						// This is mostly copied from the `newWorkLoop`
 						// `clearPending` function and must be called
@@ -729,7 +727,6 @@ func (w *worker) resultLoop() {
 	for {
 		select {
 		case block := <-w.resultCh:
-			log.Debug("worker resultLoop read block", block)
 			// Short circuit when receiving empty result.
 			if block == nil {
 				continue
@@ -1060,6 +1057,12 @@ func (w *worker) commitNewTx(tx *types.Transaction) error {
 		GasLimit:   w.config.GasFloor,
 		Extra:      w.extra,
 		Time:       tx.L1Timestamp(),
+	}
+	if w.isRunning() {
+		if w.coinbase == (common.Address{}) {
+			return fmt.Errorf("Refusing to mine without etherbase")
+		}
+		header.Coinbase = w.coinbase
 	}
 	if err := w.engine.Prepare(w.chain, header); err != nil {
 		return fmt.Errorf("Failed to prepare header for mining: %w", err)
