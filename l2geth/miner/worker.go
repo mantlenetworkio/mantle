@@ -541,87 +541,93 @@ func (w *worker) mainLoop() {
 				defer w.exitProducingBlockPhase()
 
 				// ----------------------------------------------------------------------
-				// TODO for loop to wait for tx until expire time
-				pending, err := w.eth.TxPool().Pending()
-				if err != nil {
-					log.Error("Failed to fetch pending transactions", "err", err)
-					return
-				}
-				// Short circuit if there is no available pending transactions
-				if len(pending) == 0 {
-					log.Info("no pending tx")
-					return
-				}
-				log.Info("pending size", "size", len(pending))
-				// Split the pending transactions into locals and remotes
-				localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
-				// TODO mev
-				var txsQueue types.Transactions
-				for _, account := range w.eth.TxPool().Locals() {
-					if txs := remoteTxs[account]; len(txs) > 0 {
-						delete(remoteTxs, account)
-						localTxs[account] = txs
+				for ev.Msg.ExpireTime > uint64(time.Now().Unix()) && w.chain.CurrentBlock().NumberU64() < ev.Msg.MaxHeight {
+					pending, err := w.eth.TxPool().Pending()
+					if err != nil {
+						log.Error("Failed to fetch pending transactions", "err", err)
+						return
+					}
+					// Short circuit if there is no available pending transactions
+					if len(pending) == 0 {
+						log.Info("no pending tx")
+						return
+					}
+					log.Info("pending size", "size", len(pending))
+					// Split the pending transactions into locals and remotes
+					localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
+					// TODO mev
+					var txsQueue types.Transactions
+					for _, account := range w.eth.TxPool().Locals() {
+						if txs := remoteTxs[account]; len(txs) > 0 {
+							delete(remoteTxs, account)
+							localTxs[account] = txs
+							txsQueue = append(txsQueue, txs...)
+						}
+					}
+					for _, txs := range remoteTxs {
 						txsQueue = append(txsQueue, txs...)
 					}
+					// ----------------------------------------------------------------------
+					for i, tx := range txsQueue {
+						if ev.Msg.StartHeight+uint64(i) > ev.Msg.MaxHeight {
+							log.Info("can't produce more blocks", "Msg.MaxHeight", ev.Msg.MaxHeight)
+							break
+						}
+						if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
+							log.Info("No transaction sent to miner from syncservice")
+							break
+						}
+						log.Info("Attempting to commit rollup transaction", "hash", tx.Hash().Hex())
+						// Build the block with the tx and add it to the chain. This will
+						// send the block through the `taskCh` and then through the
+						// `resultCh` which ultimately adds the block to the blockchain
+						// through `bc.WriteBlockWithState`
+						err, _ := w.eth.SyncService().ValidateAndApplySequencerTransactionMock(tx)
+						if err != nil {
+							log.Error("SyncService err", "errMsg", err.Error())
+							break
+						}
+						if err := w.commitNewTx(tx); err == nil {
+							//hook()
+							// `chainHeadCh` is written to when a new block is added to the
+							// tip of the chain. Reading from the channel will block until
+							// the ethereum block is added to the chain downstream of `commitNewTx`.
+							// This will result in a deadlock if we call `commitNewTx` with
+							// a transaction that cannot be added to the chain, so this
+							// should be updated to a select statement that can also listen
+							// for errors.
+							log.Debug("wait for chainHeadWaitCh")
+							head := <-w.chainHeadWaitCh
+							log.Debug("get chainHeadWaitCh", "height", head.Block.NumberU64())
+							txs := head.Block.Transactions()
+							if len(txs) == 0 {
+								log.Warn("No transactions in block")
+								continue
+							}
+							log.Info("Miner got new head", "height", head.Block.Number().Uint64(), "block-hash", head.Block.Hash().Hex(), "miner", head.Block.Coinbase())
+							// Prevent memory leak by cleaning up pending tasks
+							// This is mostly copied from the `newWorkLoop`
+							// `clearPending` function and must be called
+							// periodically to clean up pending tasks. This
+							// function was originally called in `newWorkLoop`
+							// but the BVM implementation no longer uses that code path.
+							w.pendingMu.Lock()
+							for h := range w.pendingTasks {
+								delete(w.pendingTasks, h)
+							}
+							w.pendingMu.Unlock()
+						} else {
+							log.Error("Problem committing transaction", "msg", err)
+							if ev.ErrCh != nil {
+								ev.ErrCh <- err
+							}
+						}
+					}
 				}
-				for _, txs := range remoteTxs {
-					txsQueue = append(txsQueue, txs...)
-				}
-				// ----------------------------------------------------------------------
-				for i, tx := range txsQueue {
-					if ev.Msg.StartHeight+uint64(i) > ev.Msg.MaxHeight {
-						log.Info("can't produce more blocks", "Msg.MaxHeight", ev.Msg.MaxHeight)
-						break
-					}
-					if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
-						log.Info("No transaction sent to miner from syncservice")
-						break
-					}
-					log.Info("Attempting to commit rollup transaction", "hash", tx.Hash().Hex())
-					// Build the block with the tx and add it to the chain. This will
-					// send the block through the `taskCh` and then through the
-					// `resultCh` which ultimately adds the block to the blockchain
-					// through `bc.WriteBlockWithState`
-					err, _ := w.eth.SyncService().ValidateAndApplySequencerTransactionMock(tx)
-					if err != nil {
-						log.Error("SyncService err", "errMsg", err.Error())
-						break
-					}
-					if err := w.commitNewTx(tx); err == nil {
-						//hook()
-						// `chainHeadCh` is written to when a new block is added to the
-						// tip of the chain. Reading from the channel will block until
-						// the ethereum block is added to the chain downstream of `commitNewTx`.
-						// This will result in a deadlock if we call `commitNewTx` with
-						// a transaction that cannot be added to the chain, so this
-						// should be updated to a select statement that can also listen
-						// for errors.
-						log.Debug("wait for chainHeadWaitCh")
-						head := <-w.chainHeadWaitCh
-						log.Debug("get chainHeadWaitCh", "height", head.Block.NumberU64())
-						txs := head.Block.Transactions()
-						if len(txs) == 0 {
-							log.Warn("No transactions in block")
-							continue
-						}
-						log.Info("Miner got new head", "height", head.Block.Number().Uint64(), "block-hash", head.Block.Hash().Hex(), "miner", head.Block.Coinbase())
-						// Prevent memory leak by cleaning up pending tasks
-						// This is mostly copied from the `newWorkLoop`
-						// `clearPending` function and must be called
-						// periodically to clean up pending tasks. This
-						// function was originally called in `newWorkLoop`
-						// but the BVM implementation no longer uses that code path.
-						w.pendingMu.Lock()
-						for h := range w.pendingTasks {
-							delete(w.pendingTasks, h)
-						}
-						w.pendingMu.Unlock()
-					} else {
-						log.Error("Problem committing transaction", "msg", err)
-						if ev.ErrCh != nil {
-							ev.ErrCh <- err
-						}
-					}
+				if ev.Msg.ExpireTime > uint64(time.Now().Unix()) {
+					log.Debug("Height over", "Msg.MaxHeight", ev.Msg.MaxHeight)
+				} else {
+					log.Debug("Time over", "Msg.MaxHeight", ev.Msg.MaxHeight)
 				}
 			}()
 		case ev := <-w.txsCh:

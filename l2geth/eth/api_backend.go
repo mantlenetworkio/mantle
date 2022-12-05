@@ -309,7 +309,7 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 	for _, v := range pending {
 		end += uint64(len(v))
 	}
-	exTime := time.Now().Unix() + 1000
+	exTime := time.Now().Unix() + 1000*1000*1000*20
 	erCh := make(chan error, 1)
 
 	to := signedTx.To()
