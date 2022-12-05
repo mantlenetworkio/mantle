@@ -16,16 +16,21 @@ type Config struct {
 	ChainId           uint64
 	ChainProvider     string
 	GraphProvider     string
-	Private           string
+	PrivateKey        string
+	Mnemonic          string
+	SequencerHDPath   string
 	RollupAddress     string
-	Duration          string
-	Timeout           uint64
+	DataStoreDuration uint64
+	DataStoreTimeout  uint64
 	SentryEnable      bool
+	PollInterval      time.Duration
 
 	LogLevel        string
 	LogTerminal     bool
 	SentryDsn       string
 	SentryTraceRate time.Duration
+
+	DisableHTTP2 bool
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -39,16 +44,20 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		ChainId:           ctx.GlobalUint64(flags.GrpcPortFlag.Name),
 		ChainProvider:     ctx.GlobalString(flags.GrpcPortFlag.Name),
 		GraphProvider:     ctx.GlobalString(flags.GrpcPortFlag.Name),
-		Private:           ctx.GlobalString(flags.GrpcPortFlag.Name),
+		PrivateKey:        ctx.GlobalString(flags.PrivateKeyFlag.Name),
+		Mnemonic:          ctx.GlobalString(flags.MnemonicFlag.Name),
+		SequencerHDPath:   ctx.GlobalString(flags.SequencerHDPathFlag.Name),
 		RollupAddress:     ctx.GlobalString(flags.GrpcPortFlag.Name),
-		Duration:          ctx.GlobalString(flags.GrpcPortFlag.Name),
-		Timeout:           ctx.GlobalUint64(flags.GrpcPortFlag.Name),
+		DataStoreDuration: ctx.GlobalUint64(flags.DataStoreDurationFlag.Name),
+		DataStoreTimeout:  ctx.GlobalUint64(flags.DataStoreTimeoutFlag.Name),
+		PollInterval:      ctx.GlobalDuration(flags.PollIntervalFlag.Name),
 
 		LogLevel:        ctx.GlobalString(flags.LogLevelFlag.Name),
 		LogTerminal:     ctx.GlobalBool(flags.LogTerminalFlag.Name),
 		SentryEnable:    ctx.GlobalBool(flags.SentryEnableFlag.Name),
 		SentryDsn:       ctx.GlobalString(flags.SentryDsnFlag.Name),
 		SentryTraceRate: ctx.GlobalDuration(flags.SentryTraceRateFlag.Name),
+		DisableHTTP2:    ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
 	}
 	return cfg, nil
 }
