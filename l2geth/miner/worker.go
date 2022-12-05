@@ -549,10 +549,10 @@ func (w *worker) mainLoop() {
 					}
 					// Short circuit if there is no available pending transactions
 					if len(pending) == 0 {
-						log.Info("no pending tx")
-						return
+						continue
 					}
 					log.Info("pending size", "size", len(pending))
+					log.Debug("report time ", "time now", uint64(time.Now().Unix()), "msg time", ev.Msg.ExpireTime)
 					// Split the pending transactions into locals and remotes
 					localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
 					// TODO mev
