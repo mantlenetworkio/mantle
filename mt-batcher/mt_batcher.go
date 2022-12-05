@@ -49,7 +49,10 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			return err
 		}
 
-		chainId, _ := l1Client.ChainID(ctx)
+		chainId, err := l1Client.ChainID(ctx)
+		if err != nil {
+			return err
+		}
 
 		l2Client, err := l1l2client.DialL2EthClientWithTimeout(ctx, cfg.L2MtlRpc, cfg.DisableHTTP2)
 		if err != nil {
