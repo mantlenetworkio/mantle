@@ -68,11 +68,23 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "GRAPH_PROVIDER"),
 	}
-	PrivateFlag = cli.StringFlag{
+	PrivateKeyFlag = cli.StringFlag{
 		Name:     "private",
 		Usage:    "Ethereum private key for node operator",
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "PRIVATE"),
+	}
+	MnemonicFlag = cli.StringFlag{
+		Name: "mnemonic",
+		Usage: "The mnemonic used to derive the wallets for either the " +
+			"sequencer or the proposer",
+		EnvVar: prefixEnvVar(envVarPrefix, "MNEMONIC"),
+	}
+	SequencerHDPathFlag = cli.StringFlag{
+		Name: "sequencer-hd-path",
+		Usage: "The HD path used to derive the sequencer wallet from the " +
+			"mnemonic. The mnemonic flag must also be set.",
+		EnvVar: prefixEnvVar(envVarPrefix, "SEQUENCER_HD_PATH"),
 	}
 	RollupAddressFlag = cli.StringFlag{
 		Name:     "rollup-address",
@@ -80,13 +92,26 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "ROLLUP_ADDRESS"),
 	}
-	DurationFlag = cli.IntFlag{
+	BlockOffsetFlag = cli.Uint64Flag{
+		Name:   "block-offset",
+		Usage:  "The offset between the CTC contract start and the L2 geth blocks",
+		Value:  1,
+		EnvVar: prefixEnvVar(envVarPrefix, "BLOCK_OFFSET"),
+	}
+	PollIntervalFlag = cli.DurationFlag{
+		Name: "poll-interval",
+		Usage: "Delay between querying L2 for more transactions and " +
+			"creating a new batch",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "POLL_INTERVAL"),
+	}
+	DataStoreDurationFlag = cli.IntFlag{
 		Name:     "duration",
 		Usage:    "Duration to store blob",
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "DURATION"),
 	}
-	TimeoutFlag = cli.IntFlag{
+	DataStoreTimeoutFlag = cli.IntFlag{
 		Name:     "timeout",
 		Usage:    "Blob timeout",
 		Required: true,
@@ -122,6 +147,11 @@ var (
 		Value:  50 * time.Millisecond,
 		EnvVar: prefixEnvVar(envVarPrefix, "SENTRY_TRACE_RATE"),
 	}
+	HTTP2DisableFlag = cli.BoolFlag{
+		Name:   "http2-disable",
+		Usage:  "Whether or not to disable HTTP/2 support.",
+		EnvVar: prefixEnvVar(envVarPrefix, "HTTP2_DISABLE"),
+	}
 )
 
 var requiredFlags = []cli.Flag{
@@ -134,10 +164,14 @@ var requiredFlags = []cli.Flag{
 	ChainIdFlag,
 	ChainProviderFlag,
 	GraphProviderFlag,
-	PrivateFlag,
+	PrivateKeyFlag,
+	MnemonicFlag,
+	SequencerHDPathFlag,
 	RollupAddressFlag,
-	DurationFlag,
-	TimeoutFlag,
+	BlockOffsetFlag,
+	PollIntervalFlag,
+	DataStoreDurationFlag,
+	DataStoreTimeoutFlag,
 }
 
 var optionalFlags = []cli.Flag{
@@ -146,6 +180,7 @@ var optionalFlags = []cli.Flag{
 	SentryEnableFlag,
 	SentryDsnFlag,
 	SentryTraceRateFlag,
+	HTTP2DisableFlag,
 }
 
 func init() {

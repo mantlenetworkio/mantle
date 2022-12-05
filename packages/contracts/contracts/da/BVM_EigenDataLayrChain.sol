@@ -33,6 +33,7 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
     address public sequencer;
     address public dataManageAddress;
     uint256 public BLOCK_STALE_MEASURE;
+    uint256 public l2BlockNumber;
     uint256 public fraudProofPeriod = 1 days;
 
     bytes public constant FRAUD_STRING = '-_(` O `)_- -_(` o `)_- -_(` Q `)_- BITDAO JUST REKT YOU |_(` O `)_| - |_(` o `)_| - |_(` Q `)_|';
@@ -66,6 +67,10 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         BLOCK_STALE_MEASURE = 100;
     }
 
+    function GetSunmitL2Block() public view returns (uint256 _l2BlockNumber) {
+        return  l2BlockNumber;
+    }
+
     /**
      * @notice Called by the (staked) sequencer to pay for a datastore and post some metadata (in the `header` parameter) about it on chain.
      * Since the sequencer must encode the data before they post the header on chain, they must use a *snapshot* of the number and stakes of DataLayr operators
@@ -80,12 +85,14 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         bytes calldata header,
         uint8 duration,
         uint32 blockNumber,
+        uint256 _l2BlockNumber,
         uint32 totalOperatorsIndex
     ) external {
         require(msg.sender == sequencer, "Only the sequencer can store data");
 
         require(block.number - blockNumber < BLOCK_STALE_MEASURE, "stakes taken from too long ago");
         uint32 dataStoreId = IDataLayrServiceManager(dataManageAddress).taskNumber();
+        l2BlockNumber = _l2BlockNumber;
         //Initialize and pay for the datastore
         IDataLayrServiceManager(dataManageAddress).initDataStore(
             msg.sender,
