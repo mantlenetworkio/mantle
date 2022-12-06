@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const envVarPrefix = "MT-BATCHER"
+const envVarPrefix = "MT_BATCHER"
 
 func prefixEnvVar(prefix, suffix string) string {
 	return prefix + "_" + suffix
@@ -41,7 +41,7 @@ var (
 		Name:     "disperser",
 		Usage:    "Endpoint at which disperser is available",
 		Required: true,
-		EnvVar:   prefixEnvVar(envVarPrefix, "DISPERSER"),
+		EnvVar:   prefixEnvVar(envVarPrefix, "DISPERSER_ENDPOINT"),
 	}
 	GrpcPortFlag = cli.IntFlag{
 		Name:     "grpc-port",
@@ -72,7 +72,7 @@ var (
 		Name:     "private",
 		Usage:    "Ethereum private key for node operator",
 		Required: true,
-		EnvVar:   prefixEnvVar(envVarPrefix, "PRIVATE"),
+		EnvVar:   prefixEnvVar(envVarPrefix, "PRIVATE_KEY"),
 	}
 	MnemonicFlag = cli.StringFlag{
 		Name: "mnemonic",
@@ -109,13 +109,13 @@ var (
 		Name:     "duration",
 		Usage:    "Duration to store blob",
 		Required: true,
-		EnvVar:   prefixEnvVar(envVarPrefix, "DURATION"),
+		EnvVar:   prefixEnvVar(envVarPrefix, "DATA_STORE_DURATION"),
 	}
 	DataStoreTimeoutFlag = cli.IntFlag{
 		Name:     "timeout",
 		Usage:    "Blob timeout",
 		Required: true,
-		EnvVar:   prefixEnvVar(envVarPrefix, "TIMEOUT"),
+		EnvVar:   prefixEnvVar(envVarPrefix, "DATA_STORE_TIMEOUT"),
 	}
 
 	LogLevelFlag = cli.StringFlag{
