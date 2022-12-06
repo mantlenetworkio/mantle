@@ -12,6 +12,9 @@ EDLC_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/da/BVM_EigenDataL
 mt-batcher:
 	env GO111MODULE=on go build -v $(LDFLAGS) ./cmd/mt-batcher
 
+datalayr-mantle:
+	cd ../datalayr-mantle/contracts && ./compile.sh compile-el && ./compile.sh compile-rollup
+
 clean:
 	rm mt-batcher
 
@@ -20,7 +23,6 @@ test:
 
 lint:
 	golangci-lint run ./...
-
 
 binding:
 	$(eval temp := $(shell mktemp))
