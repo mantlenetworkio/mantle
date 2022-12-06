@@ -1060,7 +1060,7 @@ func (s *SyncService) applyTransactionToTipMock(tx *types.Transaction) (error, f
 			tx.SetIndex(*index + 1)
 		}
 	}
-	log.Info("tx meta", "tx_index", *tx.GetMeta().Index, "tx_L1Timestamp", tx.GetMeta().L1Timestamp)
+	log.Info("tx meta", "tx_index", *tx.GetMeta().Index, "tx_L1Timestamp", tx.GetMeta().L1Timestamp, "tx_L1BlockNumber", tx.GetMeta().L1BlockNumber)
 
 	// On restart, these values are repaired to handle
 	// the case where the index is updated but the
