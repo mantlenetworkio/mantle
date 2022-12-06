@@ -3,7 +3,7 @@
 	url = https://github.com/ethereum/tests
 [submodule "datalayr-mantle"]
 	path = datalayr-mantle
-	url = https://github.com/Layr-Labs/datalayr-mantle
+	url = https://github.com/mantlenetworkio/datalayr-mantle
 [submodule "eignlayr-contracts-mantle"]
 	path = eignlayr-contracts-mantle
-	url = https://github.com/Layr-Labs/eignlayr-contracts-mantle
+	url = https://github.com/mantlenetworkio/eignlayr-contracts-mantle

@@ -10,10 +10,10 @@ import { DataLayrDisclosureLogic } from "../libraries/eigenda/DataLayrDisclosure
 import { IDataLayrServiceManager } from "../libraries/eigenda/lib/contracts/interfaces/IDataLayrServiceManager.sol";
 import { BN254 } from "../libraries/eigenda/BN254.sol";
 import "../libraries/eigenda/lib/contracts/libraries/DataStoreUtils.sol";
-import "./Parse.sol";
+import "../libraries/eigenda/Parse.sol";
 
 
-contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeable,Parser{
+contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeable, Parser{
     using SafeMathUpgradeable for uint256;
     using AddressUpgradeable for address;
 
@@ -30,6 +30,7 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         BN254.G2Point polyEquivalenceProof;
     }
 
+    uint256 public SUBMISSION_INTERVAL;
     address public sequencer;
     address public dataManageAddress;
     uint256 public BLOCK_STALE_MEASURE;
@@ -60,15 +61,32 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
     event RollupStoreConfirmed(uint32 rollupStoreNumber);
     event RollupStoreReverted(uint32 rollupStoreNumber);
 
-    function initialize(address _sequencer, address _dataManageAddress) public initializer {
+    function initialize(address _sequencer, address _dataManageAddress, uint256 _submissionInterval, uint256 _block_stale_measure) public initializer {
         __Ownable_init();
         sequencer = _sequencer;
         dataManageAddress = _dataManageAddress;
-        BLOCK_STALE_MEASURE = 100;
+        SUBMISSION_INTERVAL = _submissionInterval;
+        BLOCK_STALE_MEASURE = _block_stale_measure;
+        l2BlockNumber = 0;
     }
 
-    function GetSunmitL2Block() public view returns (uint256 _l2BlockNumber) {
-        return  l2BlockNumber;
+    /**
+     * @notice Returns the block number of the latest submitted L2.
+     * If no submitted yet then this function will return the starting block number.
+     *
+     * @return Latest submitted L2 block number.
+     */
+    function latestBlockNumber() public view returns (uint256) {
+        return l2BlockNumber;
+    }
+
+    /**
+     * @notice Computes the block number of the next L2 block that needs to be checkpointed.
+     *
+     * @return Next L2 block number.
+     */
+    function nextBlockNumber() public view returns (uint256) {
+        return latestBlockNumber() + SUBMISSION_INTERVAL;
     }
 
     /**
@@ -193,5 +211,4 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         rollupStores[fraudulentStoreNumber].status = RollupStoreStatus.REVERTED;
         emit RollupStoreReverted(uint32(fraudulentStoreNumber));
     }
-
 }

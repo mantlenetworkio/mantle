@@ -33,7 +33,7 @@ const deployFn: DeployFunction = async (hre) => {
     }
   )
 
-  const args = [eigenSequencerAddress, dataManagerAddress]
+  const args = [eigenSequencerAddress, dataManagerAddress, 10, 100]
   const callData = Impl_BVM_EigenDataLayrChain.interface.encodeFunctionData(
     'initialize',
     args
