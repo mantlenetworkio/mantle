@@ -17,9 +17,9 @@ const config = {
   bvmFeeWalletOwner: process.env.BVM_FEE_WALLETOWNER_OWNER ||'0xeEbceB07eA7D2339895Dd492B3B5960641302830',
   l1BitAddress: process.env.L1_BIT_ADDRESS || '0xC40C655a91ef15c8eAd818B840CFC08C755D2C0F',
 
-
   //on l2, same as l1 address manager.
   bvmTssRewardContractOwner: process.env.TssRewardContractOwner || '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
+  dataManagerAddress: process.env.DATA_MANAGER_ADDRESS || '0xec36421F31108A26E46a0445d336978aA88A2012'
 }
 
 export default config

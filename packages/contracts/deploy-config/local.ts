@@ -14,7 +14,8 @@ const config = {
   bvmGasPriceOracleOwner: process.env.BVM_GAS_PRICE_ORACLE_OWNER || '0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc',
   bvmFeeWalletOwner: process.env.BVM_FEE_WALLETOWNER_OWNER ||'0xDfCDD683728F83A5da850a210db828e6f35DCfA6',
   l1BitAddress: process.env.L1_BIT_ADDRESS || '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
-  bvmTssRewardContractOwner: process.env.TssRewardContractOwner || '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B'
+  bvmTssRewardContractOwner: process.env.TssRewardContractOwner || '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
+  dataManagerAddress: process.env.DATA_MANAGER_ADDRESS || '0xec36421F31108A26E46a0445d336978aA88A2012'
 }
 
 export default config
