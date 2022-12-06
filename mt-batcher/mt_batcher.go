@@ -5,7 +5,6 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/getsentry/sentry-go"
 	bsscore "github.com/mantlenetworkio/mantle/bss-core"
-	"github.com/mantlenetworkio/mantle/bss-core/dial"
 	"github.com/mantlenetworkio/mantle/mt-batcher/l1l2client"
 	"github.com/mantlenetworkio/mantle/mt-batcher/sequencer"
 	"github.com/urfave/cli"
@@ -44,16 +43,21 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			return err
 		}
 
-		l1Client, err := dial.L1EthClientWithTimeout(ctx, cfg.L1EthRpc, cfg.DisableHTTP2)
+		l1l2Config := &l1l2client.Config{
+			L1RpcUrl:     cfg.L1EthRpc,
+			ChainId:      cfg.ChainId,
+			Private:      cfg.PrivateKey,
+			DisableHTTP2: cfg.DisableHTTP2,
+		}
+
+		l1Client, err := l1l2client.NewL1ChainClient(ctx, l1l2Config)
 		if err != nil {
 			return err
 		}
-
-		chainId, err := l1Client.ChainID(ctx)
+		chainID, err := l1Client.Client.ChainID(ctx)
 		if err != nil {
 			return err
 		}
-
 		l2Client, err := l1l2client.DialL2EthClientWithTimeout(ctx, cfg.L2MtlRpc, cfg.DisableHTTP2)
 		if err != nil {
 			return err
@@ -63,8 +67,8 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			L2Client:          l2Client,
 			EigenAddr:         eigenAddress,
 			PrivKey:           sequencerPrivKey,
-			BlockOffset:       1,
-			ChainID:           chainId,
+			BlockOffset:       cfg.BlockOffset,
+			ChainID:           chainID,
 			DataStoreDuration: uint64(cfg.DataStoreDuration),
 			DataStoreTimeout:  cfg.DataStoreTimeout,
 			DisperserSocket:   cfg.DisperserEndpoint,

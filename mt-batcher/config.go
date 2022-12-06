@@ -24,6 +24,7 @@ type Config struct {
 	DataStoreTimeout  uint64
 	SentryEnable      bool
 	PollInterval      time.Duration
+	BlockOffset       uint64
 
 	LogLevel        string
 	LogTerminal     bool
@@ -41,9 +42,9 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		L2MtlRpc:          ctx.GlobalString(flags.L2MtlRpcFlag.Name),
 		DisperserEndpoint: ctx.GlobalString(flags.DisperserEndpointFlag.Name),
 		GrpcPort:          ctx.GlobalInt64(flags.GrpcPortFlag.Name),
-		ChainId:           ctx.GlobalUint64(flags.GrpcPortFlag.Name),
-		ChainProvider:     ctx.GlobalString(flags.GrpcPortFlag.Name),
-		GraphProvider:     ctx.GlobalString(flags.GrpcPortFlag.Name),
+		ChainId:           ctx.GlobalUint64(flags.ChainIdFlag.Name),
+		ChainProvider:     ctx.GlobalString(flags.ChainProviderFlag.Name),
+		GraphProvider:     ctx.GlobalString(flags.GraphProviderFlag.Name),
 		PrivateKey:        ctx.GlobalString(flags.PrivateKeyFlag.Name),
 		Mnemonic:          ctx.GlobalString(flags.MnemonicFlag.Name),
 		SequencerHDPath:   ctx.GlobalString(flags.SequencerHDPathFlag.Name),
@@ -51,6 +52,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		DataStoreDuration: ctx.GlobalUint64(flags.DataStoreDurationFlag.Name),
 		DataStoreTimeout:  ctx.GlobalUint64(flags.DataStoreTimeoutFlag.Name),
 		PollInterval:      ctx.GlobalDuration(flags.PollIntervalFlag.Name),
+		BlockOffset:       ctx.GlobalUint64(flags.BlockOffsetFlag.Name),
 
 		LogLevel:        ctx.GlobalString(flags.LogLevelFlag.Name),
 		LogTerminal:     ctx.GlobalBool(flags.LogTerminalFlag.Name),

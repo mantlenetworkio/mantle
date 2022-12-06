@@ -15,7 +15,7 @@ import (
 )
 
 type Config struct {
-	L1Client     string
+	L1RpcUrl     string
 	ChainId      uint64
 	Private      string
 	Address      common.Address
@@ -27,8 +27,8 @@ type L1ChainClient struct {
 	Client *ethclient.Client
 }
 
-func NewL1ChainClient(ctx context.Context, conf *Config) *L1ChainClient {
-	client, err := dial.L1EthClientWithTimeout(ctx, conf.L1Client, conf.DisableHTTP2)
+func NewL1ChainClient(ctx context.Context, conf *Config) (*L1ChainClient, error) {
+	client, err := dial.L1EthClientWithTimeout(ctx, conf.L1RpcUrl, conf.DisableHTTP2)
 	if err != nil {
 		log.Error("Error. Cannot connect to provider")
 	}
@@ -51,7 +51,7 @@ func NewL1ChainClient(ctx context.Context, conf *Config) *L1ChainClient {
 		conf:   conf,
 		Client: client,
 	}
-	return c
+	return c, nil
 }
 
 func (c *L1ChainClient) GetBalance(ctx context.Context) (*big.Int, error) {

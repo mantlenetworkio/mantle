@@ -12,7 +12,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
@@ -28,7 +27,7 @@ import (
 )
 
 type DriverConfig struct {
-	L1Client          *ethclient.Client
+	L1Client          *l1l2client.L1ChainClient
 	L2Client          *l2ethclient.Client
 	EigenAddr         common.Address
 	PrivKey           *ecdsa.PrivateKey
@@ -38,6 +37,7 @@ type DriverConfig struct {
 	DataStoreTimeout  uint64
 	DisperserSocket   string
 	PollInterval      time.Duration
+	GraphProvider     string
 }
 
 type Driver struct {
@@ -57,7 +57,7 @@ var bigOne = new(big.Int).SetUint64(1)
 
 func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 	eigenContract, err := bindings.NewBVMEigenDataLayrChain(
-		cfg.EigenAddr, cfg.L1Client,
+		cfg.EigenAddr, cfg.L1Client.Client,
 	)
 	if err != nil {
 		return nil, err
@@ -75,9 +75,12 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 		return nil, err
 	}
 	rawEigenContract := bind.NewBoundContract(
-		cfg.EigenAddr, parsed, cfg.L1Client, cfg.L1Client,
-		cfg.L1Client,
+		cfg.EigenAddr, parsed, cfg.L1Client.Client, cfg.L1Client.Client,
+		cfg.L1Client.Client,
 	)
+
+	graphClient := graphView.NewGraphClient(cfg.GraphProvider, nil)
+
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
 	return &Driver{
 		Cfg:              cfg,
@@ -86,6 +89,8 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 		RawEigenContract: rawEigenContract,
 		WalletAddr:       walletAddr,
 		EigenABI:         eignenABI,
+		L1ChainClient:    cfg.L1Client,
+		GraphClient:      graphClient,
 	}, nil
 }
 
