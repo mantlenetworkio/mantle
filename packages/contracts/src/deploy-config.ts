@@ -95,6 +95,11 @@ export interface DeployConfig {
   bvmWhitelistOwner?: string
 
   /**
+   * Address of data manager.
+   */
+  dataManagerAddress: string
+
+  /**
    * Optional initial overhead value for GPO (default: 2750).
    */
   gasPriceOracleOverhead?: number
@@ -196,6 +201,9 @@ const configSpec: {
   bvmWhitelistOwner: {
     type: 'address',
     default: ethers.constants.AddressZero,
+  },
+  dataManagerAddress: {
+    type: 'address',
   },
   gasPriceOracleOverhead: {
     type: 'number',

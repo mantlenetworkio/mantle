@@ -288,6 +288,9 @@ const config: HardhatUserConfig = {
       type: 'address',
       default: ethers.constants.AddressZero,
     },
+    dataManagerAddress: {
+      type: 'address',
+    },
     gasPriceOracleOverhead: {
       type: 'number',
       default: 2750,
