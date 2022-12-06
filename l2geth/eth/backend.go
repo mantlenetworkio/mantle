@@ -498,26 +498,17 @@ func (s *Ethereum) StartMining(threads int) error {
 		atomic.StoreUint32(&s.protocolManager.acceptTxs, 1)
 		go s.miner.Start(eb)
 
-		// set sequencer server and get schedulerAddr address
-		var schedulerInst *clique.Scheduler
-		var schedulerAddr common.Address
-
-		// check method for sequencer server check if miner is already start
-		check := func() bool {
-			return s.IsMining()
-		}
-		// only start when Clique consensus
 		if _, ok := s.engine.(*clique.Clique); ok {
-			schedulerInst, err = clique.NewScheduler(
+			schedulerInst, err := clique.NewScheduler(
 				time.Duration(s.blockchain.Config().Clique.Epoch),
 				s.engine.(*clique.Clique),
+				s.blockchain,
 				s.eventMux,
-				check,
 			)
 			if err != nil {
 				return fmt.Errorf("create scheduler instance err: %v", err)
 			}
-			schedulerAddr, err = schedulerInst.GetScheduler()
+			schedulerAddr, err := schedulerInst.GetScheduler()
 			if err != nil {
 				return fmt.Errorf("cannot get schedulerAddr: %w", err)
 			}
@@ -529,7 +520,6 @@ func (s *Ethereum) StartMining(threads int) error {
 				schedulerInst.Start()
 			}
 		}
-
 	}
 	return nil
 }

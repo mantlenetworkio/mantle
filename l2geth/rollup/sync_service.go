@@ -1003,6 +1003,7 @@ func (s *SyncService) applyTransactionToTipMock(tx *types.Transaction) (error, f
 	ts := s.GetLatestL1Timestamp()
 	bn := s.GetLatestL1BlockNumber()
 
+	log.Info("sync service status", "ts", ts, "bn", bn, "tx.L1Timestamp", tx.L1Timestamp(), "tx.L1BlockNumber()", tx.L1BlockNumber())
 	// The L1Timestamp is 0 for QueueOriginSequencer transactions when
 	// running as the sequencer, the transactions are coming in via RPC.
 	// This code path also runs for replicas/verifiers so any logic involving
@@ -1059,6 +1060,7 @@ func (s *SyncService) applyTransactionToTipMock(tx *types.Transaction) (error, f
 			tx.SetIndex(*index + 1)
 		}
 	}
+	log.Info("tx meta", "tx_index", *tx.GetMeta().Index, "tx_L1Timestamp", tx.GetMeta().L1Timestamp)
 
 	// On restart, these values are repaired to handle
 	// the case where the index is updated but the
@@ -1069,40 +1071,22 @@ func (s *SyncService) applyTransactionToTipMock(tx *types.Transaction) (error, f
 	}
 
 	// The index was set above so it is safe to dereference
-	log.Debug("Applying transaction to tip mock", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
-
-	//txs := types.Transactions{tx}
-	//errCh := make(chan error, 1)
-	//s.txFeed.Send(core.NewTxsEvent{
-	//	Txs:   txs,
-	//	ErrCh: errCh,
-	//})
-	// Block until the transaction has been added to the chain
-	log.Trace("Waiting for transaction to be added to chain", "hash", tx.Hash().Hex())
+	log.Info("Applying transaction to tip mock", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
 
 	hook := func() error {
-		select {
-		//case err := <-errCh:
-		//	log.Error("Got error waiting for transaction to be added to chain", "msg", err)
-		//	s.SetLatestL1Timestamp(ts)
-		//	s.SetLatestL1BlockNumber(bn)
-		//	s.SetLatestIndex(index)
-		//	return err
-		case <-s.chainHeadCh:
-			// Update the cache when the transaction is from the owner
-			// of the gas price oracle
-			sender, _ := types.Sender(s.signer, tx)
-			owner := s.GasPriceOracleOwnerAddress()
-			if owner != nil && sender == *owner {
-				if err := s.updateGasPriceOracleCache(nil); err != nil {
-					s.SetLatestL1Timestamp(ts)
-					s.SetLatestL1BlockNumber(bn)
-					s.SetLatestIndex(index)
-					return err
-				}
+		// Update the cache when the transaction is from the owner
+		// of the gas price oracle
+		sender, _ := types.Sender(s.signer, tx)
+		owner := s.GasPriceOracleOwnerAddress()
+		if owner != nil && sender == *owner {
+			if err := s.updateGasPriceOracleCache(nil); err != nil {
+				s.SetLatestL1Timestamp(ts)
+				s.SetLatestL1BlockNumber(bn)
+				s.SetLatestIndex(index)
+				return err
 			}
-			return nil
 		}
+		return nil
 	}
 
 	return nil, hook

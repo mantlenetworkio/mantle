@@ -582,23 +582,26 @@ func (w *worker) mainLoop() {
 						// send the block through the `taskCh` and then through the
 						// `resultCh` which ultimately adds the block to the blockchain
 						// through `bc.WriteBlockWithState`
-						err, _ := w.eth.SyncService().ValidateAndApplySequencerTransactionMock(tx)
+						if tx.GetMeta().Index == nil {
+							log.Info("tx information", "tx_index", nil, "tx_L1Timestamp", tx.GetMeta().L1Timestamp)
+						} else {
+							log.Info("tx information", "tx_index", *tx.GetMeta().Index, "tx_L1Timestamp", tx.GetMeta().L1Timestamp)
+						}
+						err, hook := w.eth.SyncService().ValidateAndApplySequencerTransactionMock(tx)
 						if err != nil {
 							log.Error("SyncService err", "errMsg", err.Error())
 							break
 						}
 						if err := w.commitNewTx(tx); err == nil {
-							//hook()
-							// `chainHeadCh` is written to when a new block is added to the
-							// tip of the chain. Reading from the channel will block until
-							// the ethereum block is added to the chain downstream of `commitNewTx`.
-							// This will result in a deadlock if we call `commitNewTx` with
-							// a transaction that cannot be added to the chain, so this
-							// should be updated to a select statement that can also listen
-							// for errors.
-							log.Debug("wait for chainHeadWaitCh")
 							head := <-w.chainHeadWaitCh
-							log.Debug("get chainHeadWaitCh", "height", head.Block.NumberU64())
+							if hook != nil {
+								if hook() != nil {
+									log.Error("SyncService hook err", "errMsg", err.Error())
+									break
+								}
+							} else {
+								log.Error("nil hook")
+							}
 							txs := head.Block.Transactions()
 							if len(txs) == 0 {
 								log.Warn("No transactions in block")
