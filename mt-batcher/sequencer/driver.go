@@ -91,7 +91,7 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 
 func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, *big.Int, error) {
 	blockOffset := new(big.Int).SetUint64(d.Cfg.BlockOffset)
-	start, err := d.EigenDaContract.GetSunmitL2Block(&bind.CallOpts{
+	start, err := d.EigenDaContract.L2BlockNumber(&bind.CallOpts{
 		Context: ctx,
 	})
 	if err != nil {
@@ -146,7 +146,7 @@ func (d *Driver) Disperse(data []byte, l2BlockNumber *big.Int) error {
 		return err
 	}
 	auth := d.L1ChainClient.PrepareAuthTransactor()
-	tx, err := d.EigenDaContract.StoreData(auth, uploadHeader, uint8(params.Duration), params.BlockNumber, params.TotalOperatorsIndex, l2BlockNumber)
+	tx, err := d.EigenDaContract.StoreData(auth, uploadHeader, uint8(params.Duration), params.BlockNumber, l2BlockNumber, params.TotalOperatorsIndex)
 	if err != nil {
 		return err
 	}
