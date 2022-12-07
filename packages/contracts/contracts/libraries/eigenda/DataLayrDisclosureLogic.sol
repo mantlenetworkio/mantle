@@ -59,7 +59,7 @@ library DataLayrDisclosureLogic {
     function getNumSysFromHeader(
         // bytes calldata header
         bytes calldata header
-    ) public pure returns (uint32) {
+    ) internal pure returns (uint32) {
         uint32 numSys;
 
         assembly {
@@ -439,7 +439,7 @@ library DataLayrDisclosureLogic {
         bytes[] calldata polys,
         MultiRevealProof[] calldata multiRevealProofs,
         BN254.G2Point calldata polyEquivalenceProof
-    ) public view returns (bool) {
+    ) internal view returns (bool) {
         //randomness from each polynomial
         bytes32[] memory rs = new bytes32[](polys.length);
         DataStoreKZGMetadata

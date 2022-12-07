@@ -9,11 +9,11 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import { DataLayrDisclosureLogic } from "../libraries/eigenda/DataLayrDisclosureLogic.sol";
 import { IDataLayrServiceManager } from "../libraries/eigenda/lib/contracts/interfaces/IDataLayrServiceManager.sol";
 import { BN254 } from "../libraries/eigenda/BN254.sol";
-import "../libraries/eigenda/lib/contracts/libraries/DataStoreUtils.sol";
-import "../libraries/eigenda/Parse.sol";
+import { DataStoreUtils } from "../libraries/eigenda/lib/contracts/libraries/DataStoreUtils.sol";
+import { Parser } from "../libraries/eigenda/Parse.sol";
 
 
-contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeable, Parser{
+contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeable, Parser {
     using SafeMathUpgradeable for uint256;
     using AddressUpgradeable for address;
 
@@ -22,6 +22,7 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         COMMITTED,
         REVERTED
     }
+
     struct DisclosureProofs {
         bytes header;
         uint32 firstChunkNumber;

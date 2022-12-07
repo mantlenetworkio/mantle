@@ -13,17 +13,19 @@ const deployFn: DeployFunction = async (hre) => {
   const owner = hre.deployConfig.bvmAddressManagerOwner
   const eigenSequencerAddress = hre.deployConfig.bvmSequencerAddress
   const dataManagerAddress = hre.deployConfig.dataManagerAddress
+  console.log('dataManagerAddress is', dataManagerAddress)
+  console.log('eigenSequencerAddress is', eigenSequencerAddress)
 
-  // deploy impl
+
+  const args = [eigenSequencerAddress, dataManagerAddress, 10, 100]
   await deployAndVerifyAndThen({
     hre,
     name: names.managed.da.BVM_EigenDataLayrChain,
     contract: 'BVM_EigenDataLayrChain',
     args: [],
   })
-  console.log('deploy tss group manager success')
+  console.log('deploy eigen datalayr chain success')
 
-  // deploy proxy
   const Impl_BVM_EigenDataLayrChain = await getContractFromArtifact(
     hre,
     names.managed.da.BVM_EigenDataLayrChain,
@@ -33,7 +35,6 @@ const deployFn: DeployFunction = async (hre) => {
     }
   )
 
-  const args = [eigenSequencerAddress, dataManagerAddress, 10, 100]
   const callData = Impl_BVM_EigenDataLayrChain.interface.encodeFunctionData(
     'initialize',
     args
