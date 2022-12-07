@@ -200,6 +200,10 @@ func (e *NoRewardEngine) Author(header *types.Header) (common.Address, error) {
 	return e.inner.Author(header)
 }
 
+func (e *NoRewardEngine) SetBatchPeriod(bps *types.BatchPeriodStartMsg) {
+	// do nothing
+}
+
 func (e *NoRewardEngine) VerifyHeader(chain consensus.ChainReader, header *types.Header, seal bool) error {
 	return e.inner.VerifyHeader(chain, header, seal)
 }

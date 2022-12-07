@@ -2,6 +2,7 @@ package rollup
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -23,6 +24,11 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/eth/gasprice"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
+)
+
+const (
+	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
+	chainHeadChanSize = 10
 )
 
 var (
@@ -48,6 +54,7 @@ type SyncService struct {
 	db                             ethdb.Database
 	scope                          event.SubscriptionScope
 	txFeed                         event.Feed
+	batchPeriodCh                  event.Feed
 	txLock                         sync.Mutex
 	loopLock                       sync.Mutex
 	enable                         bool
@@ -75,6 +82,8 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	if bc == nil {
 		return nil, errors.New("Must pass BlockChain to SyncService")
 	}
+
+	log.Info(fmt.Sprintf("SyncService config: %v", cfg))
 
 	ctx, cancel := context.WithCancel(ctx)
 	_ = cancel // satisfy govet
@@ -131,7 +140,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		syncing:                        atomic.Value{},
 		bc:                             bc,
 		txpool:                         txpool,
-		chainHeadCh:                    make(chan core.ChainHeadEvent, 1),
+		chainHeadCh:                    make(chan core.ChainHeadEvent, chainHeadChanSize),
 		client:                         client,
 		db:                             db,
 		pollInterval:                   pollInterval,
@@ -151,6 +160,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	// reorgs and also favors safety over liveliness. If a transaction breaks
 	// things downstream, it is expected that this channel will halt ingestion
 	// of additional transactions by the SyncService.
+	// TODO handle this subscription later
 	service.chainHeadSub = service.bc.SubscribeChainHeadEvent(service.chainHeadCh)
 
 	// Initial sync service setup if it is enabled. This code depends on
@@ -220,6 +230,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 			service.setSyncStatus(true)
 		}
 	}
+	go service.handleChainHeadEventLoop()
 	return &service, nil
 }
 
@@ -404,6 +415,7 @@ func (s *SyncService) IsSyncing() bool {
 // started by this service.
 func (s *SyncService) Stop() error {
 	s.scope.Close()
+	// TODO handle this subscription later
 	s.chainHeadSub.Unsubscribe()
 	close(s.chainHeadCh)
 
@@ -615,8 +627,8 @@ func (s *SyncService) GasPriceOracleOwnerAddress() *common.Address {
 	return &s.gasPriceOracleOwnerAddress
 }
 
-/// Update the execution context's timestamp and blocknumber
-/// over time. This is only necessary for the sequencer.
+// Update the execution context's timestamp and blocknumber
+// over time. This is only necessary for the sequencer.
 func (s *SyncService) updateL1BlockNumber() error {
 	context, err := s.client.GetLatestEthContext()
 	if err != nil {
@@ -922,6 +934,162 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 		}
 		return nil
 	}
+}
+
+// applyTransaction is a higher level API for applying a transaction
+func (s *SyncService) applyTransactionMock(tx *types.Transaction) (error, func() error) {
+	if tx.GetMeta().Index != nil {
+		return s.applyIndexedTransaction(tx), nil
+	}
+	return s.applyTransactionToTipMock(tx)
+}
+
+// Higher level API for applying transactions. Should only be called for
+// queue origin sequencer transactions, as the contracts on L1 manage the same
+// validity checks that are done here.
+func (s *SyncService) ValidateAndApplySequencerTransactionMock(tx *types.Transaction) (error, func() error) {
+	if s.verifier {
+		return errors.New("Verifier does not accept transactions out of band"), nil
+	}
+	if tx == nil {
+		return errors.New("nil transaction passed to ValidateAndApplySequencerTransaction"), nil
+	}
+	s.txLock.Lock()
+	defer s.txLock.Unlock()
+	if err := s.verifyFee(tx); err != nil {
+		return err, nil
+	}
+	log.Trace("Sequencer transaction validation", "hash", tx.Hash().Hex())
+
+	qo := tx.QueueOrigin()
+	if qo != types.QueueOriginSequencer {
+		return fmt.Errorf("invalid transaction with queue origin %s", qo.String()), nil
+	}
+	if err := s.txpool.ValidateTx(tx); err != nil {
+		return fmt.Errorf("invalid transaction: %w", err), nil
+	}
+	err, hook := s.applyTransactionMock(tx)
+	if err != nil {
+		return err, nil
+	}
+
+	return nil, hook
+}
+
+// applyTransactionToTip will do sanity checks on the transaction before
+// applying it to the tip. It blocks until the transaction has been included in
+// the chain. It is assumed that validation around the index has already
+// happened.
+func (s *SyncService) applyTransactionToTipMock(tx *types.Transaction) (error, func() error) {
+	if tx == nil {
+		return errors.New("nil transaction passed to applyTransactionToTip"), nil
+	}
+	// Queue Origin L1 to L2 transactions must have a timestamp that is set by
+	// the L1 block that holds the transaction. This should never happen but is
+	// a sanity check to prevent fraudulent execution.
+	// No need to unlock here as the lock is only taken when its a queue origin
+	// sequencer transaction.
+	if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+		if tx.L1Timestamp() == 0 {
+			return fmt.Errorf("Queue origin L1 to L2 transaction without a timestamp: %s", tx.Hash().Hex()), nil
+		}
+	}
+
+	// If there is no L1 timestamp assigned to the transaction, then assign a
+	// timestamp to it. The property that L1 to L2 transactions have the same
+	// timestamp as the L1 block that it was included in is removed for better
+	// UX. This functionality can be added back in during a future release. For
+	// now, the sequencer will assign a timestamp to each transaction.
+	ts := s.GetLatestL1Timestamp()
+	bn := s.GetLatestL1BlockNumber()
+
+	log.Info("sync service status", "ts", ts, "bn", bn, "tx.L1Timestamp", tx.L1Timestamp(), "tx.L1BlockNumber()", tx.L1BlockNumber())
+	// The L1Timestamp is 0 for QueueOriginSequencer transactions when
+	// running as the sequencer, the transactions are coming in via RPC.
+	// This code path also runs for replicas/verifiers so any logic involving
+	// `time.Now` can only run for the sequencer. All other nodes must listen
+	// to what the sequencer says is the timestamp, otherwise there will be a
+	// network split.
+	// Note that it should never be possible for the timestamp to be set to
+	// 0 when running as a verifier.
+	shouldMalleateTimestamp := !s.verifier && tx.QueueOrigin() == types.QueueOriginL1ToL2
+	if tx.L1Timestamp() == 0 || shouldMalleateTimestamp {
+		// Get the latest known timestamp
+		current := time.Unix(int64(ts), 0)
+		// Get the current clocktime
+		now := time.Now()
+		// If enough time has passed, then assign the
+		// transaction to have the timestamp now. Otherwise,
+		// use the current timestamp
+		if now.Sub(current) > s.timestampRefreshThreshold {
+			current = now
+		}
+		log.Info("Updating latest timestamp", "timestamp", current, "unix", current.Unix())
+		tx.SetL1Timestamp(uint64(current.Unix()))
+	} else if tx.L1Timestamp() == 0 && s.verifier {
+		// This should never happen
+		log.Error("No tx timestamp found when running as verifier", "hash", tx.Hash().Hex())
+	} else if tx.L1Timestamp() < ts {
+		// This should never happen, but sometimes does
+		log.Error("Timestamp monotonicity violation", "hash", tx.Hash().Hex(), "latest", ts, "tx", tx.L1Timestamp())
+	}
+
+	l1BlockNumber := tx.L1BlockNumber()
+	// Set the L1 blocknumber
+	if l1BlockNumber == nil {
+		tx.SetL1BlockNumber(bn)
+	} else if l1BlockNumber.Uint64() > bn {
+		s.SetLatestL1BlockNumber(l1BlockNumber.Uint64())
+	} else if l1BlockNumber.Uint64() < bn {
+		// l1BlockNumber < latest l1BlockNumber
+		// indicates an error
+		log.Error("Blocknumber monotonicity violation", "hash", tx.Hash().Hex(),
+			"new", l1BlockNumber.Uint64(), "old", bn)
+	}
+
+	// Store the latest timestamp value
+	if tx.L1Timestamp() > ts {
+		s.SetLatestL1Timestamp(tx.L1Timestamp())
+	}
+
+	index := s.GetLatestIndex()
+	if tx.GetMeta().Index == nil {
+		if index == nil {
+			tx.SetIndex(0)
+		} else {
+			tx.SetIndex(*index + 1)
+		}
+	}
+	log.Info("tx meta", "tx_index", *tx.GetMeta().Index, "tx_L1Timestamp", tx.GetMeta().L1Timestamp, "tx_L1BlockNumber", tx.GetMeta().L1BlockNumber)
+
+	// On restart, these values are repaired to handle
+	// the case where the index is updated but the
+	// transaction isn't yet added to the chain
+	s.SetLatestIndex(tx.GetMeta().Index)
+	if queueIndex := tx.GetMeta().QueueIndex; queueIndex != nil {
+		s.SetLatestEnqueueIndex(queueIndex)
+	}
+
+	// The index was set above so it is safe to dereference
+	log.Info("Applying transaction to tip mock", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
+
+	hook := func() error {
+		// Update the cache when the transaction is from the owner
+		// of the gas price oracle
+		sender, _ := types.Sender(s.signer, tx)
+		owner := s.GasPriceOracleOwnerAddress()
+		if owner != nil && sender == *owner {
+			if err := s.updateGasPriceOracleCache(nil); err != nil {
+				s.SetLatestL1Timestamp(ts)
+				s.SetLatestL1BlockNumber(bn)
+				s.SetLatestIndex(index)
+				return err
+			}
+		}
+		return nil
+	}
+
+	return nil, hook
 }
 
 // applyBatchedTransaction applies transactions that were batched to layer one.
@@ -1238,6 +1406,27 @@ func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) e
 // starts sending event to the given channel.
 func (s *SyncService) SubscribeNewTxsEvent(ch chan<- core.NewTxsEvent) event.Subscription {
 	return s.scope.Track(s.txFeed.Subscribe(ch))
+}
+
+// SubscribeBatchPeriodStartEvent registers a subscription of ProduceBlockEvent and
+// starts sending event to the given channel.
+func (s *SyncService) SubscribeBatchPeriodStartEvent(ch chan<- core.BatchPeriodStartEvent) event.Subscription {
+	return s.scope.Track(s.batchPeriodCh.Subscribe(ch))
+}
+
+func (s *SyncService) ProcessBatchPeriodStartMsg() error {
+	s.batchPeriodCh.Send(nil) // TODO
+	return nil
+}
+
+func (s *SyncService) handleChainHeadEventLoop() {
+	log.Info("Start handle chain head event loop")
+	for {
+		select {
+		case chainHead := <-s.chainHeadCh:
+			log.Debug("chainHead", "block number", chainHead.Block.NumberU64(), "extra data", hex.EncodeToString(chainHead.Block.Extra()))
+		}
+	}
 }
 
 func stringify(i *uint64) string {

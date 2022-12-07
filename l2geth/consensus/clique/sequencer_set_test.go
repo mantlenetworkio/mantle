@@ -115,7 +115,7 @@ func TestSequencerSetSequencerBasic(t *testing.T) {
 		{
 			seqs: SequencerSet{
 				Sequencers: []*Sequencer{seq},
-				Producer:   seq,
+				Proposer:   seq,
 			},
 			err: false,
 			msg: "",
@@ -152,9 +152,9 @@ func TestCopy(t *testing.T) {
 // Test that IncrementProducerPriority requires positive times.
 func TestIncrementProducerPriorityPositiveTimes(t *testing.T) {
 	sset := NewSequencerSet([]*Sequencer{
-		newSequencer(byteToCommonAddr([]byte("foo")), randPubKey(), 1000),
-		newSequencer(byteToCommonAddr([]byte("bar")), randPubKey(), 300),
-		newSequencer(byteToCommonAddr([]byte("baz")), randPubKey(), 330),
+		newSequencer(byteToCommonAddr([]byte("foo")), 1000),
+		newSequencer(byteToCommonAddr([]byte("bar")), 300),
+		newSequencer(byteToCommonAddr([]byte("baz")), 330),
 	})
 
 	assert.Panics(t, func() { sset.IncrementProducerPriority(-1) })
@@ -166,9 +166,7 @@ func BenchmarkSequencerSetCopy(b *testing.B) {
 	b.StopTimer()
 	sset := NewSequencerSet([]*Sequencer{})
 	for i := 0; i < 1000; i++ {
-		privKey, _ := ecdsa.GenerateKey(elliptic.P256(), crand.Reader)
-		pubKey := privKey.PublicKey
-		seq := NewSequencer(randAddress(), pubKey, 10)
+		seq := NewSequencer(randAddress(), 10)
 		err := sset.UpdateWithChangeSet([]*Sequencer{seq})
 		if err != nil {
 			panic("Failed to add sequencer")
@@ -185,9 +183,9 @@ func BenchmarkSequencerSetCopy(b *testing.B) {
 
 func TestProducerSelection1(t *testing.T) {
 	sset := NewSequencerSet([]*Sequencer{
-		newSequencer(byteToCommonAddr([]byte("foo")), randPubKey(), 1000),
-		newSequencer(byteToCommonAddr([]byte("bar")), randPubKey(), 300),
-		newSequencer(byteToCommonAddr([]byte("baz")), randPubKey(), 330),
+		newSequencer(byteToCommonAddr([]byte("foo")), 1000),
+		newSequencer(byteToCommonAddr([]byte("bar")), 300),
+		newSequencer(byteToCommonAddr([]byte("baz")), 330),
 	})
 	var producers []string
 	for i := 0; i < 5; i++ {
@@ -207,7 +205,7 @@ func TestProducerSelection2(t *testing.T) {
 	addr2 := []byte{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2}
 
 	// when all voting power is same, we go in order of addresses
-	seq0, seq1, seq2 := newSequencer(byteToCommonAddr(addr0), randPubKey(), 100), newSequencer(byteToCommonAddr(addr1), randPubKey(), 100), newSequencer(byteToCommonAddr(addr2), randPubKey(), 100)
+	seq0, seq1, seq2 := newSequencer(byteToCommonAddr(addr0), 100), newSequencer(byteToCommonAddr(addr1), 100), newSequencer(byteToCommonAddr(addr2), 100)
 	seqList := []*Sequencer{seq0, seq1, seq2}
 	seqs := NewSequencerSet(seqList)
 	for i := 0; i < len(seqList)*5; i++ {
@@ -220,7 +218,7 @@ func TestProducerSelection2(t *testing.T) {
 	}
 
 	// One sequencer has more than the others, but not enough to produce twice in a row
-	*seq2 = *newSequencer(byteToCommonAddr(addr2), randPubKey(), 400)
+	*seq2 = *newSequencer(byteToCommonAddr(addr2), 400)
 	seqs = NewSequencerSet(seqList)
 	// seqs.IncrementProducerPriority(1)
 	prop := seqs.GetProducer()
@@ -234,7 +232,7 @@ func TestProducerSelection2(t *testing.T) {
 	}
 
 	// One sequencer has more than the others, and enough to be produce twice in a row
-	*seq2 = *newSequencer(byteToCommonAddr(addr2), randPubKey(), 401)
+	*seq2 = *newSequencer(byteToCommonAddr(addr2), 401)
 	seqs = NewSequencerSet(seqList)
 	prop = seqs.GetProducer()
 	if !bytes.Equal(prop.Address.Bytes(), addr2) {
@@ -252,7 +250,7 @@ func TestProducerSelection2(t *testing.T) {
 	}
 
 	// each sequencer should be the producer a proportional number of times
-	seq0, seq1, seq2 = newSequencer(byteToCommonAddr(addr0), randPubKey(), 4), newSequencer(byteToCommonAddr(addr1), randPubKey(), 5), newSequencer(byteToCommonAddr(addr2), randPubKey(), 3)
+	seq0, seq1, seq2 = newSequencer(byteToCommonAddr(addr0), 4), newSequencer(byteToCommonAddr(addr1), 5), newSequencer(byteToCommonAddr(addr2), 3)
 	seqList = []*Sequencer{seq0, seq1, seq2}
 	propCount := make([]int, 3)
 	seqs = NewSequencerSet(seqList)
@@ -295,18 +293,15 @@ func TestProducerSelection2(t *testing.T) {
 
 func TestProducerSelection3(t *testing.T) {
 	sset := NewSequencerSet([]*Sequencer{
-		newSequencer(byteToCommonAddr([]byte("asequencer_address12")), randPubKey(), 1),
-		newSequencer(byteToCommonAddr([]byte("bsequencer_address12")), randPubKey(), 1),
-		newSequencer(byteToCommonAddr([]byte("csequencer_address12")), randPubKey(), 1),
-		newSequencer(byteToCommonAddr([]byte("dsequencer_address12")), randPubKey(), 1),
+		newSequencer(byteToCommonAddr([]byte("asequencer_address12")), 1),
+		newSequencer(byteToCommonAddr([]byte("bsequencer_address12")), 1),
+		newSequencer(byteToCommonAddr([]byte("csequencer_address12")), 1),
+		newSequencer(byteToCommonAddr([]byte("dsequencer_address12")), 1),
 	})
 
 	producerOrder := make([]*Sequencer, 4)
 	for i := 0; i < 4; i++ {
 		// need to give all sequencer to have keys
-		privKey, _ := ecdsa.GenerateKey(elliptic.P256(), crand.Reader)
-		pk := privKey.PublicKey
-		sset.Sequencers[i].PubKey = pk
 		producerOrder[i] = sset.GetProducer()
 		sset.IncrementProducerPriority(1)
 	}
@@ -322,7 +317,7 @@ func TestProducerSelection3(t *testing.T) {
 		got := sset.GetProducer().Address
 		expected := producerOrder[j%4].Address
 		if !bytes.Equal(got.Bytes(), expected.Bytes()) {
-			t.Fatalf(fmt.Sprintf("sset.Producer (%X) does not match expected producer (%X) for (%d, %d)", got, expected, i, j))
+			t.Fatalf(fmt.Sprintf("sset.Proposer (%X) does not match expected producer (%X) for (%d, %d)", got, expected, i, j))
 		}
 
 		// serialize, deserialize, check producer
@@ -334,7 +329,7 @@ func TestProducerSelection3(t *testing.T) {
 			if !bytes.Equal(got.Bytes(), computed.Address.Bytes()) {
 				t.Fatalf(
 					fmt.Sprintf(
-						"sset.Producer (%X) does not match computed proposer (%X) for (%d, %d)",
+						"sset.Proposer (%X) does not match computed proposer (%X) for (%d, %d)",
 						got,
 						computed.Address,
 						i,
@@ -361,8 +356,8 @@ func byteToCommonAddr(bytes []byte) common.Address {
 	return common.BytesToAddress(bytes)
 }
 
-func newSequencer(address common.Address, pubKey ecdsa.PublicKey, power int64) *Sequencer {
-	return &Sequencer{Address: address, PubKey: pubKey, Power: power}
+func newSequencer(address common.Address, power int64) *Sequencer {
+	return &Sequencer{Address: address, Power: power}
 }
 
 func randPubKey() ecdsa.PublicKey {
@@ -381,7 +376,7 @@ func randAddress() common.Address {
 func randSequencer(totalVotingPower int64) *Sequencer {
 	// this modulo limits the ProducerPriority/Power to stay in the
 	// bounds of MaxTotalPower minus the already existing voting power:
-	seq := NewSequencer(randAddress(), randPubKey(), int64(rand.Uint64()%uint64(MaxTotalPower-totalVotingPower)))
+	seq := NewSequencer(randAddress(), int64(rand.Uint64()%uint64(MaxTotalPower-totalVotingPower)))
 	seq.ProducerPriority = rand.Int63() % (MaxTotalPower - totalVotingPower)
 	return seq
 }
@@ -692,15 +687,15 @@ func TestEmptySet(t *testing.T) {
 	seqSet.GetProducer()
 
 	// Add to empty set
-	v1 := newSequencer(byteToCommonAddr([]byte("v1")), randPubKey(), 100)
-	v2 := newSequencer(byteToCommonAddr([]byte("v2")), randPubKey(), 100)
+	v1 := newSequencer(byteToCommonAddr([]byte("v1")), 100)
+	v2 := newSequencer(byteToCommonAddr([]byte("v2")), 100)
 	seqList = []*Sequencer{v1, v2}
 	assert.NoError(t, seqSet.UpdateWithChangeSet(seqList))
 	verifySequencerSet(t, seqSet)
 
 	// Delete all seqidators from set
-	v1 = newSequencer(byteToCommonAddr([]byte("v1")), randPubKey(), 0)
-	v2 = newSequencer(byteToCommonAddr([]byte("v2")), randPubKey(), 0)
+	v1 = newSequencer(byteToCommonAddr([]byte("v1")), 0)
+	v2 = newSequencer(byteToCommonAddr([]byte("v2")), 0)
 	delList := []*Sequencer{v1, v2}
 	assert.Error(t, seqSet.UpdateWithChangeSet(delList))
 
@@ -709,30 +704,30 @@ func TestEmptySet(t *testing.T) {
 }
 
 func TestUpdatesForNewSequencerSet(t *testing.T) {
-	v1 := newSequencer(byteToCommonAddr([]byte("v1")), randPubKey(), 100)
-	v2 := newSequencer(byteToCommonAddr([]byte("v2")), randPubKey(), 100)
+	v1 := newSequencer(byteToCommonAddr([]byte("v1")), 100)
+	v2 := newSequencer(byteToCommonAddr([]byte("v2")), 100)
 	seqList := []*Sequencer{v1, v2}
 	seqSet := NewSequencerSet(seqList)
 	verifySequencerSet(t, seqSet)
 
 	// Verify duplicates are caught in NewSequencerSet() and it panics
-	v111 := newSequencer(byteToCommonAddr([]byte("v1")), randPubKey(), 100)
-	v112 := newSequencer(byteToCommonAddr([]byte("v1")), randPubKey(), 123)
-	v113 := newSequencer(byteToCommonAddr([]byte("v1")), randPubKey(), 234)
+	v111 := newSequencer(byteToCommonAddr([]byte("v1")), 100)
+	v112 := newSequencer(byteToCommonAddr([]byte("v1")), 123)
+	v113 := newSequencer(byteToCommonAddr([]byte("v1")), 234)
 	seqList = []*Sequencer{v111, v112, v113}
 	assert.Panics(t, func() { NewSequencerSet(seqList) })
 
 	// Verify set including seqidator with voting power 0 cannot be created
-	v1 = newSequencer(byteToCommonAddr([]byte("v1")), randPubKey(), 0)
-	v2 = newSequencer(byteToCommonAddr([]byte("v2")), randPubKey(), 22)
-	v3 := newSequencer(byteToCommonAddr([]byte("v3")), randPubKey(), 33)
+	v1 = newSequencer(byteToCommonAddr([]byte("v1")), 0)
+	v2 = newSequencer(byteToCommonAddr([]byte("v2")), 22)
+	v3 := newSequencer(byteToCommonAddr([]byte("v3")), 33)
 	seqList = []*Sequencer{v1, v2, v3}
 	assert.Panics(t, func() { NewSequencerSet(seqList) })
 
 	// Verify set including seqidator with negative voting power cannot be created
-	v1 = newSequencer(byteToCommonAddr([]byte("v1")), randPubKey(), 10)
-	v2 = newSequencer(byteToCommonAddr([]byte("v2")), randPubKey(), -20)
-	v3 = newSequencer(byteToCommonAddr([]byte("v3")), randPubKey(), 30)
+	v1 = newSequencer(byteToCommonAddr([]byte("v1")), 10)
+	v2 = newSequencer(byteToCommonAddr([]byte("v2")), -20)
+	v3 = newSequencer(byteToCommonAddr([]byte("v3")), 30)
 	seqList = []*Sequencer{v1, v2, v3}
 	assert.Panics(t, func() { NewSequencerSet(seqList) })
 }
@@ -757,7 +752,7 @@ func permutation(seqList []testSeq) []testSeq {
 func createNewSequencerList(testSeqList []testSeq) []*Sequencer {
 	seqList := make([]*Sequencer, 0, len(testSeqList))
 	for _, seq := range testSeqList {
-		seqList = append(seqList, newSequencer(byteToCommonAddr([]byte(seq.name)), randPubKey(), seq.power))
+		seqList = append(seqList, newSequencer(byteToCommonAddr([]byte(seq.name)), seq.power))
 	}
 	return seqList
 }
@@ -1504,7 +1499,7 @@ func BenchmarkUpdates(b *testing.B) {
 	// Init with n sequencers
 	vs := make([]*Sequencer, n)
 	for j := 0; j < n; j++ {
-		vs[j] = newSequencer(byteToCommonAddr([]byte(fmt.Sprintf("v%d", j))), randPubKey(), 100)
+		vs[j] = newSequencer(byteToCommonAddr([]byte(fmt.Sprintf("v%d", j))), 100)
 	}
 	seqSet := NewSequencerSet(vs)
 	l := len(seqSet.Sequencers)
@@ -1512,7 +1507,7 @@ func BenchmarkUpdates(b *testing.B) {
 	// Make m new sequencer
 	newValList := make([]*Sequencer, m)
 	for j := 0; j < m; j++ {
-		newValList[j] = newSequencer(byteToCommonAddr([]byte(fmt.Sprintf("v%d", j+l))), randPubKey(), 1000)
+		newValList[j] = newSequencer(byteToCommonAddr([]byte(fmt.Sprintf("v%d", j+l))), 1000)
 	}
 	b.ResetTimer()
 

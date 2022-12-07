@@ -45,25 +45,19 @@ func TestReimportMirroredState(t *testing.T) {
 		signer = new(types.HomesteadSigner)
 	)
 	address := addr
-	Producer := Sequencer{
-		Address:          address,
-		Power:            100,
-		ProducerPriority: -100,
-	}
-	producers := Producers{
-		Number:      0,
-		Index:       0,
-		Epoch:       100,
-		SchedulerID: address.Bytes(),
-		SequencerSet: SequencerSet{
-			Sequencers: []*Sequencer{
-				&Producer,
-			},
-			Producer:   &Producer,
-			totalPower: 100,
+	batchPeriodStartMsg := types.BatchPeriodStartMsg{
+		ReorgIndex:   0,
+		BatchIndex:   0,
+		StartHeight:  1,
+		MaxHeight:    100,
+		ExpireTime:   1669787879,
+		MinerAddress: address,
+		SequencerSet: []common.Address{
+			address,
 		},
+		Signature: nil,
 	}
-	buf := producers.serialize()
+	buf := batchPeriodStartMsg.SerializeBatchPeriodStartMsg()
 	genspec := &core.Genesis{
 		ExtraData: make([]byte, extraVanity+len(buf)+extraSeal),
 		Alloc: map[common.Address]core.GenesisAccount{

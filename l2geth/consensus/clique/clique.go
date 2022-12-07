@@ -19,11 +19,13 @@ package clique
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"math/big"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
@@ -51,6 +53,8 @@ const (
 	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
 
 	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
+
+	schedulerSigFlag = "scheduler_sig_flag"
 )
 
 // Clique proof-of-authority protocol constants.
@@ -93,6 +97,10 @@ var (
 	// errMissingVanity is returned if a block's extra-data section is shorter than
 	// 32 bytes, which is required to store the signer vanity.
 	errMissingVanity = errors.New("extra-data 32 byte vanity prefix missing")
+
+	errIncompleteExtra = errors.New("incomplete extra-data")
+
+	errExtraContainsInvalidBatchPeriodBuf = errors.New("extra-data contains invalid batch period buf")
 
 	// errMissingSignature is returned if a block's extra-data section doesn't seem
 	// to contain a 65 byte secp256k1 signature.
@@ -177,9 +185,7 @@ type Clique struct {
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
 
-	schedulerID []byte    // Identifier of the current scheduler
-	producers   Producers // Current list of producers
-	signature   []byte    // Current signature of producers
+	batchPeriod *types.BatchPeriodStartMsg // Current BatchPeriodStartMsg
 
 	proposals map[common.Address]bool // Current list of proposals we are pushing
 
@@ -212,23 +218,14 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 	}
 }
 
-func (c *Clique) SetProducers(data ProducerUpdate) {
-	c.producers = data.Producers
-	c.schedulerID = data.Producers.SchedulerID
-	c.signature = data.Signature
-}
-
-func (c *Clique) GetProducers(data GetProducers) ProducerUpdate {
-	return ProducerUpdate{
-		c.producers,
-		c.signature,
-	}
-}
-
 // Author implements consensus.Engine, returning the Ethereum address recovered
 // from the signature in the header's extra-data section.
 func (c *Clique) Author(header *types.Header) (common.Address, error) {
 	return ecrecover(header, c.signatures)
+}
+
+func (c *Clique) SetBatchPeriod(bps *types.BatchPeriodStartMsg) {
+	c.batchPeriod = bps
 }
 
 // VerifyHeader checks whether a header conforms to the consensus rules.
@@ -274,17 +271,17 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 		}
 	}
 	// Checkpoint blocks need to enforce zero beneficiary
-	checkpoint := (number % c.config.Epoch) == 0
-	if checkpoint && header.Coinbase != (common.Address{}) {
-		return errInvalidCheckpointBeneficiary
-	}
+	//checkpoint := (number % c.config.Epoch) == 0
+	//if checkpoint && header.Coinbase != (common.Address{}) {
+	//	return errInvalidCheckpointBeneficiary
+	//}
 	// Nonces must be 0x00..0 or 0xff..f, zeroes enforced on checkpoints
 	if !bytes.Equal(header.Nonce[:], nonceAuthVote) && !bytes.Equal(header.Nonce[:], nonceDropVote) {
 		return errInvalidVote
 	}
-	if checkpoint && !bytes.Equal(header.Nonce[:], nonceDropVote) {
-		return errInvalidCheckpointVote
-	}
+	//if checkpoint && !bytes.Equal(header.Nonce[:], nonceDropVote) {
+	//	return errInvalidCheckpointVote
+	//}
 	// Check that the extra-data contains both the vanity and signature
 	if len(header.Extra) < extraVanity {
 		return errMissingVanity
@@ -292,14 +289,42 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 	if len(header.Extra) < extraVanity+extraSeal {
 		return errMissingSignature
 	}
+
+	var batchPeriodBuffer []byte
+	var proposerSignature []byte
+	var schedulerSignature []byte
+	if strings.HasPrefix(string(header.Extra), schedulerSigFlag) {
+		if len(header.Extra) <= extraVanity+crypto.SignatureLength*2+len(schedulerSigFlag) {
+			log.Error("header extra", "height", header.Number.Uint64(), "length", len(header.Extra), "data", hex.EncodeToString(header.Extra))
+			return errIncompleteExtra
+		}
+		batchPeriodBuffer = header.Extra[extraVanity : len(header.Extra)-len(schedulerSigFlag)-crypto.SignatureLength*2]
+		proposerSignature = header.Extra[len(header.Extra)-len(schedulerSigFlag)-crypto.SignatureLength*2 : len(header.Extra)-len(schedulerSigFlag)-crypto.SignatureLength]
+		schedulerSignature = header.Extra[len(header.Extra)-len(schedulerSigFlag)-crypto.SignatureLength*1 : len(header.Extra)-len(schedulerSigFlag)]
+	} else {
+		if len(header.Extra) <= extraVanity+crypto.SignatureLength {
+			log.Error("header extra", "height", header.Number.Uint64(), "length", len(header.Extra), "data", hex.EncodeToString(header.Extra))
+			return errIncompleteExtra
+		}
+		batchPeriodBuffer = header.Extra[extraVanity : len(header.Extra)-crypto.SignatureLength]
+		proposerSignature = header.Extra[len(header.Extra)-crypto.SignatureLength:]
+	}
+	if !types.IsValidBatchPeriodStartMsgBuf(batchPeriodBuffer) {
+		return errExtraContainsInvalidBatchPeriodBuf
+	}
+	batchPeriod := types.DeserializeBatchPeriodStartMsg(batchPeriodBuffer)
+	//TODO verify batch period, proposer signature and schedule signature
+	_ = batchPeriod
+	_ = proposerSignature
+	_ = schedulerSignature
 	// Ensure that the extra-data contains a signer list on checkpoint, but none otherwise
-	signersBytes := len(header.Extra) - extraVanity - extraSeal
-	if !checkpoint && signersBytes != 0 {
-		return errExtraSigners
-	}
-	if checkpoint && signersBytes%common.AddressLength != 0 {
-		return errInvalidCheckpointSigners
-	}
+	//signersBytes := len(header.Extra) - extraVanity - extraSeal
+	//if !checkpoint && signersBytes != 0 {
+	//	return errExtraSigners
+	//}
+	//if checkpoint && signersBytes%common.AddressLength != 0 {
+	//	return errInvalidCheckpointSigners
+	//}
 	// Ensure that the mix digest is zero as we don't have fork protection currently
 	if header.MixDigest != (common.Hash{}) {
 		return errInvalidMixDigest
@@ -353,22 +378,11 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 
 	}
 	// Retrieve the snapshot needed to verify this header and cache it
-	snap, err := c.snapshot(chain, number-1, header.ParentHash, parents)
+	_, err := c.snapshot(chain, number-1, header.ParentHash, parents)
 	if err != nil {
 		return err
 	}
-	// If the block is a checkpoint block, verify the signer list
-	if number%c.config.Epoch == 0 {
-		signers := make([]byte, len(snap.Signers)*common.AddressLength)
-		for i, signer := range snap.signers() {
-			copy(signers[i*common.AddressLength:], signer[:])
-		}
-		extraSuffix := len(header.Extra) - extraSeal
-		if !bytes.Equal(header.Extra[extraVanity:extraSuffix], signers) {
-			return errMismatchingCheckpointSigners
-		}
-		// todo verify producer
-	}
+
 	// All basic checks passed, verify the seal and return
 	return c.verifySeal(chain, header, parents)
 }
@@ -403,14 +417,9 @@ func (c *Clique) snapshot(chain consensus.ChainReader, number uint64, hash commo
 			if checkpoint != nil {
 				hash := checkpoint.Hash()
 
-				producers := deserialize(checkpoint.Extra[extraVanity : len(checkpoint.Extra)-extraSeal])
-
-				signers := make([]common.Address, len(producers.SequencerSet.Sequencers))
-				for i := 0; i < len(producers.SequencerSet.Sequencers); i++ {
-					signers[i] = producers.SequencerSet.Sequencers[i].Address
-				}
-
-				snap = newSnapshot(c.config, c.signatures, number, hash, signers, *producers)
+				batchPeriodStartMsg := types.DeserializeBatchPeriodStartMsg(checkpoint.Extra[extraVanity : len(checkpoint.Extra)-extraSeal])
+				log.Info("snapshot batchPeriodStartMsg", "miner_address", batchPeriodStartMsg.MinerAddress, "sequencerSet length", len(batchPeriodStartMsg.SequencerSet))
+				snap = newSnapshot(c.config, c.signatures, number, hash, batchPeriodStartMsg.SequencerSet)
 				if err := snap.store(c.db); err != nil {
 					return nil, err
 				}
@@ -493,18 +502,19 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	if err != nil {
 		return err
 	}
-	log.Info(fmt.Sprintf("signer is : %v", signer.String()))
+	log.Debug(fmt.Sprintf("signer is: %v", signer.String()))
 	if _, ok := snap.Signers[signer]; !ok {
 		return errUnauthorizedSigner
 	}
-	for seen, recent := range snap.Recents {
-		if recent == signer {
-			// Signer is among recents, only fail if the current block doesn't shift it out
-			if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
-				return errRecentlySigned
-			}
-		}
-	}
+	// TODO double check
+	//for seen, recent := range snap.Recents {
+	//	if recent == signer {
+	//		// Signer is among recents, only fail if the current block doesn't shift it out
+	//		if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
+	//			return errRecentlySigned
+	//		}
+	//	}
+	//}
 	// Ensure that the difficulty corresponds to the turn-ness of the signer
 	if !c.fakeDiff {
 		inturn := snap.inturn(header.Number.Uint64(), signer)
@@ -522,7 +532,7 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 // header for running the transactions on top.
 func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) error {
 	// If the block isn't a checkpoint, cast a random vote (good enough for now)
-	header.Coinbase = common.Address{}
+	// header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
 
 	number := header.Number.Uint64()
@@ -530,10 +540,6 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	snap, err := c.snapshot(chain, number-1, header.ParentHash, nil)
 	if err != nil {
 		return err
-	}
-
-	if number == 1 {
-		c.producers = snap.Producers
 	}
 
 	if number%c.config.Epoch != 0 {
@@ -565,12 +571,11 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, extraVanity-len(header.Extra))...)
 	}
 	header.Extra = header.Extra[:extraVanity]
-
-	if number%c.config.Epoch == 0 {
-		// for _, signer := range snap.signers() {
-		// 	header.Extra = append(header.Extra, signer[:]...)
-		// }
-		header.Extra = append(header.Extra, snap.Producers.serialize()...)
+	batchPeriodBytes := c.batchPeriod.SerializeBatchPeriodStartMsg()
+	if batchPeriodBytes == nil {
+		return nil
+	} else {
+		header.Extra = append(header.Extra, batchPeriodBytes...)
 	}
 	header.Extra = append(header.Extra, make([]byte, extraSeal)...)
 
@@ -649,22 +654,23 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 	}
 
 	for k, _ := range snap.Signers {
-		log.Info(fmt.Sprintf("has signer: %v", k.String()))
+		log.Info(fmt.Sprintf("signer: %v", k.String()))
 	}
 
 	if _, authorized := snap.Signers[signer]; !authorized {
 		return errUnauthorizedSigner
 	}
 	// If we're amongst the recent signers, wait for the next block
-	for seen, recent := range snap.Recents {
-		if recent == signer {
-			// Signer is among recents, only wait if the current block doesn't shift it out
-			if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
-				log.Info("Signed recently, must wait for others")
-				return nil
-			}
-		}
-	}
+	// TODO double check
+	//for seen, recent := range snap.Recents {
+	//	if recent == signer {
+	//		// Signer is among recents, only wait if the current block doesn't shift it out
+	//		if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
+	//			log.Info("Signed recently, must wait for others")
+	//			return nil
+	//		}
+	//	}
+	//}
 	// Sweet, the protocol permits us to sign the block, wait for our time
 	delay := time.Unix(int64(header.Time), 0).Sub(time.Now()) // nolint: gosimple
 	if header.Difficulty.Cmp(diffNoTurn) == 0 {
@@ -701,13 +707,6 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 			log.Warn("Sealing result is not read by miner", "sealhash", SealHash(header))
 		}
 	}()
-
-	if number%c.config.Epoch == 0 {
-		producers := deserialize(header.Extra[extraVanity : len(header.Extra)-extraSeal])
-		c.producers = *producers
-	}
-
-	c.producers.SequencerSet.IncrementProducerPriority(1)
 
 	return nil
 }

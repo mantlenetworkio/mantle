@@ -28,7 +28,6 @@ import (
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
-	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
@@ -89,7 +88,10 @@ type ProtocolManager struct {
 	txsCh         chan core.NewTxsEvent
 	txsSub        event.Subscription
 	minedBlockSub *event.TypeMuxSubscription
-	producersSub  *event.TypeMuxSubscription
+	// consensus control messages
+	batchStartMsgSub      *event.TypeMuxSubscription
+	batchEndMsgSub        *event.TypeMuxSubscription
+	fraudProofReorgMsgSub *event.TypeMuxSubscription
 
 	whitelist map[uint64]common.Hash
 
@@ -263,8 +265,14 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 	go pm.minedBroadcastLoop()
 
 	// broadcast producers
-	pm.producersSub = pm.eventMux.Subscribe(clique.ProducersUpdateEvent{})
-	go pm.producersBroadcastLoop()
+	pm.batchStartMsgSub = pm.eventMux.Subscribe(core.BatchPeriodStartEvent{})
+	go pm.batchPeriodStartMsgBroadcastLoop()
+
+	pm.batchEndMsgSub = pm.eventMux.Subscribe(core.BatchPeriodEndEvent{})
+	go pm.batchPeriodEndMsgBroadcastLoop()
+
+	pm.fraudProofReorgMsgSub = pm.eventMux.Subscribe(core.FraudProofReorgEvent{})
+	go pm.fraudProofReorgMsgBroadcastLoop()
 
 	// start sync handlers
 	go pm.syncer()
@@ -276,7 +284,10 @@ func (pm *ProtocolManager) Stop() {
 
 	pm.txsSub.Unsubscribe()        // quits txBroadcastLoop
 	pm.minedBlockSub.Unsubscribe() // quits blockBroadcastLoop
-	pm.producersSub.Unsubscribe()  // quits producersBroadcastLoop
+
+	pm.batchStartMsgSub.Unsubscribe()
+	pm.batchEndMsgSub.Unsubscribe()
+	pm.fraudProofReorgMsgSub.Unsubscribe()
 
 	// Quit the sync loop.
 	// After this send has completed, no new peers will be accepted.
@@ -737,9 +748,9 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 
 	case msg.Code == TxMsg:
 		// Transactions arrived, make sure we have a valid and fresh chain to handle them
-		if atomic.LoadUint32(&pm.acceptTxs) == 0 {
-			break
-		}
+		//if atomic.LoadUint32(&pm.acceptTxs) == 0 {
+		//	break
+		//}
 		// Transactions can be processed, parse all of them and deliver to the pool
 		var txs []*types.Transaction
 		if err := msg.Decode(&txs); err != nil {
@@ -788,7 +799,7 @@ func (pm *ProtocolManager) BroadcastBlock(block *types.Block, propagate bool) {
 		for _, peer := range transfer {
 			peer.AsyncSendNewBlock(block, td)
 		}
-		log.Trace("Propagated block", "hash", hash, "recipients", len(transfer), "duration", common.PrettyDuration(time.Since(block.ReceivedAt)))
+		log.Trace("Propagated block", "hash", hash, "height", block.NumberU64(), "recipients", len(transfer), "duration", common.PrettyDuration(time.Since(block.ReceivedAt)))
 		return
 	}
 	// Otherwise if the block is indeed in out own chain, announce it
@@ -828,25 +839,6 @@ func (pm *ProtocolManager) minedBroadcastLoop() {
 			pm.BroadcastBlock(ev.Block, false) // Only then announce to the rest
 		}
 	}
-}
-
-// Sequencer set broadcast loop
-func (pm *ProtocolManager) producersBroadcastLoop() {
-	// automatically stops if unsubscribe
-	for obj := range pm.producersSub.Chan() {
-		if prs, ok := obj.Data.(clique.ProducersUpdateEvent); ok {
-			pm.BroadcastProducers(prs.Update) // First propagate block to peers
-		}
-	}
-}
-
-func (pm *ProtocolManager) BroadcastProducers(producersUpdate *clique.ProducerUpdate) {
-	peers := pm.peersTmp.PeersWithoutProducer(producersUpdate.Producers.Index)
-	for _, p := range peers {
-		p.AsyncSendProducers(producersUpdate)
-	}
-
-	log.Trace("Broadcast producers", "block number", producersUpdate.Producers.Number, "recipients", len(pm.peers.peers))
 }
 
 func (pm *ProtocolManager) txBroadcastLoop() {

@@ -21,6 +21,21 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 )
 
+type BatchPeriodStartEvent struct {
+	Msg   *types.BatchPeriodStartMsg
+	ErrCh chan error
+}
+
+type BatchPeriodEndEvent struct {
+	Msg   *types.BatchPeriodEndMsg
+	ErrCh chan error
+}
+
+type FraudProofReorgEvent struct {
+	Msg   *types.FraudProofReorgMsg
+	ErrCh chan error
+}
+
 // NewTxsEvent is posted when a batch of transactions enter the transaction pool.
 type NewTxsEvent struct {
 	Txs   []*types.Transaction

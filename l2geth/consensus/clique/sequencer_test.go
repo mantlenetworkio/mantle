@@ -1,8 +1,6 @@
 package clique
 
 import (
-	"crypto/ecdsa"
-	"crypto/elliptic"
 	"crypto/rand"
 	"fmt"
 	"testing"
@@ -17,15 +15,13 @@ func TestSequencerValidateBasic(t *testing.T) {
 	rand.Read(seed)
 	var addr common.Address
 	copy(addr[:], seed)
-	priv, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	pubKey := priv.PublicKey
 	testCases := []struct {
 		seq *Sequencer
 		err bool
 		msg string
 	}{
 		{
-			seq: NewSequencer(addr, pubKey, 1),
+			seq: NewSequencer(addr, 1),
 			err: false,
 			msg: "",
 		},
@@ -35,18 +31,12 @@ func TestSequencerValidateBasic(t *testing.T) {
 			msg: "nil sequencer",
 		},
 		{
-			seq: &Sequencer{
-				PubKey: ecdsa.PublicKey{
-					Curve: nil,
-					X:     nil,
-					Y:     nil,
-				},
-			},
+			seq: &Sequencer{},
 			err: true,
 			msg: "sequencer does not have a public key",
 		},
 		{
-			seq: NewSequencer(addr, pubKey, -1),
+			seq: NewSequencer(addr, -1),
 			err: true,
 			msg: "sequencer has negative voting power",
 		},

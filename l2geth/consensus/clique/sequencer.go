@@ -2,9 +2,6 @@ package clique
 
 import (
 	"bytes"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	crand "crypto/rand"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -17,18 +14,16 @@ import (
 // NOTE: The ProducerPriority is not included in Sequencer.Hash();
 // make sure to update that method if changes are made here
 type Sequencer struct {
-	Address common.Address  `json:"address"`
-	PubKey  ecdsa.PublicKey `json:"pub_key"`
-	Power   int64           `json:"power"`
+	Address common.Address `json:"address"`
+	Power   int64          `json:"power"`
 
 	ProducerPriority int64 `json:"producer_priority"`
 }
 
 // NewSequencer returns a new sequencer with the given pubkey and power.
-func NewSequencer(addr common.Address, pubKey ecdsa.PublicKey, power int64) *Sequencer {
+func NewSequencer(addr common.Address, power int64) *Sequencer {
 	return &Sequencer{
 		Address:          addr,
-		PubKey:           pubKey,
 		Power:            power,
 		ProducerPriority: 0,
 	}
@@ -38,9 +33,6 @@ func NewSequencer(addr common.Address, pubKey ecdsa.PublicKey, power int64) *Seq
 func (s *Sequencer) SequencerBasic() error {
 	if s == nil {
 		return errors.New("nil sequencer")
-	}
-	if s.PubKey.Curve == nil || s.PubKey.X == nil || s.PubKey.Y == nil {
-		return errors.New("sequencer does not have a public key")
 	}
 
 	if s.Power < 0 {
@@ -90,9 +82,8 @@ func (s *Sequencer) String() string {
 	if s == nil {
 		return "nil-Sequencer"
 	}
-	return fmt.Sprintf("Sequencer{%v %v P:%v A:%v}",
+	return fmt.Sprintf("Sequencer{%v %v A:%v}",
 		s.Address,
-		s.PubKey,
 		s.Power,
 		s.ProducerPriority)
 }
@@ -121,11 +112,6 @@ func RandSequencer(randPower bool, minPower int64) *Sequencer {
 	rand.Read(seed)
 	var addr common.Address
 	copy(addr[:], seed)
-	priKey, err := ecdsa.GenerateKey(elliptic.P256(), crand.Reader)
-	pubKey := priKey.PublicKey
-	if err != nil {
-		panic(fmt.Errorf("could not retrieve pubkey %w", err))
-	}
-	seq := NewSequencer(addr, pubKey, power)
+	seq := NewSequencer(addr, power)
 	return seq
 }

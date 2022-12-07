@@ -74,10 +74,11 @@ func NewTransactionMeta(l1BlockNumber *big.Int, l1timestamp uint64, l1MessageSen
 
 // TxMetaDecode deserializes bytes as a TransactionMeta struct.
 // The schema is:
-//   varbytes(L1BlockNumber) ||
-//   varbytes(L1MessageSender) ||
-//   varbytes(QueueOrigin) ||
-//   varbytes(L1Timestamp)
+//
+//	varbytes(L1BlockNumber) ||
+//	varbytes(L1MessageSender) ||
+//	varbytes(QueueOrigin) ||
+//	varbytes(L1Timestamp)
 func TxMetaDecode(input []byte) (*TransactionMeta, error) {
 	var err error
 	meta := TransactionMeta{}

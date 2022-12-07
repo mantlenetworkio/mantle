@@ -25,10 +25,8 @@ import (
 
 	mapset "github.com/deckarep/golang-set"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
@@ -40,9 +38,11 @@ var (
 )
 
 const (
-	maxKnownTxs    = 32768 // Maximum transactions hashes to keep in the known list (prevent DOS)
-	maxKnownBlocks = 1024  // Maximum block hashes to keep in the known list (prevent DOS)
-	maxKnownPrs    = 1024
+	maxKnownTxs                = 32768 // Maximum transactions hashes to keep in the known list (prevent DOS)
+	maxKnownBlocks             = 1024  // Maximum block hashes to keep in the known list (prevent DOS)
+	maxKnownStartMsg           = 1024
+	maxKnownEndMsg             = 1024
+	maxKnownFraudProofReorgMsg = 1024
 
 	maxQueuedPrs = 128
 
@@ -60,6 +60,10 @@ const (
 	// dropping broadcasts. Similarly to block propagations, there's no point to queue
 	// above some healthy uncle limit, so use that.
 	maxQueuedAnns = 4
+
+	maxQueuedBatchPeriodStart = 4
+	maxQueuedBatchPeriodEnd   = 4
+	maxQueuedFraudProofReorg  = 4
 
 	handshakeTimeout = 5 * time.Second
 )
@@ -91,30 +95,38 @@ type peer struct {
 	td   *big.Int
 	lock sync.RWMutex
 
-	knownTxs    mapset.Set                  // Set of transaction hashes known to be known by this peer
-	knownBlocks mapset.Set                  // Set of block hashes known to be known by this peer
-	knowPrs     mapset.Set                  // Set of Producers height to be known by this peer
-	queuedTxs   chan []*types.Transaction   // Queue of transactions to broadcast to the peer
-	queuedProps chan *propEvent             // Queue of blocks to broadcast to the peer
-	queuedAnns  chan *types.Block           // Queue of blocks to announce to the peer
-	queuedPrs   chan *clique.ProducerUpdate // Queue of ProducerUpdate to announce to the peer
-	term        chan struct{}               // Termination channel to stop the broadcaster
+	knownTxs              mapset.Set                      // Set of transaction hashes known to be known by this peer
+	knownBlocks           mapset.Set                      // Set of block hashes known to be known by this peer
+	knowStartMsg          mapset.Set                      // Set of start msg index to be known by this peer
+	knowEndMsg            mapset.Set                      // Set of end msg index to be known by this peer
+	knowFraudProofReorg   mapset.Set                      // Set of end msg index to be known by this peer
+	queuedTxs             chan []*types.Transaction       // Queue of transactions to broadcast to the peer
+	queuedProps           chan *propEvent                 // Queue of blocks to broadcast to the peer
+	queuedAnns            chan *types.Block               // Queue of blocks to announce to the peer
+	queuedStartMsg        chan *types.BatchPeriodStartMsg // Queue of BatchPeriodStartMsg to announce to the peer
+	queuedEndMsg          chan *types.BatchPeriodEndMsg   // Queue of BatchPeriodEndMsg to announce to the peer
+	queuedFraudProofReorg chan *types.FraudProofReorgMsg  // Queue of FraudProofReorgMsg to announce to the peer
+	term                  chan struct{}                   // Termination channel to stop the broadcaster
 }
 
 func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 	return &peer{
-		Peer:        p,
-		rw:          rw,
-		version:     version,
-		id:          fmt.Sprintf("%x", p.ID().Bytes()[:8]),
-		knownTxs:    mapset.NewSet(),
-		knownBlocks: mapset.NewSet(),
-		knowPrs:     mapset.NewSet(),
-		queuedTxs:   make(chan []*types.Transaction, maxQueuedTxs),
-		queuedProps: make(chan *propEvent, maxQueuedProps),
-		queuedAnns:  make(chan *types.Block, maxQueuedAnns),
-		queuedPrs:   make(chan *clique.ProducerUpdate, maxQueuedPrs),
-		term:        make(chan struct{}),
+		Peer:                  p,
+		rw:                    rw,
+		version:               version,
+		id:                    fmt.Sprintf("%x", p.ID().Bytes()[:8]),
+		knownTxs:              mapset.NewSet(),
+		knownBlocks:           mapset.NewSet(),
+		knowStartMsg:          mapset.NewSet(),
+		knowEndMsg:            mapset.NewSet(),
+		knowFraudProofReorg:   mapset.NewSet(),
+		queuedTxs:             make(chan []*types.Transaction, maxQueuedTxs),
+		queuedProps:           make(chan *propEvent, maxQueuedProps),
+		queuedAnns:            make(chan *types.Block, maxQueuedAnns),
+		queuedStartMsg:        make(chan *types.BatchPeriodStartMsg, maxQueuedBatchPeriodStart),
+		queuedEndMsg:          make(chan *types.BatchPeriodEndMsg, maxQueuedBatchPeriodEnd),
+		queuedFraudProofReorg: make(chan *types.FraudProofReorgMsg, maxQueuedFraudProofReorg),
+		term:                  make(chan struct{}),
 	}
 }
 
@@ -123,7 +135,6 @@ func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 // writer that does not lock up node internals.
 func (p *peer) broadcast() {
 	for {
-		log.Info(fmt.Sprintf("start  broadcast \n\n"))
 		select {
 		case txs := <-p.queuedTxs:
 			if err := p.SendTransactions(txs); err != nil {
@@ -142,14 +153,21 @@ func (p *peer) broadcast() {
 				return
 			}
 			p.Log().Trace("Announced block", "number", block.Number(), "hash", block.Hash())
-
-		case proUpdate := <-p.queuedPrs:
-			if err := p.SendProducers(*proUpdate); err != nil {
-				log.Debug(fmt.Sprintf("Producers send error %v ", err))
+		case sm := <-p.queuedStartMsg:
+			if err := p.SendBatchPeriodStart(sm); err != nil {
 				return
 			}
-			p.Log().Trace("Broadcast producers", "number:", proUpdate.Producers.Number, "index", proUpdate.Producers.Index)
-
+			p.Log().Trace("Batch period start msg", "batch_index", sm.BatchIndex, "start_height", sm.StartHeight)
+		case em := <-p.queuedEndMsg:
+			if err := p.SendBatchPeriodEnd(em); err != nil {
+				return
+			}
+			p.Log().Trace("Batch period end msg", "batch_index", em.BatchIndex, "start_height", em.StartHeight)
+		case fpr := <-p.queuedFraudProofReorg:
+			if err := p.SendFraudProofReorg(fpr); err != nil {
+				return
+			}
+			p.Log().Trace("Fraud proof reorg msg", "index", fpr.ReorgIndex, "reorg_height", fpr.ReorgToHeight)
 		case <-p.term:
 			return
 		}
@@ -565,15 +583,45 @@ func (ps *peerSet) Len() int {
 	return len(ps.peers)
 }
 
-// PeersWithoutProducer retrieves a list of peers that do not have a given producer in
+// PeersWithoutFraudProofReorgMsg retrieves a list of peers that do not have a given producer in
 // their set of known index.
-func (ps *peerSet) PeersWithoutProducer(index uint64) []*peer {
+func (ps *peerSet) PeersWithoutFraudProofReorgMsg(msgHash common.Hash) []*peer {
 	ps.lock.RLock()
 	defer ps.lock.RUnlock()
 
 	list := make([]*peer, 0, len(ps.peers))
 	for _, p := range ps.peers {
-		if !p.knowPrs.Contains(index) {
+		if !p.knowFraudProofReorg.Contains(msgHash) {
+			list = append(list, p)
+		}
+	}
+	return list
+}
+
+// PeersWithoutEndMsg retrieves a list of peers that do not have a given producer in
+// their set of known index.
+func (ps *peerSet) PeersWithoutEndMsg(msgHash common.Hash) []*peer {
+	ps.lock.RLock()
+	defer ps.lock.RUnlock()
+
+	list := make([]*peer, 0, len(ps.peers))
+	for _, p := range ps.peers {
+		if !p.knowEndMsg.Contains(msgHash) {
+			list = append(list, p)
+		}
+	}
+	return list
+}
+
+// PeersWithoutStartMsg retrieves a list of peers that do not have a given producer in
+// their set of known index.
+func (ps *peerSet) PeersWithoutStartMsg(msgHash common.Hash) []*peer {
+	ps.lock.RLock()
+	defer ps.lock.RUnlock()
+
+	list := make([]*peer, 0, len(ps.peers))
+	for _, p := range ps.peers {
+		if !p.knowStartMsg.Contains(msgHash) {
 			list = append(list, p)
 		}
 	}

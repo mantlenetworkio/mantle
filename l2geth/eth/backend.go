@@ -498,35 +498,28 @@ func (s *Ethereum) StartMining(threads int) error {
 		atomic.StoreUint32(&s.protocolManager.acceptTxs, 1)
 		go s.miner.Start(eb)
 
-		// set sequencer server and get scheduler address
-		var seqServer *clique.SequencerServer
-		var scheduler common.Address
-
-		// check method for sequencer server check if miner is already start
-		check := func() bool {
-			return s.IsMining()
-		}
-		// only start when Clique consensus
 		if _, ok := s.engine.(*clique.Clique); ok {
-			seqServer = clique.NewSequencerServer(
+			schedulerInst, err := clique.NewScheduler(
 				time.Duration(s.blockchain.Config().Clique.Epoch),
 				s.engine.(*clique.Clique),
+				s.blockchain,
 				s.eventMux,
-				check,
 			)
-			scheduler, err = seqServer.GetScheduler()
 			if err != nil {
-				return fmt.Errorf("Cannot get scheduler: %w", err)
+				return fmt.Errorf("create scheduler instance err: %v", err)
 			}
-			// check eb to equal scheduler then start sequencer server after miner start
-			if bytes.Equal(scheduler.Bytes(), eb.Bytes()) {
+			schedulerAddr, err := schedulerInst.GetScheduler()
+			if err != nil {
+				return fmt.Errorf("cannot get schedulerAddr: %w", err)
+			}
+			// check eb to equal schedulerAddr then start sequencer server after miner start
+			if bytes.Equal(schedulerAddr.Bytes(), eb.Bytes()) {
 				// set wallet for sign msgs
-				seqServer.SetWallet(wallet, account)
+				schedulerInst.SetWallet(wallet, account)
 				// start sequencer server
-				seqServer.Start()
+				schedulerInst.Start()
 			}
 		}
-
 	}
 	return nil
 }
