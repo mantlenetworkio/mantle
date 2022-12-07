@@ -111,27 +111,31 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bs); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
+		log.Info("Batch Period Start Msg", "batchIndex", bs.BatchIndex, "startHeight", bs.StartHeight, "maxHeight", bs.MaxHeight, "expireTime", bs.ExpireTime)
+		p.knowStartMsg.Add(bs.Hash())
 		// todo : verify Signature and index then post ProduceBlockEvent
 		erCh := make(chan error, 1)
 		pm.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   bs,
 			ErrCh: erCh,
 		})
-		log.Info("Batch Period Start Msg")
 	case msg.Code == BatchPeriodEndMsg:
 		var be *types.BatchPeriodEndMsg
 		if err := msg.Decode(&be); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
+		log.Info("Batch Period End Msg", "batchIndex", be.BatchIndex, "startHeight", be.StartHeight, "maxHeight", be.EndHeight)
+		p.knowStartMsg.Add(be.Hash())
 		// todo: BatchPeriodEndMsg handle
-		log.Info("Batch Period End Msg")
+
 	case msg.Code == FraudProofReorgMsg:
 		var fpr *types.FraudProofReorgMsg
 		if err := msg.Decode(&fpr); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		// todo: FraudProofReorgMsg handle
 		log.Info("Fraud Proof Reorg Msg")
+		p.knowStartMsg.Add(fpr.Hash())
+		// todo: FraudProofReorgMsg handle
 
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
@@ -144,16 +148,22 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 
 // BatchPeriodStartMsg will
 func (pm *ProtocolManager) batchPeriodStartMsgBroadcastLoop() {
+	log.Info("Start batchPeriodStartMsg broadcast routine")
 	// automatically stops if unsubscribe
 	for obj := range pm.batchStartMsgSub.Chan() {
 		if se, ok := obj.Data.(core.BatchPeriodStartEvent); ok {
+			log.Debug("Got BatchPeriodStartEvent, broadcast it",
+				"batchIndex", se.Msg.BatchIndex,
+				"startHeight", se.Msg.StartHeight,
+				"maxHeight", se.Msg.MaxHeight)
 			pm.BroadcastBatchPeriodStartMsg(se.Msg) // First propagate block to peers
 		}
 	}
 }
 
 func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
-	peers := pm.peersTmp.PeersWithoutStartMsg(msg.BatchIndex)
+	peers := pm.peersTmp.PeersWithoutStartMsg(msg.Hash())
+	log.Info("peers", "length", len(peers))
 	for _, p := range peers {
 		p.AsyncSendBatchPeriodStartMsg(msg)
 	}
@@ -163,7 +173,7 @@ func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *types.BatchPeriodSt
 func (p *peer) AsyncSendBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 	select {
 	case p.queuedStartMsg <- msg:
-		p.knowStartMsg.Add(msg.BatchIndex)
+		p.knowStartMsg.Add(msg.Hash())
 		for p.knowStartMsg.Cardinality() >= maxKnownStartMsg {
 			p.knowStartMsg.Pop()
 		}
@@ -175,16 +185,22 @@ func (p *peer) AsyncSendBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 
 // BatchPeriodEndMsg
 func (pm *ProtocolManager) batchPeriodEndMsgBroadcastLoop() {
+	log.Info("Start batchPeriodEndMsg broadcast routine")
 	// automatically stops if unsubscribe
 	for obj := range pm.batchEndMsgSub.Chan() {
 		if ee, ok := obj.Data.(core.BatchPeriodEndEvent); ok {
+			log.Debug("Got BatchPeriodEndEvent, broadcast it",
+				"batchIndex", ee.Msg.BatchIndex,
+				"startHeight", ee.Msg.StartHeight,
+				"maxHeight", ee.Msg.EndHeight)
+
 			pm.BroadcastBatchPeriodEndMsg(ee.Msg) // First propagate block to peers
 		}
 	}
 }
 
 func (pm *ProtocolManager) BroadcastBatchPeriodEndMsg(msg *types.BatchPeriodEndMsg) {
-	peers := pm.peersTmp.PeersWithoutEndMsg(msg.BatchIndex)
+	peers := pm.peersTmp.PeersWithoutEndMsg(msg.Hash())
 	for _, p := range peers {
 		p.AsyncSendBatchPeriodEndMsg(msg)
 	}
@@ -194,7 +210,7 @@ func (pm *ProtocolManager) BroadcastBatchPeriodEndMsg(msg *types.BatchPeriodEndM
 func (p *peer) AsyncSendBatchPeriodEndMsg(msg *types.BatchPeriodEndMsg) {
 	select {
 	case p.queuedEndMsg <- msg:
-		p.knowEndMsg.Add(msg.BatchIndex)
+		p.knowEndMsg.Add(msg.Hash())
 		for p.knowEndMsg.Cardinality() >= maxKnownEndMsg {
 			p.knowEndMsg.Pop()
 		}
@@ -206,16 +222,21 @@ func (p *peer) AsyncSendBatchPeriodEndMsg(msg *types.BatchPeriodEndMsg) {
 
 // FraudProofReorgMsg
 func (pm *ProtocolManager) fraudProofReorgMsgBroadcastLoop() {
+	log.Info("Start fraudProofReorgMsg broadcast routine")
 	// automatically stops if unsubscribe
 	for obj := range pm.fraudProofReorgMsgSub.Chan() {
 		if fe, ok := obj.Data.(core.FraudProofReorgEvent); ok {
+			log.Debug("Got BatchPeriodEndEvent, broadcast it",
+				"reorgIndex", fe.Msg.ReorgIndex,
+				"reorgToHeight", fe.Msg.ReorgToHeight)
+
 			pm.BroadcastFraudProofReorgMsg(fe.Msg) // First propagate block to peers
 		}
 	}
 }
 
 func (pm *ProtocolManager) BroadcastFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
-	peers := pm.peersTmp.PeersWithoutFraudProofReorgMsg(reorg.ReorgIndex)
+	peers := pm.peersTmp.PeersWithoutFraudProofReorgMsg(reorg.Hash())
 	for _, p := range peers {
 		p.AsyncSendFraudProofReorgMsg(reorg)
 	}
@@ -225,7 +246,7 @@ func (pm *ProtocolManager) BroadcastFraudProofReorgMsg(reorg *types.FraudProofRe
 func (p *peer) AsyncSendFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
 	select {
 	case p.queuedFraudProofReorg <- reorg:
-		p.knowFraudProofReorg.Add(reorg.ReorgIndex)
+		p.knowFraudProofReorg.Add(reorg.Hash())
 		for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
 			p.knowFraudProofReorg.Pop()
 		}
@@ -240,7 +261,7 @@ func (p *peer) AsyncSendFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
 // SendBatchPeriodStart sends a batch of transaction receipts, corresponding to the
 // ones requested from an already RLP encoded format.
 func (p *peer) SendBatchPeriodStart(bs *types.BatchPeriodStartMsg) error {
-	p.knowStartMsg.Add(bs.BatchIndex)
+	p.knowStartMsg.Add(bs.Hash())
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowStartMsg.Cardinality() >= maxKnownStartMsg {
 		p.knowStartMsg.Pop()
@@ -249,7 +270,7 @@ func (p *peer) SendBatchPeriodStart(bs *types.BatchPeriodStartMsg) error {
 }
 
 func (p *peer) SendBatchPeriodEnd(be *types.BatchPeriodEndMsg) error {
-	p.knowEndMsg.Add(be.BatchIndex)
+	p.knowEndMsg.Add(be.Hash())
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowEndMsg.Cardinality() >= maxKnownEndMsg {
 		p.knowEndMsg.Pop()
@@ -258,7 +279,7 @@ func (p *peer) SendBatchPeriodEnd(be *types.BatchPeriodEndMsg) error {
 }
 
 func (p *peer) SendFraudProofReorg(fpr *types.FraudProofReorgMsg) error {
-	p.knowFraudProofReorg.Add(fpr.ReorgIndex)
+	p.knowFraudProofReorg.Add(fpr.Hash())
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
 		p.knowFraudProofReorg.Pop()

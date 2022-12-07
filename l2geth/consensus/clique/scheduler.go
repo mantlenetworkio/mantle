@@ -2,11 +2,16 @@ package clique
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"math"
 	"math/big"
+	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/mantlenetworkio/mantle/l2geth/core"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -15,14 +20,23 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
+const (
+	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
+	chainHeadChanSize = 10
+)
+
 type Scheduler struct {
-	wg  sync.WaitGroup
-	mux *event.TypeMux
+	wg       sync.WaitGroup
+	eventMux *event.TypeMux
 
 	sequencerSet    *SequencerSet
 	consensusEngine *Clique
-	ticker          *time.Ticker
-	check           func() bool
+	blockchain      *core.BlockChain
+
+	chainHeadSub event.Subscription
+	chainHeadCh  chan core.ChainHeadEvent
+
+	ticker *time.Ticker
 
 	wallet      accounts.Wallet
 	signAccount accounts.Account
@@ -30,7 +44,7 @@ type Scheduler struct {
 	syncer *synchronizer.Synchronizer
 }
 
-func NewScheduler(epoch time.Duration, clique *Clique, mux *event.TypeMux, check func() bool) (*Scheduler, error) {
+func NewScheduler(epoch time.Duration, clique *Clique, blockchain *core.BlockChain, eventMux *event.TypeMux) (*Scheduler, error) {
 	log.Info("Create Sequencer Server")
 
 	syncer := synchronizer.NewSynchronizer()
@@ -55,10 +69,11 @@ func NewScheduler(epoch time.Duration, clique *Clique, mux *event.TypeMux, check
 	return &Scheduler{
 		ticker:          time.NewTicker(epoch * time.Second),
 		consensusEngine: clique,
-		mux:             mux,
-		check:           check,
+		eventMux:        eventMux,
 		syncer:          syncer,
 		sequencerSet:    NewSequencerSet(seqz),
+		blockchain:      blockchain,
+		chainHeadCh:     make(chan core.ChainHeadEvent, chainHeadChanSize),
 	}, nil
 }
 
@@ -76,30 +91,82 @@ func (schedulerInst *Scheduler) GetScheduler() (common.Address, error) {
 }
 
 func (schedulerInst *Scheduler) Start() {
-	// check
-	if schedulerInst.check == nil {
-		panic("Sequencer server need method to check pre-preparation status")
-	}
 	if schedulerInst.wallet == nil || len(schedulerInst.signAccount.Address.Bytes()) == 0 {
 		panic("Sequencer server need wallet to sign msgs")
 	}
+	schedulerInst.chainHeadSub = schedulerInst.blockchain.SubscribeChainHeadEvent(schedulerInst.chainHeadCh)
 
-	// we need pre-preparation is ready first then we can start the server
-	for times := 0; !schedulerInst.check(); times++ {
-		log.Debug("Sequencer server pre-preparation is not ready, times : ", times)
-	}
 	schedulerInst.wg.Add(1)
 	go schedulerInst.readLoop()
+	go schedulerInst.schedulerRoutine()
+	go schedulerInst.handleChainHeadEventLoop()
+}
+
+func (schedulerInst *Scheduler) Close() {
+	schedulerInst.chainHeadSub.Unsubscribe()
+	close(schedulerInst.chainHeadCh)
+}
+
+func (schedulerInst *Scheduler) schedulerRoutine() {
+	sequencerSet := []common.Address{
+		//common.HexToAddress("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"),
+		common.HexToAddress("0x70997970c51812dc3a010c7d01b50e0d17dc79c8"),
+		common.HexToAddress("0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc"),
+	}
+	mockSignature := common.Hex2Bytes("2020a0bbf67b08b1df594333c1ead3a771d9742d2f33798e050da744b1255bb67860d672a5055429cc53d17e6c57550989b39cf997e2fb58d1ec6aae198a471501")
+
+	batchSize := uint64(10) // 10 transaction in one batch
+	expireTime := int64(15) // 15s
+	for {
+		randomIdx := rand.Intn(len(sequencerSet))
+		sequencerAddr := sequencerSet[randomIdx]
+
+		currentBlock := schedulerInst.blockchain.CurrentBlock()
+
+		msg := types.BatchPeriodStartMsg{
+			ReorgIndex:   0,
+			BatchIndex:   1,
+			StartHeight:  currentBlock.NumberU64() + 1,
+			MaxHeight:    currentBlock.NumberU64() + 1 + batchSize,
+			ExpireTime:   uint64(time.Now().Unix() + expireTime),
+			MinerAddress: sequencerAddr,
+			SequencerSet: sequencerSet,
+			Signature:    mockSignature,
+		}
+
+		log.Info("Start Post BatchPeriodStartEvent")
+		err := schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
+			Msg:   &msg,
+			ErrCh: nil,
+		})
+		log.Info("End Post BatchPeriodStartEvent")
+		if err != nil {
+			log.Error("generate BatchPeriodStartEvent error")
+			return
+		} else {
+			log.Info("generate BatchPeriodStartEvent success", "startHeight", msg.StartHeight, "maxHeight", msg.MaxHeight, "expireTime", msg.ExpireTime, "minerAddress", msg.MinerAddress)
+		}
+		ticker := time.NewTicker(time.Duration(expireTime) * time.Second)
+		select {
+		case <-schedulerInst.ticker.C:
+			log.Info("ticker timeout")
+			ticker.Stop()
+		}
+	}
+}
+
+func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
+	for {
+		select {
+		case chainHead := <-schedulerInst.chainHeadCh:
+			log.Debug("chainHead", "block number", chainHead.Block.NumberU64(), "extra data", hex.EncodeToString(chainHead.Block.Extra()))
+		}
+	}
 }
 
 func (schedulerInst *Scheduler) readLoop() {
 	defer schedulerInst.wg.Done()
 	for {
-		// we need pre-preparation is ready first then we can restart the server
-		if !schedulerInst.check() {
-			log.Debug("Sequencer server pre-preparation is not ready")
-			return
-		}
 		select {
 		case <-schedulerInst.ticker.C:
 			seqSet, err := schedulerInst.syncer.GetSequencerSet()

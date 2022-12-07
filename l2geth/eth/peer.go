@@ -27,7 +27,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
@@ -118,6 +117,9 @@ func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 		id:                    fmt.Sprintf("%x", p.ID().Bytes()[:8]),
 		knownTxs:              mapset.NewSet(),
 		knownBlocks:           mapset.NewSet(),
+		knowStartMsg:          mapset.NewSet(),
+		knowEndMsg:            mapset.NewSet(),
+		knowFraudProofReorg:   mapset.NewSet(),
 		queuedTxs:             make(chan []*types.Transaction, maxQueuedTxs),
 		queuedProps:           make(chan *propEvent, maxQueuedProps),
 		queuedAnns:            make(chan *types.Block, maxQueuedAnns),
@@ -133,7 +135,6 @@ func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 // writer that does not lock up node internals.
 func (p *peer) broadcast() {
 	for {
-		log.Debug(fmt.Sprintf("start  broadcast %v ", p.version))
 		select {
 		case txs := <-p.queuedTxs:
 			if err := p.SendTransactions(txs); err != nil {
@@ -584,13 +585,13 @@ func (ps *peerSet) Len() int {
 
 // PeersWithoutFraudProofReorgMsg retrieves a list of peers that do not have a given producer in
 // their set of known index.
-func (ps *peerSet) PeersWithoutFraudProofReorgMsg(index uint64) []*peer {
+func (ps *peerSet) PeersWithoutFraudProofReorgMsg(msgHash common.Hash) []*peer {
 	ps.lock.RLock()
 	defer ps.lock.RUnlock()
 
 	list := make([]*peer, 0, len(ps.peers))
 	for _, p := range ps.peers {
-		if !p.knowFraudProofReorg.Contains(index) {
+		if !p.knowFraudProofReorg.Contains(msgHash) {
 			list = append(list, p)
 		}
 	}
@@ -599,13 +600,13 @@ func (ps *peerSet) PeersWithoutFraudProofReorgMsg(index uint64) []*peer {
 
 // PeersWithoutEndMsg retrieves a list of peers that do not have a given producer in
 // their set of known index.
-func (ps *peerSet) PeersWithoutEndMsg(index uint64) []*peer {
+func (ps *peerSet) PeersWithoutEndMsg(msgHash common.Hash) []*peer {
 	ps.lock.RLock()
 	defer ps.lock.RUnlock()
 
 	list := make([]*peer, 0, len(ps.peers))
 	for _, p := range ps.peers {
-		if !p.knowEndMsg.Contains(index) {
+		if !p.knowEndMsg.Contains(msgHash) {
 			list = append(list, p)
 		}
 	}
@@ -614,13 +615,13 @@ func (ps *peerSet) PeersWithoutEndMsg(index uint64) []*peer {
 
 // PeersWithoutStartMsg retrieves a list of peers that do not have a given producer in
 // their set of known index.
-func (ps *peerSet) PeersWithoutStartMsg(index uint64) []*peer {
+func (ps *peerSet) PeersWithoutStartMsg(msgHash common.Hash) []*peer {
 	ps.lock.RLock()
 	defer ps.lock.RUnlock()
 
 	list := make([]*peer, 0, len(ps.peers))
 	for _, p := range ps.peers {
-		if !p.knowStartMsg.Contains(index) {
+		if !p.knowStartMsg.Contains(msgHash) {
 			list = append(list, p)
 		}
 	}
