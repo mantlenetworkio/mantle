@@ -1,10 +1,11 @@
 package eth
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 
 	"github.com/mantlenetworkio/mantle/l2geth/core"
-	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
@@ -33,13 +34,13 @@ func (pm *ProtocolManager) makeConsensusProtocol(version uint) p2p.Protocol {
 
 func (pm *ProtocolManager) removePeerTmp(id string) {
 	// Short circuit if the peer was already removed
-	peer := pm.peersTmp.Peer(id)
+	peer := pm.consensusPeers.Peer(id)
 	if peer == nil {
 		return
 	}
 	log.Debug("Removing Ethereum consensus peer", "peer", id)
 
-	if err := pm.peersTmp.Unregister(id); err != nil {
+	if err := pm.consensusPeers.Unregister(id); err != nil {
 		log.Error("Consensus Peer removal failed", "peer", id, "err", err)
 	}
 	// Hard disconnect at the networking layer
@@ -55,27 +56,27 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 		pm.wg.Add(1)
 		defer pm.wg.Done()
 		// Ignore maxPeers if this is a trusted peer
-		if pm.peersTmp.Len() >= pm.maxPeers && !p.Peer.Info().Network.Trusted {
+		if pm.consensusPeers.Len() >= pm.maxPeers && !p.Peer.Info().Network.Trusted {
 			return p2p.DiscTooManyPeers
 		}
 		p.Log().Debug("Ethereum consensus peer connected", "name", p.Name())
 		// Execute the Ethereum handshake
-		var (
-			genesis = pm.blockchain.Genesis()
-			head    = pm.blockchain.CurrentHeader()
-			hash    = head.Hash()
-			number  = head.Number.Uint64()
-			td      = pm.blockchain.GetTd(hash, number)
-		)
-		if err := p.Handshake(pm.networkID, td, hash, genesis.Hash(), forkid.NewID(pm.blockchain), pm.forkFilter); err != nil {
-			p.Log().Debug("Ethereum handshake failed", "err", err)
-			return err
-		}
+		//var (
+		//	genesis = pm.blockchain.Genesis()
+		//	head    = pm.blockchain.CurrentHeader()
+		//	hash    = head.Hash()
+		//	number  = head.Number.Uint64()
+		//	td      = pm.blockchain.GetTd(hash, number)
+		//)
+		//if err := p.Handshake(pm.networkID, td, hash, genesis.Hash(), forkid.NewID(pm.blockchain), pm.forkFilter); err != nil {
+		//	p.Log().Debug("Ethereum handshake failed", "err", err)
+		//	return err
+		//}
 		if rw, ok := p.rw.(*meteredMsgReadWriter); ok {
 			rw.Init(p.version)
 		}
 		// Register the peer locally
-		if err := pm.peersTmp.Register(p); err != nil {
+		if err := pm.consensusPeers.Register(p); err != nil {
 			p.Log().Error("Ethereum peer registration failed", "err", err)
 			return err
 		}
@@ -83,6 +84,11 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 
 		// Handle incoming messages until the connection is torn down
 		for {
+			if err := pm.checkPeer(p); err != nil {
+				p.Log().Debug("Ethereum consensus checkPeer failed", "err", err)
+				return err
+			}
+
 			if err := pm.handleConsensusMsg(p); err != nil {
 				p.Log().Debug("Ethereum consensus message handling failed", "err", err)
 				return err
@@ -91,6 +97,34 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 	case <-pm.quitSync:
 		return p2p.DiscQuitting
 	}
+}
+
+func (pm *ProtocolManager) checkPeer(p *peer) error {
+	scheduler, err := pm.schedulerInst.GetScheduler()
+	if err != nil {
+		return err
+	}
+	if bytes.Equal(pm.etherbase.Bytes(), scheduler.Bytes()) {
+		has := make(chan bool)
+		if err := pm.eventMux.Post(core.PeerAddEvent{
+			PeerId: p.ID().Bytes(),
+			Has:    has,
+		}); err != nil {
+			return err
+		}
+
+		p.Log().Info("wait for peer id check", "ID", p.ID().String())
+		select {
+		case find := <-has:
+			if !find {
+				p.Log().Error("Have not find peer ", "ID", p.ID().String())
+				return errors.New("have not find peer")
+			} else {
+				p.Log().Debug("find peer ", "ID", p.ID().String())
+			}
+		}
+	}
+	return nil
 }
 
 func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
@@ -162,7 +196,7 @@ func (pm *ProtocolManager) batchPeriodStartMsgBroadcastLoop() {
 }
 
 func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
-	peers := pm.peersTmp.PeersWithoutStartMsg(msg.Hash())
+	peers := pm.consensusPeers.PeersWithoutStartMsg(msg.Hash())
 	log.Info("peers", "length", len(peers))
 	for _, p := range peers {
 		p.AsyncSendBatchPeriodStartMsg(msg)
@@ -200,7 +234,7 @@ func (pm *ProtocolManager) batchPeriodEndMsgBroadcastLoop() {
 }
 
 func (pm *ProtocolManager) BroadcastBatchPeriodEndMsg(msg *types.BatchPeriodEndMsg) {
-	peers := pm.peersTmp.PeersWithoutEndMsg(msg.Hash())
+	peers := pm.consensusPeers.PeersWithoutEndMsg(msg.Hash())
 	for _, p := range peers {
 		p.AsyncSendBatchPeriodEndMsg(msg)
 	}
@@ -236,7 +270,7 @@ func (pm *ProtocolManager) fraudProofReorgMsgBroadcastLoop() {
 }
 
 func (pm *ProtocolManager) BroadcastFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
-	peers := pm.peersTmp.PeersWithoutFraudProofReorgMsg(reorg.Hash())
+	peers := pm.consensusPeers.PeersWithoutFraudProofReorgMsg(reorg.Hash())
 	for _, p := range peers {
 		p.AsyncSendFraudProofReorgMsg(reorg)
 	}

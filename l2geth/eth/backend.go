@@ -87,6 +87,7 @@ type Ethereum struct {
 	eventMux       *event.TypeMux
 	engine         consensus.Engine
 	accountManager *accounts.Manager
+	//schedulerInst      *clique.Scheduler
 
 	bloomRequests chan chan *bloombits.Retrieval // Channel receiving bloom data retrieval requests
 	bloomIndexer  *core.ChainIndexer             // Bloom indexer operating during block imports
@@ -236,6 +237,25 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	rollupGpo := gasprice.NewRollupOracle()
 	eth.APIBackend.rollupGpo = rollupGpo
 	eth.syncService.RollupGpo = rollupGpo
+
+	if _, ok := eth.engine.(*clique.Clique); ok {
+		schedulerInst, err := clique.NewScheduler(
+			time.Duration(eth.blockchain.Config().Clique.Epoch),
+			eth.engine.(*clique.Clique),
+			eth.blockchain,
+			eth.eventMux,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("create schedulerInst instance err: %v", err)
+		}
+		eth.protocolManager.setSchedulerInst(schedulerInst)
+	}
+	//setEtherBase
+	etherBase, err := eth.Etherbase()
+	if err != nil {
+		return nil, err
+	}
+	eth.protocolManager.setEtherBase(etherBase)
 	return eth, nil
 }
 
@@ -499,25 +519,16 @@ func (s *Ethereum) StartMining(threads int) error {
 		go s.miner.Start(eb)
 
 		if _, ok := s.engine.(*clique.Clique); ok {
-			schedulerInst, err := clique.NewScheduler(
-				time.Duration(s.blockchain.Config().Clique.Epoch),
-				s.engine.(*clique.Clique),
-				s.blockchain,
-				s.eventMux,
-			)
-			if err != nil {
-				return fmt.Errorf("create scheduler instance err: %v", err)
-			}
-			schedulerAddr, err := schedulerInst.GetScheduler()
+			schedulerAddr, err := s.protocolManager.schedulerInst.GetScheduler()
 			if err != nil {
 				return fmt.Errorf("cannot get schedulerAddr: %w", err)
 			}
 			// check eb to equal schedulerAddr then start sequencer server after miner start
 			if bytes.Equal(schedulerAddr.Bytes(), eb.Bytes()) {
 				// set wallet for sign msgs
-				schedulerInst.SetWallet(wallet, account)
+				s.protocolManager.schedulerInst.SetWallet(wallet, account)
 				// start sequencer server
-				schedulerInst.Start()
+				s.protocolManager.schedulerInst.Start()
 			}
 		}
 	}
@@ -534,6 +545,8 @@ func (s *Ethereum) StopMining() {
 	if th, ok := s.engine.(threaded); ok {
 		th.SetThreads(-1)
 	}
+	// stop schedulerInst server
+	s.protocolManager.schedulerInst.Stop()
 	// Stop the block creating itself
 	s.miner.Stop()
 }

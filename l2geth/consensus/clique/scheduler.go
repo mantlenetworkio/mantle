@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"math/rand"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/mantlenetworkio/mantle/l2geth/core"
@@ -28,6 +29,8 @@ const (
 type Scheduler struct {
 	wg       sync.WaitGroup
 	eventMux *event.TypeMux
+	done     chan struct{}
+	running  int32
 
 	sequencerSet    *SequencerSet
 	consensusEngine *Clique
@@ -35,6 +38,7 @@ type Scheduler struct {
 
 	chainHeadSub event.Subscription
 	chainHeadCh  chan core.ChainHeadEvent
+	addPeerSub   *event.TypeMuxSubscription
 
 	ticker *time.Ticker
 
@@ -58,15 +62,16 @@ func NewScheduler(epoch time.Duration, clique *Clique, blockchain *core.BlockCha
 		var addrTemp common.Address
 		copy(addrTemp[:], item.MintAddress[:])
 		votingPower := big.NewInt(0).Div(item.Amount, big.NewInt(1e16))
-		seqz = append(seqz, NewSequencer(addrTemp, votingPower.Int64()))
-		log.Info("sequencer: ", "address", item.MintAddress.String())
+		seqz = append(seqz, NewSequencer(addrTemp, votingPower.Int64(), item.NodeID))
+		log.Info("sequencer: ", "address", item.MintAddress.String(), "nodeID", hex.EncodeToString(item.NodeID))
 	}
 
 	if err != nil {
 		return nil, fmt.Errorf("get sequencer set failed, err: %v", err)
 	}
-
-	return &Scheduler{
+	schedulerInst := &Scheduler{
+		running:         0,
+		done:            make(chan struct{}, 1),
 		ticker:          time.NewTicker(epoch * time.Second),
 		consensusEngine: clique,
 		eventMux:        eventMux,
@@ -74,7 +79,11 @@ func NewScheduler(epoch time.Duration, clique *Clique, blockchain *core.BlockCha
 		sequencerSet:    NewSequencerSet(seqz),
 		blockchain:      blockchain,
 		chainHeadCh:     make(chan core.ChainHeadEvent, chainHeadChanSize),
-	}, nil
+	}
+	schedulerInst.addPeerSub = schedulerInst.eventMux.Subscribe(core.PeerAddEvent{})
+	go schedulerInst.AddPeerCheck()
+	return schedulerInst, nil
+
 }
 
 func (schedulerInst *Scheduler) SetWallet(wallet accounts.Wallet, acc accounts.Account) {
@@ -95,6 +104,7 @@ func (schedulerInst *Scheduler) Start() {
 		panic("Sequencer server need wallet to sign msgs")
 	}
 	schedulerInst.chainHeadSub = schedulerInst.blockchain.SubscribeChainHeadEvent(schedulerInst.chainHeadCh)
+	atomic.StoreInt32(&schedulerInst.running, 1)
 
 	schedulerInst.wg.Add(1)
 	go schedulerInst.readLoop()
@@ -102,9 +112,37 @@ func (schedulerInst *Scheduler) Start() {
 	go schedulerInst.handleChainHeadEventLoop()
 }
 
+func (schedulerInst *Scheduler) Stop() {
+	atomic.StoreInt32(&schedulerInst.running, 0)
+	schedulerInst.done <- struct{}{}
+}
+
+// IsRunning returns an indicator whether schedulerInst is running or not.
+func (schedulerInst *Scheduler) IsRunning() bool {
+	return atomic.LoadInt32(&schedulerInst.running) == 1
+}
+
 func (schedulerInst *Scheduler) Close() {
 	schedulerInst.chainHeadSub.Unsubscribe()
+	schedulerInst.addPeerSub.Unsubscribe()
 	close(schedulerInst.chainHeadCh)
+}
+
+func (schedulerInst *Scheduler) AddPeerCheck() {
+	// automatically stops if unsubscribe
+	for obj := range schedulerInst.addPeerSub.Chan() {
+		if ape, ok := obj.Data.(core.PeerAddEvent); ok {
+			seqs := schedulerInst.sequencerSet.Sequencers
+			find := false
+			for _, v := range seqs {
+				if bytes.Equal(v.NodeID, ape.PeerId) {
+					find = true
+					break
+				}
+			}
+			ape.Has <- find
+		}
+	}
 }
 
 func (schedulerInst *Scheduler) schedulerRoutine() {
@@ -178,13 +216,15 @@ func (schedulerInst *Scheduler) readLoop() {
 			changes := compareSequencerSet(schedulerInst.sequencerSet.Sequencers, seqSet)
 			log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
 
-			// todo : should it post every times? or post only have changes
 			// update sequencer set and consensus_engine
 			err = schedulerInst.sequencerSet.UpdateWithChangeSet(changes)
 			if err != nil {
-				log.Error(fmt.Sprintf("update sequencer set failed, err :%v", err))
+				log.Error("sequencer set update failed", "err", err)
 				continue
 			}
+		case <-schedulerInst.done:
+			log.Info("Get scheduler stop signal")
+			return
 		}
 	}
 }
@@ -192,7 +232,6 @@ func (schedulerInst *Scheduler) readLoop() {
 // compareSequencerSet will return the update with Driver.seqz
 func compareSequencerSet(old []*Sequencer, newSeq synchronizer.SequencerSequencerInfos) []*Sequencer {
 	var tmp synchronizer.SequencerSequencerInfos
-	// voting power = deposit / scale (10^18)
 	scale := int64(math.Pow10(18))
 	for i, v := range newSeq {
 		changed := true
@@ -218,8 +257,8 @@ func bindToSeq(binds synchronizer.SequencerSequencerInfos) []*Sequencer {
 	for _, v := range binds {
 		seq := &Sequencer{
 			Address: common.BytesToAddress(v.MintAddress.Bytes()),
-			// PubKey:  nil,
-			Power: v.Amount.Div(v.Amount, big.NewInt(scale)).Int64(),
+			NodeID:  v.NodeID,
+			Power:   v.Amount.Div(v.Amount, big.NewInt(scale)).Int64(),
 		}
 		seqs = append(seqs, seq)
 	}
