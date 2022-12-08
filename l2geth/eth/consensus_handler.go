@@ -145,19 +145,14 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		log.Info("Batch Period Start Msg", "batchIndex", bs.BatchIndex, "startHeight", bs.StartHeight, "maxHeight", bs.MaxHeight, "expireTime", bs.ExpireTime)
-		// todo query each time? or just set as constant
-		schedulerAddr, err := pm.schedulerInst.GetScheduler()
-		if err != nil {
-			log.Error("Query scheduler failed", "err", err)
-			return err
-		}
+
 		signer, err := bs.GetSigner()
 		if err != nil {
 			log.Error("Verify signature err", "err", err)
-			return err
+			return nil
 		}
-		if !bytes.Equal(signer.Bytes(), schedulerAddr.Bytes()) {
-			log.Error("Verify signature failed", "scheduler", schedulerAddr.String(), "signer", signer.String())
+		if !bytes.Equal(signer.Bytes(), pm.schedulerInst.SchedulerAddr.Bytes()) {
+			log.Error("Verify signature failed", "scheduler", pm.schedulerInst.SchedulerAddr.String(), "signer", signer.String())
 			return nil
 		}
 		p.knowStartMsg.Add(bs.Hash())
