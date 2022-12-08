@@ -11,6 +11,7 @@ import { IDataLayrServiceManager } from "../libraries/eigenda/lib/contracts/inte
 import { BN254 } from "../libraries/eigenda/BN254.sol";
 import { DataStoreUtils } from "../libraries/eigenda/lib/contracts/libraries/DataStoreUtils.sol";
 import { Parser } from "../libraries/eigenda/Parse.sol";
+import "hardhat/console.sol";
 
 
 contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeable, Parser {
@@ -108,11 +109,12 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         uint32 totalOperatorsIndex
     ) external {
         require(msg.sender == sequencer, "Only the sequencer can store data");
-
-        require(block.number - blockNumber < BLOCK_STALE_MEASURE, "stakes taken from too long ago");
+        console.log("0000000000000000000000000");
+        // require(block.number - blockNumber < BLOCK_STALE_MEASURE, "stakes taken from too long ago");
         uint32 dataStoreId = IDataLayrServiceManager(dataManageAddress).taskNumber();
         l2BlockNumber = _l2BlockNumber;
         //Initialize and pay for the datastore
+        console.log("11111111111111111111111111");
         IDataLayrServiceManager(dataManageAddress).initDataStore(
             msg.sender,
             address(this),
@@ -121,7 +123,9 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
             totalOperatorsIndex,
             header
         );
+        console.log("222222222222222222222222222222");
         dataStoreIdToRollupStoreNumber[dataStoreId] = DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED;
+        console.log("333333333333333333333333333333");
         emit RollupStoreInitialized(dataStoreId);
     }
 

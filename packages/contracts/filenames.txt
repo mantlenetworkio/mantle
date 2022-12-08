@@ -8,10 +8,12 @@ BVM_L1CrossDomainMessenger
 Proxy__TSS_GroupManager
 Lib_AddressManager
 AddressDictator
+BVM_EigenDataLayrChain
 CanonicalTransactionChain
 TssGroupManager
 L1StandardBridge_for_verification_only
 ChugSplashDictator
+Proxy__BVM_EigenDataLayrChain
 Proxy__BVM_L1CrossDomainMessenger
 Proxy__TSS_StakingSlashing
 BondManager

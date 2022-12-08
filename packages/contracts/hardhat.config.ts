@@ -37,10 +37,10 @@ import { spawnSync } from 'child_process'
 subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
   async (_, __, runSuper) => {
     console.log('running task')
-    copySync(
-      '../../datalayr-mantle/contracts/eignlayr-contracts/src',
-      './contracts/libraries/eigenda/lib'
-    )
+    // copySync(
+    //   '../../datalayr-mantle/contracts/eignlayr-contracts/src',
+    //   './contracts/libraries/eigenda/lib'
+    // )
     const paths = await runSuper()
     const filteredPaths = paths.filter(function (p) {
       return !p.includes('eigenda')
@@ -289,6 +289,9 @@ const config: HardhatUserConfig = {
       default: ethers.constants.AddressZero,
     },
     dataManagerAddress: {
+      type: 'address',
+    },
+    bvmEigenSequencerAddress: {
       type: 'address',
     },
     gasPriceOracleOverhead: {

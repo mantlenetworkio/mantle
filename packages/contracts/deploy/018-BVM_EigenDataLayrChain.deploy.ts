@@ -11,12 +11,10 @@ const deployFn: DeployFunction = async (hre) => {
   const { deployer } = await hre.getNamedAccounts()
 
   const owner = hre.deployConfig.bvmAddressManagerOwner
-  const eigenSequencerAddress = hre.deployConfig.bvmSequencerAddress
+  // const eigenSequencerAddress = hre.deployConfig.bvmSequencerAddress
+  const eigenSequencerAddress = hre.deployConfig.bvmEigenSequencerAddress
   const dataManagerAddress = hre.deployConfig.dataManagerAddress
-  console.log('dataManagerAddress is', dataManagerAddress)
-  console.log('eigenSequencerAddress is', eigenSequencerAddress)
-
-
+ 
   const args = [eigenSequencerAddress, dataManagerAddress, 10, 100]
   await deployAndVerifyAndThen({
     hre,
