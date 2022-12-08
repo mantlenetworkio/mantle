@@ -2,6 +2,7 @@ package manager
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -10,6 +11,7 @@ import (
 	"math"
 	"math/big"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
@@ -169,12 +171,30 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	var resp tss.SignResponse
+	var culprits []string
+	var rollback bool
+
 	if len(ctx.Approvers()) < ctx.TssInfos().Threshold+1 {
-		return nil, errors.New("failed to sign, not enough approvals from tss nodes")
+		if len(ctx.UnApprovers()) < ctx.TssInfos().Threshold+1 {
+			return nil, errors.New("failed to sign, approvals " + strings.Join(ctx.Approvers(), ",") + " ,unApprovals " + strings.Join(ctx.UnApprovers(), ","))
+		}
+		log.Warn("failed to approval from tss nodes , there is wrong state root in batch state roots.need to roll back l2chain to batch index !")
+		//change unApprovals to approvals to do sign
+		ctx = ctx.WithApprovers(ctx.UnApprovers())
+		rollback = true
+		startBlock, _ := new(big.Int).SetString(request.StartBlock, 10)
+		rollBackRequest := tss.RollBackRequest{StartBlock: request.StartBlock}
+		rollBackBz, err := tss.RollBackHash(startBlock)
+		if err != nil {
+			return nil, err
+		}
+		resp, culprits, err = m.sign(ctx, rollBackRequest, rollBackBz, tss.SignRollBack)
+	} else {
+		request.ElectionId = tssInfo.ElectionId
+		resp, culprits, err = m.sign(ctx, request, digestBz, tss.SignStateBatch)
 	}
 
-	request.ElectionId = tssInfo.ElectionId
-	resp, culprits, err := m.sign(ctx, request, digestBz, tss.SignStateBatch)
 	if err != nil {
 		for _, culprit := range culprits {
 			addr, err := tss.NodeToAddress(culprit)
@@ -192,21 +212,32 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		m.store.AddCulprits(culprits)
 		return nil, err
 	}
-	absents := make([]string, 0)
-	for _, node := range tssInfo.TssMembers {
-		if !slices.ExistsIgnoreCase(ctx.Approvers(), node) {
-			addr, _ := tss.NodeToAddress(node)
-			if !m.store.IsInSlashing(addr) {
-				absents = append(absents, node)
+
+	if !rollback {
+		absents := make([]string, 0)
+		for _, node := range tssInfo.TssMembers {
+			if !slices.ExistsIgnoreCase(ctx.Approvers(), node) {
+				addr, _ := tss.NodeToAddress(node)
+				if !m.store.IsInSlashing(addr) {
+					absents = append(absents, node)
+				}
 			}
 		}
+		if err = m.afterSignStateBatch(ctx, request.StateRoots, absents); err != nil {
+			log.Error("failed to execute afterSign", "err", err)
+		}
+		m.setStateSignature(digestBz, resp.Signature)
 	}
-	if err = m.afterSignStateBatch(ctx, request.StateRoots, absents); err != nil {
-		log.Error("failed to execute afterSign", "err", err)
+	response := tss.BatchSubmitterResponse{
+		Signature: resp.Signature,
+		RollBack:  rollback,
 	}
-
-	m.setStateSignature(digestBz, resp.Signature)
-	return resp.Signature, nil
+	responseBytes, err := json.Marshal(response)
+	if err != nil {
+		log.Error("batch submitter response failed to marshal !")
+		return nil, err
+	}
+	return responseBytes, nil
 }
 
 func (m Manager) SignTxBatch() error {

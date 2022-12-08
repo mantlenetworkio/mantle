@@ -17,6 +17,11 @@ type Client struct {
 	client *resty.Client
 }
 
+type TssResponse struct {
+	Signature []byte `json:"signature"`
+	RollBack  bool   `json:"roll_back"`
+}
+
 func NewClient(url string) *Client {
 	client := resty.New()
 	client.SetHostURL(url)

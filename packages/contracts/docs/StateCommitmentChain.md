@@ -224,6 +224,40 @@ Resolves the address associated with a given name.
 |---|---|---|
 | _0 | address | Address associated with the given name.
 
+### rollBackL2Chain
+
+```solidity
+function rollBackL2Chain(uint256 _shouldRollBack, uint256 _shouldStartAtElement, bytes _signature) external nonpayable
+```
+
+Emit event to notify sequencers to roll back.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _shouldRollBack | uint256 | roll back to should start .
+| _shouldStartAtElement | uint256 | Index of the element at which this batch should start
+| _signature | bytes | signature of rollback message
+
+### rollBackMessage
+
+```solidity
+function rollBackMessage(uint256 _shouldRollBack) external nonpayable
+```
+
+interface for send domain message
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _shouldRollBack | uint256 | roll back to should start .
+
 ### verifyStateCommitment
 
 ```solidity
@@ -270,6 +304,22 @@ event DistributeTssReward(uint256 indexed _startBlockNumber, uint256 _length, ui
 | _length  | uint256 | undefined |
 | _batchTime `indexed` | uint256 | undefined |
 | _tssMembers  | address[] | undefined |
+
+### RollBackL2Chain
+
+```solidity
+event RollBackL2Chain(uint256 indexed _startBlockNumber)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _startBlockNumber `indexed` | uint256 | undefined |
 
 ### StateBatchAppended
 
