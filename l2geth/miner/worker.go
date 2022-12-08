@@ -742,6 +742,8 @@ func (w *worker) SetHead(number uint64) error {
 	}
 	w.eth.SyncService().SetLatestL1Timestamp(tx.L1Timestamp())
 	w.eth.SyncService().SetLatestL1BlockNumber(blockNumber.Uint64())
+	index := blockNumber.Uint64() - 1
+	w.eth.SyncService().SetLatestIndex(&index)
 	return nil
 }
 
