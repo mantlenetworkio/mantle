@@ -307,8 +307,12 @@ const config: HardhatUserConfig = {
       default: 6,
     },
     gasPriceOracleIsBurning: {
-      type: 'boolean',
-      default: true,
+      type: 'number',
+      default: 1,
+    },
+    gasPriceOracleCharge: {
+      type: 'number',
+      default: 0,
     },
     gasPriceOracleL1BaseFee: {
       type: 'number',
@@ -316,7 +320,7 @@ const config: HardhatUserConfig = {
     },
     gasPriceOracleL2GasPrice: {
       type: 'number',
-      default: 0,
+      default: 1,
     },
     hfBerlinBlock: {
       type: 'number',

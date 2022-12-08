@@ -98,7 +98,7 @@ function withdrawDust() external nonpayable
 ### DistributeTssReward
 
 ```solidity
-event DistributeTssReward(uint256 batchTime, address[] tssMembers)
+event DistributeTssReward(uint256 lastBatchTime, uint256 batchTime, uint256 amount, address[] tssMembers)
 ```
 
 
@@ -109,13 +109,15 @@ event DistributeTssReward(uint256 batchTime, address[] tssMembers)
 
 | Name | Type | Description |
 |---|---|---|
+| lastBatchTime  | uint256 | undefined |
 | batchTime  | uint256 | undefined |
+| amount  | uint256 | undefined |
 | tssMembers  | address[] | undefined |
 
 ### DistributeTssRewardByBlock
 
 ```solidity
-event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, address[] tssMembers)
+event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, uint256 amount, address[] tssMembers)
 ```
 
 
@@ -128,6 +130,7 @@ event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, addres
 |---|---|---|
 | blockStartHeight  | uint256 | undefined |
 | length  | uint32 | undefined |
+| amount  | uint256 | undefined |
 | tssMembers  | address[] | undefined |
 
 

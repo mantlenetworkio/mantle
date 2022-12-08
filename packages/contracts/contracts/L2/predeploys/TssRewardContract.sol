@@ -5,6 +5,7 @@ import {ITssRewardContract} from  "./iTssRewardContract.sol";
 import {IBVM_GasPriceOracle} from "./iBVM_GasPriceOracle.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAddresses.sol";
+import { CrossDomainEnabled } from "../../libraries/bridge/CrossDomainEnabled.sol";
 
 /* Library Imports */
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -17,7 +18,7 @@ import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
  * @title TssRewardContract
  * @dev Release to batch roll up tss members.
  */
-contract TssRewardContract is Ownable,ITssRewardContract {
+contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     using SafeMath for uint256;
 
     mapping(uint256 => uint256) public ledger;
@@ -26,21 +27,21 @@ contract TssRewardContract is Ownable,ITssRewardContract {
     uint256 public dust;
     uint256 public bestBlockID;
     uint256 public totalAmount;
-    uint256 public latsBatchTime;
+    uint256 public lastBatchTime;
     uint256 public sendAmountPerYear;
-    address public l2Message;
+    address public sccAddress;
 
 
 
     // set call address
-    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress, address _l2Message)
-    Ownable()
+    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress,address _l2CrossDomainMessenger, address _sccAddress)
+    Ownable() CrossDomainEnabled(_l2CrossDomainMessenger)
     {
         transferOwnership(_owner);
         deadAddress = _deadAddress;
         sendAmountPerYear = _sendAmountPerYear;
         bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
-        l2Message = _l2Message;
+        sccAddress = _sccAddress;
     }
 
     // slither-disable-next-line locked-ether
@@ -57,15 +58,6 @@ contract TssRewardContract is Ownable,ITssRewardContract {
         );
         _;
     }
-
-    modifier onlyL2Message() {
-        require(
-            msg.sender == l2Message,
-            "tss reward call message unauthenticated"
-        );
-        _;
-    }
-
 
     modifier checkBalance() {
         require(
@@ -99,9 +91,9 @@ contract TssRewardContract is Ownable,ITssRewardContract {
     function claimReward(uint256 _blockStartHeight, uint32 _length, uint256 _batchTime, address[] calldata _tssMembers)
     external
     virtual
-    onlyL2Message
+    onlyFromCrossDomainAccount(sccAddress)
     {
-        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != true) {
+        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != 1) {
             claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
             return;
         }
@@ -109,11 +101,12 @@ contract TssRewardContract is Ownable,ITssRewardContract {
         uint256 batchAmount = 0;
         uint256 accu = 0;
         // sendAmount
-        if (latsBatchTime == 0) {
-            latsBatchTime = _batchTime;
+        if (lastBatchTime == 0) {
+            lastBatchTime = _batchTime;
             return;
         }
-        batchAmount = (_batchTime - latsBatchTime) * querySendAmountPerSecond() + dust;
+        require(_batchTime > lastBatchTime,"args _batchTime must gther than last lastBatchTime");
+        batchAmount = (_batchTime - lastBatchTime) * querySendAmountPerSecond() + dust;
         dust = 0;
         sendAmount = batchAmount.div(_tssMembers.length);
         for (uint256 j = 0; j < _tssMembers.length; j++) {
@@ -126,9 +119,12 @@ contract TssRewardContract is Ownable,ITssRewardContract {
             dust = dust.add(reserved);
         }
         emit DistributeTssReward(
+            lastBatchTime,
             _batchTime,
+            sendAmount,
             _tssMembers
         );
+        lastBatchTime = _batchTime;
     }
 
     /**
@@ -167,6 +163,7 @@ contract TssRewardContract is Ownable,ITssRewardContract {
         emit DistributeTssRewardByBlock(
             _blockStartHeight,
             _length,
+            sendAmount,
             _tssMembers
         );
     }
