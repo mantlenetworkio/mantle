@@ -555,7 +555,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		var (
 			hash   common.Hash
 			bytes  int
-			bodies []rlp.RawValue
+			bodies []*blockBody
 		)
 		for bytes < softResponseLimit && len(bodies) < downloader.MaxBlockFetch {
 			// Retrieve the hash of the next block
@@ -566,11 +566,22 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 			}
 			// Retrieve the requested block body, stopping if enough was found
 			if data := pm.blockchain.GetBodyRLP(hash); len(data) != 0 {
-				bodies = append(bodies, data)
 				bytes += len(data)
 			}
+			if body := pm.blockchain.GetBody(hash); body != nil {
+				txMetas := make([][]byte, 0, len(body.Transactions))
+				for _, tx := range body.Transactions {
+					txMetaBytes := types.TxMetaEncode(tx.GetMeta())
+					txMetas = append(txMetas, txMetaBytes)
+				}
+				bodies = append(bodies, &blockBody{
+					Transactions:     body.Transactions,
+					TransactionMetas: txMetas,
+					Uncles:           body.Uncles,
+				})
+			}
 		}
-		return p.SendBlockBodiesRLP(bodies)
+		return p.SendBlockBodies(bodies)
 
 	case msg.Code == BlockBodiesMsg:
 		// A batch of block bodies arrived to one of our previous requests
@@ -582,9 +593,17 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		transactions := make([][]*types.Transaction, len(request))
 		uncles := make([][]*types.Header, len(request))
 
-		for i, body := range request {
-			transactions[i] = body.Transactions
-			uncles[i] = body.Uncles
+		for i, _ := range request {
+			for j, _ := range request[i].Transactions {
+				txMeta, err := types.TxMetaDecode(request[i].TransactionMetas[j])
+				if err != nil {
+					log.Error("tx meta decode err", "errMsg", err.Error())
+					break
+				}
+				request[i].Transactions[j].SetTransactionMeta(txMeta)
+			}
+			transactions[i] = request[i].Transactions
+			uncles[i] = request[i].Uncles
 		}
 		// Filter out any explicitly requested bodies, deliver the rest to the downloader
 		filter := len(transactions) > 0 || len(uncles) > 0
@@ -716,6 +735,15 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		if hash := types.DeriveSha(request.Block.Transactions()); hash != request.Block.TxHash() {
 			log.Warn("Propagated block has invalid body", "have", hash, "exp", request.Block.TxHash())
 			break // TODO(karalabe): return error eventually, but wait a few releases
+		}
+		txs := request.Block.Transactions()
+		for index, txMetaBytes := range request.TxMetas {
+			txMeta, err := types.TxMetaDecode(txMetaBytes)
+			if err != nil {
+				log.Error("tx meta decode err", "errMsg", err.Error())
+				break
+			}
+			txs[index].SetTransactionMeta(txMeta)
 		}
 		if err := request.sanityCheck(); err != nil {
 			return err

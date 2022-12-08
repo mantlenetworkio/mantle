@@ -263,6 +263,7 @@ func (w *worker) setEtherbase(addr common.Address) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.coinbase = addr
+	w.eth.SyncService().SetMinerAddress(addr)
 }
 
 func (w *worker) isInProducingBlockPhase() bool {
@@ -549,6 +550,8 @@ func (w *worker) mainLoop() {
 					}
 					// Short circuit if there is no available pending transactions
 					if len(pending) == 0 {
+						log.Debug("empty txpool, wait for 200 millisecond")
+						time.Sleep(200 * time.Millisecond)
 						continue
 					}
 					log.Info("pending size", "size", len(pending))
@@ -582,16 +585,12 @@ func (w *worker) mainLoop() {
 						// send the block through the `taskCh` and then through the
 						// `resultCh` which ultimately adds the block to the blockchain
 						// through `bc.WriteBlockWithState`
-						if tx.GetMeta().Index == nil {
-							log.Info("tx information", "tx_index", nil, "tx_L1Timestamp", tx.GetMeta().L1Timestamp)
-						} else {
-							log.Info("tx information", "tx_index", *tx.GetMeta().Index, "tx_L1Timestamp", tx.GetMeta().L1Timestamp)
-						}
-						err, hook := w.eth.SyncService().ValidateAndApplySequencerTransactionMock(tx)
+						err, hook := w.eth.SyncService().ValidateAndApplySequencerTransactionForMiner(tx)
 						if err != nil {
 							log.Error("SyncService err", "errMsg", err.Error())
 							break
 						}
+						log.Info("After sync service, tx metadata", "tx_index", *tx.GetMeta().Index, "tx_L1Timestamp", tx.GetMeta().L1Timestamp, "tx_L1BlockNumber", tx.GetMeta().L1BlockNumber)
 						if err := w.commitNewTx(tx); err == nil {
 							head := <-w.chainHeadWaitCh
 							if hook != nil {
