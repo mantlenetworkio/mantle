@@ -213,6 +213,8 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		return nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
 
+	eth.blockchain.SetSyncServiceHook(eth.syncService.ApplyBlockTransactions)
+
 	// Permit the downloader to use the trie cache allowance during fast sync
 	cacheLimit := cacheConfig.TrieCleanLimit + cacheConfig.TrieDirtyLimit
 	checkpoint := config.Checkpoint

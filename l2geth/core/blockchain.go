@@ -177,6 +177,7 @@ type BlockChain struct {
 	badBlocks       *lru.Cache                     // Bad block cache
 	shouldPreserve  func(*types.Block) bool        // Function used to determine whether should preserve the given block.
 	terminateInsert func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
+	syncServiceHook func(block *types.Block) error
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -305,6 +306,11 @@ func (bc *BlockChain) getProcInterrupt() bool {
 // GetVMConfig returns the block chain VM config.
 func (bc *BlockChain) GetVMConfig() *vm.Config {
 	return &bc.vmConfig
+}
+
+// GetVMConfig returns the block chain VM config.
+func (bc *BlockChain) SetSyncServiceHook(hook func(block *types.Block) error) {
+	bc.syncServiceHook = hook
 }
 
 // empty returns an indicator whether the blockchain is empty.
@@ -681,6 +687,10 @@ func (bc *BlockChain) GetBody(hash common.Hash) *types.Body {
 	body := rawdb.ReadBody(bc.db, hash, *number)
 	if body == nil {
 		return nil
+	}
+	for i := 0; i < len(body.Transactions); i++ {
+		meta := rawdb.ReadTransactionMeta(bc.db, *number)
+		body.Transactions[i].SetTransactionMeta(meta)
 	}
 	// Cache the found body for next time and return
 	bc.bodyCache.Add(hash, body)
@@ -1680,6 +1690,13 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, er
 				}(time.Now())
 			}
 		}
+		if bc.syncServiceHook != nil {
+			err = bc.syncServiceHook(block)
+			if err != nil {
+				log.Info("syncServiceHook err", "errMsg", err.Error())
+				return it.index, err
+			}
+		}
 		// Process block using the parent state as reference point
 		substart := time.Now()
 		receipts, logs, usedGas, err := bc.processor.Process(block, statedb, bc.vmConfig)
@@ -1733,7 +1750,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, er
 
 		switch status {
 		case CanonStatTy:
-			log.Debug("Inserted new block", "number", block.Number(), "hash", block.Hash(),
+			log.Info("Inserted new block", "number", block.Number(), "hash", block.Hash(),
 				"uncles", len(block.Uncles()), "txs", len(block.Transactions()), "gas", block.GasUsed(),
 				"elapsed", common.PrettyDuration(time.Since(start)),
 				"root", block.Root())

@@ -654,7 +654,7 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 	}
 
 	for k, _ := range snap.Signers {
-		log.Info(fmt.Sprintf("signer: %v", k.String()))
+		log.Debug(fmt.Sprintf("signer: %v", k.String()))
 	}
 
 	if _, authorized := snap.Signers[signer]; !authorized {

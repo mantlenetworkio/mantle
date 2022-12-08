@@ -2,7 +2,6 @@ package rollup
 
 import (
 	"context"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -75,6 +74,7 @@ type SyncService struct {
 	signer                         types.Signer
 	feeThresholdUp                 *big.Float
 	feeThresholdDown               *big.Float
+	minerAddress                   common.Address
 }
 
 // NewSyncService returns an initialized sync service
@@ -770,7 +770,7 @@ func (s *SyncService) applyIndexedTransaction(tx *types.Transaction) error {
 	if index == nil {
 		return errors.New("No index found in applyIndexedTransaction")
 	}
-	log.Trace("Applying indexed transaction", "index", *index)
+	log.Info("Applying indexed transaction", "index", *index)
 	next := s.GetNextIndex()
 	if *index == next {
 		return s.applyTransactionToTip(tx)
@@ -827,49 +827,11 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 		}
 	}
 
-	// If there is no L1 timestamp assigned to the transaction, then assign a
-	// timestamp to it. The property that L1 to L2 transactions have the same
-	// timestamp as the L1 block that it was included in is removed for better
-	// UX. This functionality can be added back in during a future release. For
-	// now, the sequencer will assign a timestamp to each transaction.
 	ts := s.GetLatestL1Timestamp()
 	bn := s.GetLatestL1BlockNumber()
 
-	// The L1Timestamp is 0 for QueueOriginSequencer transactions when
-	// running as the sequencer, the transactions are coming in via RPC.
-	// This code path also runs for replicas/verifiers so any logic involving
-	// `time.Now` can only run for the sequencer. All other nodes must listen
-	// to what the sequencer says is the timestamp, otherwise there will be a
-	// network split.
-	// Note that it should never be possible for the timestamp to be set to
-	// 0 when running as a verifier.
-	shouldMalleateTimestamp := !s.verifier && tx.QueueOrigin() == types.QueueOriginL1ToL2
-	if tx.L1Timestamp() == 0 || shouldMalleateTimestamp {
-		// Get the latest known timestamp
-		current := time.Unix(int64(ts), 0)
-		// Get the current clocktime
-		now := time.Now()
-		// If enough time has passed, then assign the
-		// transaction to have the timestamp now. Otherwise,
-		// use the current timestamp
-		if now.Sub(current) > s.timestampRefreshThreshold {
-			current = now
-		}
-		log.Info("Updating latest timestamp", "timestamp", current, "unix", current.Unix())
-		tx.SetL1Timestamp(uint64(current.Unix()))
-	} else if tx.L1Timestamp() == 0 && s.verifier {
-		// This should never happen
-		log.Error("No tx timestamp found when running as verifier", "hash", tx.Hash().Hex())
-	} else if tx.L1Timestamp() < ts {
-		// This should never happen, but sometimes does
-		log.Error("Timestamp monotonicity violation", "hash", tx.Hash().Hex(), "latest", ts, "tx", tx.L1Timestamp())
-	}
-
 	l1BlockNumber := tx.L1BlockNumber()
-	// Set the L1 blocknumber
-	if l1BlockNumber == nil {
-		tx.SetL1BlockNumber(bn)
-	} else if l1BlockNumber.Uint64() > bn {
+	if l1BlockNumber.Uint64() > bn {
 		s.SetLatestL1BlockNumber(l1BlockNumber.Uint64())
 	} else if l1BlockNumber.Uint64() < bn {
 		// l1BlockNumber < latest l1BlockNumber
@@ -883,15 +845,6 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 		s.SetLatestL1Timestamp(tx.L1Timestamp())
 	}
 
-	index := s.GetLatestIndex()
-	if tx.GetMeta().Index == nil {
-		if index == nil {
-			tx.SetIndex(0)
-		} else {
-			tx.SetIndex(*index + 1)
-		}
-	}
-
 	// On restart, these values are repaired to handle
 	// the case where the index is updated but the
 	// transaction isn't yet added to the chain
@@ -900,40 +853,34 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 		s.SetLatestEnqueueIndex(queueIndex)
 	}
 
-	// The index was set above so it is safe to dereference
-	log.Debug("Applying transaction to tip", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
+	return nil
+}
 
-	txs := types.Transactions{tx}
-	errCh := make(chan error, 1)
-	s.txFeed.Send(core.NewTxsEvent{
-		Txs:   txs,
-		ErrCh: errCh,
-	})
-	// Block until the transaction has been added to the chain
-	log.Trace("Waiting for transaction to be added to chain", "hash", tx.Hash().Hex())
-
-	select {
-	case err := <-errCh:
-		log.Error("Got error waiting for transaction to be added to chain", "msg", err)
-		s.SetLatestL1Timestamp(ts)
-		s.SetLatestL1BlockNumber(bn)
-		s.SetLatestIndex(index)
-		return err
-	case <-s.chainHeadCh:
-		// Update the cache when the transaction is from the owner
-		// of the gas price oracle
-		sender, _ := types.Sender(s.signer, tx)
-		owner := s.GasPriceOracleOwnerAddress()
-		if owner != nil && sender == *owner {
-			if err := s.updateGasPriceOracleCache(nil); err != nil {
-				s.SetLatestL1Timestamp(ts)
-				s.SetLatestL1BlockNumber(bn)
-				s.SetLatestIndex(index)
-				return err
-			}
-		}
+func (s *SyncService) ApplyBlockTransactions(block *types.Block) error {
+	if block.Coinbase() == s.minerAddress {
+		log.Info("block is miner by current sequencer, skip it")
 		return nil
 	}
+	// TODO maybe we need mutex lock here
+	for _, tx := range block.Transactions() {
+		if tx == nil {
+			return errors.New("Transaction is nil in applyIndexedTransaction")
+		}
+		index := tx.GetMeta().Index
+		if index == nil {
+			return errors.New("No index found in applyIndexedTransaction")
+		}
+		log.Info("Applying indexed transaction", "index", *index)
+		next := s.GetNextIndex()
+		if *index == next {
+			return s.applyTransactionToTip(tx)
+		}
+		if *index < next {
+			return s.applyHistoricalTransaction(tx)
+		}
+		return fmt.Errorf("Received tx at index %d when looking for %d", *index, next)
+	}
+	return nil
 }
 
 // applyTransaction is a higher level API for applying a transaction
@@ -941,13 +888,13 @@ func (s *SyncService) applyTransactionMock(tx *types.Transaction) (error, func()
 	if tx.GetMeta().Index != nil {
 		return s.applyIndexedTransaction(tx), nil
 	}
-	return s.applyTransactionToTipMock(tx)
+	return s.applyTransactionToTipForMiner(tx)
 }
 
 // Higher level API for applying transactions. Should only be called for
 // queue origin sequencer transactions, as the contracts on L1 manage the same
 // validity checks that are done here.
-func (s *SyncService) ValidateAndApplySequencerTransactionMock(tx *types.Transaction) (error, func() error) {
+func (s *SyncService) ValidateAndApplySequencerTransactionForMiner(tx *types.Transaction) (error, func() error) {
 	if s.verifier {
 		return errors.New("Verifier does not accept transactions out of band"), nil
 	}
@@ -980,7 +927,7 @@ func (s *SyncService) ValidateAndApplySequencerTransactionMock(tx *types.Transac
 // applying it to the tip. It blocks until the transaction has been included in
 // the chain. It is assumed that validation around the index has already
 // happened.
-func (s *SyncService) applyTransactionToTipMock(tx *types.Transaction) (error, func() error) {
+func (s *SyncService) applyTransactionToTipForMiner(tx *types.Transaction) (error, func() error) {
 	if tx == nil {
 		return errors.New("nil transaction passed to applyTransactionToTip"), nil
 	}
@@ -1060,7 +1007,6 @@ func (s *SyncService) applyTransactionToTipMock(tx *types.Transaction) (error, f
 			tx.SetIndex(*index + 1)
 		}
 	}
-	log.Info("tx meta", "tx_index", *tx.GetMeta().Index, "tx_L1Timestamp", tx.GetMeta().L1Timestamp, "tx_L1BlockNumber", tx.GetMeta().L1BlockNumber)
 
 	// On restart, these values are repaired to handle
 	// the case where the index is updated but the
@@ -1071,7 +1017,7 @@ func (s *SyncService) applyTransactionToTipMock(tx *types.Transaction) (error, f
 	}
 
 	// The index was set above so it is safe to dereference
-	log.Info("Applying transaction to tip mock", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
+	log.Info("Applying transaction for miner", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
 
 	hook := func() error {
 		// Update the cache when the transaction is from the owner
@@ -1419,12 +1365,16 @@ func (s *SyncService) ProcessBatchPeriodStartMsg() error {
 	return nil
 }
 
+func (s *SyncService) SetMinerAddress(addr common.Address) {
+	s.minerAddress = addr
+}
+
 func (s *SyncService) handleChainHeadEventLoop() {
 	log.Info("Start handle chain head event loop")
 	for {
 		select {
-		case chainHead := <-s.chainHeadCh:
-			log.Debug("chainHead", "block number", chainHead.Block.NumberU64(), "extra data", hex.EncodeToString(chainHead.Block.Extra()))
+		case block := <-s.chainHeadCh:
+			log.Info("handleChainHeadEventLoop receive block", "block_number", block.Block.NumberU64())
 		}
 	}
 }

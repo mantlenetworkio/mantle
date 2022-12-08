@@ -143,7 +143,12 @@ func (p *peer) broadcast() {
 			p.Log().Trace("Broadcast transactions", "count", len(txs))
 
 		case prop := <-p.queuedProps:
-			if err := p.SendNewBlock(prop.block, prop.td); err != nil {
+			txMetas := make([][]byte, 0, len(prop.block.Transactions()))
+			for _, tx := range prop.block.Transactions() {
+				txMetaBytes := types.TxMetaEncode(tx.GetMeta())
+				txMetas = append(txMetas, txMetaBytes)
+			}
+			if err := p.SendNewBlock(prop.block, txMetas, prop.td); err != nil {
 				return
 			}
 			p.Log().Trace("Propagated block", "number", prop.block.Number(), "hash", prop.block.Hash(), "td", prop.td)
@@ -294,13 +299,13 @@ func (p *peer) AsyncSendNewBlockHash(block *types.Block) {
 }
 
 // SendNewBlock propagates an entire block to a remote peer.
-func (p *peer) SendNewBlock(block *types.Block, td *big.Int) error {
+func (p *peer) SendNewBlock(block *types.Block, txMetas [][]byte, td *big.Int) error {
 	// Mark all the block hash as known, but ensure we don't overflow our limits
 	p.knownBlocks.Add(block.Hash())
 	for p.knownBlocks.Cardinality() >= maxKnownBlocks {
 		p.knownBlocks.Pop()
 	}
-	return p2p.Send(p.rw, NewBlockMsg, []interface{}{block, td})
+	return p2p.Send(p.rw, NewBlockMsg, []interface{}{block, txMetas, td})
 }
 
 // AsyncSendNewBlock queues an entire block for propagation to a remote peer. If

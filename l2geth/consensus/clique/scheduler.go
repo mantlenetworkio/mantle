@@ -133,18 +133,13 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			SequencerSet: sequencerSet,
 			Signature:    mockSignature,
 		}
-
-		log.Info("Start Post BatchPeriodStartEvent")
 		err := schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   &msg,
 			ErrCh: nil,
 		})
-		log.Info("End Post BatchPeriodStartEvent")
 		if err != nil {
 			log.Error("generate BatchPeriodStartEvent error")
 			return
-		} else {
-			log.Info("generate BatchPeriodStartEvent success", "startHeight", msg.StartHeight, "maxHeight", msg.MaxHeight, "expireTime", msg.ExpireTime, "minerAddress", msg.MinerAddress)
 		}
 		ticker := time.NewTicker(time.Duration(expireTime) * time.Second)
 		select {
