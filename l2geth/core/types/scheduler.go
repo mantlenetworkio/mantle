@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/binary"
+	"errors"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
@@ -14,6 +15,7 @@ const (
 type MsgVerify interface {
 	GetData() []byte
 	GetSignature() []byte
+	GetSigner() (common.Address, error)
 }
 
 var _ MsgVerify = &BatchPeriodStartMsg{}
@@ -29,8 +31,20 @@ type BatchPeriodStartMsg struct {
 	Signature    []byte
 }
 
+func (bps *BatchPeriodStartMsg) GetSigner() (common.Address, error) {
+	if bps.Signature == nil {
+		return common.Address{}, errors.New("msg do not have signature")
+	}
+	pubEcr, err := crypto.SigToPub(crypto.Keccak256(bps.GetData()), bps.GetSignature())
+	if err != nil {
+		return common.Address{}, errors.New("signature ecrecover failed")
+	}
+	addressEcr := crypto.PubkeyToAddress(*pubEcr)
+	return addressEcr, nil
+}
+
 func (bps *BatchPeriodStartMsg) GetData() []byte {
-	if bps == nil || len(bps.SequencerSet) == 0 || len(bps.Signature) != crypto.SignatureLength {
+	if bps == nil || len(bps.SequencerSet) == 0 {
 		return nil
 	}
 	var buf = make([]byte, 8)
