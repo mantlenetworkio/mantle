@@ -11,6 +11,13 @@ const (
 	uint64Length = 8
 )
 
+type MsgVerify interface {
+	GetData() []byte
+	GetSignature() []byte
+}
+
+var _ MsgVerify = &BatchPeriodStartMsg{}
+
 type BatchPeriodStartMsg struct {
 	ReorgIndex   uint64
 	BatchIndex   uint64
@@ -20,6 +27,29 @@ type BatchPeriodStartMsg struct {
 	MinerAddress common.Address
 	SequencerSet []common.Address
 	Signature    []byte
+}
+
+func (bps *BatchPeriodStartMsg) GetData() []byte {
+	if bps == nil || len(bps.SequencerSet) == 0 || len(bps.Signature) != crypto.SignatureLength {
+		return nil
+	}
+	var buf = make([]byte, 8)
+	binary.BigEndian.PutUint64(buf, bps.ReorgIndex)
+	buf = binary.BigEndian.AppendUint64(buf, bps.BatchIndex)
+	buf = binary.BigEndian.AppendUint64(buf, bps.StartHeight)
+	buf = binary.BigEndian.AppendUint64(buf, bps.MaxHeight)
+	buf = binary.BigEndian.AppendUint64(buf, bps.ExpireTime)
+
+	buf = append(buf, bps.MinerAddress.Bytes()...)
+
+	for _, sequencer := range bps.SequencerSet {
+		buf = append(buf, sequencer.Bytes()...)
+	}
+	return buf
+}
+
+func (bps *BatchPeriodStartMsg) GetSignature() []byte {
+	return bps.Signature
 }
 
 func (bps *BatchPeriodStartMsg) SerializeBatchPeriodStartMsg() []byte {

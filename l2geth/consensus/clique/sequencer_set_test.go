@@ -164,9 +164,10 @@ func TestIncrementProducerPriorityPositiveTimes(t *testing.T) {
 
 func BenchmarkSequencerSetCopy(b *testing.B) {
 	b.StopTimer()
+	mockId := []byte("test")
 	sset := NewSequencerSet([]*Sequencer{})
 	for i := 0; i < 1000; i++ {
-		seq := NewSequencer(randAddress(), 10)
+		seq := NewSequencer(randAddress(), 10, mockId)
 		err := sset.UpdateWithChangeSet([]*Sequencer{seq})
 		if err != nil {
 			panic("Failed to add sequencer")
@@ -376,7 +377,8 @@ func randAddress() common.Address {
 func randSequencer(totalVotingPower int64) *Sequencer {
 	// this modulo limits the ProducerPriority/Power to stay in the
 	// bounds of MaxTotalPower minus the already existing voting power:
-	seq := NewSequencer(randAddress(), int64(rand.Uint64()%uint64(MaxTotalPower-totalVotingPower)))
+	mockId := []byte("test")
+	seq := NewSequencer(randAddress(), int64(rand.Uint64()%uint64(MaxTotalPower-totalVotingPower)), mockId)
 	seq.ProducerPriority = rand.Int63() % (MaxTotalPower - totalVotingPower)
 	return seq
 }

@@ -15,13 +15,14 @@ func TestSequencerValidateBasic(t *testing.T) {
 	rand.Read(seed)
 	var addr common.Address
 	copy(addr[:], seed)
+	mockId := []byte("test")
 	testCases := []struct {
 		seq *Sequencer
 		err bool
 		msg string
 	}{
 		{
-			seq: NewSequencer(addr, 1),
+			seq: NewSequencer(addr, 1, mockId),
 			err: false,
 			msg: "",
 		},
@@ -36,7 +37,7 @@ func TestSequencerValidateBasic(t *testing.T) {
 			msg: "sequencer does not have a public key",
 		},
 		{
-			seq: NewSequencer(addr, -1),
+			seq: NewSequencer(addr, -1, mockId),
 			err: true,
 			msg: "sequencer has negative voting power",
 		},
