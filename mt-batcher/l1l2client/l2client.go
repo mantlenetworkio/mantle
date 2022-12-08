@@ -14,10 +14,8 @@ import (
 
 func DialL2EthClientWithTimeout(ctx context.Context, url string, disableHTTP2 bool) (
 	*ethclient.Client, error) {
-
 	ctxt, cancel := context.WithTimeout(ctx, dial.DefaultTimeout)
 	defer cancel()
-
 	if strings.HasPrefix(url, "http") {
 		httpClient := new(http.Client)
 		if disableHTTP2 {

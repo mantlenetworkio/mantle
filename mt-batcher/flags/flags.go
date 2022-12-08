@@ -43,24 +43,12 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "DISPERSER_ENDPOINT"),
 	}
-	GrpcPortFlag = cli.IntFlag{
-		Name:     "grpc-port",
-		Usage:    "Port at which node listens for grpc calls",
-		Required: true,
-		EnvVar:   prefixEnvVar(envVarPrefix, "GRPC_PORT"),
-	}
 
 	ChainIdFlag = cli.Uint64Flag{
 		Name:     "chain-id",
 		Usage:    "Chain id for ethereum chain",
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "CHAIN_ID"),
-	}
-	ChainProviderFlag = cli.StringFlag{
-		Name:     "chain-provider",
-		Usage:    "Ethereum chain rpc",
-		Required: true,
-		EnvVar:   prefixEnvVar(envVarPrefix, "CHAIN_PROVIDER"),
 	}
 	GraphProviderFlag = cli.StringFlag{
 		Name:     "graph-provider",
@@ -86,7 +74,7 @@ var (
 			"mnemonic. The mnemonic flag must also be set.",
 		EnvVar: prefixEnvVar(envVarPrefix, "SEQUENCER_HD_PATH"),
 	}
-	RollupAddressFlag = cli.StringFlag{
+	EigenContractAddressFlag = cli.StringFlag{
 		Name:     "rollup-address",
 		Usage:    "Address of the datalayr repository contract",
 		Required: true,
@@ -117,7 +105,6 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "DATA_STORE_TIMEOUT"),
 	}
-
 	LogLevelFlag = cli.StringFlag{
 		Name:   "log-level",
 		Usage:  "The lowest log level that will be output",
@@ -160,14 +147,12 @@ var requiredFlags = []cli.Flag{
 	L1EthRpcFlag,
 	L2MtlRpcFlag,
 	DisperserEndpointFlag,
-	GrpcPortFlag,
 	ChainIdFlag,
-	ChainProviderFlag,
 	GraphProviderFlag,
 	PrivateKeyFlag,
 	MnemonicFlag,
 	SequencerHDPathFlag,
-	RollupAddressFlag,
+	EigenContractAddressFlag,
 	BlockOffsetFlag,
 	PollIntervalFlag,
 	DataStoreDurationFlag,

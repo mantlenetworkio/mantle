@@ -4,12 +4,16 @@ import (
 	"bytes"
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/Layr-Labs/datalayr/common/graphView"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceDL"
+	"github.com/Layr-Labs/datalayr/common/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
@@ -29,7 +33,7 @@ import (
 type DriverConfig struct {
 	L1Client          *l1l2client.L1ChainClient
 	L2Client          *l2ethclient.Client
-	EigenAddr         common.Address
+	EigenContractAddr common.Address
 	PrivKey           *ecdsa.PrivateKey
 	BlockOffset       uint64
 	ChainID           *big.Int
@@ -38,6 +42,7 @@ type DriverConfig struct {
 	DisperserSocket   string
 	PollInterval      time.Duration
 	GraphProvider     string
+	EigenLogConfig    logging.Config
 }
 
 type Driver struct {
@@ -49,6 +54,7 @@ type Driver struct {
 	EigenABI         *abi.ABI
 	L1ChainClient    *l1l2client.L1ChainClient
 	GraphClient      *graphView.GraphClient
+	logger           *logging.Logger
 	cancel           func()
 	wg               sync.WaitGroup
 }
@@ -57,29 +63,34 @@ var bigOne = new(big.Int).SetUint64(1)
 
 func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 	eigenContract, err := bindings.NewBVMEigenDataLayrChain(
-		cfg.EigenAddr, cfg.L1Client.Client,
+		cfg.EigenContractAddr, cfg.L1Client.Client,
 	)
+	if err != nil {
+		log.Error("binding eigenda contract fail", "err", err)
+		return nil, err
+	}
+	logger, err := logging.GetLogger(cfg.EigenLogConfig)
 	if err != nil {
 		return nil, err
 	}
-
 	parsed, err := abi.JSON(strings.NewReader(
 		bindings.BVMEigenDataLayrChainABI,
 	))
 	if err != nil {
+		log.Error("parse eigenda contract abi fail", "err", err)
 		return nil, err
 	}
-
 	eignenABI, err := bindings.BVMEigenDataLayrChainMetaData.GetAbi()
 	if err != nil {
+		log.Error("get eigenda contract abi fail", "err", err)
 		return nil, err
 	}
 	rawEigenContract := bind.NewBoundContract(
-		cfg.EigenAddr, parsed, cfg.L1Client.Client, cfg.L1Client.Client,
+		cfg.EigenContractAddr, parsed, cfg.L1Client.Client, cfg.L1Client.Client,
 		cfg.L1Client.Client,
 	)
 
-	graphClient := graphView.NewGraphClient(cfg.GraphProvider, nil)
+	graphClient := graphView.NewGraphClient(cfg.GraphProvider, logger)
 
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
 	return &Driver{
@@ -91,26 +102,32 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 		EigenABI:         eignenABI,
 		L1ChainClient:    cfg.L1Client,
 		GraphClient:      graphClient,
+		logger:           logger,
 	}, nil
 }
 
 func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, *big.Int, error) {
 	blockOffset := new(big.Int).SetUint64(d.Cfg.BlockOffset)
-	start, err := d.EigenDaContract.L2BlockNumber(&bind.CallOpts{
-		Context: ctx,
+	var end *big.Int
+	log.Info("GetBatchBlockRange", "blockOffset", blockOffset)
+	start, err := d.EigenDaContract.LatestBlockNumber(&bind.CallOpts{
+		Context: context.Background(),
 	})
+	log.Info("start", "start", start)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	start.Add(start, blockOffset)
 	latestHeader, err := d.Cfg.L2Client.HeaderByNumber(ctx, nil)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	end := new(big.Int).Add(latestHeader.Number, bigOne)
+	end = new(big.Int).Add(start, big.NewInt(int64(d.Cfg.BlockOffset)))
 	if start.Cmp(end) > 0 {
 		return nil, nil, nil, fmt.Errorf("invalid range, "+
 			"end(%v) < start(%v)", end, start)
+	}
+	if end.Cmp(latestHeader.Number) > 0 {
+		end = latestHeader.Number
 	}
 	return start, end, latestHeader.Number, nil
 }
@@ -129,6 +146,7 @@ func (d *Driver) CraftBatchTx(
 			panic(fmt.Sprintf("attempting to create batch element from block %d, "+
 				"found %d txs instead of 1", block.Number(), len(txs)))
 		}
+		log.Info("Transactions", "txs", txs[0])
 		var txBuf bytes.Buffer
 		if err := txs[0].EncodeRLP(&txBuf); err != nil {
 			panic(fmt.Sprintf("Unable to encode tx: %v", err))
@@ -151,28 +169,35 @@ func (d *Driver) Disperse(data []byte, l2BlockNumber *big.Int) error {
 		return err
 	}
 	auth := d.L1ChainClient.PrepareAuthTransactor()
+	log.Info("params value", "uploadHeader", uploadHeader, "Duration", params.Duration, "BlockNumber", params.BlockNumber, "TotalOperatorsIndex", params.TotalOperatorsIndex)
 	tx, err := d.EigenDaContract.StoreData(auth, uploadHeader, uint8(params.Duration), params.BlockNumber, l2BlockNumber, params.TotalOperatorsIndex)
 	if err != nil {
+		log.Error("EigenDa store data error", "err", err)
 		return err
 	}
+	log.Info("StoreData success", "txHash", tx.Hash().Hex())
 	err = d.L1ChainClient.EnsureTransactionEvaled(tx)
 	if err != nil {
+		log.Error("EnsureTransactionEvaled fail", "err", err)
 		return err
 	}
 	event, ok := graphView.PollingInitDataStore(
 		d.GraphClient,
 		tx.Hash().Bytes()[:],
-		nil,
+		d.logger,
 		12,
 	)
 	if !ok {
+		log.Error("could not get initDataStore")
 		return errors.New("could not get initDataStore")
 	}
+	log.Info("PollingInitDataStore", "MsgHash", event.MsgHash, "StoreNumber", event.StoreNumber)
 	meta, err := d.callDisperse(
 		params.HeaderHash,
 		event.MsgHash[:],
 	)
 	if err != nil {
+		log.Error("callDisperse fail", "err", err)
 		return err
 	}
 	calldata := common2.MakeCalldata(params, meta, event.StoreNumber, event.MsgHash)
@@ -190,12 +215,23 @@ func (d *Driver) Disperse(data []byte, l2BlockNumber *big.Int) error {
 			SignatoryRecordHash: [32]byte{},
 		},
 	}
+	obj, _ := json.Marshal(event)
+	log.Info("Event", "obj", string(obj))
+	log.Info("Calldata", "calldata", hexutil.Encode(calldata))
+	obj, _ = json.Marshal(params)
+	log.Info("Params", "obj", string(obj))
+	obj, _ = json.Marshal(meta)
+	log.Info("Meta", "obj", string(obj))
+	obj, _ = json.Marshal(searchData)
+	log.Info("SearchData ", "obj", string(obj))
+	log.Info("HeaderHash: ", "DataCommitment", hex.EncodeToString(event.DataCommitment[:]))
+	log.Info("MsgHash", "event", hex.EncodeToString(event.MsgHash[:]))
 	auth = d.L1ChainClient.PrepareAuthTransactor()
 	tx, err = d.EigenDaContract.ConfirmData(auth, calldata, searchData)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("ConfirmDataStore tx sent. TxHash: %v\n", tx.Hash().Hex())
+	log.Info("confirmDataStore tx sent", "tx.Hash", tx.Hash().Hex())
 	err = d.L1ChainClient.EnsureTransactionEvaled(tx)
 	if err != nil {
 		return err
@@ -219,7 +255,7 @@ func (d *Driver) callEncode(data []byte) (common2.StoreParams, error) {
 	}
 	opt := grpc.MaxCallSendMsgSize(1024 * 1024 * 300)
 	reply, err := c.EncodeStore(ctx, request, opt)
-	log.Info("get store")
+	log.Info("get store", "reply", reply)
 	if err != nil {
 		log.Error("get store err", err)
 		return common2.StoreParams{}, err
@@ -280,26 +316,26 @@ func (d *Driver) callDisperse(headerHash []byte, messageHash []byte) (common2.Di
 	return meta, nil
 }
 
-func (s *Driver) Start() error {
-	s.wg.Add(1)
-	go s.eventLoop()
+func (d *Driver) Start() error {
+	d.wg.Add(1)
+	go d.eventLoop()
 	return nil
 }
 
-func (s *Driver) Stop() {
-	s.cancel()
-	s.wg.Wait()
+func (d *Driver) Stop() {
+	// s.cancel()
+	d.wg.Wait()
 }
 
-func (s *Driver) eventLoop() {
-	defer s.wg.Done()
-	ticker := time.NewTicker(s.Cfg.PollInterval)
+func (d *Driver) eventLoop() {
+	defer d.wg.Done()
+	ticker := time.NewTicker(d.Cfg.PollInterval)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
-			log.Info("EigenDa Sequencer  fetching current block range")
-			start, end, l2block, err := s.GetBatchBlockRange(s.Ctx)
+			log.Info("EigenDa Sequencer fetching current block range")
+			start, end, l2block, err := d.GetBatchBlockRange(d.Ctx)
 			if err != nil {
 				log.Error("EigenDa Sequencer unable to get block range", "err", err)
 				continue
@@ -309,8 +345,8 @@ func (s *Driver) eventLoop() {
 				continue
 			}
 			log.Info("EigenDa Sequencer block range", "start", start, "end", end)
-			tx, err := s.CraftBatchTx(
-				s.Ctx, start, end, l2block,
+			tx, err := d.CraftBatchTx(
+				d.Ctx, start, end, l2block,
 			)
 			if err != nil {
 				log.Error("EigenDa Sequencer unable to craft batch tx",
@@ -319,7 +355,7 @@ func (s *Driver) eventLoop() {
 			} else if tx == nil {
 				continue
 			}
-		case err := <-s.Ctx.Done():
+		case err := <-d.Ctx.Done():
 			log.Error("EigenDa Sequencer service shutting down", "err", err)
 			return
 		}

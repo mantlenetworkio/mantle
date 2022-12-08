@@ -17,7 +17,8 @@ const config = {
   bvmFeeWalletOwner: process.env.BVM_FEE_WALLETOWNER_OWNER || '0xAe3e6f7Df1CC6Cf18Fe9F3E69BCFC3351eb4fB45',
   bvmTssRewardContractOwner: process.env.TssRewardContractOwner || '0xAe3e6f7Df1CC6Cf18Fe9F3E69BCFC3351eb4fB45',
   l1BitAddress: process.env.L1_BIT_ADDRESS || '0x5a94Dc6cc85fdA49d8E9A8b85DDE8629025C42be',
-  dataManagerAddress: process.env.DATA_MANAGER_ADDRESS || '0xec36421F31108A26E46a0445d336978aA88A2012'
+  dataManagerAddress: process.env.DATA_MANAGER_ADDRESS || '0xec36421F31108A26E46a0445d336978aA88A2012',
+  bvmEigenSequencerAddress: process.env.BVM_EIGENDA_SEQUENCER_ADDRESS || '0x70997970c51812dc3a010c7d01b50e0d17dc79c8'
 }
 
 export default config

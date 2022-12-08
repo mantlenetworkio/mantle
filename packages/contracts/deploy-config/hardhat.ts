@@ -16,6 +16,7 @@ const config = {
   bvmTssRewardContractOwner: '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
   bvmFeeWalletOwner: '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
   dataManagerAddress: '0xec36421F31108A26E46a0445d336978aA88A2012',
+  bvmEigenSequencerAddress: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
 }
 
 export default config

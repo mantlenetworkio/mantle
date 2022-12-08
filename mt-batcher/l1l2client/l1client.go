@@ -46,6 +46,7 @@ func NewL1ChainClient(ctx context.Context, conf *Config) (*L1ChainClient, error)
 	if err != nil {
 		log.Error("Cannot get nonce")
 	}
+	log.Info("publicAddr", "publicAddr", publicAddr)
 	conf.Address = publicAddr
 	c := &L1ChainClient{
 		conf:   conf,

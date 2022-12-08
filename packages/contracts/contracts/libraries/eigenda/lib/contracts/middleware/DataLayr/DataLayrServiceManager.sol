@@ -17,6 +17,7 @@ import "../../permissions/Pausable.sol";
 
 import "../Repository.sol";
 import "./DataLayrChallengeUtils.sol";
+import "hardhat/console.sol";
 
 /**
  * @title Primary entrypoint for procuring services from DataLayr.
@@ -35,8 +36,8 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
     //quorumThresholdBasisPoints is the minimum basis points of total registered operators that must sign the datastore
     uint16 public quorumThresholdBasisPoints = 9000;
 
-    /** 
-    * adversaryThresholdBasisPoints is the maximum basis points of total registered 
+    /**
+    * adversaryThresholdBasisPoints is the maximum basis points of total registered
     * operators that witholds their chunks before the data can no longer be reconstructed
     * TODO: Change for prod!
     */
@@ -66,7 +67,7 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
     event AdversaryThresholdBasisPointsUpdated(uint16 adversaryThresholdBasisPoints);
 
     modifier checkValidThresholds(uint16 _quorumThresholdBasisPoints, uint16 _adversaryThresholdBasisPoints) {
-        require(_quorumThresholdBasisPoints > _adversaryThresholdBasisPoints, 
+        require(_quorumThresholdBasisPoints > _adversaryThresholdBasisPoints,
             "DataLayrServiceManager.validThresholds: Quorum threshold must be strictly greater than adversary");
         _;
     }
@@ -80,7 +81,7 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
     event EphemeralKeyRegistrySet(address previousAddress, address newAddress);
 
     event FirstQuorumThresholdPercentageSet(uint256 previousThreshold, uint256 newThreshold);
-    
+
     event SecondQuorumThresholdPercentageSet(uint256 previousThreshold, uint256 newThreshold);
 
     constructor(
@@ -126,25 +127,25 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
         ephemeralKeyRegistry = _ephemeralKeyRegistry;
     }
 
-    function setQuorumThresholdBasisPoints(uint16 _quorumThresholdBasisPoints) 
-        external 
-        onlyRepositoryGovernance 
-        checkValidThresholds(_quorumThresholdBasisPoints, adversaryThresholdBasisPoints) 
+    function setQuorumThresholdBasisPoints(uint16 _quorumThresholdBasisPoints)
+        external
+        onlyRepositoryGovernance
+        checkValidThresholds(_quorumThresholdBasisPoints, adversaryThresholdBasisPoints)
     {
         quorumThresholdBasisPoints = _quorumThresholdBasisPoints;
         emit QuorumThresholdBasisPointsUpdate(quorumThresholdBasisPoints);
     }
 
-    function setAdversaryThresholdBasisPoints(uint16 _adversaryThresholdBasisPoints) 
-        external 
+    function setAdversaryThresholdBasisPoints(uint16 _adversaryThresholdBasisPoints)
+        external
         onlyRepositoryGovernance
-        checkValidThresholds(quorumThresholdBasisPoints, _adversaryThresholdBasisPoints) 
+        checkValidThresholds(quorumThresholdBasisPoints, _adversaryThresholdBasisPoints)
     {
         adversaryThresholdBasisPoints = _adversaryThresholdBasisPoints;
         emit AdversaryThresholdBasisPointsUpdated(adversaryThresholdBasisPoints);
     }
-    
-    
+
+
     function setFirstQuorumThresholdPercentage(uint128 _firstQuorumThresholdPercentage) external onlyRepositoryGovernance {
         _setFirstQuorumThresholdPercentage(_firstQuorumThresholdPercentage);
     }
@@ -169,12 +170,12 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
      * @param header is the summary of the data that is being asserted into DataLayr,
      *  type DataStoreHeader struct {
      *   KzgCommit      [64]byte
-     *   Degree         uint32 
+     *   Degree         uint32
      *   NumSys         uint32
      *   NumPar         uint32
-     *   OrigDataSize   uint32 
+     *   OrigDataSize   uint32
      *   Disperser      [20]byte
-     *   LowDegreeProof [64]byte 
+     *   LowDegreeProof [64]byte
      *  }
      * @param duration for which the data has to be stored by the DataLayr operators.
      * This is a quantized parameter that describes how many factors of DURATION_SCALE
@@ -197,11 +198,11 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
         whenNotPaused
         returns (uint32 index)
     {
-
+        console.log("dlsm:01010101010101010100101010");
         bytes32 headerHash = keccak256(header);
         uint32 storePeriodLength;
         IDataLayrServiceManager.DataStoreMetadata memory metadata;
-        
+        console.log("dlsm:0000000000000000000000000");
         {
             uint256 totalBytes;
             {
@@ -215,8 +216,8 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
 
 
                 /**
-                * @notice coding ratio is numSys/numOperators (where numOperators = numSys + numPar).  This is the minimum 
-                *   percentage of all chunks require to reconstruct the data. 
+                * @notice coding ratio is numSys/numOperators (where numOperators = numSys + numPar).  This is the minimum
+                *   percentage of all chunks require to reconstruct the data.
                 *
                 * quorumThresholdBasisPoints is the minimum percentage of total registered operators that must sign the datastore
                 * adversaryThresholdBasisPoints is the maximum percentage of total registered operators that witholds their chunks
@@ -224,12 +225,12 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
                 *
                 * adversaryThresholdBasisPoints <  quorumThresholdBasisPoints, there cannot be more dishonest signers than actual signers
                 *
-                * quorumThresholdBasisPoints - adversaryThresholdBasisPoints represents the minimum percentage 
-                *   of operators that must be honest signers. This value must be greater than or equal to the coding ratio 
+                * quorumThresholdBasisPoints - adversaryThresholdBasisPoints represents the minimum percentage
+                *   of operators that must be honest signers. This value must be greater than or equal to the coding ratio
                 *   in order to ensure the data is available.
                 */
                 require(quorumThresholdBasisPoints - adversaryThresholdBasisPoints >= DataStoreUtils.getCodingRatio(header, totalOperators), "DataLayrServiceManager.initDataStore: Coding ratio is too high");
-               
+
             }
 
             require(duration >= 1 && duration <= MAX_DATASTORE_DURATION, "DataLayrServiceManager.initDataStore: Invalid duration");
@@ -260,10 +261,11 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
                 signatoryRecordHash: bytes32(0)
             });
          }
-     
+         console.log("dlsm:111111111111111");
+
 
         /**
-         * Stores the hash of the datastore's metadata into the `dataStoreHashesForDurationAtTimestamp` mapping. 
+         * Stores the hash of the datastore's metadata into the `dataStoreHashesForDurationAtTimestamp` mapping.
          * We iterate through the mapping and store the hash in the first available empty storage slot.
          * This hash is stored to be checked during the quorum signature verification, ensuring that the correct dataStore is signed and confirmed.
          */
@@ -285,7 +287,7 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
                 "DataLayrServiceManager.initDataStore: number of initDatastores for this duration and block has reached its limit"
             );
         }
-
+        console.log("dlsm:2222222222222222222");
         // sanity check on blockNumber
         {
             require(
@@ -295,16 +297,16 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
             require(
                 (blockNumber + BLOCK_STALE_MEASURE) >= block.number,
                 "DataLayrServiceManager.initDataStore: specified blockNumber is too far in past"
-            );    
+            );
         }
-
+        console.log("dlsm:333333333333333333333333333333");
         IDataLayrServiceManager.DataStoreSearchData memory searchData = IDataLayrServiceManager.DataStoreSearchData({
             duration: duration,
             timestamp: block.timestamp,
             index: index,
             metadata: metadata
         });
-
+        console.log("dlsm:444444444444444444444444444444");
         // emit event to represent initialization of data store
         emit InitDataStore(feePayer, searchData, header);
 
@@ -319,14 +321,14 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
         if (_latestTime > dataStoresForDuration.latestTime) {
             dataStoresForDuration.latestTime = _latestTime;
         }
-
+        console.log("dlsm:5555555555555555555");
         // increments the number of datastores for the specific duration of the asserted DataStore
         _incrementDataStoresForDuration(duration);
 
         // increment the counter
         ++dataStoresForDuration.dataStoreId;
 
-    
+        console.log("dlsm:66666666666666666666");
         return index;
     }
 
@@ -395,7 +397,7 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
             searchData.metadata.globalDataStoreId == dataStoreIdToConfirm,
             "DataLayrServiceManager.confirmDataStore: gloabldatastoreid is does not agree with data"
         );
-        // verify integrity of `blockNumberFromTaskHash` provided as part of `data` input        
+        // verify integrity of `blockNumberFromTaskHash` provided as part of `data` input
         require(
             searchData.metadata.blockNumber == blockNumberFromTaskHash,
             "DataLayrServiceManager.confirmDataStore: blocknumber does not agree with data"
@@ -430,7 +432,7 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
             "DataLayrServiceManager.confirmDataStore: signatories do not own at least threshold percentage of both quorums"
         );
 
-        
+
 
         emit ConfirmDataStore(dataStoresForDuration.dataStoreId, searchData.metadata.headerHash);
 
@@ -467,15 +469,15 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
         uint256 timestamp,
         uint32 index,
         DataStoreMetadata memory metadata
-    ) 
+    )
         external
         view
         returns (bool)
     {
         return(
             getDataStoreHashesForDurationAtTimestamp(
-                duration, 
-                timestamp, 
+                duration,
+                timestamp,
                 index
             ) == DataStoreUtils.computeDataStoreHash(metadata)
         );
