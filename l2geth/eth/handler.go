@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"math"
 	"math/big"
 	"sync"
@@ -81,8 +82,9 @@ type ProtocolManager struct {
 	fetcher    *fetcher.Fetcher
 	peers      *peerSet
 
-	// tmp test
-	peersTmp *peerSet
+	consensusPeers *peerSet
+	schedulerInst  *clique.Scheduler
+	etherbase      common.Address
 
 	eventMux      *event.TypeMux
 	txsCh         chan core.NewTxsEvent
@@ -111,18 +113,18 @@ type ProtocolManager struct {
 func NewProtocolManager(config *params.ChainConfig, checkpoint *params.TrustedCheckpoint, mode downloader.SyncMode, networkID uint64, mux *event.TypeMux, txpool txPool, engine consensus.Engine, blockchain *core.BlockChain, chaindb ethdb.Database, cacheLimit int, whitelist map[uint64]common.Hash) (*ProtocolManager, error) {
 	// Create the protocol manager with the base fields
 	manager := &ProtocolManager{
-		networkID:   networkID,
-		forkFilter:  forkid.NewFilter(blockchain),
-		eventMux:    mux,
-		txpool:      txpool,
-		blockchain:  blockchain,
-		peers:       newPeerSet(),
-		peersTmp:    newPeerSet(),
-		whitelist:   whitelist,
-		newPeerCh:   make(chan *peer),
-		noMorePeers: make(chan struct{}),
-		txsyncCh:    make(chan *txsync),
-		quitSync:    make(chan struct{}),
+		networkID:      networkID,
+		forkFilter:     forkid.NewFilter(blockchain),
+		eventMux:       mux,
+		txpool:         txpool,
+		blockchain:     blockchain,
+		peers:          newPeerSet(),
+		consensusPeers: newPeerSet(),
+		whitelist:      whitelist,
+		newPeerCh:      make(chan *peer),
+		noMorePeers:    make(chan struct{}),
+		txsyncCh:       make(chan *txsync),
+		quitSync:       make(chan struct{}),
 	}
 	if mode == downloader.FullSync {
 		// The database seems empty as the current block is the genesis. Yet the fast
@@ -198,6 +200,14 @@ func NewProtocolManager(config *params.ChainConfig, checkpoint *params.TrustedCh
 	manager.fetcher = fetcher.New(blockchain.GetBlockByHash, validator, manager.BroadcastBlock, heighter, inserter, manager.removePeer)
 
 	return manager, nil
+}
+
+func (pm *ProtocolManager) setSchedulerInst(schedulerInst *clique.Scheduler) {
+	pm.schedulerInst = schedulerInst
+}
+
+func (pm *ProtocolManager) setEtherBase(etherBase common.Address) {
+	pm.etherbase = etherBase
 }
 
 func (pm *ProtocolManager) makeProtocol(version uint) p2p.Protocol {

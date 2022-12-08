@@ -21,6 +21,11 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 )
 
+type PeerAddEvent struct {
+	PeerId []byte
+	Has    chan bool
+}
+
 type BatchPeriodStartEvent struct {
 	Msg   *types.BatchPeriodStartMsg
 	ErrCh chan error

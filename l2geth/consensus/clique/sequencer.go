@@ -16,15 +16,17 @@ import (
 type Sequencer struct {
 	Address common.Address `json:"address"`
 	Power   int64          `json:"power"`
+	NodeID  []byte         `json:"node_id"`
 
 	ProducerPriority int64 `json:"producer_priority"`
 }
 
 // NewSequencer returns a new sequencer with the given pubkey and power.
-func NewSequencer(addr common.Address, power int64) *Sequencer {
+func NewSequencer(addr common.Address, power int64, nodeId []byte) *Sequencer {
 	return &Sequencer{
 		Address:          addr,
 		Power:            power,
+		NodeID:           nodeId,
 		ProducerPriority: 0,
 	}
 }
@@ -112,6 +114,6 @@ func RandSequencer(randPower bool, minPower int64) *Sequencer {
 	rand.Read(seed)
 	var addr common.Address
 	copy(addr[:], seed)
-	seq := NewSequencer(addr, power)
+	seq := NewSequencer(addr, power, []byte{})
 	return seq
 }
