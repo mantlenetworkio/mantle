@@ -69,7 +69,7 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         dataManageAddress = _dataManageAddress;
         SUBMISSION_INTERVAL = _submissionInterval;
         BLOCK_STALE_MEASURE = _block_stale_measure;
-        l2BlockNumber = 0;
+        l2BlockNumber = 1;
     }
 
     /**
@@ -109,12 +109,10 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         uint32 totalOperatorsIndex
     ) external {
         require(msg.sender == sequencer, "Only the sequencer can store data");
-        console.log("0000000000000000000000000");
-        // require(block.number - blockNumber < BLOCK_STALE_MEASURE, "stakes taken from too long ago");
+        require(block.number - blockNumber < BLOCK_STALE_MEASURE, "stakes taken from too long ago");
         uint32 dataStoreId = IDataLayrServiceManager(dataManageAddress).taskNumber();
         l2BlockNumber = _l2BlockNumber;
         //Initialize and pay for the datastore
-        console.log("11111111111111111111111111");
         IDataLayrServiceManager(dataManageAddress).initDataStore(
             msg.sender,
             address(this),
@@ -123,9 +121,7 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
             totalOperatorsIndex,
             header
         );
-        console.log("222222222222222222222222222222");
         dataStoreIdToRollupStoreNumber[dataStoreId] = DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED;
-        console.log("333333333333333333333333333333");
         emit RollupStoreInitialized(dataStoreId);
     }
 
