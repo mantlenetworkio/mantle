@@ -151,7 +151,6 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		common.HexToAddress("0x70997970c51812dc3a010c7d01b50e0d17dc79c8"),
 		common.HexToAddress("0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc"),
 	}
-	mockSignature := common.Hex2Bytes("2020a0bbf67b08b1df594333c1ead3a771d9742d2f33798e050da744b1255bb67860d672a5055429cc53d17e6c57550989b39cf997e2fb58d1ec6aae198a471501")
 
 	batchSize := uint64(10) // 10 transaction in one batch
 	expireTime := int64(15) // 15s
@@ -169,9 +168,17 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			ExpireTime:   uint64(time.Now().Unix() + expireTime),
 			MinerAddress: sequencerAddr,
 			SequencerSet: sequencerSet,
-			Signature:    mockSignature,
 		}
-		err := schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
+		sign, err := schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetData())
+		if err != nil {
+			log.Error("sign BatchPeriodStartEvent error")
+			return
+		}
+		msg.Signature = sign
+		//signer, _ := msg.GetSigner()
+		//log.Debug("signature", "hash", hex.EncodeToString(crypto.Keccak256(msg.GetData())), "address", schedulerInst.signAccount.Address.String(), "signer", signer.String())
+
+		err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   &msg,
 			ErrCh: nil,
 		})
