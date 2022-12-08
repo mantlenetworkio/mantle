@@ -50,7 +50,7 @@ const deployFn: DeployFunction = async (hre) => {
         async () => {
           return hexStringEquals(
             await contract
-              .connect(deployer)
+              .connect(Impl_Sequencer.signer.provider)
               .bitToken({ from: ethers.constants.AddressZero }),
             l1BitAddress
           )
