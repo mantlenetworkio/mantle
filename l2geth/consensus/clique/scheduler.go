@@ -35,6 +35,7 @@ type Scheduler struct {
 	sequencerSet    *SequencerSet
 	consensusEngine *Clique
 	blockchain      *core.BlockChain
+	SchedulerAddr   common.Address
 
 	chainHeadSub event.Subscription
 	chainHeadCh  chan core.ChainHeadEvent
@@ -79,6 +80,10 @@ func NewScheduler(epoch time.Duration, clique *Clique, blockchain *core.BlockCha
 		sequencerSet:    NewSequencerSet(seqz),
 		blockchain:      blockchain,
 		chainHeadCh:     make(chan core.ChainHeadEvent, chainHeadChanSize),
+	}
+	schedulerInst.SchedulerAddr, err = schedulerInst.GetScheduler()
+	if err != nil {
+		return nil, fmt.Errorf("get scheduler address failed, err: %v", err)
 	}
 	schedulerInst.addPeerSub = schedulerInst.eventMux.Subscribe(core.PeerAddEvent{})
 	go schedulerInst.AddPeerCheck()
