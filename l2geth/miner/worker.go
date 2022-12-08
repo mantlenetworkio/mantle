@@ -683,6 +683,72 @@ func (w *worker) mainLoop() {
 	}
 }
 
+func (w *worker) SchedulerRollback(start uint64) error {
+	latest := w.chain.CurrentBlock().Number().Uint64()
+	if start > latest {
+		return fmt.Errorf("invalid block number:%v,currentBlock number:%v", start, latest)
+	}
+	var blocks []*types.Block
+	for i := start; i <= latest; i++ {
+		block := w.chain.GetBlockByNumber(start)
+		blocks = append(blocks, block)
+	}
+	w.SetHead(start - 1)
+	_, err := w.chain.InsertChain(blocks)
+	return err
+}
+
+func (w *worker) SequencerRollback() error {
+	if !w.blockAbnormal() {
+		return nil
+	}
+	// TODO get rollback start block
+	var start uint64 = 0
+	latest := w.chain.CurrentBlock().Number().Uint64()
+	if start > latest {
+		return fmt.Errorf("invalid block number:%v,currentBlock number:%v", start, latest)
+	}
+	var blocks []*types.Block
+	for i := start; i <= latest; i++ {
+		block := w.chain.GetBlockByNumber(start)
+		block.Header().Hash()
+		blocks = append(blocks, block)
+	}
+	if err := w.SetHead(start - 1); err != nil {
+		log.Error("set head error:", err)
+	}
+	_, err := w.chain.InsertChain(blocks)
+	return err
+}
+
+func (w *worker) SetHead(number uint64) error {
+	if number == 0 {
+		return errors.New("cannot reset to genesis")
+	}
+	if err := w.chain.SetHead(number); err != nil {
+		return err
+	}
+	// Make sure to reset the LatestL1{Timestamp,BlockNumber}
+	block := w.chain.CurrentBlock()
+	txs := block.Transactions()
+	if len(txs) == 0 {
+		log.Error("No transactions found in block", "number", number)
+		return fmt.Errorf("no transactions found in block:%v", number)
+	}
+	tx := txs[0]
+	blockNumber := tx.L1BlockNumber()
+	if blockNumber == nil {
+		return fmt.Errorf("no L1BlockNumber found in transaction,number:%v", number)
+	}
+	w.eth.SyncService().SetLatestL1Timestamp(tx.L1Timestamp())
+	w.eth.SyncService().SetLatestL1BlockNumber(blockNumber.Uint64())
+	return nil
+}
+
+func (w *worker) blockAbnormal() bool {
+	return true
+}
+
 // taskLoop is a standalone goroutine to fetch sealing task from the generator and
 // push them to consensus engine.
 func (w *worker) taskLoop() {
