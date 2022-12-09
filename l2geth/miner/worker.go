@@ -518,7 +518,7 @@ func (w *worker) mainLoop() {
 		// not an error processing the transaction.
 		case ev := <-w.produceBlockCh:
 			if !bytes.Equal(ev.Msg.MinerAddress[:], w.coinbase[:]) {
-				log.Trace("Current node is not the miner")
+				log.Debug("Current node is not the miner", "msg", ev.Msg.MinerAddress.String(), "coinbase", w.coinbase.String())
 				continue
 			}
 			if !w.isRunning() {

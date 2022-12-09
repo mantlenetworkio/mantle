@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math"
 	"math/big"
-	"math/rand"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -28,6 +27,7 @@ const (
 
 type Scheduler struct {
 	wg       sync.WaitGroup
+	l        sync.Mutex
 	eventMux *event.TypeMux
 	done     chan struct{}
 	running  int32
@@ -151,17 +151,18 @@ func (schedulerInst *Scheduler) AddPeerCheck() {
 }
 
 func (schedulerInst *Scheduler) schedulerRoutine() {
-	sequencerSet := []common.Address{
-		//common.HexToAddress("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"),
-		common.HexToAddress("0x70997970c51812dc3a010c7d01b50e0d17dc79c8"),
-		common.HexToAddress("0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc"),
-	}
-
 	batchSize := uint64(10) // 10 transaction in one batch
 	expireTime := int64(15) // 15s
 	for {
-		randomIdx := rand.Intn(len(sequencerSet))
-		sequencerAddr := sequencerSet[randomIdx]
+		schedulerInst.l.Lock()
+		if schedulerInst.sequencerSet == nil {
+			continue
+		}
+		seq := schedulerInst.sequencerSet.getSeqWithMostPriority()
+		var seqSet []common.Address
+		for _, v := range schedulerInst.sequencerSet.Sequencers {
+			seqSet = append(seqSet, v.Address)
+		}
 
 		currentBlock := schedulerInst.blockchain.CurrentBlock()
 
@@ -171,18 +172,16 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			StartHeight:  currentBlock.NumberU64() + 1,
 			MaxHeight:    currentBlock.NumberU64() + 1 + batchSize,
 			ExpireTime:   uint64(time.Now().Unix() + expireTime),
-			MinerAddress: sequencerAddr,
-			SequencerSet: sequencerSet,
+			MinerAddress: seq.Address,
+			SequencerSet: seqSet,
 		}
+		log.Debug("Miner select", "minerAddr", msg.MinerAddress.String())
 		sign, err := schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetData())
 		if err != nil {
 			log.Error("sign BatchPeriodStartEvent error")
 			return
 		}
 		msg.Signature = sign
-		//signer, _ := msg.GetSigner()
-		//log.Debug("signature", "hash", hex.EncodeToString(crypto.Keccak256(msg.GetData())), "address", schedulerInst.signAccount.Address.String(), "signer", signer.String())
-
 		err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   &msg,
 			ErrCh: nil,
@@ -191,11 +190,13 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			log.Error("generate BatchPeriodStartEvent error")
 			return
 		}
+		schedulerInst.sequencerSet.IncrementProducerPriority(1)
+		schedulerInst.l.Unlock()
 		ticker := time.NewTicker(time.Duration(expireTime) * time.Second)
 		select {
-		case <-schedulerInst.ticker.C:
+		case <-ticker.C:
 			log.Info("ticker timeout")
-			ticker.Stop()
+			//ticker.Stop()
 		}
 	}
 }
@@ -214,6 +215,7 @@ func (schedulerInst *Scheduler) readLoop() {
 	for {
 		select {
 		case <-schedulerInst.ticker.C:
+			schedulerInst.l.Lock()
 			seqSet, err := schedulerInst.syncer.GetSequencerSet()
 			if err != nil {
 				log.Error("Get sequencer set failed, err : ", err)
@@ -229,6 +231,7 @@ func (schedulerInst *Scheduler) readLoop() {
 				log.Error("sequencer set update failed", "err", err)
 				continue
 			}
+			schedulerInst.l.Unlock()
 		case <-schedulerInst.done:
 			log.Info("Get scheduler stop signal")
 			return
