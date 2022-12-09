@@ -95,6 +95,16 @@ export interface DeployConfig {
   bvmWhitelistOwner?: string
 
   /**
+   * Address of data manager.
+   */
+  dataManagerAddress: string
+
+  /**
+   * Address of data eigenda sequencer.
+   */
+  bvmEigenSequencerAddress: string
+
+  /**
    * Optional initial overhead value for GPO (default: 2750).
    */
   gasPriceOracleOverhead?: number
@@ -201,6 +211,12 @@ const configSpec: {
   bvmWhitelistOwner: {
     type: 'address',
     default: ethers.constants.AddressZero,
+  },
+  dataManagerAddress: {
+    type: 'address',
+  },
+  bvmEigenSequencerAddress: {
+    type: 'address',
   },
   gasPriceOracleOverhead: {
     type: 'number',

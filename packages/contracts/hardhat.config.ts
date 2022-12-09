@@ -1,7 +1,7 @@
-import {HardhatUserConfig} from 'hardhat/types'
+import { HardhatUserConfig } from 'hardhat/types'
 import 'solidity-coverage'
 import * as dotenv from 'dotenv'
-import {ethers} from 'ethers'
+import { ethers } from 'ethers'
 
 // Hardhat plugins
 import '@openzeppelin/hardhat-upgrades'
@@ -9,7 +9,7 @@ import '@mantleio/hardhat-deploy-config'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
-import '@primitivefi/hardhat-dodoc'
+// import '@primitivefi/hardhat-dodoc'
 import '@typechain/hardhat'
 import 'hardhat-deploy'
 import 'hardhat-gas-reporter'
@@ -24,6 +24,52 @@ dotenv.config()
 const enableGasReport = !!process.env.ENABLE_GAS_REPORT
 const privateKey = process.env.PRIVATE_KEY || '0x' + '11'.repeat(32) // this is to avoid hardhat error
 const deploy = process.env.DEPLOY_DIRECTORY || 'deploy'
+
+import { copySync, remove } from 'fs-extra'
+import { subtask } from 'hardhat/config'
+import {
+  TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS,
+  TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT,
+  TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE
+} from 'hardhat/builtin-tasks/task-names'
+import { spawnSync } from 'child_process'
+
+subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
+  async (_, __, runSuper) => {
+    console.log('running task')
+    // copySync(
+    //   '../../datalayr-mantle/contracts/eignlayr-contracts/src',
+    //   './contracts/libraries/eigenda/lib'
+    // )
+    const paths = await runSuper()
+    const filteredPaths = paths.filter(function (p) {
+      return !p.includes('eigenda')
+    })
+    console.log('end task')
+    return filteredPaths
+  }
+)
+
+subtask(TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT).setAction(
+  async (_, __, runSuper) => {
+    console.log('running TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT')
+
+    // delete
+    // await remove('./contracts/libraries/eigenda')
+
+    runSuper()
+  }
+)
+
+subtask(TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE).setAction(
+  async (_, __, runSuper) => {
+    console.log('running TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE')
+
+    // delete
+    // await remove('./contracts/libraries/eigenda')
+    runSuper()
+  }
+)
 
 const config: HardhatUserConfig = {
   networks: {
@@ -108,13 +154,13 @@ const config: HardhatUserConfig = {
       {
         version: '0.8.9',
         settings: {
-          optimizer: {enabled: true, runs: 10_000},
+          optimizer: { enabled: true, runs: 10_000 },
         },
       },
       {
         version: '0.5.17', // Required for WETH9
         settings: {
-          optimizer: {enabled: true, runs: 10_000},
+          optimizer: { enabled: true, runs: 10_000 },
         },
       },
     ],
@@ -241,6 +287,12 @@ const config: HardhatUserConfig = {
     bvmWhitelistOwner: {
       type: 'address',
       default: ethers.constants.AddressZero,
+    },
+    dataManagerAddress: {
+      type: 'address',
+    },
+    bvmEigenSequencerAddress: {
+      type: 'address',
     },
     gasPriceOracleOverhead: {
       type: 'number',

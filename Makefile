@@ -37,4 +37,5 @@ mod-tidy:
 	cd ./gas-oracle && go mod tidy && cd ..  && \
 	cd ./l2geth && go mod tidy && cd ..  && \
 	cd ./l2geth-exporter && go mod tidy && cd ..
+	cd ./mt-batcher && go mod tidy && cd ..
 .PHONY: mod-tidy

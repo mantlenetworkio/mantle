@@ -17,6 +17,10 @@ export const names = {
       Proxy__TSS_GroupManager: 'Proxy__TSS_GroupManager',
       Proxy__TSS_StakingSlashing: 'Proxy__TSS_StakingSlashing',
     },
+    da: {
+      BVM_EigenDataLayrChain: 'BVM_EigenDataLayrChain',
+      Proxy__BVM_EigenDataLayrChain: 'Proxy__BVM_EigenDataLayrChain',
+    },
     accounts: { BVM_Sequencer: 'BVM_Sequencer', BVM_Proposer: 'BVM_Proposer' },
     configs: {
       L1_BIT_ADDRESS: 'L1_BitAddress',
