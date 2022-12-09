@@ -42,14 +42,14 @@ func (p *Processor) SignSlash() {
 				nodeSignRequest.RequestBody = &rawMsg
 
 				if err := json.Unmarshal(req.Params, &nodeSignRequest); err != nil {
-					logger.Error().Msg("failed to unmarshal ask request")
+					logger.Error().Msg("failed to unmarshal node sign request")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 					p.wsClient.SendMsg(RpcResponse)
 					continue
 				}
 				var requestBody tsscommon.SlashRequest
 				if err := json.Unmarshal(rawMsg, &requestBody); err != nil {
-					logger.Error().Msg("failed to umarshal ask's params request body")
+					logger.Error().Msg("failed to umarshal slash params request body")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 					p.wsClient.SendMsg(RpcResponse)
 					continue

@@ -14,6 +14,7 @@ const (
 	SignStateBatch Method = "signStateBatch"
 	AskSlash       Method = "askSlash"
 	SignSlash      Method = "signSlash"
+	SignRollBack   Method = "signRollBack"
 
 	SlashTypeLiveness byte = 1
 	SlashTypeCulprit  byte = 2
@@ -44,6 +45,10 @@ type SlashRequest struct {
 	Address    common.Address `json:"address"`
 	BatchIndex uint64         `json:"batch_index"`
 	SignType   byte           `json:"sign_type"`
+}
+
+type RollBackRequest struct {
+	StartBlock string `json:"start_block"`
 }
 
 type AskResponse struct {
@@ -82,4 +87,9 @@ type SignatureData struct {
 	S []byte `json:"s,omitempty"`
 	// M represents the original message digest that was signed M
 	M []byte `json:"m,omitempty"`
+}
+
+type BatchSubmitterResponse struct {
+	Signature []byte `json:"signature"`
+	RollBack  bool   `json:"roll_back"`
 }

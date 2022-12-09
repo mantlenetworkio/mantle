@@ -181,6 +181,36 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         return (timestamp + FRAUD_PROOF_WINDOW) > block.timestamp;
     }
 
+    /**
+    * @inheritdoc IStateCommitmentChain
+     */
+    // slither-disable-next-line external-function
+    function rollBackL2Chain(uint256 _shouldRollBack, uint256 _shouldStartAtElement, bytes memory _signature) public {
+        // Fail fast in to make sure our batch roots aren't accidentally made fraudulent by the
+        // publication of batches by some other user.
+        require(
+            _shouldStartAtElement == getTotalElements(),
+            "Actual batch start index does not match expected start index."
+        );
+
+        // Proposers must have previously staked at the BondManager
+        require(
+            IBondManager(resolve("BondManager")).isCollateralized(msg.sender),
+            "Proposer does not have enough collateral posted"
+        );
+
+        _checkRollBackSignature(_shouldRollBack,_signature);
+
+    }
+
+
+    /**
+    * @inheritdoc IStateCommitmentChain
+     */
+    // slither-disable-next-line external-function
+    function rollBackMessage(uint256 _shouldRollBack) public {}
+
+
     /**********************
      * Internal Functions *
      **********************/
@@ -367,5 +397,39 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
     returns (bool)
     {
         return Lib_BVMCodec.hashBatchHeader(_batchHeader) == batches().get(_batchHeader.batchIndex);
+    }
+
+
+    /**
+     * roll back l2 chain to should start block number.
+     * @param _shouldRollBack roll back number.
+     * @param _signature Signature of roll back number.
+     */
+    function _checkRollBackSignature(uint256 _shouldRollBack, bytes memory _signature)
+    internal
+    {
+        // abi hash encode to bytes
+        require(
+            ITssGroupManager(resolve("Proxy__TSS_GroupManager")).verifySign(
+                keccak256(abi.encode(_shouldRollBack)), _signature),
+            "verify signature failed"
+        );
+
+
+        // construct calldata for claimReward call
+        bytes memory message = abi.encodeWithSelector(
+            IStateCommitmentChain.rollBackMessage.selector,
+                _shouldRollBack
+        );
+
+        // send call data into L2, hardcode address
+        sendCrossDomainMessage(
+            address(0xDeADdeaDdEaDdeADdEaDDeADDEaddEaDDEad2222),
+            2000000,
+            message
+        );
+
+        //emit roll back l2chain from block number
+        emit RollBackL2Chain(_shouldRollBack);
     }
 }

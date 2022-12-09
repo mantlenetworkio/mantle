@@ -33,7 +33,8 @@ packages/integration-tests-bedrock/artifacts
 
 packages/contracts-bedrock/deployments/devnetL1
 packages/contracts-bedrock/deployments/anvil
-
+packages/contracts/genesis/state-dump.latest.json.bak
+packages/contracts/genesis2.json
 # vim
 *.sw*
 

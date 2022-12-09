@@ -106,12 +106,16 @@ func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Me
 	}
 
 	approvers := make([]string, 0)
+	unApprovers := make([]string, 0)
 	for node, pass := range results {
 		if pass {
 			approvers = append(approvers, node)
+		} else {
+			unApprovers = append(unApprovers, node)
 		}
 	}
 	ctx = ctx.WithApprovers(approvers)
+	ctx = ctx.WithUnApprovers(unApprovers)
 
 	return ctx, nil
 }
