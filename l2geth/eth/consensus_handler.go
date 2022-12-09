@@ -99,11 +99,7 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 }
 
 func (pm *ProtocolManager) checkPeer(p *peer) error {
-	scheduler, err := pm.schedulerInst.GetScheduler()
-	if err != nil {
-		return err
-	}
-	if bytes.Equal(pm.etherbase.Bytes(), scheduler.Bytes()) {
+	if bytes.Equal(pm.etherbase.Bytes(), pm.schedulerInst.SchedulerAddr.Bytes()) {
 		has := make(chan bool)
 		if err := pm.eventMux.Post(core.PeerAddEvent{
 			PeerId: p.ID().Bytes(),

@@ -252,12 +252,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		}
 		eth.protocolManager.setSchedulerInst(schedulerInst)
 	}
-	//setEtherBase
-	etherBase, err := eth.Etherbase()
-	if err != nil {
-		return nil, err
-	}
-	eth.protocolManager.setEtherBase(etherBase)
 	return eth, nil
 }
 
@@ -527,6 +521,7 @@ func (s *Ethereum) StartMining(threads int) error {
 			}
 			// check eb to equal schedulerAddr then start sequencer server after miner start
 			if bytes.Equal(schedulerAddr.Bytes(), eb.Bytes()) {
+				s.protocolManager.setEtherBase(eb)
 				// set wallet for sign msgs
 				s.protocolManager.schedulerInst.SetWallet(wallet, account)
 				// start sequencer server

@@ -517,12 +517,12 @@ func (w *worker) mainLoop() {
 		// reading the next tx from the channel when there is
 		// not an error processing the transaction.
 		case ev := <-w.produceBlockCh:
-			if !bytes.Equal(ev.Msg.MinerAddress[:], w.coinbase[:]) {
-				log.Debug("Current node is not the miner", "msg", ev.Msg.MinerAddress.String(), "coinbase", w.coinbase.String())
-				continue
-			}
 			if !w.isRunning() {
 				log.Warn("Miner is not started")
+				continue
+			}
+			if !bytes.Equal(ev.Msg.MinerAddress[:], w.coinbase[:]) {
+				log.Debug("Current node is not the miner", "msg", ev.Msg.MinerAddress.String(), "coinbase", w.coinbase.String())
 				continue
 			}
 			if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
