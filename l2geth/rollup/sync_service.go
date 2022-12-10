@@ -1307,10 +1307,13 @@ func (s *SyncService) syncQueueTransactionRange(start, end uint64) error {
 	for i := start; i <= end; i++ {
 		tx, err := s.client.GetEnqueue(i)
 		if err != nil {
-			return fmt.Errorf("Canot get enqueue transaction; %w", err)
+			return fmt.Errorf("canot get enqueue transaction; %w", err)
 		}
-		if err := s.applyTransaction(tx); err != nil {
-			return fmt.Errorf("Cannot apply transaction: %w", err)
+		if err := s.txpool.AddLocal(tx); err != nil {
+			return fmt.Errorf("canot add enqueue transaction to txpool; %w", err)
+		}
+		if queueIndex := tx.GetMeta().QueueIndex; queueIndex != nil {
+			s.SetLatestEnqueueIndex(queueIndex)
 		}
 	}
 	return nil
