@@ -1012,9 +1012,6 @@ func (s *SyncService) applyTransactionToTipForMiner(tx *types.Transaction) (erro
 	// the case where the index is updated but the
 	// transaction isn't yet added to the chain
 	s.SetLatestIndex(tx.GetMeta().Index)
-	if queueIndex := tx.GetMeta().QueueIndex; queueIndex != nil {
-		s.SetLatestEnqueueIndex(queueIndex)
-	}
 
 	// The index was set above so it is safe to dereference
 	log.Info("Applying transaction for miner", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
