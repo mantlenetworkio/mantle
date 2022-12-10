@@ -31,8 +31,8 @@ type BatchPeriodEndEvent struct {
 	ErrCh chan error
 }
 
-type FraudProofReorgEvent struct {
-	Msg   *types.FraudProofReorgMsg
+type RollbackEvent struct {
+	Msg   *types.RollbackMsg
 	ErrCh chan error
 }
 

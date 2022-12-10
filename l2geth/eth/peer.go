@@ -38,11 +38,11 @@ var (
 )
 
 const (
-	maxKnownTxs                = 32768 // Maximum transactions hashes to keep in the known list (prevent DOS)
-	maxKnownBlocks             = 1024  // Maximum block hashes to keep in the known list (prevent DOS)
-	maxKnownStartMsg           = 1024
-	maxKnownEndMsg             = 1024
-	maxKnownFraudProofReorgMsg = 1024
+	maxKnownTxs         = 32768 // Maximum transactions hashes to keep in the known list (prevent DOS)
+	maxKnownBlocks      = 1024  // Maximum block hashes to keep in the known list (prevent DOS)
+	maxKnownStartMsg    = 1024
+	maxKnownEndMsg      = 1024
+	maxKnownRollbackMsg = 1024
 
 	maxQueuedPrs = 128
 
@@ -63,7 +63,7 @@ const (
 
 	maxQueuedBatchPeriodStart = 4
 	maxQueuedBatchPeriodEnd   = 4
-	maxQueuedFraudProofReorg  = 4
+	maxQueuedRollback         = 4
 
 	handshakeTimeout = 5 * time.Second
 )
@@ -95,38 +95,38 @@ type peer struct {
 	td   *big.Int
 	lock sync.RWMutex
 
-	knownTxs              mapset.Set                      // Set of transaction hashes known to be known by this peer
-	knownBlocks           mapset.Set                      // Set of block hashes known to be known by this peer
-	knowStartMsg          mapset.Set                      // Set of start msg index to be known by this peer
-	knowEndMsg            mapset.Set                      // Set of end msg index to be known by this peer
-	knowFraudProofReorg   mapset.Set                      // Set of end msg index to be known by this peer
-	queuedTxs             chan []*types.Transaction       // Queue of transactions to broadcast to the peer
-	queuedProps           chan *propEvent                 // Queue of blocks to broadcast to the peer
-	queuedAnns            chan *types.Block               // Queue of blocks to announce to the peer
-	queuedStartMsg        chan *types.BatchPeriodStartMsg // Queue of BatchPeriodStartMsg to announce to the peer
-	queuedEndMsg          chan *types.BatchPeriodEndMsg   // Queue of BatchPeriodEndMsg to announce to the peer
-	queuedFraudProofReorg chan *types.FraudProofReorgMsg  // Queue of FraudProofReorgMsg to announce to the peer
-	term                  chan struct{}                   // Termination channel to stop the broadcaster
+	knownTxs       mapset.Set                      // Set of transaction hashes known to be known by this peer
+	knownBlocks    mapset.Set                      // Set of block hashes known to be known by this peer
+	knowStartMsg   mapset.Set                      // Set of start msg index to be known by this peer
+	knowEndMsg     mapset.Set                      // Set of end msg index to be known by this peer
+	knowRollback   mapset.Set                      // Set of end msg index to be known by this peer
+	queuedTxs      chan []*types.Transaction       // Queue of transactions to broadcast to the peer
+	queuedProps    chan *propEvent                 // Queue of blocks to broadcast to the peer
+	queuedAnns     chan *types.Block               // Queue of blocks to announce to the peer
+	queuedStartMsg chan *types.BatchPeriodStartMsg // Queue of BatchPeriodStartMsg to announce to the peer
+	queuedEndMsg   chan *types.BatchPeriodEndMsg   // Queue of BatchPeriodEndMsg to announce to the peer
+	queuedRollback chan *types.RollbackMsg         // Queue of RollbackMsg to announce to the peer
+	term           chan struct{}                   // Termination channel to stop the broadcaster
 }
 
 func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 	return &peer{
-		Peer:                  p,
-		rw:                    rw,
-		version:               version,
-		id:                    fmt.Sprintf("%x", p.ID().Bytes()[:8]),
-		knownTxs:              mapset.NewSet(),
-		knownBlocks:           mapset.NewSet(),
-		knowStartMsg:          mapset.NewSet(),
-		knowEndMsg:            mapset.NewSet(),
-		knowFraudProofReorg:   mapset.NewSet(),
-		queuedTxs:             make(chan []*types.Transaction, maxQueuedTxs),
-		queuedProps:           make(chan *propEvent, maxQueuedProps),
-		queuedAnns:            make(chan *types.Block, maxQueuedAnns),
-		queuedStartMsg:        make(chan *types.BatchPeriodStartMsg, maxQueuedBatchPeriodStart),
-		queuedEndMsg:          make(chan *types.BatchPeriodEndMsg, maxQueuedBatchPeriodEnd),
-		queuedFraudProofReorg: make(chan *types.FraudProofReorgMsg, maxQueuedFraudProofReorg),
-		term:                  make(chan struct{}),
+		Peer:           p,
+		rw:             rw,
+		version:        version,
+		id:             fmt.Sprintf("%x", p.ID().Bytes()[:8]),
+		knownTxs:       mapset.NewSet(),
+		knownBlocks:    mapset.NewSet(),
+		knowStartMsg:   mapset.NewSet(),
+		knowEndMsg:     mapset.NewSet(),
+		knowRollback:   mapset.NewSet(),
+		queuedTxs:      make(chan []*types.Transaction, maxQueuedTxs),
+		queuedProps:    make(chan *propEvent, maxQueuedProps),
+		queuedAnns:     make(chan *types.Block, maxQueuedAnns),
+		queuedStartMsg: make(chan *types.BatchPeriodStartMsg, maxQueuedBatchPeriodStart),
+		queuedEndMsg:   make(chan *types.BatchPeriodEndMsg, maxQueuedBatchPeriodEnd),
+		queuedRollback: make(chan *types.RollbackMsg, maxQueuedRollback),
+		term:           make(chan struct{}),
 	}
 }
 
@@ -163,8 +163,8 @@ func (p *peer) broadcast() {
 				return
 			}
 			p.Log().Trace("Batch period end msg", "batch_index", em.BatchIndex, "start_height", em.StartHeight)
-		case fpr := <-p.queuedFraudProofReorg:
-			if err := p.SendFraudProofReorg(fpr); err != nil {
+		case fpr := <-p.queuedRollback:
+			if err := p.SendRollback(fpr); err != nil {
 				return
 			}
 			p.Log().Trace("Fraud proof reorg msg", "index", fpr.ReorgIndex, "reorg_height", fpr.ReorgToHeight)
@@ -583,15 +583,15 @@ func (ps *peerSet) Len() int {
 	return len(ps.peers)
 }
 
-// PeersWithoutFraudProofReorgMsg retrieves a list of peers that do not have a given producer in
+// PeersWithoutRollbackMsg retrieves a list of peers that do not have a given producer in
 // their set of known index.
-func (ps *peerSet) PeersWithoutFraudProofReorgMsg(msgHash common.Hash) []*peer {
+func (ps *peerSet) PeersWithoutRollbackMsg(msgHash common.Hash) []*peer {
 	ps.lock.RLock()
 	defer ps.lock.RUnlock()
 
 	list := make([]*peer, 0, len(ps.peers))
 	for _, p := range ps.peers {
-		if !p.knowFraudProofReorg.Contains(msgHash) {
+		if !p.knowRollback.Contains(msgHash) {
 			list = append(list, p)
 		}
 	}

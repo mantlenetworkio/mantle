@@ -28,5 +28,5 @@ const consensusProtocolName = "clique"
 const (
 	BatchPeriodStartMsg = 0x00
 	BatchPeriodEndMsg   = 0x01
-	FraudProofReorgMsg  = 0x02
+	RollbackMsg         = 0x02
 )

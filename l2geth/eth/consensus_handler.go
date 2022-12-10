@@ -128,14 +128,14 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		p.knowStartMsg.Add(be.Hash())
 		// todo: BatchPeriodEndMsg handle
 
-	case msg.Code == FraudProofReorgMsg:
-		var fpr *types.FraudProofReorgMsg
+	case msg.Code == RollbackMsg:
+		var fpr *types.RollbackMsg
 		if err := msg.Decode(&fpr); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		log.Info("Fraud Proof Reorg Msg")
 		p.knowStartMsg.Add(fpr.Hash())
-		// todo: FraudProofReorgMsg handle
+		// todo: RollbackMsg handle
 
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
@@ -220,12 +220,12 @@ func (p *peer) AsyncSendBatchPeriodEndMsg(msg *types.BatchPeriodEndMsg) {
 	}
 }
 
-// FraudProofReorgMsg
-func (pm *ProtocolManager) fraudProofReorgMsgBroadcastLoop() {
+// RollbackMsg
+func (pm *ProtocolManager) rollbackMsgBroadcastLoop() {
 	log.Info("Start fraudProofReorgMsg broadcast routine")
 	// automatically stops if unsubscribe
-	for obj := range pm.fraudProofReorgMsgSub.Chan() {
-		if fe, ok := obj.Data.(core.FraudProofReorgEvent); ok {
+	for obj := range pm.rollbackMsgSub.Chan() {
+		if fe, ok := obj.Data.(core.RollbackEvent); ok {
 			log.Debug("Got BatchPeriodEndEvent, broadcast it",
 				"reorgIndex", fe.Msg.ReorgIndex,
 				"reorgToHeight", fe.Msg.ReorgToHeight)
@@ -235,20 +235,20 @@ func (pm *ProtocolManager) fraudProofReorgMsgBroadcastLoop() {
 	}
 }
 
-func (pm *ProtocolManager) BroadcastFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
-	peers := pm.peersTmp.PeersWithoutFraudProofReorgMsg(reorg.Hash())
+func (pm *ProtocolManager) BroadcastFraudProofReorgMsg(reorg *types.RollbackMsg) {
+	peers := pm.peersTmp.PeersWithoutRollbackMsg(reorg.Hash())
 	for _, p := range peers {
 		p.AsyncSendFraudProofReorgMsg(reorg)
 	}
 	log.Trace("Broadcast fraud proof reorg msg")
 }
 
-func (p *peer) AsyncSendFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
+func (p *peer) AsyncSendFraudProofReorgMsg(reorg *types.RollbackMsg) {
 	select {
-	case p.queuedFraudProofReorg <- reorg:
-		p.knowFraudProofReorg.Add(reorg.Hash())
-		for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
-			p.knowFraudProofReorg.Pop()
+	case p.queuedRollback <- reorg:
+		p.knowRollback.Add(reorg.Hash())
+		for p.knowRollback.Cardinality() >= maxKnownRollbackMsg {
+			p.knowRollback.Pop()
 		}
 
 	default:
@@ -278,11 +278,11 @@ func (p *peer) SendBatchPeriodEnd(be *types.BatchPeriodEndMsg) error {
 	return p2p.Send(p.rw, BatchPeriodEndMsg, be)
 }
 
-func (p *peer) SendFraudProofReorg(fpr *types.FraudProofReorgMsg) error {
-	p.knowFraudProofReorg.Add(fpr.Hash())
+func (p *peer) SendRollback(fpr *types.RollbackMsg) error {
+	p.knowRollback.Add(fpr.Hash())
 	// Mark all the producers as known, but ensure we don't overflow our limits
-	for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
-		p.knowFraudProofReorg.Pop()
+	for p.knowRollback.Cardinality() >= maxKnownRollbackMsg {
+		p.knowRollback.Pop()
 	}
-	return p2p.Send(p.rw, FraudProofReorgMsg, fpr)
+	return p2p.Send(p.rw, RollbackMsg, fpr)
 }

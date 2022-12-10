@@ -105,13 +105,23 @@ func (bps *BatchPeriodEndMsg) Hash() common.Hash {
 	return rlpHash(bps)
 }
 
-type FraudProofReorgMsg struct {
-	ReorgIndex    uint64
-	ReorgToHeight uint64
-	TssSignature  []byte
+type RollbackMsg struct {
+	ReorgIndex      uint64
+	ReorgToHeight   uint64
+	RollbackHeight  uint64
+	RollbackHistory []uint64
+	TssSignature    []byte
 }
 
-func (bps *FraudProofReorgMsg) Hash() common.Hash {
+type RollMsg struct {
+	ReorgIndex      uint64
+	ReorgToHeight   uint64
+	RollbackHeight  uint64
+	RollbackHistory []uint64
+	TssSignature    []byte
+}
+
+func (bps *RollbackMsg) Hash() common.Hash {
 	if bps == nil {
 		return common.Hash{}
 	}
