@@ -891,36 +891,42 @@ func (s *SyncService) applyTransactionMock(tx *types.Transaction) (error, func()
 	return s.applyTransactionToTipForMiner(tx)
 }
 
+// ValidateSequencerTransactionForMiner only validate sequencer transaction and do not apply
+func (s *SyncService) ValidateSequencerTransactionForMiner(tx *types.Transaction) error {
+	_, err := s.ValidateAndApplySequencerTransactionForMiner(tx)
+	return err
+}
+
 // Higher level API for applying transactions. Should only be called for
 // queue origin sequencer transactions, as the contracts on L1 manage the same
 // validity checks that are done here.
-func (s *SyncService) ValidateAndApplySequencerTransactionForMiner(tx *types.Transaction) (error, func() error) {
+func (s *SyncService) ValidateAndApplySequencerTransactionForMiner(tx *types.Transaction) (func() error, error) {
 	if s.verifier {
-		return errors.New("Verifier does not accept transactions out of band"), nil
+		return nil, errors.New("verifier does not accept transactions out of band")
 	}
 	if tx == nil {
-		return errors.New("nil transaction passed to ValidateAndApplySequencerTransaction"), nil
+		return nil, errors.New("nil transaction passed to ValidateAndApplySequencerTransaction")
 	}
 	s.txLock.Lock()
 	defer s.txLock.Unlock()
 	if err := s.verifyFee(tx); err != nil {
-		return err, nil
+		return nil, err
 	}
 	log.Trace("Sequencer transaction validation", "hash", tx.Hash().Hex())
 
 	qo := tx.QueueOrigin()
 	if qo != types.QueueOriginSequencer {
-		return fmt.Errorf("invalid transaction with queue origin %s", qo.String()), nil
+		return nil, fmt.Errorf("invalid transaction with queue origin %s", qo.String())
 	}
 	if err := s.txpool.ValidateTx(tx); err != nil {
-		return fmt.Errorf("invalid transaction: %w", err), nil
+		return nil, fmt.Errorf("invalid transaction: %w", err)
 	}
 	err, hook := s.applyTransactionMock(tx)
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 
-	return nil, hook
+	return hook, nil
 }
 
 // applyTransactionToTip will do sanity checks on the transaction before

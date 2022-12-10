@@ -585,7 +585,7 @@ func (w *worker) mainLoop() {
 						// send the block through the `taskCh` and then through the
 						// `resultCh` which ultimately adds the block to the blockchain
 						// through `bc.WriteBlockWithState`
-						err, hook := w.eth.SyncService().ValidateAndApplySequencerTransactionForMiner(tx)
+						hook, err := w.eth.SyncService().ValidateAndApplySequencerTransactionForMiner(tx)
 						if err != nil {
 							log.Error("SyncService err", "errMsg", err.Error())
 							break
