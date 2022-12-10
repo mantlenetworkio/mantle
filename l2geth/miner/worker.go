@@ -150,15 +150,17 @@ type worker struct {
 	pendingLogsFeed event.Feed
 
 	// Subscriptions
-	mux   *event.TypeMux
-	txsCh chan core.NewTxsEvent
-	//txsSub          event.Subscription
+	mux             *event.TypeMux
+	txsCh           chan core.NewTxsEvent
+	txsSub          event.Subscription
 	chainHeadCh     chan core.ChainHeadEvent
 	chainHeadSub    event.Subscription
 	chainSideCh     chan core.ChainSideEvent
 	chainSideSub    event.Subscription
 	produceBlockCh  chan core.BatchPeriodStartEvent
 	produceBlockSub *event.TypeMuxSubscription
+	rollupCh        chan core.NewTxsEvent
+	rollupSub       event.Subscription
 
 	// Channels
 	newWorkCh          chan *newWorkReq
@@ -217,6 +219,7 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 		unconfirmed:        newUnconfirmedBlocks(eth.BlockChain(), miningLogAtDepth),
 		pendingTasks:       make(map[common.Hash]*task),
 		txsCh:              make(chan core.NewTxsEvent, txChanSize),
+		rollupCh:           make(chan core.NewTxsEvent, 1),
 		produceBlockCh:     make(chan core.BatchPeriodStartEvent, 1),
 		chainHeadCh:        make(chan core.ChainHeadEvent, chainHeadChanSize),
 		chainHeadWaitCh:    make(chan core.ChainHeadEvent, 1),
@@ -230,8 +233,9 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 		resubmitAdjustCh:   make(chan *intervalAdjust, resubmitAdjustChanSize),
 	}
 	// Subscribe NewTxsEvent for tx pool
-	//worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
+	worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
 	// channel directly to the miner
+	worker.rollupSub = eth.SyncService().SubscribeNewTxsEvent(worker.rollupCh)
 	worker.produceBlockSub = worker.mux.Subscribe(core.BatchPeriodStartEvent{})
 
 	// Subscribe events for blockchain
@@ -394,11 +398,18 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 		select {
 		case <-w.startCh:
 			clearPending(w.chain.CurrentBlock().NumberU64())
+			// TODO
 			//commit(commitInterruptNewHead)
 
 		// Remove this code for the BVM implementation. It is responsible for
 		// cleaning up memory with the call to `clearPending`, so be sure to
 		// call that in the new hot code path
+
+		// TODO
+		//case <-w.chainHeadCh:
+		//		clearPending(head.Block.NumberU64())
+		//		timestamp = time.Now().Unix()
+		//		commit(commitInterruptNewHead)
 
 		case head := <-w.chainHeadCh:
 			log.Debug("new chain header", "height", head.Block.NumberU64())
@@ -464,9 +475,10 @@ func (w *worker) feedProduceBlockChannelLoop() {
 
 // mainLoop is a standalone goroutine to regenerate the sealing task based on the received event.
 func (w *worker) mainLoop() {
-	//defer w.txsSub.Unsubscribe()
+	defer w.txsSub.Unsubscribe()
 	defer w.chainHeadSub.Unsubscribe()
 	defer w.chainSideSub.Unsubscribe()
+	defer w.rollupSub.Unsubscribe()
 	defer w.produceBlockSub.Unsubscribe()
 
 	for {
@@ -510,6 +522,56 @@ func (w *worker) mainLoop() {
 						return false
 					})
 					w.commit(uncles, nil, start)
+				}
+			}
+		// Read from the sync service and mine single txs
+		// as they come. Wait for the block to be mined before
+		// reading the next tx from the channel when there is
+		// not an error processing the transaction.
+		case ev := <-w.rollupCh:
+			if len(ev.Txs) == 0 {
+				log.Warn("No transaction sent to miner from syncservice")
+				continue
+			}
+			tx := ev.Txs[0]
+			log.Debug("Attempting to commit rollup transaction", "hash", tx.Hash().Hex())
+			// Build the block with the tx and add it to the chain. This will
+			// send the block through the `taskCh` and then through the
+			// `resultCh` which ultimately adds the block to the blockchain
+			// through `bc.WriteBlockWithState`
+			if err := w.commitNewTx(tx); err == nil {
+				// `chainHeadCh` is written to when a new block is added to the
+				// tip of the chain. Reading from the channel will block until
+				// the ethereum block is added to the chain downstream of `commitNewTx`.
+				// This will result in a deadlock if we call `commitNewTx` with
+				// a transaction that cannot be added to the chain, so this
+				// should be updated to a select statement that can also listen
+				// for errors.
+				head := <-w.chainHeadCh
+				txs := head.Block.Transactions()
+				if len(txs) == 0 {
+					log.Warn("No transactions in block")
+					continue
+				}
+				txn := txs[0]
+				height := head.Block.Number().Uint64()
+				log.Debug("Miner got new head", "height", height, "block-hash", head.Block.Hash().Hex(), "tx-hash", txn.Hash().Hex(), "tx-hash", tx.Hash().Hex())
+
+				// Prevent memory leak by cleaning up pending tasks
+				// This is mostly copied from the `newWorkLoop`
+				// `clearPending` function and must be called
+				// periodically to clean up pending tasks. This
+				// function was originally called in `newWorkLoop`
+				// but the BVM implementation no longer uses that code path.
+				w.pendingMu.Lock()
+				for h := range w.pendingTasks {
+					delete(w.pendingTasks, h)
+				}
+				w.pendingMu.Unlock()
+			} else {
+				log.Error("Problem committing transaction", "msg", err)
+				if ev.ErrCh != nil {
+					ev.ErrCh <- err
 				}
 			}
 		// Read from the sync service and mine single txs
@@ -672,8 +734,8 @@ func (w *worker) mainLoop() {
 		// System stopped
 		case <-w.exitCh:
 			return
-		//case <-w.txsSub.Err():
-		//	return
+		case <-w.txsSub.Err():
+			return
 		case <-w.chainHeadSub.Err():
 			return
 		case <-w.chainSideSub.Err():
