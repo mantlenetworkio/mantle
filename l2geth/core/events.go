@@ -31,8 +31,8 @@ type BatchPeriodStartEvent struct {
 	ErrCh chan error
 }
 
-type BatchPeriodEndEvent struct {
-	Msg   *types.BatchPeriodEndMsg
+type BatchPeriodAnswerEvent struct {
+	Msg   *types.BatchPeriodAnswerMsg
 	ErrCh chan error
 }
 

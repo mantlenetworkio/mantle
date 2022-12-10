@@ -22,12 +22,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/big"
-	"runtime"
-	"sync"
-	"sync/atomic"
-	"time"
-
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi/bind"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -56,6 +50,10 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
+	"math/big"
+	"runtime"
+	"sync"
+	"sync/atomic"
 )
 
 type LesServer interface {
@@ -214,8 +212,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		return nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
 
-	eth.blockchain.SetSyncServiceHook(eth.syncService.ApplyBlockTransactions)
-
 	// Permit the downloader to use the trie cache allowance during fast sync
 	cacheLimit := cacheConfig.TrieCleanLimit + cacheConfig.TrieDirtyLimit
 	checkpoint := config.Checkpoint
@@ -242,7 +238,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 
 	if _, ok := eth.engine.(*clique.Clique); ok {
 		schedulerInst, err := clique.NewScheduler(
-			time.Duration(eth.blockchain.Config().Clique.Epoch),
+			config.Rollup.SchedulerAddress,
 			eth.engine.(*clique.Clique),
 			eth.blockchain,
 			eth.eventMux,
@@ -521,7 +517,7 @@ func (s *Ethereum) StartMining(threads int) error {
 		go s.miner.Start(eb)
 
 		if _, ok := s.engine.(*clique.Clique); ok {
-			schedulerAddr, err := s.protocolManager.schedulerInst.GetScheduler()
+			schedulerAddr := s.protocolManager.schedulerInst.Scheduler()
 			if err != nil {
 				return fmt.Errorf("cannot get schedulerAddr: %w", err)
 			}

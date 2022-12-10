@@ -26,7 +26,7 @@ const consensusProtocolName = "clique"
 
 // eth protocol message codes
 const (
-	BatchPeriodStartMsg = 0x00
-	BatchPeriodEndMsg   = 0x01
-	FraudProofReorgMsg  = 0x02
+	BatchPeriodStartMsg  = 0x00
+	BatchPeriodAnswerMsg = 0x01
+	FraudProofReorgMsg   = 0x02
 )
