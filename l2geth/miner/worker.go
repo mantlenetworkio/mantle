@@ -405,12 +405,6 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 		// cleaning up memory with the call to `clearPending`, so be sure to
 		// call that in the new hot code path
 
-		// TODO
-		//case <-w.chainHeadCh:
-		//		clearPending(head.Block.NumberU64())
-		//		timestamp = time.Now().Unix()
-		//		commit(commitInterruptNewHead)
-
 		case head := <-w.chainHeadCh:
 			log.Debug("new chain header", "height", head.Block.NumberU64())
 			if w.isInProducingBlockPhase() {
