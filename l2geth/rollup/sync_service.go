@@ -137,7 +137,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		syncing:                        atomic.Value{},
 		bc:                             bc,
 		txpool:                         txpool,
-		chainHeadCh:                    make(chan core.ChainHeadEvent, 1),
+		chainHeadCh:                    make(chan core.ChainHeadEvent, chainHeadChanSize),
 		client:                         client,
 		db:                             db,
 		pollInterval:                   pollInterval,
@@ -160,6 +160,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	// of additional transactions by the SyncService.
 	service.chainHeadSub = service.bc.SubscribeChainHeadEvent(service.chainHeadCh)
 
+	go service.handleChainHeadEventLoop()
 	// Initial sync service setup if it is enabled. This code depends on
 	// a remote server that indexes the layer one contracts. Place this
 	// code behind this if statement so that this can run without the
@@ -913,8 +914,8 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 		ErrCh: errCh,
 	})
 	// Block until the transaction has been added to the chain
-	log.Trace("Waiting for transaction to be added to chain", "hash", tx.Hash().Hex())
-
+	log.Info("Waiting for transaction to be added to chain", "hash", tx.Hash().Hex())
+	defer log.Info("Transaction has be added to chain")
 	select {
 	case err := <-errCh:
 		log.Error("Got error waiting for transaction to be added to chain", "msg", err)
@@ -1266,4 +1267,16 @@ func stringify(i *uint64) string {
 // validation and applies the transaction
 func (s *SyncService) IngestTransaction(tx *types.Transaction) error {
 	return s.applyTransaction(tx)
+}
+
+func (s *SyncService) handleChainHeadEventLoop() {
+	if s.IsSequencerMode() {
+		log.Info("Start handle chain head event loop")
+		for {
+			select {
+			case block := <-s.chainHeadCh:
+				log.Info("handleChainHeadEventLoop receive block", "block_number", block.Block.NumberU64())
+			}
+		}
+	}
 }

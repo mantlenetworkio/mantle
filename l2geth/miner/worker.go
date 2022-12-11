@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"math/big"
 	"sync"
 	"sync/atomic"
@@ -118,6 +119,8 @@ type task struct {
 	block     *types.Block
 	createdAt time.Time
 }
+
+type SignerFn func(accounts.Account, string, []byte) ([]byte, error)
 
 const (
 	commitInterruptNone int32 = iota
@@ -228,7 +231,7 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 		resubmitAdjustCh:   make(chan *intervalAdjust, resubmitAdjustChanSize),
 	}
 	// Subscribe NewTxsEvent for tx pool
-	worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
+	//worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
 	// channel directly to the miner
 	worker.rollupSub = eth.SyncService().SubscribeNewTxsEvent(worker.rollupCh)
 
@@ -236,7 +239,9 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	worker.bpaSub = worker.mux.Subscribe(core.BatchPeriodAnswerEvent{})
 
 	// Subscribe events for blockchain
-	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
+	if !worker.eth.SyncService().IsSequencerMode() {
+		worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
+	}
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
 
 	// Sanitize recommit interval if the user-specified one is too short.
@@ -250,7 +255,8 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	go worker.newWorkLoop(recommit)
 	go worker.resultLoop()
 	go worker.taskLoop()
-	go worker.batchLoop()
+	go worker.batchStartLoop()
+	go worker.batchAnswerLoop()
 
 	// Submit first work to initialize pending state.
 	if init {
@@ -435,9 +441,8 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 	}
 }
 
-func (w *worker) batchLoop() {
+func (w *worker) batchStartLoop() {
 	defer w.bpsSub.Unsubscribe()
-	defer w.bpaSub.Unsubscribe()
 
 	for {
 		select {
@@ -450,14 +455,89 @@ func (w *worker) batchLoop() {
 			}
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
-
+				log.Info("Scheduler receives batchPeriodStartEvent")
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
+					log.Info("Active sequencer receives batchPeriodStartEvent")
+					pending, err := w.eth.TxPool().Pending()
+					if err != nil {
+						log.Error("Failed to fetch pending transactions", "err", err)
+						return
+					}
+					// Short circuit if there is no available pending transactions
+					if len(pending) == 0 {
+						log.Info("empty txpool, wait for 200 millisecond")
+						time.Sleep(200 * time.Millisecond)
+						continue
+					}
+					log.Info("pending size", "size", len(pending))
+					// Split the pending transactions into locals and remotes
+					localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
+					// TODO mev
+					var txsQueue types.Transactions
+					for _, account := range w.eth.TxPool().Locals() {
+						if txs := remoteTxs[account]; len(txs) > 0 {
+							delete(remoteTxs, account)
+							localTxs[account] = txs
+							txsQueue = append(txsQueue, txs...)
+						}
+					}
+					for _, txs := range remoteTxs {
+						txsQueue = append(txsQueue, txs...)
+					}
+					if ev.Msg.StartHeight != w.chain.CurrentBlock().NumberU64()+1 {
+						log.Info("start height mismatch", "current_height", w.current.header.Number.Uint64(), "startHeight", ev.Msg.StartHeight)
+						continue
+					}
+					if ev.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
+						log.Info("maxHeight is too large, just ignore the batch", "current_height", w.current.header.Number.Uint64(), "maxHeight", ev.Msg.MaxHeight)
+						continue
+					}
+					if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
+						log.Info("expire timestamp is passed", "current_time", time.Now().Unix(), "expireTime", ev.Msg.ExpireTime)
+						continue
+					}
+					var bpa types.BatchPeriodAnswerMsg
+					if uint64(len(txsQueue)) > ev.Msg.MaxHeight-ev.Msg.StartHeight {
+						bpa.Txs = txsQueue[:ev.Msg.MaxHeight-ev.Msg.StartHeight]
+					} else {
+						bpa.Txs = txsQueue
+					}
+					bpa.StartIndex = ev.Msg.StartHeight
+					bpa.Sequencer = w.coinbase
+					signature, err := w.engine.SignData(bpa.Sequencer, bpa.GetSignData())
+					if err != nil {
+						log.Error("Sign BatchPeriodAnswerMsg error", "errMsg", err.Error())
+						continue
+					}
+					bpa.Signature = signature
+					err = w.mux.Post(core.BatchPeriodAnswerEvent{
+						Msg:   &bpa,
+						ErrCh: nil,
+					})
+					if err != nil {
+						log.Error("Post BatchPeriodAnswerMsg error", "errMsg", err.Error())
+						continue
+					}
+					log.Info("Generate BatchPeriodAnswerEvent", "coinbase", w.coinbase.String(), "tx_count", len(bpa.Txs), "startIndex", bpa.StartIndex)
 				} else {
 					// for inactive sequencer
+					log.Info("Inactive sequencer receives batchPeriodStartEvent")
 				}
 			}
+		// System stopped
+		case <-w.exitCh:
+			return
+		}
+	}
+}
+
+func (w *worker) batchAnswerLoop() {
+	defer w.bpsSub.Unsubscribe()
+
+	for {
+		select {
 		// BatchPeriodAnswerEvent
 		case obj := <-w.bpaSub.Chan():
 			var ev core.BatchPeriodAnswerEvent
@@ -467,12 +547,21 @@ func (w *worker) batchLoop() {
 			}
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
-
+				log.Info("Scheduler receives BatchPeriodAnswerEvent", "Sequencer", ev.Msg.Sequencer.String())
+				for _, tx := range ev.Msg.Txs {
+					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx)
+					if err != nil {
+						log.Error("ValidateAndApplySequencerTransaction error", "errMsg", err.Error())
+						continue
+					}
+				}
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
+					log.Info("Active sequencer receives BatchPeriodAnswerEvent")
 				} else {
 					// for inactive sequencer
+					log.Info("Inactive sequencer receives BatchPeriodAnswerEvent")
 				}
 			}
 			// System stopped
@@ -484,8 +573,10 @@ func (w *worker) batchLoop() {
 
 // mainLoop is a standalone goroutine to regenerate the sealing task based on the received event.
 func (w *worker) mainLoop() {
-	defer w.txsSub.Unsubscribe()
-	defer w.chainHeadSub.Unsubscribe()
+	//defer w.txsSub.Unsubscribe()
+	if !w.eth.SyncService().IsSequencerMode() {
+		defer w.chainHeadSub.Unsubscribe()
+	}
 	defer w.chainSideSub.Unsubscribe()
 	defer w.rollupSub.Unsubscribe()
 
@@ -623,10 +714,10 @@ func (w *worker) mainLoop() {
 		// System stopped
 		case <-w.exitCh:
 			return
-		case <-w.txsSub.Err():
-			return
-		case <-w.chainHeadSub.Err():
-			return
+		//case <-w.txsSub.Err():
+		//	return
+		//case <-w.chainHeadSub.Err():
+		//	return
 		case <-w.chainSideSub.Err():
 			return
 		}

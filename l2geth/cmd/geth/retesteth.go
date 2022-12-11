@@ -256,6 +256,10 @@ func (e *NoRewardEngine) FinalizeAndAssemble(chain consensus.ChainReader, header
 	}
 }
 
+func (e *NoRewardEngine) SignData(addr common.Address, data []byte) ([]byte, error) {
+	return nil, nil
+}
+
 func (e *NoRewardEngine) Seal(chain consensus.ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
 	return e.inner.Seal(chain, block, results, stop)
 }

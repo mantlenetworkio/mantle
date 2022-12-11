@@ -225,23 +225,24 @@ func (p *peer) AsyncSendBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 
 // BatchPeriodAnswerMsg
 func (pm *ProtocolManager) batchPeriodAnswerMsgBroadcastLoop() {
-	log.Info("Start batchPeriodEndMsg broadcast routine")
+	log.Info("Start batchPeriodAnswerMsg broadcast routine")
 	for obj := range pm.batchAnswerMsgSub.Chan() {
 		if ee, ok := obj.Data.(core.BatchPeriodAnswerEvent); ok {
-			pm.BroadcastBatchPeriodEndMsg(ee.Msg) // First propagate block to peers
+			log.Info("Broadcast BatchPeriodAnswerEvent", "Sequencer", ee.Msg.Sequencer, "tx_count", len(ee.Msg.Txs))
+			pm.BroadcastBatchPeriodAnswerMsg(ee.Msg) // First propagate block to peers
 		}
 	}
 }
 
-func (pm *ProtocolManager) BroadcastBatchPeriodEndMsg(msg *types.BatchPeriodAnswerMsg) {
+func (pm *ProtocolManager) BroadcastBatchPeriodAnswerMsg(msg *types.BatchPeriodAnswerMsg) {
 	peers := pm.consensusPeers.PeersWithoutEndMsg(msg.Hash())
 	for _, p := range peers {
-		p.AsyncSendBatchPeriodEndMsg(msg)
+		p.AsyncSendBatchPeriodAnswerMsg(msg)
 	}
-	log.Trace("Broadcast batch period end msg")
+	log.Trace("Broadcast batch period answer msg")
 }
 
-func (p *peer) AsyncSendBatchPeriodEndMsg(msg *types.BatchPeriodAnswerMsg) {
+func (p *peer) AsyncSendBatchPeriodAnswerMsg(msg *types.BatchPeriodAnswerMsg) {
 	select {
 	case p.queuedBatchAnswerMsg <- msg:
 		p.knowEndMsg.Add(msg.Hash())

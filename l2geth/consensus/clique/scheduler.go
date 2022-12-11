@@ -178,8 +178,6 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			return
 		}
 		msg.Signature = sign
-		//signer, _ := msg.GetSigner()
-		//log.Debug("signature", "hash", hex.EncodeToString(crypto.Keccak256(msg.GetSignData())), "address", schedulerInst.signAccount.Address.String(), "signer", signer.String())
 
 		err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   &msg,

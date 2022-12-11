@@ -113,6 +113,8 @@ type Engine interface {
 	// than one result may also be returned depending on the consensus algorithm.
 	Seal(chain ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error
 
+	SignData(addr common.Address, data []byte) ([]byte, error)
+
 	// SealHash returns the hash of a block prior to it being sealed.
 	SealHash(header *types.Header) common.Hash
 

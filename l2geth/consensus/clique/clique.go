@@ -593,6 +593,10 @@ func (c *Clique) Authorize(signer common.Address, signFn SignerFn) {
 	c.signFn = signFn
 }
 
+func (c *Clique) SignData(addr common.Address, data []byte) ([]byte, error) {
+	return c.signFn(accounts.Account{Address: addr}, "", data)
+}
+
 // Seal implements consensus.Engine, attempting to create a sealed block using
 // the local signing credentials.
 func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
