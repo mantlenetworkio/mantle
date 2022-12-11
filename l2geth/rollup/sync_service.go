@@ -751,6 +751,72 @@ func (s *SyncService) SetLatestBatchIndex(index *uint64) {
 	}
 }
 
+func (s *SyncService) SetHead(number uint64) error {
+	if number == 0 {
+		return errors.New("cannot reset to genesis")
+	}
+	if err := s.bc.SetHead(number); err != nil {
+		return err
+	}
+	// Make sure to reset the LatestL1{Timestamp,BlockNumber}
+	block := s.bc.CurrentBlock()
+	txs := block.Transactions()
+	if len(txs) == 0 {
+		log.Error("No transactions found in block", "number", number)
+		return fmt.Errorf("no transactions found in block:%v", number)
+	}
+	tx := txs[0]
+	blockNumber := tx.L1BlockNumber()
+	if blockNumber == nil {
+		return fmt.Errorf("no L1BlockNumber found in transaction,number:%v", number)
+	}
+	s.SetLatestL1Timestamp(tx.L1Timestamp())
+	s.SetLatestL1BlockNumber(blockNumber.Uint64())
+	s.SetLatestIndex(tx.GetMeta().Index)
+	return nil
+}
+
+func (s *SyncService) SchedulerRollback(start uint64) error {
+	latest := s.bc.CurrentBlock().Number().Uint64()
+	if start > latest {
+		return fmt.Errorf("invalid block number:%v,currentBlock number:%v", start, latest)
+	}
+	var blocks []*types.Block
+	for i := start; i <= latest; i++ {
+		block := s.bc.GetBlockByNumber(start)
+		blocks = append(blocks, block)
+	}
+	if err := s.bc.SetHead(start - 1); err != nil {
+		log.Crit("rollback error:", "setHead error", err)
+	}
+	var txs []types.Transaction
+	h := s.bc.CurrentHeader()
+	for i := 11; i <= int(h.Number.Uint64()); i++ {
+		block := s.bc.GetBlockByNumber(uint64(i))
+		txs = append(txs, *block.Transactions()[0])
+	}
+	for _, t := range txs {
+		if err := s.applyIndexedTransaction(&t); err != nil {
+			log.Crit("rollback applyIndexedTransaction tx :", "applyIndexedTransaction error", err)
+		}
+	}
+	//var newBlocks []types.Block
+	//var notEqual bool
+	for i := start; i <= h.Number.Uint64(); i++ {
+		newBlock := s.bc.GetBlockByNumber(i)
+		if newBlock.Hash() != blocks[h.Number.Uint64()-i].Hash() {
+			//notEqual = false
+			// TODO Emit Rollback Event To sequencer
+			break
+		}
+	}
+	return nil
+}
+
+func (s *SyncService) SequencerRollback() error {
+	return nil
+}
+
 // applyTransaction is a higher level API for applying a transaction
 func (s *SyncService) applyTransaction(tx *types.Transaction) error {
 	if tx.GetMeta().Index != nil {
