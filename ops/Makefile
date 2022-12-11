@@ -44,7 +44,7 @@ restart:
 .PHONY: restart
 
 clean: stop
-	sudo rm -rf chaindata 
+	sudo rm -rf chaindata
 	find data -mindepth 1 -maxdepth 1 -type d | xargs rm -rf
 .PHONY: clean
 
