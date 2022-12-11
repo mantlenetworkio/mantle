@@ -1,2 +1,0 @@
-# @mantlenetworkio/hardhat-node
-

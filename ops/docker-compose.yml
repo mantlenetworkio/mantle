@@ -75,54 +75,15 @@ services:
       URL: http://deployer:8081/addresses.json
       # connect to the 2 layers
       DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT: http://l1_chain:8545
-      DATA_TRANSPORT_LAYER__L2_RPC_ENDPOINT: http://l2geth:8545
+      DATA_TRANSPORT_LAYER__L2_RPC_ENDPOINT: http://scheduler:8545
       DATA_TRANSPORT_LAYER__SYNC_FROM_L2: 'true'
       DATA_TRANSPORT_LAYER__L2_CHAIN_ID: 17
     ports:
       - ${DTL_PORT:-7878}:7878
 
-  l2geth:
-    depends_on:
-      - l1_chain
-      - deployer
-      - dtl
-    build:
-      context: ..
-      dockerfile: ./l2geth/Dockerfile
-    image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
-    # override with the geth script and the env vars required for it
-    entrypoint: sh ./geth.sh
-    env_file:
-      - ./envs/geth.env
-    volumes:
-      - ./data/l2geth:/root/.ethereum/geth/
-    environment:
-      <<: *system-addr-env
-      ETH1_HTTP: http://l1_chain:8545
-      ROLLUP_TIMESTAMP_REFRESH: 5s
-      ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
-      # connecting to the DTL
-      ROLLUP_CLIENT_HTTP: http://dtl:7878
-      ETH1_CTC_DEPLOYMENT_HEIGHT: 8
-      RETRIES: 60
-      # no need to keep this secret, only used internally to sign blocks
-      BLOCK_SIGNER_KEY: '6587ae678cf4fc9a33000cdbf9f35226b71dcc6a4684a31203241f9bcfd55d27'
-      BLOCK_SIGNER_ADDRESS: '0x00000398232E2064F896018496b4b44b3D62751F'
-
-      ROLLUP_ENFORCE_FEES: ${ROLLUP_ENFORCE_FEES:-false}
-      ROLLUP_FEE_THRESHOLD_DOWN: 0.9
-      ROLLUP_FEE_THRESHOLD_UP: 1.1
-
-      GASPRICE: 0
-    ports:
-      - ${L2GETH_HTTP_PORT:-8545}:8545
-      - ${L2GETH_WS_PORT:-8546}:8546
-    healthcheck: *healthcheck
-
   relayer:
     depends_on:
       - l1_chain
-      - l2geth
     deploy:
       replicas: 0
     build:
@@ -133,72 +94,14 @@ services:
     entrypoint: ./relayer.sh
     environment:
       MESSAGE_RELAYER__L1_RPC_PROVIDER: http://l1_chain:8545
-      MESSAGE_RELAYER__L2_RPC_PROVIDER: http://l2geth:8545
+      MESSAGE_RELAYER__L2_RPC_PROVIDER: http://scheduler:8545
       MESSAGE_RELAYER__L1_WALLET: '0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97'
       RETRIES: 60
 
-  verifier:
-    depends_on:
-      - l1_chain
-      - deployer
-      - dtl
-      - l2geth
-    # deploy:
-    #   replicas: 1
-    build:
-      context: ..
-      dockerfile: ./l2geth/Dockerfile
-    image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
-    entrypoint: sh ./geth.sh
-    env_file:
-      - ./envs/geth.env
-    volumes:
-      - ./data/verifier:/root/.ethereum/geth/
-    environment:
-      <<: *system-addr-env
-      ETH1_HTTP: http://l1_chain:8545
-      SEQUENCER_CLIENT_HTTP: http://l2geth:8545
-      ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
-      ROLLUP_CLIENT_HTTP: http://dtl:7878
-      ROLLUP_BACKEND: 'l1'
-      ETH1_CTC_DEPLOYMENT_HEIGHT: 8
-      RETRIES: 60
-      ROLLUP_VERIFIER_ENABLE: 'true'
-    ports:
-      - ${VERIFIER_HTTP_PORT:-8547}:8545
-      - ${VERIFIER_WS_PORT:-8548}:8546
-
-  replica:
-    depends_on:
-      - dtl
-      - l2geth
-    # deploy:
-    #   replicas: 1
-    build:
-      context: ..
-      dockerfile: ./l2geth/Dockerfile
-    image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
-    entrypoint: sh ./geth.sh
-    env_file:
-      - ./envs/geth.env
-    environment:
-      <<: *system-addr-env
-      ETH1_HTTP: http://l1_chain:8545
-      SEQUENCER_CLIENT_HTTP: http://l2geth:8545
-      ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
-      ROLLUP_CLIENT_HTTP: http://dtl:7878
-      ROLLUP_BACKEND: 'l2'
-      ROLLUP_VERIFIER_ENABLE: 'true'
-      ETH1_CTC_DEPLOYMENT_HEIGHT: 8
-      RETRIES: 60
-    ports:
-      - ${REPLICA_HTTP_PORT:-8549}:8545
-      - ${REPLICA_WS_PORT:-8550}:8546
-
   replica_healthcheck:
     depends_on:
-      - l2geth
-      - replica
+      - scheduler
+      - replica1
     deploy:
       replicas: 0
     build:
@@ -207,7 +110,7 @@ services:
       target: replica-healthcheck
     image: mantlenetworkio/replica-healthcheck:${DOCKER_TAG_REPLICA_HEALTHCHECK:-latest}
     environment:
-      HEALTHCHECK__REFERENCE_RPC_PROVIDER: http://l2geth:8545
+      HEALTHCHECK__REFERENCE_RPC_PROVIDER: http://scheduler:8545
       HEALTHCHECK__TARGET_RPC_PROVIDER: http://replica:8545
     ports:
       - ${HEALTHCHECK_HTTP_PORT:-7300}:7300
@@ -223,7 +126,7 @@ services:
     entrypoint: ./integration-tests.sh
     environment:
       L1_URL: http://l1_chain:8545
-      L2_URL: http://l2geth:8545
+      L2_URL: http://scheduler:8545
       HEALTHCHECK_URL: http://replica_healthcheck:7300/metrics
       REPLICA_URL: http://replica:8545
       VERIFIER_URL: http://verifier:8545
@@ -245,7 +148,7 @@ services:
     image: mantlenetworkio/gas-oracle:${DOCKER_TAG_GAS_ORACLE:-latest}
     environment:
       GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL: http://l1_chain:8545
-      GAS_PRICE_ORACLE_LAYER_TWO_HTTP_URL: http://l2geth:8545
+      GAS_PRICE_ORACLE_LAYER_TWO_HTTP_URL: http://scheduler:8545
       BYBIT_BACKEND_URL: https://api.bybit.com
       TOKEN_PRICER_UPDATE_FREQUENCY: 3
       # Default hardhat account 5
@@ -259,7 +162,7 @@ services:
     depends_on:
       - l1_chain
       - deployer
-      - l2geth
+      - scheduler
     build:
       context: ..
       dockerfile: ./batch-submitter/Dockerfile
@@ -269,7 +172,7 @@ services:
       - ./envs/batch-submitter.env
     environment:
       L1_ETH_RPC: http://l1_chain:8545
-      L2_ETH_RPC: http://l2geth:8545
+      L2_ETH_RPC: http://scheduler:8545
       URL: http://deployer:8081/addresses.json
       BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY: '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
       BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY: '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a'
@@ -278,7 +181,7 @@ services:
   fault_detector:
     depends_on:
       - l1_chain
-      - l2geth
+      - scheduler
     deploy:
       replicas: 0
     build:
@@ -289,13 +192,55 @@ services:
     entrypoint: ./detector.sh
     environment:
       FAULT_DETECTOR__L1_RPC_PROVIDER: http://l1_chain:8545
-      FAULT_DETECTOR__L2_RPC_PROVIDER: http://l2geth:8545
+      FAULT_DETECTOR__L2_RPC_PROVIDER: http://scheduler:8545
       RETRIES: 60
 
-  # second l2geth
-  l2geth2:
+
+  scheduler:
     depends_on:
-      - l2geth
+      - l1_chain
+      - deployer
+      - dtl
+    build:
+      context: ..
+      dockerfile: ./l2geth/Dockerfile
+    image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
+    # override with the geth script and the env vars required for it
+    entrypoint: sh ./geth.sh
+    env_file:
+      - ./envs/geth.env
+    volumes:
+      - ./chaindata/scheduler/geth:/root/.ethereum/geth/
+    environment:
+      <<: *system-addr-env
+      ETH1_HTTP: http://l1_chain:8545
+      SEQUENCER_L1_RPC: http://l1_chain:8545
+      ROLLUP_TIMESTAMP_REFRESH: 5s
+      ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
+      # connecting to the DTL
+      ROLLUP_CLIENT_HTTP: http://dtl:7878
+      ETH1_CTC_DEPLOYMENT_HEIGHT: 8
+      RETRIES: 60
+      # no need to keep this secret, only used internally to sign blocks
+      BLOCK_SIGNER_KEY: 'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+      BLOCK_SIGNER_ADDRESS: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+      SEQUENCER_CONTRACT_ADDRESS: '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e'
+      ROLLUP_ENFORCE_FEES: ${ROLLUP_ENFORCE_FEES:-false}
+      ROLLUP_FEE_THRESHOLD_DOWN: 0.9
+      ROLLUP_FEE_THRESHOLD_UP: 1.1
+      GASPRICE: 0
+      VERBOSITY: 3
+      IS_SEQUENCER: 'false'
+    ports:
+      - ${L2GETH_HTTP_PORT:-8545}:8545
+      - ${L2GETH_WS_PORT:-8546}:8546
+      - ${L2GETH_P2P_PORT:-30303}:30303
+    healthcheck: *healthcheck
+
+
+  sequencer1:
+    depends_on:
+      - scheduler
       - deployer
     deploy:
       replicas: 0
@@ -306,9 +251,12 @@ services:
     entrypoint: sh ./geth.sh
     env_file:
       - ./envs/geth.env
+    volumes:
+      - ./chaindata/sequencer1/geth:/root/.ethereum/geth/
     environment:
       <<: *system-addr-env
       ETH1_HTTP: http://l1_chain:8545
+      SEQUENCER_L1_RPC: http://l1_chain:8545
       ROLLUP_TIMESTAMP_REFRESH: 5s
       ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
       # connecting to the DTL
@@ -316,14 +264,153 @@ services:
       ETH1_CTC_DEPLOYMENT_HEIGHT: 8
       RETRIES: 60
       # no need to keep this secret, only used internally to sign blocks
-      BLOCK_SIGNER_KEY: '6587ae678cf4fc9a33000cdbf9f35226b71dcc6a4684a31203241f9bcfd55d27'
-      BLOCK_SIGNER_ADDRESS: '0x00000398232E2064F896018496b4b44b3D62751F'
-
+      BLOCK_SIGNER_KEY: '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a'
+      BLOCK_SIGNER_ADDRESS: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC'
+      SEQUENCER_CONTRACT_ADDRESS: '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e'
       ROLLUP_ENFORCE_FEES: ${ROLLUP_ENFORCE_FEES:-false}
       ROLLUP_FEE_THRESHOLD_DOWN: 0.9
       ROLLUP_FEE_THRESHOLD_UP: 1.1
+      IS_SEQUENCER: 'true'
+      SCHEDULER_P2P_ENODE: 'enode://c75a9fab070ef6e4f8131bc2cfe3a44756ed615138d95e2d3df8ed06653f3fd5b6f92d338da1b5ce7191829a292da0907c269254000917d2016e5764221c365c@172.17.0.1:30303'
     ports:
       - ${L2GETH_HTTP_PORT:-7545}:8545
       - ${L2GETH_WS_PORT:-7546}:8546
+      - ${L2GETH_P2P_PORT:-30313}:30303
     healthcheck: *healthcheck
 
+  sequencer2:
+    depends_on:
+      - scheduler
+      - deployer
+    deploy:
+      replicas: 0
+    build:
+      context: ..
+      dockerfile: ./l2geth/Dockerfile
+    image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
+    entrypoint: sh ./geth.sh
+    env_file:
+      - ./envs/geth.env
+    volumes:
+      - ./chaindata/sequencer2/geth:/root/.ethereum/geth/
+    environment:
+      <<: *system-addr-env
+      ETH1_HTTP: http://l1_chain:8545
+      SEQUENCER_L1_RPC: http://l1_chain:8545
+      ROLLUP_TIMESTAMP_REFRESH: 5s
+      ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
+      # connecting to the DTL
+      ROLLUP_CLIENT_HTTP: http://dtl:7878
+      ETH1_CTC_DEPLOYMENT_HEIGHT: 8
+      RETRIES: 60
+      # no need to keep this secret, only used internally to sign blocks
+      BLOCK_SIGNER_KEY: '59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
+      BLOCK_SIGNER_ADDRESS: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
+      SEQUENCER_CONTRACT_ADDRESS: '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e'
+      ROLLUP_ENFORCE_FEES: ${ROLLUP_ENFORCE_FEES:-false}
+      ROLLUP_FEE_THRESHOLD_DOWN: 0.9
+      ROLLUP_FEE_THRESHOLD_UP: 1.1
+      IS_SEQUENCER: 'true'
+      SCHEDULER_P2P_ENODE: 'enode://c75a9fab070ef6e4f8131bc2cfe3a44756ed615138d95e2d3df8ed06653f3fd5b6f92d338da1b5ce7191829a292da0907c269254000917d2016e5764221c365c@172.17.0.1:30303'
+    ports:
+      - ${L2GETH_HTTP_PORT:-7543}:8545
+      - ${L2GETH_WS_PORT:-7544}:8546
+      - ${L2GETH_P2P_PORT:-30323}:30303
+    healthcheck: *healthcheck
+
+
+  replica1:
+    depends_on:
+      - dtl
+      - scheduler
+    # deploy:
+    #   replicas: 1
+    build:
+      context: ..
+      dockerfile: ./l2geth/Dockerfile
+    image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
+    entrypoint: sh ./geth.sh
+    env_file:
+      - ./envs/geth.env
+    environment:
+      <<: *system-addr-env
+      ETH1_HTTP: http://l1_chain:8545
+      SEQUENCER_L1_RPC: http://l1_chain:8545
+      SEQUENCER_CLIENT_HTTP: http://scheduler:8545
+      ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
+      ROLLUP_CLIENT_HTTP: http://dtl:7878
+      SEQUENCER_CONTRACT_ADDRESS: '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e'
+      ROLLUP_BACKEND: 'l2'
+      ROLLUP_VERIFIER_ENABLE: 'true'
+      ETH1_CTC_DEPLOYMENT_HEIGHT: 8
+      RETRIES: 60
+      IS_SEQUENCER: 'false'
+    ports:
+      - ${REPLICA_HTTP_PORT:-8549}:8545
+      - ${REPLICA_WS_PORT:-8550}:8546
+
+
+  replica2:
+    depends_on:
+      - dtl
+      - scheduler
+    # deploy:
+    #   replicas: 1
+    build:
+      context: ..
+      dockerfile: ./l2geth/Dockerfile
+    image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
+    entrypoint: sh ./geth.sh
+    env_file:
+      - ./envs/geth.env
+    environment:
+      <<: *system-addr-env
+      ETH1_HTTP: http://l1_chain:8545
+      SEQUENCER_L1_RPC: http://l1_chain:8545
+      SEQUENCER_CLIENT_HTTP: http://scheduler:8545
+      ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
+      ROLLUP_CLIENT_HTTP: http://dtl:7878
+      SEQUENCER_CONTRACT_ADDRESS: '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e'
+      ROLLUP_BACKEND: 'l2'
+      ROLLUP_VERIFIER_ENABLE: 'true'
+      ETH1_CTC_DEPLOYMENT_HEIGHT: 8
+      RETRIES: 60
+      IS_SEQUENCER: 'false'
+    ports:
+      - ${REPLICA_HTTP_PORT:-8551}:8545
+      - ${REPLICA_WS_PORT:-8552}:8546
+
+
+  verifier:
+    depends_on:
+      - l1_chain
+      - deployer
+      - dtl
+      - scheduler
+    # deploy:
+    #   replicas: 1
+    build:
+      context: ..
+      dockerfile: ./l2geth/Dockerfile
+    image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
+    entrypoint: sh ./geth.sh
+    env_file:
+      - ./envs/geth.env
+    volumes:
+      - ./data/verifier:/root/.ethereum/geth/
+    environment:
+      <<: *system-addr-env
+      ETH1_HTTP: http://l1_chain:8545
+      SEQUENCER_L1_RPC: http://l1_chain:8545
+      SEQUENCER_CLIENT_HTTP: http://scheduler:8545
+      ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
+      ROLLUP_CLIENT_HTTP: http://dtl:7878
+      SEQUENCER_CONTRACT_ADDRESS: '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e'
+      ROLLUP_BACKEND: 'l1'
+      ETH1_CTC_DEPLOYMENT_HEIGHT: 8
+      RETRIES: 60
+      ROLLUP_VERIFIER_ENABLE: 'true'
+      IS_SEQUENCER: 'false'
+    ports:
+      - ${VERIFIER_HTTP_PORT:-8547}:8545
+      - ${VERIFIER_WS_PORT:-8548}:8546

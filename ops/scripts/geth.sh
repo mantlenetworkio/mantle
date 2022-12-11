@@ -43,11 +43,24 @@ geth --verbosity="$VERBOSITY" "$@" init genesis.json
 
 # start the geth node
 echo "Starting Geth node"
-exec geth \
-  --verbosity="$VERBOSITY" \
-  --password ./password \
-  --allow-insecure-unlock \
-  --unlock $BLOCK_SIGNER_ADDRESS \
-  --mine \
-  --miner.etherbase $BLOCK_SIGNER_ADDRESS \
-  "$@"
+if [ $IS_SEQUENCER == "true" ] ;then
+  echo "we are sequencer node!!"
+  exec geth \
+    --verbosity="$VERBOSITY" \
+    --password ./password \
+    --allow-insecure-unlock \
+    --unlock $BLOCK_SIGNER_ADDRESS \
+    --bootnodes $SCHEDULER_P2P_ENODE \
+    --mine \
+    --miner.etherbase $BLOCK_SIGNER_ADDRESS \
+    "$@"
+else [ $IS_SEQUENCER == "false" ]
+  exec geth \
+    --verbosity="$VERBOSITY" \
+    --password ./password \
+    --allow-insecure-unlock \
+    --unlock $BLOCK_SIGNER_ADDRESS \
+    --mine \
+    --miner.etherbase $BLOCK_SIGNER_ADDRESS \
+    "$@"
+fi

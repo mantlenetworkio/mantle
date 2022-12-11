@@ -949,7 +949,7 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 	}
 
 	cfg.BootstrapNodes = make([]*enode.Node, 0, len(urls))
-	for _, url := range urls {
+	for index, url := range urls {
 		if url != "" {
 			node, err := enode.Parse(enode.ValidSchemes, url)
 			if err != nil {
@@ -958,6 +958,8 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 			}
 			cfg.BootstrapNodes = append(cfg.BootstrapNodes, node)
 		}
+		log.Info("bootnodes", "id", cfg.BootstrapNodes[index].ID(),
+			"string", cfg.BootstrapNodes[index].String(), "ip", cfg.BootstrapNodes[index].IP())
 	}
 }
 
