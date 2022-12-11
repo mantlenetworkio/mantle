@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/log"
 	"os"
 	"sort"
 	"time"
@@ -12,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 
 	binding "github.com/mantlenetworkio/mantle/l2geth/consensus/clique/synchronizer/bindings"
 )
