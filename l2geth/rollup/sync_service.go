@@ -786,7 +786,7 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 		block := s.bc.GetBlockByNumber(start)
 		blocks = append(blocks, block)
 	}
-	if err := s.bc.SetHead(start - 1); err != nil {
+	if err := s.SetHead(start - 1); err != nil {
 		log.Crit("rollback error:", "setHead error", err)
 	}
 	var txs []types.Transaction
