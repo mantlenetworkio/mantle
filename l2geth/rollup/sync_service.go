@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"math/big"
 	"strconv"
 	"sync"
@@ -786,9 +788,11 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 		block := s.bc.GetBlockByNumber(start)
 		blocks = append(blocks, block)
 	}
+	log.Info("setHead start,current block number:", s.bc.CurrentHeader().Number.Uint64())
 	if err := s.SetHead(start - 1); err != nil {
 		log.Crit("rollback error:", "setHead error", err)
 	}
+	log.Info("setHead end,current block number:", s.bc.CurrentHeader().Number.Uint64())
 	var txs []types.Transaction
 	h := s.bc.CurrentHeader()
 	for i := 11; i <= int(h.Number.Uint64()); i++ {
@@ -800,6 +804,7 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 			log.Crit("rollback applyIndexedTransaction tx :", "applyIndexedTransaction error", err)
 		}
 	}
+	log.Info("apply rollback blocks transactions end,current block number", s.bc.CurrentHeader().Number.Uint64())
 	//var newBlocks []types.Block
 	//var notEqual bool
 	for i := start; i <= h.Number.Uint64(); i++ {
@@ -807,6 +812,7 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 		if newBlock.Hash() != blocks[h.Number.Uint64()-i].Hash() {
 			//notEqual = false
 			// TODO Emit Rollback Event To sequencer
+			log.Info("Emit Rollback Event To sequencer", "Block hash updated")
 			break
 		}
 	}
@@ -1428,6 +1434,19 @@ func (s *SyncService) syncQueueTransactionRange(start, end uint64) error {
 		tx, err := s.client.GetEnqueue(i)
 		if err != nil {
 			return fmt.Errorf("Canot get enqueue transaction; %w", err)
+		}
+		hexRawTx := hexutil.Encode(tx.GetMeta().RawTransaction)
+		if len(hexRawTx) > 402 {
+			// TODO handle sccAddr
+			var sccAddress common.Address
+			if common.HexToAddress(hexRawTx[34:74]) == dump.BvmRollbackAddress && common.HexToAddress(hexRawTx[98:138]) == sccAddress {
+				if parseUint, err := strconv.ParseUint(hexRawTx[362:402], 16, 32); err == nil {
+					if err := s.SchedulerRollback(parseUint); err != nil {
+						fmt.Println("scheduler rollback error:", err)
+					}
+				}
+				return nil
+			}
 		}
 		if err := s.applyTransaction(tx); err != nil {
 			return fmt.Errorf("Cannot apply transaction: %w", err)
