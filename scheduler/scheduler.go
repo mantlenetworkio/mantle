@@ -83,7 +83,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 		}
 		defer scheduler.Stop()
 
-		log.Info("Batch submitter started")
+		log.Info("Scheduler started")
 
 		<-(chan struct{})(nil)
 

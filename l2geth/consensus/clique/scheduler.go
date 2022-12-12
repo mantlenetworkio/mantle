@@ -134,6 +134,12 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			Signature:    mockSignature,
 		}
 
+		// index block and sign L1toL2Tx here?
+		// for tx in currentBlock.Transactions() {
+		// if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+		// tx.metadata.schedulerSignature = schedulerInst.wallet.SignTx(schedulerInst.signingAccount, tx, schedulerInst.blockchain.Config().ChainID)
+		//}
+
 		log.Info("Start Post BatchPeriodStartEvent")
 		err := schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   &msg,

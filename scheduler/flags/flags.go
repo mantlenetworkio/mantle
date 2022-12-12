@@ -6,7 +6,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-const envVarPrefix = "BATCH_SUBMITTER_"
+const envVarPrefix = "BATCH_SUBMITTER_" // is this stale?
 
 func prefixEnvVar(name string) string {
 	return envVarPrefix + name
@@ -206,6 +206,7 @@ var (
 		Value:  1,
 		EnvVar: prefixEnvVar("BLOCK_OFFSET"),
 	}
+	// is this the scheduler private key? why in optional flags?
 	SequencerPrivateKeyFlag = cli.StringFlag{
 		Name:   "sequencer-private-key",
 		Usage:  "The private key to use for sending to the sequencer contract",

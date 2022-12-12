@@ -52,6 +52,9 @@ type TransactionMeta struct {
 	L1Timestamp     uint64          `json:"l1Timestamp"`
 	L1MessageSender *common.Address `json:"l1MessageSender" gencodec:"required"`
 	QueueOrigin     QueueOrigin     `json:"queueOrigin" gencodec:"required"`
+
+	SchedulerSignature []byte `json:"schedulerSignature"`
+
 	// The canonical transaction chain index
 	Index *uint64 `json:"index" gencodec:"required"`
 	// The queue index, nil for queue origin sequencer transactions

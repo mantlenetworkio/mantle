@@ -17,6 +17,8 @@
 package core
 
 import (
+	"errors"
+
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/misc"
@@ -24,6 +26,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
@@ -105,6 +108,27 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	l1Fee, l1GasPrice, l1GasUsed, scalar, err := fees.DeriveL1GasInfo(msg, statedb)
 	if err != nil {
 		return nil, err
+	}
+
+	// if transaction is type L1ToL2, check that the scheduler has signed it
+	if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+		// get the scheduler address
+		schedulerAddress, err := bc.Engine().GetSchedulerAddress()
+		if err != nil {
+			return nil, err
+		}
+		log.Debug("Scheduler Address", "address", schedulerAddress)
+		// Recover the public key and the Ethereum address
+		pubkey, err := crypto.SigToPub(tx.Hash().Bytes(), tx.GetMeta().SchedulerSignature)
+		if err != nil {
+			return nil, err
+		}
+		log.Debug("Recovered pubkey", "pubkey", pubkey)
+
+		// check that the recovered address is the scheduler address
+		if crypto.PubkeyToAddress(*pubkey) != schedulerAddress {
+			return nil, errors.New("L1toL2 Scheduler signature is invalid")
+		}
 	}
 
 	// Apply the transaction to the current state (included in the env)

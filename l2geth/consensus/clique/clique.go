@@ -228,6 +228,11 @@ func (c *Clique) SetBatchPeriod(bps *types.BatchPeriodStartMsg) {
 	c.batchPeriod = bps
 }
 
+func (c *Clique) GetSchedulerAddress() (common.Address, error) {
+	// validate a scheduler address exists
+	return "0x", nil
+}
+
 // VerifyHeader checks whether a header conforms to the consensus rules.
 func (c *Clique) VerifyHeader(chain consensus.ChainReader, header *types.Header, seal bool) error {
 	return c.verifyHeader(chain, header, nil)
