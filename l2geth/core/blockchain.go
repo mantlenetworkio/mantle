@@ -1531,11 +1531,9 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, er
 	)
 	// Fire a single chain head event if we've progressed the chain
 	defer func() {
-		log.Info("insertChain chainHeadFeed start-------------------------")
 		if lastCanon != nil && bc.CurrentBlock().Hash() == lastCanon.Hash() {
 			bc.chainHeadFeed.Send(ChainHeadEvent{lastCanon})
 		}
-		log.Info("insertChain chainHeadFeed End-------------------------")
 	}()
 	// Start the parallel header verifier
 	headers := make([]*types.Header, len(chain))

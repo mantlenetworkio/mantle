@@ -151,7 +151,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			log.Error("Verify signature failed", "scheduler", pm.schedulerInst.Scheduler().String(), "signer", signer.String())
 			return nil
 		}
-		p.knowStartMsg.Add(bs.Hash())
+		p.knowBatchPeriodStartMsg.Add(bs.Hash())
 		erCh := make(chan error, 1)
 		pm.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   bs,
@@ -162,7 +162,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bpa); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		p.knowStartMsg.Add(bpa.Hash())
+		p.knowBatchPeriodStartMsg.Add(bpa.Hash())
 		erCh := make(chan error, 1)
 		pm.eventMux.Post(core.BatchPeriodAnswerEvent{
 			Msg:   bpa,
@@ -174,7 +174,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		log.Info("Fraud Proof Reorg Msg")
-		p.knowStartMsg.Add(fpr.Hash())
+		p.knowBatchPeriodStartMsg.Add(fpr.Hash())
 		// todo: FraudProofReorgMsg handle
 
 	default:
@@ -213,9 +213,9 @@ func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *types.BatchPeriodSt
 func (p *peer) AsyncSendBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 	select {
 	case p.queuedBatchStartMsg <- msg:
-		p.knowStartMsg.Add(msg.Hash())
-		for p.knowStartMsg.Cardinality() >= maxKnownStartMsg {
-			p.knowStartMsg.Pop()
+		p.knowBatchPeriodStartMsg.Add(msg.Hash())
+		for p.knowBatchPeriodStartMsg.Cardinality() >= maxKnownStartMsg {
+			p.knowBatchPeriodStartMsg.Pop()
 		}
 
 	default:
@@ -245,9 +245,9 @@ func (pm *ProtocolManager) BroadcastBatchPeriodAnswerMsg(msg *types.BatchPeriodA
 func (p *peer) AsyncSendBatchPeriodAnswerMsg(msg *types.BatchPeriodAnswerMsg) {
 	select {
 	case p.queuedBatchAnswerMsg <- msg:
-		p.knowEndMsg.Add(msg.Hash())
-		for p.knowEndMsg.Cardinality() >= maxKnownEndMsg {
-			p.knowEndMsg.Pop()
+		p.knowBatchPeriodAnswerMsg.Add(msg.Hash())
+		for p.knowBatchPeriodAnswerMsg.Cardinality() >= maxKnownEndMsg {
+			p.knowBatchPeriodAnswerMsg.Pop()
 		}
 
 	default:
@@ -296,19 +296,19 @@ func (p *peer) AsyncSendFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
 // SendBatchPeriodStart sends a batch of transaction receipts, corresponding to the
 // ones requested from an already RLP encoded format.
 func (p *peer) SendBatchPeriodStart(bps *types.BatchPeriodStartMsg) error {
-	p.knowStartMsg.Add(bps.Hash())
+	p.knowBatchPeriodStartMsg.Add(bps.Hash())
 	// Mark all the producers as known, but ensure we don't overflow our limits
-	for p.knowStartMsg.Cardinality() >= maxKnownStartMsg {
-		p.knowStartMsg.Pop()
+	for p.knowBatchPeriodStartMsg.Cardinality() >= maxKnownStartMsg {
+		p.knowBatchPeriodStartMsg.Pop()
 	}
 	return p2p.Send(p.rw, BatchPeriodStartMsg, bps)
 }
 
 func (p *peer) SendBatchPeriodAnswer(bpa *types.BatchPeriodAnswerMsg) error {
-	p.knowEndMsg.Add(bpa.Hash())
+	p.knowBatchPeriodAnswerMsg.Add(bpa.Hash())
 	// Mark all the producers as known, but ensure we don't overflow our limits
-	for p.knowEndMsg.Cardinality() >= maxKnownEndMsg {
-		p.knowEndMsg.Pop()
+	for p.knowBatchPeriodAnswerMsg.Cardinality() >= maxKnownEndMsg {
+		p.knowBatchPeriodAnswerMsg.Pop()
 	}
 	return p2p.Send(p.rw, BatchPeriodAnswerMsg, bpa)
 }

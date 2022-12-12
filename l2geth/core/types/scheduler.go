@@ -123,23 +123,25 @@ func IsValidBatchPeriodStartMsgBuf(buf []byte) bool {
 
 type BatchPeriodAnswerMsg struct {
 	Sequencer  common.Address
+	BatchIndex uint64
 	StartIndex uint64
 	Txs        Transactions
 	Signature  []byte
 }
 
 func DeserializeBatchPeriodAnswerMsg(buf []byte) (BatchPeriodAnswerMsg, error) {
-	txsBytes := len(buf) - (common.AddressLength + uint64Length + crypto.SignatureLength)
+	txsBytes := len(buf) - (common.AddressLength + 2*uint64Length + crypto.SignatureLength)
 	if txsBytes <= 0 {
 		return BatchPeriodAnswerMsg{}, fmt.Errorf("invalid BatchPeriodAnswerMsg bytes")
 	}
 
 	sequencer := common.BytesToAddress(buf[:common.AddressLength])
-	startIndex := binary.BigEndian.Uint64(buf[common.AddressLength : common.AddressLength+uint64Length])
+	batchIndex := binary.BigEndian.Uint64(buf[common.AddressLength : common.AddressLength+uint64Length])
+	startIndex := binary.BigEndian.Uint64(buf[common.AddressLength+uint64Length : common.AddressLength+uint64Length*2])
 
 	var txs Transactions
 
-	startPos := common.AddressLength + uint64Length
+	startPos := common.AddressLength + uint64Length*2
 	for {
 		if startPos >= len(buf)-crypto.SignatureLength {
 			break
@@ -163,6 +165,7 @@ func DeserializeBatchPeriodAnswerMsg(buf []byte) (BatchPeriodAnswerMsg, error) {
 
 	return BatchPeriodAnswerMsg{
 		Sequencer:  sequencer,
+		BatchIndex: batchIndex,
 		StartIndex: startIndex,
 		Txs:        txs,
 		Signature:  signature,
@@ -174,12 +177,13 @@ func (bpa *BatchPeriodAnswerMsg) Serialize() []byte {
 		return nil
 	}
 	buf := bpa.Sequencer.Bytes()
-	binary.BigEndian.PutUint64(buf, bpa.StartIndex)
+	binary.BigEndian.AppendUint64(buf, bpa.BatchIndex)
+	binary.BigEndian.AppendUint64(buf, bpa.StartIndex)
 	for i, _ := range bpa.Txs {
 		txBytes := bpa.Txs.GetRlp(i)
 
 		var txBytesLengthBytes = make([]byte, 8)
-		binary.BigEndian.PutUint64(txBytesLengthBytes, uint64(len(txBytes)))
+		binary.BigEndian.AppendUint64(txBytesLengthBytes, uint64(len(txBytes)))
 		buf = append(buf, txBytesLengthBytes...)
 		buf = append(buf, txBytes...)
 	}
@@ -206,7 +210,8 @@ func (bpa *BatchPeriodAnswerMsg) GetSignData() []byte {
 		return nil
 	}
 	buf := bpa.Sequencer.Bytes()
-	binary.BigEndian.PutUint64(buf, bpa.StartIndex)
+	binary.BigEndian.AppendUint64(buf, bpa.BatchIndex)
+	binary.BigEndian.AppendUint64(buf, bpa.StartIndex)
 	for _, tx := range bpa.Txs {
 		txHash := tx.Hash()
 		buf = append(buf, txHash[:]...)

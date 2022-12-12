@@ -95,38 +95,38 @@ type peer struct {
 	td   *big.Int
 	lock sync.RWMutex
 
-	knownTxs              mapset.Set                       // Set of transaction hashes known to be known by this peer
-	knownBlocks           mapset.Set                       // Set of block hashes known to be known by this peer
-	knowStartMsg          mapset.Set                       // Set of start msg index to be known by this peer
-	knowEndMsg            mapset.Set                       // Set of end msg index to be known by this peer
-	knowFraudProofReorg   mapset.Set                       // Set of end msg index to be known by this peer
-	queuedTxs             chan []*types.Transaction        // Queue of transactions to broadcast to the peer
-	queuedProps           chan *propEvent                  // Queue of blocks to broadcast to the peer
-	queuedAnns            chan *types.Block                // Queue of blocks to announce to the peer
-	queuedBatchStartMsg   chan *types.BatchPeriodStartMsg  // Queue of BatchPeriodStartMsg to announce to the peer
-	queuedBatchAnswerMsg  chan *types.BatchPeriodAnswerMsg // Queue of BatchPeriodAnswerMsg to announce to the peer
-	queuedFraudProofReorg chan *types.FraudProofReorgMsg   // Queue of FraudProofReorgMsg to announce to the peer
-	term                  chan struct{}                    // Termination channel to stop the broadcaster
+	knownTxs                 mapset.Set                       // Set of transaction hashes known to be known by this peer
+	knownBlocks              mapset.Set                       // Set of block hashes known to be known by this peer
+	knowBatchPeriodStartMsg  mapset.Set                       // Set of start msg index to be known by this peer
+	knowBatchPeriodAnswerMsg mapset.Set                       // Set of end msg index to be known by this peer
+	knowFraudProofReorg      mapset.Set                       // Set of end msg index to be known by this peer
+	queuedTxs                chan []*types.Transaction        // Queue of transactions to broadcast to the peer
+	queuedProps              chan *propEvent                  // Queue of blocks to broadcast to the peer
+	queuedAnns               chan *types.Block                // Queue of blocks to announce to the peer
+	queuedBatchStartMsg      chan *types.BatchPeriodStartMsg  // Queue of BatchPeriodStartMsg to announce to the peer
+	queuedBatchAnswerMsg     chan *types.BatchPeriodAnswerMsg // Queue of BatchPeriodAnswerMsg to announce to the peer
+	queuedFraudProofReorg    chan *types.FraudProofReorgMsg   // Queue of FraudProofReorgMsg to announce to the peer
+	term                     chan struct{}                    // Termination channel to stop the broadcaster
 }
 
 func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 	return &peer{
-		Peer:                  p,
-		rw:                    rw,
-		version:               version,
-		id:                    fmt.Sprintf("%x", p.ID().Bytes()[:8]),
-		knownTxs:              mapset.NewSet(),
-		knownBlocks:           mapset.NewSet(),
-		knowStartMsg:          mapset.NewSet(),
-		knowEndMsg:            mapset.NewSet(),
-		knowFraudProofReorg:   mapset.NewSet(),
-		queuedTxs:             make(chan []*types.Transaction, maxQueuedTxs),
-		queuedProps:           make(chan *propEvent, maxQueuedProps),
-		queuedAnns:            make(chan *types.Block, maxQueuedAnns),
-		queuedBatchStartMsg:   make(chan *types.BatchPeriodStartMsg, maxQueuedBatchPeriodStart),
-		queuedBatchAnswerMsg:  make(chan *types.BatchPeriodAnswerMsg, maxQueuedBatchPeriodEnd),
-		queuedFraudProofReorg: make(chan *types.FraudProofReorgMsg, maxQueuedFraudProofReorg),
-		term:                  make(chan struct{}),
+		Peer:                     p,
+		rw:                       rw,
+		version:                  version,
+		id:                       fmt.Sprintf("%x", p.ID().Bytes()[:8]),
+		knownTxs:                 mapset.NewSet(),
+		knownBlocks:              mapset.NewSet(),
+		knowBatchPeriodStartMsg:  mapset.NewSet(),
+		knowBatchPeriodAnswerMsg: mapset.NewSet(),
+		knowFraudProofReorg:      mapset.NewSet(),
+		queuedTxs:                make(chan []*types.Transaction, maxQueuedTxs),
+		queuedProps:              make(chan *propEvent, maxQueuedProps),
+		queuedAnns:               make(chan *types.Block, maxQueuedAnns),
+		queuedBatchStartMsg:      make(chan *types.BatchPeriodStartMsg, maxQueuedBatchPeriodStart),
+		queuedBatchAnswerMsg:     make(chan *types.BatchPeriodAnswerMsg, maxQueuedBatchPeriodEnd),
+		queuedFraudProofReorg:    make(chan *types.FraudProofReorgMsg, maxQueuedFraudProofReorg),
+		term:                     make(chan struct{}),
 	}
 }
 
@@ -611,7 +611,7 @@ func (ps *peerSet) PeersWithoutEndMsg(msgHash common.Hash) []*peer {
 
 	list := make([]*peer, 0, len(ps.peers))
 	for _, p := range ps.peers {
-		if !p.knowEndMsg.Contains(msgHash) {
+		if !p.knowBatchPeriodAnswerMsg.Contains(msgHash) {
 			list = append(list, p)
 		}
 	}
@@ -626,7 +626,7 @@ func (ps *peerSet) PeersWithoutStartMsg(msgHash common.Hash) []*peer {
 
 	list := make([]*peer, 0, len(ps.peers))
 	for _, p := range ps.peers {
-		if !p.knowStartMsg.Contains(msgHash) {
+		if !p.knowBatchPeriodStartMsg.Contains(msgHash) {
 			list = append(list, p)
 		}
 	}

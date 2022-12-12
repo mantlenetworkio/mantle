@@ -20,11 +20,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"math/big"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 
 	mapset "github.com/deckarep/golang-set"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -163,6 +164,10 @@ type worker struct {
 	rollupCh     chan core.NewTxsEvent
 	rollupSub    event.Subscription
 
+	chainHeadToRollupCh      chan core.ChainHeadEvent
+	knowBatchPeriodStartMsg  mapset.Set
+	knowBatchPeriodAnswerMsg mapset.Set
+
 	bpsSub *event.TypeMuxSubscription
 	bpaSub *event.TypeMuxSubscription
 
@@ -207,28 +212,31 @@ type worker struct {
 
 func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus.Engine, eth Backend, mux *event.TypeMux, isLocalBlock func(*types.Block) bool, init bool) *worker {
 	worker := &worker{
-		config:             config,
-		chainConfig:        chainConfig,
-		engine:             engine,
-		eth:                eth,
-		mux:                mux,
-		chain:              eth.BlockChain(),
-		isLocalBlock:       isLocalBlock,
-		localUncles:        make(map[common.Hash]*types.Block),
-		remoteUncles:       make(map[common.Hash]*types.Block),
-		unconfirmed:        newUnconfirmedBlocks(eth.BlockChain(), miningLogAtDepth),
-		pendingTasks:       make(map[common.Hash]*task),
-		txsCh:              make(chan core.NewTxsEvent, txChanSize),
-		rollupCh:           make(chan core.NewTxsEvent, 1),
-		chainHeadCh:        make(chan core.ChainHeadEvent, chainHeadChanSize),
-		chainSideCh:        make(chan core.ChainSideEvent, chainSideChanSize),
-		newWorkCh:          make(chan *newWorkReq),
-		taskCh:             make(chan *task),
-		resultCh:           make(chan *types.Block, resultQueueSize),
-		exitCh:             make(chan struct{}),
-		startCh:            make(chan struct{}, 1),
-		resubmitIntervalCh: make(chan time.Duration),
-		resubmitAdjustCh:   make(chan *intervalAdjust, resubmitAdjustChanSize),
+		config:                   config,
+		chainConfig:              chainConfig,
+		engine:                   engine,
+		eth:                      eth,
+		mux:                      mux,
+		chain:                    eth.BlockChain(),
+		isLocalBlock:             isLocalBlock,
+		localUncles:              make(map[common.Hash]*types.Block),
+		remoteUncles:             make(map[common.Hash]*types.Block),
+		unconfirmed:              newUnconfirmedBlocks(eth.BlockChain(), miningLogAtDepth),
+		pendingTasks:             make(map[common.Hash]*task),
+		txsCh:                    make(chan core.NewTxsEvent, txChanSize),
+		rollupCh:                 make(chan core.NewTxsEvent, 1),
+		chainHeadCh:              make(chan core.ChainHeadEvent, chainHeadChanSize),
+		chainSideCh:              make(chan core.ChainSideEvent, chainSideChanSize),
+		newWorkCh:                make(chan *newWorkReq),
+		taskCh:                   make(chan *task),
+		resultCh:                 make(chan *types.Block, resultQueueSize),
+		exitCh:                   make(chan struct{}),
+		startCh:                  make(chan struct{}, 1),
+		resubmitIntervalCh:       make(chan time.Duration),
+		resubmitAdjustCh:         make(chan *intervalAdjust, resubmitAdjustChanSize),
+		chainHeadToRollupCh:      make(chan core.ChainHeadEvent, chainHeadChanSize),
+		knowBatchPeriodStartMsg:  mapset.NewSet(),
+		knowBatchPeriodAnswerMsg: mapset.NewSet(),
 	}
 	// Subscribe NewTxsEvent for tx pool
 	//worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
@@ -239,9 +247,7 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	worker.bpaSub = worker.mux.Subscribe(core.BatchPeriodAnswerEvent{})
 
 	// Subscribe events for blockchain
-	if !worker.eth.SyncService().IsSequencerMode() {
-		worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
-	}
+	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
 
 	// Sanitize recommit interval if the user-specified one is too short.
@@ -387,12 +393,13 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 		// Remove this code for the OVM implementation. It is responsible for
 		// cleaning up memory with the call to `clearPending`, so be sure to
 		// call that in the new hot code path
-		/*
-			case <-w.chainHeadCh:
-				clearPending(head.Block.NumberU64())
-				timestamp = time.Now().Unix()
-				commit(commitInterruptNewHead)
-		*/
+		case head := <-w.chainHeadCh:
+			if !w.eth.SyncService().IsSequencerMode() {
+				w.chainHeadToRollupCh <- head
+			}
+			//clearPending(head.Block.NumberU64())
+			//timestamp = time.Now().Unix()
+			//commit(commitInterruptNewHead)
 
 		case <-timer.C:
 			// If mining is running resubmit a new work cycle periodically to pull in
@@ -453,6 +460,12 @@ func (w *worker) batchStartLoop() {
 			if ev, ok = obj.Data.(core.BatchPeriodStartEvent); !ok {
 				continue
 			}
+			if w.knowBatchPeriodStartMsg.Contains(ev.Msg.Hash()) {
+				log.Debug("Duplicated BatchPeriodStartMsg", "batchIndex", ev.Msg.BatchIndex, "startHeight", ev.Msg.StartHeight)
+				continue
+			} else {
+				w.knowBatchPeriodStartMsg.Add(ev.Msg.Hash())
+			}
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
 				log.Info("Scheduler receives batchPeriodStartEvent")
@@ -504,6 +517,7 @@ func (w *worker) batchStartLoop() {
 					} else {
 						bpa.Txs = txsQueue
 					}
+					bpa.BatchIndex = ev.Msg.BatchIndex
 					bpa.StartIndex = ev.Msg.StartHeight
 					bpa.Sequencer = w.coinbase
 					signature, err := w.engine.SignData(bpa.Sequencer, bpa.GetSignData())
@@ -544,6 +558,12 @@ func (w *worker) batchAnswerLoop() {
 			var ok bool
 			if ev, ok = obj.Data.(core.BatchPeriodAnswerEvent); !ok {
 				continue
+			}
+			if w.knowBatchPeriodAnswerMsg.Contains(ev.Msg.Hash()) {
+				log.Debug("Duplicated BatchPeriodAnswerMsg", "batchIndex", ev.Msg.StartIndex, "tx_count", len(ev.Msg.Txs))
+				continue
+			} else {
+				w.knowBatchPeriodAnswerMsg.Add(ev.Msg.Hash())
 			}
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
@@ -646,7 +666,7 @@ func (w *worker) mainLoop() {
 				// a transaction that cannot be added to the chain, so this
 				// should be updated to a select statement that can also listen
 				// for errors.
-				head := <-w.chainHeadCh
+				head := <-w.chainHeadToRollupCh
 				txs := head.Block.Transactions()
 				if len(txs) == 0 {
 					log.Warn("No transactions in block")
@@ -716,8 +736,8 @@ func (w *worker) mainLoop() {
 			return
 		//case <-w.txsSub.Err():
 		//	return
-		//case <-w.chainHeadSub.Err():
-		//	return
+		case <-w.chainHeadSub.Err():
+			return
 		case <-w.chainSideSub.Err():
 			return
 		}
