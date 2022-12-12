@@ -472,7 +472,20 @@ func (w *worker) batchStartLoop() {
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
+					// TODO wait until expireTime
 					log.Info("Active sequencer receives batchPeriodStartEvent")
+					if ev.Msg.StartHeight != w.chain.CurrentBlock().NumberU64()+1 {
+						log.Info("start height mismatch", "current_height", w.current.header.Number.Uint64(), "startHeight", ev.Msg.StartHeight)
+						continue
+					}
+					if ev.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
+						log.Info("maxHeight is too large, just ignore the batch", "current_height", w.current.header.Number.Uint64(), "maxHeight", ev.Msg.MaxHeight)
+						continue
+					}
+					if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
+						log.Info("expire timestamp is passed", "current_time", time.Now().Unix(), "expireTime", ev.Msg.ExpireTime)
+						continue
+					}
 					pending, err := w.eth.TxPool().Pending()
 					if err != nil {
 						log.Error("Failed to fetch pending transactions", "err", err)
@@ -499,18 +512,7 @@ func (w *worker) batchStartLoop() {
 					for _, txs := range remoteTxs {
 						txsQueue = append(txsQueue, txs...)
 					}
-					if ev.Msg.StartHeight != w.chain.CurrentBlock().NumberU64()+1 {
-						log.Info("start height mismatch", "current_height", w.current.header.Number.Uint64(), "startHeight", ev.Msg.StartHeight)
-						continue
-					}
-					if ev.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
-						log.Info("maxHeight is too large, just ignore the batch", "current_height", w.current.header.Number.Uint64(), "maxHeight", ev.Msg.MaxHeight)
-						continue
-					}
-					if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
-						log.Info("expire timestamp is passed", "current_time", time.Now().Unix(), "expireTime", ev.Msg.ExpireTime)
-						continue
-					}
+
 					var bpa types.BatchPeriodAnswerMsg
 					if uint64(len(txsQueue)) > ev.Msg.MaxHeight-ev.Msg.StartHeight {
 						bpa.Txs = txsQueue[:ev.Msg.MaxHeight-ev.Msg.StartHeight]
@@ -569,7 +571,7 @@ func (w *worker) batchAnswerLoop() {
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
 				log.Info("Scheduler receives BatchPeriodAnswerEvent", "Sequencer", ev.Msg.Sequencer.String())
 				for _, tx := range ev.Msg.Txs {
-					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx)
+					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, ev.Msg.Sequencer)
 					if err != nil {
 						log.Error("ValidateAndApplySequencerTransaction error", "errMsg", err.Error())
 						continue
@@ -658,7 +660,7 @@ func (w *worker) mainLoop() {
 			// send the block through the `taskCh` and then through the
 			// `resultCh` which ultimately adds the block to the blockchain
 			// through `bc.WriteBlockWithState`
-			if err := w.commitNewTx(tx); err == nil {
+			if err := w.commitNewTx(tx, ev.Sequencer); err == nil {
 				// `chainHeadCh` is written to when a new block is added to the
 				// tip of the chain. Reading from the channel will block until
 				// the ethereum block is added to the chain downstream of `commitNewTx`.
@@ -1096,7 +1098,7 @@ func (w *worker) commitTransactionsWithError(txs *types.TransactionsByPriceAndNo
 // It needs to return an error in the case there is an error to prevent waiting
 // on reading from a channel that is written to when a new block is added to the
 // chain.
-func (w *worker) commitNewTx(tx *types.Transaction) error {
+func (w *worker) commitNewTx(tx *types.Transaction, sequencer common.Address) error {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 	tstart := time.Now()
@@ -1127,6 +1129,7 @@ func (w *worker) commitNewTx(tx *types.Transaction) error {
 		GasLimit:   w.config.GasFloor,
 		Extra:      w.extra,
 		Time:       tx.L1Timestamp(),
+		Coinbase:   sequencer,
 	}
 	if err := w.engine.Prepare(w.chain, header); err != nil {
 		return fmt.Errorf("Failed to prepare header for mining: %w", err)

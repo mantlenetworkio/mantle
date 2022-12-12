@@ -314,7 +314,7 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 				return fmt.Errorf("Calldata cannot be larger than %d, sent %d", b.MaxCallDataSize, len(signedTx.Data()))
 			}
 		}
-		return b.eth.syncService.ValidateAndApplySequencerTransaction(signedTx)
+		return b.eth.syncService.ValidateAndApplySequencerTransaction(signedTx, b.eth.syncService.GetScheduler())
 	}
 	return nil
 }
