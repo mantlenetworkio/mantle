@@ -206,7 +206,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 			return nil, fmt.Errorf("Cannot initialize latest L1 data: %w", err)
 		}
 
-		// Log the OVMContext information on startup
+		// Log the BVMContext information on startup
 		bn := service.GetLatestL1BlockNumber()
 		ts := service.GetLatestL1Timestamp()
 		log.Info("Initialized Latest L1 Info", "blocknumber", bn, "timestamp", ts)
@@ -288,7 +288,7 @@ func (s *SyncService) initializeLatestL1(ctcDeployHeight *big.Int) error {
 		if ctcDeployHeight == nil {
 			return errors.New("Must configure with canonical transaction chain deploy height")
 		}
-		log.Info("Initializing initial OVM Context", "ctc-deploy-height", ctcDeployHeight.Uint64())
+		log.Info("Initializing initial BVM Context", "ctc-deploy-height", ctcDeployHeight.Uint64())
 		context, err := s.client.GetEthContext(ctcDeployHeight.Uint64())
 		if err != nil {
 			return fmt.Errorf("Cannot fetch ctc deploy block at height %d: %w", ctcDeployHeight.Uint64(), err)
@@ -333,7 +333,7 @@ func (s *SyncService) initializeLatestL1(ctcDeployHeight *big.Int) error {
 		txs := block.Transactions()
 		if len(txs) != 1 {
 			log.Error("Unexpected number of transactions in block", "count", len(txs))
-			panic("Cannot recover OVM Context")
+			panic("Cannot recover BVM Context")
 		}
 		tx := txs[0]
 		s.SetLatestL1Timestamp(tx.L1Timestamp())
@@ -539,7 +539,7 @@ func (s *SyncService) updateL2GasPrice(statedb *state.StateDB) error {
 	return s.RollupGpo.SetL2GasPrice(value)
 }
 
-// updateOverhead will update the overhead value from the OVM_GasPriceOracle
+// updateOverhead will update the overhead value from the BVM_GasPriceOracle
 // in the local cache
 func (s *SyncService) updateOverhead(statedb *state.StateDB) error {
 	value, err := s.readGPOStorageSlot(statedb, rcfg.OverheadSlot)
@@ -549,7 +549,7 @@ func (s *SyncService) updateOverhead(statedb *state.StateDB) error {
 	return s.RollupGpo.SetOverhead(value)
 }
 
-// updateScalar will update the scalar value from the OVM_GasPriceOracle
+// updateScalar will update the scalar value from the BVM_GasPriceOracle
 // in the local cache
 func (s *SyncService) updateScalar(statedb *state.StateDB) error {
 	scalar, err := s.readGPOStorageSlot(statedb, rcfg.ScalarSlot)
@@ -578,7 +578,7 @@ func (s *SyncService) cacheGasPriceOracleOwner(statedb *state.StateDB) error {
 }
 
 // readGPOStorageSlot is a helper function for reading storage
-// slots from the OVM_GasPriceOracle
+// slots from the BVM_GasPriceOracle
 func (s *SyncService) readGPOStorageSlot(statedb *state.StateDB, hash common.Hash) (*big.Int, error) {
 	var err error
 	if statedb == nil {
@@ -592,9 +592,9 @@ func (s *SyncService) readGPOStorageSlot(statedb *state.StateDB, hash common.Has
 }
 
 // updateGasPriceOracleCache caches the owner as well as updating the
-// the L2 gas price from the OVM_GasPriceOracle.
+// the L2 gas price from the BVM_GasPriceOracle.
 // This should be sure to read all public variables from the
-// OVM_GasPriceOracle
+// BVM_GasPriceOracle
 func (s *SyncService) updateGasPriceOracleCache(hash *common.Hash) error {
 	var statedb *state.StateDB
 	var err error
@@ -915,7 +915,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 	})
 	// Block until the transaction has been added to the chain
 	log.Info("Waiting for transaction to be added to chain", "hash", tx.Hash().Hex())
-	defer log.Info("Transaction has be added to chain")
+
 	select {
 	case err := <-errCh:
 		log.Error("Got error waiting for transaction to be added to chain", "msg", err)

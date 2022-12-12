@@ -390,7 +390,7 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 			clearPending(w.chain.CurrentBlock().NumberU64())
 			commit(commitInterruptNewHead)
 
-		// Remove this code for the OVM implementation. It is responsible for
+		// Remove this code for the BVM implementation. It is responsible for
 		// cleaning up memory with the call to `clearPending`, so be sure to
 		// call that in the new hot code path
 		case head := <-w.chainHeadCh:
@@ -681,7 +681,7 @@ func (w *worker) mainLoop() {
 				// `clearPending` function and must be called
 				// periodically to clean up pending tasks. This
 				// function was originally called in `newWorkLoop`
-				// but the OVM implementation no longer uses that code path.
+				// but the BVM implementation no longer uses that code path.
 				w.pendingMu.Lock()
 				for h := range w.pendingTasks {
 					delete(w.pendingTasks, h)
@@ -1056,7 +1056,7 @@ func (w *worker) commitTransactionsWithError(txs *types.TransactionsByPriceAndNo
 			txs.Shift()
 		}
 
-		// UsingOVM
+		// UsingBVM
 		// Return specific execution errors directly to the user to
 		// avoid returning the generic ErrCannotCommitTxnErr. It is safe
 		// to return the error directly since l2geth only processes at
@@ -1092,7 +1092,7 @@ func (w *worker) commitTransactionsWithError(txs *types.TransactionsByPriceAndNo
 	return nil
 }
 
-// commitNewTx is an OVM addition that mines a block with a single tx in it.
+// commitNewTx is an BVM addition that mines a block with a single tx in it.
 // It needs to return an error in the case there is an error to prevent waiting
 // on reading from a channel that is written to when a new block is added to the
 // chain.

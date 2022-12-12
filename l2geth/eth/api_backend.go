@@ -49,7 +49,7 @@ type EthAPIBackend struct {
 	rollupGpo       *gasprice.RollupOracle
 	verifier        bool
 	gasLimit        uint64
-	UsingOVM        bool
+	UsingBVM        bool
 	MaxCallDataSize int
 }
 
@@ -102,7 +102,7 @@ func (b *EthAPIBackend) SetHead(number uint64) {
 		log.Info("Cannot reset to genesis")
 		return
 	}
-	if !b.UsingOVM {
+	if !b.UsingBVM {
 		b.eth.protocolManager.downloader.Cancel()
 	}
 	b.eth.blockchain.SetHead(number)
@@ -300,7 +300,7 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 		// TODO add sync service pre check
 		return b.eth.txPool.AddLocal(signedTx)
 	}
-	if b.UsingOVM {
+	if b.UsingBVM {
 		//TODO only for L1 to L2 transactions
 		to := signedTx.To()
 		if to != nil {
