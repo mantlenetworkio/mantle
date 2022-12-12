@@ -297,9 +297,11 @@ func (b *EthAPIBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscri
 // a lock can be used around the remotes for when the sequencer is reorganizing.
 func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
 	if b.eth.syncService.IsSequencerMode() {
+		// TODO add sync service pre check
 		return b.eth.txPool.AddLocal(signedTx)
 	}
 	if b.UsingOVM {
+		//TODO only for L1 to L2 transactions
 		to := signedTx.To()
 		if to != nil {
 			// Prevent QueueOriginSequencer transactions that are too large to

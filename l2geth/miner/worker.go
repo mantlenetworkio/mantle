@@ -515,7 +515,7 @@ func (w *worker) batchStartLoop() {
 					if uint64(len(txsQueue)) > ev.Msg.MaxHeight-ev.Msg.StartHeight {
 						bpa.Txs = txsQueue[:ev.Msg.MaxHeight-ev.Msg.StartHeight]
 					} else {
-						bpa.Txs = txsQueue
+						bpa.Txs = txsQueue // TODO before expire time, send multiple BatchPeriodAnswerMsg
 					}
 					bpa.BatchIndex = ev.Msg.BatchIndex
 					bpa.StartIndex = ev.Msg.StartHeight
