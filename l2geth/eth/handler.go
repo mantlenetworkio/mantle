@@ -208,6 +208,11 @@ func (pm *ProtocolManager) setSchedulerInst(schedulerInst *clique.Scheduler) {
 
 func (pm *ProtocolManager) setEtherBase(etherBase common.Address) {
 	pm.etherbase = etherBase
+	for k, v := range pm.consensusPeers.peers {
+		if err := pm.checkPeer(v); err != nil {
+			pm.removePeerTmp(k)
+		}
+	}
 }
 
 func (pm *ProtocolManager) makeProtocol(version uint) p2p.Protocol {
