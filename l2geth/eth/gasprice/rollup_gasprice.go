@@ -18,7 +18,7 @@ type RollupOracle struct {
 	scalar         *big.Float
 	isBurning      *big.Int
 	charge         *big.Int
-	sccAddress     *common.Address
+	sccAddress     common.Address
 	l1GasPriceLock sync.RWMutex
 	l2GasPriceLock sync.RWMutex
 	overheadLock   sync.RWMutex
@@ -128,10 +128,17 @@ func (gpo *RollupOracle) SetCharge(charge *big.Int) error {
 }
 
 // SetCharge sets the charge value held in the BVM_GasPriceOracle
-func (gpo *RollupOracle) SetSCCAddress(sccAddress *common.Address) error {
+func (gpo *RollupOracle) SetSCCAddress(sccAddress common.Address) error {
 	gpo.sccAddressLock.Lock()
 	defer gpo.sccAddressLock.Unlock()
 	gpo.sccAddress = sccAddress
 	log.Info("Set sccAddress", "sccAddress", sccAddress)
 	return nil
+}
+
+// SCCAddress returns the cached SCCAddress value
+func (gpo *RollupOracle) SCCAddress() (common.Address, error) {
+	gpo.sccAddressLock.RLock()
+	defer gpo.sccAddressLock.RUnlock()
+	return gpo.sccAddress, nil
 }

@@ -6,7 +6,7 @@ use (
 	./gas-oracle
 	./l2geth
 	./l2geth-exporter
-	./mt-batcher
+	//./mt-batcher
 	./proxyd
 	./state-surgery
 	./subsidy

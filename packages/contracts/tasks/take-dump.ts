@@ -52,7 +52,12 @@ task('take-dump').setAction(async (args, hre) => {
       decimals: hre.deployConfig.gasPriceOracleDecimals,
       isBurning: hre.deployConfig.gasPriceOracleIsBurning,
       charge: hre.deployConfig.gasPriceOracleCharge,
-      sccAddress:hre.deployConfig.sccAddress,
+      sccAddress: (
+        await getContractFromArtifact(
+          hre,
+          names.managed.contracts.StateCommitmentChain
+        )
+      ).address,
     },
     L2StandardBridge: {
       l1TokenBridge: (
