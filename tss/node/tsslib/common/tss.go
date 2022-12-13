@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"github.com/binance-chain/tss-lib/tss"
-	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	abnormal2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/abnormal"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
