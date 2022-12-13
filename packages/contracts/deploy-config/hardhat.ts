@@ -13,6 +13,10 @@ const config = {
   bvmAddressManagerOwner: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
   bvmGasPriceOracleOwner: '0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc',
   l1BitAddress: '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
+  bvmTssRewardContractOwner: '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
+  bvmFeeWalletOwner: '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
+  dataManagerAddress: '0xec36421F31108A26E46a0445d336978aA88A2012',
+  bvmEigenSequencerAddress: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
 }
 
 export default config

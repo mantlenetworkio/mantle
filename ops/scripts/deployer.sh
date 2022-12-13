@@ -24,6 +24,10 @@ curl \
 echo "Connected to L1."
 echo "Building deployment command."
 
+echo $CONTRACTS_TARGET_NETWORK
+echo $SKIP_CONTRACT_DEPLOY
+echo "test point1"
+
 if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
   DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
 
@@ -34,6 +38,7 @@ elif [ $SKIP_CONTRACT_DEPLOY == "NO" ] ; then
   DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
   echo $PWD
   rm -rf deployments/goerli-qa
+  rm -rf deployments/goerli-testnet
   rm -rf deployments/goerlibn
 
   echo "Deploying contracts. Deployment command:"
@@ -46,14 +51,24 @@ fi
 echo "Building addresses.json."
 export ADDRESS_MANAGER_ADDRESS=$(cat "./deployments/$CONTRACTS_TARGET_NETWORK/Lib_AddressManager.json" | jq -r .address)
 
-# First, create two files. One of them contains a list of addresses, the other contains a list of contract names.
-find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | xargs cat | jq -r '.address' > addresses.txt
-find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | sed -e "s/.\/deployments\/$CONTRACTS_TARGET_NETWORK\///g" | sed -e 's/.json//g' > filenames.txt
+
+if [ $SKIP_CONTRACT_DEPLOY == "NO" ] ;then
+  echo "Re-generate addresses.txt"
+  # First, create two files. One of them contains a list of addresses, the other contains a list of contract names.
+  find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | xargs cat | jq -r '.address' > addresses.txt
+  find "./deployments/$CONTRACTS_TARGET_NETWORK" -maxdepth 1 -name '*.json' | sed -e "s/.\/deployments\/$CONTRACTS_TARGET_NETWORK\///g" | sed -e 's/.json//g' > filenames.txt
+elif [ $CONTRACTS_TARGET_NETWORK == "goerli-qa" ] ; then
+  cp -r addresses-qa.txt addresses.txt
+  cp -r filenames-qa.txt filenames.txt
+else [ $CONTRACTS_TARGET_NETWORK == "goerli-testnet" ]
+  cp -r addresses-testnet.txt addresses.txt
+  cp -r filenames-testnet.txt filenames.txt
+fi
 
 # Start building addresses.json.
-echo "{" >> addresses.json
+echo "{" > addresses.json
 # Zip the two files describe above together, then, switch their order and format as JSON.
-paste addresses.txt filenames.txt | sed -e "s/^\([^ ]\+\)\s\+\([^ ]\+\)/\"\2\": \"\1\",/" >> addresses.json
+paste addresses.txt filenames.txt | awk '{printf "  \"%s\": \"%s\",\n", $2, $1}' >> addresses.json
 # Add the address manager alias.
 echo "\"AddressManager\": \"$ADDRESS_MANAGER_ADDRESS\"" >> addresses.json
 # End addresses.json
@@ -68,9 +83,12 @@ mv addresses.json ./genesis
 cp ./genesis/$CONTRACTS_TARGET_NETWORK.json ./genesis/state-dump.latest.json
 
 # init balance
-jq -n 'reduce inputs as $item ({}; . *= $item)' ./genesis/state-dump.latest.json ./balance.json > genesis2.json
-mv ./genesis/state-dump.latest.json ./genesis/state-dump1.latest.json
-mv ./genesis2.json ./genesis/state-dump.latest.json
+if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
+  jq -n 'reduce inputs as $item ({}; . *= $item)' ./genesis/state-dump.latest.json ./balance.json > genesis2.json
+  mv ./genesis/state-dump.latest.json ./genesis/state-dump.latest.json.bak
+  cp ./genesis2.json ./genesis/state-dump.latest.json
+fi
+
 
 # service the addresses and dumps
 echo "Starting server."

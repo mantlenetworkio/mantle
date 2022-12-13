@@ -82,12 +82,27 @@ export interface DeployConfig {
   /**
    * Address of the owner of the GasPriceOracle contract on L2.
    */
+  bvmFeeWalletOwner: string
+
+  /**
+   * Address of the owner of the GasPriceOracle contract on L2.
+   */
   bvmGasPriceOracleOwner: string
 
   /**
    * Optional whitelist owner address.
    */
   bvmWhitelistOwner?: string
+
+  /**
+   * Address of data manager.
+   */
+  dataManagerAddress: string
+
+  /**
+   * Address of data eigenda sequencer.
+   */
+  bvmEigenSequencerAddress: string
 
   /**
    * Optional initial overhead value for GPO (default: 2750).
@@ -103,6 +118,16 @@ export interface DeployConfig {
    * Optional initial decimals for GPO (default: 6).
    */
   gasPriceOracleDecimals?: number
+
+  /**
+   * Optional initial isBurning for GPO (default: false).
+   */
+  gasPriceOracleIsBurning?: number
+
+  /**
+   * Optional initial charge for GPO (default: false).
+   */
+  gasPriceOracleCharge?: number
 
   /**
    * Optional initial L1 base fee for GPO (default: 1).
@@ -180,9 +205,18 @@ const configSpec: {
   bvmGasPriceOracleOwner: {
     type: 'address',
   },
+  bvmFeeWalletOwner: {
+    type: 'address',
+  },
   bvmWhitelistOwner: {
     type: 'address',
     default: ethers.constants.AddressZero,
+  },
+  dataManagerAddress: {
+    type: 'address',
+  },
+  bvmEigenSequencerAddress: {
+    type: 'address',
   },
   gasPriceOracleOverhead: {
     type: 'number',
@@ -195,6 +229,14 @@ const configSpec: {
   gasPriceOracleDecimals: {
     type: 'number',
     default: 6,
+  },
+  gasPriceOracleIsBurning: {
+    type: 'number',
+    default: 1,
+  },
+  gasPriceOracleCharge: {
+    type: 'number',
+    default: 0,
   },
   gasPriceOracleL1BaseFee: {
     type: 'number',

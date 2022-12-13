@@ -4,11 +4,12 @@ import * as dotenv from 'dotenv'
 import { ethers } from 'ethers'
 
 // Hardhat plugins
-import '@mantlenetworkio/hardhat-deploy-config'
+import '@openzeppelin/hardhat-upgrades'
+import '@mantleio/hardhat-deploy-config'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
-import '@primitivefi/hardhat-dodoc'
+// import '@primitivefi/hardhat-dodoc'
 import '@typechain/hardhat'
 import 'hardhat-deploy'
 import 'hardhat-gas-reporter'
@@ -24,6 +25,52 @@ const enableGasReport = !!process.env.ENABLE_GAS_REPORT
 const privateKey = process.env.PRIVATE_KEY || '0x' + '11'.repeat(32) // this is to avoid hardhat error
 const deploy = process.env.DEPLOY_DIRECTORY || 'deploy'
 
+import { copySync, remove } from 'fs-extra'
+import { subtask } from 'hardhat/config'
+import {
+  TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS,
+  TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT,
+  TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE
+} from 'hardhat/builtin-tasks/task-names'
+import { spawnSync } from 'child_process'
+
+subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
+  async (_, __, runSuper) => {
+    console.log('running task')
+    // copySync(
+    //   '../../datalayr-mantle/contracts/eignlayr-contracts/src',
+    //   './contracts/libraries/eigenda/lib'
+    // )
+    const paths = await runSuper()
+    const filteredPaths = paths.filter(function (p) {
+      return !p.includes('eigenda')
+    })
+    console.log('end task')
+    return filteredPaths
+  }
+)
+
+subtask(TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT).setAction(
+  async (_, __, runSuper) => {
+    console.log('running TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT')
+
+    // delete
+    // await remove('./contracts/libraries/eigenda')
+
+    runSuper()
+  }
+)
+
+subtask(TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE).setAction(
+  async (_, __, runSuper) => {
+    console.log('running TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE')
+
+    // delete
+    // await remove('./contracts/libraries/eigenda')
+    runSuper()
+  }
+)
+
 const config: HardhatUserConfig = {
   networks: {
     hardhat: {
@@ -35,6 +82,14 @@ const config: HardhatUserConfig = {
       chainId: 31337,
       url: 'http://127.0.0.1:9545',
       accounts: [privateKey],
+    },
+    dev: {
+      chainId: 31337,
+      url: 'https://mantle-l1chain.dev.davionlabs.com',
+      accounts: [
+        'dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97',
+        'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
+      ],
     },
     mantle: {
       url: 'http://127.0.0.1:8545',
@@ -61,17 +116,22 @@ const config: HardhatUserConfig = {
       chainId: 5,
       url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
       deploy,
-      accounts: [
-        'e4bf8c09fc7bb5c3eb932260b9fcf0f2a3fecb61512b0e979afb4ce1187bfe70',
-      ],
+      accounts: [privateKey],
     },
     'goerli-qa': {
       chainId: 5,
       url: 'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28',
       deploy,
-      accounts: [
-        '04586afc8e720e5dbb06f598b056d835bb02cd9743efd438cda8055c90722f33',
-      ],
+      accounts: [privateKey],
+    },
+    'goerli-testnet': {
+      chainId: 5,
+      //url: 'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28',
+      url: 'https://goerli.davionlabs.com',
+      deploy,
+      accounts: [privateKey],
+      gas: 'auto',
+      gasPrice: 'auto',
     },
     kovan: {
       chainId: 42,
@@ -221,9 +281,18 @@ const config: HardhatUserConfig = {
     bvmGasPriceOracleOwner: {
       type: 'address',
     },
+    bvmFeeWalletOwner: {
+      type: 'address',
+    },
     bvmWhitelistOwner: {
       type: 'address',
       default: ethers.constants.AddressZero,
+    },
+    dataManagerAddress: {
+      type: 'address',
+    },
+    bvmEigenSequencerAddress: {
+      type: 'address',
     },
     gasPriceOracleOverhead: {
       type: 'number',
@@ -237,13 +306,21 @@ const config: HardhatUserConfig = {
       type: 'number',
       default: 6,
     },
+    gasPriceOracleIsBurning: {
+      type: 'number',
+      default: 1,
+    },
+    gasPriceOracleCharge: {
+      type: 'number',
+      default: 0,
+    },
     gasPriceOracleL1BaseFee: {
       type: 'number',
       default: 1,
     },
     gasPriceOracleL2GasPrice: {
       type: 'number',
-      default: 0,
+      default: 1,
     },
     hfBerlinBlock: {
       type: 'number',

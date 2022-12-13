@@ -25,19 +25,19 @@ services:
     <<: *base
     container_name: mantledeployer
     environment:
-      CONTRACTS_RPC_URL: ${CONTRACTS_RPC_URL:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
+      CONTRACTS_RPC_URL: ${CONTRACTS_RPC_URL:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
       CONTRACTS_DEPLOYER_KEY: ${CONTRACTS_DEPLOYER_KEY:-04586afc8e720e5dbb06f598b056d835bb02cd9743efd438cda8055c90722f33}
       CONTRACTS_TARGET_NETWORK: ${CONTRACTS_TARGET_NETWORK:-goerli-qa}
       ETHERSCAN_API_KEY: ${ETHERSCAN_API_KEY:-B1XAN986315AME96W9QK7X1RGQ6WJMWEPW}
       BVM_SEQUENCER_ADDRESS: ${BVM_SEQUENCER_ADDRESS:-}
       BVM_PROPOSER_ADDRESS: ${BVM_PROPOSER_ADDRESS:-}
-      SKIP_CONTRACT_DEPLOY: ${CONTRACTS_DEPLOYER_KEY:-YES}
+      SKIP_CONTRACT_DEPLOY: ${SKIP_CONTRACT_DEPLOY:-YES}
       BVM_BLOCK_SIGNER_ADDRESS: ${BVM_BLOCK_SIGNER_ADDRESS:-}
       BVM_FEE_WALLET_ADDRESS: ${BVM_FEE_WALLET_ADDRESS:-}
       BVM_ADDRESS_MANAGER_OWNER: ${BVM_ADDRESS_MANAGER_OWNER:-}
       BVM_GAS_PRICE_ORACLE_OWNER: ${BVM_GAS_PRICE_ORACLE_OWNER:-}
       AUTOMATICALLY_TRANSFER_OWNERSHIP: ${AUTOMATICALLY_TRANSFER_OWNERSHIP:-true}
-      L1_BIT_ADDRESS: ${L1_BIT_ADDRESS:-0x320735F74BaA37Bc344a96D4A4EfABBAB06A522C}
+      L1_BIT_ADDRESS: ${L1_BIT_ADDRESS:-0xC40C655a91ef15c8eAd818B840CFC08C755D2C0F}
     ports:
       # expose the service to the host for getting the contract addrs
       - ${DEPLOYER_PORT:-8080}:8081
@@ -47,22 +47,25 @@ services:
     <<: *base
     container_name: bitdtl
     environment:
-      DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT: ${DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
+      DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT: ${DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
       DATA_TRANSPORT_LAYER__L1_START_HEIGHT: ${DATA_TRANSPORT_LAYER__L1_START_HEIGHT:-7759200}
       DATA_TRANSPORT_LAYER__L2_CHAIN_ID: ${DATA_TRANSPORT_LAYER__L2_CHAIN_ID:-1705003}
 
   l2geth:
     <<: *base
     environment:
-      ETH1_HTTP: ${ETH1_HTTP:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
+      ETH1_HTTP: ${ETH1_HTTP:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
     container_name: bitl2geth
 
   gas_oracle:
     <<: *base
     container_name: bitgasoracle
+    env_file:
+      - ./envs/gas-oracle.env
     environment:
-      GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL: ${GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
-      GAS_PRICE_ORACLE_PRIVATE_KEY: ${GAS_PRICE_ORACLE_PRIVATE_KEY:-0xd20daefa839330fa6bdc36f4b4f24eeb2403d2cbaaa602ec2edc6ef5f0010514}
+      GAS_PRICE_ORACLE_PRIVATE_KEY: ${GAS_PRICE_ORACLE_PRIVATE_KEY:-0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba}
+      GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL: ${GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
+      TOKEN_PRICER_UPDATE_FREQUENCY: ${TOKEN_PRICER_UPDATE_FREQUENCY:-600}
     deploy:
       replicas: 1
 
@@ -70,9 +73,10 @@ services:
     <<: *base
     container_name: bitbatchsubmitter
     environment:
-      L1_ETH_RPC: ${L1_ETH_RPC:-https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp}
-      BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY: ${BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY:-0x04586afc8e720e5dbb06f598b056d835bb02cd9743efd438cda8055c90722f33}
-      BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY: ${BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY:-0x7ae9a12a6a2da8528b5b3d4b0c27b218109f08b37d3564a9b890203edd4aa8d8}
+      L1_ETH_RPC: ${L1_ETH_RPC:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
+      BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY: ${BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY:-0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d}
+      BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY: ${BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY:-0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a}
+
 
   integration_tests:
     <<: *base
@@ -88,8 +92,10 @@ services:
   verifier:
     <<: *base
     container_name: bitverifier
+    environment:
+      ETH1_HTTP: ${ETH1_HTTP:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
     deploy:
-      replicas: 0
+      replicas: 1
 
   replica:
     <<: *base

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
 )
 
 func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContractBackend, cfg *Config) (func() error, error) {
@@ -33,11 +33,10 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 
 	// Create a new contract bindings in scope of the updateL2GasPriceFn
 	// that is returned from this function
-	contract, err := bindings.NewGasPriceOracle(cfg.gasPriceOracleAddress, l2Backend)
+	contract, err := bindings.NewBVMGasPriceOracle(cfg.gasPriceOracleAddress, l2Backend)
 	if err != nil {
 		return nil, err
 	}
-
 	return func() error {
 		baseFee, err := contract.L1BaseFee(&bind.CallOpts{
 			Context: context.Background(),
@@ -78,7 +77,7 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 		if err := l2Backend.SendTransaction(context.Background(), tx); err != nil {
 			return fmt.Errorf("cannot update base fee: %w", err)
 		}
-		log.Info("L1 base fee transaction sent", "hash", tx.Hash().Hex())
+		log.Info("L1 base fee transaction sent", "hash", tx.Hash().Hex(), "baseFee", tip.BaseFee)
 
 		if cfg.waitForReceipt {
 			// Wait for the receipt

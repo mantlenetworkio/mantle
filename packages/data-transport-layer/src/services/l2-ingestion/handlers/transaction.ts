@@ -1,7 +1,7 @@
 /* Imports: External */
 import { BigNumber, ethers } from 'ethers'
 import { serialize } from '@ethersproject/transactions'
-import { padHexString } from '@mantlenetworkio/core-utils'
+import { padHexString } from '@mantleio/core-utils'
 
 /* Imports: Internal */
 import { TransportDB } from '../../../db/transport-db'

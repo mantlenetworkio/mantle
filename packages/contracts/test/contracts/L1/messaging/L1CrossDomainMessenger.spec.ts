@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat'
 import { Contract, BigNumber } from 'ethers'
 import { smock, FakeContract, MockContract } from '@defi-wonderland/smock'
-import { toHexString, applyL1ToL2Alias } from '@mantlenetworkio/core-utils'
+import { toHexString, applyL1ToL2Alias } from '@mantleio/core-utils'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
 import { expect } from '../../../setup'

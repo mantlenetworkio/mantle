@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Contract } from 'ethers'
-import { hexStringEquals } from '@mantlenetworkio/core-utils'
+import { hexStringEquals } from '@mantleio/core-utils'
 
 import { AddressLike } from '../interfaces'
 import { toAddress } from '../utils'

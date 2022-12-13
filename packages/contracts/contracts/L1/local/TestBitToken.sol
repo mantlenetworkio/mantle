@@ -9,7 +9,7 @@ contract BitTokenERC20 is ERC20 {
         // Similar to how
         // 1 dollar = 100 cents
         // 1 token = 1 * (10 ** decimals)
-        _mint(msg.sender, 100 * 10**uint(decimals()));
+        _mint(msg.sender, 10000 * 10**uint(decimals()));
     }
 
     // public mint for any user

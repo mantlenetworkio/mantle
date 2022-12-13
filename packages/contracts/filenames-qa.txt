@@ -1,0 +1,33 @@
+StateCommitmentChain
+Proxy__BVM_L1StandardBridge
+<<<<<<< HEAD:packages/contracts/filenames.txt
+TssStakingSlashing
+BVM_L1CrossDomainMessenger
+Proxy__TSS_GroupManager
+Lib_AddressManager
+AddressDictator
+BVM_EigenDataLayrChain
+CanonicalTransactionChain
+TssGroupManager
+L1StandardBridge_for_verification_only
+ChugSplashDictator
+Proxy__BVM_EigenDataLayrChain
+Proxy__BVM_L1CrossDomainMessenger
+Proxy__TSS_StakingSlashing
+=======
+>>>>>>> main:packages/contracts/filenames-qa.txt
+BondManager
+TssStakingSlashing
+ChainStorageContainer-SCC-batches
+CanonicalTransactionChain
+ChugSplashDictator
+Proxy__TSS_GroupManager
+Proxy__BVM_L1CrossDomainMessenger
+AddressDictator
+L1StandardBridge_for_verification_only
+ChainStorageContainer-CTC-batches
+TestBitToken
+Proxy__TSS_StakingSlashing
+Lib_AddressManager
+TssGroupManager
+BVM_L1CrossDomainMessenger

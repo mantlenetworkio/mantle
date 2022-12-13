@@ -34,6 +34,12 @@ var (
 	// DecimalsSlot refers to the storage slot in the BVM_GasPriceOracle that
 	// holds the number of decimals in the fee scalar
 	DecimalsSlot = common.BigToHash(big.NewInt(5))
+	// IsBurningSlot refers to the storage slot in the BVM_GasPriceOracle that
+	// holds switch controls whether GasFee is brun
+	IsBurningSlot = common.BigToHash(big.NewInt(6))
+	// ChargeSlot refers to the storage slot in the BVM_GasPriceOracle that
+	// holds switch controls whether charge
+	ChargeSlot = common.BigToHash(big.NewInt(7))
 )
 
 func init() {

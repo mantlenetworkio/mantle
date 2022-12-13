@@ -1,8 +1,8 @@
-import { ethers, Contract } from 'ethers'
-import { Provider } from '@ethersproject/abstract-provider'
-import { Signer } from '@ethersproject/abstract-signer'
-import { sleep, awaitCondition, getChainId } from '@mantlenetworkio/core-utils'
-import { HttpNetworkConfig } from 'hardhat/types'
+import {Contract, ethers} from 'ethers'
+import {Provider} from '@ethersproject/abstract-provider'
+import {Signer} from '@ethersproject/abstract-signer'
+import {awaitCondition, getChainId, sleep} from '@mantleio/core-utils'
+import {HttpNetworkConfig} from 'hardhat/types'
 
 /**
  * @param  {Any} hre Hardhat runtime environment
@@ -14,13 +14,13 @@ import { HttpNetworkConfig } from 'hardhat/types'
  */
 
 export const deployAndVerifyAndThen = async ({
-  hre,
-  name,
-  args,
-  contract,
-  iface,
-  postDeployAction,
-}: {
+                                               hre,
+                                               name,
+                                               args,
+                                               contract,
+                                               iface,
+                                               postDeployAction,
+                                             }: {
   hre: any
   name: string
   args: any[]
@@ -28,8 +28,8 @@ export const deployAndVerifyAndThen = async ({
   iface?: string
   postDeployAction?: (contract: Contract) => Promise<void>
 }) => {
-  const { deploy } = hre.deployments
-  const { deployer } = await hre.getNamedAccounts()
+  const {deploy} = hre.deployments
+  const {deployer} = await hre.getNamedAccounts()
 
   const result = await deploy(name, {
     contract,
@@ -266,3 +266,11 @@ export const isHardhatNode = async (hre) => {
 
 // Large balance to fund accounts with.
 export const BIG_BALANCE = ethers.BigNumber.from(`0xFFFFFFFFFFFFFFFFFFFF`)
+
+export const HexToBytes = async (hex: string) => {
+  const bytes = []
+  for (let c = 0; c < hex.length; c += 2) {
+    bytes.push(parseInt(hex.substr(c, 2), 16))
+  }
+  return bytes
+}

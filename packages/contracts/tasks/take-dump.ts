@@ -1,16 +1,16 @@
 import * as path from 'path'
 import * as fs from 'fs'
-import { exec } from 'child_process'
-import { promisify } from 'util'
+import {exec} from 'child_process'
+import {promisify} from 'util'
 
 import * as mkdirp from 'mkdirp'
-import { ethers } from 'ethers'
-import { task } from 'hardhat/config'
-import { remove0x } from '@mantlenetworkio/core-utils'
+import {ethers} from 'ethers'
+import {task} from 'hardhat/config'
+import {remove0x} from '@mantleio/core-utils'
 
-import { predeploys } from '../src/predeploys'
-import { getContractFromArtifact } from '../src/deploy-utils'
-import { names } from '../src/address-names'
+import {predeploys} from '../src/predeploys'
+import {getContractFromArtifact} from '../src/deploy-utils'
+import {names} from '../src/address-names'
 
 task('take-dump').setAction(async (args, hre) => {
   /* eslint-disable @typescript-eslint/no-var-requires */
@@ -25,7 +25,7 @@ task('take-dump').setAction(async (args, hre) => {
   // Needs to be imported here because the artifacts can only be generated after the contracts have
   // been compiled, but compiling the contracts will import the config file which, as a result,
   // will import this file.
-  const { getContractArtifact } = require('../src/contract-artifacts')
+  const {getContractArtifact} = require('../src/contract-artifacts')
 
   /* eslint-enable @typescript-eslint/no-var-requires */
 
@@ -50,6 +50,8 @@ task('take-dump').setAction(async (args, hre) => {
       overhead: hre.deployConfig.gasPriceOracleOverhead,
       scalar: hre.deployConfig.gasPriceOracleScalar,
       decimals: hre.deployConfig.gasPriceOracleDecimals,
+      isBurning: hre.deployConfig.gasPriceOracleIsBurning,
+      charge: hre.deployConfig.gasPriceOracleCharge,
     },
     L2StandardBridge: {
       l1TokenBridge: (
@@ -61,13 +63,18 @@ task('take-dump').setAction(async (args, hre) => {
       messenger: predeploys.L2CrossDomainMessenger,
     },
     BVM_SequencerFeeVault: {
+      _owner: hre.deployConfig.bvmFeeWalletOwner,
       l1FeeWallet: hre.deployConfig.bvmFeeWalletAddress,
+      bvmGasPriceOracleAddress: predeploys.BVM_GasPriceOracle,
+      burner: '0x000000000000000000000000000000000000dEaD',
+      minWithdrawalAmount: 15,
     },
     BVM_ETH: {
       l2Bridge: predeploys.L2StandardBridge,
       l1Token: ethers.constants.AddressZero,
       _name: 'Ether',
-      _symbol: 'ETH',
+      _symbol: 'WETH',
+      decimal: 18,
     },
     BVM_BIT: {
       l2Bridge: predeploys.L2StandardBridge,
@@ -75,6 +82,7 @@ task('take-dump').setAction(async (args, hre) => {
       l1Token: '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
       _name: 'Bit Token',
       _symbol: 'BIT',
+      decimal: 18,
     },
     L2CrossDomainMessenger: {
       // We default the xDomainMsgSender to this value to save gas.
@@ -93,6 +101,19 @@ task('take-dump').setAction(async (args, hre) => {
       name: 'Wrapped Ether',
       symbol: 'WETH',
       decimals: 18,
+    },
+    TssRewardContract: {
+      deadAddress: '0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead',
+      _owner: hre.deployConfig.bvmTssRewardContractOwner,
+      sendAmountPerYear: 1000000,
+      bvmGasPriceOracleAddress: '0x420000000000000000000000000000000000000F',
+      messenger: predeploys.L2CrossDomainMessenger,
+      sccAddress: (
+        await getContractFromArtifact(
+          hre,
+          names.managed.contracts.StateCommitmentChain
+        )
+      ).address,
     },
   }
 
@@ -128,7 +149,7 @@ task('take-dump').setAction(async (args, hre) => {
   // Grab the commit hash so we can stick it in the genesis file.
   let commit: string
   try {
-    const { stdout } = await promisify(exec)('git rev-parse HEAD')
+    const {stdout} = await promisify(exec)('git rev-parse HEAD')
     commit = stdout.replace('\n', '')
   } catch {
     console.log('unable to get commit hash, using empty hash instead')

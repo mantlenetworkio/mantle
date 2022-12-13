@@ -1,6 +1,6 @@
 /* Imports: External */
 import { BigNumber } from 'ethers'
-import { TransactionEnqueuedEvent } from '@mantlenetworkio/contracts/dist/types/contracts/L1/rollup/CanonicalTransactionChain'
+import { TransactionEnqueuedEvent } from '@mantleio/contracts/dist/types/contracts/L1/rollup/CanonicalTransactionChain'
 
 /* Imports: Internal */
 import { MissingElementError } from './errors'

@@ -1,6 +1,6 @@
 import { Provider } from '@ethersproject/abstract-provider'
-import { expectApprox, hashCrossDomainMessage } from '@mantlenetworkio/core-utils'
-import { predeploys } from '@mantlenetworkio/contracts'
+import { expectApprox, hashCrossDomainMessage } from '@mantleio/core-utils'
+import { predeploys } from '@mantleio/contracts'
 import { Contract } from 'ethers'
 import { ethers } from 'hardhat'
 
@@ -625,9 +625,10 @@ describe('CrossChainMessenger', () => {
         batchRoot: ethers.constants.HashZero,
         batchSize: 1,
         prevTotalElements: message.blockNumber,
+        signature: '0x',
         extraData: '0x',
       })
-      await scc.appendStateBatch([ethers.constants.HashZero], 0)
+      await scc.appendStateBatch([ethers.constants.HashZero], 0, '0x')
     }
 
     describe('when the message is an L1 => L2 message', () => {
@@ -710,7 +711,6 @@ describe('CrossChainMessenger', () => {
           )
 
           await submitStateRootBatchForMessage(message)
-
           expect(await messenger.getMessageStatus(message)).to.equal(
             MessageStatus.IN_CHALLENGE_PERIOD
           )
@@ -787,7 +787,6 @@ describe('CrossChainMessenger', () => {
             const challengePeriod = await messenger.getChallengePeriodSeconds()
             ethers.provider.send('evm_increaseTime', [challengePeriod + 1])
             ethers.provider.send('evm_mine', [])
-
             expect(await messenger.getMessageStatus(message)).to.equal(
               MessageStatus.READY_FOR_RELAY
             )
@@ -1210,9 +1209,10 @@ describe('CrossChainMessenger', () => {
         batchRoot: ethers.constants.HashZero,
         batchSize: 1,
         prevTotalElements: message.blockNumber,
+        signature: '0x',
         extraData: '0x',
       })
-      await scc.appendStateBatch([ethers.constants.HashZero], 0)
+      await scc.appendStateBatch([ethers.constants.HashZero], 0, '0x')
     }
 
     describe('when the message is an L1 => L2 message', () => {
