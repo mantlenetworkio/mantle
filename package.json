@@ -19,8 +19,7 @@
       "ops/docker/js-builder",
       "ops/docker/ci-builder",
       "ops/docker/foundry",
-      "proxyd",
-      "teleportr"
+      "proxyd"
     ],
     "nohoist": [
       "**/typechain/*",
