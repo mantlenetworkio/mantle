@@ -56,9 +56,6 @@ type Engine interface {
 	// engine is based on signatures.
 	Author(header *types.Header) (common.Address, error)
 
-	// TODO Add comment
-	SetBatchPeriod(bps *types.BatchPeriodStartMsg)
-
 	// VerifyHeader checks whether a header conforms to the consensus rules of a
 	// given engine. Verifying the seal may be done optionally here, or explicitly
 	// via the VerifySeal method.
