@@ -52,4 +52,5 @@ coverage.out
 mantle.iml
 
 ops/data/**
+ops/chaindata/**
 dist/

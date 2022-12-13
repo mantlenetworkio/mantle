@@ -2,6 +2,7 @@ package synchronizer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
@@ -10,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 
 	binding "github.com/mantlenetworkio/mantle/l2geth/consensus/clique/synchronizer/bindings"
 )
@@ -19,6 +21,8 @@ const (
 
 	ENV_SEQUENCER_CONTRACT_ADDRESS = "SEQUENCER_CONTRACT_ADDRESS"
 	ENV_SEQUENCER_L1_RPC           = "SEQUENCER_L1_RPC"
+	GET_SEQUENCER_RETRY_TIMES      = 1000
+	GET_SEQUENCER_TIMEOUT          = 10
 )
 
 // set infos for sort
@@ -88,10 +92,23 @@ func (sync *Synchronizer) GetSequencerSet() (SequencerSequencerInfos, error) {
 	}
 	// get sequencers from sequencer contract
 	var seqInfos SequencerSequencerInfos
-	seqInfos, err = seqContractInst.GetSequencers(nil)
-	if err != nil {
-		return nil, err
+	for i := 0; i < GET_SEQUENCER_RETRY_TIMES; i++ {
+		seqInfos, err = seqContractInst.GetSequencers(nil)
+		if err != nil {
+			return nil, err
+		}
+		time.Sleep(GET_SEQUENCER_TIMEOUT * time.Second)
+		if len(seqInfos) == 0 && i == 99 {
+			return nil, fmt.Errorf("empty sequencer set")
+		}
+		if len(seqInfos) != 0 {
+			break
+		}
+		log.Info("retry get sequencer", "time", time.Now(),
+			"retry time", i)
 	}
+	seqInfoStr, err := json.Marshal(seqInfos)
+	log.Info("SEQ INFO STR", "data", string(seqInfoStr))
 	if len(seqInfos) == 0 {
 		return nil, fmt.Errorf("empty sequencer set")
 	}
