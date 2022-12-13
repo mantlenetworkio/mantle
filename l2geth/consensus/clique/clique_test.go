@@ -46,12 +46,12 @@ func TestReimportMirroredState(t *testing.T) {
 	)
 	address := addr
 	batchPeriodStartMsg := types.BatchPeriodStartMsg{
-		ReorgIndex:   0,
-		BatchIndex:   0,
-		StartHeight:  1,
-		MaxHeight:    100,
-		ExpireTime:   1669787879,
-		MinerAddress: address,
+		ReorgIndex:  0,
+		BatchIndex:  0,
+		StartHeight: 1,
+		MaxHeight:   100,
+		ExpireTime:  1669787879,
+		Sequencer:   address,
 		SequencerSet: []common.Address{
 			address,
 		},

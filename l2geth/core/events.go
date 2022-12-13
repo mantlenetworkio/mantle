@@ -31,8 +31,8 @@ type BatchPeriodStartEvent struct {
 	ErrCh chan error
 }
 
-type BatchPeriodEndEvent struct {
-	Msg   *types.BatchPeriodEndMsg
+type BatchPeriodAnswerEvent struct {
+	Msg   *types.BatchPeriodAnswerMsg
 	ErrCh chan error
 }
 
@@ -43,8 +43,9 @@ type FraudProofReorgEvent struct {
 
 // NewTxsEvent is posted when a batch of transactions enter the transaction pool.
 type NewTxsEvent struct {
-	Txs   []*types.Transaction
-	ErrCh chan error
+	Txs       []*types.Transaction
+	Sequencer common.Address
+	ErrCh     chan error
 }
 
 // NewMinedBlockEvent is posted when a block has been imported.

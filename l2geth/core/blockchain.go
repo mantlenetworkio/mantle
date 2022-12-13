@@ -177,7 +177,6 @@ type BlockChain struct {
 	badBlocks       *lru.Cache                     // Bad block cache
 	shouldPreserve  func(*types.Block) bool        // Function used to determine whether should preserve the given block.
 	terminateInsert func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
-	syncServiceHook func(block *types.Block) error
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -306,11 +305,6 @@ func (bc *BlockChain) getProcInterrupt() bool {
 // GetVMConfig returns the block chain VM config.
 func (bc *BlockChain) GetVMConfig() *vm.Config {
 	return &bc.vmConfig
-}
-
-// GetVMConfig returns the block chain VM config.
-func (bc *BlockChain) SetSyncServiceHook(hook func(block *types.Block) error) {
-	bc.syncServiceHook = hook
 }
 
 // empty returns an indicator whether the blockchain is empty.
@@ -1690,13 +1684,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, er
 				}(time.Now())
 			}
 		}
-		if bc.syncServiceHook != nil {
-			err = bc.syncServiceHook(block)
-			if err != nil {
-				log.Info("syncServiceHook err", "errMsg", err.Error())
-				return it.index, err
-			}
-		}
+
 		// Process block using the parent state as reference point
 		substart := time.Now()
 		receipts, logs, usedGas, err := bc.processor.Process(block, statedb, bc.vmConfig)

@@ -92,7 +92,7 @@ type ProtocolManager struct {
 	minedBlockSub *event.TypeMuxSubscription
 	// consensus control messages
 	batchStartMsgSub      *event.TypeMuxSubscription
-	batchEndMsgSub        *event.TypeMuxSubscription
+	batchAnswerMsgSub     *event.TypeMuxSubscription
 	fraudProofReorgMsgSub *event.TypeMuxSubscription
 
 	whitelist map[uint64]common.Hash
@@ -283,8 +283,8 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 	pm.batchStartMsgSub = pm.eventMux.Subscribe(core.BatchPeriodStartEvent{})
 	go pm.batchPeriodStartMsgBroadcastLoop()
 
-	pm.batchEndMsgSub = pm.eventMux.Subscribe(core.BatchPeriodEndEvent{})
-	go pm.batchPeriodEndMsgBroadcastLoop()
+	pm.batchAnswerMsgSub = pm.eventMux.Subscribe(core.BatchPeriodAnswerEvent{})
+	go pm.batchPeriodAnswerMsgBroadcastLoop()
 
 	pm.fraudProofReorgMsgSub = pm.eventMux.Subscribe(core.FraudProofReorgEvent{})
 	go pm.fraudProofReorgMsgBroadcastLoop()
@@ -301,7 +301,7 @@ func (pm *ProtocolManager) Stop() {
 	pm.minedBlockSub.Unsubscribe() // quits blockBroadcastLoop
 
 	pm.batchStartMsgSub.Unsubscribe()
-	pm.batchEndMsgSub.Unsubscribe()
+	pm.batchAnswerMsgSub.Unsubscribe()
 	pm.fraudProofReorgMsgSub.Unsubscribe()
 
 	// Quit the sync loop.
