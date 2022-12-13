@@ -11,12 +11,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/core"
-	"github.com/mantlenetworkio/mantle/l2geth/core/types"
-
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique/synchronizer"
+	"github.com/mantlenetworkio/mantle/l2geth/core"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/event"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
@@ -32,10 +31,10 @@ type Scheduler struct {
 	done     chan struct{}
 	running  int32
 
+	schedulerAddr   common.Address
 	sequencerSet    *SequencerSet
 	consensusEngine *Clique
 	blockchain      *core.BlockChain
-	SchedulerAddr   common.Address
 
 	chainHeadSub event.Subscription
 	chainHeadCh  chan core.ChainHeadEvent
@@ -49,10 +48,17 @@ type Scheduler struct {
 	syncer *synchronizer.Synchronizer
 }
 
-func NewScheduler(epoch time.Duration, clique *Clique, blockchain *core.BlockChain, eventMux *event.TypeMux) (*Scheduler, error) {
+func NewScheduler(schedulerAddress common.Address, clique *Clique, blockchain *core.BlockChain, eventMux *event.TypeMux) (*Scheduler, error) {
 	log.Info("Create Sequencer Server")
 
 	syncer := synchronizer.NewSynchronizer()
+	schedulerAddr, err := syncer.GetSchedulerAddr()
+	if err != nil {
+		return nil, err
+	}
+	if schedulerAddr.String() != schedulerAddress.String() {
+		return nil, fmt.Errorf("scheduler address mismatch, schedulerAddr from L1 %s,schedulerAddr from config %s", schedulerAddr.String(), schedulerAddress.String())
+	}
 	seqSet, err := syncer.GetSequencerSet()
 	if err != nil {
 		return nil, err
@@ -73,17 +79,14 @@ func NewScheduler(epoch time.Duration, clique *Clique, blockchain *core.BlockCha
 	schedulerInst := &Scheduler{
 		running:         0,
 		done:            make(chan struct{}, 1),
-		ticker:          time.NewTicker(epoch * time.Second),
+		ticker:          time.NewTicker(10 * time.Second), //TODO
 		consensusEngine: clique,
 		eventMux:        eventMux,
 		syncer:          syncer,
+		schedulerAddr:   common.BytesToAddress(schedulerAddr[:]),
 		sequencerSet:    NewSequencerSet(seqz),
 		blockchain:      blockchain,
 		chainHeadCh:     make(chan core.ChainHeadEvent, chainHeadChanSize),
-	}
-	schedulerInst.SchedulerAddr, err = schedulerInst.GetScheduler()
-	if err != nil {
-		return nil, fmt.Errorf("get scheduler address failed, err: %v", err)
 	}
 	schedulerInst.addPeerSub = schedulerInst.eventMux.Subscribe(core.PeerAddEvent{})
 	go schedulerInst.AddPeerCheck()
@@ -96,12 +99,8 @@ func (schedulerInst *Scheduler) SetWallet(wallet accounts.Wallet, acc accounts.A
 	schedulerInst.signAccount = acc
 }
 
-func (schedulerInst *Scheduler) GetScheduler() (common.Address, error) {
-	scheduler, err := schedulerInst.syncer.GetSchedulerAddr()
-	if err != nil {
-		return common.BigToAddress(common.Big0), err
-	}
-	return common.BytesToAddress(scheduler.Bytes()), nil
+func (schedulerInst *Scheduler) Scheduler() common.Address {
+	return schedulerInst.schedulerAddr
 }
 
 func (schedulerInst *Scheduler) Start() {
@@ -166,22 +165,19 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		currentBlock := schedulerInst.blockchain.CurrentBlock()
 
 		msg := types.BatchPeriodStartMsg{
-			ReorgIndex:   0,
-			BatchIndex:   1,
-			StartHeight:  currentBlock.NumberU64() + 1,
-			MaxHeight:    currentBlock.NumberU64() + 1 + batchSize,
-			ExpireTime:   uint64(time.Now().Unix() + expireTime),
-			MinerAddress: sequencerAddr,
-			SequencerSet: sequencerSet,
+			ReorgIndex:  0,
+			BatchIndex:  1,
+			StartHeight: currentBlock.NumberU64() + 1,
+			MaxHeight:   currentBlock.NumberU64() + 1 + batchSize,
+			ExpireTime:  uint64(time.Now().Unix() + expireTime),
+			Sequencer:   sequencerAddr,
 		}
-		sign, err := schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetData())
+		sign, err := schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetSignData())
 		if err != nil {
 			log.Error("sign BatchPeriodStartEvent error")
 			return
 		}
 		msg.Signature = sign
-		//signer, _ := msg.GetSigner()
-		//log.Debug("signature", "hash", hex.EncodeToString(crypto.Keccak256(msg.GetData())), "address", schedulerInst.signAccount.Address.String(), "signer", signer.String())
 
 		err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   &msg,

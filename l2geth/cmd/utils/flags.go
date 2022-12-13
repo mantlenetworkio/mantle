@@ -872,6 +872,16 @@ var (
 		Usage:  "HTTP endpoint for the sequencer client",
 		EnvVar: "SEQUENCER_CLIENT_HTTP",
 	}
+	SchedulerAddressFlag = cli.StringFlag{
+		Name:   "scheduler.address",
+		Usage:  "Set scheduler address",
+		EnvVar: "SCHEDULER_ADDRESS",
+	}
+	SequencerModeFlag = cli.BoolFlag{
+		Name:   "sequencer.mode",
+		Usage:  "Set sequencer mode",
+		EnvVar: "SEQUENCER_MODE",
+	}
 )
 
 // MakeDataDir retrieves the currently requested data directory, terminating
@@ -1150,6 +1160,12 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	}
 	if ctx.GlobalIsSet(SequencerClientHttpFlag.Name) {
 		cfg.SequencerClientHttp = ctx.GlobalString(SequencerClientHttpFlag.Name)
+	}
+	if ctx.GlobalIsSet(SchedulerAddressFlag.Name) {
+		cfg.SchedulerAddress = common.HexToAddress(ctx.GlobalString(SchedulerAddressFlag.Name))
+	}
+	if ctx.GlobalIsSet(SequencerModeFlag.Name) {
+		cfg.SequencerMode = ctx.GlobalBool(SequencerModeFlag.Name)
 	}
 }
 

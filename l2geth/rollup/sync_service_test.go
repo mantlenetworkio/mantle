@@ -53,7 +53,7 @@ func TestSyncServiceTimestampUpdate(t *testing.T) {
 	}
 
 	go func() {
-		err = service.applyTransactionToTip(tx1)
+		err = service.applyTransactionToTip(tx1, common.Address{})
 	}()
 	event1 := <-txCh
 
@@ -74,7 +74,7 @@ func TestSyncServiceTimestampUpdate(t *testing.T) {
 		t.Fatal("Expecting mock timestamp to be 0")
 	}
 	go func() {
-		err = service.applyTransactionToTip(tx2)
+		err = service.applyTransactionToTip(tx2, common.Address{})
 	}()
 	event2 := <-txCh
 
@@ -96,7 +96,7 @@ func TestSyncServiceTimestampUpdate(t *testing.T) {
 	ts3 := service.GetLatestL1Timestamp()
 
 	go func() {
-		err = service.applyTransactionToTip(tx3)
+		err = service.applyTransactionToTip(tx3, common.Address{})
 	}()
 	event3 := <-txCh
 
@@ -125,7 +125,7 @@ func TestSyncServiceL1BlockNumberUpdate(t *testing.T) {
 
 	tx1 := setMockTxL1BlockNumber(mockTx(), new(big.Int).SetUint64(1))
 	go func() {
-		err = service.applyTransactionToTip(tx1)
+		err = service.applyTransactionToTip(tx1, common.Address{})
 	}()
 	event1 := <-txCh
 
@@ -148,7 +148,7 @@ func TestSyncServiceL1BlockNumberUpdate(t *testing.T) {
 		t.Fatal("non nil l1 blocknumber")
 	}
 	go func() {
-		err = service.applyTransactionToTip(tx2)
+		err = service.applyTransactionToTip(tx2, common.Address{})
 	}()
 	event2 := <-txCh
 
@@ -163,7 +163,7 @@ func TestSyncServiceL1BlockNumberUpdate(t *testing.T) {
 	latest := service.GetLatestL1BlockNumber()
 	tx3 := setMockTxL1BlockNumber(mockTx(), new(big.Int).SetUint64(latest-1))
 	go func() {
-		err = service.applyTransactionToTip(tx3)
+		err = service.applyTransactionToTip(tx3, common.Address{})
 	}()
 	event3 := <-txCh
 	if service.GetLatestL1BlockNumber() != latest {
@@ -270,7 +270,7 @@ func TestTransactionToTipNoIndex(t *testing.T) {
 	tx.SetTransactionMeta(meta)
 
 	go func() {
-		err = service.applyTransactionToTip(tx)
+		err = service.applyTransactionToTip(tx, common.Address{})
 	}()
 	event := <-txCh
 	if err != nil {
@@ -313,7 +313,7 @@ func TestTransactionToTipTimestamps(t *testing.T) {
 		nextIndex := service.GetNextIndex()
 
 		go func() {
-			err = service.applyTransactionToTip(tx)
+			err = service.applyTransactionToTip(tx, common.Address{})
 		}()
 		event := <-txCh
 		if err != nil {
@@ -353,7 +353,7 @@ func TestTransactionToTipTimestamps(t *testing.T) {
 	tx3 := setMockTxL1Timestamp(mockTx(), 0)
 	now := time.Now()
 	go func() {
-		err = service.applyTransactionToTip(tx3)
+		err = service.applyTransactionToTip(tx3, common.Address{})
 	}()
 	result := <-txCh
 	service.chainHeadCh <- core.ChainHeadEvent{}
@@ -383,7 +383,7 @@ func TestApplyIndexedTransaction(t *testing.T) {
 	tx1a := setMockTxIndex(mockTx(), 1)
 
 	go func() {
-		err = service.applyIndexedTransaction(tx0)
+		err = service.applyIndexedTransaction(tx0, common.Address{})
 	}()
 	<-txCh
 	if err != nil {
@@ -394,7 +394,7 @@ func TestApplyIndexedTransaction(t *testing.T) {
 	}
 
 	go func() {
-		err = service.applyIndexedTransaction(tx1)
+		err = service.applyIndexedTransaction(tx1, common.Address{})
 	}()
 	<-txCh
 	if err != nil {
@@ -404,7 +404,7 @@ func TestApplyIndexedTransaction(t *testing.T) {
 		t.Fatal("Latest index mismatch")
 	}
 
-	err = service.applyIndexedTransaction(tx1a)
+	err = service.applyIndexedTransaction(tx1a, common.Address{})
 	if err == nil {
 		t.Fatal(err)
 	}

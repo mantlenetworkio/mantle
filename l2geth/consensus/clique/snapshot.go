@@ -51,13 +51,12 @@ type Snapshot struct {
 	config   *params.CliqueConfig // Consensus engine parameters to fine tune behavior
 	sigcache *lru.ARCCache        // Cache of recent block signatures to speed up ecrecover
 
-	Number    uint64                      `json:"number"`    // Block number where the snapshot was created
-	Hash      common.Hash                 `json:"hash"`      // Block hash where the snapshot was created
-	Producers Proposers                   `json:"proposers"` // Set of authorized proposers at this moment
-	Signers   map[common.Address]struct{} `json:"signers"`   // Set of authorized signers at this moment
-	Recents   map[uint64]common.Address   `json:"recents"`   // Set of recent signers for spam protections
-	Votes     []*Vote                     `json:"votes"`     // List of votes cast in chronological order
-	Tally     map[common.Address]Tally    `json:"tally"`     // Current vote tally to avoid recalculating
+	Number  uint64                      `json:"number"`  // Block number where the snapshot was created
+	Hash    common.Hash                 `json:"hash"`    // Block hash where the snapshot was created
+	Signers map[common.Address]struct{} `json:"signers"` // Set of authorized signers at this moment
+	Recents map[uint64]common.Address   `json:"recents"` // Set of recent signers for spam protections
+	Votes   []*Vote                     `json:"votes"`   // List of votes cast in chronological order
+	Tally   map[common.Address]Tally    `json:"tally"`   // Current vote tally to avoid recalculating
 }
 
 // signersAscending implements the sort interface to allow sorting a list of addresses
@@ -82,7 +81,6 @@ func newSnapshot(config *params.CliqueConfig, sigcache *lru.ARCCache, number uin
 	}
 	for _, signer := range signers {
 		snap.Signers[signer] = struct{}{}
-		log.Info("Add signer to snapshot", "signer_address", signer.String())
 	}
 	return snap
 }
@@ -115,15 +113,14 @@ func (s *Snapshot) store(db ethdb.Database) error {
 // copy creates a deep copy of the snapshot, though not the individual votes.
 func (s *Snapshot) copy() *Snapshot {
 	cpy := &Snapshot{
-		config:    s.config,
-		sigcache:  s.sigcache,
-		Number:    s.Number,
-		Hash:      s.Hash,
-		Producers: s.Producers,
-		Signers:   make(map[common.Address]struct{}),
-		Recents:   make(map[uint64]common.Address),
-		Votes:     make([]*Vote, len(s.Votes)),
-		Tally:     make(map[common.Address]Tally),
+		config:   s.config,
+		sigcache: s.sigcache,
+		Number:   s.Number,
+		Hash:     s.Hash,
+		Signers:  make(map[common.Address]struct{}),
+		Recents:  make(map[uint64]common.Address),
+		Votes:    make([]*Vote, len(s.Votes)),
+		Tally:    make(map[common.Address]Tally),
 	}
 	for signer := range s.Signers {
 		cpy.Signers[signer] = struct{}{}
@@ -225,12 +222,11 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		if _, ok := snap.Signers[signer]; !ok {
 			return nil, errUnauthorizedSigner
 		}
-		// TODO double check
-		//for _, recent := range snap.Recents {
-		//	if recent == signer {
-		//		return nil, errRecentlySigned
-		//	}
-		//}
+		for _, recent := range snap.Recents {
+			if recent == signer {
+				return nil, errRecentlySigned
+			}
+		}
 		snap.Recents[number] = signer
 
 		// Header authorized, discard any previous votes from the signer
