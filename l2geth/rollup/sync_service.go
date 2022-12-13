@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"math/big"
 	"strconv"
 	"sync"
@@ -567,6 +569,17 @@ func (s *SyncService) updateCharge(statedb *state.StateDB) error {
 	return s.RollupGpo.SetCharge(charge)
 }
 
+// updateSCCAddress will update the sccAddress value from the BVM_GasPriceOracle
+// in the local cache
+func (s *SyncService) updateSCCAddress(statedb *state.StateDB) error {
+	scc, err := s.readGPOStorageSlot(statedb, rcfg.SccAddressSlot)
+	if err != nil {
+		return err
+	}
+	sccAddress := common.BigToAddress(scc)
+	return s.RollupGpo.SetSCCAddress(&sccAddress)
+}
+
 // cacheGasPriceOracleOwner accepts a statedb and caches the gas price oracle
 // owner address locally
 func (s *SyncService) cacheGasPriceOracleOwner(statedb *state.StateDB) error {
@@ -623,6 +636,15 @@ func (s *SyncService) updateGasPriceOracleCache(hash *common.Hash) error {
 		return err
 	}
 	if err := s.updateScalar(statedb); err != nil {
+		return err
+	}
+	if err := s.updateIsBurning(statedb); err != nil {
+		return err
+	}
+	if err := s.updateCharge(statedb); err != nil {
+		return err
+	}
+	if err := s.updateSCCAddress(statedb); err != nil {
 		return err
 	}
 	return nil
@@ -781,6 +803,51 @@ func (s *SyncService) SetHead(number uint64) error {
 	s.SetLatestL1Timestamp(tx.L1Timestamp())
 	s.SetLatestL1BlockNumber(blockNumber.Uint64())
 	s.SetLatestIndex(tx.GetMeta().Index)
+	return nil
+}
+
+func (s *SyncService) SchedulerRollback(start uint64) error {
+	latest := s.bc.CurrentBlock().Number().Uint64()
+	if start > latest {
+		return fmt.Errorf("invalid block number:%v,currentBlock number:%v", start, latest)
+	}
+	var blocks []*types.Block
+	for i := start; i <= latest; i++ {
+		block := s.bc.GetBlockByNumber(start)
+		blocks = append(blocks, block)
+	}
+	log.Info("setHead start,current block number:", s.bc.CurrentHeader().Number.Uint64())
+	if err := s.SetHead(start - 1); err != nil {
+		log.Crit("rollback error:", "setHead error", err)
+	}
+	log.Info("setHead end,current block number:", s.bc.CurrentHeader().Number.Uint64())
+	var txs []types.Transaction
+	h := s.bc.CurrentHeader()
+	for i := 11; i <= int(h.Number.Uint64()); i++ {
+		block := s.bc.GetBlockByNumber(uint64(i))
+		txs = append(txs, *block.Transactions()[0])
+	}
+	for _, t := range txs {
+		if err := s.applyIndexedTransaction(&t); err != nil {
+			log.Crit("rollback applyIndexedTransaction tx :", "applyIndexedTransaction error", err)
+		}
+	}
+	log.Info("apply rollback blocks transactions end,current block number", s.bc.CurrentHeader().Number.Uint64())
+	//var newBlocks []types.Block
+	//var notEqual bool
+	for i := start; i <= h.Number.Uint64(); i++ {
+		newBlock := s.bc.GetBlockByNumber(i)
+		if newBlock.Hash() != blocks[h.Number.Uint64()-i].Hash() {
+			//notEqual = false
+			// TODO Emit Rollback Event To sequencer
+			log.Info("Emit Rollback Event To sequencer", "Block hash updated")
+			break
+		}
+	}
+	return nil
+}
+
+func (s *SyncService) SequencerRollback() error {
 	return nil
 }
 
@@ -1241,6 +1308,19 @@ func (s *SyncService) syncQueueTransactionRange(start, end uint64) error {
 		tx, err := s.client.GetEnqueue(i)
 		if err != nil {
 			return fmt.Errorf("Canot get enqueue transaction; %w", err)
+		}
+		hexRawTx := hexutil.Encode(tx.GetMeta().RawTransaction)
+		if len(hexRawTx) > 402 {
+			// TODO handle sccAddr
+			var sccAddress common.Address
+			if common.HexToAddress(hexRawTx[34:74]) == dump.BvmRollbackAddress && common.HexToAddress(hexRawTx[98:138]) == sccAddress {
+				if parseUint, err := strconv.ParseUint(hexRawTx[362:402], 16, 32); err == nil {
+					if err := s.SchedulerRollback(parseUint); err != nil {
+						fmt.Println("scheduler rollback error:", err)
+					}
+				}
+				return nil
+			}
 		}
 		if err := s.applyTransaction(tx); err != nil {
 			return fmt.Errorf("Cannot apply transaction: %w", err)

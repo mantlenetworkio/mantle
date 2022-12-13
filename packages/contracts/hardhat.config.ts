@@ -294,6 +294,10 @@ const config: HardhatUserConfig = {
     bvmEigenSequencerAddress: {
       type: 'address',
     },
+    sccAddress: {
+      type: 'number',
+      default: 0,
+    },
     gasPriceOracleOverhead: {
       type: 'number',
       default: 2750,

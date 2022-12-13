@@ -52,6 +52,7 @@ task('take-dump').setAction(async (args, hre) => {
       decimals: hre.deployConfig.gasPriceOracleDecimals,
       isBurning: hre.deployConfig.gasPriceOracleIsBurning,
       charge: hre.deployConfig.gasPriceOracleCharge,
+      sccAddress:hre.deployConfig.sccAddress,
     },
     L2StandardBridge: {
       l1TokenBridge: (

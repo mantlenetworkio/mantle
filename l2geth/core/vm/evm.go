@@ -197,7 +197,7 @@ func (evm *EVM) Interpreter() Interpreter {
 // execution error or failed value transfer.
 func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error) {
 	//TODO test roll back
-	if addr == dump.BvmReorgAddress {
+	if addr == dump.BvmRollbackAddress {
 		log.Info("Reorg Message:", "input", input)
 		return nil, 0, nil
 	}

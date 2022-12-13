@@ -2,6 +2,7 @@ package gasprice
 
 import (
 	"context"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"math/big"
 	"sync"
 
@@ -17,12 +18,14 @@ type RollupOracle struct {
 	scalar         *big.Float
 	isBurning      *big.Int
 	charge         *big.Int
+	sccAddress     *common.Address
 	l1GasPriceLock sync.RWMutex
 	l2GasPriceLock sync.RWMutex
 	overheadLock   sync.RWMutex
 	scalarLock     sync.RWMutex
 	isBurningLock  sync.RWMutex
 	chargeLock     sync.RWMutex
+	sccAddressLock sync.RWMutex
 }
 
 // NewRollupOracle returns an initialized RollupOracle
@@ -121,5 +124,14 @@ func (gpo *RollupOracle) SetCharge(charge *big.Int) error {
 	defer gpo.chargeLock.Unlock()
 	gpo.charge = charge
 	log.Info("Set charge", "charge", charge)
+	return nil
+}
+
+// SetCharge sets the charge value held in the BVM_GasPriceOracle
+func (gpo *RollupOracle) SetSCCAddress(sccAddress *common.Address) error {
+	gpo.sccAddressLock.Lock()
+	defer gpo.sccAddressLock.Unlock()
+	gpo.sccAddress = sccAddress
+	log.Info("Set sccAddress", "sccAddress", sccAddress)
 	return nil
 }
