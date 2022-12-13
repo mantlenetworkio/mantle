@@ -812,9 +812,11 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 		return fmt.Errorf("invalid block number:%v,currentBlock number:%v", start, latest)
 	}
 	var txs []types.Transaction
+	var oldBlocks []types.Block
 	for i := start; i <= latest; i++ {
 		block := s.bc.GetBlockByNumber(i)
 		txs = append(txs, *block.Transactions()[0])
+		oldBlocks = append(oldBlocks, *block)
 	}
 	log.Info("setHead start", "current block number", s.bc.CurrentHeader().Number.Uint64())
 	if err := s.SetHead(start - 1); err != nil {
@@ -827,18 +829,13 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 		}
 	}
 	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
-	var blocks []*types.Block
-	for i := start; i <= latest; i++ {
-		block := s.bc.GetBlockByNumber(start)
-		blocks = append(blocks, block)
-	}
 	for i := start; i <= latest; i++ {
 		newBlock := s.bc.GetBlockByNumber(i)
-		if newBlock.Hash() != blocks[latest-i].Hash() {
-			//notEqual = false
+		if oldBlocks[i-start].Hash() != newBlock.Hash() {
 			// TODO Emit Rollback Event To sequencer
-			log.Info("Emit Rollback Event To sequencer", "Block hash updated", newBlock.Hash())
-			break
+			log.Info("Emit Rollback Event To sequencer", "old blockHash", oldBlocks[i-start].Hash(), "newBlockHash", newBlock.Hash())
+			log.Info("Emit Rollback Event To sequencer", "oldBlock number:", oldBlocks[i-start].Number().Uint64(), "newBlockNumber", newBlock.Number().Uint64())
+			//break
 		}
 	}
 	return nil
