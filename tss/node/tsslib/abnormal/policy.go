@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/binance-chain/tss-lib/tss"
 	mapset "github.com/deckarep/golang-set"
-	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p/core/peer"
 	conversion2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	messages2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 )
