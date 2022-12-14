@@ -461,22 +461,16 @@ func (s *SyncService) verify() error {
 	return nil
 }
 
-// SequencerLoop is the polling loop that runs in sequencer mode. It sequences
-// transactions and then updates the EthContext.
-func (s *SyncService) SequencerLoop() {
-	log.Info("Starting Sequencer Loop", "poll-interval", s.pollInterval, "timestamp-refresh-threshold", s.timestampRefreshThreshold)
-	t := time.NewTicker(s.pollInterval)
-	defer t.Stop()
-	for ; true; <-t.C {
-		s.txLock.Lock()
-		if err := s.sequence(); err != nil {
-			log.Error("Could not sequence", "error", err)
-		}
-		s.txLock.Unlock()
+// SchedulerPull scheduler Get the L1ToL2 Tx from L1
+func (s *SyncService) SchedulerPull() {
+	s.txLock.Lock()
+	if err := s.sequence(); err != nil {
+		log.Error("Could not sequence", "error", err)
+	}
+	s.txLock.Unlock()
 
-		if err := s.updateL1BlockNumber(); err != nil {
-			log.Error("Could not update execution context", "error", err)
-		}
+	if err := s.updateL1BlockNumber(); err != nil {
+		log.Error("Could not update execution context", "error", err)
 	}
 }
 
