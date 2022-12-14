@@ -2,10 +2,10 @@ package gasprice
 
 import (
 	"context"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"math/big"
 	"sync"
 
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 )
