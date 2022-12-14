@@ -53,12 +53,26 @@ if [ $IS_SEQUENCER == "true" ] ;then
     --allow-insecure-unlock \
     --unlock $BLOCK_SIGNER_ADDRESS \
     --bootnodes $SCHEDULER_P2P_ENODE \
+    --nat $NAT \
+    --port $P2P_PORT \
     --mine \
     --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
 #    --miner.etherbase $BLOCK_SIGNER_ADDRESS \
     --sequencer.mode="true" \
     "$@"
-else [ $IS_SEQUENCER == "false" ]
+else [ $IS_SCHEDULER == "true" ]
+  exec geth \
+    --verbosity="$VERBOSITY" \
+    --password ./password \
+    --allow-insecure-unlock \
+    --unlock $BLOCK_SIGNER_ADDRESS \
+    --nat $NAT \
+    --mine \
+    --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
+#    --miner.etherbase $BLOCK_SIGNER_ADDRESS \
+    "$@"
+fi
+
   exec geth \
     --verbosity="$VERBOSITY" \
     --password ./password \
@@ -68,8 +82,6 @@ else [ $IS_SEQUENCER == "false" ]
     --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
 #    --miner.etherbase $BLOCK_SIGNER_ADDRESS \
     "$@"
-fi
-
 #
 #./geth --datadir data --scheduler.address 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --password password.txt --unlock 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --nodiscover --verbosity 5
 #./geth --datadir data1 --rpcport 8085 --port 30306 --password password.txt --unlock 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 --nodiscover --scheduler.address 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --sequencer.mode=true --verbosity 5
