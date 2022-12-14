@@ -38,14 +38,16 @@ type fileCache struct {
 // scan performs a new scan on the given directory, compares against the already
 // cached filenames, and returns file sets: creates, deletes, updates.
 func (fc *fileCache) scan(keyDir string) (mapset.Set, mapset.Set, mapset.Set, error) {
-	t0 := time.Now()
+	//TODO: temp ignore the fs scan, revert it
+	//t0 := time.Now()
 
 	// List all the failes from the keystore folder
 	files, err := ioutil.ReadDir(keyDir)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	t1 := time.Now()
+	//TODO: temp ignore the fs scan, revert it
+	//t1 := time.Now()
 
 	fc.mu.Lock()
 	defer fc.mu.Unlock()
