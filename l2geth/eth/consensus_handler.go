@@ -108,11 +108,11 @@ func (pm *ProtocolManager) checkPeer(p *peer) error {
 			return err
 		}
 
-		p.Log().Info("wait for peer id check", "ID", p.ID().String())
+		p.Log().Debug("wait for peer id check", "ID", p.ID().String())
 		select {
 		case find := <-has:
 			if !find {
-				p.Log().Error("Have not find peer ", "ID", p.ID().String())
+				p.Log().Debug("Have not find peer ", "ID", p.ID().String())
 				return errors.New("have not find peer")
 			} else {
 				p.Log().Debug("find peer ", "ID", p.ID().String())
@@ -203,7 +203,6 @@ func (pm *ProtocolManager) batchPeriodStartMsgBroadcastLoop() {
 
 func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 	peers := pm.consensusPeers.PeersWithoutStartMsg(msg.Hash())
-	log.Info("peers", "length", len(peers))
 	for _, p := range peers {
 		p.AsyncSendBatchPeriodStartMsg(msg)
 	}
