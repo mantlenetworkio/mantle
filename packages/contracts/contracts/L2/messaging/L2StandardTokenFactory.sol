@@ -11,7 +11,7 @@ import { Lib_PredeployAddresses } from "../../libraries/constants/Lib_PredeployA
  * compatible with and working on the standard bridge.
  */
 contract L2StandardTokenFactory {
-    event StandardL2TokenCreated(address indexed _l1Token, address indexed _l2Token);
+    event StandardL2TokenCreated(address indexed _l1Token, address indexed _l2Token, uint8 decimal);
 
     /**
      * @dev Creates an instance of the standard ERC20 token on L2.
@@ -22,7 +22,8 @@ contract L2StandardTokenFactory {
     function createStandardL2Token(
         address _l1Token,
         string memory _name,
-        string memory _symbol
+        string memory _symbol,
+        uint8 _decimal
     ) external {
         require(_l1Token != address(0), "Must provide L1 token address");
 
@@ -30,9 +31,10 @@ contract L2StandardTokenFactory {
             Lib_PredeployAddresses.L2_STANDARD_BRIDGE,
             _l1Token,
             _name,
-            _symbol
+            _symbol,
+            _decimal
         );
 
-        emit StandardL2TokenCreated(_l1Token, address(l2Token));
+        emit StandardL2TokenCreated(_l1Token, address(l2Token), _decimal);
     }
 }

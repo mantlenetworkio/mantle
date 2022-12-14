@@ -1,6 +1,6 @@
 {
   "name": "@mantlenetworkio/l2geth",
-  "version": "0.5.23",
+  "version": "0.7.2",
   "private": true,
   "devDependencies": {}
 }

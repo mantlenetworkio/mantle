@@ -18,6 +18,6 @@ contract BVM_ETH is L2StandardERC20 {
      ***************/
 
     constructor()
-        L2StandardERC20(Lib_PredeployAddresses.L2_STANDARD_BRIDGE, address(0), "Ether", "WETH")
+        L2StandardERC20(Lib_PredeployAddresses.L2_STANDARD_BRIDGE, address(0), "Ether", "WETH", 18)
     {}
 }

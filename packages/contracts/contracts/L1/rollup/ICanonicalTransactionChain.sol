@@ -47,6 +47,7 @@ interface ICanonicalTransactionChain {
         bytes32 _batchRoot,
         uint256 _batchSize,
         uint256 _prevTotalElements,
+        bytes _signature,
         bytes _extraData
     );
 

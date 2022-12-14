@@ -1,13 +1,13 @@
 [![codecov](https://codecov.io/gh/mantlenetworkio/mantle/branch/main/graph/badge.svg?token=0VTG7PG7YR&flag=sdk)](https://codecov.io/gh/mantlenetworkio/mantle)
 
-# @mantlenetworkio/sdk
+# @mantleio/sdk
 
-The `@mantlenetworkio/sdk` package provides a set of tools for interacting with Mantle.
+The `@mantleio/sdk` package provides a set of tools for interacting with Mantle.
 
 ## Installation
 
 ```
-npm install @mantlenetworkio/sdk
+npm install @mantleio/sdk
 ```
 
 ## Docs

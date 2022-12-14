@@ -1,5 +1,5 @@
 import { Contract } from 'ethers'
-import { applyL1ToL2Alias, undoL1ToL2Alias } from '@mantlenetworkio/core-utils'
+import { applyL1ToL2Alias, undoL1ToL2Alias } from '@mantleio/core-utils'
 
 import { expect } from '../../../setup'
 import { deploy } from '../../../helpers'

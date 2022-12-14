@@ -1,6 +1,7 @@
 go 1.18
 
 use (
+    ./subsidy
 	./batch-submitter
 	./scheduler
 	./bss-core
@@ -10,6 +11,8 @@ use (
 	./proxyd
 	./state-surgery
 	integration-tests/go-tests
+	./tss
+	./mt-batcher
 )
 
 replace github.com/ethereum/go-ethereum v1.10.21 => github.com/ethereum-mantle/reference-optimistic-geth v0.0.0-20220803173305-1c9d4cc76a6e

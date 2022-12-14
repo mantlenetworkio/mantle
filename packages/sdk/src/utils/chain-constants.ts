@@ -4,9 +4,9 @@ export const DEPOSIT_CONFIRMATION_BLOCKS: {
   [ChainID in L2ChainID]: number
 } = {
   [L2ChainID.MANTLE]: 50 as const,
-  [L2ChainID.MANTLE_GOERLI]: 12 as const,
   [L2ChainID.MANTLE_KOVAN]: 12 as const,
   [L2ChainID.MANTLE_GOERLIQA]: 12 as const,
+  [L2ChainID.MANTLE_TESTNET]: 12 as const,
   [L2ChainID.MANTLE_HARDHAT_LOCAL]: 2 as const,
   [L2ChainID.MANTLE_HARDHAT_DEVNET]: 2 as const,
 }

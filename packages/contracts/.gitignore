@@ -1,2 +1,9 @@
 src/contract-artifacts.ts
 src/contract-deployed-artifacts.ts
+<<<<<<< HEAD
+contracts/da/out/
+contracts/da/bindings/
+contracts/da/data/
+=======
+
+>>>>>>> main

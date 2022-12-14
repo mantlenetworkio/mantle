@@ -17,10 +17,20 @@ interface IStateCommitmentChain {
         bytes32 _batchRoot,
         uint256 _batchSize,
         uint256 _prevTotalElements,
+        bytes _signature,
         bytes _extraData
     );
 
     event StateBatchDeleted(uint256 indexed _batchIndex, bytes32 _batchRoot);
+
+    event DistributeTssReward(
+        uint256 indexed _startBlockNumber,
+        uint256 _length,
+        uint256 indexed _batchTime,
+        address[] _tssMembers
+    );
+
+    event RollBackL2Chain(uint256 indexed _startBlockNumber);
 
     /********************
      * Public Functions *
@@ -49,7 +59,7 @@ interface IStateCommitmentChain {
      * @param _batch Batch of state roots.
      * @param _shouldStartAtElement Index of the element at which this batch should start.
      */
-    function appendStateBatch(bytes32[] calldata _batch, uint256 _shouldStartAtElement) external;
+    function appendStateBatch(bytes32[] calldata _batch, uint256 _shouldStartAtElement, bytes memory _signature) external;
 
     /**
      * Deletes all state roots after (and including) a given batch.
@@ -75,7 +85,22 @@ interface IStateCommitmentChain {
      * @return _inside Whether or not the batch is inside the fraud proof window.
      */
     function insideFraudProofWindow(Lib_BVMCodec.ChainBatchHeader memory _batchHeader)
-        external
-        view
-        returns (bool _inside);
+    external
+    view
+    returns (bool _inside);
+
+    /**
+     * Emit event to notify sequencers to roll back.
+     * @param _shouldRollBack roll back to should start .
+     * @param _shouldStartAtElement Index of the element at which this batch should start
+     * @param _signature signature of rollback message
+     */
+    function rollBackL2Chain(uint256 _shouldRollBack,uint256 _shouldStartAtElement, bytes memory _signature) external;
+
+    /**
+     * interface for send domain message
+     * @param _shouldRollBack roll back to should start .
+     */
+    function rollBackMessage(uint256 _shouldRollBack) external;
+
 }

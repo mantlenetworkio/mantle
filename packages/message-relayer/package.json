@@ -1,7 +1,7 @@
 {
   "private": true,
-  "name": "@mantlenetworkio/message-relayer",
-  "version": "0.0.1",
+  "name": "@mantleio/message-relayer",
+  "version": "0.1.0",
   "description": "[Mantle] Service for automatically relaying L2 to L1 transactions",
   "main": "dist/index",
   "types": "dist/index",
@@ -31,9 +31,9 @@
     "url": "https://github.com/mantlenetworkio/mantle.git"
   },
   "dependencies": {
-    "@mantlenetworkio/common-ts": "0.0.1",
-    "@mantlenetworkio/core-utils": "0.0.1",
-    "@mantlenetworkio/sdk": "0.0.2",
+    "@mantleio/common-ts": "0.1.0",
+    "@mantleio/core-utils": "0.1.0",
+    "@mantleio/sdk": "0.1.2",
     "ethers": "^5.6.8"
   },
   "devDependencies": {

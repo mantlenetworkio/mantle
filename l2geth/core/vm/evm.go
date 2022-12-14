@@ -17,7 +17,7 @@
 package vm
 
 import (
-	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"math/big"
 	"sync/atomic"
 	"time"
@@ -26,8 +26,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup/util"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -198,6 +196,11 @@ func (evm *EVM) Interpreter() Interpreter {
 // the necessary steps to create accounts and reverses the state in case of an
 // execution error or failed value transfer.
 func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error) {
+	//TODO test roll back
+	if addr == dump.BvmReorgAddress {
+		log.Info("Reorg Message:", "input", input)
+		return nil, 0, nil
+	}
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
 		return nil, gas, nil
 	}
@@ -402,30 +405,6 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 	}
 	if !evm.CanTransfer(evm.StateDB, caller.Address(), value) {
 		return nil, common.Address{}, gas, ErrInsufficientBalance
-	}
-	if rcfg.UsingBVM {
-		// Make sure the creator address should be able to deploy.
-		if !evm.AddressWhitelisted(caller.Address()) {
-			// Try to encode this error as a Solidity error message so it's more clear to end-users
-			// what's going on when a contract creation fails.
-			solerr := fmt.Errorf("deployer address not whitelisted: %s", caller.Address().Hex())
-			ret, err := util.EncodeSolidityError(solerr)
-			if err != nil {
-				// If we're unable to properly encode the error then just return the original message.
-				return nil, common.Address{}, gas, solerr
-			}
-			return ret, common.Address{}, gas, errExecutionReverted
-		}
-
-		// Get the system address for this caller.
-		sysAddr := rcfg.SystemAddressFor(evm.ChainConfig().ChainID, caller.Address())
-
-		// If there is a configured system address for this caller, and the caller's nonce is zero,
-		// and there is no contract already deployed at this system address, then set the created
-		// address to the system address.
-		if sysAddr != rcfg.ZeroSystemAddress && evm.StateDB.GetNonce(caller.Address()) == 0 {
-			address = sysAddr
-		}
 	}
 	nonce := evm.StateDB.GetNonce(caller.Address())
 	evm.StateDB.SetNonce(caller.Address(), nonce+1)

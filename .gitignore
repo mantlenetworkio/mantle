@@ -18,7 +18,9 @@ artifacts
 cache
 
 l2geth/build/bin
+tss/tss
 packages/contracts/deployments/custom
+packages/contracts/deployments/local
 packages/contracts/coverage*
 packages/contracts/@ens*
 packages/contracts/@openzeppelin*
@@ -31,7 +33,8 @@ packages/integration-tests-bedrock/artifacts
 
 packages/contracts-bedrock/deployments/devnetL1
 packages/contracts-bedrock/deployments/anvil
-
+packages/contracts/genesis/state-dump.latest.json.bak
+packages/contracts/genesis2.json
 # vim
 *.sw*
 

@@ -1,8 +1,8 @@
 /* Imports: External */
 import { Signer } from 'ethers'
-import { getChainId, sleep } from '@mantlenetworkio/core-utils'
-import { BaseServiceV2, validators, Gauge, Counter } from '@mantlenetworkio/common-ts'
-import { CrossChainMessenger, MessageStatus } from '@mantlenetworkio/sdk'
+import { getChainId, sleep } from '@mantleio/core-utils'
+import { BaseServiceV2, validators, Gauge, Counter } from '@mantleio/common-ts'
+import { CrossChainMessenger, MessageStatus } from '@mantleio/sdk'
 import { Provider } from '@ethersproject/abstract-provider'
 
 type MessageRelayerOptions = {

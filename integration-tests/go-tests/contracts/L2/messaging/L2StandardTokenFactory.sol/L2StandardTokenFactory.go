@@ -30,7 +30,7 @@ var (
 
 // L2StandardTokenFactoryMetaData contains all meta data concerning the L2StandardTokenFactory contract.
 var L2StandardTokenFactoryMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_l1Token\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_l2Token\",\"type\":\"address\"}],\"name\":\"StandardL2TokenCreated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_l1Token\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_symbol\",\"type\":\"string\"}],\"name\":\"createStandardL2Token\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_l1Token\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_l2Token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"decimal\",\"type\":\"uint8\"}],\"name\":\"StandardL2TokenCreated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_l1Token\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_symbol\",\"type\":\"string\"},{\"internalType\":\"uint8\",\"name\":\"_decimal\",\"type\":\"uint8\"}],\"name\":\"createStandardL2Token\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // L2StandardTokenFactoryABI is the input ABI used to generate the binding from.
@@ -179,25 +179,25 @@ func (_L2StandardTokenFactory *L2StandardTokenFactoryTransactorRaw) Transact(opt
 	return _L2StandardTokenFactory.Contract.contract.Transact(opts, method, params...)
 }
 
-// CreateStandardL2Token is a paid mutator transaction binding the contract method 0x896f93d1.
+// CreateStandardL2Token is a paid mutator transaction binding the contract method 0x0769a969.
 //
-// Solidity: function createStandardL2Token(address _l1Token, string _name, string _symbol) returns()
-func (_L2StandardTokenFactory *L2StandardTokenFactoryTransactor) CreateStandardL2Token(opts *bind.TransactOpts, _l1Token common.Address, _name string, _symbol string) (*types.Transaction, error) {
-	return _L2StandardTokenFactory.contract.Transact(opts, "createStandardL2Token", _l1Token, _name, _symbol)
+// Solidity: function createStandardL2Token(address _l1Token, string _name, string _symbol, uint8 _decimal) returns()
+func (_L2StandardTokenFactory *L2StandardTokenFactoryTransactor) CreateStandardL2Token(opts *bind.TransactOpts, _l1Token common.Address, _name string, _symbol string, _decimal uint8) (*types.Transaction, error) {
+	return _L2StandardTokenFactory.contract.Transact(opts, "createStandardL2Token", _l1Token, _name, _symbol, _decimal)
 }
 
-// CreateStandardL2Token is a paid mutator transaction binding the contract method 0x896f93d1.
+// CreateStandardL2Token is a paid mutator transaction binding the contract method 0x0769a969.
 //
-// Solidity: function createStandardL2Token(address _l1Token, string _name, string _symbol) returns()
-func (_L2StandardTokenFactory *L2StandardTokenFactorySession) CreateStandardL2Token(_l1Token common.Address, _name string, _symbol string) (*types.Transaction, error) {
-	return _L2StandardTokenFactory.Contract.CreateStandardL2Token(&_L2StandardTokenFactory.TransactOpts, _l1Token, _name, _symbol)
+// Solidity: function createStandardL2Token(address _l1Token, string _name, string _symbol, uint8 _decimal) returns()
+func (_L2StandardTokenFactory *L2StandardTokenFactorySession) CreateStandardL2Token(_l1Token common.Address, _name string, _symbol string, _decimal uint8) (*types.Transaction, error) {
+	return _L2StandardTokenFactory.Contract.CreateStandardL2Token(&_L2StandardTokenFactory.TransactOpts, _l1Token, _name, _symbol, _decimal)
 }
 
-// CreateStandardL2Token is a paid mutator transaction binding the contract method 0x896f93d1.
+// CreateStandardL2Token is a paid mutator transaction binding the contract method 0x0769a969.
 //
-// Solidity: function createStandardL2Token(address _l1Token, string _name, string _symbol) returns()
-func (_L2StandardTokenFactory *L2StandardTokenFactoryTransactorSession) CreateStandardL2Token(_l1Token common.Address, _name string, _symbol string) (*types.Transaction, error) {
-	return _L2StandardTokenFactory.Contract.CreateStandardL2Token(&_L2StandardTokenFactory.TransactOpts, _l1Token, _name, _symbol)
+// Solidity: function createStandardL2Token(address _l1Token, string _name, string _symbol, uint8 _decimal) returns()
+func (_L2StandardTokenFactory *L2StandardTokenFactoryTransactorSession) CreateStandardL2Token(_l1Token common.Address, _name string, _symbol string, _decimal uint8) (*types.Transaction, error) {
+	return _L2StandardTokenFactory.Contract.CreateStandardL2Token(&_L2StandardTokenFactory.TransactOpts, _l1Token, _name, _symbol, _decimal)
 }
 
 // L2StandardTokenFactoryStandardL2TokenCreatedIterator is returned from FilterStandardL2TokenCreated and is used to iterate over the raw logs and unpacked data for StandardL2TokenCreated events raised by the L2StandardTokenFactory contract.
@@ -271,12 +271,13 @@ func (it *L2StandardTokenFactoryStandardL2TokenCreatedIterator) Close() error {
 type L2StandardTokenFactoryStandardL2TokenCreated struct {
 	L1Token common.Address
 	L2Token common.Address
+	Decimal uint8
 	Raw     types.Log // Blockchain specific contextual infos
 }
 
-// FilterStandardL2TokenCreated is a free log retrieval operation binding the contract event 0xceeb8e7d520d7f3b65fc11a262b91066940193b05d4f93df07cfdced0eb551cf.
+// FilterStandardL2TokenCreated is a free log retrieval operation binding the contract event 0x41e27481c6f764357db26ae29b68b9f3aafc40b87444459cbf50d338c7531732.
 //
-// Solidity: event StandardL2TokenCreated(address indexed _l1Token, address indexed _l2Token)
+// Solidity: event StandardL2TokenCreated(address indexed _l1Token, address indexed _l2Token, uint8 decimal)
 func (_L2StandardTokenFactory *L2StandardTokenFactoryFilterer) FilterStandardL2TokenCreated(opts *bind.FilterOpts, _l1Token []common.Address, _l2Token []common.Address) (*L2StandardTokenFactoryStandardL2TokenCreatedIterator, error) {
 
 	var _l1TokenRule []interface{}
@@ -295,9 +296,9 @@ func (_L2StandardTokenFactory *L2StandardTokenFactoryFilterer) FilterStandardL2T
 	return &L2StandardTokenFactoryStandardL2TokenCreatedIterator{contract: _L2StandardTokenFactory.contract, event: "StandardL2TokenCreated", logs: logs, sub: sub}, nil
 }
 
-// WatchStandardL2TokenCreated is a free log subscription operation binding the contract event 0xceeb8e7d520d7f3b65fc11a262b91066940193b05d4f93df07cfdced0eb551cf.
+// WatchStandardL2TokenCreated is a free log subscription operation binding the contract event 0x41e27481c6f764357db26ae29b68b9f3aafc40b87444459cbf50d338c7531732.
 //
-// Solidity: event StandardL2TokenCreated(address indexed _l1Token, address indexed _l2Token)
+// Solidity: event StandardL2TokenCreated(address indexed _l1Token, address indexed _l2Token, uint8 decimal)
 func (_L2StandardTokenFactory *L2StandardTokenFactoryFilterer) WatchStandardL2TokenCreated(opts *bind.WatchOpts, sink chan<- *L2StandardTokenFactoryStandardL2TokenCreated, _l1Token []common.Address, _l2Token []common.Address) (event.Subscription, error) {
 
 	var _l1TokenRule []interface{}
@@ -341,9 +342,9 @@ func (_L2StandardTokenFactory *L2StandardTokenFactoryFilterer) WatchStandardL2To
 	}), nil
 }
 
-// ParseStandardL2TokenCreated is a log parse operation binding the contract event 0xceeb8e7d520d7f3b65fc11a262b91066940193b05d4f93df07cfdced0eb551cf.
+// ParseStandardL2TokenCreated is a log parse operation binding the contract event 0x41e27481c6f764357db26ae29b68b9f3aafc40b87444459cbf50d338c7531732.
 //
-// Solidity: event StandardL2TokenCreated(address indexed _l1Token, address indexed _l2Token)
+// Solidity: event StandardL2TokenCreated(address indexed _l1Token, address indexed _l2Token, uint8 decimal)
 func (_L2StandardTokenFactory *L2StandardTokenFactoryFilterer) ParseStandardL2TokenCreated(log types.Log) (*L2StandardTokenFactoryStandardL2TokenCreated, error) {
 	event := new(L2StandardTokenFactoryStandardL2TokenCreated)
 	if err := _L2StandardTokenFactory.contract.UnpackLog(event, "StandardL2TokenCreated", log); err != nil {

@@ -1,60 +1,58 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-  Provider,
   BlockTag,
+  Provider,
   TransactionReceipt,
-  TransactionResponse,
   TransactionRequest,
-  Log,
+  TransactionResponse,
 } from '@ethersproject/abstract-provider'
-import { Signer } from '@ethersproject/abstract-signer'
-import { ethers, BigNumber, Overrides, CallOverrides } from 'ethers'
+import {Signer} from '@ethersproject/abstract-signer'
+import {BigNumber, CallOverrides, ethers, Overrides} from 'ethers'
 import {
-  sleep,
-  remove0x,
-  toHexString,
   encodeCrossDomainMessageV0,
   hashCrossDomainMessage,
-} from '@mantlenetworkio/core-utils'
-import { getContractInterface, predeploys } from '@mantlenetworkio/contracts'
+  remove0x,
+  sleep,
+  toHexString,
+} from '@mantleio/core-utils'
+import {getContractInterface, predeploys} from '@mantleio/contracts'
 import * as rlp from 'rlp'
 
 import {
-  CoreCrossChainMessage,
-  ICrossChainMessenger,
-  OEContracts,
-  OEContractsLike,
-  MessageLike,
-  MessageRequestLike,
-  TransactionLike,
   AddressLike,
-  NumberLike,
-  SignerOrProviderLike,
-  CrossChainMessage,
-  CrossChainMessageRequest,
-  CrossChainMessageProof,
-  MessageDirection,
-  MessageStatus,
-  TokenBridgeMessage,
-  MessageReceipt,
-  MessageReceiptStatus,
   BridgeAdapterData,
   BridgeAdapters,
+  CrossChainMessage,
+  CrossChainMessageProof,
+  CrossChainMessageRequest,
+  IBridgeAdapter,
+  ICrossChainMessenger,
+  MessageDirection,
+  MessageLike,
+  MessageReceipt,
+  MessageReceiptStatus,
+  MessageRequestLike,
+  MessageStatus,
+  NumberLike,
+  OEContracts,
+  OEContractsLike,
+  SignerOrProviderLike,
   StateRoot,
   StateRootBatch,
-  IBridgeAdapter,
+  TokenBridgeMessage,
+  TransactionLike,
 } from './interfaces'
 import {
-  toSignerOrProvider,
-  toNumber,
-  toTransactionHash,
+  CHAIN_BLOCK_TIMES,
   DeepPartial,
+  DEPOSIT_CONFIRMATION_BLOCKS,
   getAllOEContracts,
   getBridgeAdapters,
   makeMerkleTreeProof,
   makeStateTrieProof,
-  DEPOSIT_CONFIRMATION_BLOCKS,
-  CHAIN_BLOCK_TIMES,
+  toNumber,
+  toSignerOrProvider,
+  toTransactionHash,
 } from './utils'
 
 export class CrossChainMessenger implements ICrossChainMessenger {
@@ -464,8 +462,8 @@ export class CrossChainMessenger implements ICrossChainMessenger {
       return {
         receiptStatus: MessageReceiptStatus.RELAYED_FAILED,
         transactionReceipt: await failedRelayedMessageEvents[
-          failedRelayedMessageEvents.length - 1
-        ].getTransactionReceipt(),
+        failedRelayedMessageEvents.length - 1
+          ].getTransactionReceipt(),
       }
     }
 
@@ -825,6 +823,7 @@ export class CrossChainMessenger implements ICrossChainMessenger {
         batchRoot: stateBatchAppendedEvent.args._batchRoot,
         batchSize: stateBatchAppendedEvent.args._batchSize,
         prevTotalElements: stateBatchAppendedEvent.args._prevTotalElements,
+        signature: stateBatchAppendedEvent.args._signature,
         extraData: stateBatchAppendedEvent.args._extraData,
       },
     }

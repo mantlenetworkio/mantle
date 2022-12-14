@@ -1,0 +1,47 @@
+# This is a TOML config file.
+# For more information, see https://github.com/toml_lang/toml
+###############################################################################
+###                           Base Configuration                            ###
+###############################################################################
+l1_url = "http://bitnetwork-l1chain"
+time_task_interval = "10s"
+l1_receipt_confirm_timeout = "30s"
+l1_confirm_blocks = "1"
+scc_contract_address = "0x2A88056985814dcBb72aFA50B95893359B6262f5"
+tss_group_contract_address = "0x666f755Ff171702702EAc10339A2a613698Cbd2f"
+tss_staking_slash_contract_address = "0x00f59693Ab3a491356FDB4Facb4B04D811135E22"
+timed_task_interval = "10s"
+signed_batches_window = 100
+min_signed_in_window = 50
+[node]
+# database directory; default: 'base_dir' will be used
+db_dir = "/root/.tssnode/db"
+# the base directory for storing the data, tss localSaveData etc. 
+base_dir = "/root/.tssnode"
+# websocket addr of tss manager
+ws_addr = "tcp://tss-manager:8081"
+# l2 eth rpc
+l2_eth_rpc = "http://bitnetwork-l2geth"
+tss_group_manager_address = "0x666f755Ff171702702EAc10339A2a613698Cbd2f"
+tss_staking_slashing_address = "0x00f59693Ab3a491356FDB4Facb4B04D811135E22"
+# the preParamFile for tss job
+pre_param_file = ""
+# listening port for p2p communication
+p2p_port = "8000"
+# bootstrap peers the node is going to connecting to once the node started
+# format: /ip4/${ip}/tcp/${port}/p2p/${peerID},..
+# the self peerID can be checked via command of 'tssnode keys parse-peer-id -h '
+# bootstrap_peers = "/ip4/{2nd node ip}/tcp/8000/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,/ip4/{3rd node ip}/tcp/8000/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH"
+bootstrap_peers=""
+# the address ip we should advertise to the network
+external_ip = "127.0.0.1"
+# timeout setting during tss job
+join_party_timeout = "60s"
+key_gen_timeout = "60s"
+key_sign_timeout = "60s"
+pre_param_timeout = "5m0s"
+# The private key for identifying the node, it should be hex string here without '0x'.
+# It is unsafe to put the raw private key here in the file, it would be nice to
+# set it to environment with the prefix 'TSS', export TSS_KEY_PRIVATE_KEY="981a3e...."
+# or it is recommended to store the private key into keyring, you can checkout with 'tssnode keys -h'.
+private_key = ""

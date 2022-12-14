@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ethers, Contract, Overrides, BigNumber } from 'ethers'
 import { TransactionRequest, BlockTag } from '@ethersproject/abstract-provider'
-import { predeploys, getContractInterface } from '@mantlenetworkio/contracts'
-import { hexStringEquals } from '@mantlenetworkio/core-utils'
+import { predeploys, getContractInterface } from '@mantleio/contracts'
+import { hexStringEquals } from '@mantleio/core-utils'
 
 import {
   NumberLike,
@@ -42,12 +42,12 @@ export class ETHBridgeAdapter extends StandardBridgeAdapter {
       .map((event) => {
         return {
           direction: MessageDirection.L1_TO_L2,
-          from: event.args.from,
-          to: event.args.to,
+          from: event.args._from,
+          to: event.args._to,
           l1Token: ethers.constants.AddressZero,
           l2Token: predeploys.BVM_ETH,
-          amount: event.args.amount,
-          data: event.args.extraData,
+          amount: event.args._amount,
+          data: event.args._data,
           logIndex: event.logIndex,
           blockNumber: event.blockNumber,
           transactionHash: event.transactionHash,
@@ -76,19 +76,19 @@ export class ETHBridgeAdapter extends StandardBridgeAdapter {
       .filter((event) => {
         // Only find ETH withdrawals.
         return (
-          hexStringEquals(event.args.l1Token, ethers.constants.AddressZero) &&
-          hexStringEquals(event.args.l2Token, predeploys.BVM_ETH)
+          hexStringEquals(event.args._l1Token, ethers.constants.AddressZero) &&
+          hexStringEquals(event.args._l2Token, predeploys.BVM_ETH)
         )
       })
       .map((event) => {
         return {
           direction: MessageDirection.L2_TO_L1,
-          from: event.args.from,
-          to: event.args.to,
-          l1Token: event.args.l1Token,
-          l2Token: event.args.l2Token,
-          amount: event.args.amount,
-          data: event.args.extraData,
+          from: event.args._from,
+          to: event.args._to,
+          l1Token: event.args._l1Token,
+          l2Token: event.args._l2Token,
+          amount: event.args._amount,
+          data: event.args._data,
           logIndex: event.logIndex,
           blockNumber: event.blockNumber,
           transactionHash: event.transactionHash,
