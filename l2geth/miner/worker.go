@@ -455,6 +455,9 @@ func (w *worker) batchStartLoop() {
 		select {
 		//BatchPeriodStartEvent
 		case obj := <-w.bpsSub.Chan():
+			if !w.isRunning() {
+				log.Info("miner receives batchPeriodStartEvent but miner not start")
+			}
 			var ev core.BatchPeriodStartEvent
 			var ok bool
 			if ev, ok = obj.Data.(core.BatchPeriodStartEvent); !ok {
@@ -472,7 +475,6 @@ func (w *worker) batchStartLoop() {
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
-					// TODO wait until expireTime
 					log.Info("Active sequencer receives batchPeriodStartEvent")
 					if ev.Msg.StartHeight != w.chain.CurrentBlock().NumberU64()+1 {
 						log.Info("start height mismatch", "current_height", w.current.header.Number.Uint64(), "startHeight", ev.Msg.StartHeight)
@@ -486,57 +488,64 @@ func (w *worker) batchStartLoop() {
 						log.Info("expire timestamp is passed", "current_time", time.Now().Unix(), "expireTime", ev.Msg.ExpireTime)
 						continue
 					}
-					pending, err := w.eth.TxPool().Pending()
-					if err != nil {
-						log.Error("Failed to fetch pending transactions", "err", err)
-						return
-					}
-					// Short circuit if there is no available pending transactions
-					if len(pending) == 0 {
-						log.Info("empty txpool, wait for 200 millisecond")
-						time.Sleep(200 * time.Millisecond)
-						continue
-					}
-					log.Info("pending size", "size", len(pending))
-					// Split the pending transactions into locals and remotes
-					localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
-					// TODO mev
-					var txsQueue types.Transactions
-					for _, account := range w.eth.TxPool().Locals() {
-						if txs := remoteTxs[account]; len(txs) > 0 {
-							delete(remoteTxs, account)
-							localTxs[account] = txs
+
+					// Keep sending messages until the limit is reached
+					for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < ev.Msg.MaxHeight && uint64(time.Now().Unix()) < ev.Msg.ExpireTime && inTxLen < (ev.Msg.MaxHeight-ev.Msg.StartHeight); {
+						pending, err := w.eth.TxPool().Pending()
+						if err != nil {
+							log.Error("Failed to fetch pending transactions", "err", err)
+							return
+						}
+						// Short circuit if there is no available pending transactions
+						if len(pending) == 0 {
+							log.Debug("empty txpool, wait for 200 millisecond")
+							time.Sleep(200 * time.Millisecond)
+							continue
+						}
+						log.Info("pending size", "size", len(pending))
+						// Split the pending transactions into locals and remotes
+						localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
+						// TODO mev
+						var txsQueue types.Transactions
+						for _, account := range w.eth.TxPool().Locals() {
+							if txs := remoteTxs[account]; len(txs) > 0 {
+								delete(remoteTxs, account)
+								localTxs[account] = txs
+								txsQueue = append(txsQueue, txs...)
+							}
+						}
+						for _, txs := range remoteTxs {
 							txsQueue = append(txsQueue, txs...)
 						}
-					}
-					for _, txs := range remoteTxs {
-						txsQueue = append(txsQueue, txs...)
+
+						var bpa types.BatchPeriodAnswerMsg
+						if uint64(len(txsQueue)) > ev.Msg.MaxHeight-ev.Msg.StartHeight {
+							bpa.Txs = txsQueue[:ev.Msg.MaxHeight-ev.Msg.StartHeight]
+							inTxLen += ev.Msg.MaxHeight - ev.Msg.StartHeight
+						} else {
+							bpa.Txs = txsQueue // TODO before expire time, send multiple BatchPeriodAnswerMsg
+							inTxLen += uint64(len(txsQueue))
+						}
+						bpa.BatchIndex = ev.Msg.BatchIndex
+						bpa.StartIndex = ev.Msg.StartHeight
+						bpa.Sequencer = w.coinbase
+						signature, err := w.engine.SignData(bpa.Sequencer, bpa.GetSignData())
+						if err != nil {
+							log.Error("Sign BatchPeriodAnswerMsg error", "errMsg", err.Error())
+							continue
+						}
+						bpa.Signature = signature
+						err = w.mux.Post(core.BatchPeriodAnswerEvent{
+							Msg:   &bpa,
+							ErrCh: nil,
+						})
+						if err != nil {
+							log.Error("Post BatchPeriodAnswerMsg error", "errMsg", err.Error())
+							continue
+						}
+						log.Info("Generate BatchPeriodAnswerEvent", "coinbase", w.coinbase.String(), "tx_count", len(bpa.Txs), "startIndex", bpa.StartIndex)
 					}
 
-					var bpa types.BatchPeriodAnswerMsg
-					if uint64(len(txsQueue)) > ev.Msg.MaxHeight-ev.Msg.StartHeight {
-						bpa.Txs = txsQueue[:ev.Msg.MaxHeight-ev.Msg.StartHeight]
-					} else {
-						bpa.Txs = txsQueue // TODO before expire time, send multiple BatchPeriodAnswerMsg
-					}
-					bpa.BatchIndex = ev.Msg.BatchIndex
-					bpa.StartIndex = ev.Msg.StartHeight
-					bpa.Sequencer = w.coinbase
-					signature, err := w.engine.SignData(bpa.Sequencer, bpa.GetSignData())
-					if err != nil {
-						log.Error("Sign BatchPeriodAnswerMsg error", "errMsg", err.Error())
-						continue
-					}
-					bpa.Signature = signature
-					err = w.mux.Post(core.BatchPeriodAnswerEvent{
-						Msg:   &bpa,
-						ErrCh: nil,
-					})
-					if err != nil {
-						log.Error("Post BatchPeriodAnswerMsg error", "errMsg", err.Error())
-						continue
-					}
-					log.Info("Generate BatchPeriodAnswerEvent", "coinbase", w.coinbase.String(), "tx_count", len(bpa.Txs), "startIndex", bpa.StartIndex)
 				} else {
 					// for inactive sequencer
 					log.Info("Inactive sequencer receives batchPeriodStartEvent")

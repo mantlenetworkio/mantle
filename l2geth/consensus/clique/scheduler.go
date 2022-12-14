@@ -192,7 +192,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		ticker := time.NewTicker(time.Duration(expireTime) * time.Second)
 		select {
 		case <-ticker.C:
-			log.Info("ticker timeout")
+			log.Debug("ticker timeout")
 			//ticker.Stop()
 		}
 	}
