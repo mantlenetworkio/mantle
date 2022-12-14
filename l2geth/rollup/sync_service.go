@@ -1302,10 +1302,8 @@ func (s *SyncService) syncQueueTransactionRange(start, end uint64) error {
 		if err != nil {
 			return fmt.Errorf("Canot get enqueue transaction; %w", err)
 		}
-		log.Info("current block:", "number", s.bc.CurrentHeader().Number.Uint64())
 		hexRawTx := hexutil.Encode(tx.GetMeta().RawTransaction)
 		if len(hexRawTx) > 402 {
-			// TODO handle sccAddr
 			sccAddress, err := s.RollupGpo.SCCAddress()
 			if err != nil {
 				log.Crit("RollupGpo get sccAddress", "error", err)
