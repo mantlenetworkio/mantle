@@ -275,7 +275,6 @@ func (s *SyncService) Start() error {
 				log.Crit("Sequencer cannot sync queue to tip", "err", err)
 			}
 			s.setSyncStatus(false)
-			go s.SequencerLoop()
 		}()
 	}
 	return nil
@@ -461,7 +460,6 @@ func (s *SyncService) verify() error {
 	return nil
 }
 
-// SchedulerPull scheduler Get the L1ToL2 Tx from L1
 func (s *SyncService) SchedulerPull() {
 	s.txLock.Lock()
 	if err := s.sequence(); err != nil {
