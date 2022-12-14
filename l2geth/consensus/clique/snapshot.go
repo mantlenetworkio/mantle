@@ -327,12 +327,5 @@ func (s *Snapshot) inturn(number uint64, signer common.Address) bool {
 	for offset < len(signers) && signers[offset] != signer {
 		offset++
 	}
-	fmt.Println("print signers begin------------------")
-	fmt.Println(len(signers))
-	for index, value := range signers {
-		fmt.Println(index)
-		fmt.Println(value.String())
-	}
-	fmt.Println("print signers end  ------------------")
 	return (number % uint64(len(signers))) == uint64(offset)
 }

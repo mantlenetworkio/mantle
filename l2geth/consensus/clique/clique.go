@@ -625,13 +625,6 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 	if err != nil {
 		return err
 	}
-	fmt.Println("---------------seal errUnauth signer begin--------------------")
-	fmt.Println(signer.String())
-	for key, value := range snap.Signers {
-		fmt.Println(key.String())
-		fmt.Println(value)
-	}
-	fmt.Println("---------------seal errUnauth signer end--------------------")
 	if _, authorized := snap.Signers[signer]; !authorized {
 		return errUnauthorizedSigner
 	}

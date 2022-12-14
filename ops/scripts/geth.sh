@@ -54,7 +54,7 @@ if [ $IS_SEQUENCER == "true" ] ;then
     --unlock $BLOCK_SIGNER_ADDRESS \
     --bootnodes $SCHEDULER_P2P_ENODE \
     --nat $NAT \
-    --port $P2P_PORT \
+    --config /root/.ethereum/geth/config.toml \
     --mine \
     --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
 #    --miner.etherbase $BLOCK_SIGNER_ADDRESS \

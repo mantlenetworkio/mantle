@@ -276,6 +276,7 @@ services:
       IS_SEQUENCER: 'true'
       P2P_PORT: 30313
       NAT: 'extip:172.17.0.1'
+      CONFIG_PATH: ''
       SCHEDULER_P2P_ENODE: 'enode://09998ab210032351a2bea94fbb8c867cfc95553019d3cecfe0d3f3aef78b24290e624b07a99fdaa3c2fb9015d193303179b396e3520284d249ef9a233a5f5e62@172.17.0.1:30303?discport=0'
     ports:
       - ${L2GETH_HTTP_PORT:-7545}:8545
@@ -318,6 +319,7 @@ services:
       ROLLUP_FEE_THRESHOLD_UP: 1.1
       IS_SEQUENCER: 'true'
       P2P_PORT: 30323
+      CONFIG_PATH: ''
       SCHEDULER_P2P_ENODE: 'enode://09998ab210032351a2bea94fbb8c867cfc95553019d3cecfe0d3f3aef78b24290e624b07a99fdaa3c2fb9015d193303179b396e3520284d249ef9a233a5f5e62@172.17.0.1:30303?discport=0'
       NAT: 'extip:172.17.0.1'
     ports:
