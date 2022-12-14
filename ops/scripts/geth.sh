@@ -41,6 +41,7 @@ geth account import --password ./password ./key.prv
 echo "Initializing Geth node"
 geth --verbosity="$VERBOSITY" "$@" init genesis.json
 echo $BLOCK_SCHEDULER_ADDRESS
+echo $SCHEDULER_P2P_ENODE
 
 # start the geth node
 echo "Starting Geth node"
