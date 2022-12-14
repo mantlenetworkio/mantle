@@ -295,7 +295,7 @@ const config: HardhatUserConfig = {
       type: 'address',
     },
     sccAddress: {
-      type: 'number',
+      type: 'address',
       default: 0,
     },
     gasPriceOracleOverhead: {
