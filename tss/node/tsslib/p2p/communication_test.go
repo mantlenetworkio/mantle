@@ -3,8 +3,8 @@ package p2p
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"github.com/libp2p/go-libp2p-core/crypto"
-	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p/core/crypto"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 	maddr "github.com/multiformats/go-multiaddr"
 	. "gopkg.in/check.v1"
