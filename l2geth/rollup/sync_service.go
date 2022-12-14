@@ -1302,26 +1302,24 @@ func (s *SyncService) syncQueueTransactionRange(start, end uint64) error {
 		if err != nil {
 			return fmt.Errorf("Canot get enqueue transaction; %w", err)
 		}
-		fmt.Println("current block:", s.bc.CurrentHeader().Number.Uint64())
+		log.Info("current block:", "number", s.bc.CurrentHeader().Number.Uint64())
 		hexRawTx := hexutil.Encode(tx.GetMeta().RawTransaction)
 		if len(hexRawTx) > 402 {
 			// TODO handle sccAddr
 			sccAddress, err := s.RollupGpo.SCCAddress()
 			if err != nil {
-				fmt.Println("RollupGpo get sccAddress error:", err)
+				log.Crit("RollupGpo get sccAddress", "error", err)
 			}
-			// TODO delete
-			fmt.Println("sccAddress:===", sccAddress.Hex())
 			if common.HexToAddress(hexRawTx[34:74]) == dump.BvmRollbackAddress && common.HexToAddress(hexRawTx[98:138]) == sccAddress {
 				if parseUint, err := strconv.ParseUint(hexRawTx[362:402], 16, 32); err == nil {
 					if err := s.SchedulerRollback(parseUint); err != nil {
-						fmt.Println("scheduler rollback error:", err)
+						log.Error("scheduler rollback", "error", err)
 					}
 				}
 			}
 		}
 		if err := s.applyTransaction(tx); err != nil {
-			return fmt.Errorf("Cannot apply transaction: %w", err)
+			return fmt.Errorf("cannot apply transaction: %w", err)
 		}
 	}
 	return nil
