@@ -831,6 +831,7 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
 	for i := start; i <= latest; i++ {
 		newBlock := s.bc.GetBlockByNumber(i)
+		log.Info("StateRoot", "equal", oldBlocks[i-start].Root() == newBlock.Root())
 		if oldBlocks[i-start].Hash() != newBlock.Hash() {
 			// TODO Emit Rollback Event To sequencer
 			log.Info("Emit Rollback Event To sequencer", "old blockHash", oldBlocks[i-start].Hash(), "newBlockHash", newBlock.Hash())

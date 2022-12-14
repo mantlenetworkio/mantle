@@ -203,25 +203,6 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
 
     }
 
-    function rollBackChain(uint256 _shouldRollBack) public {
-        // Fail fast in to make sure our batch roots aren't accidentally made fraudulent by the
-        // publication of batches by some other user.
-        // construct calldata for claimReward call
-        bytes memory message = abi.encodeWithSelector(
-            IStateCommitmentChain.rollBackMessage.selector,
-            _shouldRollBack
-        );
-
-        // send call data into L2, hardcode address
-        sendCrossDomainMessage(
-            address(0xDeADdeaDdEaDdeADdEaDDeADDEaddEaDDEad2222),
-            2000000,
-            message
-        );
-
-    }
-
-
     /**
     * @inheritdoc IStateCommitmentChain
      */
