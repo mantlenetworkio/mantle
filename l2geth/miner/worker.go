@@ -578,6 +578,7 @@ func (w *worker) batchAnswerLoop() {
 			}
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
+				// todo check event index
 				log.Info("Scheduler receives BatchPeriodAnswerEvent", "Sequencer", ev.Msg.Sequencer.String())
 				for _, tx := range ev.Msg.Txs {
 					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, ev.Msg.Sequencer)
@@ -585,6 +586,7 @@ func (w *worker) batchAnswerLoop() {
 						log.Error("ValidateAndApplySequencerTransaction error", "errMsg", err.Error())
 						continue
 					}
+
 				}
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {

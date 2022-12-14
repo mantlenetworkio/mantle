@@ -1,12 +1,13 @@
 package types
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
-
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
@@ -23,6 +24,19 @@ type MsgVerify interface {
 }
 
 var _ MsgVerify = &BatchPeriodStartMsg{}
+var _ MsgVerify = &BatchPeriodAnswerMsg{}
+
+func VerifySigner(msg MsgVerify, addr common.Address) bool {
+	signer, err := msg.GetSigner()
+	if err != nil {
+		log.Error("Verify signature err", "err", err)
+	}
+	if !bytes.Equal(signer.Bytes(), addr.Bytes()) {
+		log.Error("Verify signature failed", "addr", addr, "signer", signer.String())
+		return false
+	}
+	return true
+}
 
 type BatchPeriodStartMsg struct {
 	ReorgIndex  uint64

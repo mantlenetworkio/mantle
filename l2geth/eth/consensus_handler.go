@@ -141,16 +141,10 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		log.Info("Batch Period Start Msg", "batchIndex", bs.BatchIndex, "startHeight", bs.StartHeight, "maxHeight", bs.MaxHeight, "expireTime", bs.ExpireTime)
+		if !types.VerifySigner(bs, pm.schedulerInst.Scheduler()) {
+			return nil
+		}
 
-		signer, err := bs.GetSigner()
-		if err != nil {
-			log.Error("Verify signature err", "err", err)
-			return nil
-		}
-		if !bytes.Equal(signer.Bytes(), pm.schedulerInst.Scheduler().Bytes()) {
-			log.Error("Verify signature failed", "scheduler", pm.schedulerInst.Scheduler().String(), "signer", signer.String())
-			return nil
-		}
 		p.knowBatchPeriodStartMsg.Add(bs.Hash())
 		erCh := make(chan error, 1)
 		pm.eventMux.Post(core.BatchPeriodStartEvent{
@@ -162,7 +156,15 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bpa); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		p.knowBatchPeriodStartMsg.Add(bpa.Hash())
+		log.Info("Batch Period Start Msg", "batchIndex", bpa.BatchIndex, "StartIndex", bpa.StartIndex, "tx len", len(bpa.Txs))
+		if !pm.schedulerInst.IsRunning() {
+			log.Debug("not scheduler")
+			return nil
+		}
+		if !types.VerifySigner(bpa, pm.schedulerInst.CurrentStartMsg().Sequencer) {
+			return nil
+		}
+		p.knowBatchPeriodAnswerMsg.Add(bpa.Hash())
 		erCh := make(chan error, 1)
 		pm.eventMux.Post(core.BatchPeriodAnswerEvent{
 			Msg:   bpa,
@@ -174,7 +176,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		log.Info("Fraud Proof Reorg Msg")
-		p.knowBatchPeriodStartMsg.Add(fpr.Hash())
+		p.knowFraudProofReorg.Add(fpr.Hash())
 		// todo: FraudProofReorgMsg handle
 
 	default:
