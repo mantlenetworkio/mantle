@@ -73,7 +73,8 @@ func (fc *fileCache) scan(keyDir string) (mapset.Set, mapset.Set, mapset.Set, er
 			newLastMod = modified
 		}
 	}
-	t2 := time.Now()
+	//TODO: temp ignore the fs scan, revert it
+	//t2 := time.Now()
 
 	// Update the tracked files and return the three sets
 	deletes := fc.all.Difference(all)   // Deletes = previous - current
