@@ -489,7 +489,6 @@ func (w *worker) batchStartLoop() {
 						continue
 					}
 
-					w.eth.TxPool().Pending()
 					// Keep sending messages until the limit is reached
 					for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < ev.Msg.MaxHeight && uint64(time.Now().Unix()) < ev.Msg.ExpireTime && inTxLen < (ev.Msg.MaxHeight-ev.Msg.StartHeight); {
 						pending, err := w.eth.TxPool().Pending()
@@ -524,7 +523,7 @@ func (w *worker) batchStartLoop() {
 							bpa.Txs = txsQueue[:ev.Msg.MaxHeight-ev.Msg.StartHeight]
 							inTxLen += ev.Msg.MaxHeight - ev.Msg.StartHeight
 						} else {
-							bpa.Txs = txsQueue // TODO before expire time, send multiple BatchPeriodAnswerMsg
+							bpa.Txs = txsQueue
 							inTxLen += uint64(len(txsQueue))
 						}
 						bpa.BatchIndex = ev.Msg.BatchIndex
