@@ -220,8 +220,8 @@ func (e *NoRewardEngine) VerifySeal(chain consensus.ChainReader, header *types.H
 	return e.inner.VerifySeal(chain, header)
 }
 
-func (e *NoRewardEngine) Prepare(chain consensus.ChainReader, header *types.Header) error {
-	return e.inner.Prepare(chain, header)
+func (e *NoRewardEngine) Prepare(chain consensus.ChainReader, header *types.Header, txSetProof *types.BatchTxSetProof) error {
+	return e.inner.Prepare(chain, header, txSetProof)
 }
 
 func (e *NoRewardEngine) accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
@@ -477,7 +477,7 @@ func (api *RetestethAPI) mineBlock() error {
 	}
 	header.Coinbase = api.author
 	if api.engine != nil {
-		api.engine.Prepare(api.blockchain, header)
+		api.engine.Prepare(api.blockchain, header, nil)
 	}
 	// If we are care about TheDAO hard-fork check whether to override the extra-data or not
 	if daoBlock := api.chainConfig.DAOForkBlock; daoBlock != nil {

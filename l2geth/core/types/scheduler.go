@@ -191,8 +191,8 @@ func (bpa *BatchPeriodAnswerMsg) Serialize() []byte {
 		return nil
 	}
 	buf := bpa.Sequencer.Bytes()
-	binary.BigEndian.AppendUint64(buf, bpa.BatchIndex)
-	binary.BigEndian.AppendUint64(buf, bpa.StartIndex)
+	buf = binary.BigEndian.AppendUint64(buf, bpa.BatchIndex)
+	buf = binary.BigEndian.AppendUint64(buf, bpa.StartIndex)
 	for i, _ := range bpa.Txs {
 		txBytes := bpa.Txs.GetRlp(i)
 
@@ -224,11 +224,13 @@ func (bpa *BatchPeriodAnswerMsg) GetSignData() []byte {
 		return nil
 	}
 	buf := bpa.Sequencer.Bytes()
-	binary.BigEndian.AppendUint64(buf, bpa.BatchIndex)
-	binary.BigEndian.AppendUint64(buf, bpa.StartIndex)
+	buf = binary.BigEndian.AppendUint64(buf, bpa.BatchIndex)
+	buf = binary.BigEndian.AppendUint64(buf, bpa.StartIndex)
 	for _, tx := range bpa.Txs {
-		txHash := tx.Hash()
-		buf = append(buf, txHash[:]...)
+		tempTxs := make(Transactions, 1, 1)
+		tempTxs[0] = tx
+		txHashRoot := DeriveSha(tempTxs)
+		buf = append(buf, txHashRoot[:]...)
 	}
 
 	return buf
@@ -243,6 +245,115 @@ func (bpa *BatchPeriodAnswerMsg) Hash() common.Hash {
 		return common.Hash{}
 	}
 	return rlpHash(bpa)
+}
+
+func (bpa *BatchPeriodAnswerMsg) ToBatchTxSetProof() *BatchTxSetProof {
+	result := BatchTxSetProof{
+		Sequencer:  bpa.Sequencer,
+		BatchIndex: bpa.BatchIndex,
+		StartIndex: bpa.StartIndex,
+		Signature:  bpa.Signature,
+	}
+	for _, tx := range bpa.Txs {
+		tempTxs := make(Transactions, 1, 1)
+		tempTxs[0] = tx
+		txHashRoot := DeriveSha(tempTxs)
+		result.TxHashSet = append(result.TxHashSet, txHashRoot)
+	}
+
+	return &result
+}
+
+type BatchTxSetProof struct {
+	Sequencer  common.Address
+	BatchIndex uint64
+	StartIndex uint64
+	TxHashSet  []common.Hash
+	Signature  []byte
+}
+
+func DecodeBatchTxSetProof(buf []byte) (BatchTxSetProof, error) {
+	if len(buf) <= common.AddressLength+uint64Length+uint64Length+crypto.SignatureLength {
+		return BatchTxSetProof{}, fmt.Errorf("BatchPeriodAnswerMsg SignData length is too short")
+	}
+	txHashSetLength := len(buf) - common.AddressLength - uint64Length - uint64Length - crypto.SignatureLength
+	if txHashSetLength%common.HashLength != 0 {
+		return BatchTxSetProof{}, fmt.Errorf("BatchPeriodAnswerMsg SignData contains invalid tx hash set")
+	}
+
+	sequencer := common.BytesToAddress(buf[:common.AddressLength])
+	batchIndex := binary.BigEndian.Uint64(buf[common.AddressLength : common.AddressLength+uint64Length])
+	startIndex := binary.BigEndian.Uint64(buf[common.AddressLength+uint64Length : common.AddressLength+uint64Length*2])
+
+	var txs []common.Hash
+
+	startPos := common.AddressLength + uint64Length*2
+	for {
+		if startPos >= len(buf)-crypto.SignatureLength {
+			break
+		}
+		txHashBytes := buf[startPos : startPos+common.HashLength]
+		var txHash common.Hash
+		copy(txHash[:], txHashBytes)
+		txs = append(txs, txHash)
+
+		startPos = startPos + common.HashLength
+	}
+
+	signature := buf[len(buf)-crypto.SignatureLength:]
+
+	return BatchTxSetProof{
+		Sequencer:  sequencer,
+		BatchIndex: batchIndex,
+		StartIndex: startIndex,
+		TxHashSet:  txs,
+		Signature:  signature,
+	}, nil
+}
+
+func (btsp *BatchTxSetProof) Serialize() []byte {
+	if btsp == nil {
+		return nil
+	}
+	buf := btsp.Sequencer[:]
+	buf = binary.BigEndian.AppendUint64(buf, btsp.BatchIndex)
+	buf = binary.BigEndian.AppendUint64(buf, btsp.StartIndex)
+	for _, txHash := range btsp.TxHashSet {
+		buf = append(buf, txHash[:]...)
+	}
+
+	buf = append(buf, btsp.Signature...)
+	return buf
+}
+
+func (btsp *BatchTxSetProof) GetSignData() []byte {
+	if btsp == nil {
+		return nil
+	}
+	buf := btsp.Sequencer[:]
+	buf = binary.BigEndian.AppendUint64(buf, btsp.BatchIndex)
+	buf = binary.BigEndian.AppendUint64(buf, btsp.StartIndex)
+	for _, txHash := range btsp.TxHashSet {
+		buf = append(buf, txHash[:]...)
+	}
+	return buf
+}
+
+func (btsp *BatchTxSetProof) GetSignature() []byte {
+	return btsp.Signature
+}
+
+func (btsp *BatchTxSetProof) ContainTxHashOrNot(txHash common.Hash, height uint64) bool {
+	if btsp == nil {
+		return false
+	}
+	if height < btsp.StartIndex || height-btsp.StartIndex >= uint64(len(btsp.TxHashSet)) {
+		return false
+	}
+	if bytes.Equal(txHash[:], btsp.TxHashSet[height-btsp.StartIndex][:]) {
+		return true
+	}
+	return false
 }
 
 type FraudProofReorgMsg struct {
