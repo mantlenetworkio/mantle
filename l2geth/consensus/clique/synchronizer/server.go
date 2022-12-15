@@ -2,7 +2,6 @@ package synchronizer
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
@@ -116,8 +115,6 @@ func (sync *Synchronizer) GetSequencerSet() (SequencerSequencerInfos, error) {
 		log.Info("retry get sequencer", "time", time.Now(),
 			"retry time", i)
 	}
-	seqInfoStr, err := json.Marshal(seqInfos)
-	log.Info("SEQ INFO STR", "data", string(seqInfoStr))
 	if len(seqInfos) == 0 {
 		return nil, fmt.Errorf("empty sequencer set")
 	}
