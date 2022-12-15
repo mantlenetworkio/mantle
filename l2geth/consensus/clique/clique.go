@@ -489,14 +489,8 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 		if err != nil {
 			return err
 		}
-		pubEcr, err := crypto.SigToPub(crypto.Keccak256(txSetProof.GetSignData()), txSetProof.GetSignature())
-		if err != nil {
-			return errors.New("signature ecrecover failed")
-		}
-		addressEcr := crypto.PubkeyToAddress(*pubEcr)
-
-		if addressEcr != txSetProof.Sequencer {
-			return fmt.Errorf("invalid txSetProof recovered_sequencer %s , txSetProof Sequencer %s", addressEcr.String(), txSetProof.Sequencer.String())
+		if !types.VerifySigner(&txSetProof, txSetProof.Sequencer) {
+			return nil
 		}
 		if !txSetProof.ContainTxHashOrNot(header.TxHash, header.Number.Uint64()) {
 			return fmt.Errorf("the transactionsRoot is not included in txSetProof")

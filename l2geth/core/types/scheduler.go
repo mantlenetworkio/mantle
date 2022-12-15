@@ -25,6 +25,7 @@ type MsgVerify interface {
 
 var _ MsgVerify = &BatchPeriodStartMsg{}
 var _ MsgVerify = &BatchPeriodAnswerMsg{}
+var _ MsgVerify = &BatchTxSetProof{}
 
 func VerifySigner(msg MsgVerify, addr common.Address) bool {
 	signer, err := msg.GetSigner()
@@ -341,6 +342,22 @@ func (btsp *BatchTxSetProof) GetSignData() []byte {
 
 func (btsp *BatchTxSetProof) GetSignature() []byte {
 	return btsp.Signature
+}
+
+func (btsp *BatchTxSetProof) GetSigner() (common.Address, error) {
+	pubEcr, err := crypto.SigToPub(crypto.Keccak256(btsp.GetSignData()), btsp.GetSignature())
+	if err != nil {
+		return common.Address{}, errors.New("signature ecrecover failed")
+	}
+
+	return crypto.PubkeyToAddress(*pubEcr), nil
+}
+
+func (btsp *BatchTxSetProof) Hash() common.Hash {
+	if btsp == nil {
+		return common.Hash{}
+	}
+	return rlpHash(btsp)
 }
 
 func (btsp *BatchTxSetProof) ContainTxHashOrNot(txHash common.Hash, height uint64) bool {
