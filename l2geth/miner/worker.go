@@ -489,6 +489,7 @@ func (w *worker) batchStartLoop() {
 						continue
 					}
 
+					w.eth.TxPool().Pending()
 					// Keep sending messages until the limit is reached
 					for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < ev.Msg.MaxHeight && uint64(time.Now().Unix()) < ev.Msg.ExpireTime && inTxLen < (ev.Msg.MaxHeight-ev.Msg.StartHeight); {
 						pending, err := w.eth.TxPool().Pending()

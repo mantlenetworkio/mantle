@@ -156,7 +156,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bpa); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		log.Info("Batch Period Start Msg", "batchIndex", bpa.BatchIndex, "StartIndex", bpa.StartIndex, "tx len", len(bpa.Txs))
+		log.Info("Batch Period Answer Msg", "batchIndex", bpa.BatchIndex, "StartIndex", bpa.StartIndex, "tx len", len(bpa.Txs))
 		if !pm.schedulerInst.IsRunning() {
 			log.Debug("not scheduler")
 			return nil
