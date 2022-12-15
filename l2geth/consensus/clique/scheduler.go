@@ -36,6 +36,11 @@ type Scheduler struct {
 	consensusEngine *Clique
 	blockchain      *core.BlockChain
 
+	// consensus channel
+	batchDone       chan struct{}
+	currentStartMsg types.BatchPeriodStartMsg
+	currentHeight   uint64
+
 	chainHeadSub event.Subscription
 	chainHeadCh  chan core.ChainHeadEvent
 	addPeerSub   *event.TypeMuxSubscription
@@ -78,7 +83,9 @@ func NewScheduler(schedulerAddress common.Address, clique *Clique, blockchain *c
 	}
 	schedulerInst := &Scheduler{
 		running:         0,
+		currentHeight:   0,
 		done:            make(chan struct{}, 1),
+		batchDone:       make(chan struct{}, 1),
 		ticker:          time.NewTicker(10 * time.Second), //TODO
 		consensusEngine: clique,
 		eventMux:        eventMux,
@@ -101,6 +108,10 @@ func (schedulerInst *Scheduler) SetWallet(wallet accounts.Wallet, acc accounts.A
 
 func (schedulerInst *Scheduler) Scheduler() common.Address {
 	return schedulerInst.schedulerAddr
+}
+
+func (schedulerInst *Scheduler) CurrentStartMsg() types.BatchPeriodStartMsg {
+	return schedulerInst.currentStartMsg
 }
 
 func (schedulerInst *Scheduler) Start() {
@@ -179,6 +190,8 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			return
 		}
 		msg.Signature = sign
+		schedulerInst.currentStartMsg = msg
+
 		err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   &msg,
 			ErrCh: nil,
@@ -192,8 +205,9 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		ticker := time.NewTicker(time.Duration(expireTime) * time.Second)
 		select {
 		case <-ticker.C:
-			log.Info("ticker timeout")
-			//ticker.Stop()
+			log.Debug("ticker timeout")
+		case <-schedulerInst.batchDone:
+			log.Debug("batch done")
 		}
 	}
 }
@@ -202,6 +216,10 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 	for {
 		select {
 		case chainHead := <-schedulerInst.chainHeadCh:
+			if schedulerInst.blockchain.CurrentBlock().NumberU64() == schedulerInst.currentStartMsg.MaxHeight {
+				log.Debug("Batch done with height at max height")
+				schedulerInst.batchDone <- struct{}{}
+			}
 			log.Debug("chainHead", "block number", chainHead.Block.NumberU64(), "extra data", hex.EncodeToString(chainHead.Block.Extra()))
 		}
 	}
