@@ -57,7 +57,6 @@ if [ $IS_SEQUENCER == "true" ] ;then
     --config /root/.ethereum/geth/config.toml \
     --mine \
     --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
-#    --miner.etherbase $BLOCK_SIGNER_ADDRESS \
     --sequencer.mode="true" \
     "$@"
 else [ $IS_SCHEDULER == "true" ]
@@ -69,7 +68,6 @@ else [ $IS_SCHEDULER == "true" ]
     --nat $NAT \
     --mine \
     --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
-#    --miner.etherbase $BLOCK_SIGNER_ADDRESS \
     "$@"
 fi
 
