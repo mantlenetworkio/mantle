@@ -19,7 +19,6 @@ package clique
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"sort"
 	"time"
 
@@ -264,11 +263,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			if tally.Authorize {
 				snap.Signers[header.Coinbase] = struct{}{}
 			} else {
-				fmt.Println("signers  length begin", len(snap.Signers))
-				fmt.Println(header.Coinbase.String())
-				fmt.Println(tally.Votes)
 				delete(snap.Signers, header.Coinbase)
-				fmt.Println("signers  length end", len(snap.Signers))
 
 				// Signer list shrunk, delete any leftover recent caches
 				if limit := uint64(len(snap.Signers)/2 + 1); number >= limit {

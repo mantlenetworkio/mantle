@@ -70,11 +70,9 @@ func (sync *Synchronizer) GetSchedulerAddr() (common.Address, error) {
 	schedulerAddr, err := seqContractInst.Scheduler(nil)
 	for schedulerAddr.String() == "0x0000000000000000000000000000000000000000" && err == nil {
 		log.Info("retry get scheduler", "addr", schedulerAddr)
-		time.Sleep(10 * time.Second)
+		time.Sleep(GET_SEQUENCER_TIMEOUT * time.Second)
 		schedulerAddr, err = seqContractInst.Scheduler(nil)
 	}
-	fmt.Println(schedulerAddr)
-	fmt.Println("we are print the scheduler log------")
 
 	return schedulerAddr, err
 }
