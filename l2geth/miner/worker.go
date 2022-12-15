@@ -548,7 +548,7 @@ func (w *worker) batchStartLoop() {
 
 				} else {
 					// for inactive sequencer
-					log.Info("Inactive sequencer receives batchPeriodStartEvent")
+					log.Info("Inactive sequencer receives batchPeriodStartEvent", "coinbase", w.coinbase.String(), "expected sequencer", ev.Msg.Sequencer.String())
 				}
 			}
 		// System stopped
