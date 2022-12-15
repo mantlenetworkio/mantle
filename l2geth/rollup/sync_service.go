@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"math/big"
 	"strconv"
 	"sync"
@@ -11,7 +13,6 @@ import (
 	"time"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/core/state"
@@ -20,7 +21,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
 	"github.com/mantlenetworkio/mantle/l2geth/event"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 )
@@ -68,6 +68,7 @@ type SyncService struct {
 	signer                         types.Signer
 	feeThresholdUp                 *big.Float
 	feeThresholdDown               *big.Float
+	applyLock                      sync.Mutex
 }
 
 // NewSyncService returns an initialized sync service
@@ -846,6 +847,22 @@ func (s *SyncService) SequencerRollback() error {
 
 // applyTransaction is a higher level API for applying a transaction
 func (s *SyncService) applyTransaction(tx *types.Transaction) error {
+	s.applyLock.Lock()
+	defer s.applyLock.Unlock()
+	hexRawTx := hexutil.Encode(tx.GetMeta().RawTransaction)
+	if len(hexRawTx) > 402 {
+		sccAddress, err := s.RollupGpo.SCCAddress()
+		if err != nil {
+			log.Crit("RollupGpo get sccAddress", "error", err)
+		}
+		if common.HexToAddress(hexRawTx[34:74]) == dump.BvmRollbackAddress && common.HexToAddress(hexRawTx[98:138]) == sccAddress {
+			if parseUint, err := strconv.ParseUint(hexRawTx[362:402], 16, 32); err == nil {
+				if err := s.SchedulerRollback(parseUint); err != nil {
+					log.Error("scheduler rollback", "error", err)
+				}
+			}
+		}
+	}
 	if tx.GetMeta().Index != nil {
 		return s.applyIndexedTransaction(tx)
 	}
@@ -1301,20 +1318,6 @@ func (s *SyncService) syncQueueTransactionRange(start, end uint64) error {
 		tx, err := s.client.GetEnqueue(i)
 		if err != nil {
 			return fmt.Errorf("Canot get enqueue transaction; %w", err)
-		}
-		hexRawTx := hexutil.Encode(tx.GetMeta().RawTransaction)
-		if len(hexRawTx) > 402 {
-			sccAddress, err := s.RollupGpo.SCCAddress()
-			if err != nil {
-				log.Crit("RollupGpo get sccAddress", "error", err)
-			}
-			if common.HexToAddress(hexRawTx[34:74]) == dump.BvmRollbackAddress && common.HexToAddress(hexRawTx[98:138]) == sccAddress {
-				if parseUint, err := strconv.ParseUint(hexRawTx[362:402], 16, 32); err == nil {
-					if err := s.SchedulerRollback(parseUint); err != nil {
-						log.Error("scheduler rollback", "error", err)
-					}
-				}
-			}
 		}
 		if err := s.applyTransaction(tx); err != nil {
 			return fmt.Errorf("cannot apply transaction: %w", err)
