@@ -314,7 +314,7 @@ func DecodeBatchTxSetProof(buf []byte) (BatchTxSetProof, error) {
 }
 
 func (btsp *BatchTxSetProof) Serialize() []byte {
-	if btsp == nil || len(btsp.TxHashSet) == 0 || len(btsp.Signature) == crypto.SignatureLength {
+	if btsp == nil || len(btsp.TxHashSet) == 0 || len(btsp.Signature) != crypto.SignatureLength {
 		return nil
 	}
 	buf := btsp.Sequencer[:]
