@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
@@ -188,7 +189,7 @@ func DeserializeBatchPeriodAnswerMsg(buf []byte) (BatchPeriodAnswerMsg, error) {
 }
 
 func (bpa *BatchPeriodAnswerMsg) Serialize() []byte {
-	if bpa == nil || len(bpa.Signature) != crypto.SignatureLength {
+	if bpa == nil || len(bpa.Txs) == 0 || len(bpa.Signature) != crypto.SignatureLength {
 		return nil
 	}
 	buf := bpa.Sequencer.Bytes()
@@ -313,7 +314,7 @@ func DecodeBatchTxSetProof(buf []byte) (BatchTxSetProof, error) {
 }
 
 func (btsp *BatchTxSetProof) Serialize() []byte {
-	if btsp == nil {
+	if btsp == nil || len(btsp.TxHashSet) == 0 || len(btsp.Signature) == crypto.SignatureLength {
 		return nil
 	}
 	buf := btsp.Sequencer[:]
