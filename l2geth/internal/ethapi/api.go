@@ -1699,25 +1699,22 @@ func (s *PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, encod
 		return common.Hash{}, errors.New("Cannot send raw transaction while syncing")
 	}
 
-	//if s.b.IsVerifier() {
-	//	sequencerURL := s.b.SequencerClientHttp()
-	//	if sequencerURL == "" {
-	//		return common.Hash{}, errNoSequencerURL
-	//	}
-	//	fmt.Println("------------sequencer URL begin--------------------")
-	//	fmt.Println(sequencerURL)
-	//	fmt.Println("------------sequencer URL end  --------------------")
-	//	client, err := dialSequencerClientWithTimeout(ctx, sequencerURL)
-	//	if err != nil {
-	//		return common.Hash{}, err
-	//	}
-	//	err = client.SendTransaction(context.Background(), tx)
-	//	if err != nil {
-	//		return common.Hash{}, err
-	//	}
-	//	return tx.Hash(), nil
-	//}
-	//
+	if s.b.IsVerifier() {
+		sequencerURL := s.b.SequencerClientHttp()
+		if sequencerURL == "" {
+			return common.Hash{}, errNoSequencerURL
+		}
+		client, err := dialSequencerClientWithTimeout(ctx, sequencerURL)
+		if err != nil {
+			return common.Hash{}, err
+		}
+		err = client.SendTransaction(context.Background(), tx)
+		if err != nil {
+			return common.Hash{}, err
+		}
+		return tx.Hash(), nil
+	}
+
 	// L1Timestamp and L1BlockNumber will be set right before execution
 	txMeta := types.NewTransactionMeta(nil, 0, nil, types.QueueOriginSequencer, nil, nil, encodedTx)
 	tx.SetTransactionMeta(txMeta)
