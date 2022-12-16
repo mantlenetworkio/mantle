@@ -225,9 +225,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	eth.miner.SetExtra(makeExtraData(config.Miner.ExtraData))
 
 	log.Info("Backend Config", "max-calldata-size", config.Rollup.MaxCallDataSize, "gas-limit", config.Rollup.GasLimit, "is-verifier", config.Rollup.IsVerifier, "using-bvm", rcfg.UsingBVM)
-	fmt.Println("-------------is verifier begin-----------------------")
-	fmt.Println(config.Rollup.IsVerifier)
-	fmt.Println("-------------is verifier end  -----------------------")
 
 	eth.APIBackend = &EthAPIBackend{ctx.ExtRPCEnabled(), eth, nil, nil, config.Rollup.IsVerifier, config.Rollup.GasLimit, rcfg.UsingBVM, config.Rollup.MaxCallDataSize}
 	gpoParams := config.GPO
