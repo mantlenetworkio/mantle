@@ -1159,27 +1159,17 @@ func (s *SyncService) syncToTip(sync syncer, getTip indexGetter) error {
 	defer s.loopLock.Unlock()
 
 	for {
-		fmt.Println("---------syntToTip timepoint0------------------")
 		index, err := sync()
-		fmt.Println("---------syntToTip timepoint1------------------")
-		fmt.Println(index)
-		fmt.Println(err)
 		if errors.Is(err, errElementNotFound) {
 			return nil
 		}
-		fmt.Println("---------syntToTip timepoint2------------------")
 		if err != nil {
 			return err
 		}
-		fmt.Println("---------syntToTip timepoint3------------------")
 		isAtTip, err := s.isAtTip(index, getTip)
 		if err != nil {
 			return err
 		}
-		fmt.Println("-----------index begin-----------------")
-		fmt.Println(index)
-		fmt.Println(isAtTip)
-		fmt.Println("-----------index end  -----------------")
 		if isAtTip {
 			return nil
 		}
