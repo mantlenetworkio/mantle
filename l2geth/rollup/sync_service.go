@@ -1059,6 +1059,27 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	return nil
 }
 
+func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction, sequencer common.Address) error {
+	if s.verifier {
+		return errors.New("Verifier does not accept transactions out of band")
+	}
+	if tx == nil {
+		return errors.New("nil transaction passed to ValidateAndApplySequencerTransaction")
+	}
+	s.txLock.Lock()
+	defer s.txLock.Unlock()
+	if err := s.verifyFee(tx); err != nil {
+		return err
+	}
+	log.Trace("Sequencer transaction validation", "hash", tx.Hash().Hex())
+
+	qo := tx.QueueOrigin()
+	if qo != types.QueueOriginSequencer {
+		return fmt.Errorf("invalid transaction with queue origin %s", qo.String())
+	}
+	return nil
+}
+
 // Higher level API for applying transactions. Should only be called for
 // queue origin sequencer transactions, as the contracts on L1 manage the same
 // validity checks that are done here.
