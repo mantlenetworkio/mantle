@@ -285,9 +285,7 @@ func (c *Client) GetLatestEnqueue() (*types.Transaction, error) {
 
 // GetLatestEnqueueIndex returns the latest `enqueue()` index
 func (c *Client) GetLatestEnqueueIndex() (*uint64, error) {
-	fmt.Println("-------------GetLatestEnqueueIndex  begin-----------------------")
 	tx, err := c.GetLatestEnqueue()
-	fmt.Println("-------------GetLatestEnqueueIndex  end  -----------------------")
 	if err != nil {
 		return nil, err
 	}
