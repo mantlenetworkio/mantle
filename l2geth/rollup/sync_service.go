@@ -268,17 +268,12 @@ func (s *SyncService) Start() error {
 		go s.VerifierLoop()
 	} else {
 		go func() {
-			fmt.Println("wenbin print point1---------------")
-			fmt.Println(s.IsSequencerMode())
 			if err := s.syncTransactionsToTip(); err != nil {
 				log.Crit("Sequencer cannot sync transactions to tip", "err", err)
 			}
-			fmt.Println("wenbin print point2---------------")
-			fmt.Println("-------syncQueueToTip begin-------------------")
 			if err := s.syncQueueToTip(); err != nil {
 				log.Crit("Sequencer cannot sync queue to tip", "err", err)
 			}
-			fmt.Println("wenbin print point3---------------")
 			s.setSyncStatus(false)
 			go s.SequencerLoop()
 		}()
@@ -500,11 +495,9 @@ func (s *SyncService) sequence() error {
 }
 
 func (s *SyncService) syncQueueToTip() error {
-	fmt.Println("-----------------syncToTip begin-------------------------")
 	if err := s.syncToTip(s.syncQueue, s.client.GetLatestEnqueueIndex); err != nil {
 		return fmt.Errorf("Cannot sync queue to tip: %w", err)
 	}
-	fmt.Println("-----------------syncToTip end-------------------------")
 	return nil
 }
 
@@ -962,7 +955,6 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, sequencer com
 		// of the gas price oracle
 		sender, _ := types.Sender(s.signer, tx)
 		owner := s.GasPriceOracleOwnerAddress()
-		fmt.Println(owner != nil && sender == *owner)
 		if owner != nil && sender == *owner {
 			if err := s.updateGasPriceOracleCache(nil); err != nil {
 				s.SetLatestL1Timestamp(ts)
@@ -1243,24 +1235,15 @@ func (s *SyncService) syncQueue() (*uint64, error) {
 // start to end (inclusive)
 func (s *SyncService) syncQueueTransactionRange(start, end uint64) error {
 	log.Info("Syncing enqueue transactions range", "start", start, "end", end)
-	fmt.Println("-----------syncQueueTransactionRange begin------------------------")
 	for i := start; i <= end; i++ {
-		fmt.Println("-----------index---------------------")
-		fmt.Println(i)
-		fmt.Println(end)
-		fmt.Println("-----------getEnqueue begin------------------")
 		tx, err := s.client.GetEnqueue(i)
-		fmt.Println("-----------getEnqueue end  ------------------")
 		if err != nil {
 			return fmt.Errorf("Canot get enqueue transaction; %w", err)
 		}
-		fmt.Println("-----------applyTransaction begin------------------")
 		if err := s.applyTransaction(tx, s.cfg.SchedulerAddress); err != nil {
 			return fmt.Errorf("Cannot apply transaction: %w", err)
 		}
-		fmt.Println("-----------applyTransaction end  ------------------")
 	}
-	fmt.Println("-----------syncQueueTransactionRange end------------------------")
 	return nil
 }
 
