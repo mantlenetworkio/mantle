@@ -1159,27 +1159,17 @@ func (s *SyncService) syncToTip(sync syncer, getTip indexGetter) error {
 	defer s.loopLock.Unlock()
 
 	for {
-		fmt.Println("---------syntToTip timepoint0------------------")
 		index, err := sync()
-		fmt.Println("---------syntToTip timepoint1------------------")
-		fmt.Println(index)
-		fmt.Println(err)
 		if errors.Is(err, errElementNotFound) {
 			return nil
 		}
-		fmt.Println("---------syntToTip timepoint2------------------")
 		if err != nil {
 			return err
 		}
-		fmt.Println("---------syntToTip timepoint3------------------")
 		isAtTip, err := s.isAtTip(index, getTip)
 		if err != nil {
 			return err
 		}
-		fmt.Println("-----------index begin-----------------")
-		fmt.Println(index)
-		fmt.Println(isAtTip)
-		fmt.Println("-----------index end  -----------------")
 		if isAtTip {
 			return nil
 		}
@@ -1257,7 +1247,7 @@ func (s *SyncService) syncQueueTransactionRange(start, end uint64) error {
 		tx, err := s.client.GetEnqueue(i)
 		if err != nil {
 			return fmt.Errorf("Canot get enqueue transaction; %w", err)
-    }
+		}
 		if err := s.applyTransaction(tx, &types.BatchTxSetProof{}); err != nil {
 			return fmt.Errorf("Cannot apply transaction: %w", err)
 		}
