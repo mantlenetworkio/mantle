@@ -1454,7 +1454,9 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 		bc.chainSideFeed.Send(ChainSideEvent{Block: block})
 	}
 	if bc.updateSyncService != nil {
-		bc.updateSyncService(block.Transactions()[0])
+		if block.Transactions().Len() > 0 {
+			bc.updateSyncService(block.Transactions()[0])
+		}
 	}
 	return status, nil
 }
@@ -2277,6 +2279,6 @@ func (bc *BlockChain) SubscribeBlockProcessingEvent(ch chan<- bool) event.Subscr
 	return bc.scope.Track(bc.blockProcFeed.Subscribe(ch))
 }
 
-func (bc *BlockChain) SetUpdateSyncServiceFunc(function func(*types.Transaction) bool ) {
+func (bc *BlockChain) SetUpdateSyncServiceFunc(function func(*types.Transaction) bool) {
 	bc.updateSyncService = function
 }
