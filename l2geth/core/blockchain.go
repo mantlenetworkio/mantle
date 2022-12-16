@@ -174,9 +174,10 @@ type BlockChain struct {
 	processor  Processor  // Block transaction processor interface
 	vmConfig   vm.Config
 
-	badBlocks       *lru.Cache                     // Bad block cache
-	shouldPreserve  func(*types.Block) bool        // Function used to determine whether should preserve the given block.
-	terminateInsert func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
+	badBlocks         *lru.Cache                     // Bad block cache
+	shouldPreserve    func(*types.Block) bool        // Function used to determine whether should preserve the given block.
+	terminateInsert   func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
+	updateSyncService func(*types.Transaction) bool  // update sync service state after inserting chain block
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -1452,6 +1453,9 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 	} else {
 		bc.chainSideFeed.Send(ChainSideEvent{Block: block})
 	}
+	if bc.updateSyncService != nil {
+		bc.updateSyncService(block.Transactions()[0])
+	}
 	return status, nil
 }
 
@@ -2271,4 +2275,8 @@ func (bc *BlockChain) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscript
 // block processing has started while false means it has stopped.
 func (bc *BlockChain) SubscribeBlockProcessingEvent(ch chan<- bool) event.Subscription {
 	return bc.scope.Track(bc.blockProcFeed.Subscribe(ch))
+}
+
+func (bc *BlockChain) SetUpdateSyncServiceFunc(function func(*types.Transaction) bool ) {
+	bc.updateSyncService = function
 }

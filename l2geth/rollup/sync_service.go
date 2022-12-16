@@ -1089,6 +1089,41 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 	return nil
 }
 
+func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) bool {
+	ts := s.GetLatestL1Timestamp()
+	bn := s.GetLatestL1BlockNumber()
+	l1BlockNumber := tx.L1BlockNumber()
+	if l1BlockNumber == nil {
+		log.Warn("Blocknumber is nil ","hash",tx.Hash().Hex())
+		return false
+	}else if l1BlockNumber.Uint64() > bn {
+		s.SetLatestL1BlockNumber(l1BlockNumber.Uint64())
+	} else {
+		// l1BlockNumber < latest l1BlockNumber
+		// indicates an error
+		log.Warn("Blocknumber monotonicity violation", "hash", tx.Hash().Hex(),
+		"new", l1BlockNumber.Uint64(), "old", bn)
+		return false
+	}
+
+	if tx.L1Timestamp() > ts {
+		s.SetLatestL1Timestamp(tx.L1Timestamp())
+	}
+
+	if tx.GetMeta().Index == nil {
+		log.Warn("meta index is nil ","hash",tx.Hash().Hex())
+		return false
+	}
+
+	s.SetLatestIndex(tx.GetMeta().Index)
+	if queueIndex := tx.GetMeta().QueueIndex; queueIndex != nil {
+		s.SetLatestEnqueueIndex(queueIndex)
+	}
+
+	log.Debug("Update sync service state with new block", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
+	return true
+}
+
 // syncer represents a function that can sync remote items and then returns the
 // index that it synced to as well as an error if it encountered one. It has
 // side effects on the state and its functionality depends on the current state
