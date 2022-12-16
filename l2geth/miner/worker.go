@@ -472,6 +472,12 @@ func (w *worker) batchStartLoop() {
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
 				log.Info("Scheduler receives batchPeriodStartEvent")
+				var zeroAddr common.Address
+				if ev.Msg.Sequencer == zeroAddr && ev.SchedulerCh != nil {
+					w.eth.SyncService().SchedulerPullAndApply()
+					close(ev.SchedulerCh)
+				}
+
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer

@@ -460,7 +460,7 @@ func (s *SyncService) verify() error {
 	return nil
 }
 
-func (s *SyncService) SchedulerPull() {
+func (s *SyncService) SchedulerPullAndApply() {
 	s.txLock.Lock()
 	if err := s.sequence(); err != nil {
 		log.Error("Could not sequence", "error", err)

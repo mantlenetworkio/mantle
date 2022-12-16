@@ -164,6 +164,33 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 	batchSize := uint64(10) // 10 transaction in one batch
 	expireTime := int64(15) // 15s
 	for {
+		currentBlock := schedulerInst.blockchain.CurrentBlock()
+		msg := types.BatchPeriodStartMsg{
+			ReorgIndex:  0,
+			BatchIndex:  1,
+			StartHeight: currentBlock.NumberU64() + 1,
+			MaxHeight:   currentBlock.NumberU64() + 1 + math.MaxUint64,
+			ExpireTime:  uint64(time.Now().Unix() + math.MaxUint64),
+			Sequencer:   common.Address{},
+		}
+		sign, err := schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetSignData())
+		if err != nil {
+			log.Error("sign BatchPeriodStartEvent error")
+			return
+		}
+		msg.Signature = sign
+		schedulerInst.currentStartMsg = msg
+		schedulerCh := make(chan struct{})
+		err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
+			Msg:         &msg,
+			ErrCh:       nil,
+			SchedulerCh: schedulerCh,
+		})
+		select {
+		case <-schedulerCh:
+			log.Debug("produce block for L1ToL2Tx end", "current block number", schedulerInst.blockchain.CurrentBlock().Number().Uint64())
+		}
+
 		schedulerInst.l.Lock()
 		if schedulerInst.sequencerSet == nil {
 			continue
@@ -174,9 +201,9 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			seqSet = append(seqSet, v.Address)
 		}
 
-		currentBlock := schedulerInst.blockchain.CurrentBlock()
+		currentBlock = schedulerInst.blockchain.CurrentBlock()
 
-		msg := types.BatchPeriodStartMsg{
+		msg = types.BatchPeriodStartMsg{
 			ReorgIndex:  0,
 			BatchIndex:  1,
 			StartHeight: currentBlock.NumberU64() + 1,
@@ -184,7 +211,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			ExpireTime:  uint64(time.Now().Unix() + expireTime),
 			Sequencer:   seq.Address,
 		}
-		sign, err := schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetSignData())
+		sign, err = schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetSignData())
 		if err != nil {
 			log.Error("sign BatchPeriodStartEvent error")
 			return
