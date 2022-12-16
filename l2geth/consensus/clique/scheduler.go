@@ -164,6 +164,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 	batchSize := uint64(10) // 10 transaction in one batch
 	expireTime := int64(15) // 15s
 	for {
+		schedulerInst.l.Lock()
 		currentBlock := schedulerInst.blockchain.CurrentBlock()
 		msg := types.BatchPeriodStartMsg{
 			ReorgIndex:  0,
@@ -186,6 +187,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			ErrCh:       nil,
 			SchedulerCh: schedulerCh,
 		})
+		schedulerInst.l.Unlock()
 		select {
 		case <-schedulerCh:
 			log.Debug("produce block for L1ToL2Tx end", "current block number", schedulerInst.blockchain.CurrentBlock().Number().Uint64())
