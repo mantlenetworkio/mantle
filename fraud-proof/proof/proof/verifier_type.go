@@ -12,21 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package state
+package proof
 
-import "github.com/mantlenetworkio/mantle/l2geth/common"
+type VerifierType int
 
-type AccessListTrie struct {
-}
-
-func NewAccessListTrie() *AccessListTrie {
-	return &AccessListTrie{}
-}
-
-func (s *AccessListTrie) Root() common.Hash {
-	return common.Hash{}
-}
-
-func (s *AccessListTrie) EncodeState() []byte {
-	return s.Root().Bytes()
-}
+const (
+	VerifierTypeStackOp         VerifierType = 0
+	VerifierTypeEnvironmentalOp VerifierType = 1
+	VerifierTypeMemoryOp        VerifierType = 2
+	VerifierTypeStorageOp       VerifierType = 3
+	VerifierTypeCallOp          VerifierType = 4
+	VerifierTypeInvalidOp       VerifierType = 5
+	VerifierTypeInterTx         VerifierType = 6
+	VerifierTypeBlockInit       VerifierType = 7
+)

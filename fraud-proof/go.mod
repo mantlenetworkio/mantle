@@ -2,6 +2,10 @@ module github.com/mantlenetworkio/mantle/fraud-proof
 
 go 1.19
 
+replace (
+	github.com/mantlenetworkio/mantle/fraud-proof v0.0.0 => ./
+)
+
 require (
 	github.com/cbergoon/merkletree v0.2.0
 	github.com/ethereum/go-ethereum v1.10.25
