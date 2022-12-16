@@ -315,6 +315,7 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 			}
 		}
 		return b.eth.syncService.ValidateAndApplySequencerTransaction(signedTx, b.eth.syncService.GetScheduler())
+
 	}
 	return nil
 }

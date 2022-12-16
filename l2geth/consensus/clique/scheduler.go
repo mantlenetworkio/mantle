@@ -153,6 +153,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 	batchSize := uint64(10) // 10 transaction in one batch
 	expireTime := int64(15) // 15s
 	for {
+		// TODO
 		schedulerInst.l.Lock()
 		if schedulerInst.sequencerSet == nil {
 			continue
