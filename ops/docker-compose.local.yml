@@ -45,29 +45,41 @@ services:
     <<: *base
     container_name: bitdtl
 
-  l2geth:
+  scheduler:
     <<: *base
-    container_name: bitl2geth
+    container_name: bitscheduler
 
   gas_oracle:
     <<: *base
     container_name: bitgasoracle
     deploy:
-      replicas: 1
+      replicas: 0
 
   batch_submitter:
     <<: *base
     container_name: bitbatchsubmitter
 
-  integration_tests:
+  sequencer1:
     <<: *base
-    container_name: bititests
+    container_name: bitsequencer1
     deploy:
-      replicas: 0
+      replicas: 1
 
-  relayer:
+  sequencer2:
     <<: *base
-    container_name: bitrelayer
+    container_name: bitsequencer2
+    deploy:
+      replicas: 1
+
+  replica1:
+    <<: *base
+    container_name: bitreplica1
+    deploy:
+      replicas: 1
+
+  replica2:
+    <<: *base
+    container_name: bitreplica2
     deploy:
       replicas: 1
 
@@ -75,13 +87,7 @@ services:
     <<: *base
     container_name: bitverifier
     deploy:
-      replicas: 0
-
-  replica:
-    <<: *base
-    container_name: bitreplica
-    deploy:
-      replicas: 0
+      replicas: 1
 
   replica_healthcheck:
     <<: *base
@@ -93,11 +99,17 @@ services:
     <<: *base
     container_name: bitfaultdetector
     deploy:
-      replicas: 1
+      replicas: 0
 
-  l2geth2:
+  relayer:
     <<: *base
-    container_name: bitl2geth2
+    container_name: bitrelayer
+    deploy:
+      replicas: 0
+
+  integration_tests:
+    <<: *base
+    container_name: bititests
     deploy:
       replicas: 0  # disable by default
 

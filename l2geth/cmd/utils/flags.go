@@ -959,7 +959,7 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 	}
 
 	cfg.BootstrapNodes = make([]*enode.Node, 0, len(urls))
-	for _, url := range urls {
+	for index, url := range urls {
 		if url != "" {
 			node, err := enode.Parse(enode.ValidSchemes, url)
 			if err != nil {
@@ -968,6 +968,8 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 			}
 			cfg.BootstrapNodes = append(cfg.BootstrapNodes, node)
 		}
+		log.Info("bootnodes", "id", cfg.BootstrapNodes[index].ID(),
+			"string", cfg.BootstrapNodes[index].String(), "ip", cfg.BootstrapNodes[index].IP())
 	}
 }
 
@@ -1124,7 +1126,10 @@ func setEth1(ctx *cli.Context, cfg *rollup.Config) {
 // setRollup configures the rollup
 func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	if ctx.GlobalIsSet(RollupEnableVerifierFlag.Name) {
+		fmt.Println("-------------wenbin test verifier begin-----------------")
 		cfg.IsVerifier = true
+		fmt.Println(RollupEnableVerifierFlag.Name)
+		fmt.Println("-------------wenbin test verifier end  -----------------")
 	}
 	if ctx.GlobalIsSet(RollupMaxCalldataSizeFlag.Name) {
 		cfg.MaxCallDataSize = ctx.GlobalInt(RollupMaxCalldataSizeFlag.Name)

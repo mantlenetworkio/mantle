@@ -137,6 +137,9 @@ func (b *EthAPIBackend) IngestTransactions(txs []*types.Transaction) error {
 }
 
 func (b *EthAPIBackend) SequencerClientHttp() string {
+	fmt.Println(b.eth.config.Rollup.SequencerMode)
+	fmt.Println(b.eth.config.Rollup.SequencerClientHttp)
+	fmt.Println(b.eth.config.Rollup.SchedulerAddress)
 	return b.eth.config.Rollup.SequencerClientHttp
 }
 
