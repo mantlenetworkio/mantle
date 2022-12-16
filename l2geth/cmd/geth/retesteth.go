@@ -477,7 +477,7 @@ func (api *RetestethAPI) mineBlock() error {
 	}
 	header.Coinbase = api.author
 	if api.engine != nil {
-		api.engine.Prepare(api.blockchain, header, nil)
+		api.engine.Prepare(api.blockchain, header, &types.BatchTxSetProof{})
 	}
 	// If we are care about TheDAO hard-fork check whether to override the extra-data or not
 	if daoBlock := api.chainConfig.DAOForkBlock; daoBlock != nil {

@@ -490,7 +490,7 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 			return err
 		}
 		if !types.VerifySigner(&txSetProof, txSetProof.Sequencer) {
-			return nil
+			return fmt.Errorf("tx set proof is not from sequencer %s", txSetProof.Sequencer.Bytes())
 		}
 		if !txSetProof.ContainTxHashOrNot(header.TxHash, header.Number.Uint64()) {
 			return fmt.Errorf("the transactionsRoot is not included in txSetProof")
