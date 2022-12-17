@@ -266,16 +266,6 @@ func (s *SyncService) Start() error {
 
 	if s.verifier {
 		go s.VerifierLoop()
-	} else {
-		go func() {
-			if err := s.syncTransactionsToTip(); err != nil {
-				log.Crit("Sequencer cannot sync transactions to tip", "err", err)
-			}
-			if err := s.syncQueueToTip(); err != nil {
-				log.Crit("Sequencer cannot sync queue to tip", "err", err)
-			}
-			s.setSyncStatus(false)
-		}()
 	}
 	return nil
 }
@@ -460,18 +450,6 @@ func (s *SyncService) verify() error {
 	return nil
 }
 
-func (s *SyncService) SchedulerPullAndApply() {
-	s.txLock.Lock()
-	if err := s.sequence(); err != nil {
-		log.Error("Could not sequence", "error", err)
-	}
-	s.txLock.Unlock()
-
-	if err := s.updateL1BlockNumber(); err != nil {
-		log.Error("Could not update execution context", "error", err)
-	}
-}
-
 // sequence is the main logic for the Sequencer. It will sync any `enqueue`
 // transactions it has yet to sync and then pull in transaction batches to
 // compare against the transactions it has in its local state. The sequencer
@@ -479,14 +457,8 @@ func (s *SyncService) SchedulerPullAndApply() {
 // L1 is the source of truth. The sequencer concurrently accepts user
 // transactions via the RPC. When reorg logic is enabled, this should
 // also call `syncBatchesToTip`
-func (s *SyncService) sequence() error {
-	if err := s.syncQueueToTip(); err != nil {
-		return fmt.Errorf("Sequencer cannot sequence queue: %w", err)
-	}
-	return nil
-}
 
-func (s *SyncService) syncQueueToTip() error {
+func (s *SyncService) SyncQueueToTip() error {
 	if err := s.syncToTip(s.syncQueue, s.client.GetLatestEnqueueIndex); err != nil {
 		return fmt.Errorf("Cannot sync queue to tip: %w", err)
 	}

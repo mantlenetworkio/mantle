@@ -171,6 +171,8 @@ type worker struct {
 	bpsSub *event.TypeMuxSubscription
 	bpaSub *event.TypeMuxSubscription
 
+	l1ToL2Sub *event.TypeMuxSubscription
+
 	// Channels
 	newWorkCh          chan *newWorkReq
 	taskCh             chan *task
@@ -246,6 +248,8 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	worker.bpsSub = worker.mux.Subscribe(core.BatchPeriodStartEvent{})
 	worker.bpaSub = worker.mux.Subscribe(core.BatchPeriodAnswerEvent{})
 
+	worker.l1ToL2Sub = worker.mux.Subscribe(core.L1ToL2TxStartEvent{})
+
 	// Subscribe events for blockchain
 	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
@@ -263,6 +267,10 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	go worker.taskLoop()
 	go worker.batchStartLoop()
 	go worker.batchAnswerLoop()
+
+	if worker.eth.SyncService().IsScheduler(worker.coinbase) {
+		worker.l1Tol2StartLoop()
+	}
 
 	// Submit first work to initialize pending state.
 	if init {
@@ -448,6 +456,36 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 	}
 }
 
+func (w *worker) l1Tol2StartLoop() {
+	defer w.l1ToL2Sub.Unsubscribe()
+
+	for {
+		select {
+		case obj := <-w.l1ToL2Sub.Chan():
+			if !w.isRunning() {
+				log.Info("miner receives batchPeriodStartEvent but miner not start")
+			}
+			var ev core.L1ToL2TxStartEvent
+			var ok bool
+			if ev, ok = obj.Data.(core.L1ToL2TxStartEvent); !ok {
+				continue
+			}
+			log.Info("Scheduler receives batchPeriodStartEvent")
+			if ev.SchedulerCh != nil {
+				if err := w.eth.SyncService().SyncQueueToTip(); err != nil {
+					log.Info("SyncQueueToTip interrupt", "error", err)
+				}
+				close(ev.SchedulerCh)
+			} else {
+				log.Error("SchedulerCh is nil")
+			}
+		// System stopped
+		case <-w.exitCh:
+			return
+		}
+	}
+}
+
 func (w *worker) batchStartLoop() {
 	defer w.bpsSub.Unsubscribe()
 
@@ -472,11 +510,6 @@ func (w *worker) batchStartLoop() {
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
 				log.Info("Scheduler receives batchPeriodStartEvent")
-				var zeroAddr common.Address
-				if ev.Msg.Sequencer == zeroAddr && ev.SchedulerCh != nil {
-					w.eth.SyncService().SchedulerPullAndApply()
-					close(ev.SchedulerCh)
-				}
 
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {

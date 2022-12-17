@@ -164,30 +164,11 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 	batchSize := uint64(10) // 10 transaction in one batch
 	expireTime := int64(15) // 15s
 	for {
-		schedulerInst.l.Lock()
-		currentBlock := schedulerInst.blockchain.CurrentBlock()
-		msg := types.BatchPeriodStartMsg{
-			ReorgIndex:  0,
-			BatchIndex:  1,
-			StartHeight: currentBlock.NumberU64() + 1,
-			MaxHeight:   currentBlock.NumberU64() + 1 + math.MaxUint64,
-			ExpireTime:  uint64(time.Now().Unix() + math.MaxUint64),
-			Sequencer:   common.Address{},
-		}
-		sign, err := schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetSignData())
-		if err != nil {
-			log.Error("sign BatchPeriodStartEvent error")
-			return
-		}
-		msg.Signature = sign
-		schedulerInst.currentStartMsg = msg
 		schedulerCh := make(chan struct{})
-		err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
-			Msg:         &msg,
+		err := schedulerInst.eventMux.Post(core.L1ToL2TxStartEvent{
 			ErrCh:       nil,
 			SchedulerCh: schedulerCh,
 		})
-		schedulerInst.l.Unlock()
 		select {
 		case <-schedulerCh:
 			log.Debug("produce block for L1ToL2Tx end", "current block number", schedulerInst.blockchain.CurrentBlock().Number().Uint64())
@@ -203,9 +184,9 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			seqSet = append(seqSet, v.Address)
 		}
 
-		currentBlock = schedulerInst.blockchain.CurrentBlock()
+		currentBlock := schedulerInst.blockchain.CurrentBlock()
 
-		msg = types.BatchPeriodStartMsg{
+		msg := types.BatchPeriodStartMsg{
 			ReorgIndex:  0,
 			BatchIndex:  1,
 			StartHeight: currentBlock.NumberU64() + 1,
@@ -213,7 +194,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			ExpireTime:  uint64(time.Now().Unix() + expireTime),
 			Sequencer:   seq.Address,
 		}
-		sign, err = schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetSignData())
+		sign, err := schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetSignData())
 		if err != nil {
 			log.Error("sign BatchPeriodStartEvent error")
 			return
@@ -245,6 +226,10 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 	for {
 		select {
 		case chainHead := <-schedulerInst.chainHeadCh:
+			if chainHead.Block.Transactions()[0].QueueOrigin() == types.QueueOriginL1ToL2 {
+				log.Debug("chainHead", "block number", chainHead.Block.NumberU64(), "extra data", hex.EncodeToString(chainHead.Block.Extra()))
+				continue
+			}
 			if schedulerInst.blockchain.CurrentBlock().NumberU64() == schedulerInst.currentStartMsg.MaxHeight {
 				log.Debug("Batch done with height at max height")
 				schedulerInst.batchDone <- struct{}{}
