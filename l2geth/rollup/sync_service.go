@@ -462,6 +462,9 @@ func (s *SyncService) SyncQueueToTip() error {
 	if err := s.syncToTip(s.syncQueue, s.client.GetLatestEnqueueIndex); err != nil {
 		return fmt.Errorf("Cannot sync queue to tip: %w", err)
 	}
+	if err := s.updateL1BlockNumber(); err != nil {
+		log.Error("Could not update execution context", "error", err)
+	}
 	return nil
 }
 
