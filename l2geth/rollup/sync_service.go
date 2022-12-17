@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/contracts/message"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"math/big"
 	"strconv"
@@ -849,15 +849,24 @@ func (s *SyncService) SequencerRollback() error {
 func (s *SyncService) applyTransaction(tx *types.Transaction) error {
 	s.applyLock.Lock()
 	defer s.applyLock.Unlock()
-	hexRawTx := hexutil.Encode(tx.GetMeta().RawTransaction)
-	if len(hexRawTx) > 402 {
+
+	if tx.GetMeta() != nil && tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+		data := &message.Data{}
+		if err := data.UnPackData(tx.GetMeta().RawTransaction); err != nil {
+			log.Info("message.UnPackData interrupt", "error", err)
+		}
+
 		sccAddress, err := s.RollupGpo.SCCAddress()
 		if err != nil {
 			log.Crit("RollupGpo get sccAddress", "error", err)
 		}
-		if common.HexToAddress(hexRawTx[34:74]) == dump.BvmRollbackAddress && common.HexToAddress(hexRawTx[98:138]) == sccAddress {
-			if parseUint, err := strconv.ParseUint(hexRawTx[362:402], 16, 32); err == nil {
-				if err := s.SchedulerRollback(parseUint); err != nil {
+		if data.Target == dump.BvmRollbackAddress && data.Sender == sccAddress {
+			rd := &message.RollbackData{}
+			if err := rd.UnPackData(data.Message); err != nil {
+				log.Error("rollback data unpack failed", "error", err)
+			}
+			if rd.ShouldRollBack != nil {
+				if err := s.SchedulerRollback(rd.ShouldRollBack.Uint64()); err != nil {
 					log.Error("scheduler rollback", "error", err)
 				}
 			}
