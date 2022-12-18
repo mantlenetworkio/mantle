@@ -11,16 +11,16 @@ import (
 	"time"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/contracts/message"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
+	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/core/state"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/eth/gasprice"
 	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
 	"github.com/mantlenetworkio/mantle/l2geth/event"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
-
-	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
-	"github.com/mantlenetworkio/mantle/l2geth/core/types"
-
-	"github.com/mantlenetworkio/mantle/l2geth/eth/gasprice"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 )
@@ -74,6 +74,7 @@ type SyncService struct {
 	feeThresholdUp                 *big.Float
 	feeThresholdDown               *big.Float
 	cfg                            Config
+	applyLock                      sync.Mutex
 }
 
 // NewSyncService returns an initialized sync service
@@ -587,6 +588,17 @@ func (s *SyncService) updateCharge(statedb *state.StateDB) error {
 	return s.RollupGpo.SetCharge(charge)
 }
 
+// updateSCCAddress will update the sccAddress value from the BVM_GasPriceOracle
+// in the local cache
+func (s *SyncService) updateSCCAddress(statedb *state.StateDB) error {
+	scc, err := s.readGPOStorageSlot(statedb, rcfg.SccAddressSlot)
+	if err != nil {
+		return err
+	}
+	sccAddress := common.BigToAddress(scc)
+	return s.RollupGpo.SetSCCAddress(sccAddress)
+}
+
 // cacheGasPriceOracleOwner accepts a statedb and caches the gas price oracle
 // owner address locally
 func (s *SyncService) cacheGasPriceOracleOwner(statedb *state.StateDB) error {
@@ -643,6 +655,15 @@ func (s *SyncService) updateGasPriceOracleCache(hash *common.Hash) error {
 		return err
 	}
 	if err := s.updateScalar(statedb); err != nil {
+		return err
+	}
+	if err := s.updateIsBurning(statedb); err != nil {
+		return err
+	}
+	if err := s.updateCharge(statedb); err != nil {
+		return err
+	}
+	if err := s.updateSCCAddress(statedb); err != nil {
 		return err
 	}
 	return nil
@@ -779,8 +800,98 @@ func (s *SyncService) SetLatestBatchIndex(index *uint64) {
 	}
 }
 
+func (s *SyncService) SetHead(number uint64) error {
+	if number == 0 {
+		return errors.New("cannot reset to genesis")
+	}
+	if err := s.bc.SetHead(number); err != nil {
+		return err
+	}
+	// Make sure to reset the LatestL1{Timestamp,BlockNumber}
+	block := s.bc.CurrentBlock()
+	txs := block.Transactions()
+	if len(txs) == 0 {
+		log.Error("No transactions found in block", "number", number)
+		return fmt.Errorf("no transactions found in block:%v", number)
+	}
+	tx := txs[0]
+	blockNumber := tx.L1BlockNumber()
+	if blockNumber == nil {
+		return fmt.Errorf("no L1BlockNumber found in transaction,number:%v", number)
+	}
+	s.SetLatestL1Timestamp(tx.L1Timestamp())
+	s.SetLatestL1BlockNumber(blockNumber.Uint64())
+	s.SetLatestIndex(tx.GetMeta().Index)
+	return nil
+}
+
+func (s *SyncService) SchedulerRollback(start uint64) error {
+	latest := s.bc.CurrentBlock().Number().Uint64()
+	if start > latest {
+		return fmt.Errorf("invalid block number:%v,currentBlock number:%v", start, latest)
+	}
+	var txs []types.Transaction
+	var oldBlocks []types.Block
+	for i := start; i <= latest; i++ {
+		block := s.bc.GetBlockByNumber(i)
+		txs = append(txs, *block.Transactions()[0])
+		oldBlocks = append(oldBlocks, *block)
+	}
+	log.Info("setHead start", "current block number", s.bc.CurrentHeader().Number.Uint64())
+	if err := s.SetHead(start - 1); err != nil {
+		log.Crit("rollback error:", "setHead error", err)
+	}
+	log.Info("setHead end,current :", "block number", s.bc.CurrentHeader().Number.Uint64())
+	for _, t := range txs {
+		if err := s.applyIndexedTransaction(&t); err != nil {
+			log.Crit("rollback applyIndexedTransaction tx :", "applyIndexedTransaction error", err)
+		}
+	}
+	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
+	for i := start; i <= latest; i++ {
+		newBlock := s.bc.GetBlockByNumber(i)
+		log.Info("StateRoot", "equal", oldBlocks[i-start].Root() == newBlock.Root())
+		if oldBlocks[i-start].Hash() != newBlock.Hash() {
+			// TODO Emit Rollback Event To sequencer
+			log.Info("Emit Rollback Event To sequencer", "old blockHash", oldBlocks[i-start].Hash(), "newBlockHash", newBlock.Hash())
+			log.Info("Emit Rollback Event To sequencer", "oldBlock number:", oldBlocks[i-start].Number().Uint64(), "newBlockNumber", newBlock.Number().Uint64())
+			//break
+		}
+	}
+	return nil
+}
+
+func (s *SyncService) SequencerRollback() error {
+	return nil
+}
+
 // applyTransaction is a higher level API for applying a transaction
-func (s *SyncService) applyTransaction(tx *types.Transaction, sequencer common.Address) error {
+func (s *SyncService) applyTransaction(tx *types.Transaction,sequencer common.Address) error {
+	s.applyLock.Lock()
+	defer s.applyLock.Unlock()
+
+	if tx.GetMeta() != nil && tx.GetMeta().Index == nil && tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+		data := &message.Data{}
+		if err := data.UnPackData(tx.GetMeta().RawTransaction); err != nil {
+			log.Info("message.UnPackData interrupt", "error", err)
+		}
+
+		sccAddress, err := s.RollupGpo.SCCAddress()
+		if err != nil {
+			log.Crit("RollupGpo get sccAddress", "error", err)
+		}
+		if data.Target == dump.BvmRollbackAddress && data.Sender == sccAddress {
+			rd := &message.RollbackData{}
+			if err := rd.UnPackData(data.Message); err != nil {
+				log.Error("rollback data unpack failed", "error", err)
+			}
+			if rd.ShouldRollBack != nil {
+				if err := s.SchedulerRollback(rd.ShouldRollBack.Uint64()); err != nil {
+					log.Error("scheduler rollback", "error", err)
+				}
+			}
+		}
+	}
 	if tx.GetMeta().Index != nil {
 		return s.applyIndexedTransaction(tx, sequencer)
 	}

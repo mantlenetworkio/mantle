@@ -25,6 +25,7 @@ type Config struct {
 	SentryEnable         bool
 	PollInterval         time.Duration
 	BlockOffset          uint64
+	EigenLayerNode       int
 	EigenLogConfig       logging.Config
 
 	LogLevel        string
@@ -52,6 +53,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		DataStoreTimeout:     ctx.GlobalUint64(flags.DataStoreTimeoutFlag.Name),
 		PollInterval:         ctx.GlobalDuration(flags.PollIntervalFlag.Name),
 		BlockOffset:          ctx.GlobalUint64(flags.BlockOffsetFlag.Name),
+		EigenLayerNode:       ctx.GlobalInt(flags.EigenLayerNodeFlag.Name),
 		EigenLogConfig:       logging.ReadCLIConfig(ctx),
 		LogLevel:             ctx.GlobalString(flags.LogLevelFlag.Name),
 		LogTerminal:          ctx.GlobalBool(flags.LogTerminalFlag.Name),
