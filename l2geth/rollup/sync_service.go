@@ -850,7 +850,7 @@ func (s *SyncService) applyTransaction(tx *types.Transaction) error {
 	s.applyLock.Lock()
 	defer s.applyLock.Unlock()
 
-	if tx.GetMeta() != nil && tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+	if tx.GetMeta() != nil && tx.GetMeta().Index == nil && tx.QueueOrigin() == types.QueueOriginL1ToL2 {
 		data := &message.Data{}
 		if err := data.UnPackData(tx.GetMeta().RawTransaction); err != nil {
 			log.Info("message.UnPackData interrupt", "error", err)
