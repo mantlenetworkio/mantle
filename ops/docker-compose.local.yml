@@ -53,7 +53,7 @@ services:
     <<: *base
     container_name: bitgasoracle
     deploy:
-      replicas: 0
+      replicas: 1
 
   batch_submitter:
     <<: *base
