@@ -273,6 +273,8 @@ func (s *SyncService) Start() error {
 			}
 			s.setSyncStatus(false)
 		}()
+	} else {
+		s.setSyncStatus(false)
 	}
 	return nil
 }
