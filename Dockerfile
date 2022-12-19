@@ -5,7 +5,6 @@
 FROM mantlenetworkio/foundry:latest as foundry
 FROM node:16-alpine3.15 as base
 
-# When the download speed in mainland is very slow, you can change the source
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
 RUN apk --no-cache add curl \
     jq \
@@ -59,38 +58,3 @@ COPY ./integration-tests ./integration-tests
 RUN cd packages/contracts && yarn build
 RUN cd ../../
 RUN yarn build
-
-
-FROM base as deployer
-WORKDIR /opt/mantle/packages/contracts
-COPY ./ops/scripts/deployer.sh .
-CMD ["yarn", "run", "deploy"]
-
-FROM base as data-transport-layer
-WORKDIR /opt/mantle/packages/data-transport-layer
-COPY ./ops/scripts/dtl.sh .
-CMD ["node", "dist/src/services/run.js"]
-
-
-FROM base as integration-tests
-WORKDIR /opt/mantle/integration-tests
-COPY ./ops/scripts/integration-tests.sh ./
-CMD ["yarn", "test:integration"]
-
-
-FROM base as message-relayer
-WORKDIR /opt/mantle/packages/message-relayer
-COPY ./ops/scripts/relayer.sh .
-CMD ["npm", "run", "start"]
-
-
-FROM base as fault-detector
-WORKDIR /opt/mantle/packages/fault-detector
-COPY ./ops/scripts/detector.sh .
-CMD ["npm", "run", "start"]
-
-
-FROM base as replica-healthcheck
-WORKDIR /opt/mantle/packages/replica-healthcheck
-ENTRYPOINT ["npm", "run", "start"]
-
