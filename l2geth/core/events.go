@@ -27,9 +27,8 @@ type PeerAddEvent struct {
 }
 
 type BatchPeriodStartEvent struct {
-	Msg         *types.BatchPeriodStartMsg
-	ErrCh       chan error
-	SchedulerCh chan struct{}
+	Msg   *types.BatchPeriodStartMsg
+	ErrCh chan error
 }
 
 type L1ToL2TxStartEvent struct {

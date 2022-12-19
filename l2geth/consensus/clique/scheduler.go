@@ -169,6 +169,10 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			ErrCh:       nil,
 			SchedulerCh: schedulerCh,
 		})
+		if err != nil {
+			log.Error("generate BatchPeriodStartEvent error")
+			return
+		}
 		select {
 		case <-schedulerCh:
 			log.Debug("produce block for L1ToL2Tx end", "current block number", schedulerInst.blockchain.CurrentBlock().Number().Uint64())
