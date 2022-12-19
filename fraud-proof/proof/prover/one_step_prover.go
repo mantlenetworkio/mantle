@@ -106,9 +106,8 @@ func (l *OneStepProver) CaptureTxStart(gasLimit uint64) {}
 
 func (l *OneStepProver) CaptureTxEnd(restGas uint64) {}
 
-func (l *OneStepProver) CaptureStart(env *vm.EVM, from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) {
-	// We won't handle transaction initation proof here, it should be handlede outside tracing
-	l.env = env
+func (l *OneStepProver) CaptureStart(from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) error {
+	// We won't handle transaction initiation proof here, it should be handled outside tracing
 	l.counter = 1
 	if create {
 		l.callFlag = state.CALLFLAG_CREATE
@@ -118,18 +117,19 @@ func (l *OneStepProver) CaptureStart(env *vm.EVM, from common.Address, to common
 	l.input = state.NewMemoryFromBytes(input)
 	l.accessListTrie = state.NewAccessListTrie()
 	l.selfDestructSet = state.NewSelfDestructSet()
-	l.startInterState.GlobalState = env.StateDB.Copy() // This state includes gas-buying and nonce-increment
+	l.startInterState.GlobalState = l.env.StateDB.Copy() // This state includes gas-buying and nonce-increment
 	l.lastDepthState = l.startInterState
 	log.Info("Capture Start", "from", from, "to", to)
+	return nil
 }
 
 // CaptureState will be called before the opcode execution
 // vmerr is for stack validation and gas validation
 // the execution error is captured in CaptureFault
-func (l *OneStepProver) CaptureState(pc uint64, op vm.OpCode, gas, cost uint64, memory *vm.Memory, stack *vm.Stack, contract *vm.Contract, rData []byte, depth int, vmerr error) {
+func (l *OneStepProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, cost uint64, memory *vm.Memory, stack *vm.Stack, contract *vm.Contract, rData []byte, depth int, vmerr error) error {
 	if l.done {
 		// Something went wrong during tracing, exit early
-		return
+		return nil
 	}
 
 	defer func() {
@@ -170,7 +170,7 @@ func (l *OneStepProver) CaptureState(pc uint64, op vm.OpCode, gas, cost uint64, 
 		l.done = true
 		if l.lastState == nil || l.lastState.Hash() != l.target {
 			l.err = ErrStepIdxAndHashMismatch
-			return
+			return nil
 		}
 		// l.vmerr is the error of l.lastState, either before/during the opcode execution
 		// if l.vmerr is not nil, the current state s must be in the parent call frame of l.lastState
@@ -181,7 +181,7 @@ func (l *OneStepProver) CaptureState(pc uint64, op vm.OpCode, gas, cost uint64, 
 		} else {
 			l.proof = osp
 		}
-		return
+		return nil
 	}
 	l.lastState = s
 	l.lastCode = contract.Code
@@ -190,6 +190,7 @@ func (l *OneStepProver) CaptureState(pc uint64, op vm.OpCode, gas, cost uint64, 
 	// last CaptureState call for this call frame and there won't be any CaptureFault call.
 	// Otherwise, vmerr should be cleared.
 	l.vmerr = vmerr
+	return nil
 }
 
 func (l *OneStepProver) CaptureEnter(typ vm.OpCode, from common.Address, to common.Address, input []byte, gas uint64, value *big.Int) {
@@ -254,16 +255,17 @@ func (l *OneStepProver) CaptureExit(output []byte, gasUsed uint64, vmerr error) 
 
 // CaptureFault will be called when the stack/gas validation is passed but
 // the execution failed. The current call will immediately be reverted.
-func (l *OneStepProver) CaptureFault(pc uint64, op vm.OpCode, gas, cost uint64, memory *vm.Memory, stack *vm.Stack, contract *vm.Contract, depth int, vmerr error) {
+func (l *OneStepProver) CaptureFault(env *vm.EVM, pc uint64, op vm.OpCode, gas, cost uint64, memory *vm.Memory, stack *vm.Stack, contract *vm.Contract, depth int, vmerr error) error {
 	l.vmerr = vmerr
 	// The next CaptureState or CaptureEnd will handle the proof generation if needed
+	return nil
 }
 
-func (l *OneStepProver) CaptureEnd(output []byte, gasUsed uint64, t time.Duration, err error) {
+func (l *OneStepProver) CaptureEnd(output []byte, gasUsed uint64, t time.Duration, err error) error {
 	log.Info("Capture End", "output", output)
 	if l.done {
 		// Something went wrong during tracing, exit early
-		return
+		return nil
 	}
 
 	// If the last state is the target state, generate the transaction finalization proof
@@ -271,7 +273,7 @@ func (l *OneStepProver) CaptureEnd(output []byte, gasUsed uint64, t time.Duratio
 		l.done = true
 		if l.lastState.Hash() != l.target {
 			l.err = ErrStepIdxAndHashMismatch
-			return
+			return nil
 		}
 		// If l.vmerr is not nil, the entire transaction execution will be reverted.
 		// Otherwise, the execution ended through STOP or RETURN opcode.
@@ -283,6 +285,7 @@ func (l *OneStepProver) CaptureEnd(output []byte, gasUsed uint64, t time.Duratio
 			l.proof = osp
 		}
 	}
+	return nil
 }
 
 func (l *OneStepProver) GetProof() (*proof.OneStepProof, error) {
