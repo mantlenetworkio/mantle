@@ -1,9 +1,10 @@
 package message
 
 import (
-	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 	"log"
 	"testing"
+
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 )
 
 func TestUnpacket(t *testing.T) {
