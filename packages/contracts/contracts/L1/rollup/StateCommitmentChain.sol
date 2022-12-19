@@ -203,14 +203,6 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
 
     }
 
-
-    /**
-    * @inheritdoc IStateCommitmentChain
-     */
-    // slither-disable-next-line external-function
-    function rollBackMessage(uint256 _shouldRollBack) public {}
-
-
     /**********************
      * Internal Functions *
      **********************/
@@ -416,10 +408,9 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         );
 
 
-        // construct calldata for claimReward call
-        bytes memory message = abi.encodeWithSelector(
-            IStateCommitmentChain.rollBackMessage.selector,
-                _shouldRollBack
+        bytes memory message = abi.encodeWithSignature(
+            "rollBackMessage(uint256)",
+            _shouldRollBack
         );
 
         // send call data into L2, hardcode address

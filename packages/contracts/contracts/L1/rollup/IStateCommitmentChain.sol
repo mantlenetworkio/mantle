@@ -97,10 +97,4 @@ interface IStateCommitmentChain {
      */
     function rollBackL2Chain(uint256 _shouldRollBack,uint256 _shouldStartAtElement, bytes memory _signature) external;
 
-    /**
-     * interface for send domain message
-     * @param _shouldRollBack roll back to should start .
-     */
-    function rollBackMessage(uint256 _shouldRollBack) external;
-
 }
