@@ -132,13 +132,13 @@ func (gpo *RollupOracle) SetSCCAddress(sccAddress common.Address) error {
 	gpo.sccAddressLock.Lock()
 	defer gpo.sccAddressLock.Unlock()
 	gpo.sccAddress = sccAddress
-	log.Info("Set sccAddress", "sccAddress", sccAddress)
+	log.Info("Set sccAddress", "sccAddress", sccAddress.Hex())
 	return nil
 }
 
 // SCCAddress returns the cached SCCAddress value
-func (gpo *RollupOracle) SCCAddress() (common.Address, error) {
+func (gpo *RollupOracle) SCCAddress() common.Address {
 	gpo.sccAddressLock.RLock()
 	defer gpo.sccAddressLock.RUnlock()
-	return gpo.sccAddress, nil
+	return gpo.sccAddress
 }

@@ -2,10 +2,11 @@ package message
 
 import (
 	"fmt"
-	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"math/big"
 	"strings"
+
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 var (
