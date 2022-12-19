@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/rs/zerolog"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
@@ -84,10 +85,21 @@ func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger z
 
 	value, ok := p.cacheVerify.Get(blockNumber.String())
 	if ok {
-		return value
+		if value {
+			return value
+		}
 	}
 
-	block, err := p.l2Client.BlockByNumber(p.ctx, blockNumber)
+	var block *types.Block
+	var err error
+	for i := 0; i < 3; i++ {
+		block, err = p.l2Client.BlockByNumber(p.ctx, blockNumber)
+		if err == nil {
+			break
+		} else {
+			logger.Info().Msgf("retry to query block by number %d, times %d", blockNumber, i)
+		}
+	}
 	if err != nil {
 		logger.Err(err).Msgf("failed to get block by (%d) ", blockNumber)
 		return false
