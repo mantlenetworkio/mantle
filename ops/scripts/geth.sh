@@ -59,7 +59,8 @@ if [ $IS_SEQUENCER == "true" ] ;then
     --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
     --sequencer.mode="true" \
     "$@"
-else [ $IS_SCHEDULER == "true" ]
+elif [ $IS_SCHEDULER == "true" ];then
+  echo "we are scheduler node"
   exec geth \
     --verbosity="$VERBOSITY" \
     --password ./password \
