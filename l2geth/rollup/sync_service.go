@@ -266,6 +266,13 @@ func (s *SyncService) Start() error {
 
 	if s.verifier {
 		go s.VerifierLoop()
+	} else if !s.IsSequencerMode() {
+		go func() {
+			if err := s.syncTransactionsToTip(); err != nil {
+				log.Crit("Sequencer cannot sync transactions to tip", "err", err)
+			}
+			s.setSyncStatus(false)
+		}()
 	}
 	return nil
 }
