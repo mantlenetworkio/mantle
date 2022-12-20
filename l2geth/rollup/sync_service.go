@@ -1088,16 +1088,22 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 	return nil
 }
 
-func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) bool {
+func (s *SyncService) PreCheckSyncServiceState(tx *types.Transaction) bool {
 	ts := s.GetLatestL1Timestamp()
 	bn := s.GetLatestL1BlockNumber()
 	l1BlockNumber := tx.L1BlockNumber()
+
+	if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+		if tx.L1Timestamp() == 0 {
+			return false
+		}
+	}
+
 	if l1BlockNumber == nil {
 		log.Warn("Blocknumber is nil ","hash",tx.Hash().Hex())
 		return false
-	}else if l1BlockNumber.Uint64() > bn {
-		s.SetLatestL1BlockNumber(l1BlockNumber.Uint64())
-	} else {
+	}
+	if l1BlockNumber.Uint64() < bn{
 		// l1BlockNumber < latest l1BlockNumber
 		// indicates an error
 		log.Warn("Blocknumber monotonicity violation", "hash", tx.Hash().Hex(),
@@ -1105,22 +1111,28 @@ func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) bool {
 		return false
 	}
 
-	if tx.L1Timestamp() > ts {
-		s.SetLatestL1Timestamp(tx.L1Timestamp())
+	if tx.L1Timestamp() < ts {
+		log.Error("Timestamp monotonicity violation", "hash", tx.Hash().Hex(), "latest", ts, "tx", tx.L1Timestamp())
+		return false
 	}
 
 	if tx.GetMeta().Index == nil {
 		log.Warn("meta index is nil ","hash",tx.Hash().Hex())
 		return false
 	}
+	return true
 
+}
+
+func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
+	l1BlockNumber := tx.L1BlockNumber()
+	s.SetLatestL1BlockNumber(l1BlockNumber.Uint64())
+	s.SetLatestL1Timestamp(tx.L1Timestamp())
 	s.SetLatestIndex(tx.GetMeta().Index)
 	if queueIndex := tx.GetMeta().QueueIndex; queueIndex != nil {
 		s.SetLatestEnqueueIndex(queueIndex)
 	}
-
 	log.Debug("Update sync service state with new block", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
-	return true
 }
 
 // syncer represents a function that can sync remote items and then returns the
