@@ -266,17 +266,15 @@ func (s *SyncService) Start() error {
 
 	if s.verifier {
 		go s.VerifierLoop()
-	} else {
+	} else if !s.IsSequencerMode() {
 		go func() {
 			if err := s.syncTransactionsToTip(); err != nil {
 				log.Crit("Sequencer cannot sync transactions to tip", "err", err)
 			}
-			if err := s.syncQueueToTip(); err != nil {
-				log.Crit("Sequencer cannot sync queue to tip", "err", err)
-			}
 			s.setSyncStatus(false)
-			go s.SequencerLoop()
 		}()
+	} else {
+		s.setSyncStatus(false)
 	}
 	return nil
 }
@@ -461,25 +459,6 @@ func (s *SyncService) verify() error {
 	return nil
 }
 
-// SequencerLoop is the polling loop that runs in sequencer mode. It sequences
-// transactions and then updates the EthContext.
-func (s *SyncService) SequencerLoop() {
-	log.Info("Starting Sequencer Loop", "poll-interval", s.pollInterval, "timestamp-refresh-threshold", s.timestampRefreshThreshold)
-	t := time.NewTicker(s.pollInterval)
-	defer t.Stop()
-	for ; true; <-t.C {
-		s.txLock.Lock()
-		if err := s.sequence(); err != nil {
-			log.Error("Could not sequence", "error", err)
-		}
-		s.txLock.Unlock()
-
-		if err := s.updateL1BlockNumber(); err != nil {
-			log.Error("Could not update execution context", "error", err)
-		}
-	}
-}
-
 // sequence is the main logic for the Sequencer. It will sync any `enqueue`
 // transactions it has yet to sync and then pull in transaction batches to
 // compare against the transactions it has in its local state. The sequencer
@@ -487,16 +466,13 @@ func (s *SyncService) SequencerLoop() {
 // L1 is the source of truth. The sequencer concurrently accepts user
 // transactions via the RPC. When reorg logic is enabled, this should
 // also call `syncBatchesToTip`
-func (s *SyncService) sequence() error {
-	if err := s.syncQueueToTip(); err != nil {
-		return fmt.Errorf("Sequencer cannot sequence queue: %w", err)
-	}
-	return nil
-}
 
-func (s *SyncService) syncQueueToTip() error {
+func (s *SyncService) SyncQueueToTip() error {
 	if err := s.syncToTip(s.syncQueue, s.client.GetLatestEnqueueIndex); err != nil {
 		return fmt.Errorf("Cannot sync queue to tip: %w", err)
+	}
+	if err := s.updateL1BlockNumber(); err != nil {
+		log.Error("Could not update execution context", "error", err)
 	}
 	return nil
 }
@@ -943,12 +919,14 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, sequencer com
 
 	select {
 	case err := <-errCh:
+		log.Debug("we have receiverd errCh")
 		log.Error("Got error waiting for transaction to be added to chain", "msg", err)
 		s.SetLatestL1Timestamp(ts)
 		s.SetLatestL1BlockNumber(bn)
 		s.SetLatestIndex(index)
 		return err
 	case <-s.chainHeadCh:
+		log.Debug("we have receiverd chainHeadCh")
 		// Update the cache when the transaction is from the owner
 		// of the gas price oracle
 		sender, _ := types.Sender(s.signer, tx)
@@ -1055,6 +1033,27 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 				fees.ErrGasPriceTooHigh, tx.GasPrice(), l2GasPrice)
 		}
 		return err
+	}
+	return nil
+}
+
+func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction, sequencer common.Address) error {
+	if s.verifier {
+		return errors.New("Verifier does not accept transactions out of band")
+	}
+	if tx == nil {
+		return errors.New("nil transaction passed to ValidateAndApplySequencerTransaction")
+	}
+	s.txLock.Lock()
+	defer s.txLock.Unlock()
+	if err := s.verifyFee(tx); err != nil {
+		return err
+	}
+	log.Trace("Sequencer transaction validation", "hash", tx.Hash().Hex())
+
+	qo := tx.QueueOrigin()
+	if qo != types.QueueOriginSequencer {
+		return fmt.Errorf("invalid transaction with queue origin %s", qo.String())
 	}
 	return nil
 }
@@ -1214,7 +1213,7 @@ func (s *SyncService) sync(getLatest indexGetter, getNext nextGetter, syncer ran
 	}
 
 	nextIndex := getNext()
-	log.Info("SyncService sync", "nextIndex", nextIndex, "latestIndex", *latestIndex)
+	log.Debug("SyncService sync", "nextIndex", nextIndex, "latestIndex", *latestIndex)
 	if nextIndex == *latestIndex+1 {
 		return latestIndex, nil
 	}

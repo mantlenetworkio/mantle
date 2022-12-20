@@ -222,7 +222,7 @@ func TestSyncServiceTransactionEnqueued(t *testing.T) {
 	// Run an iteration of the eloop
 	err = nil
 	go func() {
-		err = service.syncQueueToTip()
+		err = service.SyncQueueToTip()
 	}()
 	// Wait for the tx to be confirmed into the chain and then
 	// make sure it is the transactions that was set up with in the mockclient
