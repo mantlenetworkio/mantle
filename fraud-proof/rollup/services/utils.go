@@ -5,10 +5,10 @@ import (
 	"math/big"
 
 	l1abi "github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
+	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/specularl2/specular/clients/geth/specular/bindings"
-	"github.com/specularl2/specular/clients/geth/specular/proof"
 )
 
 func SubmitOneStepProof(
