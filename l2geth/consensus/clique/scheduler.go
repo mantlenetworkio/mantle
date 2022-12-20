@@ -170,6 +170,20 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 	batchSize := uint64(10) // 10 transaction in one batch
 	expireTime := int64(15) // 15s
 	for {
+		schedulerCh := make(chan struct{})
+		err := schedulerInst.eventMux.Post(core.L1ToL2TxStartEvent{
+			ErrCh:       nil,
+			SchedulerCh: schedulerCh,
+		})
+		if err != nil {
+			log.Error("generate BatchPeriodStartEvent error")
+			return
+		}
+		select {
+		case <-schedulerCh:
+			log.Debug("produce block for L1ToL2Tx end", "blockNumber", schedulerInst.blockchain.CurrentBlock().Number().Uint64())
+		}
+
 		schedulerInst.l.Lock()
 
 		if schedulerInst.sequencerSet == nil {
@@ -225,11 +239,15 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 	for {
 		select {
 		case chainHead := <-schedulerInst.chainHeadCh:
+			if chainHead.Block.Transactions().Len() != 0 && chainHead.Block.Transactions()[0].GetMeta() != nil && chainHead.Block.Transactions()[0].QueueOrigin() == types.QueueOriginL1ToL2 {
+				log.Debug("chainHead", "blockNumber", chainHead.Block.NumberU64(), "extraData", hex.EncodeToString(chainHead.Block.Extra()))
+				continue
+			}
 			if schedulerInst.blockchain.CurrentBlock().NumberU64() == schedulerInst.currentStartMsg.MaxHeight {
 				log.Debug("Batch done with height at max height")
 				schedulerInst.batchDone <- struct{}{}
 			}
-			log.Debug("chainHead", "block number", chainHead.Block.NumberU64(), "extra data", hex.EncodeToString(chainHead.Block.Extra()))
+			log.Debug("chainHead", "blockNumber", chainHead.Block.NumberU64(), "extraData", hex.EncodeToString(chainHead.Block.Extra()))
 		}
 	}
 }
