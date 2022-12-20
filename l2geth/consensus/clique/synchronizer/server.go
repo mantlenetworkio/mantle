@@ -68,7 +68,7 @@ func (sync *Synchronizer) GetSchedulerAddr() (common.Address, error) {
 		return common.Address{}, fmt.Errorf("create rpcClient failed: %s", err)
 	}
 	schedulerAddr, err := seqContractInst.Scheduler(nil)
-	for schedulerAddr.String() == "0x0000000000000000000000000000000000000000" && err == nil {
+	for schedulerAddr.String() == (common.Address{}.String()) && err == nil {
 		log.Info("retry get scheduler", "addr", schedulerAddr)
 		time.Sleep(GET_SEQUENCER_TIMEOUT * time.Second)
 		schedulerAddr, err = seqContractInst.Scheduler(nil)
@@ -101,10 +101,10 @@ func (sync *Synchronizer) GetSequencerSet() (SequencerSequencerInfos, error) {
 	for i := 0; i < GET_SEQUENCER_RETRY_TIMES; i++ {
 		seqInfos, err = seqContractInst.GetSequencers(nil)
 		if err != nil {
-			return nil, err
+			continue
 		}
 		time.Sleep(GET_SEQUENCER_TIMEOUT * time.Second)
-		if len(seqInfos) == 0 && i == 99 {
+		if len(seqInfos) == 0 {
 			return nil, fmt.Errorf("empty sequencer set")
 		}
 		if len(seqInfos) != 0 {

@@ -919,14 +919,14 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, sequencer com
 
 	select {
 	case err := <-errCh:
-		fmt.Println("========we have receiverd errCh-------------------")
+		log.Debug("we have receiverd errCh")
 		log.Error("Got error waiting for transaction to be added to chain", "msg", err)
 		s.SetLatestL1Timestamp(ts)
 		s.SetLatestL1BlockNumber(bn)
 		s.SetLatestIndex(index)
 		return err
 	case <-s.chainHeadCh:
-		fmt.Println("========we have receiverd chainHeadCh-------------------")
+		log.Debug("we have receiverd chainHeadCh")
 		// Update the cache when the transaction is from the owner
 		// of the gas price oracle
 		sender, _ := types.Sender(s.signer, tx)
