@@ -1031,12 +1031,14 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, sequencer com
 
 	select {
 	case err := <-errCh:
+		log.Debug("we have receiverd errCh")
 		log.Error("Got error waiting for transaction to be added to chain", "msg", err)
 		s.SetLatestL1Timestamp(ts)
 		s.SetLatestL1BlockNumber(bn)
 		s.SetLatestIndex(index)
 		return err
 	case <-s.chainHeadCh:
+		log.Debug("we have receiverd chainHeadCh")
 		// Update the cache when the transaction is from the owner
 		// of the gas price oracle
 		sender, _ := types.Sender(s.signer, tx)
@@ -1198,6 +1200,53 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 	return nil
 }
 
+func (s *SyncService) PreCheckSyncServiceState(tx *types.Transaction) bool {
+	ts := s.GetLatestL1Timestamp()
+	bn := s.GetLatestL1BlockNumber()
+	l1BlockNumber := tx.L1BlockNumber()
+
+	if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+		if tx.L1Timestamp() == 0 {
+			return false
+		}
+	}
+
+	if l1BlockNumber == nil {
+		log.Warn("Blocknumber is nil ","hash",tx.Hash().Hex())
+		return false
+	}
+	if l1BlockNumber.Uint64() < bn{
+		// l1BlockNumber < latest l1BlockNumber
+		// indicates an error
+		log.Warn("Blocknumber monotonicity violation", "hash", tx.Hash().Hex(),
+		"new", l1BlockNumber.Uint64(), "old", bn)
+		return false
+	}
+
+	if tx.L1Timestamp() < ts {
+		log.Error("Timestamp monotonicity violation", "hash", tx.Hash().Hex(), "latest", ts, "tx", tx.L1Timestamp())
+		return false
+	}
+
+	if tx.GetMeta().Index == nil {
+		log.Warn("meta index is nil ","hash",tx.Hash().Hex())
+		return false
+	}
+	return true
+
+}
+
+func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
+	l1BlockNumber := tx.L1BlockNumber()
+	s.SetLatestL1BlockNumber(l1BlockNumber.Uint64())
+	s.SetLatestL1Timestamp(tx.L1Timestamp())
+	s.SetLatestIndex(tx.GetMeta().Index)
+	if queueIndex := tx.GetMeta().QueueIndex; queueIndex != nil {
+		s.SetLatestEnqueueIndex(queueIndex)
+	}
+	log.Debug("Update sync service state with new block", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
+}
+
 // syncer represents a function that can sync remote items and then returns the
 // index that it synced to as well as an error if it encountered one. It has
 // side effects on the state and its functionality depends on the current state
@@ -1288,7 +1337,7 @@ func (s *SyncService) sync(getLatest indexGetter, getNext nextGetter, syncer ran
 	}
 
 	nextIndex := getNext()
-	log.Info("SyncService sync", "nextIndex", nextIndex, "latestIndex", *latestIndex)
+	log.Debug("SyncService sync", "nextIndex", nextIndex, "latestIndex", *latestIndex)
 	if nextIndex == *latestIndex+1 {
 		return latestIndex, nil
 	}

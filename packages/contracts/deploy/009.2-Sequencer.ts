@@ -1,6 +1,6 @@
 /* Imports: External */
 import { DeployFunction } from 'hardhat-deploy/dist/types'
-import { hexStringEquals, awaitCondition } from '@mantlenetworkio/core-utils'
+import { hexStringEquals, awaitCondition } from '@mantleio/core-utils'
 import { ethers } from 'ethers'
 
 import { names } from '../src/address-names'
@@ -50,7 +50,7 @@ const deployFn: DeployFunction = async (hre) => {
         async () => {
           return hexStringEquals(
             await contract
-              .connect(deployer)
+              .connect(Impl_Sequencer.signer.provider)
               .bitToken({ from: ethers.constants.AddressZero }),
             l1BitAddress
           )
