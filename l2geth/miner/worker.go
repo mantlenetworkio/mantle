@@ -268,8 +268,8 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	go worker.batchStartLoop()
 	go worker.batchAnswerLoop()
 
-	if worker.eth.SyncService().IsScheduler(worker.coinbase) {
-		worker.l1Tol2StartLoop()
+	if !worker.eth.SyncService().IsSequencerMode() {
+		go worker.l1Tol2StartLoop()
 	}
 
 	// Submit first work to initialize pending state.
