@@ -299,27 +299,22 @@ func (b *EthAPIBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscri
 // Transactions originating from the RPC endpoints are added to remotes so that
 // a lock can be used around the remotes for when the sequencer is reorganizing.
 func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
-	if b.eth.syncService.IsSequencerMode() {
-		// TODO add sync service pre check
-		return b.eth.txPool.AddLocal(signedTx)
-	}
-	if b.UsingBVM {
-		//TODO only for L1 to L2 transactions
-		to := signedTx.To()
-		if to != nil {
-			// Prevent QueueOriginSequencer transactions that are too large to
-			// be included in a batch. The `MaxCallDataSize` should be set to
-			// the layer one consensus max transaction size in bytes minus the
-			// constant sized overhead of a batch. This will prevent
-			// a layer two transaction from not being able to be batch submitted
-			// to layer one.
-			if len(signedTx.Data()) > b.MaxCallDataSize {
-				return fmt.Errorf("Calldata cannot be larger than %d, sent %d", b.MaxCallDataSize, len(signedTx.Data()))
-			}
+	to := signedTx.To()
+	if to != nil {
+		// Prevent QueueOriginSequencer transactions that are too large to
+		// be included in a batch. The `MaxCallDataSize` should be set to
+		// the layer one consensus max transaction size in bytes minus the
+		// constant sized overhead of a batch. This will prevent
+		// a layer two transaction from not being able to be batch submitted
+		// to layer one.
+		if len(signedTx.Data()) > b.MaxCallDataSize {
+			return fmt.Errorf("Calldata cannot be larger than %d, sent %d", b.MaxCallDataSize, len(signedTx.Data()))
 		}
-		return b.eth.syncService.ValidateAndApplySequencerTransaction(signedTx, b.eth.syncService.GetScheduler())
 	}
-	return nil
+	if err := b.eth.syncService.ValidateSequencerTransaction(signedTx, b.eth.syncService.GetScheduler()); err != nil {
+		return err
+	}
+	return b.eth.txPool.AddLocal(signedTx)
 }
 
 func (b *EthAPIBackend) GetPoolTransactions() (types.Transactions, error) {
