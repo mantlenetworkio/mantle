@@ -175,7 +175,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		}
 		select {
 		case <-schedulerCh:
-			log.Debug("produce block for L1ToL2Tx end", "current block number", schedulerInst.blockchain.CurrentBlock().Number().Uint64())
+			log.Debug("produce block for L1ToL2Tx end", "blockNumber", schedulerInst.blockchain.CurrentBlock().Number().Uint64())
 		}
 
 		schedulerInst.l.Lock()
@@ -231,14 +231,14 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 		select {
 		case chainHead := <-schedulerInst.chainHeadCh:
 			if chainHead.Block.Transactions().Len() != 0 && chainHead.Block.Transactions()[0].GetMeta() != nil && chainHead.Block.Transactions()[0].QueueOrigin() == types.QueueOriginL1ToL2 {
-				log.Debug("chainHead", "block number", chainHead.Block.NumberU64(), "extra data", hex.EncodeToString(chainHead.Block.Extra()))
+				log.Debug("chainHead", "blockNumber", chainHead.Block.NumberU64(), "extraData", hex.EncodeToString(chainHead.Block.Extra()))
 				continue
 			}
 			if schedulerInst.blockchain.CurrentBlock().NumberU64() == schedulerInst.currentStartMsg.MaxHeight {
 				log.Debug("Batch done with height at max height")
 				schedulerInst.batchDone <- struct{}{}
 			}
-			log.Debug("chainHead", "block number", chainHead.Block.NumberU64(), "extra data", hex.EncodeToString(chainHead.Block.Extra()))
+			log.Debug("chainHead", "blockNumber", chainHead.Block.NumberU64(), "extraData", hex.EncodeToString(chainHead.Block.Extra()))
 		}
 	}
 }
