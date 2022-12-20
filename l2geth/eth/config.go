@@ -17,7 +17,6 @@
 package eth
 
 import (
-	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"math/big"
 	"os"
 	"os/user"
@@ -26,6 +25,7 @@ import (
 	"time"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/ethash"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/eth/downloader"
