@@ -26,12 +26,19 @@ const (
 	chainHeadChanSize = 10
 )
 
+type Config struct {
+	BatchSize int64
+	BatchTime int64
+}
+
 type Scheduler struct {
 	wg       sync.WaitGroup
 	l        sync.Mutex
 	eventMux *event.TypeMux
 	done     chan struct{}
 	running  int32
+
+	config *Config
 
 	db ethdb.Database
 
@@ -57,7 +64,7 @@ type Scheduler struct {
 	syncer *synchronizer.Synchronizer
 }
 
-func NewScheduler(db ethdb.Database, schedulerAddress common.Address, clique *Clique, blockchain *core.BlockChain, eventMux *event.TypeMux) (*Scheduler, error) {
+func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Address, clique *Clique, blockchain *core.BlockChain, eventMux *event.TypeMux) (*Scheduler, error) {
 	log.Info("Create Sequencer Server")
 
 	syncer := synchronizer.NewSynchronizer()
@@ -86,6 +93,7 @@ func NewScheduler(db ethdb.Database, schedulerAddress common.Address, clique *Cl
 		return nil, fmt.Errorf("get sequencer set failed, err: %v", err)
 	}
 	schedulerInst := &Scheduler{
+		config:          config,
 		running:         0,
 		currentHeight:   0,
 		db:              db,
@@ -167,8 +175,14 @@ func (schedulerInst *Scheduler) AddPeerCheck() {
 }
 
 func (schedulerInst *Scheduler) schedulerRoutine() {
-	batchSize := uint64(10) // 10 transaction in one batch
-	expireTime := int64(15) // 15s
+	batchSize := uint64(100) // 10 transaction in one batch
+	expireTime := int64(60)  // 15s
+	if schedulerInst.config.BatchSize != 0 {
+		batchSize = uint64(schedulerInst.config.BatchSize)
+	}
+	if schedulerInst.config.BatchTime != 0 {
+		expireTime = schedulerInst.config.BatchTime
+	}
 	for {
 		schedulerCh := make(chan struct{})
 		err := schedulerInst.eventMux.Post(core.L1ToL2TxStartEvent{

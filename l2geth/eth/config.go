@@ -17,6 +17,7 @@
 package eth
 
 import (
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"math/big"
 	"os"
 	"os/user"
@@ -183,4 +184,7 @@ type Config struct {
 
 	// Mantle Rollup Config
 	Rollup rollup.Config
+
+	// Mantle Scheduler Config
+	SchedulerConfig clique.Config
 }
