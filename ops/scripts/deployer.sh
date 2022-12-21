@@ -82,7 +82,7 @@ jq . addresses.json
 
 echo "Building dump file."
 npx hardhat take-dump --network $CONTRACTS_TARGET_NETWORK
-mv addresses.json ./genesis
+cp addresses.json ./genesis
 cp ./genesis/$CONTRACTS_TARGET_NETWORK.json ./genesis/state-dump.latest.json
 
 # init balance
