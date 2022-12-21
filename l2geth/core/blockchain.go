@@ -1489,8 +1489,16 @@ func (bc *BlockChain) addFutureBlock(block *types.Block) error {
 // wrong.
 //
 // After insertion is done, all accumulated events will be fired.
-func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
+func (bc *BlockChain) InsertChain(blocks types.Blocks) (int, error) {
 	// Sanity check that we have something meaningful to import
+	var chain types.Blocks
+	// TODO
+	var latestRollbackState types.RollbackState
+	for _, block := range chain {
+		if block.Header().RollbackIndex != latestRollbackState.Index {
+
+		}
+	}
 	if len(chain) == 0 {
 		return 0, nil
 	}

@@ -837,8 +837,33 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	return nil
 }
 
-func (s *SyncService) SequencerRollback() error {
-	return nil
+func (s *SyncService) SequencerRollback(start uint64) error {
+	return s.SetHead(start - 1)
+}
+
+func (s *SyncService) UpdateRollbackStates(rollbackState *types.RollbackState) {
+	var rollbackStates types.RollbackStates
+	rbss := rawdb.ReadRollbackStates(s.db)
+	if rbss == nil {
+		rollbackStates = append(rollbackStates, rollbackState)
+	} else {
+		for _, rbs := range rbss {
+			if rbs.BlockHeight >= rollbackState.BlockHeight {
+				break
+			}
+			rollbackStates = append(rollbackStates, rbs)
+		}
+		rollbackStates = append(rollbackStates, rollbackState)
+	}
+	rawdb.WriteRollbackStates(s.db, rollbackStates)
+}
+
+func (s *SyncService) LatestRollbackStates() *types.RollbackState {
+	rbss := rawdb.ReadRollbackStates(s.db)
+	if len(rbss) == 0 {
+		return nil
+	}
+	return rbss[len(rbss)-1]
 }
 
 // applyTransaction is a higher level API for applying a transaction
