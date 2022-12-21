@@ -419,7 +419,7 @@ func (c *Clique) snapshot(chain consensus.ChainReader, number uint64, hash commo
 	for i := 0; i < len(headers)/2; i++ {
 		headers[i], headers[len(headers)-1-i] = headers[len(headers)-1-i], headers[i]
 	}
-	snap, err := snap.apply(headers)
+	snap, err := snap.apply(headers, c.config.IsVerifier)
 	if err != nil {
 		return nil, err
 	}
@@ -471,8 +471,10 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	if err != nil {
 		return err
 	}
-	if _, ok := snap.Signers[signer]; !ok {
-		return errUnauthorizedSigner
+	if !c.config.IsVerifier {
+		if _, ok := snap.Signers[signer]; !ok {
+			return errUnauthorizedSigner
+		}
 	}
 	for seen, recent := range snap.Recents {
 		if recent == signer {
@@ -622,8 +624,10 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 	if err != nil {
 		return err
 	}
-	if _, authorized := snap.Signers[signer]; !authorized {
-		return errUnauthorizedSigner
+	if !c.config.IsVerifier {
+		if _, authorized := snap.Signers[signer]; !authorized {
+			return errUnauthorizedSigner
+		}
 	}
 	// If we're amongst the recent signers, wait for the next block
 	for seen, recent := range snap.Recents {
