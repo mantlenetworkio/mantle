@@ -553,23 +553,26 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@defi-wonderland/smock@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/@defi-wonderland/smock/-/smock-2.0.2.tgz"
-  integrity sha512-nZtnUftPkMmFedqDzBqQrZWX+6Q3fK5MNMK3R6mLTg8Ig087A7ifs1KH9vGGpZ3p9RdgC+scUy9KfDASp2SKxg==
-  dependencies:
-    diff "^5.0.0"
-    lodash.isequal "^4.5.0"
-    lodash.isequalwith "^4.4.0"
-    rxjs "^7.2.0"
-    semver "^7.3.5"
-
 "@defi-wonderland/smock@^2.0.7":
   version "2.0.7"
   resolved "https://registry.npmjs.org/@defi-wonderland/smock/-/smock-2.0.7.tgz"
   integrity sha512-RVpODLKZ/Cr0C1bCbhJ2aXbAr2Ll/K2WO7hDL96tqhMzCsA7ToWdDIgiNpV5Vtqqvpftu5ddO7v3TAurQNSU0w==
   dependencies:
     "@nomiclabs/ethereumjs-vm" "^4.2.2"
+    diff "^5.0.0"
+    lodash.isequal "^4.5.0"
+    lodash.isequalwith "^4.4.0"
+    rxjs "^7.2.0"
+    semver "^7.3.5"
+
+"@defi-wonderland/smock@^2.3.0":
+  version "2.3.4"
+  resolved "https://registry.yarnpkg.com/@defi-wonderland/smock/-/smock-2.3.4.tgz#2bfe7e19052140634b25db344d77de9b0ac7a96b"
+  integrity sha512-VYJbsoCOdFRyGkAwvaQhQRrU6V8AjK3five8xdbo41DEE9n3qXzUNBUxyD9HhXB/dWWPFWT21IGw5Ztl6Qw3Ew==
+  dependencies:
+    "@nomicfoundation/ethereumjs-evm" "^1.0.0-rc.3"
+    "@nomicfoundation/ethereumjs-util" "^8.0.0-rc.3"
+    "@nomicfoundation/ethereumjs-vm" "^6.0.0-rc.3"
     diff "^5.0.0"
     lodash.isequal "^4.5.0"
     lodash.isequalwith "^4.4.0"
