@@ -81,7 +81,7 @@ type Header struct {
 	GasUsed       uint64         `json:"gasUsed"          gencodec:"required"`
 	Time          uint64         `json:"timestamp"        gencodec:"required"`
 	Extra         []byte         `json:"extraData"        gencodec:"required"`
-	RollbackIndex uint64         `json:"rollbackIndex"`
+	RollbackState *RollbackState `json:"rollbackState"`
 	MixDigest     common.Hash    `json:"mixHash"`
 	Nonce         BlockNonce     `json:"nonce"`
 }
@@ -396,7 +396,7 @@ func (b *Block) Hash() common.Hash {
 type Blocks []*Block
 
 type RollbackState struct {
-	BlockHeight uint64
+	BlockNumber uint64
 	Index       uint64
 }
 

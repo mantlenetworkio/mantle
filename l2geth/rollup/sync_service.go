@@ -817,6 +817,7 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	if err := s.SetHead(start - 1); err != nil {
 		log.Crit("rollback error:", "setHead error", err)
 	}
+	s.UpdateRollbackStates(start)
 	log.Info("setHead end,current :", "block number", s.bc.CurrentHeader().Number.Uint64())
 	for _, t := range txs {
 		if err := s.applyIndexedTransaction(&t, s.cfg.SchedulerAddress); err != nil {
@@ -826,13 +827,8 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
 	for i := start; i <= latest; i++ {
 		newBlock := s.bc.GetBlockByNumber(i)
-		log.Info("StateRoot", "equal", oldBlocks[i-start].Root() == newBlock.Root())
-		if oldBlocks[i-start].Hash() != newBlock.Hash() {
-			// TODO Emit Rollback Event To sequencer
-			log.Info("Emit Rollback Event To sequencer", "old blockHash", oldBlocks[i-start].Hash(), "newBlockHash", newBlock.Hash())
-			log.Info("Emit Rollback Event To sequencer", "oldBlock number:", oldBlocks[i-start].Number().Uint64(), "newBlockNumber", newBlock.Number().Uint64())
-			//break
-		}
+		log.Info("new block rollback state", "index", newBlock.Header().RollbackState.Index)
+		log.Info("new block rollback state", "blockNumber", newBlock.Header().RollbackState.BlockNumber)
 	}
 	return nil
 }
@@ -841,20 +837,23 @@ func (s *SyncService) SequencerRollback(start uint64) error {
 	return s.SetHead(start - 1)
 }
 
-func (s *SyncService) UpdateRollbackStates(rollbackState *types.RollbackState) {
+func (s *SyncService) UpdateRollbackStates(rollbackNumber uint64) {
 	var rollbackStates types.RollbackStates
+	rollbackState := new(types.RollbackState)
 	rbss := rawdb.ReadRollbackStates(s.db)
-	if rbss == nil {
-		rollbackStates = append(rollbackStates, rollbackState)
+	if len(rbss) == 0 {
+		rollbackState.Index = 1
 	} else {
+		rollbackState.Index = rbss[len(rbss)-1].Index + 1
 		for _, rbs := range rbss {
-			if rbs.BlockHeight >= rollbackState.BlockHeight {
+			if rbs.BlockNumber >= rollbackState.BlockNumber {
 				break
 			}
 			rollbackStates = append(rollbackStates, rbs)
 		}
-		rollbackStates = append(rollbackStates, rollbackState)
 	}
+	rollbackState.BlockNumber = rollbackNumber
+	rollbackStates = append(rollbackStates, rollbackState)
 	rawdb.WriteRollbackStates(s.db, rollbackStates)
 }
 
@@ -1237,14 +1236,14 @@ func (s *SyncService) PreCheckSyncServiceState(tx *types.Transaction) bool {
 	}
 
 	if l1BlockNumber == nil {
-		log.Warn("Blocknumber is nil ","hash",tx.Hash().Hex())
+		log.Warn("Blocknumber is nil ", "hash", tx.Hash().Hex())
 		return false
 	}
-	if l1BlockNumber.Uint64() < bn{
+	if l1BlockNumber.Uint64() < bn {
 		// l1BlockNumber < latest l1BlockNumber
 		// indicates an error
 		log.Warn("Blocknumber monotonicity violation", "hash", tx.Hash().Hex(),
-		"new", l1BlockNumber.Uint64(), "old", bn)
+			"new", l1BlockNumber.Uint64(), "old", bn)
 		return false
 	}
 
@@ -1254,7 +1253,7 @@ func (s *SyncService) PreCheckSyncServiceState(tx *types.Transaction) bool {
 	}
 
 	if tx.GetMeta().Index == nil {
-		log.Warn("meta index is nil ","hash",tx.Hash().Hex())
+		log.Warn("meta index is nil ", "hash", tx.Hash().Hex())
 		return false
 	}
 	return true

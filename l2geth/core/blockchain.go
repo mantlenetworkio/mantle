@@ -174,11 +174,12 @@ type BlockChain struct {
 	processor  Processor  // Block transaction processor interface
 	vmConfig   vm.Config
 
-	badBlocks           *lru.Cache                     // Bad block cache
-	shouldPreserve      func(*types.Block) bool        // Function used to determine whether should preserve the given block.
-	terminateInsert     func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
-	preCheckSyncService func(*types.Transaction) bool  // first check block avaliabe before insert chain
-	updateSyncService   func(*types.Transaction)       // update sync service state after inserting chain block
+	badBlocks             *lru.Cache                     // Bad block cache
+	shouldPreserve        func(*types.Block) bool        // Function used to determine whether should preserve the given block.
+	terminateInsert       func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
+	preCheckSyncService   func(*types.Transaction) bool  // first check block avaliabe before insert chain
+	updateSyncService     func(*types.Transaction)       // update sync service state after inserting chain block
+	sequencerRollbackFunc func(start uint64) error       // rollback will setHead to start - 1
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -1492,11 +1493,16 @@ func (bc *BlockChain) addFutureBlock(block *types.Block) error {
 func (bc *BlockChain) InsertChain(blocks types.Blocks) (int, error) {
 	// Sanity check that we have something meaningful to import
 	var chain types.Blocks
-	// TODO
-	var latestRollbackState types.RollbackState
-	for _, block := range chain {
-		if block.Header().RollbackIndex != latestRollbackState.Index {
-
+	current := bc.CurrentHeader()
+	for _, block := range blocks {
+		if block.Header().RollbackState.Index >= current.RollbackState.Index {
+			if block.Header().RollbackState.Index == current.RollbackState.Index+1 && block.Header().RollbackState.BlockNumber <= current.Number.Uint64() {
+				if err := bc.sequencerRollbackFunc(block.Header().RollbackState.BlockNumber); err != nil {
+					return 0, err
+				}
+				// TODO sync service update sequencer rollback states
+			}
+			chain = append(chain, block)
 		}
 	}
 	if len(chain) == 0 {
@@ -2297,10 +2303,14 @@ func (bc *BlockChain) SubscribeBlockProcessingEvent(ch chan<- bool) event.Subscr
 	return bc.scope.Track(bc.blockProcFeed.Subscribe(ch))
 }
 
-func (bc *BlockChain) SetUpdateSyncServiceFunc(function func(*types.Transaction)) {
-	bc.updateSyncService = function
+func (bc *BlockChain) SetUpdateSyncServiceFunc(updateSyncServiceFunc func(*types.Transaction)) {
+	bc.updateSyncService = updateSyncServiceFunc
 }
 
-func (bc *BlockChain) SetPreCheckSyncServiceFunc(function func(*types.Transaction) bool) {
-	bc.preCheckSyncService = function
+func (bc *BlockChain) SetPreCheckSyncServiceFunc(preCheckFunc func(*types.Transaction) bool) {
+	bc.preCheckSyncService = preCheckFunc
+}
+
+func (bc *BlockChain) SetSequencerRollbackFunc(rollbackFunc func(start uint64) error) {
+	bc.sequencerRollbackFunc = rollbackFunc
 }
