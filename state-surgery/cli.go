@@ -49,14 +49,14 @@ func DumpAddresses(dataDir string, outFile string) error {
 
 // Migrate performs the actual state migration. It does quite a lot:
 //
-//   1. It uses address lists, allowance lists, Mint events, and address preimages in
-//      the input state database to create a comprehensive list of storage slots in the
-//      BVM ETH contract.
-//   2. It iterates over the slots in BVM ETH, and compares then against the list in (1).
-//      If the list doesn't match, or the total supply of BVM ETH doesn't match the sum of
-//      all balance storage slots, it panics.
-//   3. It performs the actual migration by copying the input state DB into a new state DB.
-//   4. It imports the provided genesis into the new state DB like Geth would during geth init.
+//  1. It uses address lists, allowance lists, Mint events, and address preimages in
+//     the input state database to create a comprehensive list of storage slots in the
+//     BVM ETH contract.
+//  2. It iterates over the slots in BVM ETH, and compares then against the list in (1).
+//     If the list doesn't match, or the total supply of BVM ETH doesn't match the sum of
+//     all balance storage slots, it panics.
+//  3. It performs the actual migration by copying the input state DB into a new state DB.
+//  4. It imports the provided genesis into the new state DB like Geth would during geth init.
 //
 // It takes the following arguments:
 //
@@ -64,9 +64,9 @@ func DumpAddresses(dataDir string, outFile string) error {
 //   - outDir:         A directory to output the migrated database to.
 //   - genesis:        The new chain's genesis configuration.
 //   - addrLists:      A list of address list file paths. These address lists are used to populate
-//                     balances from previous regenesis events.
+//     balances from previous regenesis events.
 //   - allowanceLists: A list of allowance list file paths. These allowance lists are used
-//                     to calculate allowance storage slots from previous regenesis events.
+//     to calculate allowance storage slots from previous regenesis events.
 //   - chainID:        The chain ID of the chain being migrated.
 func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowanceLists []string, chainID, levelDBCacheSize, levelDBHandles int) error {
 	db := MustOpenDBWithCacheOpts(dataDir, levelDBCacheSize, levelDBHandles)
@@ -359,7 +359,7 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 	//
 	// Unlike regular Geth (which panics if you try to import a genesis state with a nonzero
 	// block number), the block number can be anything.
-	block := genesis.ToBlock(nil)
+	block := genesis.ToBlock()
 
 	// Geth block headers are immutable, so swap the root and make a new block with the
 	// updated root.

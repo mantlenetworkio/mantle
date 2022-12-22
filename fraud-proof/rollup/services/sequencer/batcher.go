@@ -6,15 +6,14 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/specularl2/specular/clients/geth/specular/rollup/services"
+	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core"
+	"github.com/mantlenetworkio/mantle/l2geth/core/state"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
 )
 
 type Batch struct {
@@ -84,7 +83,7 @@ func (b *Batcher) CommitTransactions(txs []*types.Transaction) error {
 			continue
 		}
 		// Start executing the transaction
-		b.state.Prepare(tx.Hash(), b.tcount)
+		b.state.Prepare(tx.Hash(), tx.Hash(), b.tcount) // TODO-FIXME check if block hash === tx hash
 		snap := b.state.Snapshot()
 		receipt, err := core.ApplyTransaction(b.chainConfig, b.chain, &b.coinbase, b.gasPool, b.state, b.header, tx, &b.header.GasUsed, *b.chain.GetVMConfig())
 		if err != nil {
@@ -127,15 +126,11 @@ func (b *Batcher) Batch() (types.Blocks, error) {
 func (b *Batcher) commitBlock() error {
 	// TODO: return if nothing to be committed
 
-	// Stop state prefetcher (see env.discard in worker.go)
-	if b.state != nil {
-		b.state.StopPrefetcher()
-	}
 	// Finalize header
 	b.header.Root = b.state.IntermediateRoot(b.chain.Config().IsEIP158(b.header.Number))
 	b.header.UncleHash = types.CalcUncleHash(nil)
 	// Assemble block
-	block := types.NewBlock(b.header, b.txs, nil, b.receipts, trie.NewStackTrie(nil))
+	block := types.NewBlock(b.header, b.txs, nil, b.receipts)
 	hash := block.Hash()
 	// Finalize receipts and logs
 	var logs []*types.Log
@@ -178,7 +173,7 @@ func (b *Batcher) startNewBlock() error {
 	b.header = &types.Header{
 		ParentHash: parent.Hash(),
 		Number:     num.Add(num, common.Big1),
-		GasLimit:   core.CalcGasLimit(parent.GasLimit(), ethconfig.Defaults.Miner.GasCeil),
+		GasLimit:   core.CalcGasLimit(parent, parent.GasLimit(), ethconfig.Defaults.Miner.GasCeil),
 		Time:       uint64(time.Now().Unix()),
 		Coinbase:   b.coinbase,
 		Difficulty: common.Big1, // Fake difficulty. Avoid use 0 here because it means the merge happened
@@ -197,7 +192,6 @@ func (b *Batcher) startNewBlock() error {
 	if err != nil {
 		return err
 	}
-	state.StartPrefetcher("sequencer")
 	b.state = state
 	b.gasPool = new(core.GasPool).AddGas(b.header.GasLimit)
 	b.tcount = 0

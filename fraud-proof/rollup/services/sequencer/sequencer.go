@@ -2,31 +2,31 @@ package sequencer
 
 import (
 	"fmt"
+	ethc "github.com/ethereum/go-ethereum/common"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/specularl2/specular/clients/geth/specular/bindings"
-	"github.com/specularl2/specular/clients/geth/specular/proof"
-	"github.com/specularl2/specular/clients/geth/specular/rollup/services"
-	rollupTypes "github.com/specularl2/specular/clients/geth/specular/rollup/types"
+	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
+	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
+	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
+	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core"
 )
 
-func RegisterService(stack *node.Node, eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {
-	sequencer, err := New(eth, proofBackend, cfg, auth)
-	if err != nil {
-		log.Crit("Failed to register the Rollup service", "err", err)
-	}
-	stack.RegisterLifecycle(sequencer)
-	// stack.RegisterAPIs(seq.APIs())
-	log.Info("Sequencer registered")
-}
+//func RegisterService(stack *node.Node, eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {
+//	sequencer, err := New(eth, proofBackend, cfg, auth)
+//	if err != nil {
+//		log.Crit("Failed to register the Rollup service", "err", err)
+//	}
+//	stack.RegisterLifecycle(sequencer)
+//	// stack.RegisterAPIs(seq.APIs())
+//	log.Info("Sequencer registered")
+//}
 
 type challengeCtx struct {
 	challengeAddr common.Address
@@ -294,7 +294,7 @@ func (s *Sequencer) confirmationLoop() {
 				// New challenge raised
 				if ev.AssertionID.Cmp(pendingAssertion.ID) == 0 {
 					s.challengeCh <- &challengeCtx{
-						ev.ChallengeAddr,
+						common.Address(ev.ChallengeAddr),
 						pendingAssertion,
 					}
 					isInChallenge = true
@@ -346,7 +346,7 @@ func (s *Sequencer) challengeLoop() {
 					log.Error("Can not get current responder", "error", err)
 					continue
 				}
-				if responder == common.Address(s.Config.Coinbase) {
+				if common.Address(responder) == s.Config.Coinbase {
 					// If it's our turn
 					err := services.RespondBisection(s.BaseService, abi, challengeSession, ev, states, common.Hash{}, false)
 					if err != nil {
@@ -394,7 +394,7 @@ func (s *Sequencer) challengeLoop() {
 		} else {
 			select {
 			case ctx := <-s.challengeCh:
-				challenge, err := bindings.NewIChallenge(ctx.challengeAddr, s.L1)
+				challenge, err := bindings.NewIChallenge(ethc.Address(ctx.challengeAddr), s.L1)
 				if err != nil {
 					log.Crit("Failed to access ongoing challenge", "address", ctx.challengeAddr, "err", err)
 				}

@@ -5,18 +5,19 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/eth/ethconfig"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/specularl2/specular/clients/geth/specular/bindings"
-	"github.com/specularl2/specular/clients/geth/specular/proof"
-	"github.com/specularl2/specular/clients/geth/specular/rollup/services"
-	rollupTypes "github.com/specularl2/specular/clients/geth/specular/rollup/types"
+	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
+	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
+	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
+	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 )
 
 type challengeCtx struct {
@@ -80,14 +81,12 @@ func (v *Validator) commitBlocks(blocks []*rollupTypes.SequenceBlock) (common.Ha
 	if err != nil {
 		return common.Hash{}, nil, err
 	}
-	state.StartPrefetcher("validator")
-	defer state.StopPrefetcher()
 
 	for _, sblock := range blocks {
 		header := &types.Header{
 			ParentHash: parent.Hash(),
 			Number:     new(big.Int).SetUint64(sblock.BlockNumber),
-			GasLimit:   core.CalcGasLimit(parent.GasLimit(), ethconfig.Defaults.Miner.GasCeil), // TODO: this may cause problem
+			GasLimit:   core.CalcGasLimit(parent, parent.GasLimit(), ethconfig.Defaults.Miner.GasCeil), // TODO: this may cause problem
 			Time:       sblock.Timestamp,
 			Coinbase:   v.Config.SequencerAddr,
 			Difficulty: common.Big1, // Fake difficulty. Avoid use 0 here because it means the merge happened
@@ -95,7 +94,7 @@ func (v *Validator) commitBlocks(blocks []*rollupTypes.SequenceBlock) (common.Ha
 		gasPool := new(core.GasPool).AddGas(header.GasLimit)
 		var receipts []*types.Receipt
 		for idx, tx := range sblock.Txs {
-			state.Prepare(tx.Hash(), idx)
+			state.Prepare(tx.Hash(), tx.Hash(), idx) // TODO-FIXME test out if tx hash ==== block hash
 			receipt, err := core.ApplyTransaction(chainConfig, v.Chain, &v.Config.SequencerAddr, gasPool, state, header, tx, &header.GasUsed, *v.Chain.GetVMConfig())
 			if err != nil {
 				return common.Hash{}, nil, err
@@ -106,7 +105,7 @@ func (v *Validator) commitBlocks(blocks []*rollupTypes.SequenceBlock) (common.Ha
 		header.Root = state.IntermediateRoot(v.Chain.Config().IsEIP158(header.Number))
 		header.UncleHash = types.CalcUncleHash(nil)
 		// Assemble block
-		block := types.NewBlock(header, sblock.Txs, nil, receipts, trie.NewStackTrie(nil))
+		block := types.NewBlock(header, sblock.Txs, nil, receipts)
 		hash := block.Hash()
 		// Finalize receipts and logs
 		var logs []*types.Log
@@ -234,7 +233,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 				}
 				log.Info("preparing pendingBlocks, SequenceBlocks blockNUm: ", len(pendingBlocks))
 			case ev := <-assertionEventCh:
-				if ev.AsserterAddr == common.Address(v.Config.Coinbase) {
+				if common.Address(ev.AsserterAddr) == v.Config.Coinbase {
 					// Create by our own for challenge
 					continue
 				}
@@ -325,7 +324,7 @@ func (v *Validator) challengeLoop() {
 	defer challengedSub.Unsubscribe()
 
 	// Watch L1 blockchain for challenge timeout
-	headCh := make(chan *types.Header, 4096)
+	headCh := make(chan *ethtypes.Header, 4096)
 	headSub, err := v.L1.SubscribeNewHead(v.Ctx, headCh)
 	if err != nil {
 		log.Crit("Failed to watch l1 chain head", "err", err)
@@ -358,7 +357,7 @@ func (v *Validator) challengeLoop() {
 					continue
 				}
 				// If it's our turn
-				if responder == common.Address(v.Config.Coinbase) {
+				if common.Address(responder) == v.Config.Coinbase {
 					err := services.RespondBisection(v.BaseService, abi, challengeSession, ev, states, ctx.opponentAssertion.VmHash, false)
 					if err != nil {
 						// TODO: error handling
@@ -419,9 +418,9 @@ func (v *Validator) challengeLoop() {
 				if common.Address(ev.AsserterAddr) == v.Config.Coinbase {
 					if ev.VmHash == ctx.ourAssertion.VmHash {
 						_, err := v.Rollup.ChallengeAssertion(
-							[2]common.Address{
-								common.Address(v.Config.SequencerAddr),
-								common.Address(v.Config.Coinbase),
+							[2]ethcommon.Address{
+								ethcommon.Address(v.Config.SequencerAddr),
+								ethcommon.Address(v.Config.Coinbase),
 							},
 							[2]*big.Int{
 								ctx.opponentAssertion.ID,
