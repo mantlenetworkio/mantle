@@ -77,6 +77,16 @@ func (b *TxBatch) SerializeToArgs() ([]*big.Int, []*big.Int, []byte, error) {
 	return contexts, txLengths, buf.Bytes(), nil
 }
 
+func (b *TxBatch) ToAssertion(parent *Assertion) *Assertion {
+	return &Assertion{
+		ID:        new(big.Int).Add(parent.ID, big.NewInt(1)),
+		VmHash:    b.LastBlockRoot(),
+		InboxSize: big.NewInt(int64(b.LastBlockNumber())), // TODO-FIXME uint64 -> int64 -> big.Int
+		GasUsed:   b.GasUsed,
+		Parent:    parent.ID,
+	}
+}
+
 func writeContext(w *bytes.Buffer, ctx *SequenceContext) error {
 	if err := writePrimitive(w, ctx.NumTxs); err != nil {
 		return err

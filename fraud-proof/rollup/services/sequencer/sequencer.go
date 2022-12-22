@@ -3,6 +3,7 @@ package sequencer
 import (
 	"fmt"
 	ethc "github.com/ethereum/go-ethereum/common"
+	rollup "github.com/mantlenetworkio/mantle/fraud-proof"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -97,9 +98,9 @@ func (s *Sequencer) batchingLoop() {
 	}
 }
 
-// This goroutine sequences batches to L1 SequencerInbox and creates DAs
+// SequencingLoop This goroutine sequences batches to L1 SequencerInbox and creates DAs
 // TODO: create assertions by timer
-func (s *Sequencer) sequencingLoop(genesisRoot common.Hash) {
+func (s *Sequencer) SequencingLoop(genesisRoot common.Hash) {
 	defer s.Wg.Done()
 
 	// Watch AssertionCreated event
@@ -445,7 +446,7 @@ func (s *Sequencer) Start() error {
 
 	s.Wg.Add(4)
 	go s.batchingLoop()
-	go s.sequencingLoop(genesis.Root())
+	go s.SequencingLoop(genesis.Root())
 	go s.confirmationLoop()
 	go s.challengeLoop()
 	log.Info("Sequencer started")
@@ -462,4 +463,42 @@ func (s *Sequencer) Stop() error {
 func (s *Sequencer) APIs() []rpc.API {
 	// TODO: sequencer APIs
 	return []rpc.API{}
+}
+
+var _ rollup.FraudProover = (*Sequencer)(nil)
+
+func (s *Sequencer) CreateAssertion(obj interface{}) error {
+	var parentAssertion *rollupTypes.Assertion
+	var err error
+	assertion, _ := obj.(rollupTypes.Assertion)
+	if parentAssertion, err = assertion.GetParentAssertion(s.AssertionMap); err != nil {
+		return err
+	}
+	_, err = s.Rollup.CreateAssertion(
+		assertion.VmHash,
+		assertion.InboxSize,
+		assertion.GasUsed,
+		parentAssertion.VmHash,
+		parentAssertion.GasUsed,
+	)
+	return nil
+}
+
+func (s *Sequencer) GetLatestAssertion() (*rollupTypes.Assertion, error) {
+	var latestAssertion *rollupTypes.Assertion
+	var err error
+	if latestAssertion, err = s.AssertionMap.GetLatestAssertion(s.AssertionMap); err != nil {
+		return nil, err
+	}
+	return latestAssertion, nil
+}
+
+func (s *Sequencer) GenerateState() (interface{}, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *Sequencer) RespondChallenge() error {
+	//TODO implement me
+	panic("implement me")
 }

@@ -7,6 +7,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/mantlenetworkio/mantle/fraud-proof"
+	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
+	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"math/big"
 	"strings"
 
@@ -170,6 +173,7 @@ func (d *Driver) CraftBatchTx(
 
 	log.Info(name+" crafting batch tx", "start", start, "end", end, "nonce", nonce)
 
+	var blocks []*l2types.Block
 	var stateRoots [][stateRootSize]byte
 	for i := new(big.Int).Set(start); i.Cmp(end) < 0; i.Add(i, bigOne) {
 		// Consume state roots until reach our maximum tx size.
@@ -182,6 +186,7 @@ func (d *Driver) CraftBatchTx(
 			return nil, err
 		}
 
+		blocks = append(blocks, block)
 		stateRoots = append(stateRoots, block.Root())
 	}
 
@@ -233,9 +238,26 @@ func (d *Driver) CraftBatchTx(
 	if tssResponse.RollBack {
 		tx, err = d.sccContract.RollBackL2Chain(opts, start, offsetStartsAtIndex, tssResponse.Signature)
 	} else {
-		tx, err = d.sccContract.AppendStateBatch(
-			opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
-		)
+		// FRAUD-PROOF modify
+		// TODO-FIXME maxBatchSize currently not used
+		var rollup rollup.FraudProover // TODO-FIXME
+		var parentAssertion *rollupTypes.Assertion
+		var obj interface{}
+		// convert blocks to batch
+		txBatch := rollupTypes.NewTxBatch(blocks, uint64(len(blocks)))
+		// get parent assertion
+		if obj, err = rollup.GetLatestAssertion(); err != nil {
+			return nil, err
+		}
+		parentAssertion, _ = obj.(*rollupTypes.Assertion)
+		assertion := txBatch.ToAssertion(parentAssertion)
+		// create assertion
+		if err = rollup.CreateAssertionWithStateBatch(stateRoots, offsetStartsAtIndex, tssResponse.Signature, assertion); err != nil {
+			return nil, err
+		}
+		//tx, err = d.sccContract.AppendStateBatch(
+		//	opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
+		//)
 	}
 
 	switch {
