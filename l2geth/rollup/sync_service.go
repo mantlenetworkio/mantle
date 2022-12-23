@@ -842,7 +842,7 @@ func (s *SyncService) SequencerRollback() error {
 }
 
 // applyTransaction is a higher level API for applying a transaction
-func (s *SyncService) applyTransaction(tx *types.Transaction, sequencer common.Address) error {
+func (s *SyncService) applyTransaction(tx *types.Transaction) error {
 	s.applyLock.Lock()
 	defer s.applyLock.Unlock()
 
@@ -1396,8 +1396,8 @@ func (s *SyncService) syncQueueTransactionRange(start, end uint64) error {
 		if err != nil {
 			return fmt.Errorf("Canot get enqueue transaction; %w", err)
 		}
-		if err := s.applyTransaction(tx, s.cfg.SchedulerAddress); err != nil {
-			return fmt.Errorf("Cannot apply transaction: %w", err)
+		if err := s.applyTransaction(tx); err != nil {
+			return fmt.Errorf("cannot apply transaction: %w", err)
 		}
 	}
 	return nil
