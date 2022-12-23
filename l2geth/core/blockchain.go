@@ -174,12 +174,12 @@ type BlockChain struct {
 	processor  Processor  // Block transaction processor interface
 	vmConfig   vm.Config
 
-	badBlocks             *lru.Cache                     // Bad block cache
-	shouldPreserve        func(*types.Block) bool        // Function used to determine whether should preserve the given block.
-	terminateInsert       func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
-	preCheckSyncService   func(*types.Transaction) bool  // first check block avaliabe before insert chain
-	updateSyncService     func(*types.Transaction)       // update sync service state after inserting chain block
-	sequencerRollbackFunc func(start uint64) error       // rollback will setHead to start - 1
+	badBlocks             *lru.Cache                                       // Bad block cache
+	shouldPreserve        func(*types.Block) bool                          // Function used to determine whether should preserve the given block.
+	terminateInsert       func(common.Hash, uint64) bool                   // Testing hook used to terminate ancient receipt chain insertion.
+	preCheckSyncService   func(*types.Transaction) bool                    // first check block avaliabe before insert chain
+	updateSyncService     func(*types.Transaction)                         // update sync service state after inserting chain block
+	sequencerRollbackFunc func(rollbackNumber, rollbackIndex uint64) error // rollback will setHead to start - 1
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -1484,6 +1484,84 @@ func (bc *BlockChain) addFutureBlock(block *types.Block) error {
 	return nil
 }
 
+func (bc *BlockChain) UpdateRollbackStates(rollbackNumber, rollbackIndex uint64) error {
+	var rollbackStates types.RollbackStates
+	rollbackState := new(types.RollbackState)
+	rollbackState.BlockNumber = rollbackNumber
+	rollbackState.Index = rollbackIndex
+	rbss := rawdb.ReadRollbackStates(bc.db)
+	var handled bool
+	for i, rbs := range rbss {
+		if handled {
+			rollbackStates = append(rollbackStates, rbss[i:]...)
+			continue
+		}
+		if rollbackState.BlockNumber > rbs.BlockNumber {
+			if rollbackState.Index > rbs.Index {
+				rollbackStates = append(rollbackStates, rbs)
+				continue
+			}
+			if rollbackState.Index < rbs.Index {
+				rollbackStates = append(rollbackStates, rbss[i:]...)
+				handled = true
+				break
+			}
+			if rbs.Index == rollbackState.Index {
+				return fmt.Errorf("invalid rollbackState")
+			}
+		}
+
+		if rollbackState.BlockNumber == rbs.BlockNumber {
+			if rollbackState.Index > rbs.Index {
+				rollbackStates = append(rollbackStates, rollbackState)
+				handled = true
+				continue
+			}
+			// rollbackState.Index <= rbs.Index no need to update
+			log.Info("no need to update")
+			return nil
+		}
+
+		if rollbackState.BlockNumber < rbs.BlockNumber {
+			if rollbackState.Index > rbs.Index {
+				// discard rbs
+				continue
+			}
+			if rollbackState.Index < rbs.Index {
+				rollbackStates = append(rollbackStates, rbs)
+				handled = true
+				continue
+			}
+			if rollbackState.Index == rbs.Index {
+				return fmt.Errorf("invalid rollbackState")
+			}
+		}
+	}
+	if !handled {
+		rollbackStates = append(rollbackStates, rollbackState)
+	}
+	rawdb.WriteRollbackStates(bc.db, rollbackStates)
+	return nil
+}
+
+func (bc *BlockChain) checkBlockNumber(blockNumber, rollbackIndex uint64) bool {
+	rbss := rawdb.ReadRollbackStates(bc.db)
+	for i, rbs := range rbss {
+		if rollbackIndex == rbs.Index {
+			if len(rbss) < i+2 {
+				// latest index
+				return true
+			}
+			return blockNumber < rbss[i+1].BlockNumber
+		}
+		// There is no equivalent so far
+		if rollbackIndex < rbs.Index {
+			return blockNumber < rbs.BlockNumber
+		}
+	}
+	return false
+}
+
 // InsertChain attempts to insert the given batch of blocks in to the canonical
 // chain or, otherwise, create a fork. If an error is returned it will return
 // the index number of the failing block as well an error describing what went
@@ -1492,19 +1570,33 @@ func (bc *BlockChain) addFutureBlock(block *types.Block) error {
 // After insertion is done, all accumulated events will be fired.
 func (bc *BlockChain) InsertChain(blocks types.Blocks) (int, error) {
 	// Sanity check that we have something meaningful to import
+	// Blocks earlier versions of blocks from entering
 	var chain types.Blocks
 	current := bc.CurrentHeader()
 	for _, block := range blocks {
-		if block.Header().RollbackState.Index >= current.RollbackState.Index {
-			if block.Header().RollbackState.Index == current.RollbackState.Index+1 && block.Header().RollbackState.BlockNumber <= current.Number.Uint64() {
-				if err := bc.sequencerRollbackFunc(block.Header().RollbackState.BlockNumber); err != nil {
+		// Deformed block & oldIndex block
+		if !bc.checkBlockNumber(block.NumberU64(), block.Header().RollbackIndex) {
+			continue
+		}
+		if block.Number().Uint64() < block.Header().RollbackNumber || block.Header().RollbackIndex < current.RollbackIndex {
+			continue
+		}
+		// oldNumber block
+		if block.Header().RollbackIndex == current.RollbackIndex && block.Header().Number.Uint64() < current.Number.Uint64() {
+			continue
+		}
+		// newIndex block
+		if block.Header().RollbackIndex > current.RollbackIndex {
+			if block.Header().RollbackNumber <= current.Number.Uint64() {
+				// rollback and update rollbackStates
+				if err := bc.sequencerRollbackFunc(block.Header().RollbackNumber, block.Header().RollbackIndex); err != nil {
 					return 0, err
 				}
-				// TODO sync service update sequencer rollback states
 			}
-			chain = append(chain, block)
 		}
+		chain = append(chain, block)
 	}
+
 	if len(chain) == 0 {
 		return 0, nil
 	}
@@ -2311,6 +2403,6 @@ func (bc *BlockChain) SetPreCheckSyncServiceFunc(preCheckFunc func(*types.Transa
 	bc.preCheckSyncService = preCheckFunc
 }
 
-func (bc *BlockChain) SetSequencerRollbackFunc(rollbackFunc func(start uint64) error) {
+func (bc *BlockChain) SetSequencerRollbackFunc(rollbackFunc func(rollbackNumber, rollbackIndex uint64) error) {
 	bc.sequencerRollbackFunc = rollbackFunc
 }
