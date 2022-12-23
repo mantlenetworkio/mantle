@@ -15,7 +15,7 @@ const config = {
   l1BitAddress: '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
   bvmTssRewardContractOwner: '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
   bvmFeeWalletOwner: '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
-  dataManagerAddress: '0xec36421F31108A26E46a0445d336978aA88A2012',
+  dataManagerAddress: '0xE5C3D068e2160c67e09afaCEff3E765e30163Eb8',
   bvmEigenSequencerAddress: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
 }
 

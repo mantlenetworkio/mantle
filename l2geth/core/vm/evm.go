@@ -17,7 +17,6 @@
 package vm
 
 import (
-	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"math/big"
 	"sync/atomic"
 	"time"
@@ -196,9 +195,7 @@ func (evm *EVM) Interpreter() Interpreter {
 // the necessary steps to create accounts and reverses the state in case of an
 // execution error or failed value transfer.
 func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error) {
-	//TODO test roll back
-	if addr == dump.BvmReorgAddress {
-		log.Info("Reorg Message:", "input", input)
+	if addr == dump.BvmRollbackAddress {
 		return nil, 0, nil
 	}
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {

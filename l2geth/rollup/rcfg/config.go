@@ -40,6 +40,8 @@ var (
 	// ChargeSlot refers to the storage slot in the BVM_GasPriceOracle that
 	// holds switch controls whether charge
 	ChargeSlot = common.BigToHash(big.NewInt(7))
+	// SccAddressSlot refers to the storage slot in the Scc contract address
+	SccAddressSlot = common.BigToHash(big.NewInt(8))
 )
 
 func init() {
