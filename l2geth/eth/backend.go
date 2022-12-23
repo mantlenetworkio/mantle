@@ -22,6 +22,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
+	"runtime"
+	"sync"
+	"sync/atomic"
+
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi/bind"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -50,10 +55,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
-	"math/big"
-	"runtime"
-	"sync"
-	"sync/atomic"
 )
 
 type LesServer interface {
@@ -85,7 +86,6 @@ type Ethereum struct {
 	eventMux       *event.TypeMux
 	engine         consensus.Engine
 	accountManager *accounts.Manager
-	//schedulerInst      *clique.Scheduler
 
 	bloomRequests chan chan *bloombits.Retrieval // Channel receiving bloom data retrieval requests
 	bloomIndexer  *core.ChainIndexer             // Bloom indexer operating during block imports

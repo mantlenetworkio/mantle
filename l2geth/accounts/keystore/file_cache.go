@@ -38,16 +38,14 @@ type fileCache struct {
 // scan performs a new scan on the given directory, compares against the already
 // cached filenames, and returns file sets: creates, deletes, updates.
 func (fc *fileCache) scan(keyDir string) (mapset.Set, mapset.Set, mapset.Set, error) {
-	//TODO: temp ignore the fs scan, revert it
-	//t0 := time.Now()
+	t0 := time.Now()
 
 	// List all the failes from the keystore folder
 	files, err := ioutil.ReadDir(keyDir)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	//TODO: temp ignore the fs scan, revert it
-	//t1 := time.Now()
+	t1 := time.Now()
 
 	fc.mu.Lock()
 	defer fc.mu.Unlock()
@@ -75,8 +73,7 @@ func (fc *fileCache) scan(keyDir string) (mapset.Set, mapset.Set, mapset.Set, er
 			newLastMod = modified
 		}
 	}
-	//TODO: temp ignore the fs scan, revert it
-	//t2 := time.Now()
+	t2 := time.Now()
 
 	// Update the tracked files and return the three sets
 	deletes := fc.all.Difference(all)   // Deletes = previous - current
@@ -84,12 +81,10 @@ func (fc *fileCache) scan(keyDir string) (mapset.Set, mapset.Set, mapset.Set, er
 	updates := mods.Difference(creates) // Updates = modified - creates
 
 	fc.all, fc.lastMod = all, newLastMod
-	//TODO: temp ignore the fs scan, revert it
-	//t3 := time.Now()
+	t3 := time.Now()
 
 	// Report on the scanning stats and return
-	//TODO: temp ignore the fs scan, revert it
-	//log.Debug("FS scan times", "list", t1.Sub(t0), "set", t2.Sub(t1), "diff", t3.Sub(t2))
+	log.Debug("FS scan times", "list", t1.Sub(t0), "set", t2.Sub(t1), "diff", t3.Sub(t2))
 	return creates, deletes, updates, nil
 }
 

@@ -1,2 +1,0 @@
-# @bitnetwork/scheduler-service
-
