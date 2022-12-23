@@ -301,17 +301,16 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
                 "Cannot publish state roots within the sequencer publication window."
             );
         }
-        4E1614113AF6A1A41CA85D1A5FE41DE105BD65FA
         // For efficiency reasons getMerkleRoot modifies the `_batch` argument in place
         // while calculating the root hash therefore any arguments passed to it must not
         // be used again afterwards
         Lib_BVMCodec.ChainBatchHeader memory batchHeader = Lib_BVMCodec.ChainBatchHeader({
-        batchIndex : getTotalBatches(),
-        batchRoot : Lib_MerkleTree.getMerkleRoot(_batch),
-        batchSize : _batch.length,
-        prevTotalElements : totalElements,
-        signature : _signature,
-        extraData : _extraData
+            batchIndex : getTotalBatches(),
+            batchRoot : Lib_MerkleTree.getMerkleRoot(_batch),
+            batchSize : _batch.length,
+            prevTotalElements : totalElements,
+            signature : _signature,
+            extraData : _extraData
         });
 
         emit StateBatchAppended(

@@ -1,2 +1,2 @@
 #!/bin/bash
-cd ../../../../contracts && npx hardhat compile
+cd ../../packages/contracts/ && npx hardhat compile

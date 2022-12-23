@@ -468,27 +468,45 @@ func (s *Sequencer) APIs() []rpc.API {
 var _ rollup.FraudProover = (*Sequencer)(nil)
 
 func (s *Sequencer) CreateAssertion(obj interface{}) error {
-	var parentAssertion *rollupTypes.Assertion
-	var err error
 	assertion, _ := obj.(rollupTypes.Assertion)
-	if parentAssertion, err = assertion.GetParentAssertion(s.AssertionMap); err != nil {
-		return err
-	}
-	_, err = s.Rollup.CreateAssertion(
+	_, err := s.Rollup.CreateAssertion(
 		assertion.VmHash,
 		assertion.InboxSize,
 		assertion.GasUsed,
-		parentAssertion.VmHash,
-		parentAssertion.GasUsed,
 	)
-	return nil
+	return err
 }
 
-func (s *Sequencer) GetLatestAssertion() (*rollupTypes.Assertion, error) {
-	var latestAssertion *rollupTypes.Assertion
+func (s *Sequencer) CreateAssertionWithStateBatch(batches [][32]byte, shouldStartAtElement *big.Int, signature []byte, obj interface{}) error {
+	assertion, _ := obj.(rollupTypes.Assertion)
+	_, err := s.Rollup.CreateAssertionWithStateBatch(
+		assertion.VmHash,
+		assertion.InboxSize,
+		assertion.GasUsed,
+		batches,
+		shouldStartAtElement,
+		signature,
+	)
+	return err
+}
+
+func (s *Sequencer) GetLatestAssertion() (interface{}, error) {
+	var latestAssertion rollupTypes.Assertion
+	var assertionID *big.Int
 	var err error
-	if latestAssertion, err = s.AssertionMap.GetLatestAssertion(s.AssertionMap); err != nil {
+	if assertionID, err = s.AssertionMap.GetLatestAssertionID(); err != nil {
 		return nil, err
+	}
+	if ret, err := s.AssertionMap.Assertions(assertionID); err != nil {
+		return nil, err
+	} else {
+		latestAssertion.ID = assertionID
+		latestAssertion.VmHash = ret.StateHash
+		latestAssertion.InboxSize = ret.InboxSize
+		latestAssertion.GasUsed = ret.GasUsed
+		latestAssertion.Parent = ret.Parent
+		latestAssertion.Deadline = ret.Deadline
+		latestAssertion.ProposalTime = ret.ProposalTime
 	}
 	return latestAssertion, nil
 }

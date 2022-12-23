@@ -238,23 +238,23 @@ func (d *Driver) CraftBatchTx(
 	if tssResponse.RollBack {
 		tx, err = d.sccContract.RollBackL2Chain(opts, start, offsetStartsAtIndex, tssResponse.Signature)
 	} else {
-		// FRAUD-PROOF modify
+		// ##### FRAUD-PROOF modify ##### //
 		// TODO-FIXME maxBatchSize currently not used
 		var rollup rollup.FraudProover // TODO-FIXME
-		var parentAssertion *rollupTypes.Assertion
 		var obj interface{}
 		// convert blocks to batch
 		txBatch := rollupTypes.NewTxBatch(blocks, uint64(len(blocks)))
-		// get parent assertion
+		// build assertion
 		if obj, err = rollup.GetLatestAssertion(); err != nil {
 			return nil, err
 		}
-		parentAssertion, _ = obj.(*rollupTypes.Assertion)
-		assertion := txBatch.ToAssertion(parentAssertion)
+		assertion := txBatch.ToAssertion(obj.(*rollupTypes.Assertion))
 		// create assertion
 		if err = rollup.CreateAssertionWithStateBatch(stateRoots, offsetStartsAtIndex, tssResponse.Signature, assertion); err != nil {
 			return nil, err
 		}
+		// ##### FRAUD-PROOF modify ##### //
+
 		//tx, err = d.sccContract.AppendStateBatch(
 		//	opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
 		//)
