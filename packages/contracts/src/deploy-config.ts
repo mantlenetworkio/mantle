@@ -105,6 +105,11 @@ export interface DeployConfig {
   bvmEigenSequencerAddress: string
 
   /**
+   * Address of scc contract.
+   */
+  sccAddress: string
+
+  /**
    * Optional initial overhead value for GPO (default: 2750).
    */
   gasPriceOracleOverhead?: number
@@ -216,6 +221,9 @@ const configSpec: {
     type: 'address',
   },
   bvmEigenSequencerAddress: {
+    type: 'address',
+  },
+  sccAddress: {
     type: 'address',
   },
   gasPriceOracleOverhead: {

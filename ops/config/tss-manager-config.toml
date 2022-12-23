@@ -17,5 +17,5 @@ db_dir = "/root/tss-manager/db"
 
 keygen_timeout = "1m"
 cpk_confirm_timeout = "10s"
-ask_timeout = "10s"
-sign_timeout = "1m"
+ask_timeout = "1m"
+sign_timeout = "2m"

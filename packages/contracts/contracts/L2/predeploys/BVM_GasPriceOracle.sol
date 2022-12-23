@@ -35,6 +35,8 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
     uint256    isBurning;
     // Switch controls whether charge L2 GasFee
     uint256    public charge;
+    // sccAddress l1 sccAddress
+    address public sccAddress;
 
     /***************
      * Constructor *

@@ -86,6 +86,12 @@ var (
 		Value:  1,
 		EnvVar: prefixEnvVar(envVarPrefix, "BLOCK_OFFSET"),
 	}
+	EigenLayerNodeFlag = cli.IntFlag{
+		Name:   "eigen-layer-node",
+		Usage:  "The offset between the CTC contract start and the L2 geth blocks",
+		Value:  4,
+		EnvVar: prefixEnvVar(envVarPrefix, "EIGEN_LAYER_NODE"),
+	}
 	PollIntervalFlag = cli.DurationFlag{
 		Name: "poll-interval",
 		Usage: "Delay between querying L2 for more transactions and " +
@@ -157,6 +163,7 @@ var requiredFlags = []cli.Flag{
 	PollIntervalFlag,
 	DataStoreDurationFlag,
 	DataStoreTimeoutFlag,
+	EigenLayerNodeFlag,
 }
 
 var optionalFlags = []cli.Flag{
