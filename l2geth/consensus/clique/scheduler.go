@@ -24,6 +24,9 @@ import (
 const (
 	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
 	chainHeadChanSize = 10
+
+	defaultBatchSize  = int64(100)
+	defaultExpireTime = int64(60)
 )
 
 type Config struct {
@@ -175,10 +178,10 @@ func (schedulerInst *Scheduler) AddPeerCheck() {
 }
 
 func (schedulerInst *Scheduler) schedulerRoutine() {
-	batchSize := uint64(100) // 10 transaction in one batch
-	expireTime := int64(60)  // 15s
+	batchSize := defaultBatchSize
+	expireTime := defaultExpireTime
 	if schedulerInst.config.BatchSize != 0 {
-		batchSize = uint64(schedulerInst.config.BatchSize)
+		batchSize = schedulerInst.config.BatchSize
 	}
 	if schedulerInst.config.BatchTime != 0 {
 		expireTime = schedulerInst.config.BatchTime
@@ -216,7 +219,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			ReorgIndex:  0,
 			BatchIndex:  currentIndex + 1,
 			StartHeight: currentBlock.NumberU64() + 1,
-			MaxHeight:   currentBlock.NumberU64() + 1 + batchSize,
+			MaxHeight:   currentBlock.NumberU64() + 1 + uint64(batchSize),
 			ExpireTime:  uint64(time.Now().Unix() + expireTime),
 			Sequencer:   seq.Address,
 		}
@@ -227,7 +230,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		}
 		msg.Signature = sign
 		schedulerInst.currentStartMsg = msg
-		rawdb.WriteStartMsgIndex(schedulerInst.db, msg.BatchIndex)
+		rawdb.WriteCurrentBatchPeriodIndex(schedulerInst.db, msg.BatchIndex)
 
 		err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   &msg,

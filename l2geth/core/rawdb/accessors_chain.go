@@ -31,14 +31,14 @@ import (
 )
 
 func ReadStartMsgIndex(db ethdb.KeyValueReader) uint64 {
-	has, err := db.Has(startMsgIndexPrefix)
+	has, err := db.Has(currentBatchPeriodIndexKey)
 	if err != nil {
 		log.Crit("Failed to get batchIndex", "err", err)
 	}
 	if !has {
 		return 0
 	}
-	data, err := db.Get(startMsgIndexPrefix)
+	data, err := db.Get(currentBatchPeriodIndexKey)
 	if err != nil {
 		log.Crit("Failed to get batchIndex", "err", err)
 	}
@@ -46,11 +46,11 @@ func ReadStartMsgIndex(db ethdb.KeyValueReader) uint64 {
 	return index
 }
 
-func WriteStartMsgIndex(db ethdb.KeyValueWriter, batchIndex uint64) {
+func WriteCurrentBatchPeriodIndex(db ethdb.KeyValueWriter, batchIndex uint64) {
 	enc := make([]byte, 8)
 	binary.BigEndian.PutUint64(enc, batchIndex)
-	if err := db.Put(startMsgIndexPrefix, enc); err != nil {
-		log.Crit("Failed to put batchIndex", "err", err)
+	if err := db.Put(currentBatchPeriodIndexKey, enc); err != nil {
+		log.Crit("Failed to put batchPeriodIndex", "err", err)
 	}
 }
 

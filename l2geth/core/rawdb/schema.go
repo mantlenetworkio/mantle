@@ -74,7 +74,8 @@ var (
 	preimageCounter    = metrics.NewRegisteredCounter("db/preimage/total", nil)
 	preimageHitCounter = metrics.NewRegisteredCounter("db/preimage/hits", nil)
 
-	startMsgIndexPrefix = []byte("StartMsgBatchIndex") // headerNumberPrefix + hash -> num (uint64 big endian)
+	// currentBatchPeriodIndexKey tracks the latest batch period index
+	currentBatchPeriodIndexKey = []byte("CurrentBatchPeriodIndexKey")
 )
 
 const (
