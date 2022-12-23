@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 - 2022-12-23
+## 0.2.0-alpha - 2022-12-23
 
 ### Features
 - Implement the mechanism of triggering the Rollback instruction when the MPC signature fails ([#377](https://github.com/mantlenetworkio/mantle/pull/377)).
