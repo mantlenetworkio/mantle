@@ -620,7 +620,7 @@ func (w *worker) batchAnswerLoop() {
 				// todo check event index
 				log.Info("Scheduler receives BatchPeriodAnswerEvent", "Sequencer", ev.Msg.Sequencer.String())
 				for _, tx := range ev.Msg.Txs {
-					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, ev.Msg.Sequencer)
+					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, ev.Msg.ToBatchTxSetProof())
 					if err != nil {
 						log.Error("ValidateAndApplySequencerTransaction error", "errMsg", err.Error())
 						continue
@@ -710,7 +710,7 @@ func (w *worker) mainLoop() {
 			// send the block through the `taskCh` and then through the
 			// `resultCh` which ultimately adds the block to the blockchain
 			// through `bc.WriteBlockWithState`
-			if err := w.commitNewTx(tx, ev.Sequencer); err == nil {
+			if err := w.commitNewTx(tx, ev.TxSetProof); err == nil {
 				// `chainHeadCh` is written to when a new block is added to the
 				// tip of the chain. Reading from the channel will block until
 				// the ethereum block is added to the chain downstream of `commitNewTx`.
@@ -1148,7 +1148,7 @@ func (w *worker) commitTransactionsWithError(txs *types.TransactionsByPriceAndNo
 // It needs to return an error in the case there is an error to prevent waiting
 // on reading from a channel that is written to when a new block is added to the
 // chain.
-func (w *worker) commitNewTx(tx *types.Transaction, sequencer common.Address) error {
+func (w *worker) commitNewTx(tx *types.Transaction, txSetProof *types.BatchTxSetProof) error {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 	tstart := time.Now()
@@ -1179,9 +1179,9 @@ func (w *worker) commitNewTx(tx *types.Transaction, sequencer common.Address) er
 		GasLimit:   w.config.GasFloor,
 		Extra:      w.extra,
 		Time:       tx.L1Timestamp(),
-		Coinbase:   sequencer,
+		Coinbase:   txSetProof.Sequencer,
 	}
-	if err := w.engine.Prepare(w.chain, header); err != nil {
+	if err := w.engine.Prepare(w.chain, header, txSetProof); err != nil {
 		return fmt.Errorf("Failed to prepare header for mining: %w", err)
 	}
 	// Could potentially happen if starting to mine in an odd state.
@@ -1223,7 +1223,7 @@ func (w *worker) commitNewWork(interrupt *int32, timestamp int64) {
 		}
 		header.Coinbase = w.coinbase
 	}
-	if err := w.engine.Prepare(w.chain, header); err != nil {
+	if err := w.engine.Prepare(w.chain, header, &types.BatchTxSetProof{}); err != nil {
 		log.Error("Failed to prepare header for mining", "err", err)
 		return
 	}

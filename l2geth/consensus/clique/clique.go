@@ -20,6 +20,7 @@ package clique
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"math/big"
 	"math/rand"
@@ -275,13 +276,13 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 		return errMissingSignature
 	}
 	// Ensure that the extra-data contains a signer list on checkpoint, but none otherwise
-	signersBytes := len(header.Extra) - extraVanity - extraSeal
-	if !checkpoint && signersBytes != 0 {
-		return errExtraSigners
-	}
-	if checkpoint && signersBytes%common.AddressLength != 0 {
-		return errInvalidCheckpointSigners
-	}
+	//signersBytes := len(header.Extra) - extraVanity - extraSeal
+	//if !checkpoint && signersBytes != 0 {
+	//	return errExtraSigners
+	//}
+	//if checkpoint && signersBytes%common.AddressLength != 0 {
+	//	return errInvalidCheckpointSigners
+	//}
 	// Ensure that the mix digest is zero as we don't have fork protection currently
 	if header.MixDigest != (common.Hash{}) {
 		return errInvalidMixDigest
@@ -345,8 +346,8 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 		for i, signer := range snap.signers() {
 			copy(signers[i*common.AddressLength:], signer[:])
 		}
-		extraSuffix := len(header.Extra) - extraSeal
-		if !bytes.Equal(header.Extra[extraVanity:extraSuffix], signers) {
+		// There always will be only one signer
+		if !bytes.Equal(header.Extra[extraVanity:extraVanity+common.AddressLength], signers) {
 			return errMismatchingCheckpointSigners
 		}
 	}
@@ -384,10 +385,9 @@ func (c *Clique) snapshot(chain consensus.ChainReader, number uint64, hash commo
 			if checkpoint != nil {
 				hash := checkpoint.Hash()
 
-				signers := make([]common.Address, (len(checkpoint.Extra)-extraVanity-extraSeal)/common.AddressLength)
-				for i := 0; i < len(signers); i++ {
-					copy(signers[i][:], checkpoint.Extra[extraVanity+i*common.AddressLength:])
-				}
+				// There always will be only one signer
+				signers := make([]common.Address, 1)
+				copy(signers[0][:], checkpoint.Extra[extraVanity:extraVanity+common.AddressLength])
 				snap = newSnapshot(c.config, c.signatures, number, hash, signers)
 				if err := snap.store(c.db); err != nil {
 					return nil, err
@@ -471,10 +471,8 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	if err != nil {
 		return err
 	}
-	if !c.config.IsVerifier {
-		if _, ok := snap.Signers[signer]; !ok {
-			return errUnauthorizedSigner
-		}
+	if _, ok := snap.Signers[signer]; !ok {
+		return errUnauthorizedSigner
 	}
 	for seen, recent := range snap.Recents {
 		if recent == signer {
@@ -482,6 +480,20 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 			if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
 				return errRecentlySigned
 			}
+		}
+	}
+	txSetProofBytes := header.Extra[extraVanity+common.AddressLength : len(header.Extra)-extraSeal]
+	if len(txSetProofBytes) != 0 {
+		var txSetProof types.BatchTxSetProof
+		txSetProof, err = types.DecodeBatchTxSetProof(txSetProofBytes)
+		if err != nil {
+			return err
+		}
+		if !types.VerifySigner(&txSetProof, txSetProof.Sequencer) {
+			return fmt.Errorf("tx set proof is not from sequencer %s", txSetProof.Sequencer.Bytes())
+		}
+		if !txSetProof.ContainTxHashOrNot(header.TxHash, header.Number.Uint64()) {
+			return fmt.Errorf("the transactionsRoot is not included in txSetProof")
 		}
 	}
 	// Ensure that the difficulty corresponds to the turn-ness of the signer
@@ -499,7 +511,7 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 
 // Prepare implements consensus.Engine, preparing all the consensus fields of the
 // header for running the transactions on top.
-func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) error {
+func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header, txSetProof *types.BatchTxSetProof) error {
 	// If the block isn't a checkpoint, cast a random vote (good enough for now)
 	header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
@@ -540,11 +552,11 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	}
 	header.Extra = header.Extra[:extraVanity]
 
-	if number%c.config.Epoch == 0 {
-		for _, signer := range snap.signers() {
-			header.Extra = append(header.Extra, signer[:]...)
-		}
+	for _, signer := range snap.signers() {
+		header.Extra = append(header.Extra, signer[:]...)
 	}
+
+	header.Extra = append(header.Extra, txSetProof.Serialize()...)
 	header.Extra = append(header.Extra, make([]byte, extraSeal)...)
 
 	// Mix digest is reserved for now, set to empty
@@ -624,10 +636,8 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 	if err != nil {
 		return err
 	}
-	if !c.config.IsVerifier {
-		if _, authorized := snap.Signers[signer]; !authorized {
-			return errUnauthorizedSigner
-		}
+	if _, authorized := snap.Signers[signer]; !authorized {
+		return errUnauthorizedSigner
 	}
 	// If we're amongst the recent signers, wait for the next block
 	for seen, recent := range snap.Recents {

@@ -52,12 +52,9 @@ func TestReimportMirroredState(t *testing.T) {
 		MaxHeight:   100,
 		ExpireTime:  1669787879,
 		Sequencer:   address,
-		SequencerSet: []common.Address{
-			address,
-		},
-		Signature: nil,
+		Signature:   nil,
 	}
-	buf := batchPeriodStartMsg.SerializeBatchPeriodStartMsg()
+	buf := batchPeriodStartMsg.Serialize()
 	genspec := &core.Genesis{
 		ExtraData: make([]byte, extraVanity+len(buf)+extraSeal),
 		Alloc: map[common.Address]core.GenesisAccount{
