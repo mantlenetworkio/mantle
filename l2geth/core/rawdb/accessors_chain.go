@@ -30,6 +30,30 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
+func ReadStartMsgIndex(db ethdb.KeyValueReader) uint64 {
+	has, err := db.Has(currentBatchPeriodIndexKey)
+	if err != nil {
+		log.Crit("Failed to get batchIndex", "err", err)
+	}
+	if !has {
+		return 0
+	}
+	data, err := db.Get(currentBatchPeriodIndexKey)
+	if err != nil {
+		log.Crit("Failed to get batchIndex", "err", err)
+	}
+	index := binary.BigEndian.Uint64(data)
+	return index
+}
+
+func WriteCurrentBatchPeriodIndex(db ethdb.KeyValueWriter, batchIndex uint64) {
+	enc := make([]byte, 8)
+	binary.BigEndian.PutUint64(enc, batchIndex)
+	if err := db.Put(currentBatchPeriodIndexKey, enc); err != nil {
+		log.Crit("Failed to put batchPeriodIndex", "err", err)
+	}
+}
+
 // ReadCanonicalHash retrieves the hash assigned to a canonical block number.
 func ReadCanonicalHash(db ethdb.Reader, number uint64) common.Hash {
 	data, _ := db.Ancient(freezerHashTable, number)
