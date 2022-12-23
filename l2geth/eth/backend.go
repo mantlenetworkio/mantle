@@ -144,6 +144,9 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if _, ok := genesisErr.(*params.ConfigCompatError); genesisErr != nil && !ok {
 		return nil, genesisErr
 	}
+	if chainConfig.Clique != nil {
+		chainConfig.Clique.IsVerifier = config.Rollup.IsVerifier
+	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
 	eth := &Ethereum{
@@ -211,6 +214,8 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
+	eth.blockchain.SetPreCheckSyncServiceFunc(eth.syncService.PreCheckSyncServiceState)
+	eth.blockchain.SetUpdateSyncServiceFunc(eth.syncService.UpdateSyncServiceState)
 
 	// Permit the downloader to use the trie cache allowance during fast sync
 	cacheLimit := cacheConfig.TrieCleanLimit + cacheConfig.TrieDirtyLimit
@@ -238,6 +243,8 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 
 	if _, ok := eth.engine.(*clique.Clique); ok {
 		schedulerInst, err := clique.NewScheduler(
+			chainDb,
+			&eth.config.SchedulerConfig,
 			config.Rollup.SchedulerAddress,
 			eth.engine.(*clique.Clique),
 			eth.blockchain,

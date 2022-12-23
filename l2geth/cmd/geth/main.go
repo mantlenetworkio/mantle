@@ -166,6 +166,8 @@ var (
 		utils.RollupGenesisTimeoutSecondsFlag,
 		utils.SequencerClientHttpFlag,
 		utils.SchedulerAddressFlag,
+		utils.SchedulerBatchTime,
+		utils.SchedulerBatchSize,
 		utils.SequencerModeFlag,
 	}
 

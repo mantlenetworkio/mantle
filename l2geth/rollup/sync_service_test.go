@@ -222,7 +222,7 @@ func TestSyncServiceTransactionEnqueued(t *testing.T) {
 	// Run an iteration of the eloop
 	err = nil
 	go func() {
-		err = service.syncQueueToTip()
+		err = service.SyncQueueToTip()
 	}()
 	// Wait for the tx to be confirmed into the chain and then
 	// make sure it is the transactions that was set up with in the mockclient
@@ -422,7 +422,7 @@ func TestApplyBatchedTransaction(t *testing.T) {
 	// Ingest through applyBatchedTransaction which should set the latest
 	// verified index to the index of the transaction
 	go func() {
-		err = service.applyBatchedTransaction(tx0)
+		err = service.applyBatchedTransaction(tx0,common.Address{})
 	}()
 	service.chainHeadCh <- core.ChainHeadEvent{}
 	<-txCh
@@ -903,6 +903,52 @@ func TestBadFeeThresholds(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateSyncService(t *testing.T) {
+	service, _, _, err := newTestSyncService(true, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var (
+		key2, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
+		addr2   = crypto.PubkeyToAddress(key2.PublicKey)
+		db      = rawdb.NewMemoryDatabase()
+
+		gspec   = &core.Genesis{
+			Config:   params.TestChainConfig,
+			GasLimit: 31415920,
+			Alloc: core.GenesisAlloc{
+				addr2: {Balance: big.NewInt(1000000)},
+			},
+		}
+		genesis = gspec.MustCommit(db)
+
+		signer  = types.NewEIP155Signer(gspec.Config.ChainID)
+	)
+
+	blocks, _ := core.GenerateChain(gspec.Config, genesis, ethash.NewFaker(), db, 3, func(i int, b *core.BlockGen) {
+		switch i {
+		case 0:
+			newTx, _ := types.SignTx(types.NewTransaction(0, addr2, big.NewInt(1000), params.TxGas, nil, nil), signer, key2)
+			b.AddTx(newTx)
+		}
+
+	})
+
+
+	blockchain, _ := core.NewBlockChain(db, nil, gspec.Config, ethash.NewFaker(), vm.Config{}, nil)
+	blockchain.SetUpdateSyncServiceFunc(service.UpdateSyncServiceState)
+
+	blockchain.SetPreCheckSyncServiceFunc(service.PreCheckSyncServiceState)
+
+	if i, err := blockchain.InsertChain(blocks); err != nil {
+		t.Fatalf("failed to insert original chain[%d]: %v", i, err)
+	}
+
+
+}
+
 
 func newTestSyncServiceDeps(isVerifier bool, alloc *common.Address) (Config, *core.TxPool, *core.BlockChain, ethdb.Database, error) {
 	chainCfg := params.AllEthashProtocolChanges

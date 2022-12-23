@@ -877,6 +877,16 @@ var (
 		Usage:  "Set scheduler address",
 		EnvVar: "SCHEDULER_ADDRESS",
 	}
+	SchedulerBatchTime = cli.StringFlag{
+		Name:   "scheduler.batchtime",
+		Usage:  "Set scheduler batch time",
+		EnvVar: "SCHEDULER_BATCHTIME",
+	}
+	SchedulerBatchSize = cli.StringFlag{
+		Name:   "scheduler.batchsize",
+		Usage:  "Set scheduler batch size",
+		EnvVar: "SCHEDULER_BATCHSIZE",
+	}
 	SequencerModeFlag = cli.BoolFlag{
 		Name:   "sequencer.mode",
 		Usage:  "Set sequencer mode",
@@ -1166,6 +1176,16 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	}
 	if ctx.GlobalIsSet(SequencerModeFlag.Name) {
 		cfg.SequencerMode = ctx.GlobalBool(SequencerModeFlag.Name)
+	}
+}
+
+// setScheduler configures the scheduler server settings from the command line flags.
+func setScheduler(ctx *cli.Context, cfg *clique.Config) {
+	if ctx.GlobalIsSet(SchedulerBatchTime.Name) {
+		cfg.BatchTime = ctx.GlobalInt64(SchedulerBatchTime.Name)
+	}
+	if ctx.GlobalIsSet(SchedulerBatchSize.Name) {
+		cfg.BatchSize = ctx.GlobalInt64(SchedulerBatchSize.Name)
 	}
 }
 
@@ -1628,6 +1648,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	setLes(ctx, cfg)
 	setEth1(ctx, &cfg.Rollup)
 	setRollup(ctx, &cfg.Rollup)
+	setScheduler(ctx, &cfg.SchedulerConfig)
 
 	if ctx.GlobalIsSet(SyncModeFlag.Name) {
 		cfg.SyncMode = *GlobalTextMarshaler(ctx, SyncModeFlag.Name).(*downloader.SyncMode)

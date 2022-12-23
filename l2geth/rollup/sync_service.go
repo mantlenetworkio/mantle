@@ -267,17 +267,15 @@ func (s *SyncService) Start() error {
 
 	if s.verifier {
 		go s.VerifierLoop()
-	} else {
+	} else if !s.IsSequencerMode() {
 		go func() {
 			if err := s.syncTransactionsToTip(); err != nil {
 				log.Crit("Sequencer cannot sync transactions to tip", "err", err)
 			}
-			if err := s.syncQueueToTip(); err != nil {
-				log.Crit("Sequencer cannot sync queue to tip", "err", err)
-			}
 			s.setSyncStatus(false)
-			go s.SequencerLoop()
 		}()
+	} else {
+		s.setSyncStatus(false)
 	}
 	return nil
 }
@@ -462,25 +460,6 @@ func (s *SyncService) verify() error {
 	return nil
 }
 
-// SequencerLoop is the polling loop that runs in sequencer mode. It sequences
-// transactions and then updates the EthContext.
-func (s *SyncService) SequencerLoop() {
-	log.Info("Starting Sequencer Loop", "poll-interval", s.pollInterval, "timestamp-refresh-threshold", s.timestampRefreshThreshold)
-	t := time.NewTicker(s.pollInterval)
-	defer t.Stop()
-	for ; true; <-t.C {
-		s.txLock.Lock()
-		if err := s.sequence(); err != nil {
-			log.Error("Could not sequence", "error", err)
-		}
-		s.txLock.Unlock()
-
-		if err := s.updateL1BlockNumber(); err != nil {
-			log.Error("Could not update execution context", "error", err)
-		}
-	}
-}
-
 // sequence is the main logic for the Sequencer. It will sync any `enqueue`
 // transactions it has yet to sync and then pull in transaction batches to
 // compare against the transactions it has in its local state. The sequencer
@@ -488,16 +467,13 @@ func (s *SyncService) SequencerLoop() {
 // L1 is the source of truth. The sequencer concurrently accepts user
 // transactions via the RPC. When reorg logic is enabled, this should
 // also call `syncBatchesToTip`
-func (s *SyncService) sequence() error {
-	if err := s.syncQueueToTip(); err != nil {
-		return fmt.Errorf("Sequencer cannot sequence queue: %w", err)
-	}
-	return nil
-}
 
-func (s *SyncService) syncQueueToTip() error {
+func (s *SyncService) SyncQueueToTip() error {
 	if err := s.syncToTip(s.syncQueue, s.client.GetLatestEnqueueIndex); err != nil {
 		return fmt.Errorf("Cannot sync queue to tip: %w", err)
+	}
+	if err := s.updateL1BlockNumber(); err != nil {
+		log.Error("Could not update execution context", "error", err)
 	}
 	return nil
 }
@@ -1055,12 +1031,14 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, sequencer com
 
 	select {
 	case err := <-errCh:
+		log.Debug("we have receiverd errCh")
 		log.Error("Got error waiting for transaction to be added to chain", "msg", err)
 		s.SetLatestL1Timestamp(ts)
 		s.SetLatestL1BlockNumber(bn)
 		s.SetLatestIndex(index)
 		return err
 	case <-s.chainHeadCh:
+		log.Debug("we have receiverd chainHeadCh")
 		// Update the cache when the transaction is from the owner
 		// of the gas price oracle
 		sender, _ := types.Sender(s.signer, tx)
@@ -1222,6 +1200,53 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 	return nil
 }
 
+func (s *SyncService) PreCheckSyncServiceState(tx *types.Transaction) bool {
+	ts := s.GetLatestL1Timestamp()
+	bn := s.GetLatestL1BlockNumber()
+	l1BlockNumber := tx.L1BlockNumber()
+
+	if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+		if tx.L1Timestamp() == 0 {
+			return false
+		}
+	}
+
+	if l1BlockNumber == nil {
+		log.Warn("Blocknumber is nil ","hash",tx.Hash().Hex())
+		return false
+	}
+	if l1BlockNumber.Uint64() < bn{
+		// l1BlockNumber < latest l1BlockNumber
+		// indicates an error
+		log.Warn("Blocknumber monotonicity violation", "hash", tx.Hash().Hex(),
+		"new", l1BlockNumber.Uint64(), "old", bn)
+		return false
+	}
+
+	if tx.L1Timestamp() < ts {
+		log.Error("Timestamp monotonicity violation", "hash", tx.Hash().Hex(), "latest", ts, "tx", tx.L1Timestamp())
+		return false
+	}
+
+	if tx.GetMeta().Index == nil {
+		log.Warn("meta index is nil ","hash",tx.Hash().Hex())
+		return false
+	}
+	return true
+
+}
+
+func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
+	l1BlockNumber := tx.L1BlockNumber()
+	s.SetLatestL1BlockNumber(l1BlockNumber.Uint64())
+	s.SetLatestL1Timestamp(tx.L1Timestamp())
+	s.SetLatestIndex(tx.GetMeta().Index)
+	if queueIndex := tx.GetMeta().QueueIndex; queueIndex != nil {
+		s.SetLatestEnqueueIndex(queueIndex)
+	}
+	log.Debug("Update sync service state with new block", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
+}
+
 // syncer represents a function that can sync remote items and then returns the
 // index that it synced to as well as an error if it encountered one. It has
 // side effects on the state and its functionality depends on the current state
@@ -1312,7 +1337,7 @@ func (s *SyncService) sync(getLatest indexGetter, getNext nextGetter, syncer ran
 	}
 
 	nextIndex := getNext()
-	log.Info("SyncService sync", "nextIndex", nextIndex, "latestIndex", *latestIndex)
+	log.Debug("SyncService sync", "nextIndex", nextIndex, "latestIndex", *latestIndex)
 	if nextIndex == *latestIndex+1 {
 		return latestIndex, nil
 	}
