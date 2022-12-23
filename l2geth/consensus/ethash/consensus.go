@@ -84,10 +84,6 @@ func (ethash *Ethash) Author(header *types.Header) (common.Address, error) {
 	return header.Coinbase, nil
 }
 
-func (ethash *Ethash) SetBatchPeriod(bps *types.BatchPeriodStartMsg) {
-	// do nothing
-}
-
 // VerifyHeader checks whether a header conforms to the consensus rules of the
 // stock Ethereum ethash engine.
 func (ethash *Ethash) VerifyHeader(chain consensus.ChainReader, header *types.Header, seal bool) error {

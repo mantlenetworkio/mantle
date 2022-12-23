@@ -843,23 +843,6 @@ func (srv *Server) postHandshakeChecks(peers map[enode.ID]*Peer, inboundCount in
 }
 
 func (srv *Server) addPeerChecks(peers map[enode.ID]*Peer, inboundCount int, c *conn) error {
-	//has := make(chan bool, 1)
-	//if err := srv.eventMux.Post(&core.PeerAddEvent{
-	//	PeerId: p.ID().Bytes(),
-	//	Has:    has,
-	//}); err != nil {
-	//	return err
-	//}
-	//select {
-	//case find := <-has:
-	//	if !find {
-	//		log.Error("Have not find peer ", "ID", p.ID().String())
-	//		return errors.New("have not find peer")
-	//	} else {
-	//		log.Info("find!")
-	//	}
-	//}
-
 	// Drop connections with no matching protocols.
 	if len(srv.Protocols) > 0 && countMatchingProtocols(srv.Protocols, c.caps) == 0 {
 		return DiscUselessPeer

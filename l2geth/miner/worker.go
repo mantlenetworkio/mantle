@@ -25,9 +25,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/accounts"
-
 	mapset "github.com/deckarep/golang-set"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/misc"
