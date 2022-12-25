@@ -817,7 +817,7 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	if err := s.SetHead(start - 1); err != nil {
 		log.Crit("rollback error:", "setHead error", err)
 	}
-	s.AppendRollbackStates(start)
+	s.bc.AppendRollbackStates(start)
 	log.Info("setHead end,current :", "block number", s.bc.CurrentHeader().Number.Uint64())
 	for _, t := range txs {
 		if err := s.applyIndexedTransaction(&t, &types.BatchTxSetProof{}); err != nil {
@@ -833,42 +833,12 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	return nil
 }
 
-func (s *SyncService) AppendRollbackStates(rollbackNumber uint64) {
-	var rollbackStates types.RollbackStates
-	rollbackState := new(types.RollbackState)
-	rollbackState.BlockNumber = rollbackNumber
-	rbss := rawdb.ReadRollbackStates(s.db)
-	if len(rbss) == 0 {
-		rollbackState.Index = 1
-	} else {
-		rollbackState.Index = rbss[len(rbss)-1].Index + 1
-		for _, rbs := range rbss {
-			if rbs.BlockNumber >= rollbackState.BlockNumber {
-				break
-			}
-			rollbackStates = append(rollbackStates, rbs)
-		}
-	}
-	rollbackStates = append(rollbackStates, rollbackState)
-	rawdb.WriteRollbackStates(s.db, rollbackStates)
-}
-
-func (s *SyncService) SequencerRollback(rollbackNumber, rollbackIndex uint64) error {
-	if err := s.bc.UpdateRollbackStates(rollbackNumber, rollbackIndex); err != nil {
-		return err
-	}
+// SequencerRollback sequencer rollback
+func (s *SyncService) SequencerRollback(rollbackNumber uint64) error {
 	if err := s.SetHead(rollbackNumber - 1); err != nil {
 		return err
 	}
 	return nil
-}
-
-func (s *SyncService) LatestRollbackStates() *types.RollbackState {
-	rbss := rawdb.ReadRollbackStates(s.db)
-	if len(rbss) == 0 {
-		return nil
-	}
-	return rbss[len(rbss)-1]
 }
 
 // applyTransaction is a higher level API for applying a transaction

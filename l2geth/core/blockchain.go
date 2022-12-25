@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"math/big"
 	mrand "math/rand"
 	"sort"
@@ -174,12 +175,12 @@ type BlockChain struct {
 	processor  Processor  // Block transaction processor interface
 	vmConfig   vm.Config
 
-	badBlocks             *lru.Cache                                       // Bad block cache
-	shouldPreserve        func(*types.Block) bool                          // Function used to determine whether should preserve the given block.
-	terminateInsert       func(common.Hash, uint64) bool                   // Testing hook used to terminate ancient receipt chain insertion.
-	preCheckSyncService   func(*types.Transaction) bool                    // first check block avaliabe before insert chain
-	updateSyncService     func(*types.Transaction)                         // update sync service state after inserting chain block
-	sequencerRollbackFunc func(rollbackNumber, rollbackIndex uint64) error // rollback will setHead to start - 1
+	badBlocks             *lru.Cache                        // Bad block cache
+	shouldPreserve        func(*types.Block) bool           // Function used to determine whether should preserve the given block.
+	terminateInsert       func(common.Hash, uint64) bool    // Testing hook used to terminate ancient receipt chain insertion.
+	preCheckSyncService   func(*types.Transaction) bool     // first check block avaliabe before insert chain
+	updateSyncService     func(*types.Transaction)          // update sync service state after inserting chain block
+	sequencerRollbackFunc func(rollbackNumber uint64) error // rollback will setHead to start - 1
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -1484,82 +1485,57 @@ func (bc *BlockChain) addFutureBlock(block *types.Block) error {
 	return nil
 }
 
-func (bc *BlockChain) UpdateRollbackStates(rollbackNumber, rollbackIndex uint64) error {
-	var rollbackStates types.RollbackStates
-	rollbackState := new(types.RollbackState)
-	rollbackState.BlockNumber = rollbackNumber
-	rollbackState.Index = rollbackIndex
-	rbss := rawdb.ReadRollbackStates(bc.db)
-	var handled bool
-	for i, rbs := range rbss {
-		if handled {
-			rollbackStates = append(rollbackStates, rbss[i:]...)
-			continue
-		}
-		if rollbackState.BlockNumber > rbs.BlockNumber {
-			if rollbackState.Index > rbs.Index {
-				rollbackStates = append(rollbackStates, rbs)
-				continue
-			}
-			if rollbackState.Index < rbs.Index {
-				rollbackStates = append(rollbackStates, rbss[i:]...)
-				handled = true
-				break
-			}
-			if rbs.Index == rollbackState.Index {
-				return fmt.Errorf("invalid rollbackState")
-			}
-		}
-
-		if rollbackState.BlockNumber == rbs.BlockNumber {
-			if rollbackState.Index > rbs.Index {
-				rollbackStates = append(rollbackStates, rollbackState)
-				handled = true
-				continue
-			}
-			// rollbackState.Index <= rbs.Index no need to update
-			log.Info("no need to update")
-			return nil
-		}
-
-		if rollbackState.BlockNumber < rbs.BlockNumber {
-			if rollbackState.Index > rbs.Index {
-				// discard rbs
-				continue
-			}
-			if rollbackState.Index < rbs.Index {
-				rollbackStates = append(rollbackStates, rbs)
-				handled = true
-				continue
-			}
-			if rollbackState.Index == rbs.Index {
-				return fmt.Errorf("invalid rollbackState")
-			}
-		}
-	}
-	if !handled {
-		rollbackStates = append(rollbackStates, rollbackState)
-	}
-	rawdb.WriteRollbackStates(bc.db, rollbackStates)
-	return nil
-}
-
-func (bc *BlockChain) checkBlockNumber(blockNumber, rollbackIndex uint64) bool {
+// find next rollback blockNumber
+func (bc *BlockChain) nextRollbackNumber(rollbackIndex uint64) uint64 {
 	rbss := rawdb.ReadRollbackStates(bc.db)
 	for i, rbs := range rbss {
 		if rollbackIndex == rbs.Index {
 			if len(rbss) < i+2 {
 				// latest index
-				return true
+				return math.MaxUint64
 			}
-			return blockNumber < rbss[i+1].BlockNumber
+			return rbss[i+1].BlockNumber
 		}
 		// There is no equivalent so far
 		if rollbackIndex < rbs.Index {
-			return blockNumber < rbs.BlockNumber
+			return rbs.BlockNumber
 		}
 	}
-	return false
+	return math.MaxUint64
+}
+
+// UpdateRollbackStates sequencer update rollback index
+func (bc *BlockChain) UpdateRollbackStates(rollbackStates types.RollbackStates) {
+	rawdb.WriteRollbackStates(bc.db, rollbackStates)
+}
+
+// AppendRollbackStates scheduler bump up rollback index
+func (bc *BlockChain) AppendRollbackStates(rollbackNumber uint64) {
+	var rollbackStates types.RollbackStates
+	rollbackState := new(types.RollbackState)
+	rollbackState.BlockNumber = rollbackNumber
+	rbss := rawdb.ReadRollbackStates(bc.db)
+	if len(rbss) == 0 {
+		rollbackState.Index = 1
+	} else {
+		rollbackState.Index = rbss[len(rbss)-1].Index + 1
+		for _, rbs := range rbss {
+			if rbs.BlockNumber >= rollbackState.BlockNumber {
+				break
+			}
+			rollbackStates = append(rollbackStates, rbs)
+		}
+	}
+	rollbackStates = append(rollbackStates, rollbackState)
+	rawdb.WriteRollbackStates(bc.db, rollbackStates)
+}
+
+func (bc *BlockChain) LatestRollbackStates() *types.RollbackState {
+	rbss := rawdb.ReadRollbackStates(bc.db)
+	if len(rbss) == 0 {
+		return nil
+	}
+	return rbss[len(rbss)-1]
 }
 
 // InsertChain attempts to insert the given batch of blocks in to the canonical
@@ -1568,39 +1544,24 @@ func (bc *BlockChain) checkBlockNumber(blockNumber, rollbackIndex uint64) bool {
 // wrong.
 //
 // After insertion is done, all accumulated events will be fired.
-func (bc *BlockChain) InsertChain(blocks types.Blocks) (int, error) {
+func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 	// Sanity check that we have something meaningful to import
 	// Blocks earlier versions of blocks from entering
-	var chain types.Blocks
+	// ensure current block is correct or rollback
 	current := bc.CurrentHeader()
-	for _, block := range blocks {
-		// Deformed block & oldIndex block
-		if !bc.checkBlockNumber(block.NumberU64(), block.Header().RollbackIndex) {
-			continue
+	next := bc.nextRollbackNumber(current.RollbackIndex)
+	if current.Number.Uint64() >= next {
+		if err := bc.sequencerRollbackFunc(next); err != nil {
+			return 0, err
 		}
-		if block.Number().Uint64() < block.Header().RollbackNumber || block.Header().RollbackIndex < current.RollbackIndex {
-			continue
-		}
-		// oldNumber block
-		if block.Header().RollbackIndex == current.RollbackIndex && block.Header().Number.Uint64() < current.Number.Uint64() {
-			continue
-		}
-		// newIndex block
-		if block.Header().RollbackIndex > current.RollbackIndex {
-			if block.Header().RollbackNumber <= current.Number.Uint64() {
-				// rollback and update rollbackStates
-				if err := bc.sequencerRollbackFunc(block.Header().RollbackNumber, block.Header().RollbackIndex); err != nil {
-					return 0, err
-				}
-			}
-		}
-		chain = append(chain, block)
 	}
 
 	if len(chain) == 0 {
 		return 0, nil
 	}
 
+	last := chain[len(chain)-1]
+	next = bc.nextRollbackNumber(last.Header().RollbackIndex)
 	bc.blockProcFeed.Send(true)
 	defer bc.blockProcFeed.Send(false)
 
@@ -1609,16 +1570,27 @@ func (bc *BlockChain) InsertChain(blocks types.Blocks) (int, error) {
 		block, prev *types.Block
 	)
 	// Do a sanity check that the provided chain is actually ordered and linked
-	for i := 1; i < len(chain); i++ {
-		block = chain[i]
-		prev = chain[i-1]
-		if block.NumberU64() != prev.NumberU64()+1 || block.ParentHash() != prev.Hash() {
-			// Chain broke ancestry, log a message (programming error) and skip insertion
-			log.Error("Non contiguous block insert", "number", block.Number(), "hash", block.Hash(),
-				"parent", block.ParentHash(), "prevnumber", prev.Number(), "prevhash", prev.Hash())
+	for i := 0; i < len(chain); i++ {
+		if i != 0 {
+			block = chain[i]
+			prev = chain[i-1]
+			if block.NumberU64() != prev.NumberU64()+1 || block.ParentHash() != prev.Hash() {
+				// Chain broke ancestry, log a message (programming error) and skip insertion
+				log.Error("Non contiguous block insert", "number", block.Number(), "hash", block.Hash(),
+					"parent", block.ParentHash(), "prevnumber", prev.Number(), "prevhash", prev.Hash())
 
-			return 0, fmt.Errorf("non contiguous insert: item %d is #%d [%x…], item %d is #%d [%x…] (parent [%x…])", i-1, prev.NumberU64(),
-				prev.Hash().Bytes()[:4], i, block.NumberU64(), block.Hash().Bytes()[:4], block.ParentHash().Bytes()[:4])
+				return 0, fmt.Errorf("non contiguous insert: item %d is #%d [%x…], item %d is #%d [%x…] (parent [%x…])", i-1, prev.NumberU64(),
+					prev.Hash().Bytes()[:4], i, block.NumberU64(), block.Hash().Bytes()[:4], block.ParentHash().Bytes()[:4])
+			}
+		}
+		if last.NumberU64() >= next {
+			next = bc.nextRollbackNumber(chain[i].Header().RollbackIndex)
+			if chain[i].NumberU64() >= next {
+				chain = chain[:i]
+				log.Info("low rollbackIndex block", "number", block.Number(), "rollbackIndex", chain[i].Header().RollbackIndex,
+					"nextRollbackNumber", next)
+				break
+			}
 		}
 	}
 	// Pre-checks passed, start the full block imports
@@ -2403,6 +2375,6 @@ func (bc *BlockChain) SetPreCheckSyncServiceFunc(preCheckFunc func(*types.Transa
 	bc.preCheckSyncService = preCheckFunc
 }
 
-func (bc *BlockChain) SetSequencerRollbackFunc(rollbackFunc func(rollbackNumber, rollbackIndex uint64) error) {
+func (bc *BlockChain) SetSequencerRollbackFunc(rollbackFunc func(rollbackNumber uint64) error) {
 	bc.sequencerRollbackFunc = rollbackFunc
 }

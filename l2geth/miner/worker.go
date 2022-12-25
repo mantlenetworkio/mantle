@@ -511,6 +511,7 @@ func (w *worker) batchStartLoop() {
 				log.Info("Scheduler receives batchPeriodStartEvent")
 
 			} else {
+				w.chain.UpdateRollbackStates(ev.Msg.RollbackStates)
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
 					log.Info("Active sequencer receives batchPeriodStartEvent")
@@ -1172,15 +1173,16 @@ func (w *worker) commitNewTx(tx *types.Transaction, txSetProof *types.BatchTxSet
 		meta.Index = &index
 		tx.SetTransactionMeta(meta)
 	}
-	latestRollbackState := w.eth.SyncService().LatestRollbackStates()
+	latestRollbackState := w.eth.BlockChain().LatestRollbackStates()
 	header := &types.Header{
-		ParentHash: parent.Hash(),
-		Number:     new(big.Int).Add(num, common.Big1),
-		GasLimit:   w.config.GasFloor,
-		Extra:      w.extra,
-		Time:       tx.L1Timestamp(),
-		Coinbase:   txSetProof.Sequencer,
-		RollbackState: latestRollbackState,
+		ParentHash:     parent.Hash(),
+		Number:         new(big.Int).Add(num, common.Big1),
+		GasLimit:       w.config.GasFloor,
+		Extra:          w.extra,
+		Time:           tx.L1Timestamp(),
+		Coinbase:       txSetProof.Sequencer,
+		RollbackIndex:  latestRollbackState.Index,
+		RollbackNumber: latestRollbackState.BlockNumber,
 	}
 	if err := w.engine.Prepare(w.chain, header, txSetProof); err != nil {
 		return fmt.Errorf("Failed to prepare header for mining: %w", err)
