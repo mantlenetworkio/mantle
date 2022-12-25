@@ -14,7 +14,9 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique/synchronizer"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
+	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
 	"github.com/mantlenetworkio/mantle/l2geth/event"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
@@ -22,7 +24,15 @@ import (
 const (
 	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
 	chainHeadChanSize = 10
+
+	defaultBatchSize  = int64(100)
+	defaultExpireTime = int64(60)
 )
+
+type Config struct {
+	BatchSize int64
+	BatchTime int64
+}
 
 type Scheduler struct {
 	wg       sync.WaitGroup
@@ -30,6 +40,10 @@ type Scheduler struct {
 	eventMux *event.TypeMux
 	done     chan struct{}
 	running  int32
+
+	config *Config
+
+	db ethdb.Database
 
 	schedulerAddr   common.Address
 	sequencerSet    *SequencerSet
@@ -53,7 +67,7 @@ type Scheduler struct {
 	syncer *synchronizer.Synchronizer
 }
 
-func NewScheduler(schedulerAddress common.Address, clique *Clique, blockchain *core.BlockChain, eventMux *event.TypeMux) (*Scheduler, error) {
+func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Address, clique *Clique, blockchain *core.BlockChain, eventMux *event.TypeMux) (*Scheduler, error) {
 	log.Info("Create Sequencer Server")
 
 	syncer := synchronizer.NewSynchronizer()
@@ -82,8 +96,10 @@ func NewScheduler(schedulerAddress common.Address, clique *Clique, blockchain *c
 		return nil, fmt.Errorf("get sequencer set failed, err: %v", err)
 	}
 	schedulerInst := &Scheduler{
+		config:          config,
 		running:         0,
 		currentHeight:   0,
+		db:              db,
 		done:            make(chan struct{}, 1),
 		batchDone:       make(chan struct{}, 1),
 		ticker:          time.NewTicker(10 * time.Second), //TODO
@@ -95,6 +111,7 @@ func NewScheduler(schedulerAddress common.Address, clique *Clique, blockchain *c
 		blockchain:      blockchain,
 		chainHeadCh:     make(chan core.ChainHeadEvent, chainHeadChanSize),
 	}
+
 	schedulerInst.addPeerSub = schedulerInst.eventMux.Subscribe(core.PeerAddEvent{})
 	go schedulerInst.AddPeerCheck()
 	return schedulerInst, nil
@@ -161,8 +178,14 @@ func (schedulerInst *Scheduler) AddPeerCheck() {
 }
 
 func (schedulerInst *Scheduler) schedulerRoutine() {
-	batchSize := uint64(10) // 10 transaction in one batch
-	expireTime := int64(15) // 15s
+	batchSize := defaultBatchSize
+	expireTime := defaultExpireTime
+	if schedulerInst.config.BatchSize != 0 {
+		batchSize = schedulerInst.config.BatchSize
+	}
+	if schedulerInst.config.BatchTime != 0 {
+		expireTime = schedulerInst.config.BatchTime
+	}
 	for {
 		schedulerCh := make(chan struct{})
 		err := schedulerInst.eventMux.Post(core.L1ToL2TxStartEvent{
@@ -179,6 +202,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		}
 
 		schedulerInst.l.Lock()
+
 		if schedulerInst.sequencerSet == nil {
 			continue
 		}
@@ -189,12 +213,13 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		}
 
 		currentBlock := schedulerInst.blockchain.CurrentBlock()
-
+		currentIndex := rawdb.ReadStartMsgIndex(schedulerInst.db)
+		log.Debug("now index ", "index", currentIndex)
 		msg := types.BatchPeriodStartMsg{
 			ReorgIndex:  0,
-			BatchIndex:  1,
+			BatchIndex:  currentIndex + 1,
 			StartHeight: currentBlock.NumberU64() + 1,
-			MaxHeight:   currentBlock.NumberU64() + 1 + batchSize,
+			MaxHeight:   currentBlock.NumberU64() + 1 + uint64(batchSize),
 			ExpireTime:  uint64(time.Now().Unix() + expireTime),
 			Sequencer:   seq.Address,
 		}
@@ -205,6 +230,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		}
 		msg.Signature = sign
 		schedulerInst.currentStartMsg = msg
+		rawdb.WriteCurrentBatchPeriodIndex(schedulerInst.db, msg.BatchIndex)
 
 		err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   &msg,
