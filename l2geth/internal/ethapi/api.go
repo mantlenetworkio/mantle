@@ -1700,7 +1700,19 @@ func (s *PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, encod
 	}
 
 	if s.b.IsVerifier() {
-		return common.Hash{}, errors.New("Cannot send raw transaction to verifier")
+		sequencerURL := s.b.SequencerClientHttp()
+		if sequencerURL == "" {
+			return common.Hash{}, errNoSequencerURL
+		}
+		client, err := dialSequencerClientWithTimeout(ctx, sequencerURL)
+		if err != nil {
+			return common.Hash{}, err
+		}
+		err = client.SendTransaction(context.Background(), tx)
+		if err != nil {
+			return common.Hash{}, err
+		}
+		return tx.Hash(), nil
 	}
 
 	// L1Timestamp and L1BlockNumber will be set right before execution

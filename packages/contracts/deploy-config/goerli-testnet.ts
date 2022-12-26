@@ -5,7 +5,7 @@ const config = {
   l2ChainId: 5001,
   ctcL2GasDiscountDivisor: 32,
   ctcEnqueueGasCost: 60_000,
-  sccFaultProofWindowSeconds: 0,
+  sccFaultProofWindowSeconds: 14400,
   sccSequencerPublishWindowSeconds: 12592000,
   bvmSequencerAddress: process.env.BVM_SEQUENCER_ADDRESS ||  '0xc4AaE221f1C62E8CBC657Af5b051eA573914cFc7',
   bvmProposerAddress: process.env.BVM_PROPOSER_ADDRESS || '0x3079Be9D8622173f02618bA2B793F00795D4f320',
