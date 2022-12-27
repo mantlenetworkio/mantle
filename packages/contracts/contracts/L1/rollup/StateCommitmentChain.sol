@@ -49,16 +49,13 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         SEQUENCER_PUBLISH_WINDOW = _sequencerPublishWindow;
     }
 
-    /**
- * Modifier to enforce that, if configured, only the Owner may
- * successfully call a method.
- */
-    modifier onlyOwner() {
-        require(msg.sender == libAddressManager.owner(), "Only callable by the Owner.");
-        _;
-    }
+    function setSequencerPublisWindow(uint256 _sequencerPublishWindow) public {
+        // Proposers must have previously staked at the BondManager
+        require(
+            IBondManager(resolve("BondManager")).isCollateralized(msg.sender),
+            "Proposer does not have enough collateral posted"
+        );
 
-    function setSequencerPublisWindow(uint256 _sequencerPublishWindow)  external onlyOwner {
         SEQUENCER_PUBLISH_WINDOW = _sequencerPublishWindow;
     }
 
