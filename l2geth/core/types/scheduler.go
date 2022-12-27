@@ -74,8 +74,8 @@ func (bps *BatchPeriodStartMsg) Serialize() []byte {
 	}
 	var buf = make([]byte, 8)
 	for _, rollbackState := range bps.RollbackStates {
-		binary.BigEndian.PutUint64(buf, rollbackState.BlockNumber)
-		binary.BigEndian.PutUint64(buf, rollbackState.Index)
+		binary.BigEndian.AppendUint64(buf, rollbackState.BlockNumber)
+		binary.BigEndian.AppendUint64(buf, rollbackState.Index)
 	}
 	buf = binary.BigEndian.AppendUint64(buf, bps.BatchIndex)
 	buf = binary.BigEndian.AppendUint64(buf, bps.StartHeight)
@@ -107,8 +107,8 @@ func (bps *BatchPeriodStartMsg) GetSignData() []byte {
 	}
 	var buf = make([]byte, 8)
 	for _, rollbackState := range bps.RollbackStates {
-		binary.BigEndian.PutUint64(buf, rollbackState.BlockNumber)
-		binary.BigEndian.PutUint64(buf, rollbackState.Index)
+		binary.BigEndian.AppendUint64(buf, rollbackState.BlockNumber)
+		binary.BigEndian.AppendUint64(buf, rollbackState.Index)
 	}
 	buf = binary.BigEndian.AppendUint64(buf, bps.BatchIndex)
 	buf = binary.BigEndian.AppendUint64(buf, bps.StartHeight)
