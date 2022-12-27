@@ -827,8 +827,8 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
 	for i := start; i <= latest; i++ {
 		newBlock := s.bc.GetBlockByNumber(i)
-		log.Info("new block rollback state", "index", newBlock.Header().RollbackIndex)
-		log.Info("new block rollback state", "blockNumber", newBlock.Header().RollbackNumber)
+		log.Info("new block rollback state", "index", s.bc.RollbackIndex(newBlock.Extra()))
+		log.Info("new block rollback state", "blockNumber", s.bc.RollbackIndex(newBlock.Extra()))
 	}
 	return nil
 }

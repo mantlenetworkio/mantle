@@ -12,10 +12,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
-const (
-	uint64Length = 8
-)
-
 type MsgVerify interface {
 	Serialize() []byte
 	GetSignData() []byte
@@ -51,15 +47,15 @@ type BatchPeriodStartMsg struct {
 }
 
 func DeserializeBatchPeriodStartMsg(buf []byte) BatchPeriodStartMsg {
-	sequencerSetLength := len(buf) - (uint64Length*5 + common.AddressLength + crypto.SignatureLength)
+	sequencerSetLength := len(buf) - (common.Uint64Length*5 + common.AddressLength + crypto.SignatureLength)
 	if sequencerSetLength <= 0 || sequencerSetLength%common.AddressLength != 0 {
 		return BatchPeriodStartMsg{}
 	}
 
-	batchIndex := binary.BigEndian.Uint64(buf[uint64Length : uint64Length*2])
-	startHeight := binary.BigEndian.Uint64(buf[uint64Length*2 : uint64Length*3])
-	maxHeight := binary.BigEndian.Uint64(buf[uint64Length*3 : uint64Length*4])
-	expireTime := binary.BigEndian.Uint64(buf[uint64Length*4 : uint64Length*5])
+	batchIndex := binary.BigEndian.Uint64(buf[common.Uint64Length : common.Uint64Length*2])
+	startHeight := binary.BigEndian.Uint64(buf[common.Uint64Length*2 : common.Uint64Length*3])
+	maxHeight := binary.BigEndian.Uint64(buf[common.Uint64Length*3 : common.Uint64Length*4])
+	expireTime := binary.BigEndian.Uint64(buf[common.Uint64Length*4 : common.Uint64Length*5])
 
 	return BatchPeriodStartMsg{
 		RollbackStates: nil,
@@ -67,7 +63,7 @@ func DeserializeBatchPeriodStartMsg(buf []byte) BatchPeriodStartMsg {
 		StartHeight:    startHeight,
 		MaxHeight:      maxHeight,
 		ExpireTime:     expireTime,
-		Sequencer:      common.BytesToAddress(buf[uint64Length*5 : uint64Length*5+common.AddressLength]),
+		Sequencer:      common.BytesToAddress(buf[common.Uint64Length*5 : common.Uint64Length*5+common.AddressLength]),
 		Signature:      buf[len(buf)-crypto.SignatureLength:],
 	}
 }
@@ -135,7 +131,7 @@ func (bps *BatchPeriodStartMsg) Hash() common.Hash {
 }
 
 func IsValidBatchPeriodStartMsgBuf(buf []byte) bool {
-	sequencerSetLength := len(buf) - (uint64Length*5 + common.AddressLength + crypto.SignatureLength)
+	sequencerSetLength := len(buf) - (common.Uint64Length*5 + common.AddressLength + crypto.SignatureLength)
 	if sequencerSetLength <= 0 || sequencerSetLength%common.AddressLength != 0 {
 		return false
 	}
@@ -151,27 +147,27 @@ type BatchPeriodAnswerMsg struct {
 }
 
 func DeserializeBatchPeriodAnswerMsg(buf []byte) (BatchPeriodAnswerMsg, error) {
-	txsBytes := len(buf) - (common.AddressLength + 2*uint64Length + crypto.SignatureLength)
+	txsBytes := len(buf) - (common.AddressLength + 2*common.Uint64Length + crypto.SignatureLength)
 	if txsBytes <= 0 {
 		return BatchPeriodAnswerMsg{}, fmt.Errorf("invalid BatchPeriodAnswerMsg bytes")
 	}
 
 	sequencer := common.BytesToAddress(buf[:common.AddressLength])
-	batchIndex := binary.BigEndian.Uint64(buf[common.AddressLength : common.AddressLength+uint64Length])
-	startIndex := binary.BigEndian.Uint64(buf[common.AddressLength+uint64Length : common.AddressLength+uint64Length*2])
+	batchIndex := binary.BigEndian.Uint64(buf[common.AddressLength : common.AddressLength+common.Uint64Length])
+	startIndex := binary.BigEndian.Uint64(buf[common.AddressLength+common.Uint64Length : common.AddressLength+common.Uint64Length*2])
 
 	var txs Transactions
 
-	startPos := common.AddressLength + uint64Length*2
+	startPos := common.AddressLength + common.Uint64Length*2
 	for {
 		if startPos >= len(buf)-crypto.SignatureLength {
 			break
 		}
-		txBytesLength := int(binary.BigEndian.Uint64(buf[startPos : startPos+uint64Length]))
-		if startPos+uint64Length+txBytesLength > len(buf)-crypto.SignatureLength {
+		txBytesLength := int(binary.BigEndian.Uint64(buf[startPos : startPos+common.Uint64Length]))
+		if startPos+common.Uint64Length+txBytesLength > len(buf)-crypto.SignatureLength {
 			return BatchPeriodAnswerMsg{}, fmt.Errorf("invalid tx bytes")
 		}
-		txBytes := buf[startPos+uint64Length : startPos+uint64Length+txBytesLength]
+		txBytes := buf[startPos+common.Uint64Length : startPos+common.Uint64Length+txBytesLength]
 		var tx *Transaction
 		err := rlp.DecodeBytes(txBytes, &tx)
 		if err != nil {
@@ -179,7 +175,7 @@ func DeserializeBatchPeriodAnswerMsg(buf []byte) (BatchPeriodAnswerMsg, error) {
 		}
 		txs = append(txs, tx)
 
-		startPos = startPos + uint64Length + txBytesLength
+		startPos = startPos + common.Uint64Length + txBytesLength
 	}
 
 	signature := buf[len(buf)-crypto.SignatureLength:]
@@ -280,21 +276,21 @@ type BatchTxSetProof struct {
 }
 
 func DecodeBatchTxSetProof(buf []byte) (BatchTxSetProof, error) {
-	if len(buf) <= common.AddressLength+uint64Length+uint64Length+crypto.SignatureLength {
+	if len(buf) <= common.AddressLength+common.Uint64Length+common.Uint64Length+crypto.SignatureLength {
 		return BatchTxSetProof{}, fmt.Errorf("BatchPeriodAnswerMsg SignData length is too short")
 	}
-	txHashSetLength := len(buf) - common.AddressLength - uint64Length - uint64Length - crypto.SignatureLength
+	txHashSetLength := len(buf) - common.AddressLength - common.Uint64Length - common.Uint64Length - crypto.SignatureLength
 	if txHashSetLength%common.HashLength != 0 {
 		return BatchTxSetProof{}, fmt.Errorf("BatchPeriodAnswerMsg SignData contains invalid tx hash set")
 	}
 
 	sequencer := common.BytesToAddress(buf[:common.AddressLength])
-	batchIndex := binary.BigEndian.Uint64(buf[common.AddressLength : common.AddressLength+uint64Length])
-	startIndex := binary.BigEndian.Uint64(buf[common.AddressLength+uint64Length : common.AddressLength+uint64Length*2])
+	batchIndex := binary.BigEndian.Uint64(buf[common.AddressLength : common.AddressLength+common.Uint64Length])
+	startIndex := binary.BigEndian.Uint64(buf[common.AddressLength+common.Uint64Length : common.AddressLength+common.Uint64Length*2])
 
 	var txs []common.Hash
 
-	startPos := common.AddressLength + uint64Length*2
+	startPos := common.AddressLength + common.Uint64Length*2
 	for {
 		if startPos >= len(buf)-crypto.SignatureLength {
 			break

@@ -217,6 +217,10 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	eth.blockchain.SetPreCheckSyncServiceFunc(eth.syncService.PreCheckSyncServiceState)
 	eth.blockchain.SetUpdateSyncServiceFunc(eth.syncService.UpdateSyncServiceState)
 	eth.blockchain.SetSequencerRollbackFunc(eth.syncService.SequencerRollback)
+	if chainConfig.Clique != nil {
+		eth.blockchain.SetExtraSeal(clique.ExtraSeal)
+		eth.blockchain.SetExtraVanity(clique.ExtraVanity)
+	}
 
 	// Permit the downloader to use the trie cache allowance during fast sync
 	cacheLimit := cacheConfig.TrieCleanLimit + cacheConfig.TrieDirtyLimit

@@ -2,6 +2,7 @@ package rawdb
 
 import (
 	"bytes"
+
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
@@ -33,4 +34,18 @@ func ReadRollbackStates(db ethdb.KeyValueReader) types.RollbackStates {
 		return nil
 	}
 	return rollbackStates
+}
+
+// ReadRollbackStates will read rollback states.
+func ReadLatestRollbackState(db ethdb.KeyValueReader) *types.RollbackState {
+	data, _ := db.Get(rollbackStatesKey)
+	if len(data) == 0 {
+		return &types.RollbackState{}
+	}
+	var rollbackStates types.RollbackStates
+	if err := rlp.Decode(bytes.NewReader(data), rollbackStates); err != nil {
+		log.Error("Invalid rollbackStates RLP", "err", err)
+		return nil
+	}
+	return rollbackStates[len(rollbackStates)-1]
 }

@@ -37,6 +37,8 @@ const (
 	HashLength = 32
 	// AddressLength is the expected length of the address
 	AddressLength = 20
+	// Uint64Length is the expected length of the bytes of uint64
+	Uint64Length = 8
 )
 
 var (

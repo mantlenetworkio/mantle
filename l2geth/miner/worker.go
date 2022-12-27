@@ -1173,16 +1173,13 @@ func (w *worker) commitNewTx(tx *types.Transaction, txSetProof *types.BatchTxSet
 		meta.Index = &index
 		tx.SetTransactionMeta(meta)
 	}
-	latestRollbackState := w.eth.BlockChain().LatestRollbackStates()
 	header := &types.Header{
-		ParentHash:     parent.Hash(),
-		Number:         new(big.Int).Add(num, common.Big1),
-		GasLimit:       w.config.GasFloor,
-		Extra:          w.extra,
-		Time:           tx.L1Timestamp(),
-		Coinbase:       txSetProof.Sequencer,
-		RollbackIndex:  latestRollbackState.Index,
-		RollbackNumber: latestRollbackState.BlockNumber,
+		ParentHash: parent.Hash(),
+		Number:     new(big.Int).Add(num, common.Big1),
+		GasLimit:   w.config.GasFloor,
+		Extra:      w.extra,
+		Time:       tx.L1Timestamp(),
+		Coinbase:   txSetProof.Sequencer,
 	}
 	if err := w.engine.Prepare(w.chain, header, txSetProof); err != nil {
 		return fmt.Errorf("Failed to prepare header for mining: %w", err)

@@ -18,6 +18,7 @@
 package core
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -181,6 +182,9 @@ type BlockChain struct {
 	preCheckSyncService   func(*types.Transaction) bool     // first check block avaliabe before insert chain
 	updateSyncService     func(*types.Transaction)          // update sync service state after inserting chain block
 	sequencerRollbackFunc func(rollbackNumber uint64) error // rollback will setHead to start - 1
+
+	extraVanity int // Fixed number of extra-data prefix bytes reserved for signer vanity
+	extraSeal   int // Fixed number of extra-data suffix bytes reserved for signer seal
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -1530,12 +1534,13 @@ func (bc *BlockChain) AppendRollbackStates(rollbackNumber uint64) {
 	rawdb.WriteRollbackStates(bc.db, rollbackStates)
 }
 
-func (bc *BlockChain) LatestRollbackStates() *types.RollbackState {
-	rbss := rawdb.ReadRollbackStates(bc.db)
-	if len(rbss) == 0 {
-		return nil
-	}
-	return rbss[len(rbss)-1]
+func (bc *BlockChain) LatestRollbackState() *types.RollbackState {
+	return rawdb.ReadLatestRollbackState(bc.db)
+}
+
+func (bc *BlockChain) RollbackIndex(extra []byte) uint64 {
+	rollbackIndexBytes := extra[len(extra)-bc.extraSeal-common.Uint64Length : len(extra)-bc.extraSeal]
+	return binary.BigEndian.Uint64(rollbackIndexBytes)
 }
 
 // InsertChain attempts to insert the given batch of blocks in to the canonical
@@ -1549,7 +1554,7 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 	// Blocks earlier versions of blocks from entering
 	// ensure current block is correct or rollback
 	current := bc.CurrentHeader()
-	next := bc.nextRollbackNumber(current.RollbackIndex)
+	next := bc.nextRollbackNumber(bc.RollbackIndex(current.Extra))
 	if current.Number.Uint64() >= next {
 		if err := bc.sequencerRollbackFunc(next); err != nil {
 			return 0, err
@@ -1561,7 +1566,7 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 	}
 
 	last := chain[len(chain)-1]
-	next = bc.nextRollbackNumber(last.Header().RollbackIndex)
+	next = bc.nextRollbackNumber(bc.RollbackIndex(last.Header().Extra))
 	bc.blockProcFeed.Send(true)
 	defer bc.blockProcFeed.Send(false)
 
@@ -1584,10 +1589,10 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 			}
 		}
 		if last.NumberU64() >= next {
-			next = bc.nextRollbackNumber(chain[i].Header().RollbackIndex)
+			next = bc.nextRollbackNumber(bc.RollbackIndex(chain[i].Header().Extra))
 			if chain[i].NumberU64() >= next {
 				chain = chain[:i]
-				log.Info("low rollbackIndex block", "number", block.Number(), "rollbackIndex", chain[i].Header().RollbackIndex,
+				log.Info("low RollbackIndex block", "number", block.Number(), "RollbackIndex", bc.RollbackIndex(chain[i].Extra()),
 					"nextRollbackNumber", next)
 				break
 			}
@@ -2377,4 +2382,14 @@ func (bc *BlockChain) SetPreCheckSyncServiceFunc(preCheckFunc func(*types.Transa
 
 func (bc *BlockChain) SetSequencerRollbackFunc(rollbackFunc func(rollbackNumber uint64) error) {
 	bc.sequencerRollbackFunc = rollbackFunc
+}
+
+// SetExtraVanity clique Fixed number of extra-data prefix bytes reserved for signer vanity
+func (bc *BlockChain) SetExtraVanity(extraVanity int) {
+	bc.extraVanity = extraVanity
+}
+
+// SetExtraSeal clique Fixed number of extra-data suffix bytes reserved for signer seal
+func (bc *BlockChain) SetExtraSeal(extraSeal int) {
+	bc.extraSeal = extraSeal
 }

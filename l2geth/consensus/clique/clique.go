@@ -19,6 +19,7 @@ package clique
 
 import (
 	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -33,6 +34,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/misc"
+	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/core/state"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
@@ -57,8 +59,8 @@ const (
 var (
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 
-	extraVanity = 32                     // Fixed number of extra-data prefix bytes reserved for signer vanity
-	extraSeal   = crypto.SignatureLength // Fixed number of extra-data suffix bytes reserved for signer seal
+	ExtraVanity = 32                     // Fixed number of extra-data prefix bytes reserved for signer vanity
+	ExtraSeal   = crypto.SignatureLength // Fixed number of extra-data suffix bytes reserved for signer seal
 
 	nonceAuthVote = hexutil.MustDecode("0xffffffffffffffff") // Magic nonce number to vote on adding a new signer
 	nonceDropVote = hexutil.MustDecode("0x0000000000000000") // Magic nonce number to vote on removing a signer.
@@ -151,10 +153,10 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 		return address.(common.Address), nil
 	}
 	// Retrieve the signature from the header extra-data
-	if len(header.Extra) < extraSeal {
+	if len(header.Extra) < ExtraSeal {
 		return common.Address{}, errMissingSignature
 	}
-	signature := header.Extra[len(header.Extra)-extraSeal:]
+	signature := header.Extra[len(header.Extra)-ExtraSeal:]
 
 	// Recover the public key and the Ethereum address
 	pubkey, err := crypto.Ecrecover(SealHash(header).Bytes(), signature)
@@ -269,10 +271,10 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 		return errInvalidCheckpointVote
 	}
 	// Check that the extra-data contains both the vanity and signature
-	if len(header.Extra) < extraVanity {
+	if len(header.Extra) < ExtraVanity {
 		return errMissingVanity
 	}
-	if len(header.Extra) < extraVanity+extraSeal {
+	if len(header.Extra) < ExtraVanity+ExtraSeal {
 		return errMissingSignature
 	}
 	// Ensure that the mix digest is zero as we don't have fork protection currently
@@ -339,7 +341,7 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 			copy(signers[i*common.AddressLength:], signer[:])
 		}
 		// There always will be only one signer
-		if !bytes.Equal(header.Extra[extraVanity:extraVanity+common.AddressLength], signers) {
+		if !bytes.Equal(header.Extra[ExtraVanity:ExtraVanity+common.AddressLength], signers) {
 			return errMismatchingCheckpointSigners
 		}
 	}
@@ -379,7 +381,7 @@ func (c *Clique) snapshot(chain consensus.ChainReader, number uint64, hash commo
 
 				// There always will be only one signer
 				signers := make([]common.Address, 1)
-				copy(signers[0][:], checkpoint.Extra[extraVanity:extraVanity+common.AddressLength])
+				copy(signers[0][:], checkpoint.Extra[ExtraVanity:ExtraVanity+common.AddressLength])
 				snap = newSnapshot(c.config, c.signatures, number, hash, signers)
 				if err := snap.store(c.db); err != nil {
 					return nil, err
@@ -476,7 +478,7 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 			}
 		}
 	}
-	txSetProofBytes := header.Extra[extraVanity+common.AddressLength : len(header.Extra)-extraSeal]
+	txSetProofBytes := getTxSetProofBytes(header.Extra)
 	if len(txSetProofBytes) != 0 {
 		var txSetProof types.BatchTxSetProof
 		txSetProof, err = types.DecodeBatchTxSetProof(txSetProofBytes)
@@ -501,6 +503,14 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 		}
 	}
 	return nil
+}
+
+func getTxSetProofBytes(extra []byte) []byte {
+	return extra[ExtraVanity+common.AddressLength : len(extra)-ExtraSeal-common.Uint64Length]
+}
+
+func GetRollbackIndexBytes(extra []byte) []byte {
+	return extra[len(extra)-ExtraSeal-common.Uint64Length : len(extra)-ExtraSeal]
 }
 
 // Prepare implements consensus.Engine, preparing all the consensus fields of the
@@ -541,17 +551,19 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header, txSe
 	header.Difficulty = CalcDifficulty(snap, c.signer)
 
 	// Ensure the extra data has all its components
-	if len(header.Extra) < extraVanity {
-		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, extraVanity-len(header.Extra))...)
+	if len(header.Extra) < ExtraVanity {
+		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, ExtraVanity-len(header.Extra))...)
 	}
-	header.Extra = header.Extra[:extraVanity]
+	header.Extra = header.Extra[:ExtraVanity]
 
 	for _, signer := range snap.signers() {
 		header.Extra = append(header.Extra, signer[:]...)
 	}
 
 	header.Extra = append(header.Extra, txSetProof.Serialize()...)
-	header.Extra = append(header.Extra, make([]byte, extraSeal)...)
+	latestRollbackState := rawdb.ReadLatestRollbackState(c.db)
+	binary.BigEndian.AppendUint64(header.Extra, latestRollbackState.Index)
+	header.Extra = append(header.Extra, make([]byte, ExtraSeal)...)
 
 	// Mix digest is reserved for now, set to empty
 	header.MixDigest = common.Hash{}
@@ -665,7 +677,7 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 	if err != nil {
 		return err
 	}
-	copy(header.Extra[len(header.Extra)-extraSeal:], sighash)
+	copy(header.Extra[len(header.Extra)-ExtraSeal:], sighash)
 	// Wait until sealing is terminated or delay timeout.
 	log.Trace("Waiting for slot to sign and propagate", "delay", common.PrettyDuration(delay))
 	go func() {
