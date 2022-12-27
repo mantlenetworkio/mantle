@@ -478,7 +478,7 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 			}
 		}
 	}
-	txSetProofBytes := getTxSetProofBytes(header.Extra)
+	txSetProofBytes := header.Extra[ExtraVanity+common.AddressLength : len(header.Extra)-ExtraSeal-common.Uint64Length]
 	if len(txSetProofBytes) != 0 {
 		var txSetProof types.BatchTxSetProof
 		txSetProof, err = types.DecodeBatchTxSetProof(txSetProofBytes)
@@ -503,14 +503,6 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 		}
 	}
 	return nil
-}
-
-func getTxSetProofBytes(extra []byte) []byte {
-	return extra[ExtraVanity+common.AddressLength : len(extra)-ExtraSeal-common.Uint64Length]
-}
-
-func GetRollbackIndexBytes(extra []byte) []byte {
-	return extra[len(extra)-ExtraSeal-common.Uint64Length : len(extra)-ExtraSeal]
 }
 
 // Prepare implements consensus.Engine, preparing all the consensus fields of the
