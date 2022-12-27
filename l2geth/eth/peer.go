@@ -620,13 +620,13 @@ func (ps *peerSet) PeersWithoutEndMsg(msgHash common.Hash) []*peer {
 
 // PeersWithoutStartMsg retrieves a list of peers that do not have a given producer in
 // their set of known index.
-func (ps *peerSet) PeersWithoutStartMsg(msgHash common.Hash) []*peer {
+func (ps *peerSet) PeersWithoutStartMsg(batchIndex uint64) []*peer {
 	ps.lock.RLock()
 	defer ps.lock.RUnlock()
 
 	list := make([]*peer, 0, len(ps.peers))
 	for _, p := range ps.peers {
-		if !p.knowBatchPeriodStartMsg.Contains(msgHash) {
+		if !p.knowBatchPeriodStartMsg.Contains(batchIndex) {
 			list = append(list, p)
 		}
 	}

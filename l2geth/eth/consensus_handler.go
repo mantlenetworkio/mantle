@@ -145,7 +145,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			return nil
 		}
 
-		p.knowBatchPeriodStartMsg.Add(bs.Hash())
+		p.knowBatchPeriodStartMsg.Add(bs.BatchIndex)
 		erCh := make(chan error, 1)
 		pm.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   bs,
@@ -204,7 +204,7 @@ func (pm *ProtocolManager) batchPeriodStartMsgBroadcastLoop() {
 }
 
 func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
-	peers := pm.consensusPeers.PeersWithoutStartMsg(msg.Hash())
+	peers := pm.consensusPeers.PeersWithoutStartMsg(msg.BatchIndex)
 	for _, p := range peers {
 		p.AsyncSendBatchPeriodStartMsg(msg)
 	}
@@ -214,7 +214,7 @@ func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *types.BatchPeriodSt
 func (p *peer) AsyncSendBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 	select {
 	case p.queuedBatchStartMsg <- msg:
-		p.knowBatchPeriodStartMsg.Add(msg.Hash())
+		p.knowBatchPeriodStartMsg.Add(msg.BatchIndex)
 		for p.knowBatchPeriodStartMsg.Cardinality() >= maxKnownStartMsg {
 			p.knowBatchPeriodStartMsg.Pop()
 		}
@@ -297,7 +297,7 @@ func (p *peer) AsyncSendFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
 // SendBatchPeriodStart sends a batch of transaction receipts, corresponding to the
 // ones requested from an already RLP encoded format.
 func (p *peer) SendBatchPeriodStart(bps *types.BatchPeriodStartMsg) error {
-	p.knowBatchPeriodStartMsg.Add(bps.Hash())
+	p.knowBatchPeriodStartMsg.Add(bps.BatchIndex)
 	// Mark all the producers as known, but ensure we don't overflow our limits
 	for p.knowBatchPeriodStartMsg.Cardinality() >= maxKnownStartMsg {
 		p.knowBatchPeriodStartMsg.Pop()
