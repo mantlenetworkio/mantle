@@ -295,6 +295,7 @@ func (schedulerInst *Scheduler) readLoop() {
 				log.Error("Get sequencer set failed, err : ", err)
 				continue
 			}
+			schedulerInst.SetSequencerHealthChecker(seqSet)
 			// get changes
 			changes := compareSequencerSet(schedulerInst.sequencerSet.Sequencers, seqSet)
 			log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
@@ -305,7 +306,6 @@ func (schedulerInst *Scheduler) readLoop() {
 				log.Error("sequencer set update failed", "err", err)
 				continue
 			}
-			schedulerInst.SetSequencerHealthChecker(seqSet)
 			schedulerInst.l.Unlock()
 		case <-schedulerInst.done:
 			log.Info("Get scheduler stop signal")
