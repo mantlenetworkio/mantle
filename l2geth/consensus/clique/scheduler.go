@@ -14,7 +14,9 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique/synchronizer"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
+	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
 	"github.com/mantlenetworkio/mantle/l2geth/event"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
@@ -22,7 +24,15 @@ import (
 const (
 	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
 	chainHeadChanSize = 10
+
+	defaultBatchSize  = int64(100)
+	defaultExpireTime = int64(60)
 )
+
+type Config struct {
+	BatchSize int64
+	BatchTime int64
+}
 
 type Scheduler struct {
 	wg       sync.WaitGroup
@@ -31,10 +41,19 @@ type Scheduler struct {
 	done     chan struct{}
 	running  int32
 
+	config *Config
+
+	db ethdb.Database
+
 	schedulerAddr   common.Address
 	sequencerSet    *SequencerSet
 	consensusEngine *Clique
 	blockchain      *core.BlockChain
+
+	// consensus channel
+	batchDone       chan struct{}
+	currentStartMsg types.BatchPeriodStartMsg
+	currentHeight   uint64
 
 	chainHeadSub event.Subscription
 	chainHeadCh  chan core.ChainHeadEvent
@@ -48,7 +67,7 @@ type Scheduler struct {
 	syncer *synchronizer.Synchronizer
 }
 
-func NewScheduler(schedulerAddress common.Address, clique *Clique, blockchain *core.BlockChain, eventMux *event.TypeMux) (*Scheduler, error) {
+func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Address, clique *Clique, blockchain *core.BlockChain, eventMux *event.TypeMux) (*Scheduler, error) {
 	log.Info("Create Sequencer Server")
 
 	syncer := synchronizer.NewSynchronizer()
@@ -77,8 +96,12 @@ func NewScheduler(schedulerAddress common.Address, clique *Clique, blockchain *c
 		return nil, fmt.Errorf("get sequencer set failed, err: %v", err)
 	}
 	schedulerInst := &Scheduler{
+		config:          config,
 		running:         0,
+		currentHeight:   0,
+		db:              db,
 		done:            make(chan struct{}, 1),
+		batchDone:       make(chan struct{}, 1),
 		ticker:          time.NewTicker(10 * time.Second), //TODO
 		consensusEngine: clique,
 		eventMux:        eventMux,
@@ -88,6 +111,7 @@ func NewScheduler(schedulerAddress common.Address, clique *Clique, blockchain *c
 		blockchain:      blockchain,
 		chainHeadCh:     make(chan core.ChainHeadEvent, chainHeadChanSize),
 	}
+
 	schedulerInst.addPeerSub = schedulerInst.eventMux.Subscribe(core.PeerAddEvent{})
 	go schedulerInst.AddPeerCheck()
 	return schedulerInst, nil
@@ -101,6 +125,10 @@ func (schedulerInst *Scheduler) SetWallet(wallet accounts.Wallet, acc accounts.A
 
 func (schedulerInst *Scheduler) Scheduler() common.Address {
 	return schedulerInst.schedulerAddr
+}
+
+func (schedulerInst *Scheduler) CurrentStartMsg() types.BatchPeriodStartMsg {
+	return schedulerInst.currentStartMsg
 }
 
 func (schedulerInst *Scheduler) Start() {
@@ -150,11 +178,31 @@ func (schedulerInst *Scheduler) AddPeerCheck() {
 }
 
 func (schedulerInst *Scheduler) schedulerRoutine() {
-	batchSize := uint64(10) // 10 transaction in one batch
-	expireTime := int64(15) // 15s
+	batchSize := defaultBatchSize
+	expireTime := defaultExpireTime
+	if schedulerInst.config.BatchSize != 0 {
+		batchSize = schedulerInst.config.BatchSize
+	}
+	if schedulerInst.config.BatchTime != 0 {
+		expireTime = schedulerInst.config.BatchTime
+	}
 	for {
-		// TODO
+		schedulerCh := make(chan struct{})
+		err := schedulerInst.eventMux.Post(core.L1ToL2TxStartEvent{
+			ErrCh:       nil,
+			SchedulerCh: schedulerCh,
+		})
+		if err != nil {
+			log.Error("generate BatchPeriodStartEvent error")
+			return
+		}
+		select {
+		case <-schedulerCh:
+			log.Debug("produce block for L1ToL2Tx end", "blockNumber", schedulerInst.blockchain.CurrentBlock().Number().Uint64())
+		}
+
 		schedulerInst.l.Lock()
+
 		if schedulerInst.sequencerSet == nil {
 			continue
 		}
@@ -165,12 +213,13 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		}
 
 		currentBlock := schedulerInst.blockchain.CurrentBlock()
-
+		currentIndex := rawdb.ReadStartMsgIndex(schedulerInst.db)
+		log.Debug("now index ", "index", currentIndex)
 		msg := types.BatchPeriodStartMsg{
 			ReorgIndex:  0,
-			BatchIndex:  1,
+			BatchIndex:  currentIndex + 1,
 			StartHeight: currentBlock.NumberU64() + 1,
-			MaxHeight:   currentBlock.NumberU64() + 1 + batchSize,
+			MaxHeight:   currentBlock.NumberU64() + 1 + uint64(batchSize),
 			ExpireTime:  uint64(time.Now().Unix() + expireTime),
 			Sequencer:   seq.Address,
 		}
@@ -180,6 +229,9 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			return
 		}
 		msg.Signature = sign
+		schedulerInst.currentStartMsg = msg
+		rawdb.WriteCurrentBatchPeriodIndex(schedulerInst.db, msg.BatchIndex)
+
 		err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   &msg,
 			ErrCh: nil,
@@ -193,8 +245,9 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		ticker := time.NewTicker(time.Duration(expireTime) * time.Second)
 		select {
 		case <-ticker.C:
-			log.Info("ticker timeout")
-			//ticker.Stop()
+			log.Debug("ticker timeout")
+		case <-schedulerInst.batchDone:
+			log.Debug("batch done")
 		}
 	}
 }
@@ -203,7 +256,15 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 	for {
 		select {
 		case chainHead := <-schedulerInst.chainHeadCh:
-			log.Debug("chainHead", "block number", chainHead.Block.NumberU64(), "extra data", hex.EncodeToString(chainHead.Block.Extra()))
+			if chainHead.Block.Transactions().Len() != 0 && chainHead.Block.Transactions()[0].GetMeta() != nil && chainHead.Block.Transactions()[0].QueueOrigin() == types.QueueOriginL1ToL2 {
+				log.Debug("chainHead", "blockNumber", chainHead.Block.NumberU64(), "extraData", hex.EncodeToString(chainHead.Block.Extra()))
+				continue
+			}
+			if schedulerInst.blockchain.CurrentBlock().NumberU64() == schedulerInst.currentStartMsg.MaxHeight {
+				log.Debug("Batch done with height at max height")
+				schedulerInst.batchDone <- struct{}{}
+			}
+			log.Debug("chainHead", "blockNumber", chainHead.Block.NumberU64(), "extraData", hex.EncodeToString(chainHead.Block.Extra()))
 		}
 	}
 }

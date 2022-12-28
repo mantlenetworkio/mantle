@@ -122,26 +122,6 @@ func (miner *Miner) update() {
 	}
 }
 
-//
-//var (
-//	index = uint64(0)
-//)
-//
-//func (miner *Miner) MockScheduler(startHeight, maxHeight, exTime uint64, erCh chan error) {
-//	miner.worker.mu.Lock()
-//	defer miner.worker.mu.Unlock()
-//
-//	miner.worker.produceBlockCh <- core.ProduceBlockEvent{
-//		BatchIdx:    index,
-//		StartHeight: startHeight,
-//		MaxHeight:   maxHeight,
-//		ExpireTime:  exTime,
-//		ErrCh:       erCh,
-//	}
-//
-//	index++
-//}
-
 func (miner *Miner) Start(coinbase common.Address) {
 	atomic.StoreInt32(&miner.shouldStart, 1)
 	miner.SetEtherbase(coinbase)

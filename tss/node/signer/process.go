@@ -125,7 +125,7 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 		waitSignSlashLock:         &sync.Mutex{},
 		waitSignSlashMsgs:         make(map[string]map[uint64]common.SlashRequest),
 		cacheVerifyLock:           &sync.Mutex{},
-		cacheVerify:               types.NewCache[string, bool](50),
+		cacheVerify:               types.NewCache[string, bool](1000),
 		cacheSignLock:             &sync.Mutex{},
 		cacheSign:                 types.NewCache[string, []byte](10),
 		nodeStore:                 nodeStore,

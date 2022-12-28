@@ -21,6 +21,8 @@ We believe one of the things that makes Mantle special is its coherent design an
 - Size: The Mantle project’s culture is one of small pull-requests, regularly submitted. The larger a pull-request, the more likely it is that you will be asked to resubmit as a series of self-contained and individually reviewable smaller PRs
 - Maintainability: If the feature will require ongoing maintenance (eg support for a particular brand of database), we may ask you to accept responsibility for maintaining this feature
 
+
+
 ## Workflow for Pull Requests
 
 🚨 Before making any non-trivial change, please first open an issue describing the change to solicit feedback and guidance. This will increase the likelihood of the PR getting merged.

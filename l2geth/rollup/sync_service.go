@@ -11,16 +11,16 @@ import (
 	"time"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/contracts/message"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
+	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/core/state"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/eth/gasprice"
 	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
 	"github.com/mantlenetworkio/mantle/l2geth/event"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
-
-	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
-	"github.com/mantlenetworkio/mantle/l2geth/core/types"
-
-	"github.com/mantlenetworkio/mantle/l2geth/eth/gasprice"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 )
@@ -74,6 +74,7 @@ type SyncService struct {
 	feeThresholdUp                 *big.Float
 	feeThresholdDown               *big.Float
 	cfg                            Config
+	applyLock                      sync.Mutex
 }
 
 // NewSyncService returns an initialized sync service
@@ -266,17 +267,15 @@ func (s *SyncService) Start() error {
 
 	if s.verifier {
 		go s.VerifierLoop()
-	} else {
+	} else if !s.IsSequencerMode() {
 		go func() {
 			if err := s.syncTransactionsToTip(); err != nil {
 				log.Crit("Sequencer cannot sync transactions to tip", "err", err)
 			}
-			if err := s.syncQueueToTip(); err != nil {
-				log.Crit("Sequencer cannot sync queue to tip", "err", err)
-			}
 			s.setSyncStatus(false)
-			go s.SequencerLoop()
 		}()
+	} else {
+		s.setSyncStatus(false)
 	}
 	return nil
 }
@@ -461,25 +460,6 @@ func (s *SyncService) verify() error {
 	return nil
 }
 
-// SequencerLoop is the polling loop that runs in sequencer mode. It sequences
-// transactions and then updates the EthContext.
-func (s *SyncService) SequencerLoop() {
-	log.Info("Starting Sequencer Loop", "poll-interval", s.pollInterval, "timestamp-refresh-threshold", s.timestampRefreshThreshold)
-	t := time.NewTicker(s.pollInterval)
-	defer t.Stop()
-	for ; true; <-t.C {
-		s.txLock.Lock()
-		if err := s.sequence(); err != nil {
-			log.Error("Could not sequence", "error", err)
-		}
-		s.txLock.Unlock()
-
-		if err := s.updateL1BlockNumber(); err != nil {
-			log.Error("Could not update execution context", "error", err)
-		}
-	}
-}
-
 // sequence is the main logic for the Sequencer. It will sync any `enqueue`
 // transactions it has yet to sync and then pull in transaction batches to
 // compare against the transactions it has in its local state. The sequencer
@@ -487,16 +467,13 @@ func (s *SyncService) SequencerLoop() {
 // L1 is the source of truth. The sequencer concurrently accepts user
 // transactions via the RPC. When reorg logic is enabled, this should
 // also call `syncBatchesToTip`
-func (s *SyncService) sequence() error {
-	if err := s.syncQueueToTip(); err != nil {
-		return fmt.Errorf("Sequencer cannot sequence queue: %w", err)
-	}
-	return nil
-}
 
-func (s *SyncService) syncQueueToTip() error {
+func (s *SyncService) SyncQueueToTip() error {
 	if err := s.syncToTip(s.syncQueue, s.client.GetLatestEnqueueIndex); err != nil {
 		return fmt.Errorf("Cannot sync queue to tip: %w", err)
+	}
+	if err := s.updateL1BlockNumber(); err != nil {
+		log.Error("Could not update execution context", "error", err)
 	}
 	return nil
 }
@@ -587,6 +564,17 @@ func (s *SyncService) updateCharge(statedb *state.StateDB) error {
 	return s.RollupGpo.SetCharge(charge)
 }
 
+// updateSCCAddress will update the sccAddress value from the BVM_GasPriceOracle
+// in the local cache
+func (s *SyncService) updateSCCAddress(statedb *state.StateDB) error {
+	scc, err := s.readGPOStorageSlot(statedb, rcfg.SccAddressSlot)
+	if err != nil {
+		return err
+	}
+	sccAddress := common.BigToAddress(scc)
+	return s.RollupGpo.SetSCCAddress(sccAddress)
+}
+
 // cacheGasPriceOracleOwner accepts a statedb and caches the gas price oracle
 // owner address locally
 func (s *SyncService) cacheGasPriceOracleOwner(statedb *state.StateDB) error {
@@ -643,6 +631,15 @@ func (s *SyncService) updateGasPriceOracleCache(hash *common.Hash) error {
 		return err
 	}
 	if err := s.updateScalar(statedb); err != nil {
+		return err
+	}
+	if err := s.updateIsBurning(statedb); err != nil {
+		return err
+	}
+	if err := s.updateCharge(statedb); err != nil {
+		return err
+	}
+	if err := s.updateSCCAddress(statedb); err != nil {
 		return err
 	}
 	return nil
@@ -779,18 +776,109 @@ func (s *SyncService) SetLatestBatchIndex(index *uint64) {
 	}
 }
 
-// applyTransaction is a higher level API for applying a transaction
-func (s *SyncService) applyTransaction(tx *types.Transaction, sequencer common.Address) error {
-	if tx.GetMeta().Index != nil {
-		return s.applyIndexedTransaction(tx, sequencer)
+func (s *SyncService) SetHead(number uint64) error {
+	if number == 0 {
+		return errors.New("cannot reset to genesis")
 	}
-	return s.applyTransactionToTip(tx, sequencer)
+	if err := s.bc.SetHead(number); err != nil {
+		return err
+	}
+	// Make sure to reset the LatestL1{Timestamp,BlockNumber}
+	block := s.bc.CurrentBlock()
+	txs := block.Transactions()
+	if len(txs) == 0 {
+		log.Error("No transactions found in block", "number", number)
+		return fmt.Errorf("no transactions found in block:%v", number)
+	}
+	tx := txs[0]
+	blockNumber := tx.L1BlockNumber()
+	if blockNumber == nil {
+		return fmt.Errorf("no L1BlockNumber found in transaction,number:%v", number)
+	}
+	s.SetLatestL1Timestamp(tx.L1Timestamp())
+	s.SetLatestL1BlockNumber(blockNumber.Uint64())
+	s.SetLatestIndex(tx.GetMeta().Index)
+	return nil
+}
+
+func (s *SyncService) SchedulerRollback(start uint64) error {
+	latest := s.bc.CurrentBlock().Number().Uint64()
+	if start > latest {
+		return fmt.Errorf("invalid block number:%v,currentBlock number:%v", start, latest)
+	}
+	var txs []types.Transaction
+	var oldBlocks []types.Block
+	for i := start; i <= latest; i++ {
+		block := s.bc.GetBlockByNumber(i)
+		txs = append(txs, *block.Transactions()[0])
+		oldBlocks = append(oldBlocks, *block)
+	}
+	log.Info("setHead start", "current block number", s.bc.CurrentHeader().Number.Uint64())
+	if err := s.SetHead(start - 1); err != nil {
+		log.Crit("rollback error:", "setHead error", err)
+	}
+	log.Info("setHead end,current :", "block number", s.bc.CurrentHeader().Number.Uint64())
+	for _, t := range txs {
+		if err := s.applyIndexedTransaction(&t, &types.BatchTxSetProof{}); err != nil {
+			log.Crit("rollback applyIndexedTransaction tx :", "applyIndexedTransaction error", err)
+		}
+	}
+	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
+	for i := start; i <= latest; i++ {
+		newBlock := s.bc.GetBlockByNumber(i)
+		log.Info("StateRoot", "equal", oldBlocks[i-start].Root() == newBlock.Root())
+		if oldBlocks[i-start].Hash() != newBlock.Hash() {
+			// TODO Emit Rollback Event To sequencer
+			log.Info("Emit Rollback Event To sequencer", "old blockHash", oldBlocks[i-start].Hash(), "newBlockHash", newBlock.Hash())
+			log.Info("Emit Rollback Event To sequencer", "oldBlock number:", oldBlocks[i-start].Number().Uint64(), "newBlockNumber", newBlock.Number().Uint64())
+			//break
+		}
+	}
+	return nil
+}
+
+func (s *SyncService) SequencerRollback() error {
+	return nil
+}
+
+// applyTransaction is a higher level API for applying a transaction
+func (s *SyncService) applyTransaction(tx *types.Transaction, txSetProof *types.BatchTxSetProof) error {
+	s.applyLock.Lock()
+	defer s.applyLock.Unlock()
+
+	if tx.GetMeta() != nil && tx.GetMeta().Index == nil && tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+		data := &message.Data{}
+		if err := data.UnPackData(tx.GetMeta().RawTransaction); err != nil {
+			log.Info("message.UnPackData interrupt", "error", err)
+		}
+
+		sccAddress := s.RollupGpo.SCCAddress()
+		var zeroAddr common.Address
+		if sccAddress == zeroAddr {
+			log.Crit("RollupGpo get sccAddress", "error", fmt.Errorf("sccAddr is zeroAddr"))
+		}
+		if data.Target == dump.BvmRollbackAddress && data.Sender == sccAddress {
+			rd := &message.RollbackData{}
+			if err := rd.UnPackData(data.Message); err != nil {
+				log.Error("rollback data unpack failed", "error", err)
+			}
+			if rd.ShouldRollBack != nil {
+				if err := s.SchedulerRollback(rd.ShouldRollBack.Uint64()); err != nil {
+					log.Error("scheduler rollback", "error", err)
+				}
+			}
+		}
+	}
+	if tx.GetMeta().Index != nil {
+		return s.applyIndexedTransaction(tx, txSetProof)
+	}
+	return s.applyTransactionToTip(tx, txSetProof)
 }
 
 // applyIndexedTransaction applys a transaction that has an index. This means
 // that the source of the transaction was either a L1 batch or from the
 // sequencer.
-func (s *SyncService) applyIndexedTransaction(tx *types.Transaction, sequencer common.Address) error {
+func (s *SyncService) applyIndexedTransaction(tx *types.Transaction, txSetProof *types.BatchTxSetProof) error {
 	if tx == nil {
 		return errors.New("Transaction is nil in applyIndexedTransaction")
 	}
@@ -801,7 +889,7 @@ func (s *SyncService) applyIndexedTransaction(tx *types.Transaction, sequencer c
 	log.Trace("Applying indexed transaction", "index", *index)
 	next := s.GetNextIndex()
 	if *index == next {
-		return s.applyTransactionToTip(tx, sequencer)
+		return s.applyTransactionToTip(tx, txSetProof)
 	}
 	if *index < next {
 		return s.applyHistoricalTransaction(tx)
@@ -840,7 +928,7 @@ func (s *SyncService) applyHistoricalTransaction(tx *types.Transaction) error {
 // applying it to the tip. It blocks until the transaction has been included in
 // the chain. It is assumed that validation around the index has already
 // happened.
-func (s *SyncService) applyTransactionToTip(tx *types.Transaction, sequencer common.Address) error {
+func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *types.BatchTxSetProof) error {
 	if tx == nil {
 		return errors.New("nil transaction passed to applyTransactionToTip")
 	}
@@ -934,21 +1022,23 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, sequencer com
 	txs := types.Transactions{tx}
 	errCh := make(chan error, 1)
 	s.txFeed.Send(core.NewTxsEvent{
-		Txs:       txs,
-		Sequencer: sequencer,
-		ErrCh:     errCh,
+		Txs:        txs,
+		TxSetProof: txSetProof,
+		ErrCh:      errCh,
 	})
 	// Block until the transaction has been added to the chain
 	log.Info("Waiting for transaction to be added to chain", "hash", tx.Hash().Hex())
 
 	select {
 	case err := <-errCh:
+		log.Debug("we have receiverd errCh")
 		log.Error("Got error waiting for transaction to be added to chain", "msg", err)
 		s.SetLatestL1Timestamp(ts)
 		s.SetLatestL1BlockNumber(bn)
 		s.SetLatestIndex(index)
 		return err
 	case <-s.chainHeadCh:
+		log.Debug("we have receiverd chainHeadCh")
 		// Update the cache when the transaction is from the owner
 		// of the gas price oracle
 		sender, _ := types.Sender(s.signer, tx)
@@ -969,7 +1059,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, sequencer com
 // The sequencer checks for batches over time to make sure that it does not
 // deviate from the L1 state and this is the main method of transaction
 // ingestion for the verifier.
-func (s *SyncService) applyBatchedTransaction(tx *types.Transaction, sequencer common.Address) error {
+func (s *SyncService) applyBatchedTransaction(tx *types.Transaction, txSetProof *types.BatchTxSetProof) error {
 	if tx == nil {
 		return errors.New("nil transaction passed into applyBatchedTransaction")
 	}
@@ -978,7 +1068,7 @@ func (s *SyncService) applyBatchedTransaction(tx *types.Transaction, sequencer c
 		return errors.New("No index found on transaction")
 	}
 	log.Trace("Applying batched transaction", "index", *index)
-	err := s.applyIndexedTransaction(tx, sequencer)
+	err := s.applyIndexedTransaction(tx, txSetProof)
 	if err != nil {
 		return fmt.Errorf("Cannot apply batched transaction: %w", err)
 	}
@@ -1059,10 +1149,31 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	return nil
 }
 
+func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction, sequencer common.Address) error {
+	if s.verifier {
+		return errors.New("Verifier does not accept transactions out of band")
+	}
+	if tx == nil {
+		return errors.New("nil transaction passed to ValidateAndApplySequencerTransaction")
+	}
+	s.txLock.Lock()
+	defer s.txLock.Unlock()
+	if err := s.verifyFee(tx); err != nil {
+		return err
+	}
+	log.Trace("Sequencer transaction validation", "hash", tx.Hash().Hex())
+
+	qo := tx.QueueOrigin()
+	if qo != types.QueueOriginSequencer {
+		return fmt.Errorf("invalid transaction with queue origin %s", qo.String())
+	}
+	return nil
+}
+
 // Higher level API for applying transactions. Should only be called for
 // queue origin sequencer transactions, as the contracts on L1 manage the same
 // validity checks that are done here.
-func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction, sequencer common.Address) error {
+func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction, txSetProof *types.BatchTxSetProof) error {
 	if s.verifier {
 		return errors.New("Verifier does not accept transactions out of band")
 	}
@@ -1083,10 +1194,57 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 	if err := s.txpool.ValidateTx(tx); err != nil {
 		return fmt.Errorf("invalid transaction: %w", err)
 	}
-	if err := s.applyTransaction(tx, sequencer); err != nil {
+	if err := s.applyTransaction(tx, txSetProof); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (s *SyncService) PreCheckSyncServiceState(tx *types.Transaction) bool {
+	ts := s.GetLatestL1Timestamp()
+	bn := s.GetLatestL1BlockNumber()
+	l1BlockNumber := tx.L1BlockNumber()
+
+	if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+		if tx.L1Timestamp() == 0 {
+			return false
+		}
+	}
+
+	if l1BlockNumber == nil {
+		log.Warn("Blocknumber is nil ", "hash", tx.Hash().Hex())
+		return false
+	}
+	if l1BlockNumber.Uint64() < bn {
+		// l1BlockNumber < latest l1BlockNumber
+		// indicates an error
+		log.Warn("Blocknumber monotonicity violation", "hash", tx.Hash().Hex(),
+			"new", l1BlockNumber.Uint64(), "old", bn)
+		return false
+	}
+
+	if tx.L1Timestamp() < ts {
+		log.Error("Timestamp monotonicity violation", "hash", tx.Hash().Hex(), "latest", ts, "tx", tx.L1Timestamp())
+		return false
+	}
+
+	if tx.GetMeta().Index == nil {
+		log.Warn("meta index is nil ", "hash", tx.Hash().Hex())
+		return false
+	}
+	return true
+
+}
+
+func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
+	l1BlockNumber := tx.L1BlockNumber()
+	s.SetLatestL1BlockNumber(l1BlockNumber.Uint64())
+	s.SetLatestL1Timestamp(tx.L1Timestamp())
+	s.SetLatestIndex(tx.GetMeta().Index)
+	if queueIndex := tx.GetMeta().QueueIndex; queueIndex != nil {
+		s.SetLatestEnqueueIndex(queueIndex)
+	}
+	log.Debug("Update sync service state with new block", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
 }
 
 // syncer represents a function that can sync remote items and then returns the
@@ -1179,7 +1337,7 @@ func (s *SyncService) sync(getLatest indexGetter, getNext nextGetter, syncer ran
 	}
 
 	nextIndex := getNext()
-	log.Info("SyncService sync", "nextIndex", nextIndex, "latestIndex", *latestIndex)
+	log.Debug("SyncService sync", "nextIndex", nextIndex, "latestIndex", *latestIndex)
 	if nextIndex == *latestIndex+1 {
 		return latestIndex, nil
 	}
@@ -1210,7 +1368,7 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 			return fmt.Errorf("Cannot get transaction batch: %w", err)
 		}
 		for _, tx := range txs {
-			if err := s.applyBatchedTransaction(tx, s.cfg.SchedulerAddress); err != nil {
+			if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
 				return fmt.Errorf("cannot apply batched transaction: %w", err)
 			}
 		}
@@ -1238,8 +1396,8 @@ func (s *SyncService) syncQueueTransactionRange(start, end uint64) error {
 		if err != nil {
 			return fmt.Errorf("Canot get enqueue transaction; %w", err)
 		}
-		if err := s.applyTransaction(tx, s.cfg.SchedulerAddress); err != nil {
-			return fmt.Errorf("Cannot apply transaction: %w", err)
+		if err := s.applyTransaction(tx, &types.BatchTxSetProof{}); err != nil {
+			return fmt.Errorf("cannot apply transaction: %w", err)
 		}
 	}
 	return nil
@@ -1270,7 +1428,7 @@ func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) e
 		if err != nil {
 			return fmt.Errorf("cannot fetch transaction %d: %w", i, err)
 		}
-		if err := s.applyTransaction(tx, s.cfg.SchedulerAddress); err != nil {
+		if err := s.applyTransaction(tx, &types.BatchTxSetProof{}); err != nil {
 			return fmt.Errorf("Cannot apply transaction: %w", err)
 		}
 	}
@@ -1293,7 +1451,7 @@ func stringify(i *uint64) string {
 // IngestTransaction should only be called by trusted parties as it skips all
 // validation and applies the transaction
 func (s *SyncService) IngestTransaction(tx *types.Transaction) error {
-	return s.applyTransaction(tx, s.cfg.SchedulerAddress)
+	return s.applyTransaction(tx, &types.BatchTxSetProof{})
 }
 
 func (s *SyncService) handleChainHeadEventLoop() {

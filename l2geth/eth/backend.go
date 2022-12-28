@@ -22,6 +22,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
+	"runtime"
+	"sync"
+	"sync/atomic"
+
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi/bind"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -50,10 +55,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
-	"math/big"
-	"runtime"
-	"sync"
-	"sync/atomic"
 )
 
 type LesServer interface {
@@ -85,7 +86,6 @@ type Ethereum struct {
 	eventMux       *event.TypeMux
 	engine         consensus.Engine
 	accountManager *accounts.Manager
-	//schedulerInst      *clique.Scheduler
 
 	bloomRequests chan chan *bloombits.Retrieval // Channel receiving bloom data retrieval requests
 	bloomIndexer  *core.ChainIndexer             // Bloom indexer operating during block imports
@@ -143,6 +143,9 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	chainConfig, genesisHash, genesisErr := core.SetupGenesisBlockWithOverride(chainDb, config.Genesis, config.OverrideIstanbul, config.OverrideMuirGlacier)
 	if _, ok := genesisErr.(*params.ConfigCompatError); genesisErr != nil && !ok {
 		return nil, genesisErr
+	}
+	if chainConfig.Clique != nil {
+		chainConfig.Clique.IsVerifier = config.Rollup.IsVerifier
 	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
@@ -211,6 +214,8 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
+	eth.blockchain.SetPreCheckSyncServiceFunc(eth.syncService.PreCheckSyncServiceState)
+	eth.blockchain.SetUpdateSyncServiceFunc(eth.syncService.UpdateSyncServiceState)
 
 	// Permit the downloader to use the trie cache allowance during fast sync
 	cacheLimit := cacheConfig.TrieCleanLimit + cacheConfig.TrieDirtyLimit
@@ -238,6 +243,8 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 
 	if _, ok := eth.engine.(*clique.Clique); ok {
 		schedulerInst, err := clique.NewScheduler(
+			chainDb,
+			&eth.config.SchedulerConfig,
 			config.Rollup.SchedulerAddress,
 			eth.engine.(*clique.Clique),
 			eth.blockchain,

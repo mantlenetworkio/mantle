@@ -25,9 +25,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/accounts"
-
 	mapset "github.com/deckarep/golang-set"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/misc"
@@ -171,6 +170,8 @@ type worker struct {
 	bpsSub *event.TypeMuxSubscription
 	bpaSub *event.TypeMuxSubscription
 
+	l1ToL2Sub *event.TypeMuxSubscription
+
 	// Channels
 	newWorkCh          chan *newWorkReq
 	taskCh             chan *task
@@ -246,6 +247,8 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	worker.bpsSub = worker.mux.Subscribe(core.BatchPeriodStartEvent{})
 	worker.bpaSub = worker.mux.Subscribe(core.BatchPeriodAnswerEvent{})
 
+	worker.l1ToL2Sub = worker.mux.Subscribe(core.L1ToL2TxStartEvent{})
+
 	// Subscribe events for blockchain
 	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
@@ -263,6 +266,10 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	go worker.taskLoop()
 	go worker.batchStartLoop()
 	go worker.batchAnswerLoop()
+
+	if !worker.eth.SyncService().IsSequencerMode() {
+		go worker.l1Tol2StartLoop()
+	}
 
 	// Submit first work to initialize pending state.
 	if init {
@@ -448,6 +455,36 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 	}
 }
 
+func (w *worker) l1Tol2StartLoop() {
+	defer w.l1ToL2Sub.Unsubscribe()
+
+	for {
+		select {
+		case obj := <-w.l1ToL2Sub.Chan():
+			if !w.isRunning() {
+				log.Info("miner receives batchPeriodStartEvent but miner not start")
+			}
+			var ev core.L1ToL2TxStartEvent
+			var ok bool
+			if ev, ok = obj.Data.(core.L1ToL2TxStartEvent); !ok {
+				continue
+			}
+			log.Info("Scheduler receives batchPeriodStartEvent")
+			if ev.SchedulerCh != nil {
+				if err := w.eth.SyncService().SyncQueueToTip(); err != nil {
+					log.Info("SyncQueueToTip interrupt", "error", err)
+				}
+				close(ev.SchedulerCh)
+			} else {
+				log.Error("SchedulerCh is nil")
+			}
+		// System stopped
+		case <-w.exitCh:
+			return
+		}
+	}
+}
+
 func (w *worker) batchStartLoop() {
 	defer w.bpsSub.Unsubscribe()
 
@@ -455,6 +492,9 @@ func (w *worker) batchStartLoop() {
 		select {
 		//BatchPeriodStartEvent
 		case obj := <-w.bpsSub.Chan():
+			if !w.isRunning() {
+				log.Info("miner receives batchPeriodStartEvent but miner not start")
+			}
 			var ev core.BatchPeriodStartEvent
 			var ok bool
 			if ev, ok = obj.Data.(core.BatchPeriodStartEvent); !ok {
@@ -469,10 +509,10 @@ func (w *worker) batchStartLoop() {
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
 				log.Info("Scheduler receives batchPeriodStartEvent")
+
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
-					// TODO wait until expireTime
 					log.Info("Active sequencer receives batchPeriodStartEvent")
 					if ev.Msg.StartHeight != w.chain.CurrentBlock().NumberU64()+1 {
 						log.Info("start height mismatch", "current_height", w.current.header.Number.Uint64(), "startHeight", ev.Msg.StartHeight)
@@ -486,57 +526,64 @@ func (w *worker) batchStartLoop() {
 						log.Info("expire timestamp is passed", "current_time", time.Now().Unix(), "expireTime", ev.Msg.ExpireTime)
 						continue
 					}
-					pending, err := w.eth.TxPool().Pending()
-					if err != nil {
-						log.Error("Failed to fetch pending transactions", "err", err)
-						return
-					}
-					// Short circuit if there is no available pending transactions
-					if len(pending) == 0 {
-						log.Info("empty txpool, wait for 200 millisecond")
-						time.Sleep(200 * time.Millisecond)
-						continue
-					}
-					log.Info("pending size", "size", len(pending))
-					// Split the pending transactions into locals and remotes
-					localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
-					// TODO mev
-					var txsQueue types.Transactions
-					for _, account := range w.eth.TxPool().Locals() {
-						if txs := remoteTxs[account]; len(txs) > 0 {
-							delete(remoteTxs, account)
-							localTxs[account] = txs
+
+					// Keep sending messages until the limit is reached
+					for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < ev.Msg.MaxHeight && uint64(time.Now().Unix()) < ev.Msg.ExpireTime && inTxLen < (ev.Msg.MaxHeight-ev.Msg.StartHeight); {
+						pending, err := w.eth.TxPool().Pending()
+						if err != nil {
+							log.Error("Failed to fetch pending transactions", "err", err)
+							return
+						}
+						// Short circuit if there is no available pending transactions
+						if len(pending) == 0 {
+							log.Debug("empty txpool, wait for 200 millisecond")
+							time.Sleep(200 * time.Millisecond)
+							continue
+						}
+						log.Info("pending size", "size", len(pending))
+						// Split the pending transactions into locals and remotes
+						localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
+						// TODO mev
+						var txsQueue types.Transactions
+						for _, account := range w.eth.TxPool().Locals() {
+							if txs := remoteTxs[account]; len(txs) > 0 {
+								delete(remoteTxs, account)
+								localTxs[account] = txs
+								txsQueue = append(txsQueue, txs...)
+							}
+						}
+						for _, txs := range remoteTxs {
 							txsQueue = append(txsQueue, txs...)
 						}
-					}
-					for _, txs := range remoteTxs {
-						txsQueue = append(txsQueue, txs...)
+
+						var bpa types.BatchPeriodAnswerMsg
+						if uint64(len(txsQueue)) > ev.Msg.MaxHeight-ev.Msg.StartHeight {
+							bpa.Txs = txsQueue[:ev.Msg.MaxHeight-ev.Msg.StartHeight]
+							inTxLen += ev.Msg.MaxHeight - ev.Msg.StartHeight
+						} else {
+							bpa.Txs = txsQueue
+							inTxLen += uint64(len(txsQueue))
+						}
+						bpa.BatchIndex = ev.Msg.BatchIndex
+						bpa.StartIndex = ev.Msg.StartHeight
+						bpa.Sequencer = w.coinbase
+						signature, err := w.engine.SignData(bpa.Sequencer, bpa.GetSignData())
+						if err != nil {
+							log.Error("Sign BatchPeriodAnswerMsg error", "errMsg", err.Error())
+							continue
+						}
+						bpa.Signature = signature
+						err = w.mux.Post(core.BatchPeriodAnswerEvent{
+							Msg:   &bpa,
+							ErrCh: nil,
+						})
+						if err != nil {
+							log.Error("Post BatchPeriodAnswerMsg error", "errMsg", err.Error())
+							continue
+						}
+						log.Info("Generate BatchPeriodAnswerEvent", "coinbase", w.coinbase.String(), "tx_count", len(bpa.Txs), "startIndex", bpa.StartIndex)
 					}
 
-					var bpa types.BatchPeriodAnswerMsg
-					if uint64(len(txsQueue)) > ev.Msg.MaxHeight-ev.Msg.StartHeight {
-						bpa.Txs = txsQueue[:ev.Msg.MaxHeight-ev.Msg.StartHeight]
-					} else {
-						bpa.Txs = txsQueue // TODO before expire time, send multiple BatchPeriodAnswerMsg
-					}
-					bpa.BatchIndex = ev.Msg.BatchIndex
-					bpa.StartIndex = ev.Msg.StartHeight
-					bpa.Sequencer = w.coinbase
-					signature, err := w.engine.SignData(bpa.Sequencer, bpa.GetSignData())
-					if err != nil {
-						log.Error("Sign BatchPeriodAnswerMsg error", "errMsg", err.Error())
-						continue
-					}
-					bpa.Signature = signature
-					err = w.mux.Post(core.BatchPeriodAnswerEvent{
-						Msg:   &bpa,
-						ErrCh: nil,
-					})
-					if err != nil {
-						log.Error("Post BatchPeriodAnswerMsg error", "errMsg", err.Error())
-						continue
-					}
-					log.Info("Generate BatchPeriodAnswerEvent", "coinbase", w.coinbase.String(), "tx_count", len(bpa.Txs), "startIndex", bpa.StartIndex)
 				} else {
 					// for inactive sequencer
 					log.Info("Inactive sequencer receives batchPeriodStartEvent")
@@ -569,13 +616,15 @@ func (w *worker) batchAnswerLoop() {
 			}
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
+				// todo check event index
 				log.Info("Scheduler receives BatchPeriodAnswerEvent", "Sequencer", ev.Msg.Sequencer.String())
 				for _, tx := range ev.Msg.Txs {
-					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, ev.Msg.Sequencer)
+					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, ev.Msg.ToBatchTxSetProof())
 					if err != nil {
 						log.Error("ValidateAndApplySequencerTransaction error", "errMsg", err.Error())
 						continue
 					}
+
 				}
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {
@@ -660,7 +709,7 @@ func (w *worker) mainLoop() {
 			// send the block through the `taskCh` and then through the
 			// `resultCh` which ultimately adds the block to the blockchain
 			// through `bc.WriteBlockWithState`
-			if err := w.commitNewTx(tx, ev.Sequencer); err == nil {
+			if err := w.commitNewTx(tx, ev.TxSetProof); err == nil {
 				// `chainHeadCh` is written to when a new block is added to the
 				// tip of the chain. Reading from the channel will block until
 				// the ethereum block is added to the chain downstream of `commitNewTx`.
@@ -1098,7 +1147,7 @@ func (w *worker) commitTransactionsWithError(txs *types.TransactionsByPriceAndNo
 // It needs to return an error in the case there is an error to prevent waiting
 // on reading from a channel that is written to when a new block is added to the
 // chain.
-func (w *worker) commitNewTx(tx *types.Transaction, sequencer common.Address) error {
+func (w *worker) commitNewTx(tx *types.Transaction, txSetProof *types.BatchTxSetProof) error {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 	tstart := time.Now()
@@ -1129,9 +1178,9 @@ func (w *worker) commitNewTx(tx *types.Transaction, sequencer common.Address) er
 		GasLimit:   w.config.GasFloor,
 		Extra:      w.extra,
 		Time:       tx.L1Timestamp(),
-		Coinbase:   sequencer,
+		Coinbase:   txSetProof.Sequencer,
 	}
-	if err := w.engine.Prepare(w.chain, header); err != nil {
+	if err := w.engine.Prepare(w.chain, header, txSetProof); err != nil {
 		return fmt.Errorf("Failed to prepare header for mining: %w", err)
 	}
 	// Could potentially happen if starting to mine in an odd state.
@@ -1173,7 +1222,7 @@ func (w *worker) commitNewWork(interrupt *int32, timestamp int64) {
 		}
 		header.Coinbase = w.coinbase
 	}
-	if err := w.engine.Prepare(w.chain, header); err != nil {
+	if err := w.engine.Prepare(w.chain, header, &types.BatchTxSetProof{}); err != nil {
 		log.Error("Failed to prepare header for mining", "err", err)
 		return
 	}

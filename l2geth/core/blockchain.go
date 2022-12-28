@@ -90,7 +90,7 @@ const (
 	//
 	// - Version 4
 	//   The following incompatible database changes were added:
-	//   * the `BlockNumber`, `TxHash`, `TxIndex`, `BlockHash` and `ReorgIndex` fields of log are deleted
+	//   * the `BlockNumber`, `TxHash`, `TxIndex`, `BlockHash` and `Index` fields of log are deleted
 	//   * the `Bloom` field of receipt is deleted
 	//   * the `BlockIndex` and `TxIndex` fields of txlookup are deleted
 	// - Version 5
@@ -174,9 +174,11 @@ type BlockChain struct {
 	processor  Processor  // Block transaction processor interface
 	vmConfig   vm.Config
 
-	badBlocks       *lru.Cache                     // Bad block cache
-	shouldPreserve  func(*types.Block) bool        // Function used to determine whether should preserve the given block.
-	terminateInsert func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
+	badBlocks           *lru.Cache                     // Bad block cache
+	shouldPreserve      func(*types.Block) bool        // Function used to determine whether should preserve the given block.
+	terminateInsert     func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
+	preCheckSyncService func(*types.Transaction) bool  // first check block avaliabe before insert chain
+	updateSyncService   func(*types.Transaction)       // update sync service state after inserting chain block
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -1322,6 +1324,17 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 	if ptd == nil {
 		return NonStatTy, consensus.ErrUnknownAncestor
 	}
+	if block.Transactions().Len() == 0 {
+		return NonStatTy, consensus.ErrUnknownAncestor
+	}
+
+	if bc.preCheckSyncService != nil {
+		bol := bc.preCheckSyncService(block.Transactions()[0])
+		if !bol {
+			return NonStatTy, consensus.ErrUnknownAncestor
+		}
+	}
+
 	// Make sure no inconsistent state is leaked during insertion
 	currentBlock := bc.CurrentBlock()
 	localTd := bc.GetTd(currentBlock.Hash(), currentBlock.NumberU64())
@@ -1451,6 +1464,9 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 		}
 	} else {
 		bc.chainSideFeed.Send(ChainSideEvent{Block: block})
+	}
+	if bc.updateSyncService != nil {
+		bc.updateSyncService(block.Transactions()[0])
 	}
 	return status, nil
 }
@@ -2271,4 +2287,12 @@ func (bc *BlockChain) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscript
 // block processing has started while false means it has stopped.
 func (bc *BlockChain) SubscribeBlockProcessingEvent(ch chan<- bool) event.Subscription {
 	return bc.scope.Track(bc.blockProcFeed.Subscribe(ch))
+}
+
+func (bc *BlockChain) SetUpdateSyncServiceFunc(function func(*types.Transaction)) {
+	bc.updateSyncService = function
+}
+
+func (bc *BlockChain) SetPreCheckSyncServiceFunc(function func(*types.Transaction) bool) {
+	bc.preCheckSyncService = function
 }

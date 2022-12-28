@@ -3,7 +3,6 @@ go 1.18
 use (
     ./subsidy
 	./batch-submitter
-	./scheduler
 	./bss-core
 	./gas-oracle
 	./l2geth
