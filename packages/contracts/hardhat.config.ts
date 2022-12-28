@@ -343,6 +343,8 @@ if (
     url: process.env.CONTRACTS_RPC_URL,
     live: true,
     saveDeployments: true,
+    gas: 'auto',
+    gasPrice: 'auto',
     tags: [process.env.CONTRACTS_TARGET_NETWORK],
   }
 }
