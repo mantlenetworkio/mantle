@@ -49,11 +49,15 @@ type Scheduler struct {
 	sequencerSet    *SequencerSet
 	consensusEngine *Clique
 	blockchain      *core.BlockChain
+	txpool          *core.TxPool
 
 	// consensus channel
 	batchDone       chan struct{}
 	currentStartMsg types.BatchPeriodStartMsg
 	currentHeight   uint64
+
+	expectMinTxsCount uint64
+	sequencerHealther *sequencerHealther
 
 	chainHeadSub event.Subscription
 	chainHeadCh  chan core.ChainHeadEvent
@@ -67,7 +71,7 @@ type Scheduler struct {
 	syncer *synchronizer.Synchronizer
 }
 
-func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Address, clique *Clique, blockchain *core.BlockChain, eventMux *event.TypeMux) (*Scheduler, error) {
+func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Address, clique *Clique, blockchain *core.BlockChain, txpool *core.TxPool, eventMux *event.TypeMux) (*Scheduler, error) {
 	log.Info("Create Sequencer Server")
 
 	syncer := synchronizer.NewSynchronizer()
@@ -96,20 +100,22 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 		return nil, fmt.Errorf("get sequencer set failed, err: %v", err)
 	}
 	schedulerInst := &Scheduler{
-		config:          config,
-		running:         0,
-		currentHeight:   0,
-		db:              db,
-		done:            make(chan struct{}, 1),
-		batchDone:       make(chan struct{}, 1),
-		ticker:          time.NewTicker(10 * time.Second), //TODO
-		consensusEngine: clique,
-		eventMux:        eventMux,
-		syncer:          syncer,
-		schedulerAddr:   common.BytesToAddress(schedulerAddr[:]),
-		sequencerSet:    NewSequencerSet(seqz),
-		blockchain:      blockchain,
-		chainHeadCh:     make(chan core.ChainHeadEvent, chainHeadChanSize),
+		config:            config,
+		running:           0,
+		currentHeight:     0,
+		db:                db,
+		done:              make(chan struct{}, 1),
+		batchDone:         make(chan struct{}, 1),
+		ticker:            time.NewTicker(10 * time.Second), //TODO
+		consensusEngine:   clique,
+		eventMux:          eventMux,
+		syncer:            syncer,
+		schedulerAddr:     common.BytesToAddress(schedulerAddr[:]),
+		sequencerSet:      NewSequencerSet(seqz),
+		blockchain:        blockchain,
+		txpool:            txpool,
+		sequencerHealther: NewSequencerHealther(),
+		chainHeadCh:       make(chan core.ChainHeadEvent, chainHeadChanSize),
 	}
 
 	schedulerInst.addPeerSub = schedulerInst.eventMux.Subscribe(core.PeerAddEvent{})
@@ -187,6 +193,9 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		expireTime = schedulerInst.config.BatchTime
 	}
 	for {
+		// acceptance check last sequencer
+		schedulerInst.checkSequencer()
+
 		schedulerCh := make(chan struct{})
 		err := schedulerInst.eventMux.Post(core.L1ToL2TxStartEvent{
 			ErrCh:       nil,
@@ -229,6 +238,12 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			return
 		}
 		msg.Signature = sign
+		expectMinTxsCount, err := schedulerInst.GetExpectMinTxsCount(uint64(batchSize))
+		if err != nil {
+			log.Error("getminBlockCount failed", "error", err)
+			return
+		}
+		schedulerInst.expectMinTxsCount = expectMinTxsCount
 		schedulerInst.currentStartMsg = msg
 		rawdb.WriteCurrentBatchPeriodIndex(schedulerInst.db, msg.BatchIndex)
 
@@ -290,6 +305,7 @@ func (schedulerInst *Scheduler) readLoop() {
 				log.Error("sequencer set update failed", "err", err)
 				continue
 			}
+			schedulerInst.SetSequencerHealthChecker(seqSet)
 			schedulerInst.l.Unlock()
 		case <-schedulerInst.done:
 			log.Info("Get scheduler stop signal")
