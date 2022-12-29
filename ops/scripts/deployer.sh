@@ -66,7 +66,7 @@ else [ $CONTRACTS_TARGET_NETWORK == "goerli-testnet" ]
 fi
 
 # only gen addresses.json in local. Use exist configmap in k8s environment
-if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
+if [ $CONTRACTS_TARGET_NETWORK = "local" ] || [ $SKIP_CONTRACT_DEPLOY = "NO"];then
   # Start building addresses.json.
   echo "{" > addresses.json
   # Zip the two files describe above together, then, switch their order and format as JSON.
