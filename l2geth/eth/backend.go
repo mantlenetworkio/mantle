@@ -245,7 +245,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	rollupGpo := gasprice.NewRollupOracle()
 	eth.APIBackend.rollupGpo = rollupGpo
 	eth.syncService.RollupGpo = rollupGpo
-
+	eth.protocolManager.setMinerCheck(eth.miner.Mining)
 	if _, ok := eth.engine.(*clique.Clique); ok {
 		schedulerInst, err := clique.NewScheduler(
 			chainDb,
