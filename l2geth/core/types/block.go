@@ -396,7 +396,7 @@ type Blocks []*Block
 
 type RollbackState struct {
 	BlockNumber uint64
-	Index       uint64
+	BlockHash   common.Hash
 }
 
 type RollbackStates []*RollbackState

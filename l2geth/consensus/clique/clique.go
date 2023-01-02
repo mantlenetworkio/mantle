@@ -19,7 +19,6 @@ package clique
 
 import (
 	"bytes"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -34,7 +33,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/misc"
-	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/core/state"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
@@ -553,8 +551,6 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header, txSe
 	}
 
 	header.Extra = append(header.Extra, txSetProof.Serialize()...)
-	latestRollbackState := rawdb.ReadLatestRollbackState(c.db)
-	binary.BigEndian.AppendUint64(header.Extra, latestRollbackState.Index)
 	header.Extra = append(header.Extra, make([]byte, ExtraSeal)...)
 
 	// Mix digest is reserved for now, set to empty
