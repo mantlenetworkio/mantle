@@ -973,7 +973,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 		// If enough time has passed, then assign the
 		// transaction to have the timestamp now. Otherwise,
 		// use the current timestamp
-		if now.Sub(current) > s.timestampRefreshThreshold {
+		if now.Sub(current) > s.timestampRefreshThreshold && tx.GetMeta().Index == nil {
 			current = now
 		}
 		log.Info("Updating latest timestamp", "timestamp", current, "unix", current.Unix())
