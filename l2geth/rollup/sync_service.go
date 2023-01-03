@@ -1237,6 +1237,7 @@ func (s *SyncService) PreCheckSyncServiceState(tx *types.Transaction) bool {
 }
 
 func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
+	log.Debug("we have receiverd newBlock")
 	l1BlockNumber := tx.L1BlockNumber()
 	s.SetLatestL1BlockNumber(l1BlockNumber.Uint64())
 	s.SetLatestL1Timestamp(tx.L1Timestamp())
@@ -1244,7 +1245,15 @@ func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
 	if queueIndex := tx.GetMeta().QueueIndex; queueIndex != nil {
 		s.SetLatestEnqueueIndex(queueIndex)
 	}
-	log.Debug("Update sync service state with new block", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
+	// Update the cache when the transaction is from the owner
+	// of the gas price oracle
+	sender, _ := types.Sender(s.signer, tx)
+	owner := s.GasPriceOracleOwnerAddress()
+	if owner != nil && sender == *owner {
+		if err := s.updateGasPriceOracleCache(nil); err != nil {
+			return
+		}
+	}
 }
 
 // syncer represents a function that can sync remote items and then returns the
