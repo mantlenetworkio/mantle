@@ -18,7 +18,6 @@
 package core
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -182,9 +181,6 @@ type BlockChain struct {
 	preCheckSyncService   func(*types.Transaction) bool     // first check block avaliabe before insert chain
 	updateSyncService     func(*types.Transaction)          // update sync service state after inserting chain block
 	sequencerRollbackFunc func(rollbackNumber uint64) error // rollback will setHead to start - 1
-
-	extraVanity int // Fixed number of extra-data prefix bytes reserved for signer vanity
-	extraSeal   int // Fixed number of extra-data suffix bytes reserved for signer seal
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -1489,23 +1485,39 @@ func (bc *BlockChain) addFutureBlock(block *types.Block) error {
 	return nil
 }
 
-// find next rollback blockNumber
-func (bc *BlockChain) nextRollbackNumber(rollbackIndex uint64) uint64 {
+// GetRollbackNumber get rollback blockNumber
+func (bc *BlockChain) GetRollbackNumber() uint64 {
 	rbss := rawdb.ReadRollbackStates(bc.db)
-	for i, rbs := range rbss {
-		if rollbackIndex == rbs.Index {
-			if len(rbss) < i+2 {
-				// latest index
-				return math.MaxUint64
+	current := bc.CurrentBlock()
+	var rollbackNumber uint64 = math.MaxUint64
+	for i := len(rbss) - 1; i >= 0; i-- {
+		if current.Number().Uint64() >= rbss[i].BlockNumber {
+			block := bc.GetBlockByNumber(rbss[i].BlockNumber)
+			if block.Hash() != rbss[i].BlockHash {
+				rollbackNumber = rbss[i].BlockNumber
+			} else {
+				break
 			}
-			return rbss[i+1].BlockNumber
-		}
-		// There is no equivalent so far
-		if rollbackIndex < rbs.Index {
-			return rbs.BlockNumber
 		}
 	}
-	return math.MaxUint64
+	return rollbackNumber
+}
+
+// checkRemoteBlockHash check remote block hash
+func (bc *BlockChain) checkRemoteBlockHash(block *types.Block) bool {
+	rbss := rawdb.ReadRollbackStates(bc.db)
+	if len(rbss) == 0 {
+		return true
+	}
+	if block.Number().Uint64() > rbss[len(rbss)-1].BlockNumber {
+		return true
+	}
+	for i := len(rbss) - 1; i >= 0; i-- {
+		if block.Number().Uint64() == rbss[i].BlockNumber {
+			return block.Hash() == rbss[i].BlockHash
+		}
+	}
+	return true
 }
 
 // UpdateRollbackStates sequencer update rollback index
@@ -1514,15 +1526,10 @@ func (bc *BlockChain) UpdateRollbackStates(rollbackStates types.RollbackStates) 
 }
 
 // AppendRollbackStates scheduler bump up rollback index
-func (bc *BlockChain) AppendRollbackStates(rollbackNumber uint64) {
+func (bc *BlockChain) AppendRollbackStates(rollbackState *types.RollbackState) {
 	var rollbackStates types.RollbackStates
-	rollbackState := new(types.RollbackState)
-	rollbackState.BlockNumber = rollbackNumber
 	rbss := rawdb.ReadRollbackStates(bc.db)
-	if len(rbss) == 0 {
-		rollbackState.Index = 1
-	} else {
-		rollbackState.Index = rbss[len(rbss)-1].Index + 1
+	if len(rbss) != 0 {
 		for _, rbs := range rbss {
 			if rbs.BlockNumber >= rollbackState.BlockNumber {
 				break
@@ -1532,15 +1539,6 @@ func (bc *BlockChain) AppendRollbackStates(rollbackNumber uint64) {
 	}
 	rollbackStates = append(rollbackStates, rollbackState)
 	rawdb.WriteRollbackStates(bc.db, rollbackStates)
-}
-
-func (bc *BlockChain) LatestRollbackState() *types.RollbackState {
-	return rawdb.ReadLatestRollbackState(bc.db)
-}
-
-func (bc *BlockChain) RollbackIndex(extra []byte) uint64 {
-	rollbackIndexBytes := extra[len(extra)-bc.extraSeal-common.Uint64Length : len(extra)-bc.extraSeal]
-	return binary.BigEndian.Uint64(rollbackIndexBytes)
 }
 
 // InsertChain attempts to insert the given batch of blocks in to the canonical
@@ -1553,20 +1551,16 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 	// Sanity check that we have something meaningful to import
 	// Blocks earlier versions of blocks from entering
 	// ensure current block is correct or rollback
-	current := bc.CurrentHeader()
-	next := bc.nextRollbackNumber(bc.RollbackIndex(current.Extra))
-	if current.Number.Uint64() >= next {
-		if err := bc.sequencerRollbackFunc(next); err != nil {
+	rollbackNumber := bc.GetRollbackNumber()
+	if rollbackNumber != math.MaxUint64 {
+		if err := bc.sequencerRollbackFunc(rollbackNumber); err != nil {
 			return 0, err
 		}
 	}
-
 	if len(chain) == 0 {
 		return 0, nil
 	}
 
-	last := chain[len(chain)-1]
-	next = bc.nextRollbackNumber(bc.RollbackIndex(last.Header().Extra))
 	bc.blockProcFeed.Send(true)
 	defer bc.blockProcFeed.Send(false)
 
@@ -1574,6 +1568,8 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 	var (
 		block, prev *types.Block
 	)
+	last := chain[len(chain)-1]
+	pass := bc.checkRemoteBlockHash(last)
 	// Do a sanity check that the provided chain is actually ordered and linked
 	for i := 0; i < len(chain); i++ {
 		if i != 0 {
@@ -1588,12 +1584,9 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 					prev.Hash().Bytes()[:4], i, block.NumberU64(), block.Hash().Bytes()[:4], block.ParentHash().Bytes()[:4])
 			}
 		}
-		if last.NumberU64() >= next {
-			next = bc.nextRollbackNumber(bc.RollbackIndex(chain[i].Header().Extra))
-			if chain[i].NumberU64() >= next {
+		if !pass {
+			if !bc.checkRemoteBlockHash(block) {
 				chain = chain[:i]
-				log.Info("low RollbackIndex block", "number", block.Number(), "RollbackIndex", bc.RollbackIndex(chain[i].Extra()),
-					"nextRollbackNumber", next)
 				break
 			}
 		}
@@ -2382,14 +2375,4 @@ func (bc *BlockChain) SetPreCheckSyncServiceFunc(preCheckFunc func(*types.Transa
 
 func (bc *BlockChain) SetSequencerRollbackFunc(rollbackFunc func(rollbackNumber uint64) error) {
 	bc.sequencerRollbackFunc = rollbackFunc
-}
-
-// SetExtraVanity clique Fixed number of extra-data prefix bytes reserved for signer vanity
-func (bc *BlockChain) SetExtraVanity(extraVanity int) {
-	bc.extraVanity = extraVanity
-}
-
-// SetExtraSeal clique Fixed number of extra-data suffix bytes reserved for signer seal
-func (bc *BlockChain) SetExtraSeal(extraSeal int) {
-	bc.extraSeal = extraSeal
 }

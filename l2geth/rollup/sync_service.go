@@ -817,7 +817,6 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	if err := s.SetHead(start - 1); err != nil {
 		log.Crit("rollback error:", "setHead error", err)
 	}
-	s.bc.AppendRollbackStates(start)
 	log.Info("setHead end,current :", "block number", s.bc.CurrentHeader().Number.Uint64())
 	for _, t := range txs {
 		if err := s.applyIndexedTransaction(&t, &types.BatchTxSetProof{}); err != nil {
@@ -827,8 +826,14 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
 	for i := start; i <= latest; i++ {
 		newBlock := s.bc.GetBlockByNumber(i)
-		log.Info("new block rollback state", "index", s.bc.RollbackIndex(newBlock.Extra()))
-		log.Info("new block rollback state", "blockNumber", s.bc.RollbackIndex(newBlock.Extra()))
+		log.Info("StateRoot", "equal", oldBlocks[i-start].Root() == newBlock.Root())
+		if oldBlocks[i-start].Hash() != newBlock.Hash() {
+			rollbackState := &types.RollbackState{
+				BlockNumber: i,
+				BlockHash:   newBlock.Hash(),
+			}
+			s.bc.AppendRollbackStates(rollbackState)
+		}
 	}
 	return nil
 }
@@ -968,7 +973,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 		// If enough time has passed, then assign the
 		// transaction to have the timestamp now. Otherwise,
 		// use the current timestamp
-		if now.Sub(current) > s.timestampRefreshThreshold {
+		if now.Sub(current) > s.timestampRefreshThreshold && tx.GetMeta().Index == nil {
 			current = now
 		}
 		log.Info("Updating latest timestamp", "timestamp", current, "unix", current.Unix())

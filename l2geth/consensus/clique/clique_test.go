@@ -56,12 +56,12 @@ func TestReimportMirroredState(t *testing.T) {
 	}
 	buf := batchPeriodStartMsg.Serialize()
 	genspec := &core.Genesis{
-		ExtraData: make([]byte, ExtraVanity+len(buf)+ExtraSeal),
+		ExtraData: make([]byte, extraVanity+len(buf)+extraSeal),
 		Alloc: map[common.Address]core.GenesisAccount{
 			addr: {Balance: big.NewInt(1)},
 		},
 	}
-	copy(genspec.ExtraData[ExtraVanity:], buf[:])
+	copy(genspec.ExtraData[extraVanity:], buf[:])
 	genesis := genspec.MustCommit(db)
 
 	// Generate a batch of blocks, each properly signed
@@ -88,11 +88,11 @@ func TestReimportMirroredState(t *testing.T) {
 		if i > 0 {
 			header.ParentHash = blocks[i-1].Hash()
 		}
-		header.Extra = make([]byte, ExtraVanity+ExtraSeal)
+		header.Extra = make([]byte, extraVanity+extraSeal)
 		header.Difficulty = diffInTurn
 
 		sig, _ := crypto.Sign(SealHash(header).Bytes(), key)
-		copy(header.Extra[len(header.Extra)-ExtraSeal:], sig)
+		copy(header.Extra[len(header.Extra)-extraSeal:], sig)
 		blocks[i] = block.WithSeal(header)
 	}
 	// Insert the first two blocks and make sure the chain is valid
