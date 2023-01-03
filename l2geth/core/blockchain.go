@@ -181,9 +181,6 @@ type BlockChain struct {
 	preCheckSyncService   func(*types.Transaction) bool     // first check block avaliabe before insert chain
 	updateSyncService     func(*types.Transaction)          // update sync service state after inserting chain block
 	sequencerRollbackFunc func(rollbackNumber uint64) error // rollback will setHead to start - 1
-
-	extraVanity int // Fixed number of extra-data prefix bytes reserved for signer vanity
-	extraSeal   int // Fixed number of extra-data suffix bytes reserved for signer seal
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -2378,14 +2375,4 @@ func (bc *BlockChain) SetPreCheckSyncServiceFunc(preCheckFunc func(*types.Transa
 
 func (bc *BlockChain) SetSequencerRollbackFunc(rollbackFunc func(rollbackNumber uint64) error) {
 	bc.sequencerRollbackFunc = rollbackFunc
-}
-
-// SetExtraVanity clique Fixed number of extra-data prefix bytes reserved for signer vanity
-func (bc *BlockChain) SetExtraVanity(extraVanity int) {
-	bc.extraVanity = extraVanity
-}
-
-// SetExtraSeal clique Fixed number of extra-data suffix bytes reserved for signer seal
-func (bc *BlockChain) SetExtraSeal(extraSeal int) {
-	bc.extraSeal = extraSeal
 }

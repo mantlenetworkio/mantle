@@ -57,8 +57,8 @@ const (
 var (
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 
-	ExtraVanity = 32                     // Fixed number of extra-data prefix bytes reserved for signer vanity
-	ExtraSeal   = crypto.SignatureLength // Fixed number of extra-data suffix bytes reserved for signer seal
+	extraVanity = 32                     // Fixed number of extra-data prefix bytes reserved for signer vanity
+	extraSeal   = crypto.SignatureLength // Fixed number of extra-data suffix bytes reserved for signer seal
 
 	nonceAuthVote = hexutil.MustDecode("0xffffffffffffffff") // Magic nonce number to vote on adding a new signer
 	nonceDropVote = hexutil.MustDecode("0x0000000000000000") // Magic nonce number to vote on removing a signer.
@@ -151,10 +151,10 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 		return address.(common.Address), nil
 	}
 	// Retrieve the signature from the header extra-data
-	if len(header.Extra) < ExtraSeal {
+	if len(header.Extra) < extraSeal {
 		return common.Address{}, errMissingSignature
 	}
-	signature := header.Extra[len(header.Extra)-ExtraSeal:]
+	signature := header.Extra[len(header.Extra)-extraSeal:]
 
 	// Recover the public key and the Ethereum address
 	pubkey, err := crypto.Ecrecover(SealHash(header).Bytes(), signature)
@@ -269,10 +269,10 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 		return errInvalidCheckpointVote
 	}
 	// Check that the extra-data contains both the vanity and signature
-	if len(header.Extra) < ExtraVanity {
+	if len(header.Extra) < extraVanity {
 		return errMissingVanity
 	}
-	if len(header.Extra) < ExtraVanity+ExtraSeal {
+	if len(header.Extra) < extraVanity+extraSeal {
 		return errMissingSignature
 	}
 	// Ensure that the mix digest is zero as we don't have fork protection currently
@@ -339,7 +339,7 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainReader, header *type
 			copy(signers[i*common.AddressLength:], signer[:])
 		}
 		// There always will be only one signer
-		if !bytes.Equal(header.Extra[ExtraVanity:ExtraVanity+common.AddressLength], signers) {
+		if !bytes.Equal(header.Extra[extraVanity:extraVanity+common.AddressLength], signers) {
 			return errMismatchingCheckpointSigners
 		}
 	}
@@ -379,7 +379,7 @@ func (c *Clique) snapshot(chain consensus.ChainReader, number uint64, hash commo
 
 				// There always will be only one signer
 				signers := make([]common.Address, 1)
-				copy(signers[0][:], checkpoint.Extra[ExtraVanity:ExtraVanity+common.AddressLength])
+				copy(signers[0][:], checkpoint.Extra[extraVanity:extraVanity+common.AddressLength])
 				snap = newSnapshot(c.config, c.signatures, number, hash, signers)
 				if err := snap.store(c.db); err != nil {
 					return nil, err
@@ -476,7 +476,7 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 			}
 		}
 	}
-	txSetProofBytes := header.Extra[ExtraVanity+common.AddressLength : len(header.Extra)-ExtraSeal-common.Uint64Length]
+	txSetProofBytes := header.Extra[extraVanity+common.AddressLength : len(header.Extra)-extraSeal]
 	if len(txSetProofBytes) != 0 {
 		var txSetProof types.BatchTxSetProof
 		txSetProof, err = types.DecodeBatchTxSetProof(txSetProofBytes)
@@ -541,17 +541,17 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header, txSe
 	header.Difficulty = CalcDifficulty(snap, c.signer)
 
 	// Ensure the extra data has all its components
-	if len(header.Extra) < ExtraVanity {
-		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, ExtraVanity-len(header.Extra))...)
+	if len(header.Extra) < extraVanity {
+		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, extraVanity-len(header.Extra))...)
 	}
-	header.Extra = header.Extra[:ExtraVanity]
+	header.Extra = header.Extra[:extraVanity]
 
 	for _, signer := range snap.signers() {
 		header.Extra = append(header.Extra, signer[:]...)
 	}
 
 	header.Extra = append(header.Extra, txSetProof.Serialize()...)
-	header.Extra = append(header.Extra, make([]byte, ExtraSeal)...)
+	header.Extra = append(header.Extra, make([]byte, extraSeal)...)
 
 	// Mix digest is reserved for now, set to empty
 	header.MixDigest = common.Hash{}
@@ -665,7 +665,7 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 	if err != nil {
 		return err
 	}
-	copy(header.Extra[len(header.Extra)-ExtraSeal:], sighash)
+	copy(header.Extra[len(header.Extra)-extraSeal:], sighash)
 	// Wait until sealing is terminated or delay timeout.
 	log.Trace("Waiting for slot to sign and propagate", "delay", common.PrettyDuration(delay))
 	go func() {

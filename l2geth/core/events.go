@@ -31,6 +31,11 @@ type BatchPeriodStartEvent struct {
 	ErrCh chan error
 }
 
+type RollbackStartEvent struct {
+	Msg   *types.RollbackStates
+	ErrCh chan error
+}
+
 type L1ToL2TxStartEvent struct {
 	ErrCh       chan error
 	SchedulerCh chan struct{}
