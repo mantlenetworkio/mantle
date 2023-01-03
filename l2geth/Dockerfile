@@ -2,7 +2,7 @@
 FROM golang:1.19-alpine3.17 as builder
 
 RUN apk add --no-cache make gcc musl-dev linux-headers git
-
+RUN go env -w GOPROXY=https://goproxy.cn
 COPY ./l2geth /app/l2geth
 
 WORKDIR /app/l2geth
