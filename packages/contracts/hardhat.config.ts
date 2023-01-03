@@ -14,6 +14,7 @@ import '@typechain/hardhat'
 import 'hardhat-deploy'
 import 'hardhat-gas-reporter'
 import 'hardhat-output-validator'
+import 'hardhat-abi-exporter'
 
 // Hardhat tasks
 import './tasks'
@@ -71,6 +72,8 @@ subtask(TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE).setAction(
   }
 )
 
+// @ts-ignore
+// @ts-ignore
 const config: HardhatUserConfig = {
   networks: {
     hardhat: {
@@ -183,6 +186,11 @@ const config: HardhatUserConfig = {
     deploy: './deploy',
     deployments: './deployments',
     deployConfig: './deploy-config',
+  },
+  abiExporter: {
+    path: './abi',
+    runOnCompile: true,
+    clear: true,
   },
   namedAccounts: {
     deployer: {

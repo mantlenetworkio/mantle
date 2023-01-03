@@ -34,7 +34,7 @@ import "./verifier/IVerifier.sol";
 import {Lib_AddressResolver} from "../../libraries/resolver/Lib_AddressResolver.sol";
 import {IStateCommitmentChain} from "../rollup/IStateCommitmentChain.sol";
 
-abstract contract RollupBase is IRollup, Initializable, Lib_AddressResolver {
+abstract contract RollupBase is IRollup, Initializable {
     // Config parameters
     uint256 public confirmationPeriod; // number of L1 blocks
     uint256 public challengePeriod; // number of L1 blocks
@@ -60,7 +60,7 @@ abstract contract RollupBase is IRollup, Initializable, Lib_AddressResolver {
     }
 }
 
-contract Rollup is RollupBase {
+contract Rollup is Lib_AddressResolver, RollupBase {
     modifier stakedOnly() {
         require(isStaked(msg.sender));
         _;
@@ -111,7 +111,7 @@ contract Rollup is RollupBase {
     }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
+    constructor(address _libAddressManager) Lib_AddressResolver(_libAddressManager) {
         _disableInitializers();
     }
 
@@ -179,13 +179,6 @@ contract Rollup is RollupBase {
     }
 
     /// @inheritdoc IRollup
-    function withdraw() external override {
-        uint256 withdrawableFund = withdrawableFunds[msg.sender];
-        withdrawableFunds[msg.sender] = 0;
-        (bool success,) = msg.sender.call{value: withdrawableFund}("");
-        require(success, "TRANSFER_FAILED");
-    }
-
     function createAssertionWithStateBatch(
         bytes32 vmHash,
         uint256 inboxSize,
@@ -198,7 +191,7 @@ contract Rollup is RollupBase {
         require(msg.sender == resolve("BVM_Proposer"), "msg.sender is not proposer, can't append batch");
 
         // create assertion
-        createAssertion(vmHash, inboxSize, l2GasUsed);
+        this.createAssertion(vmHash, inboxSize, l2GasUsed);
 
         // append state batch
         address scc = resolve("StateCommitmentChain");
@@ -229,8 +222,6 @@ contract Rollup is RollupBase {
         require(assertionGasUsed <= maxGasPerAssertion, "TOO_LARGE");
         // Require that the assertion at least includes one transaction
         require(inboxSize > assertions.getInboxSize(parentID), "NO_TXN");
-        // Require that the assertion doesn't read past the end of the current inbox.
-        require(inboxSize <= sequencerInbox.getInboxSize(), "INBOX_PAST_END");
 
         // Initialize assertion.
         lastCreatedAssertionID++;

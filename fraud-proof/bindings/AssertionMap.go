@@ -30,7 +30,7 @@ var (
 
 // AssertionMapMetaData contains all meta data concerning the AssertionMap contract.
 var AssertionMapMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_rollupAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"assertions\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"stateHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"parent\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proposalTime\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"numStakers\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"childInboxSize\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"stateHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"parentID\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"}],\"name\":\"createAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"deleteAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"getDeadline\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"getInboxSize\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"getNumStakers\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"getParentID\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"getProposalTime\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"getStateHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"stakerAddress\",\"type\":\"address\"}],\"name\":\"isStaker\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rollupAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"stakerAddress\",\"type\":\"address\"}],\"name\":\"stakeOnAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_rollupAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"assertions\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"stateHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"gasUsed\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"parent\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proposalTime\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"numStakers\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"childInboxSize\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"stateHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"gasUsed\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"parentID\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"}],\"name\":\"createAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"deleteAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"getDeadline\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"getGasUsed\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"getInboxSize\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getLatestAssertionID\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"getNumStakers\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"getParentID\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"getProposalTime\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"getStateHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"stakerAddress\",\"type\":\"address\"}],\"name\":\"isStaker\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rollupAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"stakerAddress\",\"type\":\"address\"}],\"name\":\"stakeOnAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // AssertionMapABI is the input ABI used to generate the binding from.
@@ -181,10 +181,11 @@ func (_AssertionMap *AssertionMapTransactorRaw) Transact(opts *bind.TransactOpts
 
 // Assertions is a free data retrieval call binding the contract method 0x524232f6.
 //
-// Solidity: function assertions(uint256 ) view returns(bytes32 stateHash, uint256 inboxSize, uint256 parent, uint256 deadline, uint256 proposalTime, uint256 numStakers, uint256 childInboxSize)
+// Solidity: function assertions(uint256 ) view returns(bytes32 stateHash, uint256 inboxSize, uint256 gasUsed, uint256 parent, uint256 deadline, uint256 proposalTime, uint256 numStakers, uint256 childInboxSize)
 func (_AssertionMap *AssertionMapCaller) Assertions(opts *bind.CallOpts, arg0 *big.Int) (struct {
 	StateHash      [32]byte
 	InboxSize      *big.Int
+	GasUsed        *big.Int
 	Parent         *big.Int
 	Deadline       *big.Int
 	ProposalTime   *big.Int
@@ -197,6 +198,7 @@ func (_AssertionMap *AssertionMapCaller) Assertions(opts *bind.CallOpts, arg0 *b
 	outstruct := new(struct {
 		StateHash      [32]byte
 		InboxSize      *big.Int
+		GasUsed        *big.Int
 		Parent         *big.Int
 		Deadline       *big.Int
 		ProposalTime   *big.Int
@@ -209,11 +211,12 @@ func (_AssertionMap *AssertionMapCaller) Assertions(opts *bind.CallOpts, arg0 *b
 
 	outstruct.StateHash = *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
 	outstruct.InboxSize = *abi.ConvertType(out[1], new(*big.Int)).(**big.Int)
-	outstruct.Parent = *abi.ConvertType(out[2], new(*big.Int)).(**big.Int)
-	outstruct.Deadline = *abi.ConvertType(out[3], new(*big.Int)).(**big.Int)
-	outstruct.ProposalTime = *abi.ConvertType(out[4], new(*big.Int)).(**big.Int)
-	outstruct.NumStakers = *abi.ConvertType(out[5], new(*big.Int)).(**big.Int)
-	outstruct.ChildInboxSize = *abi.ConvertType(out[6], new(*big.Int)).(**big.Int)
+	outstruct.GasUsed = *abi.ConvertType(out[2], new(*big.Int)).(**big.Int)
+	outstruct.Parent = *abi.ConvertType(out[3], new(*big.Int)).(**big.Int)
+	outstruct.Deadline = *abi.ConvertType(out[4], new(*big.Int)).(**big.Int)
+	outstruct.ProposalTime = *abi.ConvertType(out[5], new(*big.Int)).(**big.Int)
+	outstruct.NumStakers = *abi.ConvertType(out[6], new(*big.Int)).(**big.Int)
+	outstruct.ChildInboxSize = *abi.ConvertType(out[7], new(*big.Int)).(**big.Int)
 
 	return *outstruct, err
 
@@ -221,10 +224,11 @@ func (_AssertionMap *AssertionMapCaller) Assertions(opts *bind.CallOpts, arg0 *b
 
 // Assertions is a free data retrieval call binding the contract method 0x524232f6.
 //
-// Solidity: function assertions(uint256 ) view returns(bytes32 stateHash, uint256 inboxSize, uint256 parent, uint256 deadline, uint256 proposalTime, uint256 numStakers, uint256 childInboxSize)
+// Solidity: function assertions(uint256 ) view returns(bytes32 stateHash, uint256 inboxSize, uint256 gasUsed, uint256 parent, uint256 deadline, uint256 proposalTime, uint256 numStakers, uint256 childInboxSize)
 func (_AssertionMap *AssertionMapSession) Assertions(arg0 *big.Int) (struct {
 	StateHash      [32]byte
 	InboxSize      *big.Int
+	GasUsed        *big.Int
 	Parent         *big.Int
 	Deadline       *big.Int
 	ProposalTime   *big.Int
@@ -236,10 +240,11 @@ func (_AssertionMap *AssertionMapSession) Assertions(arg0 *big.Int) (struct {
 
 // Assertions is a free data retrieval call binding the contract method 0x524232f6.
 //
-// Solidity: function assertions(uint256 ) view returns(bytes32 stateHash, uint256 inboxSize, uint256 parent, uint256 deadline, uint256 proposalTime, uint256 numStakers, uint256 childInboxSize)
+// Solidity: function assertions(uint256 ) view returns(bytes32 stateHash, uint256 inboxSize, uint256 gasUsed, uint256 parent, uint256 deadline, uint256 proposalTime, uint256 numStakers, uint256 childInboxSize)
 func (_AssertionMap *AssertionMapCallerSession) Assertions(arg0 *big.Int) (struct {
 	StateHash      [32]byte
 	InboxSize      *big.Int
+	GasUsed        *big.Int
 	Parent         *big.Int
 	Deadline       *big.Int
 	ProposalTime   *big.Int
@@ -280,6 +285,37 @@ func (_AssertionMap *AssertionMapCallerSession) GetDeadline(assertionID *big.Int
 	return _AssertionMap.Contract.GetDeadline(&_AssertionMap.CallOpts, assertionID)
 }
 
+// GetGasUsed is a free data retrieval call binding the contract method 0xb919bf93.
+//
+// Solidity: function getGasUsed(uint256 assertionID) view returns(uint256)
+func (_AssertionMap *AssertionMapCaller) GetGasUsed(opts *bind.CallOpts, assertionID *big.Int) (*big.Int, error) {
+	var out []interface{}
+	err := _AssertionMap.contract.Call(opts, &out, "getGasUsed", assertionID)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// GetGasUsed is a free data retrieval call binding the contract method 0xb919bf93.
+//
+// Solidity: function getGasUsed(uint256 assertionID) view returns(uint256)
+func (_AssertionMap *AssertionMapSession) GetGasUsed(assertionID *big.Int) (*big.Int, error) {
+	return _AssertionMap.Contract.GetGasUsed(&_AssertionMap.CallOpts, assertionID)
+}
+
+// GetGasUsed is a free data retrieval call binding the contract method 0xb919bf93.
+//
+// Solidity: function getGasUsed(uint256 assertionID) view returns(uint256)
+func (_AssertionMap *AssertionMapCallerSession) GetGasUsed(assertionID *big.Int) (*big.Int, error) {
+	return _AssertionMap.Contract.GetGasUsed(&_AssertionMap.CallOpts, assertionID)
+}
+
 // GetInboxSize is a free data retrieval call binding the contract method 0x2b27e93b.
 //
 // Solidity: function getInboxSize(uint256 assertionID) view returns(uint256)
@@ -309,6 +345,37 @@ func (_AssertionMap *AssertionMapSession) GetInboxSize(assertionID *big.Int) (*b
 // Solidity: function getInboxSize(uint256 assertionID) view returns(uint256)
 func (_AssertionMap *AssertionMapCallerSession) GetInboxSize(assertionID *big.Int) (*big.Int, error) {
 	return _AssertionMap.Contract.GetInboxSize(&_AssertionMap.CallOpts, assertionID)
+}
+
+// GetLatestAssertionID is a free data retrieval call binding the contract method 0x4935e6e2.
+//
+// Solidity: function getLatestAssertionID() view returns(uint256)
+func (_AssertionMap *AssertionMapCaller) GetLatestAssertionID(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _AssertionMap.contract.Call(opts, &out, "getLatestAssertionID")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// GetLatestAssertionID is a free data retrieval call binding the contract method 0x4935e6e2.
+//
+// Solidity: function getLatestAssertionID() view returns(uint256)
+func (_AssertionMap *AssertionMapSession) GetLatestAssertionID() (*big.Int, error) {
+	return _AssertionMap.Contract.GetLatestAssertionID(&_AssertionMap.CallOpts)
+}
+
+// GetLatestAssertionID is a free data retrieval call binding the contract method 0x4935e6e2.
+//
+// Solidity: function getLatestAssertionID() view returns(uint256)
+func (_AssertionMap *AssertionMapCallerSession) GetLatestAssertionID() (*big.Int, error) {
+	return _AssertionMap.Contract.GetLatestAssertionID(&_AssertionMap.CallOpts)
 }
 
 // GetNumStakers is a free data retrieval call binding the contract method 0x366b2b69.
@@ -497,25 +564,25 @@ func (_AssertionMap *AssertionMapCallerSession) RollupAddress() (common.Address,
 	return _AssertionMap.Contract.RollupAddress(&_AssertionMap.CallOpts)
 }
 
-// CreateAssertion is a paid mutator transaction binding the contract method 0x42281584.
+// CreateAssertion is a paid mutator transaction binding the contract method 0x05fa5c53.
 //
-// Solidity: function createAssertion(uint256 assertionID, bytes32 stateHash, uint256 inboxSize, uint256 parentID, uint256 deadline) returns()
-func (_AssertionMap *AssertionMapTransactor) CreateAssertion(opts *bind.TransactOpts, assertionID *big.Int, stateHash [32]byte, inboxSize *big.Int, parentID *big.Int, deadline *big.Int) (*types.Transaction, error) {
-	return _AssertionMap.contract.Transact(opts, "createAssertion", assertionID, stateHash, inboxSize, parentID, deadline)
+// Solidity: function createAssertion(uint256 assertionID, bytes32 stateHash, uint256 inboxSize, uint256 gasUsed, uint256 parentID, uint256 deadline) returns()
+func (_AssertionMap *AssertionMapTransactor) CreateAssertion(opts *bind.TransactOpts, assertionID *big.Int, stateHash [32]byte, inboxSize *big.Int, gasUsed *big.Int, parentID *big.Int, deadline *big.Int) (*types.Transaction, error) {
+	return _AssertionMap.contract.Transact(opts, "createAssertion", assertionID, stateHash, inboxSize, gasUsed, parentID, deadline)
 }
 
-// CreateAssertion is a paid mutator transaction binding the contract method 0x42281584.
+// CreateAssertion is a paid mutator transaction binding the contract method 0x05fa5c53.
 //
-// Solidity: function createAssertion(uint256 assertionID, bytes32 stateHash, uint256 inboxSize, uint256 parentID, uint256 deadline) returns()
-func (_AssertionMap *AssertionMapSession) CreateAssertion(assertionID *big.Int, stateHash [32]byte, inboxSize *big.Int, parentID *big.Int, deadline *big.Int) (*types.Transaction, error) {
-	return _AssertionMap.Contract.CreateAssertion(&_AssertionMap.TransactOpts, assertionID, stateHash, inboxSize, parentID, deadline)
+// Solidity: function createAssertion(uint256 assertionID, bytes32 stateHash, uint256 inboxSize, uint256 gasUsed, uint256 parentID, uint256 deadline) returns()
+func (_AssertionMap *AssertionMapSession) CreateAssertion(assertionID *big.Int, stateHash [32]byte, inboxSize *big.Int, gasUsed *big.Int, parentID *big.Int, deadline *big.Int) (*types.Transaction, error) {
+	return _AssertionMap.Contract.CreateAssertion(&_AssertionMap.TransactOpts, assertionID, stateHash, inboxSize, gasUsed, parentID, deadline)
 }
 
-// CreateAssertion is a paid mutator transaction binding the contract method 0x42281584.
+// CreateAssertion is a paid mutator transaction binding the contract method 0x05fa5c53.
 //
-// Solidity: function createAssertion(uint256 assertionID, bytes32 stateHash, uint256 inboxSize, uint256 parentID, uint256 deadline) returns()
-func (_AssertionMap *AssertionMapTransactorSession) CreateAssertion(assertionID *big.Int, stateHash [32]byte, inboxSize *big.Int, parentID *big.Int, deadline *big.Int) (*types.Transaction, error) {
-	return _AssertionMap.Contract.CreateAssertion(&_AssertionMap.TransactOpts, assertionID, stateHash, inboxSize, parentID, deadline)
+// Solidity: function createAssertion(uint256 assertionID, bytes32 stateHash, uint256 inboxSize, uint256 gasUsed, uint256 parentID, uint256 deadline) returns()
+func (_AssertionMap *AssertionMapTransactorSession) CreateAssertion(assertionID *big.Int, stateHash [32]byte, inboxSize *big.Int, gasUsed *big.Int, parentID *big.Int, deadline *big.Int) (*types.Transaction, error) {
+	return _AssertionMap.Contract.CreateAssertion(&_AssertionMap.TransactOpts, assertionID, stateHash, inboxSize, gasUsed, parentID, deadline)
 }
 
 // DeleteAssertion is a paid mutator transaction binding the contract method 0xd8a4e5af.

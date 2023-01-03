@@ -14,8 +14,7 @@
 
 package bindings
 
-//go:generate ./compile.sh
-//go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../../../contracts/abi/src/AssertionMap.sol/AssertionMap.json --pkg bindings --type AssertionMap --out AssertionMap.go
-//go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../../../contracts/abi/src/challenge/IChallenge.sol/IChallenge.json --pkg bindings --type IChallenge --out IChallenge.go
-//go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../../../contracts/abi/src/IRollup.sol/IRollup.json --pkg bindings --type IRollup --out IRollup.go
-//go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../../../contracts/abi/src/ISequencerInbox.sol/ISequencerInbox.json --pkg bindings --type ISequencerInbox --out ISequencerInbox.go
+//// go:generate ./compile.sh
+//go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../packages/contracts/abi/contracts/L1/fraud-proof/AssertionMap.sol/AssertionMap.json --pkg bindings --type AssertionMap --out AssertionMap.go
+//go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../packages/contracts/abi/contracts/L1/fraud-proof/challenge/IChallenge.sol/IChallenge.json --pkg bindings --type IChallenge --out IChallenge.go
+//go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../packages/contracts/abi/contracts/L1/fraud-proof/IRollup.sol/IRollup.json --pkg bindings --type IRollup --out IRollup.go

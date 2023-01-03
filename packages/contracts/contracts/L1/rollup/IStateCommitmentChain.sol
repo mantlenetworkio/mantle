@@ -58,6 +58,7 @@ interface IStateCommitmentChain {
      * Appends a batch of state roots to the chain.
      * @param _batch Batch of state roots.
      * @param _shouldStartAtElement Index of the element at which this batch should start.
+     * @param _signature tss group signature of state batches.
      */
     function appendStateBatch(bytes32[] calldata _batch, uint256 _shouldStartAtElement, bytes memory _signature) external;
 

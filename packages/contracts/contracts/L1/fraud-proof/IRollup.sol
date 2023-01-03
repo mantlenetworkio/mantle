@@ -83,13 +83,15 @@ interface IRollup {
     function advanceStake(uint256 assertionID) external;
 
     /**
-     * @notice Withdraws all of msg.sender's withdrawable funds.
-     */
-    function withdraw() external;
-
-    /**
      *
      * @notice create assertion with scc state batch
+     *
+     * @param vmHash New VM hash.
+     * @param inboxSize Size of inbox corresponding to assertion (number of transactions).
+     * @param l2GasUsed Total L2 gas used as of the end of this assertion's last transaction.
+     * @param _batch Batch of state roots.
+     * @param _shouldStartAtElement Index of the element at which this batch should start.
+     * @param _signature tss group signature of state batches.
      */
     function createAssertionWithStateBatch(
         bytes32 vmHash,
@@ -110,8 +112,6 @@ interface IRollup {
      * @param vmHash New VM hash.
      * @param inboxSize Size of inbox corresponding to assertion (number of transactions).
      * @param l2GasUsed Total L2 gas used as of the end of this assertion's last transaction.
-     * @param prevVMHash Predecessor assertion VM hash (required because it does not get stored in the assertion).
-     * @param prevL2GasUsed Predecessor assertion L2 gas used (required because it does not get stored in the assertion).
      */
     function createAssertion(
         bytes32 vmHash,
