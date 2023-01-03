@@ -47,6 +47,9 @@ echo $SCHEDULER_P2P_ENODE
 echo "Starting Geth node"
 if [ $IS_SEQUENCER == "true" ] ;then
   echo "we are sequencer node!!"
+  echo "config begin"
+  echo $CONFIG_PATH
+  echo "config end"
   exec geth \
     --verbosity="$VERBOSITY" \
     --password ./password \
@@ -54,19 +57,24 @@ if [ $IS_SEQUENCER == "true" ] ;then
     --unlock $BLOCK_SIGNER_ADDRESS \
     --bootnodes $SCHEDULER_P2P_ENODE \
     --nat $NAT \
-    --config /root/.ethereum/geth/config.toml \
+    --nodekeyhex $NODEKEY_HEX \
+    --config $CONFIG_PATH \
     --mine \
     --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
     --sequencer.mode="true" \
     "$@"
 elif [ $IS_SCHEDULER == "true" ];then
   echo "we are scheduler node"
+  echo "wenbin test begin"
+  echo $NODEKEY_HEX
+  echo "wenbin test end"
   exec geth \
     --verbosity="$VERBOSITY" \
     --password ./password \
     --allow-insecure-unlock \
     --unlock $BLOCK_SIGNER_ADDRESS \
     --nat $NAT \
+    --nodekeyhex $NODEKEY_HEX \
     --mine \
     --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
     "$@"
