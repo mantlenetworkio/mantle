@@ -590,13 +590,13 @@ func (w *worker) batchStartLoop() {
 					}
 				} else {
 					log.Debug("Inactive sequencer receives batchPeriodStartEvent",
-						"ReorgIndex", ev.Msg.ReorgIndex,
-						"StartHeight", ev.Msg.StartHeight,
-						"BatchIndex", ev.Msg.BatchIndex,
-						"MaxHeight", ev.Msg.MaxHeight,
-						"ExpireTime", ev.Msg.ExpireTime,
-						"SequencerAddress", ev.Msg.Sequencer.String(),
-						"Signature", hex.EncodeToString(ev.Msg.Signature),
+						"reorgIndex", ev.Msg.ReorgIndex,
+						"startHeight", ev.Msg.StartHeight,
+						"batchIndex", ev.Msg.BatchIndex,
+						"maxHeight", ev.Msg.MaxHeight,
+						"expireTime", ev.Msg.ExpireTime,
+						"sequencerAddress", ev.Msg.Sequencer.String(),
+						"signature", hex.EncodeToString(ev.Msg.Signature),
 					)
 				}
 			}
@@ -652,11 +652,11 @@ func (w *worker) batchAnswerLoop() {
 				}
 			} else {
 				log.Debug("Sequencer receives BatchPeriodAnswerEvent",
-					"Sequencer Address", ev.Msg.Sequencer.String(),
-					"StartHeight", ev.Msg.BatchIndex,
-					"BatchIndex", ev.Msg.StartIndex,
-					"TxLength", ev.Msg.Txs.Len(),
-					"Signature", hex.EncodeToString(ev.Msg.Signature),
+					"sequencerAddress", ev.Msg.Sequencer.String(),
+					"startHeight", ev.Msg.BatchIndex,
+					"batchIndex", ev.Msg.StartIndex,
+					"txLength", ev.Msg.Txs.Len(),
+					"signature", hex.EncodeToString(ev.Msg.Signature),
 				)
 			}
 			// System stopped
