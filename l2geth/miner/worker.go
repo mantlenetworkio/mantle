@@ -541,7 +541,12 @@ func (w *worker) batchStartLoop() {
 					}
 
 					// Keep sending messages until the limit is reached
+					expectHeight := ev.Msg.StartHeight - 1
 					for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < ev.Msg.MaxHeight && uint64(time.Now().Unix()) < ev.Msg.ExpireTime && inTxLen < (ev.Msg.MaxHeight-ev.Msg.StartHeight); {
+						if w.eth.BlockChain().CurrentBlock().NumberU64() < expectHeight {
+							time.Sleep(200 * time.Millisecond)
+							continue
+						}
 						pending, err := w.eth.TxPool().Pending()
 						if err != nil {
 							log.Error("Failed to fetch pending transactions", "err", err)
@@ -590,6 +595,7 @@ func (w *worker) batchStartLoop() {
 							Msg:   &bpa,
 							ErrCh: nil,
 						})
+						expectHeight += inTxLen
 						if err != nil {
 							log.Error("Post BatchPeriodAnswerMsg error", "err_msg", err.Error())
 							continue
@@ -645,7 +651,7 @@ func (w *worker) batchAnswerLoop() {
 					continue
 				}
 				w.mutex.Unlock()
-				if ev.Msg.StartIndex != w.eth.BlockChain().CurrentBlock().NumberU64() {
+				if ev.Msg.StartIndex != w.eth.BlockChain().CurrentBlock().NumberU64()+1 {
 					log.Error("Start index not equal with current height", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "start_index", ev.Msg.StartIndex)
 					continue
 				}
