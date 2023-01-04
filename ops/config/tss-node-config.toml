@@ -16,7 +16,7 @@ min_signed_in_window = 50
 [node]
 # database directory; default: 'base_dir' will be used
 db_dir = "/root/.tssnode/db"
-# the base directory for storing the data, tss localSaveData etc. 
+# the base directory for storing the data, tss localSaveData etc.
 base_dir = "/root/.tssnode"
 # websocket addr of tss manager
 ws_addr = "tcp://tss-manager:8081"
@@ -45,3 +45,4 @@ pre_param_timeout = "5m0s"
 # set it to environment with the prefix 'TSS', export TSS_KEY_PRIVATE_KEY="981a3e...."
 # or it is recommended to store the private key into keyring, you can checkout with 'tssnode keys -h'.
 private_key = ""
+

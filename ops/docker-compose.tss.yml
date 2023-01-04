@@ -1,0 +1,128 @@
+
+x-base: &base
+  restart: unless-stopped
+
+
+x-base-env: &base-env
+  TSS_NODE_BASE_DIR: /data/tssnode
+  TSS_NODE_DB_DIR: /data/tssnode/db
+  TSS_NODE_L1_URL: http://172.17.0.1:9545
+  TSS_NODE_L2_ETH_RPC: http://172.17.0.1:8545
+
+services:
+  tss-manager:
+    <<: *base
+    image: mantlenetworkio/tss:latest
+    container_name: bittss-manager
+    environment:
+      TSS_L1_URL: http://172.17.0.1:9545
+      TSS_L1_CONFIRM_BLOCKS: 0
+      TSS_L1_RECEIPT_CONFIRM_TIMEOUT: 30s
+      TSS_SCC_CONTRACT_ADDRESS: 0xc48078a734c2e22D43F54B47F7a8fB314Fa5A601
+      TSS_TSS_GROUP_CONTRACT_ADDRESS: 0x3495fa1C4C2Ae290CF20ED1745395663b6189911
+      TSS_TSS_STAKING_SLASH_CONTRACT_ADDRESS: 0x446Ae0F4BE2110a900B6506f5E1379C1E4BDfC57
+      TSS_SIGNED_BATCHES_WINDOW: 5
+      TSS_MIN_SIGNED_IN_WINDOW: 2
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss
+    command: ./tss manager -c config/tss-manager-config.toml
+    volumes:
+      - ./data/tss-manager:/root/tss-manager/db
+      - ./config:/app/config
+
+  tss-node1:
+    depends_on:
+      - tss-manager
+    image: mantlenetworkio/tss:latest
+    container_name: bittss-node1
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss
+    environment:
+      <<: *base-env
+      TSS_NODE_PRIVATE_KEY: 8579041c09247ea30aa30fdc4aad1897505ecfe44b92dc01c6481fae7d5dc705
+      TSS_NODE_BOOTSTRAP_PEERS: >
+        /ip4/172.17.0.1/tcp/8001/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,
+        /ip4/172.17.0.1/tcp/8002/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH,
+        /ip4/172.17.0.1/tcp/8003/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
+      TSS_NODE_EXTERNAL_IP: 172.17.0.1
+      TSS_NODE_P2P_PORT: 8000
+    command: ./tss node -c config/tss-node-config.toml
+    volumes:
+      - ./data/tss-1:/data
+      - ./config:/app/config
+
+  tss-node2:
+    depends_on:
+      - tss-node1
+    image: mantlenetworkio/tss:latest
+    container_name: bittss-node2
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss
+    command: ./tss node -c config/tss-node-config.toml
+    environment:
+      <<: *base-env
+      TSS_NODE_PRIVATE_KEY: 2bdfd71614eb0d2a994ecd96ba5f1dc9774e13ccdaece910992e4818e823e822
+      TSS_NODE_BOOTSTRAP_PEERS: >
+        /ip4/172.17.0.1/tcp/8000/p2p/16Uiu2HAmQWNYM7JXW55Qs5z6mR49eVu5pdRk17dKZ6zRSscdcWve,
+        /ip4/172.17.0.1/tcp/8002/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH,
+        /ip4/172.17.0.1/tcp/8003/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
+      TSS_NODE_EXTERNAL_IP: 172.17.0.1
+      TSS_NODE_P2P_PORT: 8001
+    volumes:
+      - ./data/tss-2:/data
+      - ./config:/app/config
+
+  tss-node3:
+    depends_on:
+      - tss-node1
+      - tss-node2
+    image: mantlenetworkio/tss:latest
+    container_name: bittss-node3
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss
+    command: ./tss node -c config/tss-node-config.toml
+    environment:
+      <<: *base-env
+      TSS_NODE_PRIVATE_KEY: ad55949cb6419c86cd59fb7b36a3d86d4dd7ee9cae5c55d2fd9584c80ea5bacb
+      TSS_NODE_BOOTSTRAP_PEERS: >
+        /ip4/172.17.0.1/tcp/8000/p2p/16Uiu2HAmQWNYM7JXW55Qs5z6mR49eVu5pdRk17dKZ6zRSscdcWve,
+        /ip4/172.17.0.1/tcp/8001/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,
+        /ip4/172.17.0.1/tcp/8003/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
+      TSS_NODE_EXTERNAL_IP: 172.17.0.1
+      TSS_NODE_P2P_PORT: 8002
+    volumes:
+      - ./data/tss-3:/data
+      - ./config:/app/config
+
+  tss-node4:
+    depends_on:
+      - tss-node1
+      - tss-node2
+      - tss-node3
+    image: mantlenetworkio/tss:latest
+    container_name: bittss-node4
+    build:
+      context: ..
+      dockerfile: ./ops/docker/tss/Dockerfile
+      target: tss
+    command: ./tss node -c config/tss-node-config.toml
+    environment:
+      <<: *base-env
+      TSS_NODE_PRIVATE_KEY: a7e87580b54050212e20ab75fb808ec9c7f759201ec4fe9ea1acad85adaf9b52
+      TSS_NODE_BOOTSTRAP_PEERS: >
+        /ip4/172.17.0.11/tcp/8000/p2p/16Uiu2HAmQWNYM7JXW55Qs5z6mR49eVu5pdRk17dKZ6zRSscdcWve,
+        /ip4/172.17.0.12/tcp/8001/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,
+        /ip4/172.17.0.13/tcp/8002/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH
+      TSS_NODE_EXTERNAL_IP: 172.17.0.1
+      TSS_NODE_P2P_PORT: 8003
+    volumes:
+      - ./data/tss-4:/data
+      - ./config:/app/config

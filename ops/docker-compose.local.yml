@@ -135,6 +135,7 @@ services:
 #    volumes:
 #      - ./data/tss-manager:/root/tss-manager/db
 #      - ./config:/app/config
+
 #  tss-1:
 #    depends_on:
 #      - tss-manager
