@@ -55,6 +55,21 @@ export interface DeployConfig {
   sccSequencerPublishWindowSeconds: number
 
   /**
+   * blockStaleMeasure block stale measure.
+   */
+  blockStaleMeasure: number
+
+  /**
+   * daFraudProofPeriod da fraud proof period.
+   */
+  daFraudProofPeriod: number
+
+  /**
+   * l2SubmittedBlockNumber l2 submitted block number.
+   */
+  l2SubmittedBlockNumber: number
+
+  /**
    * Address of the Sequencer (publishes to CTC).
    */
   bvmSequencerAddress: string
@@ -190,6 +205,15 @@ const configSpec: {
     type: 'number',
   },
   sccSequencerPublishWindowSeconds: {
+    type: 'number',
+  },
+  blockStaleMeasure: {
+    type: 'number',
+  },
+  daFraudProofPeriod:  {
+    type: 'number',
+  },
+  l2SubmittedBlockNumber:  {
     type: 'number',
   },
   bvmSequencerAddress: {

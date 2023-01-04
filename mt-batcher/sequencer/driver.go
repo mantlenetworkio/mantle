@@ -14,7 +14,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
@@ -107,46 +106,43 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 	}, nil
 }
 
-func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, *big.Int, error) {
+func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, error) {
 	blockOffset := new(big.Int).SetUint64(d.Cfg.BlockOffset)
 	var end *big.Int
 	log.Info("GetBatchBlockRange", "blockOffset", blockOffset)
-	start, err := d.EigenDaContract.LatestBlockNumber(&bind.CallOpts{
+	start, err := d.EigenDaContract.GetL2SubmitBlockNumber(&bind.CallOpts{
 		Context: context.Background(),
 	})
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 	latestHeader, err := d.Cfg.L2Client.HeaderByNumber(ctx, nil)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 	end = new(big.Int).Add(start, big.NewInt(int64(d.Cfg.BlockOffset)))
 	if start.Cmp(end) > 0 {
-		return nil, nil, nil, fmt.Errorf("invalid range, "+
+		return nil, nil, fmt.Errorf("invalid range, "+
 			"end(%v) < start(%v)", end, start)
 	}
 	if end.Cmp(latestHeader.Number) > 0 {
 		end = latestHeader.Number
 	}
-	return start, end, latestHeader.Number, nil
+	return start, end, nil
 }
 
-func (d *Driver) CraftBatchTx(
-	ctx context.Context,
-	start, end, blockNumber *big.Int,
-) (*types.Transaction, error) {
+func (d *Driver) CraftBatchTx(ctx context.Context, start, end *big.Int) error {
 	for i := new(big.Int).Set(start); i.Cmp(end) < 0; i.Add(i, bigOne) {
 		block, err := d.Cfg.L2Client.BlockByNumber(ctx, i)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		txs := block.Transactions()
 		if len(txs) != 1 {
 			panic(fmt.Sprintf("attempting to create batch element from block %d, "+
 				"found %d txs instead of 1", block.Number(), len(txs)))
 		}
-		log.Info("Origin Transactions", "txs[0]", txs[0], "txs[0].QueueOrigin()", txs[0].QueueOrigin())
+		log.Info("Origin Transactions", "txs[0]", txs[0], "Transaction l2BlockNumber", block.Number(), "txs[0].QueueOrigin()", txs[0].QueueOrigin())
 		//isSequencerTx := txs[0].QueueOrigin() == l2types.QueueOriginSequencer
 		//if !isSequencerTx || txs[0] == nil {
 		//	continue
@@ -164,12 +160,12 @@ func (d *Driver) CraftBatchTx(
 			transactionData = append(txBuf.Bytes(), paddingBytes...)
 		}
 		log.Info("transaction data len", "dataLen", len(transactionData))
-		err = d.Disperse(transactionData, blockNumber)
+		err = d.Disperse(transactionData, block.Number())
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
-	return nil, nil
+	return nil
 }
 
 func (d *Driver) Disperse(data []byte, l2BlockNumber *big.Int) error {
@@ -240,7 +236,7 @@ func (d *Driver) Disperse(data []byte, l2BlockNumber *big.Int) error {
 	log.Info("HeaderHash: ", "DataCommitment", hex.EncodeToString(event.DataCommitment[:]))
 	log.Info("MsgHash", "event", hex.EncodeToString(event.MsgHash[:]))
 	auth = d.L1ChainClient.PrepareAuthTransactor()
-	tx, err = d.EigenDaContract.ConfirmData(auth, calldata, searchData)
+	tx, err = d.EigenDaContract.ConfirmData(auth, calldata, searchData, l2BlockNumber)
 	if err != nil {
 		return err
 	}
@@ -329,6 +325,20 @@ func (d *Driver) callDisperse(headerHash []byte, messageHash []byte) (common2.Di
 	return meta, nil
 }
 
+func (d *Driver) UpdateL2LatestBlockNumber(l2BlockNumber *big.Int) error {
+	auth := d.L1ChainClient.PrepareAuthTransactor()
+	tx, err := d.EigenDaContract.UpdateSubmittedL2BlockNumber(auth, l2BlockNumber)
+	if err != nil {
+		return err
+	}
+	log.Info("update latest l2 block number tx sent", "tx.Hash", tx.Hash().Hex())
+	err = d.L1ChainClient.EnsureTransactionEvaled(tx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (d *Driver) Start() error {
 	d.wg.Add(1)
 	go d.eventLoop()
@@ -336,7 +346,7 @@ func (d *Driver) Start() error {
 }
 
 func (d *Driver) Stop() {
-	// s.cancel()
+	// d.cancel()
 	d.wg.Wait()
 }
 
@@ -348,12 +358,12 @@ func (d *Driver) eventLoop() {
 		select {
 		case <-ticker.C:
 			log.Info("EigenDa Sequencer fetching current block range")
-			start, end, l2block, err := d.GetBatchBlockRange(d.Ctx)
+			start, end, err := d.GetBatchBlockRange(d.Ctx)
 			if err != nil {
 				log.Error("EigenDa Sequencer unable to get block range", "err", err)
 				continue
 			}
-			log.Info("start", "start", start, "end", end, "l2block", l2block)
+			log.Info("start", "start", start, "end", end)
 			if start.Cmp(end) == 0 {
 				log.Info("EigenDa Sequencer no updates", "start", start, "end", end)
 				continue
@@ -362,14 +372,16 @@ func (d *Driver) eventLoop() {
 				log.Info("end sub start must bigger than block offset", "start", start, "end", end, "BlockOffset", d.Cfg.BlockOffset)
 				continue
 			}
-			tx, err := d.CraftBatchTx(
-				d.Ctx, start, end, l2block,
+			err = d.CraftBatchTx(
+				d.Ctx, start, end,
 			)
 			if err != nil {
-				log.Error("EigenDa Sequencer unable to craft batch tx",
-					"err", err)
+				log.Error("EigenDa Sequencer unable to craft batch tx", "err", err)
 				continue
-			} else if tx == nil {
+			}
+			err = d.UpdateL2LatestBlockNumber(end)
+			if err != nil {
+				log.Error("update l2 latest block number tx fail", "err", err)
 				continue
 			}
 		case err := <-d.Ctx.Done():
