@@ -642,16 +642,9 @@ func (w *worker) batchAnswerLoop() {
 						}
 						break
 					}
-
 				}
 			} else {
-				if ev.Msg.Sequencer == w.coinbase {
-					// for active sequencer
-					log.Info("Active sequencer receives BatchPeriodAnswerEvent")
-				} else {
-					// for inactive sequencer
-					log.Info("Inactive sequencer receives BatchPeriodAnswerEvent")
-				}
+				log.Debug("Sequencer receives BatchPeriodAnswerEvent")
 			}
 			// System stopped
 		case <-w.exitCh:
