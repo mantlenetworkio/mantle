@@ -1031,14 +1031,12 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 
 	select {
 	case err := <-errCh:
-		log.Debug("we have receiverd errCh")
 		log.Error("Got error waiting for transaction to be added to chain", "msg", err)
 		s.SetLatestL1Timestamp(ts)
 		s.SetLatestL1BlockNumber(bn)
 		s.SetLatestIndex(index)
 		return err
 	case <-s.chainHeadCh:
-		log.Debug("we have receiverd chainHeadCh")
 		// Update the cache when the transaction is from the owner
 		// of the gas price oracle
 		sender, _ := types.Sender(s.signer, tx)
@@ -1237,7 +1235,6 @@ func (s *SyncService) PreCheckSyncServiceState(tx *types.Transaction) bool {
 }
 
 func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
-	log.Debug("we have receiverd newBlock")
 	l1BlockNumber := tx.L1BlockNumber()
 	s.SetLatestL1BlockNumber(l1BlockNumber.Uint64())
 	s.SetLatestL1Timestamp(tx.L1Timestamp())
