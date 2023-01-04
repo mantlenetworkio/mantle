@@ -54,7 +54,8 @@ if [ $IS_SEQUENCER == "true" ] ;then
     --unlock $BLOCK_SIGNER_ADDRESS \
     --bootnodes $SCHEDULER_P2P_ENODE \
     --nat $NAT \
-    --config /root/.ethereum/geth/config.toml \
+    --nodekeyhex $NODEKEY_HEX \
+    --config $CONFIG_PATH \
     --mine \
     --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
     --sequencer.mode="true" \
@@ -67,6 +68,7 @@ elif [ $IS_SCHEDULER == "true" ];then
     --allow-insecure-unlock \
     --unlock $BLOCK_SIGNER_ADDRESS \
     --nat $NAT \
+    --nodekeyhex $NODEKEY_HEX \
     --mine \
     --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
     "$@"
