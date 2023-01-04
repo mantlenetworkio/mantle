@@ -47,9 +47,6 @@ echo $SCHEDULER_P2P_ENODE
 echo "Starting Geth node"
 if [ $IS_SEQUENCER == "true" ] ;then
   echo "we are sequencer node!!"
-  echo "config begin"
-  echo $CONFIG_PATH
-  echo "config end"
   exec geth \
     --verbosity="$VERBOSITY" \
     --password ./password \
@@ -65,9 +62,6 @@ if [ $IS_SEQUENCER == "true" ] ;then
     "$@"
 elif [ $IS_SCHEDULER == "true" ];then
   echo "we are scheduler node"
-  echo "wenbin test begin"
-  echo $NODEKEY_HEX
-  echo "wenbin test end"
   exec geth \
     --verbosity="$VERBOSITY" \
     --password ./password \
