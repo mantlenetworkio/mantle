@@ -91,7 +91,7 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 		copy(addrTemp[:], item.MintAddress[:])
 		votingPower := big.NewInt(0).Div(item.Amount, big.NewInt(1e16))
 		seqz = append(seqz, NewSequencer(addrTemp, votingPower.Int64(), item.NodeID))
-		log.Info("sequencer: ", "address", item.MintAddress.String(), "nodeID", hex.EncodeToString(item.NodeID))
+		log.Info("sequencer: ", "address", item.MintAddress.String(), "node_ID", hex.EncodeToString(item.NodeID))
 	}
 
 	if err != nil {
@@ -215,7 +215,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		}
 		select {
 		case <-schedulerCh:
-			log.Debug("produce block for L1ToL2Tx end", "blockNumber", schedulerInst.blockchain.CurrentBlock().Number().Uint64())
+			log.Debug("produce block for L1ToL2Tx end", "block_number", schedulerInst.blockchain.CurrentBlock().Number().Uint64())
 		}
 
 		schedulerInst.l.Lock()
@@ -275,7 +275,7 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 		select {
 		case chainHead := <-schedulerInst.chainHeadCh:
 			if chainHead.Block.Transactions().Len() != 0 && chainHead.Block.Transactions()[0].GetMeta() != nil && chainHead.Block.Transactions()[0].QueueOrigin() == types.QueueOriginL1ToL2 {
-				log.Debug("chainHead", "blockNumber", chainHead.Block.NumberU64(), "extraData", hex.EncodeToString(chainHead.Block.Extra()))
+				log.Debug("chainHead", "block_number", chainHead.Block.NumberU64(), "extra_data", hex.EncodeToString(chainHead.Block.Extra()))
 				continue
 			}
 			if schedulerInst.blockchain.CurrentBlock().NumberU64() == schedulerInst.currentStartMsg.MaxHeight {
@@ -289,7 +289,7 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 				}
 				schedulerInst.l.Unlock()
 			}
-			log.Debug("chainHead", "blockNumber", chainHead.Block.NumberU64(), "extraData", hex.EncodeToString(chainHead.Block.Extra()))
+			log.Debug("chainHead", "block_number", chainHead.Block.NumberU64(), "extra_data", hex.EncodeToString(chainHead.Block.Extra()))
 		}
 	}
 }
@@ -302,7 +302,7 @@ func (schedulerInst *Scheduler) readLoop() {
 			schedulerInst.l.Lock()
 			seqSet, err := schedulerInst.syncer.GetSequencerSet()
 			if err != nil {
-				log.Error("Get sequencer set failed, err : ", err)
+				log.Error("Get sequencer set failed", "err", err)
 				continue
 			}
 			// get changes
