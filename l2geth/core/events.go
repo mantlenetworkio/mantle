@@ -41,6 +41,8 @@ type BatchPeriodAnswerEvent struct {
 	ErrCh chan error
 }
 
+type BatchEndEvent struct{}
+
 type FraudProofReorgEvent struct {
 	Msg   *types.FraudProofReorgMsg
 	ErrCh chan error
