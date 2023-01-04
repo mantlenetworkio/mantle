@@ -981,7 +981,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 	} else if tx.L1Timestamp() == 0 && s.verifier {
 		// This should never happen
 		log.Error("No tx timestamp found when running as verifier", "hash", tx.Hash().Hex())
-	} else if tx.L1Timestamp() < ts {
+	} else if tx.L1Timestamp() < ts && tx.GetMeta().Index == nil {
 		// This should never happen, but sometimes does
 		log.Error("Timestamp monotonicity violation", "hash", tx.Hash().Hex(), "latest", ts, "tx", tx.L1Timestamp())
 	}

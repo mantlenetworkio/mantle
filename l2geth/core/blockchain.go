@@ -1591,6 +1591,9 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 			}
 		}
 	}
+	if len(chain) == 0 {
+		return 0, nil
+	}
 	// Pre-checks passed, start the full block imports
 	bc.wg.Add(1)
 	bc.chainmu.Lock()
