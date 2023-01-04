@@ -562,6 +562,7 @@ func (w *worker) batchStartLoop() {
 						}
 
 						var bpa types.BatchPeriodAnswerMsg
+						bpa.StartIndex = ev.Msg.StartHeight + inTxLen
 						if uint64(len(txsQueue)) > ev.Msg.MaxHeight-ev.Msg.StartHeight {
 							bpa.Txs = txsQueue[:ev.Msg.MaxHeight-ev.Msg.StartHeight]
 							inTxLen += ev.Msg.MaxHeight - ev.Msg.StartHeight
@@ -570,7 +571,6 @@ func (w *worker) batchStartLoop() {
 							inTxLen += uint64(len(txsQueue))
 						}
 						bpa.BatchIndex = ev.Msg.BatchIndex
-						bpa.StartIndex = ev.Msg.StartHeight + inTxLen
 						bpa.Sequencer = w.coinbase
 						signature, err := w.engine.SignData(bpa.Sequencer, bpa.GetSignData())
 						if err != nil {
