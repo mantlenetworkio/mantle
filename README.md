@@ -1,13 +1,16 @@
 <div align="center">
-  <h1> Mantle Wiki</h1>
-</div>
-<p align="center">
+
+<p><img src="./docs/assets/Mantle full logo_black_transparent.png" width="600"></p>
+
+<p>
   <a href="https://github.com/mantlenetworkio/mantle/actions/workflows/ts-packages.yml?query=branch%3Amain"><img src="https://github.com/mantlenetworkio/mantle/workflows/typescript%20/%20contracts/badge.svg" /></a>
   <a href="https://github.com/mantlenetworkio/mantle/actions/workflows/integration.yml?query=branch%3Amain"><img src="https://github.com/mantlenetworkio/mantle/workflows/integration/badge.svg" /></a>
   <a href="https://github.com/mantlenetworkio/mantle/actions/workflows/geth.yml?query=branch%3Amain"><img src="https://github.com/mantlenetworkio/mantle/workflows/geth%20unit%20tests/badge.svg" /></a>
 </p>
 
-## Documentation & Introduction
+</div>
+
+## Introduction
 ___
 
 Mantle is a suite of Ethereum scaling solutions including an optimistic rollup and ZK rollup built using an iterative modular chain approach, and supported by BitDAO’s native token $BIT.
@@ -17,17 +20,64 @@ It is designed to bolster support for hyper-scaled throughput decentralized appl
 <br/>
 <br/>
 
-## Quick Start
+## Goals
+---
 
-___
+Layer 2 rollups are built to address the scaling limitations of Ethereum by taking transaction processing to a separate execution layer, but this inevitably exposes users to the high gas fees and limited throughput on Layer 1.
+
+Mantle's **modular architecture** helps achieve greater network efficiency for resources at hand, while maintaining the same level of security for all network actors. Increased network performance also enables better fraud proof and ZK proof technology, essentially unlocking the true potential of L2 rollups.
+
+Different parts of the Mantle tech stack are specialized to tackle specific issues.
+
+- [**Decentralized Sequencer**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/decentralized-sequencer): A permissionless set of L2 block producers
+- [**Data Availability**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/solving-data-availability): Implementing EigenDA, an innovative re-staking solution that levarges Ethereum's validator network to bring the security of L1 to L2
+- [**EVM-level Fraud Proofs**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/fraud-proofs): Improved fraud proofs that are evaluated using EVM-level instructions
+
+> We encourage you to check out the [**Mantle tech docs**](https://docs.mantle.xyz) to learn more about the inner workings of Mantle.
+
+</br>
+</br>
+
+## Quick Start
+---
+
+### Set up a Local Environment
+
+Setting up local L1 and L2 nodes may be particularly useful for testing out Mantle SDK methods.
+
+1. Make sure your system has the following tools set up and running.
+   - [Git](https://git-scm.com/downloads) - to fetch node software
+   - [Node.js](https://nodejs.org/en/) - to run node instances
+   - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable) - for dependancy management
+
+2. Run L1 and L2 node instances
+
+```bash
+ git clone https://github.com/mantlenetworkio/mantle.git
+ cd mantle/ops
+ make up
+ # check status
+ make ps
+```
+3. Check out the tutorial
+
+### Useful Addresses
+
+|         Name          | Value                                |
+| :-------------------: | ------------------------------------ |
+| Testnet Token Faucet  | https://faucet.testnet.mantle.xyz/   |
+| Mantle Testnet Bridge | https://bridge.testnet.mantle.xyz/   |
+|    Mantle Explorer    | https://explorer.testnet.mantle.xyz/ |
+|  Mantle Node RPC URL  | https://rpc.testnet.mantle.xyz/      |
+|       Chain ID        | 5001                                 |
 
 Check out [DEVELOP.md](./DEVELOP.md) for how we develop the Mantle.
 <br/>
 <br/>
 
-## How to contribute
-
+## How to Contribute
 ___
+
 
 
 Read through [CONTRIBUTING.md](./CONTRIBUTING.md) for a general overview of our contribution process.
