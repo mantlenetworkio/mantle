@@ -18,6 +18,7 @@ package miner
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -587,10 +588,16 @@ func (w *worker) batchStartLoop() {
 						}
 						log.Info("Generate BatchPeriodAnswerEvent", "coinbase", w.coinbase.String(), "tx_count", len(bpa.Txs), "startIndex", bpa.StartIndex)
 					}
-
 				} else {
-					// for inactive sequencer
-					log.Info("Inactive sequencer receives batchPeriodStartEvent")
+					log.Debug("Inactive sequencer receives batchPeriodStartEvent",
+						"ReorgIndex", ev.Msg.ReorgIndex,
+						"StartHeight", ev.Msg.StartHeight,
+						"BatchIndex", ev.Msg.BatchIndex,
+						"MaxHeight", ev.Msg.MaxHeight,
+						"ExpireTime", ev.Msg.ExpireTime,
+						"SequencerAddress", ev.Msg.Sequencer.String(),
+						"Signature", hex.EncodeToString(ev.Msg.Signature),
+					)
 				}
 			}
 		// System stopped
@@ -644,7 +651,13 @@ func (w *worker) batchAnswerLoop() {
 					}
 				}
 			} else {
-				log.Debug("Sequencer receives BatchPeriodAnswerEvent")
+				log.Debug("Sequencer receives BatchPeriodAnswerEvent",
+					"Sequencer Address", ev.Msg.Sequencer.String(),
+					"StartHeight", ev.Msg.BatchIndex,
+					"BatchIndex", ev.Msg.StartIndex,
+					"TxLength", ev.Msg.Txs.Len(),
+					"Signature", hex.EncodeToString(ev.Msg.Signature),
+				)
 			}
 			// System stopped
 		case <-w.exitCh:
