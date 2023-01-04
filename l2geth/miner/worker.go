@@ -628,13 +628,17 @@ func (w *worker) batchAnswerLoop() {
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
 				w.mutex.Lock()
+				if w.currentBps == nil {
+					log.Debug("Current BatchPeriodStartMsg is null")
+					continue
+				}
 				if ev.Msg.BatchIndex != w.currentBps.BatchIndex {
 					log.Error("Batch index not equal", "current_index", w.currentBps.BatchIndex, "receive", ev.Msg.BatchIndex)
 					continue
 				}
 				w.mutex.Unlock()
 				if ev.Msg.StartIndex != w.eth.BlockChain().CurrentBlock().NumberU64() {
-					log.Info("Start index not equal with current height", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "start_index", ev.Msg.StartIndex)
+					log.Error("Start index not equal with current height", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "start_index", ev.Msg.StartIndex)
 					continue
 				}
 				log.Info("Scheduler receives BatchPeriodAnswerEvent", "sequencer", ev.Msg.Sequencer.String())
