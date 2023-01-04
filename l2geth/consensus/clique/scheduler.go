@@ -231,7 +231,6 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 
 		currentBlock := schedulerInst.blockchain.CurrentBlock()
 		currentIndex := rawdb.ReadStartMsgIndex(schedulerInst.db)
-		log.Debug("now index ", "index", currentIndex)
 		msg := types.BatchPeriodStartMsg{
 			ReorgIndex:  0,
 			BatchIndex:  currentIndex + 1,
@@ -254,9 +253,10 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			ErrCh: nil,
 		})
 		if err != nil {
-			log.Error("generate BatchPeriodStartEvent error")
+			log.Error("Generate BatchPeriodStartEvent error")
 			return
 		}
+		log.Info("Generate BatchPeriodStartEvent", "startHeight", msg.StartHeight, "maxHeight", msg.MaxHeight)
 		schedulerInst.sequencerSet.IncrementProducerPriority(1)
 		schedulerInst.batchEndFlag = false
 		schedulerInst.l.Unlock()

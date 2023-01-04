@@ -472,7 +472,6 @@ func (w *worker) l1Tol2StartLoop() {
 			if ev, ok = obj.Data.(core.L1ToL2TxStartEvent); !ok {
 				continue
 			}
-			log.Info("Scheduler receives batchPeriodStartEvent")
 			if ev.SchedulerCh != nil {
 				if err := w.eth.SyncService().SyncQueueToTip(); err != nil {
 					log.Info("SyncQueueToTip interrupt", "error", err)
@@ -514,7 +513,7 @@ func (w *worker) batchStartLoop() {
 				w.mutex.Lock()
 				w.currentBps = ev.Msg
 				w.mutex.Unlock()
-				log.Info("Scheduler receives batchPeriodStartEvent")
+				log.Info("Scheduler start new batch", "batchIndex", ev.Msg.BatchIndex, "startHeight", ev.Msg.StartHeight, "sequencer", ev.Msg.Sequencer)
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
