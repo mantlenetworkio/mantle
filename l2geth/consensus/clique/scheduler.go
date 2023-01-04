@@ -54,10 +54,12 @@ type Scheduler struct {
 	batchDone       chan struct{}
 	currentStartMsg types.BatchPeriodStartMsg
 	currentHeight   uint64
+	batchEndFlag    bool
 
 	chainHeadSub event.Subscription
 	chainHeadCh  chan core.ChainHeadEvent
 	addPeerSub   *event.TypeMuxSubscription
+	batchEndSub  *event.TypeMuxSubscription
 
 	ticker *time.Ticker
 
@@ -113,6 +115,7 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 	}
 
 	schedulerInst.addPeerSub = schedulerInst.eventMux.Subscribe(core.PeerAddEvent{})
+	schedulerInst.batchEndSub = schedulerInst.eventMux.Subscribe(core.BatchEndEvent{})
 	go schedulerInst.AddPeerCheck()
 	return schedulerInst, nil
 
@@ -173,6 +176,20 @@ func (schedulerInst *Scheduler) AddPeerCheck() {
 				}
 			}
 			ape.Has <- find
+		}
+	}
+}
+
+func (schedulerInst *Scheduler) BatchEndService() {
+	// automatically stops if unsubscribe
+	for obj := range schedulerInst.batchEndSub.Chan() {
+		if _, ok := obj.Data.(core.BatchEndEvent); ok {
+			schedulerInst.l.Lock()
+			if !schedulerInst.batchEndFlag {
+				schedulerInst.batchDone <- struct{}{}
+				schedulerInst.batchEndFlag = true
+			}
+			schedulerInst.l.Unlock()
 		}
 	}
 }
@@ -241,6 +258,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			return
 		}
 		schedulerInst.sequencerSet.IncrementProducerPriority(1)
+		schedulerInst.batchEndFlag = false
 		schedulerInst.l.Unlock()
 		ticker := time.NewTicker(time.Duration(expireTime) * time.Second)
 		select {
@@ -261,8 +279,15 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 				continue
 			}
 			if schedulerInst.blockchain.CurrentBlock().NumberU64() == schedulerInst.currentStartMsg.MaxHeight {
-				log.Debug("Batch done with height at max height")
-				schedulerInst.batchDone <- struct{}{}
+				schedulerInst.l.Lock()
+				if !schedulerInst.batchEndFlag {
+					log.Debug("Batch done with height at max height")
+					schedulerInst.batchDone <- struct{}{}
+					schedulerInst.batchEndFlag = true
+				} else {
+					log.Debug("Batch already done")
+				}
+				schedulerInst.l.Unlock()
 			}
 			log.Debug("chainHead", "blockNumber", chainHead.Block.NumberU64(), "extraData", hex.EncodeToString(chainHead.Block.Extra()))
 		}

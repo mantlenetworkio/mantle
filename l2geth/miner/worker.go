@@ -510,7 +510,9 @@ func (w *worker) batchStartLoop() {
 			}
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
+				w.mu.RLock()
 				w.currentBps = ev.Msg
+				w.mu.Unlock()
 				log.Info("Scheduler receives batchPeriodStartEvent")
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {
@@ -616,24 +618,28 @@ func (w *worker) batchAnswerLoop() {
 			} else {
 				w.knowBatchPeriodAnswerMsg.Add(ev.Msg.Hash())
 			}
-			if ev.Msg.BatchIndex != w.currentBps.BatchIndex {
-				log.Error("Batch index not equal", "Current index", w.currentBps.BatchIndex, "Receive", ev.Msg.BatchIndex)
-				continue
-			}
-			if ev.Msg.StartIndex != w.eth.BlockChain().CurrentBlock().NumberU64() {
-				log.Info("Start index not equal with current height", "Current height", w.eth.BlockChain().CurrentBlock().NumberU64(), "Start index", ev.Msg.StartIndex)
-				continue
-			}
-
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
-				// todo check event index
+				w.mu.RLock()
+				if ev.Msg.BatchIndex != w.currentBps.BatchIndex {
+					log.Error("Batch index not equal", "Current index", w.currentBps.BatchIndex, "Receive", ev.Msg.BatchIndex)
+					continue
+				}
+				w.mu.Unlock()
+				if ev.Msg.StartIndex != w.eth.BlockChain().CurrentBlock().NumberU64() {
+					log.Info("Start index not equal with current height", "Current height", w.eth.BlockChain().CurrentBlock().NumberU64(), "Start index", ev.Msg.StartIndex)
+					continue
+				}
 				log.Info("Scheduler receives BatchPeriodAnswerEvent", "Sequencer", ev.Msg.Sequencer.String())
 				for _, tx := range ev.Msg.Txs {
 					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, ev.Msg.ToBatchTxSetProof())
 					if err != nil {
 						log.Error("ValidateAndApplySequencerTransaction error", "errMsg", err.Error())
-						// todo break and end this batch
+						err = w.mux.Post(core.BatchEndEvent{})
+						if err != nil {
+							log.Error("Post BatchEndEvent error", "errMsg", err.Error())
+							break
+						}
 						break
 					}
 
