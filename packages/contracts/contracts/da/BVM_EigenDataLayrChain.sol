@@ -145,6 +145,15 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
     }
 
     /**
+    * @notice update sequencer address
+    * @param _sequencer update sequencer address
+    */
+    function updateSequencerAddress(address _sequencer) external {
+        require(msg.sender == sequencer, "Only the sequencer can update sequencer address");
+        sequencer = _sequencer;
+    }
+
+    /**
      * @notice Called by the (staked) sequencer to pay for a datastore and post some metadata (in the `header` parameter) about it on chain.
      * Since the sequencer must encode the data before they post the header on chain, they must use a *snapshot* of the number and stakes of DataLayr operators
      * from a previous block number, specified by the `blockNumber` input.
