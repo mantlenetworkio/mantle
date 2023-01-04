@@ -513,7 +513,7 @@ func (w *worker) batchStartLoop() {
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
 				w.mu.RLock()
 				w.currentBps = ev.Msg
-				w.mu.Unlock()
+				w.mu.RUnlock()
 				log.Info("Scheduler receives batchPeriodStartEvent")
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {
@@ -632,7 +632,7 @@ func (w *worker) batchAnswerLoop() {
 					log.Error("Batch index not equal", "Current index", w.currentBps.BatchIndex, "Receive", ev.Msg.BatchIndex)
 					continue
 				}
-				w.mu.Unlock()
+				w.mu.RUnlock()
 				if ev.Msg.StartIndex != w.eth.BlockChain().CurrentBlock().NumberU64() {
 					log.Info("Start index not equal with current height", "Current height", w.eth.BlockChain().CurrentBlock().NumberU64(), "Start index", ev.Msg.StartIndex)
 					continue
