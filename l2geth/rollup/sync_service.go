@@ -1031,14 +1031,12 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 
 	select {
 	case err := <-errCh:
-		log.Debug("we have receiverd errCh")
 		log.Error("Got error waiting for transaction to be added to chain", "msg", err)
 		s.SetLatestL1Timestamp(ts)
 		s.SetLatestL1BlockNumber(bn)
 		s.SetLatestIndex(index)
 		return err
 	case <-s.chainHeadCh:
-		log.Debug("we have receiverd chainHeadCh")
 		// Update the cache when the transaction is from the owner
 		// of the gas price oracle
 		sender, _ := types.Sender(s.signer, tx)
@@ -1244,7 +1242,15 @@ func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
 	if queueIndex := tx.GetMeta().QueueIndex; queueIndex != nil {
 		s.SetLatestEnqueueIndex(queueIndex)
 	}
-	log.Debug("Update sync service state with new block", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
+	// Update the cache when the transaction is from the owner
+	// of the gas price oracle
+	sender, _ := types.Sender(s.signer, tx)
+	owner := s.GasPriceOracleOwnerAddress()
+	if owner != nil && sender == *owner {
+		if err := s.updateGasPriceOracleCache(nil); err != nil {
+			return
+		}
+	}
 }
 
 // syncer represents a function that can sync remote items and then returns the
