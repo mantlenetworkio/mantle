@@ -49,8 +49,12 @@ services:
         /ip4/172.17.0.1/tcp/8002/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH,
         /ip4/172.17.0.1/tcp/8003/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
       TSS_NODE_EXTERNAL_IP: 172.17.0.1
+      TSS_NODE_L1_URL: http://172.17.0.1:9545
       TSS_NODE_P2P_PORT: 8000
     command: ./tss node -c config/tss-node-config.toml
+    ports:
+     # expose the service to the host for getting the contract addrs
+     - ${DEPLOYER_PORT:-8000}:8000
     volumes:
       - ./data/tss-1:/data
       - ./config:/app/config
@@ -73,7 +77,11 @@ services:
         /ip4/172.17.0.1/tcp/8002/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH,
         /ip4/172.17.0.1/tcp/8003/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
       TSS_NODE_EXTERNAL_IP: 172.17.0.1
+      TSS_NODE_L1_URL: http://172.17.0.1:9545
       TSS_NODE_P2P_PORT: 8001
+    ports:
+      # expose the service to the host for getting the contract addrs
+      - ${DEPLOYER_PORT:-8001}:8001
     volumes:
       - ./data/tss-2:/data
       - ./config:/app/config
@@ -97,7 +105,11 @@ services:
         /ip4/172.17.0.1/tcp/8001/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,
         /ip4/172.17.0.1/tcp/8003/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
       TSS_NODE_EXTERNAL_IP: 172.17.0.1
+      TSS_NODE_L1_URL: http://172.17.0.1:9545
       TSS_NODE_P2P_PORT: 8002
+    ports:
+      # expose the service to the host for getting the contract addrs
+      - ${DEPLOYER_PORT:-8002}:8002
     volumes:
       - ./data/tss-3:/data
       - ./config:/app/config
@@ -122,7 +134,11 @@ services:
         /ip4/172.17.0.12/tcp/8001/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,
         /ip4/172.17.0.13/tcp/8002/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH
       TSS_NODE_EXTERNAL_IP: 172.17.0.1
+      TSS_NODE_L1_URL: http://172.17.0.1:9545
       TSS_NODE_P2P_PORT: 8003
+    ports:
+      # expose the service to the host for getting the contract addrs
+      - ${DEPLOYER_PORT:-8003}:8003
     volumes:
       - ./data/tss-4:/data
       - ./config:/app/config
