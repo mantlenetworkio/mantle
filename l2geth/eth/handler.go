@@ -85,6 +85,7 @@ type ProtocolManager struct {
 	consensusPeers *peerSet
 	schedulerInst  *clique.Scheduler
 	etherbase      common.Address
+	minerCheck     func() bool
 
 	eventMux      *event.TypeMux
 	txsCh         chan core.NewTxsEvent
@@ -246,6 +247,10 @@ func (pm *ProtocolManager) makeProtocol(version uint) p2p.Protocol {
 			return nil
 		},
 	}
+}
+
+func (pm *ProtocolManager) setMinerCheck(check func() bool) {
+	pm.minerCheck = check
 }
 
 func (pm *ProtocolManager) removePeer(id string) {

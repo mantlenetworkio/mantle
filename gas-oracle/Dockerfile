@@ -1,7 +1,7 @@
 FROM golang:1.19-alpine3.17 as builder
 
 RUN apk add --no-cache make gcc musl-dev linux-headers git jq bash
-
+RUN go env -w GOPROXY=https://goproxy.cn
 COPY ./gas-oracle /gas-oracle
 
 RUN cd /gas-oracle && make gas-oracle

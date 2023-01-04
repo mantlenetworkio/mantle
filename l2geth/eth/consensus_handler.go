@@ -84,9 +84,11 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 
 		// Handle incoming messages until the connection is torn down
 		for {
-			//if err := pm.checkPeer(p); err != nil {
-			//	return err
-			//}
+			if pm.minerCheck() {
+				if err := pm.checkPeer(p); err != nil {
+					return err
+				}
+			}
 
 			if err := pm.handleConsensusMsg(p); err != nil {
 				p.Log().Debug("Ethereum consensus message handling failed", "err", err)
