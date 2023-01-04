@@ -513,7 +513,15 @@ func (w *worker) batchStartLoop() {
 				w.mutex.Lock()
 				w.currentBps = ev.Msg
 				w.mutex.Unlock()
-				log.Info("Scheduler start new batch", "batchIndex", ev.Msg.BatchIndex, "startHeight", ev.Msg.StartHeight, "sequencer", ev.Msg.Sequencer)
+				log.Info("Scheduler start new batch",
+					"reorg_index", ev.Msg.ReorgIndex,
+					"start_height", ev.Msg.StartHeight,
+					"batch_index", ev.Msg.BatchIndex,
+					"max_height", ev.Msg.MaxHeight,
+					"expire_time", ev.Msg.ExpireTime,
+					"sequencer_address", ev.Msg.Sequencer.String(),
+					"signature", hex.EncodeToString(ev.Msg.Signature),
+				)
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
