@@ -28,6 +28,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/elastic/gosigar"
+	fp "github.com/mantlenetworkio/mantle/fraud-proof"
+	fpcmd "github.com/mantlenetworkio/mantle/fraud-proof/cmd"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
 	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
@@ -41,7 +44,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/metrics"
 	"github.com/mantlenetworkio/mantle/l2geth/node"
-	"github.com/elastic/gosigar"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -464,6 +466,13 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 			}
 		}
 	}
+
+	// <FRAUD-PROOF modification>
+	if ctx.IsSet(fpcmd.RollupNodeFlag.Name) {
+		cfg := fpcmd.MakeFraudProofConfig(ctx)
+		fp.RegisterFraudProofService(stack, nil, nil, cfg)
+	}
+	// <FRAUD-PROOF modification/>
 }
 
 // unlockAccounts unlocks any account specifically requested.

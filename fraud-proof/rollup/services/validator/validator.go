@@ -20,6 +20,15 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 )
 
+func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {
+	validator, err := New(eth, proofBackend, cfg, auth)
+	if err != nil {
+		log.Crit("Failed to register the Rollup service", "err", err)
+	}
+	validator.Start()
+	log.Info("Validator registered")
+}
+
 type challengeCtx struct {
 	opponentAssertion  *rollupTypes.Assertion
 	ourAssertion       *rollupTypes.Assertion
@@ -88,7 +97,7 @@ func (v *Validator) commitBlocks(blocks []*rollupTypes.SequenceBlock) (common.Ha
 			Number:     new(big.Int).SetUint64(sblock.BlockNumber),
 			GasLimit:   core.CalcGasLimit(parent, parent.GasLimit(), ethconfig.Defaults.Miner.GasCeil), // TODO: this may cause problem
 			Time:       sblock.Timestamp,
-			Coinbase:   v.Config.SequencerAddr,
+			//Coinbase:   v.Config.SequencerAddr, //TODO-FIXME
 			Difficulty: common.Big1, // Fake difficulty. Avoid use 0 here because it means the merge happened
 		}
 		gasPool := new(core.GasPool).AddGas(header.GasLimit)
@@ -136,44 +145,45 @@ func (v *Validator) commitBlocks(blocks []*rollupTypes.SequenceBlock) (common.Ha
 func (v *Validator) collectingLoop() {
 	defer v.Wg.Done()
 
-	abi, err := bindings.ISequencerInboxMetaData.GetAbi()
-	if err != nil {
-		log.Crit("Failed to get ISequencerInbox ABI", "err", err)
-	}
+	//abi, err := bindings.ISequencerInboxMetaData.GetAbi()
+	//if err != nil {
+	//	log.Crit("Failed to get ISequencerInbox ABI", "err", err)
+	//}
 
-	// Listen to TxBatchAppendEvent
-	batchEventCh := make(chan *bindings.ISequencerInboxTxBatchAppended, 4096)
-	batchEventSub, err := v.Inbox.Contract.WatchTxBatchAppended(&bind.WatchOpts{Context: v.Ctx}, batchEventCh)
-	if err != nil {
-		log.Crit("Failed to watch rollup event", "err", err)
-	}
-	defer batchEventSub.Unsubscribe()
+	//// Listen to TxBatchAppendEvent
+	//batchEventCh := make(chan *bindings.ISequencerInboxTxBatchAppended, 4096)
+	//batchEventSub, err := v.Inbox.Contract.WatchTxBatchAppended(&bind.WatchOpts{Context: v.Ctx}, batchEventCh)
+	//if err != nil {
+	//	log.Crit("Failed to watch rollup event", "err", err)
+	//}
+	//defer batchEventSub.Unsubscribe()
 
 	for {
 		// if challenge, pause
 		select {
-		case ev := <-batchEventCh:
-			// New appendTxBatch call
-			log.Info(fmt.Sprintf("Get New Batch, batchNum: %s, startTxNum: %s, endTxNum: %s",
-				ev.BatchNumber, ev.StartTxNumber, ev.EndTxNumber))
-			tx, _, err := v.L1.TransactionByHash(v.Ctx, ev.Raw.TxHash)
-			if err != nil {
-				log.Error("Failed to get tx batch data", "error", err)
-				continue
-			}
-			// Decode input from abi
-			decoded, err := abi.Methods["appendTxBatch"].Inputs.Unpack(tx.Data()[4:])
-			if err != nil {
-				log.Error("Failed to decode tx batch data", "error", err)
-				continue
-			}
-			// Construct batch
-			batch, err := rollupTypes.TxBatchFromDecoded(decoded)
-			if err != nil {
-				log.Error("Failed to decode tx batch data", "error", err)
-				continue
-			}
-			v.batchCh <- batch
+		//case ev := <-batchEventCh:
+		//	log.Warn("new batch rise", ev)
+		//	// New appendTxBatch call
+		//	log.Info(fmt.Sprintf("Get New Batch, batchNum: %s, startTxNum: %s, endTxNum: %s",
+		//		ev.BatchNumber, ev.StartTxNumber, ev.EndTxNumber))
+		//	tx, _, err := v.L1.TransactionByHash(v.Ctx, ev.Raw.TxHash)
+		//	if err != nil {
+		//		log.Error("Failed to get tx batch data", "error", err)
+		//		continue
+		//	}
+		//	// Decode input from abi
+		//	decoded, err := abi.Methods["appendTxBatch"].Inputs.Unpack(tx.Data()[4:])
+		//	if err != nil {
+		//		log.Error("Failed to decode tx batch data", "error", err)
+		//		continue
+		//	}
+		//	// Construct batch
+		//	batch, err := rollupTypes.TxBatchFromDecoded(decoded)
+		//	if err != nil {
+		//		log.Error("Failed to decode tx batch data", "error", err)
+		//		continue
+		//	}
+		//	v.batchCh <- batch
 		case <-v.Ctx.Done():
 			return
 		}
@@ -198,12 +208,11 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 	// Current agreed assertion, initalize to genesis assertion
 	// TODO: sync from L1 when restart
 	confirmedAssertion := &rollupTypes.Assertion{
-		ID:                    new(big.Int),
-		VmHash:                genesisRoot,
-		CumulativeGasUsed:     new(big.Int),
-		InboxSize:             new(big.Int),
-		Deadline:              new(big.Int),
-		PrevCumulativeGasUsed: new(big.Int),
+		ID:        new(big.Int),
+		VmHash:    genesisRoot,
+		GasUsed:   new(big.Int),
+		InboxSize: new(big.Int),
+		Deadline:  new(big.Int),
 	}
 
 	isInChallenge := false
@@ -240,12 +249,12 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 				// New assertion created on Rollup
 				log.Info("Get New Assertion....")
 				assertion := &rollupTypes.Assertion{
-					ID:                    ev.AssertionID,
-					VmHash:                ev.VmHash,
-					CumulativeGasUsed:     ev.L2GasUsed,
-					InboxSize:             ev.InboxSize,
-					StartBlock:            confirmedAssertion.EndBlock + 1,
-					PrevCumulativeGasUsed: new(big.Int).Set(confirmedAssertion.CumulativeGasUsed),
+					ID:        ev.AssertionID,
+					VmHash:    ev.VmHash,
+					InboxSize: ev.InboxSize,
+					GasUsed:   ev.L2GasUsed,
+					//StartBlock:            confirmedAssertion.EndBlock + 1,
+					//PrevCumulativeGasUsed: new(big.Int).Set(confirmedAssertion.CumulativeGasUsed),
 				}
 				// Pop correct amount of pending blocks asserted
 				inboxSizeDiff := assertion.InboxSize.Uint64() - confirmedAssertion.InboxSize.Uint64()
@@ -263,7 +272,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 				if inboxSizeDiff != 0 {
 					log.Crit("UNHANDELED: SequencerInbox overflow, validator state corrupted!")
 				}
-				assertion.EndBlock = assertion.StartBlock + uint64(len(blocksToCommit)) - 1
+				//assertion.EndBlock = assertion.StartBlock + uint64(len(blocksToCommit)) - 1
 				pendingBlocks = pendingBlocks[len(blocksToCommit):]
 				// Commit asserted blocks
 				log.Info("Commit Blocks....")
@@ -273,14 +282,14 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					log.Crit("UNHANDELED: Can't execute sequence blocks, validator state corrupted", "err", err)
 				}
 				// Check result vm hash and gas
-				targetGasUsed.Add(targetGasUsed, confirmedAssertion.CumulativeGasUsed)
-				if targetVmHash != assertion.VmHash || targetGasUsed.Cmp(assertion.CumulativeGasUsed) != 0 {
+				targetGasUsed.Add(targetGasUsed, confirmedAssertion.GasUsed)
+				if targetVmHash != assertion.VmHash || targetGasUsed.Cmp(assertion.GasUsed) != 0 {
 					// Validation failed
 					log.Info("Challenge Assertion....")
 					ourAssertion := &rollupTypes.Assertion{
-						VmHash:            targetVmHash,
-						InboxSize:         ev.InboxSize,
-						CumulativeGasUsed: targetGasUsed,
+						VmHash:    targetVmHash,
+						InboxSize: ev.InboxSize,
+						GasUsed:   targetGasUsed,
 					}
 					v.challengeCh <- &challengeCtx{assertion, ourAssertion, confirmedAssertion}
 					isInChallenge = true
@@ -407,9 +416,7 @@ func (v *Validator) challengeLoop() {
 				_, err = v.Rollup.CreateAssertion(
 					ctx.ourAssertion.VmHash,
 					ctx.ourAssertion.InboxSize,
-					ctx.ourAssertion.CumulativeGasUsed.Add(ctx.ourAssertion.CumulativeGasUsed, big.NewInt(1)),
-					ctx.confirmedAssertion.VmHash,
-					ctx.confirmedAssertion.CumulativeGasUsed,
+					ctx.ourAssertion.GasUsed.Add(ctx.ourAssertion.GasUsed, big.NewInt(1)),
 				)
 				if err != nil {
 					log.Crit("UNHANDELED: Can't create assertion for challenge, validator state corrupted", "err", err)
@@ -461,9 +468,9 @@ func (v *Validator) challengeLoop() {
 					states, err = proof.GenerateStates(
 						v.ProofBackend,
 						v.Ctx,
-						ctx.opponentAssertion.PrevCumulativeGasUsed,
-						ctx.opponentAssertion.StartBlock,
-						ctx.opponentAssertion.EndBlock+1,
+						big.NewInt(0), //ctx.opponentAssertion.PrevCumulativeGasUsed,
+						0,             //ctx.opponentAssertion.StartBlock,
+						0,             //ctx.opponentAssertion.EndBlock+1,
 						nil,
 					)
 					if err != nil {

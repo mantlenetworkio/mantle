@@ -12,7 +12,9 @@ type FraudProover interface {
 
 	GetLatestAssertion() (interface{}, error)
 
-	GenerateState() (interface{}, error)
+	InChallenge() bool
 
 	RespondChallenge() error
+
+	GenerateState() (interface{}, error)
 }

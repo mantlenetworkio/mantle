@@ -2,11 +2,12 @@ package rollup
 
 import (
 	"bytes"
-	"fmt"
+	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services/sequencer"
+	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services/validator"
+	"github.com/mantlenetworkio/mantle/l2geth/eth"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
@@ -14,9 +15,9 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/node"
 )
 
-// RegisterRollupService registers rollup service configured by ctx
+// RegisterFraudProofService registers rollup service configured by ctx
 // Either a sequncer service or a validator service will be registered
-func RegisterRollupService(stack *node.Node, eth services.Backend, proofBackend proof.Backend, cfg *services.Config) {
+func RegisterFraudProofService(stack *node.Node, cfg *services.Config) {
 	// Unlock account for L1 transaction signer
 	var ks *keystore.KeyStore
 	if keystores := stack.AccountManager().Backends(keystore.KeyStoreType); len(keystores) > 0 {
@@ -35,15 +36,16 @@ func RegisterRollupService(stack *node.Node, eth services.Backend, proofBackend 
 		log.Crit("Failed to register the Rollup service", "err", err)
 	}
 
+	var ethService *eth.Ethereum
+	if err := stack.Service(&ethService); err != nil {
+		log.Crit("Failed to retrieve eth service backend", "err", err)
+	}
+
 	// Register services
 	if cfg.Node == services.NODE_SEQUENCER {
-		fmt.Println(auth)
-		// TODO-FIXME new service and start
-		//sequencer.RegisterService(stack, eth, proofBackend, cfg, auth)
+		sequencer.RegisterService(ethService, ethService.APIBackend, cfg, auth)
 	} else if cfg.Node == services.NODE_VALIDATOR {
-		fmt.Println(auth)
-		// TODO-FIXME new service and start
-		//validator.RegisterService(stack, eth, proofBackend, cfg, auth)
+		validator.RegisterService(ethService, ethService.APIBackend, cfg, auth)
 	} else {
 		log.Crit("Failed to register the Rollup service: Node type unkown", "type", cfg.Node)
 	}

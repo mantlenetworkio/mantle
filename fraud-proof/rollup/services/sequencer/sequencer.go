@@ -2,8 +2,8 @@ package sequencer
 
 import (
 	"fmt"
-	ethc "github.com/ethereum/go-ethereum/common"
 	rollup "github.com/mantlenetworkio/mantle/fraud-proof"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -16,21 +16,20 @@ import (
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/core"
 )
 
-//func RegisterService(stack *node.Node, eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {
-//	sequencer, err := New(eth, proofBackend, cfg, auth)
-//	if err != nil {
-//		log.Crit("Failed to register the Rollup service", "err", err)
-//	}
-//	stack.RegisterLifecycle(sequencer)
-//	// stack.RegisterAPIs(seq.APIs())
-//	log.Info("Sequencer registered")
-//}
+func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {
+	sequencer, err := New(eth, proofBackend, cfg, auth)
+	if err != nil {
+		log.Crit("Failed to register the Rollup service", "err", err)
+	}
+	sequencer.Start()
+	log.Info("Sequencer registered")
+}
 
 type challengeCtx struct {
 	challengeAddr common.Address
+	parent        *rollupTypes.Assertion
 	assertion     *rollupTypes.Assertion
 }
 
@@ -38,7 +37,6 @@ type challengeCtx struct {
 type Sequencer struct {
 	*services.BaseService
 
-	batchCh              chan *rollupTypes.TxBatch
 	pendingAssertionCh   chan *rollupTypes.Assertion
 	confirmedIDCh        chan *big.Int
 	challengeCh          chan *challengeCtx
@@ -52,7 +50,6 @@ func New(eth services.Backend, proofBackend proof.Backend, cfg *services.Config,
 	}
 	s := &Sequencer{
 		BaseService:          base,
-		batchCh:              make(chan *rollupTypes.TxBatch, 4096),
 		pendingAssertionCh:   make(chan *rollupTypes.Assertion, 4096),
 		confirmedIDCh:        make(chan *big.Int, 4096),
 		challengeCh:          make(chan *challengeCtx),
@@ -61,46 +58,8 @@ func New(eth services.Backend, proofBackend proof.Backend, cfg *services.Config,
 	return s, nil
 }
 
-// This goroutine fetches txs from txpool and batches them
-// TODO: fetching txs through sub is unstable
-// TODO: batch txs by timer and directly querying txpool as worker does
-func (s *Sequencer) batchingLoop() {
-	defer s.Wg.Done()
-	defer close(s.batchCh)
-
-	// Watch transactions in TxPool
-	txsCh := make(chan core.NewTxsEvent, 4096)
-	txsSub := s.Eth.TxPool().SubscribeNewTxsEvent(txsCh)
-	defer txsSub.Unsubscribe()
-
-	batcher, err := NewBatcher(s.Config.Coinbase, s.Eth)
-	if err != nil {
-		log.Crit("Failed to start batcher", "err", err)
-	}
-
-	for {
-		select {
-		case ev := <-txsCh:
-			// New transactions from TxPool
-			err = batcher.CommitTransactions(ev.Txs)
-			if err != nil {
-				log.Crit("Failed to commit transactions", "err", err)
-			}
-			blocks, err := batcher.Batch()
-			if err != nil {
-				log.Crit("Failed to batch blocks", "err", err)
-			}
-			batch := rollupTypes.NewTxBatch(blocks, 0) // TODO: add max batch size
-			s.batchCh <- batch
-		case <-s.Ctx.Done():
-			return
-		}
-	}
-}
-
-// SequencingLoop This goroutine sequences batches to L1 SequencerInbox and creates DAs
-// TODO: create assertions by timer
-func (s *Sequencer) SequencingLoop(genesisRoot common.Hash) {
+// This goroutine tries to confirm created assertions
+func (s *Sequencer) confirmationLoop() {
 	defer s.Wg.Done()
 
 	// Watch AssertionCreated event
@@ -110,109 +69,6 @@ func (s *Sequencer) SequencingLoop(genesisRoot common.Hash) {
 		log.Crit("Failed to watch rollup event", "err", err)
 	}
 	defer createdSub.Unsubscribe()
-
-	// Current confirmed assertion, initalize it to genesis
-	// TODO: sync from L1 Rollup
-	confirmedAssertion := &rollupTypes.Assertion{
-		ID:                    new(big.Int),
-		VmHash:                genesisRoot,
-		CumulativeGasUsed:     new(big.Int),
-		InboxSize:             new(big.Int),
-		Deadline:              new(big.Int),
-		PrevCumulativeGasUsed: new(big.Int),
-	}
-	// Assertion created and pending for confirmation
-	var pendingAssertion *rollupTypes.Assertion
-	// Assertion to be created on L1 Rollup
-	queuedAssertion := confirmedAssertion.Copy()
-	queuedAssertion.StartBlock = 1
-
-	// Create assertion on L1 Rollup
-	commitAssertion := func() {
-		pendingAssertion = queuedAssertion.Copy()
-		queuedAssertion.StartBlock = queuedAssertion.EndBlock + 1
-		queuedAssertion.PrevCumulativeGasUsed = new(big.Int).Set(queuedAssertion.CumulativeGasUsed)
-		_, err = s.Rollup.CreateAssertion(
-			pendingAssertion.VmHash,
-			pendingAssertion.InboxSize,
-			pendingAssertion.CumulativeGasUsed,
-			confirmedAssertion.VmHash,
-			confirmedAssertion.CumulativeGasUsed,
-		)
-		if err != nil {
-			log.Error("Can not create DA", "error", err)
-		}
-	}
-
-	for {
-		select {
-		case batch := <-s.batchCh:
-			// New batch from Batcher
-			log.Info("Get New Batch", "length", len(batch.Txs))
-			// Sequence batch to SequencerInbox
-			contexts, txLengths, txs, err := batch.SerializeToArgs()
-			if err != nil {
-				log.Error("Can not serialize batch", "error", err)
-				continue
-			}
-			_, err = s.Inbox.AppendTxBatch(contexts, txLengths, txs)
-			if err != nil {
-				log.Error("Can not sequence batch", "error", err)
-				continue
-			}
-			// Update queued assertion to latest batch
-			queuedAssertion.VmHash = batch.LastBlockRoot()
-			queuedAssertion.CumulativeGasUsed.Add(queuedAssertion.CumulativeGasUsed, batch.GasUsed)
-			queuedAssertion.InboxSize.Add(queuedAssertion.InboxSize, batch.InboxSize())
-			queuedAssertion.EndBlock = batch.LastBlockNumber()
-			// If no assertion is pending, commit it
-			if pendingAssertion == nil {
-				log.Info("commitAssertion.....")
-				commitAssertion()
-			}
-		case ev := <-createdCh:
-			// New assertion created on L1 Rollup
-			log.Info(fmt.Sprintf("Get New Assertion, AssertionID: %s, AsserterAddress: %s",
-				ev.AssertionID.String(), ev.AsserterAddr.String()))
-			if common.Address(ev.AsserterAddr) == s.Config.Coinbase {
-				if ev.VmHash == pendingAssertion.VmHash {
-					log.Info("confirmAssertion.....")
-					// If assertion is created by us, get ID and deadline
-					pendingAssertion.ID = ev.AssertionID
-					pendingAssertion.Deadline, err = s.AssertionMap.GetDeadline(ev.AssertionID)
-					if err != nil {
-						log.Error("Can not get DA deadline", "error", err)
-						continue
-					}
-					// Send to confirmation goroutine to confirm it
-					s.pendingAssertionCh <- pendingAssertion
-				}
-			}
-		case id := <-s.confirmedIDCh:
-			// New assertion confirmed
-			if pendingAssertion.ID.Cmp(id) == 0 {
-				confirmedAssertion = pendingAssertion
-				if pendingAssertion.VmHash == queuedAssertion.VmHash {
-					// We are done here, waiting for new batches
-					pendingAssertion = nil
-				} else {
-					// Commit queued assertion
-					commitAssertion()
-				}
-			} else {
-				// TODO: decentralized sequencer
-				// TODO: rewind blockchain, sync from L1, reset states
-				log.Error("Confirmed ID is not current pending one", "get", id.String(), "expected", pendingAssertion.ID.String())
-			}
-		case <-s.Ctx.Done():
-			return
-		}
-	}
-}
-
-// This goroutine tries to confirm created assertions
-func (s *Sequencer) confirmationLoop() {
-	defer s.Wg.Done()
 
 	// Watch AssertionConfirmed event
 	confirmedCh := make(chan *bindings.IRollupAssertionConfirmed, 4096)
@@ -239,7 +95,6 @@ func (s *Sequencer) confirmationLoop() {
 	isInChallenge := false
 
 	// Current pending assertion from sequencing goroutine
-	// TODO: watch multiple pending assertions
 	var pendingAssertion *rollupTypes.Assertion
 	pendingConfirmationSent := true
 	pendingConfirmed := true
@@ -256,6 +111,36 @@ func (s *Sequencer) confirmationLoop() {
 			}
 		} else {
 			select {
+			case ev := <-createdCh:
+				// New assertion created on L1 Rollup
+				log.Info(fmt.Sprintf("Get New Assertion, AssertionID: %s, AsserterAddress: %s",
+					ev.AssertionID.String(), ev.AsserterAddr.String()))
+				if common.Address(ev.AsserterAddr) == s.Config.Coinbase {
+					log.Info("confirmAssertion.....")
+					pendingAssertion.ID = ev.AssertionID
+					pendingAssertion.VmHash = ev.VmHash
+					pendingAssertion.InboxSize = ev.InboxSize
+					pendingAssertion.GasUsed = ev.L2GasUsed
+					pendingAssertion.Parent = new(big.Int).Sub(ev.AssertionID, big.NewInt(1))
+					pendingAssertion.Deadline, err = s.AssertionMap.GetDeadline(ev.AssertionID)
+					if err != nil {
+						log.Error("Can not get Assertion deadline", "error", err)
+						continue
+					}
+					pendingAssertion.ProposalTime, err = s.AssertionMap.GetProposalTime(ev.AssertionID)
+					if err != nil {
+						log.Error("Can not get Assertion proposal time", "error", err)
+						continue
+					}
+					// New assertion created by sequencing goroutine
+					if !pendingConfirmed {
+						log.Error("Got another DA request before current is confirmed")
+						continue
+					}
+					log.Info("confirmAssertion setup states.....")
+					pendingConfirmationSent = false
+					pendingConfirmed = false
+				}
 			case header := <-headCh:
 				// New block mined on L1
 				log.Info("sequencer sync new layer1 block...")
@@ -265,9 +150,7 @@ func (s *Sequencer) confirmationLoop() {
 						log.Info("call ConfirmFirstUnresolvedAssertion...")
 						_, err := s.Rollup.ConfirmFirstUnresolvedAssertion()
 						if err != nil {
-							// log.Error("Failed to confirm DA", "error", err)
 							log.Crit("Failed to confirm DA", "err", err)
-							// TODO: wait some time before retry
 							continue
 						}
 						pendingConfirmationSent = true
@@ -292,14 +175,15 @@ func (s *Sequencer) confirmationLoop() {
 				pendingConfirmationSent = false
 				pendingConfirmed = false
 			case ev := <-challengedCh:
+				log.Warn("new challenge rise", ev)
 				// New challenge raised
-				if ev.AssertionID.Cmp(pendingAssertion.ID) == 0 {
-					s.challengeCh <- &challengeCtx{
-						common.Address(ev.ChallengeAddr),
-						pendingAssertion,
-					}
-					isInChallenge = true
-				}
+				//if ev.AssertionID.Cmp(pendingAssertion.ID) == 0 {
+				//	s.challengeCh <- &challengeCtx{
+				//		common.Address(ev.ChallengeAddr),
+				//		pendingAssertion,
+				//	}
+				//	isInChallenge = true
+				//}
 			case <-s.Ctx.Done():
 				return
 			}
@@ -395,43 +279,44 @@ func (s *Sequencer) challengeLoop() {
 		} else {
 			select {
 			case ctx := <-s.challengeCh:
-				challenge, err := bindings.NewIChallenge(ethc.Address(ctx.challengeAddr), s.L1)
-				if err != nil {
-					log.Crit("Failed to access ongoing challenge", "address", ctx.challengeAddr, "err", err)
-				}
-				challengeSession = &bindings.IChallengeSession{
-					Contract:     challenge,
-					CallOpts:     bind.CallOpts{Pending: true, Context: s.Ctx},
-					TransactOpts: *s.TransactOpts,
-				}
-				bisectedCh = make(chan *bindings.IChallengeBisected, 4096)
-				bisectedSub, err = challenge.WatchBisected(&bind.WatchOpts{Context: s.Ctx}, bisectedCh)
-				if err != nil {
-					log.Crit("Failed to watch challenge event", "err", err)
-				}
-				challengeCompletedCh = make(chan *bindings.IChallengeChallengeCompleted, 4096)
-				challengeCompletedSub, err = challenge.WatchChallengeCompleted(&bind.WatchOpts{Context: s.Ctx}, challengeCompletedCh)
-				if err != nil {
-					log.Crit("Failed to watch challenge event", "err", err)
-				}
-				log.Info("to generate state from", "start", ctx.assertion.StartBlock, "to", ctx.assertion.EndBlock)
-				log.Info("backend", "start", ctx.assertion.StartBlock, "to", ctx.assertion.EndBlock)
-				states, err = proof.GenerateStates(
-					s.ProofBackend,
-					s.Ctx,
-					ctx.assertion.PrevCumulativeGasUsed,
-					ctx.assertion.StartBlock,
-					ctx.assertion.EndBlock+1,
-					nil,
-				)
-				if err != nil {
-					log.Crit("Failed to generate states", "err", err)
-				}
-				_, err = challengeSession.InitializeChallengeLength(new(big.Int).SetUint64(uint64(len(states)) - 1))
-				if err != nil {
-					log.Crit("Failed to initialize challenge", "err", err)
-				}
-				inChallenge = true
+				log.Warn("new challenge rise, handle it", ctx)
+				//challenge, err := bindings.NewIChallenge(ethc.Address(ctx.challengeAddr), s.L1)
+				//if err != nil {
+				//	log.Crit("Failed to access ongoing challenge", "address", ctx.challengeAddr, "err", err)
+				//}
+				//challengeSession = &bindings.IChallengeSession{
+				//	Contract:     challenge,
+				//	CallOpts:     bind.CallOpts{Pending: true, Context: s.Ctx},
+				//	TransactOpts: *s.TransactOpts,
+				//}
+				//bisectedCh = make(chan *bindings.IChallengeBisected, 4096)
+				//bisectedSub, err = challenge.WatchBisected(&bind.WatchOpts{Context: s.Ctx}, bisectedCh)
+				//if err != nil {
+				//	log.Crit("Failed to watch challenge event", "err", err)
+				//}
+				//challengeCompletedCh = make(chan *bindings.IChallengeChallengeCompleted, 4096)
+				//challengeCompletedSub, err = challenge.WatchChallengeCompleted(&bind.WatchOpts{Context: s.Ctx}, challengeCompletedCh)
+				//if err != nil {
+				//	log.Crit("Failed to watch challenge event", "err", err)
+				//}
+				//log.Info("to generate state from", "start", ctx.assertion.StartBlock, "to", ctx.assertion.InboxSize)
+				//log.Info("backend", "start", ctx.assertion.StartBlock, "to", ctx.assertion.EndBlock)
+				//states, err = proof.GenerateStates(
+				//	s.ProofBackend,
+				//	s.Ctx,
+				//	ctx.assertion.PrevCumulativeGasUsed,
+				//	ctx.assertion.StartBlock,
+				//	ctx.assertion.EndBlock+1,
+				//	nil,
+				//)
+				//if err != nil {
+				//	log.Crit("Failed to generate states", "err", err)
+				//}
+				//_, err = challengeSession.InitializeChallengeLength(new(big.Int).SetUint64(uint64(len(states)) - 1))
+				//if err != nil {
+				//	log.Crit("Failed to initialize challenge", "err", err)
+				//}
+				//inChallenge = true
 			case <-headCh:
 				continue // consume channel values
 			case <-s.Ctx.Done():
@@ -441,28 +326,29 @@ func (s *Sequencer) challengeLoop() {
 	}
 }
 
-func (s *Sequencer) Start() error {
-	genesis := s.BaseService.Start()
-
-	s.Wg.Add(4)
-	go s.batchingLoop()
-	go s.SequencingLoop(genesis.Root())
-	go s.confirmationLoop()
-	go s.challengeLoop()
-	log.Info("Sequencer started")
-	return nil
-}
-
-func (s *Sequencer) Stop() error {
-	log.Info("Sequencer stopped")
-	s.Cancel()
-	s.Wg.Wait()
-	return nil
+func (s *Sequencer) Protocols() []p2p.Protocol {
+	// TODO: sequencer APIs
+	return []p2p.Protocol{}
 }
 
 func (s *Sequencer) APIs() []rpc.API {
 	// TODO: sequencer APIs
 	return []rpc.API{}
+}
+
+func (s *Sequencer) Start() error {
+	s.Wg.Add(2)
+	go s.confirmationLoop()
+	go s.challengeLoop()
+	log.Info("fraud-proof defender started")
+	return nil
+}
+
+func (s *Sequencer) Stop() error {
+	log.Info("fraud-proof defender stopped")
+	s.Cancel()
+	s.Wg.Wait()
+	return nil
 }
 
 var _ rollup.FraudProover = (*Sequencer)(nil)
@@ -512,6 +398,11 @@ func (s *Sequencer) GetLatestAssertion() (interface{}, error) {
 }
 
 func (s *Sequencer) GenerateState() (interface{}, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *Sequencer) InChallenge() bool {
 	//TODO implement me
 	panic("implement me")
 }

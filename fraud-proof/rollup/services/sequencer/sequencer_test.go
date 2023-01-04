@@ -1,3 +1,1 @@
 package sequencer
-
-func Test

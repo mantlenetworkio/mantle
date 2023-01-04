@@ -40,7 +40,7 @@ type Backend interface {
 	BlockByNumber(ctx context.Context, number rpc.BlockNumber) (*types.Block, error)
 	GetTransaction(ctx context.Context, txHash common.Hash) (*types.Transaction, common.Hash, uint64, uint64, error)
 	GetReceipts(ctx context.Context, hash common.Hash) (types.Receipts, error)
-	RPCGasCap() uint64
+	RPCGasCap() *big.Int
 	ChainConfig() *params.ChainConfig
 	Engine() consensus.Engine
 	ChainDb() ethdb.Database

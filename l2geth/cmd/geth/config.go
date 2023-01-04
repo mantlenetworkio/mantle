@@ -25,7 +25,7 @@ import (
 	"reflect"
 	"unicode"
 
-	cli "gopkg.in/urfave/cli.v1"
+	"gopkg.in/urfave/cli.v1"
 
 	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
 	"github.com/mantlenetworkio/mantle/l2geth/eth"
@@ -153,7 +153,7 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 	if ctx.GlobalIsSet(utils.OverrideMuirGlacierFlag.Name) {
 		cfg.Eth.OverrideMuirGlacier = new(big.Int).SetUint64(ctx.GlobalUint64(utils.OverrideMuirGlacierFlag.Name))
 	}
-	utils.RegisterEthService(stack, &cfg.Eth) //TODO-FIXME
+	utils.RegisterEthService(stack, &cfg.Eth) // TODO-FIXME
 
 	// Whisper must be explicitly enabled by specifying at least 1 whisper flag or in dev mode
 	shhEnabled := enableWhisper(ctx)
@@ -178,14 +178,6 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 	if cfg.Ethstats.URL != "" {
 		utils.RegisterEthStatsService(stack, cfg.Ethstats.URL)
 	}
-
-	//// <FRAUD-PROOF modification>
-	//if ctx.IsSet(specularUtils.RollupNodeFlag.Name) {
-	//	cfg := specularUtils.MakeRollupConfig(ctx)
-	//	rollup.RegisterRollupService(stack, eth, eth.APIBackend, cfg)
-	//}
-	//// <FRAUD-PROOF modification/>
-
 	return stack
 }
 
