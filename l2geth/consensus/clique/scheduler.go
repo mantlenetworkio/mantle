@@ -38,7 +38,7 @@ type Scheduler struct {
 	wg       sync.WaitGroup
 	l        sync.Mutex
 	eventMux *event.TypeMux
-	done     chan struct{}
+	exitCh   chan struct{}
 	running  int32
 
 	config *Config
@@ -102,7 +102,7 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 		running:         0,
 		currentHeight:   0,
 		db:              db,
-		done:            make(chan struct{}, 1),
+		exitCh:          make(chan struct{}, 1),
 		batchDone:       make(chan struct{}, 1),
 		ticker:          time.NewTicker(10 * time.Second), //TODO
 		consensusEngine: clique,
@@ -117,6 +117,7 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 	schedulerInst.addPeerSub = schedulerInst.eventMux.Subscribe(core.PeerAddEvent{})
 	schedulerInst.batchEndSub = schedulerInst.eventMux.Subscribe(core.BatchEndEvent{})
 	go schedulerInst.AddPeerCheck()
+	go schedulerInst.BatchEndService()
 	return schedulerInst, nil
 
 }
@@ -149,7 +150,7 @@ func (schedulerInst *Scheduler) Start() {
 
 func (schedulerInst *Scheduler) Stop() {
 	atomic.StoreInt32(&schedulerInst.running, 0)
-	schedulerInst.done <- struct{}{}
+	schedulerInst.Close()
 }
 
 // IsRunning returns an indicator whether schedulerInst is running or not.
@@ -160,6 +161,8 @@ func (schedulerInst *Scheduler) IsRunning() bool {
 func (schedulerInst *Scheduler) Close() {
 	schedulerInst.chainHeadSub.Unsubscribe()
 	schedulerInst.addPeerSub.Unsubscribe()
+	schedulerInst.batchEndSub.Unsubscribe()
+	close(schedulerInst.exitCh)
 	close(schedulerInst.chainHeadCh)
 }
 
@@ -184,12 +187,13 @@ func (schedulerInst *Scheduler) BatchEndService() {
 	// automatically stops if unsubscribe
 	for obj := range schedulerInst.batchEndSub.Chan() {
 		if _, ok := obj.Data.(core.BatchEndEvent); ok {
-			schedulerInst.l.Lock()
+			// if batch already exitCh with timeout or height at max height then pass
 			if !schedulerInst.batchEndFlag {
 				schedulerInst.batchDone <- struct{}{}
 				schedulerInst.batchEndFlag = true
+			} else {
+				log.Debug("Batch already exitCh with timeout or height at max height")
 			}
-			schedulerInst.l.Unlock()
 		}
 	}
 }
@@ -219,7 +223,6 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		}
 
 		schedulerInst.l.Lock()
-
 		if schedulerInst.sequencerSet == nil {
 			continue
 		}
@@ -266,6 +269,9 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			log.Debug("ticker timeout")
 		case <-schedulerInst.batchDone:
 			log.Debug("batch done")
+		case <-schedulerInst.exitCh:
+			log.Info("schedulerRoutine stop")
+			return
 		}
 	}
 }
@@ -279,17 +285,18 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 				continue
 			}
 			if schedulerInst.blockchain.CurrentBlock().NumberU64() == schedulerInst.currentStartMsg.MaxHeight {
-				schedulerInst.l.Lock()
 				if !schedulerInst.batchEndFlag {
 					log.Debug("Batch done with height at max height")
 					schedulerInst.batchDone <- struct{}{}
 					schedulerInst.batchEndFlag = true
 				} else {
-					log.Debug("Batch already done")
+					log.Debug("Batch already done with tx apply failed")
 				}
-				schedulerInst.l.Unlock()
 			}
 			log.Debug("chainHead handle", "block_number", chainHead.Block.NumberU64(), "extra_data", hex.EncodeToString(chainHead.Block.Extra()))
+		case <-schedulerInst.exitCh:
+			log.Info("scheduler chain head loop stop")
+			return
 		}
 	}
 }
@@ -316,8 +323,8 @@ func (schedulerInst *Scheduler) readLoop() {
 				continue
 			}
 			schedulerInst.l.Unlock()
-		case <-schedulerInst.done:
-			log.Info("Get scheduler stop signal")
+		case <-schedulerInst.exitCh:
+			log.Info("Get scheduler stop signal, scheduler readLoop stop")
 			return
 		}
 	}
