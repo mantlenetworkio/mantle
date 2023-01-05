@@ -4,6 +4,7 @@ DOCKER_COMPOSE_CMD := docker-compose \
 DOCKER_COMPOSE_TSS_CMD := docker-compose \
 	-f docker-compose.tss.yml
 COPY_ENV := cp -r envs/deployer.env ./.env
+CLEAR_DOCKER_NETWORK := docker network rm ops_mantle
 COPY_CHAIN := cp -r chaintestdata ./chaindata
 
 build:
@@ -14,6 +15,7 @@ build:
 
 up:
 	$(COPY_ENV)
+	$(CLEAR_DOCKER_NETWORK)
 	$(COPY_CHAIN)
 	DOCKER_BUILDKIT=1 \
 	$(DOCKER_COMPOSE_CMD) \
