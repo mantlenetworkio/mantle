@@ -18,6 +18,7 @@ package miner
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -167,9 +168,8 @@ type worker struct {
 	knowBatchPeriodStartMsg  mapset.Set
 	knowBatchPeriodAnswerMsg mapset.Set
 
-	bpsSub *event.TypeMuxSubscription
-	bpaSub *event.TypeMuxSubscription
-
+	bpsSub    *event.TypeMuxSubscription
+	bpaSub    *event.TypeMuxSubscription
 	l1ToL2Sub *event.TypeMuxSubscription
 
 	// Channels
@@ -185,6 +185,9 @@ type worker struct {
 	localUncles  map[common.Hash]*types.Block // A set of side blocks generated locally as the possible uncle blocks.
 	remoteUncles map[common.Hash]*types.Block // A set of side blocks as the possible uncle blocks.
 	unconfirmed  *unconfirmedBlocks           // A set of locally mined blocks pending canonicalness confirmations.
+
+	mutex      sync.Mutex // The lock used to protect the currentBps
+	currentBps *types.BatchPeriodStartMsg
 
 	mu       sync.RWMutex // The lock used to protect the coinbase and extra fields
 	coinbase common.Address
@@ -469,7 +472,6 @@ func (w *worker) l1Tol2StartLoop() {
 			if ev, ok = obj.Data.(core.L1ToL2TxStartEvent); !ok {
 				continue
 			}
-			log.Info("Scheduler receives batchPeriodStartEvent")
 			if ev.SchedulerCh != nil {
 				if err := w.eth.SyncService().SyncQueueToTip(); err != nil {
 					log.Info("SyncQueueToTip interrupt", "error", err)
@@ -501,35 +503,51 @@ func (w *worker) batchStartLoop() {
 				continue
 			}
 			if w.knowBatchPeriodStartMsg.Contains(ev.Msg.Hash()) {
-				log.Debug("Duplicated BatchPeriodStartMsg", "batchIndex", ev.Msg.BatchIndex, "startHeight", ev.Msg.StartHeight)
+				log.Debug("Duplicated BatchPeriodStartMsg", "batch_index", ev.Msg.BatchIndex, "start_height", ev.Msg.StartHeight)
 				continue
 			} else {
 				w.knowBatchPeriodStartMsg.Add(ev.Msg.Hash())
 			}
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
-				log.Info("Scheduler receives batchPeriodStartEvent")
-
+				w.mutex.Lock()
+				w.currentBps = ev.Msg
+				w.mutex.Unlock()
+				log.Info("Scheduler start new batch",
+					"reorg_index", ev.Msg.ReorgIndex,
+					"start_height", ev.Msg.StartHeight,
+					"batch_index", ev.Msg.BatchIndex,
+					"max_height", ev.Msg.MaxHeight,
+					"expire_time", ev.Msg.ExpireTime,
+					"sequencer_address", ev.Msg.Sequencer.String(),
+					"signature", hex.EncodeToString(ev.Msg.Signature),
+				)
 			} else {
 				w.chain.UpdateRollbackStates(ev.Msg.RollbackStates)
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
 					log.Info("Active sequencer receives batchPeriodStartEvent")
 					if ev.Msg.StartHeight != w.chain.CurrentBlock().NumberU64()+1 {
-						log.Info("start height mismatch", "current_height", w.current.header.Number.Uint64(), "startHeight", ev.Msg.StartHeight)
+						log.Error("start height mismatch", "current_height", w.current.header.Number.Uint64(), "start_height", ev.Msg.StartHeight)
 						continue
 					}
 					if ev.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
-						log.Info("maxHeight is too large, just ignore the batch", "current_height", w.current.header.Number.Uint64(), "maxHeight", ev.Msg.MaxHeight)
+						log.Error("maxHeight is too large, just ignore the batch", "current_height", w.current.header.Number.Uint64(), "max_height", ev.Msg.MaxHeight)
 						continue
 					}
 					if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
-						log.Info("expire timestamp is passed", "current_time", time.Now().Unix(), "expireTime", ev.Msg.ExpireTime)
+						log.Error("expire timestamp is passed", "current_time", time.Now().Unix(), "expire_time", ev.Msg.ExpireTime)
 						continue
 					}
 
 					// Keep sending messages until the limit is reached
+					expectHeight := ev.Msg.StartHeight - 1
 					for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < ev.Msg.MaxHeight && uint64(time.Now().Unix()) < ev.Msg.ExpireTime && inTxLen < (ev.Msg.MaxHeight-ev.Msg.StartHeight); {
+						if w.eth.BlockChain().CurrentBlock().NumberU64() < expectHeight {
+							log.Debug("wanting for current height to reach expectHeight", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "expect_height", expectHeight)
+							time.Sleep(200 * time.Millisecond)
+							continue
+						}
 						pending, err := w.eth.TxPool().Pending()
 						if err != nil {
 							log.Error("Failed to fetch pending transactions", "err", err)
@@ -558,6 +576,7 @@ func (w *worker) batchStartLoop() {
 						}
 
 						var bpa types.BatchPeriodAnswerMsg
+						bpa.StartIndex = ev.Msg.StartHeight + inTxLen
 						if uint64(len(txsQueue)) > ev.Msg.MaxHeight-ev.Msg.StartHeight {
 							bpa.Txs = txsQueue[:ev.Msg.MaxHeight-ev.Msg.StartHeight]
 							inTxLen += ev.Msg.MaxHeight - ev.Msg.StartHeight
@@ -566,11 +585,10 @@ func (w *worker) batchStartLoop() {
 							inTxLen += uint64(len(txsQueue))
 						}
 						bpa.BatchIndex = ev.Msg.BatchIndex
-						bpa.StartIndex = ev.Msg.StartHeight
 						bpa.Sequencer = w.coinbase
 						signature, err := w.engine.SignData(bpa.Sequencer, bpa.GetSignData())
 						if err != nil {
-							log.Error("Sign BatchPeriodAnswerMsg error", "errMsg", err.Error())
+							log.Error("Sign BatchPeriodAnswerMsg error", "err_msg", err.Error())
 							continue
 						}
 						bpa.Signature = signature
@@ -578,16 +596,23 @@ func (w *worker) batchStartLoop() {
 							Msg:   &bpa,
 							ErrCh: nil,
 						})
+						expectHeight = ev.Msg.StartHeight - 1 + inTxLen
 						if err != nil {
-							log.Error("Post BatchPeriodAnswerMsg error", "errMsg", err.Error())
+							log.Error("Post BatchPeriodAnswerMsg error", "err_msg", err.Error())
 							continue
 						}
-						log.Info("Generate BatchPeriodAnswerEvent", "coinbase", w.coinbase.String(), "tx_count", len(bpa.Txs), "startIndex", bpa.StartIndex)
+						log.Info("Generate BatchPeriodAnswerEvent", "coinbase", w.coinbase.String(), "tx_count", len(bpa.Txs), "start_index", bpa.StartIndex)
 					}
-
 				} else {
-					// for inactive sequencer
-					log.Info("Inactive sequencer receives batchPeriodStartEvent")
+					log.Debug("Inactive sequencer receives batchPeriodStartEvent",
+						"reorg_index", ev.Msg.ReorgIndex,
+						"start_height", ev.Msg.StartHeight,
+						"batch_index", ev.Msg.BatchIndex,
+						"max_height", ev.Msg.MaxHeight,
+						"expire_time", ev.Msg.ExpireTime,
+						"sequencer_address", ev.Msg.Sequencer.String(),
+						"signature", hex.EncodeToString(ev.Msg.Signature),
+					)
 				}
 			}
 		// System stopped
@@ -610,31 +635,48 @@ func (w *worker) batchAnswerLoop() {
 				continue
 			}
 			if w.knowBatchPeriodAnswerMsg.Contains(ev.Msg.Hash()) {
-				log.Debug("Duplicated BatchPeriodAnswerMsg", "batchIndex", ev.Msg.StartIndex, "tx_count", len(ev.Msg.Txs))
+				log.Debug("Duplicated BatchPeriodAnswerMsg", "batch_index", ev.Msg.StartIndex, "tx_count", len(ev.Msg.Txs))
 				continue
 			} else {
 				w.knowBatchPeriodAnswerMsg.Add(ev.Msg.Hash())
 			}
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
-				// todo check event index
-				log.Info("Scheduler receives BatchPeriodAnswerEvent", "Sequencer", ev.Msg.Sequencer.String())
+				w.mutex.Lock()
+				if w.currentBps == nil {
+					log.Debug("Current BatchPeriodStartMsg is null")
+					continue
+				}
+				if ev.Msg.BatchIndex != w.currentBps.BatchIndex {
+					log.Error("Batch index not equal", "current_index", w.currentBps.BatchIndex, "receive", ev.Msg.BatchIndex)
+					continue
+				}
+				w.mutex.Unlock()
+				if ev.Msg.StartIndex != w.eth.BlockChain().CurrentBlock().NumberU64()+1 {
+					log.Error("Start index not equal with current height", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "start_index", ev.Msg.StartIndex)
+					continue
+				}
+				log.Info("Scheduler receives BatchPeriodAnswerEvent", "sequencer", ev.Msg.Sequencer.String())
 				for _, tx := range ev.Msg.Txs {
 					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, ev.Msg.ToBatchTxSetProof())
 					if err != nil {
-						log.Error("ValidateAndApplySequencerTransaction error", "errMsg", err.Error())
-						continue
+						log.Error("ValidateAndApplySequencerTransaction error", "err_msg", err.Error())
+						err = w.mux.Post(core.BatchEndEvent{})
+						if err != nil {
+							log.Error("Post BatchEndEvent error", "err_msg", err.Error())
+							break
+						}
+						break
 					}
-
 				}
 			} else {
-				if ev.Msg.Sequencer == w.coinbase {
-					// for active sequencer
-					log.Info("Active sequencer receives BatchPeriodAnswerEvent")
-				} else {
-					// for inactive sequencer
-					log.Info("Inactive sequencer receives BatchPeriodAnswerEvent")
-				}
+				log.Debug("Sequencer receives BatchPeriodAnswerEvent",
+					"sequencer_address", ev.Msg.Sequencer.String(),
+					"start_height", ev.Msg.BatchIndex,
+					"batch_index", ev.Msg.StartIndex,
+					"tx_len", ev.Msg.Txs.Len(),
+					"signature", hex.EncodeToString(ev.Msg.Signature),
+				)
 			}
 			// System stopped
 		case <-w.exitCh:

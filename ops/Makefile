@@ -1,6 +1,8 @@
 DOCKER_COMPOSE_CMD := docker-compose \
 	-f docker-compose.yml \
 	-f docker-compose.local.yml
+DOCKER_COMPOSE_TSS_CMD := docker-compose \
+	-f docker-compose.tss.yml
 COPY_ENV := cp -r envs/deployer.env ./.env
 COPY_CHAIN := cp -r chaintestdata ./chaindata
 
@@ -12,11 +14,19 @@ build:
 
 up:
 	$(COPY_ENV)
+	$(CLEAR_DOCKER_NETWORK)
 	$(COPY_CHAIN)
 	DOCKER_BUILDKIT=1 \
 	$(DOCKER_COMPOSE_CMD) \
 		up --build --detach $(service)
 .PHONY: up
+
+up-tss:
+	DOCKER_BUILDKIT=1 \
+	$(DOCKER_COMPOSE_TSS_CMD) \
+		up --build --detach $(service)
+.PHONY: up-tss
+
 
 down:
 	$(DOCKER_COMPOSE_CMD) \
@@ -46,6 +56,7 @@ restart:
 clean: stop
 	sudo rm -rf chaindata
 	find data -mindepth 1 -maxdepth 1 -type d | xargs rm -rf
+	docker network rm ops_mantle
 .PHONY: clean
 
 up-metrics: down-metrics

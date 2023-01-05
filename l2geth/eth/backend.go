@@ -249,6 +249,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 			config.Rollup.SchedulerAddress,
 			eth.engine.(*clique.Clique),
 			eth.blockchain,
+			eth.txPool,
 			eth.eventMux,
 		)
 		if err != nil {
