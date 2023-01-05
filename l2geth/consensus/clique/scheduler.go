@@ -60,7 +60,7 @@ type Scheduler struct {
 	batchEndFlag    bool
 
 	expectMinTxsCount uint64
-	sequencerHealther *sequencerHealther
+	sequencerAssessor *healthAssessor
 
 	chainHeadSub event.Subscription
 	chainHeadCh  chan core.ChainHeadEvent
@@ -116,12 +116,11 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 		sequencerSet:      NewSequencerSet(seqz),
 		blockchain:        blockchain,
 		txpool:            txpool,
-		sequencerHealther: NewSequencerHealther(),
+		sequencerAssessor: NewHealthAssessor(),
 		chainHeadCh:       make(chan core.ChainHeadEvent, chainHeadChanSize),
 	}
 
 	return schedulerInst, nil
-
 }
 
 func (schedulerInst *Scheduler) SetWallet(wallet accounts.Wallet, acc accounts.Account) {
@@ -338,7 +337,7 @@ func (schedulerInst *Scheduler) readLoop() {
 				log.Error("Get sequencer set failed", "err", err)
 				continue
 			}
-			schedulerInst.SetSequencerHealthChecker(seqSet)
+			schedulerInst.SetSequencerHealthPoints(seqSet)
 			// get changes
 			changes := compareSequencerSet(schedulerInst.sequencerSet.Sequencers, seqSet)
 			log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
