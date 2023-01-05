@@ -535,6 +535,7 @@ func (w *worker) batchStartLoop() {
 					expectHeight := ev.Msg.StartHeight - 1
 					for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < ev.Msg.MaxHeight && uint64(time.Now().Unix()) < ev.Msg.ExpireTime && inTxLen < (ev.Msg.MaxHeight-ev.Msg.StartHeight); {
 						if w.eth.BlockChain().CurrentBlock().NumberU64() < expectHeight {
+							log.Debug("wanting for current height to reach expectHeight", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "expect_height", expectHeight)
 							time.Sleep(200 * time.Millisecond)
 							continue
 						}
@@ -586,7 +587,7 @@ func (w *worker) batchStartLoop() {
 							Msg:   &bpa,
 							ErrCh: nil,
 						})
-						expectHeight += inTxLen
+						expectHeight = ev.Msg.StartHeight - 1 + inTxLen
 						if err != nil {
 							log.Error("Post BatchPeriodAnswerMsg error", "err_msg", err.Error())
 							continue
