@@ -2,7 +2,4 @@ go 1.18
 
 use (
 	./mt-challenger
-	./mt-batcher
-	./bss-core
-	./l2geth
 )
