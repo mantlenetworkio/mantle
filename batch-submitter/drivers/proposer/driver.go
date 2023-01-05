@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/mantlenetworkio/mantle/fraud-proof"
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"math/big"
@@ -25,6 +24,7 @@ import (
 	"github.com/mantlenetworkio/mantle/bss-core/drivers"
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
+	fpbindings "github.com/mantlenetworkio/mantle/fraud-proof/bindings"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	tss_types "github.com/mantlenetworkio/mantle/tss/common"
 )
@@ -44,6 +44,7 @@ type Config struct {
 	MinStateRootElements uint64
 	SCCAddr              common.Address
 	CTCAddr              common.Address
+	FPRollupAddr         common.Address
 	ChainID              *big.Int
 	PrivKey              *ecdsa.PrivateKey
 }
@@ -53,6 +54,8 @@ type Driver struct {
 	sccContract    *scc.StateCommitmentChain
 	rawSccContract *bind.BoundContract
 	ctcContract    *ctc.CanonicalTransactionChain
+	fpRollup       *fpbindings.IRollup
+	fpAssertion    *fpbindings.AssertionMap
 	walletAddr     common.Address
 	metrics        *metrics.Base
 }
@@ -67,6 +70,25 @@ func NewDriver(cfg Config) (*Driver, error) {
 
 	ctcContract, err := ctc.NewCanonicalTransactionChain(
 		cfg.CTCAddr, cfg.L1Client,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	fpRollup, err := fpbindings.NewIRollup(
+		cfg.FPRollupAddr, cfg.L1Client,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	assertionAddr, err := fpRollup.Assertions(&bind.CallOpts{})
+	if err != nil {
+		return nil, err
+	}
+
+	assertionMap, err := fpbindings.NewAssertionMap(
+		assertionAddr, cfg.L1Client,
 	)
 	if err != nil {
 		return nil, err
@@ -90,6 +112,8 @@ func NewDriver(cfg Config) (*Driver, error) {
 		sccContract:    sccContract,
 		rawSccContract: rawSccContract,
 		ctcContract:    ctcContract,
+		fpRollup:       fpRollup,
+		fpAssertion:    assertionMap,
 		walletAddr:     walletAddr,
 		metrics:        metrics.NewBase("batch_submitter", cfg.Name),
 	}, nil
@@ -238,30 +262,20 @@ func (d *Driver) CraftBatchTx(
 	if tssResponse.RollBack {
 		tx, err = d.sccContract.RollBackL2Chain(opts, start, offsetStartsAtIndex, tssResponse.Signature)
 	} else {
-		// ##### FRAUD-PROOF modify #####
-		var fraudProover rollup.FraudProover // TODO-FIXME
-		var obj interface{}
-
-		if fraudProover.InChallenge() {
-			log.Warn("currently in challenge, can't submit new assertion")
-			return nil, nil
+		log.Info(">>>> d.cfg.FPRollupAddr: ", d.cfg)
+		if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
+			log.Info("append state with fraud proof")
+			// ##### FRAUD-PROOF modify #####
+			tx, err = d.FraudProofAppendStateBatch(
+				opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature, blocks,
+			)
+			// ##### FRAUD-PROOF modify ##### //
+		} else {
+			log.Info("append state with scc")
+			tx, err = d.sccContract.AppendStateBatch(
+				opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
+			)
 		}
-
-		txBatch := rollupTypes.NewTxBatch(blocks, uint64(len(blocks)))
-		if obj, err = fraudProover.GetLatestAssertion(); err != nil {
-			return nil, err
-		}
-		assertion := txBatch.ToAssertion(obj.(*rollupTypes.Assertion))
-
-		// create assertion
-		if err = fraudProover.CreateAssertionWithStateBatch(stateRoots, offsetStartsAtIndex, tssResponse.Signature, assertion); err != nil {
-			return nil, err
-		}
-		// ##### FRAUD-PROOF modify ##### //
-
-		//tx, err = d.sccContract.AppendStateBatch(
-		//	opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
-		//)
 	}
 
 	switch {
@@ -339,4 +353,41 @@ func (d *Driver) SendTransaction(
 	tx *types.Transaction,
 ) error {
 	return d.cfg.L1Client.SendTransaction(ctx, tx)
+}
+
+func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32]byte, shouldStartAtElement *big.Int, signature []byte, blocks []*l2types.Block) (*types.Transaction, error) {
+
+	//if d.fpRollup.InChallenge() {
+	//	log.Warn("currently in challenge, can't submit new assertion")
+	//	return
+	//}
+	var latestAssertion rollupTypes.Assertion
+	var assertionID *big.Int
+	var err error
+	if assertionID, err = d.fpAssertion.GetLatestAssertionID(&bind.CallOpts{}); err != nil {
+		return nil, err
+	}
+	if ret, err := d.fpAssertion.Assertions(&bind.CallOpts{}, assertionID); err != nil {
+		return nil, err
+	} else {
+		latestAssertion.ID = assertionID
+		latestAssertion.VmHash = ret.StateHash
+		latestAssertion.InboxSize = ret.InboxSize
+		latestAssertion.GasUsed = ret.GasUsed
+		latestAssertion.Parent = ret.Parent
+		latestAssertion.Deadline = ret.Deadline
+		latestAssertion.ProposalTime = ret.ProposalTime
+	}
+
+	txBatch := rollupTypes.NewTxBatch(blocks, uint64(len(blocks)))
+	assertion := txBatch.ToAssertion(&latestAssertion)
+
+	// create assertion
+	if tx, err := d.fpRollup.CreateAssertionWithStateBatch(
+		opts, assertion.VmHash, assertion.InboxSize, assertion.GasUsed, batch, shouldStartAtElement, signature); err != nil {
+		return nil, err
+	} else {
+		fmt.Println("tx hash: ", tx.Hash())
+		return tx, nil
+	}
 }

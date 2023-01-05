@@ -336,6 +336,8 @@ func (s *Sequencer) APIs() []rpc.API {
 }
 
 func (s *Sequencer) Start() error {
+	_ = s.BaseService.Start()
+
 	s.Wg.Add(2)
 	go s.confirmationLoop()
 	go s.challengeLoop()
@@ -401,7 +403,7 @@ func (s *Sequencer) GenerateState() (interface{}, error) {
 
 func (s *Sequencer) InChallenge() bool {
 	//TODO implement me
-	panic("implement me")
+	return false
 }
 
 func (s *Sequencer) RespondChallenge() error {

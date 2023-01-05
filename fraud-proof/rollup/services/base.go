@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 	"sync"
 
@@ -33,9 +32,6 @@ type BaseService struct {
 }
 
 func NewBaseService(eth Backend, proofBackend proof.Backend, cfg *Config, auth *bind.TransactOpts) (*BaseService, error) {
-	if eth == nil {
-		return nil, fmt.Errorf("can not use light client with rollup")
-	}
 	ctx, cancel := context.WithCancel(context.Background())
 	l1, err := ethclient.DialContext(ctx, cfg.L1Endpoint)
 	if err != nil {
@@ -87,7 +83,9 @@ func NewBaseService(eth Backend, proofBackend proof.Backend, cfg *Config, auth *
 		Ctx:          ctx,
 		Cancel:       cancel,
 	}
-	b.Chain = eth.BlockChain()
+	if eth != nil {
+		b.Chain = eth.BlockChain()
+	}
 	return b, nil
 }
 

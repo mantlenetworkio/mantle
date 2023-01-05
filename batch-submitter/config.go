@@ -69,6 +69,9 @@ type Config struct {
 	// SCCAddress is the SCC contract address.
 	SCCAddress string
 
+	// FPRollupAddress is the fraud proof rollup contract address.
+	FPRollupAddress string
+
 	// MinL1TxSize is the minimum size in bytes of any L1 transactions generated
 	// by the batch submitter.
 	MinL1TxSize uint64

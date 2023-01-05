@@ -1,8 +1,10 @@
+Proxy__Verifier
 ChainStorageContainer-SCC-batches
 StateCommitmentChain
 TestBitToken
 ChainStorageContainer-CTC-batches
 Proxy__BVM_L1StandardBridge
+Rollup
 TssStakingSlashing
 BVM_L1CrossDomainMessenger
 Proxy__TSS_GroupManager
@@ -17,3 +19,5 @@ Proxy__BVM_EigenDataLayrChain
 Proxy__BVM_L1CrossDomainMessenger
 Proxy__TSS_StakingSlashing
 BondManager
+Verifier
+Proxy__Rollup

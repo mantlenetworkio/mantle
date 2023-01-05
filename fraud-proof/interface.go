@@ -4,11 +4,12 @@ import "math/big"
 
 type FraudProover interface {
 	Start() error
+
 	Stop() error
 
-	CreateAssertion(interface{}) error
-
 	CreateAssertionWithStateBatch([][32]byte, *big.Int, []byte, interface{}) error
+
+	CreateAssertion(interface{}) error
 
 	GetLatestAssertion() (interface{}, error)
 
