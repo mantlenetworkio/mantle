@@ -830,7 +830,6 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 		newBlock := s.bc.GetBlockByNumber(i)
 		log.Info("StateRoot", "equal", oldBlocks[i-start].Root() == newBlock.Root())
 		if oldBlocks[i-start].Hash() != newBlock.Hash() {
-
 			rollbackState := &types.RollbackState{
 				BlockNumber: i,
 				BlockHash:   newBlock.Hash(),

@@ -66,6 +66,7 @@ type Scheduler struct {
 	chainHeadCh  chan core.ChainHeadEvent
 	addPeerSub   *event.TypeMuxSubscription
 	batchEndSub  *event.TypeMuxSubscription
+	rollbackSub  *event.TypeMuxSubscription
 
 	ticker *time.Ticker
 
@@ -145,12 +146,14 @@ func (schedulerInst *Scheduler) Start() {
 
 	schedulerInst.addPeerSub = schedulerInst.eventMux.Subscribe(core.PeerAddEvent{})
 	schedulerInst.batchEndSub = schedulerInst.eventMux.Subscribe(core.BatchEndEvent{})
+	schedulerInst.rollbackSub = schedulerInst.eventMux.Subscribe(core.RollbackEvent{})
 	schedulerInst.chainHeadSub = schedulerInst.blockchain.SubscribeChainHeadEvent(schedulerInst.chainHeadCh)
 
 	schedulerInst.wg.Add(1)
 	go schedulerInst.readLoop()
 	go schedulerInst.addPeerCheckLoop()
 	go schedulerInst.batchEndLoop()
+	go schedulerInst.rollbackStartLoop()
 	go schedulerInst.schedulerRoutine()
 	go schedulerInst.handleChainHeadEventLoop()
 
@@ -171,6 +174,7 @@ func (schedulerInst *Scheduler) Close() {
 	schedulerInst.chainHeadSub.Unsubscribe()
 	schedulerInst.addPeerSub.Unsubscribe()
 	schedulerInst.batchEndSub.Unsubscribe()
+	schedulerInst.rollbackSub.Unsubscribe()
 	close(schedulerInst.exitCh)
 }
 
@@ -210,7 +214,7 @@ func (schedulerInst *Scheduler) batchEndLoop() {
 
 func (schedulerInst *Scheduler) rollbackStartLoop() {
 	// automatically stops if unsubscribe
-	for obj := range schedulerInst.batchEndSub.Chan() {
+	for obj := range schedulerInst.rollbackSub.Chan() {
 		if _, ok := obj.Data.(core.RollbackEvent); ok {
 			// if batch already exitCh with timeout or height at max height then pass
 			msg := types.RollbackMsg{

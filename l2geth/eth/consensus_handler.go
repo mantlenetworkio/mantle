@@ -131,7 +131,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bs); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		log.Info("Batch Period Start RollbackStates", "batch_index", bs.BatchIndex, "start_height", bs.StartHeight, "max_height", bs.MaxHeight, "expire_time", bs.ExpireTime)
+		log.Info("Batch Period Start Msg", "batch_index", bs.BatchIndex, "start_height", bs.StartHeight, "max_height", bs.MaxHeight, "expire_time", bs.ExpireTime)
 		if !types.VerifySigner(bs, pm.schedulerInst.Scheduler()) {
 			return nil
 		}
@@ -147,7 +147,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bpa); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		log.Info("Batch Period Answer RollbackStates", "batchIndex", bpa.BatchIndex, "start_index", bpa.StartIndex, "tx_len", len(bpa.Txs))
+		log.Info("Batch Period Answer Msg", "batchIndex", bpa.BatchIndex, "start_index", bpa.StartIndex, "tx_len", len(bpa.Txs))
 		if !pm.schedulerInst.IsRunning() {
 			log.Debug("not scheduler")
 			return nil
@@ -166,7 +166,6 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&rm); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		log.Info("Fraud Proof Reorg RollbackStates")
 		p.knowRollbackMsg.Add(rm.Hash())
 		erCh := make(chan error, 1)
 		pm.eventMux.Post(core.RollbackStartEvent{
