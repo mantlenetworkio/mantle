@@ -435,7 +435,7 @@ func (c *Challenger) eventLoop() {
 			continue
 		}
 		newBatchTxn := *batchTxn
-		for i := 0; i <= len(newBatchTxn); i++ {
+		for i := 0; i < len(newBatchTxn); i++ {
 			l2Tx := new(l2types.Transaction)
 			rlpStream := l2rlp.NewStream(bytes.NewBuffer(newBatchTxn[i].RawTx), 0)
 			if err := l2Tx.DecodeRLP(rlpStream); err != nil {
