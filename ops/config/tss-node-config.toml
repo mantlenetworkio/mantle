@@ -8,9 +8,11 @@ l1_url = "http://10.0.0.2:8545"
 time_task_interval = "10s"
 l1_receipt_confirm_timeout = "30s"
 l1_confirm_blocks = "1"
-scc_contract_address = "0x2A88056985814dcBb72aFA50B95893359B6262f5"
-tss_group_contract_address = "0x666f755Ff171702702EAc10339A2a613698Cbd2f"
-tss_staking_slash_contract_address = "0x00f59693Ab3a491356FDB4Facb4B04D811135E22"
+scc_contract_address = "0xc48078a734c2e22D43F54B47F7a8fB314Fa5A601"
+#Proxy_tssGroup
+tss_group_contract_address = "0x67EBb5690d1Fc1Bc0fa67cBD6Fe944515c5e7F93"
+#Proxy_tssslashing
+tss_staking_slash_contract_address = "0x2B8380FCA14b5F5C4a763bf38573A3c36a548c56"
 timed_task_interval = "10s"
 signed_batches_window = 100
 min_signed_in_window = 50
@@ -22,9 +24,11 @@ base_dir = "/root/.tssnode"
 # websocket addr of tss manager
 ws_addr = "tcp://tss-manager:8081"
 # l2 eth rpc
-l2_eth_rpc = "http://bitnetwork-l2geth"
-tss_group_manager_address = "0x666f755Ff171702702EAc10339A2a613698Cbd2f"
-tss_staking_slashing_address = "0x00f59693Ab3a491356FDB4Facb4B04D811135E22"
+l2_eth_rpc = "http://10.0.0.5:8545"
+#Proxy_tssGroup
+tss_group_manager_address = "0x67EBb5690d1Fc1Bc0fa67cBD6Fe944515c5e7F93"
+#Proxy_tssslashing
+tss_staking_slashing_address = "0x2B8380FCA14b5F5C4a763bf38573A3c36a548c56"
 # the preParamFile for tss job
 pre_param_file = ""
 # listening port for p2p communication
