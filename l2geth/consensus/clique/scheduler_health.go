@@ -32,6 +32,7 @@ func (schedulerInst *Scheduler) SetSequencerHealthChecker(seqSets synchronizer.S
 	for key := range schedulerInst.sequencerHealther.SequencersPoints {
 		schedulerInst.sequencerHealther.SequencersPoints[key] = initPoints
 	}
+	log.Debug("set sequencer healthChecker success")
 }
 
 func (schedulerInst *Scheduler) checkSequencer() {
@@ -74,6 +75,7 @@ func (schedulerInst *Scheduler) punishSequencer(sequencer common.Address) {
 func (schedulerInst *Scheduler) deductPoints(sequencer common.Address) {
 	if schedulerInst.zeroPoints(sequencer) {
 		schedulerInst.punishSequencer(sequencer)
+		log.Info("sequencer debuct points success", "current", sequencer, "points", schedulerInst.sequencerHealther.SequencersPoints[sequencer])
 		return
 	}
 	schedulerInst.sequencerHealther.SequencersPoints[sequencer] = schedulerInst.sequencerHealther.SequencersPoints[sequencer] - 1
