@@ -18,6 +18,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/rlp"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	rc "github.com/mantlenetworkio/mantle/mt-batcher/bindings"
@@ -29,7 +30,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unsafe"
 )
 
 var (
@@ -204,24 +204,20 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 		log.Info("MtBatcher Rlp Transactions", "txBuf", txBuf.Bytes(), "txs[0].QueueOrigin()", txs[0].QueueOrigin())
 		batchTx := BatchTx{
 			BlockNumber: i,
-			rawTx:       txBuf.Bytes(),
+			RawTx:       txBuf.Bytes(),
 		}
 		batchTxList = append(batchTxList, batchTx)
 	}
-	batchTxVector := &BatchTxVector{batchTxList}
-	Len := unsafe.Sizeof(*batchTxVector)
-	batchTxVectorBytes := &SliceBatchTx{
-		addr: uintptr(unsafe.Pointer(batchTxVector)),
-		cap:  int(Len),
-		len:  int(Len),
+	txnBufBytes, err := rlp.EncodeToBytes(batchTxList)
+	if err != nil {
+		panic(fmt.Sprintf("MtBatcher Unable to encode txn: %v", err))
 	}
 	var transactionByte []byte
-	txBufBytes := *(*[]byte)(unsafe.Pointer(batchTxVectorBytes))
-	if len(txBufBytes) > 31*d.Cfg.EigenLayerNode {
-		transactionByte = txBufBytes
+	if len(txnBufBytes) > 31*d.Cfg.EigenLayerNode {
+		transactionByte = txnBufBytes
 	} else {
-		paddingBytes := make([]byte, (31*d.Cfg.EigenLayerNode)-len(txBufBytes))
-		transactionByte = append(txBufBytes, paddingBytes...)
+		paddingBytes := make([]byte, (31*d.Cfg.EigenLayerNode)-len(txnBufBytes))
+		transactionByte = append(txnBufBytes, paddingBytes...)
 	}
 	log.Info("MtBatcher transaction data len", "dataLen", len(transactionByte))
 	return transactionByte, start, end
