@@ -281,8 +281,12 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		}
 		log.Info("Generate BatchPeriodStartEvent", "start_height", msg.StartHeight, "max_height", msg.MaxHeight)
 		schedulerInst.sequencerSet.IncrementProducerPriority(1)
-		schedulerInst.batchEndFlag = false
 		schedulerInst.l.Unlock()
+
+		schedulerInst.mu.Lock()
+		schedulerInst.batchEndFlag = false
+		schedulerInst.mu.Unlock()
+
 		ticker := time.NewTicker(time.Duration(expireTime) * time.Second)
 		select {
 		case <-ticker.C:
