@@ -16,7 +16,6 @@ func TestSigAndVerify(t *testing.T) {
 	pub := prv.Public().(*ecdsa.PublicKey)
 	address := crypto.PubkeyToAddress(*pub).Hex()
 	bps := &types.BatchPeriodStartMsg{
-		ReorgIndex:  0,
 		BatchIndex:  0,
 		StartHeight: 1,
 		MaxHeight:   100,

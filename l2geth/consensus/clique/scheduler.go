@@ -208,6 +208,30 @@ func (schedulerInst *Scheduler) batchEndLoop() {
 	}
 }
 
+func (schedulerInst *Scheduler) rollbackStartLoop() {
+	// automatically stops if unsubscribe
+	for obj := range schedulerInst.batchEndSub.Chan() {
+		if _, ok := obj.Data.(core.RollbackEvent); ok {
+			// if batch already exitCh with timeout or height at max height then pass
+			msg := types.RollbackMsg{
+				RollbackStates: rawdb.ReadRollbackStates(schedulerInst.db),
+			}
+			sign, err := schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetSignData())
+			if err != nil {
+				log.Error("sign RollbackStartEvent error")
+				return
+			}
+			msg.Signature = sign
+			if err := schedulerInst.eventMux.Post(core.RollbackStartEvent{
+				ErrCh: nil,
+				Msg:   &msg,
+			}); err != nil {
+				log.Error("Generate RollbackStartEvent error")
+			}
+		}
+	}
+}
+
 func (schedulerInst *Scheduler) schedulerRoutine() {
 	batchSize := defaultBatchSize
 	expireTime := defaultExpireTime

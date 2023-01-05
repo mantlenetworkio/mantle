@@ -853,7 +853,7 @@ type Msg struct {
 
 // String returns a log-friendly string
 func (m *Msg) String() string {
-	return fmt.Sprintf("Msg(%d) %v->%v", m.Code, m.One.TerminalString(), m.Other.TerminalString())
+	return fmt.Sprintf("RollbackStates(%d) %v->%v", m.Code, m.One.TerminalString(), m.Other.TerminalString())
 }
 
 // ConnLabel generates a deterministic string which represents a connection

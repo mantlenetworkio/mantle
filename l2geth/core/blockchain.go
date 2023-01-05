@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math"
 	"math/big"
 	mrand "math/rand"
 	"sort"
@@ -1489,7 +1488,7 @@ func (bc *BlockChain) addFutureBlock(block *types.Block) error {
 func (bc *BlockChain) GetRollbackNumber() uint64 {
 	rbss := rawdb.ReadRollbackStates(bc.db)
 	current := bc.CurrentBlock()
-	var rollbackNumber uint64 = math.MaxUint64
+	var rollbackNumber uint64 = common.InvalidRollback
 	for i := len(rbss) - 1; i >= 0; i-- {
 		if current.Number().Uint64() >= rbss[i].BlockNumber {
 			block := bc.GetBlockByNumber(rbss[i].BlockNumber)
@@ -1520,9 +1519,14 @@ func (bc *BlockChain) checkRemoteBlockHash(block *types.Block) bool {
 	return true
 }
 
-// UpdateRollbackStates sequencer update rollback index
-func (bc *BlockChain) UpdateRollbackStates(rollbackStates types.RollbackStates) {
+// SetRollbackStates sequencer update rollback states
+func (bc *BlockChain) SetRollbackStates(rollbackStates types.RollbackStates) {
 	rawdb.WriteRollbackStates(bc.db, rollbackStates)
+}
+
+// GetRollbackStates sequencer get rollback states
+func (bc *BlockChain) GetRollbackStates() types.RollbackStates {
+	return rawdb.ReadRollbackStates(bc.db)
 }
 
 // AppendRollbackStates scheduler bump up rollback index
@@ -1552,7 +1556,7 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 	// Blocks earlier versions of blocks from entering
 	// ensure current block is correct or rollback
 	rollbackNumber := bc.GetRollbackNumber()
-	if rollbackNumber != math.MaxUint64 {
+	if rollbackNumber != common.InvalidRollback {
 		if err := bc.sequencerRollbackFunc(rollbackNumber); err != nil {
 			return 0, err
 		}

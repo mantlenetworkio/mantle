@@ -92,9 +92,9 @@ type ProtocolManager struct {
 	txsSub        event.Subscription
 	minedBlockSub *event.TypeMuxSubscription
 	// consensus control messages
-	batchStartMsgSub      *event.TypeMuxSubscription
-	batchAnswerMsgSub     *event.TypeMuxSubscription
-	fraudProofReorgMsgSub *event.TypeMuxSubscription
+	batchStartMsgSub  *event.TypeMuxSubscription
+	batchAnswerMsgSub *event.TypeMuxSubscription
+	rollbackMsgSub    *event.TypeMuxSubscription
 
 	whitelist map[uint64]common.Hash
 
@@ -291,8 +291,8 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 	pm.batchAnswerMsgSub = pm.eventMux.Subscribe(core.BatchPeriodAnswerEvent{})
 	go pm.batchPeriodAnswerMsgBroadcastLoop()
 
-	pm.fraudProofReorgMsgSub = pm.eventMux.Subscribe(core.FraudProofReorgEvent{})
-	go pm.fraudProofReorgMsgBroadcastLoop()
+	pm.rollbackMsgSub = pm.eventMux.Subscribe(core.RollbackStartEvent{})
+	go pm.rollbackMsgBroadcastLoop()
 
 	// start sync handlers
 	go pm.syncer()
@@ -307,7 +307,7 @@ func (pm *ProtocolManager) Stop() {
 
 	pm.batchStartMsgSub.Unsubscribe()
 	pm.batchAnswerMsgSub.Unsubscribe()
-	pm.fraudProofReorgMsgSub.Unsubscribe()
+	pm.rollbackMsgSub.Unsubscribe()
 
 	// Quit the sync loop.
 	// After this send has completed, no new peers will be accepted.

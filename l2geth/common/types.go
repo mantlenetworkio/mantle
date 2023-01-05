@@ -37,6 +37,8 @@ const (
 	HashLength = 32
 	// AddressLength is the expected length of the address
 	AddressLength = 20
+	// InvalidRollback is the invalid rollback height
+	InvalidRollback = 0
 )
 
 var (

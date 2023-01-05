@@ -167,10 +167,12 @@ type worker struct {
 	chainHeadToRollupCh      chan core.ChainHeadEvent
 	knowBatchPeriodStartMsg  mapset.Set
 	knowBatchPeriodAnswerMsg mapset.Set
+	knowBatchRollbackMsg     mapset.Set
 
-	bpsSub    *event.TypeMuxSubscription
-	bpaSub    *event.TypeMuxSubscription
-	l1ToL2Sub *event.TypeMuxSubscription
+	bpsSub      *event.TypeMuxSubscription
+	bpaSub      *event.TypeMuxSubscription
+	l1ToL2Sub   *event.TypeMuxSubscription
+	rollbackSub *event.TypeMuxSubscription
 
 	// Channels
 	newWorkCh          chan *newWorkReq
@@ -250,8 +252,6 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	worker.bpsSub = worker.mux.Subscribe(core.BatchPeriodStartEvent{})
 	worker.bpaSub = worker.mux.Subscribe(core.BatchPeriodAnswerEvent{})
 
-	worker.l1ToL2Sub = worker.mux.Subscribe(core.L1ToL2TxStartEvent{})
-
 	// Subscribe events for blockchain
 	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
@@ -271,7 +271,13 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	go worker.batchAnswerLoop()
 
 	if !worker.eth.SyncService().IsSequencerMode() {
+		worker.l1ToL2Sub = worker.mux.Subscribe(core.L1ToL2TxStartEvent{})
 		go worker.l1Tol2StartLoop()
+	}
+
+	if worker.eth.SyncService().IsSequencerMode() {
+		worker.rollbackSub = worker.mux.Subscribe(core.RollbackStartEvent{})
+		go worker.rollbackStartLoop()
 	}
 
 	// Submit first work to initialize pending state.
@@ -465,7 +471,7 @@ func (w *worker) l1Tol2StartLoop() {
 		select {
 		case obj := <-w.l1ToL2Sub.Chan():
 			if !w.isRunning() {
-				log.Info("miner receives batchPeriodStartEvent but miner not start")
+				log.Info("miner receives l1Tol2StartEvent but miner not start")
 			}
 			var ev core.L1ToL2TxStartEvent
 			var ok bool
@@ -479,6 +485,50 @@ func (w *worker) l1Tol2StartLoop() {
 				close(ev.SchedulerCh)
 			} else {
 				log.Error("SchedulerCh is nil")
+			}
+		// System stopped
+		case <-w.exitCh:
+			return
+		}
+	}
+}
+
+func (w *worker) rollbackStartLoop() {
+	defer w.rollbackSub.Unsubscribe()
+
+	for {
+		select {
+		case obj := <-w.rollbackSub.Chan():
+			if !w.isRunning() {
+				log.Info("miner receives l1Tol2StartEvent but miner not start")
+			}
+			var ev core.RollbackStartEvent
+			var ok bool
+			if ev, ok = obj.Data.(core.RollbackStartEvent); !ok {
+				continue
+			}
+			if w.knowBatchRollbackMsg.Contains(ev.Msg.Hash()) {
+				var rollbackNumber uint64
+				var blockHash common.Hash
+				if len(ev.Msg.RollbackStates) == 0 {
+					rollbackNumber = common.InvalidRollback
+				} else {
+					rollbackNumber = ev.Msg.RollbackStates[len(ev.Msg.RollbackStates)-1].BlockNumber
+					blockHash = ev.Msg.RollbackStates[len(ev.Msg.RollbackStates)-1].BlockHash
+				}
+				log.Debug("Duplicated BatchPeriodStartMsg", "rollbackNumber", rollbackNumber, "blockHash", blockHash)
+				continue
+			} else {
+				w.knowBatchRollbackMsg.Add(ev.Msg.Hash())
+			}
+			w.eth.BlockChain().SetRollbackStates(ev.Msg.RollbackStates)
+			rollbackNumber := w.eth.BlockChain().GetRollbackNumber()
+			log.Debug("received rollback msg", "rollbackNumber", rollbackNumber)
+			if rollbackNumber != common.InvalidRollback {
+				if err := w.eth.SyncService().SequencerRollback(rollbackNumber); err != nil {
+					log.Info("sequencer rollback filed", "error", err)
+					continue
+				}
 			}
 		// System stopped
 		case <-w.exitCh:
@@ -514,7 +564,6 @@ func (w *worker) batchStartLoop() {
 				w.currentBps = ev.Msg
 				w.mutex.Unlock()
 				log.Info("Scheduler start new batch",
-					"reorg_index", ev.Msg.ReorgIndex,
 					"start_height", ev.Msg.StartHeight,
 					"batch_index", ev.Msg.BatchIndex,
 					"max_height", ev.Msg.MaxHeight,
@@ -523,7 +572,7 @@ func (w *worker) batchStartLoop() {
 					"signature", hex.EncodeToString(ev.Msg.Signature),
 				)
 			} else {
-				w.chain.UpdateRollbackStates(ev.Msg.RollbackStates)
+				w.chain.SetRollbackStates(ev.Msg.RollbackStates)
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
 					log.Info("Active sequencer receives batchPeriodStartEvent")
@@ -605,7 +654,6 @@ func (w *worker) batchStartLoop() {
 					}
 				} else {
 					log.Debug("Inactive sequencer receives batchPeriodStartEvent",
-						"reorg_index", ev.Msg.ReorgIndex,
 						"start_height", ev.Msg.StartHeight,
 						"batch_index", ev.Msg.BatchIndex,
 						"max_height", ev.Msg.MaxHeight,

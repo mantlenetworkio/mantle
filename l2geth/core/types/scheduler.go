@@ -379,15 +379,39 @@ func (btsp *BatchTxSetProof) ContainTxHashOrNot(txHash common.Hash, height uint6
 	return false
 }
 
-type FraudProofReorgMsg struct {
-	ReorgIndex    uint64
-	ReorgToHeight uint64
-	TssSignature  []byte
+type RollbackMsg struct {
+	RollbackStates RollbackStates
+	Signature      []byte
 }
 
-func (bps *FraudProofReorgMsg) Hash() common.Hash {
+func (bps *RollbackMsg) Hash() common.Hash {
 	if bps == nil {
 		return common.Hash{}
 	}
 	return rlpHash(bps)
+}
+
+func (bps *RollbackMsg) GetSignature() []byte {
+	return bps.Signature
+}
+
+func (bps *RollbackMsg) GetSigner() (common.Address, error) {
+	pubEcr, err := crypto.SigToPub(crypto.Keccak256(bps.GetSignData()), bps.GetSignature())
+	if err != nil {
+		return common.Address{}, errors.New("signature ecrecover failed")
+	}
+
+	return crypto.PubkeyToAddress(*pubEcr), nil
+}
+
+func (bps *RollbackMsg) GetSignData() []byte {
+	if len(bps.RollbackStates) == 0 {
+		return nil
+	}
+	var buf []byte
+	for _, rs := range bps.RollbackStates {
+		buf = binary.BigEndian.AppendUint64(buf, rs.BlockNumber)
+		buf = append(buf, rs.BlockHash.Bytes()...)
+	}
+	return buf
 }

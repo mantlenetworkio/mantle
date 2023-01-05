@@ -131,7 +131,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bs); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		log.Info("Batch Period Start Msg", "batch_index", bs.BatchIndex, "start_height", bs.StartHeight, "max_height", bs.MaxHeight, "expire_time", bs.ExpireTime)
+		log.Info("Batch Period Start RollbackStates", "batch_index", bs.BatchIndex, "start_height", bs.StartHeight, "max_height", bs.MaxHeight, "expire_time", bs.ExpireTime)
 		if !types.VerifySigner(bs, pm.schedulerInst.Scheduler()) {
 			return nil
 		}
@@ -147,7 +147,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bpa); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		log.Info("Batch Period Answer Msg", "batchIndex", bpa.BatchIndex, "start_index", bpa.StartIndex, "tx_len", len(bpa.Txs))
+		log.Info("Batch Period Answer RollbackStates", "batchIndex", bpa.BatchIndex, "start_index", bpa.StartIndex, "tx_len", len(bpa.Txs))
 		if !pm.schedulerInst.IsRunning() {
 			log.Debug("not scheduler")
 			return nil
@@ -161,14 +161,18 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			Msg:   bpa,
 			ErrCh: erCh,
 		})
-	case msg.Code == FraudProofReorgMsg:
-		var fpr *types.FraudProofReorgMsg
-		if err := msg.Decode(&fpr); err != nil {
+	case msg.Code == RollbackMsg:
+		var rm *types.RollbackMsg
+		if err := msg.Decode(&rm); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		log.Info("Fraud Proof Reorg Msg")
-		p.knowFraudProofReorg.Add(fpr.Hash())
-		// todo: FraudProofReorgMsg handle
+		log.Info("Fraud Proof Reorg RollbackStates")
+		p.knowRollbackMsg.Add(rm.Hash())
+		erCh := make(chan error, 1)
+		pm.eventMux.Post(core.RollbackStartEvent{
+			Msg:   rm,
+			ErrCh: erCh,
+		})
 
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
@@ -247,39 +251,37 @@ func (p *peer) AsyncSendBatchPeriodAnswerMsg(msg *types.BatchPeriodAnswerMsg) {
 	}
 }
 
-// FraudProofReorgMsg
-func (pm *ProtocolManager) fraudProofReorgMsgBroadcastLoop() {
-	log.Info("Start fraudProofReorgMsg broadcast routine")
+// RollbackMsg
+func (pm *ProtocolManager) rollbackMsgBroadcastLoop() {
+	log.Info("Start rollbackMsg broadcast routine")
 	// automatically stops if unsubscribe
-	for obj := range pm.fraudProofReorgMsgSub.Chan() {
-		if fe, ok := obj.Data.(core.FraudProofReorgEvent); ok {
-			log.Debug("Got BatchPeriodAnswerEvent, broadcast it",
-				"reorg_index", fe.Msg.ReorgIndex,
-				"reorg_to_height", fe.Msg.ReorgToHeight)
+	for obj := range pm.rollbackMsgSub.Chan() {
+		if fe, ok := obj.Data.(core.RollbackStartEvent); ok {
+			log.Debug("Got BatchPeriodAnswerEvent, broadcast it")
 
-			pm.BroadcastFraudProofReorgMsg(fe.Msg) // First propagate block to peers
+			pm.BroadcastRollbackMsg(fe.Msg) // First propagate block to peers
 		}
 	}
 }
 
-func (pm *ProtocolManager) BroadcastFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
-	peers := pm.consensusPeers.PeersWithoutFraudProofReorgMsg(reorg.Hash())
+func (pm *ProtocolManager) BroadcastRollbackMsg(rollbackMsg *types.RollbackMsg) {
+	peers := pm.consensusPeers.PeersWithoutRollbackMsg(rollbackMsg.Hash())
 	for _, p := range peers {
-		p.AsyncSendFraudProofReorgMsg(reorg)
+		p.AsyncSendRollbackMsg(rollbackMsg)
 	}
 	log.Trace("Broadcast fraud proof reorg msg")
 }
 
-func (p *peer) AsyncSendFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
+func (p *peer) AsyncSendRollbackMsg(rollbackMsg *types.RollbackMsg) {
 	select {
-	case p.queuedFraudProofReorg <- reorg:
-		p.knowFraudProofReorg.Add(reorg.Hash())
-		for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
-			p.knowFraudProofReorg.Pop()
+	case p.queuedRollback <- rollbackMsg:
+		p.knowRollbackMsg.Add(rollbackMsg.Hash())
+		for p.knowRollbackMsg.Cardinality() >= maxKnownRollbackMsg {
+			p.knowRollbackMsg.Pop()
 		}
 
 	default:
-		p.Log().Debug("Dropping producers propagation", "reorg_index", reorg.ReorgIndex)
+		p.Log().Debug("Dropping producers propagation")
 	}
 }
 
@@ -305,11 +307,11 @@ func (p *peer) SendBatchPeriodAnswer(bpa *types.BatchPeriodAnswerMsg) error {
 	return p2p.Send(p.rw, BatchPeriodAnswerMsg, bpa)
 }
 
-func (p *peer) SendFraudProofReorg(fpr *types.FraudProofReorgMsg) error {
-	p.knowFraudProofReorg.Add(fpr.Hash())
+func (p *peer) SendRollback(fpr *types.RollbackMsg) error {
+	p.knowRollbackMsg.Add(fpr.Hash())
 	// Mark all the producers as known, but ensure we don't overflow our limits
-	for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
-		p.knowFraudProofReorg.Pop()
+	for p.knowRollbackMsg.Cardinality() >= maxKnownRollbackMsg {
+		p.knowRollbackMsg.Pop()
 	}
-	return p2p.Send(p.rw, FraudProofReorgMsg, fpr)
+	return p2p.Send(p.rw, RollbackMsg, fpr)
 }

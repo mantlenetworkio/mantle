@@ -53,6 +53,7 @@ type SyncService struct {
 	db                             ethdb.Database
 	scope                          event.SubscriptionScope
 	txFeed                         event.Feed
+	mux                            *event.TypeMux
 	txLock                         sync.Mutex
 	loopLock                       sync.Mutex
 	enable                         bool
@@ -78,7 +79,7 @@ type SyncService struct {
 }
 
 // NewSyncService returns an initialized sync service
-func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *core.BlockChain, db ethdb.Database) (*SyncService, error) {
+func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *core.BlockChain, db ethdb.Database, mux *event.TypeMux) (*SyncService, error) {
 	if bc == nil {
 		return nil, errors.New("Must pass BlockChain to SyncService")
 	}
@@ -151,6 +152,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		feeThresholdDown:               cfg.FeeThresholdDown,
 		feeThresholdUp:                 cfg.FeeThresholdUp,
 		cfg:                            cfg,
+		mux:                            mux,
 	}
 
 	// The chainHeadSub is used to synchronize the SyncService with the chain.
@@ -828,11 +830,13 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 		newBlock := s.bc.GetBlockByNumber(i)
 		log.Info("StateRoot", "equal", oldBlocks[i-start].Root() == newBlock.Root())
 		if oldBlocks[i-start].Hash() != newBlock.Hash() {
+
 			rollbackState := &types.RollbackState{
 				BlockNumber: i,
 				BlockHash:   newBlock.Hash(),
 			}
 			s.bc.AppendRollbackStates(rollbackState)
+			s.mux.Post(core.RollbackEvent{})
 		}
 	}
 	return nil

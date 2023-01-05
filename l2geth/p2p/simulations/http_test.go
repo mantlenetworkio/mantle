@@ -448,7 +448,7 @@ loop:
 				continue loop
 			}
 			if event.Msg == nil {
-				t.Fatal("expected event.Msg to be set")
+				t.Fatal("expected event.RollbackStates to be set")
 			}
 			filter := MsgFilter{
 				Proto: event.Msg.Protocol,
