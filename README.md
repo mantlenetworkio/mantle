@@ -24,7 +24,6 @@
 
 
 ## Introduction
-___
 
 Mantle is a suite of Ethereum scaling solutions including an optimistic rollup and ZK rollup built using an iterative modular chain approach, and supported by BitDAO’s native token $BIT.
 
@@ -33,7 +32,6 @@ It is designed to bolster support for hyper-scaled throughput decentralized appl
 <br/>
 
 ## Goals
----
 
 Layer 2 rollups are built to address the scaling limitations of Ethereum by taking transaction processing to a separate execution layer, but this inevitably exposes users to the high gas fees and limited throughput on Layer 1.
 
@@ -50,7 +48,6 @@ Different parts of the Mantle tech stack are specialized to tackle specific issu
 </br>
 
 ## Quick Start
----
 
 ### Useful Addresses
 
@@ -162,7 +159,7 @@ Here's a [tutorial](https://docs.mantle.xyz/for-validators/deploying-a-rollup-ve
 <br/>
 
 ## Directory Structure
-___
+
 <pre>
 root
 ├── <a href="./packages">packages</a>
@@ -190,8 +187,6 @@ root
 </br>
 
 ## How to Contribute
-___
-
 
 Read through [CONTRIBUTING.md](./CONTRIBUTING.md) for a general overview of our contribution process.
 Then check out our list of [good first issues](https://github.com/mantlenetworkio/mantle/contribute) to find something fun to work on!
@@ -201,7 +196,6 @@ Then check out our list of [good first issues](https://github.com/mantlenetworki
 
 
 ## License
-___
 
 Code forked from [`optimism`](https://github.com/ethereum-optimism/optimism) under the name [`optimism`](https://github.com/mantlenetworkio/bitnetwork/tree/master/l2geth) is licensed under the [GNU GPLv3](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60) in accordance with the [original license](https://github.com/ethereum-optimism/optimism/blob/master/COPYING).
 
