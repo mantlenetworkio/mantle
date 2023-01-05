@@ -59,6 +59,8 @@ Different parts of the Mantle tech stack are specialized to tackle specific issu
 |  Mantle Node RPC URL  | https://rpc.testnet.mantle.xyz/      |
 |       Chain ID        | 5001                                 |
 
+</br>
+
 ### Set up Local Environment
 
 Setting up local L1 and L2 nodes may be particularly useful for testing out Mantle SDK methods.
@@ -87,6 +89,7 @@ dApps need to connect to nodes for fetching block data and sending transactions 
 |    RPC    | https://rpc.testnet.mantle.xyz/ |
 | WebSocket | wss://ws.testnet.mantle.xyz     |
 
+</br>
 
 ### Using the Mantle SDK
 
@@ -125,6 +128,7 @@ main();
 
 > Feel free to browse through our [compilation of tutorials](https://mantlenetworkio.github.io/mantle-tutorial/) that use the Mantle SDK to demonstrate common functionality such as bridging assets between Mantle and Ethereum, and more.
 
+</br>
 
 ### Using the Node RPC API
 
@@ -149,6 +153,8 @@ The response is of the form:
 ```
 
 > Check out [DEVELOP.md](./DEVELOP.md) for more detailed information on getting started with developing your apps using Mantle.
+
+</br>
 
 ### Spin up a Verifier Node
 
@@ -193,7 +199,6 @@ Then check out our list of [good first issues](https://github.com/mantlenetworki
 
 
 <br/>
-
 
 ## License
 
