@@ -60,18 +60,6 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 			return p2p.DiscTooManyPeers
 		}
 		p.Log().Debug("Ethereum consensus peer connected", "name", p.Name())
-		// Execute the Ethereum handshake
-		//var (
-		//	genesis = pm.blockchain.Genesis()
-		//	head    = pm.blockchain.CurrentHeader()
-		//	hash    = head.Hash()
-		//	number  = head.Number.Uint64()
-		//	td      = pm.blockchain.GetTd(hash, number)
-		//)
-		//if err := p.Handshake(pm.networkID, td, hash, genesis.Hash(), forkid.NewID(pm.blockchain), pm.forkFilter); err != nil {
-		//	p.Log().Debug("Ethereum handshake failed", "err", err)
-		//	return err
-		//}
 		if rw, ok := p.rw.(*meteredMsgReadWriter); ok {
 			rw.Init(p.version)
 		}
@@ -84,10 +72,8 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 
 		// Handle incoming messages until the connection is torn down
 		for {
-			if pm.minerCheck() {
-				if err := pm.checkPeer(p); err != nil {
-					return err
-				}
+			if err := pm.checkPeer(p); err != nil {
+				return err
 			}
 
 			if err := pm.handleConsensusMsg(p); err != nil {
@@ -101,6 +87,9 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 }
 
 func (pm *ProtocolManager) checkPeer(p *peer) error {
+	if !pm.schedulerInst.IsRunning() {
+		return nil
+	}
 	if bytes.Equal(pm.etherbase.Bytes(), pm.schedulerInst.Scheduler().Bytes()) {
 		has := make(chan bool)
 		if err := pm.eventMux.Post(core.PeerAddEvent{
@@ -142,7 +131,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bs); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		log.Info("Batch Period Start Msg", "batchIndex", bs.BatchIndex, "startHeight", bs.StartHeight, "maxHeight", bs.MaxHeight, "expireTime", bs.ExpireTime)
+		log.Info("Batch Period Start Msg", "batch_index", bs.BatchIndex, "start_height", bs.StartHeight, "max_height", bs.MaxHeight, "expire_time", bs.ExpireTime)
 		if !types.VerifySigner(bs, pm.schedulerInst.Scheduler()) {
 			return nil
 		}
@@ -158,7 +147,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bpa); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		log.Info("Batch Period Answer Msg", "batchIndex", bpa.BatchIndex, "startIndex", bpa.StartIndex, "txLen", len(bpa.Txs))
+		log.Info("Batch Period Answer Msg", "batchIndex", bpa.BatchIndex, "start_index", bpa.StartIndex, "tx_len", len(bpa.Txs))
 		if !pm.schedulerInst.IsRunning() {
 			log.Debug("not scheduler")
 			return nil
@@ -197,9 +186,9 @@ func (pm *ProtocolManager) batchPeriodStartMsgBroadcastLoop() {
 	for obj := range pm.batchStartMsgSub.Chan() {
 		if se, ok := obj.Data.(core.BatchPeriodStartEvent); ok {
 			log.Debug("Got BatchPeriodStartEvent, broadcast it",
-				"batchIndex", se.Msg.BatchIndex,
-				"startHeight", se.Msg.StartHeight,
-				"maxHeight", se.Msg.MaxHeight)
+				"batch_index", se.Msg.BatchIndex,
+				"start_height", se.Msg.StartHeight,
+				"max_height", se.Msg.MaxHeight)
 			pm.BroadcastBatchPeriodStartMsg(se.Msg) // First propagate block to peers
 		}
 	}
@@ -222,7 +211,7 @@ func (p *peer) AsyncSendBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 		}
 
 	default:
-		p.Log().Debug("Dropping batch period start msg propagation", "batch index", msg.BatchIndex)
+		p.Log().Debug("Dropping batch period start msg propagation", "batch_index", msg.BatchIndex)
 	}
 }
 
@@ -231,7 +220,7 @@ func (pm *ProtocolManager) batchPeriodAnswerMsgBroadcastLoop() {
 	log.Info("Start batchPeriodAnswerMsg broadcast routine")
 	for obj := range pm.batchAnswerMsgSub.Chan() {
 		if ee, ok := obj.Data.(core.BatchPeriodAnswerEvent); ok {
-			log.Debug("Broadcast BatchPeriodAnswerEvent", "Sequencer", ee.Msg.Sequencer, "txCount", len(ee.Msg.Txs))
+			log.Debug("Broadcast BatchPeriodAnswerEvent", "sequencer", ee.Msg.Sequencer, "tx_len", len(ee.Msg.Txs))
 			pm.BroadcastBatchPeriodAnswerMsg(ee.Msg) // First propagate block to peers
 		}
 	}
@@ -254,7 +243,7 @@ func (p *peer) AsyncSendBatchPeriodAnswerMsg(msg *types.BatchPeriodAnswerMsg) {
 		}
 
 	default:
-		p.Log().Debug("Dropping batch period end msg propagation", "start index", msg.StartIndex)
+		p.Log().Debug("Dropping batch period end msg propagation", "start_index", msg.StartIndex)
 	}
 }
 
@@ -265,8 +254,8 @@ func (pm *ProtocolManager) fraudProofReorgMsgBroadcastLoop() {
 	for obj := range pm.fraudProofReorgMsgSub.Chan() {
 		if fe, ok := obj.Data.(core.FraudProofReorgEvent); ok {
 			log.Debug("Got BatchPeriodAnswerEvent, broadcast it",
-				"reorgIndex", fe.Msg.ReorgIndex,
-				"reorgToHeight", fe.Msg.ReorgToHeight)
+				"reorg_index", fe.Msg.ReorgIndex,
+				"reorg_to_height", fe.Msg.ReorgToHeight)
 
 			pm.BroadcastFraudProofReorgMsg(fe.Msg) // First propagate block to peers
 		}
@@ -290,7 +279,7 @@ func (p *peer) AsyncSendFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
 		}
 
 	default:
-		p.Log().Debug("Dropping producers propagation", "reorg index", reorg.ReorgIndex)
+		p.Log().Debug("Dropping producers propagation", "reorg_index", reorg.ReorgIndex)
 	}
 }
 
