@@ -111,7 +111,7 @@ func (sync *Synchronizer) GetSequencerSet() (SequencerSequencerInfos, error) {
 			break
 		}
 		log.Info("retry get sequencer", "time", time.Now(),
-			"retry time", i)
+			"retry_time", i)
 	}
 	if len(seqInfos) == 0 {
 		return nil, fmt.Errorf("empty sequencer set")

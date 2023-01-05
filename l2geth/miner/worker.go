@@ -513,21 +513,29 @@ func (w *worker) batchStartLoop() {
 				w.mutex.Lock()
 				w.currentBps = ev.Msg
 				w.mutex.Unlock()
-				log.Info("Scheduler start new batch", "batchIndex", ev.Msg.BatchIndex, "startHeight", ev.Msg.StartHeight, "sequencer", ev.Msg.Sequencer)
+				log.Info("Scheduler start new batch",
+					"reorg_index", ev.Msg.ReorgIndex,
+					"start_height", ev.Msg.StartHeight,
+					"batch_index", ev.Msg.BatchIndex,
+					"max_height", ev.Msg.MaxHeight,
+					"expire_time", ev.Msg.ExpireTime,
+					"sequencer_address", ev.Msg.Sequencer.String(),
+					"signature", hex.EncodeToString(ev.Msg.Signature),
+				)
 			} else {
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
 					log.Info("Active sequencer receives batchPeriodStartEvent")
 					if ev.Msg.StartHeight != w.chain.CurrentBlock().NumberU64()+1 {
-						log.Info("start height mismatch", "current_height", w.current.header.Number.Uint64(), "start_height", ev.Msg.StartHeight)
+						log.Error("start height mismatch", "current_height", w.current.header.Number.Uint64(), "start_height", ev.Msg.StartHeight)
 						continue
 					}
 					if ev.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
-						log.Info("maxHeight is too large, just ignore the batch", "current_height", w.current.header.Number.Uint64(), "max_height", ev.Msg.MaxHeight)
+						log.Error("maxHeight is too large, just ignore the batch", "current_height", w.current.header.Number.Uint64(), "max_height", ev.Msg.MaxHeight)
 						continue
 					}
 					if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
-						log.Info("expire timestamp is passed", "current_time", time.Now().Unix(), "expire_time", ev.Msg.ExpireTime)
+						log.Error("expire timestamp is passed", "current_time", time.Now().Unix(), "expire_time", ev.Msg.ExpireTime)
 						continue
 					}
 
