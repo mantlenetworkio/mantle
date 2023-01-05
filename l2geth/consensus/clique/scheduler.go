@@ -58,7 +58,7 @@ type Scheduler struct {
 	batchEndFlag    bool
 
 	expectMinTxsCount uint64
-	sequencerHealther *healthAssessor
+	sequencerAssessor *healthAssessor
 
 	chainHeadSub event.Subscription
 	chainHeadCh  chan core.ChainHeadEvent
@@ -116,7 +116,7 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 		sequencerSet:      NewSequencerSet(seqz),
 		blockchain:        blockchain,
 		txpool:            txpool,
-		sequencerHealther: NewHealthAssessor(),
+		sequencerAssessor: NewHealthAssessor(),
 		chainHeadCh:       make(chan core.ChainHeadEvent, chainHeadChanSize),
 	}
 

@@ -24,13 +24,13 @@ func NewHealthAssessor() *healthAssessor {
 
 // SetSequencerHealthPoints when update sequencerSet sequencerHealthChecker will be reset
 func (schedulerInst *Scheduler) SetSequencerHealthPoints(seqSets synchronizer.SequencerSequencerInfos) {
-	schedulerInst.sequencerHealther.SequencersPoints = make(map[common.Address]uint64)
-	schedulerInst.sequencerHealther.SeqSet = seqSets
+	schedulerInst.sequencerAssessor.SequencersPoints = make(map[common.Address]uint64)
+	schedulerInst.sequencerAssessor.SeqSet = seqSets
 	for _, seqSet := range seqSets {
-		schedulerInst.sequencerHealther.SequencersPoints[common.Address(seqSet.MintAddress)] = initPoints
+		schedulerInst.sequencerAssessor.SequencersPoints[common.Address(seqSet.MintAddress)] = initPoints
 	}
-	for key := range schedulerInst.sequencerHealther.SequencersPoints {
-		schedulerInst.sequencerHealther.SequencersPoints[key] = initPoints
+	for key := range schedulerInst.sequencerAssessor.SequencersPoints {
+		schedulerInst.sequencerAssessor.SequencersPoints[key] = initPoints
 	}
 	log.Debug("set sequencer healthChecker success")
 }
@@ -51,13 +51,13 @@ func (schedulerInst *Scheduler) checkSequencer() {
 // from the collection of block producers on the day
 func (schedulerInst *Scheduler) punishSequencer(sequencer common.Address) {
 	var newSeqSet synchronizer.SequencerSequencerInfos
-	for _, seqSet := range schedulerInst.sequencerHealther.SeqSet {
+	for _, seqSet := range schedulerInst.sequencerAssessor.SeqSet {
 		if seqSet.MintAddress.String() == sequencer.String() {
 			continue
 		}
 		newSeqSet = append(newSeqSet, seqSet)
 	}
-	delete(schedulerInst.sequencerHealther.SequencersPoints, sequencer)
+	delete(schedulerInst.sequencerAssessor.SequencersPoints, sequencer)
 	// get changes
 	changes := compareSequencerSet(schedulerInst.sequencerSet.Sequencers, newSeqSet)
 	log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
@@ -75,15 +75,15 @@ func (schedulerInst *Scheduler) punishSequencer(sequencer common.Address) {
 func (schedulerInst *Scheduler) deductPoints(sequencer common.Address) {
 	if schedulerInst.zeroPoints(sequencer) {
 		schedulerInst.punishSequencer(sequencer)
-		log.Info("sequencer debuct points success", "current", sequencer, "points", schedulerInst.sequencerHealther.SequencersPoints[sequencer])
+		log.Info("sequencer debuct points success", "current", sequencer, "points", schedulerInst.sequencerAssessor.SequencersPoints[sequencer])
 		return
 	}
-	schedulerInst.sequencerHealther.SequencersPoints[sequencer] = schedulerInst.sequencerHealther.SequencersPoints[sequencer] - 1
+	schedulerInst.sequencerAssessor.SequencersPoints[sequencer] = schedulerInst.sequencerAssessor.SequencersPoints[sequencer] - 1
 	return
 }
 
 func (schedulerInst *Scheduler) zeroPoints(sequencer common.Address) bool {
-	return schedulerInst.sequencerHealther.SequencersPoints[sequencer] == 0
+	return schedulerInst.sequencerAssessor.SequencersPoints[sequencer] == 0
 }
 
 func (schedulerInst *Scheduler) GetExpectMinTxsCount(batchSize uint64) (uint64, error) {
