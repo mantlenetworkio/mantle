@@ -82,7 +82,7 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 		cfg.EigenContractAddr, cfg.L1Client,
 	)
 	if err != nil {
-		log.Error("binding eigenda contract fail", "err", err)
+		log.Error("MtBatcher binding eigenda contract fail", "err", err)
 		return nil, err
 	}
 	logger, err := logging.GetLogger(cfg.EigenLogConfig)
@@ -93,12 +93,12 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 		bindings.BVMEigenDataLayrChainABI,
 	))
 	if err != nil {
-		log.Error("parse eigenda contract abi fail", "err", err)
+		log.Error("MtBatcher parse eigenda contract abi fail", "err", err)
 		return nil, err
 	}
 	eignenABI, err := bindings.BVMEigenDataLayrChainMetaData.GetAbi()
 	if err != nil {
-		log.Error("get eigenda contract abi fail", "err", err)
+		log.Error("MtBatcher get eigenda contract abi fail", "err", err)
 		return nil, err
 	}
 	rawEigenContract := bind.NewBoundContract(
@@ -160,7 +160,7 @@ func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, er
 	blockOffset := new(big.Int).SetUint64(d.Cfg.BlockOffset)
 	var end *big.Int
 	log.Info("MtBatcher GetBatchBlockRange", "blockOffset", blockOffset)
-	start, err := d.EigenDaContract.GetL2SubmitBlockNumber(&bind.CallOpts{
+	start, err := d.EigenDaContract.GetL2StoredBlockNumber(&bind.CallOpts{
 		Context: context.Background(),
 	})
 	if err != nil {
@@ -189,7 +189,7 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 		}
 		txs := block.Transactions()
 		if len(txs) != 1 {
-			panic(fmt.Sprintf("attempting to create batch element from block %d, "+
+			panic(fmt.Sprintf("MtBatcher attempting to create batch element from block %d, "+
 				"found %d txs instead of 1", block.Number(), len(txs)))
 		}
 		log.Info("Origin Transactions", "txs[0]", txs[0], "Transaction l2BlockNumber", block.Number(), "txs[0].QueueOrigin()", txs[0].QueueOrigin())
@@ -199,9 +199,9 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 		//}
 		var txBuf bytes.Buffer
 		if err := txs[0].EncodeRLP(&txBuf); err != nil {
-			panic(fmt.Sprintf("Unable to encode tx: %v", err))
+			panic(fmt.Sprintf("MtBatcher Unable to encode tx: %v", err))
 		}
-		log.Info("Rlp Transactions", "txBuf", txBuf.Bytes(), "txs[0].QueueOrigin()", txs[0].QueueOrigin())
+		log.Info("MtBatcher Rlp Transactions", "txBuf", txBuf.Bytes(), "txs[0].QueueOrigin()", txs[0].QueueOrigin())
 		batchTx := BatchTx{
 			BlockNumber: i,
 			rawTx:       txBuf.Bytes(),
@@ -223,7 +223,7 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 		paddingBytes := make([]byte, (31*d.Cfg.EigenLayerNode)-len(txBufBytes))
 		transactionByte = append(txBufBytes, paddingBytes...)
 	}
-	log.Info("transaction data len", "dataLen", len(transactionByte))
+	log.Info("MtBatcher transaction data len", "dataLen", len(transactionByte))
 	return transactionByte, start, end
 }
 
@@ -235,7 +235,7 @@ func (d *Driver) StoreData(ctx context.Context, uploadHeader []byte, duration ui
 		log.Error("MtBatcher unable to get current balance", "err", err)
 		return nil, err
 	}
-	log.Info("WalletAddr Balance", "balance", balance)
+	log.Info("MtBatcher WalletAddr Balance", "balance", balance)
 	nonce64, err := d.Cfg.L1Client.NonceAt(
 		d.Ctx, d.WalletAddr, nil,
 	)
@@ -275,7 +275,7 @@ func (d *Driver) ConfirmData(ctx context.Context, callData []byte, searchData rc
 		log.Error("MtBatcher unable to get current balance", "err", err)
 		return nil, err
 	}
-	log.Info("WalletAddr Balance", "balance", balance)
+	log.Info("MtBatcher wallet address balance", "balance", balance)
 	nonce64, err := d.Cfg.L1Client.NonceAt(
 		d.Ctx, d.WalletAddr, nil,
 	)
@@ -312,48 +312,49 @@ func (d *Driver) SendTransaction(ctx context.Context, tx *types.Transaction) err
 	return d.Cfg.L1Client.SendTransaction(ctx, tx)
 }
 
-func (d *Driver) DisperseStoreAndConfirmData(data []byte, startl2BlockNumber *big.Int, endl2BlockNumber *big.Int) error {
+func (d *Driver) DisperseStoreData(data []byte, startl2BlockNumber *big.Int, endl2BlockNumber *big.Int) (common2.StoreParams, *types.Receipt, error) {
 	params, err := d.callEncode(data)
 	if err != nil {
-		return err
+		return params, nil, err
 	}
 	uploadHeader, err := common2.CreateUploadHeader(params)
 	if err != nil {
-		return err
+		return params, nil, err
 	}
 	tx, err := d.StoreData(
 		d.Ctx, uploadHeader, uint8(params.Duration), params.BlockNumber, startl2BlockNumber, endl2BlockNumber, params.TotalOperatorsIndex,
 	)
 	if err != nil {
 		log.Error("MtBatcher StoreData tx", "err", err)
-		return err
+		return params, nil, err
 	} else if tx == nil {
-		return errors.New("tx is nil")
+		return params, nil, errors.New("tx is nil")
 	}
 	log.Info("d.StoreData", "txHash", tx.Hash().String())
 	updateGasPrice := func(ctx context.Context) (*types.Transaction, error) {
 		return d.UpdateGasPrice(ctx, tx)
 	}
-	log.Info("updateGasPrice", "gasPrice", updateGasPrice)
+	log.Info("MtBatcher updateGasPrice", "gasPrice", updateGasPrice)
 	receipt, err := d.txMgr.Send(
 		d.Ctx, updateGasPrice, d.SendTransaction,
 	)
-	log.Info(" d.txMgr.Send", "receipt", receipt.Status, "err", err)
-
 	if err != nil {
 		log.Error("MtBatcher unable to StoreData", "err", err)
-		return err
+		return params, nil, err
 	}
-	log.Info("MtBatcher StoreData successfully", "tx_hash", receipt.TxHash)
+	return params, receipt, nil
+}
+
+func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, startl2BlockNumber, endl2BlockNumber *big.Int) (*types.Receipt, error) {
 	event, ok := graphView.PollingInitDataStore(
 		d.GraphClient,
-		tx.Hash().Bytes()[:],
+		txHash[:],
 		d.logger,
 		12,
 	)
 	if !ok {
-		log.Error("could not get initDataStore")
-		return errors.New("could not get initDataStore")
+		log.Error("MtBatcher could not get initDataStore")
+		return nil, errors.New("MtBatcher could not get initDataStore")
 	}
 	log.Info("PollingInitDataStore", "MsgHash", event.MsgHash, "StoreNumber", event.StoreNumber)
 	meta, err := d.callDisperse(
@@ -361,8 +362,8 @@ func (d *Driver) DisperseStoreAndConfirmData(data []byte, startl2BlockNumber *bi
 		event.MsgHash[:],
 	)
 	if err != nil {
-		log.Error("callDisperse fail", "err", err)
-		return err
+		log.Error("MtBatcher call Disperse fail", "err", err)
+		return nil, err
 	}
 	callData := common2.MakeCalldata(params, meta, event.StoreNumber, event.MsgHash)
 	searchData := rc.IDataLayrServiceManagerDataStoreSearchData{
@@ -380,39 +381,38 @@ func (d *Driver) DisperseStoreAndConfirmData(data []byte, startl2BlockNumber *bi
 		},
 	}
 	obj, _ := json.Marshal(event)
-	log.Info("Event", "obj", string(obj))
-	log.Info("Calldata", "calldata", hexutil.Encode(callData))
+	log.Info("MtBatcher Event", "obj", string(obj))
+	log.Info("MtBatcher Calldata", "calldata", hexutil.Encode(callData))
 	obj, _ = json.Marshal(params)
-	log.Info("Params", "obj", string(obj))
+	log.Info("MtBatcher Params", "obj", string(obj))
 	obj, _ = json.Marshal(meta)
-	log.Info("Meta", "obj", string(obj))
+	log.Info("MtBatcher Meta", "obj", string(obj))
 	obj, _ = json.Marshal(searchData)
-	log.Info("SearchData ", "obj", string(obj))
-	log.Info("HeaderHash: ", "DataCommitment", hex.EncodeToString(event.DataCommitment[:]))
-	log.Info("MsgHash", "event", hex.EncodeToString(event.MsgHash[:]))
-	tx, err = d.ConfirmData(d.Ctx, callData, searchData, startl2BlockNumber, endl2BlockNumber)
+	log.Info("MtBatcher SearchData ", "obj", string(obj))
+	log.Info("MtBatcher HeaderHash: ", "DataCommitment", hex.EncodeToString(event.DataCommitment[:]))
+	log.Info("MtBatcher MsgHash", "event", hex.EncodeToString(event.MsgHash[:]))
+	tx, err := d.ConfirmData(d.Ctx, callData, searchData, startl2BlockNumber, endl2BlockNumber)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	updateGasPrice = func(ctx context.Context) (*types.Transaction, error) {
+	updateGasPrice := func(ctx context.Context) (*types.Transaction, error) {
 		log.Info("MtBatcher ConfirmData update gas price")
 		return d.UpdateGasPrice(ctx, tx)
 	}
-	receipt, err = d.txMgr.Send(
+	receipt, err := d.txMgr.Send(
 		d.Ctx, updateGasPrice, d.SendTransaction,
 	)
 	if err != nil {
 		log.Error("MtBatcher unable to ConfirmData tx", "err", err)
-		return err
+		return nil, err
 	}
-	log.Info("MtBatcher ConfirmData successfully", "tx_hash", receipt.TxHash)
-	return nil
+	return receipt, nil
 }
 
 func (d *Driver) callEncode(data []byte) (common2.StoreParams, error) {
 	conn, err := grpc.Dial(d.Cfg.DisperserSocket, grpc.WithInsecure())
 	if err != nil {
-		log.Error("Err. Disperser Cannot connect to", "DisperserSocket", d.Cfg.DisperserSocket)
+		log.Error("MtBatcher Disperser Cannot connect to", "DisperserSocket", d.Cfg.DisperserSocket)
 		return common2.StoreParams{}, err
 	}
 	defer conn.Close()
@@ -425,12 +425,12 @@ func (d *Driver) callEncode(data []byte) (common2.StoreParams, error) {
 	}
 	opt := grpc.MaxCallSendMsgSize(1024 * 1024 * 300)
 	reply, err := c.EncodeStore(ctx, request, opt)
-	log.Info("get store", "reply", reply)
+	log.Info("MtBatcher get store", "reply", reply)
 	if err != nil {
-		log.Error("get store err", err)
+		log.Error("MtBatcher get store err", err)
 		return common2.StoreParams{}, err
 	}
-	log.Info("get store end")
+	log.Info("MtBatcher get store end")
 	g := reply.GetStore()
 	feeBigInt := new(big.Int).SetBytes(g.Fee)
 	params := common2.StoreParams{
@@ -457,7 +457,7 @@ func (d *Driver) callEncode(data []byte) (common2.StoreParams, error) {
 func (d *Driver) callDisperse(headerHash []byte, messageHash []byte) (common2.DisperseMeta, error) {
 	conn, err := grpc.Dial(d.Cfg.DisperserSocket, grpc.WithInsecure())
 	if err != nil {
-		log.Error("d.cfg.DisperserSocket", "err", err)
+		log.Error("MtBatcher Dial DisperserSocket", "err", err)
 		return common2.DisperseMeta{}, err
 	}
 	defer conn.Close()
@@ -522,23 +522,30 @@ func (d *Driver) eventLoop() {
 				continue
 			}
 			if new(big.Int).Sub(end, start).Cmp(big.NewInt(int64(d.Cfg.BlockOffset))) < 0 {
-				log.Info("end sub start must bigger than block offset", "start", start, "end", end, "BlockOffset", d.Cfg.BlockOffset)
+				log.Info("MtBatcher end sub start must bigger than block offset", "start", start, "end", end, "BlockOffset", d.Cfg.BlockOffset)
 				continue
 			}
 			aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
 				d.Ctx, start, end,
 			)
 			if err != nil {
-				log.Error("EigenDa Sequencer unable to craft batch tx", "err", err)
+				log.Error("MtBatcher eigenDa sequencer unable to craft batch tx", "err", err)
 				continue
 			}
-			err = d.DisperseStoreAndConfirmData(aggregateTxData, startL2BlockNumber, endL2BlockNumber)
+			params, receipt, err := d.DisperseStoreData(aggregateTxData, startL2BlockNumber, endL2BlockNumber)
 			if err != nil {
-				log.Error("DisperseStoreAndConfirmData fail", "err", err)
+				log.Error("MtBatcher disperse store data fail", "err", err)
 				continue
 			}
+			log.Info("MtBatcher disperse store data success", "txHash", receipt.TxHash.String())
+			csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber)
+			if err != nil {
+				log.Error("MtBatcher confirm store data fail", "err", err)
+				continue
+			}
+			log.Info("MtBatcher confirm store data success", "txHash", csdReceipt.TxHash.String())
 		case err := <-d.Ctx.Done():
-			log.Error("EigenDa Sequencer service shutting down", "err", err)
+			log.Error("MtBatcher eigenDa sequencer service shutting down", "err", err)
 			return
 		}
 	}

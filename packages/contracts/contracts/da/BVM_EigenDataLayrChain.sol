@@ -35,7 +35,8 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
     address public sequencer;
     address public dataManageAddress;
     uint256 public BLOCK_STALE_MEASURE;
-    uint256 public l2SubmittedBlockNumber;
+    uint256 public l2StoredBlockNumber;
+    uint256 public l2ConfirmedBlockNumber;
     uint256 public fraudProofPeriod;
     uint256 public rollupBatchIndex;
 
@@ -69,17 +70,24 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         dataManageAddress = _dataManageAddress;
         BLOCK_STALE_MEASURE = _block_stale_measure;
         fraudProofPeriod = _fraudProofPeriod;
-        l2SubmittedBlockNumber = _l2SubmittedBlockNumber;
+        l2StoredBlockNumber = _l2SubmittedBlockNumber;
+        l2ConfirmedBlockNumber = _l2SubmittedBlockNumber;
     }
 
     /**
-     * @notice Returns the block number of the latest submitted L2.
-     * If no submitted yet then this function will return the starting block number.
-     *
-     * @return Latest submitted L2 block number.
+     * @notice Returns the block number of the latest stored L2.
+     * @return Latest stored L2 block number.
      */
-    function getL2SubmitBlockNumber() public view returns (uint256) {
-        return l2SubmittedBlockNumber;
+    function getL2StoredBlockNumber() public view returns (uint256) {
+        return l2StoredBlockNumber;
+    }
+
+    /**
+     * @notice Returns the block number of the latest stored L2.
+     * @return Latest stored L2 block number.
+     */
+    function getL2ConfirmedBlockNumber() public view returns (uint256) {
+        return l2ConfirmedBlockNumber;
     }
 
     /**
@@ -144,12 +152,21 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
     }
 
     /**
-    * @notice update l2 latest block number
-    * @param _l2SubmittedBlockNumber l2 latest block number
+    * @notice update l2 latest store block number
+    * @param _l2StoredBlockNumber l2 latest block number
     */
-    function updateSubmittedL2BlockNumber(uint256 _l2SubmittedBlockNumber) external {
+    function updateStoredL2BlockNumber(uint256 _l2StoredBlockNumber) external {
         require(msg.sender == sequencer, "Only the sequencer can set latest l2 block number");
-        l2SubmittedBlockNumber = _l2SubmittedBlockNumber;
+        l2StoredBlockNumber = l2StoredBlockNumber;
+    }
+
+    /**
+    * @notice update l2 latest confirm block number
+    * @param _l2ConfirmedBlockNumber l2 latest block number
+    */
+    function updateL2ConfirmedBlockNumber(uint256 _l2ConfirmedBlockNumber) external {
+        require(msg.sender == sequencer, "Only the sequencer can set latest l2 block number");
+        l2ConfirmedBlockNumber = _l2ConfirmedBlockNumber;
     }
 
     /**
@@ -195,7 +212,7 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
             endBL2BlockNumber: endL2Block
         });
         dataStoreIdToRollupStoreNumber[dataStoreId] = DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED;
-        l2SubmittedBlockNumber = endL2Block;
+        l2StoredBlockNumber = endL2Block;
         emit RollupStoreInitialized(dataStoreId, startL2Block, endL2Block);
     }
 
@@ -228,6 +245,7 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
             confirmAt: uint32(block.timestamp + fraudProofPeriod),
             status: RollupStoreStatus.COMMITTED
         });
+        l2ConfirmedBlockNumber = endL2Block;
         dataStoreIdToRollupStoreNumber[searchData.metadata.globalDataStoreId] = rollupBatchIndex;
         emit RollupStoreConfirmed(uint32(rollupBatchIndex++), searchData.metadata.globalDataStoreId, startL2Block, endL2Block);
     }
