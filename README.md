@@ -25,7 +25,7 @@ It is designed to bolster support for hyper-scaled throughput decentralized appl
 
 Layer 2 rollups are built to address the scaling limitations of Ethereum by taking transaction processing to a separate execution layer, but this inevitably exposes users to the high gas fees and limited throughput on Layer 1.
 
-Mantle's **modular architecture** helps achieve greater network efficiency for resources at hand, while maintaining the same level of security for all network actors. Increased network performance also enables better fraud proof and ZK proof technology, essentially unlocking the true potential of L2 rollups.
+Mantle's modular architecture helps achieve greater network efficiency for resources at hand, while maintaining the same level of security for all network actors. Increased network performance also enables better fraud proof and ZK proof technology, essentially unlocking the true potential of L2 rollups.
 
 Different parts of the Mantle tech stack are specialized to tackle specific issues.
 
@@ -41,26 +41,6 @@ Different parts of the Mantle tech stack are specialized to tackle specific issu
 ## Quick Start
 ---
 
-### Set up a Local Environment
-
-Setting up local L1 and L2 nodes may be particularly useful for testing out Mantle SDK methods.
-
-1. Make sure your system has the following tools set up and running.
-   - [Git](https://git-scm.com/downloads) - to fetch node software
-   - [Node.js](https://nodejs.org/en/) - to run node instances
-   - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable) - for dependancy management
-
-2. Run L1 and L2 node instances
-
-```bash
- git clone https://github.com/mantlenetworkio/mantle.git
- cd mantle/ops
- make up
- # check status
- make ps
-```
-3. Check out the tutorial
-
 ### Useful Addresses
 
 |         Name          | Value                                |
@@ -71,13 +51,102 @@ Setting up local L1 and L2 nodes may be particularly useful for testing out Mant
 |  Mantle Node RPC URL  | https://rpc.testnet.mantle.xyz/      |
 |       Chain ID        | 5001                                 |
 
+### Set up Local Environment
+
+Setting up local L1 and L2 nodes may be particularly useful for testing out Mantle SDK methods.
+
+1. Make sure your system has the following tools set up and running.
+   - [Git](https://git-scm.com/downloads) - to fetch node software
+   - [Node.js](https://nodejs.org/en/) - to run node instances
+   - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/) - for dependancy management
+
+2. Run L1 and L2 node instances
+
+```bash
+ git clone https://github.com/mantlenetworkio/mantle.git
+ cd mantle/ops
+ make up
+ # check status
+ make ps
+```
+
+dApps need to connect to nodes for fetching block data and sending transactions to the Mantle network. Our JSON-RPC API supports **HTTPS** and **WebSocket** connections.
+
+|  Service  | URL                             |
+| :-------: | ------------------------------- |
+|    RPC    | https://rpc.testnet.mantle.xyz/ |
+| WebSocket | wss://ws.testnet.mantle.xyz     |
+
+
+### Using the Mantle SDK
+
+You can use `npm` or `yarn` package managers to download and install the `@mantleio/sdk` package. We'll use `yarn` in this example.
+
+1. Set up a project directory.
+
+```bash
+mkdir MantleSDK
+cd MantleSDK
+npm init --yes
+```
+
+2. Download and install the SDK package using this command.
+
+```bash
+yarn add -D @mantleio/sdk
+```
+
+3. Create a `.js` script and get started by making a request, for instance, to fetch the current L1 gas price.
+
+```js
+const ethers = require("ethers")
+const mantle = require("@mantleio/sdk")
+
+const l2RpcProvider = new ethers.providers.JsonRpcProvider("https://rpc.testnet.mantle.xyz")
+
+async function main() {
+
+    console.log(await mantle.getL1GasPrice(l2RpcProvider))
+}
+
+main();
+```
+4. Run your script using the `node <filename>.js` command to see the output.
+
+> Feel free to browse through our [compilation of tutorials](https://mantlenetworkio.github.io/mantle-tutorial/) that use the Mantle SDK to demonstrate common functionality such as bridging assets between Mantle and Ethereum, and more.
+
+
+### Using the Node RPC API
+
+You can invoke the API endpoints by sending `curl` requests as well. Let's look at an example of a simple curl request being sent to invoke the `rollup_gasPrices` method that returns a JSON object containing the L1 and L2 gas prices used by a [Sequencer](https://docs.mantle.xyz/for-validators/network-roles#sequencers) to calculate the transaction gas fees.
+
+> Want to get a better understanding of how gas fees are calculated on Mantle? Check out [the section on fee basics](https://docs.mantle.xyz/for-validators/transaction-fees-on-l2) in the tech docs.
+
+```sh
+# Request
+
+curl -X POST --data '{"jsonrpc":"2.0","method":"rollup_gasPrices","params":[],"id":1}' <node url>
+```
+
+```json
+// Response
+
+{
+  "jsonrpc":"2.0",
+  "id":1,
+  "result":{
+    "l1GasPrice":"0x254aa66732",
+    "l2GasPrice":"0xf3792"
+  }
+}
+```
+
 Check out [DEVELOP.md](./DEVELOP.md) for how we develop the Mantle.
 <br/>
 <br/>
 
 ## How to Contribute
 ___
-
 
 
 Read through [CONTRIBUTING.md](./CONTRIBUTING.md) for a general overview of our contribution process.
