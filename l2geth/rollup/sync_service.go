@@ -822,22 +822,19 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 		log.Crit("rollback error:", "setHead error", err)
 	}
 	log.Info("setHead end,current :", "block number", s.bc.CurrentHeader().Number.Uint64())
-	for _, t := range txs {
+	var emited bool
+	for i, t := range txs {
 		if err := s.applyIndexedTransaction(&t); err != nil {
 			log.Crit("rollback applyIndexedTransaction tx :", "applyIndexedTransaction error", err)
 		}
-	}
-	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
-	for i := start; i <= latest; i++ {
-		newBlock := s.bc.GetBlockByNumber(i)
-		log.Info("StateRoot", "equal", oldBlocks[i-start].Root() == newBlock.Root())
-		if oldBlocks[i-start].Hash() != newBlock.Hash() {
-			// TODO Emit Rollback Event To sequencer
-			log.Info("Emit Rollback Event To sequencer", "old blockHash", oldBlocks[i-start].Hash(), "newBlockHash", newBlock.Hash())
-			log.Info("Emit Rollback Event To sequencer", "oldBlock number:", oldBlocks[i-start].Number().Uint64(), "newBlockNumber", newBlock.Number().Uint64())
-			//break
+		newBlock := s.bc.GetBlockByNumber(uint64(i))
+		if oldBlocks[i].Hash() != newBlock.Hash() && !emited {
+			log.Info("Emit Rollback Event To sequencer", "old blockHash", oldBlocks[i].Hash(), "newBlockHash", newBlock.Hash())
+			log.Info("Emit Rollback Event To sequencer", "oldBlock number:", oldBlocks[i].Number().Uint64(), "newBlockNumber", newBlock.Number().Uint64())
+			emited = true
 		}
 	}
+	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
 	return nil
 }
 
@@ -972,7 +969,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 		// If enough time has passed, then assign the
 		// transaction to have the timestamp now. Otherwise,
 		// use the current timestamp
-		if now.Sub(current) > s.timestampRefreshThreshold {
+		if now.Sub(current) > s.timestampRefreshThreshold && tx.GetMeta().Index == nil {
 			current = now
 		}
 		log.Info("Updating latest timestamp", "timestamp", current, "unix", current.Unix())
