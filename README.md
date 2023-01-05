@@ -1,6 +1,6 @@
 <div align="center">
 
-<p><img src="./docs/assets/Mantle full logo_black_transparent.png" width="600"></p>
+<p><img src="./docs/assets/horizontal_logo.svg" width="700"></p>
 
 <p>
   <a href="https://github.com/mantlenetworkio/mantle/actions/workflows/ts-packages.yml?query=branch%3Amain"><img src="https://github.com/mantlenetworkio/mantle/workflows/typescript%20/%20contracts/badge.svg" /></a>
@@ -60,15 +60,17 @@ Setting up local L1 and L2 nodes may be particularly useful for testing out Mant
    - [Node.js](https://nodejs.org/en/) - to run node instances
    - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/) - for dependancy management
 
-2. Run L1 and L2 node instances
+2. Run L1 and L2 node instances using the following commands.
 
-```bash
+```sh
  git clone https://github.com/mantlenetworkio/mantle.git
  cd mantle/ops
  make up
  # check status
  make ps
 ```
+
+Find more details on setting up your local development environment [here in this README](ops/README.local.md).
 
 dApps need to connect to nodes for fetching block data and sending transactions to the Mantle network. Our JSON-RPC API supports **HTTPS** and **WebSocket** connections.
 
@@ -84,7 +86,7 @@ You can use `npm` or `yarn` package managers to download and install the `@mantl
 
 1. Set up a project directory.
 
-```bash
+```sh
 mkdir MantleSDK
 cd MantleSDK
 npm init --yes
@@ -92,7 +94,7 @@ npm init --yes
 
 2. Download and install the SDK package using this command.
 
-```bash
+```sh
 yarn add -D @mantleio/sdk
 ```
 
@@ -137,6 +139,8 @@ The response is of the form:
   }
 }
 ```
+
+
 
 Check out [DEVELOP.md](./DEVELOP.md) for how we develop the Mantle.
 <br/>
