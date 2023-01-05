@@ -148,8 +148,8 @@ func (schedulerInst *Scheduler) Start() {
 
 	schedulerInst.wg.Add(1)
 	go schedulerInst.readLoop()
-	go schedulerInst.AddPeerCheck()
-	go schedulerInst.BatchEndService()
+	go schedulerInst.addPeerCheckLoop()
+	go schedulerInst.batchEndLoop()
 	go schedulerInst.schedulerRoutine()
 	go schedulerInst.handleChainHeadEventLoop()
 
@@ -173,7 +173,7 @@ func (schedulerInst *Scheduler) Close() {
 	close(schedulerInst.exitCh)
 }
 
-func (schedulerInst *Scheduler) AddPeerCheck() {
+func (schedulerInst *Scheduler) addPeerCheckLoop() {
 	// automatically stops if unsubscribe
 	for obj := range schedulerInst.addPeerSub.Chan() {
 		if ape, ok := obj.Data.(core.PeerAddEvent); ok {
@@ -190,7 +190,7 @@ func (schedulerInst *Scheduler) AddPeerCheck() {
 	}
 }
 
-func (schedulerInst *Scheduler) BatchEndService() {
+func (schedulerInst *Scheduler) batchEndLoop() {
 	// automatically stops if unsubscribe
 	for obj := range schedulerInst.batchEndSub.Chan() {
 		if _, ok := obj.Data.(core.BatchEndEvent); ok {
