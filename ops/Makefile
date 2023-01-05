@@ -4,7 +4,6 @@ DOCKER_COMPOSE_CMD := docker-compose \
 DOCKER_COMPOSE_TSS_CMD := docker-compose \
 	-f docker-compose.tss.yml
 COPY_ENV := cp -r envs/deployer.env ./.env
-CLEAR_DOCKER_NETWORK := docker network rm ops_mantle
 COPY_CHAIN := cp -r chaintestdata ./chaindata
 
 build:
@@ -57,6 +56,7 @@ restart:
 clean: stop
 	sudo rm -rf chaindata
 	find data -mindepth 1 -maxdepth 1 -type d | xargs rm -rf
+	docker network rm ops_mantle
 .PHONY: clean
 
 up-metrics: down-metrics
