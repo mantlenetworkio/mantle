@@ -35,8 +35,10 @@ type Config struct {
 }
 
 type Scheduler struct {
-	wg       sync.WaitGroup
-	l        sync.Mutex
+	wg sync.WaitGroup
+	l  sync.Mutex // The lock used to protect the sequencerSet field
+	mu sync.Mutex // The lock used to protect the batchEndFlag and batchDone fields
+
 	eventMux *event.TypeMux
 	exitCh   chan struct{}
 	running  int32
@@ -195,12 +197,14 @@ func (schedulerInst *Scheduler) batchEndLoop() {
 	for obj := range schedulerInst.batchEndSub.Chan() {
 		if _, ok := obj.Data.(core.BatchEndEvent); ok {
 			// if batch already exitCh with timeout or height at max height then pass
+			schedulerInst.mu.Lock()
 			if !schedulerInst.batchEndFlag {
 				schedulerInst.batchDone <- struct{}{}
 				schedulerInst.batchEndFlag = true
 			} else {
 				log.Debug("Batch already exitCh with timeout or height at max height")
 			}
+			schedulerInst.mu.Lock()
 		}
 	}
 }
@@ -301,6 +305,7 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 				continue
 			}
 			if schedulerInst.blockchain.CurrentBlock().NumberU64() == schedulerInst.currentStartMsg.MaxHeight {
+				schedulerInst.mu.Lock()
 				if !schedulerInst.batchEndFlag {
 					log.Debug("Batch done with height at max height")
 					schedulerInst.batchDone <- struct{}{}
@@ -308,6 +313,7 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 				} else {
 					log.Debug("Batch already done with tx apply failed")
 				}
+				schedulerInst.mu.Lock()
 			}
 			log.Debug("chainHead handle", "block_number", chainHead.Block.NumberU64(), "extra_data", hex.EncodeToString(chainHead.Block.Extra()))
 		case <-schedulerInst.exitCh:
