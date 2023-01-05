@@ -247,7 +247,6 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 
 		currentBlock := schedulerInst.blockchain.CurrentBlock()
 		currentIndex := rawdb.ReadStartMsgIndex(schedulerInst.db)
-		log.Debug("now index ", "index", currentIndex)
 
 		msg := types.BatchPeriodStartMsg{
 			RollbackStates: rawdb.ReadRollbackStates(schedulerInst.db),
