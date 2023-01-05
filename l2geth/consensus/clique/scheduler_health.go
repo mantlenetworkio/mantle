@@ -8,7 +8,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
-type sequencerHealther struct {
+type healthAssessor struct {
 	SeqSet           synchronizer.SequencerSequencerInfos
 	SequencersPoints map[common.Address]uint64
 }
@@ -18,12 +18,12 @@ var (
 	initPoints uint64 = 6
 )
 
-func NewSequencerHealther() *sequencerHealther {
-	return &sequencerHealther{}
+func NewHealthAssessor() *healthAssessor {
+	return &healthAssessor{}
 }
 
-// SetSequencerHealthChecker when update sequencerSet sequencerHealthChecker will be reset
-func (schedulerInst *Scheduler) SetSequencerHealthChecker(seqSets synchronizer.SequencerSequencerInfos) {
+// SetSequencerHealthPoints when update sequencerSet sequencerHealthChecker will be reset
+func (schedulerInst *Scheduler) SetSequencerHealthPoints(seqSets synchronizer.SequencerSequencerInfos) {
 	schedulerInst.sequencerHealther.SequencersPoints = make(map[common.Address]uint64)
 	schedulerInst.sequencerHealther.SeqSet = seqSets
 	for _, seqSet := range seqSets {
