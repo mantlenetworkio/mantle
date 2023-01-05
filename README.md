@@ -18,8 +18,8 @@
   - [Using the Mantle SDK](#using-the-mantle-sdk)
   - [Using the Node RPC API](#using-the-node-rpc-api)
   - [Spin up a Verifier Node](#spin-up-a-verifier-node)
-- [How to Contribute](#how-to-contribute)
 - [Directory Structure](#directory-structure)
+- [How to Contribute](#how-to-contribute)
 - [License](#license)
 
 
@@ -161,17 +161,6 @@ Here's a [tutorial](https://docs.mantle.xyz/for-validators/deploying-a-rollup-ve
 
 <br/>
 
-## How to Contribute
-___
-
-
-Read through [CONTRIBUTING.md](./CONTRIBUTING.md) for a general overview of our contribution process.
-Then check out our list of [good first issues](https://github.com/mantlenetworkio/mantle/contribute) to find something fun to work on!
-
-
-<br/>
-
-
 ## Directory Structure
 ___
 <pre>
@@ -197,6 +186,18 @@ root
 ├── <a href="./proxyd">proxyd</a>: Configurable RPC request router and proxy
 ├── <a href="./technical-documents">technical-documents</a>: audits and post-mortem documents
 </pre>
+
+</br>
+
+## How to Contribute
+___
+
+
+Read through [CONTRIBUTING.md](./CONTRIBUTING.md) for a general overview of our contribution process.
+Then check out our list of [good first issues](https://github.com/mantlenetworkio/mantle/contribute) to find something fun to work on!
+
+
+<br/>
 
 
 ## License
