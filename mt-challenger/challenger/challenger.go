@@ -15,19 +15,19 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/mantlenetworkio/mantle/mt-batcher/sequencer"
 	"github.com/mantlenetworkio/mantle/mt-batcher/txmgr"
 	"github.com/mantlenetworkio/mantle/mt-challenger/bindings"
 	rc "github.com/mantlenetworkio/mantle/mt-challenger/bindings"
-
 	"github.com/pkg/errors"
 	"github.com/shurcooL/graphql"
 	"google.golang.org/grpc"
@@ -159,7 +159,6 @@ func (c *Challenger) getNextDataStore() (*graphView.DataStore, error) {
 	if err != nil {
 		return nil, errors.New("conversion error")
 	}
-	fmt.Println("challenger get store", store.StoreNumber)
 	c.Cfg.LastStoreNumber = uint64(store.StoreNumber)
 	return store, nil
 }
@@ -235,8 +234,6 @@ func (c *Challenger) constructFraudProof(store *graphView.DataStore, data []byte
 	//there are 32 bytes in the actual poly for every 31 bytes in the data, hence (startingSymbolIndex/31)*32
 	//then we shift over by 1 to get past the first 0 byte, and then (startingSymbolIndex % 31)
 	startingSymbolIndex = (startingSymbolIndex/31)*32 + 1 + (startingSymbolIndex % 31)
-
-	fmt.Println("INDEX", fraud.StartingIndex, startingSymbolIndex)
 
 	//generate parameters for proving data on chain
 	//this is
@@ -425,25 +422,34 @@ func (c *Challenger) eventLoop() {
 		obj, _ := json.Marshal(store)
 		c.Cfg.Logger.Info().Msg("Got store:" + string(obj))
 		data, frames, err := c.callRetrieve(store)
-		//retrieve the data associated with the store
+		// retrieve the data associated with the store
 		if err != nil {
 			c.Cfg.Logger.Error().Err(err).Msg("Error getting data")
 			continue
 		}
-		c.Cfg.Logger.Info().Msg("Got data:" + hexutil.Encode(data))
-		l2Tx := new(l2types.Transaction)
-		rlpStream := l2rlp.NewStream(bytes.NewBuffer(data), 0)
-		if err := l2Tx.DecodeRLP(rlpStream); err != nil {
-			c.Cfg.Logger.Error().Err(err).Msg("Decode RLP fail")
-		}
-		c.Cfg.Logger.Info().Msg("tx hash:" + l2Tx.Hash().Hex())
-		// tx check for tmp, will remove in future
-		l2Transaction, _, err := c.Cfg.L2Client.TransactionByHash(c.Ctx, l2Tx.Hash())
+		batchTxn := new([]sequencer.BatchTx)
+		batchRlpStream := rlp.NewStream(bytes.NewBuffer(data), 0)
+		err = batchRlpStream.Decode(batchTxn)
 		if err != nil {
-			c.Cfg.Logger.Error().Err(err).Msg("No this transaction")
+			c.Cfg.Logger.Error().Err(err).Msg("Decode batch txn fail")
 			continue
 		}
-		c.Cfg.Logger.Info().Msg("fond transaction, hash is " + l2Transaction.Hash().Hex())
+		newBatchTxn := *batchTxn
+		for i := 0; i <= len(newBatchTxn); i++ {
+			l2Tx := new(l2types.Transaction)
+			rlpStream := l2rlp.NewStream(bytes.NewBuffer(newBatchTxn[i].RawTx), 0)
+			if err := l2Tx.DecodeRLP(rlpStream); err != nil {
+				c.Cfg.Logger.Error().Err(err).Msg("Decode RLP fail")
+			}
+			c.Cfg.Logger.Info().Msg("tx hash:" + l2Tx.Hash().Hex())
+			// tx check for tmp, will remove in future
+			l2Transaction, _, err := c.Cfg.L2Client.TransactionByHash(c.Ctx, l2Tx.Hash())
+			if err != nil {
+				c.Cfg.Logger.Error().Err(err).Msg("No this transaction")
+				continue
+			}
+			c.Cfg.Logger.Info().Msg("fond transaction, hash is " + l2Transaction.Hash().Hex())
+		}
 		// check if the fraud string exists within the data
 		fraud, exists := c.checkForFraud(store, data)
 		if !exists {
