@@ -92,6 +92,28 @@ var (
 		Value:  4,
 		EnvVar: prefixEnvVar(envVarPrefix, "EIGEN_LAYER_NODE"),
 	}
+	ResubmissionTimeoutFlag = cli.DurationFlag{
+		Name: "resubmission-timeout",
+		Usage: "Duration we will wait before resubmitting a " +
+			"transaction to L1",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "RESUBMISSION_TIMEOUT"),
+	}
+	NumConfirmationsFlag = cli.Uint64Flag{
+		Name: "num-confirmations",
+		Usage: "Number of confirmations which we will wait after " +
+			"appending a new batch",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "NUM_CONFIRMATIONS"),
+	}
+	SafeAbortNonceTooLowCountFlag = cli.Uint64Flag{
+		Name: "safe-abort-nonce-too-low-count",
+		Usage: "Number of ErrNonceTooLow observations required to " +
+			"give up on a tx at a particular nonce without receiving " +
+			"confirmation",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "SAFE_ABORT_NONCE_TOO_LOW_COUNT"),
+	}
 	PollIntervalFlag = cli.DurationFlag{
 		Name: "poll-interval",
 		Usage: "Delay between querying L2 for more transactions and " +
@@ -164,6 +186,9 @@ var requiredFlags = []cli.Flag{
 	DataStoreDurationFlag,
 	DataStoreTimeoutFlag,
 	EigenLayerNodeFlag,
+	ResubmissionTimeoutFlag,
+	NumConfirmationsFlag,
+	SafeAbortNonceTooLowCountFlag,
 }
 
 var optionalFlags = []cli.Flag{
