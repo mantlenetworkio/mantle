@@ -72,10 +72,8 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 
 		// Handle incoming messages until the connection is torn down
 		for {
-			if pm.minerCheck() {
-				if err := pm.checkPeer(p); err != nil {
-					return err
-				}
+			if err := pm.checkPeer(p); err != nil {
+				return err
 			}
 
 			if err := pm.handleConsensusMsg(p); err != nil {
@@ -89,6 +87,9 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 }
 
 func (pm *ProtocolManager) checkPeer(p *peer) error {
+	if !pm.schedulerInst.IsRunning() {
+		return nil
+	}
 	if bytes.Equal(pm.etherbase.Bytes(), pm.schedulerInst.Scheduler().Bytes()) {
 		has := make(chan bool)
 		if err := pm.eventMux.Post(core.PeerAddEvent{

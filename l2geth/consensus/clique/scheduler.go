@@ -106,8 +106,6 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 		running:           0,
 		currentHeight:     0,
 		db:                db,
-		exitCh:            make(chan struct{}, 1),
-		batchDone:         make(chan struct{}, 1),
 		ticker:            time.NewTicker(10 * time.Second), //TODO
 		consensusEngine:   clique,
 		eventMux:          eventMux,
@@ -120,10 +118,6 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 		chainHeadCh:       make(chan core.ChainHeadEvent, chainHeadChanSize),
 	}
 
-	schedulerInst.addPeerSub = schedulerInst.eventMux.Subscribe(core.PeerAddEvent{})
-	schedulerInst.batchEndSub = schedulerInst.eventMux.Subscribe(core.BatchEndEvent{})
-	go schedulerInst.AddPeerCheck()
-	go schedulerInst.BatchEndService()
 	return schedulerInst, nil
 
 }
@@ -145,13 +139,21 @@ func (schedulerInst *Scheduler) Start() {
 	if schedulerInst.wallet == nil || len(schedulerInst.signAccount.Address.Bytes()) == 0 {
 		panic("Sequencer server need wallet to sign msgs")
 	}
+	schedulerInst.exitCh = make(chan struct{}, 1)
+	schedulerInst.batchDone = make(chan struct{}, 1)
+
+	schedulerInst.addPeerSub = schedulerInst.eventMux.Subscribe(core.PeerAddEvent{})
+	schedulerInst.batchEndSub = schedulerInst.eventMux.Subscribe(core.BatchEndEvent{})
 	schedulerInst.chainHeadSub = schedulerInst.blockchain.SubscribeChainHeadEvent(schedulerInst.chainHeadCh)
-	atomic.StoreInt32(&schedulerInst.running, 1)
 
 	schedulerInst.wg.Add(1)
 	go schedulerInst.readLoop()
+	go schedulerInst.AddPeerCheck()
+	go schedulerInst.BatchEndService()
 	go schedulerInst.schedulerRoutine()
 	go schedulerInst.handleChainHeadEventLoop()
+
+	atomic.StoreInt32(&schedulerInst.running, 1)
 }
 
 func (schedulerInst *Scheduler) Stop() {
