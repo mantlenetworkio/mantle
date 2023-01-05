@@ -171,7 +171,6 @@ func (schedulerInst *Scheduler) Close() {
 	schedulerInst.addPeerSub.Unsubscribe()
 	schedulerInst.batchEndSub.Unsubscribe()
 	close(schedulerInst.exitCh)
-	close(schedulerInst.chainHeadCh)
 }
 
 func (schedulerInst *Scheduler) AddPeerCheck() {
