@@ -1,6 +1,6 @@
 <div align="center">
 
-<p><img src="./docs/assets/horizontal_logo.svg" width="700"></p>
+<p><img src="./docs/assets/horizontal_logo.svg" width="800"></p>
 
 <p>
   <a href="https://github.com/mantlenetworkio/mantle/actions/workflows/ts-packages.yml?query=branch%3Amain"><img src="https://github.com/mantlenetworkio/mantle/workflows/typescript%20/%20contracts/badge.svg" /></a>
@@ -10,6 +10,19 @@
 
 </div>
 
+- [Introduction](#introduction)
+- [Goals](#goals)
+- [Quick Start](#quick-start)
+  - [Useful Addresses](#useful-addresses)
+  - [Set up Local Environment](#set-up-local-environment)
+  - [Using the Mantle SDK](#using-the-mantle-sdk)
+  - [Using the Node RPC API](#using-the-node-rpc-api)
+  - [Spin up a Verifier Node](#spin-up-a-verifier-node)
+- [How to Contribute](#how-to-contribute)
+- [Directory Structure](#directory-structure)
+- [License](#license)
+
+
 ## Introduction
 ___
 
@@ -17,7 +30,6 @@ Mantle is a suite of Ethereum scaling solutions including an optimistic rollup a
 
 It is designed to bolster support for hyper-scaled throughput decentralized applications (dApps) — from derivatives decentralized exchanges (DEXs), to gaming, to operations of decentralized autonomous organizations (DAOs).
 
-<br/>
 <br/>
 
 ## Goals
@@ -35,7 +47,6 @@ Different parts of the Mantle tech stack are specialized to tackle specific issu
 
 > We encourage you to check out the [**Mantle tech docs**](https://docs.mantle.xyz) to learn more about the inner workings of Mantle.
 
-</br>
 </br>
 
 ## Quick Start
@@ -70,7 +81,7 @@ Setting up local L1 and L2 nodes may be particularly useful for testing out Mant
  make ps
 ```
 
-Find more details on setting up your local development environment [here in this README](ops/README.local.md).
+Find more details on setting up your local development environment [here in this README.md](ops/README.local.md).
 
 dApps need to connect to nodes for fetching block data and sending transactions to the Mantle network. Our JSON-RPC API supports **HTTPS** and **WebSocket** connections.
 
@@ -140,10 +151,14 @@ The response is of the form:
 }
 ```
 
+> Check out [DEVELOP.md](./DEVELOP.md) for more detailed information on getting started with developing your apps using Mantle.
 
+### Spin up a Verifier Node
 
-Check out [DEVELOP.md](./DEVELOP.md) for how we develop the Mantle.
-<br/>
+There are [multiple roles](https://docs.mantle.xyz/for-validators/network-roles#defining-network-roles) associated with Mantle nodes. Rollup Verifiers mainly sync rollup data from Mantle's trusted Sequencer ([to be decentralized in the future!](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/decentralized-sequencer)). dApp builders who run their own verifier nodes have the benefit of being able to simulate L2 transactons, [among other advantages](https://docs.mantle.xyz/for-validators/network-roles#why-run-a-rollup-verifier-node), and have ready access to them without rate-limiting (as opposed to public RPCs).
+
+Here's a [tutorial](https://docs.mantle.xyz/for-validators/deploying-a-rollup-verifier) describing the process of deploying a verifier node.
+
 <br/>
 
 ## How to Contribute
@@ -154,7 +169,6 @@ Read through [CONTRIBUTING.md](./CONTRIBUTING.md) for a general overview of our 
 Then check out our list of [good first issues](https://github.com/mantlenetworkio/mantle/contribute) to find something fun to work on!
 
 
-<br/>
 <br/>
 
 
