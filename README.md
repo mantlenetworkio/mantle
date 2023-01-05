@@ -123,14 +123,11 @@ You can invoke the API endpoints by sending `curl` requests as well. Let's look 
 > Want to get a better understanding of how gas fees are calculated on Mantle? Check out [the section on fee basics](https://docs.mantle.xyz/for-validators/transaction-fees-on-l2) in the tech docs.
 
 ```sh
-# Request
-
 curl -X POST --data '{"jsonrpc":"2.0","method":"rollup_gasPrices","params":[],"id":1}' <node url>
 ```
+The response is of the form:
 
 ```json
-// Response
-
 {
   "jsonrpc":"2.0",
   "id":1,
