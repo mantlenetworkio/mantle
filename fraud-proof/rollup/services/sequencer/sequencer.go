@@ -2,7 +2,6 @@ package sequencer
 
 import (
 	"fmt"
-	rollup "github.com/mantlenetworkio/mantle/fraud-proof"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"math/big"
 
@@ -350,8 +349,6 @@ func (s *Sequencer) Stop() error {
 	s.Wg.Wait()
 	return nil
 }
-
-var _ rollup.FraudProover = (*Sequencer)(nil)
 
 func (s *Sequencer) CreateAssertion(obj interface{}) error {
 	assertion, _ := obj.(rollupTypes.Assertion)

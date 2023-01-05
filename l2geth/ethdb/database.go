@@ -129,6 +129,6 @@ type Database interface {
 	Iteratee
 	Stater
 	Compacter
-	Snapshotter
+	//Snapshotter
 	io.Closer
 }

@@ -470,7 +470,7 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 	// <FRAUD-PROOF modification>
 	if ctx.IsSet(fpcmd.RollupNodeFlag.Name) {
 		cfg := fpcmd.MakeFraudProofConfig(ctx)
-		fp.RegisterFraudProofService(stack, nil, nil, cfg)
+		fp.RegisterFraudProofService(stack, cfg)
 	}
 	// <FRAUD-PROOF modification/>
 }
