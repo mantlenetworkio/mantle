@@ -77,6 +77,7 @@ services:
   relayer:
     depends_on:
       - l1_chain
+      - scheduler
     deploy:
       replicas: 0
     build:
@@ -109,6 +110,9 @@ services:
       - ${HEALTHCHECK_HTTP_PORT:-7300}:7300
 
   integration_tests:
+    depends_on:
+      - l1_chain
+      - scheduler
     deploy:
       replicas: 0
     build:
@@ -130,6 +134,9 @@ services:
 
 
   gas_oracle:
+    depends_on:
+      - l1_chain
+      - scheduler
     build:
       context: ..
       dockerfile: ./gas-oracle/Dockerfile

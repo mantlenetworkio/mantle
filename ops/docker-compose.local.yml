@@ -5,8 +5,8 @@ networks:
     driver: bridge
     ipam:
      config:
-       - subnet: 172.5.0.0/16
-         gateway: 172.5.0.1
+       - subnet: 10.0.0.0/24
+         gateway: 10.0.0.1
 
 x-base: &base
   restart: unless-stopped

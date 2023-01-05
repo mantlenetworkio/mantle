@@ -4,7 +4,7 @@
 ###                           Base Configuration                            ###
 ###############################################################################
 #l1 chain port
-l1_url = "http://172.17.0.1:9545"
+l1_url = "http://10.0.0.2:8545"
 time_task_interval = "10s"
 l1_receipt_confirm_timeout = "30s"
 l1_confirm_blocks = "1"

@@ -1,13 +1,23 @@
 
+networks:
+  mantle:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+          gateway: 10.0.0.1
+
 x-base: &base
   restart: unless-stopped
+  networks:
+    mantle: {}
 
 
 x-base-env: &base-env
   TSS_NODE_BASE_DIR: /data/tssnode
   TSS_NODE_DB_DIR: /data/tssnode/db
-  TSS_NODE_L1_URL: http://172.17.0.1:9545
-  TSS_NODE_L2_ETH_RPC: http://172.17.0.1:8545
+  TSS_NODE_L1_URL: http://10.0.0.2:8545
+  TSS_NODE_L2_ETH_RPC: http://10.0.0.5:8545
 
 services:
   tss-manager:
@@ -15,7 +25,7 @@ services:
     image: mantlenetworkio/tss:latest
     container_name: bittss-manager
     environment:
-      TSS_L1_URL: http://172.17.0.1:9545
+      TSS_L1_URL: http://10.0.0.2:8545
       TSS_L1_CONFIRM_BLOCKS: 0
       TSS_L1_RECEIPT_CONFIRM_TIMEOUT: 30s
       TSS_SCC_CONTRACT_ADDRESS: 0xc48078a734c2e22D43F54B47F7a8fB314Fa5A601
@@ -33,6 +43,7 @@ services:
       - ./config:/app/config
 
   tss-node1:
+    <<: *base
     depends_on:
       - tss-manager
     image: mantlenetworkio/tss:latest
@@ -45,11 +56,11 @@ services:
       <<: *base-env
       TSS_NODE_PRIVATE_KEY: 8579041c09247ea30aa30fdc4aad1897505ecfe44b92dc01c6481fae7d5dc705
       TSS_NODE_BOOTSTRAP_PEERS: >
-        /ip4/172.17.0.1/tcp/8001/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,
-        /ip4/172.17.0.1/tcp/8002/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH,
-        /ip4/172.17.0.1/tcp/8003/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
-      TSS_NODE_EXTERNAL_IP: 172.17.0.1
-      TSS_NODE_L1_URL: http://172.17.0.1:9545
+        /ip4/10.0.0.15/tcp/8000/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,
+        /ip4/10.0.0.16/tcp/8000/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH,
+        /ip4/10.0.0.17/tcp/8000/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
+      TSS_NODE_EXTERNAL_IP: 10.0.0.14
+      TSS_L1_URL: http://10.0.0.2:8545
       TSS_NODE_P2P_PORT: 8000
     command: ./tss node -c config/tss-node-config.toml
     ports:
@@ -60,6 +71,7 @@ services:
       - ./config:/app/config
 
   tss-node2:
+    <<: *base
     depends_on:
       - tss-node1
     image: mantlenetworkio/tss:latest
@@ -73,20 +85,21 @@ services:
       <<: *base-env
       TSS_NODE_PRIVATE_KEY: 2bdfd71614eb0d2a994ecd96ba5f1dc9774e13ccdaece910992e4818e823e822
       TSS_NODE_BOOTSTRAP_PEERS: >
-        /ip4/172.17.0.1/tcp/8000/p2p/16Uiu2HAmQWNYM7JXW55Qs5z6mR49eVu5pdRk17dKZ6zRSscdcWve,
-        /ip4/172.17.0.1/tcp/8002/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH,
-        /ip4/172.17.0.1/tcp/8003/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
-      TSS_NODE_EXTERNAL_IP: 172.17.0.1
-      TSS_NODE_L1_URL: http://172.17.0.1:9545
-      TSS_NODE_P2P_PORT: 8001
+        /ip4/10.0.0.14/tcp/8000/p2p/16Uiu2HAmQWNYM7JXW55Qs5z6mR49eVu5pdRk17dKZ6zRSscdcWve,
+        /ip4/10.0.0.16/tcp/8000/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH,
+        /ip4/10.0.0.17/tcp/8000/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
+      TSS_NODE_EXTERNAL_IP: 10.0.0.15
+      TSS_L1_URL: http://10.0.0.2:8545
+      TSS_NODE_P2P_PORT: 8000
     ports:
       # expose the service to the host for getting the contract addrs
-      - ${DEPLOYER_PORT:-8001}:8001
+      - ${DEPLOYER_PORT:-8001}:8000
     volumes:
       - ./data/tss-2:/data
       - ./config:/app/config
 
   tss-node3:
+    <<: *base
     depends_on:
       - tss-node1
       - tss-node2
@@ -101,20 +114,21 @@ services:
       <<: *base-env
       TSS_NODE_PRIVATE_KEY: ad55949cb6419c86cd59fb7b36a3d86d4dd7ee9cae5c55d2fd9584c80ea5bacb
       TSS_NODE_BOOTSTRAP_PEERS: >
-        /ip4/172.17.0.1/tcp/8000/p2p/16Uiu2HAmQWNYM7JXW55Qs5z6mR49eVu5pdRk17dKZ6zRSscdcWve,
-        /ip4/172.17.0.1/tcp/8001/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,
-        /ip4/172.17.0.1/tcp/8003/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
-      TSS_NODE_EXTERNAL_IP: 172.17.0.1
-      TSS_NODE_L1_URL: http://172.17.0.1:9545
-      TSS_NODE_P2P_PORT: 8002
+        /ip4/10.0.0.14/tcp/8000/p2p/16Uiu2HAmQWNYM7JXW55Qs5z6mR49eVu5pdRk17dKZ6zRSscdcWve,
+        /ip4/10.0.0.15/tcp/8000/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,
+        /ip4/10.0.0.17/tcp/8000/p2p/16Uiu2HAkwMunZrRiXKWJesEakL8UnrUQSR3sRVGve6HjYxdQnUZv
+      TSS_NODE_EXTERNAL_IP: 10.0.0.16
+      TSS_L1_URL: http://10.0.0.2:8545
+      TSS_NODE_P2P_PORT: 8000
     ports:
       # expose the service to the host for getting the contract addrs
-      - ${DEPLOYER_PORT:-8002}:8002
+      - ${DEPLOYER_PORT:-8002}:8000
     volumes:
       - ./data/tss-3:/data
       - ./config:/app/config
 
   tss-node4:
+    <<: *base
     depends_on:
       - tss-node1
       - tss-node2
@@ -130,15 +144,15 @@ services:
       <<: *base-env
       TSS_NODE_PRIVATE_KEY: a7e87580b54050212e20ab75fb808ec9c7f759201ec4fe9ea1acad85adaf9b52
       TSS_NODE_BOOTSTRAP_PEERS: >
-        /ip4/172.17.0.11/tcp/8000/p2p/16Uiu2HAmQWNYM7JXW55Qs5z6mR49eVu5pdRk17dKZ6zRSscdcWve,
-        /ip4/172.17.0.12/tcp/8001/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,
-        /ip4/172.17.0.13/tcp/8002/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH
-      TSS_NODE_EXTERNAL_IP: 172.17.0.1
-      TSS_NODE_L1_URL: http://172.17.0.1:9545
-      TSS_NODE_P2P_PORT: 8003
+        /ip4/10.0.0.14/tcp/8000/p2p/16Uiu2HAmQWNYM7JXW55Qs5z6mR49eVu5pdRk17dKZ6zRSscdcWve,
+        /ip4/10.0.0.15/tcp/8000/p2p/16Uiu2HAmBKgEjv9buq3LkSHrRRcTN3c5VbPskgaqwq6mRquHJvk4,
+        /ip4/10.0.0.16/tcp/8000/p2p/16Uiu2HAmC3L4WmoJHcXhFtXDfg6BMcdweybEeLhfUtKMi4WhxViH
+      TSS_NODE_EXTERNAL_IP: 10.0.0.17
+      TSS_L1_URL: http://10.0.0.2:8545
+      TSS_NODE_P2P_PORT: 8000
     ports:
       # expose the service to the host for getting the contract addrs
-      - ${DEPLOYER_PORT:-8003}:8003
+      - ${DEPLOYER_PORT:-8003}:8000
     volumes:
       - ./data/tss-4:/data
       - ./config:/app/config
