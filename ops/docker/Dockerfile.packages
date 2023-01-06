@@ -57,7 +57,7 @@ COPY ./integration-tests ./integration-tests
 # build it!
 RUN cd packages/contracts && yarn build
 RUN cd ../../
-## RUN yarn build
+RUN yarn build
 
 
 FROM base as deployer
