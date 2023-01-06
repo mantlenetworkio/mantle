@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math"
 	"math/big"
 	mrand "math/rand"
 	"sort"
@@ -175,12 +174,11 @@ type BlockChain struct {
 	processor  Processor  // Block transaction processor interface
 	vmConfig   vm.Config
 
-	badBlocks             *lru.Cache                        // Bad block cache
-	shouldPreserve        func(*types.Block) bool           // Function used to determine whether should preserve the given block.
-	terminateInsert       func(common.Hash, uint64) bool    // Testing hook used to terminate ancient receipt chain insertion.
-	preCheckSyncService   func(*types.Transaction) bool     // first check block avaliabe before insert chain
-	updateSyncService     func(*types.Transaction)          // update sync service state after inserting chain block
-	sequencerRollbackFunc func(rollbackNumber uint64) error // rollback will setHead to start - 1
+	badBlocks           *lru.Cache                     // Bad block cache
+	shouldPreserve      func(*types.Block) bool        // Function used to determine whether should preserve the given block.
+	terminateInsert     func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
+	preCheckSyncService func(*types.Transaction) bool  // first check block avaliabe before insert chain
+	updateSyncService   func(*types.Transaction)       // update sync service state after inserting chain block
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -1489,7 +1487,7 @@ func (bc *BlockChain) addFutureBlock(block *types.Block) error {
 func (bc *BlockChain) GetRollbackNumber() uint64 {
 	rbss := rawdb.ReadRollbackStates(bc.db)
 	current := bc.CurrentBlock()
-	var rollbackNumber uint64 = math.MaxUint64
+	var rollbackNumber uint64 = common.InvalidRollbackHeight
 	for i := len(rbss) - 1; i >= 0; i-- {
 		if current.Number().Uint64() >= rbss[i].BlockNumber {
 			block := bc.GetBlockByNumber(rbss[i].BlockNumber)
@@ -1551,12 +1549,6 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 	// Sanity check that we have something meaningful to import
 	// Blocks earlier versions of blocks from entering
 	// ensure current block is correct or rollback
-	rollbackNumber := bc.GetRollbackNumber()
-	if rollbackNumber != math.MaxUint64 {
-		if err := bc.sequencerRollbackFunc(rollbackNumber); err != nil {
-			return 0, err
-		}
-	}
 	if len(chain) == 0 {
 		return 0, nil
 	}
@@ -2374,8 +2366,4 @@ func (bc *BlockChain) SetUpdateSyncServiceFunc(updateSyncServiceFunc func(*types
 
 func (bc *BlockChain) SetPreCheckSyncServiceFunc(preCheckFunc func(*types.Transaction) bool) {
 	bc.preCheckSyncService = preCheckFunc
-}
-
-func (bc *BlockChain) SetSequencerRollbackFunc(rollbackFunc func(rollbackNumber uint64) error) {
-	bc.sequencerRollbackFunc = rollbackFunc
 }

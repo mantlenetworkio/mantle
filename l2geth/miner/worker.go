@@ -523,6 +523,12 @@ func (w *worker) batchStartLoop() {
 				)
 			} else {
 				w.chain.UpdateRollbackStates(ev.Msg.RollbackStates)
+				rollbackNumber := w.chain.GetRollbackNumber()
+				if rollbackNumber != common.InvalidRollbackHeight {
+					if err := w.eth.SyncService().SequencerRollback(rollbackNumber); err != nil {
+						log.Error("sequencer rollback failed", "error", err)
+					}
+				}
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
 					log.Info("Active sequencer receives batchPeriodStartEvent")
