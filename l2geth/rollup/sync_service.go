@@ -828,16 +828,21 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 		newBlock := s.bc.GetBlockByNumber(i)
 		log.Info("StateRoot", "equal", oldBlocks[i-start].Root() == newBlock.Root())
 		if oldBlocks[i-start].Hash() != newBlock.Hash() {
-			// TODO Emit Rollback Event To sequencer
-			log.Info("Emit Rollback Event To sequencer", "old blockHash", oldBlocks[i-start].Hash(), "newBlockHash", newBlock.Hash())
-			log.Info("Emit Rollback Event To sequencer", "oldBlock number:", oldBlocks[i-start].Number().Uint64(), "newBlockNumber", newBlock.Number().Uint64())
-			//break
+			rollbackState := &types.RollbackState{
+				BlockNumber: i,
+				BlockHash:   newBlock.Hash(),
+			}
+			s.bc.AppendRollbackStates(rollbackState)
 		}
 	}
 	return nil
 }
 
-func (s *SyncService) SequencerRollback() error {
+// SequencerRollback sequencer rollback
+func (s *SyncService) SequencerRollback(rollbackNumber uint64) error {
+	if err := s.SetHead(rollbackNumber - 1); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -968,7 +973,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 		// If enough time has passed, then assign the
 		// transaction to have the timestamp now. Otherwise,
 		// use the current timestamp
-		if now.Sub(current) > s.timestampRefreshThreshold {
+		if now.Sub(current) > s.timestampRefreshThreshold && tx.GetMeta().Index == nil {
 			current = now
 		}
 		log.Info("Updating latest timestamp", "timestamp", current, "unix", current.Unix())
@@ -976,7 +981,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 	} else if tx.L1Timestamp() == 0 && s.verifier {
 		// This should never happen
 		log.Error("No tx timestamp found when running as verifier", "hash", tx.Hash().Hex())
-	} else if tx.L1Timestamp() < ts {
+	} else if tx.L1Timestamp() < ts && tx.GetMeta().Index == nil {
 		// This should never happen, but sometimes does
 		log.Error("Timestamp monotonicity violation", "hash", tx.Hash().Hex(), "latest", ts, "tx", tx.L1Timestamp())
 	}
