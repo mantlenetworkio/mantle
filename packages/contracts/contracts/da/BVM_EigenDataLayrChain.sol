@@ -155,7 +155,7 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
     * @notice update l2 latest store block number
     * @param _l2StoredBlockNumber l2 latest block number
     */
-    function updateStoredL2BlockNumber(uint256 _l2StoredBlockNumber) external {
+    function updateL2StoredBlockNumber(uint256 _l2StoredBlockNumber) external {
         require(msg.sender == sequencer, "Only the sequencer can set latest l2 block number");
         l2StoredBlockNumber = _l2StoredBlockNumber;
     }
