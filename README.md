@@ -3,9 +3,16 @@
 <p><img src="./docs/assets/horizontal_logo.svg" width="800"></p>
 
 <p>
-  <a href="https://github.com/mantlenetworkio/mantle/actions/workflows/ts-packages.yml?query=branch%3Amain"><img src="https://github.com/mantlenetworkio/mantle/workflows/typescript%20/%20contracts/badge.svg" /></a>
-  <a href="https://github.com/mantlenetworkio/mantle/actions/workflows/integration.yml?query=branch%3Amain"><img src="https://github.com/mantlenetworkio/mantle/workflows/integration/badge.svg" /></a>
-  <a href="https://github.com/mantlenetworkio/mantle/actions/workflows/geth.yml?query=branch%3Amain"><img src="https://github.com/mantlenetworkio/mantle/workflows/geth%20unit%20tests/badge.svg" /></a>
+<h3><a href="https://mantle.xyz">Website</a> &nbsp&nbsp | &nbsp&nbsp&nbsp<a href="https://docs.mantle.xyz">Tech Docs</a>
+</p>
+
+<p>
+
+</br>
+
+![](https://github.com/mantlenetworkio/mantle/actions/workflows/build-image.yml/badge.svg)
+![]()
+
 </p>
 
 </div>
