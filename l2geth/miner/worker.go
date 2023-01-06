@@ -514,7 +514,6 @@ func (w *worker) batchStartLoop() {
 				w.currentBps = ev.Msg
 				w.mutex.Unlock()
 				log.Info("Scheduler start new batch",
-					"reorg_index", ev.Msg.ReorgIndex,
 					"start_height", ev.Msg.StartHeight,
 					"batch_index", ev.Msg.BatchIndex,
 					"max_height", ev.Msg.MaxHeight,
@@ -605,7 +604,6 @@ func (w *worker) batchStartLoop() {
 					}
 				} else {
 					log.Debug("Inactive sequencer receives batchPeriodStartEvent",
-						"reorg_index", ev.Msg.ReorgIndex,
 						"start_height", ev.Msg.StartHeight,
 						"batch_index", ev.Msg.BatchIndex,
 						"max_height", ev.Msg.MaxHeight,
