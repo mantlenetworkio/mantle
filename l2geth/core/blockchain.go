@@ -1547,8 +1547,6 @@ func (bc *BlockChain) AppendRollbackStates(rollbackState *types.RollbackState) {
 // After insertion is done, all accumulated events will be fired.
 func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 	// Sanity check that we have something meaningful to import
-	// Blocks earlier versions of blocks from entering
-	// ensure current block is correct or rollback
 	if len(chain) == 0 {
 		return 0, nil
 	}

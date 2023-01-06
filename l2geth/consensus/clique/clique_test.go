@@ -17,7 +17,6 @@
 package clique
 
 import (
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"math/big"
 	"testing"
 
@@ -28,6 +27,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
 // This test case is a repro of an annoying bug that took us forever to catch.
