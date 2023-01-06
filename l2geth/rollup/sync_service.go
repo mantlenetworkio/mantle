@@ -825,7 +825,7 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	var handle bool
 	for i, t := range txs {
 		if err := s.applyIndexedTransaction(&t); err != nil {
-			log.Crit("rollback applyIndexedTransaction tx :", "applyIndexedTransaction error", err)
+			log.Crit("rollback applyIndexedTransaction tx :", "error", err)
 		}
 		newBlock := s.bc.GetBlockByNumber(uint64(i) + start)
 		if oldBlocks[i].Hash() != newBlock.Hash() && !handle {
