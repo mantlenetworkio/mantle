@@ -262,13 +262,15 @@ func (d *Driver) CraftBatchTx(
 	if tssResponse.RollBack {
 		tx, err = d.sccContract.RollBackL2Chain(opts, start, offsetStartsAtIndex, tssResponse.Signature)
 	} else {
-		log.Info(">>>> d.cfg.FPRollupAddr: ", d.cfg)
 		if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
 			log.Info("append state with fraud proof")
 			// ##### FRAUD-PROOF modify #####
 			tx, err = d.FraudProofAppendStateBatch(
 				opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature, blocks,
 			)
+			if err != nil {
+				log.Error("fraud proof append state batch in error: ", err.Error())
+			}
 			// ##### FRAUD-PROOF modify ##### //
 		} else {
 			log.Info("append state with scc")
@@ -296,9 +298,21 @@ func (d *Driver) CraftBatchTx(
 				opts, start, offsetStartsAtIndex, tssResponse.Signature,
 			)
 		} else {
-			return d.sccContract.AppendStateBatch(
-				opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
-			)
+			if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
+				log.Info("append state with fraud proof by gas tip cap")
+				// ##### FRAUD-PROOF modify #####
+				tx, err := d.FraudProofAppendStateBatch(
+					opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature, blocks,
+				)
+				log.Info(">>>>>>>>  tx hash: ", tx.Hash().String())
+				return tx, err
+				// ##### FRAUD-PROOF modify ##### //
+			} else {
+				log.Info("append state with scc by gas tip cap")
+				return d.sccContract.AppendStateBatch(
+					opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
+				)
+			}
 		}
 	default:
 		return nil, err
@@ -387,7 +401,6 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 		opts, assertion.VmHash, assertion.InboxSize, assertion.GasUsed, batch, shouldStartAtElement, signature); err != nil {
 		return nil, err
 	} else {
-		fmt.Println("tx hash: ", tx.Hash())
 		return tx, nil
 	}
 }
