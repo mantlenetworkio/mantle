@@ -10,6 +10,8 @@
 
 </div>
 
+<hr>
+
 - [Introduction](#introduction)
 - [Goals](#goals)
 - [Quick Start](#quick-start)
@@ -22,6 +24,7 @@
 - [How to Contribute](#how-to-contribute)
 - [License](#license)
 
+<hr>
 
 ## Introduction
 
@@ -128,6 +131,8 @@ main();
 
 > Feel free to browse through our [compilation of tutorials](https://mantlenetworkio.github.io/mantle-tutorial/) that use the Mantle SDK to demonstrate common functionality such as bridging assets between Mantle and Ethereum, and more.
 
+The [SDK docs](https://sdk.mantle.xyz/index.html) provide complete reference of all the methods available as part of the Mantle SDK to faciliatate interaction between applications and Mantle network.
+
 </br>
 
 ### Using the Node RPC API
@@ -196,7 +201,6 @@ root
 
 Read through [CONTRIBUTING.md](./CONTRIBUTING.md) for a general overview of our contribution process.
 Then check out our list of [good first issues](https://github.com/mantlenetworkio/mantle/contribute) to find something fun to work on!
-
 
 <br/>
 
