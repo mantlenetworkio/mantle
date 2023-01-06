@@ -10,7 +10,7 @@
 
 </br>
 
-![](https://github.com/mantlenetworkio/mantle/actions/workflows/build-image.yml/badge.svg)
+[![](https://github.com/mantlenetworkio/mantle/actions/workflows/build-image.yml/badge.svg)](https://github.com/mantlenetworkio/mantle/actions/workflows/build-image.yml)
 
 </p>
 
