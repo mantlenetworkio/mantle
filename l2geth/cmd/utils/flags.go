@@ -887,11 +887,6 @@ var (
 		Usage:  "Set scheduler batch size",
 		EnvVar: "SCHEDULER_BATCHSIZE",
 	}
-	SchedulerBatchEpoch = cli.StringFlag{
-		Name:   "scheduler.batchepoch",
-		Usage:  "Set scheduler batch epoch",
-		EnvVar: "SCHEDULER_BATCHEPOCH",
-	}
 	SequencerModeFlag = cli.BoolFlag{
 		Name:   "sequencer.mode",
 		Usage:  "Set sequencer mode",
@@ -1191,9 +1186,6 @@ func setScheduler(ctx *cli.Context, cfg *clique.Config) {
 	}
 	if ctx.GlobalIsSet(SchedulerBatchSize.Name) {
 		cfg.BatchSize = ctx.GlobalInt64(SchedulerBatchSize.Name)
-	}
-	if ctx.GlobalIsSet(SchedulerBatchEpoch.Name) {
-		cfg.BatchEpoch = ctx.GlobalInt64(SchedulerBatchEpoch.Name)
 	}
 }
 

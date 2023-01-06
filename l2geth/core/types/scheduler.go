@@ -41,13 +41,13 @@ func VerifySigner(msg MsgVerify, addr common.Address) bool {
 }
 
 type BatchPeriodStartMsg struct {
-	ReorgIndex  uint64
-	BatchIndex  uint64
-	StartHeight uint64
-	MaxHeight   uint64
-	ExpireTime  uint64
-	Sequencer   common.Address
-	Signature   []byte
+	RollbackStates RollbackStates
+	BatchIndex     uint64
+	StartHeight    uint64
+	MaxHeight      uint64
+	ExpireTime     uint64
+	Sequencer      common.Address
+	Signature      []byte
 }
 
 func DeserializeBatchPeriodStartMsg(buf []byte) BatchPeriodStartMsg {
@@ -56,20 +56,19 @@ func DeserializeBatchPeriodStartMsg(buf []byte) BatchPeriodStartMsg {
 		return BatchPeriodStartMsg{}
 	}
 
-	reorgIndex := binary.BigEndian.Uint64(buf[:uint64Length])
 	batchIndex := binary.BigEndian.Uint64(buf[uint64Length : uint64Length*2])
 	startHeight := binary.BigEndian.Uint64(buf[uint64Length*2 : uint64Length*3])
 	maxHeight := binary.BigEndian.Uint64(buf[uint64Length*3 : uint64Length*4])
 	expireTime := binary.BigEndian.Uint64(buf[uint64Length*4 : uint64Length*5])
 
 	return BatchPeriodStartMsg{
-		ReorgIndex:  reorgIndex,
-		BatchIndex:  batchIndex,
-		StartHeight: startHeight,
-		MaxHeight:   maxHeight,
-		ExpireTime:  expireTime,
-		Sequencer:   common.BytesToAddress(buf[uint64Length*5 : uint64Length*5+common.AddressLength]),
-		Signature:   buf[len(buf)-crypto.SignatureLength:],
+		RollbackStates: nil,
+		BatchIndex:     batchIndex,
+		StartHeight:    startHeight,
+		MaxHeight:      maxHeight,
+		ExpireTime:     expireTime,
+		Sequencer:      common.BytesToAddress(buf[uint64Length*5 : uint64Length*5+common.AddressLength]),
+		Signature:      buf[len(buf)-crypto.SignatureLength:],
 	}
 }
 
@@ -78,7 +77,10 @@ func (bps *BatchPeriodStartMsg) Serialize() []byte {
 		return nil
 	}
 	var buf = make([]byte, 8)
-	binary.BigEndian.PutUint64(buf, bps.ReorgIndex)
+	for _, rollbackState := range bps.RollbackStates {
+		binary.BigEndian.AppendUint64(buf, rollbackState.BlockNumber)
+		buf = append(buf, rollbackState.BlockHash.Bytes()...)
+	}
 	buf = binary.BigEndian.AppendUint64(buf, bps.BatchIndex)
 	buf = binary.BigEndian.AppendUint64(buf, bps.StartHeight)
 	buf = binary.BigEndian.AppendUint64(buf, bps.MaxHeight)
@@ -108,7 +110,10 @@ func (bps *BatchPeriodStartMsg) GetSignData() []byte {
 		return nil
 	}
 	var buf = make([]byte, 8)
-	binary.BigEndian.PutUint64(buf, bps.ReorgIndex)
+	for _, rollbackState := range bps.RollbackStates {
+		binary.BigEndian.AppendUint64(buf, rollbackState.BlockNumber)
+		buf = append(buf, rollbackState.BlockHash.Bytes()...)
+	}
 	buf = binary.BigEndian.AppendUint64(buf, bps.BatchIndex)
 	buf = binary.BigEndian.AppendUint64(buf, bps.StartHeight)
 	buf = binary.BigEndian.AppendUint64(buf, bps.MaxHeight)

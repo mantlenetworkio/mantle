@@ -523,6 +523,7 @@ func (w *worker) batchStartLoop() {
 					"signature", hex.EncodeToString(ev.Msg.Signature),
 				)
 			} else {
+				w.chain.UpdateRollbackStates(ev.Msg.RollbackStates)
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
 					log.Info("Active sequencer receives batchPeriodStartEvent")
