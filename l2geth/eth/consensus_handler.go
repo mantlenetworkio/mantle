@@ -288,28 +288,13 @@ func (p *peer) AsyncSendFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
 // SendBatchPeriodStart sends a batch of transaction receipts, corresponding to the
 // ones requested from an already RLP encoded format.
 func (p *peer) SendBatchPeriodStart(bps *types.BatchPeriodStartMsg) error {
-	p.knowBatchPeriodStartMsg.Add(bps.BatchIndex)
-	// Mark all the producers as known, but ensure we don't overflow our limits
-	for p.knowBatchPeriodStartMsg.Cardinality() >= maxKnownStartMsg {
-		p.knowBatchPeriodStartMsg.Pop()
-	}
 	return p2p.Send(p.rw, BatchPeriodStartMsg, bps)
 }
 
 func (p *peer) SendBatchPeriodAnswer(bpa *types.BatchPeriodAnswerMsg) error {
-	p.knowBatchPeriodAnswerMsg.Add(bpa.Hash())
-	// Mark all the producers as known, but ensure we don't overflow our limits
-	for p.knowBatchPeriodAnswerMsg.Cardinality() >= maxKnownEndMsg {
-		p.knowBatchPeriodAnswerMsg.Pop()
-	}
 	return p2p.Send(p.rw, BatchPeriodAnswerMsg, bpa)
 }
 
 func (p *peer) SendFraudProofReorg(fpr *types.FraudProofReorgMsg) error {
-	p.knowFraudProofReorg.Add(fpr.Hash())
-	// Mark all the producers as known, but ensure we don't overflow our limits
-	for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
-		p.knowFraudProofReorg.Pop()
-	}
 	return p2p.Send(p.rw, FraudProofReorgMsg, fpr)
 }
