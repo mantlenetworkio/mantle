@@ -25,6 +25,8 @@ type Config struct {
 	SentryEnable              bool
 	PollInterval              time.Duration
 	BlockOffset               uint64
+	RollUpMinSize             uint64
+	RollUpMaxSize             uint64
 	EigenLayerNode            int
 	EigenLogConfig            logging.Config
 	LogLevel                  string
@@ -55,6 +57,8 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		DataStoreTimeout:          ctx.GlobalUint64(flags.DataStoreTimeoutFlag.Name),
 		PollInterval:              ctx.GlobalDuration(flags.PollIntervalFlag.Name),
 		BlockOffset:               ctx.GlobalUint64(flags.BlockOffsetFlag.Name),
+		RollUpMinSize:             ctx.GlobalUint64(flags.RollUpMinSizeFlag.Name),
+		RollUpMaxSize:             ctx.GlobalUint64(flags.RollUpMaxSizeFlag.Name),
 		EigenLayerNode:            ctx.GlobalInt(flags.EigenLayerNodeFlag.Name),
 		EigenLogConfig:            logging.ReadCLIConfig(ctx),
 		ResubmissionTimeout:       ctx.GlobalDuration(flags.ResubmissionTimeoutFlag.Name),

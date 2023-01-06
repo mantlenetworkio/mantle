@@ -82,6 +82,8 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			EigenContractAddr:         ethc.Address(common.HexToAddress(cfg.EigenContractAddress)),
 			PrivKey:                   sequencerPrivKey,
 			BlockOffset:               cfg.BlockOffset,
+			RollUpMinSize:             cfg.RollUpMinSize,
+			RollUpMaxSize:             cfg.RollUpMaxSize,
 			EigenLayerNode:            cfg.EigenLayerNode,
 			ChainID:                   chainID,
 			DataStoreDuration:         uint64(cfg.DataStoreDuration),
