@@ -16,7 +16,6 @@ const (
 )
 
 type MsgVerify interface {
-	Serialize() []byte
 	GetSignData() []byte
 	GetSignature() []byte
 	GetSigner() (common.Address, error)
@@ -117,27 +116,6 @@ type BatchPeriodAnswerMsg struct {
 	StartIndex uint64
 	Txs        Transactions
 	Signature  []byte
-}
-
-func (bpa *BatchPeriodAnswerMsg) Serialize() []byte {
-	if bpa == nil || len(bpa.Txs) == 0 || len(bpa.Signature) != crypto.SignatureLength {
-		return nil
-	}
-	buf := bpa.Sequencer.Bytes()
-	buf = binary.BigEndian.AppendUint64(buf, bpa.BatchIndex)
-	buf = binary.BigEndian.AppendUint64(buf, bpa.StartIndex)
-	for i, _ := range bpa.Txs {
-		txBytes := bpa.Txs.GetRlp(i)
-
-		var txBytesLengthBytes = make([]byte, 8)
-		binary.BigEndian.AppendUint64(txBytesLengthBytes, uint64(len(txBytes)))
-		buf = append(buf, txBytesLengthBytes...)
-		buf = append(buf, txBytes...)
-	}
-
-	buf = append(buf, bpa.Signature...)
-
-	return buf
 }
 
 func (bpa *BatchPeriodAnswerMsg) GetSigner() (common.Address, error) {

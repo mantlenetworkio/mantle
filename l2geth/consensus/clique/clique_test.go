@@ -17,6 +17,7 @@
 package clique
 
 import (
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"math/big"
 	"testing"
 
@@ -54,7 +55,10 @@ func TestReimportMirroredState(t *testing.T) {
 		Sequencer:      address,
 		Signature:      nil,
 	}
-	buf := batchPeriodStartMsg.Serialize()
+	buf, err := rlp.EncodeToBytes(batchPeriodStartMsg)
+	if err != nil {
+		t.Fatalf("failed encode batchPeriodStartMsg: %v", err)
+	}
 	genspec := &core.Genesis{
 		ExtraData: make([]byte, extraVanity+len(buf)+extraSeal),
 		Alloc: map[common.Address]core.GenesisAccount{
