@@ -12,17 +12,17 @@
 
 <hr>
 
-- [Introduction](#introduction)
-- [Goals](#goals)
-- [Quick Start](#quick-start)
-  - [Useful Addresses](#useful-addresses)
-  - [Set up Local Environment](#set-up-local-environment)
-  - [Using the Mantle SDK](#using-the-mantle-sdk)
-  - [Using the Node RPC API](#using-the-node-rpc-api)
-  - [Spin up a Verifier Node](#spin-up-a-verifier-node)
-- [Directory Structure](#directory-structure)
-- [How to Contribute](#how-to-contribute)
-- [License](#license)
+- :book: [Introduction](#introduction)
+- :dart: [Goals](#goals)
+- :rocket: [Quick Start](#quick-start)
+  - :link: [Useful Addresses](#useful-addresses)
+  - :computer: [Set up Local Environment](#set-up-local-environment)
+  - :wrench: [Using the Mantle SDK](#using-the-mantle-sdk)
+  - 🧩 [Using the Node RPC API](#using-the-node-rpc-api)
+  - 🎛 [Spin up a Verifier Node](#spin-up-a-verifier-node)
+- :ledger: [Directory Structure](#directory-structure)
+- :sparkles: [How to Contribute](#how-to-contribute)
+- :copyright: [License](#license)
 
 <hr>
 
@@ -43,7 +43,7 @@ Mantle's modular architecture helps achieve greater network efficiency for resou
 Different parts of the Mantle tech stack are specialized to tackle specific issues.
 
 - [**Decentralized Sequencer**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/decentralized-sequencer): A permissionless set of L2 block producers
-- [**Data Availability**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/solving-data-availability): Implementing EigenDA, an innovative re-staking solution that levarges Ethereum's validator network to bring the security of L1 to L2
+- [**Data Availability**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/solving-data-availability): Implementing EigenDA, an innovative re-staking solution that leverages Ethereum's validator network to bring the security of L1 to L2
 - [**EVM-level Fraud Proofs**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/fraud-proofs): Improved fraud proofs that are evaluated using EVM-level instructions
 
 > We encourage you to check out the [**Mantle tech docs**](https://docs.mantle.xyz) to learn more about the inner workings of Mantle.
@@ -71,7 +71,7 @@ Setting up local L1 and L2 nodes may be particularly useful for testing out Mant
 1. Make sure your system has the following tools set up and running.
    - [Git](https://git-scm.com/downloads) - to fetch node software
    - [Node.js](https://nodejs.org/en/) - to run node instances
-   - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/) - for dependancy management
+   - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/) - for dependency management
 
 2. Run L1 and L2 node instances using the following commands.
 
@@ -131,7 +131,7 @@ main();
 
 > Feel free to browse through our [compilation of tutorials](https://mantlenetworkio.github.io/mantle-tutorial/) that use the Mantle SDK to demonstrate common functionality such as bridging assets between Mantle and Ethereum, and more.
 
-The [SDK docs](https://sdk.mantle.xyz/index.html) provide complete reference of all the methods available as part of the Mantle SDK to faciliatate interaction between applications and Mantle network.
+The [SDK docs](https://sdk.mantle.xyz/index.html) provide complete reference of all the methods available as part of the Mantle SDK to facilitate interaction between applications and Mantle network.
 
 </br>
 
@@ -163,7 +163,7 @@ The response is of the form:
 
 ### Spin up a Verifier Node
 
-There are [multiple roles](https://docs.mantle.xyz/for-validators/network-roles#defining-network-roles) associated with Mantle nodes. Rollup Verifiers mainly sync rollup data from Mantle's trusted Sequencer ([to be decentralized in the future!](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/decentralized-sequencer)). dApp builders who run their own verifier nodes have the benefit of being able to simulate L2 transactons, [among other advantages](https://docs.mantle.xyz/for-validators/network-roles#why-run-a-rollup-verifier-node), and have ready access to them without rate-limiting (as opposed to public RPCs).
+There are [multiple roles](https://docs.mantle.xyz/for-validators/network-roles#defining-network-roles) associated with Mantle nodes. Rollup Verifiers mainly sync rollup data from Mantle's trusted Sequencer ([to be decentralized in the future!](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/decentralized-sequencer)). dApp builders who run their own verifier nodes have the benefit of being able to simulate L2 transactions, [among other advantages](https://docs.mantle.xyz/for-validators/network-roles#why-run-a-rollup-verifier-node), and have ready access to them without rate-limiting (as opposed to public RPCs).
 
 Here's a [tutorial](https://docs.mantle.xyz/for-validators/deploying-a-rollup-verifier) describing the process of deploying a verifier node.
 
