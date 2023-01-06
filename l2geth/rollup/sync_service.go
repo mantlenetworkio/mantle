@@ -818,26 +818,30 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 		log.Crit("rollback error:", "setHead error", err)
 	}
 	log.Info("setHead end,current :", "block number", s.bc.CurrentHeader().Number.Uint64())
-	for _, t := range txs {
+	var handle bool
+	for i, t := range txs {
 		if err := s.applyIndexedTransaction(&t, &types.BatchTxSetProof{}); err != nil {
 			log.Crit("rollback applyIndexedTransaction tx :", "applyIndexedTransaction error", err)
 		}
-	}
-	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
-	for i := start; i <= latest; i++ {
-		newBlock := s.bc.GetBlockByNumber(i)
-		log.Info("StateRoot", "equal", oldBlocks[i-start].Root() == newBlock.Root())
-		if oldBlocks[i-start].Hash() != newBlock.Hash() {
-			// TODO Emit Rollback Event To sequencer
-			log.Info("Emit Rollback Event To sequencer", "old blockHash", oldBlocks[i-start].Hash(), "newBlockHash", newBlock.Hash())
-			log.Info("Emit Rollback Event To sequencer", "oldBlock number:", oldBlocks[i-start].Number().Uint64(), "newBlockNumber", newBlock.Number().Uint64())
-			//break
+		newBlock := s.bc.GetBlockByNumber(uint64(i) + start)
+		if oldBlocks[i].Hash() != newBlock.Hash() && !handle {
+			rollbackState := &types.RollbackState{
+				BlockNumber: uint64(i) + start,
+				BlockHash:   newBlock.Hash(),
+			}
+			s.bc.AppendRollbackStates(rollbackState)
+			handle = true
 		}
 	}
+	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
 	return nil
 }
 
-func (s *SyncService) SequencerRollback() error {
+// SequencerRollback sequencer rollback
+func (s *SyncService) SequencerRollback(rollbackNumber uint64) error {
+	if err := s.SetHead(rollbackNumber - 1); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -968,7 +972,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 		// If enough time has passed, then assign the
 		// transaction to have the timestamp now. Otherwise,
 		// use the current timestamp
-		if now.Sub(current) > s.timestampRefreshThreshold {
+		if now.Sub(current) > s.timestampRefreshThreshold && tx.GetMeta().Index == nil {
 			current = now
 		}
 		log.Info("Updating latest timestamp", "timestamp", current, "unix", current.Unix())
@@ -976,7 +980,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 	} else if tx.L1Timestamp() == 0 && s.verifier {
 		// This should never happen
 		log.Error("No tx timestamp found when running as verifier", "hash", tx.Hash().Hex())
-	} else if tx.L1Timestamp() < ts {
+	} else if tx.L1Timestamp() < ts && tx.GetMeta().Index == nil {
 		// This should never happen, but sometimes does
 		log.Error("Timestamp monotonicity violation", "hash", tx.Hash().Hex(), "latest", ts, "tx", tx.L1Timestamp())
 	}

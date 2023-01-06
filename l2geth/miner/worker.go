@@ -514,7 +514,6 @@ func (w *worker) batchStartLoop() {
 				w.currentBps = ev.Msg
 				w.mutex.Unlock()
 				log.Info("Scheduler start new batch",
-					"reorg_index", ev.Msg.ReorgIndex,
 					"start_height", ev.Msg.StartHeight,
 					"batch_index", ev.Msg.BatchIndex,
 					"max_height", ev.Msg.MaxHeight,
@@ -523,6 +522,13 @@ func (w *worker) batchStartLoop() {
 					"signature", hex.EncodeToString(ev.Msg.Signature),
 				)
 			} else {
+				w.chain.UpdateRollbackStates(ev.Msg.RollbackStates)
+				rollbackNumber := w.chain.GetRollbackNumber()
+				if rollbackNumber != common.InvalidRollbackHeight {
+					if err := w.eth.SyncService().SequencerRollback(rollbackNumber); err != nil {
+						log.Error("sequencer rollback failed", "error", err)
+					}
+				}
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
 					log.Info("Active sequencer receives batchPeriodStartEvent")
@@ -604,7 +610,6 @@ func (w *worker) batchStartLoop() {
 					}
 				} else {
 					log.Debug("Inactive sequencer receives batchPeriodStartEvent",
-						"reorg_index", ev.Msg.ReorgIndex,
 						"start_height", ev.Msg.StartHeight,
 						"batch_index", ev.Msg.BatchIndex,
 						"max_height", ev.Msg.MaxHeight,

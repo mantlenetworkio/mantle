@@ -27,6 +27,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
 // This test case is a repro of an annoying bug that took us forever to catch.
@@ -46,15 +47,18 @@ func TestReimportMirroredState(t *testing.T) {
 	)
 	address := addr
 	batchPeriodStartMsg := types.BatchPeriodStartMsg{
-		ReorgIndex:  0,
-		BatchIndex:  0,
-		StartHeight: 1,
-		MaxHeight:   100,
-		ExpireTime:  1669787879,
-		Sequencer:   address,
-		Signature:   nil,
+		RollbackStates: nil,
+		BatchIndex:     0,
+		StartHeight:    1,
+		MaxHeight:      100,
+		ExpireTime:     1669787879,
+		Sequencer:      address,
+		Signature:      nil,
 	}
-	buf := batchPeriodStartMsg.Serialize()
+	buf, err := rlp.EncodeToBytes(batchPeriodStartMsg)
+	if err != nil {
+		t.Fatalf("failed encode batchPeriodStartMsg: %v", err)
+	}
 	genspec := &core.Genesis{
 		ExtraData: make([]byte, extraVanity+len(buf)+extraSeal),
 		Alloc: map[common.Address]core.GenesisAccount{

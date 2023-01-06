@@ -32,6 +32,9 @@ var (
 	// headHeaderKey tracks the latest known header's hash.
 	headHeaderKey = []byte("LastHeader")
 
+	// rollbackStateKey tracks the current rollbackStates.
+	rollbackStatesKey = []byte("rollbackStates")
+
 	// headBlockKey tracks the latest known full block's hash.
 	headBlockKey = []byte("LastBlock")
 

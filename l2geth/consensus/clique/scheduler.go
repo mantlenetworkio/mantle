@@ -252,13 +252,14 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 
 		currentBlock := schedulerInst.blockchain.CurrentBlock()
 		currentIndex := rawdb.ReadStartMsgIndex(schedulerInst.db)
+
 		msg := types.BatchPeriodStartMsg{
-			ReorgIndex:  0,
-			BatchIndex:  currentIndex + 1,
-			StartHeight: currentBlock.NumberU64() + 1,
-			MaxHeight:   currentBlock.NumberU64() + 1 + uint64(batchSize),
-			ExpireTime:  uint64(time.Now().Unix() + expireTime),
-			Sequencer:   seq.Address,
+			RollbackStates: rawdb.ReadRollbackStates(schedulerInst.db),
+			BatchIndex:     currentIndex + 1,
+			StartHeight:    currentBlock.NumberU64() + 1,
+			MaxHeight:      currentBlock.NumberU64() + 1 + uint64(batchSize),
+			ExpireTime:     uint64(time.Now().Unix() + expireTime),
+			Sequencer:      seq.Address,
 		}
 		sign, err := schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetSignData())
 		if err != nil {
