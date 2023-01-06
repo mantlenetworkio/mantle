@@ -11,7 +11,6 @@
 </br>
 
 ![](https://github.com/mantlenetworkio/mantle/actions/workflows/build-image.yml/badge.svg)
-![]()
 
 </p>
 
