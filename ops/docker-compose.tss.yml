@@ -38,6 +38,9 @@ services:
       dockerfile: ./ops/docker/tss/Dockerfile
       target: tss
     command: ./tss manager -c config/tss-manager-config.toml
+    ports:
+      # expose the service to the host for getting the contract addrs
+      - ${DEPLOYER_PORT:-8082}:8080
     volumes:
       - ./data/tss-manager:/root/tss-manager/db
       - ./config:/app/config
