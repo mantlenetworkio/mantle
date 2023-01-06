@@ -818,9 +818,19 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 		log.Crit("rollback error:", "setHead error", err)
 	}
 	log.Info("setHead end,current :", "block number", s.bc.CurrentHeader().Number.Uint64())
-	for _, t := range txs {
+	var emited bool
+	for i, t := range txs {
 		if err := s.applyIndexedTransaction(&t, &types.BatchTxSetProof{}); err != nil {
 			log.Crit("rollback applyIndexedTransaction tx :", "applyIndexedTransaction error", err)
+		}
+		newBlock := s.bc.GetBlockByNumber(uint64(i) + start)
+		if oldBlocks[i].Hash() != newBlock.Hash() && !emited {
+			rollbackState := &types.RollbackState{
+				BlockNumber: uint64(i) + start,
+				BlockHash:   newBlock.Hash(),
+			}
+			s.bc.AppendRollbackStates(rollbackState)
+			emited = true
 		}
 	}
 	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
