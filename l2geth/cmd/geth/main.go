@@ -28,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/elastic/gosigar"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
 	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
@@ -41,7 +42,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/metrics"
 	"github.com/mantlenetworkio/mantle/l2geth/node"
-	"github.com/elastic/gosigar"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -165,6 +165,11 @@ var (
 		utils.RollupFeeThresholdUpFlag,
 		utils.RollupGenesisTimeoutSecondsFlag,
 		utils.SequencerClientHttpFlag,
+		utils.SchedulerAddressFlag,
+		utils.SchedulerBatchTime,
+		utils.SchedulerBatchSize,
+		utils.SchedulerBatchEpoch,
+		utils.SequencerModeFlag,
 	}
 
 	rpcFlags = []cli.Flag{

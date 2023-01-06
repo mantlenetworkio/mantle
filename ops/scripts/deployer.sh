@@ -50,7 +50,8 @@ fi
 
 echo "Building addresses.json."
 export ADDRESS_MANAGER_ADDRESS=$(cat "./deployments/$CONTRACTS_TARGET_NETWORK/Lib_AddressManager.json" | jq -r .address)
-
+echo "add test timepoint1"
+echo $SKIP_CONTRACT_DEPLOY
 
 if [ $SKIP_CONTRACT_DEPLOY == "NO" ] ;then
   echo "Re-generate addresses.txt"

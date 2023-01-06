@@ -231,6 +231,7 @@ type TxPool struct {
 	scope       event.SubscriptionScope
 	signer      types.Signer
 	mu          sync.RWMutex
+	reorgMux    sync.RWMutex
 
 	istanbul bool // Fork indicator whether we are in the istanbul stage.
 
@@ -522,6 +523,9 @@ func (pool *TxPool) local() map[common.Address]types.Transactions {
 }
 
 func (pool *TxPool) ValidateTx(tx *types.Transaction) error {
+	pool.reorgMux.RLock()
+	defer pool.reorgMux.RUnlock()
+
 	return pool.validateTx(tx, false)
 }
 
@@ -554,15 +558,18 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrUnderpriced
 	}
 	// Ensure the transaction adheres to nonce ordering
-	if rcfg.UsingBVM {
-		if pool.currentState.GetNonce(from) != tx.Nonce() {
-			return ErrNonceTooLow
-		}
-	} else {
-		if pool.currentState.GetNonce(from) > tx.Nonce() {
-			return ErrNonceTooLow
-		}
+	if pool.currentState.GetNonce(from) > tx.Nonce() {
+		return ErrNonceTooLow
 	}
+	//if rcfg.UsingBVM {
+	//	if pool.currentState.GetNonce(from) != tx.Nonce() {
+	//		return ErrNonceTooLow
+	//	}
+	//} else {
+	//	if pool.currentState.GetNonce(from) > tx.Nonce() {
+	//		return ErrNonceTooLow
+	//	}
+	//}
 	// Transactor should have enough funds to cover the costs
 	// cost == V + GP * GL
 	if !rcfg.UsingBVM {
@@ -1035,6 +1042,8 @@ func (pool *TxPool) scheduleReorgLoop() {
 // runReorg runs reset and promoteExecutables on behalf of scheduleReorgLoop.
 func (pool *TxPool) runReorg(done chan struct{}, reset *txpoolResetRequest, dirtyAccounts *accountSet, events map[common.Address]*txSortedMap) {
 	defer close(done)
+	pool.reorgMux.Lock()
+	defer pool.reorgMux.Unlock()
 
 	var promoteAddrs []common.Address
 	if dirtyAccounts != nil {

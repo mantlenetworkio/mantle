@@ -18,6 +18,7 @@
 package eth
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -143,6 +144,9 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if _, ok := genesisErr.(*params.ConfigCompatError); genesisErr != nil && !ok {
 		return nil, genesisErr
 	}
+	if chainConfig.Clique != nil {
+		chainConfig.Clique.IsVerifier = config.Rollup.IsVerifier
+	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
 	eth := &Ethereum{
@@ -210,6 +214,8 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
+	eth.blockchain.SetPreCheckSyncServiceFunc(eth.syncService.PreCheckSyncServiceState)
+	eth.blockchain.SetUpdateSyncServiceFunc(eth.syncService.UpdateSyncServiceState)
 
 	// Permit the downloader to use the trie cache allowance during fast sync
 	cacheLimit := cacheConfig.TrieCleanLimit + cacheConfig.TrieDirtyLimit
@@ -234,6 +240,22 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	rollupGpo := gasprice.NewRollupOracle()
 	eth.APIBackend.rollupGpo = rollupGpo
 	eth.syncService.RollupGpo = rollupGpo
+	eth.protocolManager.setMinerCheck(eth.miner.Mining)
+	if _, ok := eth.engine.(*clique.Clique); ok {
+		schedulerInst, err := clique.NewScheduler(
+			chainDb,
+			&eth.config.SchedulerConfig,
+			config.Rollup.SchedulerAddress,
+			eth.engine.(*clique.Clique),
+			eth.blockchain,
+			eth.txPool,
+			eth.eventMux,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("create schedulerInst instance err: %v", err)
+		}
+		eth.protocolManager.setSchedulerInst(schedulerInst)
+	}
 	return eth, nil
 }
 
@@ -480,8 +502,11 @@ func (s *Ethereum) StartMining(threads int) error {
 			log.Error("Cannot start mining without etherbase", "err", err)
 			return fmt.Errorf("etherbase missing: %v", err)
 		}
+		var wallet accounts.Wallet
+		var account accounts.Account
 		if clique, ok := s.engine.(*clique.Clique); ok {
-			wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
+			account = accounts.Account{Address: eb}
+			wallet, err = s.accountManager.Find(account)
 			if wallet == nil || err != nil {
 				log.Error("Etherbase account unavailable locally", "err", err)
 				return fmt.Errorf("signer missing: %v", err)
@@ -491,8 +516,22 @@ func (s *Ethereum) StartMining(threads int) error {
 		// If mining is started, we can disable the transaction rejection mechanism
 		// introduced to speed sync times.
 		atomic.StoreUint32(&s.protocolManager.acceptTxs, 1)
-
 		go s.miner.Start(eb)
+
+		if _, ok := s.engine.(*clique.Clique); ok {
+			schedulerAddr := s.protocolManager.schedulerInst.Scheduler()
+			if err != nil {
+				return fmt.Errorf("cannot get schedulerAddr: %w", err)
+			}
+			// check eb to equal schedulerAddr then start sequencer server after miner start
+			if bytes.Equal(schedulerAddr.Bytes(), eb.Bytes()) {
+				s.protocolManager.setEtherBase(eb)
+				// set wallet for sign msgs
+				s.protocolManager.schedulerInst.SetWallet(wallet, account)
+				// start sequencer server
+				s.protocolManager.schedulerInst.Start()
+			}
+		}
 	}
 	return nil
 }
@@ -507,6 +546,8 @@ func (s *Ethereum) StopMining() {
 	if th, ok := s.engine.(threaded); ok {
 		th.SetThreads(-1)
 	}
+	// stop schedulerInst server
+	s.protocolManager.schedulerInst.Stop()
 	// Stop the block creating itself
 	s.miner.Stop()
 }
@@ -539,6 +580,7 @@ func (s *Ethereum) Protocols() []p2p.Protocol {
 	if s.lesServer != nil {
 		protos = append(protos, s.lesServer.Protocols()...)
 	}
+	protos = append(protos, s.protocolManager.makeConsensusProtocol(eth64))
 	return protos
 }
 
@@ -552,6 +594,18 @@ func (s *Ethereum) Start(srvr *p2p.Server) error {
 
 	// Start the RPC service
 	s.netRPCService = ethapi.NewPublicNetAPI(srvr, s.NetVersion())
+
+	// Figure out a max peers count based on the server limits
+	maxPeers := srvr.MaxPeers
+	if s.config.LightServ > 0 {
+		if s.config.LightPeers >= srvr.MaxPeers {
+			return fmt.Errorf("invalid peer config: light peer count (%d) >= total peer count (%d)", s.config.LightPeers, srvr.MaxPeers)
+		}
+		maxPeers -= s.config.LightPeers
+	}
+	// Start the networking layer and the light server if requested
+	s.protocolManager.Start(maxPeers)
+
 	return nil
 }
 

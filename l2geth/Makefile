@@ -12,6 +12,8 @@ GOBIN = ./build/bin
 GO ?= latest
 GORUN = env GO111MODULE=on go run
 
+SEQUENCER_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/L1/sequencer/Sequencer.sol/Sequencer.json
+
 geth:
 	$(GORUN) build/ci.go install ./cmd/geth
 	@echo "Done building."
@@ -144,3 +146,19 @@ geth-windows-amd64:
 	$(GORUN) build/ci.go xgo -- --go=$(GO) --targets=windows/amd64 -v ./cmd/geth
 	@echo "Windows amd64 cross compilation done:"
 	@ls -ld $(GOBIN)/geth-windows-* | grep amd64
+
+bindings-sequencer:
+	$(eval temp := $(shell mktemp))
+
+	cat $(SEQUENCER_ABI_ARTIFACT) \
+		| jq -r .bytecode > $(temp)
+
+	cat $(SEQUENCER_ABI_ARTIFACT) \
+		| jq .abi \
+		| abigen --pkg binding \
+		--abi - \
+		--out ./consensus/clique/sequencer/bindings/sequencer.go \
+		--type Sequencer \
+		--bin $(temp)
+
+	rm $(temp)

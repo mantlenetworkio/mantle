@@ -872,6 +872,31 @@ var (
 		Usage:  "HTTP endpoint for the sequencer client",
 		EnvVar: "SEQUENCER_CLIENT_HTTP",
 	}
+	SchedulerAddressFlag = cli.StringFlag{
+		Name:   "scheduler.address",
+		Usage:  "Set scheduler address",
+		EnvVar: "SCHEDULER_ADDRESS",
+	}
+	SchedulerBatchTime = cli.StringFlag{
+		Name:   "scheduler.batchtime",
+		Usage:  "Set scheduler batch time",
+		EnvVar: "SCHEDULER_BATCHTIME",
+	}
+	SchedulerBatchSize = cli.StringFlag{
+		Name:   "scheduler.batchsize",
+		Usage:  "Set scheduler batch size",
+		EnvVar: "SCHEDULER_BATCHSIZE",
+	}
+	SchedulerBatchEpoch = cli.StringFlag{
+		Name:   "scheduler.batchepoch",
+		Usage:  "Set scheduler batch epoch",
+		EnvVar: "SCHEDULER_BATCHEPOCH",
+	}
+	SequencerModeFlag = cli.BoolFlag{
+		Name:   "sequencer.mode",
+		Usage:  "Set sequencer mode",
+		EnvVar: "SEQUENCER_MODE",
+	}
 )
 
 // MakeDataDir retrieves the currently requested data directory, terminating
@@ -1150,6 +1175,25 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	}
 	if ctx.GlobalIsSet(SequencerClientHttpFlag.Name) {
 		cfg.SequencerClientHttp = ctx.GlobalString(SequencerClientHttpFlag.Name)
+	}
+	if ctx.GlobalIsSet(SchedulerAddressFlag.Name) {
+		cfg.SchedulerAddress = common.HexToAddress(ctx.GlobalString(SchedulerAddressFlag.Name))
+	}
+	if ctx.GlobalIsSet(SequencerModeFlag.Name) {
+		cfg.SequencerMode = ctx.GlobalBool(SequencerModeFlag.Name)
+	}
+}
+
+// setScheduler configures the scheduler server settings from the command line flags.
+func setScheduler(ctx *cli.Context, cfg *clique.Config) {
+	if ctx.GlobalIsSet(SchedulerBatchTime.Name) {
+		cfg.BatchTime = ctx.GlobalInt64(SchedulerBatchTime.Name)
+	}
+	if ctx.GlobalIsSet(SchedulerBatchSize.Name) {
+		cfg.BatchSize = ctx.GlobalInt64(SchedulerBatchSize.Name)
+	}
+	if ctx.GlobalIsSet(SchedulerBatchEpoch.Name) {
+		cfg.BatchEpoch = ctx.GlobalInt64(SchedulerBatchEpoch.Name)
 	}
 }
 
@@ -1612,6 +1656,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	setLes(ctx, cfg)
 	setEth1(ctx, &cfg.Rollup)
 	setRollup(ctx, &cfg.Rollup)
+	setScheduler(ctx, &cfg.SchedulerConfig)
 
 	if ctx.GlobalIsSet(SyncModeFlag.Name) {
 		cfg.SyncMode = *GlobalTextMarshaler(ctx, SyncModeFlag.Name).(*downloader.SyncMode)

@@ -40,14 +40,50 @@ geth account import --password ./password ./key.prv
 # initialize the geth node with the genesis file
 echo "Initializing Geth node"
 geth --verbosity="$VERBOSITY" "$@" init genesis.json
+echo $BLOCK_SCHEDULER_ADDRESS
+echo $SCHEDULER_P2P_ENODE
 
 # start the geth node
 echo "Starting Geth node"
-exec geth \
-  --verbosity="$VERBOSITY" \
-  --password ./password \
-  --allow-insecure-unlock \
-  --unlock $BLOCK_SIGNER_ADDRESS \
-  --mine \
-  --miner.etherbase $BLOCK_SIGNER_ADDRESS \
-  "$@"
+if [ $IS_SEQUENCER == "true" ] ;then
+  echo "we are sequencer node!!"
+  exec geth \
+    --verbosity="$VERBOSITY" \
+    --password ./password \
+    --allow-insecure-unlock \
+    --unlock $BLOCK_SIGNER_ADDRESS \
+    --bootnodes $SCHEDULER_P2P_ENODE \
+    --nat $NAT \
+    --nodekeyhex $NODEKEY_HEX \
+    --config $CONFIG_PATH \
+    --mine \
+    --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
+    --sequencer.mode="true" \
+    "$@"
+elif [ $IS_SCHEDULER == "true" ];then
+  echo "we are scheduler node"
+  exec geth \
+    --verbosity="$VERBOSITY" \
+    --password ./password \
+    --allow-insecure-unlock \
+    --unlock $BLOCK_SIGNER_ADDRESS \
+    --nat $NAT \
+    --nodekeyhex $NODEKEY_HEX \
+    --mine \
+    --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
+    "$@"
+fi
+
+  exec geth \
+    --verbosity="$VERBOSITY" \
+    --password ./password \
+    --allow-insecure-unlock \
+    --unlock $BLOCK_SIGNER_ADDRESS \
+    --mine \
+    --scheduler.address $BLOCK_SCHEDULER_ADDRESS \
+#    --miner.etherbase $BLOCK_SIGNER_ADDRESS \
+    "$@"
+#
+#./geth --datadir data --scheduler.address 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --password password.txt --unlock 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --nodiscover --verbosity 5
+#./geth --datadir data1 --rpcport 8085 --port 30306 --password password.txt --unlock 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 --nodiscover --scheduler.address 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --sequencer.mode=true --verbosity 5
+#./geth --datadir data2 --rpcport 8086 --port 30307 --password password.txt --unlock 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc --nodiscover --scheduler.address 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --sequencer.mode=true --verbosity 5

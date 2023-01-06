@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/ethash"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/eth/downloader"
@@ -183,4 +184,7 @@ type Config struct {
 
 	// Mantle Rollup Config
 	Rollup rollup.Config
+
+	// Mantle Scheduler Config
+	SchedulerConfig clique.Config
 }
