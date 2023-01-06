@@ -168,6 +168,7 @@ var (
 		utils.SchedulerAddressFlag,
 		utils.SchedulerBatchTime,
 		utils.SchedulerBatchSize,
+		utils.SchedulerBatchEpoch,
 		utils.SequencerModeFlag,
 	}
 

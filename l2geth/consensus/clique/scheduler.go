@@ -27,11 +27,13 @@ const (
 
 	defaultBatchSize  = int64(100)
 	defaultExpireTime = int64(60)
+	defaultBatchEpoch = time.Duration(86400)
 )
 
 type Config struct {
-	BatchSize int64
-	BatchTime int64
+	BatchSize  int64
+	BatchTime  int64
+	BatchEpoch int64
 }
 
 type Scheduler struct {
@@ -88,7 +90,7 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 	}
 	seqSet, err := syncer.GetSequencerSet()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get sequencer set failed, err: %v", err)
 	}
 
 	var seqz []*Sequencer
@@ -100,15 +102,18 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 		log.Info("sequencer: ", "address", item.MintAddress.String(), "node_ID", hex.EncodeToString(item.NodeID))
 	}
 
-	if err != nil {
-		return nil, fmt.Errorf("get sequencer set failed, err: %v", err)
+	// default epoch 1 day = 86400 second
+	batchEpoch := defaultBatchEpoch * time.Second
+	if config.BatchEpoch != 0 {
+		batchEpoch = time.Duration(config.BatchEpoch) * time.Second
 	}
+
 	schedulerInst := &Scheduler{
 		config:            config,
 		running:           0,
 		currentHeight:     0,
 		db:                db,
-		ticker:            time.NewTicker(10 * time.Second), //TODO
+		ticker:            time.NewTicker(batchEpoch),
 		consensusEngine:   clique,
 		eventMux:          eventMux,
 		syncer:            syncer,
