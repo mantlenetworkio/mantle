@@ -161,14 +161,6 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			Msg:   bpa,
 			ErrCh: erCh,
 		})
-	case msg.Code == FraudProofReorgMsg:
-		var fpr *types.FraudProofReorgMsg
-		if err := msg.Decode(&fpr); err != nil {
-			return errResp(ErrDecode, "msg %v: %v", msg, err)
-		}
-		log.Info("Fraud Proof Reorg Msg")
-		p.knowFraudProofReorg.Add(fpr.Hash())
-		// todo: FraudProofReorgMsg handle
 
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
@@ -247,42 +239,6 @@ func (p *peer) AsyncSendBatchPeriodAnswerMsg(msg *types.BatchPeriodAnswerMsg) {
 	}
 }
 
-// FraudProofReorgMsg
-func (pm *ProtocolManager) fraudProofReorgMsgBroadcastLoop() {
-	log.Info("Start fraudProofReorgMsg broadcast routine")
-	// automatically stops if unsubscribe
-	for obj := range pm.fraudProofReorgMsgSub.Chan() {
-		if fe, ok := obj.Data.(core.FraudProofReorgEvent); ok {
-			log.Debug("Got BatchPeriodAnswerEvent, broadcast it",
-				"reorg_index", fe.Msg.ReorgIndex,
-				"reorg_to_height", fe.Msg.ReorgToHeight)
-
-			pm.BroadcastFraudProofReorgMsg(fe.Msg) // First propagate block to peers
-		}
-	}
-}
-
-func (pm *ProtocolManager) BroadcastFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
-	peers := pm.consensusPeers.PeersWithoutFraudProofReorgMsg(reorg.Hash())
-	for _, p := range peers {
-		p.AsyncSendFraudProofReorgMsg(reorg)
-	}
-	log.Trace("Broadcast fraud proof reorg msg")
-}
-
-func (p *peer) AsyncSendFraudProofReorgMsg(reorg *types.FraudProofReorgMsg) {
-	select {
-	case p.queuedFraudProofReorg <- reorg:
-		p.knowFraudProofReorg.Add(reorg.Hash())
-		for p.knowFraudProofReorg.Cardinality() >= maxKnownFraudProofReorgMsg {
-			p.knowFraudProofReorg.Pop()
-		}
-
-	default:
-		p.Log().Debug("Dropping producers propagation", "reorg_index", reorg.ReorgIndex)
-	}
-}
-
 // ---------------------------- Proposers ----------------------------
 
 // SendBatchPeriodStart sends a batch of transaction receipts, corresponding to the
@@ -293,8 +249,4 @@ func (p *peer) SendBatchPeriodStart(bps *types.BatchPeriodStartMsg) error {
 
 func (p *peer) SendBatchPeriodAnswer(bpa *types.BatchPeriodAnswerMsg) error {
 	return p2p.Send(p.rw, BatchPeriodAnswerMsg, bpa)
-}
-
-func (p *peer) SendFraudProofReorg(fpr *types.FraudProofReorgMsg) error {
-	return p2p.Send(p.rw, FraudProofReorgMsg, fpr)
 }
