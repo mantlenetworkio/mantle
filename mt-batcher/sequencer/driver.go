@@ -195,7 +195,7 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 			panic(fmt.Sprintf("MtBatcher attempting to create batch element from block %d, "+
 				"found %d txs instead of 1", block.Number(), len(txs)))
 		}
-		log.Info("Origin Transactions", "TxHash", txs[0].Hash().String(), "Transaction l2BlockNumber", block.Number(), "txs[0].QueueOrigin()", txs[0].QueueOrigin())
+		log.Info("MtBatcher origin transactions", "TxHash", txs[0].Hash().String(), "l2BlockNumber", block.Number(), "QueueOrigin", txs[0].QueueOrigin())
 		//isSequencerTx := txs[0].QueueOrigin() == l2types.QueueOriginSequencer
 		//if !isSequencerTx || txs[0] == nil {
 		//	continue
@@ -337,7 +337,7 @@ func (d *Driver) DisperseStoreData(data []byte, startl2BlockNumber *big.Int, end
 	} else if tx == nil {
 		return params, nil, errors.New("tx is nil")
 	}
-	log.Info("d.StoreData", "txHash", tx.Hash().String())
+	log.Info("MtBatcher store data success", "txHash", tx.Hash().String())
 	updateGasPrice := func(ctx context.Context) (*types.Transaction, error) {
 		return d.UpdateGasPrice(ctx, tx)
 	}

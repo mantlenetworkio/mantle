@@ -167,33 +167,33 @@ func waitMined(
 			txHeight := receipt.BlockNumber.Uint64()
 			tipHeight, err := backend.BlockNumber(ctx)
 			if err != nil {
-				log.Error("Unable to fetch block number", "err", err)
+				log.Error("MtBatcher Unable to fetch block number", "err", err)
 				break
 			}
 
-			log.Trace("Transaction mined, checking confirmations",
+			log.Trace("MtBatcher Transaction mined, checking confirmations",
 				"txHash", txHash, "txHeight", txHeight,
 				"tipHeight", tipHeight,
 				"numConfirmations", numConfirmations)
 
 			if txHeight+numConfirmations <= tipHeight+1 {
-				log.Info("Transaction confirmed", "txHash", txHash)
+				log.Info("MtBatcher Transaction confirmed", "txHash", txHash)
 				return receipt, nil
 			}
 
 			confsRemaining := (txHeight + numConfirmations) - (tipHeight + 1)
-			log.Info("Transaction not yet confirmed", "txHash", txHash,
+			log.Info("MtBatcher Transaction not yet confirmed", "txHash", txHash,
 				"confsRemaining", confsRemaining)
 
 		case err != nil:
-			log.Trace("Receipt retrievel failed", "hash", txHash,
+			log.Trace("MtBatcher Receipt retrievel failed", "hash", txHash,
 				"err", err)
 
 		default:
 			if sendState != nil {
 				sendState.TxNotMined(txHash)
 			}
-			log.Trace("Transaction not yet mined", "hash", txHash)
+			log.Trace("MtBatcher Transaction not yet mined", "hash", txHash)
 		}
 
 		select {
