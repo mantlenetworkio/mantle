@@ -47,6 +47,8 @@ type DriverConfig struct {
 	EigenContractAddr         common.Address
 	PrivKey                   *ecdsa.PrivateKey
 	BlockOffset               uint64
+	RollUpMinSize             uint64
+	RollUpMaxSize             uint64
 	EigenLayerNode            int
 	ChainID                   *big.Int
 	DataStoreDuration         uint64
@@ -182,6 +184,7 @@ func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, er
 
 func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transactionData []byte, startL2BlockNumber *big.Int, endL2BlockNumber *big.Int) {
 	var batchTxList []BatchTx
+	var transactionByte []byte
 	for i := new(big.Int).Set(start); i.Cmp(end) < 0; i.Add(i, bigOne) {
 		block, err := d.Cfg.L2Client.BlockByNumber(ctx, i)
 		if err != nil {
@@ -192,7 +195,7 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 			panic(fmt.Sprintf("MtBatcher attempting to create batch element from block %d, "+
 				"found %d txs instead of 1", block.Number(), len(txs)))
 		}
-		log.Info("Origin Transactions", "txs[0]", txs[0], "Transaction l2BlockNumber", block.Number(), "txs[0].QueueOrigin()", txs[0].QueueOrigin())
+		log.Info("MtBatcher origin transactions", "TxHash", txs[0].Hash().String(), "l2BlockNumber", block.Number(), "QueueOrigin", txs[0].QueueOrigin())
 		//isSequencerTx := txs[0].QueueOrigin() == l2types.QueueOriginSequencer
 		//if !isSequencerTx || txs[0] == nil {
 		//	continue
@@ -201,25 +204,33 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 		if err := txs[0].EncodeRLP(&txBuf); err != nil {
 			panic(fmt.Sprintf("MtBatcher Unable to encode tx: %v", err))
 		}
-		log.Info("MtBatcher Rlp Transactions", "txBuf", txBuf.Bytes(), "txs[0].QueueOrigin()", txs[0].QueueOrigin())
 		batchTx := BatchTx{
 			BlockNumber: i,
 			RawTx:       txBuf.Bytes(),
 		}
 		batchTxList = append(batchTxList, batchTx)
+		txnBufBytes, err := rlp.EncodeToBytes(batchTxList)
+		if err != nil {
+			panic(fmt.Sprintf("MtBatcher Unable to encode txn: %v", err))
+		}
+		if uint64(len(txnBufBytes)) >= d.Cfg.RollUpMaxSize {
+			log.Info("MtBatcher batch size more than RollUpMaxSize, real rollup data", "RollUpMaxSize", d.Cfg.RollUpMaxSize, "start", start, "end", i)
+			return transactionByte, start, i
+		} else {
+			transactionByte = txnBufBytes
+		}
 	}
 	txnBufBytes, err := rlp.EncodeToBytes(batchTxList)
 	if err != nil {
 		panic(fmt.Sprintf("MtBatcher Unable to encode txn: %v", err))
 	}
-	var transactionByte []byte
+	// order=3000 can send about 31600 byte data
 	if len(txnBufBytes) > 31*d.Cfg.EigenLayerNode {
 		transactionByte = txnBufBytes
 	} else {
 		paddingBytes := make([]byte, (31*d.Cfg.EigenLayerNode)-len(txnBufBytes))
 		transactionByte = append(txnBufBytes, paddingBytes...)
 	}
-	log.Info("MtBatcher transaction data len", "dataLen", len(transactionByte))
 	return transactionByte, start, end
 }
 
@@ -326,7 +337,7 @@ func (d *Driver) DisperseStoreData(data []byte, startl2BlockNumber *big.Int, end
 	} else if tx == nil {
 		return params, nil, errors.New("tx is nil")
 	}
-	log.Info("d.StoreData", "txHash", tx.Hash().String())
+	log.Info("MtBatcher store data success", "txHash", tx.Hash().String())
 	updateGasPrice := func(ctx context.Context) (*types.Transaction, error) {
 		return d.UpdateGasPrice(ctx, tx)
 	}
@@ -506,7 +517,7 @@ func (d *Driver) eventLoop() {
 	for {
 		select {
 		case <-ticker.C:
-			log.Info("EigenDa Sequencer fetching current block range")
+			log.Info("MtBatcher eigen da sequencer fetching current block range")
 			start, end, err := d.GetBatchBlockRange(d.Ctx)
 			if err != nil {
 				log.Error("MtBatcher Sequencer unable to get block range", "err", err)
@@ -517,10 +528,10 @@ func (d *Driver) eventLoop() {
 				log.Info("MtBatcher Sequencer no updates", "start", start, "end", end)
 				continue
 			}
-			if new(big.Int).Sub(end, start).Cmp(big.NewInt(int64(d.Cfg.BlockOffset))) < 0 {
-				log.Info("MtBatcher end sub start must bigger than block offset", "start", start, "end", end, "BlockOffset", d.Cfg.BlockOffset)
-				continue
-			}
+			//if new(big.Int).Sub(end, start).Cmp(big.NewInt(int64(d.Cfg.BlockOffset))) < 0 {
+			//	log.Info("MtBatcher end sub start must bigger than block offset", "start", start, "end", end, "BlockOffset", d.Cfg.BlockOffset)
+			//	continue
+			//}
 			aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
 				d.Ctx, start, end,
 			)

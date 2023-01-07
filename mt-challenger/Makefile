@@ -9,11 +9,11 @@ LDFLAGS := -ldflags "$(LDFLAGSSTRING)"
 
 EDLC_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/da/BVM_EigenDataLayrChain.sol/BVM_EigenDataLayrChain.json
 
-da-challenger:
+mt-challenger:
 	env GO111MODULE=on go build -v $(LDFLAGS) ./cmd/mt-challenger
 
 datalayr-mantle:
-	cd ./datalayr-mantle/contracts && ./compile.sh compile-el && ./compile.sh compile-rollup
+	cd ../datalayr-mantle/contracts && ./compile.sh compile-el && ./compile.sh compile-rollup
 
 clean:
 	rm mt-challenger
