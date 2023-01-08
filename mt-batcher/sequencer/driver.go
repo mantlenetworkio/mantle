@@ -36,6 +36,7 @@ type DriverConfig struct {
 	EigenContractAddr common.Address
 	PrivKey           *ecdsa.PrivateKey
 	BlockOffset       uint64
+	EigenLayerNode    int
 	ChainID           *big.Int
 	DataStoreDuration uint64
 	DataStoreTimeout  uint64
@@ -113,7 +114,6 @@ func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, *b
 	start, err := d.EigenDaContract.LatestBlockNumber(&bind.CallOpts{
 		Context: context.Background(),
 	})
-	log.Info("start", "start", start)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -146,12 +146,25 @@ func (d *Driver) CraftBatchTx(
 			panic(fmt.Sprintf("attempting to create batch element from block %d, "+
 				"found %d txs instead of 1", block.Number(), len(txs)))
 		}
-		log.Info("Transactions", "txs", txs[0])
+		log.Info("Origin Transactions", "txs[0]", txs[0], "txs[0].QueueOrigin()", txs[0].QueueOrigin())
+		//isSequencerTx := txs[0].QueueOrigin() == l2types.QueueOriginSequencer
+		//if !isSequencerTx || txs[0] == nil {
+		//	continue
+		//}
 		var txBuf bytes.Buffer
 		if err := txs[0].EncodeRLP(&txBuf); err != nil {
 			panic(fmt.Sprintf("Unable to encode tx: %v", err))
 		}
-		err = d.Disperse(txBuf.Bytes(), blockNumber)
+		log.Info("Rlp Transactions", "txBuf", txBuf.Bytes(), "txs[0].QueueOrigin()", txs[0].QueueOrigin())
+		var transactionData []byte
+		if len(txBuf.Bytes()) > 31*d.Cfg.EigenLayerNode {
+			transactionData = txBuf.Bytes()
+		} else {
+			paddingBytes := make([]byte, (31*d.Cfg.EigenLayerNode)-len(txBuf.Bytes()))
+			transactionData = append(txBuf.Bytes(), paddingBytes...)
+		}
+		log.Info("transaction data len", "dataLen", len(transactionData))
+		err = d.Disperse(transactionData, blockNumber)
 		if err != nil {
 			return nil, err
 		}
@@ -340,11 +353,15 @@ func (d *Driver) eventLoop() {
 				log.Error("EigenDa Sequencer unable to get block range", "err", err)
 				continue
 			}
+			log.Info("start", "start", start, "end", end, "l2block", l2block)
 			if start.Cmp(end) == 0 {
 				log.Info("EigenDa Sequencer no updates", "start", start, "end", end)
 				continue
 			}
-			log.Info("EigenDa Sequencer block range", "start", start, "end", end)
+			if new(big.Int).Sub(end, start).Cmp(big.NewInt(int64(d.Cfg.BlockOffset))) < 0 {
+				log.Info("end sub start must bigger than block offset", "start", start, "end", end, "BlockOffset", d.Cfg.BlockOffset)
+				continue
+			}
 			tx, err := d.CraftBatchTx(
 				d.Ctx, start, end, l2block,
 			)

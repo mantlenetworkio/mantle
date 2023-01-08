@@ -21,6 +21,12 @@ export const names = {
       BVM_EigenDataLayrChain: 'BVM_EigenDataLayrChain',
       Proxy__BVM_EigenDataLayrChain: 'Proxy__BVM_EigenDataLayrChain',
     },
+    fraud_proof: {
+      Verifier: 'Verifier',
+      Rollup: 'Rollup',
+      Proxy__Verifier: 'Proxy__Verifier',
+      Proxy__Rollup: 'Proxy__Rollup',
+    },
     accounts: { BVM_Sequencer: 'BVM_Sequencer', BVM_Proposer: 'BVM_Proposer' },
     configs: {
       L1_BIT_ADDRESS: 'L1_BitAddress',

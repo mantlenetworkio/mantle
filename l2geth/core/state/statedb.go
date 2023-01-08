@@ -580,8 +580,8 @@ func (s *StateDB) createObject(addr common.Address) (newobj, prev *stateObject) 
 // CreateAccount is called during the EVM CREATE operation. The situation might arise that
 // a contract does the following:
 //
-//   1. sends funds to sha(account ++ (nonce + 1))
-//   2. tx_create(sha(account ++ nonce)) (note that this gets the address of 1)
+//  1. sends funds to sha(account ++ (nonce + 1))
+//  2. tx_create(sha(account ++ nonce)) (note that this gets the address of 1)
 //
 // Carrying over the balance ensures that Ether doesn't disappear.
 func (s *StateDB) CreateAccount(addr common.Address) {
@@ -888,3 +888,89 @@ func (s *StateDB) AddressInAccessList(addr common.Address) bool {
 func (s *StateDB) SlotInAccessList(addr common.Address, slot common.Hash) (addressPresent bool, slotPresent bool) {
 	return s.accessList.Contains(addr, slot)
 }
+
+// <FRAUD-PROOF modification>
+func (s *StateDB) GetCurrentLogs() []*types.Log {
+	return s.logs[s.thash]
+}
+
+func (s *StateDB) GetCurrentAccessListForProof() (map[common.Address]int, []map[common.Hash]struct{}) {
+	return s.accessList.addresses, s.accessList.slots
+}
+
+func (s *StateDB) GetStateRootForProof(addr common.Address) common.Hash {
+	stateObject := s.getStateObject(addr)
+	if stateObject == nil {
+		return common.Hash{}
+	}
+	return stateObject.data.Root
+}
+
+func (s *StateDB) GetRootForProof() common.Hash {
+	return s.trie.Hash()
+}
+
+func (s *StateDB) CommitForProof() {
+	addressesToPrefetch := make([][]byte, 0, len(s.journal.dirties))
+	for addr := range s.journal.dirties {
+		obj, exist := s.stateObjects[addr]
+		if !exist {
+			continue
+		}
+		if obj.empty() { // rollup-specific: we ignore suicided accounts here
+			obj.deleted = true
+			//if s.snap != nil {
+			//	s.snapDestructs[obj.addrHash] = struct{}{} // We need to maintain account deletions explicitly (will remain set indefinitely)
+			//	delete(s.snapAccounts, obj.addrHash)       // Clear out any previously updated account data (may be recreated via a ressurrect)
+			//	delete(s.snapStorage, obj.addrHash)        // Clear out any previously updated storage data (may be recreated via a ressurrect)
+			//}
+		} else {
+			obj.finalise() // Prefetch slots in the background
+		}
+		s.stateObjectsPending[addr] = struct{}{}
+		s.stateObjectsDirty[addr] = struct{}{}
+		addressesToPrefetch = append(addressesToPrefetch, common.CopyBytes(addr[:])) // Copy needed for closure
+	}
+	//if s.prefetcher != nil && len(addressesToPrefetch) > 0 {
+	//	s.prefetcher.prefetch(common.Hash{}, s.originalRoot, addressesToPrefetch)
+	//}
+	for addr := range s.stateObjectsPending {
+		if obj := s.stateObjects[addr]; !obj.deleted {
+			obj.updateRoot(s.db)
+		}
+	}
+	//if s.prefetcher != nil {
+	//	if trie := s.prefetcher.trie(common.Hash{}, s.originalRoot); trie != nil {
+	//		s.trie = trie
+	//	}
+	//}
+	for addr := range s.stateObjectsPending {
+		if obj := s.stateObjects[addr]; obj.deleted {
+			s.deleteStateObject(obj)
+		} else {
+			s.updateStateObject(obj)
+		}
+	}
+	if len(s.stateObjectsPending) > 0 {
+		s.stateObjectsPending = make(map[common.Address]struct{})
+	}
+}
+
+func (s *StateDB) DeleteSuicidedAccountForProof(addr common.Address) {
+	obj, exist := s.stateObjects[addr]
+	if !exist {
+		return
+	}
+	obj.deleted = true
+	//if s.prefetcher != nil {
+	//	s.prefetcher.prefetch(common.Hash{}, s.originalRoot, [][]byte{common.CopyBytes(addr[:])})
+	//}
+	//if s.prefetcher != nil {
+	//	if trie := s.prefetcher.trie(common.Hash{}, s.originalRoot); trie != nil {
+	//		s.trie = trie
+	//	}
+	//}
+	s.deleteStateObject(obj)
+}
+
+// <FRAUD-PROOF modification/>

@@ -58,6 +58,12 @@ var (
 		Required: true,
 		EnvVar:   "SCC_ADDRESS",
 	}
+	FPRollupAddressFlag = cli.StringFlag{
+		Name:     "fraud-proof-rollup-address",
+		Usage:    "Address of the FraudProof Rollup contract",
+		Required: true,
+		EnvVar:   "FP_ROLLUP_ADDRESS",
+	}
 	MinL1TxSizeFlag = cli.Uint64Flag{
 		Name: "min-l1-tx-size",
 		Usage: "Minimum size in bytes of any L1 transaction that gets " +
@@ -266,6 +272,7 @@ var requiredFlags = []cli.Flag{
 	TssClientUrl,
 	CTCAddressFlag,
 	SCCAddressFlag,
+	FPRollupAddressFlag,
 	MinL1TxSizeFlag,
 	MaxL1TxSizeFlag,
 	MaxPlaintextBatchSizeFlag,

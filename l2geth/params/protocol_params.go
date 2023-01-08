@@ -145,6 +145,11 @@ const (
 	Bn256PairingBaseGasIstanbul      uint64 = 45000  // Base price for an elliptic curve pairing check
 	Bn256PairingPerPointGasByzantium uint64 = 80000  // Byzantium per-point price for an elliptic curve pairing check
 	Bn256PairingPerPointGasIstanbul  uint64 = 34000  // Per-point price for an elliptic curve pairing check
+
+	// The Refund Quotient is the cap on how much of the used gas can be refunded. Before EIP-3529,
+	// up to half the consumed gas could be refunded. Redefined as 1/5th in EIP-3529
+	RefundQuotient        uint64 = 2
+	RefundQuotientEIP3529 uint64 = 5
 )
 
 var (

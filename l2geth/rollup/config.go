@@ -39,4 +39,6 @@ type Config struct {
 	FeeThresholdUp   *big.Float
 	// HTTP endpoint of the sequencer
 	SequencerClientHttp string
+	// stake amount
+	StakeAmount *big.Int
 }

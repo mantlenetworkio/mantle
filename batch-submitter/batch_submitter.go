@@ -2,6 +2,7 @@ package batchsubmitter
 
 import (
 	"context"
+	"github.com/ethereum/go-ethereum/common"
 	"os"
 	"time"
 
@@ -162,6 +163,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				MaxStateRootElements: cfg.MaxStateRootElements,
 				SCCAddr:              sccAddress,
 				CTCAddr:              ctcAddress,
+				FPRollupAddr:         common.HexToAddress(cfg.FPRollupAddress),
 				ChainID:              chainID,
 				PrivKey:              proposerPrivKey,
 			})

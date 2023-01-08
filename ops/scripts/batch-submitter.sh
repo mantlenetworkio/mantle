@@ -17,6 +17,7 @@ if [[ ! -z "$URL" ]]; then
     # set the env
     export CTC_ADDRESS=$(echo $ADDRESSES | jq -r '.CanonicalTransactionChain')
     export SCC_ADDRESS=$(echo $ADDRESSES | jq -r '.StateCommitmentChain')
+    export FP_ROLLUP_ADDRESS=$(echo $ADDRESSES | jq -r '.Proxy__Rollup')
 fi
 
 

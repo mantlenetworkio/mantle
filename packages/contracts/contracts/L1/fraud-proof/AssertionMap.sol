@@ -1,0 +1,131 @@
+// SPDX-License-Identifier: Apache-2.0
+
+/*
+ * Modifications Copyright 2022, Specular contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+pragma solidity ^0.8.0;
+
+// Exists only to reduce size of Rollup contract (maybe revert since Rollup fits under optimized compilation).
+contract AssertionMap {
+    struct Assertion {
+        bytes32 stateHash; // Hash of execution state associated with assertion (see `RollupLib.stateHash`)
+        uint256 inboxSize; // Inbox size this assertion advanced to
+        uint256 gasUsed; // Total gas used for current assertion
+        uint256 parent; // Parent assertion ID
+        uint256 deadline; // Confirmation deadline (L1 block number)
+        uint256 proposalTime; // L1 block number at which assertion was proposed
+        // Staking state
+        uint256 numStakers; // total number of stakers that have ever staked on this assertion. increasing only.
+        mapping(address => bool) stakers; // all stakers that have ever staked on this assertion.
+        // Child state
+        uint256 childInboxSize; // child assertion inbox state
+        mapping(bytes32 => bool) childStateHashes; // child assertion vm hashes
+    }
+
+    uint256 latestAssertionID;
+    mapping(uint256 => Assertion) public assertions;
+    address public rollupAddress;
+
+    modifier rollupOnly() {
+        require(msg.sender == rollupAddress, "ROLLUP_ONLY");
+        _;
+    }
+
+    constructor(address _rollupAddress) {
+        require(_rollupAddress != address(0), "ZERO_ADDRESS");
+        rollupAddress = _rollupAddress;
+    }
+
+    function getStateHash(uint256 assertionID) external view returns (bytes32) {
+        return assertions[assertionID].stateHash;
+    }
+
+    function getInboxSize(uint256 assertionID) external view returns (uint256) {
+        return assertions[assertionID].inboxSize;
+    }
+
+    function getGasUsed(uint256 assertionID) external view returns (uint256) {
+        return assertions[assertionID].gasUsed;
+    }
+
+    function getParentID(uint256 assertionID) external view returns (uint256) {
+        return assertions[assertionID].parent;
+    }
+
+    function getDeadline(uint256 assertionID) external view returns (uint256) {
+        return assertions[assertionID].deadline;
+    }
+
+    function getProposalTime(uint256 assertionID) external view returns (uint256) {
+        return assertions[assertionID].proposalTime;
+    }
+
+    function getNumStakers(uint256 assertionID) external view returns (uint256) {
+        return assertions[assertionID].numStakers;
+    }
+
+    function isStaker(uint256 assertionID, address stakerAddress) external view returns (bool) {
+        return assertions[assertionID].stakers[stakerAddress];
+    }
+
+    function getLatestAssertionID() external view returns (uint256) {
+        return latestAssertionID;
+    }
+
+    function createAssertion(
+        uint256 assertionID,
+        bytes32 stateHash,
+        uint256 inboxSize,
+        uint256 gasUsed,
+        uint256 parentID,
+        uint256 deadline
+    ) external rollupOnly {
+        Assertion storage assertion = assertions[assertionID];
+        Assertion storage parentAssertion = assertions[parentID];
+        // Child assertions must have same inbox size
+        uint256 parentChildInboxSize = parentAssertion.childInboxSize;
+        if (parentChildInboxSize == 0) {
+            parentAssertion.childInboxSize = inboxSize;
+        } else {
+            require(inboxSize == parentChildInboxSize, "CHILD_INBOX_SIZE_MISMATCH");
+        }
+
+        // update latest assertion id
+        if (assertionID > latestAssertionID) {
+            latestAssertionID = assertionID;
+        }
+
+        require(!parentAssertion.childStateHashes[stateHash], "SIBLING_STATE_HASH_EXISTS");
+        parentAssertion.childStateHashes[stateHash] = true;
+
+        assertion.stateHash = stateHash;
+        assertion.inboxSize = inboxSize;
+        assertion.gasUsed = gasUsed;
+        assertion.parent = parentID;
+        assertion.deadline = deadline;
+        assertion.proposalTime = block.number;
+    }
+
+    function stakeOnAssertion(uint256 assertionID, address stakerAddress) external rollupOnly {
+        Assertion storage assertion = assertions[assertionID];
+        assertion.stakers[stakerAddress] = true;
+        assertion.numStakers++;
+    }
+
+    function deleteAssertion(uint256 assertionID) external rollupOnly {
+        delete assertions[assertionID];
+    }
+}
