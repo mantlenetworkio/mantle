@@ -1,4 +1,4 @@
-// Copyright (C) 2015, 2016, 2017 Dapphub
+// SPDX-License-Identifier: MIT
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ contract WBIT9 is ERC20  {
     function withdraw(uint wad) public {
         require(balanceOf[msg.sender] >= wad);
         balanceOf[msg.sender] -= wad;
-        msg.sender.transfer(wad);
+        payable(msg.sender).transfer(wad);
         emit Withdrawal(msg.sender, wad);
     }
 }
