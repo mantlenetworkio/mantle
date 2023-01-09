@@ -52,6 +52,16 @@ contract WBITDeployer {
         WBIT9 w = new WBIT9{salt: salt}();
         return address(w);
     }
+
+    function calculateAddr() public view returns(address predictedAddress){
+        bytes32 salt = keccak256(abi.encodePacked("WBIT9"));
+        predictedAddress = address(uint160(uint(keccak256(abi.encodePacked(
+                bytes1(0xff),
+                address(this),
+                salt,
+                keccak256(type(WBIT9).creationCode)
+            )))));
+    }
 }
 
 
