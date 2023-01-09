@@ -159,7 +159,7 @@ func (p *peer) broadcast() {
 			if err := p.SendBatchPeriodAnswer(em); err != nil {
 				return
 			}
-			p.Log().Trace("Batch period answer msg", "start_index", em.StartIndex, "sequencer", em.Sequencer)
+			p.Log().Trace("Batch period answer msg", "start_height", em.StartHeight, "sequencer", em.Sequencer)
 		case <-p.term:
 			return
 		}

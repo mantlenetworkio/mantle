@@ -579,10 +579,10 @@ func (w *worker) batchStartLoop() {
 						}
 
 						var bpa types.BatchPeriodAnswerMsg
-						bpa.StartIndex = ev.Msg.StartHeight + inTxLen
-						if uint64(len(txsQueue)) >= ev.Msg.MaxHeight-bpa.StartIndex+1 {
-							bpa.Txs = txsQueue[:ev.Msg.MaxHeight-bpa.StartIndex+1]
-							inTxLen += ev.Msg.MaxHeight - bpa.StartIndex + 1
+						bpa.StartHeight = ev.Msg.StartHeight + inTxLen
+						if uint64(len(txsQueue)) >= ev.Msg.MaxHeight-bpa.StartHeight+1 {
+							bpa.Txs = txsQueue[:ev.Msg.MaxHeight-bpa.StartHeight+1]
+							inTxLen += ev.Msg.MaxHeight - bpa.StartHeight + 1
 						} else {
 							bpa.Txs = txsQueue
 							inTxLen += uint64(len(txsQueue))
@@ -604,12 +604,12 @@ func (w *worker) batchStartLoop() {
 							log.Error("Post BatchPeriodAnswerMsg error", "err_msg", err.Error())
 							continue
 						}
-						log.Info("Generate BatchPeriodAnswerEvent", "coinbase", w.coinbase.String(), "tx_count", len(bpa.Txs), "start_index", bpa.StartIndex)
+						log.Info("Generate BatchPeriodAnswerEvent", "coinbase", w.coinbase.String(), "tx_count", len(bpa.Txs), "start_height", bpa.StartHeight)
 					}
 				} else {
 					log.Debug("Inactive sequencer receives batchPeriodStartEvent",
-						"start_height", ev.Msg.StartHeight,
 						"batch_index", ev.Msg.BatchIndex,
+						"start_height", ev.Msg.StartHeight,
 						"max_height", ev.Msg.MaxHeight,
 						"expire_time", ev.Msg.ExpireTime,
 						"sequencer_address", ev.Msg.Sequencer.String(),
@@ -636,7 +636,7 @@ func (w *worker) batchAnswerLoop() {
 				continue
 			}
 			if w.knowBatchPeriodAnswerMsg.Contains(ev.Msg.Hash()) {
-				log.Debug("Duplicated BatchPeriodAnswerMsg", "batch_index", ev.Msg.StartIndex, "tx_count", len(ev.Msg.Txs))
+				log.Debug("Duplicated BatchPeriodAnswerMsg", "batch_index", ev.Msg.StartHeight, "tx_count", len(ev.Msg.Txs))
 				continue
 			} else {
 				w.knowBatchPeriodAnswerMsg.Add(ev.Msg.Hash())
@@ -653,13 +653,13 @@ func (w *worker) batchAnswerLoop() {
 					continue
 				}
 				w.mutex.Unlock()
-				if ev.Msg.StartIndex != w.eth.BlockChain().CurrentBlock().NumberU64()+1 {
-					log.Error("Start index not equal with current height", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "start_index", ev.Msg.StartIndex)
+				if ev.Msg.StartHeight != w.eth.BlockChain().CurrentBlock().NumberU64()+1 {
+					log.Error("Start index not equal with current height", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "start_height", ev.Msg.StartHeight)
 					continue
 				}
-				log.Info("Scheduler receives BatchPeriodAnswerEvent", "sequencer", ev.Msg.Sequencer.String(), "start_index", ev.Msg.StartIndex, "tx_len", len(ev.Msg.Txs), "max_height", w.currentBps.MaxHeight)
-				if ev.Msg.StartIndex-1+uint64(len(ev.Msg.Txs)) > w.currentBps.MaxHeight {
-					log.Error("Batch answer contains too many transactions", "start_index", ev.Msg.StartIndex, "max_height", w.currentBps.MaxHeight, "tx_len", len(ev.Msg.Txs))
+				log.Info("Scheduler receives BatchPeriodAnswerEvent", "sequencer", ev.Msg.Sequencer.String(), "start_height", ev.Msg.StartHeight, "tx_len", len(ev.Msg.Txs), "max_height", w.currentBps.MaxHeight)
+				if ev.Msg.StartHeight-1+uint64(len(ev.Msg.Txs)) > w.currentBps.MaxHeight {
+					log.Error("Batch answer contains too many transactions", "start_height", ev.Msg.StartHeight, "max_height", w.currentBps.MaxHeight, "tx_len", len(ev.Msg.Txs))
 					err := w.mux.Post(core.BatchEndEvent{})
 					if err != nil {
 						log.Error("Post BatchEndEvent error", "err_msg", err.Error())
@@ -682,7 +682,7 @@ func (w *worker) batchAnswerLoop() {
 				log.Debug("Sequencer receives BatchPeriodAnswerEvent",
 					"sequencer_address", ev.Msg.Sequencer.String(),
 					"start_height", ev.Msg.BatchIndex,
-					"batch_index", ev.Msg.StartIndex,
+					"batch_index", ev.Msg.StartHeight,
 					"tx_len", ev.Msg.Txs.Len(),
 				)
 			}
