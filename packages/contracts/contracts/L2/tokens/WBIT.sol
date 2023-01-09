@@ -18,23 +18,29 @@ pragma solidity ^0.8.9;
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract WBIT9 is ERC20  {
-    string public name     = "Wrapped BIT";
-    string public symbol   = "WBIT";
-    uint8  public decimals = 18;
-
+    constructor() ERC20("Wrapped BIT", "WBIT") {}
     event  Deposit(address indexed dst, uint wad);
     event  Withdrawal(address indexed src, uint wad);
 
-    receive() external payable {}
+    fallback() external payable {
+        deposit();
+    }
 
+    receive() external payable {
+        deposit();
+    }
+
+    /// @dev mint tokens for sender based on amount of bit sent.
     function deposit() public payable {
-        balanceOf[msg.sender] += msg.value;
+        _mint(msg.sender, msg.value);
         emit Deposit(msg.sender, msg.value);
     }
-    function withdraw(uint wad) public {
-        require(balanceOf[msg.sender] >= wad);
-        balanceOf[msg.sender] -= wad;
-        payable(msg.sender).transfer(wad);
+
+    /// @dev withdraw bit based on requested amount and user balance.
+    function withdraw(uint256 _amount) external {
+        require(balanceOf(msg.sender) >= _amount, "insufficient balance.");
+        _burn(msg.sender, _amount);
+        payable(msg.sender).transfer(_amount);
         emit Withdrawal(msg.sender, wad);
     }
 }
