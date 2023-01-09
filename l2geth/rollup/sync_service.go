@@ -817,27 +817,23 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 		txs = append(txs, *block.Transactions()[0])
 		oldBlocks = append(oldBlocks, *block)
 	}
-	log.Info("setHead start", "current block number", s.bc.CurrentHeader().Number.Uint64())
+	log.Info("setHead start", "currentBlockNumber", s.bc.CurrentHeader().Number.Uint64())
 	if err := s.SetHead(start - 1); err != nil {
-		log.Crit("rollback error:", "setHead error", err)
+		log.Crit("rollback setHead failed", "error", err)
 	}
-	log.Info("setHead end,current :", "block number", s.bc.CurrentHeader().Number.Uint64())
-	for _, t := range txs {
+	log.Info("setHead end", "currentBlockNumber", s.bc.CurrentHeader().Number.Uint64())
+	var handle bool
+	for i, t := range txs {
 		if err := s.applyIndexedTransaction(&t); err != nil {
-			log.Crit("rollback applyIndexedTransaction tx :", "applyIndexedTransaction error", err)
+			log.Crit("rollback applyIndexedTransaction tx", "error", err)
+		}
+		newBlock := s.bc.GetBlockByNumber(uint64(i) + start)
+		if oldBlocks[i].Hash() != newBlock.Hash() && !handle {
+			log.Info("Emit Rollback Event To sequencer", "oldBlockHash", oldBlocks[i].Hash(), "newBlockHash", newBlock.Hash(), "oldBlockNumber", oldBlocks[i].Number().Uint64(), "newBlockNumber", newBlock.Number().Uint64())
+			handle = true
 		}
 	}
-	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
-	for i := start; i <= latest; i++ {
-		newBlock := s.bc.GetBlockByNumber(i)
-		log.Info("StateRoot", "equal", oldBlocks[i-start].Root() == newBlock.Root())
-		if oldBlocks[i-start].Hash() != newBlock.Hash() {
-			// TODO Emit Rollback Event To sequencer
-			log.Info("Emit Rollback Event To sequencer", "old blockHash", oldBlocks[i-start].Hash(), "newBlockHash", newBlock.Hash())
-			log.Info("Emit Rollback Event To sequencer", "oldBlock number:", oldBlocks[i-start].Number().Uint64(), "newBlockNumber", newBlock.Number().Uint64())
-			//break
-		}
-	}
+	log.Info("apply rollback blocks transactions end", "currentBlockNumber", s.bc.CurrentHeader().Number.Uint64())
 	return nil
 }
 
@@ -972,7 +968,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 		// If enough time has passed, then assign the
 		// transaction to have the timestamp now. Otherwise,
 		// use the current timestamp
-		if now.Sub(current) > s.timestampRefreshThreshold {
+		if now.Sub(current) > s.timestampRefreshThreshold && tx.GetMeta().Index == nil {
 			current = now
 		}
 		log.Info("Updating latest timestamp", "timestamp", current, "unix", current.Unix())
