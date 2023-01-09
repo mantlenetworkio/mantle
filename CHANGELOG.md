@@ -36,6 +36,7 @@
 
 ## [0.1.1](https://github.com/mantlenetworkio/mantle/commits/v0.1.1) - 2022-12-01
 
+
 ### Improvements
 - Optimize code submission for deployed contracts ([#343](https://github.com/mantlenetworkio/mantle/pull/343)).
 - Adjust l2 charging logic([#317](https://github.com/mantlenetworkio/mantle/pull/317)).
@@ -49,6 +50,7 @@
 - Delete automatic burning ([#328](https://github.com/mantlenetworkio/mantle/pull/328)) .
 
 ## [0.1.0](https://github.com/mantlenetworkio/mantle/commits/v0.1.0) - 2022-11-11
+
 
 ### Features
 - MPC validators module in Layer 2 network, to minimize the trust risk of L2 execution results by threshold signature scheme(TSS).
