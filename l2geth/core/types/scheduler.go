@@ -41,7 +41,7 @@ func VerifySigner(msg MsgVerify, addr common.Address) bool {
 type BatchPeriodStartMsg struct {
 	RollbackStates RollbackStates
 	BatchIndex     uint64
-	StartHeight    uint64
+	CurrentHeight  uint64
 	MaxHeight      uint64
 	ExpireTime     uint64
 	Sequencer      common.Address
@@ -58,7 +58,7 @@ func (bps *BatchPeriodStartMsg) Serialize() []byte {
 		buf = append(buf, rollbackState.BlockHash.Bytes()...)
 	}
 	buf = binary.BigEndian.AppendUint64(buf, bps.BatchIndex)
-	buf = binary.BigEndian.AppendUint64(buf, bps.StartHeight)
+	buf = binary.BigEndian.AppendUint64(buf, bps.CurrentHeight)
 	buf = binary.BigEndian.AppendUint64(buf, bps.MaxHeight)
 	buf = binary.BigEndian.AppendUint64(buf, bps.ExpireTime)
 
@@ -91,7 +91,7 @@ func (bps *BatchPeriodStartMsg) GetSignData() []byte {
 		buf = append(buf, rollbackState.BlockHash.Bytes()...)
 	}
 	buf = binary.BigEndian.AppendUint64(buf, bps.BatchIndex)
-	buf = binary.BigEndian.AppendUint64(buf, bps.StartHeight)
+	buf = binary.BigEndian.AppendUint64(buf, bps.CurrentHeight)
 	buf = binary.BigEndian.AppendUint64(buf, bps.MaxHeight)
 	buf = binary.BigEndian.AppendUint64(buf, bps.ExpireTime)
 
@@ -111,11 +111,11 @@ func (bps *BatchPeriodStartMsg) Hash() common.Hash {
 }
 
 type BatchPeriodAnswerMsg struct {
-	Sequencer  common.Address
-	BatchIndex uint64
-	StartIndex uint64
-	Txs        Transactions
-	Signature  []byte
+	Sequencer     common.Address
+	BatchIndex    uint64
+	CurrentHeight uint64
+	Txs           Transactions
+	Signature     []byte
 }
 
 func (bpa *BatchPeriodAnswerMsg) GetSigner() (common.Address, error) {
@@ -136,7 +136,7 @@ func (bpa *BatchPeriodAnswerMsg) GetSignData() []byte {
 	}
 	buf := bpa.Sequencer.Bytes()
 	buf = binary.BigEndian.AppendUint64(buf, bpa.BatchIndex)
-	buf = binary.BigEndian.AppendUint64(buf, bpa.StartIndex)
+	buf = binary.BigEndian.AppendUint64(buf, bpa.CurrentHeight)
 	for _, tx := range bpa.Txs {
 		tempTxs := make(Transactions, 1, 1)
 		tempTxs[0] = tx
@@ -160,10 +160,10 @@ func (bpa *BatchPeriodAnswerMsg) Hash() common.Hash {
 
 func (bpa *BatchPeriodAnswerMsg) ToBatchTxSetProof() *BatchTxSetProof {
 	result := BatchTxSetProof{
-		Sequencer:  bpa.Sequencer,
-		BatchIndex: bpa.BatchIndex,
-		StartIndex: bpa.StartIndex,
-		Signature:  bpa.Signature,
+		Sequencer:     bpa.Sequencer,
+		BatchIndex:    bpa.BatchIndex,
+		CurrentHeight: bpa.CurrentHeight,
+		Signature:     bpa.Signature,
 	}
 	for _, tx := range bpa.Txs {
 		tempTxs := make(Transactions, 1, 1)
@@ -176,11 +176,11 @@ func (bpa *BatchPeriodAnswerMsg) ToBatchTxSetProof() *BatchTxSetProof {
 }
 
 type BatchTxSetProof struct {
-	Sequencer  common.Address
-	BatchIndex uint64
-	StartIndex uint64
-	TxHashSet  []common.Hash
-	Signature  []byte
+	Sequencer     common.Address
+	BatchIndex    uint64
+	CurrentHeight uint64
+	TxHashSet     []common.Hash
+	Signature     []byte
 }
 
 func DecodeBatchTxSetProof(buf []byte) (BatchTxSetProof, error) {
@@ -214,11 +214,11 @@ func DecodeBatchTxSetProof(buf []byte) (BatchTxSetProof, error) {
 	signature := buf[len(buf)-crypto.SignatureLength:]
 
 	return BatchTxSetProof{
-		Sequencer:  sequencer,
-		BatchIndex: batchIndex,
-		StartIndex: startIndex,
-		TxHashSet:  txs,
-		Signature:  signature,
+		Sequencer:     sequencer,
+		BatchIndex:    batchIndex,
+		CurrentHeight: startIndex,
+		TxHashSet:     txs,
+		Signature:     signature,
 	}, nil
 }
 
@@ -228,7 +228,7 @@ func (btsp *BatchTxSetProof) Serialize() []byte {
 	}
 	buf := btsp.Sequencer[:]
 	buf = binary.BigEndian.AppendUint64(buf, btsp.BatchIndex)
-	buf = binary.BigEndian.AppendUint64(buf, btsp.StartIndex)
+	buf = binary.BigEndian.AppendUint64(buf, btsp.CurrentHeight)
 	for _, txHash := range btsp.TxHashSet {
 		buf = append(buf, txHash[:]...)
 	}
@@ -243,7 +243,7 @@ func (btsp *BatchTxSetProof) GetSignData() []byte {
 	}
 	buf := btsp.Sequencer[:]
 	buf = binary.BigEndian.AppendUint64(buf, btsp.BatchIndex)
-	buf = binary.BigEndian.AppendUint64(buf, btsp.StartIndex)
+	buf = binary.BigEndian.AppendUint64(buf, btsp.CurrentHeight)
 	for _, txHash := range btsp.TxHashSet {
 		buf = append(buf, txHash[:]...)
 	}
@@ -274,10 +274,10 @@ func (btsp *BatchTxSetProof) ContainTxHashOrNot(txHash common.Hash, height uint6
 	if btsp == nil {
 		return false
 	}
-	if height < btsp.StartIndex || height-btsp.StartIndex >= uint64(len(btsp.TxHashSet)) {
+	if height < btsp.CurrentHeight || height-btsp.CurrentHeight >= uint64(len(btsp.TxHashSet)) {
 		return false
 	}
-	if bytes.Equal(txHash[:], btsp.TxHashSet[height-btsp.StartIndex][:]) {
+	if bytes.Equal(txHash[:], btsp.TxHashSet[height-btsp.CurrentHeight][:]) {
 		return true
 	}
 	return false

@@ -16,12 +16,11 @@ func TestSigAndVerify(t *testing.T) {
 	pub := prv.Public().(*ecdsa.PublicKey)
 	address := crypto.PubkeyToAddress(*pub).Hex()
 	bps := &types.BatchPeriodStartMsg{
-		ReorgIndex:  0,
-		BatchIndex:  0,
-		StartHeight: 1,
-		MaxHeight:   100,
-		ExpireTime:  1669787879,
-		Sequencer:   common.HexToAddress("0xe86c354b11bdc9f295eb2aca01640727dc332d43"),
+		BatchIndex:    0,
+		CurrentHeight: 0,
+		MaxHeight:     100,
+		ExpireTime:    1669787879,
+		Sequencer:     common.HexToAddress("0xe86c354b11bdc9f295eb2aca01640727dc332d43"),
 	}
 
 	bpsHash := bps.GetSignData()

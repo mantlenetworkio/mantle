@@ -131,7 +131,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bs); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		log.Info("Batch Period Start Msg", "batch_index", bs.BatchIndex, "start_height", bs.StartHeight, "max_height", bs.MaxHeight, "expire_time", bs.ExpireTime)
+		log.Info("Batch Period Start Msg", "batch_index", bs.BatchIndex, "current_height", bs.CurrentHeight, "max_height", bs.MaxHeight, "expire_time", bs.ExpireTime)
 		if !types.VerifySigner(bs, pm.schedulerInst.Scheduler()) {
 			return nil
 		}
@@ -147,7 +147,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if err := msg.Decode(&bpa); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		log.Info("Batch Period Answer Msg", "batchIndex", bpa.BatchIndex, "start_index", bpa.StartIndex, "tx_len", len(bpa.Txs))
+		log.Info("Batch Period Answer Msg", "batchIndex", bpa.BatchIndex, "msg_current_height", bpa.CurrentHeight, "tx_len", len(bpa.Txs))
 		if !pm.schedulerInst.IsRunning() {
 			log.Debug("not scheduler")
 			return nil
@@ -179,7 +179,7 @@ func (pm *ProtocolManager) batchPeriodStartMsgBroadcastLoop() {
 		if se, ok := obj.Data.(core.BatchPeriodStartEvent); ok {
 			log.Debug("Got BatchPeriodStartEvent, broadcast it",
 				"batch_index", se.Msg.BatchIndex,
-				"start_height", se.Msg.StartHeight,
+				"current_height", se.Msg.CurrentHeight,
 				"max_height", se.Msg.MaxHeight)
 			pm.BroadcastBatchPeriodStartMsg(se.Msg) // First propagate block to peers
 		}
@@ -235,7 +235,7 @@ func (p *peer) AsyncSendBatchPeriodAnswerMsg(msg *types.BatchPeriodAnswerMsg) {
 		}
 
 	default:
-		p.Log().Debug("Dropping batch period end msg propagation", "start_index", msg.StartIndex)
+		p.Log().Debug("Dropping batch period end msg propagation", "msg_current_height", msg.CurrentHeight)
 	}
 }
 

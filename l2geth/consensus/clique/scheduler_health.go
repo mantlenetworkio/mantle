@@ -38,7 +38,7 @@ func (schedulerInst *Scheduler) SetSequencerHealthPoints(seqSets synchronizer.Se
 func (schedulerInst *Scheduler) checkSequencer() {
 	blockNumber := schedulerInst.blockchain.CurrentHeader().Number.Uint64()
 	sequencer := schedulerInst.currentStartMsg.Sequencer
-	if (blockNumber - schedulerInst.currentStartMsg.StartHeight) >= schedulerInst.expectMinTxsCount {
+	if (blockNumber - schedulerInst.currentStartMsg.CurrentHeight) >= schedulerInst.expectMinTxsCount {
 		return
 	}
 	// deduct points
