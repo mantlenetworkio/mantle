@@ -282,16 +282,3 @@ func (btsp *BatchTxSetProof) ContainTxHashOrNot(txHash common.Hash, height uint6
 	}
 	return false
 }
-
-type FraudProofReorgMsg struct {
-	ReorgIndex    uint64
-	ReorgToHeight uint64
-	TssSignature  []byte
-}
-
-func (bps *FraudProofReorgMsg) Hash() common.Hash {
-	if bps == nil {
-		return common.Hash{}
-	}
-	return rlpHash(bps)
-}

@@ -38,13 +38,10 @@ var (
 )
 
 const (
-	maxKnownTxs                = 32768 // Maximum transactions hashes to keep in the known list (prevent DOS)
-	maxKnownBlocks             = 1024  // Maximum block hashes to keep in the known list (prevent DOS)
-	maxKnownStartMsg           = 1024
-	maxKnownEndMsg             = 1024
-	maxKnownFraudProofReorgMsg = 1024
-
-	maxQueuedPrs = 128
+	maxKnownTxs      = 32768 // Maximum transactions hashes to keep in the known list (prevent DOS)
+	maxKnownBlocks   = 1024  // Maximum block hashes to keep in the known list (prevent DOS)
+	maxKnownStartMsg = 1024
+	maxKnownEndMsg   = 1024
 
 	// maxQueuedTxs is the maximum number of transaction lists to queue up before
 	// dropping broadcasts. This is a sensitive number as a transaction list might
@@ -63,7 +60,6 @@ const (
 
 	maxQueuedBatchPeriodStart = 4
 	maxQueuedBatchPeriodEnd   = 4
-	maxQueuedFraudProofReorg  = 4
 
 	handshakeTimeout = 5 * time.Second
 )
@@ -99,13 +95,11 @@ type peer struct {
 	knownBlocks              mapset.Set                       // Set of block hashes known to be known by this peer
 	knowBatchPeriodStartMsg  mapset.Set                       // Set of start msg index to be known by this peer
 	knowBatchPeriodAnswerMsg mapset.Set                       // Set of end msg index to be known by this peer
-	knowFraudProofReorg      mapset.Set                       // Set of end msg index to be known by this peer
 	queuedTxs                chan []*types.Transaction        // Queue of transactions to broadcast to the peer
 	queuedProps              chan *propEvent                  // Queue of blocks to broadcast to the peer
 	queuedAnns               chan *types.Block                // Queue of blocks to announce to the peer
 	queuedBatchStartMsg      chan *types.BatchPeriodStartMsg  // Queue of BatchPeriodStartMsg to announce to the peer
 	queuedBatchAnswerMsg     chan *types.BatchPeriodAnswerMsg // Queue of BatchPeriodAnswerMsg to announce to the peer
-	queuedFraudProofReorg    chan *types.FraudProofReorgMsg   // Queue of FraudProofReorgMsg to announce to the peer
 	term                     chan struct{}                    // Termination channel to stop the broadcaster
 }
 
@@ -119,13 +113,11 @@ func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 		knownBlocks:              mapset.NewSet(),
 		knowBatchPeriodStartMsg:  mapset.NewSet(),
 		knowBatchPeriodAnswerMsg: mapset.NewSet(),
-		knowFraudProofReorg:      mapset.NewSet(),
 		queuedTxs:                make(chan []*types.Transaction, maxQueuedTxs),
 		queuedProps:              make(chan *propEvent, maxQueuedProps),
 		queuedAnns:               make(chan *types.Block, maxQueuedAnns),
 		queuedBatchStartMsg:      make(chan *types.BatchPeriodStartMsg, maxQueuedBatchPeriodStart),
 		queuedBatchAnswerMsg:     make(chan *types.BatchPeriodAnswerMsg, maxQueuedBatchPeriodEnd),
-		queuedFraudProofReorg:    make(chan *types.FraudProofReorgMsg, maxQueuedFraudProofReorg),
 		term:                     make(chan struct{}),
 	}
 }
@@ -168,11 +160,6 @@ func (p *peer) broadcast() {
 				return
 			}
 			p.Log().Trace("Batch period answer msg", "start_index", em.StartIndex, "sequencer", em.Sequencer)
-		case fpr := <-p.queuedFraudProofReorg:
-			if err := p.SendFraudProofReorg(fpr); err != nil {
-				return
-			}
-			p.Log().Trace("Fraud proof reorg msg", "index", fpr.ReorgIndex, "reorg_height", fpr.ReorgToHeight)
 		case <-p.term:
 			return
 		}
@@ -586,21 +573,6 @@ func (ps *peerSet) Len() int {
 	defer ps.lock.RUnlock()
 
 	return len(ps.peers)
-}
-
-// PeersWithoutFraudProofReorgMsg retrieves a list of peers that do not have a given producer in
-// their set of known index.
-func (ps *peerSet) PeersWithoutFraudProofReorgMsg(msgHash common.Hash) []*peer {
-	ps.lock.RLock()
-	defer ps.lock.RUnlock()
-
-	list := make([]*peer, 0, len(ps.peers))
-	for _, p := range ps.peers {
-		if !p.knowFraudProofReorg.Contains(msgHash) {
-			list = append(list, p)
-		}
-	}
-	return list
 }
 
 // PeersWithoutEndMsg retrieves a list of peers that do not have a given producer in
