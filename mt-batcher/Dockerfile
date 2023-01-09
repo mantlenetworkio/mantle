@@ -4,6 +4,7 @@ RUN apk add --no-cache make gcc musl-dev linux-headers git jq bash
 
 COPY ./mt-batcher /go/mt-batcher
 COPY ./bss-core /go/bss-core
+COPY ./datalayr-mantle /go/datalayr-mantle
 COPY ./l2geth /go/l2geth
 COPY ./mt-batcher/docker.go.work /go/go.work
 
@@ -16,5 +17,4 @@ RUN apk add --no-cache ca-certificates jq curl
 COPY --from=builder /go/mt-batcher/mt-batcher /usr/local/bin/
 
 WORKDIR /usr/local/bin
-COPY ./ops/scripts/mt-batcher.sh .
 ENTRYPOINT ["mt-batcher"]
