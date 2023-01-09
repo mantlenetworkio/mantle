@@ -1,5 +1,6 @@
 # Changelog
 
+
 ## [0.2.0] - 2023-01-09
 
 ### Features
@@ -29,11 +30,12 @@
 - Update datalayer to support l1 hardhat and bit token ([#410](https://github.com/mantlenetworkio/mantle/pull/410)).
 - Update golang version to 1.19 ([#424](https://github.com/mantlenetworkio/mantle/pull/424)).
 
+
 ### Bug Fixes
 - Optimized tss roll back codes ([#454](https://github.com/mantlenetworkio/mantle/pull/454)).
 - Complete data verification logic for eigenlayer ([#433](https://github.com/mantlenetworkio/mantle/pull/433)) .
 
-## [0.1.1](https://github.com/mantlenetworkio/mantle/commits/v0.1.1) - 2022-12-01
+## 0.1.1 - 2022-12-01
 
 ### Improvements
 - Optimize code submission for deployed contracts ([#343](https://github.com/mantlenetworkio/mantle/pull/343)).
@@ -47,7 +49,7 @@
 ### Deprecated
 - Delete automatic burning ([#328](https://github.com/mantlenetworkio/mantle/pull/328)) .
 
-## [0.1.0](https://github.com/mantlenetworkio/mantle/commits/v0.1.0) - 2022-11-11
+## 0.1.0 - 2022-11-11
 
 ### Features
 - MPC validators module in Layer 2 network, to minimize the trust risk of L2 execution results by threshold signature scheme(TSS).
