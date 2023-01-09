@@ -7,6 +7,9 @@ const config = {
   ctcEnqueueGasCost: 60_000,
   sccFaultProofWindowSeconds: 10,
   sccSequencerPublishWindowSeconds: 12592000,
+  blockStaleMeasure: 100,
+  daFraudProofPeriod: 120,
+  l2SubmittedBlockNumber: 1,
   bvmSequencerAddress: process.env.BVM_SEQUENCER_ADDRESS ||  '0xc4AaE221f1C62E8CBC657Af5b051eA573914cFc7',
   bvmProposerAddress: process.env.BVM_PROPOSER_ADDRESS || '0x3079Be9D8622173f02618bA2B793F00795D4f320',
   //default bvmBlockSignerAddress
