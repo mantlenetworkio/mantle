@@ -29,7 +29,7 @@ func ReadRollbackStates(db ethdb.KeyValueReader) types.RollbackStates {
 		return types.RollbackStates{}
 	}
 	var rollbackStates types.RollbackStates
-	if err := rlp.Decode(bytes.NewReader(data), rollbackStates); err != nil {
+	if err := rlp.Decode(bytes.NewReader(data), &rollbackStates); err != nil {
 		log.Error("Invalid rollbackStates RLP", "err", err)
 		return nil
 	}
