@@ -154,12 +154,12 @@ func (p *peer) broadcast() {
 			if err := p.SendBatchPeriodStart(sm); err != nil {
 				return
 			}
-			p.Log().Trace("Batch period start msg", "batch_index", sm.BatchIndex, "current_height", sm.CurrentHeight)
+			p.Log().Trace("Batch period start msg", "batch_index", sm.BatchIndex, "current_height", sm.BaseHeight)
 		case em := <-p.queuedBatchAnswerMsg:
 			if err := p.SendBatchPeriodAnswer(em); err != nil {
 				return
 			}
-			p.Log().Trace("Batch period answer msg", "msg_current_height", em.CurrentHeight, "sequencer", em.Sequencer)
+			p.Log().Trace("Batch period answer msg", "msg_current_height", em.BaseHeight, "sequencer", em.Sequencer)
 		case <-p.term:
 			return
 		}

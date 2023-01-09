@@ -256,7 +256,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		msg := types.BatchPeriodStartMsg{
 			RollbackStates: rawdb.ReadRollbackStates(schedulerInst.db),
 			BatchIndex:     currentIndex + 1,
-			CurrentHeight:  currentBlock.NumberU64(),
+			BaseHeight:     currentBlock.NumberU64(),
 			MaxHeight:      currentBlock.NumberU64() + uint64(batchSize),
 			ExpireTime:     uint64(time.Now().Unix() + expireTime),
 			Sequencer:      seq.Address,
@@ -290,7 +290,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			log.Error("Generate BatchPeriodStartEvent error")
 			return
 		}
-		log.Info("Generate BatchPeriodStartEvent", "current_height", msg.CurrentHeight, "max_height", msg.MaxHeight)
+		log.Info("Generate BatchPeriodStartEvent", "current_height", msg.BaseHeight, "max_height", msg.MaxHeight)
 		schedulerInst.sequencerSet.IncrementProducerPriority(1)
 		schedulerInst.l.Unlock()
 

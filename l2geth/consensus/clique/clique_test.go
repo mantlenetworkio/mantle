@@ -49,7 +49,7 @@ func TestReimportMirroredState(t *testing.T) {
 	batchPeriodStartMsg := types.BatchPeriodStartMsg{
 		RollbackStates: nil,
 		BatchIndex:     0,
-		CurrentHeight:  0,
+		BaseHeight:     0,
 		MaxHeight:      100,
 		ExpireTime:     1669787879,
 		Sequencer:      address,
