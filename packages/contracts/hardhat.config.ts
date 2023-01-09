@@ -263,6 +263,15 @@ const config: HardhatUserConfig = {
     sccSequencerPublishWindowSeconds: {
       type: 'number',
     },
+    blockStaleMeasure: {
+      type: 'number',
+    },
+    daFraudProofPeriod: {
+      type: 'number',
+    },
+    l2SubmittedBlockNumber: {
+      type: 'number',
+    },
     bvmSequencerAddress: {
       type: 'address',
     },
