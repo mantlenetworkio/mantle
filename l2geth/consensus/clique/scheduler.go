@@ -208,7 +208,7 @@ func (schedulerInst *Scheduler) batchEndLoop() {
 			} else {
 				log.Debug("Batch already exitCh with timeout or height at max height")
 			}
-			schedulerInst.mu.Lock()
+			schedulerInst.mu.Unlock()
 		}
 	}
 }
@@ -257,7 +257,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			RollbackStates: rawdb.ReadRollbackStates(schedulerInst.db),
 			BatchIndex:     currentIndex + 1,
 			StartHeight:    currentBlock.NumberU64() + 1,
-			MaxHeight:      currentBlock.NumberU64() + 1 + uint64(batchSize),
+			MaxHeight:      currentBlock.NumberU64() + uint64(batchSize),
 			ExpireTime:     uint64(time.Now().Unix() + expireTime),
 			Sequencer:      seq.Address,
 		}
@@ -275,6 +275,12 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		schedulerInst.expectMinTxsCount = expectMinTxsCount
 		schedulerInst.currentStartMsg = msg
 		rawdb.WriteCurrentBatchPeriodIndex(schedulerInst.db, msg.BatchIndex)
+
+		// clean channel batchDone
+		select {
+		case <-schedulerInst.batchDone:
+		default:
+		}
 
 		err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
 			Msg:   &msg,
@@ -295,9 +301,9 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		ticker := time.NewTicker(time.Duration(expireTime) * time.Second)
 		select {
 		case <-ticker.C:
-			log.Debug("ticker timeout")
+			log.Info("schedulerRoutine, ticker timeout")
 		case <-schedulerInst.batchDone:
-			log.Debug("batch done")
+			log.Info("schedulerRoutine, batch done")
 		case <-schedulerInst.exitCh:
 			log.Info("schedulerRoutine stop")
 			return
@@ -313,18 +319,18 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 				log.Debug("chainHead", "block_number", chainHead.Block.NumberU64(), "extra_data", hex.EncodeToString(chainHead.Block.Extra()))
 				continue
 			}
+			log.Info("schedulerInst handle chain head", "current_height", schedulerInst.blockchain.CurrentBlock().NumberU64(), "max_height", schedulerInst.currentStartMsg.MaxHeight)
 			if schedulerInst.blockchain.CurrentBlock().NumberU64() == schedulerInst.currentStartMsg.MaxHeight {
 				schedulerInst.mu.Lock()
 				if !schedulerInst.batchEndFlag {
-					log.Debug("Batch done with height at max height")
+					log.Info("Batch done with height at max height")
 					schedulerInst.batchDone <- struct{}{}
 					schedulerInst.batchEndFlag = true
 				} else {
 					log.Debug("Batch already done with tx apply failed")
 				}
-				schedulerInst.mu.Lock()
+				schedulerInst.mu.Unlock()
 			}
-			log.Debug("chainHead handle", "block_number", chainHead.Block.NumberU64(), "extra_data", hex.EncodeToString(chainHead.Block.Extra()))
 		case <-schedulerInst.exitCh:
 			log.Info("scheduler chain head loop stop")
 			return

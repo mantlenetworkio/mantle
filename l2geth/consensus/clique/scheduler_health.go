@@ -75,7 +75,7 @@ func (schedulerInst *Scheduler) punishSequencer(sequencer common.Address) {
 func (schedulerInst *Scheduler) deductPoints(sequencer common.Address) {
 	if schedulerInst.zeroPoints(sequencer) {
 		schedulerInst.punishSequencer(sequencer)
-		log.Info("sequencer debuct points success", "current", sequencer, "points", schedulerInst.sequencerAssessor.SequencersPoints[sequencer])
+		log.Debug("Deduct sequencer points", "current", sequencer, "points", schedulerInst.sequencerAssessor.SequencersPoints[sequencer])
 		return
 	}
 	schedulerInst.sequencerAssessor.SequencersPoints[sequencer] = schedulerInst.sequencerAssessor.SequencersPoints[sequencer] - 1

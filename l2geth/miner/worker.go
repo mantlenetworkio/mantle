@@ -18,7 +18,6 @@ package miner
 
 import (
 	"bytes"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -519,7 +518,6 @@ func (w *worker) batchStartLoop() {
 					"max_height", ev.Msg.MaxHeight,
 					"expire_time", ev.Msg.ExpireTime,
 					"sequencer_address", ev.Msg.Sequencer.String(),
-					"signature", hex.EncodeToString(ev.Msg.Signature),
 				)
 			} else {
 				w.chain.UpdateRollbackStates(ev.Msg.RollbackStates)
@@ -537,7 +535,7 @@ func (w *worker) batchStartLoop() {
 						continue
 					}
 					if ev.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
-						log.Error("maxHeight is too large, just ignore the batch", "current_height", w.current.header.Number.Uint64(), "max_height", ev.Msg.MaxHeight)
+						log.Error("maxHeight is too low, just ignore the batch", "current_height", w.current.header.Number.Uint64(), "max_height", ev.Msg.MaxHeight)
 						continue
 					}
 					if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
@@ -547,7 +545,7 @@ func (w *worker) batchStartLoop() {
 
 					// Keep sending messages until the limit is reached
 					expectHeight := ev.Msg.StartHeight - 1
-					for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < ev.Msg.MaxHeight && uint64(time.Now().Unix()) < ev.Msg.ExpireTime && inTxLen < (ev.Msg.MaxHeight-ev.Msg.StartHeight); {
+					for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < ev.Msg.MaxHeight && uint64(time.Now().Unix()) < ev.Msg.ExpireTime && inTxLen < (ev.Msg.MaxHeight-ev.Msg.StartHeight+1); {
 						if w.eth.BlockChain().CurrentBlock().NumberU64() < expectHeight {
 							log.Debug("wanting for current height to reach expectHeight", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "expect_height", expectHeight)
 							time.Sleep(200 * time.Millisecond)
@@ -582,9 +580,9 @@ func (w *worker) batchStartLoop() {
 
 						var bpa types.BatchPeriodAnswerMsg
 						bpa.StartIndex = ev.Msg.StartHeight + inTxLen
-						if uint64(len(txsQueue)) > ev.Msg.MaxHeight-ev.Msg.StartHeight {
-							bpa.Txs = txsQueue[:ev.Msg.MaxHeight-ev.Msg.StartHeight]
-							inTxLen += ev.Msg.MaxHeight - ev.Msg.StartHeight
+						if uint64(len(txsQueue)) >= ev.Msg.MaxHeight-bpa.StartIndex+1 {
+							bpa.Txs = txsQueue[:ev.Msg.MaxHeight-bpa.StartIndex+1]
+							inTxLen += ev.Msg.MaxHeight - bpa.StartIndex + 1
 						} else {
 							bpa.Txs = txsQueue
 							inTxLen += uint64(len(txsQueue))
@@ -615,7 +613,6 @@ func (w *worker) batchStartLoop() {
 						"max_height", ev.Msg.MaxHeight,
 						"expire_time", ev.Msg.ExpireTime,
 						"sequencer_address", ev.Msg.Sequencer.String(),
-						"signature", hex.EncodeToString(ev.Msg.Signature),
 					)
 				}
 			}
@@ -660,7 +657,15 @@ func (w *worker) batchAnswerLoop() {
 					log.Error("Start index not equal with current height", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "start_index", ev.Msg.StartIndex)
 					continue
 				}
-				log.Info("Scheduler receives BatchPeriodAnswerEvent", "sequencer", ev.Msg.Sequencer.String())
+				log.Info("Scheduler receives BatchPeriodAnswerEvent", "sequencer", ev.Msg.Sequencer.String(), "start_index", ev.Msg.StartIndex, "tx_len", len(ev.Msg.Txs), "max_height", w.currentBps.MaxHeight)
+				if ev.Msg.StartIndex-1+uint64(len(ev.Msg.Txs)) > w.currentBps.MaxHeight {
+					log.Error("Batch answer contains too many transactions", "start_index", ev.Msg.StartIndex, "max_height", w.currentBps.MaxHeight, "tx_len", len(ev.Msg.Txs))
+					err := w.mux.Post(core.BatchEndEvent{})
+					if err != nil {
+						log.Error("Post BatchEndEvent error", "err_msg", err.Error())
+						break
+					}
+				}
 				for _, tx := range ev.Msg.Txs {
 					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, ev.Msg.ToBatchTxSetProof())
 					if err != nil {
@@ -679,7 +684,6 @@ func (w *worker) batchAnswerLoop() {
 					"start_height", ev.Msg.BatchIndex,
 					"batch_index", ev.Msg.StartIndex,
 					"tx_len", ev.Msg.Txs.Len(),
-					"signature", hex.EncodeToString(ev.Msg.Signature),
 				)
 			}
 			// System stopped
