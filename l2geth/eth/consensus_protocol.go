@@ -17,7 +17,7 @@
 package eth
 
 // consensusProtocolLength is the number of implemented message.
-var consensusProtocolLength = uint64(3)
+var consensusProtocolLength = uint64(2)
 
 const consensusMaxMsgSize = 10 * 1024 * 1024 // Maximum cap on the size of a protocol message
 
@@ -28,5 +28,4 @@ const consensusProtocolName = "clique"
 const (
 	BatchPeriodStartMsg  = 0x00
 	BatchPeriodAnswerMsg = 0x01
-	FraudProofReorgMsg   = 0x02
 )
