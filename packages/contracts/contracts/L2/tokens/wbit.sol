@@ -49,8 +49,8 @@ contract WBITDeployer {
     function deploy() public returns(address addr) {
         bytes32 salt = keccak256(abi.encodePacked("WBIT9"));
 
-        WBIT9 p = new WBIT9{salt: salt}();
-        return address(p);
+        WBIT9 w = new WBIT9{salt: salt}();
+        return address(w);
     }
 }
 
