@@ -1,6 +1,10 @@
 DOCKER_COMPOSE_CMD := docker-compose \
 	-f docker-compose.yml \
 	-f docker-compose.local.yml
+DOCKER_COMPOSE_L1_CMD := docker-compose \
+	-f docker-compose.l1.yml
+DOCKER_COMPOSE_L2_CMD := docker-compose \
+	-f docker-compose.l2.yml
 COPY_ENV := cp -r envs/deployer.env ./.env
 
 build:
@@ -16,10 +20,33 @@ up:
 		up --build --detach $(service)
 .PHONY: up
 
+l1up:
+	$(COPY_ENV)
+	DOCKER_BUILDKIT=1 \
+	$(DOCKER_COMPOSE_L1_CMD) \
+		up --build --detach $(service)
+.PHONY: up
+
+
+l2up:
+	$(COPY_ENV)
+	DOCKER_BUILDKIT=1 \
+	$(DOCKER_COMPOSE_L2_CMD) \
+		up --build --detach $(service)
+.PHONY: up
+
+
 down:
 	$(DOCKER_COMPOSE_CMD) \
 		down
 .PHONY: down
+
+
+l2down:
+	$(DOCKER_COMPOSE_L2_CMD) \
+		down
+.PHONY: down
+
 
 ps:
 	$(DOCKER_COMPOSE_CMD) \
