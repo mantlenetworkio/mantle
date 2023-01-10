@@ -502,7 +502,7 @@ func (w *worker) batchStartLoop() {
 				continue
 			}
 			if w.knowBatchPeriodStartMsg.Contains(ev.Msg.Hash()) {
-				log.Debug("Duplicated BatchPeriodStartMsg", "batch_index", ev.Msg.BatchIndex, "start_height", ev.Msg.StartHeight)
+				log.Info("Duplicated BatchPeriodStartMsg", "batch_index", ev.Msg.BatchIndex, "start_height", ev.Msg.StartHeight)
 				continue
 			} else {
 				w.knowBatchPeriodStartMsg.Add(ev.Msg.Hash())
@@ -547,7 +547,7 @@ func (w *worker) batchStartLoop() {
 					expectHeight := ev.Msg.StartHeight - 1
 					for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < ev.Msg.MaxHeight && uint64(time.Now().Unix()) < ev.Msg.ExpireTime && inTxLen < (ev.Msg.MaxHeight-ev.Msg.StartHeight+1); {
 						if w.eth.BlockChain().CurrentBlock().NumberU64() < expectHeight {
-							log.Debug("wanting for current height to reach expectHeight", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "expect_height", expectHeight)
+							log.Info("wanting for current height to reach expectHeight", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "expect_height", expectHeight)
 							time.Sleep(200 * time.Millisecond)
 							continue
 						}
@@ -558,7 +558,7 @@ func (w *worker) batchStartLoop() {
 						}
 						// Short circuit if there is no available pending transactions
 						if len(pending) == 0 {
-							log.Debug("empty txpool, wait for 200 millisecond")
+							log.Info("empty txpool, wait for 200 millisecond")
 							time.Sleep(200 * time.Millisecond)
 							continue
 						}
@@ -643,16 +643,24 @@ func (w *worker) batchAnswerLoop() {
 			}
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler(w.coinbase) {
-				w.mutex.Lock()
-				if w.currentBps == nil {
-					log.Debug("Current BatchPeriodStartMsg is null")
+				err := func() error {
+					w.mutex.Lock()
+					defer w.mutex.Unlock()
+
+					if w.currentBps == nil {
+						return fmt.Errorf("current BatchPeriodStartMsg is null")
+					}
+					if ev.Msg.BatchIndex != w.currentBps.BatchIndex {
+						return fmt.Errorf("batch index not equal, current_batch_index %d,  answer_batch_index %d", w.currentBps.BatchIndex, ev.Msg.BatchIndex)
+					}
+					return nil
+				}()
+
+				if err != nil {
+					log.Error("batch period answer pre-check err", "err_msg", err.Error())
 					continue
 				}
-				if ev.Msg.BatchIndex != w.currentBps.BatchIndex {
-					log.Error("Batch index not equal", "current_index", w.currentBps.BatchIndex, "receive", ev.Msg.BatchIndex)
-					continue
-				}
-				w.mutex.Unlock()
+
 				if ev.Msg.StartHeight != w.eth.BlockChain().CurrentBlock().NumberU64()+1 {
 					log.Error("Start index not equal with current height", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "start_height", ev.Msg.StartHeight)
 					continue

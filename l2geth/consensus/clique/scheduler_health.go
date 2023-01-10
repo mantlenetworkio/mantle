@@ -63,8 +63,8 @@ func (schedulerInst *Scheduler) punishSequencer(sequencer common.Address) {
 	log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
 
 	// update sequencer set and consensus_engine
-	schedulerInst.l.Lock()
-	defer schedulerInst.l.Unlock()
+	schedulerInst.sequencerSetMtx.Lock()
+	defer schedulerInst.sequencerSetMtx.Unlock()
 	err := schedulerInst.sequencerSet.UpdateWithChangeSet(changes)
 	if err != nil {
 		log.Error("sequencer set update failed", "err", err)
