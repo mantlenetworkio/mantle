@@ -37,7 +37,6 @@ type Config struct {
 }
 
 type Scheduler struct {
-	wg              sync.WaitGroup
 	sequencerSetMtx sync.Mutex // The lock used to protect the sequencerSet field
 	batchMtx        sync.Mutex // The lock used to protect the batchEndFlag and batchDone fields
 
@@ -152,7 +151,6 @@ func (schedulerInst *Scheduler) Start() {
 	schedulerInst.batchEndSub = schedulerInst.eventMux.Subscribe(core.BatchEndEvent{})
 	schedulerInst.chainHeadSub = schedulerInst.blockchain.SubscribeChainHeadEvent(schedulerInst.chainHeadCh)
 
-	schedulerInst.wg.Add(1)
 	go schedulerInst.readLoop()
 	go schedulerInst.addPeerCheckLoop()
 	go schedulerInst.batchEndLoop()
@@ -352,7 +350,6 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 }
 
 func (schedulerInst *Scheduler) readLoop() {
-	defer schedulerInst.wg.Done()
 	for {
 		select {
 		case <-schedulerInst.ticker.C:
