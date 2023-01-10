@@ -201,14 +201,16 @@ func (schedulerInst *Scheduler) batchEndLoop() {
 	for obj := range schedulerInst.batchEndSub.Chan() {
 		if _, ok := obj.Data.(core.BatchEndEvent); ok {
 			// if batch already exitCh with timeout or height at max height then pass
-			schedulerInst.batchMtx.Lock()
-			if !schedulerInst.batchEndFlag {
-				schedulerInst.batchDone <- struct{}{}
-				schedulerInst.batchEndFlag = true
-			} else {
-				log.Debug("Batch already exitCh with timeout or height at max height")
-			}
-			schedulerInst.batchMtx.Unlock()
+			func() {
+				schedulerInst.batchMtx.Lock()
+				defer schedulerInst.batchMtx.Unlock()
+				if !schedulerInst.batchEndFlag {
+					schedulerInst.batchDone <- struct{}{}
+					schedulerInst.batchEndFlag = true
+				} else {
+					log.Debug("Batch already exitCh with timeout or height at max height")
+				}
+			}()
 		}
 	}
 }
@@ -301,9 +303,11 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			continue
 		}
 
-		schedulerInst.batchMtx.Lock()
-		schedulerInst.batchEndFlag = false
-		schedulerInst.batchMtx.Unlock()
+		func() {
+			schedulerInst.batchMtx.Lock()
+			defer schedulerInst.batchMtx.Unlock()
+			schedulerInst.batchEndFlag = false
+		}()
 
 		ticker := time.NewTicker(time.Duration(expireTime) * time.Second)
 		select {
@@ -328,15 +332,17 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 			}
 			log.Info("schedulerInst handle chain head", "current_height", schedulerInst.blockchain.CurrentBlock().NumberU64(), "max_height", schedulerInst.currentStartMsg.MaxHeight)
 			if schedulerInst.blockchain.CurrentBlock().NumberU64() == schedulerInst.currentStartMsg.MaxHeight {
-				schedulerInst.batchMtx.Lock()
-				if !schedulerInst.batchEndFlag {
-					log.Info("Batch done with height at max height")
-					schedulerInst.batchDone <- struct{}{}
-					schedulerInst.batchEndFlag = true
-				} else {
-					log.Debug("Batch already done with tx apply failed")
-				}
-				schedulerInst.batchMtx.Unlock()
+				func() {
+					schedulerInst.batchMtx.Lock()
+					defer schedulerInst.batchMtx.Unlock()
+					if !schedulerInst.batchEndFlag {
+						log.Info("Batch done with height at max height")
+						schedulerInst.batchDone <- struct{}{}
+						schedulerInst.batchEndFlag = true
+					} else {
+						log.Debug("Batch already done with tx apply failed")
+					}
+				}()
 			}
 		case <-schedulerInst.exitCh:
 			log.Info("scheduler chain head loop stop")
