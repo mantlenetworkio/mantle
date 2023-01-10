@@ -194,7 +194,7 @@ func DecodeBatchTxSetProof(buf []byte) (BatchTxSetProof, error) {
 
 	sequencer := common.BytesToAddress(buf[:common.AddressLength])
 	batchIndex := binary.BigEndian.Uint64(buf[common.AddressLength : common.AddressLength+uint64Length])
-	startIndex := binary.BigEndian.Uint64(buf[common.AddressLength+uint64Length : common.AddressLength+uint64Length*2])
+	baseHeight := binary.BigEndian.Uint64(buf[common.AddressLength+uint64Length : common.AddressLength+uint64Length*2])
 
 	var txs []common.Hash
 
@@ -216,7 +216,7 @@ func DecodeBatchTxSetProof(buf []byte) (BatchTxSetProof, error) {
 	return BatchTxSetProof{
 		Sequencer:  sequencer,
 		BatchIndex: batchIndex,
-		BaseHeight: startIndex,
+		BaseHeight: baseHeight,
 		TxHashSet:  txs,
 		Signature:  signature,
 	}, nil
@@ -274,10 +274,10 @@ func (btsp *BatchTxSetProof) ContainTxHashOrNot(txHash common.Hash, height uint6
 	if btsp == nil {
 		return false
 	}
-	if height < btsp.BaseHeight || height-btsp.BaseHeight >= uint64(len(btsp.TxHashSet)) {
+	if height <= btsp.BaseHeight || height-btsp.BaseHeight > uint64(len(btsp.TxHashSet)) {
 		return false
 	}
-	if bytes.Equal(txHash[:], btsp.TxHashSet[height-btsp.BaseHeight][:]) {
+	if bytes.Equal(txHash[:], btsp.TxHashSet[height-btsp.BaseHeight-1][:]) {
 		return true
 	}
 	return false
