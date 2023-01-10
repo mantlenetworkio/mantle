@@ -37,9 +37,8 @@ type Config struct {
 }
 
 type Scheduler struct {
-	wg sync.WaitGroup
-	l  sync.Mutex // The lock used to protect the sequencerSet field
-	mu sync.Mutex // The lock used to protect the batchEndFlag and batchDone fields
+	sequencerSetMtx sync.Mutex // The lock used to protect the sequencerSet field
+	batchMtx        sync.Mutex // The lock used to protect the batchEndFlag and batchDone fields
 
 	eventMux *event.TypeMux
 	exitCh   chan struct{}
@@ -152,7 +151,6 @@ func (schedulerInst *Scheduler) Start() {
 	schedulerInst.batchEndSub = schedulerInst.eventMux.Subscribe(core.BatchEndEvent{})
 	schedulerInst.chainHeadSub = schedulerInst.blockchain.SubscribeChainHeadEvent(schedulerInst.chainHeadCh)
 
-	schedulerInst.wg.Add(1)
 	go schedulerInst.readLoop()
 	go schedulerInst.addPeerCheckLoop()
 	go schedulerInst.batchEndLoop()
@@ -201,14 +199,16 @@ func (schedulerInst *Scheduler) batchEndLoop() {
 	for obj := range schedulerInst.batchEndSub.Chan() {
 		if _, ok := obj.Data.(core.BatchEndEvent); ok {
 			// if batch already exitCh with timeout or height at max height then pass
-			schedulerInst.mu.Lock()
-			if !schedulerInst.batchEndFlag {
-				schedulerInst.batchDone <- struct{}{}
-				schedulerInst.batchEndFlag = true
-			} else {
-				log.Debug("Batch already exitCh with timeout or height at max height")
-			}
-			schedulerInst.mu.Lock()
+			func() {
+				schedulerInst.batchMtx.Lock()
+				defer schedulerInst.batchMtx.Unlock()
+				if !schedulerInst.batchEndFlag {
+					schedulerInst.batchDone <- struct{}{}
+					schedulerInst.batchEndFlag = true
+				} else {
+					log.Debug("Batch already exitCh with timeout or height at max height")
+				}
+			}()
 		}
 	}
 }
@@ -240,64 +240,79 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			log.Debug("produce block for L1ToL2Tx end", "block_number", schedulerInst.blockchain.CurrentBlock().Number().Uint64())
 		}
 
-		schedulerInst.l.Lock()
-		if schedulerInst.sequencerSet == nil {
+		err = func() error {
+			schedulerInst.sequencerSetMtx.Lock()
+			defer schedulerInst.sequencerSetMtx.Unlock()
+
+			if schedulerInst.sequencerSet == nil {
+				return fmt.Errorf("empty sequencer set")
+			}
+
+			seq := schedulerInst.sequencerSet.getSeqWithMostPriority()
+			var seqSet []common.Address
+			for _, v := range schedulerInst.sequencerSet.Sequencers {
+				seqSet = append(seqSet, v.Address)
+			}
+
+			currentBlock := schedulerInst.blockchain.CurrentBlock()
+			currentIndex := rawdb.ReadStartMsgIndex(schedulerInst.db)
+
+			msg := types.BatchPeriodStartMsg{
+				RollbackStates: rawdb.ReadRollbackStates(schedulerInst.db),
+				BatchIndex:     currentIndex + 1,
+				StartHeight:    currentBlock.NumberU64() + 1,
+				MaxHeight:      currentBlock.NumberU64() + uint64(batchSize),
+				ExpireTime:     uint64(time.Now().Unix() + expireTime),
+				Sequencer:      seq.Address,
+			}
+			signature, err := schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetSignData())
+			if err != nil {
+				return fmt.Errorf("sign BatchPeriodStartEvent error %s", err.Error())
+			}
+			msg.Signature = signature
+			expectMinTxsCount, err := schedulerInst.GetExpectMinTxsCount(uint64(batchSize))
+			if err != nil {
+				return fmt.Errorf("get minimum block count failed %s", err.Error())
+			}
+			schedulerInst.expectMinTxsCount = expectMinTxsCount
+			schedulerInst.currentStartMsg = msg
+			rawdb.WriteCurrentBatchPeriodIndex(schedulerInst.db, msg.BatchIndex)
+
+			// clean channel batchDone
+			select {
+			case <-schedulerInst.batchDone:
+			default:
+			}
+
+			err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
+				Msg:   &msg,
+				ErrCh: nil,
+			})
+			if err != nil {
+				return fmt.Errorf("generate BatchPeriodStartEvent error %s", err.Error())
+			}
+			schedulerInst.sequencerSet.IncrementProducerPriority(1)
+			log.Info("Generate BatchPeriodStartEvent", "batch_index", msg.BatchIndex, "start_height", msg.StartHeight, "max_height", msg.MaxHeight)
+			return nil
+		}()
+
+		if err != nil {
+			log.Info("Generate BatchPeriodStartEvent failed", "err_msg", err.Error())
 			continue
 		}
-		seq := schedulerInst.sequencerSet.getSeqWithMostPriority()
-		var seqSet []common.Address
-		for _, v := range schedulerInst.sequencerSet.Sequencers {
-			seqSet = append(seqSet, v.Address)
-		}
 
-		currentBlock := schedulerInst.blockchain.CurrentBlock()
-		currentIndex := rawdb.ReadStartMsgIndex(schedulerInst.db)
-
-		msg := types.BatchPeriodStartMsg{
-			RollbackStates: rawdb.ReadRollbackStates(schedulerInst.db),
-			BatchIndex:     currentIndex + 1,
-			StartHeight:    currentBlock.NumberU64() + 1,
-			MaxHeight:      currentBlock.NumberU64() + 1 + uint64(batchSize),
-			ExpireTime:     uint64(time.Now().Unix() + expireTime),
-			Sequencer:      seq.Address,
-		}
-		sign, err := schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetSignData())
-		if err != nil {
-			log.Error("sign BatchPeriodStartEvent error")
-			return
-		}
-		msg.Signature = sign
-		expectMinTxsCount, err := schedulerInst.GetExpectMinTxsCount(uint64(batchSize))
-		if err != nil {
-			log.Error("getminBlockCount failed", "error", err)
-			return
-		}
-		schedulerInst.expectMinTxsCount = expectMinTxsCount
-		schedulerInst.currentStartMsg = msg
-		rawdb.WriteCurrentBatchPeriodIndex(schedulerInst.db, msg.BatchIndex)
-
-		err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
-			Msg:   &msg,
-			ErrCh: nil,
-		})
-		if err != nil {
-			log.Error("Generate BatchPeriodStartEvent error")
-			return
-		}
-		log.Info("Generate BatchPeriodStartEvent", "start_height", msg.StartHeight, "max_height", msg.MaxHeight)
-		schedulerInst.sequencerSet.IncrementProducerPriority(1)
-		schedulerInst.l.Unlock()
-
-		schedulerInst.mu.Lock()
-		schedulerInst.batchEndFlag = false
-		schedulerInst.mu.Unlock()
+		func() {
+			schedulerInst.batchMtx.Lock()
+			defer schedulerInst.batchMtx.Unlock()
+			schedulerInst.batchEndFlag = false
+		}()
 
 		ticker := time.NewTicker(time.Duration(expireTime) * time.Second)
 		select {
 		case <-ticker.C:
-			log.Debug("ticker timeout")
+			log.Info("schedulerRoutine, ticker timeout")
 		case <-schedulerInst.batchDone:
-			log.Debug("batch done")
+			log.Info("schedulerRoutine, batch done")
 		case <-schedulerInst.exitCh:
 			log.Info("schedulerRoutine stop")
 			return
@@ -313,18 +328,20 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 				log.Debug("chainHead", "block_number", chainHead.Block.NumberU64(), "extra_data", hex.EncodeToString(chainHead.Block.Extra()))
 				continue
 			}
+			log.Info("schedulerInst handle chain head", "current_height", schedulerInst.blockchain.CurrentBlock().NumberU64(), "max_height", schedulerInst.currentStartMsg.MaxHeight)
 			if schedulerInst.blockchain.CurrentBlock().NumberU64() == schedulerInst.currentStartMsg.MaxHeight {
-				schedulerInst.mu.Lock()
-				if !schedulerInst.batchEndFlag {
-					log.Debug("Batch done with height at max height")
-					schedulerInst.batchDone <- struct{}{}
-					schedulerInst.batchEndFlag = true
-				} else {
-					log.Debug("Batch already done with tx apply failed")
-				}
-				schedulerInst.mu.Lock()
+				func() {
+					schedulerInst.batchMtx.Lock()
+					defer schedulerInst.batchMtx.Unlock()
+					if !schedulerInst.batchEndFlag {
+						log.Info("Batch done with height at max height")
+						schedulerInst.batchDone <- struct{}{}
+						schedulerInst.batchEndFlag = true
+					} else {
+						log.Debug("Batch already done with tx apply failed")
+					}
+				}()
 			}
-			log.Debug("chainHead handle", "block_number", chainHead.Block.NumberU64(), "extra_data", hex.EncodeToString(chainHead.Block.Extra()))
 		case <-schedulerInst.exitCh:
 			log.Info("scheduler chain head loop stop")
 			return
@@ -333,28 +350,32 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 }
 
 func (schedulerInst *Scheduler) readLoop() {
-	defer schedulerInst.wg.Done()
 	for {
 		select {
 		case <-schedulerInst.ticker.C:
-			schedulerInst.l.Lock()
-			seqSet, err := schedulerInst.syncer.GetSequencerSet()
-			if err != nil {
-				log.Error("Get sequencer set failed", "err", err)
-				continue
-			}
-			schedulerInst.SetSequencerHealthPoints(seqSet)
-			// get changes
-			changes := compareSequencerSet(schedulerInst.sequencerSet.Sequencers, seqSet)
-			log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
+			err := func() error {
+				schedulerInst.sequencerSetMtx.Lock()
+				defer schedulerInst.sequencerSetMtx.Unlock()
+				seqSet, err := schedulerInst.syncer.GetSequencerSet()
+				if err != nil {
+					return fmt.Errorf("get sequencer set failed %s", err.Error())
+				}
+				schedulerInst.SetSequencerHealthPoints(seqSet)
+				// get changes
+				changes := compareSequencerSet(schedulerInst.sequencerSet.Sequencers, seqSet)
+				log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
 
-			// update sequencer set and consensus_engine
-			err = schedulerInst.sequencerSet.UpdateWithChangeSet(changes)
+				// update sequencer set and consensus_engine
+				err = schedulerInst.sequencerSet.UpdateWithChangeSet(changes)
+				if err != nil {
+					return fmt.Errorf("sequencer set update failed %s", err.Error())
+				}
+				return err
+			}()
 			if err != nil {
-				log.Error("sequencer set update failed", "err", err)
+				log.Error("update sequencer set error", "err_msg", err.Error())
 				continue
 			}
-			schedulerInst.l.Unlock()
 		case <-schedulerInst.exitCh:
 			log.Info("Get scheduler stop signal, scheduler readLoop stop")
 			return

@@ -63,8 +63,8 @@ func (schedulerInst *Scheduler) punishSequencer(sequencer common.Address) {
 	log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
 
 	// update sequencer set and consensus_engine
-	schedulerInst.l.Lock()
-	defer schedulerInst.l.Unlock()
+	schedulerInst.sequencerSetMtx.Lock()
+	defer schedulerInst.sequencerSetMtx.Unlock()
 	err := schedulerInst.sequencerSet.UpdateWithChangeSet(changes)
 	if err != nil {
 		log.Error("sequencer set update failed", "err", err)
@@ -75,7 +75,7 @@ func (schedulerInst *Scheduler) punishSequencer(sequencer common.Address) {
 func (schedulerInst *Scheduler) deductPoints(sequencer common.Address) {
 	if schedulerInst.zeroPoints(sequencer) {
 		schedulerInst.punishSequencer(sequencer)
-		log.Info("sequencer debuct points success", "current", sequencer, "points", schedulerInst.sequencerAssessor.SequencersPoints[sequencer])
+		log.Info("Deduct sequencer points", "current", sequencer, "points", schedulerInst.sequencerAssessor.SequencersPoints[sequencer])
 		return
 	}
 	schedulerInst.sequencerAssessor.SequencersPoints[sequencer] = schedulerInst.sequencerAssessor.SequencersPoints[sequencer] - 1

@@ -111,11 +111,11 @@ func (bps *BatchPeriodStartMsg) Hash() common.Hash {
 }
 
 type BatchPeriodAnswerMsg struct {
-	Sequencer  common.Address
-	BatchIndex uint64
-	StartIndex uint64
-	Txs        Transactions
-	Signature  []byte
+	Sequencer   common.Address
+	BatchIndex  uint64
+	StartHeight uint64
+	Txs         Transactions
+	Signature   []byte
 }
 
 func (bpa *BatchPeriodAnswerMsg) GetSigner() (common.Address, error) {
@@ -136,7 +136,7 @@ func (bpa *BatchPeriodAnswerMsg) GetSignData() []byte {
 	}
 	buf := bpa.Sequencer.Bytes()
 	buf = binary.BigEndian.AppendUint64(buf, bpa.BatchIndex)
-	buf = binary.BigEndian.AppendUint64(buf, bpa.StartIndex)
+	buf = binary.BigEndian.AppendUint64(buf, bpa.StartHeight)
 	for _, tx := range bpa.Txs {
 		tempTxs := make(Transactions, 1, 1)
 		tempTxs[0] = tx
@@ -162,7 +162,7 @@ func (bpa *BatchPeriodAnswerMsg) ToBatchTxSetProof() *BatchTxSetProof {
 	result := BatchTxSetProof{
 		Sequencer:  bpa.Sequencer,
 		BatchIndex: bpa.BatchIndex,
-		StartIndex: bpa.StartIndex,
+		StartIndex: bpa.StartHeight,
 		Signature:  bpa.Signature,
 	}
 	for _, tx := range bpa.Txs {
