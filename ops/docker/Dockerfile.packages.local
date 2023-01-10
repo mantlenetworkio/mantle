@@ -55,6 +55,8 @@ COPY ./packages ./packages
 COPY ./integration-tests ./integration-tests
 
 # build it!
+RUN cd packages/contracts && yarn build
+RUN cd ../../
 RUN yarn build
 
 
