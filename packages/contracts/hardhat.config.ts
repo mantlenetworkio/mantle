@@ -17,7 +17,6 @@ import 'hardhat-output-validator'
 
 // Hardhat tasks
 import './tasks'
-import './tasks/sequencer'
 
 // Load environment variables from .env
 dotenv.config()
