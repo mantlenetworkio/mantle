@@ -17,6 +17,7 @@ import 'hardhat-output-validator'
 
 // Hardhat tasks
 import './tasks'
+import './tasks/sequencer'
 
 // Load environment variables from .env
 dotenv.config()
@@ -183,6 +184,11 @@ const config: HardhatUserConfig = {
     deploy: './deploy',
     deployments: './deployments',
     deployConfig: './deploy-config',
+    // mantleDeploy: '',
+    sources: "./contracts",
+    artifacts: "./artifacts",
+    // tests: "../sequencer/test",
+    // cache: "../sequencer/cache",
   },
   namedAccounts: {
     deployer: {
