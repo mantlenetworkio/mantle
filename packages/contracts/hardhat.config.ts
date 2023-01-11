@@ -184,11 +184,6 @@ const config: HardhatUserConfig = {
     deploy: './deploy',
     deployments: './deployments',
     deployConfig: './deploy-config',
-    // mantleDeploy: '',
-    sources: "./contracts",
-    artifacts: "./artifacts",
-    // tests: "../sequencer/test",
-    // cache: "../sequencer/cache",
   },
   namedAccounts: {
     deployer: {
