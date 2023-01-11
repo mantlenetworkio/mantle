@@ -5,24 +5,31 @@ task('deploySequencer')
   .addParam('l1bitaddress')
   .setAction(async (taskArgs, hre) => {
     const sequencerFactory = await hre.ethers.getContractFactory('Sequencer')
-    const sequencer = await hre.upgrades.deployProxy(
+    const sequencerProxy = await hre.upgrades.deployProxy(
       sequencerFactory,
       [
         taskArgs.l1bitaddress,
       ]
     )
-    await sequencer.deployed()
-    console.log('sequencer_proxy_address:', sequencer.address.toLocaleLowerCase())
-    console.log('sequencer contract owner :', await sequencer.owner())
-    console.log('sequencer bit address :', await sequencer.bitToken())
+    await sequencerProxy.deployed()
+    const proxyAdmin = await hre.upgrades.admin.getInstance()
+    const impAddr = await proxyAdmin.getProxyImplementation(sequencerProxy.address)
+    console.log('sequencer proxy address :', sequencerProxy.address.toLocaleLowerCase())
+    console.log('sequencer address :', impAddr)
+    console.log('sequencer contract owner :', await sequencerProxy.owner())
+    console.log('sequencer bit address :', await sequencerProxy.bitToken())
   })
 
-task("updateScheduler")
-  .addParam("sequencer")
-  .addParam("scheduler")
+task('upgradeSequencer')
+  .addParam('sequencerproxy')
   .setAction(async (taskArgs, hre) => {
     const sequencerFactory = await hre.ethers.getContractFactory('Sequencer')
-    const sequencer = sequencerFactory.attach(taskArgs.sequencer)
-    await sequencer.updateScheduler(taskArgs.scheduler)
-    console.log(await sequencer.scheduler())
+    const sequencerProxy = await hre.upgrades.upgradeProxy(taskArgs.sequencerproxy,sequencerFactory)
+    await sequencerProxy.deployed()
+    const proxyAdmin = await hre.upgrades.admin.getInstance()
+    const impAddr = await proxyAdmin.getProxyImplementation(sequencerProxy.address)
+    console.log('sequencer proxy address:', sequencerProxy.address.toLocaleLowerCase())
+    console.log('sequencer proxy owner :', await sequencerProxy.owner())
+    console.log('sequencer address:', impAddr)
+    console.log('sequencer bit address :', await sequencerProxy.bitToken())
   })
