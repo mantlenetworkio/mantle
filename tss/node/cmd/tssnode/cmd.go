@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
+
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
@@ -41,7 +42,6 @@ func Command() *cobra.Command {
 }
 
 func runNode(cmd *cobra.Command) error {
-	serverPort, _ := cmd.Flags().GetString("port")
 	nonProd, _ := cmd.Flags().GetBool("non-prod")
 	waitPeersFullConnected, _ := cmd.Flags().GetBool("full")
 	cfg := tss.GetConfigFromCmd(cmd)
@@ -119,7 +119,7 @@ func runNode(cmd *cobra.Command) error {
 	}
 	signer.Start()
 
-	hs := server.NewHttpServer(":"+serverPort, tssInstance, signer, nonProd)
+	hs := server.NewHttpServer(cfg.Node.HttpAddr, tssInstance, signer, nonProd)
 
 	if err := hs.Start(); err != nil {
 		log.Error().Err(err).Msg("fail to start http server")
