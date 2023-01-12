@@ -123,7 +123,7 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 		sequencerAssessor: NewHealthAssessor(),
 		chainHeadCh:       make(chan core.ChainHeadEvent, chainHeadChanSize),
 	}
-
+	schedulerInst.SetSequencerHealthPoints(seqSet)
 	return schedulerInst, nil
 }
 

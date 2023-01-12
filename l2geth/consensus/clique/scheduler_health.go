@@ -29,16 +29,13 @@ func (schedulerInst *Scheduler) SetSequencerHealthPoints(seqSets synchronizer.Se
 	for _, seqSet := range seqSets {
 		schedulerInst.sequencerAssessor.SequencersPoints[common.Address(seqSet.MintAddress)] = initPoints
 	}
-	for key := range schedulerInst.sequencerAssessor.SequencersPoints {
-		schedulerInst.sequencerAssessor.SequencersPoints[key] = initPoints
-	}
 	log.Debug("set sequencer healthChecker success")
 }
 
 func (schedulerInst *Scheduler) checkSequencer() {
 	blockNumber := schedulerInst.blockchain.CurrentHeader().Number.Uint64()
 	sequencer := schedulerInst.currentStartMsg.Sequencer
-	if (blockNumber - schedulerInst.currentStartMsg.StartHeight + 1) >= schedulerInst.expectMinTxsCount {
+	if (blockNumber - schedulerInst.currentStartMsg.StartHeight) >= schedulerInst.expectMinTxsCount {
 		return
 	}
 	// deduct points
@@ -61,7 +58,7 @@ func (schedulerInst *Scheduler) punishSequencer(sequencer common.Address) {
 	delete(schedulerInst.sequencerAssessor.SequencersPoints, sequencer)
 	// get changes
 	changes := compareSequencerSet(schedulerInst.sequencerSet.Sequencers, newSeqSet)
-	log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
+	log.Debug(fmt.Sprintf("punishSequencer Get sequencer set success, have changes: %d", len(changes)))
 
 	// update sequencer set and consensus_engine
 	schedulerInst.sequencerSetMtx.Lock()
@@ -76,10 +73,11 @@ func (schedulerInst *Scheduler) punishSequencer(sequencer common.Address) {
 func (schedulerInst *Scheduler) deductPoints(sequencer common.Address) {
 	if schedulerInst.zeroPoints(sequencer) {
 		schedulerInst.punishSequencer(sequencer)
-		log.Info("Deduct sequencer points", "current", sequencer, "points", schedulerInst.sequencerAssessor.SequencersPoints[sequencer])
+		log.Debug("punishSequencer success")
 		return
 	}
 	schedulerInst.sequencerAssessor.SequencersPoints[sequencer] = schedulerInst.sequencerAssessor.SequencersPoints[sequencer] - 1
+	log.Info("Deduct sequencer points", "current", sequencer, "points", schedulerInst.sequencerAssessor.SequencersPoints[sequencer])
 	return
 }
 
