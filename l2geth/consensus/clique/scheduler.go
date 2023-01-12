@@ -249,11 +249,6 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			}
 
 			seq := schedulerInst.sequencerSet.getSeqWithMostPriority()
-			var seqSet []common.Address
-			for _, v := range schedulerInst.sequencerSet.Sequencers {
-				seqSet = append(seqSet, v.Address)
-			}
-
 			currentBlock := schedulerInst.blockchain.CurrentBlock()
 			currentIndex := rawdb.ReadStartMsgIndex(schedulerInst.db)
 
