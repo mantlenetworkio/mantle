@@ -13,6 +13,7 @@ use (
 	./tss
 	./mt-batcher
 	./mt-challenger
+	./mt-meso-service
 )
 
 replace github.com/ethereum/go-ethereum v1.10.21 => github.com/ethereum-mantle/reference-optimistic-geth v0.0.0-20220803173305-1c9d4cc76a6e
