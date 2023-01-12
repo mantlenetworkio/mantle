@@ -49,6 +49,16 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         SEQUENCER_PUBLISH_WINDOW = _sequencerPublishWindow;
     }
 
+    function setFraudProofWindow(uint256 _fraudProofWindow) public {
+        // Proposers must have previously staked at the BondManager
+        require(
+            IBondManager(resolve("BondManager")).isCollateralized(msg.sender),
+            "Proposer does not have enough collateral posted"
+        );
+
+        FRAUD_PROOF_WINDOW = _fraudProofWindow;
+    }
+
     /********************
      * Public Functions *
      ********************/

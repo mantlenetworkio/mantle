@@ -5,16 +5,20 @@ import (
 	"crypto/tls"
 	"net/http"
 	"strings"
+	"time"
 
-	"github.com/mantlenetworkio/mantle/bss-core/dial"
 	"github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 )
 
+const (
+	DefaultTimeout = 5 * time.Second
+)
+
 func DialL2EthClientWithTimeout(ctx context.Context, url string, disableHTTP2 bool) (
 	*ethclient.Client, error) {
-	ctxt, cancel := context.WithTimeout(ctx, dial.DefaultTimeout)
+	ctxt, cancel := context.WithTimeout(ctx, DefaultTimeout)
 	defer cancel()
 	if strings.HasPrefix(url, "http") {
 		httpClient := new(http.Client)

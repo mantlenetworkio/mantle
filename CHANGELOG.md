@@ -1,6 +1,24 @@
 # Changelog
 
-## 0.2.0-alpha - 2022-12-23
+
+## [0.2.0] - 2023-01-09
+
+### Features
+- add white list for da fraud proof([#496](https://github.com/mantlenetworkio/mantle/issues/496))
+- support mt-batcher and mt-challenger send transaction by EIP1559([#524](https://github.com/mantlenetworkio/mantle/issues/524))
+- da challenger integrate to mantle([#527](https://github.com/mantlenetworkio/mantle/issues/527))
+- add da rollup min and max size config([#528](https://github.com/mantlenetworkio/mantle/issues/528))
+- Add WBIT Token on mantle network([#540](https://github.com/mantlenetworkio/mantle/issues/540))
+
+### Improvements
+- Make challenge period time for fraud proofs configurable([#461](https://github.com/mantlenetworkio/mantle/pull/461))
+- Updates to main README.md([#543](https://github.com/mantlenetworkio/mantle/pull/543))
+- sdk bump to v0.1.4([#546](https://github.com/mantlenetworkio/mantle/pull/546))
+
+### Bug Fixes
+- fix bug when tss manager get signature from store ([#538](https://github.com/mantlenetworkio/mantle/pull/538))
+
+## [0.2.0-alpha](https://github.com/mantlenetworkio/mantle/commits/v0.2.0-alpha) - 2022-12-23
 
 ### Features
 - Implement the mechanism of triggering the Rollback instruction when the MPC signature fails ([#377](https://github.com/mantlenetworkio/mantle/pull/377)).
@@ -11,6 +29,7 @@
 - Update hardhat version ([#382](https://github.com/mantlenetworkio/mantle/pull/382)).
 - Update datalayer to support l1 hardhat and bit token ([#410](https://github.com/mantlenetworkio/mantle/pull/410)).
 - Update golang version to 1.19 ([#424](https://github.com/mantlenetworkio/mantle/pull/424)).
+
 
 ### Bug Fixes
 - Optimized tss roll back codes ([#454](https://github.com/mantlenetworkio/mantle/pull/454)).
