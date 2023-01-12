@@ -391,13 +391,11 @@ func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 
 // compareSequencerSet will return the update with Driver.seqz
 func compareSequencerSet(old []*Sequencer, newSeq synchronizer.SequencerSequencerInfos) []*Sequencer {
-	log.Info("compareSequencerSet", "old_length", len(old), "newSeq_length", len(newSeq))
 	var tmp synchronizer.SequencerSequencerInfos
 	for i, v := range newSeq {
 		changed := true
 		for _, seq := range old {
 			power := big.NewInt(1).Div(v.Amount, scale)
-			log.Info("compareSequencerSet", "amount", v.Amount.String(), "miner_address", v.MintAddress.String(), "power", seq.Power, "address", seq.Address.String())
 			if bytes.Equal(seq.Address.Bytes(), v.MintAddress.Bytes()) && power.Int64() == seq.Power {
 				changed = false
 				break
