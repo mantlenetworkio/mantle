@@ -23,6 +23,8 @@ db_dir = "/root/.tssnode/db"
 base_dir = "/root/.tssnode"
 # websocket addr of tss manager
 ws_addr = "tcp://tss-manager:8081"
+# http server port
+http_addr = ":8080"
 # l2 eth rpc
 l2_eth_rpc = "http://10.0.0.5:8545"
 #Proxy_tssGroup

@@ -31,7 +31,7 @@
     "@babel/eslint-parser": "^7.5.4",
     "@mantleio/contracts": "0.1.0",
     "@mantleio/core-utils": "0.1.0",
-    "@mantleio/sdk": "0.1.2",
+    "@mantleio/sdk": "0.1.4",
     "@ethersproject/abstract-provider": "^5.6.1",
     "@ethersproject/providers": "^5.6.8",
     "@ethersproject/transactions": "^5.6.2",

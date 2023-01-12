@@ -2,14 +2,21 @@ package mt_batcher
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/getsentry/sentry-go"
 	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/l1l2client"
 	"github.com/mantlenetworkio/mantle/mt-batcher/sequencer"
+	"strings"
+
 	"github.com/urfave/cli"
+	"math/big"
 	"time"
 )
 
@@ -21,7 +28,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 		}
 		log.Info("Config parsed",
 			"disperser", cfg.DisperserEndpoint,
-			"mtlrpc", cfg.L2MtlRpc)
+			"mtlrpc", cfg.L2MtlRpc, "gitVersion", gitVersion)
 
 		if cfg.SentryEnable {
 			defer sentry.Flush(2 * time.Second)
@@ -30,15 +37,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		log.Info("Config LogLevel",
-			"LogLevel", cfg.LogLevel)
-
-		//var logHandler log.Handler
-		//logLevel, err := log.LvlFromString(cfg.LogLevel)
-		//if err != nil {
-		//	return err
-		//}
-		//log.Root().SetHandler(log.LvlFilterHandler(logLevel, logHandler))
+		log.Info("Config LogLevel", "LogLevel", cfg.LogLevel)
 
 		sequencerPrivKey, _, err := bsscore.ParseWalletPrivKeyAndContractAddr(
 			"DaSequencer", cfg.Mnemonic, cfg.SequencerHDPath,
@@ -47,22 +46,14 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-
 		log.Info("sequencerPrivKey", "sequencerPrivKey", sequencerPrivKey)
 
-		l1l2Config := &l1l2client.Config{
-			L1RpcUrl:     cfg.L1EthRpc,
-			ChainId:      cfg.ChainId,
-			Private:      cfg.PrivateKey,
-			DisableHTTP2: cfg.DisableHTTP2,
-		}
-
-		l1Client, err := l1l2client.NewL1ChainClient(ctx, l1l2Config)
+		l1Client, err := l1l2client.L1EthClientWithTimeout(ctx, cfg.L1EthRpc, cfg.DisableHTTP2)
 		if err != nil {
 			return err
 		}
 		log.Info("l1Client init success")
-		chainID, err := l1Client.Client.ChainID(ctx)
+		chainID, err := l1Client.ChainID(ctx)
 		if err != nil {
 			return err
 		}
@@ -73,19 +64,37 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 		}
 		log.Info("l2Client init success")
 
+		MtBatherPrivateKey, err := crypto.HexToECDSA(strings.TrimPrefix(cfg.PrivateKey, "0x"))
+		if err != nil {
+			return err
+		}
+
+		signer := func(chainID *big.Int) sequencer.SignerFn {
+			s := PrivateKeySignerFn(MtBatherPrivateKey, chainID)
+			return func(_ context.Context, addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
+				return s(addr, tx)
+			}
+		}
+
 		driverConfig := &sequencer.DriverConfig{
-			L1Client:          l1Client,
-			L2Client:          l2Client,
-			EigenContractAddr: ethc.Address(common.HexToAddress(cfg.EigenContractAddress)),
-			PrivKey:           sequencerPrivKey,
-			BlockOffset:       cfg.BlockOffset,
-			EigenLayerNode:    cfg.EigenLayerNode,
-			ChainID:           chainID,
-			DataStoreDuration: uint64(cfg.DataStoreDuration),
-			DataStoreTimeout:  cfg.DataStoreTimeout,
-			DisperserSocket:   cfg.DisperserEndpoint,
-			PollInterval:      cfg.PollInterval,
-			GraphProvider:     cfg.GraphProvider,
+			L1Client:                  l1Client,
+			L2Client:                  l2Client,
+			EigenContractAddr:         ethc.Address(common.HexToAddress(cfg.EigenContractAddress)),
+			PrivKey:                   sequencerPrivKey,
+			BlockOffset:               cfg.BlockOffset,
+			RollUpMinSize:             cfg.RollUpMinSize,
+			RollUpMaxSize:             cfg.RollUpMaxSize,
+			EigenLayerNode:            cfg.EigenLayerNode,
+			ChainID:                   chainID,
+			DataStoreDuration:         uint64(cfg.DataStoreDuration),
+			DataStoreTimeout:          cfg.DataStoreTimeout,
+			DisperserSocket:           cfg.DisperserEndpoint,
+			PollInterval:              cfg.PollInterval,
+			GraphProvider:             cfg.GraphProvider,
+			ResubmissionTimeout:       cfg.ResubmissionTimeout,
+			NumConfirmations:          cfg.NumConfirmations,
+			SafeAbortNonceTooLowCount: cfg.SafeAbortNonceTooLowCount,
+			SignerFn:                  signer(chainID),
 		}
 		driver, err := sequencer.NewDriver(ctx, driverConfig)
 		if err != nil {
@@ -100,5 +109,20 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 		defer driver.Stop()
 		log.Info("mt batcher started")
 		return nil
+	}
+}
+
+func PrivateKeySignerFn(key *ecdsa.PrivateKey, chainID *big.Int) bind.SignerFn {
+	from := crypto.PubkeyToAddress(key.PublicKey)
+	signer := types.LatestSignerForChainID(chainID)
+	return func(address ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
+		if address != from {
+			return nil, bind.ErrNotAuthorized
+		}
+		signature, err := crypto.Sign(signer.Hash(tx).Bytes(), key)
+		if err != nil {
+			return nil, err
+		}
+		return tx.WithSignature(signer, signature)
 	}
 }

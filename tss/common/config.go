@@ -40,6 +40,7 @@ type NodeConfig struct {
 	BaseDir      string `json:"base_dir" mapstructure:"base_dir"`
 	DBDir        string `json:"db_dir" mapstructure:"db_dir"`
 	WsAddr       string `json:"ws_addr" mapstructure:"ws_addr"`
+	HttpAddr     string `json:"http_addr" mapstructure:"http_addr"`
 	L2EthRpc     string `json:"l2_eth_rpc" mapstructure:"l2_eth_rpc"`
 	DisableHTTP2 bool   `json:"disable_http2" mapstructure:"disable_http2"`
 	PrivateKey   string `json:"private_key" mapstructure:"private_key"`

@@ -813,15 +813,15 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 		txs = append(txs, *block.Transactions()[0])
 		oldBlocks = append(oldBlocks, *block)
 	}
-	log.Info("setHead start", "current block number", s.bc.CurrentHeader().Number.Uint64())
+	log.Info("setHead start", "currentBlockNumber", s.bc.CurrentHeader().Number.Uint64())
 	if err := s.SetHead(start - 1); err != nil {
-		log.Crit("rollback error:", "setHead error", err)
+		log.Crit("rollback setHead failed", "error", err)
 	}
-	log.Info("setHead end,current :", "block number", s.bc.CurrentHeader().Number.Uint64())
+	log.Info("setHead end", "currentBlockNumber", s.bc.CurrentHeader().Number.Uint64())
 	var handle bool
 	for i, t := range txs {
 		if err := s.applyIndexedTransaction(&t, &types.BatchTxSetProof{}); err != nil {
-			log.Crit("rollback applyIndexedTransaction tx :", "applyIndexedTransaction error", err)
+			log.Crit("rollback applyIndexedTransaction tx failed", "error", err)
 		}
 		newBlock := s.bc.GetBlockByNumber(uint64(i) + start)
 		if oldBlocks[i].Hash() != newBlock.Hash() && !handle {
@@ -833,7 +833,7 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 			handle = true
 		}
 	}
-	log.Info("apply rollback blocks transactions end", "current block number", s.bc.CurrentHeader().Number.Uint64())
+	log.Info("apply rollback blocks transactions end", "currentBlockNumber", s.bc.CurrentHeader().Number.Uint64())
 	return nil
 }
 
