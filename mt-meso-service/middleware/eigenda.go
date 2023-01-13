@@ -14,43 +14,43 @@ import (
 	"time"
 )
 
-type EigenDaConfig struct {
-	L1Client          *ethclient.Client
+type EigenDaMiddleWareConfig struct {
+	EthClient         *ethclient.Client
 	EigenContractAddr common.Address
 	RetrieverSocket   string
 	Timeout           time.Duration
 }
 
-type EigenDa struct {
+type EigenDaMiddleWare struct {
 	Ctx             context.Context
-	Cfg             *EigenDaConfig
+	Cfg             *EigenDaMiddleWareConfig
 	EigenDaContract *bindings.BVMEigenDataLayrChain
 	EigenABI        *abi.ABI
 }
 
-func NewEigenDa(ctx context.Context, cfg *EigenDaConfig) (*EigenDa, error) {
+func NewEigenDaMiddleWare(ctx context.Context, cfg *EigenDaMiddleWareConfig) (*EigenDaMiddleWare, error) {
 	eigenContract, err := bindings.NewBVMEigenDataLayrChain(
-		common.Address(cfg.EigenContractAddr), cfg.L1Client,
+		cfg.EigenContractAddr, cfg.EthClient,
 	)
 	if err != nil {
 		return nil, err
 	}
-	return &EigenDa{
+	return &EigenDaMiddleWare{
 		Cfg:             cfg,
 		Ctx:             ctx,
 		EigenDaContract: eigenContract,
 	}, nil
 }
 
-func (ed EigenDa) GetLatestRollupBatchIndex() (*big.Int, error) {
+func (ed *EigenDaMiddleWare) GetRollupBatchIndex() (*big.Int, error) {
 	return ed.EigenDaContract.RollupBatchIndex(&bind.CallOpts{})
 }
 
-func (ed EigenDa) GetRollupStoreByRollupBatchIndex(batchInde *big.Int) (bindings.BVMEigenDataLayrChainRollupStore, error) {
-	return ed.EigenDaContract.GetRollupStoreByRollupBatchIndex(&bind.CallOpts{}, batchInde)
+func (ed *EigenDaMiddleWare) GetRollupStoreByRollupBatchIndex(batchIndex *big.Int) (bindings.BVMEigenDataLayrChainRollupStore, error) {
+	return ed.EigenDaContract.GetRollupStoreByRollupBatchIndex(&bind.CallOpts{}, batchIndex)
 }
 
-func (ed *EigenDa) GetBatchTransactionByStoreNumber(storeNumber uint32) ([]byte, error) {
+func (ed *EigenDaMiddleWare) GetBatchTransactionByStoreNumber(storeNumber uint32) ([]byte, error) {
 	conn, err := grpc.Dial(ed.Cfg.RetrieverSocket, grpc.WithInsecure())
 	if err != nil {
 		log.Error("Disperser Cannot connect to %v. %v\n", ed.Cfg.RetrieverSocket, err)

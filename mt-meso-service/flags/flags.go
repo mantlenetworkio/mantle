@@ -11,11 +11,17 @@ func prefixEnvVar(suffix string) string {
 }
 
 var (
-	GraphProviderFlag = cli.StringFlag{
-		Name:     "graph-provider",
-		Usage:    "Graphql endpoint for graph node",
+	EthRpcFlag = cli.StringFlag{
+		Name:     "eth-rpc",
+		Usage:    "HTTP provider URL for L1",
 		Required: true,
-		EnvVar:   prefixEnvVar("GRAPH_PROVIDER"),
+		EnvVar:   prefixEnvVar("ETH_RPC"),
+	}
+	EigenDaHttpPortFlag = cli.IntFlag{
+		Name:     "eigen-da-http-port",
+		Usage:    "Eigen da service port",
+		Required: true,
+		EnvVar:   prefixEnvVar("EIGEN_DA_HTTP_PORT"),
 	}
 	EigenContractAddressFlag = cli.StringFlag{
 		Name:     "rollup-address",
@@ -34,16 +40,23 @@ var (
 		Usage:  "Whether or not to disable HTTP/2 support.",
 		EnvVar: prefixEnvVar("HTTP2_DISABLE"),
 	}
+	EchoDebugFlag = cli.BoolFlag{
+		Name:   "echo-debug",
+		Usage:  "Echo log debug",
+		EnvVar: prefixEnvVar("ECHO-DEBUG"),
+	}
 )
 
 var requiredFlags = []cli.Flag{
-	GraphProviderFlag,
+	EthRpcFlag,
+	EigenDaHttpPortFlag,
 	EigenContractAddressFlag,
 	RetrieverSocketFlag,
 }
 
 var optionalFlags = []cli.Flag{
 	HTTP2DisableFlag,
+	EchoDebugFlag,
 }
 
 func init() {
