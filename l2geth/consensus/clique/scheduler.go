@@ -385,21 +385,42 @@ func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 
 // compareSequencerSet will return the update with Driver.seqz
 func compareSequencerSet(old []*Sequencer, newSeq synchronizer.SequencerSequencerInfos) []*Sequencer {
+	var find []common.Address
 	var tmp synchronizer.SequencerSequencerInfos
 	for i, v := range newSeq {
 		changed := true
 		for _, seq := range old {
 			power := big.NewInt(1).Div(v.Amount, scale)
-			if bytes.Equal(seq.Address.Bytes(), v.MintAddress.Bytes()) && power.Int64() == seq.Power {
-				changed = false
-				break
+			// found the sequencer and their power equal
+			if bytes.Equal(seq.Address.Bytes(), v.MintAddress.Bytes()) {
+				find = append(find, seq.Address)
+				if power.Int64() == seq.Power {
+					changed = false
+					break
+				}
 			}
 		}
+		// sequencer add or update
 		if changed {
 			tmp = append(tmp, newSeq[i])
 		}
 	}
 	changes := bindToSeq(tmp)
+	// select the deleted sequencer
+	for _, v := range old {
+		del := true
+		for _, addr := range find {
+			if bytes.Equal(addr.Bytes(), v.Address.Bytes()) {
+				del = false
+				break
+			}
+		}
+		if del {
+			tmpDel := v
+			tmpDel.Power = 0
+			changes = append(changes, tmpDel)
+		}
+	}
 	return changes
 }
 
