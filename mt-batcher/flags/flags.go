@@ -82,9 +82,21 @@ var (
 	}
 	BlockOffsetFlag = cli.Uint64Flag{
 		Name:   "block-offset",
-		Usage:  "The offset between the CTC contract start and the L2 geth blocks",
+		Usage:  "The offset between the eigenda contract start and the L2 geth blocks",
 		Value:  1,
 		EnvVar: prefixEnvVar(envVarPrefix, "BLOCK_OFFSET"),
+	}
+	RollUpMinSizeFlag = cli.Uint64Flag{
+		Name:   "rollup-min-size",
+		Usage:  "Rollup transaction min size data for eigen da",
+		Value:  1000,
+		EnvVar: prefixEnvVar(envVarPrefix, "ROLLUP_MIN_SIZE"),
+	}
+	RollUpMaxSizeFlag = cli.Uint64Flag{
+		Name:   "rollup-max-size",
+		Usage:  "Rollup transaction max size data for eigen da",
+		Value:  31600, // ktz for order is 3000
+		EnvVar: prefixEnvVar(envVarPrefix, "ROLLUP_MAX_SIZE"),
 	}
 	EigenLayerNodeFlag = cli.IntFlag{
 		Name:   "eigen-layer-node",
@@ -92,10 +104,31 @@ var (
 		Value:  4,
 		EnvVar: prefixEnvVar(envVarPrefix, "EIGEN_LAYER_NODE"),
 	}
+	ResubmissionTimeoutFlag = cli.DurationFlag{
+		Name: "resubmission-timeout",
+		Usage: "Duration we will wait before resubmitting a " +
+			"transaction to L1",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "RESUBMISSION_TIMEOUT"),
+	}
+	NumConfirmationsFlag = cli.Uint64Flag{
+		Name: "num-confirmations",
+		Usage: "Number of confirmations which we will wait after " +
+			"appending a new batch",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "NUM_CONFIRMATIONS"),
+	}
+	SafeAbortNonceTooLowCountFlag = cli.Uint64Flag{
+		Name: "safe-abort-nonce-too-low-count",
+		Usage: "Number of ErrNonceTooLow observations required to " +
+			"give up on a tx at a particular nonce without receiving " +
+			"confirmation",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "SAFE_ABORT_NONCE_TOO_LOW_COUNT"),
+	}
 	PollIntervalFlag = cli.DurationFlag{
-		Name: "poll-interval",
-		Usage: "Delay between querying L2 for more transactions and " +
-			"creating a new batch",
+		Name:     "poll-interval",
+		Usage:    "Delay between querying L2 for more transactions and creating a new batch",
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "POLL_INTERVAL"),
 	}
@@ -160,10 +193,15 @@ var requiredFlags = []cli.Flag{
 	SequencerHDPathFlag,
 	EigenContractAddressFlag,
 	BlockOffsetFlag,
+	RollUpMinSizeFlag,
+	RollUpMaxSizeFlag,
 	PollIntervalFlag,
 	DataStoreDurationFlag,
 	DataStoreTimeoutFlag,
 	EigenLayerNodeFlag,
+	ResubmissionTimeoutFlag,
+	NumConfirmationsFlag,
+	SafeAbortNonceTooLowCountFlag,
 }
 
 var optionalFlags = []cli.Flag{

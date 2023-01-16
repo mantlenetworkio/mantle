@@ -489,6 +489,7 @@ func (w *worker) l1Tol2StartLoop() {
 func (w *worker) batchStartLoop() {
 	defer w.bpsSub.Unsubscribe()
 
+	log.Info("Start batchStartLoop")
 	for {
 		select {
 		//BatchPeriodStartEvent
@@ -626,6 +627,7 @@ func (w *worker) batchStartLoop() {
 func (w *worker) batchAnswerLoop() {
 	defer w.bpsSub.Unsubscribe()
 
+	log.Info("Start batchAnswerLoop")
 	for {
 		select {
 		// BatchPeriodAnswerEvent

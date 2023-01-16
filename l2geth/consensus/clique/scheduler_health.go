@@ -1,7 +1,7 @@
 package clique
 
 import (
-	"fmt"
+	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique/synchronizer"
@@ -14,7 +14,7 @@ type healthAssessor struct {
 }
 
 var (
-	// TODO set by contract
+	// TODO set by config
 	initPoints uint64 = 6
 )
 
@@ -22,26 +22,31 @@ func NewHealthAssessor() *healthAssessor {
 	return &healthAssessor{}
 }
 
-// SetSequencerHealthPoints when update sequencerSet sequencerHealthChecker will be reset
-func (schedulerInst *Scheduler) SetSequencerHealthPoints(seqSets synchronizer.SequencerSequencerInfos) {
+// setSequencerHealthPoints when update sequencerSet sequencerHealthChecker will be reset
+func (schedulerInst *Scheduler) setSequencerHealthPoints(seqSets synchronizer.SequencerSequencerInfos) {
 	schedulerInst.sequencerAssessor.SequencersPoints = make(map[common.Address]uint64)
 	schedulerInst.sequencerAssessor.SeqSet = seqSets
 	for _, seqSet := range seqSets {
 		schedulerInst.sequencerAssessor.SequencersPoints[common.Address(seqSet.MintAddress)] = initPoints
 	}
-	for key := range schedulerInst.sequencerAssessor.SequencersPoints {
-		schedulerInst.sequencerAssessor.SequencersPoints[key] = initPoints
-	}
-	log.Debug("set sequencer healthChecker success")
 }
 
 func (schedulerInst *Scheduler) checkSequencer() {
-	blockNumber := schedulerInst.blockchain.CurrentHeader().Number.Uint64()
 	sequencer := schedulerInst.currentStartMsg.Sequencer
-	if (blockNumber - schedulerInst.currentStartMsg.StartHeight) >= schedulerInst.expectMinTxsCount {
+	if sequencer.String() == (common.Address{}).String() {
+		// just return for first running
 		return
 	}
-	// deduct points
+	blockNumber := schedulerInst.blockchain.CurrentHeader().Number.Uint64()
+	log.Info("check sequencer", "sequencer", sequencer.String(),
+		"current_height", blockNumber,
+		"last_batch_start_height", schedulerInst.currentStartMsg.StartHeight,
+		"expect_min_txs_count", schedulerInst.expectMinTxsCount,
+		"current_point", schedulerInst.sequencerAssessor.SequencersPoints[sequencer])
+
+	if (blockNumber - schedulerInst.currentStartMsg.StartHeight + 1) >= schedulerInst.expectMinTxsCount {
+		return
+	}
 	schedulerInst.deductPoints(sequencer)
 	return
 }
@@ -50,17 +55,20 @@ func (schedulerInst *Scheduler) checkSequencer() {
 // the health score reaches the lower limit, the Sequencer is removed
 // from the collection of block producers on the day
 func (schedulerInst *Scheduler) punishSequencer(sequencer common.Address) {
+	if len(schedulerInst.sequencerSet.Sequencers) == 1 {
+		log.Info("Only have one sequencer, don't punish it")
+		return
+	}
+	log.Info("Punish sequencer", "sequencer", sequencer.String())
 	var newSeqSet synchronizer.SequencerSequencerInfos
 	for _, seqSet := range schedulerInst.sequencerAssessor.SeqSet {
 		if seqSet.MintAddress.String() == sequencer.String() {
-			continue
+			seqSet.Amount = big.NewInt(0)
 		}
 		newSeqSet = append(newSeqSet, seqSet)
 	}
 	delete(schedulerInst.sequencerAssessor.SequencersPoints, sequencer)
-	// get changes
 	changes := compareSequencerSet(schedulerInst.sequencerSet.Sequencers, newSeqSet)
-	log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
 
 	// update sequencer set and consensus_engine
 	schedulerInst.sequencerSetMtx.Lock()
@@ -73,12 +81,15 @@ func (schedulerInst *Scheduler) punishSequencer(sequencer common.Address) {
 }
 
 func (schedulerInst *Scheduler) deductPoints(sequencer common.Address) {
-	if schedulerInst.zeroPoints(sequencer) {
-		schedulerInst.punishSequencer(sequencer)
-		log.Info("Deduct sequencer points", "current", sequencer, "points", schedulerInst.sequencerAssessor.SequencersPoints[sequencer])
+	if schedulerInst.sequencerAssessor.SequencersPoints[sequencer] > 0 {
+		schedulerInst.sequencerAssessor.SequencersPoints[sequencer] = schedulerInst.sequencerAssessor.SequencersPoints[sequencer] - 1
+	} else {
+		log.Error("try to deduct point from sequencer with zero point", "sequencer", sequencer.String())
 		return
 	}
-	schedulerInst.sequencerAssessor.SequencersPoints[sequencer] = schedulerInst.sequencerAssessor.SequencersPoints[sequencer] - 1
+	if schedulerInst.zeroPoints(sequencer) {
+		schedulerInst.punishSequencer(sequencer)
+	}
 	return
 }
 
@@ -86,7 +97,7 @@ func (schedulerInst *Scheduler) zeroPoints(sequencer common.Address) bool {
 	return schedulerInst.sequencerAssessor.SequencersPoints[sequencer] == 0
 }
 
-func (schedulerInst *Scheduler) GetExpectMinTxsCount(batchSize uint64) (uint64, error) {
+func (schedulerInst *Scheduler) getExpectMinTxsCount(batchSize uint64) (uint64, error) {
 	var pendingTxCount uint64
 	pendingTxs, err := schedulerInst.txpool.Pending()
 	if err != nil {

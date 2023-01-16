@@ -263,6 +263,15 @@ const config: HardhatUserConfig = {
     sccSequencerPublishWindowSeconds: {
       type: 'number',
     },
+    blockStaleMeasure: {
+      type: 'number',
+    },
+    daFraudProofPeriod: {
+      type: 'number',
+    },
+    l2SubmittedBlockNumber: {
+      type: 'number',
+    },
     bvmSequencerAddress: {
       type: 'address',
     },
@@ -343,6 +352,8 @@ if (
     url: process.env.CONTRACTS_RPC_URL,
     live: true,
     saveDeployments: true,
+    gas: 'auto',
+    gasPrice: 'auto',
     tags: [process.env.CONTRACTS_TARGET_NETWORK],
   }
 }

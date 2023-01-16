@@ -30,7 +30,7 @@ services:
       - l1_chain
     build:
       context: ..
-      dockerfile: ./ops/docker/Dockerfile.packages
+      dockerfile: ./ops/docker/Dockerfile.packages.local
       target: deployer
     image: mantlenetworkio/deployer:${DOCKER_TAG_DEPLOYER:-latest}
     entrypoint: ./deployer.sh
@@ -53,7 +53,7 @@ services:
       - deployer
     build:
       context: ..
-      dockerfile: ./ops/docker/Dockerfile.packages
+      dockerfile: ./ops/docker/Dockerfile.packages.local
       target: data-transport-layer
     image: mantlenetworkio/data-transport-layer:${DOCKER_TAG_DATA_TRANSPORT_LAYER:-latest}
     # override with the dtl script and the env vars required for it
@@ -82,7 +82,7 @@ services:
       replicas: 0
     build:
       context: ..
-      dockerfile: ./ops/docker/Dockerfile.packages
+      dockerfile: ./ops/docker/Dockerfile.packages.local
       target: message-relayer
     image: mantlenetworkio/message-relayer:${DOCKER_TAG_MESSAGE_RELAYER:-latest}
     entrypoint: ./relayer.sh
@@ -100,7 +100,7 @@ services:
       replicas: 0
     build:
       context: ..
-      dockerfile: ./ops/docker/Dockerfile.packages
+      dockerfile: ./ops/docker/Dockerfile.packages.local
       target: replica-healthcheck
     image: mantlenetworkio/replica-healthcheck:${DOCKER_TAG_REPLICA_HEALTHCHECK:-latest}
     environment:
@@ -117,7 +117,7 @@ services:
       replicas: 0
     build:
       context: ..
-      dockerfile: ./ops/docker/Dockerfile.packages
+      dockerfile: ./ops/docker/Dockerfile.packages.local
       target: integration-tests
     image: mantlenetworkio/integration-tests:${DOCKER_TAG_INTEGRATION_TESTS:-latest}
     entrypoint: ./integration-tests.sh
@@ -181,7 +181,7 @@ services:
       replicas: 0
     build:
       context: ..
-      dockerfile: ./ops/docker/Dockerfile.packages
+      dockerfile: ./ops/docker/Dockerfile.packages.local
       target: fault-detector
     image: mantlenetworkio/fault-detector:${DOCKER_TAG_FAULT_DETECTOR:-latest}
     entrypoint: ./detector.sh

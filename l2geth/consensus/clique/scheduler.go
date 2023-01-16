@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"math"
 	"math/big"
 	"sync"
 	"sync/atomic"
@@ -28,6 +27,10 @@ const (
 	defaultBatchSize  = int64(100)
 	defaultExpireTime = int64(60)
 	defaultBatchEpoch = time.Duration(86400)
+)
+
+var (
+	scale = big.NewInt(1e18)
 )
 
 type Config struct {
@@ -96,7 +99,7 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 	for _, item := range seqSet {
 		var addrTemp common.Address
 		copy(addrTemp[:], item.MintAddress[:])
-		votingPower := big.NewInt(0).Div(item.Amount, big.NewInt(1e16))
+		votingPower := big.NewInt(0).Div(item.Amount, scale)
 		seqz = append(seqz, NewSequencer(addrTemp, votingPower.Int64(), item.NodeID))
 		log.Info("sequencer: ", "address", item.MintAddress.String(), "node_ID", hex.EncodeToString(item.NodeID))
 	}
@@ -123,6 +126,7 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 		sequencerAssessor: NewHealthAssessor(),
 		chainHeadCh:       make(chan core.ChainHeadEvent, chainHeadChanSize),
 	}
+	schedulerInst.setSequencerHealthPoints(seqSet)
 
 	return schedulerInst, nil
 }
@@ -151,7 +155,7 @@ func (schedulerInst *Scheduler) Start() {
 	schedulerInst.batchEndSub = schedulerInst.eventMux.Subscribe(core.BatchEndEvent{})
 	schedulerInst.chainHeadSub = schedulerInst.blockchain.SubscribeChainHeadEvent(schedulerInst.chainHeadCh)
 
-	go schedulerInst.readLoop()
+	go schedulerInst.syncSequencerSetRoutine()
 	go schedulerInst.addPeerCheckLoop()
 	go schedulerInst.batchEndLoop()
 	go schedulerInst.schedulerRoutine()
@@ -251,6 +255,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			seq := schedulerInst.sequencerSet.getSeqWithMostPriority()
 			var seqSet []common.Address
 			for _, v := range schedulerInst.sequencerSet.Sequencers {
+				log.Info("Iterate sequencer set", "address", v.Address.String(), "power", v.Power)
 				seqSet = append(seqSet, v.Address)
 			}
 
@@ -270,7 +275,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 				return fmt.Errorf("sign BatchPeriodStartEvent error %s", err.Error())
 			}
 			msg.Signature = signature
-			expectMinTxsCount, err := schedulerInst.GetExpectMinTxsCount(uint64(batchSize))
+			expectMinTxsCount, err := schedulerInst.getExpectMinTxsCount(uint64(batchSize))
 			if err != nil {
 				return fmt.Errorf("get minimum block count failed %s", err.Error())
 			}
@@ -349,21 +354,22 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 	}
 }
 
-func (schedulerInst *Scheduler) readLoop() {
+func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 	for {
 		select {
 		case <-schedulerInst.ticker.C:
 			err := func() error {
+				log.Info("Sync sequencer set")
 				schedulerInst.sequencerSetMtx.Lock()
 				defer schedulerInst.sequencerSetMtx.Unlock()
 				seqSet, err := schedulerInst.syncer.GetSequencerSet()
 				if err != nil {
 					return fmt.Errorf("get sequencer set failed %s", err.Error())
 				}
-				schedulerInst.SetSequencerHealthPoints(seqSet)
+				schedulerInst.setSequencerHealthPoints(seqSet)
 				// get changes
 				changes := compareSequencerSet(schedulerInst.sequencerSet.Sequencers, seqSet)
-				log.Debug(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
+				log.Info(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
 
 				// update sequencer set and consensus_engine
 				err = schedulerInst.sequencerSet.UpdateWithChangeSet(changes)
@@ -377,7 +383,7 @@ func (schedulerInst *Scheduler) readLoop() {
 				continue
 			}
 		case <-schedulerInst.exitCh:
-			log.Info("Get scheduler stop signal, scheduler readLoop stop")
+			log.Info("Get scheduler stop signal, scheduler syncSequencerSetRoutine stop")
 			return
 		}
 	}
@@ -386,12 +392,10 @@ func (schedulerInst *Scheduler) readLoop() {
 // compareSequencerSet will return the update with Driver.seqz
 func compareSequencerSet(old []*Sequencer, newSeq synchronizer.SequencerSequencerInfos) []*Sequencer {
 	var tmp synchronizer.SequencerSequencerInfos
-	scale := int64(math.Pow10(18))
 	for i, v := range newSeq {
 		changed := true
 		for _, seq := range old {
-			power := big.NewInt(v.Amount.Int64())
-			power = power.Div(power, big.NewInt(scale))
+			power := big.NewInt(1).Div(v.Amount, scale)
 			if bytes.Equal(seq.Address.Bytes(), v.MintAddress.Bytes()) && power.Int64() == seq.Power {
 				changed = false
 				break
@@ -406,13 +410,12 @@ func compareSequencerSet(old []*Sequencer, newSeq synchronizer.SequencerSequence
 }
 
 func bindToSeq(binds synchronizer.SequencerSequencerInfos) []*Sequencer {
-	scale := int64(math.Pow10(18))
 	var seqs []*Sequencer
 	for _, v := range binds {
 		seq := &Sequencer{
 			Address: common.BytesToAddress(v.MintAddress.Bytes()),
 			NodeID:  v.NodeID,
-			Power:   v.Amount.Div(v.Amount, big.NewInt(scale)).Int64(),
+			Power:   v.Amount.Div(v.Amount, scale).Int64(),
 		}
 		seqs = append(seqs, seq)
 	}

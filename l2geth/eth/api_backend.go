@@ -296,6 +296,9 @@ func (b *EthAPIBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscri
 // Transactions originating from the RPC endpoints are added to remotes so that
 // a lock can be used around the remotes for when the sequencer is reorganizing.
 func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
+	if !b.eth.syncService.IsSequencerMode() {
+		return fmt.Errorf("Scheduler does not accept transactions. Please send to the correct sequencer address")
+	}
 	to := signedTx.To()
 	if to != nil {
 		// Prevent QueueOriginSequencer transactions that are too large to
