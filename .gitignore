@@ -25,6 +25,7 @@ packages/contracts/coverage*
 packages/contracts/@ens*
 packages/contracts/@openzeppelin*
 packages/contracts/hardhat
+packages/contracts/.openzeppelin
 
 packages/data-transport-layer/db
 
