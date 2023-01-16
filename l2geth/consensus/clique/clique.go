@@ -476,7 +476,10 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 			}
 		}
 	}
-	txSetProofBytes := header.Extra[extraVanity+common.AddressLength : len(header.Extra)-extraSeal]
+	var txSetProofBytes []byte
+	if len(header.Extra) > extraVanity+extraSeal+extraVanity+common.AddressLength {
+		txSetProofBytes = header.Extra[extraVanity+common.AddressLength : len(header.Extra)-extraSeal]
+	}
 	if len(txSetProofBytes) != 0 {
 		var txSetProof types.BatchTxSetProof
 		txSetProof, err = types.DecodeBatchTxSetProof(txSetProofBytes)
