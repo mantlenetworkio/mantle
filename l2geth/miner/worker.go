@@ -581,6 +581,8 @@ func (w *worker) batchStartLoop() {
 
 						var bpa types.BatchPeriodAnswerMsg
 						bpa.StartHeight = ev.Msg.StartHeight + inTxLen
+						// pick out enough transactions from txpool and insert them into batchPeriodAnswerMsg
+						// The sum of tx quantity from all batchPeriodAnswerMsgs with the same batchIndex should be no greater than ev.Msg.MaxHeight-ev.Msg.StartHeight+1
 						if uint64(len(txsQueue)) >= ev.Msg.MaxHeight-bpa.StartHeight+1 {
 							bpa.Txs = txsQueue[:ev.Msg.MaxHeight-bpa.StartHeight+1]
 							inTxLen += ev.Msg.MaxHeight - bpa.StartHeight + 1
@@ -654,6 +656,9 @@ func (w *worker) batchAnswerLoop() {
 					}
 					if ev.Msg.BatchIndex != w.currentBps.BatchIndex {
 						return fmt.Errorf("batch index not equal, current_batch_index %d,  answer_batch_index %d", w.currentBps.BatchIndex, ev.Msg.BatchIndex)
+					}
+					if time.Now().Unix() >= int64(w.currentBps.ExpireTime) {
+						return fmt.Errorf("expired BatchPeriodAnswerEvent, sequencer %s, batch_index %d", ev.Msg.Sequencer.String(), ev.Msg.BatchIndex)
 					}
 					return nil
 				}()
