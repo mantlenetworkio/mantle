@@ -10,6 +10,7 @@ LDFLAGS := -ldflags "$(LDFLAGSSTRING)"
 EDLC_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/da/BVM_EigenDataLayrChain.sol/BVM_EigenDataLayrChain.json
 
 mt-batcher:
+	go mod tidy
 	env GO111MODULE=on go build -v $(LDFLAGS) ./cmd/mt-batcher
 
 datalayr-mantle:

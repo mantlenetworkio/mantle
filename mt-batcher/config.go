@@ -13,6 +13,8 @@ type Config struct {
 	L1EthRpc                  string
 	L2MtlRpc                  string
 	DisperserEndpoint         string
+	RetrieverSocket           string
+	EigenDaHttpPort           int
 	GrpcPort                  int64
 	ChainId                   uint64
 	GraphProvider             string
@@ -29,15 +31,19 @@ type Config struct {
 	RollUpMaxSize             uint64
 	EigenLayerNode            int
 	EigenLogConfig            logging.Config
+	MetricsServerEnable       bool
+	MetricsHostname           string
+	MetricsPort               uint64
 	LogLevel                  string
 	LogTerminal               bool
 	SentryDsn                 string
 	SentryTraceRate           time.Duration
 	ResubmissionTimeout       time.Duration
+	RetrieverTimeout          time.Duration
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
-
-	DisableHTTP2 bool
+	EchoDebug                 bool
+	DisableHTTP2              bool
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -47,6 +53,8 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		L1EthRpc:                  ctx.GlobalString(flags.L1EthRpcFlag.Name),
 		L2MtlRpc:                  ctx.GlobalString(flags.L2MtlRpcFlag.Name),
 		DisperserEndpoint:         ctx.GlobalString(flags.DisperserEndpointFlag.Name),
+		RetrieverSocket:           ctx.GlobalString(flags.RetrieverSocketFlag.Name),
+		EigenDaHttpPort:           ctx.GlobalInt(flags.EigenDaHttpPortFlag.Name),
 		ChainId:                   ctx.GlobalUint64(flags.ChainIdFlag.Name),
 		GraphProvider:             ctx.GlobalString(flags.GraphProviderFlag.Name),
 		PrivateKey:                ctx.GlobalString(flags.PrivateKeyFlag.Name),
@@ -61,15 +69,20 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		RollUpMaxSize:             ctx.GlobalUint64(flags.RollUpMaxSizeFlag.Name),
 		EigenLayerNode:            ctx.GlobalInt(flags.EigenLayerNodeFlag.Name),
 		EigenLogConfig:            logging.ReadCLIConfig(ctx),
+		RetrieverTimeout:          ctx.GlobalDuration(flags.RetrieverTimeoutFlag.Name),
 		ResubmissionTimeout:       ctx.GlobalDuration(flags.ResubmissionTimeoutFlag.Name),
 		NumConfirmations:          ctx.GlobalUint64(flags.NumConfirmationsFlag.Name),
 		SafeAbortNonceTooLowCount: ctx.GlobalUint64(flags.SafeAbortNonceTooLowCountFlag.Name),
+		MetricsServerEnable:       ctx.GlobalBool(flags.MetricsServerEnableFlag.Name),
+		MetricsHostname:           ctx.GlobalString(flags.MetricsHostnameFlag.Name),
+		MetricsPort:               ctx.GlobalUint64(flags.MetricsPortFlag.Name),
 		LogLevel:                  ctx.GlobalString(flags.LogLevelFlag.Name),
 		LogTerminal:               ctx.GlobalBool(flags.LogTerminalFlag.Name),
 		SentryEnable:              ctx.GlobalBool(flags.SentryEnableFlag.Name),
 		SentryDsn:                 ctx.GlobalString(flags.SentryDsnFlag.Name),
 		SentryTraceRate:           ctx.GlobalDuration(flags.SentryTraceRateFlag.Name),
 		DisableHTTP2:              ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
+		EchoDebug:                 ctx.GlobalBool(flags.EchoDebugFlag.Name),
 	}
 	return cfg, nil
 }
