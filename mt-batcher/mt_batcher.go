@@ -191,9 +191,9 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 }
 
 func (mb *MantleBatch) Start() error {
-	//if err := mb.sequencerDriver.Start(); err != nil {
-	//	return err
-	//}
+	if err := mb.sequencerDriver.Start(); err != nil {
+		return err
+	}
 	go func() {
 		err := mb.daService.Start()
 		if err != nil {
@@ -205,5 +205,5 @@ func (mb *MantleBatch) Start() error {
 
 func (mb *MantleBatch) Stop() {
 	mb.daService.Stop()
-	// mb.sequencerDriver.Stop()
+	mb.sequencerDriver.Stop()
 }

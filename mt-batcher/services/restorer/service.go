@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
+	"github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"strconv"
 	"sync"
 	"time"
@@ -30,8 +31,8 @@ type DaService struct {
 }
 
 func NewDaService(ctx context.Context, cfg *DaServiceConfig) (*DaService, error) {
-	//ctxt, cancel := context.WithTimeout(ctx, common.DefaultTimeout)
-	//defer cancel()
+	_, cancel := context.WithTimeout(ctx, common.DefaultTimeout)
+	defer cancel()
 	e := echo.New()
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
@@ -39,10 +40,10 @@ func NewDaService(ctx context.Context, cfg *DaServiceConfig) (*DaService, error)
 	e.Debug = true
 	e.Use(middleware.Recover())
 	server := &DaService{
-		Ctx:  ctx,
-		Cfg:  cfg,
-		echo: e,
-		// cancel: cancel,
+		Ctx:    ctx,
+		Cfg:    cfg,
+		echo:   e,
+		cancel: cancel,
 	}
 	server.routes()
 	return server, nil
@@ -55,7 +56,7 @@ func (s *DaService) routes() {
 }
 
 func (s *DaService) Start() error {
-	// defer s.wg.Done()
+	defer s.wg.Done()
 	err := s.echo.Start(":" + strconv.Itoa(s.Cfg.DaServicePort))
 	if err != nil {
 		log.Error("eigen da sever start fail")
@@ -66,6 +67,6 @@ func (s *DaService) Start() error {
 }
 
 func (s *DaService) Stop() {
-	//s.cancel()
-	//s.wg.Wait()
+	s.cancel()
+	s.wg.Wait()
 }
