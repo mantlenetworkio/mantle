@@ -430,7 +430,7 @@ func bindToSeq(binds synchronizer.SequencerSequencerInfos) []*Sequencer {
 		seq := &Sequencer{
 			Address: common.BytesToAddress(v.MintAddress.Bytes()),
 			NodeID:  v.NodeID,
-			Power:   v.Amount.Div(v.Amount, scale).Int64(),
+			Power:   big.NewInt(0).Div(v.Amount, scale).Int64(),
 		}
 		seqs = append(seqs, seq)
 	}
