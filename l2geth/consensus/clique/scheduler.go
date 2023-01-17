@@ -385,7 +385,7 @@ func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 
 // compareSequencerSet will return the update with Driver.seqz
 func compareSequencerSet(preSeqs []*Sequencer, newSeq synchronizer.SequencerSequencerInfos) []*Sequencer {
-	var notDel map[common.Address]bool
+	notDel := make(map[common.Address]bool)
 	var tmp synchronizer.SequencerSequencerInfos
 	for i, v := range newSeq {
 		changed := true
