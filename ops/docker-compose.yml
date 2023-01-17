@@ -139,7 +139,7 @@ services:
       - scheduler
     build:
       context: ..
-      dockerfile: ./gas-oracle/Dockerfile
+      dockerfile: ./gas-oracle/Dockerfile.local
     image: mantlenetworkio/gas-oracle:${DOCKER_TAG_GAS_ORACLE:-latest}
     environment:
       GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL: http://l1_chain:8545
@@ -159,7 +159,7 @@ services:
       - scheduler
     build:
       context: ..
-      dockerfile: ./batch-submitter/Dockerfile
+      dockerfile: ./batch-submitter/Dockerfile.local
     image: mantlenetworkio/batch-submitter:${DOCKER_TAG_BATCH_SUBMITTER:-latest}
     entrypoint: ./batch-submitter.sh
     env_file:
@@ -198,7 +198,7 @@ services:
       - dtl
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     # override with the geth script and the env vars required for it
     entrypoint: sh ./geth.sh
@@ -241,7 +241,7 @@ services:
       replicas: 0
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     env_file:
@@ -285,7 +285,7 @@ services:
       replicas: 0
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     env_file:
@@ -329,7 +329,7 @@ services:
     #   replicas: 1
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     env_file:
@@ -362,7 +362,7 @@ services:
     #   replicas: 1
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     env_file:
@@ -397,7 +397,7 @@ services:
     #   replicas: 1
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     env_file:

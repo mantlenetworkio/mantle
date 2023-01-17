@@ -11,7 +11,7 @@ services:
   scheduler:
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     # override with the geth script and the env vars required for it
     entrypoint: sh ./geth.sh
@@ -57,7 +57,7 @@ services:
       replicas: 1
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     container_name: bitsequencer1
@@ -103,7 +103,7 @@ services:
       replicas: 1
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     container_name: bitsequencer2
@@ -149,7 +149,7 @@ services:
     #   replicas: 1
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     container_name: bitreplica1
@@ -185,7 +185,7 @@ services:
     #   replicas: 1
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     container_name: bitreplica2
@@ -221,7 +221,7 @@ services:
     #   replicas: 1
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     container_name: bitverifier
