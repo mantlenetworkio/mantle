@@ -54,7 +54,7 @@ services:
       SKIP_CONTRACT_DEPLOY: ${SKIP_CONTRACT_DEPLOY:-NO}
       CONTRACTS_DEPLOYER_KEY: '0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97'
       CONTRACTS_TARGET_NETWORK: 'local'
-      L1_BIT_ADDRESS: ${L1_BIT_ADDRESS:-0x3BBBbc86D726422b7D8bb16122322a6808135734}
+      L1_BIT_ADDRESS: ${L1_BIT_ADDRESS:-0xd778E3b2Ab28dd5D7a46e3bCF4D6d8e6eb716B57}
     ports:
       # expose the service to the host for getting the contract addrs
       - ${DEPLOYER_PORT:-8080}:8081
@@ -76,7 +76,7 @@ services:
     container_name: bitgas_oracle
     restart: unless-stopped
     environment:
-      GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL: http://l1chain:8545
+      GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL: http://l1_chain:8545
       GAS_PRICE_ORACLE_LAYER_TWO_HTTP_URL: http://10.0.0.7:8545
       BYBIT_BACKEND_URL: https://api.bybit.com
       TOKEN_PRICER_UPDATE_FREQUENCY: 3
@@ -102,7 +102,7 @@ services:
     env_file:
       - ./envs/batch-submitter.env
     environment:
-      L1_ETH_RPC: http://l1chain:8545
+      L1_ETH_RPC: http://l1_chain:8545
       L2_ETH_RPC: http://10.0.0.7:8545
       TSS_CLIENT_RPC: http://tss-manager:8080
       URL: http://deployer:8081/addresses.json
