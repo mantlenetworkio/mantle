@@ -384,17 +384,19 @@ func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 }
 
 // compareSequencerSet will return the update with Driver.seqz
-func compareSequencerSet(old []*Sequencer, newSeq synchronizer.SequencerSequencerInfos) []*Sequencer {
-	var find []common.Address
+func compareSequencerSet(preSeqs []*Sequencer, newSeq synchronizer.SequencerSequencerInfos) []*Sequencer {
+	var notDel map[common.Address]bool
 	var tmp synchronizer.SequencerSequencerInfos
 	for i, v := range newSeq {
 		changed := true
-		for _, seq := range old {
+		for _, seq := range preSeqs {
 			power := big.NewInt(1).Div(v.Amount, scale)
 			// found the sequencer and their power equal
 			if bytes.Equal(seq.Address.Bytes(), v.MintAddress.Bytes()) {
-				find = append(find, seq.Address)
+				// find the sequencer in previous sequencer set
+				notDel[seq.Address] = true
 				if power.Int64() == seq.Power {
+					// voting power have not change
 					changed = false
 					break
 				}
@@ -407,14 +409,16 @@ func compareSequencerSet(old []*Sequencer, newSeq synchronizer.SequencerSequence
 	}
 	changes := bindToSeq(tmp)
 	// select the deleted sequencer
-	for _, v := range old {
+	for _, v := range preSeqs {
 		del := true
-		for _, addr := range find {
+		for addr, _ := range notDel {
+			// find in new sequencer set, this sequencer still in sequencer set
 			if bytes.Equal(addr.Bytes(), v.Address.Bytes()) {
 				del = false
 				break
 			}
 		}
+		// not find in new sequencer set, should set the sequencer power to 0
 		if del {
 			tmpDel := v
 			tmpDel.Power = 0
