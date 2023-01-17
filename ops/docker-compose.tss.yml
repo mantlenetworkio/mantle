@@ -35,7 +35,7 @@ services:
       TSS_MIN_SIGNED_IN_WINDOW: 2
     build:
       context: ..
-      dockerfile: ./ops/docker/tss/Dockerfile
+      dockerfile: ./ops/docker/tss/Dockerfile.local
       target: tss
     command: ./tss manager -c config/tss-manager-config.toml
     ports:
@@ -53,7 +53,7 @@ services:
     container_name: bittss-node1
     build:
       context: ..
-      dockerfile: ./ops/docker/tss/Dockerfile
+      dockerfile: ./ops/docker/tss/Dockerfile.local
       target: tss
     environment:
       <<: *base-env
@@ -81,7 +81,7 @@ services:
     container_name: bittss-node2
     build:
       context: ..
-      dockerfile: ./ops/docker/tss/Dockerfile
+      dockerfile: ./ops/docker/tss/Dockerfile.local
       target: tss
     command: ./tss node -c config/tss-node-config.toml
     environment:
@@ -110,7 +110,7 @@ services:
     container_name: bittss-node3
     build:
       context: ..
-      dockerfile: ./ops/docker/tss/Dockerfile
+      dockerfile: ./ops/docker/tss/Dockerfile.local
       target: tss
     command: ./tss node -c config/tss-node-config.toml
     environment:
@@ -140,7 +140,7 @@ services:
     container_name: bittss-node4
     build:
       context: ..
-      dockerfile: ./ops/docker/tss/Dockerfile
+      dockerfile: ./ops/docker/tss/Dockerfile.local
       target: tss
     command: ./tss node -c config/tss-node-config.toml
     environment:
