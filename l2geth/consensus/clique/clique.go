@@ -478,6 +478,7 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	}
 	var txSetProofBytes []byte
 	if number%c.config.Epoch == 0 {
+		// There always will be only one signer
 		txSetProofBytes = header.Extra[extraVanity+common.AddressLength : len(header.Extra)-extraSeal]
 	} else {
 		txSetProofBytes = header.Extra[extraVanity : len(header.Extra)-extraSeal]
