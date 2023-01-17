@@ -404,25 +404,22 @@ func compareSequencerSet(preSeqs []*Sequencer, newSeq synchronizer.SequencerSequ
 		}
 		// sequencer add or update
 		if changed {
+			if notDel[common.Address(newSeq[i].MintAddress)] {
+				log.Debug("Compare sequencer set", "update_sequencer", newSeq[i].MintAddress.String())
+			} else {
+				log.Debug("Compare sequencer set", "add_sequencer", newSeq[i].MintAddress.String())
+			}
 			tmp = append(tmp, newSeq[i])
 		}
 	}
 	changes := bindToSeq(tmp)
 	// select the deleted sequencer
 	for _, v := range preSeqs {
-		del := true
-		for addr, _ := range notDel {
-			// find in new sequencer set, this sequencer still in sequencer set
-			if bytes.Equal(addr.Bytes(), v.Address.Bytes()) {
-				del = false
-				break
-			}
-		}
-		// not find in new sequencer set, should set the sequencer power to 0
-		if del {
+		if !notDel[v.Address] {
 			tmpDel := v
 			tmpDel.Power = 0
 			changes = append(changes, tmpDel)
+			log.Debug("Compare sequencer set", "delete_sequencer", v.Address.String())
 		}
 	}
 	return changes
