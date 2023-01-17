@@ -297,7 +297,13 @@ func (b *EthAPIBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscri
 // a lock can be used around the remotes for when the sequencer is reorganizing.
 func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
 	if !b.eth.syncService.IsSequencerMode() {
-		return fmt.Errorf("Scheduler does not accept transactions. Please send to the correct sequencer address")
+		if !b.eth.syncService.IsUpdateGasPriceTx(signedTx) {
+			return fmt.Errorf("Scheduler does not accept regular transactions. Please send to the correct sequencer address")
+		}
+		if err := b.eth.syncService.AddUpdateGasPriceTx(signedTx); err != nil {
+			return err
+		}
+		return nil
 	}
 	to := signedTx.To()
 	if to != nil {

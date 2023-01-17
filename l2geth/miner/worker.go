@@ -475,6 +475,7 @@ func (w *worker) l1Tol2StartLoop() {
 				if err := w.eth.SyncService().SyncQueueToTip(); err != nil {
 					log.Info("SyncQueueToTip interrupt", "error", err)
 				}
+				w.eth.SyncService().ApplyUpdateGasPriceTxs()
 				close(ev.SchedulerCh)
 			} else {
 				log.Error("SchedulerCh is nil")
@@ -567,18 +568,23 @@ func (w *worker) batchStartLoop() {
 						// Split the pending transactions into locals and remotes
 						localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
 						// TODO mev
-						var txsQueue types.Transactions
+						var rawTxsQueue types.Transactions
 						for _, account := range w.eth.TxPool().Locals() {
 							if txs := remoteTxs[account]; len(txs) > 0 {
 								delete(remoteTxs, account)
 								localTxs[account] = txs
-								txsQueue = append(txsQueue, txs...)
+								rawTxsQueue = append(rawTxsQueue, txs...)
 							}
 						}
 						for _, txs := range remoteTxs {
-							txsQueue = append(txsQueue, txs...)
+							rawTxsQueue = append(rawTxsQueue, txs...)
 						}
-
+						var txsQueue types.Transactions
+						for _, tx := range txsQueue {
+							if err := w.eth.SyncService().VerifyFee(tx); err == nil {
+								txsQueue = append(txsQueue, tx)
+							}
+						}
 						var bpa types.BatchPeriodAnswerMsg
 						bpa.StartHeight = ev.Msg.StartHeight + inTxLen
 						// pick out enough transactions from txpool and insert them into batchPeriodAnswerMsg

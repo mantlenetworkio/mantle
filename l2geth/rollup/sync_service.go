@@ -27,7 +27,8 @@ import (
 
 const (
 	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
-	chainHeadChanSize = 10
+	chainHeadChanSize  = 10
+	gasPriceTxPoolSize = 100
 )
 
 var (
@@ -75,6 +76,7 @@ type SyncService struct {
 	feeThresholdDown               *big.Float
 	cfg                            Config
 	applyLock                      sync.Mutex
+	updateGasPriceTxPool           chan *types.Transaction
 }
 
 // NewSyncService returns an initialized sync service
@@ -151,6 +153,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		feeThresholdDown:               cfg.FeeThresholdDown,
 		feeThresholdUp:                 cfg.FeeThresholdUp,
 		cfg:                            cfg,
+		updateGasPriceTxPool:           make(chan *types.Transaction, gasPriceTxPoolSize),
 	}
 
 	// The chainHeadSub is used to synchronize the SyncService with the chain.
@@ -1148,6 +1151,55 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 		}
 		return err
 	}
+	return nil
+}
+
+func (s *SyncService) VerifyFee(tx *types.Transaction) error {
+	if tx == nil {
+		return errors.New("nil transaction passed to ValidateAndApplySequencerTransaction")
+	}
+	s.txLock.Lock()
+	defer s.txLock.Unlock()
+	if err := s.verifyFee(tx); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ApplyGasPriceTxs apply tx for update gasPrice
+func (s *SyncService) ApplyUpdateGasPriceTxs() {
+	for tx := range s.updateGasPriceTxPool {
+		if err := s.ValidateAndApplySequencerTransaction(tx, &types.BatchTxSetProof{}); err != nil {
+			log.Error("apply gasPrice tx error", "err_msg", err.Error())
+		}
+	}
+}
+
+func (s *SyncService) IsUpdateGasPriceTx(tx *types.Transaction) bool {
+	if tx == nil {
+		return false
+	}
+	s.txLock.Lock()
+	defer s.txLock.Unlock()
+	from, err := types.Sender(s.signer, tx)
+	if err != nil {
+		return false
+	}
+	gpoOwner := s.GasPriceOracleOwnerAddress()
+	if gpoOwner != nil {
+		if from != *gpoOwner {
+			return false
+		}
+	}
+	return true
+}
+
+// AddUpdateGasPriceTx add updateGasPriceTx to queue
+func (s *SyncService) AddUpdateGasPriceTx(tx *types.Transaction) error {
+	if len(s.updateGasPriceTxPool) == gasPriceTxPoolSize {
+		return fmt.Errorf("there are too many transactions waiting to be processed")
+	}
+	s.updateGasPriceTxPool <- tx
 	return nil
 }
 
