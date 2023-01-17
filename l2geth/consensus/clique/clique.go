@@ -477,9 +477,13 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 		}
 	}
 	var txSetProofBytes []byte
-	if len(header.Extra) > extraVanity+extraSeal+extraVanity+common.AddressLength {
+	if number%c.config.Epoch == 0 {
+		// There always will be only one signer
 		txSetProofBytes = header.Extra[extraVanity+common.AddressLength : len(header.Extra)-extraSeal]
+	} else {
+		txSetProofBytes = header.Extra[extraVanity : len(header.Extra)-extraSeal]
 	}
+
 	if len(txSetProofBytes) != 0 {
 		var txSetProof types.BatchTxSetProof
 		txSetProof, err = types.DecodeBatchTxSetProof(txSetProofBytes)
@@ -549,8 +553,10 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header, txSe
 	}
 	header.Extra = header.Extra[:extraVanity]
 
-	for _, signer := range snap.signers() {
-		header.Extra = append(header.Extra, signer[:]...)
+	if number%c.config.Epoch == 0 {
+		for _, signer := range snap.signers() {
+			header.Extra = append(header.Extra, signer[:]...)
+		}
 	}
 
 	header.Extra = append(header.Extra, txSetProof.Serialize()...)
