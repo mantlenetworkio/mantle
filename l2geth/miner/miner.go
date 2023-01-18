@@ -60,6 +60,7 @@ type Miner struct {
 	mux      *event.TypeMux
 	worker   *worker
 	coinbase common.Address
+	signerFn SignerFn
 	eth      Backend
 	engine   consensus.Engine
 	exitCh   chan struct{}

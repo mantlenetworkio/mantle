@@ -326,13 +326,24 @@ func (c *EthashConfig) String() string {
 
 // CliqueConfig is the consensus engine configs for proof-of-authority based sealing.
 type CliqueConfig struct {
-	Period uint64 `json:"period"` // Number of seconds between blocks to enforce
-	Epoch  uint64 `json:"epoch"`  // Epoch length to reset votes and checkpoint
+	Period     uint64 `json:"period"` // Number of seconds between blocks to enforce
+	Epoch      uint64 `json:"epoch"`  // Epoch length to reset votes and checkpoint
+	IsVerifier bool   `json:"is_verifier"`
 }
 
 // String implements the stringer interface, returning the consensus engine details.
 func (c *CliqueConfig) String() string {
 	return "clique"
+}
+
+// CoterieConfig is the consensus engine configs for coterie.
+type CoterieConfig struct {
+	Period uint64 `json:"period"` // Number of seconds between blocks to enforce
+}
+
+// String implements the stringer interface, returning the consensus engine details.
+func (c *CoterieConfig) String() string {
+	return "coterie"
 }
 
 // String implements the fmt.Stringer interface.

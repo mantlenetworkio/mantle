@@ -1,0 +1,143 @@
+
+networks:
+  mantle:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+          gateway: 10.0.0.1
+
+
+
+x-healthcheck: &healthcheck
+  test: [ "CMD", "curl", "-sf", "http://localhost:8545" ]
+  interval: 5s
+  timeout: 5s
+  retries: 3
+  start_period: 30s
+
+services:
+  # this is a helper service used because there's no official hardhat image
+  l1_chain:
+    image: mantlenetworkio/hardhat:${DOCKER_TAG_HARDHAT:-latest}
+    build:
+      context: ./docker/hardhat
+      dockerfile: Dockerfile
+    env_file:
+      - ./envs/l1_chain.env
+    container_name: bitl1chain
+    ports:
+      # expose the service to the host for integration testing
+      - ${L1CHAIN_HTTP_PORT:-9545}:8545
+    volumes:
+      - ./data/l1_chain:/root/.ethereum/geth/
+    healthcheck:
+      <<: *healthcheck
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8545" ]
+    networks:
+      mantle:
+        ipv4_address: 10.0.0.2
+
+  deployer:
+    depends_on:
+      - l1_chain
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.packages.local
+      target: deployer
+    container_name: bitdeployer
+    image: mantlenetworkio/deployer:${DOCKER_TAG_DEPLOYER:-latest}
+    entrypoint: ./deployer.sh
+    environment:
+      # Env vars for the deployment script.
+      CONTRACTS_RPC_URL: http://l1_chain:8545
+      SKIP_CONTRACT_DEPLOY: ${SKIP_CONTRACT_DEPLOY:-NO}
+      CONTRACTS_DEPLOYER_KEY: '0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97'
+      CONTRACTS_TARGET_NETWORK: 'local'
+      L1_BIT_ADDRESS: ${L1_BIT_ADDRESS:-0xd778E3b2Ab28dd5D7a46e3bCF4D6d8e6eb716B57}
+    ports:
+      # expose the service to the host for getting the contract addrs
+      - ${DEPLOYER_PORT:-8080}:8081
+    healthcheck:
+      <<: *healthcheck
+      test: [ "CMD", "curl", "-sf", "http://localhost:8081" ]
+    networks:
+      mantle:
+        ipv4_address: 10.0.0.3
+
+  gas_oracle:
+    depends_on:
+      - deployer
+      - l1_chain
+    build:
+      context: ..
+      dockerfile: ./gas-oracle/Dockerfile.local
+    image: mantlenetworkio/gas-oracle:${DOCKER_TAG_GAS_ORACLE:-latest}
+    container_name: bitgas_oracle
+    restart: unless-stopped
+    environment:
+      GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL: http://l1_chain:8545
+      GAS_PRICE_ORACLE_LAYER_TWO_HTTP_URL: http://10.0.0.7:8545
+      BYBIT_BACKEND_URL: https://api.bybit.com
+      TOKEN_PRICER_UPDATE_FREQUENCY: 3
+      GAS_PRICE_ORACLE_PRIVATE_KEY: '0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba'
+      GAS_PRICE_ORACLE_ENABLE_L2_GAS_PRICE: 'false'
+      GAS_PRICE_ORACLE_ENABLE_L1_BASE_FEE: 'true'
+      GAS_PRICE_ORACLE_TRANSACTION_GAS_PRICE: 0
+    networks:
+      mantle:
+        ipv4_address: 10.0.0.5
+
+  batch_submitter:
+    depends_on:
+      - deployer
+      - l1_chain
+    build:
+      context: ..
+      dockerfile: ./batch-submitter/Dockerfile.local
+    image: mantlenetworkio/batch-submitter:${DOCKER_TAG_BATCH_SUBMITTER:-latest}
+    restart: unless-stopped
+    entrypoint: ./batch-submitter.sh
+    container_name: bitbatch_submitter
+    env_file:
+      - ./envs/batch-submitter.env
+    environment:
+      L1_ETH_RPC: http://l1_chain:8545
+      L2_ETH_RPC: http://10.0.0.7:8545
+      TSS_CLIENT_RPC: http://tss-manager:8080
+      URL: http://deployer:8081/addresses.json
+      BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY: ${BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY:-0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d}
+      BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY: ${BATCH_SUBMITTER_PROPOSER_PRIVATE_KEY:-0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a}
+      BATCH_SUBMITTER_SEQUENCER_BATCH_TYPE: ${BATCH_SUBMITTER_SEQUENCER_BATCH_TYPE:-zlib}
+    networks:
+      mantle:
+        ipv4_address: 10.0.0.6
+
+  dtl:
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.packages.local
+      target: data-transport-layer
+    image: mantlenetworkio/data-transport-layer:${DOCKER_TAG_DATA_TRANSPORT_LAYER:-latest}
+    # override with the dtl script and the env vars required for it
+    entrypoint: ./dtl.sh
+    container_name: bitdtl
+    env_file:
+      - ./envs/dtl.env
+    # set the rest of the env vars for the network which do not
+    # depend on the docker-compose setup
+    environment:
+      # used for setting the address manager address
+      URL: http://10.0.0.3:8081/addresses.json
+      # connect to the 2 layers
+      DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT: http://10.0.0.2:8545
+      DATA_TRANSPORT_LAYER__L2_RPC_ENDPOINT: http://10.0.0.7:8545
+      DATA_TRANSPORT_LAYER__SYNC_FROM_L2: 'true'
+      DATA_TRANSPORT_LAYER__L2_CHAIN_ID: 17
+      RETRIES: 100
+    ports:
+      - ${DTL_PORT:-7878}:7878
+    networks:
+      mantle:
+        ipv4_address: 10.0.0.4
+

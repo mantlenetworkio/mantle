@@ -177,8 +177,9 @@ func (hn *hashOrNumber) DecodeRLP(s *rlp.Stream) error {
 
 // newBlockData is the network packet for the block propagation message.
 type newBlockData struct {
-	Block *types.Block
-	TD    *big.Int
+	Block   *types.Block
+	TxMetas [][]byte
+	TD      *big.Int
 }
 
 // sanityCheck verifies that the values are reasonable, as a DoS protection
@@ -191,13 +192,17 @@ func (request *newBlockData) sanityCheck() error {
 	if tdlen := request.TD.BitLen(); tdlen > 100 {
 		return fmt.Errorf("too large block TD: bitlen %d", tdlen)
 	}
+	if len(request.TxMetas) != len(request.Block.Transactions()) {
+		return fmt.Errorf("tx meta length doesn't match tx length")
+	}
 	return nil
 }
 
 // blockBody represents the data content of a single block.
 type blockBody struct {
-	Transactions []*types.Transaction // Transactions contained within a block
-	Uncles       []*types.Header      // Uncles contained within a block
+	Transactions     []*types.Transaction // Transactions contained within a block
+	TransactionMetas [][]byte
+	Uncles           []*types.Header // Uncles contained within a block
 }
 
 // blockBodiesData is the network packet for block content distribution.

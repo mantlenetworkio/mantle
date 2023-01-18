@@ -1,11 +1,10 @@
-from golang:1.18 as build-environment
+FROM golang:1.19 as builder
 WORKDIR /base
 ADD . .
 RUN cd tss && CGO_ENABLED=1 make build
 
-from centos:8 as tss
+FROM centos:8 as tss
 WORKDIR /app
-COPY --from=build-environment /base/tss/tss /app
+COPY --from=builder /base/tss/tss /app
 RUN chmod +x tss
-
 
