@@ -1168,9 +1168,13 @@ func (s *SyncService) VerifyFee(tx *types.Transaction) error {
 
 // ApplyGasPriceTxs apply tx for update gasPrice
 func (s *SyncService) ApplyUpdateGasPriceTxs() {
-	for tx := range s.updateGasPriceTxPool {
+	for {
+		if len(s.updateGasPriceTxPool) == 0 {
+			break
+		}
+		tx := <-s.updateGasPriceTxPool
 		if err := s.ValidateAndApplySequencerTransaction(tx, &types.BatchTxSetProof{}); err != nil {
-			log.Error("apply gasPrice tx error", "err_msg", err.Error())
+			log.Error("apply update gasPrice tx error", "err_msg", err.Error())
 		}
 	}
 }

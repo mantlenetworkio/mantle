@@ -1,6 +1,7 @@
 package message
 
 import (
+	"fmt"
 	"log"
 	"testing"
 
@@ -28,5 +29,17 @@ func TestRollbackData_UnPackData(t *testing.T) {
 	}
 	if err := data.UnPackData(decodedData); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func TestData_UnPackData(t *testing.T) {
+	ch := make(chan int, 100)
+	//ch <- 1
+
+	for tx := range ch {
+		if len(ch) == 0 {
+			break
+		}
+		fmt.Println(tx)
 	}
 }

@@ -305,7 +305,7 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 		}
 		return nil
 	}
-	if !b.eth.syncService.IsUpdateGasPriceTx(signedTx) {
+	if b.eth.syncService.IsUpdateGasPriceTx(signedTx) {
 		return fmt.Errorf("sequencer does not accept updateGasPrice tx transactions. Please send to the correct sequencer address")
 	}
 	to := signedTx.To()
