@@ -388,27 +388,25 @@ func compareSequencerSet(preSeqs []*Sequencer, newSeq synchronizer.SequencerSequ
 	notDel := make(map[common.Address]bool)
 	var tmp synchronizer.SequencerSequencerInfos
 	for i, v := range newSeq {
-		changed := true
+		found := false
 		for _, seq := range preSeqs {
 			power := new(big.Int).Div(v.Amount, scale)
 			// figure out unchanged sequencer
 			if bytes.Equal(seq.Address.Bytes(), v.MintAddress.Bytes()) {
 				// find the sequencer in previous sequencer set
 				notDel[seq.Address] = true
-				if power.Int64() == seq.Power {
-					// voting power didn't change
-					changed = false
+				if power.Int64() != seq.Power {
+					// voting power changed sequencer update
+					log.Debug("Compare sequencer set", "update_sequencer", newSeq[i].MintAddress.String())
+					tmp = append(tmp, newSeq[i])
 				}
+				found = true
 				break
 			}
 		}
-		// sequencer add or update
-		if changed {
-			if notDel[common.Address(newSeq[i].MintAddress)] {
-				log.Debug("Compare sequencer set", "update_sequencer", newSeq[i].MintAddress.String())
-			} else {
-				log.Debug("Compare sequencer set", "add_sequencer", newSeq[i].MintAddress.String())
-			}
+		// sequencer add
+		if !found {
+			log.Debug("Compare sequencer set", "add_sequencer", newSeq[i].MintAddress.String())
 			tmp = append(tmp, newSeq[i])
 		}
 	}
