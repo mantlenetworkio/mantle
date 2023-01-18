@@ -391,15 +391,15 @@ func compareSequencerSet(preSeqs []*Sequencer, newSeq synchronizer.SequencerSequ
 		changed := true
 		for _, seq := range preSeqs {
 			power := big.NewInt(1).Div(v.Amount, scale)
-			// found the sequencer and their power equal
+			// figure out unchanged sequencer
 			if bytes.Equal(seq.Address.Bytes(), v.MintAddress.Bytes()) {
 				// find the sequencer in previous sequencer set
 				notDel[seq.Address] = true
 				if power.Int64() == seq.Power {
-					// voting power have not change
+					// voting power didn't change
 					changed = false
-					break
 				}
+				break
 			}
 		}
 		// sequencer add or update
