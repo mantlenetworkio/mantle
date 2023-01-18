@@ -99,7 +99,7 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 	for _, item := range seqSet {
 		var addrTemp common.Address
 		copy(addrTemp[:], item.MintAddress[:])
-		votingPower := big.NewInt(0).Div(item.Amount, scale)
+		votingPower := new(big.Int).Div(item.Amount, scale)
 		seqz = append(seqz, NewSequencer(addrTemp, votingPower.Int64(), item.NodeID))
 		log.Info("sequencer: ", "address", item.MintAddress.String(), "node_ID", hex.EncodeToString(item.NodeID))
 	}
@@ -390,7 +390,7 @@ func compareSequencerSet(preSeqs []*Sequencer, newSeq synchronizer.SequencerSequ
 	for i, v := range newSeq {
 		changed := true
 		for _, seq := range preSeqs {
-			power := big.NewInt(1).Div(v.Amount, scale)
+			power := new(big.Int).Div(v.Amount, scale)
 			// figure out unchanged sequencer
 			if bytes.Equal(seq.Address.Bytes(), v.MintAddress.Bytes()) {
 				// find the sequencer in previous sequencer set
@@ -431,7 +431,7 @@ func bindToSeq(binds synchronizer.SequencerSequencerInfos) []*Sequencer {
 		seq := &Sequencer{
 			Address: common.BytesToAddress(v.MintAddress.Bytes()),
 			NodeID:  v.NodeID,
-			Power:   big.NewInt(0).Div(v.Amount, scale).Int64(),
+			Power:   new(big.Int).Div(v.Amount, scale).Int64(),
 		}
 		seqs = append(seqs, seq)
 	}
