@@ -583,6 +583,8 @@ func (w *worker) batchStartLoop() {
 						for _, tx := range txsQueue {
 							if err := w.eth.SyncService().VerifyFee(tx); err == nil {
 								txsQueue = append(txsQueue, tx)
+							} else {
+								log.Error("batchStartLoop tx verifyFee error", "err_msg", err)
 							}
 						}
 						var bpa types.BatchPeriodAnswerMsg
