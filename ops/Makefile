@@ -36,6 +36,7 @@ l1up:
 
 
 l2up:
+	$(COPY_CHAIN)
 	DOCKER_BUILDKIT=1 \
 	$(DOCKER_COMPOSE_L2_CMD) \
 		up --build --detach $(service)
@@ -56,8 +57,7 @@ down:
 
 
 l2down:
-	$(DOCKER_COMPOSE_L2_CMD) \
-		down
+	docker rm -f bitscheduler bitsequencer1 bitsequencer2 bitreplica1 bitreplica2 bitverifier
 .PHONY: down
 
 
@@ -86,6 +86,15 @@ clean: stop
 	find data -mindepth 1 -maxdepth 1 -type d | xargs rm -rf
 	docker network rm ops_mantle
 .PHONY: clean
+
+
+sequencer-clean:
+	sudo rm -rf ~/data/mantle_sequencer
+	sudo rm -rf chaindata
+	find data -mindepth 1 -maxdepth 1 -type d | xargs rm -rf
+	docker network rm ops_mantle
+.PHONY: clean
+
 
 up-metrics: down-metrics
 	DOCKER_BUILDKIT=1 \

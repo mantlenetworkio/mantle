@@ -99,7 +99,7 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 	for _, item := range seqSet {
 		var addrTemp common.Address
 		copy(addrTemp[:], item.MintAddress[:])
-		votingPower := big.NewInt(0).Div(item.Amount, scale)
+		votingPower := new(big.Int).Div(item.Amount, scale)
 		seqz = append(seqz, NewSequencer(addrTemp, votingPower.Int64(), item.NodeID))
 		log.Info("sequencer: ", "address", item.MintAddress.String(), "node_ID", hex.EncodeToString(item.NodeID))
 	}
@@ -384,22 +384,40 @@ func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 }
 
 // compareSequencerSet will return the update with Driver.seqz
-func compareSequencerSet(old []*Sequencer, newSeq synchronizer.SequencerSequencerInfos) []*Sequencer {
+func compareSequencerSet(preSeqs []*Sequencer, newSeq synchronizer.SequencerSequencerInfos) []*Sequencer {
+	notDel := make(map[common.Address]bool)
 	var tmp synchronizer.SequencerSequencerInfos
 	for i, v := range newSeq {
-		changed := true
-		for _, seq := range old {
-			power := big.NewInt(1).Div(v.Amount, scale)
-			if bytes.Equal(seq.Address.Bytes(), v.MintAddress.Bytes()) && power.Int64() == seq.Power {
-				changed = false
+		for _, seq := range preSeqs {
+			power := new(big.Int).Div(v.Amount, scale)
+			// figure out unchanged sequencer
+			if bytes.Equal(seq.Address.Bytes(), v.MintAddress.Bytes()) {
+				// find the sequencer in previous sequencer set
+				notDel[seq.Address] = true
+				if power.Int64() != seq.Power {
+					// voting power changed sequencer update
+					log.Debug("Compare sequencer set", "update_sequencer", newSeq[i].MintAddress.String())
+					tmp = append(tmp, newSeq[i])
+				}
 				break
 			}
 		}
-		if changed {
+		// sequencer add
+		if !notDel[common.Address(newSeq[i].MintAddress)] {
+			log.Debug("Compare sequencer set", "add_sequencer", newSeq[i].MintAddress.String())
 			tmp = append(tmp, newSeq[i])
 		}
 	}
 	changes := bindToSeq(tmp)
+	// select the deleted sequencer
+	for _, v := range preSeqs {
+		if !notDel[v.Address] {
+			tmpDel := v
+			tmpDel.Power = 0
+			changes = append(changes, tmpDel)
+			log.Debug("Compare sequencer set", "delete_sequencer", v.Address.String())
+		}
+	}
 	return changes
 }
 
@@ -409,7 +427,7 @@ func bindToSeq(binds synchronizer.SequencerSequencerInfos) []*Sequencer {
 		seq := &Sequencer{
 			Address: common.BytesToAddress(v.MintAddress.Bytes()),
 			NodeID:  v.NodeID,
-			Power:   v.Amount.Div(v.Amount, scale).Int64(),
+			Power:   new(big.Int).Div(v.Amount, scale).Int64(),
 		}
 		seqs = append(seqs, seq)
 	}

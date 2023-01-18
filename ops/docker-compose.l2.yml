@@ -11,7 +11,7 @@ services:
   scheduler:
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     # override with the geth script and the env vars required for it
     entrypoint: sh ./geth.sh
@@ -19,7 +19,7 @@ services:
       - ./envs/geth.env
     container_name: bitscheduler
     volumes:
-      - ./data/scheduler:/root/.ethereum/geth/
+      - ~/data/mantle_sequencer/scheduler:/root/.ethereum/geth/
     environment:
       ETH1_HTTP: http://10.0.0.2:8545
       SEQUENCER_L1_RPC: http://10.0.0.2:8545
@@ -57,7 +57,7 @@ services:
       replicas: 1
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     container_name: bitsequencer1
@@ -65,7 +65,7 @@ services:
       - ./envs/geth.env
     volumes:
       - ./chaindata/sequencer1:/root/config
-      - ./data/sequencer1:/root/.ethereum/geth/
+      - ~/data/mantle_sequencer/features/sequencer1:/root/.ethereum/geth/
     environment:
       ETH1_HTTP: http://10.0.0.2:8545
       SEQUENCER_L1_RPC: http://10.0.0.2:8545
@@ -103,7 +103,7 @@ services:
       replicas: 1
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     container_name: bitsequencer2
@@ -111,7 +111,7 @@ services:
       - ./envs/geth.env
     volumes:
       - ./chaindata/sequencer2:/root/config
-      - ./data/sequencer2:/root/.ethereum/geth/
+      - ~/data/mantle_sequencer/features/sequencer2:/root/.ethereum/geth/
     environment:
       ETH1_HTTP: http://10.0.0.2:8545
       SEQUENCER_L1_RPC: http://10.0.0.2:8545
@@ -149,12 +149,12 @@ services:
     #   replicas: 1
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     container_name: bitreplica1
     volumes:
-      - ./data/replica1:/root/.ethereum/geth/
+      - ~/data/mantle_sequencer/replica1:/root/.ethereum/geth/
     env_file:
       - ./envs/geth.env
     environment:
@@ -167,7 +167,7 @@ services:
       BLOCK_SIGNER_ADDRESS: '0xCd0B4E309FB855d644bA64E5fb3dC3DD08f13917'
       BLOCK_SCHEDULER_ADDRESS: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
       SEQUENCER_CONTRACT_ADDRESS: '0xBe0F340075060F856612d91e17cAe599dE92C745'
-      #      ROLLUP_BACKEND: 'l2'
+      ROLLUP_BACKEND: 'l2'
       ROLLUP_VERIFIER_ENABLE: 'false'
       ETH1_CTC_DEPLOYMENT_HEIGHT: 8
       RETRIES: 60
@@ -185,12 +185,12 @@ services:
     #   replicas: 1
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     container_name: bitreplica2
     volumes:
-      - ./data/replica2:/root/.ethereum/geth/
+      - ~/data/mantle_sequencer/features/replica2:/root/.ethereum/geth/
     env_file:
       - ./envs/geth.env
     environment:
@@ -221,14 +221,14 @@ services:
     #   replicas: 1
     build:
       context: ..
-      dockerfile: ./l2geth/Dockerfile
+      dockerfile: ./l2geth/Dockerfile.local
     image: mantlenetworkio/l2geth:${DOCKER_TAG_L2GETH:-latest}
     entrypoint: sh ./geth.sh
     container_name: bitverifier
     env_file:
       - ./envs/geth.env
     volumes:
-      - ./data/verifier:/root/.ethereum/geth/
+      - ~/data/mantle_sequencer/verifier:/root/.ethereum/geth/
     environment:
       ETH1_HTTP: http://10.0.0.2:8545
       SEQUENCER_L1_RPC: http://10.0.0.2:8545
