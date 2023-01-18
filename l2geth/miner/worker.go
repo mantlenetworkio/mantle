@@ -580,13 +580,14 @@ func (w *worker) batchStartLoop() {
 							rawTxsQueue = append(rawTxsQueue, txs...)
 						}
 						var txsQueue types.Transactions
-						for _, tx := range txsQueue {
+						for _, tx := range rawTxsQueue {
 							if err := w.eth.SyncService().VerifyFee(tx); err == nil {
 								txsQueue = append(txsQueue, tx)
 							} else {
 								log.Error("batchStartLoop tx verifyFee error", "err_msg", err)
 							}
 						}
+						log.Info("txsQueue size", "size", len(txsQueue))
 						var bpa types.BatchPeriodAnswerMsg
 						bpa.StartHeight = ev.Msg.StartHeight + inTxLen
 						// pick out enough transactions from txpool and insert them into batchPeriodAnswerMsg
