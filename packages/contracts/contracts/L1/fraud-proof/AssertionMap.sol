@@ -18,8 +18,10 @@
 
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
 // Exists only to reduce size of Rollup contract (maybe revert since Rollup fits under optimized compilation).
-contract AssertionMap {
+contract AssertionMap is Initializable {
     struct Assertion {
         bytes32 stateHash; // Hash of execution state associated with assertion (see `RollupLib.stateHash`)
         uint256 inboxSize; // Inbox size this assertion advanced to
@@ -44,7 +46,17 @@ contract AssertionMap {
         _;
     }
 
-    constructor(address _rollupAddress) {
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize() public initializer {}
+
+    function setRollupAddress(address _rollupAddress) public {
+        require(
+            address(rollupAddress) == address(0),
+            "rollupAddress already initialized."
+        );
         require(_rollupAddress != address(0), "ZERO_ADDRESS");
         rollupAddress = _rollupAddress;
     }

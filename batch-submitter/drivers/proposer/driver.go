@@ -54,7 +54,8 @@ type Driver struct {
 	sccContract    *scc.StateCommitmentChain
 	rawSccContract *bind.BoundContract
 	ctcContract    *ctc.CanonicalTransactionChain
-	fpRollup       *fpbindings.IRollup
+	fpRollup       *fpbindings.Rollup
+	rawFPContract  *bind.BoundContract
 	fpAssertion    *fpbindings.AssertionMap
 	walletAddr     common.Address
 	metrics        *metrics.Base
@@ -75,7 +76,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		return nil, err
 	}
 
-	fpRollup, err := fpbindings.NewIRollup(
+	fpRollup, err := fpbindings.NewRollup(
 		cfg.FPRollupAddr, cfg.L1Client,
 	)
 	if err != nil {
@@ -94,15 +95,25 @@ func NewDriver(cfg Config) (*Driver, error) {
 		return nil, err
 	}
 
-	parsed, err := abi.JSON(strings.NewReader(
+	parsedSCC, err := abi.JSON(strings.NewReader(
 		scc.StateCommitmentChainABI,
+	))
+	if err != nil {
+		return nil, err
+	}
+	parsedFP, err := abi.JSON(strings.NewReader(
+		fpbindings.RollupABI,
 	))
 	if err != nil {
 		return nil, err
 	}
 
 	rawSccContract := bind.NewBoundContract(
-		cfg.SCCAddr, parsed, cfg.L1Client, cfg.L1Client, cfg.L1Client,
+		cfg.SCCAddr, parsedSCC, cfg.L1Client, cfg.L1Client, cfg.L1Client,
+	)
+
+	rawFPContract := bind.NewBoundContract(
+		cfg.FPRollupAddr, parsedFP, cfg.L1Client, cfg.L1Client, cfg.L1Client,
 	)
 
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
@@ -113,6 +124,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		rawSccContract: rawSccContract,
 		ctcContract:    ctcContract,
 		fpRollup:       fpRollup,
+		rawFPContract:  rawFPContract,
 		fpAssertion:    assertionMap,
 		walletAddr:     walletAddr,
 		metrics:        metrics.NewBase("batch_submitter", cfg.Name),
@@ -301,11 +313,9 @@ func (d *Driver) CraftBatchTx(
 			if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
 				log.Info("append state with fraud proof by gas tip cap")
 				// ##### FRAUD-PROOF modify #####
-				tx, err := d.FraudProofAppendStateBatch(
+				return d.FraudProofAppendStateBatch(
 					opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature, blocks,
 				)
-				log.Info(">>>>>>>>  tx hash: ", tx.Hash().String())
-				return tx, err
 				// ##### FRAUD-PROOF modify ##### //
 			} else {
 				log.Info("append state with scc by gas tip cap")
@@ -327,6 +337,8 @@ func (d *Driver) UpdateGasPrice(
 	ctx context.Context,
 	tx *types.Transaction,
 ) (*types.Transaction, error) {
+	var finalTx *types.Transaction
+	var err error
 
 	opts, err := bind.NewKeyedTransactorWithChainID(
 		d.cfg.PrivKey, d.cfg.ChainID,
@@ -338,7 +350,15 @@ func (d *Driver) UpdateGasPrice(
 	opts.Nonce = new(big.Int).SetUint64(tx.Nonce())
 	opts.NoSend = true
 
-	finalTx, err := d.rawSccContract.RawTransact(opts, tx.Data())
+	if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
+		// ##### FRAUD-PROOF modify #####
+		log.Info("get RawTransact from Fraud Proof")
+		finalTx, err = d.rawFPContract.RawTransact(opts, tx.Data())
+		// ##### FRAUD-PROOF modify ##### //
+	} else {
+		log.Info("get RawTransact from SCC")
+		finalTx, err = d.rawSccContract.RawTransact(opts, tx.Data())
+	}
 	switch {
 	case err == nil:
 		return finalTx, nil
@@ -353,7 +373,16 @@ func (d *Driver) UpdateGasPrice(
 		log.Warn(d.cfg.Name + " eth_maxPriorityFeePerGas is unsupported " +
 			"by current backend, using fallback gasTipCap")
 		opts.GasTipCap = drivers.FallbackGasTipCap
-		return d.rawSccContract.RawTransact(opts, tx.Data())
+
+		if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
+			// ##### FRAUD-PROOF modify #####
+			log.Info("get RawTransact from Fraud Proof by gas tip cap")
+			return d.rawFPContract.RawTransact(opts, tx.Data())
+			// ##### FRAUD-PROOF modify ##### //
+		} else {
+			log.Info("get RawTransact from SCC by gas tip cap")
+			return d.rawSccContract.RawTransact(opts, tx.Data())
+		}
 
 	default:
 		return nil, err
@@ -396,11 +425,14 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 	txBatch := rollupTypes.NewTxBatch(blocks, uint64(len(blocks)))
 	assertion := txBatch.ToAssertion(&latestAssertion)
 
+	fmt.Println(assertion.VmHash.String())
+	fmt.Println(assertion.InboxSize)
+	fmt.Println(assertion.GasUsed)
+	fmt.Println(batch)
+	fmt.Println(shouldStartAtElement)
+	fmt.Println(signature)
+
 	// create assertion
-	if tx, err := d.fpRollup.CreateAssertionWithStateBatch(
-		opts, assertion.VmHash, assertion.InboxSize, assertion.GasUsed, batch, shouldStartAtElement, signature); err != nil {
-		return nil, err
-	} else {
-		return tx, nil
-	}
+	return d.fpRollup.CreateAssertionWithStateBatch(
+		opts, assertion.VmHash, assertion.InboxSize, assertion.GasUsed, batch, shouldStartAtElement, signature)
 }

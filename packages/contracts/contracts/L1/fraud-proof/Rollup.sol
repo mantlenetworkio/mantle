@@ -25,6 +25,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
+import "hardhat/console.sol";
+
 import "./challenge/Challenge.sol";
 import "./challenge/ChallengeLib.sol";
 import "./AssertionMap.sol";
@@ -32,7 +34,7 @@ import "./IRollup.sol";
 import "./RollupLib.sol";
 import "./verifier/IVerifier.sol";
 import {Lib_AddressResolver} from "../../libraries/resolver/Lib_AddressResolver.sol";
-import {IStateCommitmentChain} from "../rollup/IStateCommitmentChain.sol";
+import {Lib_AddressManager} from "../../libraries/resolver/Lib_AddressManager.sol";
 
 abstract contract RollupBase is IRollup, Initializable {
     // Config parameters
@@ -77,10 +79,16 @@ contract Rollup is Lib_AddressResolver, RollupBase {
     mapping(address => uint256) public withdrawableFunds; // mapping from addresses to withdrawable funds (won in challenge)
     Zombie[] public zombies; // stores stakers that lost a challenge
 
+    constructor() Lib_AddressResolver(address(0)) {
+        _disableInitializers();
+    }
+
     function initialize(
         address _owner,
         address _verifier,
         address _stakeToken,
+        address _libAddressManager,
+        address _assertionMap,
         uint256 _confirmationPeriod,
         uint256 _challengePeriod,
         uint256 _minimumAssertionPeriod,
@@ -93,13 +101,25 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         stakeToken = IERC20(_stakeToken);
         verifier = IVerifier(_verifier);
 
+        require(
+            address(libAddressManager) == address(0),
+            "L1CrossDomainMessenger already initialized."
+        );
+        libAddressManager = Lib_AddressManager(_libAddressManager);
+
+        require(
+            address(assertions) == address(0),
+            "AssertionMap already initialized."
+        );
+        assertions = AssertionMap(_assertionMap);
+
         confirmationPeriod = _confirmationPeriod;
         challengePeriod = _challengePeriod; // TODO: currently unused.
         minimumAssertionPeriod = _minimumAssertionPeriod;
         maxGasPerAssertion = _maxGasPerAssertion;
         baseStakeAmount = _baseStakeAmount;
 
-        assertions = new AssertionMap(address(this));
+        assertions.setRollupAddress(address(this));
         assertions.createAssertion(
             0, // assertionID
             RollupLib.stateHash(RollupLib.ExecutionState(0, _initialVMhash)),
@@ -108,11 +128,6 @@ contract Rollup is Lib_AddressResolver, RollupBase {
             0, // parentID
             block.number // deadline (unchallengeable)
         );
-    }
-
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(address _libAddressManager) Lib_AddressResolver(_libAddressManager) {
-        _disableInitializers();
     }
 
     /// @inheritdoc IRollup
@@ -179,35 +194,12 @@ contract Rollup is Lib_AddressResolver, RollupBase {
     }
 
     /// @inheritdoc IRollup
-    function createAssertionWithStateBatch(
-        bytes32 vmHash,
-        uint256 inboxSize,
-        uint256 l2GasUsed,
-        bytes32[] calldata _batch,
-        uint256 _shouldStartAtElement,
-        bytes calldata _signature
-    ) external override stakedOnly {
-        // permissions will be checked in appendStateBatch method, don't need to check again here
-        require(msg.sender == resolve("BVM_Proposer"), "msg.sender is not proposer, can't append batch");
-
-        // create assertion
-        this.createAssertion(vmHash, inboxSize, l2GasUsed);
-
-        // append state batch
-        address scc = resolve("StateCommitmentChain");
-        (bool success, bytes memory data) = scc.delegatecall(
-            abi.encodeWithSignature("appendStateBatch(bytes32[],uint256,bytes)", _batch, _shouldStartAtElement, _signature)
-        );
-        require(success, "scc append state batch failed, revert all");
-    }
-
-
-    /// @inheritdoc IRollup
     function createAssertion(
         bytes32 vmHash,
         uint256 inboxSize,
         uint256 l2GasUsed
-    ) external override stakedOnly {
+//    ) public override stakedOnly {
+    ) public override {
         // TODO: determine if inboxSize needs to be included.
         RollupLib.ExecutionState memory endState = RollupLib.ExecutionState(l2GasUsed, vmHash);
 
@@ -220,6 +212,14 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         // Require that the L2 gas used by the assertion is less than the limit.
         // TODO: arbitrum uses: timeSinceLastNode.mul(avmGasSpeedLimitPerBlock).mul(4) ?
         require(assertionGasUsed <= maxGasPerAssertion, "TOO_LARGE");
+
+        console.log(
+            "compare inboxSize ...",
+            parentID,
+            inboxSize,
+            assertions.getInboxSize(parentID)
+        );
+
         // Require that the assertion at least includes one transaction
         require(inboxSize > assertions.getInboxSize(parentID), "NO_TXN");
 
@@ -232,6 +232,57 @@ contract Rollup is Lib_AddressResolver, RollupBase {
 
         // Update stake.
         stakeOnAssertion(msg.sender, lastCreatedAssertionID);
+    }
+
+    /// @inheritdoc IRollup
+    function createAssertionWithStateBatch(
+        bytes32 vmHash,
+        uint256 inboxSize,
+        uint256 l2GasUsed,
+        bytes32[] calldata _batch,
+        uint256 _shouldStartAtElement,
+        bytes calldata _signature
+    //    ) external override stakedOnly {
+    ) external override {
+
+        console.log(
+            "createAssertionWithStateBatch enter",
+            msg.sender,
+            resolve("BVM_Rolluper")
+        );
+
+        // permissions only allow rollup proposer to submit assertion, only allow RollupContract to append new batch
+        require(msg.sender == resolve("BVM_Rolluper"), "msg.sender is not rollup proposer, can't append batch");
+
+        console.log(
+            "start createAssertion"
+        );
+
+        // create assertion
+        createAssertion(vmHash, inboxSize, l2GasUsed);
+
+        console.log(
+            "end createAssertion"
+        );
+
+        console.log(
+            "scc.call ...",
+            resolve("StateCommitmentChain")
+        );
+
+        // append state batch
+        address scc = resolve("StateCommitmentChain");
+        (bool success, ) = scc.call(
+            abi.encodeWithSignature("appendStateBatch(bytes32[],uint256,bytes)", _batch, _shouldStartAtElement, _signature)
+        );
+
+        console.log(
+            "scc.call end ...",
+            success
+        );
+
+        require(success, "scc append state batch failed, revert all");
+        emit NewBatchAppend(_batch.length + _shouldStartAtElement);
     }
 
     function challengeAssertion(address[2] calldata players, uint256[2] calldata assertionIDs)

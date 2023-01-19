@@ -9,6 +9,7 @@ const config = {
   sccSequencerPublishWindowSeconds: 12592000,
   bvmSequencerAddress: process.env.BVM_SEQUENCER_ADDRESS ||  '0xc4AaE221f1C62E8CBC657Af5b051eA573914cFc7',
   bvmProposerAddress: process.env.BVM_PROPOSER_ADDRESS || '0x3079Be9D8622173f02618bA2B793F00795D4f320',
+  bvmRolluperAddress: process.env.BVM_ROLLUPER_ADDRESS || '0x3079Be9D8622173f02618bA2B793F00795D4f320',
   //default bvmBlockSignerAddress
   bvmBlockSignerAddress: process.env.BVM_BLOCK_SIGNER_ADDRESS || '0x00000398232E2064F896018496b4b44b3D62751F',
   bvmFeeWalletAddress: process.env.BVM_FEE_WALLET_ADDRESS || '0x018E08C754018fe54D1CE86b27120052bFe07273',

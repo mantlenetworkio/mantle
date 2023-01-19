@@ -22,12 +22,18 @@ export const names = {
       Proxy__BVM_EigenDataLayrChain: 'Proxy__BVM_EigenDataLayrChain',
     },
     fraud_proof: {
+      AssertionMap: 'AssertionMap',
       Verifier: 'Verifier',
       Rollup: 'Rollup',
+      Proxy__AssertionMap: 'Proxy__AssertionMap',
       Proxy__Verifier: 'Proxy__Verifier',
       Proxy__Rollup: 'Proxy__Rollup',
     },
-    accounts: { BVM_Sequencer: 'BVM_Sequencer', BVM_Proposer: 'BVM_Proposer' },
+    accounts: {
+      BVM_Sequencer: 'BVM_Sequencer',
+      BVM_Proposer: 'BVM_Proposer',
+      BVM_Rolluper: 'BVM_Rolluper',
+    },
     configs: {
       L1_BIT_ADDRESS: 'L1_BitAddress',
       Local_Bit_Token: 'TestBitToken',
