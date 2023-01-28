@@ -1,11 +1,22 @@
 package rollup
 
 import (
+	"context"
+	"crypto/ecdsa"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
 	"math/big"
 	"testing"
+	"time"
+
+	"github.com/influxdata/influxdb/pkg/testing/assert"
+	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi/bind"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/ethclient"
 
 	"github.com/jarcoal/httpmock"
 )
@@ -72,4 +83,62 @@ func TestDecodedJSON(t *testing.T) {
 	if tx.Value.ToInt().Cmp(cmp) != 0 {
 		t.Fatal("Cannot decode")
 	}
+}
+
+type ExtAcc struct {
+	Key  *ecdsa.PrivateKey
+	Addr common.Address
+}
+
+func FromHexKey(hexkey string) (ExtAcc, error) {
+	key, err := crypto.HexToECDSA(hexkey)
+	if err != nil {
+		return ExtAcc{}, err
+	}
+	pubKey := key.Public()
+	pubKeyECDSA, ok := pubKey.(*ecdsa.PublicKey)
+	if !ok {
+		err = fmt.Errorf("publicKey is not of type *ecdsa.PublicKey")
+		return ExtAcc{}, err
+	}
+	addr := crypto.PubkeyToAddress(*pubKeyECDSA)
+	return ExtAcc{key, addr}, nil
+}
+
+func TestBatchTransactions(t *testing.T) {
+	account, _ := FromHexKey("ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+	//("3f75eb22760d0d5c50cd320a7289262777ba6e52c0073799407daf19e5905aca")
+	txOpt := bind.NewKeyedTransactor(account.Key)
+
+	client, err := ethclient.Dial("http://localhost:7543")
+	assert.NoError(t, err)
+
+	receiveAccount := common.HexToAddress("0x76EFAac78C011D24BC975a5dAcC9a91245397e1a")
+	txOpt.GasLimit = uint64(21000)
+	txOpt.GasPrice = big.NewInt(1)
+
+	for i := 0; i < 10000; i++ {
+		nonce, err := client.PendingNonceAt(context.Background(), account.Addr)
+		assert.NoError(t, err)
+
+		txOpt.Value = big.NewInt(1).Mul(big.NewInt(3e14), big.NewInt(int64(i)))
+		rawTx := types.NewTransaction(nonce, receiveAccount, txOpt.Value, txOpt.GasLimit, txOpt.GasPrice, nil)
+
+		signedTx, err := txOpt.Signer(types.HomesteadSigner{}, txOpt.From, rawTx)
+		assert.NoError(t, err)
+
+		err = client.SendTransaction(context.Background(), signedTx)
+		assert.NoError(t, err)
+
+		t.Logf("index %d, txHash %s", i, signedTx.Hash().String())
+
+		time.Sleep(100 * time.Millisecond)
+	}
+}
+
+func TestNodeID(t *testing.T) {
+	db, _ := enode.OpenDB("")
+	account, _ := FromHexKey("0b230e4787022b0dead74c0f16eddc966075109c8945e7c23822bf05ef2459f6")
+	ln := enode.NewLocalNode(db, account.Key)
+	t.Log(ln.ID())
 }
