@@ -60,7 +60,6 @@ type Scheduler struct {
 	batchDone       chan uint64
 	currentStartMsg types.BatchPeriodStartMsg
 	currentHeight   uint64
-	//batchEndFlag    bool
 
 	expectMinTxsCount uint64
 	sequencerAssessor *healthAssessor
