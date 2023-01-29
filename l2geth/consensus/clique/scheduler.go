@@ -21,11 +21,15 @@ import (
 )
 
 const (
-	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
+	// chainHeadChanSize is the size of channel listening to ChainHeadEvent
 	chainHeadChanSize = 10
 
-	defaultBatchSize  = int64(100)
+	// default config of scheduler consensus
+	// defaultBatchSize is the size of batch tx num
+	defaultBatchSize = int64(100)
+	// defaultExpireTime is the default config of a batch timeout
 	defaultExpireTime = int64(60)
+	// defaultBatchEpoch is the epoch time of the scheduler synchronizing the sequencer collection from l1, default 1 day
 	defaultBatchEpoch = time.Duration(86400)
 )
 
@@ -39,6 +43,10 @@ type Config struct {
 	BatchEpoch int64
 }
 
+// Scheduler service has the ability to update the sequencer set
+// and select a producer from the sequencer set according to the priority algorithm.
+// The scheduler then generates blocks and broadcasts them based
+// on the transaction set sent by the producer
 type Scheduler struct {
 	sequencerSetMtx sync.Mutex // The lock used to protect the sequencerSet field
 	batchMtx        sync.Mutex // The lock used to protect the batchEndFlag and batchDone fields
@@ -79,6 +87,7 @@ type Scheduler struct {
 	syncer *synchronizer.Synchronizer
 }
 
+// NewScheduler will create a scheduler server
 func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Address, clique *Clique, blockchain *core.BlockChain, txpool *core.TxPool, eventMux *event.TypeMux) (*Scheduler, error) {
 	log.Info("Create Sequencer Server")
 
@@ -131,28 +140,37 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 	return schedulerInst, nil
 }
 
+// SetWallet set signer and wallet, so that scheduler servier
 func (schedulerInst *Scheduler) SetWallet(wallet accounts.Wallet, acc accounts.Account) {
 	schedulerInst.wallet = wallet
 	schedulerInst.signAccount = acc
 }
 
+// Scheduler return scheduler address
 func (schedulerInst *Scheduler) Scheduler() common.Address {
 	return schedulerInst.schedulerAddr
 }
 
+// CurrentStartMsg get the startMsg of this batch
 func (schedulerInst *Scheduler) CurrentStartMsg() types.BatchPeriodStartMsg {
 	return schedulerInst.currentStartMsg
 }
 
+// Start initializes and starts the sub-thread services of the scheduler
 func (schedulerInst *Scheduler) Start() {
 	if schedulerInst.wallet == nil || len(schedulerInst.signAccount.Address.Bytes()) == 0 {
 		panic("Sequencer server need wallet to sign msgs")
 	}
+
+	// channel init
 	schedulerInst.exitCh = make(chan struct{}, 1)
 	schedulerInst.batchDone = make(chan struct{}, 1)
 
+	// Subscribe to events PeerAddEvent
 	schedulerInst.addPeerSub = schedulerInst.eventMux.Subscribe(core.PeerAddEvent{})
+	// Subscribe to events BatchEndEvent
 	schedulerInst.batchEndSub = schedulerInst.eventMux.Subscribe(core.BatchEndEvent{})
+	// Subscribe to events chainHeadSub
 	schedulerInst.chainHeadSub = schedulerInst.blockchain.SubscribeChainHeadEvent(schedulerInst.chainHeadCh)
 
 	go schedulerInst.syncSequencerSetRoutine()
@@ -164,16 +182,19 @@ func (schedulerInst *Scheduler) Start() {
 	atomic.StoreInt32(&schedulerInst.running, 1)
 }
 
+// Stop set schedulerInst the indicator whether schedulerInst is running or not to 1
+// and call the method Close to unsubscribe events and close channel exitCh
 func (schedulerInst *Scheduler) Stop() {
 	atomic.StoreInt32(&schedulerInst.running, 0)
 	schedulerInst.Close()
 }
 
-// IsRunning returns an indicator whether schedulerInst is running or not.
+// IsRunning returns an indicator whether schedulerInst is running or not
 func (schedulerInst *Scheduler) IsRunning() bool {
 	return atomic.LoadInt32(&schedulerInst.running) == 1
 }
 
+// Close cancel all subscriptions and close channel exitCh
 func (schedulerInst *Scheduler) Close() {
 	schedulerInst.chainHeadSub.Unsubscribe()
 	schedulerInst.addPeerSub.Unsubscribe()
