@@ -37,6 +37,7 @@ var (
 	scale = big.NewInt(1e18)
 )
 
+// Config sets the parameters required for the scheduler service
 type Config struct {
 	BatchSize  int64
 	BatchTime  int64
@@ -200,6 +201,11 @@ func (schedulerInst *Scheduler) Close() {
 	close(schedulerInst.exitCh)
 }
 
+// addPeerCheckLoop will not be called before schedulerInst starts.
+// When the miner starts, the schedulerInst service will be started synchronously
+// and the scheduler will use addPeerCheckLoop to check the connected p2p nodes.
+// The p2p connected after schedulerInst starts will call addPeerCheckLoop to check
+// whether it is in the sequencer set
 func (schedulerInst *Scheduler) addPeerCheckLoop() {
 	// automatically stops if unsubscribe
 	for obj := range schedulerInst.addPeerSub.Chan() {
@@ -217,6 +223,8 @@ func (schedulerInst *Scheduler) addPeerCheckLoop() {
 	}
 }
 
+// batchEndLoop subscription BatchEndEvent then end this batch,
+// this will happen when the batch has tx failed
 func (schedulerInst *Scheduler) batchEndLoop() {
 	// automatically stops if unsubscribe
 	for obj := range schedulerInst.batchEndSub.Chan() {
@@ -226,6 +234,14 @@ func (schedulerInst *Scheduler) batchEndLoop() {
 	}
 }
 
+// schedulerRoutine the main process of schedulerInst
+// uses the batch parameters in the config to rotate each round of batches.
+// Each round of batches will conduct a health check based on the results of
+// the previous round of batches first, and then perform L1ToL2Tx processing.
+// According to the sequencer set The priority selects the producer,
+// generates BatchPeriodStartMsg and broadcasts, then updates the priority of the sequencer set.
+// The batch will end only when it times out or receives batchDone signal,
+// and the process will be interrupted when the exitCh signal is received
 func (schedulerInst *Scheduler) schedulerRoutine() {
 	batchSize := defaultBatchSize
 	expireTime := defaultExpireTime
@@ -261,6 +277,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 				return fmt.Errorf("empty sequencer set")
 			}
 
+			// get producer
 			seq := schedulerInst.sequencerSet.getSeqWithMostPriority()
 			currentBlock := schedulerInst.blockchain.CurrentBlock()
 			currentIndex := rawdb.ReadStartMsgIndex(schedulerInst.db)
@@ -283,9 +300,12 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 				return fmt.Errorf("get minimum block count failed %s", err.Error())
 			}
 			schedulerInst.expectMinTxsCount = expectMinTxsCount
+			// store msg as currentStartMsg
 			schedulerInst.currentStartMsg = msg
+			// set BatchIndex to db
 			rawdb.WriteCurrentBatchPeriodIndex(schedulerInst.db, msg.BatchIndex)
 
+			// broadcast BatchPeriodStartMsg
 			err = schedulerInst.eventMux.Post(core.BatchPeriodStartEvent{
 				Msg:   &msg,
 				ErrCh: nil,
@@ -320,15 +340,18 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 	}
 }
 
+// handleChainHeadEventLoop checks whether the current block height reaches the currentStartMsg.maxHeight,
+// if it reaches the maxHeight, send batchIndex to channel batchDone.
 func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 	for {
 		select {
 		case chainHead := <-schedulerInst.chainHeadCh:
+			// Transactions of type QueueOriginL1ToL2 are not included in the batch
 			if chainHead.Block.Transactions().Len() != 0 && chainHead.Block.Transactions()[0].GetMeta() != nil && chainHead.Block.Transactions()[0].QueueOrigin() == types.QueueOriginL1ToL2 {
 				log.Debug("chainHead", "block_number", chainHead.Block.NumberU64(), "extra_data", hex.EncodeToString(chainHead.Block.Extra()))
 				continue
 			}
-			log.Info("schedulerInst handle chain head", "current_height", schedulerInst.blockchain.CurrentBlock().NumberU64(), "max_height", schedulerInst.currentStartMsg.MaxHeight)
+			log.Debug("schedulerInst handle chain head", "current_height", schedulerInst.blockchain.CurrentBlock().NumberU64(), "max_height", schedulerInst.currentStartMsg.MaxHeight)
 			if schedulerInst.blockchain.CurrentBlock().NumberU64() == schedulerInst.currentStartMsg.MaxHeight {
 				schedulerInst.batchDone <- schedulerInst.CurrentStartMsg().BatchIndex
 			}
@@ -339,6 +362,8 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 	}
 }
 
+// syncSequencerSetRoutine uses the batchEpoch parameter set in the config to regularly obtain
+// the sequencer set from L1 and update the schedulerInst.sequencerSet
 func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 	for {
 		select {
@@ -352,6 +377,8 @@ func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 					return fmt.Errorf("get sequencer set failed %s", err.Error())
 				}
 				schedulerInst.setSequencerHealthPoints(seqSet)
+
+				// todo do we need get changes then use UpdateWithChangeSet to update sequencer set or just replace schedulerInst.sequencerSet
 				// get changes
 				changes := compareSequencerSet(schedulerInst.sequencerSet.Sequencers, seqSet)
 				log.Info(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
@@ -364,7 +391,7 @@ func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 				return err
 			}()
 			if err != nil {
-				log.Error("update sequencer set error", "err_msg", err.Error())
+				log.Error("syncSequencerSetRoutine update sequencer set error", "err_msg", err.Error())
 				continue
 			}
 		case <-schedulerInst.exitCh:
@@ -412,6 +439,7 @@ func compareSequencerSet(preSeqs []*Sequencer, newSeq synchronizer.SequencerSequ
 	return changes
 }
 
+// bindToSeq replaces the sequencer structure from SequencerSequencerInfos to Sequencer
 func bindToSeq(binds synchronizer.SequencerSequencerInfos) []*Sequencer {
 	var seqs []*Sequencer
 	for _, v := range binds {
