@@ -210,7 +210,7 @@ func (pm *ProtocolManager) setEtherBase(etherBase common.Address) {
 	pm.etherbase = etherBase
 	for k, v := range pm.consensusPeers.peers {
 		if err := pm.checkPeer(v); err != nil {
-			pm.removePeerTmp(k)
+			pm.removeConsensusPeer(k)
 		}
 	}
 }
@@ -283,10 +283,9 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 	pm.minedBlockSub = pm.eventMux.Subscribe(core.NewMinedBlockEvent{})
 	go pm.minedBroadcastLoop()
 
-	// broadcast producers
+	// broadcast consensus messages
 	pm.batchStartMsgSub = pm.eventMux.Subscribe(core.BatchPeriodStartEvent{})
 	go pm.batchPeriodStartMsgBroadcastLoop()
-
 	pm.batchAnswerMsgSub = pm.eventMux.Subscribe(core.BatchPeriodAnswerEvent{})
 	go pm.batchPeriodAnswerMsgBroadcastLoop()
 

@@ -684,7 +684,7 @@ func (w *worker) batchAnswerLoop() {
 				log.Info("Scheduler receives BatchPeriodAnswerEvent", "sequencer", ev.Msg.Sequencer.String(), "start_height", ev.Msg.StartHeight, "tx_len", len(ev.Msg.Txs), "max_height", w.currentBps.MaxHeight)
 				if ev.Msg.StartHeight-1+uint64(len(ev.Msg.Txs)) > w.currentBps.MaxHeight {
 					log.Error("Batch answer contains too many transactions", "start_height", ev.Msg.StartHeight, "max_height", w.currentBps.MaxHeight, "tx_len", len(ev.Msg.Txs))
-					err := w.mux.Post(core.BatchEndEvent{})
+					err := w.mux.Post(core.BatchEndEvent(w.currentBps.BatchIndex))
 					if err != nil {
 						log.Error("Post BatchEndEvent error", "err_msg", err.Error())
 						break
@@ -694,7 +694,7 @@ func (w *worker) batchAnswerLoop() {
 					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, ev.Msg.ToBatchTxSetProof())
 					if err != nil {
 						log.Error("ValidateAndApplySequencerTransaction error", "err_msg", err.Error())
-						err = w.mux.Post(core.BatchEndEvent{})
+						err = w.mux.Post(core.BatchEndEvent(w.currentBps.BatchIndex))
 						if err != nil {
 							log.Error("Post BatchEndEvent error", "err_msg", err.Error())
 							break

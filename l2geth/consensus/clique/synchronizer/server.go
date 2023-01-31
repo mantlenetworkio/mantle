@@ -10,9 +10,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
 
 	binding "github.com/mantlenetworkio/mantle/l2geth/consensus/clique/synchronizer/bindings"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 const (
@@ -24,26 +24,34 @@ const (
 	GET_SEQUENCER_TIMEOUT          = 10
 )
 
-// set infos for sort
+// SequencerSequencerInfos implementation the sort interface
+var _ sort.Interface = SequencerSequencerInfos{}
+
+// SequencerSequencerInfos set infos for sort
 type SequencerSequencerInfos []binding.SequencerSequencerInfo
 
-func (seqs SequencerSequencerInfos) Len() int {
-	return len(seqs)
+// Len for sort
+func (s SequencerSequencerInfos) Len() int {
+	return len(s)
 }
 
+// Less for sort
 func (s SequencerSequencerInfos) Less(i, j int) bool {
 	return s[i].Amount.Int64() < s[j].Amount.Int64()
 }
 
+// Swap for sort
 func (s SequencerSequencerInfos) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
+// Synchronizer set for connect with l1 sequencer contract
 type Synchronizer struct {
 	sequencerContractAddr common.Address
 	rpcUrl                string
 }
 
+// NewSynchronizer get sequencer address and l1 rpc address from os env then create Synchronizer
 func NewSynchronizer() *Synchronizer {
 	seqAddr := os.Getenv(ENV_SEQUENCER_CONTRACT_ADDRESS)
 	rpcUrl := os.Getenv(ENV_SEQUENCER_L1_RPC)
@@ -53,6 +61,7 @@ func NewSynchronizer() *Synchronizer {
 	}
 }
 
+// GetSchedulerAddr query scheduler address from l1 sequencer contract
 func (sync *Synchronizer) GetSchedulerAddr() (common.Address, error) {
 	// Create eth client
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
@@ -77,7 +86,7 @@ func (sync *Synchronizer) GetSchedulerAddr() (common.Address, error) {
 	return schedulerAddr, err
 }
 
-// GetSequencerSet will return the validator set
+// GetSequencerSet will query the sequencer set from l1 sequencer contract
 func (sync *Synchronizer) GetSequencerSet() (SequencerSequencerInfos, error) {
 	// Create eth client
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
