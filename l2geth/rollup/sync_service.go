@@ -1154,6 +1154,22 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	return nil
 }
 
+func (s *SyncService) VerifiedTxCount() (uint64, error) {
+	var pendingTxCount uint64
+	pendingTxs, err := s.txpool.Pending()
+	if err != nil {
+		return 0, err
+	}
+	for _, txs := range pendingTxs {
+		for _, tx := range txs {
+			if err := s.VerifyFee(tx); err == nil {
+				pendingTxCount++
+			}
+		}
+	}
+	return pendingTxCount, nil
+}
+
 func (s *SyncService) VerifyFee(tx *types.Transaction) error {
 	if tx == nil {
 		return errors.New("nil transaction passed to ValidateAndApplySequencerTransaction")

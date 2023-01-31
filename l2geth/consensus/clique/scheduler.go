@@ -56,6 +56,7 @@ type Scheduler struct {
 	consensusEngine *Clique
 	blockchain      *core.BlockChain
 	txpool          *core.TxPool
+	verifiedTxCount func() (uint64, error)
 
 	// consensus channel
 	batchDone       chan struct{}
@@ -129,6 +130,10 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 	schedulerInst.setSequencerHealthPoints(seqSet)
 
 	return schedulerInst, nil
+}
+
+func (schedulerInst *Scheduler) SetVerifiedTxCount(verifiedTxCount func() (uint64, error)) {
+	schedulerInst.verifiedTxCount = verifiedTxCount
 }
 
 func (schedulerInst *Scheduler) SetWallet(wallet accounts.Wallet, acc accounts.Account) {

@@ -254,6 +254,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		if err != nil {
 			return nil, fmt.Errorf("create schedulerInst instance err: %v", err)
 		}
+		schedulerInst.SetVerifiedTxCount(eth.syncService.VerifiedTxCount)
 		eth.protocolManager.setSchedulerInst(schedulerInst)
 	}
 	return eth, nil
