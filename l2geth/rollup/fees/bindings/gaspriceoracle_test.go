@@ -28,6 +28,7 @@ func TestCalculateFee(t *testing.T) {
 
 	opts, _ := NewKeyedTransactor(key)
 	addr, _, gpo, err := DeployGasPriceOracle(opts, sim, opts.From)
+	// TODO da contract
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,6 +89,8 @@ func TestCalculateFee(t *testing.T) {
 
 			gasOracle.SetL1GasPrice(l1BaseFee)
 			gasOracle.SetL2GasPrice(l2GasPrice)
+			// TODO
+			//gasOracle.SetDAGasPrice(daGasPrice)
 			gasOracle.SetOverhead(overhead)
 			gasOracle.SetScalar(scalar, decimals)
 
@@ -95,12 +98,22 @@ func TestCalculateFee(t *testing.T) {
 			if err != nil {
 				t.Fatal("cannot get l1 fee")
 			}
+			// TODO daFee
+			//daFee, err := gpo.GetDAFee(&callopts, raw.Bytes())
+			//if err != nil {
+			//	t.Fatal("cannot get l1 fee")
+			//}
 
 			scaled := fees.ScaleDecimals(scalar, decimals)
 			expectL1Fee := fees.CalculateL1Fee(raw.Bytes(), overhead, l1BaseFee, scaled)
 			if expectL1Fee.Cmp(l1Fee) != 0 {
 				t.Fatal("solidity does not match go")
 			}
+			// TODO
+			//expectDAFee := fees.CalculateDAFee(raw.Bytes(), overhead, l1BaseFee, scaled)
+			//if expectL1Fee.Cmp(l1Fee) != 0 {
+			//	t.Fatal("solidity does not match go")
+			//}
 
 			state, err := chain.State()
 			if err != nil {

@@ -34,6 +34,8 @@ var (
 	errTransactionSigned = errors.New("transaction is signed")
 	// big10 is used for decimal scaling
 	big10 = new(big.Int).SetUint64(10)
+	// TODO replace by contract value
+	DaCharge = 0
 )
 
 // Message represents the interface of a message.
@@ -92,6 +94,11 @@ func CalculateTotalFee(tx *types.Transaction, gpo RollupOracle) (*big.Int, error
 	l2GasLimit := new(big.Int).SetUint64(tx.Gas())
 	l2Fee := new(big.Int).Mul(tx.GasPrice(), l2GasLimit)
 	fee := new(big.Int).Add(l1Fee, l2Fee)
+	if DaCharge == 1 {
+		daGasPrice := new(big.Int)
+		daFee := CalculateDAFee(raw, daGasPrice, scalar)
+		fee = new(big.Int).Add(fee, daFee)
+	}
 	return fee, nil
 }
 
@@ -113,6 +120,13 @@ func CalculateTotalMsgFee(msg Message, state StateDB, gasUsed *big.Int, gpo *com
 	l2Fee := new(big.Int).Mul(msg.GasPrice(), gasUsed)
 	// Add the L1 cost and the L2 cost to get the total fee being paid
 	fee := new(big.Int).Add(l1Fee, l2Fee)
+	if DaCharge == 1 {
+		daFee, err := CalculateDAMsgFee(msg, state, gpo)
+		if err != nil {
+			return nil, err
+		}
+		return new(big.Int).Add(fee, daFee), nil
+	}
 	return fee, nil
 }
 
@@ -146,6 +160,9 @@ func CalculateL1Fee(data []byte, overhead, l1GasPrice *big.Int, scalar *big.Floa
 // batch submission goes down via contract optimizations. This will not overflow
 // under standard network conditions.
 func CalculateL1GasUsed(data []byte, overhead *big.Int) *big.Int {
+	if DaCharge == 1 {
+		return overhead
+	}
 	zeroes, ones := zeroesAndOnes(data)
 	zeroesGas := zeroes * params.TxDataZeroGas
 	onesGas := (ones + 68) * params.TxDataNonZeroGasEIP2028
@@ -153,8 +170,46 @@ func CalculateL1GasUsed(data []byte, overhead *big.Int) *big.Int {
 	return new(big.Int).Add(l1Gas, overhead)
 }
 
+// CalculateDAMsgFee computes the DA portion of the fee given
+// a Message and a StateDB
+func CalculateDAMsgFee(msg Message, state StateDB, gpo *common.Address) (*big.Int, error) {
+	tx := asTransaction(msg)
+	raw, err := rlpEncode(tx)
+	if err != nil {
+		return nil, err
+	}
+
+	if gpo == nil {
+		gpo = &rcfg.L2GasPriceOracleAddress
+	}
+
+	_, _, scalar := readGPOStorageSlots(*gpo, state)
+	daGasPrice := new(big.Int)
+	daFee := CalculateDAFee(raw, daGasPrice, scalar)
+	return daFee, nil
+}
+
+// CalculateDAFee computes the DA fee
+func CalculateDAFee(data []byte, daGasPrice *big.Int, scalar *big.Float) *big.Int {
+	daGasUsed := CalculateDAGasUsed(data)
+	daFee := new(big.Int).Mul(daGasUsed, daGasPrice)
+	return mulByFloat(daFee, scalar)
+}
+
+// CalculateDAGasUsed computes the DA gas used based on the calldata and
+// constant sized overhead. The overhead can be decreased as the cost of the
+// batch submission goes down via contract optimizations. This will not overflow
+// under standard network conditions.
+func CalculateDAGasUsed(data []byte) *big.Int {
+	zeroes, ones := zeroesAndOnes(data)
+	zeroesGas := zeroes * params.TxDataZeroGas
+	onesGas := (ones + 68) * params.TxDataNonZeroGasEIP2028
+	return new(big.Int).SetUint64(zeroesGas + onesGas)
+}
+
 // DeriveL1GasInfo reads L1 gas related information to be included
 // on the receipt
+// TODO DONE
 func DeriveL1GasInfo(msg Message, state StateDB) (*big.Int, *big.Int, *big.Int, *big.Float, error) {
 	tx := asTransaction(msg)
 	raw, err := rlpEncode(tx)
@@ -166,6 +221,23 @@ func DeriveL1GasInfo(msg Message, state StateDB) (*big.Int, *big.Int, *big.Int, 
 	l1GasUsed := CalculateL1GasUsed(raw, overhead)
 	l1Fee := CalculateL1Fee(raw, overhead, l1GasPrice, scalar)
 	return l1Fee, l1GasPrice, l1GasUsed, scalar, nil
+}
+
+// DeriveDAGasInfo reads DA gas related information to be included
+// on the receipt
+// TODO DONE
+func DeriveDAGasInfo(msg Message, state StateDB) (*big.Int, *big.Int, *big.Int, *big.Float, error) {
+	tx := asTransaction(msg)
+	raw, err := rlpEncode(tx)
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	_, _, scalar := readGPOStorageSlots(rcfg.L2GasPriceOracleAddress, state)
+	// TODO delete
+	daGasPrice := new(big.Int)
+	daGasUsed := CalculateDAGasUsed(raw)
+	daFee := CalculateDAFee(raw, daGasPrice, scalar)
+	return daFee, daGasPrice, daGasUsed, scalar, nil
 }
 
 func readGPOStorageSlots(addr common.Address, state StateDB) (*big.Int, *big.Int, *big.Float) {

@@ -69,6 +69,7 @@ type StateTransition struct {
 	evm        *vm.EVM
 	// UsingBVM
 	l1Fee *big.Int
+	daFee *big.Int
 }
 
 // Message represents a message sent to a contract.
@@ -131,6 +132,7 @@ func IntrinsicGas(data []byte, contractCreation, isHomestead bool, isEIP2028 boo
 // NewStateTransition initialises and returns a new state transition object.
 func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition {
 	l1Fee := new(big.Int)
+	daFee := new(big.Int)
 	gasPrice := msg.GasPrice()
 	if rcfg.UsingBVM {
 		if msg.GasPrice().Cmp(common.Big0) != 0 {
@@ -142,6 +144,9 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 				gasPrice = common.Big0
 			} else if charge.Cmp(common.Big1) == 1 {
 				panic(fmt.Sprintf("charge:%v is invaild", charge))
+			}
+			if fees.DaCharge == 1 {
+				daFee, _ = fees.CalculateDAMsgFee(msg, evm.StateDB, nil)
 			}
 		}
 	}
@@ -155,6 +160,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 		data:     msg.Data(),
 		state:    evm.StateDB,
 		l1Fee:    l1Fee,
+		daFee:    daFee,
 	}
 }
 

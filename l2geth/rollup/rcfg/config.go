@@ -42,6 +42,12 @@ var (
 	ChargeSlot = common.BigToHash(big.NewInt(7))
 	// SccAddressSlot refers to the storage slot in the Scc contract address
 	SccAddressSlot = common.BigToHash(big.NewInt(8))
+	// DaGasPriceSlot refers to the storage slot that the da gas price is stored
+	// in the BVM_GasPriceOracle predeploy
+	DaGasPriceSlot = common.BigToHash(big.NewInt(9))
+	// DaSwitchSlot refers to the storage slot in the BVM_GasPriceOracle that
+	// holds switch controls whether enable DA
+	DaSwitchSlot = common.BigToHash(big.NewInt(10))
 )
 
 func init() {

@@ -520,6 +520,17 @@ func (s *SyncService) updateL2GasPrice(statedb *state.StateDB) error {
 	return s.RollupGpo.SetL2GasPrice(value)
 }
 
+// updateDAGasPrice accepts a state db and reads the gas price from the gas
+// price oracle at the state that corresponds to the state db. If no state db
+// is passed in, then the tip is used.
+func (s *SyncService) updateDAGasPrice(statedb *state.StateDB) error {
+	value, err := s.readGPOStorageSlot(statedb, rcfg.DaGasPriceSlot)
+	if err != nil {
+		return err
+	}
+	return s.RollupGpo.SetDAGasPrice(value)
+}
+
 // updateOverhead will update the overhead value from the BVM_GasPriceOracle
 // in the local cache
 func (s *SyncService) updateOverhead(statedb *state.StateDB) error {
@@ -562,6 +573,16 @@ func (s *SyncService) updateCharge(statedb *state.StateDB) error {
 		return err
 	}
 	return s.RollupGpo.SetCharge(charge)
+}
+
+// updateDASwitch will update the charge value from the BVM_GasPriceOracle
+// in the local cache
+func (s *SyncService) updateDASwitch(statedb *state.StateDB) error {
+	daSwitch, err := s.readGPOStorageSlot(statedb, rcfg.DaSwitchSlot)
+	if err != nil {
+		return err
+	}
+	return s.RollupGpo.SetCharge(daSwitch)
 }
 
 // updateSCCAddress will update the sccAddress value from the BVM_GasPriceOracle

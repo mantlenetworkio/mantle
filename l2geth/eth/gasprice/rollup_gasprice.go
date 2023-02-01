@@ -14,6 +14,7 @@ import (
 type RollupOracle struct {
 	l1GasPrice     *big.Int
 	l2GasPrice     *big.Int
+	daGasPrice     *big.Int
 	overhead       *big.Int
 	scalar         *big.Float
 	isBurning      *big.Int
@@ -21,6 +22,7 @@ type RollupOracle struct {
 	sccAddress     common.Address
 	l1GasPriceLock sync.RWMutex
 	l2GasPriceLock sync.RWMutex
+	daGasPriceLock sync.RWMutex
 	overheadLock   sync.RWMutex
 	scalarLock     sync.RWMutex
 	isBurningLock  sync.RWMutex
@@ -71,6 +73,15 @@ func (gpo *RollupOracle) SetL2GasPrice(gasPrice *big.Int) error {
 	defer gpo.l2GasPriceLock.Unlock()
 	gpo.l2GasPrice = gasPrice
 	log.Info("Set L2 Gas Price", "gasprice", gpo.l2GasPrice)
+	return nil
+}
+
+// SetDAGasPrice returns the current DA gas price
+func (gpo *RollupOracle) SetDAGasPrice(daGasPrice *big.Int) error {
+	gpo.daGasPriceLock.Lock()
+	defer gpo.daGasPriceLock.Unlock()
+	gpo.daGasPrice = daGasPrice
+	log.Info("Set DA Gas Price", "daGasprice", gpo.daGasPrice)
 	return nil
 }
 
