@@ -76,6 +76,14 @@ func (gpo *RollupOracle) SetL2GasPrice(gasPrice *big.Int) error {
 	return nil
 }
 
+// SuggestDAGasPrice returns the gas price which should be charged per byte of published
+// data by the sequencer.
+func (gpo *RollupOracle) SuggestDAGasPrice(ctx context.Context) (*big.Int, error) {
+	gpo.daGasPriceLock.RLock()
+	defer gpo.daGasPriceLock.RUnlock()
+	return gpo.daGasPrice, nil
+}
+
 // SetDAGasPrice returns the current DA gas price
 func (gpo *RollupOracle) SetDAGasPrice(daGasPrice *big.Int) error {
 	gpo.daGasPriceLock.Lock()

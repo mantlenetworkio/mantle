@@ -34,8 +34,6 @@ var (
 	errTransactionSigned = errors.New("transaction is signed")
 	// big10 is used for decimal scaling
 	big10 = new(big.Int).SetUint64(10)
-	// TODO replace by contract value
-	DaCharge = 0
 )
 
 // Message represents the interface of a message.
@@ -61,9 +59,11 @@ type StateDB interface {
 // memory cache of the gas price oracle
 type RollupOracle interface {
 	SuggestL1GasPrice(ctx context.Context) (*big.Int, error)
+	SuggestDAGasPrice(ctx context.Context) (*big.Int, error)
 	SuggestL2GasPrice(ctx context.Context) (*big.Int, error)
 	SuggestOverhead(ctx context.Context) (*big.Int, error)
 	SuggestScalar(ctx context.Context) (*big.Float, error)
+	DASwitch(ctx context.Context) (*big.Int, error)
 }
 
 // CalculateTotalFee will calculate the total fee given a transaction.
@@ -72,6 +72,10 @@ type RollupOracle interface {
 func CalculateTotalFee(tx *types.Transaction, gpo RollupOracle) (*big.Int, error) {
 	// Read the variables from the cache
 	l1GasPrice, err := gpo.SuggestL1GasPrice(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	daSwitch, err := gpo.DASwitch(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -90,12 +94,15 @@ func CalculateTotalFee(tx *types.Transaction, gpo RollupOracle) (*big.Int, error
 		return nil, err
 	}
 
-	l1Fee := CalculateL1Fee(raw, overhead, l1GasPrice, scalar)
+	l1Fee := CalculateL1Fee(raw, overhead, l1GasPrice, scalar, daSwitch)
 	l2GasLimit := new(big.Int).SetUint64(tx.Gas())
 	l2Fee := new(big.Int).Mul(tx.GasPrice(), l2GasLimit)
 	fee := new(big.Int).Add(l1Fee, l2Fee)
-	if DaCharge == 1 {
-		daGasPrice := new(big.Int)
+	if daSwitch.Cmp(common.Big1) == 0 {
+		daGasPrice, err := gpo.SuggestDAGasPrice(context.Background())
+		if err != nil {
+			return nil, err
+		}
 		daFee := CalculateDAFee(raw, daGasPrice, scalar)
 		fee = new(big.Int).Add(fee, daFee)
 	}
@@ -120,7 +127,11 @@ func CalculateTotalMsgFee(msg Message, state StateDB, gasUsed *big.Int, gpo *com
 	l2Fee := new(big.Int).Mul(msg.GasPrice(), gasUsed)
 	// Add the L1 cost and the L2 cost to get the total fee being paid
 	fee := new(big.Int).Add(l1Fee, l2Fee)
-	if DaCharge == 1 {
+	daSwitch := state.GetState(*gpo, rcfg.DaSwitchSlot).Big()
+	if err != nil {
+		return nil, err
+	}
+	if daSwitch.Cmp(common.Big1) == 0 {
 		daFee, err := CalculateDAMsgFee(msg, state, gpo)
 		if err != nil {
 			return nil, err
@@ -144,13 +155,17 @@ func CalculateL1MsgFee(msg Message, state StateDB, gpo *common.Address) (*big.In
 	}
 
 	l1GasPrice, overhead, scalar := readGPOStorageSlots(*gpo, state)
-	l1Fee := CalculateL1Fee(raw, overhead, l1GasPrice, scalar)
+	daSwitch := state.GetState(*gpo, rcfg.DaSwitchSlot).Big()
+	if err != nil {
+		return nil, err
+	}
+	l1Fee := CalculateL1Fee(raw, overhead, l1GasPrice, scalar, daSwitch)
 	return l1Fee, nil
 }
 
 // CalculateL1Fee computes the L1 fee
-func CalculateL1Fee(data []byte, overhead, l1GasPrice *big.Int, scalar *big.Float) *big.Int {
-	l1GasUsed := CalculateL1GasUsed(data, overhead)
+func CalculateL1Fee(data []byte, overhead, l1GasPrice *big.Int, scalar *big.Float, daSwitch *big.Int) *big.Int {
+	l1GasUsed := CalculateL1GasUsed(data, overhead, daSwitch)
 	l1Fee := new(big.Int).Mul(l1GasUsed, l1GasPrice)
 	return mulByFloat(l1Fee, scalar)
 }
@@ -159,8 +174,8 @@ func CalculateL1Fee(data []byte, overhead, l1GasPrice *big.Int, scalar *big.Floa
 // constant sized overhead. The overhead can be decreased as the cost of the
 // batch submission goes down via contract optimizations. This will not overflow
 // under standard network conditions.
-func CalculateL1GasUsed(data []byte, overhead *big.Int) *big.Int {
-	if DaCharge == 1 {
+func CalculateL1GasUsed(data []byte, overhead *big.Int, daSwitch *big.Int) *big.Int {
+	if daSwitch.Cmp(common.Big1) == 0 {
 		return overhead
 	}
 	zeroes, ones := zeroesAndOnes(data)
@@ -218,8 +233,12 @@ func DeriveL1GasInfo(msg Message, state StateDB) (*big.Int, *big.Int, *big.Int, 
 	}
 
 	l1GasPrice, overhead, scalar := readGPOStorageSlots(rcfg.L2GasPriceOracleAddress, state)
-	l1GasUsed := CalculateL1GasUsed(raw, overhead)
-	l1Fee := CalculateL1Fee(raw, overhead, l1GasPrice, scalar)
+	daSwitch := state.GetState(rcfg.L2GasPriceOracleAddress, rcfg.DaSwitchSlot).Big()
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	l1GasUsed := CalculateL1GasUsed(raw, overhead, daSwitch)
+	l1Fee := CalculateL1Fee(raw, overhead, l1GasPrice, scalar, daSwitch)
 	return l1Fee, l1GasPrice, l1GasUsed, scalar, nil
 }
 

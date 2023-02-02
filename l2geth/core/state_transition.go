@@ -145,7 +145,8 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 			} else if charge.Cmp(common.Big1) == 1 {
 				panic(fmt.Sprintf("charge:%v is invaild", charge))
 			}
-			if fees.DaCharge == 1 {
+			daCharge := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.DaSwitchSlot).Big()
+			if daCharge.Cmp(common.Big1) == 0 {
 				daFee, _ = fees.CalculateDAMsgFee(msg, evm.StateDB, nil)
 			}
 		}
