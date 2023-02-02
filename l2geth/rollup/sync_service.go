@@ -1203,6 +1203,9 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 }
 
 func (s *SyncService) PreCheckSyncServiceState(tx *types.Transaction) bool {
+	if !s.IsSequencerMode() {
+		return true
+	}
 	ts := s.GetLatestL1Timestamp()
 	bn := s.GetLatestL1BlockNumber()
 	l1BlockNumber := tx.L1BlockNumber()
