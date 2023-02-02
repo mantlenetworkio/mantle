@@ -857,10 +857,10 @@ func (s *SyncService) applyTransaction(tx *types.Transaction, txSetProof *types.
 		}
 
 		sccAddress := s.RollupGpo.SCCAddress()
-		var zeroAddr common.Address
-		if sccAddress == zeroAddr {
-			log.Crit("RollupGpo get sccAddress", "error", fmt.Errorf("sccAddr is zeroAddr"))
-		}
+		// var zeroAddr common.Address
+		// if sccAddress == zeroAddr {
+		// 	log.Crit("RollupGpo get sccAddress", "error", fmt.Errorf("sccAddr is zeroAddr"))
+		// }
 		if data.Target == dump.BvmRollbackAddress && data.Sender == sccAddress {
 			rd := &message.RollbackData{}
 			if err := rd.UnPackData(data.Message); err != nil {
