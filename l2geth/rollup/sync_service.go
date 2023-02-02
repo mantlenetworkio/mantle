@@ -1182,7 +1182,7 @@ func (s *SyncService) VerifyFee(tx *types.Transaction) error {
 	return nil
 }
 
-// ApplyGasPriceTxs apply tx for update gasPrice
+// ApplyUpdateGasPriceTxs apply tx for update gasPrice
 func (s *SyncService) ApplyUpdateGasPriceTxs() {
 	for {
 		if len(s.updateGasPriceTxPool) == 0 {
@@ -1199,8 +1199,6 @@ func (s *SyncService) IsUpdateGasPriceTx(tx *types.Transaction) bool {
 	if tx == nil {
 		return false
 	}
-	s.txLock.Lock()
-	defer s.txLock.Unlock()
 	from, err := types.Sender(s.signer, tx)
 	if err != nil {
 		return false
