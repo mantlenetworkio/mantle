@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"math/big"
 	"strconv"
 	"sync"
@@ -20,7 +21,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
 	"github.com/mantlenetworkio/mantle/l2geth/event"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 )
@@ -860,15 +860,16 @@ func (s *SyncService) applyTransaction(tx *types.Transaction, txSetProof *types.
 		var zeroAddr common.Address
 		if sccAddress == zeroAddr {
 			log.Error("RollupGpo get sccAddress", "error", fmt.Errorf("sccAddr is zeroAddr"))
-		}
-		if data.Target == dump.BvmRollbackAddress && data.Sender == sccAddress {
-			rd := &message.RollbackData{}
-			if err := rd.UnPackData(data.Message); err != nil {
-				log.Error("rollback data unpack failed", "error", err)
-			}
-			if rd.ShouldRollBack != nil {
-				if err := s.SchedulerRollback(rd.ShouldRollBack.Uint64()); err != nil {
-					log.Error("scheduler rollback", "error", err)
+		} else {
+			if data.Target == dump.BvmRollbackAddress && data.Sender == sccAddress {
+				rd := &message.RollbackData{}
+				if err := rd.UnPackData(data.Message); err != nil {
+					log.Error("rollback data unpack failed", "error", err)
+				}
+				if rd.ShouldRollBack != nil {
+					if err := s.SchedulerRollback(rd.ShouldRollBack.Uint64()); err != nil {
+						log.Error("scheduler rollback", "error", err)
+					}
 				}
 			}
 		}
