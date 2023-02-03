@@ -1164,24 +1164,12 @@ func (s *SyncService) VerifiedTxCount() (uint64, error) {
 	}
 	for _, txs := range pendingTxs {
 		for _, tx := range txs {
-			if err := s.VerifyFee(tx); err == nil {
+			if err := s.ValidateSequencerTransaction(tx, common.Address{}); err == nil {
 				pendingTxCount++
 			}
 		}
 	}
 	return pendingTxCount, nil
-}
-
-func (s *SyncService) VerifyFee(tx *types.Transaction) error {
-	if tx == nil {
-		return errors.New("nil transaction passed to ValidateAndApplySequencerTransaction")
-	}
-	s.txLock.Lock()
-	defer s.txLock.Unlock()
-	if err := s.verifyFee(tx); err != nil {
-		return err
-	}
-	return nil
 }
 
 // ApplyUpdateGasPriceTxs apply tx for update gasPrice
@@ -1230,6 +1218,16 @@ func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction, sequen
 	if tx == nil {
 		return errors.New("nil transaction passed to ValidateAndApplySequencerTransaction")
 	}
+	l1GasPrice, err := s.RollupGpo.SuggestL1GasPrice(context.Background())
+	if err != nil {
+		return err
+	}
+	lastL1GasPrice, ok := s.verifiedMap[tx.Hash()]
+	if ok {
+		if l1GasPrice.Cmp(lastL1GasPrice) < 1 {
+			return nil
+		}
+	}
 	s.txLock.Lock()
 	defer s.txLock.Unlock()
 	if err := s.verifyFee(tx); err != nil {
@@ -1241,6 +1239,8 @@ func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction, sequen
 	if qo != types.QueueOriginSequencer {
 		return fmt.Errorf("invalid transaction with queue origin %s", qo.String())
 	}
+	// save gas price and tx hash
+	s.verifiedMap[tx.Hash()] = l1GasPrice
 	return nil
 }
 

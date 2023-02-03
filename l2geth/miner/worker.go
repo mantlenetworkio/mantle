@@ -581,7 +581,7 @@ func (w *worker) batchStartLoop() {
 						}
 						var txsQueue types.Transactions
 						for _, tx := range rawTxsQueue {
-							if err := w.eth.SyncService().VerifyFee(tx); err == nil {
+							if err := w.eth.SyncService().ValidateSequencerTransaction(tx, common.Address{}); err == nil {
 								txsQueue = append(txsQueue, tx)
 							} else {
 								log.Error("batchStartLoop tx verifyFee error", "err_msg", err)
