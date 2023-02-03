@@ -1202,45 +1202,6 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 	return nil
 }
 
-func (s *SyncService) PreCheckSyncServiceState(tx *types.Transaction) bool {
-	if !s.IsSequencerMode() {
-		return true
-	}
-	ts := s.GetLatestL1Timestamp()
-	bn := s.GetLatestL1BlockNumber()
-	l1BlockNumber := tx.L1BlockNumber()
-
-	if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
-		if tx.L1Timestamp() == 0 {
-			return false
-		}
-	}
-
-	if l1BlockNumber == nil {
-		log.Warn("Blocknumber is nil ", "hash", tx.Hash().Hex())
-		return false
-	}
-	if l1BlockNumber.Uint64() < bn {
-		// l1BlockNumber < latest l1BlockNumber
-		// indicates an error
-		log.Warn("Blocknumber monotonicity violation", "hash", tx.Hash().Hex(),
-			"new", l1BlockNumber.Uint64(), "old", bn)
-		return false
-	}
-
-	if tx.L1Timestamp() < ts {
-		log.Error("Timestamp monotonicity violation", "hash", tx.Hash().Hex(), "latest", ts, "tx", tx.L1Timestamp())
-		return false
-	}
-
-	if tx.GetMeta().Index == nil {
-		log.Warn("meta index is nil ", "hash", tx.Hash().Hex())
-		return false
-	}
-	return true
-
-}
-
 func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
 	if !s.IsSequencerMode() {
 		return
