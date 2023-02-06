@@ -1164,7 +1164,7 @@ func (s *SyncService) VerifiedTxCount() (uint64, error) {
 	}
 	for _, txs := range pendingTxs {
 		for _, tx := range txs {
-			if err := s.ValidateSequencerTransaction(tx, common.Address{}); err == nil {
+			if err := s.ValidateSequencerTransaction(tx); err == nil {
 				pendingTxCount++
 			}
 		}
@@ -1211,7 +1211,7 @@ func (s *SyncService) AddUpdateGasPriceTx(tx *types.Transaction) error {
 	return nil
 }
 
-func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction, sequencer common.Address) error {
+func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction) error {
 	if s.verifier {
 		return errors.New("Verifier does not accept transactions out of band")
 	}

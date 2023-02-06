@@ -215,6 +215,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		return nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
 	eth.txPool.SetDeleteTxVerifiedPrice(eth.syncService.DeleteTxVerifiedPrice)
+	eth.txPool.SetValidateSequencerTransaction(eth.syncService.ValidateSequencerTransaction)
 	eth.blockchain.SetPreCheckSyncServiceFunc(eth.syncService.PreCheckSyncServiceState)
 	eth.blockchain.SetUpdateSyncServiceFunc(eth.syncService.UpdateSyncServiceState)
 
@@ -227,7 +228,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if eth.protocolManager, err = NewProtocolManager(chainConfig, checkpoint, config.SyncMode, config.NetworkId, eth.eventMux, eth.txPool, eth.engine, eth.blockchain, chainDb, cacheLimit, config.Whitelist); err != nil {
 		return nil, err
 	}
-	eth.protocolManager.SetValidateSequencerTransaction(eth.syncService.ValidateSequencerTransaction)
 	eth.miner = miner.New(eth, &config.Miner, chainConfig, eth.EventMux(), eth.engine, eth.isLocalBlock)
 	eth.miner.SetExtra(makeExtraData(config.Miner.ExtraData))
 

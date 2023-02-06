@@ -106,8 +106,6 @@ type ProtocolManager struct {
 	// wait group is used for graceful shutdowns during downloading
 	// and processing
 	wg sync.WaitGroup
-
-	validateSequencerTransaction func(tx *types.Transaction, sequencer common.Address) error
 }
 
 // NewProtocolManager returns a new Ethereum sub protocol manager. The Ethereum sub protocol manages peers capable
@@ -202,10 +200,6 @@ func NewProtocolManager(config *params.ChainConfig, checkpoint *params.TrustedCh
 	manager.fetcher = fetcher.New(blockchain.GetBlockByHash, validator, manager.BroadcastBlock, heighter, inserter, manager.removePeer)
 
 	return manager, nil
-}
-
-func (pm *ProtocolManager) SetValidateSequencerTransaction(validateSequencerTransactionFunc func(tx *types.Transaction, sequencer common.Address) error) {
-	pm.validateSequencerTransaction = validateSequencerTransactionFunc
 }
 
 func (pm *ProtocolManager) setSchedulerInst(schedulerInst *clique.Scheduler) {
@@ -800,22 +794,16 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		//	break
 		//}
 		// Transactions can be processed, parse all of them and deliver to the pool
-		var remoteTxs []*types.Transaction
 		var txs []*types.Transaction
-		if err := msg.Decode(&remoteTxs); err != nil {
+		if err := msg.Decode(&txs); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		for i, tx := range remoteTxs {
+		for i, tx := range txs {
 			// Validate and mark the remote transaction
 			if tx == nil {
 				return errResp(ErrDecode, "transaction %d is nil", i)
 			}
 			p.MarkTransaction(tx.Hash())
-			if err := pm.validateSequencerTransaction(tx, common.Address{}); err != nil {
-				log.Debug("remote tx validate failed", "err_msg", err.Error())
-			} else {
-				txs = append(txs, tx)
-			}
 		}
 		pm.txpool.AddRemotes(txs)
 

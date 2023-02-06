@@ -256,6 +256,8 @@ type TxPool struct {
 	reorgDoneCh     chan chan struct{}
 	reorgShutdownCh chan struct{}  // requests shutdown of scheduleReorgLoop
 	wg              sync.WaitGroup // tracks loop, scheduleReorgLoop
+
+	validateSequencerTransaction func(tx *types.Transaction) error
 }
 
 type txpoolResetRequest struct {
@@ -320,6 +322,10 @@ func NewTxPool(config TxPoolConfig, chainconfig *params.ChainConfig, chain block
 
 func (pool *TxPool) SetDeleteTxVerifiedPrice(deleteTxHashFunc func(hash common.Hash)) {
 	pool.all.SetDeleteTxVerifiedPrice(deleteTxHashFunc)
+}
+
+func (pool *TxPool) SetValidateSequencerTransaction(validateSequencerTransactionFunc func(tx *types.Transaction) error) {
+	pool.validateSequencerTransaction = validateSequencerTransactionFunc
 }
 
 // loop is the transaction pool's main event loop, waiting for and reacting to
@@ -812,6 +818,9 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 		news = make([]*types.Transaction, 0, len(txs))
 	)
 	for i, tx := range txs {
+		if err := pool.validateSequencerTransaction(tx); err != nil {
+			return []error{err}
+		}
 		// If the transaction is known, pre-set the error slot
 		if pool.all.Get(tx.Hash()) != nil {
 			errs[i] = fmt.Errorf("known transaction: %x", tx.Hash())
