@@ -46,6 +46,10 @@ var (
 	errInvalidSealResult = errors.New("invalid or stale proof-of-work solution")
 )
 
+func (ethash *Ethash) SignData(addr common.Address, data []byte) ([]byte, error) {
+	return nil, nil
+}
+
 // Seal implements consensus.Engine, attempting to find a nonce that satisfies
 // the block's difficulty requirements.
 func (ethash *Ethash) Seal(chain consensus.ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
@@ -338,10 +342,11 @@ func (s *remoteSealer) loop() {
 // makeWork creates a work package for external miner.
 //
 // The work package consists of 3 strings:
-//   result[0], 32 bytes hex encoded current block header pow-hash
-//   result[1], 32 bytes hex encoded seed hash used for DAG
-//   result[2], 32 bytes hex encoded boundary condition ("target"), 2^256/difficulty
-//   result[3], hex encoded block number
+//
+//	result[0], 32 bytes hex encoded current block header pow-hash
+//	result[1], 32 bytes hex encoded seed hash used for DAG
+//	result[2], 32 bytes hex encoded boundary condition ("target"), 2^256/difficulty
+//	result[3], hex encoded block number
 func (s *remoteSealer) makeWork(block *types.Block) {
 	hash := s.ethash.SealHash(block.Header())
 	s.currentWork[0] = hash.Hex()

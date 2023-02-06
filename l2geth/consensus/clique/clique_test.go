@@ -27,6 +27,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
 // This test case is a repro of an annoying bug that took us forever to catch.
@@ -44,13 +45,27 @@ func TestReimportMirroredState(t *testing.T) {
 		engine = New(params.AllCliqueProtocolChanges.Clique, db)
 		signer = new(types.HomesteadSigner)
 	)
+	address := addr
+	batchPeriodStartMsg := types.BatchPeriodStartMsg{
+		RollbackStates: nil,
+		BatchIndex:     0,
+		StartHeight:    1,
+		MaxHeight:      100,
+		ExpireTime:     1669787879,
+		Sequencer:      address,
+		Signature:      nil,
+	}
+	buf, err := rlp.EncodeToBytes(batchPeriodStartMsg)
+	if err != nil {
+		t.Fatalf("failed encode batchPeriodStartMsg: %v", err)
+	}
 	genspec := &core.Genesis{
-		ExtraData: make([]byte, extraVanity+common.AddressLength+extraSeal),
+		ExtraData: make([]byte, extraVanity+len(buf)+extraSeal),
 		Alloc: map[common.Address]core.GenesisAccount{
 			addr: {Balance: big.NewInt(1)},
 		},
 	}
-	copy(genspec.ExtraData[extraVanity:], addr[:])
+	copy(genspec.ExtraData[extraVanity:], buf[:])
 	genesis := genspec.MustCommit(db)
 
 	// Generate a batch of blocks, each properly signed

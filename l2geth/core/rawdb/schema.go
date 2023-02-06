@@ -32,6 +32,9 @@ var (
 	// headHeaderKey tracks the latest known header's hash.
 	headHeaderKey = []byte("LastHeader")
 
+	// rollbackStateKey tracks the current rollbackStates.
+	rollbackStatesKey = []byte("rollbackStates")
+
 	// headBlockKey tracks the latest known full block's hash.
 	headBlockKey = []byte("LastBlock")
 
@@ -77,6 +80,9 @@ var (
 
 	preimageCounter    = metrics.NewRegisteredCounter("db/preimage/total", nil)
 	preimageHitCounter = metrics.NewRegisteredCounter("db/preimage/hits", nil)
+
+	// currentBatchPeriodIndexKey tracks the latest batch period index
+	currentBatchPeriodIndexKey = []byte("CurrentBatchPeriodIndexKey")
 )
 
 const (

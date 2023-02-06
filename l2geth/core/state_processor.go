@@ -24,6 +24,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 )
@@ -69,10 +70,16 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 	// Iterate over and process the individual transactions
 	for i, tx := range block.Transactions() {
 		statedb.Prepare(tx.Hash(), block.Hash(), i)
+		if tx.GetMeta().Index == nil {
+			log.Debug("tx meta in block processing", "tx_index", nil, "tx_L1Timestamp", tx.GetMeta().L1Timestamp, "tx_L1BlockNumber", tx.GetMeta().L1BlockNumber)
+		} else {
+			log.Debug("tx meta in block processing", "tx_index", *tx.GetMeta().Index, "tx_L1Timestamp", tx.GetMeta().L1Timestamp, "tx_L1BlockNumber", tx.GetMeta().L1BlockNumber)
+		}
 		receipt, err := ApplyTransaction(p.config, p.bc, nil, gp, statedb, header, tx, usedGas, cfg)
 		if err != nil {
 			return nil, nil, 0, err
 		}
+
 		receipts = append(receipts, receipt)
 		allLogs = append(allLogs, receipt.Logs...)
 	}

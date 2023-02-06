@@ -21,10 +21,38 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 )
 
+type PeerAddEvent struct {
+	PeerId []byte
+	Has    chan bool
+}
+
+type BatchPeriodStartEvent struct {
+	Msg   *types.BatchPeriodStartMsg
+	ErrCh chan error
+}
+
+type RollbackStartEvent struct {
+	Msg   *types.RollbackStates
+	ErrCh chan error
+}
+
+type L1ToL2TxStartEvent struct {
+	ErrCh       chan error
+	SchedulerCh chan struct{}
+}
+
+type BatchPeriodAnswerEvent struct {
+	Msg   *types.BatchPeriodAnswerMsg
+	ErrCh chan error
+}
+
+type BatchEndEvent struct{}
+
 // NewTxsEvent is posted when a batch of transactions enter the transaction pool.
 type NewTxsEvent struct {
-	Txs   []*types.Transaction
-	ErrCh chan error
+	Txs        []*types.Transaction
+	TxSetProof *types.BatchTxSetProof
+	ErrCh      chan error
 }
 
 // NewMinedBlockEvent is posted when a block has been imported.

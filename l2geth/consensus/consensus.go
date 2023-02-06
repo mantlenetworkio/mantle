@@ -77,23 +77,34 @@ type Engine interface {
 
 	// Prepare initializes the consensus fields of a block header according to the
 	// rules of a particular engine. The changes are executed inline.
-	Prepare(chain ChainReader, header *types.Header) error
+	Prepare(chain ChainReader, header *types.Header, txSetProof *types.BatchTxSetProof) error
 
 	// Finalize runs any post-transaction state modifications (e.g. block rewards)
 	// but does not assemble the block.
 	//
 	// Note: The block header and state database might be updated to reflect any
 	// consensus rules that happen at finalization (e.g. block rewards).
-	Finalize(chain ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction,
-		uncles []*types.Header)
+	Finalize(
+		chain ChainReader,
+		header *types.Header,
+		state *state.StateDB,
+		txs []*types.Transaction,
+		uncles []*types.Header,
+	)
 
 	// FinalizeAndAssemble runs any post-transaction state modifications (e.g. block
 	// rewards) and assembles the final block.
 	//
 	// Note: The block header and state database might be updated to reflect any
 	// consensus rules that happen at finalization (e.g. block rewards).
-	FinalizeAndAssemble(chain ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction,
-		uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error)
+	FinalizeAndAssemble(
+		chain ChainReader,
+		header *types.Header,
+		state *state.StateDB,
+		txs []*types.Transaction,
+		uncles []*types.Header,
+		receipts []*types.Receipt,
+	) (*types.Block, error)
 
 	// Seal generates a new sealing request for the given input block and pushes
 	// the result into the given channel.
@@ -101,6 +112,8 @@ type Engine interface {
 	// Note, the method returns immediately and will send the result async. More
 	// than one result may also be returned depending on the consensus algorithm.
 	Seal(chain ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error
+
+	SignData(addr common.Address, data []byte) ([]byte, error)
 
 	// SealHash returns the hash of a block prior to it being sealed.
 	SealHash(header *types.Header) common.Hash

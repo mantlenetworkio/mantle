@@ -28,6 +28,7 @@ import (
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus/clique"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
@@ -81,10 +82,18 @@ type ProtocolManager struct {
 	fetcher    *fetcher.Fetcher
 	peers      *peerSet
 
+	consensusPeers *peerSet
+	schedulerInst  *clique.Scheduler
+	etherbase      common.Address
+	minerCheck     func() bool
+
 	eventMux      *event.TypeMux
 	txsCh         chan core.NewTxsEvent
 	txsSub        event.Subscription
 	minedBlockSub *event.TypeMuxSubscription
+	// consensus control messages
+	batchStartMsgSub  *event.TypeMuxSubscription
+	batchAnswerMsgSub *event.TypeMuxSubscription
 
 	whitelist map[uint64]common.Hash
 
@@ -104,17 +113,18 @@ type ProtocolManager struct {
 func NewProtocolManager(config *params.ChainConfig, checkpoint *params.TrustedCheckpoint, mode downloader.SyncMode, networkID uint64, mux *event.TypeMux, txpool txPool, engine consensus.Engine, blockchain *core.BlockChain, chaindb ethdb.Database, cacheLimit int, whitelist map[uint64]common.Hash) (*ProtocolManager, error) {
 	// Create the protocol manager with the base fields
 	manager := &ProtocolManager{
-		networkID:   networkID,
-		forkFilter:  forkid.NewFilter(blockchain),
-		eventMux:    mux,
-		txpool:      txpool,
-		blockchain:  blockchain,
-		peers:       newPeerSet(),
-		whitelist:   whitelist,
-		newPeerCh:   make(chan *peer),
-		noMorePeers: make(chan struct{}),
-		txsyncCh:    make(chan *txsync),
-		quitSync:    make(chan struct{}),
+		networkID:      networkID,
+		forkFilter:     forkid.NewFilter(blockchain),
+		eventMux:       mux,
+		txpool:         txpool,
+		blockchain:     blockchain,
+		peers:          newPeerSet(),
+		consensusPeers: newPeerSet(),
+		whitelist:      whitelist,
+		newPeerCh:      make(chan *peer),
+		noMorePeers:    make(chan struct{}),
+		txsyncCh:       make(chan *txsync),
+		quitSync:       make(chan struct{}),
 	}
 	if mode == downloader.FullSync {
 		// The database seems empty as the current block is the genesis. Yet the fast
@@ -192,6 +202,19 @@ func NewProtocolManager(config *params.ChainConfig, checkpoint *params.TrustedCh
 	return manager, nil
 }
 
+func (pm *ProtocolManager) setSchedulerInst(schedulerInst *clique.Scheduler) {
+	pm.schedulerInst = schedulerInst
+}
+
+func (pm *ProtocolManager) setEtherBase(etherBase common.Address) {
+	pm.etherbase = etherBase
+	for k, v := range pm.consensusPeers.peers {
+		if err := pm.checkPeer(v); err != nil {
+			pm.removePeerTmp(k)
+		}
+	}
+}
+
 func (pm *ProtocolManager) makeProtocol(version uint) p2p.Protocol {
 	length, ok := protocolLengths[version]
 	if !ok {
@@ -225,6 +248,10 @@ func (pm *ProtocolManager) makeProtocol(version uint) p2p.Protocol {
 	}
 }
 
+func (pm *ProtocolManager) setMinerCheck(check func() bool) {
+	pm.minerCheck = check
+}
+
 func (pm *ProtocolManager) removePeer(id string) {
 	// Short circuit if the peer was already removed
 	peer := pm.peers.Peer(id)
@@ -256,6 +283,13 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 	pm.minedBlockSub = pm.eventMux.Subscribe(core.NewMinedBlockEvent{})
 	go pm.minedBroadcastLoop()
 
+	// broadcast producers
+	pm.batchStartMsgSub = pm.eventMux.Subscribe(core.BatchPeriodStartEvent{})
+	go pm.batchPeriodStartMsgBroadcastLoop()
+
+	pm.batchAnswerMsgSub = pm.eventMux.Subscribe(core.BatchPeriodAnswerEvent{})
+	go pm.batchPeriodAnswerMsgBroadcastLoop()
+
 	// start sync handlers
 	go pm.syncer()
 	go pm.txsyncLoop()
@@ -266,6 +300,9 @@ func (pm *ProtocolManager) Stop() {
 
 	pm.txsSub.Unsubscribe()        // quits txBroadcastLoop
 	pm.minedBlockSub.Unsubscribe() // quits blockBroadcastLoop
+
+	pm.batchStartMsgSub.Unsubscribe()
+	pm.batchAnswerMsgSub.Unsubscribe()
 
 	// Quit the sync loop.
 	// After this send has completed, no new peers will be accepted.
@@ -533,7 +570,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		var (
 			hash   common.Hash
 			bytes  int
-			bodies []rlp.RawValue
+			bodies []*blockBody
 		)
 		for bytes < softResponseLimit && len(bodies) < downloader.MaxBlockFetch {
 			// Retrieve the hash of the next block
@@ -544,11 +581,22 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 			}
 			// Retrieve the requested block body, stopping if enough was found
 			if data := pm.blockchain.GetBodyRLP(hash); len(data) != 0 {
-				bodies = append(bodies, data)
 				bytes += len(data)
 			}
+			if body := pm.blockchain.GetBody(hash); body != nil {
+				txMetas := make([][]byte, 0, len(body.Transactions))
+				for _, tx := range body.Transactions {
+					txMetaBytes := types.TxMetaEncode(tx.GetMeta())
+					txMetas = append(txMetas, txMetaBytes)
+				}
+				bodies = append(bodies, &blockBody{
+					Transactions:     body.Transactions,
+					TransactionMetas: txMetas,
+					Uncles:           body.Uncles,
+				})
+			}
 		}
-		return p.SendBlockBodiesRLP(bodies)
+		return p.SendBlockBodies(bodies)
 
 	case msg.Code == BlockBodiesMsg:
 		// A batch of block bodies arrived to one of our previous requests
@@ -560,9 +608,17 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		transactions := make([][]*types.Transaction, len(request))
 		uncles := make([][]*types.Header, len(request))
 
-		for i, body := range request {
-			transactions[i] = body.Transactions
-			uncles[i] = body.Uncles
+		for i, _ := range request {
+			for j, _ := range request[i].Transactions {
+				txMeta, err := types.TxMetaDecode(request[i].TransactionMetas[j])
+				if err != nil {
+					log.Error("tx meta decode err", "errMsg", err.Error())
+					break
+				}
+				request[i].Transactions[j].SetTransactionMeta(txMeta)
+			}
+			transactions[i] = request[i].Transactions
+			uncles[i] = request[i].Uncles
 		}
 		// Filter out any explicitly requested bodies, deliver the rest to the downloader
 		filter := len(transactions) > 0 || len(uncles) > 0
@@ -695,6 +751,15 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 			log.Warn("Propagated block has invalid body", "have", hash, "exp", request.Block.TxHash())
 			break // TODO(karalabe): return error eventually, but wait a few releases
 		}
+		txs := request.Block.Transactions()
+		for index, txMetaBytes := range request.TxMetas {
+			txMeta, err := types.TxMetaDecode(txMetaBytes)
+			if err != nil {
+				log.Error("tx meta decode err", "errMsg", err.Error())
+				break
+			}
+			txs[index].SetTransactionMeta(txMeta)
+		}
 		if err := request.sanityCheck(); err != nil {
 			return err
 		}
@@ -726,9 +791,9 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 
 	case msg.Code == TxMsg:
 		// Transactions arrived, make sure we have a valid and fresh chain to handle them
-		if atomic.LoadUint32(&pm.acceptTxs) == 0 {
-			break
-		}
+		//if atomic.LoadUint32(&pm.acceptTxs) == 0 {
+		//	break
+		//}
 		// Transactions can be processed, parse all of them and deliver to the pool
 		var txs []*types.Transaction
 		if err := msg.Decode(&txs); err != nil {
@@ -777,7 +842,7 @@ func (pm *ProtocolManager) BroadcastBlock(block *types.Block, propagate bool) {
 		for _, peer := range transfer {
 			peer.AsyncSendNewBlock(block, td)
 		}
-		log.Trace("Propagated block", "hash", hash, "recipients", len(transfer), "duration", common.PrettyDuration(time.Since(block.ReceivedAt)))
+		log.Trace("Propagated block", "hash", hash, "height", block.NumberU64(), "recipients", len(transfer), "duration", common.PrettyDuration(time.Since(block.ReceivedAt)))
 		return
 	}
 	// Otherwise if the block is indeed in out own chain, announce it

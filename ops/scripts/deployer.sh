@@ -50,7 +50,8 @@ fi
 
 echo "Building addresses.json."
 export ADDRESS_MANAGER_ADDRESS=$(cat "./deployments/$CONTRACTS_TARGET_NETWORK/Lib_AddressManager.json" | jq -r .address)
-
+echo "add test timepoint1"
+echo $SKIP_CONTRACT_DEPLOY
 
 if [ $SKIP_CONTRACT_DEPLOY == "NO" ] ;then
   echo "Re-generate addresses.txt"
@@ -95,6 +96,6 @@ fi
 
 # service the addresses and dumps
 echo "Starting server."
-python3 -m http.server \
+exec python3 -m http.server \
     --bind "0.0.0.0" 8081 \
     --directory ./genesis

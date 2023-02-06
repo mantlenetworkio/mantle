@@ -174,9 +174,11 @@ type BlockChain struct {
 	processor  Processor  // Block transaction processor interface
 	vmConfig   vm.Config
 
-	badBlocks       *lru.Cache                     // Bad block cache
-	shouldPreserve  func(*types.Block) bool        // Function used to determine whether should preserve the given block.
-	terminateInsert func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
+	badBlocks           *lru.Cache                     // Bad block cache
+	shouldPreserve      func(*types.Block) bool        // Function used to determine whether should preserve the given block.
+	terminateInsert     func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
+	preCheckSyncService func(*types.Transaction) bool  // first check block avaliabe before insert chain
+	updateSyncService   func(*types.Transaction)       // update sync service state after inserting chain block
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -681,6 +683,10 @@ func (bc *BlockChain) GetBody(hash common.Hash) *types.Body {
 	body := rawdb.ReadBody(bc.db, hash, *number)
 	if body == nil {
 		return nil
+	}
+	for i := 0; i < len(body.Transactions); i++ {
+		meta := rawdb.ReadTransactionMeta(bc.db, *number)
+		body.Transactions[i].SetTransactionMeta(meta)
 	}
 	// Cache the found body for next time and return
 	bc.bodyCache.Add(hash, body)
@@ -1318,6 +1324,17 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 	if ptd == nil {
 		return NonStatTy, consensus.ErrUnknownAncestor
 	}
+	if block.Transactions().Len() == 0 {
+		return NonStatTy, consensus.ErrUnknownAncestor
+	}
+
+	if bc.preCheckSyncService != nil {
+		bol := bc.preCheckSyncService(block.Transactions()[0])
+		if !bol {
+			return NonStatTy, consensus.ErrUnknownAncestor
+		}
+	}
+
 	// Make sure no inconsistent state is leaked during insertion
 	currentBlock := bc.CurrentBlock()
 	localTd := bc.GetTd(currentBlock.Hash(), currentBlock.NumberU64())
@@ -1448,6 +1465,9 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 	} else {
 		bc.chainSideFeed.Send(ChainSideEvent{Block: block})
 	}
+	if bc.updateSyncService != nil {
+		bc.updateSyncService(block.Transactions()[0])
+	}
 	return status, nil
 }
 
@@ -1461,6 +1481,62 @@ func (bc *BlockChain) addFutureBlock(block *types.Block) error {
 	}
 	bc.futureBlocks.Add(block.Hash(), block)
 	return nil
+}
+
+// GetRollbackNumber get rollback blockNumber
+func (bc *BlockChain) GetRollbackNumber() uint64 {
+	rbss := rawdb.ReadRollbackStates(bc.db)
+	current := bc.CurrentBlock()
+	var rollbackNumber uint64 = common.InvalidRollbackHeight
+	for i := len(rbss) - 1; i >= 0; i-- {
+		if current.Number().Uint64() >= rbss[i].BlockNumber {
+			block := bc.GetBlockByNumber(rbss[i].BlockNumber)
+			if block.Hash() != rbss[i].BlockHash {
+				rollbackNumber = rbss[i].BlockNumber
+			} else {
+				break
+			}
+		}
+	}
+	return rollbackNumber
+}
+
+// checkRemoteBlockHash check remote block hash
+func (bc *BlockChain) checkRemoteBlockHash(block *types.Block) bool {
+	rbss := rawdb.ReadRollbackStates(bc.db)
+	if len(rbss) == 0 {
+		return true
+	}
+	if block.Number().Uint64() > rbss[len(rbss)-1].BlockNumber {
+		return true
+	}
+	for i := len(rbss) - 1; i >= 0; i-- {
+		if block.Number().Uint64() == rbss[i].BlockNumber {
+			return block.Hash() == rbss[i].BlockHash
+		}
+	}
+	return true
+}
+
+// UpdateRollbackStates sequencer update rollback index
+func (bc *BlockChain) UpdateRollbackStates(rollbackStates types.RollbackStates) {
+	rawdb.WriteRollbackStates(bc.db, rollbackStates)
+}
+
+// AppendRollbackStates scheduler bump up rollback index
+func (bc *BlockChain) AppendRollbackStates(rollbackState *types.RollbackState) {
+	var rollbackStates types.RollbackStates
+	rbss := rawdb.ReadRollbackStates(bc.db)
+	if len(rbss) != 0 {
+		for _, rbs := range rbss {
+			if rbs.BlockNumber >= rollbackState.BlockNumber {
+				break
+			}
+			rollbackStates = append(rollbackStates, rbs)
+		}
+	}
+	rollbackStates = append(rollbackStates, rollbackState)
+	rawdb.WriteRollbackStates(bc.db, rollbackStates)
 }
 
 // InsertChain attempts to insert the given batch of blocks in to the canonical
@@ -1482,18 +1558,31 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 	var (
 		block, prev *types.Block
 	)
+	last := chain[len(chain)-1]
+	pass := bc.checkRemoteBlockHash(last)
 	// Do a sanity check that the provided chain is actually ordered and linked
-	for i := 1; i < len(chain); i++ {
-		block = chain[i]
-		prev = chain[i-1]
-		if block.NumberU64() != prev.NumberU64()+1 || block.ParentHash() != prev.Hash() {
-			// Chain broke ancestry, log a message (programming error) and skip insertion
-			log.Error("Non contiguous block insert", "number", block.Number(), "hash", block.Hash(),
-				"parent", block.ParentHash(), "prevnumber", prev.Number(), "prevhash", prev.Hash())
+	for i := 0; i < len(chain); i++ {
+		if i != 0 {
+			block = chain[i]
+			prev = chain[i-1]
+			if block.NumberU64() != prev.NumberU64()+1 || block.ParentHash() != prev.Hash() {
+				// Chain broke ancestry, log a message (programming error) and skip insertion
+				log.Error("Non contiguous block insert", "number", block.Number(), "hash", block.Hash(),
+					"parent", block.ParentHash(), "prevnumber", prev.Number(), "prevhash", prev.Hash())
 
-			return 0, fmt.Errorf("non contiguous insert: item %d is #%d [%x…], item %d is #%d [%x…] (parent [%x…])", i-1, prev.NumberU64(),
-				prev.Hash().Bytes()[:4], i, block.NumberU64(), block.Hash().Bytes()[:4], block.ParentHash().Bytes()[:4])
+				return 0, fmt.Errorf("non contiguous insert: item %d is #%d [%x…], item %d is #%d [%x…] (parent [%x…])", i-1, prev.NumberU64(),
+					prev.Hash().Bytes()[:4], i, block.NumberU64(), block.Hash().Bytes()[:4], block.ParentHash().Bytes()[:4])
+			}
 		}
+		if !pass {
+			if !bc.checkRemoteBlockHash(block) {
+				chain = chain[:i]
+				break
+			}
+		}
+	}
+	if len(chain) == 0 {
+		return 0, nil
 	}
 	// Pre-checks passed, start the full block imports
 	bc.wg.Add(1)
@@ -1680,6 +1769,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, er
 				}(time.Now())
 			}
 		}
+
 		// Process block using the parent state as reference point
 		substart := time.Now()
 		receipts, logs, usedGas, err := bc.processor.Process(block, statedb, bc.vmConfig)
@@ -1733,7 +1823,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, er
 
 		switch status {
 		case CanonStatTy:
-			log.Debug("Inserted new block", "number", block.Number(), "hash", block.Hash(),
+			log.Info("Inserted new block", "number", block.Number(), "hash", block.Hash(),
 				"uncles", len(block.Uncles()), "txs", len(block.Transactions()), "gas", block.GasUsed(),
 				"elapsed", common.PrettyDuration(time.Since(start)),
 				"root", block.Root())
@@ -2266,4 +2356,12 @@ func (bc *BlockChain) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscript
 // block processing has started while false means it has stopped.
 func (bc *BlockChain) SubscribeBlockProcessingEvent(ch chan<- bool) event.Subscription {
 	return bc.scope.Track(bc.blockProcFeed.Subscribe(ch))
+}
+
+func (bc *BlockChain) SetUpdateSyncServiceFunc(updateSyncServiceFunc func(*types.Transaction)) {
+	bc.updateSyncService = updateSyncServiceFunc
+}
+
+func (bc *BlockChain) SetPreCheckSyncServiceFunc(preCheckFunc func(*types.Transaction) bool) {
+	bc.preCheckSyncService = preCheckFunc
 }

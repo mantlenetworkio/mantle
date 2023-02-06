@@ -23,12 +23,12 @@ import (
 	"sync"
 	"time"
 
+	mapset "github.com/deckarep/golang-set"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
-	mapset "github.com/deckarep/golang-set"
 )
 
 var (
@@ -38,8 +38,10 @@ var (
 )
 
 const (
-	maxKnownTxs    = 32768 // Maximum transactions hashes to keep in the known list (prevent DOS)
-	maxKnownBlocks = 1024  // Maximum block hashes to keep in the known list (prevent DOS)
+	maxKnownTxs      = 32768 // Maximum transactions hashes to keep in the known list (prevent DOS)
+	maxKnownBlocks   = 1024  // Maximum block hashes to keep in the known list (prevent DOS)
+	maxKnownStartMsg = 1024
+	maxKnownEndMsg   = 1024
 
 	// maxQueuedTxs is the maximum number of transaction lists to queue up before
 	// dropping broadcasts. This is a sensitive number as a transaction list might
@@ -55,6 +57,9 @@ const (
 	// dropping broadcasts. Similarly to block propagations, there's no point to queue
 	// above some healthy uncle limit, so use that.
 	maxQueuedAnns = 4
+
+	maxQueuedBatchPeriodStart = 4
+	maxQueuedBatchPeriodEnd   = 4
 
 	handshakeTimeout = 5 * time.Second
 )
@@ -86,26 +91,34 @@ type peer struct {
 	td   *big.Int
 	lock sync.RWMutex
 
-	knownTxs    mapset.Set                // Set of transaction hashes known to be known by this peer
-	knownBlocks mapset.Set                // Set of block hashes known to be known by this peer
-	queuedTxs   chan []*types.Transaction // Queue of transactions to broadcast to the peer
-	queuedProps chan *propEvent           // Queue of blocks to broadcast to the peer
-	queuedAnns  chan *types.Block         // Queue of blocks to announce to the peer
-	term        chan struct{}             // Termination channel to stop the broadcaster
+	knownTxs                 mapset.Set                       // Set of transaction hashes known to be known by this peer
+	knownBlocks              mapset.Set                       // Set of block hashes known to be known by this peer
+	knowBatchPeriodStartMsg  mapset.Set                       // Set of start msg index to be known by this peer
+	knowBatchPeriodAnswerMsg mapset.Set                       // Set of end msg index to be known by this peer
+	queuedTxs                chan []*types.Transaction        // Queue of transactions to broadcast to the peer
+	queuedProps              chan *propEvent                  // Queue of blocks to broadcast to the peer
+	queuedAnns               chan *types.Block                // Queue of blocks to announce to the peer
+	queuedBatchStartMsg      chan *types.BatchPeriodStartMsg  // Queue of BatchPeriodStartMsg to announce to the peer
+	queuedBatchAnswerMsg     chan *types.BatchPeriodAnswerMsg // Queue of BatchPeriodAnswerMsg to announce to the peer
+	term                     chan struct{}                    // Termination channel to stop the broadcaster
 }
 
 func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 	return &peer{
-		Peer:        p,
-		rw:          rw,
-		version:     version,
-		id:          fmt.Sprintf("%x", p.ID().Bytes()[:8]),
-		knownTxs:    mapset.NewSet(),
-		knownBlocks: mapset.NewSet(),
-		queuedTxs:   make(chan []*types.Transaction, maxQueuedTxs),
-		queuedProps: make(chan *propEvent, maxQueuedProps),
-		queuedAnns:  make(chan *types.Block, maxQueuedAnns),
-		term:        make(chan struct{}),
+		Peer:                     p,
+		rw:                       rw,
+		version:                  version,
+		id:                       fmt.Sprintf("%x", p.ID().Bytes()[:8]),
+		knownTxs:                 mapset.NewSet(),
+		knownBlocks:              mapset.NewSet(),
+		knowBatchPeriodStartMsg:  mapset.NewSet(),
+		knowBatchPeriodAnswerMsg: mapset.NewSet(),
+		queuedTxs:                make(chan []*types.Transaction, maxQueuedTxs),
+		queuedProps:              make(chan *propEvent, maxQueuedProps),
+		queuedAnns:               make(chan *types.Block, maxQueuedAnns),
+		queuedBatchStartMsg:      make(chan *types.BatchPeriodStartMsg, maxQueuedBatchPeriodStart),
+		queuedBatchAnswerMsg:     make(chan *types.BatchPeriodAnswerMsg, maxQueuedBatchPeriodEnd),
+		term:                     make(chan struct{}),
 	}
 }
 
@@ -122,7 +135,12 @@ func (p *peer) broadcast() {
 			p.Log().Trace("Broadcast transactions", "count", len(txs))
 
 		case prop := <-p.queuedProps:
-			if err := p.SendNewBlock(prop.block, prop.td); err != nil {
+			txMetas := make([][]byte, 0, len(prop.block.Transactions()))
+			for _, tx := range prop.block.Transactions() {
+				txMetaBytes := types.TxMetaEncode(tx.GetMeta())
+				txMetas = append(txMetas, txMetaBytes)
+			}
+			if err := p.SendNewBlock(prop.block, txMetas, prop.td); err != nil {
 				return
 			}
 			p.Log().Trace("Propagated block", "number", prop.block.Number(), "hash", prop.block.Hash(), "td", prop.td)
@@ -132,7 +150,16 @@ func (p *peer) broadcast() {
 				return
 			}
 			p.Log().Trace("Announced block", "number", block.Number(), "hash", block.Hash())
-
+		case sm := <-p.queuedBatchStartMsg:
+			if err := p.SendBatchPeriodStart(sm); err != nil {
+				return
+			}
+			p.Log().Trace("Batch period start msg", "batch_index", sm.BatchIndex, "start_height", sm.StartHeight)
+		case em := <-p.queuedBatchAnswerMsg:
+			if err := p.SendBatchPeriodAnswer(em); err != nil {
+				return
+			}
+			p.Log().Trace("Batch period answer msg", "start_height", em.StartHeight, "sequencer", em.Sequencer)
 		case <-p.term:
 			return
 		}
@@ -259,13 +286,13 @@ func (p *peer) AsyncSendNewBlockHash(block *types.Block) {
 }
 
 // SendNewBlock propagates an entire block to a remote peer.
-func (p *peer) SendNewBlock(block *types.Block, td *big.Int) error {
+func (p *peer) SendNewBlock(block *types.Block, txMetas [][]byte, td *big.Int) error {
 	// Mark all the block hash as known, but ensure we don't overflow our limits
 	p.knownBlocks.Add(block.Hash())
 	for p.knownBlocks.Cardinality() >= maxKnownBlocks {
 		p.knownBlocks.Pop()
 	}
-	return p2p.Send(p.rw, NewBlockMsg, []interface{}{block, td})
+	return p2p.Send(p.rw, NewBlockMsg, []interface{}{block, txMetas, td})
 }
 
 // AsyncSendNewBlock queues an entire block for propagation to a remote peer. If
@@ -546,6 +573,36 @@ func (ps *peerSet) Len() int {
 	defer ps.lock.RUnlock()
 
 	return len(ps.peers)
+}
+
+// PeersWithoutEndMsg retrieves a list of peers that do not have a given producer in
+// their set of known index.
+func (ps *peerSet) PeersWithoutEndMsg(msgHash common.Hash) []*peer {
+	ps.lock.RLock()
+	defer ps.lock.RUnlock()
+
+	list := make([]*peer, 0, len(ps.peers))
+	for _, p := range ps.peers {
+		if !p.knowBatchPeriodAnswerMsg.Contains(msgHash) {
+			list = append(list, p)
+		}
+	}
+	return list
+}
+
+// PeersWithoutStartMsg retrieves a list of peers that do not have a given producer in
+// their set of known index.
+func (ps *peerSet) PeersWithoutStartMsg(batchIndex uint64) []*peer {
+	ps.lock.RLock()
+	defer ps.lock.RUnlock()
+
+	list := make([]*peer, 0, len(ps.peers))
+	for _, p := range ps.peers {
+		if !p.knowBatchPeriodStartMsg.Contains(batchIndex) {
+			list = append(list, p)
+		}
+	}
+	return list
 }
 
 // PeersWithoutBlock retrieves a list of peers that do not have a given block in
