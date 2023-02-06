@@ -41,6 +41,7 @@ var (
 	// with gas price zero and fees are currently enforced
 	errZeroGasPriceTx = errors.New("cannot accept 0 gas price transaction")
 	float1            = big.NewFloat(1)
+	retryInterval     = time.Second
 )
 
 // SyncService implements the main functionality around pulling in transactions
@@ -856,20 +857,23 @@ func (s *SyncService) applyTransaction(tx *types.Transaction, txSetProof *types.
 			log.Info("message.UnPackData interrupt", "error", err)
 		}
 
-		sccAddress := s.RollupGpo.SCCAddress()
-		var zeroAddr common.Address
-		if sccAddress == zeroAddr {
+		var zeroAddr, sccAddress common.Address
+		for {
+			sccAddress = s.RollupGpo.SCCAddress()
+			if sccAddress != zeroAddr {
+				break
+			}
 			log.Error("RollupGpo get sccAddress", "error", fmt.Errorf("sccAddr is zeroAddr"))
-		} else {
-			if data.Target == dump.BvmRollbackAddress && data.Sender == sccAddress {
-				rd := &message.RollbackData{}
-				if err := rd.UnPackData(data.Message); err != nil {
-					log.Error("rollback data unpack failed", "error", err)
-				}
-				if rd.ShouldRollBack != nil {
-					if err := s.SchedulerRollback(rd.ShouldRollBack.Uint64()); err != nil {
-						log.Error("scheduler rollback", "error", err)
-					}
+			time.Sleep(retryInterval)
+		}
+		if data.Target == dump.BvmRollbackAddress && data.Sender == sccAddress {
+			rd := &message.RollbackData{}
+			if err := rd.UnPackData(data.Message); err != nil {
+				log.Error("rollback data unpack failed", "error", err)
+			}
+			if rd.ShouldRollBack != nil {
+				if err := s.SchedulerRollback(rd.ShouldRollBack.Uint64()); err != nil {
+					log.Error("scheduler rollback", "error", err)
 				}
 			}
 		}
