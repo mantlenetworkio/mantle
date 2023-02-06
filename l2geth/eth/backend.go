@@ -241,11 +241,10 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	eth.APIBackend.rollupGpo = rollupGpo
 	eth.syncService.RollupGpo = rollupGpo
 	eth.protocolManager.setMinerCheck(eth.miner.Mining)
-	if _, ok := eth.engine.(*clique.Clique); ok {
+	if _, ok := eth.engine.(*clique.Clique); ok && eth.syncService.IsScheduler() {
 		schedulerInst, err := clique.NewScheduler(
 			chainDb,
 			&eth.config.SchedulerConfig,
-			config.Rollup.SchedulerAddress,
 			eth.engine.(*clique.Clique),
 			eth.blockchain,
 			eth.txPool,
@@ -524,7 +523,7 @@ func (s *Ethereum) StartMining(threads int) error {
 				return fmt.Errorf("cannot get schedulerAddr: %w", err)
 			}
 			// check eb to equal schedulerAddr then start sequencer server after miner start
-			if bytes.Equal(schedulerAddr.Bytes(), eb.Bytes()) {
+			if bytes.Equal(schedulerAddr.Bytes(), eb.Bytes()) && s.syncService.IsScheduler() {
 				s.protocolManager.setEtherBase(eb)
 				// set wallet for sign msgs
 				s.protocolManager.schedulerInst.SetWallet(wallet, account)

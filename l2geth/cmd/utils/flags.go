@@ -867,15 +867,15 @@ var (
 		Value:  time.Second * 60,
 		EnvVar: "ROLLUP_GENESIS_TIMEOUT_SECONDS",
 	}
+	RollupRoleFlag = cli.BoolFlag{
+		Name:   "rollup.role",
+		Usage:  "Set rollup node role",
+		EnvVar: "ROLLUP_ROLE",
+	}
 	SequencerClientHttpFlag = cli.StringFlag{
 		Name:   "sequencer.clienthttp",
 		Usage:  "HTTP endpoint for the sequencer client",
 		EnvVar: "SEQUENCER_CLIENT_HTTP",
-	}
-	SchedulerAddressFlag = cli.StringFlag{
-		Name:   "scheduler.address",
-		Usage:  "Set scheduler address",
-		EnvVar: "SCHEDULER_ADDRESS",
 	}
 	SchedulerBatchTime = cli.StringFlag{
 		Name:   "scheduler.batchtime",
@@ -891,11 +891,6 @@ var (
 		Name:   "scheduler.batchepoch",
 		Usage:  "Set scheduler batch epoch",
 		EnvVar: "SCHEDULER_BATCHEPOCH",
-	}
-	SequencerModeFlag = cli.BoolFlag{
-		Name:   "sequencer.mode",
-		Usage:  "Set sequencer mode",
-		EnvVar: "SEQUENCER_MODE",
 	}
 )
 
@@ -1176,11 +1171,8 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	if ctx.GlobalIsSet(SequencerClientHttpFlag.Name) {
 		cfg.SequencerClientHttp = ctx.GlobalString(SequencerClientHttpFlag.Name)
 	}
-	if ctx.GlobalIsSet(SchedulerAddressFlag.Name) {
-		cfg.SchedulerAddress = common.HexToAddress(ctx.GlobalString(SchedulerAddressFlag.Name))
-	}
-	if ctx.GlobalIsSet(SequencerModeFlag.Name) {
-		cfg.SequencerMode = ctx.GlobalBool(SequencerModeFlag.Name)
+	if ctx.GlobalIsSet(RollupRoleFlag.Name) {
+		cfg.RollupRole = rollup.Role(ctx.GlobalUint64(RollupRoleFlag.Name))
 	}
 }
 
