@@ -1244,6 +1244,10 @@ func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction, sequen
 	return nil
 }
 
+func (s *SyncService) DeleteTxVerifiedPrice(hash common.Hash) {
+	delete(s.verifiedMap, hash)
+}
+
 // Higher level API for applying transactions. Should only be called for
 // queue origin sequencer transactions, as the contracts on L1 manage the same
 // validity checks that are done here.

@@ -214,6 +214,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
+	eth.txPool.SetDeleteTxVerifiedPrice(eth.syncService.DeleteTxVerifiedPrice)
 	eth.blockchain.SetPreCheckSyncServiceFunc(eth.syncService.PreCheckSyncServiceState)
 	eth.blockchain.SetUpdateSyncServiceFunc(eth.syncService.UpdateSyncServiceState)
 

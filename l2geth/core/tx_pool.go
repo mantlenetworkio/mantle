@@ -318,6 +318,10 @@ func NewTxPool(config TxPoolConfig, chainconfig *params.ChainConfig, chain block
 	return pool
 }
 
+func (pool *TxPool) SetDeleteTxVerifiedPrice(deleteTxHashFunc func(hash common.Hash)) {
+	pool.all.SetDeleteTxVerifiedPrice(deleteTxHashFunc)
+}
+
 // loop is the transaction pool's main event loop, waiting for and reacting to
 // outside blockchain events as well as for various reporting and transaction
 // eviction events.
@@ -1535,6 +1539,8 @@ type txLookup struct {
 	all   map[common.Hash]*types.Transaction
 	slots int
 	lock  sync.RWMutex
+
+	deleteTxHash func(hash common.Hash)
 }
 
 // newTxLookup returns a new txLookup structure.
@@ -1542,6 +1548,10 @@ func newTxLookup() *txLookup {
 	return &txLookup{
 		all: make(map[common.Hash]*types.Transaction),
 	}
+}
+
+func (t *txLookup) SetDeleteTxVerifiedPrice(deleteTxHashFunc func(hash common.Hash)) {
+	t.deleteTxHash = deleteTxHashFunc
 }
 
 // Range calls f on each key and value present in the map.
@@ -1600,6 +1610,7 @@ func (t *txLookup) Remove(hash common.Hash) {
 	slotsGauge.Update(int64(t.slots))
 
 	delete(t.all, hash)
+	t.deleteTxHash(hash)
 }
 
 // numSlots calculates the number of slots needed for a single transaction.
