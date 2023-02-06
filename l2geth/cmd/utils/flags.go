@@ -811,6 +811,12 @@ var (
 		Usage:  "Deployment of the canonical transaction chain",
 		EnvVar: "ETH1_CTC_DEPLOYMENT_HEIGHT",
 	}
+	RollupEigenClientHttpFlag = cli.StringFlag{
+		Name:   "rollup.eigenclienthttp",
+		Usage:  "HTTP endpoint for the eigen  client",
+		Value:  "http://localhost:7979",
+		EnvVar: "EIGEN_CLIENT_HTTP",
+	}
 	RollupClientHttpFlag = cli.StringFlag{
 		Name:   "rollup.clienthttp",
 		Usage:  "HTTP endpoint for the rollup client",
@@ -831,7 +837,7 @@ var (
 	}
 	RollupBackendFlag = cli.StringFlag{
 		Name:   "rollup.backend",
-		Usage:  "Sync backend for verifiers (\"l1\" or \"l2\"), defaults to l1",
+		Usage:  "Sync backend for verifiers (\"l1\", \"l2\" or \"da\"), defaults to l1",
 		Value:  "l1",
 		EnvVar: "ROLLUP_BACKEND",
 	}
@@ -839,6 +845,11 @@ var (
 		Name:   "rollup.verifier",
 		Usage:  "Enable the verifier",
 		EnvVar: "ROLLUP_VERIFIER_ENABLE",
+	}
+	RollupEigenEnableFlag = cli.BoolFlag{
+		Name:   "rollup.eigen",
+		Usage:  "Enable the EigenDa",
+		EnvVar: "ROLLUP_EIGEN_ENABLE",
 	}
 	RollupMaxCalldataSizeFlag = cli.IntFlag{
 		Name:   "rollup.maxcalldatasize",
@@ -1116,11 +1127,18 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	if ctx.GlobalIsSet(RollupEnableVerifierFlag.Name) {
 		cfg.IsVerifier = true
 	}
+	if ctx.GlobalIsSet(RollupEigenEnableFlag.Name) {
+		cfg.EigenEnable = true
+	}
 	if ctx.GlobalIsSet(RollupMaxCalldataSizeFlag.Name) {
 		cfg.MaxCallDataSize = ctx.GlobalInt(RollupMaxCalldataSizeFlag.Name)
 	}
 	if ctx.GlobalIsSet(RollupClientHttpFlag.Name) {
 		cfg.RollupClientHttp = ctx.GlobalString(RollupClientHttpFlag.Name)
+	}
+	if ctx.GlobalIsSet(RollupEigenClientHttpFlag.Name) {
+		log.Info("RollupEigenClientHttpFlag", "RollupEigenClientHttpFlag", RollupEigenClientHttpFlag.Name)
+		cfg.EigenClientHttp = ctx.GlobalString(RollupEigenClientHttpFlag.Name)
 	}
 	if ctx.GlobalIsSet(RollupPollIntervalFlag.Name) {
 		cfg.PollInterval = ctx.GlobalDuration(RollupPollIntervalFlag.Name)

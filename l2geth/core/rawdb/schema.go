@@ -65,6 +65,10 @@ var (
 	// headBatchKey tracks the latest processed batch
 	headBatchKey = []byte("LastBatch")
 
+	// eigen da
+	latestEigenBatchKey = []byte("LastEigenBatch")
+	EigenBatchKey       = []byte("EigenBatch")
+
 	preimagePrefix = []byte("secure-key-")      // preimagePrefix + hash -> preimage
 	configPrefix   = []byte("ethereum-config-") // config prefix for the db
 

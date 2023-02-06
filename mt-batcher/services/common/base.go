@@ -14,14 +14,8 @@ var (
 	FallbackGasTipCap = big.NewInt(1500000000)
 )
 
-type BaseResponse struct {
-	Status bool        `json:"status"`
-	Code   int         `json:"code"`
-	Msg    interface{} `json:"msg"`
-	Data   interface{} `json:"data"`
-}
-
-func BaseResource(status bool, code int, data interface{}, msg string) (baseRep *BaseResponse) {
-	baseRep = &BaseResponse{Status: status, Code: code, Data: data, Msg: msg}
-	return
+type RollupStoreResponse struct {
+	DataStoreId uint32 `json:"data_store_id"`
+	ConfirmAt   uint32 `json:"confirm_at"`
+	Status      uint8  `json:"status"`
 }

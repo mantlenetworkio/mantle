@@ -161,7 +161,11 @@ var (
 		Value:  50 * time.Millisecond,
 		EnvVar: prefixEnvVar(envVarPrefix, "RETRIEVER_TIMEOUT"),
 	}
-
+	MtlBatcherEnableFlag = cli.BoolFlag{
+		Name:   "mtl-batch-enable",
+		Usage:  "roll data to eigen da enable",
+		EnvVar: prefixEnvVar(envVarPrefix, "MTL_BATCHER_ENABLE"),
+	}
 	LogLevelFlag = cli.StringFlag{
 		Name:   "log-level",
 		Usage:  "The lowest log level that will be output",
@@ -244,6 +248,7 @@ var requiredFlags = []cli.Flag{
 	ResubmissionTimeoutFlag,
 	NumConfirmationsFlag,
 	SafeAbortNonceTooLowCountFlag,
+	MtlBatcherEnableFlag,
 }
 
 var optionalFlags = []cli.Flag{

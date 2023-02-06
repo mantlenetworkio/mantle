@@ -12,12 +12,16 @@ type Config struct {
 	MaxCallDataSize int
 	// Verifier mode
 	IsVerifier bool
+	// Eigen mode
+	EigenEnable bool
 	// Enable the sync service
 	Eth1SyncServiceEnable bool
 	// Gas Limit
 	GasLimit uint64
 	// HTTP endpoint of the data transport layer
 	RollupClientHttp string
+	// HTTP endpoint of the data eigen http serve
+	EigenClientHttp string
 	// Owner of the GasPriceOracle contract
 	GasPriceOracleOwnerAddress common.Address
 	// Turns on checking of state for L2 gas price

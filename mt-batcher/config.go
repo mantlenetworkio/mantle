@@ -44,6 +44,7 @@ type Config struct {
 	SafeAbortNonceTooLowCount uint64
 	EchoDebug                 bool
 	DisableHTTP2              bool
+	MtlBatcherEnable          bool
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -83,6 +84,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		SentryTraceRate:           ctx.GlobalDuration(flags.SentryTraceRateFlag.Name),
 		DisableHTTP2:              ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
 		EchoDebug:                 ctx.GlobalBool(flags.EchoDebugFlag.Name),
+		MtlBatcherEnable:          ctx.GlobalBool(flags.MtlBatcherEnableFlag.Name),
 	}
 	return cfg, nil
 }

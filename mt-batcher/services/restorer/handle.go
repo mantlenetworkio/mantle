@@ -10,25 +10,14 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/common"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"math/big"
 	"net/http"
 )
 
-const (
-	SelfServiceOK     = 2000
-	SelfServiceError  = 4000
-	SelfInvalidParams = 4001
-)
-
 type RollupStoreRequest struct {
 	BatchIndex int64 `json:"batch_index"`
-}
-
-type RollupStoreResponse struct {
-	DataStoreId uint32 `json:"data_store_id"`
-	ConfirmAt   uint32 `json:"confirm_at"`
-	Status      uint8  `json:"status"`
 }
 
 type TransactionRequest struct {
@@ -38,43 +27,36 @@ type TransactionRequest struct {
 func (s *DaService) GetLatestTransactionBatchIndex(c echo.Context) error {
 	batchIndex, err := s.Cfg.EigenContract.RollupBatchIndex(&bind.CallOpts{})
 	if err != nil {
-		retValue := common.BaseResource(false, SelfServiceError, nil, "get roll batch index fail")
-		return c.JSON(http.StatusOK, retValue)
+		return c.JSON(http.StatusBadRequest, errors.New("fail to get batch index"))
 	}
-	retValue := common.BaseResource(true, SelfServiceOK, batchIndex, "get batch index success")
-	return c.JSON(http.StatusOK, retValue)
+	return c.JSON(http.StatusOK, batchIndex.Uint64())
 }
 
 func (s *DaService) GetRollupStoreByRollupBatchIndex(c echo.Context) error {
 	var rsReq RollupStoreRequest
 	if err := c.Bind(&rsReq); err != nil {
-		retValue := common.BaseResource(false, SelfInvalidParams, nil, "params format error")
-		return c.JSON(http.StatusOK, retValue)
+		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
 	}
 	rollupStore, err := s.Cfg.EigenContract.GetRollupStoreByRollupBatchIndex(&bind.CallOpts{}, big.NewInt(rsReq.BatchIndex))
 	if err != nil {
-		retValue := common.BaseResource(false, SelfServiceError, nil, "get roll batch index fail")
-		return c.JSON(http.StatusOK, retValue)
+		return c.JSON(http.StatusBadRequest, errors.New("get rollup store fail"))
 	}
-	rsRep := &RollupStoreResponse{
+	rsRep := &common.RollupStoreResponse{
 		DataStoreId: rollupStore.DataStoreId,
 		ConfirmAt:   rollupStore.ConfirmAt,
 		Status:      rollupStore.Status,
 	}
-	retValue := common.BaseResource(true, SelfServiceOK, rsRep, "get roll store success")
-	return c.JSON(http.StatusOK, retValue)
+	return c.JSON(http.StatusOK, rsRep)
 }
 
 func (s *DaService) GetBatchTransactionByDataStoreId(c echo.Context) error {
 	var txReq TransactionRequest
 	if err := c.Bind(&txReq); err != nil {
-		retValue := common.BaseResource(false, SelfInvalidParams, nil, "Params format error")
-		return c.JSON(http.StatusOK, retValue)
+		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
 	}
 	conn, err := grpc.Dial(s.Cfg.RetrieverSocket, grpc.WithInsecure())
 	if err != nil {
-		retValue := common.BaseResource(false, SelfInvalidParams, nil, "Disperser Cannot connect to")
-		return c.JSON(http.StatusOK, retValue)
+		return c.JSON(http.StatusBadRequest, errors.New("disperser Cannot connect to"))
 	}
 	defer conn.Close()
 	client := pb.NewDataRetrievalClient(conn)
@@ -85,16 +67,13 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c echo.Context) error {
 	}
 	reply, err := client.RetrieveFramesAndData(s.Ctx, request, opt)
 	if err != nil {
-		retValue := common.BaseResource(false, SelfInvalidParams, nil, "Recovery data fail")
-		return c.JSON(http.StatusOK, retValue)
+		return c.JSON(http.StatusBadRequest, errors.New("recovery data fail"))
 	}
 	batchTxn := new([]common.BatchTx)
 	batchRlpStream := rlp.NewStream(bytes.NewBuffer(reply.GetData()), 0)
 	err = batchRlpStream.Decode(batchTxn)
 	if err != nil {
-		log.Error("decode batch tx fail")
-		retValue := common.BaseResource(false, SelfServiceError, nil, "decode batch tx fail")
-		return c.JSON(http.StatusOK, retValue)
+		return c.JSON(http.StatusBadRequest, errors.New("decode batch tx fail"))
 	}
 	newBatchTxn := *batchTxn
 	var txList []*types.Transaction
@@ -107,6 +86,5 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c echo.Context) error {
 		log.Info("tx hash:" + l2Tx.Hash().Hex())
 		txList = append(txList, l2Tx)
 	}
-	retValue := common.BaseResource(true, SelfServiceOK, txList, "get transaction from eigen da success")
-	return c.JSON(http.StatusOK, retValue)
+	return c.JSON(http.StatusOK, txList)
 }
