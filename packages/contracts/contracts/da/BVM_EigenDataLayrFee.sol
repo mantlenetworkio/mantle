@@ -8,6 +8,8 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 contract BVM_EigenDataLayrFee is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
+    using AddressUpgradeable for address;
+
     address public gasFeeAddress;
     uint256 userRollupFee;
 
