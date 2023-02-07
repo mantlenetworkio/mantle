@@ -20,6 +20,7 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/log"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -128,9 +129,10 @@ func (s EIP155Signer) Sender(tx *Transaction) (common.Address, error) {
 	if !tx.Protected() {
 		return HomesteadSigner{}.Sender(tx)
 	}
-	if tx.ChainId().Cmp(s.chainId) != 0 {
-		return common.Address{}, ErrInvalidChainId
-	}
+	log.Info("tx.ChainId and s.chainId", "tx.ChainId", "s.chainId", s.chainId)
+	//if tx.ChainId().Cmp(s.chainId) != 0 {
+	//	return common.Address{}, ErrInvalidChainId
+	//}
 	V := new(big.Int).Sub(tx.data.V, s.chainIdMul)
 	V.Sub(V, big8)
 	return recoverPlain(s.Hash(tx), tx.data.R, tx.data.S, V, true)

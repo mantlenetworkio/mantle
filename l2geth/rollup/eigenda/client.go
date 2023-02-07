@@ -39,9 +39,9 @@ func NewEigenClient(url string) *Client {
 }
 
 func (c *Client) GetLatestTransactionBatchIndex() (batchIndex *uint64, err error) {
-	type batchIndexS uint64
+	var batchIndexTmp uint64
 	response, err := c.client.R().
-		SetResult(batchIndex).
+		SetResult(&batchIndexTmp).
 		Get("/eigen/getLatestTransactionBatchIndex")
 	if err != nil {
 		return nil, fmt.Errorf("cannot get latest batch index: %w", err)
@@ -49,8 +49,7 @@ func (c *Client) GetLatestTransactionBatchIndex() (batchIndex *uint64, err error
 	if response.StatusCode() != 200 {
 		return nil, errors.New("fetch latest batch index fail")
 	}
-	log.Info("exec here 666666666666666666666666666666666666", "batchIndex", response.Body(), "response", response)
-	return nil, err
+	return &batchIndexTmp, err
 }
 
 func (c *Client) GetRollupStoreByRollupBatchIndex(batchIndex int64) (*common.RollupStoreResponse, error) {
@@ -69,17 +68,21 @@ func (c *Client) GetRollupStoreByRollupBatchIndex(batchIndex int64) (*common.Rol
 }
 
 func (c *Client) GetBatchTransactionByDataStoreId(storeNumber uint32) ([]*types.Transaction, error) {
-	var TxList []*types.Transaction
+	var TxList []types.Transaction
 	response, err := c.client.R().
 		SetBody(map[string]interface{}{"store_number": storeNumber}).
-		SetResult(TxList).
+		SetResult(&TxList).
 		Post("/eigen/getBatchTransactionByDataStoreId")
 	if err != nil {
 		return nil, fmt.Errorf("cannot get tx list: %w", err)
 	}
 	if response.StatusCode() == 200 {
-		return nil, nil
-		// return response.Body(), nil
+		var retTxList []*types.Transaction
+		for _, tx := range TxList {
+			log.Info("transaction index", "index", tx.GetMeta().Index)
+			retTxList = append(retTxList, &tx)
+		}
+		return retTxList, nil
 	} else {
 		return nil, errors.New("fetch tx list fail")
 	}

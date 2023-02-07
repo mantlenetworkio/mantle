@@ -4,10 +4,10 @@ import (
 	"bytes"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceRetrieverServer"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/labstack/echo/v4"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"github.com/pkg/errors"
@@ -29,6 +29,7 @@ func (s *DaService) GetLatestTransactionBatchIndex(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, errors.New("fail to get batch index"))
 	}
+	log.Info("rollup batch index", "batchIndex", batchIndex.Uint64())
 	return c.JSON(http.StatusOK, batchIndex.Uint64())
 }
 
@@ -52,10 +53,13 @@ func (s *DaService) GetRollupStoreByRollupBatchIndex(c echo.Context) error {
 func (s *DaService) GetBatchTransactionByDataStoreId(c echo.Context) error {
 	var txReq TransactionRequest
 	if err := c.Bind(&txReq); err != nil {
+		log.Error("invalid request params", "err", err)
 		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
 	}
+	log.Info("GetBatchTransactionByDataStoreId Request para", "StoreNumber", txReq.StoreNumber)
 	conn, err := grpc.Dial(s.Cfg.RetrieverSocket, grpc.WithInsecure())
 	if err != nil {
+		log.Error("disperser Cannot connect to", "err", err)
 		return c.JSON(http.StatusBadRequest, errors.New("disperser Cannot connect to"))
 	}
 	defer conn.Close()
@@ -67,6 +71,7 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c echo.Context) error {
 	}
 	reply, err := client.RetrieveFramesAndData(s.Ctx, request, opt)
 	if err != nil {
+		log.Error("retrieve frames and data error", "err", err)
 		return c.JSON(http.StatusBadRequest, errors.New("recovery data fail"))
 	}
 	batchTxn := new([]common.BatchTx)
@@ -76,9 +81,9 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errors.New("decode batch tx fail"))
 	}
 	newBatchTxn := *batchTxn
-	var txList []*types.Transaction
+	var txList []types.Transaction
 	for i := 0; i < len(newBatchTxn); i++ {
-		l2Tx := new(types.Transaction)
+		var l2Tx types.Transaction
 		rlpStream := l2rlp.NewStream(bytes.NewBuffer(newBatchTxn[i].RawTx), 0)
 		if err := l2Tx.DecodeRLP(rlpStream); err != nil {
 			log.Error("Decode RLP fail")

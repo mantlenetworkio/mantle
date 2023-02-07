@@ -118,7 +118,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	log.Info("Configured rollup client", "url", cfg.RollupClientHttp, "chain-id", chainID.Uint64(), "ctc-deploy-height", cfg.CanonicalTransactionChainDeployHeight)
 
 	// eigenClient := eigenda.NewEigenClient(cfg.EigenClientHttp)
-	eigenClient := eigenda.NewEigenClient("http://127.0.0.1:8089")
+	eigenClient := eigenda.NewEigenClient(cfg.EigenClientHttp)
 	log.Info("Configured eigen client", "EigenClientHttp", cfg.EigenClientHttp)
 
 	// Ensure sane values for the fee thresholds
@@ -141,6 +141,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		ctx:                            ctx,
 		cancel:                         cancel,
 		verifier:                       cfg.IsVerifier,
+		eigenEnable:                    cfg.EigenEnable,
 		enable:                         cfg.Eth1SyncServiceEnable,
 		syncing:                        atomic.Value{},
 		bc:                             bc,
@@ -465,9 +466,12 @@ func (s *SyncService) verify() error {
 			return fmt.Errorf("Verifier cannot sync transactions with BackendL2: %w", err)
 		}
 	case BackendEigen:
-		log.Info("verify data from eigen da", "eigen enable", s.eigenEnable)
-		if err := s.syncEigenTransactionsToTip(); err != nil {
-			return fmt.Errorf("verifier cannot sync transactions with BackendEigen: %w", err)
+		if s.eigenEnable {
+			if err := s.syncEigenBatchesToTip(); err != nil {
+				return fmt.Errorf("verifier cannot sync transactions with BackendEigen: %w", err)
+			}
+		} else {
+			log.Info("If you want to use eigen da, you should set eigenEnable true")
 		}
 	}
 	return nil
@@ -498,6 +502,13 @@ func (s *SyncService) syncBatchesToTip() error {
 	return nil
 }
 
+func (s *SyncService) syncEigenBatchesToTip() error {
+	if err := s.syncToTip(s.syncEigenBatches, s.eigenClient.GetLatestTransactionBatchIndex); err != nil {
+		return fmt.Errorf("Cannot sync eigen transaction batches to tip: %w", err)
+	}
+	return nil
+}
+
 func (s *SyncService) syncTransactionsToTip() error {
 	sync := func() (*uint64, error) {
 		return s.syncTransactions(s.backend)
@@ -508,32 +519,6 @@ func (s *SyncService) syncTransactionsToTip() error {
 	if err := s.syncToTip(sync, check); err != nil {
 		return fmt.Errorf("Verifier cannot sync transactions with backend %s: %w", s.backend.String(), err)
 	}
-	return nil
-}
-
-func (s *SyncService) syncEigenTransactionsToTip() error {
-	log.Info("enter here 11111111111111111111")
-	sync := func() (*uint64, error) {
-		index, err := s.syncEigenTransactions(s.backend)
-		return index, err
-	}
-	log.Info("enter here 2222222222222222222222222")
-	check := func() (*uint64, error) {
-		return s.eigenClient.GetLatestTransactionBatchIndex()
-	}
-	if err := s.syncToTip(sync, check); err != nil {
-		return fmt.Errorf("verifier cannot sync eigen transactions with backend %s: %w", s.backend.String(), err)
-	}
-	return nil
-}
-
-func (s *SyncService) syncEigenBatchesToTip() error {
-	//check := func() (*uint64, error) {
-	//	return s.eigenClient.GetLatestTransactionBatchIndex, nil
-	//}
-	//if err := s.syncToTip(s.syncBatches); err != nil {
-	//	return fmt.Errorf("Cannot sync transaction batches to tip: %w", err)
-	//}
 	return nil
 }
 
@@ -764,6 +749,15 @@ func (s *SyncService) GetNextIndex() uint64 {
 	return *latest + 1
 }
 
+// GetNextIndex reads the next EigenDa index to process
+func (s *SyncService) GetEigenDaNextIndex() uint64 {
+	latest := s.GetLatestEigenBatchIndex()
+	if latest == nil {
+		return 0
+	}
+	return *latest + 1
+}
+
 // SetLatestIndex writes the last CTC index that was processed
 func (s *SyncService) SetLatestIndex(index *uint64) {
 	if index != nil {
@@ -818,15 +812,9 @@ func (s *SyncService) SetLatestBatchIndex(index *uint64) {
 func (s *SyncService) GetEigenNextBatchIndex() uint64 {
 	index := rawdb.ReadEigenBatchIndex(s.db)
 	if index == nil {
-		return 0
+		return 1
 	}
 	return *index + 1
-}
-
-func (s *SyncService) SetEigenBatchIndex(index *uint64) {
-	if index != nil {
-		rawdb.WriteEigenIndex(s.db, *index)
-	}
 }
 
 func (s *SyncService) GetLatestEigenBatchIndex() *uint64 {
@@ -835,6 +823,7 @@ func (s *SyncService) GetLatestEigenBatchIndex() *uint64 {
 
 func (s *SyncService) SetLatestEigenBatchIndex(index *uint64) {
 	if index != nil {
+		log.Info("set latest eigen batch index", "index", index)
 		rawdb.WriteLatestEigenIndex(s.db, *index)
 	}
 }
@@ -1084,7 +1073,6 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 				tx.SetIndex(*index + 1)
 			}
 		}
-
 	}
 
 	// On restart, these values are repaired to handle
@@ -1096,7 +1084,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 	}
 
 	// The index was set above so it is safe to dereference
-	log.Debug("Applying transaction to tip", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
+	log.Info("Applying transaction to tip", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
 
 	txs := types.Transactions{tx}
 	errCh := make(chan error, 1)
@@ -1113,12 +1101,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 		log.Error("Got error waiting for transaction to be added to chain", "msg", err)
 		s.SetLatestL1Timestamp(ts)
 		s.SetLatestL1BlockNumber(bn)
-		if !s.eigenEnable {
-			s.SetLatestIndex(index)
-		} else {
-			s.SetLatestEigenBatchIndex(index)
-		}
-
+		s.SetLatestIndex(index)
 		return err
 	case <-s.chainHeadCh:
 		// Update the cache when the transaction is from the owner
@@ -1129,11 +1112,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 			if err := s.updateGasPriceOracleCache(nil); err != nil {
 				s.SetLatestL1Timestamp(ts)
 				s.SetLatestL1BlockNumber(bn)
-				if !s.eigenEnable {
-					s.SetLatestIndex(index)
-				} else {
-					s.SetLatestEigenBatchIndex(index)
-				}
+				s.SetLatestIndex(index)
 				return err
 			}
 		}
@@ -1473,7 +1452,7 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 		log.Debug("Fetching transaction batch", "index", i)
 		_, txs, err := s.client.GetTransactionBatch(i)
 		if err != nil {
-			return fmt.Errorf("Cannot get transaction batch: %w", err)
+			return fmt.Errorf("cannot get transaction batch: %w", err)
 		}
 		for _, tx := range txs {
 			if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
@@ -1486,18 +1465,27 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 }
 
 func (s *SyncService) syncEigenTransactionBatchRange(start, end uint64) error {
-	log.Info("Syncing transaction batch range", "start", start, "end", end)
+	log.Info("Syncing eigen transaction batch range", "start", start, "end", end)
 	for i := start; i <= end; i++ {
 		log.Debug("Fetching transaction batch", "index", i)
-		txs, err := s.eigenClient.GetBatchTransactionByDataStoreId(uint32(i))
+		rollupInfo, err := s.eigenClient.GetRollupStoreByRollupBatchIndex(int64(i))
+		if err != nil {
+			return fmt.Errorf("cannot get rollup store by batch index: %w", err)
+		}
+		txs, err := s.eigenClient.GetBatchTransactionByDataStoreId(rollupInfo.DataStoreId)
 		if err != nil {
 			return fmt.Errorf("cannot get eigen transaction batch: %w", err)
 		}
 		for _, tx := range txs {
-			if err := s.applyBatchedTransaction(tx); err != nil {
+			if tx.QueueOrigin().String() != "sequencer" || tx.GetMeta().Index == nil {
+				log.Info("Skip this transaction", "QueueOrigin", tx.QueueOrigin().String(), "Index", tx.GetMeta().Index)
+				continue
+			}
+			if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
 				return fmt.Errorf("cannot apply batched transaction: %w", err)
 			}
 		}
+		log.Info("set latest eigen batch index", "index", i)
 		s.SetLatestEigenBatchIndex(&i)
 	}
 	return nil
@@ -1545,22 +1533,6 @@ func (s *SyncService) syncTransactions(backend Backend) (*uint64, error) {
 	return index, nil
 }
 
-func (s *SyncService) syncEigenTransactions(backend Backend) (*uint64, error) {
-	log.Info("333333333333333333333333333333333333333333")
-	getLatest := func() (*uint64, error) {
-		return s.eigenClient.GetLatestTransactionBatchIndex()
-	}
-	log.Info("444444444444444444444444444444444444444444444444")
-	sync := func(start, end uint64) error {
-		return s.syncEigenBatchTransaction(start, end, backend)
-	}
-	index, err := s.sync(getLatest, s.GetNextIndex, sync)
-	if err != nil {
-		return nil, fmt.Errorf("cannot sync transactions with backend %s: %w", backend.String(), err)
-	}
-	return index, nil
-}
-
 // syncTransactionRange will sync a range of transactions from
 // start to end (inclusive) from a specific Backend
 func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) error {
@@ -1572,23 +1544,6 @@ func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) e
 		}
 		if err := s.applyTransaction(tx, &types.BatchTxSetProof{}); err != nil {
 			return fmt.Errorf("Cannot apply transaction: %w", err)
-		}
-	}
-	return nil
-}
-
-func (s *SyncService) syncEigenBatchTransaction(start, end uint64, backend Backend) error {
-	log.Info("Syncing transaction range", "start", start, "end", end, "backend", backend.String())
-	if start != end {
-		return fmt.Errorf("strat must equal end %d: %d", start, end)
-	}
-	txList, err := s.eigenClient.GetBatchTransactionByDataStoreId(uint32(start))
-	if err != nil {
-		return fmt.Errorf("cannot fetch batch transaction %d: %w", start, err)
-	}
-	for i := 0; i < len(txList); i++ {
-		if err := s.applyTransaction(txList[i]); err != nil {
-			return fmt.Errorf("cannot apply transaction: %w", err)
 		}
 	}
 	return nil
