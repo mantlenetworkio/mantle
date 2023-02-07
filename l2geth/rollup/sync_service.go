@@ -1185,7 +1185,7 @@ func (s *SyncService) ApplyUpdateGasPriceTxs() {
 	}
 }
 
-func (s *SyncService) IsUpdateGasPriceTx(tx *types.Transaction) bool {
+func (s *SyncService) ValidateTransaction(tx *types.Transaction) bool {
 	if tx == nil {
 		return false
 	}
@@ -1195,11 +1195,13 @@ func (s *SyncService) IsUpdateGasPriceTx(tx *types.Transaction) bool {
 	}
 	gpoOwner := s.GasPriceOracleOwnerAddress()
 	if gpoOwner != nil {
-		if from != *gpoOwner {
-			return false
+		if from != *gpoOwner && s.IsSequencerMode() {
+			return true
+		} else if from == *gpoOwner && !s.IsSequencerMode() {
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 // AddUpdateGasPriceTx add updateGasPriceTx to queue
