@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 	"math/big"
 	"sync"
 	"sync/atomic"
@@ -38,6 +37,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/metrics"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 )
 
 const (
