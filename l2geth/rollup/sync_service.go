@@ -1467,7 +1467,7 @@ func (s *SyncService) IngestTransaction(tx *types.Transaction) error {
 }
 
 func (s *SyncService) handleChainHeadEventLoop() {
-	if s.GetRollupRole() == SEQUENCER_NODE {
+	if s.GetRollupRole() == SEQUENCER_NODE || s.GetRollupRole() == VERIFIER_NODE {
 		log.Info("Start handle chain head event loop")
 		for {
 			select {

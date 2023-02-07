@@ -404,7 +404,8 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 		// cleaning up memory with the call to `clearPending`, so be sure to
 		// call that in the new hot code path
 		case head := <-w.chainHeadCh:
-			if w.eth.SyncService().GetRollupRole() == rollup.SCHEDULER_NODE {
+			if w.eth.SyncService().GetRollupRole() == rollup.SCHEDULER_NODE ||
+				w.eth.SyncService().GetRollupRole() == rollup.VERIFIER_NODE {
 				w.chainHeadToRollupCh <- head
 			}
 			//clearPending(head.Block.NumberU64())
@@ -712,7 +713,8 @@ func (w *worker) batchAnswerLoop() {
 // mainLoop is a standalone goroutine to regenerate the sealing task based on the received event.
 func (w *worker) mainLoop() {
 	//defer w.txsSub.Unsubscribe()
-	if w.eth.SyncService().GetRollupRole() == rollup.SCHEDULER_NODE {
+	if w.eth.SyncService().GetRollupRole() != rollup.SEQUENCER_NODE ||
+		w.eth.SyncService().GetRollupRole() == rollup.VERIFIER_NODE {
 		defer w.chainHeadSub.Unsubscribe()
 	}
 	defer w.chainSideSub.Unsubscribe()
