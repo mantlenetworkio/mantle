@@ -713,7 +713,7 @@ func (w *worker) batchAnswerLoop() {
 // mainLoop is a standalone goroutine to regenerate the sealing task based on the received event.
 func (w *worker) mainLoop() {
 	//defer w.txsSub.Unsubscribe()
-	if w.eth.SyncService().GetRollupRole() != rollup.SEQUENCER_NODE ||
+	if w.eth.SyncService().GetRollupRole() == rollup.SCHEDULER_NODE ||
 		w.eth.SyncService().GetRollupRole() == rollup.VERIFIER_NODE {
 		defer w.chainHeadSub.Unsubscribe()
 	}
