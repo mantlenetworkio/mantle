@@ -77,8 +77,7 @@ type SyncService struct {
 	cfg                            Config
 	applyLock                      sync.Mutex
 	updateGasPriceTxPool           chan *types.Transaction
-	verifiedMap                    map[common.Hash]*big.Int
-	verifiedMapLock                sync.RWMutex
+	verifiedMap                    sync.Map
 }
 
 // NewSyncService returns an initialized sync service
@@ -156,7 +155,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		feeThresholdUp:                 cfg.FeeThresholdUp,
 		cfg:                            cfg,
 		updateGasPriceTxPool:           make(chan *types.Transaction, gasPriceTxPoolSize),
-		verifiedMap:                    make(map[common.Hash]*big.Int),
+		//verifiedMap:                    make(map[common.Hash]*big.Int),
 	}
 
 	// The chainHeadSub is used to synchronize the SyncService with the chain.
@@ -1224,12 +1223,13 @@ func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction) error 
 		return err
 	}
 	if err = func() error {
-		s.verifiedMapLock.Lock()
-		defer s.verifiedMapLock.Unlock()
-		lastL1GasPrice, ok := s.verifiedMap[tx.Hash()]
+		v, ok := s.verifiedMap.Load(tx.Hash())
 		if ok {
-			if l1GasPrice.Cmp(lastL1GasPrice) < 1 {
-				errors.New("l1GasPrice no rise")
+			lastL1GasPrice, ok := v.(*big.Int)
+			if ok {
+				if l1GasPrice.Cmp(lastL1GasPrice) <= 0 {
+					return errors.New("l1GasPrice no rise")
+				}
 			}
 		}
 		return nil
@@ -1249,16 +1249,12 @@ func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction) error 
 		return fmt.Errorf("invalid transaction with queue origin %s", qo.String())
 	}
 	// save gas price and tx hash
-	s.verifiedMapLock.Lock()
-	defer s.verifiedMapLock.Unlock()
-	s.verifiedMap[tx.Hash()] = l1GasPrice
+	s.verifiedMap.Store(tx.Hash(), l1GasPrice)
 	return nil
 }
 
 func (s *SyncService) DeleteTxVerifiedPrice(hash common.Hash) {
-	s.verifiedMapLock.Lock()
-	defer s.verifiedMapLock.Unlock()
-	delete(s.verifiedMap, hash)
+	s.verifiedMap.Delete(hash)
 }
 
 // Higher level API for applying transactions. Should only be called for
