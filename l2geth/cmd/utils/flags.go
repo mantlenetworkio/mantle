@@ -846,11 +846,6 @@ var (
 		Usage:  "Enable the verifier",
 		EnvVar: "ROLLUP_VERIFIER_ENABLE",
 	}
-	RollupEigenEnableFlag = cli.BoolFlag{
-		Name:   "rollup.eigen",
-		Usage:  "Enable the EigenDa",
-		EnvVar: "ROLLUP_EIGEN_ENABLE",
-	}
 	RollupMaxCalldataSizeFlag = cli.IntFlag{
 		Name:   "rollup.maxcalldatasize",
 		Usage:  "Maximum allowed calldata size for Queue Origin Sequencer Txs",
@@ -1151,9 +1146,6 @@ func setEth1(ctx *cli.Context, cfg *rollup.Config) {
 func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	if ctx.GlobalIsSet(RollupEnableVerifierFlag.Name) {
 		cfg.IsVerifier = true
-	}
-	if ctx.GlobalIsSet(RollupEigenEnableFlag.Name) {
-		cfg.EigenEnable = true
 	}
 	if ctx.GlobalIsSet(RollupMaxCalldataSizeFlag.Name) {
 		cfg.MaxCallDataSize = ctx.GlobalInt(RollupMaxCalldataSizeFlag.Name)

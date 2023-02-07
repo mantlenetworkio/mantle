@@ -12,8 +12,6 @@ type Config struct {
 	MaxCallDataSize int
 	// Verifier mode
 	IsVerifier bool
-	// Eigen mode
-	EigenEnable bool
 	// Enable the sync service
 	Eth1SyncServiceEnable bool
 	// Gas Limit

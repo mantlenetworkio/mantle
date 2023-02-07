@@ -51,7 +51,6 @@ type SyncService struct {
 	ctx                            context.Context
 	cancel                         context.CancelFunc
 	verifier                       bool
-	eigenEnable                    bool
 	db                             ethdb.Database
 	scope                          event.SubscriptionScope
 	txFeed                         event.Feed
@@ -141,7 +140,6 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		ctx:                            ctx,
 		cancel:                         cancel,
 		verifier:                       cfg.IsVerifier,
-		eigenEnable:                    cfg.EigenEnable,
 		enable:                         cfg.Eth1SyncServiceEnable,
 		syncing:                        atomic.Value{},
 		bc:                             bc,
@@ -466,12 +464,8 @@ func (s *SyncService) verify() error {
 			return fmt.Errorf("Verifier cannot sync transactions with BackendL2: %w", err)
 		}
 	case BackendEigen:
-		if s.eigenEnable {
-			if err := s.syncEigenBatchesToTip(); err != nil {
-				return fmt.Errorf("verifier cannot sync transactions with BackendEigen: %w", err)
-			}
-		} else {
-			log.Info("If you want to use eigen da, you should set eigenEnable true")
+		if err := s.syncEigenBatchesToTip(); err != nil {
+			return fmt.Errorf("verifier cannot sync transactions with BackendEigen: %w", err)
 		}
 	}
 	return nil
@@ -1054,27 +1048,14 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 	if tx.L1Timestamp() > ts {
 		s.SetLatestL1Timestamp(tx.L1Timestamp())
 	}
-	var index *uint64
-	if !s.eigenEnable {
-		index = s.GetLatestIndex()
-		if tx.GetMeta().Index == nil {
-			if index == nil {
-				tx.SetIndex(0)
-			} else {
-				tx.SetIndex(*index + 1)
-			}
-		}
-	} else {
-		index := s.GetLatestEigenBatchIndex()
-		if tx.GetMeta().Index == nil {
-			if index == nil {
-				tx.SetIndex(0)
-			} else {
-				tx.SetIndex(*index + 1)
-			}
+	index := s.GetLatestIndex()
+	if tx.GetMeta().Index == nil {
+		if index == nil {
+			tx.SetIndex(0)
+		} else {
+			tx.SetIndex(*index + 1)
 		}
 	}
-
 	// On restart, these values are repaired to handle
 	// the case where the index is updated but the
 	// transaction isn't yet added to the chain
