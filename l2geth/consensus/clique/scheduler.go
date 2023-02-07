@@ -140,7 +140,7 @@ func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Add
 	return schedulerInst, nil
 }
 
-// SetWallet set VerifiedTxCount function
+// SetVerifiedTxCount set VerifiedTxCount function
 func (schedulerInst *Scheduler) SetVerifiedTxCount(verifiedTxCount func() (uint64, error)) {
 	schedulerInst.verifiedTxCount = verifiedTxCount
 }
