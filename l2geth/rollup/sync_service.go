@@ -34,7 +34,6 @@ const (
 	SCHEDULER_NODE Role = 0
 	SEQUENCER_NODE Role = 1
 	VERIFIER_NODE  Role = 2
-	REPLICA_NODE   Role = 3
 )
 
 var (

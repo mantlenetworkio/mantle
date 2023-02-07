@@ -867,7 +867,7 @@ var (
 		Value:  time.Second * 60,
 		EnvVar: "ROLLUP_GENESIS_TIMEOUT_SECONDS",
 	}
-	RollupRoleFlag = cli.BoolFlag{
+	RollupRoleFlag = cli.StringFlag{
 		Name:   "rollup.role",
 		Usage:  "Set rollup node role",
 		EnvVar: "ROLLUP_ROLE",
@@ -1172,7 +1172,19 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 		cfg.SequencerClientHttp = ctx.GlobalString(SequencerClientHttpFlag.Name)
 	}
 	if ctx.GlobalIsSet(RollupRoleFlag.Name) {
-		cfg.RollupRole = rollup.Role(ctx.GlobalUint64(RollupRoleFlag.Name))
+		str := ctx.GlobalString(RollupRoleFlag.Name)
+		switch str {
+		case "scheduler", "SCHEDULER":
+			cfg.RollupRole = rollup.SCHEDULER_NODE
+		case "sequencer", "SEQUENCER":
+			cfg.RollupRole = rollup.SEQUENCER_NODE
+		case "verifier", "VERIFIER":
+			cfg.RollupRole = rollup.VERIFIER_NODE
+		case "replica", "REPLICA":
+			cfg.RollupRole = rollup.SEQUENCER_NODE
+		default:
+			log.Crit("invalid rollup role", "role", str)
+		}
 	}
 }
 
