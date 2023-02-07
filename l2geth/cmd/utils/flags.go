@@ -1178,10 +1178,8 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 			cfg.RollupRole = rollup.SCHEDULER_NODE
 		case "sequencer", "SEQUENCER":
 			cfg.RollupRole = rollup.SEQUENCER_NODE
-		case "verifier", "VERIFIER":
+		case "replica", "REPLICA", "verifier", "VERIFIER":
 			cfg.RollupRole = rollup.VERIFIER_NODE
-		case "replica", "REPLICA":
-			cfg.RollupRole = rollup.SEQUENCER_NODE
 		default:
 			log.Crit("invalid rollup role", "role", str)
 		}
