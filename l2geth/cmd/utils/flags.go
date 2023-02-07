@@ -1134,7 +1134,7 @@ func setEth1(ctx *cli.Context, cfg *rollup.Config) {
 // setRollup configures the rollup
 func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	if ctx.GlobalIsSet(RollupEnableVerifierFlag.Name) {
-		cfg.IsVerifier = true
+		cfg.IsVerifier = ctx.GlobalBool(RollupEnableVerifierFlag.Name)
 	}
 	if ctx.GlobalIsSet(RollupMaxCalldataSizeFlag.Name) {
 		cfg.MaxCallDataSize = ctx.GlobalInt(RollupMaxCalldataSizeFlag.Name)
