@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
+	gsentry "github.com/getsentry/sentry-go"
 	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/l1l2client"
@@ -29,7 +30,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			"mtlrpc", cfg.L2MtlRpc, "gitVersion", gitVersion)
 
 		if cfg.SentryEnable {
-			defer sentry.Flush(2 * time.Second)
+			defer gsentry.Flush(2 * time.Second)
 		}
 		log.Info("Initializing mantel da batch submitter")
 		ctx, cancel := context.WithCancel(context.Background())
