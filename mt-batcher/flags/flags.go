@@ -62,6 +62,12 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "PRIVATE_KEY"),
 	}
+	FeePrivateKeyFlag = cli.StringFlag{
+		Name:     "fee-private",
+		Usage:    "Ethereum private key for fee operator",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "FEE_PRIVATE_KEY"),
+	}
 	MnemonicFlag = cli.StringFlag{
 		Name: "mnemonic",
 		Usage: "The mnemonic used to derive the wallets for either the " +
@@ -80,6 +86,12 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "ROLLUP_ADDRESS"),
 	}
+	EigenFeeContractAddressFlag = cli.StringFlag{
+		Name:     "eigen-fee-address",
+		Usage:    "Address of the datalayr fee contract",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "ROLLUP_FEE_ADDRESS"),
+	}
 	BlockOffsetFlag = cli.Uint64Flag{
 		Name:   "block-offset",
 		Usage:  "The offset between the eigenda contract start and the L2 geth blocks",
@@ -91,6 +103,12 @@ var (
 		Usage:  "Rollup transaction min size data for eigen da",
 		Value:  1000,
 		EnvVar: prefixEnvVar(envVarPrefix, "ROLLUP_MIN_SIZE"),
+	}
+	FeeSizeSecFlag = cli.StringFlag{
+		Name:   "fee-size-sec",
+		Usage:  "Rollup transaction fee size",
+		Value:  "102400", //
+		EnvVar: prefixEnvVar(envVarPrefix, "FEE_SIZE_SEC"),
 	}
 	RollUpMaxSizeFlag = cli.Uint64Flag{
 		Name:   "rollup-max-size",
@@ -157,6 +175,11 @@ var (
 			"ignored and logs are printed using JSON",
 		EnvVar: prefixEnvVar(envVarPrefix, "LOG_TERMINAL"),
 	}
+	FeeModelEnableFlags = cli.BoolFlag{
+		Name:   "fee-model-enable",
+		Usage:  "fee model enable",
+		EnvVar: prefixEnvVar(envVarPrefix, "FEE_MODEL_ENABLE"),
+	}
 	SentryEnableFlag = cli.BoolFlag{
 		Name:   "sentry-enable",
 		Usage:  "Whether or not to enable Sentry. If true, sentry-dsn must also be set",
@@ -189,18 +212,22 @@ var requiredFlags = []cli.Flag{
 	ChainIdFlag,
 	GraphProviderFlag,
 	PrivateKeyFlag,
+	FeePrivateKeyFlag,
 	MnemonicFlag,
 	SequencerHDPathFlag,
 	EigenContractAddressFlag,
+	EigenFeeContractAddressFlag,
 	BlockOffsetFlag,
 	RollUpMinSizeFlag,
 	RollUpMaxSizeFlag,
+	FeeSizeSecFlag,
 	PollIntervalFlag,
 	DataStoreDurationFlag,
 	DataStoreTimeoutFlag,
 	EigenLayerNodeFlag,
 	ResubmissionTimeoutFlag,
 	NumConfirmationsFlag,
+	FeeModelEnableFlags,
 	SafeAbortNonceTooLowCountFlag,
 }
 

@@ -17,9 +17,11 @@ type Config struct {
 	ChainId                   uint64
 	GraphProvider             string
 	PrivateKey                string
+	FeePrivateKey             string
 	Mnemonic                  string
 	SequencerHDPath           string
 	EigenContractAddress      string
+	EigenFeeContractAddress   string
 	DataStoreDuration         uint64
 	DataStoreTimeout          uint64
 	SentryEnable              bool
@@ -36,8 +38,9 @@ type Config struct {
 	ResubmissionTimeout       time.Duration
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
-
-	DisableHTTP2 bool
+	FeeSizeSec                string
+	FeeModelEnable            bool
+	DisableHTTP2              bool
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -50,9 +53,11 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		ChainId:                   ctx.GlobalUint64(flags.ChainIdFlag.Name),
 		GraphProvider:             ctx.GlobalString(flags.GraphProviderFlag.Name),
 		PrivateKey:                ctx.GlobalString(flags.PrivateKeyFlag.Name),
+		FeePrivateKey:             ctx.GlobalString(flags.FeePrivateKeyFlag.Name),
 		Mnemonic:                  ctx.GlobalString(flags.MnemonicFlag.Name),
 		SequencerHDPath:           ctx.GlobalString(flags.SequencerHDPathFlag.Name),
 		EigenContractAddress:      ctx.GlobalString(flags.EigenContractAddressFlag.Name),
+		EigenFeeContractAddress:   ctx.GlobalString(flags.EigenFeeContractAddressFlag.Name),
 		DataStoreDuration:         ctx.GlobalUint64(flags.DataStoreDurationFlag.Name),
 		DataStoreTimeout:          ctx.GlobalUint64(flags.DataStoreTimeoutFlag.Name),
 		PollInterval:              ctx.GlobalDuration(flags.PollIntervalFlag.Name),
@@ -69,6 +74,8 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		SentryEnable:              ctx.GlobalBool(flags.SentryEnableFlag.Name),
 		SentryDsn:                 ctx.GlobalString(flags.SentryDsnFlag.Name),
 		SentryTraceRate:           ctx.GlobalDuration(flags.SentryTraceRateFlag.Name),
+		FeeSizeSec:                ctx.GlobalString(flags.FeeSizeSecFlag.Name),
+		FeeModelEnable:            ctx.GlobalBool(flags.FeeModelEnableFlags.Name),
 		DisableHTTP2:              ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
 	}
 	return cfg, nil

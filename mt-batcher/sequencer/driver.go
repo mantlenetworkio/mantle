@@ -45,7 +45,9 @@ type DriverConfig struct {
 	L1Client                  *ethclient.Client
 	L2Client                  *l2ethclient.Client
 	EigenContractAddr         common.Address
+	EigenFeeAddr              common.Address
 	PrivKey                   *ecdsa.PrivateKey
+	FeePrivKey                *ecdsa.PrivateKey
 	BlockOffset               uint64
 	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
@@ -54,27 +56,33 @@ type DriverConfig struct {
 	DataStoreDuration         uint64
 	DataStoreTimeout          uint64
 	DisperserSocket           string
+	FeeSizeSec                string
 	PollInterval              time.Duration
 	GraphProvider             string
 	EigenLogConfig            logging.Config
 	ResubmissionTimeout       time.Duration
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
+	FeeModelEnable            bool
 	SignerFn                  SignerFn
 }
 
 type Driver struct {
-	Ctx              context.Context
-	Cfg              *DriverConfig
-	EigenDaContract  *bindings.BVMEigenDataLayrChain
-	RawEigenContract *bind.BoundContract
-	WalletAddr       common.Address
-	EigenABI         *abi.ABI
-	GraphClient      *graphView.GraphClient
-	logger           *logging.Logger
-	txMgr            txmgr.TxManager
-	cancel           func()
-	wg               sync.WaitGroup
+	Ctx                 context.Context
+	Cfg                 *DriverConfig
+	EigenDaContract     *bindings.BVMEigenDataLayrChain
+	RawEigenContract    *bind.BoundContract
+	WalletAddr          common.Address
+	FeeWalletAddr       common.Address
+	EigenABI            *abi.ABI
+	EigenFeeContract    *bindings.BVMEigenDataLayrFee
+	RawEigenFeeContract *bind.BoundContract
+	EigenFeeABI         *abi.ABI
+	GraphClient         *graphView.GraphClient
+	logger              *logging.Logger
+	txMgr               txmgr.TxManager
+	cancel              func()
+	wg                  sync.WaitGroup
 }
 
 var bigOne = new(big.Int).SetUint64(1)
@@ -107,6 +115,31 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 		cfg.EigenContractAddr, parsed, cfg.L1Client, cfg.L1Client,
 		cfg.L1Client,
 	)
+	// for use eigen fee model
+	eigenFeeContract, err := bindings.NewBVMEigenDataLayrFee(
+		cfg.EigenFeeAddr, cfg.L1Client,
+	)
+	if err != nil {
+		log.Error("MtBatcher binding eigen fee contract fail", "err", err)
+		return nil, err
+	}
+
+	feeParsed, err := abi.JSON(strings.NewReader(
+		bindings.BVMEigenDataLayrFeeABI,
+	))
+	if err != nil {
+		log.Error("MtBatcher parse eigen fee contract abi fail", "err", err)
+		return nil, err
+	}
+	eignenFeeABI, err := bindings.BVMEigenDataLayrFeeMetaData.GetAbi()
+	if err != nil {
+		log.Error("MtBatcher get eigen fee contract abi fail", "err", err)
+		return nil, err
+	}
+	rawEigenFeeContract := bind.NewBoundContract(
+		cfg.EigenContractAddr, feeParsed, cfg.L1Client, cfg.L1Client,
+		cfg.L1Client,
+	)
 
 	txManagerConfig := txmgr.Config{
 		ResubmissionTimeout:       cfg.ResubmissionTimeout,
@@ -120,16 +153,21 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 	graphClient := graphView.NewGraphClient(cfg.GraphProvider, logger)
 
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+	feeWalletAddr := crypto.PubkeyToAddress(cfg.FeePrivKey.PublicKey)
 	return &Driver{
-		Cfg:              cfg,
-		Ctx:              ctx,
-		EigenDaContract:  eigenContract,
-		RawEigenContract: rawEigenContract,
-		WalletAddr:       walletAddr,
-		EigenABI:         eignenABI,
-		GraphClient:      graphClient,
-		logger:           logger,
-		txMgr:            txMgr,
+		Cfg:                 cfg,
+		Ctx:                 ctx,
+		EigenDaContract:     eigenContract,
+		RawEigenContract:    rawEigenContract,
+		WalletAddr:          walletAddr,
+		FeeWalletAddr:       feeWalletAddr,
+		EigenABI:            eignenABI,
+		EigenFeeContract:    eigenFeeContract,
+		EigenFeeABI:         eignenFeeABI,
+		RawEigenFeeContract: rawEigenFeeContract,
+		GraphClient:         graphClient,
+		logger:              logger,
+		txMgr:               txMgr,
 	}, nil
 }
 
@@ -180,6 +218,19 @@ func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, er
 		end = latestHeader.Number
 	}
 	return start, end, nil
+}
+
+func (d *Driver) CalcUserFeeByRules(rollupDateSize *big.Int) (*big.Int, error) {
+	rollSizeSec := new(big.Int).Div(rollupDateSize, new(big.Int).Div(big.NewInt(int64(d.Cfg.PollInterval)), big.NewInt(1000)))
+	feeSs, ok := new(big.Int).SetString(d.Cfg.FeeSizeSec, 10)
+	if !ok {
+		log.Error("FeeSizeSec from string to big.int fail")
+		return big.NewInt(0), nil
+	}
+	if rollSizeSec.Cmp(feeSs) < 0 {
+		return big.NewInt(0), nil
+	}
+	return big.NewInt(10000), nil
 }
 
 func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transactionData []byte, startL2BlockNumber *big.Int, endL2BlockNumber *big.Int) {
@@ -310,6 +361,45 @@ func (d *Driver) ConfirmData(ctx context.Context, callData []byte, searchData rc
 		opts.GasTipCap = FallbackGasTipCap
 		return d.EigenDaContract.ConfirmData(opts, callData, searchData, startL2BlockNumber, endL2BlockNumber)
 
+	default:
+		return nil, err
+	}
+}
+
+func (d *Driver) UpdateUserDaFee(ctx context.Context, l2Block, daFee *big.Int) (*types.Transaction, error) {
+	balance, err := d.Cfg.L1Client.BalanceAt(
+		d.Ctx, d.FeeWalletAddr, nil,
+	)
+	if err != nil {
+		log.Error("MtBatcher unable to get fee wallet address current balance", "err", err)
+		return nil, err
+	}
+	log.Info("MtBatcher fee wallet address balance", "balance", balance)
+	nonce64, err := d.Cfg.L1Client.NonceAt(
+		d.Ctx, d.FeeWalletAddr, nil,
+	)
+	if err != nil {
+		log.Error("MtBatcher unable to get fee wallet nonce", "err", err)
+		return nil, err
+	}
+	nonce := new(big.Int).SetUint64(nonce64)
+	opts := &bind.TransactOpts{
+		From: d.WalletAddr,
+		Signer: func(addr common.Address, tx *types.Transaction) (*types.Transaction, error) {
+			return d.Cfg.SignerFn(ctx, addr, tx)
+		},
+		Context: ctx,
+		Nonce:   nonce,
+		NoSend:  true,
+	}
+	tx, err := d.EigenFeeContract.SetUserRollupFee(opts, l2Block, daFee)
+	switch {
+	case err == nil:
+		return tx, nil
+	case d.IsMaxPriorityFeePerGasNotFoundError(err):
+		log.Warn("MtBather eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
+		opts.GasTipCap = FallbackGasTipCap
+		return d.EigenFeeContract.SetUserRollupFee(opts, l2Block, daFee)
 	default:
 		return nil, err
 	}
@@ -538,6 +628,20 @@ func (d *Driver) eventLoop() {
 			if err != nil {
 				log.Error("MtBatcher eigenDa sequencer unable to craft batch tx", "err", err)
 				continue
+			}
+			if d.Cfg.FeeModelEnable {
+				daFee, _ := d.CalcUserFeeByRules(big.NewInt(int64(len(aggregateTxData))))
+				chainFee, err := d.EigenFeeContract.GetUserRollupFee(&bind.CallOpts{})
+				if err != nil {
+					log.Error("get chain fee fail", "err", err)
+				}
+				if chainFee.Cmp(daFee) < 0 {
+					txFee, err := d.UpdateUserDaFee(d.Ctx, endL2BlockNumber, daFee)
+					if err != nil {
+						log.Error("update user da fee fail", "err", err)
+					}
+					log.Info("update user fee success", "Hash", txFee.Hash().String())
+				}
 			}
 			params, receipt, err := d.DisperseStoreData(aggregateTxData, startL2BlockNumber, endL2BlockNumber)
 			if err != nil {

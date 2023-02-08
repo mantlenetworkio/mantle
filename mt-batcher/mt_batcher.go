@@ -43,6 +43,10 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			"DaSequencer", cfg.Mnemonic, cfg.SequencerHDPath,
 			cfg.PrivateKey, cfg.EigenContractAddress,
 		)
+		feePrivKey, _, err := bsscore.ParseWalletPrivKeyAndContractAddr(
+			"DaSequencer", cfg.Mnemonic, cfg.SequencerHDPath,
+			cfg.FeePrivateKey, cfg.EigenContractAddress,
+		)
 		if err != nil {
 			return err
 		}
@@ -80,7 +84,9 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			L1Client:                  l1Client,
 			L2Client:                  l2Client,
 			EigenContractAddr:         ethc.Address(common.HexToAddress(cfg.EigenContractAddress)),
+			EigenFeeAddr:              ethc.Address(common.HexToAddress(cfg.EigenFeeContractAddress)),
 			PrivKey:                   sequencerPrivKey,
+			FeePrivKey:                feePrivKey,
 			BlockOffset:               cfg.BlockOffset,
 			RollUpMinSize:             cfg.RollUpMinSize,
 			RollUpMaxSize:             cfg.RollUpMaxSize,
@@ -89,11 +95,13 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			DataStoreDuration:         uint64(cfg.DataStoreDuration),
 			DataStoreTimeout:          cfg.DataStoreTimeout,
 			DisperserSocket:           cfg.DisperserEndpoint,
+			FeeSizeSec:                cfg.FeeSizeSec,
 			PollInterval:              cfg.PollInterval,
 			GraphProvider:             cfg.GraphProvider,
 			ResubmissionTimeout:       cfg.ResubmissionTimeout,
 			NumConfirmations:          cfg.NumConfirmations,
 			SafeAbortNonceTooLowCount: cfg.SafeAbortNonceTooLowCount,
+			FeeModelEnable:            cfg.FeeModelEnable,
 			SignerFn:                  signer(chainID),
 		}
 		driver, err := sequencer.NewDriver(ctx, driverConfig)
