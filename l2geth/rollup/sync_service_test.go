@@ -939,8 +939,6 @@ func TestUpdateSyncService(t *testing.T) {
 	blockchain, _ := core.NewBlockChain(db, nil, gspec.Config, ethash.NewFaker(), vm.Config{}, nil)
 	blockchain.SetUpdateSyncServiceFunc(service.UpdateSyncServiceState)
 
-	blockchain.SetPreCheckSyncServiceFunc(service.PreCheckSyncServiceState)
-
 	if i, err := blockchain.InsertChain(blocks); err != nil {
 		t.Fatalf("failed to insert original chain[%d]: %v", i, err)
 	}

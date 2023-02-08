@@ -174,11 +174,10 @@ type BlockChain struct {
 	processor  Processor  // Block transaction processor interface
 	vmConfig   vm.Config
 
-	badBlocks           *lru.Cache                     // Bad block cache
-	shouldPreserve      func(*types.Block) bool        // Function used to determine whether should preserve the given block.
-	terminateInsert     func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
-	preCheckSyncService func(*types.Transaction) bool  // first check block avaliabe before insert chain
-	updateSyncService   func(*types.Transaction)       // update sync service state after inserting chain block
+	badBlocks         *lru.Cache                     // Bad block cache
+	shouldPreserve    func(*types.Block) bool        // Function used to determine whether should preserve the given block.
+	terminateInsert   func(common.Hash, uint64) bool // Testing hook used to terminate ancient receipt chain insertion.
+	updateSyncService func(*types.Transaction)       // update sync service state after inserting chain block
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -1328,13 +1327,6 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 		return NonStatTy, consensus.ErrUnknownAncestor
 	}
 
-	if bc.preCheckSyncService != nil {
-		bol := bc.preCheckSyncService(block.Transactions()[0])
-		if !bol {
-			return NonStatTy, consensus.ErrUnknownAncestor
-		}
-	}
-
 	// Make sure no inconsistent state is leaked during insertion
 	currentBlock := bc.CurrentBlock()
 	localTd := bc.GetTd(currentBlock.Hash(), currentBlock.NumberU64())
@@ -2360,8 +2352,4 @@ func (bc *BlockChain) SubscribeBlockProcessingEvent(ch chan<- bool) event.Subscr
 
 func (bc *BlockChain) SetUpdateSyncServiceFunc(updateSyncServiceFunc func(*types.Transaction)) {
 	bc.updateSyncService = updateSyncServiceFunc
-}
-
-func (bc *BlockChain) SetPreCheckSyncServiceFunc(preCheckFunc func(*types.Transaction) bool) {
-	bc.preCheckSyncService = preCheckFunc
 }

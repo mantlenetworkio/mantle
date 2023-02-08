@@ -214,9 +214,9 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
+
 	eth.txPool.SetDeleteTxVerifiedPrice(eth.syncService.DeleteTxVerifiedPrice)
 	eth.txPool.SetValidateSequencerTransaction(eth.syncService.ValidateSequencerTransaction)
-	eth.blockchain.SetPreCheckSyncServiceFunc(eth.syncService.PreCheckSyncServiceState)
 	eth.blockchain.SetUpdateSyncServiceFunc(eth.syncService.UpdateSyncServiceState)
 
 	// Permit the downloader to use the trie cache allowance during fast sync
