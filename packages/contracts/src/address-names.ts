@@ -22,6 +22,8 @@ export const names = {
     da: {
       BVM_EigenDataLayrChain: 'BVM_EigenDataLayrChain',
       Proxy__BVM_EigenDataLayrChain: 'Proxy__BVM_EigenDataLayrChain',
+      BVM_EigenDataLayrFee: 'BVM_EigenDataLayrFee',
+      Proxy__BVM_EigenDataLayrFee: 'Proxy__BVM_EigenDataLayrFee',
     },
     accounts: { BVM_Sequencer: 'BVM_Sequencer', BVM_Proposer: 'BVM_Proposer' },
     configs: {
