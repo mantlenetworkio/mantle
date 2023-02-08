@@ -29,11 +29,11 @@ type Role uint8
 
 const (
 	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
-	chainHeadChanSize  = 10
-	gasPriceTxPoolSize = 100
-	SCHEDULER_NODE Role = 0
-	SEQUENCER_NODE Role = 1
-	VERIFIER_NODE  Role = 2
+	chainHeadChanSize       = 10
+	gasPriceTxPoolSize      = 100
+	SCHEDULER_NODE     Role = 0
+	SEQUENCER_NODE     Role = 1
+	VERIFIER_NODE      Role = 2
 )
 
 var (
@@ -1201,9 +1201,9 @@ func (s *SyncService) ValidateTransaction(tx *types.Transaction) bool {
 	}
 	gpoOwner := s.GasPriceOracleOwnerAddress()
 	if gpoOwner != nil {
-		if from != *gpoOwner && s.IsSequencerMode() {
+		if from != *gpoOwner && s.GetRollupRole() == SEQUENCER_NODE {
 			return true
-		} else if from == *gpoOwner && !s.IsSequencerMode() {
+		} else if from == *gpoOwner && s.GetRollupRole() == SCHEDULER_NODE {
 			return true
 		}
 	}
@@ -1296,7 +1296,7 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 }
 
 func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
-	if !s.IsSequencerMode() {
+	if s.GetRollupRole() == SCHEDULER_NODE {
 		return
 	}
 	l1BlockNumber := tx.L1BlockNumber()
