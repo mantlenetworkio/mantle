@@ -17,7 +17,6 @@ type Config struct {
 	ChainId                   uint64
 	GraphProvider             string
 	PrivateKey                string
-	FeePrivateKey             string
 	Mnemonic                  string
 	SequencerHDPath           string
 	EigenContractAddress      string
@@ -53,7 +52,6 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		ChainId:                   ctx.GlobalUint64(flags.ChainIdFlag.Name),
 		GraphProvider:             ctx.GlobalString(flags.GraphProviderFlag.Name),
 		PrivateKey:                ctx.GlobalString(flags.PrivateKeyFlag.Name),
-		FeePrivateKey:             ctx.GlobalString(flags.FeePrivateKeyFlag.Name),
 		Mnemonic:                  ctx.GlobalString(flags.MnemonicFlag.Name),
 		SequencerHDPath:           ctx.GlobalString(flags.SequencerHDPathFlag.Name),
 		EigenContractAddress:      ctx.GlobalString(flags.EigenContractAddressFlag.Name),
