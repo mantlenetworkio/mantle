@@ -37,6 +37,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/metrics"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 )
 
 const (
@@ -269,7 +270,7 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	go worker.batchStartLoop()
 	go worker.batchAnswerLoop()
 
-	if !worker.eth.SyncService().IsSequencerMode() {
+	if worker.eth.SyncService().GetRollupRole() == rollup.SCHEDULER_NODE {
 		go worker.l1Tol2StartLoop()
 	}
 
@@ -403,7 +404,8 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 		// cleaning up memory with the call to `clearPending`, so be sure to
 		// call that in the new hot code path
 		case head := <-w.chainHeadCh:
-			if !w.eth.SyncService().IsSequencerMode() {
+			if w.eth.SyncService().GetRollupRole() == rollup.SCHEDULER_NODE ||
+				w.eth.SyncService().GetRollupRole() == rollup.VERIFIER_NODE {
 				w.chainHeadToRollupCh <- head
 			}
 			//clearPending(head.Block.NumberU64())
@@ -510,7 +512,7 @@ func (w *worker) batchStartLoop() {
 				w.knowBatchPeriodStartMsg.Add(ev.Msg.Hash())
 			}
 			// for Scheduler
-			if w.eth.SyncService().IsScheduler(w.coinbase) {
+			if w.eth.SyncService().IsScheduler() {
 				w.mutex.Lock()
 				w.currentBps = ev.Msg
 				w.mutex.Unlock()
@@ -655,7 +657,7 @@ func (w *worker) batchAnswerLoop() {
 				w.knowBatchPeriodAnswerMsg.Add(ev.Msg.Hash())
 			}
 			// for Scheduler
-			if w.eth.SyncService().IsScheduler(w.coinbase) {
+			if w.eth.SyncService().IsScheduler() {
 				err := func() error {
 					w.mutex.Lock()
 					defer w.mutex.Unlock()
@@ -720,7 +722,8 @@ func (w *worker) batchAnswerLoop() {
 // mainLoop is a standalone goroutine to regenerate the sealing task based on the received event.
 func (w *worker) mainLoop() {
 	//defer w.txsSub.Unsubscribe()
-	if !w.eth.SyncService().IsSequencerMode() {
+	if w.eth.SyncService().GetRollupRole() == rollup.SCHEDULER_NODE ||
+		w.eth.SyncService().GetRollupRole() == rollup.VERIFIER_NODE {
 		defer w.chainHeadSub.Unsubscribe()
 	}
 	defer w.chainSideSub.Unsubscribe()

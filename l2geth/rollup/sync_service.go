@@ -25,10 +25,15 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 )
 
+type Role uint8
+
 const (
 	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
 	chainHeadChanSize  = 10
 	gasPriceTxPoolSize = 100
+	SCHEDULER_NODE Role = 0
+	SEQUENCER_NODE Role = 1
+	VERIFIER_NODE  Role = 2
 )
 
 var (
@@ -248,16 +253,12 @@ func (s *SyncService) ensureClient() error {
 	return nil
 }
 
-func (s *SyncService) IsScheduler(address common.Address) bool {
-	return address == s.cfg.SchedulerAddress
+func (s *SyncService) IsScheduler() bool {
+	return s.cfg.RollupRole == SCHEDULER_NODE
 }
 
-func (s *SyncService) IsSequencerMode() bool {
-	return s.cfg.SequencerMode
-}
-
-func (s *SyncService) GetScheduler() common.Address {
-	return s.cfg.SchedulerAddress
+func (s *SyncService) GetRollupRole() Role {
+	return s.cfg.RollupRole
 }
 
 // Start initializes the service
@@ -273,7 +274,7 @@ func (s *SyncService) Start() error {
 
 	if s.verifier {
 		go s.VerifierLoop()
-	} else if !s.IsSequencerMode() {
+	} else if s.GetRollupRole() == SCHEDULER_NODE {
 		go func() {
 			if err := s.syncTransactionsToTip(); err != nil {
 				log.Crit("Sequencer cannot sync transactions to tip", "err", err)
@@ -1524,7 +1525,7 @@ func (s *SyncService) IngestTransaction(tx *types.Transaction) error {
 }
 
 func (s *SyncService) handleChainHeadEventLoop() {
-	if s.IsSequencerMode() {
+	if s.GetRollupRole() == SEQUENCER_NODE {
 		log.Info("Start handle chain head event loop")
 		for {
 			select {
