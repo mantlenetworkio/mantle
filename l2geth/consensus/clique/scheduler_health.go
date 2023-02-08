@@ -103,13 +103,9 @@ func (schedulerInst *Scheduler) zeroPoints(sequencer common.Address) bool {
 // getExpectMinTxsCount returns the minimum amount of transactions that the producer should
 // complete according to the number of transactions contained in the current txpool
 func (schedulerInst *Scheduler) getExpectMinTxsCount(batchSize uint64) (uint64, error) {
-	var pendingTxCount uint64
-	pendingTxs, err := schedulerInst.txpool.Pending()
+	pendingTxCount, err := schedulerInst.verifiedTxCount()
 	if err != nil {
 		return 0, err
-	}
-	for _, txs := range pendingTxs {
-		pendingTxCount += uint64(len(txs))
 	}
 	if pendingTxCount > batchSize {
 		pendingTxCount = batchSize

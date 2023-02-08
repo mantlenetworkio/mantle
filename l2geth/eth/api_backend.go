@@ -297,8 +297,14 @@ func (b *EthAPIBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscri
 // Transactions originating from the RPC endpoints are added to remotes so that
 // a lock can be used around the remotes for when the sequencer is reorganizing.
 func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
+	if b.eth.syncService.ValidateTransaction(signedTx) {
+		return fmt.Errorf("invalid transaction. Please check whether the transaction RPC node is correct")
+	}
 	if b.eth.syncService.GetRollupRole() == rollup.SCHEDULER_NODE {
-		return fmt.Errorf("Scheduler does not accept transactions. Please send to the correct sequencer address")
+		if err := b.eth.syncService.AddUpdateGasPriceTx(signedTx); err != nil {
+			return err
+		}
+		return nil
 	}
 	to := signedTx.To()
 	if to != nil {
@@ -311,9 +317,6 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 		if len(signedTx.Data()) > b.MaxCallDataSize {
 			return fmt.Errorf("Calldata cannot be larger than %d, sent %d", b.MaxCallDataSize, len(signedTx.Data()))
 		}
-	}
-	if err := b.eth.syncService.ValidateSequencerTransaction(signedTx); err != nil {
-		return err
 	}
 	return b.eth.txPool.AddLocal(signedTx)
 }

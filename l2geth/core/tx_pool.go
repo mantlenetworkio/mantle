@@ -256,6 +256,8 @@ type TxPool struct {
 	reorgDoneCh     chan chan struct{}
 	reorgShutdownCh chan struct{}  // requests shutdown of scheduleReorgLoop
 	wg              sync.WaitGroup // tracks loop, scheduleReorgLoop
+
+	validateSequencerTransaction func(tx *types.Transaction) error
 }
 
 type txpoolResetRequest struct {
@@ -316,6 +318,14 @@ func NewTxPool(config TxPoolConfig, chainconfig *params.ChainConfig, chain block
 	go pool.loop()
 
 	return pool
+}
+
+func (pool *TxPool) SetDeleteTxVerifiedPrice(deleteTxHashFunc func(hash common.Hash)) {
+	pool.all.SetDeleteTxVerifiedPrice(deleteTxHashFunc)
+}
+
+func (pool *TxPool) SetValidateSequencerTransaction(validateSequencerTransactionFunc func(tx *types.Transaction) error) {
+	pool.validateSequencerTransaction = validateSequencerTransactionFunc
 }
 
 // loop is the transaction pool's main event loop, waiting for and reacting to
@@ -808,6 +818,9 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 		news = make([]*types.Transaction, 0, len(txs))
 	)
 	for i, tx := range txs {
+		if err := pool.validateSequencerTransaction(tx); err != nil {
+			return []error{err}
+		}
 		// If the transaction is known, pre-set the error slot
 		if pool.all.Get(tx.Hash()) != nil {
 			errs[i] = fmt.Errorf("known transaction: %x", tx.Hash())
@@ -1535,6 +1548,8 @@ type txLookup struct {
 	all   map[common.Hash]*types.Transaction
 	slots int
 	lock  sync.RWMutex
+
+	deleteTxHash func(hash common.Hash)
 }
 
 // newTxLookup returns a new txLookup structure.
@@ -1542,6 +1557,10 @@ func newTxLookup() *txLookup {
 	return &txLookup{
 		all: make(map[common.Hash]*types.Transaction),
 	}
+}
+
+func (t *txLookup) SetDeleteTxVerifiedPrice(deleteTxHashFunc func(hash common.Hash)) {
+	t.deleteTxHash = deleteTxHashFunc
 }
 
 // Range calls f on each key and value present in the map.
@@ -1600,6 +1619,7 @@ func (t *txLookup) Remove(hash common.Hash) {
 	slotsGauge.Update(int64(t.slots))
 
 	delete(t.all, hash)
+	t.deleteTxHash(hash)
 }
 
 // numSlots calculates the number of slots needed for a single transaction.

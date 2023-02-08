@@ -29,11 +29,11 @@ type Role uint8
 
 const (
 	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
-	chainHeadChanSize = 10
-
-	SCHEDULER_NODE Role = 0
-	SEQUENCER_NODE Role = 1
-	VERIFIER_NODE  Role = 2
+	chainHeadChanSize       = 10
+	gasPriceTxPoolSize      = 100
+	SCHEDULER_NODE     Role = 0
+	SEQUENCER_NODE     Role = 1
+	VERIFIER_NODE      Role = 2
 )
 
 var (
@@ -82,6 +82,8 @@ type SyncService struct {
 	feeThresholdDown               *big.Float
 	cfg                            Config
 	applyLock                      sync.Mutex
+	updateGasPriceTxPool           chan *types.Transaction
+	verifiedMap                    sync.Map
 }
 
 // NewSyncService returns an initialized sync service
@@ -158,6 +160,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		feeThresholdDown:               cfg.FeeThresholdDown,
 		feeThresholdUp:                 cfg.FeeThresholdUp,
 		cfg:                            cfg,
+		updateGasPriceTxPool:           make(chan *types.Transaction, gasPriceTxPoolSize),
 	}
 
 	// The chainHeadSub is used to synchronize the SyncService with the chain.
@@ -1158,12 +1161,88 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	return nil
 }
 
+func (s *SyncService) VerifiedTxCount() (uint64, error) {
+	var pendingTxCount uint64
+	pendingTxs, err := s.txpool.Pending()
+	if err != nil {
+		return 0, err
+	}
+	for _, txs := range pendingTxs {
+		for _, tx := range txs {
+			if err := s.ValidateSequencerTransaction(tx); err == nil {
+				pendingTxCount++
+			}
+		}
+	}
+	return pendingTxCount, nil
+}
+
+// ApplyUpdateGasPriceTxs apply tx for update gasPrice
+func (s *SyncService) ApplyUpdateGasPriceTxs() {
+	for {
+		if len(s.updateGasPriceTxPool) == 0 {
+			break
+		}
+		tx := <-s.updateGasPriceTxPool
+		if err := s.ValidateAndApplySequencerTransaction(tx, &types.BatchTxSetProof{}); err != nil {
+			log.Error("apply update gasPrice tx error", "err_msg", err.Error())
+		}
+	}
+}
+
+func (s *SyncService) ValidateTransaction(tx *types.Transaction) bool {
+	if tx == nil {
+		return false
+	}
+	from, err := types.Sender(s.signer, tx)
+	if err != nil {
+		return false
+	}
+	gpoOwner := s.GasPriceOracleOwnerAddress()
+	if gpoOwner != nil {
+		if from != *gpoOwner && s.GetRollupRole() == SEQUENCER_NODE {
+			return true
+		} else if from == *gpoOwner && s.GetRollupRole() == SCHEDULER_NODE {
+			return true
+		}
+	}
+	return false
+}
+
+// AddUpdateGasPriceTx add updateGasPriceTx to queue
+func (s *SyncService) AddUpdateGasPriceTx(tx *types.Transaction) error {
+	if len(s.updateGasPriceTxPool) == gasPriceTxPoolSize {
+		return fmt.Errorf("there are too many transactions waiting to be processed")
+	}
+	s.updateGasPriceTxPool <- tx
+	return nil
+}
+
 func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction) error {
 	if s.verifier {
 		return errors.New("Verifier does not accept transactions out of band")
 	}
 	if tx == nil {
 		return errors.New("nil transaction passed to ValidateAndApplySequencerTransaction")
+	}
+	l1GasPrice, err := s.RollupGpo.SuggestL1GasPrice(context.Background())
+	if err != nil {
+		return err
+	}
+	if err = func() error {
+		v, ok := s.verifiedMap.Load(tx.Hash())
+		if ok {
+			lastL1GasPrice, ok := v.(*big.Int)
+			if ok {
+				if l1GasPrice.Cmp(lastL1GasPrice) <= 0 {
+					return errors.New("l1GasPrice no rise")
+				}
+			}
+		}
+		return nil
+	}(); err != nil {
+		// ignore error and return nil
+		return nil
 	}
 	s.txLock.Lock()
 	defer s.txLock.Unlock()
@@ -1176,7 +1255,13 @@ func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction) error 
 	if qo != types.QueueOriginSequencer {
 		return fmt.Errorf("invalid transaction with queue origin %s", qo.String())
 	}
+	// save gas price and tx hash
+	s.verifiedMap.Store(tx.Hash(), l1GasPrice)
 	return nil
+}
+
+func (s *SyncService) DeleteTxVerifiedPrice(hash common.Hash) {
+	s.verifiedMap.Delete(hash)
 }
 
 // Higher level API for applying transactions. Should only be called for
@@ -1210,7 +1295,7 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 }
 
 func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
-	if !s.IsSequencerMode() {
+	if s.GetRollupRole() == SCHEDULER_NODE {
 		return
 	}
 	l1BlockNumber := tx.L1BlockNumber()
