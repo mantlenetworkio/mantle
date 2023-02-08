@@ -42,6 +42,7 @@ var (
 	// with gas price zero and fees are currently enforced
 	errZeroGasPriceTx = errors.New("cannot accept 0 gas price transaction")
 	float1            = big.NewFloat(1)
+	retryInterval     = time.Second
 )
 
 // SyncService implements the main functionality around pulling in transactions
@@ -902,10 +903,14 @@ func (s *SyncService) applyTransaction(tx *types.Transaction, txSetProof *types.
 			log.Info("message.UnPackData interrupt", "error", err)
 		}
 
-		sccAddress := s.RollupGpo.SCCAddress()
-		var zeroAddr common.Address
-		if sccAddress == zeroAddr {
-			log.Crit("RollupGpo get sccAddress", "error", fmt.Errorf("sccAddr is zeroAddr"))
+		var zeroAddr, sccAddress common.Address
+		for {
+			sccAddress = s.RollupGpo.SCCAddress()
+			if sccAddress != zeroAddr {
+				break
+			}
+			log.Error("RollupGpo get sccAddress", "error", fmt.Errorf("sccAddr is zeroAddr"))
+			time.Sleep(retryInterval)
 		}
 		if data.Target == dump.BvmRollbackAddress && data.Sender == sccAddress {
 			rd := &message.RollbackData{}
@@ -1244,45 +1249,6 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 		return err
 	}
 	return nil
-}
-
-func (s *SyncService) PreCheckSyncServiceState(tx *types.Transaction) bool {
-	if !s.IsSequencerMode() {
-		return true
-	}
-	ts := s.GetLatestL1Timestamp()
-	bn := s.GetLatestL1BlockNumber()
-	l1BlockNumber := tx.L1BlockNumber()
-
-	if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
-		if tx.L1Timestamp() == 0 {
-			return false
-		}
-	}
-
-	if l1BlockNumber == nil {
-		log.Warn("Blocknumber is nil ", "hash", tx.Hash().Hex())
-		return false
-	}
-	if l1BlockNumber.Uint64() < bn {
-		// l1BlockNumber < latest l1BlockNumber
-		// indicates an error
-		log.Warn("Blocknumber monotonicity violation", "hash", tx.Hash().Hex(),
-			"new", l1BlockNumber.Uint64(), "old", bn)
-		return false
-	}
-
-	if tx.L1Timestamp() < ts {
-		log.Error("Timestamp monotonicity violation", "hash", tx.Hash().Hex(), "latest", ts, "tx", tx.L1Timestamp())
-		return false
-	}
-
-	if tx.GetMeta().Index == nil {
-		log.Warn("meta index is nil ", "hash", tx.Hash().Hex())
-		return false
-	}
-	return true
-
 }
 
 func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
