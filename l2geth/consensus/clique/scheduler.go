@@ -87,16 +87,13 @@ type Scheduler struct {
 }
 
 // NewScheduler will create a scheduler server
-func NewScheduler(db ethdb.Database, config *Config, schedulerAddress common.Address, clique *Clique, blockchain *core.BlockChain, txpool *core.TxPool, eventMux *event.TypeMux) (*Scheduler, error) {
+func NewScheduler(db ethdb.Database, config *Config, clique *Clique, blockchain *core.BlockChain, txpool *core.TxPool, eventMux *event.TypeMux) (*Scheduler, error) {
 	log.Info("Create Sequencer Server")
 
 	syncer := synchronizer.NewSynchronizer()
 	schedulerAddr, err := syncer.GetSchedulerAddr()
 	if err != nil {
 		return nil, err
-	}
-	if schedulerAddr.String() != schedulerAddress.String() {
-		return nil, fmt.Errorf("scheduler address mismatch, schedulerAddr from L1 %s,schedulerAddr from config %s", schedulerAddr.String(), schedulerAddress.String())
 	}
 	seqSet, err := syncer.GetSequencerSet()
 	if err != nil {

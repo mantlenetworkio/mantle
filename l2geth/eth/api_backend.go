@@ -37,6 +37,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/event"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 )
@@ -296,7 +297,7 @@ func (b *EthAPIBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscri
 // Transactions originating from the RPC endpoints are added to remotes so that
 // a lock can be used around the remotes for when the sequencer is reorganizing.
 func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
-	if !b.eth.syncService.IsSequencerMode() {
+	if b.eth.syncService.GetRollupRole() == rollup.SCHEDULER_NODE {
 		return fmt.Errorf("Scheduler does not accept transactions. Please send to the correct sequencer address")
 	}
 	to := signedTx.To()
@@ -311,7 +312,7 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 			return fmt.Errorf("Calldata cannot be larger than %d, sent %d", b.MaxCallDataSize, len(signedTx.Data()))
 		}
 	}
-	if err := b.eth.syncService.ValidateSequencerTransaction(signedTx, b.eth.syncService.GetScheduler()); err != nil {
+	if err := b.eth.syncService.ValidateSequencerTransaction(signedTx); err != nil {
 		return err
 	}
 	return b.eth.txPool.AddLocal(signedTx)

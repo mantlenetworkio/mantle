@@ -40,7 +40,5 @@ type Config struct {
 	// HTTP endpoint of the sequencer
 	SequencerClientHttp string
 
-	SchedulerAddress common.Address
-
-	SequencerMode bool
+	RollupRole Role
 }
