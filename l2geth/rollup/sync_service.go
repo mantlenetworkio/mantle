@@ -161,7 +161,6 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		feeThresholdUp:                 cfg.FeeThresholdUp,
 		cfg:                            cfg,
 		updateGasPriceTxPool:           make(chan *types.Transaction, gasPriceTxPoolSize),
-		//verifiedMap:                    make(map[common.Hash]*big.Int),
 	}
 
 	// The chainHeadSub is used to synchronize the SyncService with the chain.
