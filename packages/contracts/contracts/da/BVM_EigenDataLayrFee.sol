@@ -15,6 +15,12 @@ contract BVM_EigenDataLayrFee is OwnableUpgradeable, ReentrancyGuardUpgradeable 
 
     event UserRollupFeeHistory(uint256 l2Block, uint256 userRollupFee);
 
+    function initialize(address _address) public initializer {
+        __Ownable_init();
+        userRollupFee = 0;
+        gasFeeAddress = _address;
+    }
+
     function setGasFeeAddress(address _address) public onlyOwner {
         gasFeeAddress = _address;
     }

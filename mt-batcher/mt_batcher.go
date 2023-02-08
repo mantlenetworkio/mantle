@@ -8,15 +8,14 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/getsentry/sentry-go"
+	sentry "github.com/getsentry/sentry-go"
 	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/l1l2client"
 	"github.com/mantlenetworkio/mantle/mt-batcher/sequencer"
-	"strings"
-
 	"github.com/urfave/cli"
 	"math/big"
+	"strings"
 	"time"
 )
 
@@ -43,15 +42,9 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			"DaSequencer", cfg.Mnemonic, cfg.SequencerHDPath,
 			cfg.PrivateKey, cfg.EigenContractAddress,
 		)
-		feePrivKey, _, err := bsscore.ParseWalletPrivKeyAndContractAddr(
-			"DaSequencer", cfg.Mnemonic, cfg.SequencerHDPath,
-			cfg.FeePrivateKey, cfg.EigenContractAddress,
-		)
 		if err != nil {
 			return err
 		}
-		log.Info("sequencerPrivKey", "sequencerPrivKey", sequencerPrivKey)
-
 		l1Client, err := l1l2client.L1EthClientWithTimeout(ctx, cfg.L1EthRpc, cfg.DisableHTTP2)
 		if err != nil {
 			return err
@@ -84,9 +77,8 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			L1Client:                  l1Client,
 			L2Client:                  l2Client,
 			EigenContractAddr:         ethc.Address(common.HexToAddress(cfg.EigenContractAddress)),
-			EigenFeeAddr:              ethc.Address(common.HexToAddress(cfg.EigenFeeContractAddress)),
+			EigenFeeContractAddress:   ethc.Address(common.HexToAddress(cfg.EigenFeeContractAddress)),
 			PrivKey:                   sequencerPrivKey,
-			FeePrivKey:                feePrivKey,
 			BlockOffset:               cfg.BlockOffset,
 			RollUpMinSize:             cfg.RollUpMinSize,
 			RollUpMaxSize:             cfg.RollUpMaxSize,
