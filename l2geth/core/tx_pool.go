@@ -818,8 +818,10 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 		news = make([]*types.Transaction, 0, len(txs))
 	)
 	for i, tx := range txs {
-		if err := pool.validateSequencerTransaction(tx); err != nil {
-			return []error{err}
+		if pool.validateSequencerTransaction != nil {
+			if err := pool.validateSequencerTransaction(tx); err != nil {
+				return []error{err}
+			}
 		}
 		// If the transaction is known, pre-set the error slot
 		if pool.all.Get(tx.Hash()) != nil {

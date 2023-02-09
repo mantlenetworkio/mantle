@@ -297,7 +297,7 @@ func (b *EthAPIBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscri
 // Transactions originating from the RPC endpoints are added to remotes so that
 // a lock can be used around the remotes for when the sequencer is reorganizing.
 func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
-	if b.eth.syncService.ValidateTransaction(signedTx) {
+	if !b.eth.syncService.ValidateTransaction(signedTx) {
 		return fmt.Errorf("invalid transaction. Please check whether the transaction RPC node is correct")
 	}
 	if b.eth.syncService.GetRollupRole() == rollup.SCHEDULER_NODE {
