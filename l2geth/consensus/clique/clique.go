@@ -579,6 +579,10 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainReader, header *types.
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
+	if chain.Config().ISFixBlockHashBranching(header.Number) {
+		header.GasLimit = 30000000
+	}
+
 	// Assemble and return the final block for sealing
 	return types.NewBlock(header, txs, nil, receipts), nil
 }

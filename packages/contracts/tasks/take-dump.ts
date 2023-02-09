@@ -176,6 +176,7 @@ task('take-dump').setAction(async (args, hre) => {
       istanbulBlock: 0,
       muirGlacierBlock: 0,
       berlinBlock: hre.deployConfig.hfBerlinBlock,
+      fixBlockHashBranchingBlock: hre.deployConfig.fixBlockHashBranchingBlock,
       clique: {
         period: 0,
         epoch: 30000,
