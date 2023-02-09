@@ -64,7 +64,7 @@ abstract contract RollupBase is IRollup, Initializable {
 
 contract Rollup is Lib_AddressResolver, RollupBase {
     modifier stakedOnly() {
-        require(isStaked(msg.sender));
+        require(isStaked(msg.sender),"Need stake");
         _;
     }
 
@@ -198,8 +198,8 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         bytes32 vmHash,
         uint256 inboxSize,
         uint256 l2GasUsed
-//    ) public override stakedOnly {
-    ) public override {
+    ) public override stakedOnly {
+//    ) public override {
         // TODO: determine if inboxSize needs to be included.
         RollupLib.ExecutionState memory endState = RollupLib.ExecutionState(l2GasUsed, vmHash);
 
@@ -409,7 +409,8 @@ contract Rollup is Lib_AddressResolver, RollupBase {
             // If loser has a higher stake than the winner, refund the difference.
             // Loser gets deleted anyways, so maybe unnecessary to set amountStaked.
             stakers[loser].amountStaked = winnerStake;
-            withdrawableFunds[loser] += (winnerStake - remainingLoserStake);
+            // todo ERR: remainingLoserStake > winnerStake
+            withdrawableFunds[loser] += (remainingLoserStake - winnerStake);
             remainingLoserStake = winnerStake;
         }
         // Reward the winner with half the remaining stake

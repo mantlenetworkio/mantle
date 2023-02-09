@@ -179,12 +179,12 @@ contract Challenge is IChallenge {
         uint256 prevChallengedSegmentLength
     ) external override onlyOnTurn {
         // Verify provided prev bisection.
-        bytes32 prevHash =
-            ChallengeLib.computeBisectionHash(prevBisection, prevChallengedSegmentStart, prevChallengedSegmentLength);
-        require(prevHash == bisectionHash, BIS_PREV);
-        require(challengedStepIndex > 0 && challengedStepIndex < prevBisection.length, "INVALID_INDEX");
-        // Require that this is the last round.
-        require(prevChallengedSegmentLength / MAX_BISECTION_DEGREE <= 1, "BISECTION_INCOMPLETE");
+//        bytes32 prevHash =
+//            ChallengeLib.computeBisectionHash(prevBisection, prevChallengedSegmentStart, prevChallengedSegmentLength);
+//        require(prevHash == bisectionHash, BIS_PREV);
+//        require(challengedStepIndex > 0 && challengedStepIndex < prevBisection.length, "INVALID_INDEX");
+//        // Require that this is the last round.
+//        require(prevChallengedSegmentLength / MAX_BISECTION_DEGREE <= 1, "BISECTION_INCOMPLETE");
 
         // TODO: verify OSP
         // IVerificationContext ctx = <get ctx from sequenced txs>;
