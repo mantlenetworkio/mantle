@@ -40,11 +40,18 @@ func (p *Processor) Verify() {
 				wg := &sync.WaitGroup{}
 				wg.Add(offset)
 				var result = true
+				var getBlockErr = false
+				var resultErr error
 				for index, stateRoot := range askRequest.StateRoots {
 					go func(fIndex int, fStateRoot [32]byte) {
-						resultTmp := p.verify(askRequest.StartBlock, fIndex, fStateRoot, logger, wg)
+						resultTmp, err := p.verify(askRequest.StartBlock, fIndex, fStateRoot, logger, wg)
 						if !resultTmp {
 							result = resultTmp
+							if err != nil {
+								logger.Error().Msgf("failed to verify block %s", err.Error())
+								getBlockErr = true
+								resultErr = err
+							}
 						}
 					}(index, stateRoot)
 				}
@@ -61,11 +68,17 @@ func (p *Processor) Verify() {
 						p.UpdateWaitSignEvents(hashStr, askRequest)
 					}
 				}
-				askResponse := common.AskResponse{
-					Result: result,
+
+				if getBlockErr {
+					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "get error when verify ", resultErr.Error())
+					p.wsClient.SendMsg(RpcResponse)
+				} else {
+					askResponse := common.AskResponse{
+						Result: result,
+					}
+					RpcResponse = tdtypes.NewRPCSuccessResponse(resId, askResponse)
+					p.wsClient.SendMsg(RpcResponse)
 				}
-				RpcResponse = tdtypes.NewRPCSuccessResponse(resId, askResponse)
-				p.wsClient.SendMsg(RpcResponse)
 
 			}
 
@@ -74,7 +87,7 @@ func (p *Processor) Verify() {
 
 }
 
-func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger zerolog.Logger, wg *sync.WaitGroup) bool {
+func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger zerolog.Logger, wg *sync.WaitGroup) (bool, error) {
 	defer wg.Done()
 	defer logger.Info().Msgf("start block number:(%s),index (%d), verify done", start, index)
 
@@ -86,7 +99,7 @@ func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger z
 	value, ok := p.cacheVerify.Get(blockNumber.String())
 	if ok {
 		if value {
-			return value
+			return value, nil
 		}
 	}
 
@@ -102,18 +115,18 @@ func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger z
 	}
 	if err != nil {
 		logger.Err(err).Msgf("failed to get block by (%d) ", blockNumber)
-		return false
+		return false, err
 	} else {
 		if hexutil.Encode(stateRoot[:]) != block.Root().String() {
 			logger.Info().Msgf("block number (%d) state root doesn't same, state root (%s) , block root (%s)", blockNumber, hexutil.Encode(stateRoot[:]), block.Root().String())
 			bol := p.CacheVerify(blockNumber.String(), false)
 			logger.Info().Msgf("cache verify behavior %s ", bol)
-			return false
+			return false, nil
 		} else {
 			logger.Info().Msgf("block number (%d) verify success", blockNumber)
 			bol := p.CacheVerify(blockNumber.String(), true)
 			logger.Info().Msgf("cache verify behavior %s ", bol)
-			return true
+			return true, nil
 		}
 	}
 }
@@ -129,3 +142,18 @@ func (p *Processor) CacheVerify(key string, value bool) bool {
 	defer p.cacheVerifyLock.Unlock()
 	return p.cacheVerify.Set(key, value)
 }
+
+//func group(slice [][32]byte, segment int) [][][32]byte {
+//	size := len(slice)
+//	var segments = make([][][32]byte, 0)
+//	quantity := size / segment
+//	remainder := size % segment
+//	i := 0
+//	for ; i < quantity; i++ {
+//		segments = append(segments, slice[i*segment:(i+1)*segment])
+//	}
+//	if remainder != 0 {
+//		segments = append(segments, slice[i*segment:i*segment+remainder])
+//	}
+//	return segments
+//}
