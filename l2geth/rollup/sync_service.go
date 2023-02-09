@@ -968,7 +968,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 	// network split.
 	// Note that it should never be possible for the timestamp to be set to
 	// 0 when running as a verifier.
-	shouldMalleateTimestamp := !s.verifier && tx.QueueOrigin() == types.QueueOriginL1ToL2
+	shouldMalleateTimestamp := !s.verifier && tx.QueueOrigin() == types.QueueOriginL1ToL2 && tx.GetMeta().Index == nil
 	if tx.L1Timestamp() == 0 || shouldMalleateTimestamp {
 		// Get the latest known timestamp
 		current := time.Unix(int64(ts), 0)
@@ -977,7 +977,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 		// If enough time has passed, then assign the
 		// transaction to have the timestamp now. Otherwise,
 		// use the current timestamp
-		if now.Sub(current) > s.timestampRefreshThreshold && tx.GetMeta().Index == nil {
+		if now.Sub(current) > s.timestampRefreshThreshold {
 			current = now
 		}
 		log.Info("Updating latest timestamp", "timestamp", current, "unix", current.Unix())
