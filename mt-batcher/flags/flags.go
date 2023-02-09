@@ -62,12 +62,6 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "PRIVATE_KEY"),
 	}
-	FeePrivateKeyFlag = cli.StringFlag{
-		Name:     "fee-private",
-		Usage:    "Ethereum private key for fee operator",
-		Required: true,
-		EnvVar:   prefixEnvVar(envVarPrefix, "FEE_PRIVATE_KEY"),
-	}
 	MnemonicFlag = cli.StringFlag{
 		Name: "mnemonic",
 		Usage: "The mnemonic used to derive the wallets for either the " +
@@ -212,7 +206,6 @@ var requiredFlags = []cli.Flag{
 	ChainIdFlag,
 	GraphProviderFlag,
 	PrivateKeyFlag,
-	FeePrivateKeyFlag,
 	MnemonicFlag,
 	SequencerHDPathFlag,
 	EigenContractAddressFlag,

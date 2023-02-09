@@ -45,9 +45,8 @@ type DriverConfig struct {
 	L1Client                  *ethclient.Client
 	L2Client                  *l2ethclient.Client
 	EigenContractAddr         common.Address
-	EigenFeeAddr              common.Address
+	EigenFeeContractAddress   common.Address
 	PrivKey                   *ecdsa.PrivateKey
-	FeePrivKey                *ecdsa.PrivateKey
 	BlockOffset               uint64
 	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
@@ -73,7 +72,6 @@ type Driver struct {
 	EigenDaContract     *bindings.BVMEigenDataLayrChain
 	RawEigenContract    *bind.BoundContract
 	WalletAddr          common.Address
-	FeeWalletAddr       common.Address
 	EigenABI            *abi.ABI
 	EigenFeeContract    *bindings.BVMEigenDataLayrFee
 	RawEigenFeeContract *bind.BoundContract
@@ -106,7 +104,7 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 		log.Error("MtBatcher parse eigenda contract abi fail", "err", err)
 		return nil, err
 	}
-	eignenABI, err := bindings.BVMEigenDataLayrChainMetaData.GetAbi()
+	eigenABI, err := bindings.BVMEigenDataLayrChainMetaData.GetAbi()
 	if err != nil {
 		log.Error("MtBatcher get eigenda contract abi fail", "err", err)
 		return nil, err
@@ -117,7 +115,7 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 	)
 	// for use eigen fee model
 	eigenFeeContract, err := bindings.NewBVMEigenDataLayrFee(
-		cfg.EigenFeeAddr, cfg.L1Client,
+		cfg.EigenFeeContractAddress, cfg.L1Client,
 	)
 	if err != nil {
 		log.Error("MtBatcher binding eigen fee contract fail", "err", err)
@@ -131,13 +129,13 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 		log.Error("MtBatcher parse eigen fee contract abi fail", "err", err)
 		return nil, err
 	}
-	eignenFeeABI, err := bindings.BVMEigenDataLayrFeeMetaData.GetAbi()
+	eigenFeeABI, err := bindings.BVMEigenDataLayrFeeMetaData.GetAbi()
 	if err != nil {
 		log.Error("MtBatcher get eigen fee contract abi fail", "err", err)
 		return nil, err
 	}
 	rawEigenFeeContract := bind.NewBoundContract(
-		cfg.EigenContractAddr, feeParsed, cfg.L1Client, cfg.L1Client,
+		cfg.EigenFeeContractAddress, feeParsed, cfg.L1Client, cfg.L1Client,
 		cfg.L1Client,
 	)
 
@@ -153,17 +151,15 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 	graphClient := graphView.NewGraphClient(cfg.GraphProvider, logger)
 
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
-	feeWalletAddr := crypto.PubkeyToAddress(cfg.FeePrivKey.PublicKey)
 	return &Driver{
 		Cfg:                 cfg,
 		Ctx:                 ctx,
 		EigenDaContract:     eigenContract,
 		RawEigenContract:    rawEigenContract,
 		WalletAddr:          walletAddr,
-		FeeWalletAddr:       feeWalletAddr,
-		EigenABI:            eignenABI,
+		EigenABI:            eigenABI,
 		EigenFeeContract:    eigenFeeContract,
-		EigenFeeABI:         eignenFeeABI,
+		EigenFeeABI:         eigenFeeABI,
 		RawEigenFeeContract: rawEigenFeeContract,
 		GraphClient:         graphClient,
 		logger:              logger,
@@ -171,7 +167,9 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 	}, nil
 }
 
-func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction) (*types.Transaction, error) {
+func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction, feeModelEnable bool) (*types.Transaction, error) {
+	var finalTx *types.Transaction
+	var err error
 	opts := &bind.TransactOpts{
 		From: d.WalletAddr,
 		Signer: func(addr common.Address, tx *types.Transaction) (*types.Transaction, error) {
@@ -181,7 +179,13 @@ func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction) (*ty
 		Nonce:   new(big.Int).SetUint64(tx.Nonce()),
 		NoSend:  true,
 	}
-	finalTx, err := d.RawEigenContract.RawTransact(opts, tx.Data())
+	if feeModelEnable {
+		log.Info("update eigen da use fee", "FeeModelEnable", d.Cfg.FeeModelEnable)
+		finalTx, err = d.RawEigenFeeContract.RawTransact(opts, tx.Data())
+	} else {
+		log.Info("rollup date", "FeeModelEnable", d.Cfg.FeeModelEnable)
+		finalTx, err = d.RawEigenContract.RawTransact(opts, tx.Data())
+	}
 	switch {
 	case err == nil:
 		return finalTx, nil
@@ -189,8 +193,13 @@ func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction) (*ty
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
 		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
 		opts.GasTipCap = FallbackGasTipCap
-		return d.RawEigenContract.RawTransact(opts, tx.Data())
-
+		if feeModelEnable {
+			log.Info("update eigen da use fee", "FeeModelEnable", d.Cfg.FeeModelEnable)
+			return d.RawEigenFeeContract.RawTransact(opts, tx.Data())
+		} else {
+			log.Info("rollup date", "FeeModelEnable", d.Cfg.FeeModelEnable)
+			return d.RawEigenContract.RawTransact(opts, tx.Data())
+		}
 	default:
 		return nil, err
 	}
@@ -221,7 +230,8 @@ func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, er
 }
 
 func (d *Driver) CalcUserFeeByRules(rollupDateSize *big.Int) (*big.Int, error) {
-	rollSizeSec := new(big.Int).Div(rollupDateSize, new(big.Int).Div(big.NewInt(int64(d.Cfg.PollInterval)), big.NewInt(1000)))
+	seconds := new(big.Int).Div(big.NewInt(int64(d.Cfg.PollInterval)), big.NewInt(1000000000))
+	rollSizeSec := new(big.Int).Div(rollupDateSize, seconds)
 	feeSs, ok := new(big.Int).SetString(d.Cfg.FeeSizeSec, 10)
 	if !ok {
 		log.Error("FeeSizeSec from string to big.int fail")
@@ -366,9 +376,9 @@ func (d *Driver) ConfirmData(ctx context.Context, callData []byte, searchData rc
 	}
 }
 
-func (d *Driver) UpdateUserDaFee(ctx context.Context, l2Block, daFee *big.Int) (*types.Transaction, error) {
+func (d *Driver) UpdateFee(ctx context.Context, l2Block, daFee *big.Int) (*types.Transaction, error) {
 	balance, err := d.Cfg.L1Client.BalanceAt(
-		d.Ctx, d.FeeWalletAddr, nil,
+		d.Ctx, d.WalletAddr, nil,
 	)
 	if err != nil {
 		log.Error("MtBatcher unable to get fee wallet address current balance", "err", err)
@@ -376,7 +386,7 @@ func (d *Driver) UpdateUserDaFee(ctx context.Context, l2Block, daFee *big.Int) (
 	}
 	log.Info("MtBatcher fee wallet address balance", "balance", balance)
 	nonce64, err := d.Cfg.L1Client.NonceAt(
-		d.Ctx, d.FeeWalletAddr, nil,
+		d.Ctx, d.WalletAddr, nil,
 	)
 	if err != nil {
 		log.Error("MtBatcher unable to get fee wallet nonce", "err", err)
@@ -405,6 +415,29 @@ func (d *Driver) UpdateUserDaFee(ctx context.Context, l2Block, daFee *big.Int) (
 	}
 }
 
+func (d *Driver) UpdateUserDaFee(l2Block, daFee *big.Int) (*types.Receipt, error) {
+	tx, err := d.UpdateFee(
+		d.Ctx, l2Block, daFee,
+	)
+	if err != nil {
+		log.Error("MtBatcher Update User fee fail", "err", err)
+		return nil, err
+	} else if tx == nil {
+		return nil, errors.New("tx is nil")
+	}
+	updateGasPrice := func(ctx context.Context) (*types.Transaction, error) {
+		return d.UpdateGasPrice(ctx, tx, true)
+	}
+	receipt, err := d.txMgr.Send(
+		d.Ctx, updateGasPrice, d.SendTransaction,
+	)
+	if err != nil {
+		log.Error("MtBatcher unable to StoreData", "err", err)
+		return nil, err
+	}
+	return receipt, nil
+}
+
 func (d *Driver) SendTransaction(ctx context.Context, tx *types.Transaction) error {
 	return d.Cfg.L1Client.SendTransaction(ctx, tx)
 }
@@ -429,7 +462,7 @@ func (d *Driver) DisperseStoreData(data []byte, startl2BlockNumber *big.Int, end
 	}
 	log.Info("MtBatcher store data success", "txHash", tx.Hash().String())
 	updateGasPrice := func(ctx context.Context) (*types.Transaction, error) {
-		return d.UpdateGasPrice(ctx, tx)
+		return d.UpdateGasPrice(ctx, tx, false)
 	}
 	log.Info("MtBatcher updateGasPrice", "gasPrice", updateGasPrice)
 	receipt, err := d.txMgr.Send(
@@ -494,7 +527,7 @@ func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, st
 	}
 	updateGasPrice := func(ctx context.Context) (*types.Transaction, error) {
 		log.Info("MtBatcher ConfirmData update gas price")
-		return d.UpdateGasPrice(ctx, tx)
+		return d.UpdateGasPrice(ctx, tx, false)
 	}
 	receipt, err := d.txMgr.Send(
 		d.Ctx, updateGasPrice, d.SendTransaction,
@@ -629,20 +662,6 @@ func (d *Driver) eventLoop() {
 				log.Error("MtBatcher eigenDa sequencer unable to craft batch tx", "err", err)
 				continue
 			}
-			if d.Cfg.FeeModelEnable {
-				daFee, _ := d.CalcUserFeeByRules(big.NewInt(int64(len(aggregateTxData))))
-				chainFee, err := d.EigenFeeContract.GetUserRollupFee(&bind.CallOpts{})
-				if err != nil {
-					log.Error("get chain fee fail", "err", err)
-				}
-				if chainFee.Cmp(daFee) < 0 {
-					txFee, err := d.UpdateUserDaFee(d.Ctx, endL2BlockNumber, daFee)
-					if err != nil {
-						log.Error("update user da fee fail", "err", err)
-					}
-					log.Info("update user fee success", "Hash", txFee.Hash().String())
-				}
-			}
 			params, receipt, err := d.DisperseStoreData(aggregateTxData, startL2BlockNumber, endL2BlockNumber)
 			if err != nil {
 				log.Error("MtBatcher disperse store data fail", "err", err)
@@ -655,6 +674,23 @@ func (d *Driver) eventLoop() {
 				continue
 			}
 			log.Info("MtBatcher confirm store data success", "txHash", csdReceipt.TxHash.String())
+			if d.Cfg.FeeModelEnable {
+				daFee, _ := d.CalcUserFeeByRules(big.NewInt(int64(len(aggregateTxData))))
+				chainFee, err := d.EigenFeeContract.GetUserRollupFee(&bind.CallOpts{})
+				if err != nil {
+					log.Error("get chain fee fail", "err", err)
+					continue
+				}
+				log.Info("chainFee and daFee", "chainFee", chainFee, "daFee", daFee)
+				if chainFee.Cmp(daFee) != 0 {
+					txfRpt, err := d.UpdateUserDaFee(endL2BlockNumber, daFee)
+					if err != nil {
+						log.Error("update user da fee fail", "err", err)
+						continue
+					}
+					log.Info("update user fee success", "Hash", txfRpt.TxHash.String())
+				}
+			}
 		case err := <-d.Ctx.Done():
 			log.Error("MtBatcher eigenDa sequencer service shutting down", "err", err)
 			return
