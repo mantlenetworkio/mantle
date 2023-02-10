@@ -188,6 +188,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		EigenContract:   eigenContract,
 		EigenABI:        eignenABI,
 		RetrieverSocket: cfg.RetrieverSocket,
+		GraphProvider:   cfg.GraphProvider,
 		Timeout:         cfg.RetrieverTimeout,
 		DaServicePort:   cfg.EigenDaHttpPort,
 		Debug:           cfg.EchoDebug,
@@ -197,7 +198,6 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		log.Error("new da http service fail", "err", err)
 		return nil, err
 	}
-
 	return &MantleBatch{
 		ctx:             ctx,
 		cfg:             cfg,

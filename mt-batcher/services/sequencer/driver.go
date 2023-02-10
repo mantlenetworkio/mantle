@@ -18,8 +18,8 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
+	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	rc "github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	common2 "github.com/mantlenetworkio/mantle/mt-batcher/common"
@@ -191,21 +191,30 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 			panic(fmt.Sprintf("MtBatcher attempting to create batch element from block %d, "+
 				"found %d txs instead of 1", block.Number(), len(txs)))
 		}
-		log.Info("MtBatcher origin transactions", "TxHash", txs[0].Hash().String(), "l2BlockNumber", block.Number(), "QueueOrigin", txs[0].QueueOrigin())
-		//isSequencerTx := txs[0].QueueOrigin() == l2types.QueueOriginSequencer
-		//if !isSequencerTx || txs[0] == nil {
-		//	continue
-		//}
+		log.Info("MtBatcher origin transactions", "TxHash", txs[0].Hash().String(), "l2BlockNumber", block.Number(), "QueueOrigin", txs[0].QueueOrigin(), "Index", txs[0].GetMeta().Index, "i", i)
 		var txBuf bytes.Buffer
 		if err := txs[0].EncodeRLP(&txBuf); err != nil {
 			panic(fmt.Sprintf("MtBatcher Unable to encode tx: %v", err))
 		}
+		txMeta := &common3.TransactionMeta{
+			L1BlockNumber:   txs[0].GetMeta().L1BlockNumber,
+			L1Timestamp:     txs[0].GetMeta().L1Timestamp,
+			L1MessageSender: txs[0].GetMeta().L1MessageSender,
+			Index:           txs[0].GetMeta().Index,
+			QueueIndex:      txs[0].GetMeta().QueueIndex,
+			RawTransaction:  txs[0].GetMeta().RawTransaction,
+		}
+		txMetaByte, err := json.Marshal(txMeta)
+		if err != nil {
+			log.Error("tx meta json marshal error", "err", err)
+		}
 		batchTx := common3.BatchTx{
-			BlockNumber: i,
+			BlockNumber: i.Bytes(),
+			TxMeta:      txMetaByte,
 			RawTx:       txBuf.Bytes(),
 		}
 		batchTxList = append(batchTxList, batchTx)
-		txnBufBytes, err := rlp.EncodeToBytes(batchTxList)
+		txnBufBytes, err := l2rlp.EncodeToBytes(batchTxList)
 		if err != nil {
 			panic(fmt.Sprintf("MtBatcher Unable to encode txn: %v", err))
 		}
@@ -216,11 +225,10 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 			transactionByte = txnBufBytes
 		}
 	}
-	txnBufBytes, err := rlp.EncodeToBytes(batchTxList)
+	txnBufBytes, err := l2rlp.EncodeToBytes(batchTxList)
 	if err != nil {
 		panic(fmt.Sprintf("MtBatcher Unable to encode txn: %v", err))
 	}
-	// order=3000 can send about 31600 byte data
 	if len(txnBufBytes) > 31*d.Cfg.EigenLayerNode {
 		transactionByte = txnBufBytes
 	} else {

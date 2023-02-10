@@ -24,7 +24,10 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0
 )
 
-require github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
+require (
+	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
+	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
+)
 
 require (
 	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0-00010101000000-000000000000 // indirect
@@ -76,7 +79,6 @@ require (
 	github.com/rs/zerolog v1.27.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
-	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29 // indirect
 	github.com/steakknife/bloomfilter v0.0.0-20180922174646-6819c0d2a570 // indirect
 	github.com/steakknife/hamming v0.0.0-20180906055917-c99c65617cd3 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
