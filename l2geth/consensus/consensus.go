@@ -61,6 +61,9 @@ type Engine interface {
 	// via the VerifySeal method.
 	VerifyHeader(chain ChainReader, header *types.Header, seal bool) error
 
+	// VerifyTxSetProof check whether a header contains valid tx set proof
+	VerifyTxSetProof(header *types.Header) error
+
 	// VerifyHeaders is similar to VerifyHeader, but verifies a batch of headers
 	// concurrently. The method returns a quit channel to abort the operations and
 	// a results channel to retrieve the async verifications (the order is that of

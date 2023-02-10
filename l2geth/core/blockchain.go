@@ -1617,6 +1617,13 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, er
 	seals := make([]bool, len(chain))
 
 	for i, block := range chain {
+		for _, tx := range block.Transactions() {
+			if tx.QueueOrigin() == types.QueueOriginSequencer {
+				if err := bc.engine.VerifyTxSetProof(block.Header()); err != nil {
+					return 0, err
+				}
+			}
+		}
 		headers[i] = block.Header()
 		seals[i] = verifySeals
 	}

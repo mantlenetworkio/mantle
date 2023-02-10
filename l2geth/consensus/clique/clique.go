@@ -219,6 +219,32 @@ func (c *Clique) VerifyHeader(chain consensus.ChainReader, header *types.Header,
 	return c.verifyHeader(chain, header, nil)
 }
 
+func (c *Clique) VerifyTxSetProof(header *types.Header) error {
+	number := header.Number.Uint64()
+	var txSetProofBytes []byte
+	if number%c.config.Epoch == 0 {
+		// There always will be only one signer
+		txSetProofBytes = header.Extra[extraVanity+common.AddressLength : len(header.Extra)-extraSeal]
+	} else {
+		txSetProofBytes = header.Extra[extraVanity : len(header.Extra)-extraSeal]
+	}
+
+	if len(txSetProofBytes) != 0 {
+		var txSetProof types.BatchTxSetProof
+		txSetProof, err := types.DecodeBatchTxSetProof(txSetProofBytes)
+		if err != nil {
+			return err
+		}
+		if !types.VerifySigner(&txSetProof, txSetProof.Sequencer) {
+			return fmt.Errorf("invalid txSetProof signature in header %d", header.Number.Uint64())
+		}
+		if !txSetProof.ValidProof(header.TxHash) {
+			return fmt.Errorf("invalid txSetProof in header %d", header.Number.Uint64())
+		}
+	}
+	return fmt.Errorf("empty txSetProof")
+}
+
 // VerifyHeaders is similar to VerifyHeader, but verifies a batch of headers. The
 // method returns a quit channel to abort the operations and a results channel to
 // retrieve the async verifications (the order is that of the input slice).
@@ -474,27 +500,6 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 			if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
 				return errRecentlySigned
 			}
-		}
-	}
-	var txSetProofBytes []byte
-	if number%c.config.Epoch == 0 {
-		// There always will be only one signer
-		txSetProofBytes = header.Extra[extraVanity+common.AddressLength : len(header.Extra)-extraSeal]
-	} else {
-		txSetProofBytes = header.Extra[extraVanity : len(header.Extra)-extraSeal]
-	}
-
-	if len(txSetProofBytes) != 0 {
-		var txSetProof types.BatchTxSetProof
-		txSetProof, err = types.DecodeBatchTxSetProof(txSetProofBytes)
-		if err != nil {
-			return err
-		}
-		if !types.VerifySigner(&txSetProof, txSetProof.Sequencer) {
-			return fmt.Errorf("tx set proof is not from sequencer %s", txSetProof.Sequencer.Bytes())
-		}
-		if !txSetProof.ContainTxHashOrNot(header.TxHash, header.Number.Uint64()) {
-			return fmt.Errorf("the transactionsRoot is not included in txSetProof")
 		}
 	}
 	// Ensure that the difficulty corresponds to the turn-ness of the signer
