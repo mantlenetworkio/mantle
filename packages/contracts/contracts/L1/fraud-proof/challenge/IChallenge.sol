@@ -22,7 +22,7 @@
 
 pragma solidity ^0.8.0;
 
-import "../verifier/IVerifier.sol";
+import "../verifier/IVerifierEntry.sol";
 
 /**
  * @notice Protocol execution:
@@ -53,7 +53,7 @@ interface IChallenge {
     function initialize(
         address _defender,
         address _challenger,
-        IVerifier _verifier,
+        IVerifierEntry _verifier,
         address _resultReceiver,
         bytes32 _startStateHash,
         bytes32 _endStateHash

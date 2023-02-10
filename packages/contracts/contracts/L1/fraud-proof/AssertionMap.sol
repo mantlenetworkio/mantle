@@ -19,9 +19,14 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./libraries/Errors.sol";
 
 // Exists only to reduce size of Rollup contract (maybe revert since Rollup fits under optimized compilation).
 contract AssertionMap is Initializable {
+    error ChildInboxSizeMismatch();
+
+    error SiblingStateHashExists();
+
     struct Assertion {
         bytes32 stateHash; // Hash of execution state associated with assertion (see `RollupLib.stateHash`)
         uint256 inboxSize; // Inbox size this assertion advanced to
@@ -37,12 +42,14 @@ contract AssertionMap is Initializable {
         mapping(bytes32 => bool) childStateHashes; // child assertion vm hashes
     }
 
-    uint256 latestAssertionID;
+    mapping(address => uint256) public latestAssertions;
     mapping(uint256 => Assertion) public assertions;
     address public rollupAddress;
 
     modifier rollupOnly() {
-        require(msg.sender == rollupAddress, "ROLLUP_ONLY");
+        if (msg.sender != rollupAddress) {
+            revert NotRollup(msg.sender, rollupAddress);
+        }
         _;
     }
 
@@ -93,8 +100,8 @@ contract AssertionMap is Initializable {
         return assertions[assertionID].stakers[stakerAddress];
     }
 
-    function getLatestAssertionID() external view returns (uint256) {
-        return latestAssertionID;
+    function getLatestAssertionID(address stakerAddress) external view returns (uint256) {
+        return latestAssertions[stakerAddress];
     }
 
     function createAssertion(
@@ -112,15 +119,16 @@ contract AssertionMap is Initializable {
         if (parentChildInboxSize == 0) {
             parentAssertion.childInboxSize = inboxSize;
         } else {
-            require(inboxSize == parentChildInboxSize, "CHILD_INBOX_SIZE_MISMATCH");
+            if (inboxSize != parentChildInboxSize) {
+                revert ChildInboxSizeMismatch();
+            }
         }
-
-        // update latest assertion id
-        if (assertionID > latestAssertionID) {
-            latestAssertionID = assertionID;
+        if (parentAssertion.childStateHashes[stateHash]) {
+            revert SiblingStateHashExists();
         }
-
-        require(!parentAssertion.childStateHashes[stateHash], "SIBLING_STATE_HASH_EXISTS");
+        if (assertionID > latestAssertions[tx.origin]) {
+            latestAssertions[tx.origin] = assertionID;
+        }
         parentAssertion.childStateHashes[stateHash] = true;
 
         assertion.stateHash = stateHash;

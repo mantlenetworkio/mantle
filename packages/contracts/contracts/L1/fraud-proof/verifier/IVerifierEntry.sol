@@ -18,23 +18,13 @@
 
 pragma solidity ^0.8.0;
 
-import "./IVerifier.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./libraries/VerificationContext.sol";
 
-contract Verifier is IVerifier, Initializable {
-    function initialize() public initializer {}
-
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
-    function verifyOneStepProof(IVerificationContext, bytes32, bytes calldata)
-        external
-        pure
-        override
-        returns (bytes32 nextStateHash)
-    {
-        nextStateHash = 0x0;
-    }
+interface IVerifierEntry {
+    function verifyOneStepProof(
+        VerificationContext.Context memory ctx,
+        uint8 verifier,
+        bytes32 currStateHash,
+        bytes calldata encoded
+    ) external view returns (bytes32);
 }

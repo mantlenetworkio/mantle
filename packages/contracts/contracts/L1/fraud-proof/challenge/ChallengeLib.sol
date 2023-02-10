@@ -58,7 +58,7 @@ library ChallengeLib {
      * @notice Returns length of first segment in a bisection.
      */
     function firstSegmentLength(uint256 length, uint256 bisectionDegree) internal pure returns (uint256) {
-        return length / bisectionDegree + (length % bisectionDegree);
+        return length / bisectionDegree + length % bisectionDegree;
     }
 
     /**

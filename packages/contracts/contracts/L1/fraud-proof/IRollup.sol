@@ -35,9 +35,90 @@ interface IRollup {
 
     event AssertionRejected(uint256 assertionID);
 
-    event AdvanceStake(uint256 assertionID);
+    event StakerStaked(address stakerAddr, uint256 assertionID);
 
-    event NewBatchAppend(uint256 totalElement);
+    /// @dev Thrown when address that have not staked any token calls a only-staked function
+    error NotStaked();
+
+    /// @dev Thrown when the function is called with Insufficient Stake
+    error InsufficientStake();
+
+    /// @dev Thrown when the caller is staked on unconfirmed assertion.
+    error StakedOnUnconfirmedAssertion();
+
+    /// @dev Thrown when transfer fails
+    error TransferFailed();
+
+    /// @dev Thrown when a staker tries to advance stake to invalid assertionId.
+    error AssertionOutOfRange();
+
+    /// @dev Thrown when a staker tries to advance stake to non-child assertion
+    error ParentAssertionUnstaked();
+
+    /// @dev Thrown when a sender tries to create assertion before the minimum assertion time period
+    error MinimumAssertionPeriodNotPassed();
+
+    /// @dev Thrown when the L2 gas used by the assertion is more the max allowed limit.
+    error MaxGasLimitExceeded();
+
+    /// @dev Thrown when parent's statehash is not equal to the start state(or previous state)/
+    error PreviousStateHash();
+
+    /// @dev Thrown when a sender tries to create assertion without any tx.
+    error EmptyAssertion();
+
+    /// @dev Thrown when the requested assertion read past the end of current Inbox.
+    error InboxReadLimitExceeded();
+
+    /// @dev Thrown when the challenge assertion Id is not ordered or in range.
+    error WrongOrder();
+
+    /// @dev Thrown when the challenger tries to challenge an unproposed assertion
+    error UnproposedAssertion();
+
+    /// @dev Thrown when the assertion is already resolved
+    error AssertionAlreadyResolved();
+
+    /// @dev Thrown when there is no unresolved assertion
+    error NoUnresolvedAssertion();
+
+    /// @dev Thrown when the challenge period has not passed
+    error ChallengePeriodPending();
+
+    /// @dev Thrown when the challenger and defender didn't attest to sibling assertions
+    error DifferentParent();
+
+    /// @dev Thrown when the assertion's parent is not the last confirmed assertion
+    error InvalidParent();
+
+    /// @dev Thrown when the staker is not in a challenge
+    error NotInChallenge();
+
+    /// @dev Thrown when the two stakers are in different challenge
+    /// @param staker1Challenge challenge address of staker 1
+    /// @param staker2Challenge challenge address of staker 2
+    error InDifferentChallenge(address staker1Challenge, address staker2Challenge);
+
+    /// @dev Thrown when the staker is currently in Challenge
+    error ChallengedStaker();
+
+    /// @dev Thrown when all the stakers are not staked
+    error NotAllStaked();
+
+    /// @dev Thrown staker's assertion is descendant of firstUnresolved assertion
+    error StakerStakedOnTarget();
+
+    /// @dev Thrown when there are staker's present on the assertion
+    error StakersPresent();
+
+    /// @dev Thrown when there are zero stakers
+    error NoStaker();
+
+    /// @dev Thrown when slot is not blank in initialize step
+    error RedundantInitialized();
+
+    /// @dev Thrown when function is called with a zero address argument
+    error ZeroAddress();
 
     function assertions() external view returns (AssertionMap);
 
@@ -85,6 +166,23 @@ interface IRollup {
     function advanceStake(uint256 assertionID) external;
 
     /**
+     * @notice Creates a new DA representing the rollup state after executing a block of transactions (sequenced in SequencerInbox).
+     * Block is represented by all transactions in range [prevInboxSize, inboxSize]. The latest staked DA of the sender
+     * is considered to be the predecessor. Moves sender stake onto the new DA.
+     *
+     * The new DA stores the hash of the parameters: H(l2GasUsed || vmHash)
+     *
+     * @param vmHash New VM hash.
+     * @param inboxSize Size of inbox corresponding to assertion (number of transactions).
+     * @param l2GasUsed Total L2 gas used as of the end of this assertion's last transaction.
+     */
+    function createAssertion(
+        bytes32 vmHash,
+        uint256 inboxSize,
+        uint256 l2GasUsed
+    ) external;
+
+    /**
      *
      * @notice create assertion with scc state batch
      *
@@ -104,22 +202,6 @@ interface IRollup {
         bytes calldata _signature
     ) external;
 
-    /**
-     * @notice Creates a new DA representing the rollup state after executing a block of transactions (sequenced in SequencerInbox).
-     * Block is represented by all transactions in range [prevInboxSize, inboxSize]. The latest staked DA of the sender
-     * is considered to be the predecessor. Moves sender stake onto the new DA.
-     *
-     * The new DA stores the hash of the parameters: H(l2GasUsed || vmHash)
-     *
-     * @param vmHash New VM hash.
-     * @param inboxSize Size of inbox corresponding to assertion (number of transactions).
-     * @param l2GasUsed Total L2 gas used as of the end of this assertion's last transaction.
-     */
-    function createAssertion(
-        bytes32 vmHash,
-        uint256 inboxSize,
-        uint256 l2GasUsed
-    ) external;
 
     /**
      * @notice Initiates a dispute between a defender and challenger on an unconfirmed DA.

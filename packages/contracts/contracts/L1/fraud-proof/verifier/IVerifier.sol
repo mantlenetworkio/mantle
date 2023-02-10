@@ -18,11 +18,11 @@
 
 pragma solidity ^0.8.0;
 
-import "./IVerificationContext.sol";
+import "./libraries/VerificationContext.sol";
 
 interface IVerifier {
-    function verifyOneStepProof(IVerificationContext ctx, bytes32 currStateHash, bytes calldata encodedProof)
+    function verifyOneStepProof(VerificationContext.Context memory ctx, bytes32 currStateHash, bytes calldata encoded)
         external
-        view
-        returns (bytes32 nextStateHash);
+        pure
+        returns (bytes32);
 }
