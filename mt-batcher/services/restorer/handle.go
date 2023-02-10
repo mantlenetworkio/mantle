@@ -143,13 +143,12 @@ func (s *DaService) GetTransactionList(c gecho.Context) error {
 	}
 	defer conn.Close()
 	client := pb.NewDataRetrievalClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), s.Cfg.Timeout)
-	defer cancel()
+
 	opt := grpc.MaxCallRecvMsgSize(1024 * 1024 * 300)
 	request := &pb.FramesAndDataRequest{
 		DataStoreId: txReq.StoreNumber,
 	}
-	reply, err := client.RetrieveFramesAndData(ctx, request, opt)
+	reply, err := client.RetrieveFramesAndData(s.Ctx, request, opt)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, errors.New("RetrieveFramesAndData error"))
 	}
