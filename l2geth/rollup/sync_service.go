@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus"
+	"github.com/mantlenetworkio/mantle/l2geth/miner"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"math/big"
 	"strconv"
 	"sync"
@@ -76,10 +79,11 @@ type SyncService struct {
 	feeThresholdDown               *big.Float
 	cfg                            Config
 	applyLock                      sync.Mutex
+	executor                       *executor
 }
 
 // NewSyncService returns an initialized sync service
-func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *core.BlockChain, db ethdb.Database) (*SyncService, error) {
+func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *core.BlockChain, db ethdb.Database, config *miner.Config, chainConfig *params.ChainConfig, engine consensus.Engine) (*SyncService, error) {
 	if bc == nil {
 		return nil, errors.New("Must pass BlockChain to SyncService")
 	}
@@ -152,6 +156,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		feeThresholdDown:               cfg.FeeThresholdDown,
 		feeThresholdUp:                 cfg.FeeThresholdUp,
 		cfg:                            cfg,
+		executor:                       newExecutor(config, chainConfig, engine, bc),
 	}
 
 	// The chainHeadSub is used to synchronize the SyncService with the chain.
@@ -1446,4 +1451,12 @@ func (s *SyncService) handleChainHeadEventLoop() {
 			}
 		}
 	}
+}
+
+func (s *SyncService) SetExtra(extra []byte) error {
+	if uint64(len(extra)) > params.MaximumExtraDataSize {
+		return fmt.Errorf("extra exceeds max length. %d > %v", len(extra), params.MaximumExtraDataSize)
+	}
+	s.executor.setExtra(extra)
+	return nil
 }
