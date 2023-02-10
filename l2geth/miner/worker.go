@@ -693,7 +693,7 @@ func (w *worker) batchAnswerLoop() {
 					}
 				}
 				for _, tx := range ev.Msg.Txs {
-					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, ev.Msg.ToBatchTxSetProof())
+					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, &types.BatchTxSetProof{})
 					if err != nil {
 						log.Error("ValidateAndApplySequencerTransaction error", "err_msg", err.Error())
 						err = w.mux.Post(core.BatchEndEvent(w.currentBps.BatchIndex))
