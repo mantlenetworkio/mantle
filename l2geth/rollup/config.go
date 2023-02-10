@@ -20,6 +20,8 @@ type Config struct {
 	RollupClientHttp string
 	// HTTP endpoint of the data eigen http serve
 	EigenClientHttp string
+	// for data eigen
+	L1MsgSender string
 	// Owner of the GasPriceOracle contract
 	GasPriceOracleOwnerAddress common.Address
 	// Turns on checking of state for L2 gas price

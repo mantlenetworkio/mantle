@@ -1,10 +1,14 @@
 package eigenda
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	common2 "github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
+	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"github.com/pkg/errors"
 )
@@ -14,7 +18,7 @@ var errTssHTTPError = errors.New("eigen da http error")
 type EigenClient interface {
 	GetLatestTransactionBatchIndex() (*uint64, error)
 	GetRollupStoreByRollupBatchIndex(batchIndex int64) (*common.RollupStoreResponse, error)
-	GetBatchTransactionByDataStoreId(storeNumber uint32) ([]*types.Transaction, error)
+	GetBatchTransactionByDataStoreId(storeNumber uint32, l1MsgSender string) ([]*types.Transaction, error)
 }
 
 type Client struct {
@@ -67,20 +71,56 @@ func (c *Client) GetRollupStoreByRollupBatchIndex(batchIndex int64) (*common.Rol
 	return rollupStore, nil
 }
 
-func (c *Client) GetBatchTransactionByDataStoreId(storeNumber uint32) ([]*types.Transaction, error) {
-	var TxList []types.Transaction
+func (c *Client) GetBatchTransactionByDataStoreId(storeNumber uint32, l1MsgSender string) ([]*types.Transaction, error) {
+	var TxListBuf []byte
 	response, err := c.client.R().
 		SetBody(map[string]interface{}{"store_number": storeNumber}).
-		SetResult(&TxList).
+		SetResult(&TxListBuf).
 		Post("/eigen/getBatchTransactionByDataStoreId")
 	if err != nil {
 		return nil, fmt.Errorf("cannot get tx list: %w", err)
 	}
 	if response.StatusCode() == 200 {
 		var retTxList []*types.Transaction
-		for _, tx := range TxList {
-			log.Info("transaction index", "index", tx.GetMeta().Index)
-			retTxList = append(retTxList, &tx)
+		batchTxn := new([]common.BatchTx)
+		batchRlpStream := l2rlp.NewStream(bytes.NewBuffer(TxListBuf), 0)
+		err = batchRlpStream.Decode(batchTxn)
+		if err != nil {
+			return nil, fmt.Errorf("decode batch tx fail: %w", err)
+		}
+		newBatchTxn := *batchTxn
+		for i := 0; i < len(newBatchTxn); i++ {
+			var l2Tx types.Transaction
+			rlpStream := l2rlp.NewStream(bytes.NewBuffer(newBatchTxn[i].RawTx), 0)
+			if err := l2Tx.DecodeRLP(rlpStream); err != nil {
+				log.Error("Decode RLP fail")
+			}
+			txDecodeMetaData := new(common.TransactionMeta)
+			err := json.Unmarshal(newBatchTxn[i].TxMeta, txDecodeMetaData)
+			if err != nil {
+				log.Error("Unmarshal json fail")
+			}
+			var queueOrigin types.QueueOrigin
+			var l1MessageSender *common2.Address
+			if txDecodeMetaData.QueueIndex == nil {
+				queueOrigin = types.QueueOriginSequencer
+				l1MessageSender = nil
+			} else {
+				queueOrigin = types.QueueOriginL1ToL2
+				addrLs := common2.HexToAddress(l1MsgSender)
+				l1MessageSender = &addrLs
+			}
+			realTxMeta := &types.TransactionMeta{
+				L1BlockNumber:   txDecodeMetaData.L1BlockNumber,
+				L1Timestamp:     txDecodeMetaData.L1Timestamp,
+				L1MessageSender: l1MessageSender,
+				QueueOrigin:     queueOrigin,
+				Index:           txDecodeMetaData.Index,
+				QueueIndex:      txDecodeMetaData.QueueIndex,
+				RawTransaction:  txDecodeMetaData.RawTransaction,
+			}
+			l2Tx.SetTransactionMeta(realTxMeta)
+			retTxList = append(retTxList, &l2Tx)
 		}
 		return retTxList, nil
 	} else {

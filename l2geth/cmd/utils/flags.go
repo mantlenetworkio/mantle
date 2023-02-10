@@ -817,6 +817,12 @@ var (
 		Value:  "http://localhost:7979",
 		EnvVar: "EIGEN_CLIENT_HTTP",
 	}
+	L1MsgSenderFlage = cli.StringFlag{
+		Name:   "rollup.l1messagesender",
+		Usage:  "l1 message sender for eigen layer handle data",
+		Value:  "0x8A6acf3B8Ffc87FAcA8ad8A1b5d95C0f58c0D009",
+		EnvVar: "L1_MSG_SENDER",
+	}
 	RollupClientHttpFlag = cli.StringFlag{
 		Name:   "rollup.clienthttp",
 		Usage:  "HTTP endpoint for the rollup client",
@@ -1154,8 +1160,10 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 		cfg.RollupClientHttp = ctx.GlobalString(RollupClientHttpFlag.Name)
 	}
 	if ctx.GlobalIsSet(RollupEigenClientHttpFlag.Name) {
-		log.Info("RollupEigenClientHttpFlag", "RollupEigenClientHttpFlag", RollupEigenClientHttpFlag.Name)
 		cfg.EigenClientHttp = ctx.GlobalString(RollupEigenClientHttpFlag.Name)
+	}
+	if ctx.GlobalIsSet(L1MsgSenderFlage.Name) {
+		cfg.L1MsgSender = ctx.GlobalString(L1MsgSenderFlage.Name)
 	}
 	if ctx.GlobalIsSet(RollupPollIntervalFlag.Name) {
 		cfg.PollInterval = ctx.GlobalDuration(RollupPollIntervalFlag.Name)

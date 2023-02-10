@@ -63,6 +63,7 @@ type SyncService struct {
 	RollupGpo                      *gasprice.RollupOracle
 	client                         RollupClient
 	eigenClient                    eigenda.EigenClient
+	l1MsgSender                    string
 	syncing                        atomic.Value
 	chainHeadSub                   event.Subscription
 	BVMContext                     BVMContext
@@ -115,12 +116,12 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	}
 	// Initialize the rollup client
 	client := NewClient(cfg.RollupClientHttp, chainID)
-	log.Info("Configured rollup client", "url", cfg.RollupClientHttp, "chain-id", chainID.Uint64(), "ctc-deploy-height", cfg.CanonicalTransactionChainDeployHeight)
+	log.Debug("Configured rollup client", "url", cfg.RollupClientHttp, "chain-id", chainID.Uint64(), "ctc-deploy-height", cfg.CanonicalTransactionChainDeployHeight)
 
-	// eigenClient := eigenda.NewEigenClient(cfg.EigenClientHttp)
 	eigenClient := eigenda.NewEigenClient(cfg.EigenClientHttp)
-	log.Info("Configured eigen client", "EigenClientHttp", cfg.EigenClientHttp)
-
+	if eigenClient == nil {
+		return nil, fmt.Errorf("new eigen client fail")
+	}
 	// Ensure sane values for the fee thresholds
 	if cfg.FeeThresholdDown != nil {
 		// The fee threshold down should be less than 1
@@ -158,6 +159,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		signer:                         types.NewEIP155Signer(chainID),
 		feeThresholdDown:               cfg.FeeThresholdDown,
 		feeThresholdUp:                 cfg.FeeThresholdUp,
+		l1MsgSender:                    cfg.L1MsgSender,
 		cfg:                            cfg,
 	}
 
@@ -744,15 +746,6 @@ func (s *SyncService) GetNextIndex() uint64 {
 	return *latest + 1
 }
 
-// GetNextIndex reads the next EigenDa index to process
-func (s *SyncService) GetEigenDaNextIndex() uint64 {
-	latest := s.GetLatestEigenBatchIndex()
-	if latest == nil {
-		return 0
-	}
-	return *latest + 1
-}
-
 // SetLatestIndex writes the last CTC index that was processed
 func (s *SyncService) SetLatestIndex(index *uint64) {
 	if index != nil {
@@ -807,7 +800,7 @@ func (s *SyncService) SetLatestBatchIndex(index *uint64) {
 func (s *SyncService) GetEigenNextBatchIndex() uint64 {
 	index := rawdb.ReadEigenBatchIndex(s.db)
 	if index == nil {
-		return 1
+		return 0
 	}
 	return *index + 1
 }
@@ -943,10 +936,10 @@ func (s *SyncService) applyIndexedTransaction(tx *types.Transaction, txSetProof 
 	}
 	log.Trace("Applying indexed transaction", "index", *index)
 	next := s.GetNextIndex()
-	if *index == next {
+	if *index == next || *index == 0 {
 		return s.applyTransactionToTip(tx, txSetProof)
 	}
-	if *index < next {
+	if *index < next && *index != 0 {
 		return s.applyHistoricalTransaction(tx)
 	}
 	return fmt.Errorf("Received tx at index %d when looking for %d", *index, next)
@@ -1412,28 +1405,26 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 }
 
 func (s *SyncService) syncEigenTransactionBatchRange(start, end uint64) error {
-	log.Info("Syncing eigen transaction batch range", "start", start, "end", end)
-	for i := start; i <= end; i++ {
-		log.Debug("Fetching transaction batch", "index", i)
-		rollupInfo, err := s.eigenClient.GetRollupStoreByRollupBatchIndex(int64(i))
-		if err != nil {
-			return fmt.Errorf("cannot get rollup store by batch index: %w", err)
-		}
-		txs, err := s.eigenClient.GetBatchTransactionByDataStoreId(rollupInfo.DataStoreId)
-		if err != nil {
-			return fmt.Errorf("cannot get eigen transaction batch: %w", err)
-		}
-		for _, tx := range txs {
-			if tx.QueueOrigin().String() != "sequencer" || tx.GetMeta().Index == nil {
-				log.Info("Skip this transaction", "QueueOrigin", tx.QueueOrigin().String(), "Index", tx.GetMeta().Index)
-				continue
+	if start < end {
+		log.Info("Syncing eigen transaction batch range", "start", start, "end", end)
+		for i := start; i <= end; i++ {
+			log.Debug("Fetching transaction batch", "index", i)
+			rollupInfo, err := s.eigenClient.GetRollupStoreByRollupBatchIndex(int64(i))
+			if err != nil {
+				return fmt.Errorf("cannot get rollup store by batch index: %w", err)
 			}
-			if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
-				return fmt.Errorf("cannot apply batched transaction: %w", err)
+			txs, err := s.eigenClient.GetBatchTransactionByDataStoreId(rollupInfo.DataStoreId, s.l1MsgSender)
+			if err != nil {
+				return fmt.Errorf("cannot get eigen transaction batch: %w", err)
 			}
+			for _, tx := range txs {
+				if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
+					return fmt.Errorf("cannot apply batched transaction: %w", err)
+				}
+			}
+			log.Info("set latest eigen batch index", "index", i)
+			s.SetLatestEigenBatchIndex(&i)
 		}
-		log.Info("set latest eigen batch index", "index", i)
-		s.SetLatestEigenBatchIndex(&i)
 	}
 	return nil
 }

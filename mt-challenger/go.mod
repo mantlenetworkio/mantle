@@ -20,8 +20,6 @@ require (
 	google.golang.org/grpc v1.51.0
 )
 
-require github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
-
 require (
 	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0-00010101000000-000000000000 // indirect
 	github.com/VictoriaMetrics/fastcache v1.9.0 // indirect

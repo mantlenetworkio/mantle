@@ -56,6 +56,7 @@ func (s *DaService) GetRollupStoreByRollupBatchIndex(c gecho.Context) error {
 		ConfirmAt:   rollupStore.ConfirmAt,
 		Status:      rollupStore.Status,
 	}
+	log.Info("datastore response", "rsRep", rsRep)
 	return c.JSON(http.StatusOK, rsRep)
 }
 
@@ -83,24 +84,7 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 		log.Error("retrieve frames and data error", "err", err)
 		return c.JSON(http.StatusBadRequest, errors.New("recovery data fail"))
 	}
-	batchTxn := new([]common.BatchTx)
-	batchRlpStream := rlp.NewStream(bytes.NewBuffer(reply.GetData()), 0)
-	err = batchRlpStream.Decode(batchTxn)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, errors.New("decode batch tx fail"))
-	}
-	newBatchTxn := *batchTxn
-	var txList []types.Transaction
-	for i := 0; i < len(newBatchTxn); i++ {
-		var l2Tx types.Transaction
-		rlpStream := l2rlp.NewStream(bytes.NewBuffer(newBatchTxn[i].RawTx), 0)
-		if err := l2Tx.DecodeRLP(rlpStream); err != nil {
-			log.Error("Decode RLP fail")
-		}
-		log.Info("Transaction", "TxHash", l2Tx.Hash().Hex(), "Index", l2Tx.GetMeta().Index)
-		txList = append(txList, l2Tx)
-	}
-	return c.JSON(http.StatusOK, txList)
+	return c.JSON(http.StatusOK, reply.GetData())
 }
 
 func (s *DaService) GetDataStore(c gecho.Context) error {

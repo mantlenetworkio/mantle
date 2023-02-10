@@ -25,7 +25,6 @@ import (
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 )
@@ -199,16 +198,17 @@ func (tx *Transaction) UnmarshalJSON(input []byte) error {
 
 	withSignature := tx.data.V.Sign() != 0 || tx.data.R.Sign() != 0 || tx.data.S.Sign() != 0
 	if withSignature {
-		var V byte
-		if isProtectedV(tx.data.V) {
-			chainID := deriveChainId(tx.data.V).Uint64()
-			V = byte(tx.data.V.Uint64() - 35 - 2*chainID)
-		} else {
-			V = byte(tx.data.V.Uint64() - 27)
-		}
-		if !crypto.ValidateSignatureValues(V, tx.data.R, tx.data.S, false) {
-			return ErrInvalidSig
-		}
+		//var V byte
+		//if isProtectedV(tx.data.V) {
+		//	chainID := deriveChainId(tx.data.V).Uint64()
+		//	V = byte(tx.data.V.Uint64() - 35 - 2*chainID)
+		//} else {
+		//	V = byte(tx.data.V.Uint64() - 27)
+		//}
+		//if !crypto.ValidateSignatureValues(V, tx.data.R, tx.data.S, false) {
+		//	return ErrInvalidSig
+		//}
+		return nil
 	}
 
 	return nil

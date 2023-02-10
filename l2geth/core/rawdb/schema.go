@@ -70,7 +70,7 @@ var (
 	headBatchKey = []byte("LastBatch")
 
 	// eigen da
-	EigenBatchKey = []byte("EigenBatch")
+	eigenBatchKey = []byte("EigenBatch")
 
 	preimagePrefix = []byte("secure-key-")      // preimagePrefix + hash -> preimage
 	configPrefix   = []byte("ethereum-config-") // config prefix for the db

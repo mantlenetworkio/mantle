@@ -82,6 +82,7 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.SchedulerAddressFlag,
 			utils.SequencerModeFlag,
 			utils.RollupEigenClientHttpFlag,
+			utils.L1MsgSenderFlage,
 		},
 	},
 	{
