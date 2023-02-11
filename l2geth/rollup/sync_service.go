@@ -321,7 +321,6 @@ func (s *SyncService) initializeLatestL1(ctcDeployHeight *big.Int) error {
 			if tx.Transaction.BatchIndex > 0 {
 				newBatchIndex -= 1
 			}
-
 			log.Info("Updating batch index", "old", oldbatchIndex, "new", newBatchIndex)
 			s.SetLatestBatchIndex(&newBatchIndex)
 		}
@@ -811,7 +810,6 @@ func (s *SyncService) GetLatestEigenBatchIndex() *uint64 {
 
 func (s *SyncService) SetLatestEigenBatchIndex(index *uint64) {
 	if index != nil {
-		log.Info("set latest eigen batch index", "index", index)
 		rawdb.WriteLatestEigenIndex(s.db, *index)
 	}
 }
@@ -936,10 +934,10 @@ func (s *SyncService) applyIndexedTransaction(tx *types.Transaction, txSetProof 
 	}
 	log.Trace("Applying indexed transaction", "index", *index)
 	next := s.GetNextIndex()
-	if *index == next || *index == 0 {
+	if *index == next {
 		return s.applyTransactionToTip(tx, txSetProof)
 	}
-	if *index < next && *index != 0 {
+	if *index < next {
 		return s.applyHistoricalTransaction(tx)
 	}
 	return fmt.Errorf("Received tx at index %d when looking for %d", *index, next)
@@ -1405,7 +1403,7 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 }
 
 func (s *SyncService) syncEigenTransactionBatchRange(start, end uint64) error {
-	if start < end {
+	if end > start {
 		log.Info("Syncing eigen transaction batch range", "start", start, "end", end)
 		for i := start; i <= end; i++ {
 			log.Debug("Fetching transaction batch", "index", i)
@@ -1413,17 +1411,19 @@ func (s *SyncService) syncEigenTransactionBatchRange(start, end uint64) error {
 			if err != nil {
 				return fmt.Errorf("cannot get rollup store by batch index: %w", err)
 			}
-			txs, err := s.eigenClient.GetBatchTransactionByDataStoreId(rollupInfo.DataStoreId, s.l1MsgSender)
-			if err != nil {
-				return fmt.Errorf("cannot get eigen transaction batch: %w", err)
-			}
-			for _, tx := range txs {
-				if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
-					return fmt.Errorf("cannot apply batched transaction: %w", err)
+			if rollupInfo.DataStoreId != 0 {
+				txs, err := s.eigenClient.GetBatchTransactionByDataStoreId(rollupInfo.DataStoreId, s.l1MsgSender)
+				if err != nil {
+					return fmt.Errorf("cannot get eigen transaction batch: %w", err)
 				}
+				for _, tx := range txs {
+					if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
+						return fmt.Errorf("cannot apply batched transaction: %w", err)
+					}
+				}
+				log.Info("set latest eigen batch index", "index", i)
+				s.SetLatestEigenBatchIndex(&i)
 			}
-			log.Info("set latest eigen batch index", "index", i)
-			s.SetLatestEigenBatchIndex(&i)
 		}
 	}
 	return nil
