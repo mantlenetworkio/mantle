@@ -209,6 +209,7 @@ func (tx *Transaction) UnmarshalJSON(input []byte) error {
 		if !crypto.ValidateSignatureValues(V, tx.data.R, tx.data.S, false) {
 			return ErrInvalidSig
 		}
+		return nil
 	}
 
 	return nil
