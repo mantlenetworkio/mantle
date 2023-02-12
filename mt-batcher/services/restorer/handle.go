@@ -33,6 +33,15 @@ type DataStoreRequest struct {
 	EigenContractAddr string `json:"eigen_contract_addr"`
 }
 
+type DataStoreIdRequest struct {
+	StoreId string `json:"store_id"`
+}
+
+type TransactionListResponse struct {
+	BlockNumber string `json:"BlockNumber"`
+	TxHash      string `json:"TxHash"`
+}
+
 func (s *DaService) GetLatestTransactionBatchIndex(c gecho.Context) error {
 	batchIndex, err := s.Cfg.EigenContract.RollupBatchIndex(&bind.CallOpts{})
 	if err != nil {
@@ -87,14 +96,14 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 	return c.JSON(http.StatusOK, reply.GetData())
 }
 
-func (s *DaService) GetDataStore(c gecho.Context) error {
+func (s *DaService) GetDataStoreList(c gecho.Context) error {
 	var dsReq DataStoreRequest
 	if err := c.Bind(&dsReq); err != nil {
 		log.Error("invalid request params", "err", err)
 		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
 	}
 	var query struct {
-		DataStores []graphView.DataStoreGql `graphql:"dataStores(first:1,where:{storeNumber_gt: $lastStoreNumber,confirmer: $confirmer,confirmed:true})"`
+		DataStores []graphView.DataStoreGql `graphql:"dataStores(where:{storeNumber_gt: $lastStoreNumber,confirmer: $confirmer,confirmed:true})"`
 	}
 	variables := map[string]interface{}{
 		"lastStoreNumber": graphql.String(dsReq.FromStoreNumber),
@@ -108,14 +117,30 @@ func (s *DaService) GetDataStore(c gecho.Context) error {
 	if len(query.DataStores) == 0 {
 		return c.JSON(http.StatusBadRequest, errors.New("no new stores"))
 	}
-	store, err := query.DataStores[0].Convert()
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, errors.New("conversion error"))
-	}
-	return c.JSON(http.StatusOK, store)
+	return c.JSON(http.StatusOK, query.DataStores)
 }
 
-func (s *DaService) GetTransactionList(c gecho.Context) error {
+func (s *DaService) getDataStoreById(c gecho.Context) error {
+	var dsIdReq DataStoreIdRequest
+	if err := c.Bind(&dsIdReq); err != nil {
+		log.Error("invalid request params", "err", err)
+		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
+	}
+	var query struct {
+		DataStore graphView.DataStoreGql `graphql:"dataStore(id: $storeId)"`
+	}
+	variables := map[string]interface{}{
+		"storeId": graphql.String(dsIdReq.StoreId),
+	}
+	err := s.GraphqlClient.Query(context.Background(), &query, variables)
+	if err != nil {
+		log.Error("query data from graphql fail", "err", err)
+		return c.JSON(http.StatusBadRequest, errors.New("query data from graphql fail"))
+	}
+	return c.JSON(http.StatusOK, query.DataStore)
+}
+
+func (s *DaService) GetTransactionListByStoreNumber(c gecho.Context) error {
 	var txReq TransactionRequest
 	if err := c.Bind(&txReq); err != nil {
 		log.Error("invalid request params", "err", err)
@@ -143,7 +168,7 @@ func (s *DaService) GetTransactionList(c gecho.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, errors.New("decode data fail"))
 	}
-	var TxHash []string
+	var TxnRep []*TransactionListResponse
 	newBatchTxn := *batchTxn
 	for i := 0; i < len(newBatchTxn); i++ {
 		l2Tx := new(types.Transaction)
@@ -153,7 +178,12 @@ func (s *DaService) GetTransactionList(c gecho.Context) error {
 			continue
 		}
 		log.Info("transaction", "hash", l2Tx.Hash().Hex())
-		TxHash = append(TxHash, l2Tx.Hash().String())
+		newBlockNumber := new(big.Int).SetBytes(newBatchTxn[i].BlockNumber)
+		txSl := &TransactionListResponse{
+			BlockNumber: newBlockNumber.String(),
+			TxHash:      l2Tx.Hash().String(),
+		}
+		TxnRep = append(TxnRep, txSl)
 	}
-	return c.JSON(http.StatusOK, TxHash)
+	return c.JSON(http.StatusOK, TxnRep)
 }
