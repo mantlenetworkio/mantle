@@ -43,7 +43,12 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "DISPERSER_ENDPOINT"),
 	}
-
+	RetrieverSocketFlag = cli.StringFlag{
+		Name:     "retriever-socket",
+		Usage:    "Address of the datalayr repository contract",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "RETRIEVER_SOCKET"),
+	}
 	ChainIdFlag = cli.Uint64Flag{
 		Name:     "chain-id",
 		Usage:    "Chain id for ethereum chain",
@@ -144,6 +149,23 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "DATA_STORE_TIMEOUT"),
 	}
+	EigenDaHttpPortFlag = cli.IntFlag{
+		Name:     "eigen-da-http-port",
+		Usage:    "Eigen da service port",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "EIGEN_DA_HTTP_PORT"),
+	}
+	RetrieverTimeoutFlag = cli.DurationFlag{
+		Name:   "retriever-timeout",
+		Usage:  "retriever timeout",
+		Value:  50 * time.Millisecond,
+		EnvVar: prefixEnvVar(envVarPrefix, "RETRIEVER_TIMEOUT"),
+	}
+	MtlBatcherEnableFlag = cli.BoolFlag{
+		Name:   "mtl-batch-enable",
+		Usage:  "roll data to eigen da enable",
+		EnvVar: prefixEnvVar(envVarPrefix, "MTL_BATCHER_ENABLE"),
+	}
 	LogLevelFlag = cli.StringFlag{
 		Name:   "log-level",
 		Usage:  "The lowest log level that will be output",
@@ -173,10 +195,32 @@ var (
 		Value:  50 * time.Millisecond,
 		EnvVar: prefixEnvVar(envVarPrefix, "SENTRY_TRACE_RATE"),
 	}
+	MetricsServerEnableFlag = cli.BoolFlag{
+		Name:   "metrics-server-enable",
+		Usage:  "Whether or not to run the embedded metrics server",
+		EnvVar: prefixEnvVar(envVarPrefix, "METRICS_SERVER_ENABLE"),
+	}
+	MetricsHostnameFlag = cli.StringFlag{
+		Name:   "metrics-hostname",
+		Usage:  "The hostname of the metrics server",
+		Value:  "127.0.0.1",
+		EnvVar: prefixEnvVar(envVarPrefix, "METRICS_HOSTNAME"),
+	}
+	MetricsPortFlag = cli.Uint64Flag{
+		Name:   "metrics-port",
+		Usage:  "The port of the metrics server",
+		Value:  7300,
+		EnvVar: prefixEnvVar(envVarPrefix, "METRICS_PORT"),
+	}
 	HTTP2DisableFlag = cli.BoolFlag{
 		Name:   "http2-disable",
 		Usage:  "Whether or not to disable HTTP/2 support.",
 		EnvVar: prefixEnvVar(envVarPrefix, "HTTP2_DISABLE"),
+	}
+	EchoDebugFlag = cli.BoolFlag{
+		Name:   "echo-debug",
+		Usage:  "Echo log debug",
+		EnvVar: prefixEnvVar(envVarPrefix, "ECHO_DEBUG"),
 	}
 )
 
@@ -186,6 +230,8 @@ var requiredFlags = []cli.Flag{
 	L1EthRpcFlag,
 	L2MtlRpcFlag,
 	DisperserEndpointFlag,
+	RetrieverSocketFlag,
+	EigenDaHttpPortFlag,
 	ChainIdFlag,
 	GraphProviderFlag,
 	PrivateKeyFlag,
@@ -202,6 +248,7 @@ var requiredFlags = []cli.Flag{
 	ResubmissionTimeoutFlag,
 	NumConfirmationsFlag,
 	SafeAbortNonceTooLowCountFlag,
+	MtlBatcherEnableFlag,
 }
 
 var optionalFlags = []cli.Flag{
@@ -211,6 +258,10 @@ var optionalFlags = []cli.Flag{
 	SentryDsnFlag,
 	SentryTraceRateFlag,
 	HTTP2DisableFlag,
+	MetricsServerEnableFlag,
+	MetricsHostnameFlag,
+	MetricsPortFlag,
+	EchoDebugFlag,
 }
 
 func init() {
