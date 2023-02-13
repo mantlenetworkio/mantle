@@ -815,7 +815,6 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	for i := start; i <= latest; i++ {
 		block := s.bc.GetBlockByNumber(i)
 		tx := block.Transactions()[0]
-		//tx := types.Transaction{}
 		if block.Transactions()[0].QueueOrigin() == types.QueueOriginL1ToL2 {
 			enqueueTx, err := s.client.GetEnqueue(*tx.GetMeta().QueueIndex)
 			if err != nil {
