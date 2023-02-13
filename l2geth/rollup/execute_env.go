@@ -10,7 +10,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/state"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/l2geth/miner"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"math/big"
 	"sync"
@@ -35,18 +34,18 @@ type environment struct {
 type executor struct {
 	mu          sync.RWMutex
 	chain       *core.BlockChain
-	config      *miner.Config
 	chainConfig *params.ChainConfig
 	extra       []byte
+	GasFloor    uint64
 	engine      consensus.Engine
 	current     *environment
 	coinbase    common.Address
 }
 
-func newExecutor(config *miner.Config, chainConfig *params.ChainConfig, engine consensus.Engine, chain *core.BlockChain) *executor {
+func newExecutor(gasFloor uint64, chainConfig *params.ChainConfig, engine consensus.Engine, chain *core.BlockChain) *executor {
 	return &executor{
 		chain:       chain,
-		config:      config,
+		GasFloor:    gasFloor,
 		chainConfig: chainConfig,
 		engine:      engine,
 	}
@@ -84,7 +83,7 @@ func (e *executor) applyTx(tx *types.Transaction, txSetProof *types.BatchTxSetPr
 	header := &types.Header{
 		ParentHash: parent.Hash(),
 		Number:     new(big.Int).Add(num, common.Big1),
-		GasLimit:   e.config.GasFloor,
+		GasLimit:   e.GasFloor,
 		Extra:      e.extra,
 		Time:       tx.L1Timestamp(),
 		Coinbase:   txSetProof.Sequencer,

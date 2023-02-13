@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
-	"github.com/mantlenetworkio/mantle/l2geth/miner"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"math/big"
 	"strconv"
@@ -83,7 +82,7 @@ type SyncService struct {
 }
 
 // NewSyncService returns an initialized sync service
-func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *core.BlockChain, db ethdb.Database, config *miner.Config, chainConfig *params.ChainConfig, engine consensus.Engine) (*SyncService, error) {
+func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *core.BlockChain, db ethdb.Database, gasFloor uint64, chainConfig *params.ChainConfig, engine consensus.Engine) (*SyncService, error) {
 	if bc == nil {
 		return nil, errors.New("Must pass BlockChain to SyncService")
 	}
@@ -156,7 +155,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		feeThresholdDown:               cfg.FeeThresholdDown,
 		feeThresholdUp:                 cfg.FeeThresholdUp,
 		cfg:                            cfg,
-		executor:                       newExecutor(config, chainConfig, engine, bc),
+		executor:                       newExecutor(gasFloor, chainConfig, engine, bc),
 	}
 
 	// The chainHeadSub is used to synchronize the SyncService with the chain.
@@ -1355,6 +1354,18 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 			return fmt.Errorf("Cannot get transaction batch: %w", err)
 		}
 		for _, tx := range txs {
+			index := tx.GetMeta().Index
+			stateRoot, err := s.client.GetStateRoot(*index, s.backend)
+			if err != nil {
+				return fmt.Errorf("Cannot get stateroot from dtl : %w", err)
+			}
+			err, block := s.executor.applyTx(tx, &types.BatchTxSetProof{})
+			if err != nil {
+				return fmt.Errorf("Cannot apply tx : %w", err)
+			}
+			if block.Root().String() != stateRoot.value {
+				return fmt.Errorf("stateroot is different")
+			}
 			if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
 				return fmt.Errorf("cannot apply batched transaction: %w", err)
 			}
