@@ -9,38 +9,38 @@ import (
 
 var (
 	// Fraud Proofs Flags
-	RollupNodeFlag = &cli.StringFlag{
-		Name:  "rollup.node",
+	FraudProofNodeFlag = &cli.StringFlag{
+		Name:  "fp.node",
 		Usage: "Start node as rollup sequencer or validator",
 		Value: "",
 	}
-	RollupCoinBaseFlag = &cli.StringFlag{
-		Name:  "rollup.coinbase",
+	FraudProofCoinBaseFlag = &cli.StringFlag{
+		Name:  "fp.coinbase",
 		Usage: "The sequencer/validator address to be unlocked (pass passphrash via --password)",
 		Value: "",
 	}
-	RollupL1EndpointFlag = &cli.StringFlag{
-		Name:  "rollup.l1endpoint",
+	FraudProofL1EndpointFlag = &cli.StringFlag{
+		Name:  "fp.l1endpoint",
 		Usage: "The api endpoint of L1 client",
 		Value: "",
 	}
-	RollupL1ChainIDFlag = &cli.Uint64Flag{
-		Name:  "rollup.l1chainid",
+	FraudProofL1ChainIDFlag = &cli.Uint64Flag{
+		Name:  "fp.l1chainid",
 		Usage: "The chain ID of L1 client",
 		Value: 31337,
 	}
-	RollupSequencerAddrFlag = &cli.StringFlag{
-		Name:  "rollup.sequencer-addr",
+	FraudProofSequencerAddrFlag = &cli.StringFlag{
+		Name:  "fp.sequencer-addr",
 		Usage: "The account address of sequencer",
 		Value: "",
 	}
-	RollupRollupAddrFlag = &cli.StringFlag{
-		Name:  "rollup.rollup-addr",
+	FraudProofRollupAddrFlag = &cli.StringFlag{
+		Name:  "fp.rollup-addr",
 		Usage: "The contract address of L1 rollup",
 		Value: "",
 	}
-	RollupRollupStakeAmount = &cli.Uint64Flag{
-		Name:   "rollup.stake-amount",
+	FraudProofRollupStakeAmount = &cli.Uint64Flag{
+		Name:   "fp.stake-amount",
 		Usage:  "Required staking amount",
 		EnvVar: "ROLLUP_STAKE_AMOUNT",
 		Value:  1000000000000000000,
@@ -72,8 +72,8 @@ var (
 //}
 
 func MakeFraudProofConfig(ctx *cli.Context) *services.Config {
-	utils.CheckExclusive(ctx, RollupNodeFlag, utils.MiningEnabledFlag)
-	utils.CheckExclusive(ctx, RollupNodeFlag, utils.DeveloperFlag)
+	//utils.CheckExclusive(ctx, FraudProofNodeFlag, utils.MiningEnabledFlag)
+	//utils.CheckExclusive(ctx, FraudProofNodeFlag, utils.DeveloperFlag)
 	var passphrase string
 	if list := utils.MakePasswordList(ctx); len(list) > 0 {
 		passphrase = list[0]
@@ -81,15 +81,14 @@ func MakeFraudProofConfig(ctx *cli.Context) *services.Config {
 		utils.Fatalf("Failed to register the Rollup service: coinbase account locked")
 	}
 	cfg := &services.Config{
-		Node:          ctx.String(RollupNodeFlag.Name),
-		Coinbase:      common.HexToAddress(ctx.String(RollupCoinBaseFlag.Name)),
-		Passphrase:    passphrase,
-		L1Endpoint:    ctx.String(RollupL1EndpointFlag.Name),
-		L1ChainID:     ctx.Uint64(RollupL1ChainIDFlag.Name),
-		SequencerAddr: common.HexToAddress(ctx.String(RollupSequencerAddrFlag.Name)),
-		//SequencerInboxAddr: common.HexToAddress(ctx.String(RollupSequencerInboxAddrFlag.Name)),
-		RollupAddr:        common.HexToAddress(ctx.String(RollupRollupAddrFlag.Name)),
-		RollupStakeAmount: ctx.Uint64(RollupRollupStakeAmount.Name),
+		Node:              ctx.String(utils.RollupRoleFlag.Name),
+		Coinbase:          common.HexToAddress(ctx.String(FraudProofCoinBaseFlag.Name)),
+		Passphrase:        passphrase,
+		L1Endpoint:        ctx.String(FraudProofL1EndpointFlag.Name),
+		L1ChainID:         ctx.Uint64(FraudProofL1ChainIDFlag.Name),
+		SequencerAddr:     common.HexToAddress(ctx.String(FraudProofSequencerAddrFlag.Name)),
+		RollupAddr:        common.HexToAddress(ctx.String(FraudProofRollupAddrFlag.Name)),
+		RollupStakeAmount: ctx.Uint64(FraudProofRollupStakeAmount.Name),
 	}
 	return cfg
 }

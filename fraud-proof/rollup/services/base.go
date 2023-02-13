@@ -89,7 +89,7 @@ func NewBaseService(eth Backend, proofBackend proof.Backend, cfg *Config, auth *
 	return b, nil
 }
 
-func (b *BaseService) Start() *types.Block {
+func (b *BaseService) Start(cleanL1, stake bool) *types.Block {
 	// Check if we are at genesis
 	// TODO: if not, sync from L1
 	genesis := b.Eth.BlockChain().CurrentBlock()
@@ -97,13 +97,26 @@ func (b *BaseService) Start() *types.Block {
 		log.Crit("Sequencer can only start from genesis")
 	}
 	log.Info("Genesis root", "root", genesis.Root())
-	// Initial staking
-	// TODO: sync L1 staking status
-	stakeOpts := b.Rollup.TransactOpts
-	stakeOpts.Value = big.NewInt(int64(b.Config.RollupStakeAmount))
-	_, err := b.Rollup.Contract.Stake(&stakeOpts)
-	if err != nil {
-		log.Crit("Failed to stake", "err", err)
+
+	if cleanL1 {
+		//inboxSize, err := b.Inbox.GetInboxSize()
+		//if err != nil {
+		//	log.Crit("Failed to get initial inbox size", "err", err)
+		//}
+		//if inboxSize.Cmp(common.Big0) != 0 {
+		//	log.Crit("Rollup service can only start from genesis")
+		//}
+	}
+
+	if stake {
+		// Initial staking
+		// TODO: sync L1 staking status
+		stakeOpts := b.Rollup.TransactOpts
+		stakeOpts.Value = big.NewInt(int64(b.Config.RollupStakeAmount))
+		_, err := b.Rollup.Contract.Stake(&stakeOpts)
+		if err != nil {
+			log.Crit("Failed to stake", "err", err)
+		}
 	}
 	return genesis
 }

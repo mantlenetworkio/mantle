@@ -336,7 +336,7 @@ func (s *Sequencer) APIs() []rpc.API {
 }
 
 func (s *Sequencer) Start() error {
-	_ = s.BaseService.Start()
+	_ = s.BaseService.Start(true, true)
 
 	s.Wg.Add(2)
 	go s.confirmationLoop()

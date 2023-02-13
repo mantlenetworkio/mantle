@@ -488,7 +488,7 @@ func (v *Validator) challengeLoop() {
 }
 
 func (v *Validator) Start() error {
-	genesis := v.BaseService.Start()
+	genesis := v.BaseService.Start(true, true)
 
 	v.Wg.Add(3)
 	go v.collectingLoop()

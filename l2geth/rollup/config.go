@@ -41,4 +41,6 @@ type Config struct {
 	SequencerClientHttp string
 	// stake amount
 	StakeAmount *big.Int
+	// node character
+	RollupRole Role
 }

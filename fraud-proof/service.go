@@ -42,9 +42,9 @@ func RegisterFraudProofService(stack *node.Node, cfg *services.Config) {
 	}
 
 	// Register services
-	if cfg.Node == services.NODE_SEQUENCER {
+	if cfg.Node == services.NODE_SCHEDULER {
 		sequencer.RegisterService(ethService, ethService.APIBackend, cfg, auth)
-	} else if cfg.Node == services.NODE_VALIDATOR {
+	} else if cfg.Node == services.NODE_VERIFIER {
 		validator.RegisterService(ethService, ethService.APIBackend, cfg, auth)
 	} else {
 		log.Crit("Failed to register the Rollup service: Node type unkown", "type", cfg.Node)

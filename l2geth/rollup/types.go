@@ -92,3 +92,11 @@ func isCtcTxEqual(a, b *types.Transaction) bool {
 	}
 	return true
 }
+
+type Role uint8
+
+const (
+	SCHEDULER_NODE Role = 0
+	SEQUENCER_NODE Role = 1
+	VERIFIER_NODE  Role = 2
+)

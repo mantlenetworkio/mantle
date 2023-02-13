@@ -50,4 +50,5 @@ exec geth \
   --unlock $BLOCK_SIGNER_ADDRESS \
   --mine \
   --miner.etherbase $BLOCK_SIGNER_ADDRESS \
+  --rollup.role "sequencer"
   "$@"
