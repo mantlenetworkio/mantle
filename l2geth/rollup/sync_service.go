@@ -814,7 +814,21 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	var oldBlocks []types.Block
 	for i := start; i <= latest; i++ {
 		block := s.bc.GetBlockByNumber(i)
-		txs = append(txs, *block.Transactions()[0])
+		tx := block.Transactions()[0]
+		//tx := types.Transaction{}
+		if block.Transactions()[0].QueueOrigin() == types.QueueOriginL1ToL2 {
+			enqueueTx, err := s.client.GetEnqueue(*tx.GetMeta().QueueIndex)
+			if err != nil {
+				return err
+			}
+			if tx.Hash() != enqueueTx.Hash() {
+				enqueueTx.SetIndex(*tx.GetMeta().Index)
+				enqueueTx.SetL1BlockNumber(tx.L1BlockNumber().Uint64())
+				enqueueTx.SetL1Timestamp(tx.L1Timestamp())
+				tx = enqueueTx
+			}
+		}
+		txs = append(txs, *tx)
 		oldBlocks = append(oldBlocks, *block)
 	}
 	log.Info("setHead start", "currentBlockNumber", s.bc.CurrentHeader().Number.Uint64())
@@ -959,7 +973,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 	// network split.
 	// Note that it should never be possible for the timestamp to be set to
 	// 0 when running as a verifier.
-	shouldMalleateTimestamp := !s.verifier && tx.QueueOrigin() == types.QueueOriginL1ToL2
+	shouldMalleateTimestamp := !s.verifier && tx.QueueOrigin() == types.QueueOriginL1ToL2 && tx.GetMeta().Index == nil
 	if tx.L1Timestamp() == 0 || shouldMalleateTimestamp {
 		// Get the latest known timestamp
 		current := time.Unix(int64(ts), 0)
@@ -968,7 +982,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 		// If enough time has passed, then assign the
 		// transaction to have the timestamp now. Otherwise,
 		// use the current timestamp
-		if now.Sub(current) > s.timestampRefreshThreshold && tx.GetMeta().Index == nil {
+		if now.Sub(current) > s.timestampRefreshThreshold {
 			current = now
 		}
 		log.Info("Updating latest timestamp", "timestamp", current, "unix", current.Unix())
