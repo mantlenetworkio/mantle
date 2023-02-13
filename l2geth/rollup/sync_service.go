@@ -821,6 +821,10 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 				return err
 			}
 			if tx.Hash() != enqueueTx.Hash() {
+				log.Info("scheduler l1 tx be replaced", "new", enqueueTx.Hash(), "old", tx.Hash())
+				// When the transaction changes, we will use enqueue Tx to replace
+				// the transaction of the original block and re-block, and we need
+				// the following data to be consistent with before rollback
 				enqueueTx.SetIndex(*tx.GetMeta().Index)
 				enqueueTx.SetL1BlockNumber(tx.L1BlockNumber().Uint64())
 				enqueueTx.SetL1Timestamp(tx.L1Timestamp())
