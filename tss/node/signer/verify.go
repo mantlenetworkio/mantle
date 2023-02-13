@@ -35,27 +35,40 @@ func (p *Processor) Verify() {
 					continue
 				}
 				var resId = req.ID
-				offset := len(askRequest.StateRoots)
+				logger.Info().Msgf("stateroots size %d ", len(askRequest.StateRoots))
+				//batch process stateroots ,default batch size 10
+				segments := group(askRequest.StateRoots, 10)
 
-				wg := &sync.WaitGroup{}
-				wg.Add(offset)
 				var result = true
 				var getBlockErr = false
 				var resultErr error
-				for index, stateRoot := range askRequest.StateRoots {
-					go func(fIndex int, fStateRoot [32]byte) {
-						resultTmp, err := p.verify(askRequest.StartBlock, fIndex, fStateRoot, logger, wg)
-						if !resultTmp {
-							result = resultTmp
-							if err != nil {
-								logger.Error().Msgf("failed to verify block %s", err.Error())
-								getBlockErr = true
-								resultErr = err
+
+				for k, v := range segments {
+					offset := len(v)
+
+					wg := &sync.WaitGroup{}
+					wg.Add(offset)
+
+					for index, stateRoot := range v {
+						go func(fIndex int, fStateRoot [32]byte) {
+							resultTmp, err := p.verify(askRequest.StartBlock, fIndex+k, fStateRoot, logger, wg)
+							if !resultTmp {
+								result = resultTmp
+								if err != nil {
+									logger.Error().Msgf("failed to verify block %s", err.Error())
+									getBlockErr = true
+									resultErr = err
+								}
 							}
-						}
-					}(index, stateRoot)
+						}(index, stateRoot)
+					}
+					wg.Wait()
+
+					if !result || getBlockErr {
+						break
+					}
 				}
-				wg.Wait()
+
 				if result {
 					hash, err := signMsgToHash(askRequest)
 					if err != nil {
@@ -96,7 +109,7 @@ func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger z
 	blockNumber := offset.Add(offset, startBig)
 	logger.Info().Msgf("verify block number %d", blockNumber)
 
-	value, ok := p.cacheVerify.Get(blockNumber.String())
+	value, ok := p.GetVerify(blockNumber.String())
 	if ok {
 		if value {
 			return value, nil
@@ -143,17 +156,23 @@ func (p *Processor) CacheVerify(key string, value bool) bool {
 	return p.cacheVerify.Set(key, value)
 }
 
-//func group(slice [][32]byte, segment int) [][][32]byte {
-//	size := len(slice)
-//	var segments = make([][][32]byte, 0)
-//	quantity := size / segment
-//	remainder := size % segment
-//	i := 0
-//	for ; i < quantity; i++ {
-//		segments = append(segments, slice[i*segment:(i+1)*segment])
-//	}
-//	if remainder != 0 {
-//		segments = append(segments, slice[i*segment:i*segment+remainder])
-//	}
-//	return segments
-//}
+func (p *Processor) GetVerify(key string) (bool, bool) {
+	p.cacheVerifyLock.RLock()
+	defer p.cacheVerifyLock.RUnlock()
+	return p.cacheVerify.Get(key)
+}
+
+func group(slice [][32]byte, segment int) map[int][][32]byte {
+	size := len(slice)
+	var segments = make(map[int][][32]byte)
+	quantity := size / segment
+	remainder := size % segment
+	i := 0
+	for ; i < quantity; i++ {
+		segments[i*segment] = slice[i*segment : (i+1)*segment]
+	}
+	if remainder != 0 {
+		segments[i*segment] = slice[i*segment : i*segment+remainder]
+	}
+	return segments
+}
