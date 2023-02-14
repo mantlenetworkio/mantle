@@ -506,6 +506,9 @@ func (c *Client) GetStateRoot(index uint64, backend Backend) (*StateRoot, error)
 	if !ok {
 		return nil, fmt.Errorf("could not get tx with index %d", index)
 	}
+	if res.StateRoot == nil {
+		return nil, errElementNotFound
+	}
 	return res.StateRoot, nil
 }
 

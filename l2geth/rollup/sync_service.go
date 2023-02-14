@@ -1355,13 +1355,20 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 		if err != nil {
 			return fmt.Errorf("Cannot get transaction batch: %w", err)
 		}
+		//verify txs state roots
+
 		for _, tx := range txs {
 			if !s.mpcVerifier {
 				index := tx.GetMeta().Index
 				stateRoot, err := s.client.GetStateRoot(*index, s.backend)
 				if err != nil {
-					log.Info("waiting stateroot to be append to scc", "index", index)
+					log.Info("waiting stateroot to be append to scc", "index", *index)
 					return fmt.Errorf("Cannot get stateroot from dtl : %w", err)
+				}
+				next := s.GetNextIndex()
+				if *index < next {
+					log.Warn("index is big than current index", "index", index, "next index", next)
+					continue
 				}
 				err, block := s.executor.applyTx(tx, &types.BatchTxSetProof{})
 				if err != nil {
@@ -1369,6 +1376,7 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 				}
 
 				if block.Root().String() != stateRoot.Value {
+					log.Error("state root is different", " scc stateroot", stateRoot.Value, "local stateroot", block.Root().String(), "index", index)
 					return fmt.Errorf("stateroot is different")
 				}
 			}
