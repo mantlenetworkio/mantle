@@ -13,6 +13,7 @@ describe('RollUp', () => {
   let rollUp: Contract
   let verifier: Contract
   let token: Contract
+  let assertionMap: Contract
 
   before('setup', async () => {
     accounts = await ethers.getSigners()
@@ -55,7 +56,7 @@ describe('RollUp', () => {
   })
 
   it('createAssertion', async () => {
-    const amountStake = 1000
+    const amountStake = 10000
     await rollUp.stake({ value: amountStake })
 
     await rollUp.createAssertion(
@@ -87,7 +88,7 @@ describe('RollUp', () => {
     )
     expect(await rollUp.lastCreatedAssertionID()).to.eq(4)
 
-    await rollUp.connect(await accounts[3]).stake({ value: 10000 })
+    await rollUp.connect(await accounts[3]).stake({ value: 1000 })
     await rollUp.connect(await accounts[3]).advanceStake(1)
     await rollUp.connect(await accounts[3]).advanceStake(2)
     await rollUp
@@ -128,8 +129,8 @@ describe('RollUp', () => {
   })
 
   it('verifyOneStepProof', async () => {
-    const winnerAddr = await accounts[0].getAddress()
-    const loserAddr = await accounts[3].getAddress()
+    const winnerAddr = await accounts[3].getAddress()
+    const loserAddr = await accounts[0].getAddress()
     const ownerAddr = await accounts[1].getAddress()
 
     const challengeImp = await deploy('Challenge')
@@ -140,6 +141,7 @@ describe('RollUp', () => {
       accounts[0]
     )
 
+    await challenge.initializeChallengeLength(1)
     const winnerAmount = (
       await rollUp.stakers(winnerAddr)
     ).amountStaked.toNumber()
@@ -148,15 +150,12 @@ describe('RollUp', () => {
     ).amountStaked.toNumber()
     const withdrawLoser = loserAmount - winnerAmount
     // todo change to mock data
-    await challenge.verifyOneStepProof(
+    await challenge.connect(accounts[3]).verifyOneStepProof(
       '0x0000', // proof
       1, // challengedStepIndex
-      [
-        '0x0000000000000000000000000000000000000000000000000000000000000000',
-        '0x0000000000000000000000000000000000000000000000000000000000000000',
-      ], // prevBisection
+      [await assertionMap.getStateHash(2), await assertionMap.getStateHash(3)], // prevBisection
       0, // prevChallengedSegmentStart
-      0 // prevChallengedSegmentLength
+      1 // prevChallengedSegmentLength
     )
     // check amount
     expect(await rollUp.withdrawableFunds(loserAddr)).to.eq(withdrawLoser)
@@ -168,7 +167,7 @@ describe('RollUp', () => {
     )
     expect(await rollUp.isStaked(loserAddr)).to.eq(false)
     expect((await rollUp.zombies(0)).stakerAddress).to.eq(loserAddr)
-    expect((await rollUp.zombies(0)).lastAssertionID.toNumber()).to.eq(5)
+    expect((await rollUp.zombies(0)).lastAssertionID.toNumber()).to.eq(4)
   })
 
   const deployToken = async () => {
@@ -177,7 +176,7 @@ describe('RollUp', () => {
 
   const deployRollUp = async () => {
     const rollUpImp = await deploy('Rollup')
-    const assertionMap = await deploy('AssertionMap')
+    assertionMap = await deploy('AssertionMap')
 
     const rollupArgs = [
       await accounts[1].getAddress(), // roll up owner
@@ -221,6 +220,6 @@ describe('RollUp', () => {
   }
 
   const deployVerifier = async () => {
-    verifier = await deploy('Verifier')
+    verifier = await deploy('VerifierEntry')
   }
 })
