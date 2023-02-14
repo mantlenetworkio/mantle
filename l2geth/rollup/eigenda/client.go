@@ -107,7 +107,7 @@ func (c *Client) GetBatchTransactionByDataStoreId(storeNumber uint32, l1MsgSende
 				l1MessageSender = nil
 			} else {
 				queueOrigin = types.QueueOriginL1ToL2
-				addrLs := common2.HexToAddress("0x8a6acf3b8ffc87faca8ad8a1b5d95c0f58c0d009")
+				addrLs := common2.HexToAddress(l1MsgSender)
 				l1MessageSender = &addrLs
 			}
 			realTxMeta := &types.TransactionMeta{
