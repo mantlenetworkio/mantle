@@ -69,6 +69,8 @@ contract Challenge is IChallenge {
     bytes32 private startStateHash;
     bytes32 private endStateHash;
 
+    // todo: just for test,delete!
+    VerificationContext.Context public ctx;
     /**
      * @notice Pre-condition: `msg.sender` is correct and still has time remaining.
      * Post-condition: `turn` changes and `lastMoveBlock` set to current `block.number`.
@@ -171,6 +173,11 @@ contract Challenge is IChallenge {
         emit Bisected(bisectionHash, challengedSegmentStart, challengedSegmentLength);
     }
 
+    // todo: just for test,delete!
+    function setCtx(VerificationContext.Context memory _ctx) public {
+        ctx = _ctx;
+    }
+
     function verifyOneStepProof(
         bytes calldata proof,
         uint256 challengedStepIndex,
@@ -186,20 +193,21 @@ contract Challenge is IChallenge {
         // Require that this is the last round.
         require(prevChallengedSegmentLength / MAX_BISECTION_DEGREE <= 1, "BISECTION_INCOMPLETE");
 
-        // TODO: verify OSP
         // IVerificationContext ctx = <get ctx from sequenced txs>;
-        // bytes32 nextStateHash = verifier.verifyOneStepProof(
-        //     ctx,
-        //     prevBisection[challengedStepIndex - 1],
-        //     proof
-        // );
-        // if (nextStateHash == prevBisection[challengedStepIndex]) {
-        //     // osp verified, current win
-        // } else {
-        //     // current lose?
-        // }
+        bytes32 nextStateHash = verifier.verifyOneStepProof(
+            ctx,
+            0, // todo : mock 0 for V_STACK_OP
+            prevBisection[challengedStepIndex - 1],
+            proof
+        );
 
-        _currentWin(CompletionReason.OSP_VERIFIED);
+         if (nextStateHash == prevBisection[challengedStepIndex]) {
+             // osp verified, current win
+             _currentWin(CompletionReason.OSP_VERIFIED);
+         } else {
+             // current lose?
+             _asserterWin(CompletionReason.OSP_VERIFIED);
+         }
     }
 
     function timeout() external override {
