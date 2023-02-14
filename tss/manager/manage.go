@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
-	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
 	"math"
 	"math/big"
 	"math/rand"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
+	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/influxdata/influxdb/pkg/slices"
@@ -138,7 +139,16 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	}
 	if sig := m.getStateSignature(digestBz); len(sig) > 0 {
 		log.Info("get stored signature ", "digest", hex.EncodeToString(digestBz), "sig", hex.EncodeToString(sig))
-		return sig, nil
+		response := tss.BatchSubmitterResponse{
+			Signature: sig,
+			RollBack:  false,
+		}
+		responseBytes, err := json.Marshal(response)
+		if err != nil {
+			log.Error("batch submitter response failed to marshal !")
+			return nil, err
+		}
+		return responseBytes, nil
 	}
 
 	tssInfo, err := m.tssQueryService.QueryActiveInfo()

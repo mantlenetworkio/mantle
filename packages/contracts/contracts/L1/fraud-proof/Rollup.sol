@@ -211,8 +211,8 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         bytes32 vmHash,
         uint256 inboxSize,
         uint256 l2GasUsed
-    ) public override stakedOnly {
-//    ) public override {
+//    ) public override stakedOnly {
+    ) public override {
         // TODO: determine if inboxSize needs to be included.
         RollupLib.ExecutionState memory endState = RollupLib.ExecutionState(l2GasUsed, vmHash);
 

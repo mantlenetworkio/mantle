@@ -10,6 +10,7 @@ TssStakingSlashing
 BVM_L1CrossDomainMessenger
 Proxy__TSS_GroupManager
 Lib_AddressManager
+VerifierEntry
 AddressDictator
 BVM_EigenDataLayrChain
 CanonicalTransactionChain
@@ -20,6 +21,5 @@ Proxy__BVM_EigenDataLayrChain
 Proxy__BVM_L1CrossDomainMessenger
 Proxy__TSS_StakingSlashing
 BondManager
-Verifier
 AssertionMap
 Proxy__Rollup

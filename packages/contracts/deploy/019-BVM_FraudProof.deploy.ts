@@ -46,15 +46,15 @@ const deployFn: DeployFunction = async (hre) => {
   // deploy verifier impl
   await deployAndVerifyAndThen({
     hre,
-    name: names.managed.fraud_proof.Verifier,
-    contract: 'Verifier',
+    name: names.managed.fraud_proof.VerifierEntry,
+    contract: 'VerifierEntry',
     args: [],
   })
   const Impl__Verifier = await getContractFromArtifact(
     hre,
-    names.managed.fraud_proof.Verifier,
+    names.managed.fraud_proof.VerifierEntry,
     {
-      iface: 'Verifier',
+      iface: 'VerifierEntry',
       signerOrProvider: deployer,
     }
   )
@@ -106,7 +106,7 @@ const deployFn: DeployFunction = async (hre) => {
     hre,
     name: names.managed.fraud_proof.Proxy__Verifier,
     contract: 'TransparentUpgradeableProxy',
-    iface: 'Verifier',
+    iface: 'VerifierEntry',
     args: [Impl__Verifier.address, owner, callData],
   })
   console.log('deploy fraud proof verifier proxy success')

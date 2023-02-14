@@ -23,7 +23,7 @@ export const names = {
     },
     fraud_proof: {
       AssertionMap: 'AssertionMap',
-      Verifier: 'Verifier',
+      VerifierEntry: 'VerifierEntry',
       Rollup: 'Rollup',
       Proxy__AssertionMap: 'Proxy__AssertionMap',
       Proxy__Verifier: 'Proxy__Verifier',
