@@ -95,6 +95,6 @@ fi
 
 # service the addresses and dumps
 echo "Starting server."
-python3 -m http.server \
+exec python3 -m http.server \
     --bind "0.0.0.0" 8081 \
     --directory ./genesis
