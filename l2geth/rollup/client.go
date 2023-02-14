@@ -87,7 +87,7 @@ type transaction struct {
 type StateRoot struct {
 	Index      uint64 `json:"index"`
 	BatchIndex uint64 `json:"batchIndex"`
-	value      string `json:"value"`
+	Value      string `json:"value"`
 }
 
 // Enqueue represents an `enqueue` transaction or a L1 to L2 transaction.

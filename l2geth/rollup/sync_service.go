@@ -1357,13 +1357,15 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 			index := tx.GetMeta().Index
 			stateRoot, err := s.client.GetStateRoot(*index, s.backend)
 			if err != nil {
+				log.Info("waiting stateroot to be append to scc", "index", index)
 				return fmt.Errorf("Cannot get stateroot from dtl : %w", err)
 			}
 			err, block := s.executor.applyTx(tx, &types.BatchTxSetProof{})
 			if err != nil {
 				return fmt.Errorf("Cannot apply tx : %w", err)
 			}
-			if block.Root().String() != stateRoot.value {
+
+			if block.Root().String() != stateRoot.Value {
 				return fmt.Errorf("stateroot is different")
 			}
 			if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
