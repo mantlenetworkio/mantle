@@ -145,7 +145,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		return nil, genesisErr
 	}
 	if chainConfig.Clique != nil {
-		chainConfig.Clique.IsVerifier = config.Rollup.IsVerifier
+		chainConfig.Clique.IsVerifier = config.Rollup.RollupRole == rollup.VERIFIER_NODE
 	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
@@ -231,8 +231,8 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	eth.miner = miner.New(eth, &config.Miner, chainConfig, eth.EventMux(), eth.engine, eth.isLocalBlock)
 	eth.miner.SetExtra(makeExtraData(config.Miner.ExtraData))
 
-	log.Info("Backend Config", "max-calldata-size", config.Rollup.MaxCallDataSize, "gas-limit", config.Rollup.GasLimit, "is-verifier", config.Rollup.IsVerifier, "using-bvm", rcfg.UsingBVM)
-	eth.APIBackend = &EthAPIBackend{ctx.ExtRPCEnabled(), eth, nil, nil, config.Rollup.IsVerifier, config.Rollup.GasLimit, rcfg.UsingBVM, config.Rollup.MaxCallDataSize}
+	log.Info("Backend Config", "max-calldata-size", config.Rollup.MaxCallDataSize, "gas-limit", config.Rollup.GasLimit, "is-verifier", config.Rollup.RollupRole == rollup.VERIFIER_NODE, "using-bvm", rcfg.UsingBVM)
+	eth.APIBackend = &EthAPIBackend{ctx.ExtRPCEnabled(), eth, nil, nil, config.Rollup.RollupRole == rollup.VERIFIER_NODE, config.Rollup.GasLimit, rcfg.UsingBVM, config.Rollup.MaxCallDataSize}
 	gpoParams := config.GPO
 	if gpoParams.Default == nil {
 		gpoParams.Default = config.Miner.GasPrice
