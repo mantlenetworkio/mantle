@@ -194,7 +194,7 @@ task('take-dump').setAction(async (args, hre) => {
         '00'.repeat(65),
       alloc: dump,
     }
-  }else{
+  }else {
     genesis = {
       commit,
       config: {
@@ -224,6 +224,7 @@ task('take-dump').setAction(async (args, hre) => {
         '00'.repeat(65),
       alloc: dump,
     }
+  }
   // Make sure the output location exists
   const outdir = path.resolve(__dirname, '../genesis')
   const outfile = path.join(outdir, `${hre.network.name}.json`)
