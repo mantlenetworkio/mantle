@@ -4,6 +4,7 @@ const config = {
   l2BlockGasLimit: 15_000_000,
   l2ChainId: 1705003,
   ctcL2GasDiscountDivisor: 32,
+  fixBlockHashBranchingBlock: 90000,
   ctcEnqueueGasCost: 60_000,
   sccFaultProofWindowSeconds: 0,
   sccSequencerPublishWindowSeconds: 12592000,
