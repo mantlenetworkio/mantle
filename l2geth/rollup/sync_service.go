@@ -1367,7 +1367,7 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 				}
 				next := s.GetNextIndex()
 				if *index < next {
-					log.Warn("index is big than current index", "index", index, "next index", next)
+					log.Warn("index is less than current index", "index", *index, ",next index", next)
 					continue
 				}
 				err, block := s.executor.applyTx(tx, &types.BatchTxSetProof{})
