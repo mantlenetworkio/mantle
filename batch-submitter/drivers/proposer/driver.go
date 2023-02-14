@@ -277,6 +277,7 @@ func (d *Driver) CraftBatchTx(
 		if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
 			log.Info("append state with fraud proof")
 			// ##### FRAUD-PROOF modify #####
+			// check stake initialised
 			tx, err = d.FraudProofAppendStateBatch(
 				opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature, blocks,
 			)
@@ -313,6 +314,7 @@ func (d *Driver) CraftBatchTx(
 			if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
 				log.Info("append state with fraud proof by gas tip cap")
 				// ##### FRAUD-PROOF modify #####
+				// check stake initialised
 				return d.FraudProofAppendStateBatch(
 					opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature, blocks,
 				)
@@ -407,7 +409,7 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 	var latestAssertion rollupTypes.Assertion
 	var assertionID *big.Int
 	var err error
-	if assertionID, err = d.fpAssertion.GetLatestAssertionID(&bind.CallOpts{}); err != nil {
+	if assertionID, err = d.fpAssertion.GetLatestAssertionID(&bind.CallOpts{}, opts.From); err != nil {
 		return nil, err
 	}
 	if ret, err := d.fpAssertion.Assertions(&bind.CallOpts{}, assertionID); err != nil {

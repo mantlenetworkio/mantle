@@ -137,6 +137,8 @@ contract AssertionMap is Initializable {
         assertion.parent = parentID;
         assertion.deadline = deadline;
         assertion.proposalTime = block.number;
+
+        latestAssertions[tx.origin] = assertionID;
     }
 
     function stakeOnAssertion(uint256 assertionID, address stakerAddress) external rollupOnly {
