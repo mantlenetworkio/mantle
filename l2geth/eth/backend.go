@@ -214,7 +214,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
-	eth.syncService.IsScheduler()
 
 	eth.txPool.SetDeleteTxVerifiedPrice(eth.syncService.DeleteTxVerifiedPrice)
 	eth.txPool.SetValidateSequencerTransaction(eth.syncService.ValidateSequencerTransaction)
