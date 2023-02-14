@@ -90,3 +90,31 @@ func WriteHeadBatchIndex(db ethdb.KeyValueWriter, index uint64) {
 		log.Crit("Failed to store head batch index", "err", err)
 	}
 }
+
+func ReadLatestEigenBatchIndex(db ethdb.KeyValueReader) *uint64 {
+	data, _ := db.Get(eigenBatchKey)
+	if len(data) == 0 {
+		return nil
+	}
+	ret := new(big.Int).SetBytes(data).Uint64()
+	return &ret
+}
+
+func WriteLatestEigenIndex(db ethdb.KeyValueWriter, index uint64) {
+	value := new(big.Int).SetUint64(index).Bytes()
+	if index == 0 {
+		value = []byte{0}
+	}
+	if err := db.Put(eigenBatchKey, value); err != nil {
+		log.Crit("Failed to store latest eigen batch index", "err", err)
+	}
+}
+
+func ReadEigenBatchIndex(db ethdb.KeyValueReader) *uint64 {
+	data, _ := db.Get(eigenBatchKey)
+	if len(data) == 0 {
+		return nil
+	}
+	ret := new(big.Int).SetBytes(data).Uint64()
+	return &ret
+}
