@@ -43,4 +43,7 @@ type Batcher interface {
 	// NewBatch creates a write-only database that buffers changes to its host db
 	// until a final write is called.
 	NewBatch() Batch
+
+	// NewBatchWithSize creates a write-only database batch with pre-allocated buffer.
+	NewBatchWithSize(size int) Batch
 }

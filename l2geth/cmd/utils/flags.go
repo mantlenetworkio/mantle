@@ -811,6 +811,11 @@ var (
 		Usage:  "Deployment of the canonical transaction chain",
 		EnvVar: "ETH1_CTC_DEPLOYMENT_HEIGHT",
 	}
+	RollupRoleFlag = cli.StringFlag{
+		Name:   "rollup.role",
+		Usage:  "Set rollup node role",
+		EnvVar: "ROLLUP_ROLE",
+	}
 	RollupClientHttpFlag = cli.StringFlag{
 		Name:   "rollup.clienthttp",
 		Usage:  "HTTP endpoint for the rollup client",
@@ -829,6 +834,8 @@ var (
 		Value:  time.Minute * 3,
 		EnvVar: "ROLLUP_TIMESTAMP_REFRESH",
 	}
+	// sequencer / verify /schedual
+
 	RollupBackendFlag = cli.StringFlag{
 		Name:   "rollup.backend",
 		Usage:  "Sync backend for verifiers (\"l1\" or \"l2\"), defaults to l1",
@@ -1150,6 +1157,19 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	}
 	if ctx.GlobalIsSet(SequencerClientHttpFlag.Name) {
 		cfg.SequencerClientHttp = ctx.GlobalString(SequencerClientHttpFlag.Name)
+	}
+	if ctx.GlobalIsSet(RollupRoleFlag.Name) {
+		str := ctx.GlobalString(RollupRoleFlag.Name)
+		switch str {
+		case "scheduler", "SCHEDULER":
+			cfg.RollupRole = rollup.SCHEDULER_NODE
+		case "sequencer", "SEQUENCER":
+			cfg.RollupRole = rollup.SEQUENCER_NODE
+		case "replica", "REPLICA", "verifier", "VERIFIER":
+			cfg.RollupRole = rollup.VERIFIER_NODE
+		default:
+			log.Crit("invalid rollup role", "role", str)
+		}
 	}
 }
 

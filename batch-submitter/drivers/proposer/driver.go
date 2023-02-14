@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/log"
+	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
+	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"math/big"
 	"strings"
 
@@ -22,6 +24,7 @@ import (
 	"github.com/mantlenetworkio/mantle/bss-core/drivers"
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
+	fpbindings "github.com/mantlenetworkio/mantle/fraud-proof/bindings"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	tss_types "github.com/mantlenetworkio/mantle/tss/common"
 )
@@ -41,6 +44,7 @@ type Config struct {
 	MinStateRootElements uint64
 	SCCAddr              common.Address
 	CTCAddr              common.Address
+	FPRollupAddr         common.Address
 	ChainID              *big.Int
 	PrivKey              *ecdsa.PrivateKey
 }
@@ -50,6 +54,9 @@ type Driver struct {
 	sccContract    *scc.StateCommitmentChain
 	rawSccContract *bind.BoundContract
 	ctcContract    *ctc.CanonicalTransactionChain
+	fpRollup       *fpbindings.Rollup
+	rawFPContract  *bind.BoundContract
+	fpAssertion    *fpbindings.AssertionMap
 	walletAddr     common.Address
 	metrics        *metrics.Base
 }
@@ -69,15 +76,44 @@ func NewDriver(cfg Config) (*Driver, error) {
 		return nil, err
 	}
 
-	parsed, err := abi.JSON(strings.NewReader(
+	fpRollup, err := fpbindings.NewRollup(
+		cfg.FPRollupAddr, cfg.L1Client,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	assertionAddr, err := fpRollup.Assertions(&bind.CallOpts{})
+	if err != nil {
+		return nil, err
+	}
+
+	assertionMap, err := fpbindings.NewAssertionMap(
+		assertionAddr, cfg.L1Client,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	parsedSCC, err := abi.JSON(strings.NewReader(
 		scc.StateCommitmentChainABI,
+	))
+	if err != nil {
+		return nil, err
+	}
+	parsedFP, err := abi.JSON(strings.NewReader(
+		fpbindings.RollupABI,
 	))
 	if err != nil {
 		return nil, err
 	}
 
 	rawSccContract := bind.NewBoundContract(
-		cfg.SCCAddr, parsed, cfg.L1Client, cfg.L1Client, cfg.L1Client,
+		cfg.SCCAddr, parsedSCC, cfg.L1Client, cfg.L1Client, cfg.L1Client,
+	)
+
+	rawFPContract := bind.NewBoundContract(
+		cfg.FPRollupAddr, parsedFP, cfg.L1Client, cfg.L1Client, cfg.L1Client,
 	)
 
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
@@ -87,6 +123,9 @@ func NewDriver(cfg Config) (*Driver, error) {
 		sccContract:    sccContract,
 		rawSccContract: rawSccContract,
 		ctcContract:    ctcContract,
+		fpRollup:       fpRollup,
+		rawFPContract:  rawFPContract,
+		fpAssertion:    assertionMap,
 		walletAddr:     walletAddr,
 		metrics:        metrics.NewBase("batch_submitter", cfg.Name),
 	}, nil
@@ -170,6 +209,7 @@ func (d *Driver) CraftBatchTx(
 
 	log.Info(name+" crafting batch tx", "start", start, "end", end, "nonce", nonce)
 
+	var blocks []*l2types.Block
 	var stateRoots [][stateRootSize]byte
 	for i := new(big.Int).Set(start); i.Cmp(end) < 0; i.Add(i, bigOne) {
 		// Consume state roots until reach our maximum tx size.
@@ -182,6 +222,7 @@ func (d *Driver) CraftBatchTx(
 			return nil, err
 		}
 
+		blocks = append(blocks, block)
 		stateRoots = append(stateRoots, block.Root())
 	}
 
@@ -233,9 +274,23 @@ func (d *Driver) CraftBatchTx(
 	if tssResponse.RollBack {
 		tx, err = d.sccContract.RollBackL2Chain(opts, start, offsetStartsAtIndex, tssResponse.Signature)
 	} else {
-		tx, err = d.sccContract.AppendStateBatch(
-			opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
-		)
+		if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
+			log.Info("append state with fraud proof")
+			// ##### FRAUD-PROOF modify #####
+			// check stake initialised
+			tx, err = d.FraudProofAppendStateBatch(
+				opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature, blocks,
+			)
+			if err != nil {
+				log.Error("fraud proof append state batch in error: ", err.Error())
+			}
+			// ##### FRAUD-PROOF modify ##### //
+		} else {
+			log.Info("append state with scc")
+			tx, err = d.sccContract.AppendStateBatch(
+				opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
+			)
+		}
 	}
 
 	switch {
@@ -256,9 +311,20 @@ func (d *Driver) CraftBatchTx(
 				opts, start, offsetStartsAtIndex, tssResponse.Signature,
 			)
 		} else {
-			return d.sccContract.AppendStateBatch(
-				opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
-			)
+			if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
+				log.Info("append state with fraud proof by gas tip cap")
+				// ##### FRAUD-PROOF modify #####
+				// check stake initialised
+				return d.FraudProofAppendStateBatch(
+					opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature, blocks,
+				)
+				// ##### FRAUD-PROOF modify ##### //
+			} else {
+				log.Info("append state with scc by gas tip cap")
+				return d.sccContract.AppendStateBatch(
+					opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature,
+				)
+			}
 		}
 	default:
 		return nil, err
@@ -273,6 +339,8 @@ func (d *Driver) UpdateGasPrice(
 	ctx context.Context,
 	tx *types.Transaction,
 ) (*types.Transaction, error) {
+	var finalTx *types.Transaction
+	var err error
 
 	opts, err := bind.NewKeyedTransactorWithChainID(
 		d.cfg.PrivKey, d.cfg.ChainID,
@@ -284,7 +352,15 @@ func (d *Driver) UpdateGasPrice(
 	opts.Nonce = new(big.Int).SetUint64(tx.Nonce())
 	opts.NoSend = true
 
-	finalTx, err := d.rawSccContract.RawTransact(opts, tx.Data())
+	if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
+		// ##### FRAUD-PROOF modify #####
+		log.Info("get RawTransact from Fraud Proof")
+		finalTx, err = d.rawFPContract.RawTransact(opts, tx.Data())
+		// ##### FRAUD-PROOF modify ##### //
+	} else {
+		log.Info("get RawTransact from SCC")
+		finalTx, err = d.rawSccContract.RawTransact(opts, tx.Data())
+	}
 	switch {
 	case err == nil:
 		return finalTx, nil
@@ -299,7 +375,16 @@ func (d *Driver) UpdateGasPrice(
 		log.Warn(d.cfg.Name + " eth_maxPriorityFeePerGas is unsupported " +
 			"by current backend, using fallback gasTipCap")
 		opts.GasTipCap = drivers.FallbackGasTipCap
-		return d.rawSccContract.RawTransact(opts, tx.Data())
+
+		if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
+			// ##### FRAUD-PROOF modify #####
+			log.Info("get RawTransact from Fraud Proof by gas tip cap")
+			return d.rawFPContract.RawTransact(opts, tx.Data())
+			// ##### FRAUD-PROOF modify ##### //
+		} else {
+			log.Info("get RawTransact from SCC by gas tip cap")
+			return d.rawSccContract.RawTransact(opts, tx.Data())
+		}
 
 	default:
 		return nil, err
@@ -313,4 +398,43 @@ func (d *Driver) SendTransaction(
 	tx *types.Transaction,
 ) error {
 	return d.cfg.L1Client.SendTransaction(ctx, tx)
+}
+
+func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32]byte, shouldStartAtElement *big.Int, signature []byte, blocks []*l2types.Block) (*types.Transaction, error) {
+
+	//if d.fpRollup.InChallenge() {
+	//	log.Warn("currently in challenge, can't submit new assertion")
+	//	return
+	//}
+	var latestAssertion rollupTypes.Assertion
+	var assertionID *big.Int
+	var err error
+	if assertionID, err = d.fpAssertion.GetLatestAssertionID(&bind.CallOpts{}, opts.From); err != nil {
+		return nil, err
+	}
+	if ret, err := d.fpAssertion.Assertions(&bind.CallOpts{}, assertionID); err != nil {
+		return nil, err
+	} else {
+		latestAssertion.ID = assertionID
+		latestAssertion.VmHash = ret.StateHash
+		latestAssertion.InboxSize = ret.InboxSize
+		latestAssertion.GasUsed = ret.GasUsed
+		latestAssertion.Parent = ret.Parent
+		latestAssertion.Deadline = ret.Deadline
+		latestAssertion.ProposalTime = ret.ProposalTime
+	}
+
+	txBatch := rollupTypes.NewTxBatch(blocks, uint64(len(blocks)))
+	assertion := txBatch.ToAssertion(&latestAssertion)
+
+	fmt.Println(assertion.VmHash.String())
+	fmt.Println(assertion.InboxSize)
+	fmt.Println(assertion.GasUsed)
+	fmt.Println(batch)
+	fmt.Println(shouldStartAtElement)
+	fmt.Println(signature)
+
+	// create assertion
+	return d.fpRollup.CreateAssertionWithStateBatch(
+		opts, assertion.VmHash, assertion.InboxSize, assertion.GasUsed, batch, shouldStartAtElement, signature)
 }

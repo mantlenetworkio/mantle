@@ -7,7 +7,8 @@ const config = {
   sccFaultProofWindowSeconds: 0,
   sccSequencerPublishWindowSeconds: 12592000,
   bvmSequencerAddress: process.env.BVM_SEQUENCER_ADDRESS || '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-  bvmProposerAddress: process.env.BVM_PROPOSER_ADDRESS || '0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc',
+  bvmProposerAddress: process.env.BVM_PROPOSER_ADDRESS || '0x4f958F2C2303BDca22b739339cD633F8543BB07D',
+  bvmRolluperAddress: process.env.BVM_ROLLUPER_ADDRESS || '0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc',
   bvmBlockSignerAddress: process.env.BVM_BLOCK_SIGNER_ADDRESS || '0x00000398232E2064F896018496b4b44b3D62751F',
   bvmFeeWalletAddress: process.env.BVM_FEE_WALLET_ADDRESS || '0xeEbceB07eA7D2339895Dd492B3B5960641302830',
   bvmAddressManagerOwner: process.env.BVM_ADDRESS_MANAGER_OWNER || '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
@@ -15,7 +16,7 @@ const config = {
   bvmFeeWalletOwner: process.env.BVM_FEE_WALLETOWNER_OWNER ||'0xDfCDD683728F83A5da850a210db828e6f35DCfA6',
   l1BitAddress: process.env.L1_BIT_ADDRESS || '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
   bvmTssRewardContractOwner: process.env.TssRewardContractOwner || '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
-  dataManagerAddress: process.env.DATA_MANAGER_ADDRESS || '0xec36421F31108A26E46a0445d336978aA88A2012',
+  dataManagerAddress: process.env.DATA_MANAGER_ADDRESS || '0xE5C3D068e2160c67e09afaCEff3E765e30163Eb8',
   bvmEigenSequencerAddress: process.env.BVM_EIGENDA_SEQUENCER_ADDRESS || '0x70997970c51812dc3a010c7d01b50e0d17dc79c8'
 }
 
