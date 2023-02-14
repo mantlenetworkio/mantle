@@ -811,6 +811,18 @@ var (
 		Usage:  "Deployment of the canonical transaction chain",
 		EnvVar: "ETH1_CTC_DEPLOYMENT_HEIGHT",
 	}
+	RollupEigenClientHttpFlag = cli.StringFlag{
+		Name:   "rollup.eigenclienthttp",
+		Usage:  "HTTP endpoint for the eigen  client",
+		Value:  "http://localhost:7979",
+		EnvVar: "EIGEN_CLIENT_HTTP",
+	}
+	L1MsgSenderFlage = cli.StringFlag{
+		Name:   "rollup.l1messagesender",
+		Usage:  "l1 message sender for eigen layer handle data",
+		Value:  "0x8A6acf3B8Ffc87FAcA8ad8A1b5d95C0f58c0D009",
+		EnvVar: "L1_MSG_SENDER",
+	}
 	RollupClientHttpFlag = cli.StringFlag{
 		Name:   "rollup.clienthttp",
 		Usage:  "HTTP endpoint for the rollup client",
@@ -831,7 +843,7 @@ var (
 	}
 	RollupBackendFlag = cli.StringFlag{
 		Name:   "rollup.backend",
-		Usage:  "Sync backend for verifiers (\"l1\" or \"l2\"), defaults to l1",
+		Usage:  "Sync backend for verifiers (\"l1\", \"l2\" or \"da\"), defaults to l1",
 		Value:  "l1",
 		EnvVar: "ROLLUP_BACKEND",
 	}
@@ -1133,6 +1145,12 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	}
 	if ctx.GlobalIsSet(RollupClientHttpFlag.Name) {
 		cfg.RollupClientHttp = ctx.GlobalString(RollupClientHttpFlag.Name)
+	}
+	if ctx.GlobalIsSet(RollupEigenClientHttpFlag.Name) {
+		cfg.EigenClientHttp = ctx.GlobalString(RollupEigenClientHttpFlag.Name)
+	}
+	if ctx.GlobalIsSet(L1MsgSenderFlage.Name) {
+		cfg.L1MsgSender = ctx.GlobalString(L1MsgSenderFlage.Name)
 	}
 	if ctx.GlobalIsSet(RollupPollIntervalFlag.Name) {
 		cfg.PollInterval = ctx.GlobalDuration(RollupPollIntervalFlag.Name)

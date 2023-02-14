@@ -168,6 +168,7 @@ var (
 		utils.SchedulerBatchTime,
 		utils.SchedulerBatchSize,
 		utils.SchedulerBatchEpoch,
+		utils.RollupEigenClientHttpFlag,
 	}
 
 	rpcFlags = []cli.Flag{

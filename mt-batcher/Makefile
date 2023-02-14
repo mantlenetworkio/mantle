@@ -11,6 +11,7 @@ EDLC_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/da/BVM_EigenDataL
 EDLF_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/da/BVM_EigenDataLayrFee.sol/BVM_EigenDataLayrFee.json
 
 mt-batcher:
+	go mod tidy
 	env GO111MODULE=on go build -v $(LDFLAGS) ./cmd/mt-batcher
 
 datalayr-mantle:
