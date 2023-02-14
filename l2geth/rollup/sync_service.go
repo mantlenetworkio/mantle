@@ -53,6 +53,7 @@ type SyncService struct {
 	ctx                            context.Context
 	cancel                         context.CancelFunc
 	verifier                       bool
+	mpcVerifier                    bool
 	db                             ethdb.Database
 	scope                          event.SubscriptionScope
 	txFeed                         event.Feed
@@ -138,6 +139,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		ctx:                            ctx,
 		cancel:                         cancel,
 		verifier:                       cfg.IsVerifier,
+		mpcVerifier:                    cfg.MpcVerifier,
 		enable:                         cfg.Eth1SyncServiceEnable,
 		syncing:                        atomic.Value{},
 		bc:                             bc,
@@ -1354,19 +1356,21 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 			return fmt.Errorf("Cannot get transaction batch: %w", err)
 		}
 		for _, tx := range txs {
-			index := tx.GetMeta().Index
-			stateRoot, err := s.client.GetStateRoot(*index, s.backend)
-			if err != nil {
-				log.Info("waiting stateroot to be append to scc", "index", index)
-				return fmt.Errorf("Cannot get stateroot from dtl : %w", err)
-			}
-			err, block := s.executor.applyTx(tx, &types.BatchTxSetProof{})
-			if err != nil {
-				return fmt.Errorf("Cannot apply tx : %w", err)
-			}
+			if !s.mpcVerifier {
+				index := tx.GetMeta().Index
+				stateRoot, err := s.client.GetStateRoot(*index, s.backend)
+				if err != nil {
+					log.Info("waiting stateroot to be append to scc", "index", index)
+					return fmt.Errorf("Cannot get stateroot from dtl : %w", err)
+				}
+				err, block := s.executor.applyTx(tx, &types.BatchTxSetProof{})
+				if err != nil {
+					return fmt.Errorf("Cannot apply tx : %w", err)
+				}
 
-			if block.Root().String() != stateRoot.Value {
-				return fmt.Errorf("stateroot is different")
+				if block.Root().String() != stateRoot.Value {
+					return fmt.Errorf("stateroot is different")
+				}
 			}
 			if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
 				return fmt.Errorf("cannot apply batched transaction: %w", err)
