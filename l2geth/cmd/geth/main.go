@@ -155,7 +155,6 @@ var (
 		utils.Eth1SyncServiceEnable,
 		utils.Eth1CanonicalTransactionChainDeployHeightFlag,
 		utils.RollupClientHttpFlag,
-		utils.RollupEnableVerifierFlag,
 		utils.RollupTimstampRefreshFlag,
 		utils.RollupPollIntervalFlag,
 		utils.RollupMaxCalldataSizeFlag,

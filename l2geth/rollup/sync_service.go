@@ -95,7 +95,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	ctx, cancel := context.WithCancel(ctx)
 	_ = cancel // satisfy govet
 
-	if cfg.IsVerifier {
+	if cfg.RollupRole == VERIFIER_NODE {
 		log.Info("Running in verifier mode", "sync-backend", cfg.Backend.String())
 	} else {
 		log.Info("Running in sequencer mode", "sync-backend", cfg.Backend.String())
@@ -142,7 +142,6 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	service := SyncService{
 		ctx:                            ctx,
 		cancel:                         cancel,
-		verifier:                       cfg.IsVerifier,
 		enable:                         cfg.Eth1SyncServiceEnable,
 		syncing:                        atomic.Value{},
 		bc:                             bc,
@@ -191,7 +190,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 			}
 		}
 
-		if !cfg.IsVerifier || cfg.Backend == BackendL2 {
+		if cfg.RollupRole != VERIFIER_NODE || cfg.Backend == BackendL2 {
 			// Wait until the remote service is done syncing
 			tStatus := time.NewTicker(10 * time.Second)
 			for ; true; <-tStatus.C {
