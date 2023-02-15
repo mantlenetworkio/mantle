@@ -58,7 +58,7 @@ func (p *Processor) SignRollBack() {
 				var signResponse tsscommon.SignResponse
 
 				hashStr := hexutil.Encode(hashTx)
-				signByte, ok := p.cacheSign.Get(hashStr)
+				signByte, ok := p.GetSign(hashStr)
 				if ok {
 					logger.Info().Msg("singer get roll back signature from cache")
 					signResponse = tsscommon.SignResponse{
@@ -86,7 +86,7 @@ func (p *Processor) SignRollBack() {
 					signResponse = tsscommon.SignResponse{
 						Signature: data,
 					}
-					bol := p.cacheSign.Set(hashStr, data)
+					bol := p.CacheSign(hashStr, data)
 					logger.Info().Msgf("cache roll back sign byte behavior %s ", bol)
 				}
 
