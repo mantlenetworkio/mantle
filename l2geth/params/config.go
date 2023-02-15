@@ -307,9 +307,14 @@ type ChainConfig struct {
 	MuirGlacierBlock    *big.Int `json:"muirGlacierBlock,omitempty"`    // Eip-2384 (bomb delay) switch block (nil = no fork, 0 = already activated)
 	BerlinBlock         *big.Int `json:"berlinBlock,omitempty"`         // Berlin switch block (nil = no fork, 0 = already on berlin)
 
+<<<<<<< HEAD
 	EWASMBlock *big.Int `json:"ewasmBlock,omitempty"` // EWASM switch block (nil = no fork, 0 = already activated)
 
 	FixBlockHashBranchingBlock *big.Int `json:"fixBlockHashBranchingBlock,omitempty"` //  FixBlockHashBranchingBlock witch block (nil = no fork, 0 = already activated)
+=======
+	EWASMBlock          *big.Int `json:"ewasmBlock,omitempty"`          // EWASM switch block (nil = no fork, 0 = already activated)
+	UpdateGaslimitBlock *big.Int `json:"updateGaslimitBlock,omitempty"` // UpdateGaslimitBlock witch block (nil = no fork, 0 = already activated)
+>>>>>>> 4739c74 (wb: update config name)
 
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
@@ -360,7 +365,7 @@ func (c *ChainConfig) String() string {
 		c.IstanbulBlock,
 		c.MuirGlacierBlock,
 		c.BerlinBlock,
-		c.FixBlockHashBranchingBlock,
+		c.UpdateGaslimitBlock,
 		engine,
 	)
 }
@@ -428,8 +433,8 @@ func (c *ChainConfig) IsEWASM(num *big.Int) bool {
 }
 
 // ISFixBlockHashBranching returns whether num represents a block number after the FixBlockHashBranchingBlock fork
-func (c *ChainConfig) ISFixBlockHashBranching(num *big.Int) bool {
-	return isForked(c.FixBlockHashBranchingBlock, num)
+func (c *ChainConfig) ISUpdateGaslimitBlock(num *big.Int) bool {
+	return isForked(c.UpdateGaslimitBlock, num)
 }
 
 // IsSDUpdate returns whether num represents a block number after the SD update fork
@@ -480,8 +485,8 @@ func (c *ChainConfig) CheckConfigForkOrder() error {
 		{"istanbulBlock", c.IstanbulBlock},
 		{"muirGlacierBlock", c.MuirGlacierBlock},
 		{name: "berlinBlock", block: c.BerlinBlock},
-		//we needn't to check config fork order for fixBlockHashBranchingBlock
-		//{name: "fixBlockHashBranchingBlock", block: c.FixBlockHashBranchingBlock},
+		//we needn't to check config fork order for UpdateGaslimitBlock
+		//{name: "UpdateGaslimitBlock", block: c.UpdateGaslimitBlock},
 	} {
 		if lastFork.name != "" {
 			// Next one must be higher number
@@ -544,8 +549,8 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	if isForkIncompatible(c.EWASMBlock, newcfg.EWASMBlock, head) {
 		return newCompatError("ewasm fork block", c.EWASMBlock, newcfg.EWASMBlock)
 	}
-	if isForkIncompatible(c.FixBlockHashBranchingBlock, newcfg.FixBlockHashBranchingBlock, head) {
-		return newCompatError("FixBlockHashBranching fork block", c.FixBlockHashBranchingBlock, newcfg.FixBlockHashBranchingBlock)
+	if isForkIncompatible(c.UpdateGaslimitBlock, newcfg.UpdateGaslimitBlock, head) {
+		return newCompatError("FixBlockHashBranching fork block", c.UpdateGaslimitBlock, newcfg.UpdateGaslimitBlock)
 	}
 	return nil
 }
@@ -615,7 +620,7 @@ type Rules struct {
 	IsHomestead, IsEIP150, IsEIP155, IsEIP158               bool
 	IsByzantium, IsConstantinople, IsPetersburg, IsIstanbul bool
 	IsBerlin                                                bool
-	IsFixBlockhashBranching                                 bool
+	ISUpdateGaslimitBlock                                   bool
 }
 
 // Rules ensures c's ChainID is not nil.
@@ -625,16 +630,16 @@ func (c *ChainConfig) Rules(num *big.Int) Rules {
 		chainID = new(big.Int)
 	}
 	return Rules{
-		ChainID:                 new(big.Int).Set(chainID),
-		IsHomestead:             c.IsHomestead(num),
-		IsEIP150:                c.IsEIP150(num),
-		IsEIP155:                c.IsEIP155(num),
-		IsEIP158:                c.IsEIP158(num),
-		IsByzantium:             c.IsByzantium(num),
-		IsConstantinople:        c.IsConstantinople(num),
-		IsPetersburg:            c.IsPetersburg(num),
-		IsIstanbul:              c.IsIstanbul(num),
-		IsBerlin:                c.IsBerlin(num),
-		IsFixBlockhashBranching: c.ISFixBlockHashBranching(num),
+		ChainID:               new(big.Int).Set(chainID),
+		IsHomestead:           c.IsHomestead(num),
+		IsEIP150:              c.IsEIP150(num),
+		IsEIP155:              c.IsEIP155(num),
+		IsEIP158:              c.IsEIP158(num),
+		IsByzantium:           c.IsByzantium(num),
+		IsConstantinople:      c.IsConstantinople(num),
+		IsPetersburg:          c.IsPetersburg(num),
+		IsIstanbul:            c.IsIstanbul(num),
+		IsBerlin:              c.IsBerlin(num),
+		ISUpdateGaslimitBlock: c.ISUpdateGaslimitBlock(num),
 	}
 }

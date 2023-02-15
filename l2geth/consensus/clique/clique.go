@@ -49,9 +49,14 @@ const (
 	inmemorySnapshots  = 128  // Number of recent vote snapshots to keep in memory
 	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
 
+<<<<<<< HEAD
 	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
 
 	fixTestnetBlockhashBranching = 30000000 //this params is only used for testnet
+=======
+	wiggleTime          = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
+	preUpgradedGaslimit = 15000000               //this params is only used for testnet
+>>>>>>> 4739c74 (wb: update config name)
 )
 
 // Clique proof-of-authority protocol constants.
@@ -582,8 +587,13 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainReader, header *types.
 	header.UncleHash = types.CalcUncleHash(nil)
 
 	//this is only for testnet
+<<<<<<< HEAD
 	if chain.Config().ISFixBlockHashBranching(header.Number) {
 		header.GasLimit = fixTestnetBlockhashBranching
+=======
+	if !chain.Config().ISUpdateGaslimitBlock(header.Number) {
+		header.GasLimit = preUpgradedGaslimit
+>>>>>>> 4739c74 (wb: update config name)
 	}
 
 	// Assemble and return the final block for sealing

@@ -3,8 +3,13 @@ const config = {
   l1BlockTimeSeconds: 15,
   l2BlockGasLimit: 15_000_000,
   l2ChainId: 5001,
+<<<<<<< HEAD
   fixBlockHashBranchingBlock: 222073,
   ctcL2GasDiscountDivisor: 32,
+=======
+  ctcL2GasDiscountDivisor: 32,
+  updateGaslimitBlock: 222073,
+>>>>>>> 4739c74 (wb: update config name)
   ctcEnqueueGasCost: 60_000,
   sccFaultProofWindowSeconds: 10,
   sccSequencerPublishWindowSeconds: 12592000,
