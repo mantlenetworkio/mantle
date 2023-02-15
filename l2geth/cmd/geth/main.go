@@ -165,8 +165,17 @@ var (
 		utils.RollupEnforceFeesFlag,
 		utils.RollupFeeThresholdDownFlag,
 		utils.RollupFeeThresholdUpFlag,
+		utils.RollupRoleFlag,
 		utils.RollupGenesisTimeoutSecondsFlag,
 		utils.SequencerClientHttpFlag,
+
+		// fraud proof flags
+		utils.FraudProofCoinBaseFlag,
+		utils.FraudProofL1EndpointFlag,
+		utils.FraudProofL1ChainIDFlag,
+		utils.FraudProofSequencerAddrFlag,
+		utils.FraudProofRollupAddrFlag,
+		utils.FraudProofRollupStakeAmount,
 	}
 
 	rpcFlags = []cli.Flag{

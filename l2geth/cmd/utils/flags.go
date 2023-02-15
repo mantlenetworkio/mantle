@@ -879,6 +879,39 @@ var (
 		Usage:  "HTTP endpoint for the sequencer client",
 		EnvVar: "SEQUENCER_CLIENT_HTTP",
 	}
+
+	// fraud proof flags
+	FraudProofCoinBaseFlag = &cli.StringFlag{
+		Name:  "fp.coinbase",
+		Usage: "The sequencer/validator address to be unlocked (pass passphrash via --password)",
+		Value: "",
+	}
+	FraudProofL1EndpointFlag = &cli.StringFlag{
+		Name:  "fp.l1endpoint",
+		Usage: "The api endpoint of L1 client",
+		Value: "",
+	}
+	FraudProofL1ChainIDFlag = &cli.Uint64Flag{
+		Name:  "fp.l1chainid",
+		Usage: "The chain ID of L1 client",
+		Value: 31337,
+	}
+	FraudProofSequencerAddrFlag = &cli.StringFlag{
+		Name:  "fp.sequencer-addr",
+		Usage: "The account address of sequencer",
+		Value: "",
+	}
+	FraudProofRollupAddrFlag = &cli.StringFlag{
+		Name:  "fp.rollup-addr",
+		Usage: "The contract address of L1 rollup",
+		Value: "",
+	}
+	FraudProofRollupStakeAmount = &cli.Uint64Flag{
+		Name:   "fp.stake-amount",
+		Usage:  "Required staking amount",
+		EnvVar: "ROLLUP_STAKE_AMOUNT",
+		Value:  1000000000000000000,
+	}
 )
 
 // MakeDataDir retrieves the currently requested data directory, terminating
