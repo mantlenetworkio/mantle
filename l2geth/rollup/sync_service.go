@@ -141,6 +141,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		chainHeadCh:                    make(chan core.ChainHeadEvent, 1),
 		client:                         client,
 		eigenClient:                    eigenClient,
+		l1MsgSender:                    cfg.L1MsgSender,
 		db:                             db,
 		pollInterval:                   pollInterval,
 		timestampRefreshThreshold:      timestampRefreshThreshold,
