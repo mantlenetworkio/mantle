@@ -852,6 +852,11 @@ var (
 		Usage:  "Enable the verifier",
 		EnvVar: "ROLLUP_VERIFIER_ENABLE",
 	}
+	RollupMpcVerifierFlag = cli.BoolFlag{
+		Name:   "rollup.mpcverifier",
+		Usage:  "Enable the verifier for mpc node",
+		EnvVar: "ROLLUP_VERIFIER_MPC_ENABLE",
+	}
 	RollupMaxCalldataSizeFlag = cli.IntFlag{
 		Name:   "rollup.maxcalldatasize",
 		Usage:  "Maximum allowed calldata size for Queue Origin Sequencer Txs",
@@ -1151,6 +1156,9 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	}
 	if ctx.GlobalIsSet(RollupEnforceFeesFlag.Name) {
 		cfg.EnforceFees = ctx.GlobalBool(RollupEnforceFeesFlag.Name)
+	}
+	if ctx.GlobalIsSet(RollupMpcVerifierFlag.Name) {
+		cfg.MpcVerifier = true
 	}
 	if ctx.GlobalIsSet(RollupFeeThresholdDownFlag.Name) {
 		val := ctx.GlobalFloat64(RollupFeeThresholdDownFlag.Name)

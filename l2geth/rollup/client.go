@@ -82,6 +82,14 @@ type transaction struct {
 	Decoded     *decoded        `json:"decoded"`
 }
 
+// stateroot represents the return result of the remote server.
+// it came from a batch or was replicated from the sequencer.
+type StateRoot struct {
+	Index      uint64 `json:"index"`
+	BatchIndex uint64 `json:"batchIndex"`
+	Value      string `json:"value"`
+}
+
 // Enqueue represents an `enqueue` transaction or a L1 to L2 transaction.
 type Enqueue struct {
 	Index       *uint64         `json:"ctcIndex"`
@@ -124,6 +132,7 @@ type RollupClient interface {
 	GetTransaction(uint64, Backend) (*types.Transaction, error)
 	GetLatestTransaction(Backend) (*types.Transaction, error)
 	GetLatestTransactionIndex(Backend) (*uint64, error)
+	GetStateRoot(uint64, Backend) (*StateRoot, error)
 	GetEthContext(uint64) (*EthContext, error)
 	GetLatestEthContext() (*EthContext, error)
 	GetLastConfirmedEnqueue() (*types.Transaction, error)
@@ -151,6 +160,12 @@ type TransactionResponse struct {
 type TransactionBatchResponse struct {
 	Batch        *Batch         `json:"batch"`
 	Transactions []*transaction `json:"transactions"`
+}
+
+// StateRootResponse represents the response from the remote server when querying stateroot
+type StateRootResponse struct {
+	StateRoot *StateRoot `json:"stateRoot"`
+	Batch     *Batch     `json:"batch"`
 }
 
 // NewClient create a new Client given a remote HTTP url and a chain id
@@ -470,6 +485,31 @@ func (c *Client) GetLatestTransaction(backend Backend) (*types.Transaction, erro
 	}
 
 	return batchedTransactionToTransaction(res.Transaction, c.chainID)
+}
+
+func (c *Client) GetStateRoot(index uint64, backend Backend) (*StateRoot, error) {
+	str := strconv.FormatUint(index, 10)
+	response, err := c.client.R().
+		SetPathParams(map[string]string{
+			"index": str,
+		}).
+		SetQueryParams(map[string]string{
+			"backend": backend.String(),
+		}).
+		SetResult(&StateRootResponse{}).
+		Get("/stateroot/index/{index}")
+
+	if err != nil {
+		return nil, fmt.Errorf("cannot fetch transaction: %w", err)
+	}
+	res, ok := response.Result().(*StateRootResponse)
+	if !ok {
+		return nil, fmt.Errorf("could not get tx with index %d", index)
+	}
+	if res.StateRoot == nil {
+		return nil, errElementNotFound
+	}
+	return res.StateRoot, nil
 }
 
 // GetEthContext will return the EthContext by block number

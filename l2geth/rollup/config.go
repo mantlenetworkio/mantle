@@ -45,4 +45,6 @@ type Config struct {
 	FeeThresholdUp   *big.Float
 	// HTTP endpoint of the sequencer
 	SequencerClientHttp string
+
+	MpcVerifier bool
 }
