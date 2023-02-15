@@ -26,6 +26,8 @@ func (s Backend) String() string {
 		return "l1"
 	case BackendL2:
 		return "l2"
+	case BackendEigen:
+		return "da"
 	default:
 		return ""
 	}
@@ -38,6 +40,8 @@ func NewBackend(typ string) (Backend, error) {
 		return BackendL1, nil
 	case "l2":
 		return BackendL2, nil
+	case "da":
+		return BackendEigen, nil
 	default:
 		return 0, fmt.Errorf("Unknown Backend: %s", typ)
 	}
@@ -54,6 +58,9 @@ const (
 	// around the transactions as they have not been submitted via a batch to
 	// L1.
 	BackendL2
+
+	// BackendEigen Backend involves syncing transactions from the eigen da,
+	BackendEigen
 )
 
 func isCtcTxEqual(a, b *types.Transaction) bool {

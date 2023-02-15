@@ -4,8 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
+
 	"math/big"
 	"strconv"
 	"sync"
@@ -64,6 +67,8 @@ type SyncService struct {
 	txpool                         *core.TxPool
 	RollupGpo                      *gasprice.RollupOracle
 	client                         RollupClient
+	eigenClient                    eigenda.EigenClient
+	l1MsgSender                    string
 	syncing                        atomic.Value
 	chainHeadSub                   event.Subscription
 	BVMContext                     BVMContext
@@ -117,8 +122,12 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	}
 	// Initialize the rollup client
 	client := NewClient(cfg.RollupClientHttp, chainID)
-	log.Info("Configured rollup client", "url", cfg.RollupClientHttp, "chain-id", chainID.Uint64(), "ctc-deploy-height", cfg.CanonicalTransactionChainDeployHeight)
+	log.Debug("Configured rollup client", "url", cfg.RollupClientHttp, "chain-id", chainID.Uint64(), "ctc-deploy-height", cfg.CanonicalTransactionChainDeployHeight)
 
+	eigenClient := eigenda.NewEigenClient(cfg.EigenClientHttp)
+	if eigenClient == nil {
+		return nil, fmt.Errorf("new eigen client fail")
+	}
 	// Ensure sane values for the fee thresholds
 	if cfg.FeeThresholdDown != nil {
 		// The fee threshold down should be less than 1
@@ -146,6 +155,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		txpool:                         txpool,
 		chainHeadCh:                    make(chan core.ChainHeadEvent, chainHeadChanSize),
 		client:                         client,
+		eigenClient:                    eigenClient,
 		db:                             db,
 		pollInterval:                   pollInterval,
 		timestampRefreshThreshold:      timestampRefreshThreshold,
@@ -156,6 +166,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		signer:                         types.NewEIP155Signer(chainID),
 		feeThresholdDown:               cfg.FeeThresholdDown,
 		feeThresholdUp:                 cfg.FeeThresholdUp,
+		l1MsgSender:                    cfg.L1MsgSender,
 		cfg:                            cfg,
 		executor:                       newExecutor(gasFloor, chainConfig, engine, bc),
 	}
@@ -318,7 +329,6 @@ func (s *SyncService) initializeLatestL1(ctcDeployHeight *big.Int) error {
 			if tx.Transaction.BatchIndex > 0 {
 				newBatchIndex -= 1
 			}
-
 			log.Info("Updating batch index", "old", oldbatchIndex, "new", newBatchIndex)
 			s.SetLatestBatchIndex(&newBatchIndex)
 		}
@@ -463,6 +473,10 @@ func (s *SyncService) verify() error {
 		if err := s.syncTransactionsToTip(); err != nil {
 			return fmt.Errorf("Verifier cannot sync transactions with BackendL2: %w", err)
 		}
+	case BackendEigen:
+		if err := s.syncEigenBatchesToTip(); err != nil {
+			return fmt.Errorf("verifier cannot sync transactions with BackendEigen: %w", err)
+		}
 	}
 	return nil
 }
@@ -488,6 +502,13 @@ func (s *SyncService) SyncQueueToTip() error {
 func (s *SyncService) syncBatchesToTip() error {
 	if err := s.syncToTip(s.syncBatches, s.client.GetLatestTransactionBatchIndex); err != nil {
 		return fmt.Errorf("Cannot sync transaction batches to tip: %w", err)
+	}
+	return nil
+}
+
+func (s *SyncService) syncEigenBatchesToTip() error {
+	if err := s.syncToTip(s.syncEigenBatches, s.eigenClient.GetLatestTransactionBatchIndex); err != nil {
+		return fmt.Errorf("Cannot sync eigen transaction batches to tip: %w", err)
 	}
 	return nil
 }
@@ -783,6 +804,24 @@ func (s *SyncService) SetLatestBatchIndex(index *uint64) {
 	}
 }
 
+func (s *SyncService) GetEigenNextBatchIndex() uint64 {
+	index := rawdb.ReadEigenBatchIndex(s.db)
+	if index == nil {
+		return 0
+	}
+	return *index + 1
+}
+
+func (s *SyncService) GetLatestEigenBatchIndex() *uint64 {
+	return rawdb.ReadLatestEigenBatchIndex(s.db)
+}
+
+func (s *SyncService) SetLatestEigenBatchIndex(index *uint64) {
+	if index != nil {
+		rawdb.WriteLatestEigenIndex(s.db, *index)
+	}
+}
+
 func (s *SyncService) SetHead(number uint64) error {
 	if number == 0 {
 		return errors.New("cannot reset to genesis")
@@ -817,7 +856,24 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	var oldBlocks []types.Block
 	for i := start; i <= latest; i++ {
 		block := s.bc.GetBlockByNumber(i)
-		txs = append(txs, *block.Transactions()[0])
+		tx := block.Transactions()[0]
+		if block.Transactions()[0].QueueOrigin() == types.QueueOriginL1ToL2 {
+			enqueueTx, err := s.client.GetEnqueue(*tx.GetMeta().QueueIndex)
+			if err != nil {
+				return err
+			}
+			if tx.Hash() != enqueueTx.Hash() {
+				log.Info("scheduler l1 tx be replaced", "new", enqueueTx.Hash(), "old", tx.Hash())
+				// When the transaction changes, we will use enqueue Tx to replace
+				// the transaction of the original block and re-block, and we need
+				// the following data to be consistent with before rollback
+				enqueueTx.SetIndex(*tx.GetMeta().Index)
+				enqueueTx.SetL1BlockNumber(tx.L1BlockNumber().Uint64())
+				enqueueTx.SetL1Timestamp(tx.L1Timestamp())
+				tx = enqueueTx
+			}
+		}
+		txs = append(txs, *tx)
 		oldBlocks = append(oldBlocks, *block)
 	}
 	log.Info("setHead start", "currentBlockNumber", s.bc.CurrentHeader().Number.Uint64())
@@ -974,7 +1030,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 	// network split.
 	// Note that it should never be possible for the timestamp to be set to
 	// 0 when running as a verifier.
-	shouldMalleateTimestamp := !s.verifier && tx.QueueOrigin() == types.QueueOriginL1ToL2
+	shouldMalleateTimestamp := !s.verifier && tx.QueueOrigin() == types.QueueOriginL1ToL2 && tx.GetMeta().Index == nil
 	if tx.L1Timestamp() == 0 || shouldMalleateTimestamp {
 		// Get the latest known timestamp
 		current := time.Unix(int64(ts), 0)
@@ -983,7 +1039,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 		// If enough time has passed, then assign the
 		// transaction to have the timestamp now. Otherwise,
 		// use the current timestamp
-		if now.Sub(current) > s.timestampRefreshThreshold && tx.GetMeta().Index == nil {
+		if now.Sub(current) > s.timestampRefreshThreshold {
 			current = now
 		}
 		log.Info("Updating latest timestamp", "timestamp", current, "unix", current.Unix())
@@ -1013,7 +1069,6 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 	if tx.L1Timestamp() > ts {
 		s.SetLatestL1Timestamp(tx.L1Timestamp())
 	}
-
 	index := s.GetLatestIndex()
 	if tx.GetMeta().Index == nil {
 		if index == nil {
@@ -1022,7 +1077,6 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 			tx.SetIndex(*index + 1)
 		}
 	}
-
 	// On restart, these values are repaired to handle
 	// the case where the index is updated but the
 	// transaction isn't yet added to the chain
@@ -1032,7 +1086,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction, txSetProof *t
 	}
 
 	// The index was set above so it is safe to dereference
-	log.Debug("Applying transaction to tip", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
+	log.Info("Applying transaction to tip", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex(), "origin", tx.QueueOrigin().String())
 
 	txs := types.Transactions{tx}
 	errCh := make(chan error, 1)
@@ -1317,7 +1371,7 @@ func (s *SyncService) sync(getLatest indexGetter, getNext nextGetter, syncer ran
 	latestIndex, err := getLatest()
 	if err != nil {
 		log.Error("SyncService failed to getLatest", "err", err)
-		return nil, fmt.Errorf("Cannot sync: %w", err)
+		return nil, fmt.Errorf("cannot sync: %w", err)
 	}
 	if latestIndex == nil {
 		log.Error("SyncService Latest index is not defined")
@@ -1345,6 +1399,14 @@ func (s *SyncService) syncBatches() (*uint64, error) {
 	return index, nil
 }
 
+func (s *SyncService) syncEigenBatches() (*uint64, error) {
+	index, err := s.sync(s.eigenClient.GetLatestTransactionBatchIndex, s.GetEigenNextBatchIndex, s.syncEigenTransactionBatchRange)
+	if err != nil {
+		return nil, fmt.Errorf("cannot sync eigen batches: %w", err)
+	}
+	return index, nil
+}
+
 // syncTransactionBatchRange will sync a range of batched transactions from
 // start to end (inclusive)
 func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
@@ -1353,38 +1415,55 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 		log.Debug("Fetching transaction batch", "index", i)
 		_, txs, err := s.client.GetTransactionBatch(i)
 		if err != nil {
-			return fmt.Errorf("Cannot get transaction batch: %w", err)
+			return fmt.Errorf("cannot get transaction batch: %w", err)
 		}
 		//verify txs state roots
 
 		for _, tx := range txs {
-			if !s.mpcVerifier {
-				index := tx.GetMeta().Index
-				stateRoot, err := s.client.GetStateRoot(*index, s.backend)
-				if err != nil {
-					log.Info("waiting stateroot to be append to scc", "index", *index)
-					return fmt.Errorf("Cannot get stateroot from dtl : %w", err)
-				}
-				next := s.GetNextIndex()
-				if *index < next {
-					log.Warn("index is less than current index", "index", *index, ",next index", next)
-					continue
-				}
-				err, block := s.executor.applyTx(tx, &types.BatchTxSetProof{})
-				if err != nil {
-					return fmt.Errorf("Cannot apply tx : %w", err)
-				}
-
-				if block.Root().String() != stateRoot.Value {
-					log.Error("state root is different", " scc stateroot", stateRoot.Value, "local stateroot", block.Root().String(), "index", index)
-					return fmt.Errorf("stateroot is different")
-				}
+			verified, err := s.verifyTx(tx)
+			if err != nil {
+				return err
 			}
-			if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
-				return fmt.Errorf("cannot apply batched transaction: %w", err)
+			if verified {
+				if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
+					return fmt.Errorf("cannot apply batched transaction: %w", err)
+				}
 			}
 		}
 		s.SetLatestBatchIndex(&i)
+	}
+	return nil
+}
+
+func (s *SyncService) syncEigenTransactionBatchRange(start, end uint64) error {
+	if end > start {
+		log.Info("Syncing eigen transaction batch range", "start", start, "end", end)
+		for i := start; i <= end; i++ {
+			log.Debug("Fetching transaction batch", "index", i)
+			rollupInfo, err := s.eigenClient.GetRollupStoreByRollupBatchIndex(int64(i))
+			if err != nil {
+				return fmt.Errorf("cannot get rollup store by batch index: %w", err)
+			}
+			if rollupInfo.DataStoreId != 0 {
+				txs, err := s.eigenClient.GetBatchTransactionByDataStoreId(rollupInfo.DataStoreId, s.l1MsgSender)
+				if err != nil {
+					return fmt.Errorf("cannot get eigen transaction batch: %w", err)
+				}
+				for _, tx := range txs {
+					verified, err := s.verifyTx(tx)
+					if err != nil {
+						return err
+					}
+					if verified {
+						if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
+							return fmt.Errorf("cannot apply batched transaction: %w", err)
+						}
+					}
+				}
+				log.Info("set latest eigen batch index", "index", i)
+				s.SetLatestEigenBatchIndex(&i)
+			}
+		}
 	}
 	return nil
 }
@@ -1484,4 +1563,32 @@ func (s *SyncService) SetExtra(extra []byte) error {
 	}
 	s.executor.setExtra(extra)
 	return nil
+}
+
+func (s *SyncService) verifyTx(tx *types.Transaction) (bool, error) {
+	if !s.mpcVerifier {
+		index := tx.GetMeta().Index
+		stateRoot, err := s.client.GetStateRoot(*index, s.backend)
+		if err != nil {
+			log.Info("waiting stateroot to be append to scc", "index", *index)
+			return false, fmt.Errorf("Cannot get stateroot from dtl : %w", err)
+		}
+		next := s.GetNextIndex()
+		if *index < next {
+			log.Warn("index is less than current index", "index", *index, ",next index", next)
+			return false, nil
+		}
+		err, block := s.executor.applyTx(tx, &types.BatchTxSetProof{})
+		if err != nil {
+			return false, fmt.Errorf("Cannot apply tx : %w", err)
+		}
+
+		if block.Root().String() != stateRoot.Value {
+			log.Error("state root is different", " scc stateroot", stateRoot.Value, "local stateroot", block.Root().String(), "index", index)
+			return false, fmt.Errorf("stateroot is different")
+		}
+		return true, nil
+	} else {
+		return true, nil
+	}
 }

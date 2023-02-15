@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	datalayr "github.com/Layr-Labs/datalayr/common/contracts"
-	"github.com/Layr-Labs/datalayr/common/crypto/go-kzg-bn254"
+	gkzg "github.com/Layr-Labs/datalayr/common/crypto/go-kzg-bn254"
 	"github.com/Layr-Labs/datalayr/common/graphView"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceRetrieverServer"
 	"github.com/Layr-Labs/datalayr/common/logging"
@@ -24,7 +24,7 @@ import (
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
-	"github.com/mantlenetworkio/mantle/mt-batcher/sequencer"
+	common2 "github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/txmgr"
 	"github.com/mantlenetworkio/mantle/mt-challenger/bindings"
 	rc "github.com/mantlenetworkio/mantle/mt-challenger/bindings"
@@ -219,8 +219,8 @@ func (c *Challenger) constructFraudProof(store *graphView.DataStore, data []byte
 	}
 	config := c.Cfg.KzgConfig
 
-	s1 := kzg.ReadG1Points(config.G1Path, config.Order, config.NumWorker)
-	s2 := kzg.ReadG2Points(config.G2Path, config.Order, config.NumWorker)
+	s1 := gkzg.ReadG1Points(config.G1Path, config.Order, config.NumWorker)
+	s2 := gkzg.ReadG2Points(config.G2Path, config.Order, config.NumWorker)
 
 	dp := datalayr.NewDisclosureProver(s1, s2)
 
@@ -427,8 +427,8 @@ func (c *Challenger) eventLoop() {
 			c.Cfg.Logger.Error().Err(err).Msg("Error getting data")
 			continue
 		}
-		batchTxn := new([]sequencer.BatchTx)
-		batchRlpStream := rlp.NewStream(bytes.NewBuffer(data), 0)
+		batchTxn := new([]common2.BatchTx)
+		batchRlpStream := rlp.NewStream(bytes.NewBuffer(data), uint64(len(data)))
 		err = batchRlpStream.Decode(batchTxn)
 		if err != nil {
 			c.Cfg.Logger.Error().Err(err).Msg("Decode batch txn fail")

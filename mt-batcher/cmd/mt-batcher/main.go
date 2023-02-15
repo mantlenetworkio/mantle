@@ -28,7 +28,7 @@ func main() {
 	app.Flags = flags.Flags
 	app.Version = fmt.Sprintf("%s-%s", GitVersion, params.VersionWithCommit(GitCommit, GitDate))
 	app.Name = "mt-batcher"
-	app.Usage = "EigenDA submitter Service"
+	app.Usage = "MtBatcher eigenDA submitter Service"
 	app.Description = "Service for generating and submitting batched transactions " +
 		"that synchronize L2 state to L1 contracts"
 

@@ -1,7 +1,9 @@
 ChainStorageContainer-SCC-batches
+Proxy__Sequencer
 StateCommitmentChain
 TestBitToken
 ChainStorageContainer-CTC-batches
+Sequencer
 Proxy__BVM_L1StandardBridge
 TssStakingSlashing
 BVM_L1CrossDomainMessenger
