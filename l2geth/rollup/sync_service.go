@@ -925,11 +925,7 @@ func (s *SyncService) SequencerRollback(rollbackNumber uint64) error {
 func (s *SyncService) applyTransaction(tx *types.Transaction, txSetProof *types.BatchTxSetProof) error {
 	s.applyLock.Lock()
 	defer s.applyLock.Unlock()
-	if s.bc.CurrentBlock().NumberU64() > 0 && s.bc.CurrentBlock().NumberU64()%150 == 0 {
-		if err := s.SchedulerRollback(s.bc.CurrentBlock().NumberU64() - 100); err != nil {
-			log.Error("scheduler rollback", "error", err)
-		}
-	}
+
 	if tx.GetMeta() != nil && tx.GetMeta().Index == nil && tx.QueueOrigin() == types.QueueOriginL1ToL2 {
 		data := &message.Data{}
 		if err := data.UnPackData(tx.GetMeta().RawTransaction); err != nil {
