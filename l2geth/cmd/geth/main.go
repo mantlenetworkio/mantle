@@ -170,6 +170,7 @@ var (
 		utils.SchedulerBatchSize,
 		utils.SchedulerBatchEpoch,
 		utils.SequencerModeFlag,
+		utils.RollupEigenClientHttpFlag,
 	}
 
 	rpcFlags = []cli.Flag{
