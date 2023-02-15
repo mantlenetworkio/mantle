@@ -163,7 +163,7 @@ task('take-dump').setAction(async (args, hre) => {
   }
 
   let genesis;
-  //if hre.deployConfig.l2ChainId === 5001, it is mainnet
+  //if hre.deployConfig.l2ChainId === 5000, it is mainnet
   //we needn't import it
   if (hre.deployConfig.l2ChainId === 5000) {
     genesis = {
@@ -209,7 +209,7 @@ task('take-dump').setAction(async (args, hre) => {
         istanbulBlock: 0,
         muirGlacierBlock: 0,
         berlinBlock: hre.deployConfig.hfBerlinBlock,
-        fixBlockHashBranchingBlock: hre.deployConfig.fixBlockHashBranchingBlock,
+        updateGaslimitBlock: hre.deployConfig.updateGaslimitBlock,
         clique: {
           period: 0,
           epoch: 30000,
