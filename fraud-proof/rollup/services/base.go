@@ -93,9 +93,9 @@ func (b *BaseService) Start(cleanL1, stake bool) *types.Block {
 	// Check if we are at genesis
 	// TODO: if not, sync from L1
 	genesis := b.Eth.BlockChain().CurrentBlock()
-	if genesis.NumberU64() != 0 {
-		log.Crit("Sequencer can only start from genesis")
-	}
+	//if genesis.NumberU64() != 0 { // TODO FIXME
+	//	log.Crit("Sequencer can only start from genesis")
+	//}
 	log.Info("Genesis root", "root", genesis.Root())
 
 	if cleanL1 {

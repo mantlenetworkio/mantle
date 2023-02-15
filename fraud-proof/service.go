@@ -27,7 +27,7 @@ func RegisterFraudProofService(stack *node.Node, cfg *services.Config) {
 		log.Crit("Failed to register the Rollup service: keystore not found")
 	}
 	chainID := big.NewInt(int64(cfg.L1ChainID))
-	json, err := ks.Export(accounts.Account{Address: cfg.Coinbase}, cfg.Passphrase, "")
+	json, err := ks.Export(accounts.Account{Address: cfg.Coinbase}, cfg.Passphrase, cfg.Passphrase)
 	if err != nil {
 		log.Crit("Failed to register the Rollup service", "err", err)
 	}
