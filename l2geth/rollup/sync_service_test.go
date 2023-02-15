@@ -859,7 +859,7 @@ func TestInitializeL1ContextPostGenesis(t *testing.T) {
 
 func TestBadFeeThresholds(t *testing.T) {
 	// Create the deps for the sync service
-	cfg, txPool, chain, db, err := newTestSyncServiceDeps(false, nil)
+	cfg, txPool, chain, db, chainConfig, err := newTestSyncServiceDeps(false, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -896,7 +896,7 @@ func TestBadFeeThresholds(t *testing.T) {
 			cfg.FeeThresholdDown = tt.thresholdDown
 			cfg.FeeThresholdUp = tt.thresholdUp
 
-			_, err := NewSyncService(context.Background(), cfg, txPool, chain, db)
+			_, err := NewSyncService(context.Background(), cfg, txPool, chain, db, 0, &chainConfig, chain.Engine())
 			if !errors.Is(err, tt.err) {
 				t.Fatalf("%s: %s", name, err)
 			}
@@ -945,7 +945,7 @@ func TestUpdateSyncService(t *testing.T) {
 
 }
 
-func newTestSyncServiceDeps(isVerifier bool, alloc *common.Address) (Config, *core.TxPool, *core.BlockChain, ethdb.Database, error) {
+func newTestSyncServiceDeps(isVerifier bool, alloc *common.Address) (Config, *core.TxPool, *core.BlockChain, ethdb.Database, params.ChainConfig, error) {
 	chainCfg := params.AllEthashProtocolChanges
 	chainID := big.NewInt(420)
 	chainCfg.ChainID = chainID
@@ -962,7 +962,7 @@ func newTestSyncServiceDeps(isVerifier bool, alloc *common.Address) (Config, *co
 	_ = genesis.MustCommit(db)
 	chain, err := core.NewBlockChain(db, nil, chainCfg, engine, vm.Config{}, nil)
 	if err != nil {
-		return Config{}, nil, nil, nil, fmt.Errorf("Cannot initialize blockchain: %w", err)
+		return Config{}, nil, nil, nil, params.ChainConfig{}, fmt.Errorf("Cannot initialize blockchain: %w", err)
 	}
 	chaincfg := params.ChainConfig{ChainID: chainID}
 
@@ -975,15 +975,15 @@ func newTestSyncServiceDeps(isVerifier bool, alloc *common.Address) (Config, *co
 		RollupClientHttp: "",
 		Backend:          BackendL2,
 	}
-	return cfg, txPool, chain, db, nil
+	return cfg, txPool, chain, db, chaincfg, nil
 }
 
 func newTestSyncService(isVerifier bool, alloc *common.Address) (*SyncService, chan core.NewTxsEvent, event.Subscription, error) {
-	cfg, txPool, chain, db, err := newTestSyncServiceDeps(isVerifier, alloc)
+	cfg, txPool, chain, db, chainConfig, err := newTestSyncServiceDeps(isVerifier, alloc)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
-	service, err := NewSyncService(context.Background(), cfg, txPool, chain, db)
+	service, err := NewSyncService(context.Background(), cfg, txPool, chain, db, 0, &chainConfig, chain.Engine())
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}

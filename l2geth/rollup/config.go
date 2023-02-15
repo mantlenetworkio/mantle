@@ -47,4 +47,6 @@ type Config struct {
 	SchedulerAddress common.Address
 
 	SequencerMode bool
+
+	MpcVerifier bool
 }
