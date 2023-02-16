@@ -7,7 +7,7 @@ replace github.com/Layr-Labs/datalayr/common => ../datalayr-mantle/common
 replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr-mantle/lib/merkzg
 
 require (
-	// github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
+	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/mantlenetworkio/mantle/l2geth v0.0.0-20221201061228-0589a659d047
 	github.com/pkg/errors v0.9.1
