@@ -2,6 +2,7 @@ package sequencer
 
 import (
 	"fmt"
+	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"math/big"
 
@@ -339,8 +340,8 @@ func (s *Sequencer) Start() error {
 	_ = s.BaseService.Start(true, true)
 
 	s.Wg.Add(2)
-	go s.confirmationLoop()
-	go s.challengeLoop()
+	//go s.confirmationLoop()
+	//go s.challengeLoop()
 	log.Info("fraud-proof defender started")
 	return nil
 }
@@ -348,7 +349,7 @@ func (s *Sequencer) Start() error {
 func (s *Sequencer) Stop() error {
 	log.Info("fraud-proof defender stopped")
 	s.Cancel()
-	s.Wg.Wait()
+	//s.Wg.Wait()
 	return nil
 }
 
@@ -375,11 +376,11 @@ func (s *Sequencer) CreateAssertionWithStateBatch(batches [][32]byte, shouldStar
 	return err
 }
 
-func (s *Sequencer) GetLatestAssertion() (interface{}, error) {
+func (s *Sequencer) GetLatestAssertion(staker common.Address) (interface{}, error) {
 	var latestAssertion rollupTypes.Assertion
 	var assertionID *big.Int
 	var err error
-	if assertionID, err = s.AssertionMap.GetLatestAssertionID(); err != nil {
+	if assertionID, err = s.AssertionMap.GetLatestAssertionID(ethc.Address(staker)); err != nil {
 		return nil, err
 	}
 	if ret, err := s.AssertionMap.Assertions(assertionID); err != nil {
