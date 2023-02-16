@@ -2,6 +2,7 @@ const config = {
   l1BlockTimeSeconds: 15,
   l2BlockGasLimit: 15_000_000,
   l2ChainId: 17,
+  updateGaslimitBlock: 10,
   ctcL2GasDiscountDivisor: 32,
   ctcEnqueueGasCost: 60_000,
   sccFaultProofWindowSeconds: 0,
