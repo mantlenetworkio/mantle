@@ -16,6 +16,7 @@ type Config struct {
 	Passphrase           string         // The passphrase of the coinbase account
 	L1Endpoint           string         // L1 API endpoint
 	L1ChainID            uint64         // L1 chain ID
+	L1Confirmations      uint64         // L1 confirmation block number
 	SequencerAddr        common.Address // Validator only
 	RollupAddr           common.Address // L1 Rollup contract address
 	L1RollupGenesisBlock uint64         // L1 Rollup genesis block

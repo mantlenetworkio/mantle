@@ -41,6 +41,8 @@ type Sequencer struct {
 	confirmedIDCh        chan *big.Int
 	challengeCh          chan *challengeCtx
 	challengeResoutionCh chan struct{}
+
+	confirmations uint64
 }
 
 func New(eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) (*Sequencer, error) {
@@ -54,6 +56,7 @@ func New(eth services.Backend, proofBackend proof.Backend, cfg *services.Config,
 		confirmedIDCh:        make(chan *big.Int, 4096),
 		challengeCh:          make(chan *challengeCtx),
 		challengeResoutionCh: make(chan struct{}),
+		confirmations:        cfg.L1Confirmations,
 	}
 	return s, nil
 }
@@ -142,11 +145,21 @@ func (s *Sequencer) confirmationLoop() {
 					pendingConfirmed = false
 				}
 			case header := <-headCh:
-				// confirm block number TODO
+				// Get confirm block header
+				if s.confirmations != 0 {
+					num := new(big.Int)
+					num.SetUint64(s.confirmations)
+					num.Sub(header.Number, num)
+					header, err = s.L1.HeaderByNumber(s.Ctx, num)
+					if err != nil {
+						log.Crit("Failed to get confirmed header", "err", err)
+						continue
+					}
+				}
 				// New block mined on L1
 				log.Info("sequencer sync new layer1 block...")
 				if !pendingConfirmationSent && !pendingConfirmed {
-					if header.Number.Uint64() >= pendingAssertion.Deadline.Uint64() {
+					if header.Time >= pendingAssertion.Deadline.Uint64() {
 						// Confirmation period has past, confirm it
 						log.Info("call ConfirmFirstUnresolvedAssertion...")
 						_, err := s.Rollup.ConfirmFirstUnresolvedAssertion()
