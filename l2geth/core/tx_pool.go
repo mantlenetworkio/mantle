@@ -533,9 +533,6 @@ func (pool *TxPool) local() map[common.Address]types.Transactions {
 }
 
 func (pool *TxPool) ValidateTx(tx *types.Transaction) error {
-	pool.reorgMux.RLock()
-	defer pool.reorgMux.RUnlock()
-
 	return pool.validateTx(tx, false)
 }
 
@@ -1057,9 +1054,6 @@ func (pool *TxPool) scheduleReorgLoop() {
 // runReorg runs reset and promoteExecutables on behalf of scheduleReorgLoop.
 func (pool *TxPool) runReorg(done chan struct{}, reset *txpoolResetRequest, dirtyAccounts *accountSet, events map[common.Address]*txSortedMap) {
 	defer close(done)
-	pool.reorgMux.Lock()
-	defer pool.reorgMux.Unlock()
-
 	var promoteAddrs []common.Address
 	if dirtyAccounts != nil {
 		promoteAddrs = dirtyAccounts.flatten()
