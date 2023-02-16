@@ -572,7 +572,7 @@ func (w *worker) batchStartLoop() {
 
 						// pick out enough transactions from txpool and insert them into batchPeriodAnswerMsg
 						// The sum of tx quantity from all batchPeriodAnswerMsgs with the same batchIndex should be no greater than ev.Msg.MaxHeight-ev.Msg.StartHeight+1
-						leftSpaceBatch := ev.Msg.MaxHeight - bpa.StartHeight + 1
+						batchLeftSpace := ev.Msg.MaxHeight - bpa.StartHeight + 1
 
 						// Split the pending transactions into locals and remotes
 						localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
@@ -586,7 +586,7 @@ func (w *worker) batchStartLoop() {
 								delete(remoteTxs, account)
 								localTxs[account] = txs
 								rawTxsQueue = append(rawTxsQueue, txs...)
-								if uint64(len(rawTxsQueue)) > 2*leftSpaceBatch {
+								if uint64(len(rawTxsQueue)) > 2*batchLeftSpace {
 									enough = true
 								}
 							}
@@ -596,7 +596,7 @@ func (w *worker) batchStartLoop() {
 								break
 							}
 							rawTxsQueue = append(rawTxsQueue, txs...)
-							if uint64(len(rawTxsQueue)) > 2*leftSpaceBatch {
+							if uint64(len(rawTxsQueue)) > 2*batchLeftSpace {
 								enough = true
 							}
 						}
@@ -613,11 +613,15 @@ func (w *worker) batchStartLoop() {
 								txPendingNonce, ok := pendingNonce[acc]
 								if ok {
 									if txPendingNonce != tx.Nonce() {
+										log.Error("Found nonce mismatch",
+											"tx_hash", tx.Hash().String(), "expected_nonce", txPendingNonce, "actual_nonce", tx.Nonce())
 										continue
 									}
 								} else {
 									stateNonce := state.GetNonce(acc)
 									if stateNonce != tx.Nonce() {
+										log.Error("Found nonce mismatch",
+											"tx_hash", tx.Hash().String(), "expected_nonce", stateNonce, "actual_nonce", tx.Nonce())
 										continue
 									}
 								}
@@ -627,10 +631,10 @@ func (w *worker) batchStartLoop() {
 								log.Error("batchStartLoop tx verifyFee error", "tx_hash", tx.Hash(), "err_msg", err.Error())
 							}
 						}
-						log.Info("txsQueue size", "size", len(txsQueue))
-						if uint64(len(txsQueue)) >= leftSpaceBatch {
-							bpa.Txs = txsQueue[:leftSpaceBatch]
-							inTxLen += leftSpaceBatch
+						log.Info("txsQueue size", "queue_size", len(txsQueue), "batch_left_space", batchLeftSpace)
+						if uint64(len(txsQueue)) >= batchLeftSpace {
+							bpa.Txs = txsQueue[:batchLeftSpace]
+							inTxLen += batchLeftSpace
 						} else {
 							bpa.Txs = txsQueue
 							inTxLen += uint64(len(txsQueue))
