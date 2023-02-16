@@ -142,6 +142,7 @@ func (s *Sequencer) confirmationLoop() {
 					pendingConfirmed = false
 				}
 			case header := <-headCh:
+				// confirm block number TODO
 				// New block mined on L1
 				log.Info("sequencer sync new layer1 block...")
 				if !pendingConfirmationSent && !pendingConfirmed {
@@ -340,8 +341,8 @@ func (s *Sequencer) Start() error {
 	_ = s.BaseService.Start(true, true)
 
 	s.Wg.Add(2)
-	//go s.confirmationLoop()
-	//go s.challengeLoop()
+	go s.confirmationLoop()
+	go s.challengeLoop()
 	log.Info("fraud-proof defender started")
 	return nil
 }
@@ -349,7 +350,7 @@ func (s *Sequencer) Start() error {
 func (s *Sequencer) Stop() error {
 	log.Info("fraud-proof defender stopped")
 	s.Cancel()
-	//s.Wg.Wait()
+	s.Wg.Wait()
 	return nil
 }
 
