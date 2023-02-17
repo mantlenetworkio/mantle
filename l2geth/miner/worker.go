@@ -602,6 +602,11 @@ func (w *worker) batchStartLoop() {
 						}
 						var txsQueue types.Transactions
 						pendingNonce := make(map[common.Address]uint64)
+						stateDB, err := w.eth.BlockChain().State()
+						if err != nil {
+							log.Error("get state failure", "err_msg", err.Error())
+							continue
+						}
 						for _, tx := range rawTxsQueue {
 							if err := w.eth.SyncService().ValidateSequencerTransaction(tx); err == nil {
 								acc, _ := types.Sender(w.current.signer, tx)
@@ -613,7 +618,7 @@ func (w *worker) batchStartLoop() {
 										continue
 									}
 								} else {
-									stateNonce := w.current.state.GetNonce(acc)
+									stateNonce := stateDB.GetNonce(acc)
 									if stateNonce != tx.Nonce() {
 										log.Error("Found nonce mismatch",
 											"tx_hash", tx.Hash().String(), "expected_nonce", stateNonce, "actual_nonce", tx.Nonce())
