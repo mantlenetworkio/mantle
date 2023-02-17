@@ -211,8 +211,8 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         bytes32 vmHash,
         uint256 inboxSize,
         uint256 l2GasUsed
-//    ) public override stakedOnly {
-    ) public override {
+    ) public override stakedOnly {
+//    ) public override {
         // TODO: determine if inboxSize needs to be included.
         RollupLib.ExecutionState memory endState = RollupLib.ExecutionState(l2GasUsed, vmHash);
 
@@ -253,8 +253,8 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         bytes32[] calldata _batch,
         uint256 _shouldStartAtElement,
         bytes calldata _signature
-    //    ) external override stakedOnly {
-    ) external override {
+        ) external override stakedOnly {
+//    ) external override {
 
         console.log(
             "createAssertionWithStateBatch enter",
@@ -355,7 +355,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
 
         uint256 lastUnresolvedID = lastResolvedAssertionID + 1;
         // (2) challenge period has passed
-        if (block.number < assertions.getDeadline(lastUnresolvedID)) {
+        if (block.timestamp < assertions.getDeadline(lastUnresolvedID)) {
             revert ChallengePeriodPending();
         }
         // (3) predecessor has been confirmed
@@ -399,7 +399,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         //    ^---- [3]           | invalid chain ([3] is firstUnresolved)
         if (assertions.getParentID(firstUnresolvedAssertionID) == lastConfirmedAssertionID) {
             // 1a. challenge period has passed.
-            if (block.number < assertions.getDeadline(firstUnresolvedAssertionID)) {
+            if (block.timestamp < assertions.getDeadline(firstUnresolvedAssertionID)) {
                 revert ChallengePeriodPending();
             }
             // 1b. at least one staker exists (on a sibling)
@@ -497,9 +497,15 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         return challenge;
     }
 
-    function newAssertionDeadline() private view returns (uint256) {
+    function newAssertionDeadline() private returns (uint256) {
         // TODO: account for prev assertion, gas
-        return block.number + confirmationPeriod;
+        // return block.number + confirmationPeriod;
+        address scc = resolve("StateCommitmentChain");
+        (bool success, bytes memory data) = scc.call(
+            abi.encodeWithSignature("FRAUD_PROOF_WINDOW()")
+        );
+        uint256 confirmationWindow = uint256(bytes32(data));
+        return block.timestamp + confirmationWindow;
     }
 
     // *****************

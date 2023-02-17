@@ -32,7 +32,7 @@ contract AssertionMap is Initializable {
         uint256 inboxSize; // Inbox size this assertion advanced to
         uint256 gasUsed; // Total gas used for current assertion
         uint256 parent; // Parent assertion ID
-        uint256 deadline; // Confirmation deadline (L1 block number)
+        uint256 deadline; // Confirmation deadline (L1 block timestamp)
         uint256 proposalTime; // L1 block number at which assertion was proposed
         // Staking state
         uint256 numStakers; // total number of stakers that have ever staked on this assertion. increasing only.
