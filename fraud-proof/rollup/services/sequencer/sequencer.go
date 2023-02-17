@@ -98,7 +98,7 @@ func (s *Sequencer) confirmationLoop() {
 	isInChallenge := false
 
 	// Current pending assertion from sequencing goroutine
-	var pendingAssertion *rollupTypes.Assertion
+	pendingAssertion := new(rollupTypes.Assertion)
 	pendingConfirmationSent := true
 	pendingConfirmed := true
 
