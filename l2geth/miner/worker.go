@@ -613,14 +613,14 @@ func (w *worker) batchStartLoop() {
 								txPendingNonce, ok := pendingNonce[acc]
 								if ok {
 									if txPendingNonce != tx.Nonce() {
-										log.Error("Found nonce mismatch",
+										log.Error("Found nonce mismatch during picking out transactions",
 											"tx_hash", tx.Hash().String(), "expected_nonce", txPendingNonce, "actual_nonce", tx.Nonce())
 										continue
 									}
 								} else {
 									stateNonce := stateDB.GetNonce(acc)
 									if stateNonce != tx.Nonce() {
-										log.Error("Found nonce mismatch",
+										log.Error("Found nonce mismatch during picking out transactions",
 											"tx_hash", tx.Hash().String(), "expected_nonce", stateNonce, "actual_nonce", tx.Nonce())
 										continue
 									}
@@ -734,7 +734,7 @@ func (w *worker) batchAnswerLoop() {
 					from, _ := types.Sender(w.current.signer, tx)
 					stateNonce := w.current.state.GetNonce(from)
 					if stateNonce != tx.Nonce() {
-						log.Error("Found nonce mismatch",
+						log.Error("Found nonce mismatch during producing blocks",
 							"tx_hash", tx.Hash().String(), "expected_nonce", stateNonce, "actual_nonce", tx.Nonce())
 						break
 					}
