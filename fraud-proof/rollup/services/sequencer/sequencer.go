@@ -354,8 +354,8 @@ func (s *Sequencer) Start() error {
 	_ = s.BaseService.Start(true, true)
 
 	s.Wg.Add(2)
-	go s.confirmationLoop()
-	go s.challengeLoop()
+	//go s.confirmationLoop()
+	//go s.challengeLoop()
 	log.Info("fraud-proof defender started")
 	return nil
 }
@@ -363,7 +363,7 @@ func (s *Sequencer) Start() error {
 func (s *Sequencer) Stop() error {
 	log.Info("fraud-proof defender stopped")
 	s.Cancel()
-	s.Wg.Wait()
+	//s.Wg.Wait()
 	return nil
 }
 
