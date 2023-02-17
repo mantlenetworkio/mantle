@@ -11,7 +11,7 @@ import (
 	gecho "github.com/labstack/echo/v4"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
-	"github.com/mantlenetworkio/mantle/mt-batcher/services/common"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
 	"github.com/pkg/errors"
 	"github.com/shurcooL/graphql"
 	"google.golang.org/grpc"
@@ -60,7 +60,7 @@ func (s *DaService) GetRollupStoreByRollupBatchIndex(c gecho.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, errors.New("get rollup store fail"))
 	}
-	rsRep := &common.RollupStoreResponse{
+	rsRep := &eigenda.RollupStoreResponse{
 		DataStoreId: rollupStore.DataStoreId,
 		ConfirmAt:   rollupStore.ConfirmAt,
 		Status:      rollupStore.Status,
@@ -162,7 +162,7 @@ func (s *DaService) GetTransactionListByStoreNumber(c gecho.Context) error {
 		return c.JSON(http.StatusBadRequest, errors.New("RetrieveFramesAndData error"))
 	}
 	data := reply.GetData()
-	batchTxn := new([]common.BatchTx)
+	batchTxn := new([]eigenda.BatchTx)
 	batchRlpStream := rlp.NewStream(bytes.NewBuffer(data), uint64(len(data)))
 	err = batchRlpStream.Decode(batchTxn)
 	if err != nil {

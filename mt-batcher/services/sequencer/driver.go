@@ -20,10 +20,11 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
+	common3 "github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	rc "github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	common2 "github.com/mantlenetworkio/mantle/mt-batcher/common"
-	common3 "github.com/mantlenetworkio/mantle/mt-batcher/services/common"
+	common4 "github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/txmgr"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -73,7 +74,7 @@ type Driver struct {
 var bigOne = new(big.Int).SetUint64(1)
 
 func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
-	_, cancel := context.WithTimeout(ctx, common3.DefaultTimeout)
+	_, cancel := context.WithTimeout(ctx, common4.DefaultTimeout)
 	defer cancel()
 	txManagerConfig := txmgr.Config{
 		ResubmissionTimeout:       cfg.ResubmissionTimeout,
@@ -117,7 +118,7 @@ func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction) (*ty
 
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
 		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
-		opts.GasTipCap = common3.FallbackGasTipCap
+		opts.GasTipCap = common4.FallbackGasTipCap
 		return d.Cfg.RawEigenContract.RawTransact(opts, tx.Data())
 
 	default:
@@ -241,7 +242,7 @@ func (d *Driver) StoreData(ctx context.Context, uploadHeader []byte, duration ui
 
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
 		log.Warn("MtBather eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
-		opts.GasTipCap = common3.FallbackGasTipCap
+		opts.GasTipCap = common4.FallbackGasTipCap
 		return d.Cfg.EigenDaContract.StoreData(opts, uploadHeader, duration, blockNumber, startL2BlockNumber, endL2BlockNumber, totalOperatorsIndex)
 
 	default:
@@ -282,7 +283,7 @@ func (d *Driver) ConfirmData(ctx context.Context, callData []byte, searchData rc
 
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
 		log.Warn("MtBather eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
-		opts.GasTipCap = common3.FallbackGasTipCap
+		opts.GasTipCap = common4.FallbackGasTipCap
 		return d.Cfg.EigenDaContract.ConfirmData(opts, callData, searchData, startL2BlockNumber, endL2BlockNumber)
 
 	default:
@@ -470,7 +471,7 @@ func (d *Driver) callDisperse(headerHash []byte, messageHash []byte) (common2.Di
 
 func (d *Driver) IsMaxPriorityFeePerGasNotFoundError(err error) bool {
 	return strings.Contains(
-		err.Error(), common3.ErrMaxPriorityFeePerGasNotFound.Error(),
+		err.Error(), common4.ErrMaxPriorityFeePerGasNotFound.Error(),
 	)
 }
 

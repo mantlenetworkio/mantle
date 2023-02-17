@@ -3,10 +3,10 @@ package rollup
 import (
 	"errors"
 	"fmt"
+	gresty "github.com/go-resty/resty/v2"
 	"math/big"
 	"strconv"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
@@ -144,7 +144,7 @@ type RollupClient interface {
 
 // Client is an HTTP based RollupClient
 type Client struct {
-	client  *resty.Client
+	client  *gresty.Client
 	chainID *big.Int
 }
 
@@ -170,10 +170,10 @@ type StateRootResponse struct {
 
 // NewClient create a new Client given a remote HTTP url and a chain id
 func NewClient(url string, chainID *big.Int) *Client {
-	client := resty.New()
+	client := gresty.New()
 	client.SetHostURL(url)
 	client.SetHeader("User-Agent", "sequencer")
-	client.OnAfterResponse(func(c *resty.Client, r *resty.Response) error {
+	client.OnAfterResponse(func(c *gresty.Client, r *gresty.Response) error {
 		statusCode := r.StatusCode()
 		if statusCode >= 400 {
 			method := r.Request.Method
@@ -489,12 +489,18 @@ func (c *Client) GetLatestTransaction(backend Backend) (*types.Transaction, erro
 
 func (c *Client) GetStateRoot(index uint64, backend Backend) (*StateRoot, error) {
 	str := strconv.FormatUint(index, 10)
+	var QueryParam string
+	if backend.String() == "da" {
+		QueryParam = "l1"
+	} else {
+		QueryParam = backend.String()
+	}
 	response, err := c.client.R().
 		SetPathParams(map[string]string{
 			"index": str,
 		}).
 		SetQueryParams(map[string]string{
-			"backend": backend.String(),
+			"backend": QueryParam,
 		}).
 		SetResult(&StateRootResponse{}).
 		Get("/stateroot/index/{index}")
