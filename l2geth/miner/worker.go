@@ -535,11 +535,11 @@ func (w *worker) batchStartLoop() {
 					// for active sequencer
 					log.Info("Active sequencer receives batchPeriodStartEvent")
 					if ev.Msg.StartHeight != w.chain.CurrentBlock().NumberU64()+1 {
-						log.Error("start height mismatch", "current_height", w.current.header.Number.Uint64(), "start_height", ev.Msg.StartHeight)
+						log.Error("start height mismatch", "current_height", w.chain.CurrentBlock().NumberU64(), "start_height", ev.Msg.StartHeight)
 						continue
 					}
 					if ev.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
-						log.Error("maxHeight is too low, just ignore the batch", "current_height", w.current.header.Number.Uint64(), "max_height", ev.Msg.MaxHeight)
+						log.Error("maxHeight is too low, just ignore the batch", "current_height", w.chain.CurrentBlock().NumberU64(), "max_height", ev.Msg.MaxHeight)
 						continue
 					}
 					if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
@@ -602,7 +602,7 @@ func (w *worker) batchStartLoop() {
 						}
 						var txsQueue types.Transactions
 						pendingNonce := make(map[common.Address]uint64)
-						stateDB, err := w.eth.BlockChain().State()
+						stateDB, err := w.chain.State()
 						if err != nil {
 							log.Error("get state failure", "err_msg", err.Error())
 							continue
