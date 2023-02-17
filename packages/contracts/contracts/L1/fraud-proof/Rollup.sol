@@ -497,7 +497,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         return challenge;
     }
 
-    function newAssertionDeadline() private view returns (uint256) {
+    function newAssertionDeadline() private returns (uint256) {
         // TODO: account for prev assertion, gas
         // return block.number + confirmationPeriod;
         address scc = resolve("StateCommitmentChain");
