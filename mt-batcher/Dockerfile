@@ -1,5 +1,6 @@
 FROM golang:1.19.0-alpine3.15 as builder
 
+
 RUN apk add --no-cache make gcc musl-dev linux-headers git jq bash
 
 COPY ./mt-batcher /go/mt-batcher
