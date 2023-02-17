@@ -24,7 +24,7 @@ import (
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
-	common2 "github.com/mantlenetworkio/mantle/mt-batcher/services/common"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
 	"github.com/mantlenetworkio/mantle/mt-batcher/txmgr"
 	"github.com/mantlenetworkio/mantle/mt-challenger/bindings"
 	rc "github.com/mantlenetworkio/mantle/mt-challenger/bindings"
@@ -427,7 +427,7 @@ func (c *Challenger) eventLoop() {
 			c.Cfg.Logger.Error().Err(err).Msg("Error getting data")
 			continue
 		}
-		batchTxn := new([]common2.BatchTx)
+		batchTxn := new([]eigenda.BatchTx)
 		batchRlpStream := rlp.NewStream(bytes.NewBuffer(data), uint64(len(data)))
 		err = batchRlpStream.Decode(batchTxn)
 		if err != nil {

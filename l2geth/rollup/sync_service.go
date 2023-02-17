@@ -12,7 +12,7 @@ import (
 
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
+	eigenlayer "github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/contracts/message"
@@ -60,7 +60,7 @@ type SyncService struct {
 	txpool                         *core.TxPool
 	RollupGpo                      *gasprice.RollupOracle
 	client                         RollupClient
-	eigenClient                    eigenda.EigenClient
+	eigenClient                    eigenlayer.EigenClient
 	l1MsgSender                    string
 	syncing                        atomic.Value
 	chainHeadSub                   event.Subscription
@@ -115,7 +115,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	// Initialize the rollup client
 	client := NewClient(cfg.RollupClientHttp, chainID)
 	log.Info("Configured rollup client", "url", cfg.RollupClientHttp, "chain-id", chainID.Uint64(), "ctc-deploy-height", cfg.CanonicalTransactionChainDeployHeight)
-	eigenClient := eigenda.NewEigenClient(cfg.EigenClientHttp)
+	eigenClient := eigenlayer.NewEigenClient(cfg.EigenClientHttp)
 	if eigenClient == nil {
 		return nil, fmt.Errorf("new eigen client fail")
 	}
