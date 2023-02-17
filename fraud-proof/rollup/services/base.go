@@ -112,10 +112,16 @@ func (b *BaseService) Start(cleanL1, stake bool) *types.Block {
 		// Initial staking
 		// TODO: sync L1 staking status
 		stakeOpts := b.Rollup.TransactOpts
-		stakeOpts.Value = big.NewInt(int64(b.Config.RollupStakeAmount))
-		_, err := b.Rollup.Contract.Stake(&stakeOpts)
+		isStaked, err := b.Rollup.Contract.IsStaked(&bind.CallOpts{}, stakeOpts.From)
 		if err != nil {
-			log.Crit("Failed to stake", "err", err)
+			log.Crit("Failed to query stake", "err", err)
+		}
+		if !isStaked {
+			stakeOpts.Value = big.NewInt(int64(b.Config.RollupStakeAmount))
+			_, err = b.Rollup.Contract.Stake(&stakeOpts)
+			if err != nil {
+				log.Crit("Failed to stake", "err", err)
+			}
 		}
 	}
 	return genesis

@@ -363,7 +363,7 @@ func (s *Sequencer) Start() error {
 func (s *Sequencer) Stop() error {
 	log.Info("fraud-proof defender stopped")
 	s.Cancel()
-	s.Wg.Wait()
+	//s.Wg.Wait()
 	return nil
 }
 
