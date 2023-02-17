@@ -82,7 +82,7 @@ func (b *TxBatch) ToAssertion(parent *Assertion) *Assertion {
 		ID:        new(big.Int).Add(parent.ID, big.NewInt(1)),
 		VmHash:    b.LastBlockRoot(),
 		InboxSize: big.NewInt(int64(b.LastBlockNumber())), // TODO-FIXME uint64 -> int64 -> big.Int
-		GasUsed:   b.GasUsed,
+		GasUsed:   new(big.Int).Add(b.GasUsed, parent.GasUsed),
 		Parent:    parent.ID,
 	}
 }
