@@ -188,6 +188,8 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
             delete rollupBatchIndexRollupStores[i];
         }
         rollupBatchIndex = _rollupBatchIndex;
+        l2StoredBlockNumber = 1;
+        l2ConfirmedBlockNumber = 1;
     }
 
     /**
