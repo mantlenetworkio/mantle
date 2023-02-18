@@ -179,6 +179,18 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
     }
 
     /**
+    * @notice reset batch rollup batch data
+    * @param _rollupBatchIndex update rollup index
+    */
+    function resetRollupBatchData(uint256 _rollupBatchIndex) external {
+        require(msg.sender == sequencer, "Only the sequencer can update sequencer address");
+        for (uint256 i = 0; i < rollupBatchIndex; i++) {
+            delete rollupBatchIndexRollupStores[i];
+        }
+        rollupBatchIndex = _rollupBatchIndex;
+    }
+
+    /**
      * @notice Called by the (staked) sequencer to pay for a datastore and post some metadata (in the `header` parameter) about it on chain.
      * Since the sequencer must encode the data before they post the header on chain, they must use a *snapshot* of the number and stakes of DataLayr operators
      * from a previous block number, specified by the `blockNumber` input.
