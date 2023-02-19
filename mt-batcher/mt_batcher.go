@@ -141,7 +141,9 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		DataStoreDuration:         uint64(cfg.DataStoreDuration),
 		DataStoreTimeout:          cfg.DataStoreTimeout,
 		DisperserSocket:           cfg.DisperserEndpoint,
-		PollInterval:              cfg.PollInterval,
+		MainWorkerPollInterval:    cfg.MainWorkerPollInterval,
+		CheckerWorkerPollInterval: cfg.CheckerWorkerPollInterval,
+		DbPath:                    cfg.DbPath,
 		GraphProvider:             cfg.GraphProvider,
 		ResubmissionTimeout:       cfg.ResubmissionTimeout,
 		NumConfirmations:          cfg.NumConfirmations,
@@ -160,6 +162,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		GraphProvider:   cfg.GraphProvider,
 		Timeout:         cfg.RetrieverTimeout,
 		DaServicePort:   cfg.EigenDaHttpPort,
+		EigenLayerNode:  cfg.EigenLayerNode,
 		Debug:           cfg.EchoDebug,
 	}
 	daService, err := restorer.NewDaService(ctx, daServiceConfig)

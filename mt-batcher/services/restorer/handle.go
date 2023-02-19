@@ -93,7 +93,7 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 		log.Error("retrieve frames and data error", "err", err)
 		return c.JSON(http.StatusBadRequest, errors.New("recovery data fail"))
 	}
-	if len(reply.GetData()) > 0 {
+	if len(reply.GetData()) >= 31*s.Cfg.EigenLayerNode {
 		return c.JSON(http.StatusOK, reply.GetData())
 	} else {
 		log.Error("retrieve data is empty, please check da data batch")
@@ -167,7 +167,7 @@ func (s *DaService) GetTransactionListByStoreNumber(c gecho.Context) error {
 		return c.JSON(http.StatusBadRequest, errors.New("RetrieveFramesAndData error"))
 	}
 	data := reply.GetData()
-	if len(data) > 0 {
+	if len(data) >= 31*s.Cfg.EigenLayerNode {
 		batchTxn := new([]eigenda.BatchTx)
 		batchRlpStream := rlp.NewStream(bytes.NewBuffer(data), uint64(len(data)))
 		err = batchRlpStream.Decode(batchTxn)
