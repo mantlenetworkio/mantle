@@ -537,10 +537,6 @@ func (w *worker) batchStartLoop() {
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
 					log.Info("Active sequencer receives batchPeriodStartEvent")
-					if ev.Msg.StartHeight != w.chain.CurrentBlock().NumberU64()+1 {
-						log.Error("start height mismatch", "current_height", w.chain.CurrentBlock().NumberU64(), "start_height", ev.Msg.StartHeight)
-						continue
-					}
 					if ev.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
 						log.Error("maxHeight is too low, just ignore the batch", "current_height", w.chain.CurrentBlock().NumberU64(), "max_height", ev.Msg.MaxHeight)
 						continue
