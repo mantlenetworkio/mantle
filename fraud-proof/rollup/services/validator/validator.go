@@ -97,7 +97,7 @@ func (v *Validator) commitBlocks(blocks []*rollupTypes.SequenceBlock) (common.Ha
 			Number:     new(big.Int).SetUint64(sblock.BlockNumber),
 			GasLimit:   core.CalcGasLimit(parent, parent.GasLimit(), ethconfig.Defaults.Miner.GasCeil), // TODO: this may cause problem
 			Time:       sblock.Timestamp,
-			//StakerAddr:   v.Config.SequencerAddr, //TODO-FIXME
+			//Coinbase:   v.Config.SequencerAddr, //TODO-FIXME
 			Difficulty: common.Big1, // Fake difficulty. Avoid use 0 here because it means the merge happened
 		}
 		gasPool := new(core.GasPool).AddGas(header.GasLimit)

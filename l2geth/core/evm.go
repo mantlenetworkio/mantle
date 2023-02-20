@@ -54,7 +54,7 @@ func NewEVMContext(msg Message, header *types.Header, chain ChainContext, author
 			Transfer:      Transfer,
 			GetHash:       GetHashFn(header, chain),
 			Origin:        msg.From(),
-			Coinbase:      dump.BvmFeeWallet, // StakerAddr is the fee vault.
+			Coinbase:      dump.BvmFeeWallet, // Coinbase is the fee vault.
 			BlockNumber:   new(big.Int).Set(header.Number),
 			Time:          new(big.Int).SetUint64(msg.L1Timestamp()),
 			Difficulty:    new(big.Int), // Difficulty always returns zero.
