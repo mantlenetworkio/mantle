@@ -214,7 +214,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
     ) public override stakedOnly {
 //    ) public override {
         // TODO: determine if inboxSize needs to be included.
-        RollupLib.ExecutionState memory endState = RollupLib.ExecutionState(l2GasUsed, vmHash);
+        // RollupLib.ExecutionState memory endState = RollupLib.ExecutionState(l2GasUsed, vmHash);
 
         uint256 parentID = stakers[msg.sender].assertionID;
         // Require that enough time has passed since the last assertion.
@@ -238,7 +238,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         lastCreatedAssertionID++;
         emit AssertionCreated(lastCreatedAssertionID, msg.sender, vmHash, inboxSize, l2GasUsed);
         assertions.createAssertion(
-            lastCreatedAssertionID, RollupLib.stateHash(endState), inboxSize, l2GasUsed, parentID, newAssertionDeadline()
+            lastCreatedAssertionID, vmHash, inboxSize, l2GasUsed, parentID, newAssertionDeadline()
         );
 
         // Update stake.
