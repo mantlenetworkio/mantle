@@ -570,11 +570,11 @@ func (d *Driver) CheckConfirmedWorker() {
 				log.Error("Checker get batch index from db fail", "err", err)
 				continue
 			}
-			if batchIndex == (lastestBatchIndex.Uint64() - d.Cfg.CheckerBatchIndex) {
+			if batchIndex >= (lastestBatchIndex.Uint64() - d.Cfg.CheckerBatchIndex) {
 				log.Info("Checker db batch index and contract batch idnex is equal", "DbBatchIndex", batchIndex, "ContractBatchIndex", lastestBatchIndex.Uint64()-d.Cfg.CheckerBatchIndex)
 				continue
 			}
-			log.Info("db batch index and contract batch idnex", "DbBatchIndex", batchIndex, "ContractBatchIndex", lastestBatchIndex.Uint64())
+			log.Info("Checker db batch index and contract batch idnex", "DbBatchIndex", batchIndex, "ContractBatchIndex", lastestBatchIndex.Uint64())
 			for i := batchIndex; i <= (lastestBatchIndex.Uint64() - d.Cfg.CheckerBatchIndex); i++ {
 				log.Info("Checker batch confirm data index", "batchIndex", i)
 				rollupStore, err := d.Cfg.EigenDaContract.GetRollupStoreByRollupBatchIndex(&bind.CallOpts{}, big.NewInt(int64(i)))
