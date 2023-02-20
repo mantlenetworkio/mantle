@@ -4,7 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/mantlenetworkio/mantle/l2geth/consensus"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
+
 	"math/big"
 	"strconv"
 	"sync"
@@ -58,6 +62,7 @@ type SyncService struct {
 	ctx                            context.Context
 	cancel                         context.CancelFunc
 	verifier                       bool
+	mpcVerifier                    bool
 	db                             ethdb.Database
 	scope                          event.SubscriptionScope
 	txFeed                         event.Feed
@@ -87,10 +92,11 @@ type SyncService struct {
 	applyLock                      sync.Mutex
 	updateGasPriceTxPool           chan *types.Transaction
 	verifiedMap                    sync.Map
+	executor                       *executor
 }
 
 // NewSyncService returns an initialized sync service
-func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *core.BlockChain, db ethdb.Database) (*SyncService, error) {
+func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *core.BlockChain, db ethdb.Database, gasFloor uint64, chainConfig *params.ChainConfig, engine consensus.Engine) (*SyncService, error) {
 	if bc == nil {
 		return nil, errors.New("Must pass BlockChain to SyncService")
 	}
@@ -149,6 +155,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	service := SyncService{
 		ctx:                            ctx,
 		cancel:                         cancel,
+		mpcVerifier:                    cfg.MpcVerifier,
 		enable:                         cfg.Eth1SyncServiceEnable,
 		syncing:                        atomic.Value{},
 		bc:                             bc,
@@ -169,6 +176,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		l1MsgSender:                    cfg.L1MsgSender,
 		cfg:                            cfg,
 		updateGasPriceTxPool:           make(chan *types.Transaction, gasPriceTxPoolSize),
+		executor:                       newExecutor(gasFloor, chainConfig, engine, bc),
 	}
 
 	// The chainHeadSub is used to synchronize the SyncService with the chain.
@@ -1495,9 +1503,17 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 		if err != nil {
 			return fmt.Errorf("cannot get transaction batch: %w", err)
 		}
+		//verify txs state roots
+
 		for _, tx := range txs {
-			if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
-				return fmt.Errorf("cannot apply batched transaction: %w", err)
+			verified, err := s.verifyTx(tx)
+			if err != nil {
+				return err
+			}
+			if verified {
+				if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
+					return fmt.Errorf("cannot apply batched transaction: %w", err)
+				}
 			}
 		}
 		s.SetLatestBatchIndex(&i)
@@ -1520,8 +1536,14 @@ func (s *SyncService) syncEigenTransactionBatchRange(start, end uint64) error {
 					return fmt.Errorf("cannot get eigen transaction batch: %w", err)
 				}
 				for _, tx := range txs {
-					if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
-						return fmt.Errorf("cannot apply batched transaction: %w", err)
+					verified, err := s.verifyTx(tx)
+					if err != nil {
+						return err
+					}
+					if verified {
+						if err := s.applyBatchedTransaction(tx, &types.BatchTxSetProof{}); err != nil {
+							return fmt.Errorf("cannot apply batched transaction: %w", err)
+						}
 					}
 				}
 				log.Info("set latest eigen batch index", "index", i)
@@ -1618,5 +1640,41 @@ func (s *SyncService) handleChainHeadEventLoop() {
 				log.Info("handleChainHeadEventLoop receive block", "block_number", block.Block.NumberU64())
 			}
 		}
+	}
+}
+
+func (s *SyncService) SetExtra(extra []byte) error {
+	if uint64(len(extra)) > params.MaximumExtraDataSize {
+		return fmt.Errorf("extra exceeds max length. %d > %v", len(extra), params.MaximumExtraDataSize)
+	}
+	s.executor.setExtra(extra)
+	return nil
+}
+
+func (s *SyncService) verifyTx(tx *types.Transaction) (bool, error) {
+	if !s.mpcVerifier {
+		index := tx.GetMeta().Index
+		stateRoot, err := s.client.GetStateRoot(*index, s.backend)
+		if err != nil {
+			log.Info("waiting stateroot to be append to scc", "index", *index)
+			return false, fmt.Errorf("Cannot get stateroot from dtl : %w", err)
+		}
+		next := s.GetNextIndex()
+		if *index < next {
+			log.Warn("index is less than current index", "index", *index, ",next index", next)
+			return false, nil
+		}
+		err, block := s.executor.applyTx(tx, &types.BatchTxSetProof{})
+		if err != nil {
+			return false, fmt.Errorf("Cannot apply tx : %w", err)
+		}
+
+		if block.Root().String() != stateRoot.Value {
+			log.Error("state root is different", " scc stateroot", stateRoot.Value, "local stateroot", block.Root().String(), "index", index)
+			return false, fmt.Errorf("stateroot is different")
+		}
+		return true, nil
+	} else {
+		return true, nil
 	}
 }

@@ -50,7 +50,8 @@ const (
 	inmemorySnapshots  = 128  // Number of recent vote snapshots to keep in memory
 	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
 
-	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
+	wiggleTime          = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
+	preUpgradedGaslimit = 15000000               //this params is only used for testnet
 )
 
 // Clique proof-of-authority protocol constants.
@@ -595,6 +596,11 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainReader, header *types.
 	// No block rewards in PoA, so the state remains as is and uncles are dropped
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
+
+	//this is only for testnet
+	if !chain.Config().ISUpdateGaslimitBlock(header.Number) {
+		header.GasLimit = preUpgradedGaslimit
+	}
 
 	// Assemble and return the final block for sealing
 	return types.NewBlock(header, txs, nil, receipts), nil

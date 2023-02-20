@@ -43,4 +43,6 @@ type Config struct {
 	SequencerClientHttp string
 
 	RollupRole Role
+  
+	MpcVerifier bool
 }
