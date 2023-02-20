@@ -466,7 +466,7 @@ func (w *worker) l1Tol2StartLoop() {
 		select {
 		case obj := <-w.l1ToL2Sub.Chan():
 			if !w.isRunning() {
-				log.Info("miner receives batchPeriodStartEvent but miner not start")
+				log.Debug("miner receives batchPeriodStartEvent but miner not start")
 			}
 			var ev core.L1ToL2TxStartEvent
 			var ok bool
@@ -498,10 +498,13 @@ func (w *worker) batchStartLoop() {
 		//BatchPeriodStartEvent
 		case obj := <-w.bpsSub.Chan():
 			if !w.isRunning() {
-				log.Info("miner receives batchPeriodStartEvent but miner not start")
+				log.Debug("miner receives batchPeriodStartEvent but miner not start")
 			}
 			var ev core.BatchPeriodStartEvent
 			var ok bool
+			if obj == nil || obj.Data == nil {
+				continue
+			}
 			if ev, ok = obj.Data.(core.BatchPeriodStartEvent); !ok {
 				continue
 			}
@@ -683,8 +686,14 @@ func (w *worker) batchAnswerLoop() {
 		select {
 		// BatchPeriodAnswerEvent
 		case obj := <-w.bpaSub.Chan():
+			if !w.isRunning() {
+				log.Debug("miner receives batchPeriodAnswerEvent but miner not start")
+			}
 			var ev core.BatchPeriodAnswerEvent
 			var ok bool
+			if obj == nil || obj.Data == nil {
+				continue
+			}
 			if ev, ok = obj.Data.(core.BatchPeriodAnswerEvent); !ok {
 				continue
 			}
