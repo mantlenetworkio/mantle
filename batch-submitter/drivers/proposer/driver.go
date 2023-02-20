@@ -407,15 +407,19 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 	//	return
 	//}
 	var latestAssertion rollupTypes.Assertion
-	var assertionID *big.Int
-	var err error
-	if assertionID, err = d.fpAssertion.GetLatestAssertionID(&bind.CallOpts{}, opts.From); err != nil {
-		return nil, err
-	}
-	if ret, err := d.fpAssertion.Assertions(&bind.CallOpts{}, assertionID); err != nil {
+	var staker rollupTypes.Staker
+	if ret, err := d.fpRollup.Stakers(&bind.CallOpts{}, opts.From); err != nil {
 		return nil, err
 	} else {
-		latestAssertion.ID = assertionID
+		staker.IsStaked = ret.IsStaked
+		staker.AmountStaked = ret.AmountStaked
+		staker.AssertionID = ret.AssertionID
+		staker.CurrentChallenge = ret.CurrentChallenge
+	}
+	if ret, err := d.fpAssertion.Assertions(&bind.CallOpts{}, staker.AssertionID); err != nil {
+		return nil, err
+	} else {
+		latestAssertion.ID = staker.AssertionID
 		latestAssertion.VmHash = ret.StateHash
 		latestAssertion.InboxSize = ret.InboxSize
 		latestAssertion.GasUsed = ret.GasUsed

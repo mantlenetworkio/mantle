@@ -2,7 +2,6 @@ package sequencer
 
 import (
 	"fmt"
-	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"math/big"
 
@@ -365,63 +364,4 @@ func (s *Sequencer) Stop() error {
 	s.Cancel()
 	//s.Wg.Wait()
 	return nil
-}
-
-func (s *Sequencer) CreateAssertion(obj interface{}) error {
-	assertion, _ := obj.(rollupTypes.Assertion)
-	_, err := s.Rollup.CreateAssertion(
-		assertion.VmHash,
-		assertion.InboxSize,
-		assertion.GasUsed,
-	)
-	return err
-}
-
-func (s *Sequencer) CreateAssertionWithStateBatch(batches [][32]byte, shouldStartAtElement *big.Int, signature []byte, obj interface{}) error {
-	assertion, _ := obj.(rollupTypes.Assertion)
-	_, err := s.Rollup.CreateAssertionWithStateBatch(
-		assertion.VmHash,
-		assertion.InboxSize,
-		assertion.GasUsed,
-		batches,
-		shouldStartAtElement,
-		signature,
-	)
-	return err
-}
-
-func (s *Sequencer) GetLatestAssertion(staker common.Address) (interface{}, error) {
-	var latestAssertion rollupTypes.Assertion
-	var assertionID *big.Int
-	var err error
-	if assertionID, err = s.AssertionMap.GetLatestAssertionID(ethc.Address(staker)); err != nil {
-		return nil, err
-	}
-	if ret, err := s.AssertionMap.Assertions(assertionID); err != nil {
-		return nil, err
-	} else {
-		latestAssertion.ID = assertionID
-		latestAssertion.VmHash = ret.StateHash
-		latestAssertion.InboxSize = ret.InboxSize
-		latestAssertion.GasUsed = ret.GasUsed
-		latestAssertion.Parent = ret.Parent
-		latestAssertion.Deadline = ret.Deadline
-		latestAssertion.ProposalTime = ret.ProposalTime
-	}
-	return latestAssertion, nil
-}
-
-func (s *Sequencer) GenerateState() (interface{}, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *Sequencer) InChallenge() bool {
-	//TODO implement me
-	return false
-}
-
-func (s *Sequencer) RespondChallenge() error {
-	//TODO implement me
-	panic("implement me")
 }

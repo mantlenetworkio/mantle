@@ -42,7 +42,6 @@ contract AssertionMap is Initializable {
         mapping(bytes32 => bool) childStateHashes; // child assertion vm hashes
     }
 
-    mapping(address => uint256) public latestAssertions;
     mapping(uint256 => Assertion) public assertions;
     address public rollupAddress;
 
@@ -100,10 +99,6 @@ contract AssertionMap is Initializable {
         return assertions[assertionID].stakers[stakerAddress];
     }
 
-    function getLatestAssertionID(address stakerAddress) external view returns (uint256) {
-        return latestAssertions[stakerAddress];
-    }
-
     function createAssertion(
         uint256 assertionID,
         bytes32 stateHash,
@@ -126,9 +121,7 @@ contract AssertionMap is Initializable {
         if (parentAssertion.childStateHashes[stateHash]) {
             revert SiblingStateHashExists();
         }
-        if (assertionID > latestAssertions[tx.origin]) {
-            latestAssertions[tx.origin] = assertionID;
-        }
+
         parentAssertion.childStateHashes[stateHash] = true;
 
         assertion.stateHash = stateHash;
@@ -137,8 +130,6 @@ contract AssertionMap is Initializable {
         assertion.parent = parentID;
         assertion.deadline = deadline;
         assertion.proposalTime = block.number;
-
-        latestAssertions[tx.origin] = assertionID;
     }
 
     function stakeOnAssertion(uint256 assertionID, address stakerAddress) external rollupOnly {
