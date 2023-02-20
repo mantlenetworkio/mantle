@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty/v2"
+	gresty "github.com/go-resty/resty/v2"
 	common2 "github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
-	"github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"github.com/pkg/errors"
 )
 
@@ -17,18 +16,18 @@ var errTssHTTPError = errors.New("eigen da http error")
 
 type EigenClient interface {
 	GetLatestTransactionBatchIndex() (*uint64, error)
-	GetRollupStoreByRollupBatchIndex(batchIndex int64) (*common.RollupStoreResponse, error)
+	GetRollupStoreByRollupBatchIndex(batchIndex int64) (*RollupStoreResponse, error)
 	GetBatchTransactionByDataStoreId(storeNumber uint32, l1MsgSender string) ([]*types.Transaction, error)
 }
 
 type Client struct {
-	client *resty.Client
+	client *gresty.Client
 }
 
 func NewEigenClient(url string) *Client {
-	client := resty.New()
+	client := gresty.New()
 	client.SetHostURL(url)
-	client.OnAfterResponse(func(c *resty.Client, r *resty.Response) error {
+	client.OnAfterResponse(func(c *gresty.Client, r *gresty.Response) error {
 		statusCode := r.StatusCode()
 		if statusCode >= 400 {
 			method := r.Request.Method
@@ -56,15 +55,15 @@ func (c *Client) GetLatestTransactionBatchIndex() (batchIndex *uint64, err error
 	return &batchIndexTmp, err
 }
 
-func (c *Client) GetRollupStoreByRollupBatchIndex(batchIndex int64) (*common.RollupStoreResponse, error) {
+func (c *Client) GetRollupStoreByRollupBatchIndex(batchIndex int64) (*RollupStoreResponse, error) {
 	response, err := c.client.R().
 		SetBody(map[string]interface{}{"batch_index": batchIndex}).
-		SetResult(&common.RollupStoreResponse{}).
+		SetResult(&RollupStoreResponse{}).
 		Post("/eigen/getRollupStoreByRollupBatchIndex")
 	if err != nil {
 		return nil, fmt.Errorf("cannot get roll store data: %w", err)
 	}
-	rollupStore, ok := response.Result().(*common.RollupStoreResponse)
+	rollupStore, ok := response.Result().(*RollupStoreResponse)
 	if response.StatusCode() != 200 || !ok {
 		return nil, errors.New("fetch roll store data fail")
 	}
@@ -82,7 +81,7 @@ func (c *Client) GetBatchTransactionByDataStoreId(storeNumber uint32, l1MsgSende
 	}
 	if response.StatusCode() == 200 {
 		var retTxList []*types.Transaction
-		batchTxn := new([]common.BatchTx)
+		batchTxn := new([]BatchTx)
 		batchRlpStream := l2rlp.NewStream(bytes.NewBuffer(TxListBuf), 0)
 		err = batchRlpStream.Decode(batchTxn)
 		if err != nil {
@@ -95,7 +94,7 @@ func (c *Client) GetBatchTransactionByDataStoreId(storeNumber uint32, l1MsgSende
 			if err := l2Tx.DecodeRLP(rlpStream); err != nil {
 				log.Error("Decode RLP fail")
 			}
-			txDecodeMetaData := new(common.TransactionMeta)
+			txDecodeMetaData := new(TransactionMeta)
 			err := json.Unmarshal(newBatchTxn[i].TxMeta, txDecodeMetaData)
 			if err != nil {
 				log.Error("Unmarshal json fail")
