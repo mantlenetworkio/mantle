@@ -118,7 +118,7 @@ func (s *Sequencer) confirmationLoop() {
 				// New assertion created on L1 Rollup
 				log.Info(fmt.Sprintf("Get New Assertion, AssertionID: %s, AsserterAddress: %s",
 					ev.AssertionID.String(), ev.AsserterAddr.String()))
-				if common.Address(ev.AsserterAddr) == s.Config.Coinbase {
+				if common.Address(ev.AsserterAddr) == s.Config.StakeAddr {
 					log.Info("confirmAssertion.....")
 					pendingAssertion.ID = ev.AssertionID
 					pendingAssertion.VmHash = ev.VmHash
@@ -245,7 +245,7 @@ func (s *Sequencer) challengeLoop() {
 					log.Error("Can not get current responder", "error", err)
 					continue
 				}
-				if common.Address(responder) == s.Config.Coinbase {
+				if common.Address(responder) == s.Config.StakeAddr {
 					// If it's our turn
 					err := services.RespondBisection(s.BaseService, abi, challengeSession, ev, states, common.Hash{}, false)
 					if err != nil {
