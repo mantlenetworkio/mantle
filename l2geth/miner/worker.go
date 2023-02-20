@@ -535,11 +535,11 @@ func (w *worker) batchStartLoop() {
 					// for active sequencer
 					log.Info("Active sequencer receives batchPeriodStartEvent")
 					if ev.Msg.StartHeight != w.chain.CurrentBlock().NumberU64()+1 {
-						log.Error("start height mismatch", "current_height", w.current.header.Number.Uint64(), "start_height", ev.Msg.StartHeight)
+						log.Error("start height mismatch", "current_height", w.chain.CurrentBlock().NumberU64(), "start_height", ev.Msg.StartHeight)
 						continue
 					}
 					if ev.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
-						log.Error("maxHeight is too low, just ignore the batch", "current_height", w.current.header.Number.Uint64(), "max_height", ev.Msg.MaxHeight)
+						log.Error("maxHeight is too low, just ignore the batch", "current_height", w.chain.CurrentBlock().NumberU64(), "max_height", ev.Msg.MaxHeight)
 						continue
 					}
 					if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
@@ -602,9 +602,9 @@ func (w *worker) batchStartLoop() {
 						}
 						var txsQueue types.Transactions
 						pendingNonce := make(map[common.Address]uint64)
-						state, err := w.eth.BlockChain().State()
+						stateDB, err := w.chain.State()
 						if err != nil {
-							log.Error("Get blockchain status failure", "err_msg", err.Error())
+							log.Error("get state failure", "err_msg", err.Error())
 							continue
 						}
 						for _, tx := range rawTxsQueue {
@@ -613,14 +613,14 @@ func (w *worker) batchStartLoop() {
 								txPendingNonce, ok := pendingNonce[acc]
 								if ok {
 									if txPendingNonce != tx.Nonce() {
-										log.Error("Found nonce mismatch",
+										log.Error("Found nonce mismatch during picking out transactions",
 											"tx_hash", tx.Hash().String(), "expected_nonce", txPendingNonce, "actual_nonce", tx.Nonce())
 										continue
 									}
 								} else {
-									stateNonce := state.GetNonce(acc)
+									stateNonce := stateDB.GetNonce(acc)
 									if stateNonce != tx.Nonce() {
-										log.Error("Found nonce mismatch",
+										log.Error("Found nonce mismatch during picking out transactions",
 											"tx_hash", tx.Hash().String(), "expected_nonce", stateNonce, "actual_nonce", tx.Nonce())
 										continue
 									}
@@ -731,7 +731,21 @@ func (w *worker) batchAnswerLoop() {
 					}
 				}
 				for _, tx := range ev.Msg.Txs {
-					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, &types.BatchTxSetProof{})
+					from, _ := types.Sender(w.current.signer, tx)
+					stateNonce := w.current.state.GetNonce(from)
+					if stateNonce != tx.Nonce() {
+						log.Error("Found nonce mismatch during producing blocks",
+							"tx_hash", tx.Hash().String(), "expected_nonce", stateNonce, "actual_nonce", tx.Nonce())
+						break
+					}
+
+					// This check is done in SyncService.verifyFee
+					if w.current.state.GetBalance(from).Cmp(tx.Cost()) < 0 {
+						log.Error("insufficient funds for gas * price + value")
+						break
+					}
+
+					err = w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, &types.BatchTxSetProof{})
 					if err != nil {
 						log.Error("ValidateAndApplySequencerTransaction error", "err_msg", err.Error())
 						err = w.mux.Post(core.BatchEndEvent(w.currentBps.BatchIndex))
