@@ -3,11 +3,12 @@ package signer
 import (
 	"encoding/json"
 	"errors"
+	"math/big"
+	"strings"
+
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/rs/zerolog"
-	"math/big"
-	"strings"
 
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
@@ -127,7 +128,8 @@ func (p *Processor) SignSlash() {
 }
 
 func (p *Processor) checkSlashMessages(sign tsscommon.SlashRequest) error {
-
+	p.waitSignSlashLock.RLock()
+	defer p.waitSignSlashLock.RUnlock()
 	v, ok := p.waitSignSlashMsgs[sign.Address.String()]
 	if !ok {
 		return errors.New("slash sign request has not been verified")

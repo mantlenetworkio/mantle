@@ -1,14 +1,17 @@
 package proposer
 
 import (
+	"bytes"
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/ethereum/go-ethereum/log"
 	"math/big"
 	"strings"
+
+	"github.com/ethereum/go-ethereum/log"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -46,12 +49,14 @@ type Config struct {
 }
 
 type Driver struct {
-	cfg            Config
-	sccContract    *scc.StateCommitmentChain
-	rawSccContract *bind.BoundContract
-	ctcContract    *ctc.CanonicalTransactionChain
-	walletAddr     common.Address
-	metrics        *metrics.Base
+	cfg                  Config
+	sccContract          *scc.StateCommitmentChain
+	rawSccContract       *bind.BoundContract
+	ctcContract          *ctc.CanonicalTransactionChain
+	walletAddr           common.Address
+	rollbackEndBlock     *big.Int
+	rollbackEndStateRoot [stateRootSize]byte
+	metrics              *metrics.Base
 }
 
 func NewDriver(cfg Config) (*Driver, error) {
@@ -83,12 +88,14 @@ func NewDriver(cfg Config) (*Driver, error) {
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
 
 	return &Driver{
-		cfg:            cfg,
-		sccContract:    sccContract,
-		rawSccContract: rawSccContract,
-		ctcContract:    ctcContract,
-		walletAddr:     walletAddr,
-		metrics:        metrics.NewBase("batch_submitter", cfg.Name),
+		cfg:                  cfg,
+		sccContract:          sccContract,
+		rawSccContract:       rawSccContract,
+		ctcContract:          ctcContract,
+		walletAddr:           walletAddr,
+		rollbackEndBlock:     big.NewInt(0),
+		rollbackEndStateRoot: [stateRootSize]byte{},
+		metrics:              metrics.NewBase("batch_submitter", cfg.Name),
 	}, nil
 }
 
@@ -174,6 +181,8 @@ func (d *Driver) CraftBatchTx(
 	for i := new(big.Int).Set(start); i.Cmp(end) < 0; i.Add(i, bigOne) {
 		// Consume state roots until reach our maximum tx size.
 		if uint64(len(stateRoots)) > d.cfg.MaxStateRootElements {
+			end = i
+			log.Info("range is big than max stateroot elements", "elements", d.cfg.MaxStateRootElements, "start", start, "new end", end)
 			break
 		}
 
@@ -218,19 +227,30 @@ func (d *Driver) CraftBatchTx(
 	}
 	tssReponseBytes, err := d.cfg.TssClient.GetSignStateBatch(tssReqParams)
 	if err != nil {
-		log.Error("get tss manager signature fail", "err", err)
+		log.Error(name+" get tss manager signature fail", "err", err)
 		return nil, err
 	}
 	var tssResponse tssClient.TssResponse
 	err = json.Unmarshal(tssReponseBytes, &tssResponse)
 	if err != nil {
-		log.Error("failed to unmarshal response from tss", "err", err)
+		log.Error(name+" failed to unmarshal response from tss", "err", err)
 		return nil, err
 	}
 
-	log.Info("append log", "stateRoots", fmt.Sprintf("%v", stateRoots), "offsetStartsAtIndex", offsetStartsAtIndex, "signature", hex.EncodeToString(tssResponse.Signature), "rollback", tssResponse.RollBack)
+	log.Info(name+" append log", "stateRoots size ", len(stateRoots), "offsetStartsAtIndex", offsetStartsAtIndex, "signature", hex.EncodeToString(tssResponse.Signature), "rollback", tssResponse.RollBack)
+	log.Info(name+" signature ", "len", len(tssResponse.Signature))
 	var tx *types.Transaction
 	if tssResponse.RollBack {
+		if d.rollbackEndBlock.Cmp(end) <= 0 && d.rollbackEndBlock.Cmp(start) > 0 {
+			tempS := stateRoots[d.rollbackEndBlock.Uint64()-start.Uint64()-1]
+			if bytes.Equal(tempS[:], d.rollbackEndStateRoot[:]) {
+				err = errors.New("l2geth is still rollback")
+				log.Error(name + " still waiting l2geth rollback result")
+				return nil, err
+			}
+		}
+		d.rollbackEndStateRoot = stateRoots[len(stateRoots)-1]
+		d.rollbackEndBlock = end
 		tx, err = d.sccContract.RollBackL2Chain(opts, start, offsetStartsAtIndex, tssResponse.Signature)
 	} else {
 		tx, err = d.sccContract.AppendStateBatch(

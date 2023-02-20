@@ -2,10 +2,12 @@ package signer
 
 import (
 	"encoding/json"
-	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
-	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	"math/big"
 	"strings"
+
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
+	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
 func (p *Processor) SignRollBack() {
@@ -53,27 +55,39 @@ func (p *Processor) SignRollBack() {
 					continue
 				}
 
-				data, culprits, err := p.handleSign(nodeSignRequest, hashTx, logger)
+				var signResponse tsscommon.SignResponse
 
-				if err != nil {
-					logger.Error().Msgf("roll back %s sign failed ", requestBody.StartBlock)
-					var errorRes tdtypes.RPCResponse
-					if len(culprits) > 0 {
-						respData := strings.Join(culprits, ",")
-						errorRes = tdtypes.NewRPCErrorResponse(req.ID, 100, err.Error(), respData)
-						p.nodeStore.AddCulprits(culprits)
-					} else {
-						errorRes = tdtypes.NewRPCErrorResponse(req.ID, 201, "sign failed", err.Error())
+				hashStr := hexutil.Encode(hashTx)
+				signByte, ok := p.GetSign(hashStr)
+				if ok {
+					logger.Info().Msg("singer get roll back signature from cache")
+					signResponse = tsscommon.SignResponse{
+						Signature: signByte,
 					}
-					er := p.wsClient.SendMsg(errorRes)
-					if er != nil {
-						logger.Err(er).Msg("failed to send msg to tss manager")
-					}
-					continue
-				}
+				} else {
+					data, culprits, err := p.handleSign(nodeSignRequest, hashTx, logger)
 
-				signResponse := tsscommon.SignResponse{
-					Signature: data,
+					if err != nil {
+						logger.Error().Msgf("roll back %s sign failed ", requestBody.StartBlock)
+						var errorRes tdtypes.RPCResponse
+						if len(culprits) > 0 {
+							respData := strings.Join(culprits, ",")
+							errorRes = tdtypes.NewRPCErrorResponse(req.ID, 100, err.Error(), respData)
+							p.nodeStore.AddCulprits(culprits)
+						} else {
+							errorRes = tdtypes.NewRPCErrorResponse(req.ID, 201, "sign failed", err.Error())
+						}
+						er := p.wsClient.SendMsg(errorRes)
+						if er != nil {
+							logger.Err(er).Msg("failed to send msg to tss manager")
+						}
+						continue
+					}
+					signResponse = tsscommon.SignResponse{
+						Signature: data,
+					}
+					bol := p.CacheSign(hashStr, data)
+					logger.Info().Msgf("cache roll back sign byte behavior %s ", bol)
 				}
 
 				RpcResponse := tdtypes.NewRPCSuccessResponse(req.ID, signResponse)
@@ -81,7 +95,7 @@ func (p *Processor) SignRollBack() {
 				if err != nil {
 					logger.Err(err).Msg("failed to sendMsg to bridge ")
 				} else {
-					logger.Info().Msg("send slash sign response successfully")
+					logger.Info().Msg("send roll back sign response successfully")
 				}
 			}
 		}
