@@ -570,6 +570,10 @@ func (d *Driver) CheckConfirmedWorker() {
 				log.Error("Checker get batch index from db fail", "err", err)
 				continue
 			}
+			if d.Cfg.CheckerBatchIndex > lastestBatchIndex.Uint64() {
+				log.Info("Checker Batch Index", "DbBatchIndex", batchIndex, "ContractBatchIndex", lastestBatchIndex.Uint64()-d.Cfg.CheckerBatchIndex)
+				continue
+			}
 			if batchIndex >= (lastestBatchIndex.Uint64() - d.Cfg.CheckerBatchIndex) {
 				log.Info("Checker db batch index and contract batch idnex is equal", "DbBatchIndex", batchIndex, "ContractBatchIndex", lastestBatchIndex.Uint64()-d.Cfg.CheckerBatchIndex)
 				continue
