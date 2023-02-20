@@ -22,6 +22,7 @@ type DaServiceConfig struct {
 	GraphProvider   string
 	Timeout         time.Duration
 	DaServicePort   int
+	EigenLayerNode  int
 	Debug           bool
 }
 
