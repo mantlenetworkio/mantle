@@ -97,7 +97,7 @@ func (v *Validator) commitBlocks(blocks []*rollupTypes.SequenceBlock) (common.Ha
 			Number:     new(big.Int).SetUint64(sblock.BlockNumber),
 			GasLimit:   core.CalcGasLimit(parent, parent.GasLimit(), ethconfig.Defaults.Miner.GasCeil), // TODO: this may cause problem
 			Time:       sblock.Timestamp,
-			//Coinbase:   v.Config.SequencerAddr, //TODO-FIXME
+			//StakerAddr:   v.Config.SequencerAddr, //TODO-FIXME
 			Difficulty: common.Big1, // Fake difficulty. Avoid use 0 here because it means the merge happened
 		}
 		gasPool := new(core.GasPool).AddGas(header.GasLimit)
@@ -242,7 +242,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 				}
 				log.Info("preparing pendingBlocks, SequenceBlocks blockNUm: ", len(pendingBlocks))
 			case ev := <-assertionEventCh:
-				if common.Address(ev.AsserterAddr) == v.Config.Coinbase {
+				if common.Address(ev.AsserterAddr) == v.Config.StakeAddr {
 					// Create by our own for challenge
 					continue
 				}
@@ -366,7 +366,7 @@ func (v *Validator) challengeLoop() {
 					continue
 				}
 				// If it's our turn
-				if common.Address(responder) == v.Config.Coinbase {
+				if common.Address(responder) == v.Config.StakeAddr {
 					err := services.RespondBisection(v.BaseService, abi, challengeSession, ev, states, ctx.opponentAssertion.VmHash, false)
 					if err != nil {
 						// TODO: error handling
@@ -422,12 +422,12 @@ func (v *Validator) challengeLoop() {
 					log.Crit("UNHANDELED: Can't create assertion for challenge, validator state corrupted", "err", err)
 				}
 			case ev := <-createdCh:
-				if common.Address(ev.AsserterAddr) == v.Config.Coinbase {
+				if common.Address(ev.AsserterAddr) == v.Config.StakeAddr {
 					if ev.VmHash == ctx.ourAssertion.VmHash {
 						_, err := v.Rollup.ChallengeAssertion(
 							[2]ethcommon.Address{
 								ethcommon.Address(v.Config.SequencerAddr),
-								ethcommon.Address(v.Config.Coinbase),
+								ethcommon.Address(v.Config.StakeAddr),
 							},
 							[2]*big.Int{
 								ctx.opponentAssertion.ID,
