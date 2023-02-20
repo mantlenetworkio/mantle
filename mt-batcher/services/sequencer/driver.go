@@ -146,7 +146,7 @@ func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, er
 	blockOffset := new(big.Int).SetUint64(d.Cfg.BlockOffset)
 	var end *big.Int
 	log.Info("MtBatcher GetBatchBlockRange", "blockOffset", blockOffset)
-	start, err := d.Cfg.EigenDaContract.GetL2StoredBlockNumber(&bind.CallOpts{
+	start, err := d.Cfg.EigenDaContract.GetL2ConfirmedBlockNumber(&bind.CallOpts{
 		Context: context.Background(),
 	})
 	if err != nil {
@@ -593,6 +593,7 @@ func (d *Driver) CheckConfirmedWorker() {
 					log.Error("Checker query data from graphql fail", "err", err)
 					continue
 				}
+				log.Info("Checker dataStore confirmed state", "dataStore-confirmed", query.DataStore.Confirmed)
 				if !query.DataStore.Confirmed {
 					rollupBlock, err := d.Cfg.EigenDaContract.GetL2RollUpBlockByDataStoreId(&bind.CallOpts{}, rollupStore.DataStoreId)
 					if err != nil {

@@ -61,9 +61,10 @@ func (s *DaService) GetRollupStoreByRollupBatchIndex(c gecho.Context) error {
 		return c.JSON(http.StatusBadRequest, errors.New("get rollup store fail"))
 	}
 	rsRep := &eigenda.RollupStoreResponse{
-		DataStoreId: rollupStore.DataStoreId,
-		ConfirmAt:   rollupStore.ConfirmAt,
-		Status:      rollupStore.Status,
+		OriginDataStoreId: rollupStore.OriginDataStoreId,
+		DataStoreId:       rollupStore.DataStoreId,
+		ConfirmAt:         rollupStore.ConfirmAt,
+		Status:            rollupStore.Status,
 	}
 	log.Info("datastore response", "rsRep", rsRep)
 	return c.JSON(http.StatusOK, rsRep)
