@@ -1636,6 +1636,9 @@ func (s *SyncService) handleChainHeadEventLoop() {
 		for {
 			select {
 			case block := <-s.chainHeadCh:
+				if block.Block == nil {
+					continue
+				}
 				log.Info("handleChainHeadEventLoop receive block", "block_number", block.Block.NumberU64())
 			}
 		}
