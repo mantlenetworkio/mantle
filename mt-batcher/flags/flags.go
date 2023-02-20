@@ -178,6 +178,17 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "DB_PATH"),
 	}
+	CheckerBatchIndexFlag = cli.Uint64Flag{
+		Name:   "checker-batch-index",
+		Usage:  "The port of the metrics server",
+		Value:  7300,
+		EnvVar: prefixEnvVar(envVarPrefix, "CHECKER_BATCH_INDEX"),
+	}
+	CheckerEnableFlag = cli.BoolFlag{
+		Name:   "checker-enable",
+		Usage:  "checker enable",
+		EnvVar: prefixEnvVar(envVarPrefix, "CHECKER_ENABLE"),
+	}
 	LogLevelFlag = cli.StringFlag{
 		Name:   "log-level",
 		Usage:  "The lowest log level that will be output",
@@ -259,6 +270,8 @@ var requiredFlags = []cli.Flag{
 	DataStoreTimeoutFlag,
 	EigenLayerNodeFlag,
 	DbPathFlag,
+	CheckerBatchIndexFlag,
+	CheckerEnableFlag,
 	ResubmissionTimeoutFlag,
 	NumConfirmationsFlag,
 	SafeAbortNonceTooLowCountFlag,

@@ -44,6 +44,7 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
     uint256 internal constant DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED = type(uint256).max;
 
     struct RollupStore {
+        uint32 originDataStoreId;
         uint32 dataStoreId;
         uint32 confirmAt;
         RollupStoreStatus status;
@@ -52,6 +53,7 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
     struct BatchRollupBlock {
         uint256 startL2BlockNumber;
         uint256 endBL2BlockNumber;
+        bool    isReRollup;
     }
 
     mapping(uint256 => RollupStore) public rollupBatchIndexRollupStores;
@@ -208,7 +210,8 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         uint32 blockNumber,
         uint256 startL2Block,
         uint256 endL2Block,
-        uint32 totalOperatorsIndex
+        uint32 totalOperatorsIndex,
+        bool   isReRollup
     ) external {
         require(msg.sender == sequencer, "Only the sequencer can store data");
         require(block.number - blockNumber < BLOCK_STALE_MEASURE, "stakes taken from too long ago");
@@ -223,10 +226,13 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         );
         dataStoreIdToL2RollUpBlock[dataStoreId] = BatchRollupBlock({
             startL2BlockNumber: startL2Block,
-            endBL2BlockNumber: endL2Block
+            endBL2BlockNumber: endL2Block,
+            isReRollup: isReRollup
         });
         dataStoreIdToRollupStoreNumber[dataStoreId] = DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED;
-        l2StoredBlockNumber = endL2Block;
+        if (!isReRollup) {
+            l2StoredBlockNumber = endL2Block;
+        }
         emit RollupStoreInitialized(dataStoreId, startL2Block, endL2Block);
     }
 
@@ -242,11 +248,15 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         bytes calldata data,
         IDataLayrServiceManager.DataStoreSearchData memory searchData,
         uint256 startL2Block,
-        uint256 endL2Block
+        uint256 endL2Block,
+        uint32 originDataStoreId,
+        uint256 reConfirmedBatchIndex,
+        bool isReRollup
     ) external {
         require(msg.sender == sequencer, "Only the sequencer can store data");
         require(dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].startL2BlockNumber == startL2Block &&
-            dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].endBL2BlockNumber == endL2Block,
+            dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].endBL2BlockNumber == endL2Block &&
+            dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].isReRollup == isReRollup,
             "Data store either was not initialized by the rollup contract, or is already confirmed"
         );
         require(
@@ -254,14 +264,26 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
             "Data store either was not initialized by the rollup contract, or is already confirmed"
         );
         IDataLayrServiceManager(dataManageAddress).confirmDataStore(data, searchData);
-        rollupBatchIndexRollupStores[rollupBatchIndex] = RollupStore({
-            dataStoreId: searchData.metadata.globalDataStoreId,
-            confirmAt: uint32(block.timestamp + fraudProofPeriod),
-            status: RollupStoreStatus.COMMITTED
-        });
-        l2ConfirmedBlockNumber = endL2Block;
-        dataStoreIdToRollupStoreNumber[searchData.metadata.globalDataStoreId] = rollupBatchIndex;
-        emit RollupStoreConfirmed(uint32(rollupBatchIndex++), searchData.metadata.globalDataStoreId, startL2Block, endL2Block);
+        if (!isReRollup) {
+            rollupBatchIndexRollupStores[rollupBatchIndex] = RollupStore({
+                originDataStoreId: searchData.metadata.globalDataStoreId,
+                dataStoreId: searchData.metadata.globalDataStoreId,
+                confirmAt: uint32(block.timestamp + fraudProofPeriod),
+                status: RollupStoreStatus.COMMITTED
+            });
+            l2ConfirmedBlockNumber = endL2Block;
+            dataStoreIdToRollupStoreNumber[searchData.metadata.globalDataStoreId] = rollupBatchIndex;
+            emit RollupStoreConfirmed(uint32(rollupBatchIndex++), searchData.metadata.globalDataStoreId, startL2Block, endL2Block);
+        } else {
+            rollupBatchIndexRollupStores[reConfirmedBatchIndex] = RollupStore({
+                originDataStoreId: originDataStoreId,
+                dataStoreId: searchData.metadata.globalDataStoreId,
+                confirmAt: uint32(block.timestamp + fraudProofPeriod),
+                status: RollupStoreStatus.COMMITTED
+            });
+            dataStoreIdToRollupStoreNumber[searchData.metadata.globalDataStoreId] = reConfirmedBatchIndex;
+            emit RollupStoreConfirmed(reConfirmedBatchIndex, searchData.metadata.globalDataStoreId, startL2Block, endL2Block);
+        }
     }
 
     /**

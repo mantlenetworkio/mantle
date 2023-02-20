@@ -47,6 +47,8 @@ type Config struct {
 	MtlBatcherEnable          bool
 	DisableHTTP2              bool
 	DbPath                    string
+	CheckerBatchIndex         uint64
+	CheckerEnable             bool
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -89,6 +91,8 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		EchoDebug:                 ctx.GlobalBool(flags.EchoDebugFlag.Name),
 		MtlBatcherEnable:          ctx.GlobalBool(flags.MtlBatcherEnableFlag.Name),
 		DbPath:                    ctx.GlobalString(flags.DbPathFlag.Name),
+		CheckerBatchIndex:         ctx.GlobalUint64(flags.CheckerBatchIndexFlag.Name),
+		CheckerEnable:             ctx.GlobalBool(flags.CheckerEnableFlag.Name),
 	}
 	return cfg, nil
 }

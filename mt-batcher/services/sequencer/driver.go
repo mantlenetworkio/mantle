@@ -62,6 +62,8 @@ type DriverConfig struct {
 	SafeAbortNonceTooLowCount uint64
 	SignerFn                  SignerFn
 	DbPath                    string
+	CheckerBatchIndex         uint64
+	CheckerEnable             bool
 }
 
 type Driver struct {
@@ -490,12 +492,15 @@ func (d *Driver) IsMaxPriorityFeePerGasNotFoundError(err error) bool {
 
 func (d *Driver) Start() error {
 	d.wg.Add(1)
-	batchIndex, ok := d.LevelDBStore.GetLatestBatchIndex()
-	if batchIndex == 0 || !ok {
-		d.LevelDBStore.SetLatestBatchIndex(1)
-	}
 	go d.RollupMainWorker()
-	go d.CheckDataConfirmedWorker()
+	if d.Cfg.CheckerEnable {
+		batchIndex, ok := d.LevelDBStore.GetLatestBatchIndex()
+		log.Info("get latest batch index", "batchIndex", batchIndex, "ok", ok)
+		if batchIndex == 0 || !ok {
+			d.LevelDBStore.SetLatestBatchIndex(1)
+		}
+		go d.CheckConfirmedWorker()
+	}
 	return nil
 }
 
@@ -548,7 +553,7 @@ func (d *Driver) RollupMainWorker() {
 	}
 }
 
-func (d *Driver) CheckDataConfirmedWorker() {
+func (d *Driver) CheckConfirmedWorker() {
 	defer d.wg.Done()
 	ticker := time.NewTicker(d.Cfg.CheckerWorkerPollInterval)
 	defer ticker.Stop()
@@ -565,12 +570,12 @@ func (d *Driver) CheckDataConfirmedWorker() {
 				log.Error("Checker get batch index from db fail", "err", err)
 				continue
 			}
-			if batchIndex >= (lastestBatchIndex.Uint64() - 10) {
-				log.Info("Checker db batch index and contract batch idnex is equal", "DbBatchIndex", batchIndex, "ContractBatchIndex", lastestBatchIndex.Uint64()-10)
+			if batchIndex == (lastestBatchIndex.Uint64() - d.Cfg.CheckerBatchIndex) {
+				log.Info("Checker db batch index and contract batch idnex is equal", "DbBatchIndex", batchIndex, "ContractBatchIndex", lastestBatchIndex.Uint64()-d.Cfg.CheckerBatchIndex)
 				continue
 			}
 			log.Info("db batch index and contract batch idnex", "DbBatchIndex", batchIndex, "ContractBatchIndex", lastestBatchIndex.Uint64())
-			for i := batchIndex; i <= (lastestBatchIndex.Uint64() - 10); i++ {
+			for i := batchIndex; i <= (lastestBatchIndex.Uint64() - d.Cfg.CheckerBatchIndex); i++ {
 				log.Info("Checker batch confirm data index", "batchIndex", i)
 				rollupStore, err := d.Cfg.EigenDaContract.GetRollupStoreByRollupBatchIndex(&bind.CallOpts{}, big.NewInt(int64(i)))
 				if err != nil {
@@ -613,12 +618,12 @@ func (d *Driver) CheckDataConfirmedWorker() {
 						continue
 					}
 					log.Info("Checker confirm re-rollup store data success", "txHash", csdReceipt.TxHash.String())
+					d.LevelDBStore.SetLatestBatchIndex(i - (2 * d.Cfg.CheckerBatchIndex))
 				} else {
 					log.Info("Checker rollup batch data is confirmed", "BatchIndex", batchIndex, "DataStoreId", rollupStore.DataStoreId)
+					d.LevelDBStore.SetLatestBatchIndex(i - d.Cfg.CheckerBatchIndex)
 				}
 			}
-			setLatestBatchIndex := lastestBatchIndex.Uint64() - 10
-			d.LevelDBStore.SetLatestBatchIndex(setLatestBatchIndex)
 		case err := <-d.Ctx.Done():
 			log.Error("MtBatcher eigenDa sequencer service shutting down", "err", err)
 			return

@@ -144,6 +144,8 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		MainWorkerPollInterval:    cfg.MainWorkerPollInterval,
 		CheckerWorkerPollInterval: cfg.CheckerWorkerPollInterval,
 		DbPath:                    cfg.DbPath,
+		CheckerBatchIndex:         cfg.CheckerBatchIndex,
+		CheckerEnable:             cfg.CheckerEnable,
 		GraphProvider:             cfg.GraphProvider,
 		ResubmissionTimeout:       cfg.ResubmissionTimeout,
 		NumConfirmations:          cfg.NumConfirmations,
