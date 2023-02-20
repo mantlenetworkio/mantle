@@ -143,11 +143,17 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "SAFE_ABORT_NONCE_TOO_LOW_COUNT"),
 	}
-	PollIntervalFlag = cli.DurationFlag{
-		Name:     "poll-interval",
-		Usage:    "Delay between querying L2 for more transactions and creating a new batch",
+	MainWorkerPollIntervalFlag = cli.DurationFlag{
+		Name:     "main-worker-poll-interval",
+		Usage:    "main worker poll interval",
 		Required: true,
-		EnvVar:   prefixEnvVar(envVarPrefix, "POLL_INTERVAL"),
+		EnvVar:   prefixEnvVar(envVarPrefix, "MAIN_WORKER_POLL_INTERVAL"),
+	}
+	CheckerWorkerPollIntervalFlag = cli.DurationFlag{
+		Name:     "checker-worker-poll-interval",
+		Usage:    "checker worker poll interval",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "CHECKER_WORKER_POLL_INTERVAL"),
 	}
 	DataStoreDurationFlag = cli.IntFlag{
 		Name:     "duration",
@@ -177,6 +183,23 @@ var (
 		Name:   "mtl-batch-enable",
 		Usage:  "roll data to eigen da enable",
 		EnvVar: prefixEnvVar(envVarPrefix, "MTL_BATCHER_ENABLE"),
+	}
+	DbPathFlag = cli.StringFlag{
+		Name:     "db-path",
+		Usage:    "Path for level db",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "DB_PATH"),
+	}
+	CheckerBatchIndexFlag = cli.Uint64Flag{
+		Name:   "checker-batch-index",
+		Usage:  "The port of the metrics server",
+		Value:  7300,
+		EnvVar: prefixEnvVar(envVarPrefix, "CHECKER_BATCH_INDEX"),
+	}
+	CheckerEnableFlag = cli.BoolFlag{
+		Name:   "checker-enable",
+		Usage:  "checker enable",
+		EnvVar: prefixEnvVar(envVarPrefix, "CHECKER_ENABLE"),
 	}
 	LogLevelFlag = cli.StringFlag{
 		Name:   "log-level",
@@ -260,10 +283,14 @@ var requiredFlags = []cli.Flag{
 	RollUpMinSizeFlag,
 	RollUpMaxSizeFlag,
 	FeeSizeSecFlag,
-	PollIntervalFlag,
+	MainWorkerPollIntervalFlag,
+	CheckerWorkerPollIntervalFlag,
 	DataStoreDurationFlag,
 	DataStoreTimeoutFlag,
 	EigenLayerNodeFlag,
+	DbPathFlag,
+	CheckerBatchIndexFlag,
+	CheckerEnableFlag,
 	ResubmissionTimeoutFlag,
 	NumConfirmationsFlag,
 	FeeModelEnableFlags,
