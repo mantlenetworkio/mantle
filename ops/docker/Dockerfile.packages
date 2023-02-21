@@ -5,6 +5,8 @@
 FROM mantlenetworkio/foundry:latest as foundry
 FROM node:16-alpine3.14 as base
 
+RUN export NODE_OPTIONS=--max_old_space_size=4096
+
 RUN apk --no-cache add curl \
     jq \
     python3 \
