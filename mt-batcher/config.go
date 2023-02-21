@@ -26,7 +26,8 @@ type Config struct {
 	DataStoreDuration         uint64
 	DataStoreTimeout          uint64
 	SentryEnable              bool
-	PollInterval              time.Duration
+	MainWorkerPollInterval    time.Duration
+	CheckerWorkerPollInterval time.Duration
 	BlockOffset               uint64
 	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
@@ -48,6 +49,9 @@ type Config struct {
 	FeeSizeSec                string
 	FeeModelEnable            bool
 	DisableHTTP2              bool
+	DbPath                    string
+	CheckerBatchIndex         uint64
+	CheckerEnable             bool
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -68,7 +72,8 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		EigenFeeContractAddress:   ctx.GlobalString(flags.EigenFeeContractAddressFlag.Name),
 		DataStoreDuration:         ctx.GlobalUint64(flags.DataStoreDurationFlag.Name),
 		DataStoreTimeout:          ctx.GlobalUint64(flags.DataStoreTimeoutFlag.Name),
-		PollInterval:              ctx.GlobalDuration(flags.PollIntervalFlag.Name),
+		MainWorkerPollInterval:    ctx.GlobalDuration(flags.MainWorkerPollIntervalFlag.Name),
+		CheckerWorkerPollInterval: ctx.GlobalDuration(flags.CheckerWorkerPollIntervalFlag.Name),
 		BlockOffset:               ctx.GlobalUint64(flags.BlockOffsetFlag.Name),
 		RollUpMinSize:             ctx.GlobalUint64(flags.RollUpMinSizeFlag.Name),
 		RollUpMaxSize:             ctx.GlobalUint64(flags.RollUpMaxSizeFlag.Name),
@@ -91,6 +96,9 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		DisableHTTP2:              ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
 		EchoDebug:                 ctx.GlobalBool(flags.EchoDebugFlag.Name),
 		MtlBatcherEnable:          ctx.GlobalBool(flags.MtlBatcherEnableFlag.Name),
+		DbPath:                    ctx.GlobalString(flags.DbPathFlag.Name),
+		CheckerBatchIndex:         ctx.GlobalUint64(flags.CheckerBatchIndexFlag.Name),
+		CheckerEnable:             ctx.GlobalBool(flags.CheckerEnableFlag.Name),
 	}
 	return cfg, nil
 }
