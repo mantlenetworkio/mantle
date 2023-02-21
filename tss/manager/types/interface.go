@@ -16,6 +16,7 @@ type AdminService interface {
 	ResetScanHeight(height uint64) error
 	GetScannedHeight() (uint64, error)
 	RemoveSlashingInfo(common.Address, uint64)
+	RemoveCulprits() error
 }
 
 type TssQueryService interface {

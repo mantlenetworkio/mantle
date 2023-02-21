@@ -182,6 +182,7 @@ func (d *Driver) CraftBatchTx(
 		// Consume state roots until reach our maximum tx size.
 		if uint64(len(stateRoots)) > d.cfg.MaxStateRootElements {
 			end = i
+			log.Info("range is big than max stateroot elements", "elements", d.cfg.MaxStateRootElements, "start", start, "new end", end)
 			break
 		}
 
@@ -236,7 +237,7 @@ func (d *Driver) CraftBatchTx(
 		return nil, err
 	}
 
-	log.Info(name+" append log", "stateRoots", fmt.Sprintf("%v", stateRoots), "offsetStartsAtIndex", offsetStartsAtIndex, "signature", hex.EncodeToString(tssResponse.Signature), "rollback", tssResponse.RollBack)
+	log.Info(name+" append log", "stateRoots size ", len(stateRoots), "offsetStartsAtIndex", offsetStartsAtIndex, "signature", hex.EncodeToString(tssResponse.Signature), "rollback", tssResponse.RollBack)
 	log.Info(name+" signature ", "len", len(tssResponse.Signature))
 	var tx *types.Transaction
 	if tssResponse.RollBack {
