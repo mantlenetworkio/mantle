@@ -839,6 +839,7 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 	for i, tx := range txs {
 		if pool.validateSequencerTransaction != nil {
 			if err := pool.validateSequencerTransaction(tx); err != nil {
+				log.Error("txPool addTxs failure", "err_msg", err.Error(), "tx_hash", tx.Hash().String())
 				return []error{err}
 			}
 		}
@@ -885,6 +886,9 @@ func (pool *TxPool) addTxsLocked(txs []*types.Transaction, local bool) ([]error,
 	errs := make([]error, len(txs))
 	for i, tx := range txs {
 		replaced, err := pool.add(tx, local)
+		if err != nil {
+			log.Error("txPool addTxsLocked failure", "err_msg", err.Error(), "tx_hash", tx.Hash().String())
+		}
 		errs[i] = err
 		if err == nil && !replaced {
 			dirty.addTx(tx)

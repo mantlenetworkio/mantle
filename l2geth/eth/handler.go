@@ -879,7 +879,7 @@ func (pm *ProtocolManager) BroadcastTxs(txs types.Transactions) {
 		for _, peer := range peers {
 			txset[peer] = append(txset[peer], tx)
 		}
-		log.Trace("Broadcast transaction", "hash", tx.Hash(), "recipients", len(peers))
+		log.Info("Broadcast transaction", "hash", tx.Hash(), "recipients", len(peers))
 	}
 	// FIXME include this again: peers = peers[:int(math.Sqrt(float64(len(peers))))]
 	for peer, txs := range txset {
