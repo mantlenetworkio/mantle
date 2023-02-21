@@ -32,7 +32,8 @@ func (pm *ProtocolManager) makeConsensusProtocol(version uint) p2p.Protocol {
 	}
 }
 
-func (pm *ProtocolManager) removePeerTmp(id string) {
+// removeConsensusPeer disconnect with consensus peers
+func (pm *ProtocolManager) removeConsensusPeer(id string) {
 	// Short circuit if the peer was already removed
 	peer := pm.consensusPeers.Peer(id)
 	if peer == nil {
@@ -49,6 +50,8 @@ func (pm *ProtocolManager) removePeerTmp(id string) {
 	}
 }
 
+// consensusHandler add a new peer to consensusPeers, and start a
+// thread for this peer node to handle consensus messages between nodes
 func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter) error {
 	p := pm.newPeer(int(eth64), peer, rw)
 	select {
@@ -68,7 +71,7 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 			p.Log().Error("Ethereum peer registration failed", "err", err)
 			return err
 		}
-		defer pm.removePeerTmp(p.id)
+		defer pm.removeConsensusPeer(p.id)
 
 		// Handle incoming messages until the connection is torn down
 		for {
@@ -86,6 +89,7 @@ func (pm *ProtocolManager) consensusHandler(peer *p2p.Peer, rw p2p.MsgReadWriter
 	}
 }
 
+// checkPeer check if peer is registered in the sequencer set, only check when schedulerInst running
 func (pm *ProtocolManager) checkPeer(p *peer) error {
 	if !pm.schedulerInst.IsRunning() {
 		return nil
@@ -113,6 +117,7 @@ func (pm *ProtocolManager) checkPeer(p *peer) error {
 	return nil
 }
 
+// handleConsensusMsg node received and handle consensus msg from p2p connection
 func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 	// Read the next message from the remote peer, and ensure it's fully consumed
 	msg, err := p.rw.ReadMsg()
@@ -136,6 +141,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 			return nil
 		}
 
+		// todo mark as know, keep the format consistent
 		p.knowBatchPeriodStartMsg.Add(bs.BatchIndex)
 		erCh := make(chan error, 1)
 		pm.eventMux.Post(core.BatchPeriodStartEvent{
@@ -155,6 +161,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 		if !types.VerifySigner(bpa, pm.schedulerInst.CurrentStartMsg().Sequencer) {
 			return nil
 		}
+		// todo mark as know, keep the format consistent
 		p.knowBatchPeriodAnswerMsg.Add(bpa.Hash())
 		erCh := make(chan error, 1)
 		pm.eventMux.Post(core.BatchPeriodAnswerEvent{
@@ -171,7 +178,7 @@ func (pm *ProtocolManager) handleConsensusMsg(p *peer) error {
 
 // ---------------------------- Consensus Control Messages ----------------------------
 
-// BatchPeriodStartMsg will
+// BatchPeriodStartMsg get BatchPeriodStartEvent by subscription batchStartMsgSub then broadcast it
 func (pm *ProtocolManager) batchPeriodStartMsgBroadcastLoop() {
 	log.Info("Start batchPeriodStartMsg broadcast routine")
 	// automatically stops if unsubscribe
@@ -186,6 +193,7 @@ func (pm *ProtocolManager) batchPeriodStartMsgBroadcastLoop() {
 	}
 }
 
+// BroadcastBatchPeriodStartMsg broadcast BatchPeriodStartMsg
 func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 	peers := pm.consensusPeers.PeersWithoutStartMsg(msg.BatchIndex)
 	for _, p := range peers {
@@ -194,6 +202,7 @@ func (pm *ProtocolManager) BroadcastBatchPeriodStartMsg(msg *types.BatchPeriodSt
 	log.Trace("Broadcast batch period start msg")
 }
 
+// AsyncSendBatchPeriodStartMsg set BatchPeriodStartMsg as known and clean up the old
 func (p *peer) AsyncSendBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 	select {
 	case p.queuedBatchStartMsg <- msg:
@@ -207,7 +216,7 @@ func (p *peer) AsyncSendBatchPeriodStartMsg(msg *types.BatchPeriodStartMsg) {
 	}
 }
 
-// BatchPeriodAnswerMsg
+// BatchPeriodAnswerMsg get BatchPeriodAnswerEvent by subscription batchAnswerMsgSub then broadcast it
 func (pm *ProtocolManager) batchPeriodAnswerMsgBroadcastLoop() {
 	log.Info("Start batchPeriodAnswerMsg broadcast routine")
 	for obj := range pm.batchAnswerMsgSub.Chan() {
@@ -218,6 +227,7 @@ func (pm *ProtocolManager) batchPeriodAnswerMsgBroadcastLoop() {
 	}
 }
 
+// BroadcastBatchPeriodAnswerMsg broadcast BatchPeriodAnswerMsg
 func (pm *ProtocolManager) BroadcastBatchPeriodAnswerMsg(msg *types.BatchPeriodAnswerMsg) {
 	peers := pm.consensusPeers.PeersWithoutEndMsg(msg.Hash())
 	for _, p := range peers {
@@ -226,6 +236,7 @@ func (pm *ProtocolManager) BroadcastBatchPeriodAnswerMsg(msg *types.BatchPeriodA
 	log.Trace("Broadcast batch period answer msg")
 }
 
+// AsyncSendBatchPeriodAnswerMsg set queuedBatchAnswerMsg as known and clean up the old
 func (p *peer) AsyncSendBatchPeriodAnswerMsg(msg *types.BatchPeriodAnswerMsg) {
 	select {
 	case p.queuedBatchAnswerMsg <- msg:
@@ -241,12 +252,12 @@ func (p *peer) AsyncSendBatchPeriodAnswerMsg(msg *types.BatchPeriodAnswerMsg) {
 
 // ---------------------------- Proposers ----------------------------
 
-// SendBatchPeriodStart sends a batch of transaction receipts, corresponding to the
-// ones requested from an already RLP encoded format.
+// SendBatchPeriodStart sends BatchPeriodStartMsg
 func (p *peer) SendBatchPeriodStart(bps *types.BatchPeriodStartMsg) error {
 	return p2p.Send(p.rw, BatchPeriodStartMsg, bps)
 }
 
+// SendBatchPeriodAnswer sends BatchPeriodAnswerMsg
 func (p *peer) SendBatchPeriodAnswer(bpa *types.BatchPeriodAnswerMsg) error {
 	return p2p.Send(p.rw, BatchPeriodAnswerMsg, bpa)
 }

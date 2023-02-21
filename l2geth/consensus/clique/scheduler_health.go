@@ -31,6 +31,8 @@ func (schedulerInst *Scheduler) setSequencerHealthPoints(seqSets synchronizer.Se
 	}
 }
 
+// checkSequencer checks the working status of the previous producer at the beginning
+// of the new batch and deduct points of the sequencer that did not achieve the expected goal
 func (schedulerInst *Scheduler) checkSequencer() {
 	sequencer := schedulerInst.currentStartMsg.Sequencer
 	if sequencer.String() == (common.Address{}).String() {
@@ -80,6 +82,7 @@ func (schedulerInst *Scheduler) punishSequencer(sequencer common.Address) {
 	}
 }
 
+// deductPoints deduct points for the specified sequencer
 func (schedulerInst *Scheduler) deductPoints(sequencer common.Address) {
 	if schedulerInst.sequencerAssessor.SequencersPoints[sequencer] > 0 {
 		schedulerInst.sequencerAssessor.SequencersPoints[sequencer] = schedulerInst.sequencerAssessor.SequencersPoints[sequencer] - 1
@@ -97,14 +100,12 @@ func (schedulerInst *Scheduler) zeroPoints(sequencer common.Address) bool {
 	return schedulerInst.sequencerAssessor.SequencersPoints[sequencer] == 0
 }
 
+// getExpectMinTxsCount returns the minimum amount of transactions that the producer should
+// complete according to the number of transactions contained in the current txpool
 func (schedulerInst *Scheduler) getExpectMinTxsCount(batchSize uint64) (uint64, error) {
-	var pendingTxCount uint64
-	pendingTxs, err := schedulerInst.txpool.Pending()
+	pendingTxCount, err := schedulerInst.verifiedTxCount()
 	if err != nil {
 		return 0, err
-	}
-	for _, txs := range pendingTxs {
-		pendingTxCount += uint64(len(txs))
 	}
 	if pendingTxCount > batchSize {
 		pendingTxCount = batchSize

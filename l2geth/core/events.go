@@ -46,7 +46,7 @@ type BatchPeriodAnswerEvent struct {
 	ErrCh chan error
 }
 
-type BatchEndEvent struct{}
+type BatchEndEvent uint64
 
 // NewTxsEvent is posted when a batch of transactions enter the transaction pool.
 type NewTxsEvent struct {

@@ -231,7 +231,6 @@ type TxPool struct {
 	scope       event.SubscriptionScope
 	signer      types.Signer
 	mu          sync.RWMutex
-	reorgMux    sync.RWMutex
 
 	istanbul bool // Fork indicator whether we are in the istanbul stage.
 
@@ -256,6 +255,8 @@ type TxPool struct {
 	reorgDoneCh     chan chan struct{}
 	reorgShutdownCh chan struct{}  // requests shutdown of scheduleReorgLoop
 	wg              sync.WaitGroup // tracks loop, scheduleReorgLoop
+
+	validateSequencerTransaction func(tx *types.Transaction) error
 }
 
 type txpoolResetRequest struct {
@@ -316,6 +317,14 @@ func NewTxPool(config TxPoolConfig, chainconfig *params.ChainConfig, chain block
 	go pool.loop()
 
 	return pool
+}
+
+func (pool *TxPool) SetDeleteTxVerifiedPrice(deleteTxHashFunc func(hash common.Hash)) {
+	pool.all.SetDeleteTxVerifiedPrice(deleteTxHashFunc)
+}
+
+func (pool *TxPool) SetValidateSequencerTransaction(validateSequencerTransactionFunc func(tx *types.Transaction) error) {
+	pool.validateSequencerTransaction = validateSequencerTransactionFunc
 }
 
 // loop is the transaction pool's main event loop, waiting for and reacting to
@@ -523,10 +532,30 @@ func (pool *TxPool) local() map[common.Address]types.Transactions {
 }
 
 func (pool *TxPool) ValidateTx(tx *types.Transaction) error {
-	pool.reorgMux.RLock()
-	defer pool.reorgMux.RUnlock()
+	// Reject transactions over defined size to prevent DOS attacks
+	if uint64(tx.Size()) > txMaxSize {
+		return ErrOversizedData
+	}
+	// Transactions can't be negative. This may never happen using RLP decoded
+	// transactions but may occur if you create a transaction using the RPC.
+	if tx.Value().Sign() < 0 {
+		return ErrNegativeValue
+	}
 
-	return pool.validateTx(tx, false)
+	// Ensure the transaction doesn't exceed the current block limit gas.
+	if pool.currentMaxGas < tx.Gas() {
+		return ErrGasLimit
+	}
+
+	// Ensure the transaction has more gas than the basic tx fee.
+	intrGas, err := IntrinsicGas(tx.Data(), tx.To() == nil, true, pool.istanbul)
+	if err != nil {
+		return err
+	}
+	if tx.Gas() < intrGas {
+		return ErrIntrinsicGas
+	}
+	return nil
 }
 
 // validateTx checks whether a transaction is valid according to the consensus
@@ -808,6 +837,11 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 		news = make([]*types.Transaction, 0, len(txs))
 	)
 	for i, tx := range txs {
+		if pool.validateSequencerTransaction != nil {
+			if err := pool.validateSequencerTransaction(tx); err != nil {
+				return []error{err}
+			}
+		}
 		// If the transaction is known, pre-set the error slot
 		if pool.all.Get(tx.Hash()) != nil {
 			errs[i] = fmt.Errorf("known transaction: %x", tx.Hash())
@@ -1042,8 +1076,6 @@ func (pool *TxPool) scheduleReorgLoop() {
 // runReorg runs reset and promoteExecutables on behalf of scheduleReorgLoop.
 func (pool *TxPool) runReorg(done chan struct{}, reset *txpoolResetRequest, dirtyAccounts *accountSet, events map[common.Address]*txSortedMap) {
 	defer close(done)
-	pool.reorgMux.Lock()
-	defer pool.reorgMux.Unlock()
 
 	var promoteAddrs []common.Address
 	if dirtyAccounts != nil {
@@ -1535,6 +1567,8 @@ type txLookup struct {
 	all   map[common.Hash]*types.Transaction
 	slots int
 	lock  sync.RWMutex
+
+	deleteTxHash func(hash common.Hash)
 }
 
 // newTxLookup returns a new txLookup structure.
@@ -1542,6 +1576,10 @@ func newTxLookup() *txLookup {
 	return &txLookup{
 		all: make(map[common.Hash]*types.Transaction),
 	}
+}
+
+func (t *txLookup) SetDeleteTxVerifiedPrice(deleteTxHashFunc func(hash common.Hash)) {
+	t.deleteTxHash = deleteTxHashFunc
 }
 
 // Range calls f on each key and value present in the map.
@@ -1600,6 +1638,7 @@ func (t *txLookup) Remove(hash common.Hash) {
 	slotsGauge.Update(int64(t.slots))
 
 	delete(t.all, hash)
+	t.deleteTxHash(hash)
 }
 
 // numSlots calculates the number of slots needed for a single transaction.

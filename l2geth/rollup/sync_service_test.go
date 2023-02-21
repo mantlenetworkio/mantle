@@ -969,7 +969,6 @@ func newTestSyncServiceDeps(isVerifier bool, alloc *common.Address) (Config, *co
 	txPool := core.NewTxPool(core.TxPoolConfig{PriceLimit: 0}, &chaincfg, chain)
 	cfg := Config{
 		CanonicalTransactionChainDeployHeight: big.NewInt(0),
-		IsVerifier:                            isVerifier,
 		// Set as an empty string as this is a dummy value anyways.
 		// The client needs to be mocked with a mockClient
 		RollupClientHttp: "",

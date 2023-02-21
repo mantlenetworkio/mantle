@@ -106,11 +106,13 @@ type ProtocolManager struct {
 	// wait group is used for graceful shutdowns during downloading
 	// and processing
 	wg sync.WaitGroup
+
+	isScheduler func() bool
 }
 
 // NewProtocolManager returns a new Ethereum sub protocol manager. The Ethereum sub protocol manages peers capable
 // with the Ethereum network.
-func NewProtocolManager(config *params.ChainConfig, checkpoint *params.TrustedCheckpoint, mode downloader.SyncMode, networkID uint64, mux *event.TypeMux, txpool txPool, engine consensus.Engine, blockchain *core.BlockChain, chaindb ethdb.Database, cacheLimit int, whitelist map[uint64]common.Hash) (*ProtocolManager, error) {
+func NewProtocolManager(config *params.ChainConfig, checkpoint *params.TrustedCheckpoint, mode downloader.SyncMode, networkID uint64, mux *event.TypeMux, txpool txPool, engine consensus.Engine, blockchain *core.BlockChain, chaindb ethdb.Database, cacheLimit int, whitelist map[uint64]common.Hash, isScheduler func() bool) (*ProtocolManager, error) {
 	// Create the protocol manager with the base fields
 	manager := &ProtocolManager{
 		networkID:      networkID,
@@ -125,6 +127,7 @@ func NewProtocolManager(config *params.ChainConfig, checkpoint *params.TrustedCh
 		noMorePeers:    make(chan struct{}),
 		txsyncCh:       make(chan *txsync),
 		quitSync:       make(chan struct{}),
+		isScheduler:    isScheduler,
 	}
 	if mode == downloader.FullSync {
 		// The database seems empty as the current block is the genesis. Yet the fast
@@ -210,7 +213,7 @@ func (pm *ProtocolManager) setEtherBase(etherBase common.Address) {
 	pm.etherbase = etherBase
 	for k, v := range pm.consensusPeers.peers {
 		if err := pm.checkPeer(v); err != nil {
-			pm.removePeerTmp(k)
+			pm.removeConsensusPeer(k)
 		}
 	}
 }
@@ -283,10 +286,9 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 	pm.minedBlockSub = pm.eventMux.Subscribe(core.NewMinedBlockEvent{})
 	go pm.minedBroadcastLoop()
 
-	// broadcast producers
+	// broadcast consensus messages
 	pm.batchStartMsgSub = pm.eventMux.Subscribe(core.BatchPeriodStartEvent{})
 	go pm.batchPeriodStartMsgBroadcastLoop()
-
 	pm.batchAnswerMsgSub = pm.eventMux.Subscribe(core.BatchPeriodAnswerEvent{})
 	go pm.batchPeriodAnswerMsgBroadcastLoop()
 
@@ -508,6 +510,9 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		return p.SendBlockHeaders(headers)
 
 	case msg.Code == BlockHeadersMsg:
+		if pm.isScheduler() {
+			return nil
+		}
 		// A batch of headers arrived to one of our previous requests
 		var headers []*types.Header
 		if err := msg.Decode(&headers); err != nil {
@@ -599,6 +604,9 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		return p.SendBlockBodies(bodies)
 
 	case msg.Code == BlockBodiesMsg:
+		if pm.isScheduler() {
+			return nil
+		}
 		// A batch of block bodies arrived to one of our previous requests
 		var request blockBodiesData
 		if err := msg.Decode(&request); err != nil {
@@ -718,6 +726,9 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		}
 
 	case msg.Code == NewBlockHashesMsg:
+		if pm.isScheduler() {
+			return nil
+		}
 		var announces newBlockHashesData
 		if err := msg.Decode(&announces); err != nil {
 			return errResp(ErrDecode, "%v: %v", msg, err)
@@ -738,6 +749,9 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		}
 
 	case msg.Code == NewBlockMsg:
+		if pm.isScheduler() {
+			return nil
+		}
 		// Retrieve and decode the propagated block
 		var request newBlockData
 		if err := msg.Decode(&request); err != nil {
