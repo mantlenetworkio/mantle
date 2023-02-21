@@ -155,7 +155,6 @@ var (
 		utils.Eth1SyncServiceEnable,
 		utils.Eth1CanonicalTransactionChainDeployHeightFlag,
 		utils.RollupClientHttpFlag,
-		utils.RollupEnableVerifierFlag,
 		utils.RollupMpcVerifierFlag,
 		utils.RollupTimstampRefreshFlag,
 		utils.RollupPollIntervalFlag,
@@ -165,12 +164,11 @@ var (
 		utils.RollupFeeThresholdDownFlag,
 		utils.RollupFeeThresholdUpFlag,
 		utils.RollupGenesisTimeoutSecondsFlag,
+		utils.RollupRoleFlag,
 		utils.SequencerClientHttpFlag,
-		utils.SchedulerAddressFlag,
 		utils.SchedulerBatchTime,
 		utils.SchedulerBatchSize,
 		utils.SchedulerBatchEpoch,
-		utils.SequencerModeFlag,
 		utils.RollupEigenClientHttpFlag,
 	}
 

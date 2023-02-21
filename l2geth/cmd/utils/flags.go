@@ -847,17 +847,11 @@ var (
 		Value:  "l1",
 		EnvVar: "ROLLUP_BACKEND",
 	}
-	RollupEnableVerifierFlag = cli.BoolFlag{
-		Name:   "rollup.verifier",
-		Usage:  "Enable the verifier",
-		EnvVar: "ROLLUP_VERIFIER_ENABLE",
-	}
 	RollupMpcVerifierFlag = cli.BoolFlag{
 		Name:   "rollup.mpcverifier",
 		Usage:  "Enable the verifier for mpc node",
 		EnvVar: "ROLLUP_VERIFIER_MPC_ENABLE",
 	}
-
 	RollupMaxCalldataSizeFlag = cli.IntFlag{
 		Name:   "rollup.maxcalldatasize",
 		Usage:  "Maximum allowed calldata size for Queue Origin Sequencer Txs",
@@ -885,15 +879,15 @@ var (
 		Value:  time.Second * 60,
 		EnvVar: "ROLLUP_GENESIS_TIMEOUT_SECONDS",
 	}
+	RollupRoleFlag = cli.StringFlag{
+		Name:   "rollup.role",
+		Usage:  "Set rollup node role",
+		EnvVar: "ROLLUP_ROLE",
+	}
 	SequencerClientHttpFlag = cli.StringFlag{
 		Name:   "sequencer.clienthttp",
 		Usage:  "HTTP endpoint for the sequencer client",
 		EnvVar: "SEQUENCER_CLIENT_HTTP",
-	}
-	SchedulerAddressFlag = cli.StringFlag{
-		Name:   "scheduler.address",
-		Usage:  "Set scheduler address",
-		EnvVar: "SCHEDULER_ADDRESS",
 	}
 	SchedulerBatchTime = cli.StringFlag{
 		Name:   "scheduler.batchtime",
@@ -909,11 +903,6 @@ var (
 		Name:   "scheduler.batchepoch",
 		Usage:  "Set scheduler batch epoch",
 		EnvVar: "SCHEDULER_BATCHEPOCH",
-	}
-	SequencerModeFlag = cli.BoolFlag{
-		Name:   "sequencer.mode",
-		Usage:  "Set sequencer mode",
-		EnvVar: "SEQUENCER_MODE",
 	}
 )
 
@@ -1156,9 +1145,6 @@ func setEth1(ctx *cli.Context, cfg *rollup.Config) {
 // UsingBVM
 // setRollup configures the rollup
 func setRollup(ctx *cli.Context, cfg *rollup.Config) {
-	if ctx.GlobalIsSet(RollupEnableVerifierFlag.Name) {
-		cfg.IsVerifier = true
-	}
 	if ctx.GlobalIsSet(RollupMpcVerifierFlag.Name) {
 		cfg.MpcVerifier = true
 	}
@@ -1203,11 +1189,18 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	if ctx.GlobalIsSet(SequencerClientHttpFlag.Name) {
 		cfg.SequencerClientHttp = ctx.GlobalString(SequencerClientHttpFlag.Name)
 	}
-	if ctx.GlobalIsSet(SchedulerAddressFlag.Name) {
-		cfg.SchedulerAddress = common.HexToAddress(ctx.GlobalString(SchedulerAddressFlag.Name))
-	}
-	if ctx.GlobalIsSet(SequencerModeFlag.Name) {
-		cfg.SequencerMode = ctx.GlobalBool(SequencerModeFlag.Name)
+	if ctx.GlobalIsSet(RollupRoleFlag.Name) {
+		str := ctx.GlobalString(RollupRoleFlag.Name)
+		switch str {
+		case "scheduler", "SCHEDULER":
+			cfg.RollupRole = rollup.SCHEDULER_NODE
+		case "sequencer", "SEQUENCER":
+			cfg.RollupRole = rollup.SEQUENCER_NODE
+		case "replica", "REPLICA", "verifier", "VERIFIER":
+			cfg.RollupRole = rollup.VERIFIER_NODE
+		default:
+			log.Crit("invalid rollup role", "role", str)
+		}
 	}
 }
 

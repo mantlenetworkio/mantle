@@ -37,6 +37,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/metrics"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 )
 
 const (
@@ -269,7 +270,7 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	go worker.batchStartLoop()
 	go worker.batchAnswerLoop()
 
-	if !worker.eth.SyncService().IsSequencerMode() {
+	if worker.eth.SyncService().GetRollupRole() == rollup.SCHEDULER_NODE {
 		go worker.l1Tol2StartLoop()
 	}
 
@@ -403,7 +404,8 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 		// cleaning up memory with the call to `clearPending`, so be sure to
 		// call that in the new hot code path
 		case head := <-w.chainHeadCh:
-			if !w.eth.SyncService().IsSequencerMode() {
+			if w.eth.SyncService().GetRollupRole() == rollup.SCHEDULER_NODE ||
+				w.eth.SyncService().GetRollupRole() == rollup.VERIFIER_NODE {
 				w.chainHeadToRollupCh <- head
 			}
 			//clearPending(head.Block.NumberU64())
@@ -464,7 +466,7 @@ func (w *worker) l1Tol2StartLoop() {
 		select {
 		case obj := <-w.l1ToL2Sub.Chan():
 			if !w.isRunning() {
-				log.Info("miner receives batchPeriodStartEvent but miner not start")
+				log.Debug("miner receives batchPeriodStartEvent but miner not start")
 			}
 			var ev core.L1ToL2TxStartEvent
 			var ok bool
@@ -475,6 +477,7 @@ func (w *worker) l1Tol2StartLoop() {
 				if err := w.eth.SyncService().SyncQueueToTip(); err != nil {
 					log.Info("SyncQueueToTip interrupt", "error", err)
 				}
+				w.eth.SyncService().ApplyUpdateGasPriceTxs()
 				close(ev.SchedulerCh)
 			} else {
 				log.Error("SchedulerCh is nil")
@@ -495,10 +498,13 @@ func (w *worker) batchStartLoop() {
 		//BatchPeriodStartEvent
 		case obj := <-w.bpsSub.Chan():
 			if !w.isRunning() {
-				log.Info("miner receives batchPeriodStartEvent but miner not start")
+				log.Debug("miner receives batchPeriodStartEvent but miner not start")
 			}
 			var ev core.BatchPeriodStartEvent
 			var ok bool
+			if obj == nil || obj.Data == nil {
+				continue
+			}
 			if ev, ok = obj.Data.(core.BatchPeriodStartEvent); !ok {
 				continue
 			}
@@ -509,7 +515,7 @@ func (w *worker) batchStartLoop() {
 				w.knowBatchPeriodStartMsg.Add(ev.Msg.Hash())
 			}
 			// for Scheduler
-			if w.eth.SyncService().IsScheduler(w.coinbase) {
+			if w.eth.SyncService().IsScheduler() {
 				w.mutex.Lock()
 				w.currentBps = ev.Msg
 				w.mutex.Unlock()
@@ -531,12 +537,8 @@ func (w *worker) batchStartLoop() {
 				if ev.Msg.Sequencer == w.coinbase {
 					// for active sequencer
 					log.Info("Active sequencer receives batchPeriodStartEvent")
-					if ev.Msg.StartHeight != w.chain.CurrentBlock().NumberU64()+1 {
-						log.Error("start height mismatch", "current_height", w.current.header.Number.Uint64(), "start_height", ev.Msg.StartHeight)
-						continue
-					}
 					if ev.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
-						log.Error("maxHeight is too low, just ignore the batch", "current_height", w.current.header.Number.Uint64(), "max_height", ev.Msg.MaxHeight)
+						log.Error("maxHeight is too low, just ignore the batch", "current_height", w.chain.CurrentBlock().NumberU64(), "max_height", ev.Msg.MaxHeight)
 						continue
 					}
 					if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
@@ -564,28 +566,74 @@ func (w *worker) batchStartLoop() {
 							continue
 						}
 						log.Info("pending size", "size", len(pending))
+						var bpa types.BatchPeriodAnswerMsg
+						bpa.StartHeight = ev.Msg.StartHeight + inTxLen
+
+						// pick out enough transactions from txpool and insert them into batchPeriodAnswerMsg
+						// The sum of tx quantity from all batchPeriodAnswerMsgs with the same batchIndex should be no greater than ev.Msg.MaxHeight-ev.Msg.StartHeight+1
+						batchLeftSpace := ev.Msg.MaxHeight - bpa.StartHeight + 1
+
 						// Split the pending transactions into locals and remotes
 						localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
-						// TODO mev
-						var txsQueue types.Transactions
+						var rawTxsQueue types.Transactions
+						enough := false
 						for _, account := range w.eth.TxPool().Locals() {
 							if txs := remoteTxs[account]; len(txs) > 0 {
+								if enough {
+									break
+								}
 								delete(remoteTxs, account)
 								localTxs[account] = txs
-								txsQueue = append(txsQueue, txs...)
+								rawTxsQueue = append(rawTxsQueue, txs...)
+								if uint64(len(rawTxsQueue)) > 2*batchLeftSpace {
+									enough = true
+								}
 							}
 						}
 						for _, txs := range remoteTxs {
-							txsQueue = append(txsQueue, txs...)
+							if enough {
+								break
+							}
+							rawTxsQueue = append(rawTxsQueue, txs...)
+							if uint64(len(rawTxsQueue)) > 2*batchLeftSpace {
+								enough = true
+							}
 						}
-
-						var bpa types.BatchPeriodAnswerMsg
-						bpa.StartHeight = ev.Msg.StartHeight + inTxLen
-						// pick out enough transactions from txpool and insert them into batchPeriodAnswerMsg
-						// The sum of tx quantity from all batchPeriodAnswerMsgs with the same batchIndex should be no greater than ev.Msg.MaxHeight-ev.Msg.StartHeight+1
-						if uint64(len(txsQueue)) >= ev.Msg.MaxHeight-bpa.StartHeight+1 {
-							bpa.Txs = txsQueue[:ev.Msg.MaxHeight-bpa.StartHeight+1]
-							inTxLen += ev.Msg.MaxHeight - bpa.StartHeight + 1
+						var txsQueue types.Transactions
+						pendingNonce := make(map[common.Address]uint64)
+						stateDB, err := w.chain.State()
+						if err != nil {
+							log.Error("get state failure", "err_msg", err.Error())
+							continue
+						}
+						for _, tx := range rawTxsQueue {
+							if err := w.eth.SyncService().ValidateSequencerTransaction(tx); err == nil {
+								acc, _ := types.Sender(w.current.signer, tx)
+								txPendingNonce, ok := pendingNonce[acc]
+								if ok {
+									if txPendingNonce != tx.Nonce() {
+										log.Error("Found nonce mismatch during picking out transactions",
+											"tx_hash", tx.Hash().String(), "expected_nonce", txPendingNonce, "actual_nonce", tx.Nonce())
+										continue
+									}
+								} else {
+									stateNonce := stateDB.GetNonce(acc)
+									if stateNonce != tx.Nonce() {
+										log.Error("Found nonce mismatch during picking out transactions",
+											"tx_hash", tx.Hash().String(), "expected_nonce", stateNonce, "actual_nonce", tx.Nonce())
+										continue
+									}
+								}
+								pendingNonce[acc] = tx.Nonce() + 1
+								txsQueue = append(txsQueue, tx)
+							} else {
+								log.Error("batchStartLoop tx verifyFee error", "tx_hash", tx.Hash(), "err_msg", err.Error())
+							}
+						}
+						log.Info("txsQueue size", "queue_size", len(txsQueue), "batch_left_space", batchLeftSpace)
+						if uint64(len(txsQueue)) >= batchLeftSpace {
+							bpa.Txs = txsQueue[:batchLeftSpace]
+							inTxLen += batchLeftSpace
 						} else {
 							bpa.Txs = txsQueue
 							inTxLen += uint64(len(txsQueue))
@@ -634,8 +682,14 @@ func (w *worker) batchAnswerLoop() {
 		select {
 		// BatchPeriodAnswerEvent
 		case obj := <-w.bpaSub.Chan():
+			if !w.isRunning() {
+				log.Debug("miner receives batchPeriodAnswerEvent but miner not start")
+			}
 			var ev core.BatchPeriodAnswerEvent
 			var ok bool
+			if obj == nil || obj.Data == nil {
+				continue
+			}
 			if ev, ok = obj.Data.(core.BatchPeriodAnswerEvent); !ok {
 				continue
 			}
@@ -646,7 +700,7 @@ func (w *worker) batchAnswerLoop() {
 				w.knowBatchPeriodAnswerMsg.Add(ev.Msg.Hash())
 			}
 			// for Scheduler
-			if w.eth.SyncService().IsScheduler(w.coinbase) {
+			if w.eth.SyncService().IsScheduler() {
 				err := func() error {
 					w.mutex.Lock()
 					defer w.mutex.Unlock()
@@ -675,17 +729,31 @@ func (w *worker) batchAnswerLoop() {
 				log.Info("Scheduler receives BatchPeriodAnswerEvent", "sequencer", ev.Msg.Sequencer.String(), "start_height", ev.Msg.StartHeight, "tx_len", len(ev.Msg.Txs), "max_height", w.currentBps.MaxHeight)
 				if ev.Msg.StartHeight-1+uint64(len(ev.Msg.Txs)) > w.currentBps.MaxHeight {
 					log.Error("Batch answer contains too many transactions", "start_height", ev.Msg.StartHeight, "max_height", w.currentBps.MaxHeight, "tx_len", len(ev.Msg.Txs))
-					err := w.mux.Post(core.BatchEndEvent{})
+					err := w.mux.Post(core.BatchEndEvent(w.currentBps.BatchIndex))
 					if err != nil {
 						log.Error("Post BatchEndEvent error", "err_msg", err.Error())
 						break
 					}
 				}
 				for _, tx := range ev.Msg.Txs {
-					err := w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, ev.Msg.ToBatchTxSetProof())
+					from, _ := types.Sender(w.current.signer, tx)
+					stateNonce := w.current.state.GetNonce(from)
+					if stateNonce != tx.Nonce() {
+						log.Error("Found nonce mismatch during producing blocks",
+							"tx_hash", tx.Hash().String(), "expected_nonce", stateNonce, "actual_nonce", tx.Nonce())
+						break
+					}
+
+					// This check is done in SyncService.verifyFee
+					if w.current.state.GetBalance(from).Cmp(tx.Cost()) < 0 {
+						log.Error("insufficient funds for gas * price + value")
+						break
+					}
+
+					err = w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, &types.BatchTxSetProof{})
 					if err != nil {
 						log.Error("ValidateAndApplySequencerTransaction error", "err_msg", err.Error())
-						err = w.mux.Post(core.BatchEndEvent{})
+						err = w.mux.Post(core.BatchEndEvent(w.currentBps.BatchIndex))
 						if err != nil {
 							log.Error("Post BatchEndEvent error", "err_msg", err.Error())
 							break
@@ -711,7 +779,8 @@ func (w *worker) batchAnswerLoop() {
 // mainLoop is a standalone goroutine to regenerate the sealing task based on the received event.
 func (w *worker) mainLoop() {
 	//defer w.txsSub.Unsubscribe()
-	if !w.eth.SyncService().IsSequencerMode() {
+	if w.eth.SyncService().GetRollupRole() == rollup.SCHEDULER_NODE ||
+		w.eth.SyncService().GetRollupRole() == rollup.VERIFIER_NODE {
 		defer w.chainHeadSub.Unsubscribe()
 	}
 	defer w.chainSideSub.Unsubscribe()

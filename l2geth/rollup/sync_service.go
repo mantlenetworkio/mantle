@@ -4,11 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
-	"github.com/mantlenetworkio/mantle/l2geth/consensus"
-	"github.com/mantlenetworkio/mantle/l2geth/params"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
-
 	"math/big"
 	"strconv"
 	"sync"
@@ -16,6 +11,7 @@ import (
 	"time"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 	"github.com/mantlenetworkio/mantle/l2geth/contracts/message"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
@@ -25,14 +21,22 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
 	"github.com/mantlenetworkio/mantle/l2geth/event"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 )
 
+type Role uint8
+
 const (
 	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
-	chainHeadChanSize = 10
+	chainHeadChanSize       = 10
+	gasPriceTxPoolSize      = 100
+	SCHEDULER_NODE     Role = 0
+	SEQUENCER_NODE     Role = 1
+	VERIFIER_NODE      Role = 2
 )
 
 var (
@@ -84,6 +88,8 @@ type SyncService struct {
 	feeThresholdDown               *big.Float
 	cfg                            Config
 	applyLock                      sync.Mutex
+	updateGasPriceTxPool           chan *types.Transaction
+	verifiedMap                    sync.Map
 	executor                       *executor
 }
 
@@ -96,7 +102,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	ctx, cancel := context.WithCancel(ctx)
 	_ = cancel // satisfy govet
 
-	if cfg.IsVerifier {
+	if cfg.RollupRole == VERIFIER_NODE {
 		log.Info("Running in verifier mode", "sync-backend", cfg.Backend.String())
 	} else {
 		log.Info("Running in sequencer mode", "sync-backend", cfg.Backend.String())
@@ -147,8 +153,8 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	service := SyncService{
 		ctx:                            ctx,
 		cancel:                         cancel,
-		verifier:                       cfg.IsVerifier,
 		mpcVerifier:                    cfg.MpcVerifier,
+		verifier:                       cfg.RollupRole == VERIFIER_NODE,
 		enable:                         cfg.Eth1SyncServiceEnable,
 		syncing:                        atomic.Value{},
 		bc:                             bc,
@@ -168,6 +174,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		feeThresholdUp:                 cfg.FeeThresholdUp,
 		l1MsgSender:                    cfg.L1MsgSender,
 		cfg:                            cfg,
+		updateGasPriceTxPool:           make(chan *types.Transaction, gasPriceTxPoolSize),
 		executor:                       newExecutor(gasFloor, chainConfig, engine, bc),
 	}
 
@@ -199,7 +206,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 			}
 		}
 
-		if !cfg.IsVerifier || cfg.Backend == BackendL2 {
+		if cfg.RollupRole != VERIFIER_NODE || cfg.Backend == BackendL2 {
 			// Wait until the remote service is done syncing
 			tStatus := time.NewTicker(10 * time.Second)
 			for ; true; <-tStatus.C {
@@ -260,16 +267,12 @@ func (s *SyncService) ensureClient() error {
 	return nil
 }
 
-func (s *SyncService) IsScheduler(address common.Address) bool {
-	return address == s.cfg.SchedulerAddress
+func (s *SyncService) IsScheduler() bool {
+	return s.cfg.RollupRole == SCHEDULER_NODE
 }
 
-func (s *SyncService) IsSequencerMode() bool {
-	return s.cfg.SequencerMode
-}
-
-func (s *SyncService) GetScheduler() common.Address {
-	return s.cfg.SchedulerAddress
+func (s *SyncService) GetRollupRole() Role {
+	return s.cfg.RollupRole
 }
 
 // Start initializes the service
@@ -285,7 +288,7 @@ func (s *SyncService) Start() error {
 
 	if s.verifier {
 		go s.VerifierLoop()
-	} else if !s.IsSequencerMode() {
+	} else if s.GetRollupRole() == SCHEDULER_NODE {
 		go func() {
 			if err := s.syncTransactionsToTip(); err != nil {
 				log.Crit("Sequencer cannot sync transactions to tip", "err", err)
@@ -1216,12 +1219,88 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	return nil
 }
 
-func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction, sequencer common.Address) error {
+func (s *SyncService) VerifiedTxCount() (uint64, error) {
+	var pendingTxCount uint64
+	pendingTxs, err := s.txpool.Pending()
+	if err != nil {
+		return 0, err
+	}
+	for _, txs := range pendingTxs {
+		for _, tx := range txs {
+			if err := s.ValidateSequencerTransaction(tx); err == nil {
+				pendingTxCount++
+			}
+		}
+	}
+	return pendingTxCount, nil
+}
+
+// ApplyUpdateGasPriceTxs apply tx for update gasPrice
+func (s *SyncService) ApplyUpdateGasPriceTxs() {
+	for {
+		if len(s.updateGasPriceTxPool) == 0 {
+			break
+		}
+		tx := <-s.updateGasPriceTxPool
+		if err := s.ValidateAndApplySequencerTransaction(tx, &types.BatchTxSetProof{}); err != nil {
+			log.Error("apply update gasPrice tx error", "err_msg", err.Error())
+		}
+	}
+}
+
+func (s *SyncService) ValidateTransaction(tx *types.Transaction) bool {
+	if tx == nil {
+		return false
+	}
+	from, err := types.Sender(s.signer, tx)
+	if err != nil {
+		return false
+	}
+	gpoOwner := s.GasPriceOracleOwnerAddress()
+	if gpoOwner != nil {
+		if from != *gpoOwner && s.GetRollupRole() == SEQUENCER_NODE {
+			return true
+		} else if from == *gpoOwner && s.GetRollupRole() == SCHEDULER_NODE {
+			return true
+		}
+	}
+	return false
+}
+
+// AddUpdateGasPriceTx add updateGasPriceTx to queue
+func (s *SyncService) AddUpdateGasPriceTx(tx *types.Transaction) error {
+	if len(s.updateGasPriceTxPool) == gasPriceTxPoolSize {
+		return fmt.Errorf("there are too many transactions waiting to be processed")
+	}
+	s.updateGasPriceTxPool <- tx
+	return nil
+}
+
+func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction) error {
 	if s.verifier {
 		return errors.New("Verifier does not accept transactions out of band")
 	}
 	if tx == nil {
 		return errors.New("nil transaction passed to ValidateAndApplySequencerTransaction")
+	}
+	l1GasPrice, err := s.RollupGpo.SuggestL1GasPrice(context.Background())
+	if err != nil {
+		return err
+	}
+	if err = func() error {
+		v, ok := s.verifiedMap.Load(tx.Hash())
+		if ok {
+			lastL1GasPrice, ok := v.(*big.Int)
+			if ok {
+				if l1GasPrice.Cmp(lastL1GasPrice) <= 0 {
+					return errors.New("l1GasPrice no rise")
+				}
+			}
+		}
+		return nil
+	}(); err != nil {
+		// ignore error and return nil
+		return nil
 	}
 	s.txLock.Lock()
 	defer s.txLock.Unlock()
@@ -1234,7 +1313,13 @@ func (s *SyncService) ValidateSequencerTransaction(tx *types.Transaction, sequen
 	if qo != types.QueueOriginSequencer {
 		return fmt.Errorf("invalid transaction with queue origin %s", qo.String())
 	}
+	// save gas price and tx hash
+	s.verifiedMap.Store(tx.Hash(), l1GasPrice)
 	return nil
+}
+
+func (s *SyncService) DeleteTxVerifiedPrice(hash common.Hash) {
+	s.verifiedMap.Delete(hash)
 }
 
 // Higher level API for applying transactions. Should only be called for
@@ -1268,7 +1353,7 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 }
 
 func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
-	if !s.IsSequencerMode() {
+	if s.GetRollupRole() == SCHEDULER_NODE {
 		return
 	}
 	l1BlockNumber := tx.L1BlockNumber()
@@ -1546,11 +1631,14 @@ func (s *SyncService) IngestTransaction(tx *types.Transaction) error {
 }
 
 func (s *SyncService) handleChainHeadEventLoop() {
-	if s.IsSequencerMode() {
+	if s.GetRollupRole() == SEQUENCER_NODE {
 		log.Info("Start handle chain head event loop")
 		for {
 			select {
 			case block := <-s.chainHeadCh:
+				if block.Block == nil {
+					continue
+				}
 				log.Info("handleChainHeadEventLoop receive block", "block_number", block.Block.NumberU64())
 			}
 		}

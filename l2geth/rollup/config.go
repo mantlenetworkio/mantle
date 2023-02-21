@@ -10,8 +10,6 @@ import (
 type Config struct {
 	// Maximum calldata size for a Queue Origin Sequencer Tx
 	MaxCallDataSize int
-	// Verifier mode
-	IsVerifier bool
 	// Enable the sync service
 	Eth1SyncServiceEnable bool
 	// Gas Limit
@@ -44,9 +42,7 @@ type Config struct {
 	// HTTP endpoint of the sequencer
 	SequencerClientHttp string
 
-	SchedulerAddress common.Address
-
-	SequencerMode bool
-
+	RollupRole Role
+  
 	MpcVerifier bool
 }

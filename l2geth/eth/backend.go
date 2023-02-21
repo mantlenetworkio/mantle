@@ -145,7 +145,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		return nil, genesisErr
 	}
 	if chainConfig.Clique != nil {
-		chainConfig.Clique.IsVerifier = config.Rollup.IsVerifier
+		chainConfig.Clique.IsVerifier = config.Rollup.RollupRole == rollup.VERIFIER_NODE
 	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
@@ -214,6 +214,9 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
+
+	eth.txPool.SetDeleteTxVerifiedPrice(eth.syncService.DeleteTxVerifiedPrice)
+	eth.txPool.SetValidateSequencerTransaction(eth.syncService.ValidateSequencerTransaction)
 	eth.syncService.SetExtra(makeExtraData(config.Miner.ExtraData))
 	eth.blockchain.SetUpdateSyncServiceFunc(eth.syncService.UpdateSyncServiceState)
 
@@ -223,14 +226,14 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if checkpoint == nil {
 		checkpoint = params.TrustedCheckpoints[genesisHash]
 	}
-	if eth.protocolManager, err = NewProtocolManager(chainConfig, checkpoint, config.SyncMode, config.NetworkId, eth.eventMux, eth.txPool, eth.engine, eth.blockchain, chainDb, cacheLimit, config.Whitelist); err != nil {
+	if eth.protocolManager, err = NewProtocolManager(chainConfig, checkpoint, config.SyncMode, config.NetworkId, eth.eventMux, eth.txPool, eth.engine, eth.blockchain, chainDb, cacheLimit, config.Whitelist, eth.syncService.IsScheduler); err != nil {
 		return nil, err
 	}
 	eth.miner = miner.New(eth, &config.Miner, chainConfig, eth.EventMux(), eth.engine, eth.isLocalBlock)
 	eth.miner.SetExtra(makeExtraData(config.Miner.ExtraData))
 
-	log.Info("Backend Config", "max-calldata-size", config.Rollup.MaxCallDataSize, "gas-limit", config.Rollup.GasLimit, "is-verifier", config.Rollup.IsVerifier, "using-bvm", rcfg.UsingBVM)
-	eth.APIBackend = &EthAPIBackend{ctx.ExtRPCEnabled(), eth, nil, nil, config.Rollup.IsVerifier, config.Rollup.GasLimit, rcfg.UsingBVM, config.Rollup.MaxCallDataSize}
+	log.Info("Backend Config", "max-calldata-size", config.Rollup.MaxCallDataSize, "gas-limit", config.Rollup.GasLimit, "is-verifier", config.Rollup.RollupRole == rollup.VERIFIER_NODE, "using-bvm", rcfg.UsingBVM)
+	eth.APIBackend = &EthAPIBackend{ctx.ExtRPCEnabled(), eth, nil, nil, config.Rollup.RollupRole == rollup.VERIFIER_NODE, config.Rollup.GasLimit, rcfg.UsingBVM, config.Rollup.MaxCallDataSize}
 	gpoParams := config.GPO
 	if gpoParams.Default == nil {
 		gpoParams.Default = config.Miner.GasPrice
@@ -245,7 +248,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		schedulerInst, err := clique.NewScheduler(
 			chainDb,
 			&eth.config.SchedulerConfig,
-			config.Rollup.SchedulerAddress,
 			eth.engine.(*clique.Clique),
 			eth.blockchain,
 			eth.txPool,
@@ -254,6 +256,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		if err != nil {
 			return nil, fmt.Errorf("create schedulerInst instance err: %v", err)
 		}
+		schedulerInst.SetVerifiedTxCount(eth.syncService.VerifiedTxCount)
 		eth.protocolManager.setSchedulerInst(schedulerInst)
 	}
 	return eth, nil
@@ -524,7 +527,7 @@ func (s *Ethereum) StartMining(threads int) error {
 				return fmt.Errorf("cannot get schedulerAddr: %w", err)
 			}
 			// check eb to equal schedulerAddr then start sequencer server after miner start
-			if bytes.Equal(schedulerAddr.Bytes(), eb.Bytes()) {
+			if bytes.Equal(schedulerAddr.Bytes(), eb.Bytes()) && s.syncService.IsScheduler() {
 				s.protocolManager.setEtherBase(eb)
 				// set wallet for sign msgs
 				s.protocolManager.schedulerInst.SetWallet(wallet, account)
