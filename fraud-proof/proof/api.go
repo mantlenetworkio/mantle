@@ -93,8 +93,8 @@ func (api *ProverAPI) ProveTransaction(ctx context.Context, hash common.Hash, ta
 	return hexutil.Bytes{}, nil
 }
 
-func (api *ProverAPI) ProveBlocksForBenchmark(ctx context.Context, startGasUsed *big.Int, startNum, endNum uint64, config *ProverConfig) ([]hexutil.Bytes, error) {
-	states, err := GenerateStates(api.backend, ctx, startGasUsed, startNum, endNum, config)
+func (api *ProverAPI) ProveBlocksForBenchmark(ctx context.Context, startNum, endNum uint64, config *ProverConfig) ([]hexutil.Bytes, error) {
+	states, err := GenerateStates(api.backend, ctx, startNum, endNum, config)
 	if err != nil {
 		return nil, err
 	}
@@ -110,8 +110,8 @@ func (api *ProverAPI) ProveBlocksForBenchmark(ctx context.Context, startGasUsed 
 	return proofs, nil
 }
 
-func (api *ProverAPI) GenerateStateHashes(ctx context.Context, startGasUsed *big.Int, startNum, endNum uint64, config *ProverConfig) ([]common.Hash, error) {
-	states, err := GenerateStates(api.backend, ctx, startGasUsed, startNum, endNum, config)
+func (api *ProverAPI) GenerateStateHashes(ctx context.Context, startNum, endNum uint64, config *ProverConfig) ([]common.Hash, error) {
+	states, err := GenerateStates(api.backend, ctx, startNum, endNum, config)
 	if err != nil {
 		return nil, err
 	}

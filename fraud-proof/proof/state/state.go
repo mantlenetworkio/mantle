@@ -199,14 +199,13 @@ func StateFromCaptured(
 }
 
 type InterState struct {
-	BlockNumber       uint64
-	TransactionIdx    uint64
-	GlobalState       vm.StateDB
-	CumulativeGasUsed *uint256.Int
-	BlockGasUsed      *uint256.Int
-	BlockHashTree     *BlockHashTree
-	TransactionTrie   *TransactionTrie
-	ReceiptTrie       *ReceiptTrie
+	BlockNumber     uint64
+	TransactionIdx  uint64
+	GlobalState     vm.StateDB
+	BlockGasUsed    *uint256.Int
+	BlockHashTree   *BlockHashTree
+	TransactionTrie *TransactionTrie
+	ReceiptTrie     *ReceiptTrie
 }
 
 func (s *InterState) Hash() common.Hash {
@@ -218,8 +217,6 @@ func (s *InterState) Hash() common.Hash {
 	binary.BigEndian.PutUint64(transactionIdx, s.TransactionIdx)
 	items = append(items, transactionIdx)
 	items = append(items, s.GlobalState.GetRootForProof().Bytes())
-	gasBytes := s.CumulativeGasUsed.Bytes32()
-	items = append(items, gasBytes[:])
 	blockGasBytes := s.BlockGasUsed.Bytes32()
 	items = append(items, blockGasBytes[:])
 	items = append(items, s.BlockHashTree.EncodeState())
@@ -235,33 +232,30 @@ func (s *InterState) IsInter() bool {
 func InterStateFromCaptured(
 	blockNumber, transactionIdx uint64,
 	statedb vm.StateDB,
-	cumulativeGasUsed, blockGasUsed *big.Int,
+	blockGasUsed *big.Int,
 	transactions types.Transactions,
 	receipts types.Receipts,
 	blockHashTree *BlockHashTree,
 ) *InterState {
-	cg, _ := uint256.FromBig(cumulativeGasUsed)
 	bg, _ := uint256.FromBig(blockGasUsed)
 	transactionTrie := NewTransactionTrie(transactions[:transactionIdx])
 	receiptTrie := NewReceiptTrie(receipts[:transactionIdx])
 	return &InterState{
-		BlockNumber:       blockNumber,
-		TransactionIdx:    transactionIdx,
-		GlobalState:       statedb.Copy(),
-		CumulativeGasUsed: cg,
-		BlockGasUsed:      bg,
-		TransactionTrie:   transactionTrie,
-		ReceiptTrie:       receiptTrie,
-		BlockHashTree:     blockHashTree,
+		BlockNumber:     blockNumber,
+		TransactionIdx:  transactionIdx,
+		GlobalState:     statedb.Copy(),
+		BlockGasUsed:    bg,
+		TransactionTrie: transactionTrie,
+		ReceiptTrie:     receiptTrie,
+		BlockHashTree:   blockHashTree,
 	}
 }
 
 // Represent the state at the end of a finalized block
 type BlockState struct {
-	BlockNumber       uint64
-	GlobalState       vm.StateDB
-	CumulativeGasUsed *uint256.Int
-	BlockHashTree     *BlockHashTree
+	BlockNumber   uint64
+	GlobalState   vm.StateDB
+	BlockHashTree *BlockHashTree
 }
 
 func (s *BlockState) Hash() common.Hash {
@@ -270,8 +264,6 @@ func (s *BlockState) Hash() common.Hash {
 	binary.BigEndian.PutUint64(blockNumBytes, s.BlockNumber)
 	items = append(items, blockNumBytes)
 	items = append(items, s.GlobalState.GetRootForProof().Bytes())
-	gasBytes := s.CumulativeGasUsed.Bytes32()
-	items = append(items, gasBytes[:])
 	items = append(items, s.BlockHashTree.EncodeState())
 	return crypto.Keccak256Hash(items...)
 }
@@ -280,12 +272,10 @@ func (s *BlockState) IsInter() bool {
 	return true
 }
 
-func BlockStateFromBlock(blockNumber uint64, stateDB vm.StateDB, cumulativeGasUsed *big.Int, blockHashTree *BlockHashTree) (*BlockState, error) {
-	g, _ := uint256.FromBig(cumulativeGasUsed)
+func BlockStateFromBlock(blockNumber uint64, stateDB vm.StateDB, blockHashTree *BlockHashTree) (*BlockState, error) {
 	return &BlockState{
-		BlockNumber:       blockNumber,
-		GlobalState:       stateDB.Copy(),
-		CumulativeGasUsed: g,
-		BlockHashTree:     blockHashTree,
+		BlockNumber:   blockNumber,
+		GlobalState:   stateDB.Copy(),
+		BlockHashTree: blockHashTree,
 	}, nil
 }

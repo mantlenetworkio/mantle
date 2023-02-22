@@ -1,7 +1,6 @@
 package sequencer
 
 import (
-	"fmt"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"math/big"
 
@@ -32,14 +31,13 @@ type challengeCtx struct {
 	assertion     *rollupTypes.Assertion
 }
 
-// Current Sequencer assumes no Berlin+London fork on L2
+// Sequencer run confirming loop and respond challenge, assumes no Berlin+London fork on L2
 type Sequencer struct {
 	*services.BaseService
 
-	pendingAssertionCh   chan *rollupTypes.Assertion
-	confirmedIDCh        chan *big.Int
-	challengeCh          chan *challengeCtx
-	challengeResoutionCh chan struct{}
+	confirmedIDCh         chan *big.Int
+	challengeCh           chan *challengeCtx
+	challengeResolutionCh chan struct{}
 
 	confirmations uint64
 }
@@ -50,12 +48,11 @@ func New(eth services.Backend, proofBackend proof.Backend, cfg *services.Config,
 		return nil, err
 	}
 	s := &Sequencer{
-		BaseService:          base,
-		pendingAssertionCh:   make(chan *rollupTypes.Assertion, 4096),
-		confirmedIDCh:        make(chan *big.Int, 4096),
-		challengeCh:          make(chan *challengeCtx),
-		challengeResoutionCh: make(chan struct{}),
-		confirmations:        cfg.L1Confirmations,
+		BaseService:           base,
+		confirmedIDCh:         make(chan *big.Int, 4096),
+		challengeCh:           make(chan *challengeCtx),
+		challengeResolutionCh: make(chan struct{}),
+		confirmations:         cfg.L1Confirmations,
 	}
 	return s, nil
 }
@@ -105,8 +102,8 @@ func (s *Sequencer) confirmationLoop() {
 		if isInChallenge {
 			// Waif for the challenge resolved
 			select {
-			case <-s.challengeResoutionCh:
-				log.Info("challenge finished")
+			case <-s.challengeResolutionCh:
+				log.Info("Sequencer finished challenge, reset isInChallenge status")
 				isInChallenge = false
 			case <-s.Ctx.Done():
 				return
@@ -115,10 +112,9 @@ func (s *Sequencer) confirmationLoop() {
 			select {
 			case ev := <-createdCh:
 				// New assertion created on L1 Rollup
-				log.Info(fmt.Sprintf("Get New Assertion, AssertionID: %s, AsserterAddress: %s",
-					ev.AssertionID.String(), ev.AsserterAddr.String()))
+				log.Info("Get New Assertion...", ev)
 				if common.Address(ev.AsserterAddr) == s.Config.StakeAddr {
-					log.Info("confirmAssertion.....")
+					log.Info("Sequencer saw assertion created, try to confirmAssertion.....")
 					pendingAssertion.ID = ev.AssertionID
 					pendingAssertion.VmHash = ev.VmHash
 					pendingAssertion.InboxSize = ev.InboxSize
@@ -138,7 +134,7 @@ func (s *Sequencer) confirmationLoop() {
 						log.Error("Got another DA request before current is confirmed")
 						continue
 					}
-					log.Info("confirmAssertion setup states.....")
+					log.Info("Sequencer setup confirmAssertion states.....")
 					pendingConfirmationSent = false
 					pendingConfirmed = false
 				}
@@ -155,11 +151,12 @@ func (s *Sequencer) confirmationLoop() {
 					}
 				}
 				// New block mined on L1
-				log.Info("sequencer sync new layer1 block...")
+				log.Info("Sequencer sync new layer1 block, height: ", header.Number)
 				if !pendingConfirmationSent && !pendingConfirmed {
 					if header.Time >= pendingAssertion.Deadline.Uint64() {
 						// Confirmation period has past, confirm it
-						log.Info("call ConfirmFirstUnresolvedAssertion...")
+						log.Info("Sequencer call ConfirmFirstUnresolvedAssertion...")
+						log.Info("Current pendingAssertion id is: ", pendingAssertion.ID)
 						_, err := s.Rollup.ConfirmFirstUnresolvedAssertion()
 						if err != nil {
 							log.Error("Failed to confirm DA", "err", err)
@@ -169,25 +166,16 @@ func (s *Sequencer) confirmationLoop() {
 					}
 				}
 			case ev := <-confirmedCh:
+				log.Info("New confirmed assertion id: ", ev.AssertionID)
 				// New confirmed assertion
 				if ev.AssertionID.Cmp(pendingAssertion.ID) == 0 {
+					log.Info("Confirmed to latest unsolved assertion...")
 					// Notify sequencing goroutine
 					s.confirmedIDCh <- pendingAssertion.ID
 					pendingConfirmed = true
 				}
-			case newPendingAssertion := <-s.pendingAssertionCh:
-				// New assertion created by sequencing goroutine
-				if !pendingConfirmed {
-					// TODO: support multiple pending assertion
-					log.Error("Got another DA request before current is confirmed")
-					continue
-				}
-				log.Info("confirmAssertion setup states.....")
-				pendingAssertion = newPendingAssertion.Copy()
-				pendingConfirmationSent = false
-				pendingConfirmed = false
 			case ev := <-challengedCh:
-				log.Warn("new challenge rise", ev)
+				log.Warn("New challenge rise!!!!!!", ev)
 				// New challenge raised
 				//if ev.AssertionID.Cmp(pendingAssertion.ID) == 0 {
 				//	s.challengeCh <- &challengeCtx{
@@ -282,7 +270,7 @@ func (s *Sequencer) challengeLoop() {
 				challengeCompletedSub.Unsubscribe()
 				states = []*proof.ExecutionState{}
 				inChallenge = false
-				s.challengeResoutionCh <- struct{}{}
+				s.challengeResolutionCh <- struct{}{}
 			case <-s.Ctx.Done():
 				bisectedSub.Unsubscribe()
 				challengeCompletedSub.Unsubscribe()
