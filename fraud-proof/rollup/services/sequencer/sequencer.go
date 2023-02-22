@@ -122,7 +122,6 @@ func (s *Sequencer) confirmationLoop() {
 					pendingAssertion.ID = ev.AssertionID
 					pendingAssertion.VmHash = ev.VmHash
 					pendingAssertion.InboxSize = ev.InboxSize
-					pendingAssertion.GasUsed = ev.L2GasUsed
 					pendingAssertion.Parent = new(big.Int).Sub(ev.AssertionID, big.NewInt(1))
 					pendingAssertion.Deadline, err = s.AssertionMap.GetDeadline(ev.AssertionID)
 					if err != nil {
@@ -151,7 +150,7 @@ func (s *Sequencer) confirmationLoop() {
 					num.Sub(header.Number, num)
 					header, err = s.L1.HeaderByNumber(s.Ctx, num)
 					if err != nil {
-						log.Crit("Failed to get confirmed header", "err", err)
+						log.Error("Failed to get confirmed header", "err", err)
 						continue
 					}
 				}
@@ -163,7 +162,7 @@ func (s *Sequencer) confirmationLoop() {
 						log.Info("call ConfirmFirstUnresolvedAssertion...")
 						_, err := s.Rollup.ConfirmFirstUnresolvedAssertion()
 						if err != nil {
-							log.Crit("Failed to confirm DA", "err", err)
+							log.Error("Failed to confirm DA", "err", err)
 							continue
 						}
 						pendingConfirmationSent = true

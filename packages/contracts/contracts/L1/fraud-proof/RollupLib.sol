@@ -27,7 +27,6 @@ import "./challenge/ChallengeLib.sol";
 // TODO: move into ChallengeLib.
 library RollupLib {
     struct ExecutionState {
-        uint256 l2GasUsed;
         bytes32 vmHash;
     }
 
@@ -35,6 +34,6 @@ library RollupLib {
      * @notice Computes the hash of `execState`.
      */
     function stateHash(ExecutionState memory execState) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(execState.l2GasUsed, execState.vmHash));
+        return keccak256(abi.encodePacked(execState.vmHash));
     }
 }

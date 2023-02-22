@@ -26,7 +26,7 @@ import "./AssertionMap.sol";
 
 interface IRollup {
     event AssertionCreated(
-        uint256 assertionID, address asserterAddr, bytes32 vmHash, uint256 inboxSize, uint256 l2GasUsed
+        uint256 assertionID, address asserterAddr, bytes32 vmHash, uint256 inboxSize
     );
 
     event AssertionChallenged(uint256 assertionID, address challengeAddr);
@@ -57,9 +57,6 @@ interface IRollup {
 
     /// @dev Thrown when a sender tries to create assertion before the minimum assertion time period
     error MinimumAssertionPeriodNotPassed();
-
-    /// @dev Thrown when the L2 gas used by the assertion is more the max allowed limit.
-    error MaxGasLimitExceeded();
 
     /// @dev Thrown when parent's statehash is not equal to the start state(or previous state)/
     error PreviousStateHash();
@@ -170,16 +167,14 @@ interface IRollup {
      * Block is represented by all transactions in range [prevInboxSize, inboxSize]. The latest staked DA of the sender
      * is considered to be the predecessor. Moves sender stake onto the new DA.
      *
-     * The new DA stores the hash of the parameters: H(l2GasUsed || vmHash)
+     * The new DA stores the hash of the parameters: vmHash
      *
      * @param vmHash New VM hash.
      * @param inboxSize Size of inbox corresponding to assertion (number of transactions).
-     * @param l2GasUsed Total L2 gas used as of the end of this assertion's last transaction.
      */
     function createAssertion(
         bytes32 vmHash,
-        uint256 inboxSize,
-        uint256 l2GasUsed
+        uint256 inboxSize
     ) external;
 
     /**
@@ -188,7 +183,6 @@ interface IRollup {
      *
      * @param vmHash New VM hash.
      * @param inboxSize Size of inbox corresponding to assertion (number of transactions).
-     * @param l2GasUsed Total L2 gas used as of the end of this assertion's last transaction.
      * @param _batch Batch of state roots.
      * @param _shouldStartAtElement Index of the element at which this batch should start.
      * @param _signature tss group signature of state batches.
@@ -196,7 +190,6 @@ interface IRollup {
     function createAssertionWithStateBatch(
         bytes32 vmHash,
         uint256 inboxSize,
-        uint256 l2GasUsed,
         bytes32[] calldata _batch,
         uint256 _shouldStartAtElement,
         bytes calldata _signature
