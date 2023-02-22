@@ -484,15 +484,14 @@ contract Rollup is Lib_AddressResolver, RollupBase {
     }
 
     function newAssertionDeadline() private returns (uint256) {
-         return block.number + confirmationPeriod;
+        // TODO: account for prev assertion, gas
+        // return block.number + confirmationPeriod;
         address scc = resolve("StateCommitmentChain");
         (bool success, bytes memory data) = scc.call(
             abi.encodeWithSignature("FRAUD_PROOF_WINDOW()")
         );
         uint256 confirmationWindow = uint256(bytes32(data));
         return block.timestamp + confirmationWindow;
-        // todo mock scc for test
-        // return block.timestamp + confirmationPeriod;
     }
 
     // *****************
