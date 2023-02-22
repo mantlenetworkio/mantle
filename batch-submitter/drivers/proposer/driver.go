@@ -422,7 +422,6 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 		latestAssertion.ID = staker.AssertionID
 		latestAssertion.VmHash = ret.StateHash
 		latestAssertion.InboxSize = ret.InboxSize
-		latestAssertion.GasUsed = ret.GasUsed
 		latestAssertion.Parent = ret.Parent
 		latestAssertion.Deadline = ret.Deadline
 		latestAssertion.ProposalTime = ret.ProposalTime
@@ -433,12 +432,11 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 
 	fmt.Println(assertion.VmHash.String())
 	fmt.Println(assertion.InboxSize)
-	fmt.Println(assertion.GasUsed)
 	fmt.Println(batch)
 	fmt.Println(shouldStartAtElement)
 	fmt.Println(signature)
 
 	// create assertion
 	return d.fpRollup.CreateAssertionWithStateBatch(
-		opts, assertion.VmHash, assertion.InboxSize, assertion.GasUsed, batch, shouldStartAtElement, signature)
+		opts, assertion.VmHash, assertion.InboxSize, batch, shouldStartAtElement, signature)
 }

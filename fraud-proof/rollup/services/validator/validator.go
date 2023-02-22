@@ -197,7 +197,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					isInChallenge = true
 				} else {
 					// Validation succeeded, confirm assertion and advance stake
-					log.Info("Advance State....")
+					log.Info("Advance Stake....")
 					_, err = v.Rollup.AdvanceStake(ev.AssertionID)
 					if err != nil {
 						log.Crit("UNHANDELED: Can't advance stake, validator state corrupted", "err", err)
@@ -318,7 +318,6 @@ func (v *Validator) challengeLoop() {
 				_, err = v.Rollup.CreateAssertion(
 					ctx.ourAssertion.VmHash,
 					ctx.ourAssertion.InboxSize,
-					ctx.ourAssertion.GasUsed.Add(ctx.ourAssertion.GasUsed, big.NewInt(1)),
 				)
 				if err != nil {
 					log.Crit("UNHANDELED: Can't create assertion for challenge, validator state corrupted", "err", err)

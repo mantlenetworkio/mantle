@@ -329,7 +329,8 @@ contract Rollup is Lib_AddressResolver, RollupBase {
     /// @inheritdoc IRollup
     function confirmFirstUnresolvedAssertion() external override {
         if (lastResolvedAssertionID >= lastCreatedAssertionID) {
-            revert NoUnresolvedAssertion();
+            revert("NoUnresolvedAssertion");
+//            revert NoUnresolvedAssertion();
         }
 
         // (1) there is at least one staker, and
@@ -338,11 +339,13 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         uint256 lastUnresolvedID = lastResolvedAssertionID + 1;
         // (2) challenge period has passed
         if (block.timestamp < assertions.getDeadline(lastUnresolvedID)) {
-            revert ChallengePeriodPending();
+//            revert ChallengePeriodPending();
+            revert("ChallengePeriodPending");
         }
         // (3) predecessor has been confirmed
         if (assertions.getParentID(lastUnresolvedID) != lastConfirmedAssertionID) {
-            revert InvalidParent();
+//            revert InvalidParent();
+            revert("InvalidParent");
         }
 
         // Remove old zombies
@@ -350,7 +353,8 @@ contract Rollup is Lib_AddressResolver, RollupBase {
 
         // (4) all stakers are staked on the block.
         if (assertions.getNumStakers(lastUnresolvedID) != countStakedZombies(lastUnresolvedID) + numStakers) {
-            revert NotAllStaked();
+            revert("NotAllStaked");
+//            revert NotAllStaked();
         }
 
         // Confirm assertion.

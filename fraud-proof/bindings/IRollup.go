@@ -30,7 +30,7 @@ var (
 
 // IRollupMetaData contains all meta data concerning the IRollup contract.
 var IRollupMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"name\":\"AssertionAlreadyResolved\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AssertionOutOfRange\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ChallengePeriodPending\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ChallengedStaker\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"DifferentParent\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyAssertion\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"staker1Challenge\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"staker2Challenge\",\"type\":\"address\"}],\"name\":\"InDifferentChallenge\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InboxReadLimitExceeded\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InsufficientStake\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidParent\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MaxGasLimitExceeded\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MinimumAssertionPeriodNotPassed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoStaker\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoUnresolvedAssertion\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotAllStaked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInChallenge\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotStaked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ParentAssertionUnstaked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PreviousStateHash\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RedundantInitialized\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StakedOnUnconfirmedAssertion\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StakerStakedOnTarget\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StakersPresent\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TransferFailed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UnproposedAssertion\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"WrongOrder\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAddress\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"challengeAddr\",\"type\":\"address\"}],\"name\":\"AssertionChallenged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"AssertionConfirmed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"asserterAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"vmHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"l2GasUsed\",\"type\":\"uint256\"}],\"name\":\"AssertionCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"AssertionRejected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"stakerAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"StakerStaked\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"advanceStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"assertions\",\"outputs\":[{\"internalType\":\"contractAssertionMap\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[2]\",\"name\":\"players\",\"type\":\"address[2]\"},{\"internalType\":\"uint256[2]\",\"name\":\"assertionIDs\",\"type\":\"uint256[2]\"}],\"name\":\"challengeAssertion\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"winner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"loser\",\"type\":\"address\"}],\"name\":\"completeChallenge\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"confirmFirstUnresolvedAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"confirmedInboxSize\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"vmHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"l2GasUsed\",\"type\":\"uint256\"}],\"name\":\"createAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"vmHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"l2GasUsed\",\"type\":\"uint256\"},{\"internalType\":\"bytes32[]\",\"name\":\"_batch\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint256\",\"name\":\"_shouldStartAtElement\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_signature\",\"type\":\"bytes\"}],\"name\":\"createAssertionWithStateBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentRequiredStake\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"isStaked\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"stakerAddress\",\"type\":\"address\"}],\"name\":\"rejectFirstUnresolvedAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"stakerAddress\",\"type\":\"address\"}],\"name\":\"removeStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stake\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"stakeAmount\",\"type\":\"uint256\"}],\"name\":\"unstake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"name\":\"AssertionAlreadyResolved\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AssertionOutOfRange\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ChallengePeriodPending\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ChallengedStaker\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"DifferentParent\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyAssertion\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"staker1Challenge\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"staker2Challenge\",\"type\":\"address\"}],\"name\":\"InDifferentChallenge\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InboxReadLimitExceeded\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InsufficientStake\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidParent\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MinimumAssertionPeriodNotPassed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoStaker\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoUnresolvedAssertion\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotAllStaked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInChallenge\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotStaked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ParentAssertionUnstaked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PreviousStateHash\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RedundantInitialized\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StakedOnUnconfirmedAssertion\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StakerStakedOnTarget\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StakersPresent\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TransferFailed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UnproposedAssertion\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"WrongOrder\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAddress\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"challengeAddr\",\"type\":\"address\"}],\"name\":\"AssertionChallenged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"AssertionConfirmed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"asserterAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"vmHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"}],\"name\":\"AssertionCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"AssertionRejected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"stakerAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"StakerStaked\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"advanceStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"assertions\",\"outputs\":[{\"internalType\":\"contractAssertionMap\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[2]\",\"name\":\"players\",\"type\":\"address[2]\"},{\"internalType\":\"uint256[2]\",\"name\":\"assertionIDs\",\"type\":\"uint256[2]\"}],\"name\":\"challengeAssertion\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"winner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"loser\",\"type\":\"address\"}],\"name\":\"completeChallenge\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"confirmFirstUnresolvedAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"confirmedInboxSize\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"vmHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"}],\"name\":\"createAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"vmHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"},{\"internalType\":\"bytes32[]\",\"name\":\"_batch\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint256\",\"name\":\"_shouldStartAtElement\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_signature\",\"type\":\"bytes\"}],\"name\":\"createAssertionWithStateBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentRequiredStake\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"isStaked\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"stakerAddress\",\"type\":\"address\"}],\"name\":\"rejectFirstUnresolvedAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"stakerAddress\",\"type\":\"address\"}],\"name\":\"removeStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stake\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"stakeAmount\",\"type\":\"uint256\"}],\"name\":\"unstake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // IRollupABI is the input ABI used to generate the binding from.
@@ -387,46 +387,46 @@ func (_IRollup *IRollupTransactorSession) ConfirmFirstUnresolvedAssertion() (*ty
 	return _IRollup.Contract.ConfirmFirstUnresolvedAssertion(&_IRollup.TransactOpts)
 }
 
-// CreateAssertion is a paid mutator transaction binding the contract method 0x667aa9aa.
+// CreateAssertion is a paid mutator transaction binding the contract method 0xb6da898f.
 //
-// Solidity: function createAssertion(bytes32 vmHash, uint256 inboxSize, uint256 l2GasUsed) returns()
-func (_IRollup *IRollupTransactor) CreateAssertion(opts *bind.TransactOpts, vmHash [32]byte, inboxSize *big.Int, l2GasUsed *big.Int) (*types.Transaction, error) {
-	return _IRollup.contract.Transact(opts, "createAssertion", vmHash, inboxSize, l2GasUsed)
+// Solidity: function createAssertion(bytes32 vmHash, uint256 inboxSize) returns()
+func (_IRollup *IRollupTransactor) CreateAssertion(opts *bind.TransactOpts, vmHash [32]byte, inboxSize *big.Int) (*types.Transaction, error) {
+	return _IRollup.contract.Transact(opts, "createAssertion", vmHash, inboxSize)
 }
 
-// CreateAssertion is a paid mutator transaction binding the contract method 0x667aa9aa.
+// CreateAssertion is a paid mutator transaction binding the contract method 0xb6da898f.
 //
-// Solidity: function createAssertion(bytes32 vmHash, uint256 inboxSize, uint256 l2GasUsed) returns()
-func (_IRollup *IRollupSession) CreateAssertion(vmHash [32]byte, inboxSize *big.Int, l2GasUsed *big.Int) (*types.Transaction, error) {
-	return _IRollup.Contract.CreateAssertion(&_IRollup.TransactOpts, vmHash, inboxSize, l2GasUsed)
+// Solidity: function createAssertion(bytes32 vmHash, uint256 inboxSize) returns()
+func (_IRollup *IRollupSession) CreateAssertion(vmHash [32]byte, inboxSize *big.Int) (*types.Transaction, error) {
+	return _IRollup.Contract.CreateAssertion(&_IRollup.TransactOpts, vmHash, inboxSize)
 }
 
-// CreateAssertion is a paid mutator transaction binding the contract method 0x667aa9aa.
+// CreateAssertion is a paid mutator transaction binding the contract method 0xb6da898f.
 //
-// Solidity: function createAssertion(bytes32 vmHash, uint256 inboxSize, uint256 l2GasUsed) returns()
-func (_IRollup *IRollupTransactorSession) CreateAssertion(vmHash [32]byte, inboxSize *big.Int, l2GasUsed *big.Int) (*types.Transaction, error) {
-	return _IRollup.Contract.CreateAssertion(&_IRollup.TransactOpts, vmHash, inboxSize, l2GasUsed)
+// Solidity: function createAssertion(bytes32 vmHash, uint256 inboxSize) returns()
+func (_IRollup *IRollupTransactorSession) CreateAssertion(vmHash [32]byte, inboxSize *big.Int) (*types.Transaction, error) {
+	return _IRollup.Contract.CreateAssertion(&_IRollup.TransactOpts, vmHash, inboxSize)
 }
 
-// CreateAssertionWithStateBatch is a paid mutator transaction binding the contract method 0x5e96f69e.
+// CreateAssertionWithStateBatch is a paid mutator transaction binding the contract method 0x49cd3004.
 //
-// Solidity: function createAssertionWithStateBatch(bytes32 vmHash, uint256 inboxSize, uint256 l2GasUsed, bytes32[] _batch, uint256 _shouldStartAtElement, bytes _signature) returns()
-func (_IRollup *IRollupTransactor) CreateAssertionWithStateBatch(opts *bind.TransactOpts, vmHash [32]byte, inboxSize *big.Int, l2GasUsed *big.Int, _batch [][32]byte, _shouldStartAtElement *big.Int, _signature []byte) (*types.Transaction, error) {
-	return _IRollup.contract.Transact(opts, "createAssertionWithStateBatch", vmHash, inboxSize, l2GasUsed, _batch, _shouldStartAtElement, _signature)
+// Solidity: function createAssertionWithStateBatch(bytes32 vmHash, uint256 inboxSize, bytes32[] _batch, uint256 _shouldStartAtElement, bytes _signature) returns()
+func (_IRollup *IRollupTransactor) CreateAssertionWithStateBatch(opts *bind.TransactOpts, vmHash [32]byte, inboxSize *big.Int, _batch [][32]byte, _shouldStartAtElement *big.Int, _signature []byte) (*types.Transaction, error) {
+	return _IRollup.contract.Transact(opts, "createAssertionWithStateBatch", vmHash, inboxSize, _batch, _shouldStartAtElement, _signature)
 }
 
-// CreateAssertionWithStateBatch is a paid mutator transaction binding the contract method 0x5e96f69e.
+// CreateAssertionWithStateBatch is a paid mutator transaction binding the contract method 0x49cd3004.
 //
-// Solidity: function createAssertionWithStateBatch(bytes32 vmHash, uint256 inboxSize, uint256 l2GasUsed, bytes32[] _batch, uint256 _shouldStartAtElement, bytes _signature) returns()
-func (_IRollup *IRollupSession) CreateAssertionWithStateBatch(vmHash [32]byte, inboxSize *big.Int, l2GasUsed *big.Int, _batch [][32]byte, _shouldStartAtElement *big.Int, _signature []byte) (*types.Transaction, error) {
-	return _IRollup.Contract.CreateAssertionWithStateBatch(&_IRollup.TransactOpts, vmHash, inboxSize, l2GasUsed, _batch, _shouldStartAtElement, _signature)
+// Solidity: function createAssertionWithStateBatch(bytes32 vmHash, uint256 inboxSize, bytes32[] _batch, uint256 _shouldStartAtElement, bytes _signature) returns()
+func (_IRollup *IRollupSession) CreateAssertionWithStateBatch(vmHash [32]byte, inboxSize *big.Int, _batch [][32]byte, _shouldStartAtElement *big.Int, _signature []byte) (*types.Transaction, error) {
+	return _IRollup.Contract.CreateAssertionWithStateBatch(&_IRollup.TransactOpts, vmHash, inboxSize, _batch, _shouldStartAtElement, _signature)
 }
 
-// CreateAssertionWithStateBatch is a paid mutator transaction binding the contract method 0x5e96f69e.
+// CreateAssertionWithStateBatch is a paid mutator transaction binding the contract method 0x49cd3004.
 //
-// Solidity: function createAssertionWithStateBatch(bytes32 vmHash, uint256 inboxSize, uint256 l2GasUsed, bytes32[] _batch, uint256 _shouldStartAtElement, bytes _signature) returns()
-func (_IRollup *IRollupTransactorSession) CreateAssertionWithStateBatch(vmHash [32]byte, inboxSize *big.Int, l2GasUsed *big.Int, _batch [][32]byte, _shouldStartAtElement *big.Int, _signature []byte) (*types.Transaction, error) {
-	return _IRollup.Contract.CreateAssertionWithStateBatch(&_IRollup.TransactOpts, vmHash, inboxSize, l2GasUsed, _batch, _shouldStartAtElement, _signature)
+// Solidity: function createAssertionWithStateBatch(bytes32 vmHash, uint256 inboxSize, bytes32[] _batch, uint256 _shouldStartAtElement, bytes _signature) returns()
+func (_IRollup *IRollupTransactorSession) CreateAssertionWithStateBatch(vmHash [32]byte, inboxSize *big.Int, _batch [][32]byte, _shouldStartAtElement *big.Int, _signature []byte) (*types.Transaction, error) {
+	return _IRollup.Contract.CreateAssertionWithStateBatch(&_IRollup.TransactOpts, vmHash, inboxSize, _batch, _shouldStartAtElement, _signature)
 }
 
 // RejectFirstUnresolvedAssertion is a paid mutator transaction binding the contract method 0x042dca93.
@@ -855,13 +855,12 @@ type IRollupAssertionCreated struct {
 	AsserterAddr common.Address
 	VmHash       [32]byte
 	InboxSize    *big.Int
-	L2GasUsed    *big.Int
 	Raw          types.Log // Blockchain specific contextual infos
 }
 
-// FilterAssertionCreated is a free log retrieval operation binding the contract event 0x579a5709f69211a94f85f7185bf368a69873a731563ef07b1a0e625e67a34f10.
+// FilterAssertionCreated is a free log retrieval operation binding the contract event 0x5c610f28399ecc14b66149012a0197a5e3257a8c397125afee95d1cf4b950734.
 //
-// Solidity: event AssertionCreated(uint256 assertionID, address asserterAddr, bytes32 vmHash, uint256 inboxSize, uint256 l2GasUsed)
+// Solidity: event AssertionCreated(uint256 assertionID, address asserterAddr, bytes32 vmHash, uint256 inboxSize)
 func (_IRollup *IRollupFilterer) FilterAssertionCreated(opts *bind.FilterOpts) (*IRollupAssertionCreatedIterator, error) {
 
 	logs, sub, err := _IRollup.contract.FilterLogs(opts, "AssertionCreated")
@@ -871,9 +870,9 @@ func (_IRollup *IRollupFilterer) FilterAssertionCreated(opts *bind.FilterOpts) (
 	return &IRollupAssertionCreatedIterator{contract: _IRollup.contract, event: "AssertionCreated", logs: logs, sub: sub}, nil
 }
 
-// WatchAssertionCreated is a free log subscription operation binding the contract event 0x579a5709f69211a94f85f7185bf368a69873a731563ef07b1a0e625e67a34f10.
+// WatchAssertionCreated is a free log subscription operation binding the contract event 0x5c610f28399ecc14b66149012a0197a5e3257a8c397125afee95d1cf4b950734.
 //
-// Solidity: event AssertionCreated(uint256 assertionID, address asserterAddr, bytes32 vmHash, uint256 inboxSize, uint256 l2GasUsed)
+// Solidity: event AssertionCreated(uint256 assertionID, address asserterAddr, bytes32 vmHash, uint256 inboxSize)
 func (_IRollup *IRollupFilterer) WatchAssertionCreated(opts *bind.WatchOpts, sink chan<- *IRollupAssertionCreated) (event.Subscription, error) {
 
 	logs, sub, err := _IRollup.contract.WatchLogs(opts, "AssertionCreated")
@@ -908,9 +907,9 @@ func (_IRollup *IRollupFilterer) WatchAssertionCreated(opts *bind.WatchOpts, sin
 	}), nil
 }
 
-// ParseAssertionCreated is a log parse operation binding the contract event 0x579a5709f69211a94f85f7185bf368a69873a731563ef07b1a0e625e67a34f10.
+// ParseAssertionCreated is a log parse operation binding the contract event 0x5c610f28399ecc14b66149012a0197a5e3257a8c397125afee95d1cf4b950734.
 //
-// Solidity: event AssertionCreated(uint256 assertionID, address asserterAddr, bytes32 vmHash, uint256 inboxSize, uint256 l2GasUsed)
+// Solidity: event AssertionCreated(uint256 assertionID, address asserterAddr, bytes32 vmHash, uint256 inboxSize)
 func (_IRollup *IRollupFilterer) ParseAssertionCreated(log types.Log) (*IRollupAssertionCreated, error) {
 	event := new(IRollupAssertionCreated)
 	if err := _IRollup.contract.UnpackLog(event, "AssertionCreated", log); err != nil {
