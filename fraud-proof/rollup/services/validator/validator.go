@@ -1,9 +1,8 @@
 package validator
 
 import (
+	"bytes"
 	"fmt"
-	"math/big"
-
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -18,6 +17,8 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	rpc2 "github.com/mantlenetworkio/mantle/l2geth/rpc"
+	"math/big"
 )
 
 func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {
@@ -30,9 +31,9 @@ func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *serv
 }
 
 type challengeCtx struct {
-	opponentAssertion  *rollupTypes.Assertion
-	ourAssertion       *rollupTypes.Assertion
-	confirmedAssertion *rollupTypes.Assertion
+	opponentAssertion *rollupTypes.Assertion
+	ourAssertion      *rollupTypes.Assertion
+	//confirmedAssertion *rollupTypes.Assertion
 }
 
 // TODO: abstract the common field/init to a base service
@@ -154,17 +155,6 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 	}
 	defer assertionEventSub.Unsubscribe()
 
-	// Sequenced blocks collected from SequencerInbox
-	var pendingBlocks []*rollupTypes.SequenceBlock
-	// Current agreed assertion, initalize to genesis assertion
-	// TODO: sync from L1 when restart
-	confirmedAssertion := &rollupTypes.Assertion{
-		ID:        new(big.Int),
-		VmHash:    genesisRoot,
-		InboxSize: new(big.Int),
-		Deadline:  new(big.Int),
-	}
-
 	isInChallenge := false
 
 	for {
@@ -186,47 +176,24 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 				}
 				// New assertion created on Rollup
 				log.Info("Get New Assertion....")
-				assertion := &rollupTypes.Assertion{
+				checkAssertion := &rollupTypes.Assertion{
 					ID:        ev.AssertionID,
 					VmHash:    ev.VmHash,
 					InboxSize: ev.InboxSize,
-					GasUsed:   ev.L2GasUsed}
-				// Pop correct amount of pending blocks asserted
-				inboxSizeDiff := assertion.InboxSize.Uint64() - confirmedAssertion.InboxSize.Uint64()
-				var blocksToCommit []*rollupTypes.SequenceBlock
-				for _, block := range pendingBlocks {
-					if block.NumTxs > inboxSizeDiff {
-						log.Crit("UNHANDELED: Assertion created in the middle of block, validator state corrupted!")
-					}
-					inboxSizeDiff -= block.NumTxs
-					blocksToCommit = append(blocksToCommit, block)
-					if inboxSizeDiff == 0 {
-						break
-					}
 				}
-				if inboxSizeDiff != 0 {
-					log.Crit("UNHANDELED: SequencerInbox overflow, validator state corrupted!")
-				}
-				//assertion.EndBlock = assertion.StartBlock + uint64(len(blocksToCommit)) - 1
-				pendingBlocks = pendingBlocks[len(blocksToCommit):]
-				// Commit asserted blocks
-				log.Info("Commit Blocks....")
-				targetVmHash, targetGasUsed, err := v.commitBlocks(blocksToCommit)
+
+				block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
 				if err != nil {
-					// strange error, TODO: rewind
-					log.Crit("UNHANDELED: Can't execute sequence blocks, validator state corrupted", "err", err)
+					log.Error("")
 				}
-				// Check result vm hash and gas
-				targetGasUsed.Add(targetGasUsed, confirmedAssertion.GasUsed)
-				if targetVmHash != assertion.VmHash || targetGasUsed.Cmp(assertion.GasUsed) != 0 {
+				if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Hash().Bytes()) != 0 {
 					// Validation failed
 					log.Info("Challenge Assertion....")
 					ourAssertion := &rollupTypes.Assertion{
-						VmHash:    targetVmHash,
+						VmHash:    block.Hash(),
 						InboxSize: ev.InboxSize,
-						GasUsed:   targetGasUsed,
 					}
-					v.challengeCh <- &challengeCtx{assertion, ourAssertion, confirmedAssertion}
+					v.challengeCh <- &challengeCtx{checkAssertion, ourAssertion}
 					isInChallenge = true
 				} else {
 					// Validation succeeded, confirm assertion and advance stake
@@ -235,7 +202,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					if err != nil {
 						log.Crit("UNHANDELED: Can't advance stake, validator state corrupted", "err", err)
 					}
-					confirmedAssertion = assertion
+					//confirmedAssertion = assertion
 				}
 			case <-v.Ctx.Done():
 				return
