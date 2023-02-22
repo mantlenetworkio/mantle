@@ -41,7 +41,6 @@ abstract contract RollupBase is IRollup, Initializable {
     uint256 public confirmationPeriod; // number of L1 blocks
     uint256 public challengePeriod; // number of L1 blocks
     uint256 public minimumAssertionPeriod; // number of L1 blocks
-    uint256 public maxGasPerAssertion; // L2 gas
     uint256 public baseStakeAmount; // number of stake tokens
 
     address public owner;
@@ -94,7 +93,6 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         uint256 _confirmationPeriod,
         uint256 _challengePeriod,
         uint256 _minimumAssertionPeriod,
-        uint256 _maxGasPerAssertion,
         uint256 _baseStakeAmount,
         bytes32 _initialVMhash
     ) public initializer {
@@ -118,15 +116,13 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         confirmationPeriod = _confirmationPeriod;
         challengePeriod = _challengePeriod; // TODO: currently unused.
         minimumAssertionPeriod = _minimumAssertionPeriod;
-        maxGasPerAssertion = _maxGasPerAssertion;
         baseStakeAmount = _baseStakeAmount;
 
         assertions.setRollupAddress(address(this));
         assertions.createAssertion(
             0, // assertionID
-            RollupLib.stateHash(RollupLib.ExecutionState(0, _initialVMhash)),
+            _initialVMhash,
             0, // inboxSize (genesis)
-            0, // total gasUsed
             0, // parentID
             block.number // deadline (unchallengeable)
         );
@@ -209,24 +205,12 @@ contract Rollup is Lib_AddressResolver, RollupBase {
     /// @inheritdoc IRollup
     function createAssertion(
         bytes32 vmHash,
-        uint256 inboxSize,
-        uint256 l2GasUsed
+        uint256 inboxSize
     ) public override stakedOnly {
-        // TODO: determine if inboxSize needs to be included.
-        RollupLib.ExecutionState memory endState = RollupLib.ExecutionState(l2GasUsed, vmHash);
-
         uint256 parentID = stakers[msg.sender].assertionID;
         // Require that enough time has passed since the last assertion.
         if (block.number - assertions.getProposalTime(parentID) < minimumAssertionPeriod) {
             revert MinimumAssertionPeriodNotPassed();
-        }
-        // TODO: require(..., TOO_SMALL);
-        uint256 prevL2GasUsed = assertions.getGasUsed(parentID);
-        uint256 assertionGasUsed = l2GasUsed - prevL2GasUsed;
-        // Require that the L2 gas used by the assertion is less than the limit.
-        // TODO: arbitrum uses: timeSinceLastNode.mul(avmGasSpeedLimitPerBlock).mul(4) ?
-        if (assertionGasUsed > maxGasPerAssertion) {
-            revert MaxGasLimitExceeded();
         }
         // Require that the assertion at least includes one transaction
         if (inboxSize <= assertions.getInboxSize(parentID)) {
@@ -235,9 +219,9 @@ contract Rollup is Lib_AddressResolver, RollupBase {
 
         // Initialize assertion.
         lastCreatedAssertionID++;
-        emit AssertionCreated(lastCreatedAssertionID, msg.sender, vmHash, inboxSize, l2GasUsed);
+        emit AssertionCreated(lastCreatedAssertionID, msg.sender, vmHash, inboxSize);
         assertions.createAssertion(
-            lastCreatedAssertionID, RollupLib.stateHash(endState), inboxSize, l2GasUsed, parentID, newAssertionDeadline()
+            lastCreatedAssertionID, vmHash, inboxSize, parentID, newAssertionDeadline()
         );
 
         // Update stake.
@@ -248,7 +232,6 @@ contract Rollup is Lib_AddressResolver, RollupBase {
     function createAssertionWithStateBatch(
         bytes32 vmHash,
         uint256 inboxSize,
-        uint256 l2GasUsed,
         bytes32[] calldata _batch,
         uint256 _shouldStartAtElement,
         bytes calldata _signature
@@ -269,7 +252,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         );
 
         // create assertion
-        createAssertion(vmHash, inboxSize, l2GasUsed);
+        createAssertion(vmHash, inboxSize);
 
         console.log(
             "end createAssertion"
@@ -497,14 +480,15 @@ contract Rollup is Lib_AddressResolver, RollupBase {
     }
 
     function newAssertionDeadline() private returns (uint256) {
-        // TODO: account for prev assertion, gas
-        // return block.number + confirmationPeriod;
+         return block.number + confirmationPeriod;
         address scc = resolve("StateCommitmentChain");
         (bool success, bytes memory data) = scc.call(
             abi.encodeWithSignature("FRAUD_PROOF_WINDOW()")
         );
         uint256 confirmationWindow = uint256(bytes32(data));
         return block.timestamp + confirmationWindow;
+        // todo mock scc for test
+        // return block.timestamp + confirmationPeriod;
     }
 
     // *****************

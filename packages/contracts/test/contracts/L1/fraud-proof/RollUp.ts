@@ -61,33 +61,28 @@ describe('RollUp', () => {
 
     await rollUp.createAssertion(
       '0x0000000000000000000000000000000000000000000000000000000000000001',
-      1,
-      100
+      1
     )
     expect(await rollUp.lastCreatedAssertionID()).to.eq(1)
 
     await rollUp.createAssertion(
       '0x0000000000000000000000000000000000000000000000000000000000000001',
-      2,
-      200
+      2
     )
     expect(await rollUp.lastCreatedAssertionID()).to.eq(2)
 
     await rollUp.createAssertion(
       '0x0000000000000000000000000000000000000000000000000000000000000001',
-      3,
-      300
+      3
     )
 
     expect(await rollUp.lastCreatedAssertionID()).to.eq(3)
 
     await rollUp.createAssertion(
       '0x0000000000000000000000000000000000000000000000000000000000000001',
-      4,
-      400
+      4
     )
     expect(await rollUp.lastCreatedAssertionID()).to.eq(4)
-
     await rollUp.connect(await accounts[3]).stake({ value: 1000 })
     await rollUp.connect(await accounts[3]).advanceStake(1)
     await rollUp.connect(await accounts[3]).advanceStake(2)
@@ -95,8 +90,7 @@ describe('RollUp', () => {
       .connect(await accounts[3])
       .createAssertion(
         '0x0000000000000000000000000000000000000000000000000000000000000002',
-        3,
-        300
+        3
       )
     expect(await rollUp.lastCreatedAssertionID()).to.eq(5)
   })
@@ -187,7 +181,6 @@ describe('RollUp', () => {
       0, // confirmation period
       0, // challenge period
       0, // minimum assertion period
-      1000, // maxGasPerAssertion
       100, // baseStakeAmount
       '0x0000000000000000000000000000000000000000000000000000000000000000', // initialVMhash
     ]
@@ -215,8 +208,7 @@ describe('RollUp', () => {
     expect(await rollUp.confirmationPeriod()).to.eq(rollupArgs[5])
     expect(await rollUp.challengePeriod()).to.eq(rollupArgs[6])
     expect(await rollUp.minimumAssertionPeriod()).to.eq(rollupArgs[7])
-    expect(await rollUp.maxGasPerAssertion()).to.eq(rollupArgs[8])
-    expect(await rollUp.baseStakeAmount()).to.eq(rollupArgs[9])
+    expect(await rollUp.baseStakeAmount()).to.eq(rollupArgs[8])
   }
 
   const deployVerifier = async () => {

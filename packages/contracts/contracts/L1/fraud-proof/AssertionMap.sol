@@ -30,7 +30,6 @@ contract AssertionMap is Initializable {
     struct Assertion {
         bytes32 stateHash; // Hash of execution state associated with assertion (see `RollupLib.stateHash`)
         uint256 inboxSize; // Inbox size this assertion advanced to
-        uint256 gasUsed; // Total gas used for current assertion
         uint256 parent; // Parent assertion ID
         uint256 deadline; // Confirmation deadline (L1 block timestamp)
         uint256 proposalTime; // L1 block number at which assertion was proposed
@@ -75,10 +74,6 @@ contract AssertionMap is Initializable {
         return assertions[assertionID].inboxSize;
     }
 
-    function getGasUsed(uint256 assertionID) external view returns (uint256) {
-        return assertions[assertionID].gasUsed;
-    }
-
     function getParentID(uint256 assertionID) external view returns (uint256) {
         return assertions[assertionID].parent;
     }
@@ -103,7 +98,6 @@ contract AssertionMap is Initializable {
         uint256 assertionID,
         bytes32 stateHash,
         uint256 inboxSize,
-        uint256 gasUsed,
         uint256 parentID,
         uint256 deadline
     ) external rollupOnly {
@@ -126,7 +120,6 @@ contract AssertionMap is Initializable {
 
         assertion.stateHash = stateHash;
         assertion.inboxSize = inboxSize;
-        assertion.gasUsed = gasUsed;
         assertion.parent = parentID;
         assertion.deadline = deadline;
         assertion.proposalTime = block.number;
