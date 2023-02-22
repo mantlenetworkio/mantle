@@ -2,11 +2,9 @@ package validator
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
@@ -15,8 +13,6 @@ import (
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/core"
-	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	rpc2 "github.com/mantlenetworkio/mantle/l2geth/rpc"
 	"math/big"
 )
@@ -60,87 +56,87 @@ func New(eth services.Backend, proofBackend proof.Backend, cfg *services.Config,
 	return v, nil
 }
 
-// commitBlocks executes and commits sequenced blocks to local blockchain
-// It returns the afterwards state hash and total gas used for these blocks
-// TODO: this function shares a lot of codes with Batcher
-// TODO: use StateProcessor::Process() instead
-func (v *Validator) commitBlocks(blocks []*rollupTypes.SequenceBlock) (common.Hash, *big.Int, error) {
-	var targetVmHash common.Hash
-	targetGasUsed := new(big.Int)
-	chainConfig := v.Chain.Config()
-	parent := v.Chain.CurrentBlock()
-	if parent == nil {
-		return common.Hash{}, nil, fmt.Errorf("missing parent")
-	}
-	num := parent.Number()
-	if num.Uint64() != blocks[0].BlockNumber-1 {
-		return common.Hash{}, nil, fmt.Errorf("validator unsynced")
-	}
-	state, err := v.Chain.StateAt(parent.Root())
-	// TODO: in newest version of geth, below codes are removed
-	if err != nil {
-		// Note since the sealing block can be created upon the arbitrary parent
-		// block, but the state of parent block may already be pruned, so the necessary
-		// state recovery is needed here in the future.
-		//
-		// The maximum acceptable reorg depth can be limited by the finalised block
-		// somehow. TODO(rjl493456442) fix the hard-coded number here later.
-		state, err = v.Eth.StateAtBlock(parent, 1024, nil, false, false)
-		log.Warn("Recovered mining state", "root", parent.Root(), "err", err)
-	}
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
-
-	for _, sblock := range blocks {
-		header := &types.Header{
-			ParentHash: parent.Hash(),
-			Number:     new(big.Int).SetUint64(sblock.BlockNumber),
-			GasLimit:   core.CalcGasLimit(parent, parent.GasLimit(), ethconfig.Defaults.Miner.GasCeil), // TODO: this may cause problem
-			Time:       sblock.Timestamp,
-			//Coinbase:   v.Config.SequencerAddr, //TODO-FIXME
-			Difficulty: common.Big1, // Fake difficulty. Avoid use 0 here because it means the merge happened
-		}
-		gasPool := new(core.GasPool).AddGas(header.GasLimit)
-		var receipts []*types.Receipt
-		for idx, tx := range sblock.Txs {
-			state.Prepare(tx.Hash(), tx.Hash(), idx) // TODO-FIXME test out if tx hash ==== block hash
-			receipt, err := core.ApplyTransaction(chainConfig, v.Chain, &v.Config.SequencerAddr, gasPool, state, header, tx, &header.GasUsed, *v.Chain.GetVMConfig())
-			if err != nil {
-				return common.Hash{}, nil, err
-			}
-			receipts = append(receipts, receipt)
-		}
-		// Finalize header
-		header.Root = state.IntermediateRoot(v.Chain.Config().IsEIP158(header.Number))
-		header.UncleHash = types.CalcUncleHash(nil)
-		// Assemble block
-		block := types.NewBlock(header, sblock.Txs, nil, receipts)
-		hash := block.Hash()
-		// Finalize receipts and logs
-		var logs []*types.Log
-		for i, receipt := range receipts {
-			// Add block location fields
-			receipt.BlockHash = hash
-			receipt.BlockNumber = block.Number()
-			receipt.TransactionIndex = uint(i)
-
-			// Update the block hash in all logs since it is now available and not when the
-			// receipt/log of individual transactions were created.
-			for _, log := range receipt.Logs {
-				log.BlockHash = hash
-			}
-			logs = append(logs, receipt.Logs...)
-		}
-		_, err := v.Chain.WriteBlockAndSetHead(block, receipts, logs, state, false)
-		if err != nil {
-			return common.Hash{}, nil, err
-		}
-		targetVmHash = header.Root
-		targetGasUsed.Add(targetGasUsed, new(big.Int).SetUint64(header.GasUsed))
-	}
-	return targetVmHash, targetGasUsed, nil
-}
+//// commitBlocks executes and commits sequenced blocks to local blockchain
+//// It returns the afterwards state hash and total gas used for these blocks
+//// TODO: this function shares a lot of codes with Batcher
+//// TODO: use StateProcessor::Process() instead
+//func (v *Validator) commitBlocks(blocks []*rollupTypes.SequenceBlock) (common.Hash, *big.Int, error) {
+//	var targetVmHash common.Hash
+//	targetGasUsed := new(big.Int)
+//	chainConfig := v.Chain.Config()
+//	parent := v.Chain.CurrentBlock()
+//	if parent == nil {
+//		return common.Hash{}, nil, fmt.Errorf("missing parent")
+//	}
+//	num := parent.Number()
+//	if num.Uint64() != blocks[0].BlockNumber-1 {
+//		return common.Hash{}, nil, fmt.Errorf("validator unsynced")
+//	}
+//	state, err := v.Chain.StateAt(parent.Root())
+//	// TODO: in newest version of geth, below codes are removed
+//	if err != nil {
+//		// Note since the sealing block can be created upon the arbitrary parent
+//		// block, but the state of parent block may already be pruned, so the necessary
+//		// state recovery is needed here in the future.
+//		//
+//		// The maximum acceptable reorg depth can be limited by the finalised block
+//		// somehow. TODO(rjl493456442) fix the hard-coded number here later.
+//		state, err = v.Eth.StateAtBlock(parent, 1024, nil, false, false)
+//		log.Warn("Recovered mining state", "root", parent.Root(), "err", err)
+//	}
+//	if err != nil {
+//		return common.Hash{}, nil, err
+//	}
+//
+//	for _, sblock := range blocks {
+//		header := &types.Header{
+//			ParentHash: parent.Hash(),
+//			Number:     new(big.Int).SetUint64(sblock.BlockNumber),
+//			GasLimit:   core.CalcGasLimit(parent, parent.GasLimit(), ethconfig.Defaults.Miner.GasCeil), // TODO: this may cause problem
+//			Time:       sblock.Timestamp,
+//			//Coinbase:   v.Config.SequencerAddr, //TODO-FIXME
+//			Difficulty: common.Big1, // Fake difficulty. Avoid use 0 here because it means the merge happened
+//		}
+//		gasPool := new(core.GasPool).AddGas(header.GasLimit)
+//		var receipts []*types.Receipt
+//		for idx, tx := range sblock.Txs {
+//			state.Prepare(tx.Hash(), tx.Hash(), idx) // TODO-FIXME test out if tx hash ==== block hash
+//			receipt, err := core.ApplyTransaction(chainConfig, v.Chain, &v.Config.SequencerAddr, gasPool, state, header, tx, &header.GasUsed, *v.Chain.GetVMConfig())
+//			if err != nil {
+//				return common.Hash{}, nil, err
+//			}
+//			receipts = append(receipts, receipt)
+//		}
+//		// Finalize header
+//		header.Root = state.IntermediateRoot(v.Chain.Config().IsEIP158(header.Number))
+//		header.UncleHash = types.CalcUncleHash(nil)
+//		// Assemble block
+//		block := types.NewBlock(header, sblock.Txs, nil, receipts)
+//		hash := block.Hash()
+//		// Finalize receipts and logs
+//		var logs []*types.Log
+//		for i, receipt := range receipts {
+//			// Add block location fields
+//			receipt.BlockHash = hash
+//			receipt.BlockNumber = block.Number()
+//			receipt.TransactionIndex = uint(i)
+//
+//			// Update the block hash in all logs since it is now available and not when the
+//			// receipt/log of individual transactions were created.
+//			for _, log := range receipt.Logs {
+//				log.BlockHash = hash
+//			}
+//			logs = append(logs, receipt.Logs...)
+//		}
+//		_, err := v.Chain.WriteBlockAndSetHead(block, receipts, logs, state, false)
+//		if err != nil {
+//			return common.Hash{}, nil, err
+//		}
+//		targetVmHash = header.Root
+//		targetGasUsed.Add(targetGasUsed, new(big.Int).SetUint64(header.GasUsed))
+//	}
+//	return targetVmHash, targetGasUsed, nil
+//}
 
 // This goroutine validates the assertion posted to L1 Rollup, advances
 // stake if validated, or challenges if not

@@ -68,7 +68,7 @@ func (s *Sequencer) confirmationLoop() {
 	createdCh := make(chan *bindings.IRollupAssertionCreated, 4096)
 	createdSub, err := s.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Context: s.Ctx}, createdCh)
 	if err != nil {
-		log.Crit("Failed to watch rollup event", "err", err)
+		log.Error("Failed to watch rollup event", "err", err)
 	}
 	defer createdSub.Unsubscribe()
 
@@ -76,7 +76,7 @@ func (s *Sequencer) confirmationLoop() {
 	confirmedCh := make(chan *bindings.IRollupAssertionConfirmed, 4096)
 	confirmedSub, err := s.Rollup.Contract.WatchAssertionConfirmed(&bind.WatchOpts{Context: s.Ctx}, confirmedCh)
 	if err != nil {
-		log.Crit("Failed to watch rollup event", "err", err)
+		log.Error("Failed to watch rollup event", "err", err)
 	}
 	defer confirmedSub.Unsubscribe()
 
@@ -84,14 +84,14 @@ func (s *Sequencer) confirmationLoop() {
 	headCh := make(chan *types.Header, 4096)
 	headSub, err := s.L1.SubscribeNewHead(s.Ctx, headCh)
 	if err != nil {
-		log.Crit("Failed to watch l1 chain head", "err", err)
+		log.Error("Failed to watch l1 chain head", "err", err)
 	}
 	defer headSub.Unsubscribe()
 
 	challengedCh := make(chan *bindings.IRollupAssertionChallenged, 4096)
 	challengedSub, err := s.Rollup.Contract.WatchAssertionChallenged(&bind.WatchOpts{Context: s.Ctx}, challengedCh)
 	if err != nil {
-		log.Crit("Failed to watch rollup event", "err", err)
+		log.Error("Failed to watch rollup event", "err", err)
 	}
 	defer challengedSub.Unsubscribe()
 	isInChallenge := false
@@ -208,14 +208,14 @@ func (s *Sequencer) challengeLoop() {
 
 	abi, err := bindings.IChallengeMetaData.GetAbi()
 	if err != nil {
-		log.Crit("Failed to get IChallenge ABI", "err", err)
+		log.Error("Failed to get IChallenge ABI", "err", err)
 	}
 
 	// Watch L1 blockchain for challenge timeout
 	headCh := make(chan *types.Header, 4096)
 	headSub, err := s.L1.SubscribeNewHead(s.Ctx, headCh)
 	if err != nil {
-		log.Crit("Failed to watch l1 chain head", "err", err)
+		log.Error("Failed to watch l1 chain head", "err", err)
 	}
 	defer headSub.Unsubscribe()
 
