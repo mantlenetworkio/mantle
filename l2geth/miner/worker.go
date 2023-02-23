@@ -553,22 +553,22 @@ func (w *worker) batchStartLoop() {
 				w.currentBps = ev.Msg
 				w.mutex.Unlock()
 				if ev.Msg.Sequencer == w.coinbase {
-					go func(currentBatchIndex uint64) {
+					go func(event core.BatchPeriodStartEvent) {
 						// for active sequencer
 						log.Info("Active sequencer receives batchPeriodStartEvent")
-						if ev.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
-							log.Error("maxHeight is too low, just ignore the batch", "current_height", w.chain.CurrentBlock().NumberU64(), "max_height", ev.Msg.MaxHeight)
+						if event.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
+							log.Error("maxHeight is too low, just ignore the batch", "current_height", w.chain.CurrentBlock().NumberU64(), "max_height", event.Msg.MaxHeight)
 							return
 						}
-						if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
-							log.Error("expire timestamp is passed", "current_time", time.Now().Unix(), "expire_time", ev.Msg.ExpireTime)
+						if event.Msg.ExpireTime < uint64(time.Now().Unix()) {
+							log.Error("expire timestamp is passed", "current_time", time.Now().Unix(), "expire_time", event.Msg.ExpireTime)
 							return
 						}
 
 						// Keep sending messages until the limit is reached
 						expectHeight := ev.Msg.StartHeight - 1
-						for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < ev.Msg.MaxHeight && uint64(time.Now().Unix()) < ev.Msg.ExpireTime && inTxLen < (ev.Msg.MaxHeight-ev.Msg.StartHeight+1); {
-							if currentBatchIndex < w.currentBps.BatchIndex {
+						for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < event.Msg.MaxHeight && uint64(time.Now().Unix()) < event.Msg.ExpireTime && inTxLen < (event.Msg.MaxHeight-event.Msg.StartHeight+1); {
+							if event.Msg.BatchIndex < w.currentBps.BatchIndex {
 								log.Info("current batch has been completed")
 								return
 							}
@@ -590,11 +590,11 @@ func (w *worker) batchStartLoop() {
 							}
 							log.Info("pending size", "size", len(pending))
 							var bpa types.BatchPeriodAnswerMsg
-							bpa.StartHeight = ev.Msg.StartHeight + inTxLen
+							bpa.StartHeight = event.Msg.StartHeight + inTxLen
 
 							// pick out enough transactions from txpool and insert them into batchPeriodAnswerMsg
 							// The sum of tx quantity from all batchPeriodAnswerMsgs with the same batchIndex should be no greater than ev.Msg.MaxHeight-ev.Msg.StartHeight+1
-							batchLeftSpace := ev.Msg.MaxHeight - bpa.StartHeight + 1
+							batchLeftSpace := event.Msg.MaxHeight - bpa.StartHeight + 1
 
 							// Split the pending transactions into locals and remotes
 							localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
@@ -661,7 +661,7 @@ func (w *worker) batchStartLoop() {
 								bpa.Txs = txsQueue
 								inTxLen += uint64(len(txsQueue))
 							}
-							bpa.BatchIndex = ev.Msg.BatchIndex
+							bpa.BatchIndex = event.Msg.BatchIndex
 							bpa.Sequencer = w.coinbase
 							signature, err := w.engine.SignData(bpa.Sequencer, bpa.GetSignData())
 							if err != nil {
@@ -673,14 +673,14 @@ func (w *worker) batchStartLoop() {
 								Msg:   &bpa,
 								ErrCh: nil,
 							})
-							expectHeight = ev.Msg.StartHeight - 1 + inTxLen
+							expectHeight = event.Msg.StartHeight - 1 + inTxLen
 							if err != nil {
 								log.Error("Post BatchPeriodAnswerMsg error", "err_msg", err.Error())
 								continue
 							}
 							log.Info("Generate BatchPeriodAnswerEvent", "coinbase", w.coinbase.String(), "tx_count", len(bpa.Txs), "start_height", bpa.StartHeight)
 						}
-					}(w.currentBps.BatchIndex)
+					}(ev)
 				} else {
 					log.Debug("Inactive sequencer receives batchPeriodStartEvent",
 						"batch_index", ev.Msg.BatchIndex,
