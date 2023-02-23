@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"math"
 	"math/big"
 	"sync"
 	"sync/atomic"
@@ -78,6 +79,10 @@ const (
 
 	// staleThreshold is the maximum depth of the acceptable stale block.
 	staleThreshold = 7
+
+	defaultAnswerInterval = 5
+
+	maxAnswerInterval = math.MaxUint64
 )
 
 var (
@@ -186,8 +191,10 @@ type worker struct {
 	remoteUncles map[common.Hash]*types.Block // A set of side blocks as the possible uncle blocks.
 	unconfirmed  *unconfirmedBlocks           // A set of locally mined blocks pending canonicalness confirmations.
 
-	mutex      sync.Mutex // The lock used to protect the currentBps
-	currentBps *types.BatchPeriodStartMsg
+	mutex          sync.Mutex // The lock used to protect the currentBps
+	currentBps     *types.BatchPeriodStartMsg
+	answerMutex    sync.Mutex // The lock used to protect the answerInterval
+	answerInterval uint64
 
 	mu       sync.RWMutex // The lock used to protect the coinbase and extra fields
 	coinbase common.Address
@@ -465,6 +472,39 @@ func (w *worker) l1Tol2StartLoop() {
 	for {
 		select {
 		case obj := <-w.l1ToL2Sub.Chan():
+			w.answerMutex.Lock()
+			w.answerInterval = maxAnswerInterval
+			w.answerMutex.Unlock()
+			if !w.isRunning() {
+				log.Debug("miner receives batchPeriodStartEvent but miner not start")
+			}
+			var ev core.L1ToL2TxStartEvent
+			var ok bool
+			if ev, ok = obj.Data.(core.L1ToL2TxStartEvent); !ok {
+				continue
+			}
+			if ev.SchedulerCh != nil {
+				if err := w.eth.SyncService().SyncQueueToTip(); err != nil {
+					log.Info("SyncQueueToTip interrupt", "error", err)
+				}
+				w.eth.SyncService().ApplyUpdateGasPriceTxs()
+				close(ev.SchedulerCh)
+			} else {
+				log.Error("SchedulerCh is nil")
+			}
+		// System stopped
+		case <-w.exitCh:
+			return
+		}
+	}
+}
+
+func (w *worker) BatchDoneLoop() {
+	defer w.l1ToL2Sub.Unsubscribe()
+
+	for {
+		select {
+		case obj := <-w.l1ToL2Sub.Chan():
 			if !w.isRunning() {
 				log.Debug("miner receives batchPeriodStartEvent but miner not start")
 			}
@@ -519,6 +559,10 @@ func (w *worker) batchStartLoop() {
 				w.mutex.Lock()
 				w.currentBps = ev.Msg
 				w.mutex.Unlock()
+				w.answerMutex.Lock()
+				w.answerInterval = defaultAnswerInterval
+				w.answerMutex.Unlock()
+				//
 				log.Info("Scheduler start new batch",
 					"start_height", ev.Msg.StartHeight,
 					"batch_index", ev.Msg.BatchIndex,
@@ -676,11 +720,18 @@ func (w *worker) batchStartLoop() {
 
 func (w *worker) batchAnswerLoop() {
 	defer w.bpsSub.Unsubscribe()
-
 	log.Info("Start batchAnswerLoop")
 	for {
+		ticker := time.NewTicker(time.Duration(w.answerInterval) * time.Second)
 		select {
 		// BatchPeriodAnswerEvent
+		case <-ticker.C:
+			log.Info("Batch Answer timeout")
+			err := w.mux.Post(core.BatchEndEvent(w.currentBps.BatchIndex))
+			if err != nil {
+				log.Error("Post BatchEndEvent error", "err_msg", err.Error())
+				break
+			}
 		case obj := <-w.bpaSub.Chan():
 			if !w.isRunning() {
 				log.Debug("miner receives batchPeriodAnswerEvent but miner not start")
