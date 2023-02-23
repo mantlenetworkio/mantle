@@ -532,7 +532,6 @@ func (w *worker) batchStartLoop() {
 				w.answerMutex.Lock()
 				w.answerInterval = defaultAnswerInterval
 				w.answerMutex.Unlock()
-				//
 				log.Info("Scheduler start new batch",
 					"start_height", ev.Msg.StartHeight,
 					"batch_index", ev.Msg.BatchIndex,
