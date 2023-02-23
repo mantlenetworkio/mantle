@@ -549,129 +549,137 @@ func (w *worker) batchStartLoop() {
 						log.Error("sequencer rollback failed", "error", err)
 					}
 				}
+				w.mutex.Lock()
+				w.currentBps = ev.Msg
+				w.mutex.Unlock()
 				if ev.Msg.Sequencer == w.coinbase {
-					// for active sequencer
-					log.Info("Active sequencer receives batchPeriodStartEvent")
-					if ev.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
-						log.Error("maxHeight is too low, just ignore the batch", "current_height", w.chain.CurrentBlock().NumberU64(), "max_height", ev.Msg.MaxHeight)
-						continue
-					}
-					if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
-						log.Error("expire timestamp is passed", "current_time", time.Now().Unix(), "expire_time", ev.Msg.ExpireTime)
-						continue
-					}
-
-					// Keep sending messages until the limit is reached
-					expectHeight := ev.Msg.StartHeight - 1
-					for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < ev.Msg.MaxHeight && uint64(time.Now().Unix()) < ev.Msg.ExpireTime && inTxLen < (ev.Msg.MaxHeight-ev.Msg.StartHeight+1); {
-						if w.eth.BlockChain().CurrentBlock().NumberU64() < expectHeight {
-							log.Info("wanting for current height to reach expectHeight", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "expect_height", expectHeight)
-							time.Sleep(200 * time.Millisecond)
-							continue
-						}
-						pending, err := w.eth.TxPool().Pending()
-						if err != nil {
-							log.Error("Failed to fetch pending transactions", "err", err)
+					go func(currentBatchIndex uint64) {
+						// for active sequencer
+						log.Info("Active sequencer receives batchPeriodStartEvent")
+						if ev.Msg.MaxHeight <= w.chain.CurrentBlock().NumberU64() {
+							log.Error("maxHeight is too low, just ignore the batch", "current_height", w.chain.CurrentBlock().NumberU64(), "max_height", ev.Msg.MaxHeight)
 							return
 						}
-						// Short circuit if there is no available pending transactions
-						if len(pending) == 0 {
-							log.Info("empty txpool, wait for 200 millisecond")
-							time.Sleep(200 * time.Millisecond)
-							continue
+						if ev.Msg.ExpireTime < uint64(time.Now().Unix()) {
+							log.Error("expire timestamp is passed", "current_time", time.Now().Unix(), "expire_time", ev.Msg.ExpireTime)
+							return
 						}
-						log.Info("pending size", "size", len(pending))
-						var bpa types.BatchPeriodAnswerMsg
-						bpa.StartHeight = ev.Msg.StartHeight + inTxLen
 
-						// pick out enough transactions from txpool and insert them into batchPeriodAnswerMsg
-						// The sum of tx quantity from all batchPeriodAnswerMsgs with the same batchIndex should be no greater than ev.Msg.MaxHeight-ev.Msg.StartHeight+1
-						batchLeftSpace := ev.Msg.MaxHeight - bpa.StartHeight + 1
+						// Keep sending messages until the limit is reached
+						expectHeight := ev.Msg.StartHeight - 1
+						for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < ev.Msg.MaxHeight && uint64(time.Now().Unix()) < ev.Msg.ExpireTime && inTxLen < (ev.Msg.MaxHeight-ev.Msg.StartHeight+1); {
+							if currentBatchIndex < w.currentBps.BatchIndex {
+								return
+							}
+							if w.eth.BlockChain().CurrentBlock().NumberU64() < expectHeight {
+								log.Info("wanting for current height to reach expectHeight", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "expect_height", expectHeight)
+								time.Sleep(200 * time.Millisecond)
+								continue
+							}
+							pending, err := w.eth.TxPool().Pending()
+							if err != nil {
+								log.Error("Failed to fetch pending transactions", "err", err)
+								return
+							}
+							// Short circuit if there is no available pending transactions
+							if len(pending) == 0 {
+								log.Info("empty txpool, wait for 200 millisecond")
+								time.Sleep(200 * time.Millisecond)
+								continue
+							}
+							log.Info("pending size", "size", len(pending))
+							var bpa types.BatchPeriodAnswerMsg
+							bpa.StartHeight = ev.Msg.StartHeight + inTxLen
 
-						// Split the pending transactions into locals and remotes
-						localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
-						var rawTxsQueue types.Transactions
-						enough := false
-						for _, account := range w.eth.TxPool().Locals() {
-							if txs := remoteTxs[account]; len(txs) > 0 {
+							// pick out enough transactions from txpool and insert them into batchPeriodAnswerMsg
+							// The sum of tx quantity from all batchPeriodAnswerMsgs with the same batchIndex should be no greater than ev.Msg.MaxHeight-ev.Msg.StartHeight+1
+							batchLeftSpace := ev.Msg.MaxHeight - bpa.StartHeight + 1
+
+							// Split the pending transactions into locals and remotes
+							localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
+							var rawTxsQueue types.Transactions
+							enough := false
+							for _, account := range w.eth.TxPool().Locals() {
+								if txs := remoteTxs[account]; len(txs) > 0 {
+									if enough {
+										break
+									}
+									delete(remoteTxs, account)
+									localTxs[account] = txs
+									rawTxsQueue = append(rawTxsQueue, txs...)
+									if uint64(len(rawTxsQueue)) > 2*batchLeftSpace {
+										enough = true
+									}
+								}
+							}
+							for _, txs := range remoteTxs {
 								if enough {
 									break
 								}
-								delete(remoteTxs, account)
-								localTxs[account] = txs
 								rawTxsQueue = append(rawTxsQueue, txs...)
 								if uint64(len(rawTxsQueue)) > 2*batchLeftSpace {
 									enough = true
 								}
 							}
-						}
-						for _, txs := range remoteTxs {
-							if enough {
-								break
+							var txsQueue types.Transactions
+							pendingNonce := make(map[common.Address]uint64)
+							stateDB, err := w.chain.State()
+							if err != nil {
+								log.Error("get state failure", "err_msg", err.Error())
+								continue
 							}
-							rawTxsQueue = append(rawTxsQueue, txs...)
-							if uint64(len(rawTxsQueue)) > 2*batchLeftSpace {
-								enough = true
-							}
-						}
-						var txsQueue types.Transactions
-						pendingNonce := make(map[common.Address]uint64)
-						stateDB, err := w.chain.State()
-						if err != nil {
-							log.Error("get state failure", "err_msg", err.Error())
-							continue
-						}
-						for _, tx := range rawTxsQueue {
-							if err := w.eth.SyncService().ValidateSequencerTransaction(tx); err == nil {
-								acc, _ := types.Sender(w.current.signer, tx)
-								txPendingNonce, ok := pendingNonce[acc]
-								if ok {
-									if txPendingNonce != tx.Nonce() {
-										log.Error("Found nonce mismatch during picking out transactions",
-											"tx_hash", tx.Hash().String(), "expected_nonce", txPendingNonce, "actual_nonce", tx.Nonce())
-										continue
+							for _, tx := range rawTxsQueue {
+								if err := w.eth.SyncService().ValidateSequencerTransaction(tx); err == nil {
+									acc, _ := types.Sender(w.current.signer, tx)
+									txPendingNonce, ok := pendingNonce[acc]
+									if ok {
+										if txPendingNonce != tx.Nonce() {
+											log.Error("Found nonce mismatch during picking out transactions",
+												"tx_hash", tx.Hash().String(), "expected_nonce", txPendingNonce, "actual_nonce", tx.Nonce())
+											continue
+										}
+									} else {
+										stateNonce := stateDB.GetNonce(acc)
+										if stateNonce != tx.Nonce() {
+											log.Error("Found nonce mismatch during picking out transactions",
+												"tx_hash", tx.Hash().String(), "expected_nonce", stateNonce, "actual_nonce", tx.Nonce())
+											continue
+										}
 									}
+									pendingNonce[acc] = tx.Nonce() + 1
+									txsQueue = append(txsQueue, tx)
 								} else {
-									stateNonce := stateDB.GetNonce(acc)
-									if stateNonce != tx.Nonce() {
-										log.Error("Found nonce mismatch during picking out transactions",
-											"tx_hash", tx.Hash().String(), "expected_nonce", stateNonce, "actual_nonce", tx.Nonce())
-										continue
-									}
+									log.Error("batchStartLoop tx verifyFee error", "tx_hash", tx.Hash(), "err_msg", err.Error())
 								}
-								pendingNonce[acc] = tx.Nonce() + 1
-								txsQueue = append(txsQueue, tx)
-							} else {
-								log.Error("batchStartLoop tx verifyFee error", "tx_hash", tx.Hash(), "err_msg", err.Error())
 							}
+							log.Info("txsQueue size", "queue_size", len(txsQueue), "batch_left_space", batchLeftSpace)
+							if uint64(len(txsQueue)) >= batchLeftSpace {
+								bpa.Txs = txsQueue[:batchLeftSpace]
+								inTxLen += batchLeftSpace
+							} else {
+								bpa.Txs = txsQueue
+								inTxLen += uint64(len(txsQueue))
+							}
+							bpa.BatchIndex = ev.Msg.BatchIndex
+							bpa.Sequencer = w.coinbase
+							signature, err := w.engine.SignData(bpa.Sequencer, bpa.GetSignData())
+							if err != nil {
+								log.Error("Sign BatchPeriodAnswerMsg error", "err_msg", err.Error())
+								continue
+							}
+							bpa.Signature = signature
+							err = w.mux.Post(core.BatchPeriodAnswerEvent{
+								Msg:   &bpa,
+								ErrCh: nil,
+							})
+							expectHeight = ev.Msg.StartHeight - 1 + inTxLen
+							if err != nil {
+								log.Error("Post BatchPeriodAnswerMsg error", "err_msg", err.Error())
+								continue
+							}
+							log.Info("Generate BatchPeriodAnswerEvent", "coinbase", w.coinbase.String(), "tx_count", len(bpa.Txs), "start_height", bpa.StartHeight)
 						}
-						log.Info("txsQueue size", "queue_size", len(txsQueue), "batch_left_space", batchLeftSpace)
-						if uint64(len(txsQueue)) >= batchLeftSpace {
-							bpa.Txs = txsQueue[:batchLeftSpace]
-							inTxLen += batchLeftSpace
-						} else {
-							bpa.Txs = txsQueue
-							inTxLen += uint64(len(txsQueue))
-						}
-						bpa.BatchIndex = ev.Msg.BatchIndex
-						bpa.Sequencer = w.coinbase
-						signature, err := w.engine.SignData(bpa.Sequencer, bpa.GetSignData())
-						if err != nil {
-							log.Error("Sign BatchPeriodAnswerMsg error", "err_msg", err.Error())
-							continue
-						}
-						bpa.Signature = signature
-						err = w.mux.Post(core.BatchPeriodAnswerEvent{
-							Msg:   &bpa,
-							ErrCh: nil,
-						})
-						expectHeight = ev.Msg.StartHeight - 1 + inTxLen
-						if err != nil {
-							log.Error("Post BatchPeriodAnswerMsg error", "err_msg", err.Error())
-							continue
-						}
-						log.Info("Generate BatchPeriodAnswerEvent", "coinbase", w.coinbase.String(), "tx_count", len(bpa.Txs), "start_height", bpa.StartHeight)
-					}
+					}(w.currentBps.BatchIndex)
 				} else {
 					log.Debug("Inactive sequencer receives batchPeriodStartEvent",
 						"batch_index", ev.Msg.BatchIndex,
