@@ -352,10 +352,9 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         // removeOldZombies();
 
         // (4) all stakers are staked on the block.
-        if (assertions.getNumStakers(lastUnresolvedID) != countStakedZombies(lastUnresolvedID) + numStakers) {
-            revert("NotAllStaked");
+//        if (assertions.getNumStakers(lastUnresolvedID) != countStakedZombies(lastUnresolvedID) + numStakers) {
 //            revert NotAllStaked();
-        }
+//        }
 
         // Confirm assertion.
         // assertions.deleteAssertion(lastConfirmedAssertionID);
