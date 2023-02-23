@@ -692,12 +692,17 @@ func (w *worker) batchAnswerLoop() {
 	defer w.bpsSub.Unsubscribe()
 	log.Info("Start batchAnswerLoop")
 	for {
+		currentBatchIndex := w.currentBps.BatchIndex
 		ticker := time.NewTicker(time.Duration(w.answerInterval) * time.Second)
 		select {
 		// BatchPeriodAnswerEvent
 		case <-ticker.C:
 			log.Info("Batch Answer timeout")
-			err := w.mux.Post(core.BatchEndEvent(w.currentBps.BatchIndex))
+			// If the BatchIndex increases during the wait, this operation is ignored
+			if currentBatchIndex < w.currentBps.BatchIndex {
+				continue
+			}
+			err := w.mux.Post(core.BatchEndEvent(currentBatchIndex))
 			if err != nil {
 				log.Error("Post BatchEndEvent error", "err_msg", err.Error())
 				break
