@@ -210,7 +210,6 @@ func InterStateProofFromInterState(s *state.InterState) *InterStateProof {
 		BlockNumber:         s.BlockNumber,
 		TransactionIdx:      s.TransactionIdx,
 		GlobalStateRoot:     s.GlobalState.GetRootForProof(),
-		CumulativeGasUsed:   *s.CumulativeGasUsed,
 		BlockGasUsed:        *s.BlockGasUsed,
 		BlockHashRoot:       s.BlockHashTree.Root(),
 		TransactionTireRoot: s.TransactionTrie.Root(),

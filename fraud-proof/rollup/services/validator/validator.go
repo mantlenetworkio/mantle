@@ -103,6 +103,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					ourAssertion := &rollupTypes.Assertion{
 						VmHash:    block.Hash(),
 						InboxSize: ev.InboxSize,
+						Parent:    ev.AssertionID.Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
 					}
 					v.challengeCh <- &challengeCtx{checkAssertion, ourAssertion}
 					isInChallenge = true

@@ -361,22 +361,6 @@ func generateBlockCtx(backend Backend, ctx context.Context, startBlock *types.Bl
 	return &blockCtx, nil
 }
 
-//func calculateBlockHashTree(block *types.Block, backend Backend, chainCtx core.ChainContext) (*proofState.BlockHashTree, error) {
-//	tx := block.Transactions()[0]
-//	signer := types.MakeSigner(backend.ChainConfig(), block.Number())
-//	msg, err := tx.AsMessage(signer)
-//	if err != nil {
-//		return nil, err
-//	}
-//	blockCtx := core.NewEVMContext(msg, block.Header(), chainCtx, nil)
-//	blockHashTree, err := proofState.BlockHashTreeFromBlockContext(&blockCtx)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return blockHashTree, nil
-//}
-
 func generateStartBlockState(backend Backend, ctx context.Context, startBlock *types.Block, config *ProverConfig) (*proofState.BlockState, *state.StateDB, error) {
 	reexec := defaultProveReexec
 	if config != nil && config.Reexec != nil {

@@ -236,7 +236,6 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         uint256 _shouldStartAtElement,
         bytes calldata _signature
         ) external override stakedOnly {
-//    ) external override {
 
         console.log(
             "createAssertionWithStateBatch enter",
