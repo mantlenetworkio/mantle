@@ -91,13 +91,14 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					ID:        ev.AssertionID,
 					VmHash:    ev.VmHash,
 					InboxSize: ev.InboxSize,
+					Parent:    ev.AssertionID.Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
 				}
 
 				block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
 				if err != nil {
 					log.Error("Validator get block failed, err: ", err)
 				}
-				if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Hash().Bytes()) != 0 {
+				if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 {
 					// Validation failed
 					log.Info("Validator check assertion vmHash failed, start challenge assertion....")
 					ourAssertion := &rollupTypes.Assertion{
