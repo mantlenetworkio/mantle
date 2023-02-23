@@ -80,8 +80,10 @@ const (
 	// staleThreshold is the maximum depth of the acceptable stale block.
 	staleThreshold = 7
 
+	// defaultAnswerInterval is the default answer interval of batch
 	defaultAnswerInterval = 5
 
+	// maxAnswerInterval is the mac answer interval of batch
 	maxAnswerInterval = math.MaxUint64
 )
 
