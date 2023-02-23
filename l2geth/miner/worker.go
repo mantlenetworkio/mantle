@@ -499,36 +499,6 @@ func (w *worker) l1Tol2StartLoop() {
 	}
 }
 
-func (w *worker) BatchDoneLoop() {
-	defer w.l1ToL2Sub.Unsubscribe()
-
-	for {
-		select {
-		case obj := <-w.l1ToL2Sub.Chan():
-			if !w.isRunning() {
-				log.Debug("miner receives batchPeriodStartEvent but miner not start")
-			}
-			var ev core.L1ToL2TxStartEvent
-			var ok bool
-			if ev, ok = obj.Data.(core.L1ToL2TxStartEvent); !ok {
-				continue
-			}
-			if ev.SchedulerCh != nil {
-				if err := w.eth.SyncService().SyncQueueToTip(); err != nil {
-					log.Info("SyncQueueToTip interrupt", "error", err)
-				}
-				w.eth.SyncService().ApplyUpdateGasPriceTxs()
-				close(ev.SchedulerCh)
-			} else {
-				log.Error("SchedulerCh is nil")
-			}
-		// System stopped
-		case <-w.exitCh:
-			return
-		}
-	}
-}
-
 func (w *worker) batchStartLoop() {
 	defer w.bpsSub.Unsubscribe()
 
