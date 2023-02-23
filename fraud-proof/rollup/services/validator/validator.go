@@ -6,13 +6,13 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	rpc2 "github.com/mantlenetworkio/mantle/l2geth/rpc"
 	"math/big"
 )
@@ -96,7 +96,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 
 				block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
 				if err != nil {
-					log.Error("Validator get block failed, err: ", err)
+					log.Error("Validator get block failed", "err", err)
 				}
 				if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 {
 					// Validation failed
@@ -110,7 +110,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					isInChallenge = true
 				} else {
 					// Validation succeeded, confirm assertion and advance stake
-					log.Info("Validator advance stake into assertion, ID: ", ev.AssertionID)
+					log.Info("Validator advance stake into assertion", "ID", ev.AssertionID)
 					_, err = v.Rollup.AdvanceStake(ev.AssertionID)
 					if err != nil {
 						log.Crit("UNHANDELED: Can't advance stake, validator state corrupted", "err", err)
@@ -227,7 +227,7 @@ func (v *Validator) challengeLoop() {
 		} else {
 			select {
 			case ctx = <-v.challengeCh:
-				log.Info("Validator get challenge context, create challenge assertion)")
+				log.Info("Validator get challenge context, create challenge assertion")
 				_, err = v.Rollup.CreateAssertion(
 					ctx.ourAssertion.VmHash,
 					ctx.ourAssertion.InboxSize,

@@ -112,7 +112,8 @@ func (s *Sequencer) confirmationLoop() {
 			select {
 			case ev := <-createdCh:
 				// New assertion created on L1 Rollup
-				log.Info("Get New Assertion...", ev)
+				log.Info("Get New Assertion...", "AssertionID", ev.AssertionID,
+					"AsserterAddr", ev.AsserterAddr, "VmHash", ev.VmHash, "InboxSize", ev.InboxSize)
 				if common.Address(ev.AsserterAddr) == s.Config.StakeAddr {
 					log.Info("Sequencer saw assertion created, try to confirmAssertion.....")
 					pendingAssertion.ID = ev.AssertionID
@@ -151,12 +152,12 @@ func (s *Sequencer) confirmationLoop() {
 					}
 				}
 				// New block mined on L1
-				log.Info("Sequencer sync new layer1 block, height: ", header.Number)
+				log.Info("Sequencer sync new layer1 block", "height", header.Number)
 				if !pendingConfirmationSent && !pendingConfirmed {
 					if header.Time >= pendingAssertion.Deadline.Uint64() {
 						// Confirmation period has past, confirm it
 						log.Info("Sequencer call ConfirmFirstUnresolvedAssertion...")
-						log.Info("Current pendingAssertion id is: ", pendingAssertion.ID)
+						log.Info("Current pendingAssertion", "id is", pendingAssertion.ID)
 						_, err := s.Rollup.ConfirmFirstUnresolvedAssertion()
 						if err != nil {
 							log.Error("Failed to confirm DA", "err", err)
@@ -166,7 +167,7 @@ func (s *Sequencer) confirmationLoop() {
 					}
 				}
 			case ev := <-confirmedCh:
-				log.Info("New confirmed assertion id: ", ev.AssertionID)
+				log.Info("New confirmed assertion", "id", ev.AssertionID)
 				// New confirmed assertion
 				if ev.AssertionID.Cmp(pendingAssertion.ID) == 0 {
 					log.Info("Confirmed to latest unsolved assertion...")
@@ -175,7 +176,7 @@ func (s *Sequencer) confirmationLoop() {
 					pendingConfirmed = true
 				}
 			case ev := <-challengedCh:
-				log.Warn("New challenge rise!!!!!!", ev)
+				log.Warn("New challenge rise!!!!!!", "ev", ev)
 				// New challenge raised
 				//if ev.AssertionID.Cmp(pendingAssertion.ID) == 0 {
 				//	s.challengeCh <- &challengeCtx{
@@ -279,7 +280,7 @@ func (s *Sequencer) challengeLoop() {
 		} else {
 			select {
 			case ctx := <-s.challengeCh:
-				log.Warn("new challenge rise, handle it", ctx)
+				log.Warn("new challenge rise", "handle it", ctx)
 				//challenge, err := bindings.NewIChallenge(ethc.Address(ctx.challengeAddr), s.L1)
 				//if err != nil {
 				//	log.Crit("Failed to access ongoing challenge", "address", ctx.challengeAddr, "err", err)
