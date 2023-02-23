@@ -855,8 +855,8 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	if start > latest {
 		return fmt.Errorf("invalid block number:%v,currentBlock number:%v", start, latest)
 	}
-	var txs []types.Transaction
-	var oldBlocks []types.Block
+	var txs []*types.Transaction
+	var oldBlocks []*types.Block
 	for i := start; i <= latest; i++ {
 		block := s.bc.GetBlockByNumber(i)
 		tx := block.Transactions()[0]
@@ -876,8 +876,8 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 				tx = enqueueTx
 			}
 		}
-		txs = append(txs, *tx)
-		oldBlocks = append(oldBlocks, *block)
+		txs = append(txs, tx)
+		oldBlocks = append(oldBlocks, block)
 	}
 	log.Info("setHead start", "currentBlockNumber", s.bc.CurrentHeader().Number.Uint64())
 	if err := s.SetHead(start - 1); err != nil {
@@ -886,7 +886,7 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	log.Info("setHead end", "currentBlockNumber", s.bc.CurrentHeader().Number.Uint64())
 	var handle bool
 	for i, t := range txs {
-		if err := s.applyIndexedTransaction(&t, &types.BatchTxSetProof{}); err != nil {
+		if err := s.applyIndexedTransaction(t, &types.BatchTxSetProof{}); err != nil {
 			log.Crit("rollback applyIndexedTransaction tx failed", "error", err)
 		}
 		newBlock := s.bc.GetBlockByNumber(uint64(i) + start)
