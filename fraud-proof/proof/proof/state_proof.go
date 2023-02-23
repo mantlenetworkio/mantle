@@ -210,7 +210,6 @@ func InterStateProofFromInterState(s *state.InterState) *InterStateProof {
 		BlockNumber:         s.BlockNumber,
 		TransactionIdx:      s.TransactionIdx,
 		GlobalStateRoot:     s.GlobalState.GetRootForProof(),
-		CumulativeGasUsed:   *s.CumulativeGasUsed,
 		BlockGasUsed:        *s.BlockGasUsed,
 		BlockHashRoot:       s.BlockHashTree.Root(),
 		TransactionTireRoot: s.TransactionTrie.Root(),
@@ -236,18 +235,16 @@ func (s *InterStateProof) Encode() []byte {
 }
 
 type BlockStateProof struct {
-	BlockNumber       uint64
-	GlobalStateRoot   common.Hash
-	CumulativeGasUsed uint256.Int
-	BlockHashRoot     common.Hash
+	BlockNumber     uint64
+	GlobalStateRoot common.Hash
+	BlockHashRoot   common.Hash
 }
 
 func BlockStateProofFromBlockState(s *state.BlockState) *BlockStateProof {
 	return &BlockStateProof{
-		BlockNumber:       s.BlockNumber,
-		GlobalStateRoot:   s.GlobalState.GetRootForProof(),
-		CumulativeGasUsed: *s.CumulativeGasUsed,
-		BlockHashRoot:     s.BlockHashTree.Root(),
+		BlockNumber:     s.BlockNumber,
+		GlobalStateRoot: s.GlobalState.GetRootForProof(),
+		BlockHashRoot:   s.BlockHashTree.Root(),
 	}
 }
 
@@ -255,8 +252,6 @@ func (s *BlockStateProof) Encode() []byte {
 	encoded := make([]byte, 104)
 	binary.BigEndian.PutUint64(encoded, s.BlockNumber)
 	copy(encoded[8:], s.GlobalStateRoot.Bytes())
-	gasBytes := s.CumulativeGasUsed.Bytes32()
-	copy(encoded[40:], gasBytes[:])
 	copy(encoded[72:], s.BlockHashRoot.Bytes())
 	return encoded
 }

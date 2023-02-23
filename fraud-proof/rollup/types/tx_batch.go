@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -78,6 +79,9 @@ func (b *TxBatch) SerializeToArgs() ([]*big.Int, []*big.Int, []byte, error) {
 }
 
 func (b *TxBatch) ToAssertion(parent *Assertion) *Assertion {
+	if parent.InboxSize.Uint64()+uint64(len(b.Txs)) != b.LastBlockNumber() {
+		log.Crit("Online total InboxSize not match with local batch's LatestBlockNumber")
+	}
 	return &Assertion{
 		ID:        new(big.Int).Add(parent.ID, big.NewInt(1)),
 		VmHash:    b.LastBlockRoot(),
