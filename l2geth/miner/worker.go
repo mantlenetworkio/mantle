@@ -353,6 +353,9 @@ func (w *worker) setCurrentBps(currentBps *types.BatchPeriodStartMsg) {
 func (w *worker) getCurrentBps() *types.BatchPeriodStartMsg {
 	w.mutex.RLock()
 	defer w.mutex.RUnlock()
+	if w.currentBps == nil {
+		return &types.BatchPeriodStartMsg{}
+	}
 	return w.currentBps
 }
 
@@ -723,11 +726,6 @@ func (w *worker) batchAnswerLoop() {
 	log.Info("Start batchAnswerLoop")
 	for {
 		currentBps := w.getCurrentBps()
-		if currentBps == nil {
-			log.Debug("current BatchPeriodStartMsg is null")
-			time.Sleep(200 * time.Millisecond)
-			continue
-		}
 		//currentBatchIndex := w.getCurrentBps().BatchIndex
 		ticker := time.NewTicker(time.Duration(w.getAnswerInterval()) * time.Second)
 		select {
