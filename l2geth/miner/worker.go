@@ -81,9 +81,6 @@ const (
 
 	// defaultAnswerInterval is the default answer interval of batch
 	defaultAnswerInterval = 5
-
-	// maxAnswerInterval is the mac answer interval of batch
-	maxAnswerInterval = 60
 )
 
 var (
@@ -265,7 +262,7 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
 
 	// set answer interval
-	worker.setAnswerInterval(maxAnswerInterval)
+	worker.answerInterval = defaultAnswerInterval
 
 	// Sanitize recommit interval if the user-specified one is too short.
 	recommit := worker.config.Recommit
@@ -330,19 +327,19 @@ func (w *worker) pendingBlock() *types.Block {
 	return w.snapshotBlock
 }
 
-// setAnswerInterval set answer interval of batch
-func (w *worker) setAnswerInterval(answerInterval uint64) {
-	w.answerMutex.Lock()
-	w.answerInterval = answerInterval
-	w.answerMutex.Unlock()
-}
-
-// getAnswerInterval return answer interval of batch
-func (w *worker) getAnswerInterval() uint64 {
-	w.answerMutex.RLock()
-	defer w.answerMutex.RUnlock()
-	return w.answerInterval
-}
+//// setAnswerInterval set answer interval of batch
+//func (w *worker) setAnswerInterval(answerInterval uint64) {
+//	w.answerMutex.Lock()
+//	w.answerInterval = answerInterval
+//	w.answerMutex.Unlock()
+//}
+//
+//// getAnswerInterval return answer interval of batch
+//func (w *worker) getAnswerInterval() uint64 {
+//	w.answerMutex.RLock()
+//	defer w.answerMutex.RUnlock()
+//	return w.answerInterval
+//}
 
 // setCurrentBps set current BatchPeriodStartMsg
 func (w *worker) setCurrentBps(currentBps *types.BatchPeriodStartMsg) {
@@ -507,7 +504,6 @@ func (w *worker) l1Tol2StartLoop() {
 	for {
 		select {
 		case obj := <-w.l1ToL2Sub.Chan():
-			w.setAnswerInterval(maxAnswerInterval)
 			if !w.isRunning() {
 				log.Debug("miner receives batchPeriodStartEvent but miner not start")
 			}
@@ -560,7 +556,6 @@ func (w *worker) batchStartLoop() {
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler() {
 				w.setCurrentBps(ev.Msg)
-				w.setAnswerInterval(defaultAnswerInterval)
 				log.Info("Scheduler start new batch",
 					"start_height", ev.Msg.StartHeight,
 					"batch_index", ev.Msg.BatchIndex,
@@ -728,7 +723,7 @@ func (w *worker) batchAnswerLoop() {
 	log.Info("Start batchAnswerLoop")
 	for {
 		currentBps := w.getCurrentBps()
-		ticker := time.NewTicker(time.Duration(w.getAnswerInterval()) * time.Second)
+		ticker := time.NewTicker(time.Duration(w.answerInterval) * time.Second)
 		select {
 		// BatchPeriodAnswerEvent
 		case <-ticker.C:
