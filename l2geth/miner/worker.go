@@ -763,10 +763,10 @@ func (w *worker) batchAnswerLoop() {
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler() {
 				err := func() error {
-					if ev.Msg.BatchIndex != currentBps.BatchIndex {
-						return fmt.Errorf("batch index not equal, current_batch_index %d,  answer_batch_index %d", currentBps.BatchIndex, ev.Msg.BatchIndex)
+					if ev.Msg.BatchIndex != w.getCurrentBps().BatchIndex {
+						return fmt.Errorf("batch index not equal, current_batch_index %d,  answer_batch_index %d", w.getCurrentBps().BatchIndex, ev.Msg.BatchIndex)
 					}
-					if time.Now().Unix() >= int64(currentBps.ExpireTime) {
+					if time.Now().Unix() >= int64(w.getCurrentBps().ExpireTime) {
 						return fmt.Errorf("expired BatchPeriodAnswerEvent, sequencer %s, batch_index %d", ev.Msg.Sequencer.String(), ev.Msg.BatchIndex)
 					}
 					return nil
