@@ -193,9 +193,9 @@ type worker struct {
 	remoteUncles map[common.Hash]*types.Block // A set of side blocks as the possible uncle blocks.
 	unconfirmed  *unconfirmedBlocks           // A set of locally mined blocks pending canonicalness confirmations.
 
-	mutex          sync.Mutex // The lock used to protect the currentBps
+	mutex          sync.RWMutex // The lock used to protect the currentBps
 	currentBps     *types.BatchPeriodStartMsg
-	answerMutex    sync.Mutex // The lock used to protect the answerInterval
+	answerMutex    sync.RWMutex // The lock used to protect the answerInterval
 	answerInterval uint64
 
 	mu       sync.RWMutex // The lock used to protect the coinbase and extra fields
@@ -326,6 +326,34 @@ func (w *worker) pendingBlock() *types.Block {
 	w.snapshotMu.RLock()
 	defer w.snapshotMu.RUnlock()
 	return w.snapshotBlock
+}
+
+// setAnswerInterval set answer interval of batch
+func (w *worker) setAnswerInterval(answerInterval uint64) {
+	w.answerMutex.Lock()
+	w.answerInterval = answerInterval
+	w.answerMutex.Unlock()
+}
+
+// getAnswerInterval return answer interval of batch
+func (w *worker) getAnswerInterval() uint64 {
+	w.answerMutex.RLock()
+	defer w.answerMutex.RUnlock()
+	return w.answerInterval
+}
+
+// setCurrentBps set current BatchPeriodStartMsg
+func (w *worker) setCurrentBps(currentBps *types.BatchPeriodStartMsg) {
+	w.mutex.Lock()
+	w.currentBps = currentBps
+	w.mutex.Unlock()
+}
+
+// getCurrentBps return current BatchPeriodStartMsg
+func (w *worker) getCurrentBps() *types.BatchPeriodStartMsg {
+	w.mutex.RLock()
+	defer w.mutex.RUnlock()
+	return w.currentBps
 }
 
 // start sets the running status as 1 and triggers new work submitting.
@@ -474,9 +502,7 @@ func (w *worker) l1Tol2StartLoop() {
 	for {
 		select {
 		case obj := <-w.l1ToL2Sub.Chan():
-			w.answerMutex.Lock()
-			w.answerInterval = maxAnswerInterval
-			w.answerMutex.Unlock()
+			w.setAnswerInterval(maxAnswerInterval)
 			if !w.isRunning() {
 				log.Debug("miner receives batchPeriodStartEvent but miner not start")
 			}
@@ -528,12 +554,8 @@ func (w *worker) batchStartLoop() {
 			}
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler() {
-				w.mutex.Lock()
-				w.currentBps = ev.Msg
-				w.mutex.Unlock()
-				w.answerMutex.Lock()
-				w.answerInterval = defaultAnswerInterval
-				w.answerMutex.Unlock()
+				w.setCurrentBps(ev.Msg)
+				w.setAnswerInterval(defaultAnswerInterval)
 				log.Info("Scheduler start new batch",
 					"start_height", ev.Msg.StartHeight,
 					"batch_index", ev.Msg.BatchIndex,
@@ -549,9 +571,7 @@ func (w *worker) batchStartLoop() {
 						log.Error("sequencer rollback failed", "error", err)
 					}
 				}
-				w.mutex.Lock()
-				w.currentBps = ev.Msg
-				w.mutex.Unlock()
+				w.setCurrentBps(ev.Msg)
 				if ev.Msg.Sequencer == w.coinbase {
 					go func(event core.BatchPeriodStartEvent) {
 						// for active sequencer
@@ -568,7 +588,7 @@ func (w *worker) batchStartLoop() {
 						// Keep sending messages until the limit is reached
 						expectHeight := ev.Msg.StartHeight - 1
 						for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < event.Msg.MaxHeight && uint64(time.Now().Unix()) < event.Msg.ExpireTime && inTxLen < (event.Msg.MaxHeight-event.Msg.StartHeight+1); {
-							if event.Msg.BatchIndex < w.currentBps.BatchIndex {
+							if event.Msg.BatchIndex < w.getCurrentBps().BatchIndex {
 								log.Info("current batch has been completed")
 								return
 							}
@@ -702,14 +722,14 @@ func (w *worker) batchAnswerLoop() {
 	defer w.bpsSub.Unsubscribe()
 	log.Info("Start batchAnswerLoop")
 	for {
-		currentBatchIndex := w.currentBps.BatchIndex
-		ticker := time.NewTicker(time.Duration(w.answerInterval) * time.Second)
+		currentBatchIndex := w.getCurrentBps().BatchIndex
+		ticker := time.NewTicker(time.Duration(w.getAnswerInterval()) * time.Second)
 		select {
 		// BatchPeriodAnswerEvent
 		case <-ticker.C:
 			log.Info("Batch Answer timeout")
 			// If the BatchIndex increases during the wait, this operation is ignored
-			if currentBatchIndex < w.currentBps.BatchIndex {
+			if currentBatchIndex < w.getCurrentBps().BatchIndex {
 				continue
 			}
 			err := w.mux.Post(core.BatchEndEvent(currentBatchIndex))
@@ -738,16 +758,14 @@ func (w *worker) batchAnswerLoop() {
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler() {
 				err := func() error {
-					w.mutex.Lock()
-					defer w.mutex.Unlock()
-
-					if w.currentBps == nil {
+					currentBps := w.getCurrentBps()
+					if currentBps == nil {
 						return fmt.Errorf("current BatchPeriodStartMsg is null")
 					}
-					if ev.Msg.BatchIndex != w.currentBps.BatchIndex {
-						return fmt.Errorf("batch index not equal, current_batch_index %d,  answer_batch_index %d", w.currentBps.BatchIndex, ev.Msg.BatchIndex)
+					if ev.Msg.BatchIndex != currentBps.BatchIndex {
+						return fmt.Errorf("batch index not equal, current_batch_index %d,  answer_batch_index %d", currentBps.BatchIndex, ev.Msg.BatchIndex)
 					}
-					if time.Now().Unix() >= int64(w.currentBps.ExpireTime) {
+					if time.Now().Unix() >= int64(currentBps.ExpireTime) {
 						return fmt.Errorf("expired BatchPeriodAnswerEvent, sequencer %s, batch_index %d", ev.Msg.Sequencer.String(), ev.Msg.BatchIndex)
 					}
 					return nil
@@ -762,10 +780,10 @@ func (w *worker) batchAnswerLoop() {
 					log.Error("Start index not equal with current height", "current_height", w.eth.BlockChain().CurrentBlock().NumberU64(), "start_height", ev.Msg.StartHeight)
 					continue
 				}
-				log.Info("Scheduler receives BatchPeriodAnswerEvent", "sequencer", ev.Msg.Sequencer.String(), "start_height", ev.Msg.StartHeight, "tx_len", len(ev.Msg.Txs), "max_height", w.currentBps.MaxHeight)
-				if ev.Msg.StartHeight-1+uint64(len(ev.Msg.Txs)) > w.currentBps.MaxHeight {
-					log.Error("Batch answer contains too many transactions", "start_height", ev.Msg.StartHeight, "max_height", w.currentBps.MaxHeight, "tx_len", len(ev.Msg.Txs))
-					err := w.mux.Post(core.BatchEndEvent(w.currentBps.BatchIndex))
+				log.Info("Scheduler receives BatchPeriodAnswerEvent", "sequencer", ev.Msg.Sequencer.String(), "start_height", ev.Msg.StartHeight, "tx_len", len(ev.Msg.Txs), "max_height", w.getCurrentBps().MaxHeight)
+				if ev.Msg.StartHeight-1+uint64(len(ev.Msg.Txs)) > w.getCurrentBps().MaxHeight {
+					log.Error("Batch answer contains too many transactions", "start_height", ev.Msg.StartHeight, "max_height", w.getCurrentBps().MaxHeight, "tx_len", len(ev.Msg.Txs))
+					err := w.mux.Post(core.BatchEndEvent(w.getCurrentBps().BatchIndex))
 					if err != nil {
 						log.Error("Post BatchEndEvent error", "err_msg", err.Error())
 						break
@@ -789,7 +807,7 @@ func (w *worker) batchAnswerLoop() {
 					err = w.eth.SyncService().ValidateAndApplySequencerTransaction(tx, &types.BatchTxSetProof{})
 					if err != nil {
 						log.Error("ValidateAndApplySequencerTransaction error", "err_msg", err.Error())
-						err = w.mux.Post(core.BatchEndEvent(w.currentBps.BatchIndex))
+						err = w.mux.Post(core.BatchEndEvent(w.getCurrentBps().BatchIndex))
 						if err != nil {
 							log.Error("Post BatchEndEvent error", "err_msg", err.Error())
 							break
