@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"math"
 	"math/big"
 	"sync"
 	"sync/atomic"
@@ -84,7 +83,7 @@ const (
 	defaultAnswerInterval = 5
 
 	// maxAnswerInterval is the mac answer interval of batch
-	maxAnswerInterval = math.MaxUint64
+	maxAnswerInterval = 60
 )
 
 var (
@@ -264,6 +263,9 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	// Subscribe events for blockchain
 	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
+
+	// set answer interval
+	worker.setAnswerInterval(maxAnswerInterval)
 
 	// Sanitize recommit interval if the user-specified one is too short.
 	recommit := worker.config.Recommit
@@ -726,7 +728,6 @@ func (w *worker) batchAnswerLoop() {
 	log.Info("Start batchAnswerLoop")
 	for {
 		currentBps := w.getCurrentBps()
-		//currentBatchIndex := w.getCurrentBps().BatchIndex
 		ticker := time.NewTicker(time.Duration(w.getAnswerInterval()) * time.Second)
 		select {
 		// BatchPeriodAnswerEvent
