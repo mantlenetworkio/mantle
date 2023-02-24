@@ -722,17 +722,23 @@ func (w *worker) batchAnswerLoop() {
 	defer w.bpsSub.Unsubscribe()
 	log.Info("Start batchAnswerLoop")
 	for {
-		currentBatchIndex := w.getCurrentBps().BatchIndex
+		currentBps := w.getCurrentBps()
+		if currentBps == nil {
+			log.Debug("current BatchPeriodStartMsg is null")
+			time.Sleep(200 * time.Millisecond)
+			continue
+		}
+		//currentBatchIndex := w.getCurrentBps().BatchIndex
 		ticker := time.NewTicker(time.Duration(w.getAnswerInterval()) * time.Second)
 		select {
 		// BatchPeriodAnswerEvent
 		case <-ticker.C:
 			log.Info("Batch Answer timeout")
 			// If the BatchIndex increases during the wait, this operation is ignored
-			if currentBatchIndex < w.getCurrentBps().BatchIndex {
+			if currentBps.BatchIndex < w.getCurrentBps().BatchIndex {
 				continue
 			}
-			err := w.mux.Post(core.BatchEndEvent(currentBatchIndex))
+			err := w.mux.Post(core.BatchEndEvent(currentBps.BatchIndex))
 			if err != nil {
 				log.Error("Post BatchEndEvent error", "err_msg", err.Error())
 				break
@@ -758,10 +764,6 @@ func (w *worker) batchAnswerLoop() {
 			// for Scheduler
 			if w.eth.SyncService().IsScheduler() {
 				err := func() error {
-					currentBps := w.getCurrentBps()
-					if currentBps == nil {
-						return fmt.Errorf("current BatchPeriodStartMsg is null")
-					}
 					if ev.Msg.BatchIndex != currentBps.BatchIndex {
 						return fmt.Errorf("batch index not equal, current_batch_index %d,  answer_batch_index %d", currentBps.BatchIndex, ev.Msg.BatchIndex)
 					}
