@@ -594,7 +594,7 @@ func (w *worker) batchStartLoop() {
 						expectHeight := ev.Msg.StartHeight - 1
 						for inTxLen := uint64(0); w.eth.BlockChain().CurrentBlock().NumberU64() < event.Msg.MaxHeight && uint64(time.Now().Unix()) < event.Msg.ExpireTime && inTxLen < (event.Msg.MaxHeight-event.Msg.StartHeight+1); {
 							if event.Msg.BatchIndex < w.getCurrentBps().BatchIndex {
-								log.Info("current batch has been completed")
+								log.Info("current batch has been completed", "oldBatchIndex", event.Msg.BatchIndex, "currentBatchIndex", w.getCurrentBps().BatchIndex)
 								return
 							}
 							if w.eth.BlockChain().CurrentBlock().NumberU64() < expectHeight {
