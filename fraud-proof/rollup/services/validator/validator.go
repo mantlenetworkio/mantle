@@ -87,14 +87,15 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 				}
 				// New assertion created on Rollup
 				log.Info("Validator get new assertion, check it with local block....")
+				log.Info("check ev.AssertionID....", "id", ev.AssertionID)
 				checkAssertion := &rollupTypes.Assertion{
 					ID:        ev.AssertionID,
 					VmHash:    ev.VmHash,
 					InboxSize: ev.InboxSize,
-					Parent:    ev.AssertionID.Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
+					Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
 				}
 
-				block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
+				block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
 				if err != nil {
 					log.Error("Validator get block failed", "err", err)
 				}
@@ -104,7 +105,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					ourAssertion := &rollupTypes.Assertion{
 						VmHash:    block.Hash(),
 						InboxSize: ev.InboxSize,
-						Parent:    ev.AssertionID.Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
+						Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
 					}
 					v.challengeCh <- &challengeCtx{checkAssertion, ourAssertion}
 					isInChallenge = true
@@ -173,6 +174,7 @@ func (v *Validator) challengeLoop() {
 				// case get bisection, if is our turn
 				//   if in single step, submit proof
 				//   if multiple step, track current segment, update
+				log.Info("Validator saw new bisection coming...")
 				responder, err := challengeSession.CurrentResponder()
 				if err != nil {
 					// TODO: error handling
@@ -181,6 +183,7 @@ func (v *Validator) challengeLoop() {
 				}
 				// If it's our turn
 				if common.Address(responder) == v.Config.StakeAddr {
+					log.Info("Validator start to respond new bisection...")
 					err := services.RespondBisection(v.BaseService, abi, challengeSession, ev, states, ctx.opponentAssertion.VmHash, false)
 					if err != nil {
 						// TODO: error handling
@@ -188,6 +191,7 @@ func (v *Validator) challengeLoop() {
 						continue
 					}
 				} else {
+					log.Info("Validator check bisection respond time left...")
 					opponentTimeLeft, err := challengeSession.CurrentResponderTimeLeft()
 					if err != nil {
 						// TODO: error handling
@@ -238,6 +242,7 @@ func (v *Validator) challengeLoop() {
 			case ev := <-createdCh:
 				if common.Address(ev.AsserterAddr) == v.Config.StakeAddr {
 					if ev.VmHash == ctx.ourAssertion.VmHash {
+						log.Info("Assertion ID", "opponentAssertion.ID", ctx.opponentAssertion.ID, "ev.AssertionID", ev.AssertionID)
 						_, err := v.Rollup.ChallengeAssertion(
 							[2]ethcommon.Address{
 								ethcommon.Address(v.Config.SequencerAddr),
@@ -282,6 +287,7 @@ func (v *Validator) challengeLoop() {
 					if err != nil {
 						log.Crit("Failed to watch challenge event", "err", err)
 					}
+					log.Info("Validator start to GenerateStates", "parentAssertion.InboxSize", parentAssertion.InboxSize.Uint64(), "ctx.ourAssertion.InboxSize", ctx.ourAssertion.InboxSize.Uint64())
 					states, err = proof.GenerateStates(
 						v.ProofBackend,
 						v.Ctx,
@@ -289,6 +295,7 @@ func (v *Validator) challengeLoop() {
 						ctx.ourAssertion.InboxSize.Uint64(),
 						nil,
 					)
+					log.Info("Validator generate states end...")
 					if err != nil {
 						log.Crit("Failed to generate states", "err", err)
 					}

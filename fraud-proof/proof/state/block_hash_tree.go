@@ -54,7 +54,25 @@ func NewBlockHashTree(hashes *BlockHashes) (*BlockHashTree, error) {
 	}, nil
 }
 
-func BlockHashTreeFromBlockContext(blockCtx *vm.Context) (*BlockHashTree, error) {
+func BlockHashTreeFromBlockContext(blockCtx *vm.BlockContext) (*BlockHashTree, error) {
+	// Get BlockHashes of block [current-255, current]
+	blockHashes := BlockHashes{}
+	currentBlockNum := blockCtx.BlockNumber.Uint64()
+	start := uint64(0)
+	if currentBlockNum >= RECENT_BLOCK_HASHES_LENGTH {
+		start = currentBlockNum - RECENT_BLOCK_HASHES_LENGTH + 1
+	}
+	for i := start; i <= currentBlockNum; i++ {
+		blockHashes[(currentBlockNum-i)%RECENT_BLOCK_HASHES_LENGTH] = BlockHash(blockCtx.GetHash(currentBlockNum - i))
+	}
+	tree, err := NewBlockHashTree(&blockHashes)
+	if err != nil {
+		return nil, err
+	}
+	return tree, nil
+}
+
+func BlockHashTreeFromContext(blockCtx *vm.Context) (*BlockHashTree, error) {
 	// Get BlockHashes of block [current-255, current]
 	blockHashes := BlockHashes{}
 	currentBlockNum := blockCtx.BlockNumber.Uint64()

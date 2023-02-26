@@ -135,8 +135,9 @@ func GetBlockFinalizationProof(interState *state.InterState) (*OneStepProof, err
 //     trie, and account proof of coinbase so verifier can finalize the transaction.
 func GetTransactionInitaitionProof(
 	chainConfig *params.ChainConfig,
-	vmctx *vm.Context,
+	vmctx *vm.BlockContext,
 	tx *types.Transaction,
+	txctx *vm.Context,
 	interState *state.InterState,
 	statedb vm.StateDB,
 ) (*OneStepProof, error) {
@@ -145,7 +146,7 @@ func GetTransactionInitaitionProof(
 	osp.AddProof(InterStateProofFromInterState(interState))
 
 	// MPT proof of the sender account
-	senderProof, err := statedb.GetProof(vmctx.Origin)
+	senderProof, err := statedb.GetProof(txctx.Origin)
 	if err != nil {
 		return nil, err
 	}
@@ -154,14 +155,14 @@ func GetTransactionInitaitionProof(
 	// Simulate the transaction initiation
 	success := true
 	// 1. Nonce check
-	stNonce := statedb.GetNonce(vmctx.Origin)
+	stNonce := statedb.GetNonce(txctx.Origin)
 	msgNonce := tx.Nonce()
 	if stNonce < msgNonce || stNonce > msgNonce || stNonce+1 < stNonce {
 		// Nonce check failed
 		success = false
 	}
 	// 2. Sender EOA check
-	if success && len(statedb.GetCode(vmctx.Origin)) != 0 {
+	if success && len(statedb.GetCode(txctx.Origin)) != 0 {
 		// Sender is a contract
 		success = false
 	}
@@ -169,7 +170,7 @@ func GetTransactionInitaitionProof(
 	if success {
 		requiredBalance := new(big.Int).SetUint64(tx.Gas())
 		requiredBalance = requiredBalance.Mul(requiredBalance, tx.GasPrice())
-		stBalance := statedb.GetBalance(vmctx.Origin)
+		stBalance := statedb.GetBalance(txctx.Origin)
 		if stBalance.Cmp(requiredBalance) < 0 {
 			success = false
 		}
@@ -177,7 +178,7 @@ func GetTransactionInitaitionProof(
 		// Only happens when the sequencer is malicious.
 		// TODO: reason it or check
 		if success {
-			statedb.SubBalance(vmctx.Origin, requiredBalance)
+			statedb.SubBalance(txctx.Origin, requiredBalance)
 		}
 	}
 	var rules params.Rules
@@ -197,7 +198,7 @@ func GetTransactionInitaitionProof(
 	}
 	// 5. Balance transfer check
 	if success {
-		if tx.Value().Sign() > 0 && !vmctx.CanTransfer(statedb, vmctx.Origin, tx.Value()) {
+		if tx.Value().Sign() > 0 && !vmctx.CanTransfer(statedb, txctx.Origin, tx.Value()) {
 			// ErrInsufficientFunds
 			success = false
 		}
@@ -205,9 +206,9 @@ func GetTransactionInitaitionProof(
 	// 6. Simulate the transaction initiation on the sender account
 	if success {
 		// Increment nonce
-		statedb.SetNonce(vmctx.Origin, stNonce+1)
+		statedb.SetNonce(txctx.Origin, stNonce+1)
 		// Deduct sender's balance
-		statedb.SubBalance(vmctx.Origin, tx.Value())
+		statedb.SubBalance(txctx.Origin, tx.Value())
 		// Commit for new trie root after sender account changes
 		statedb.CommitForProof()
 		// Generate proof for the recipient account
@@ -222,7 +223,7 @@ func GetTransactionInitaitionProof(
 			statedb.AddBalance(*tx.To(), tx.Value())
 		} else {
 			// Contract creation
-			contractAddr := crypto.CreateAddress(vmctx.Origin, stNonce) // stNonce is the nonce before increment
+			contractAddr := crypto.CreateAddress(txctx.Origin, stNonce) // stNonce is the nonce before increment
 			recipientProof, err := statedb.GetProof(contractAddr)
 			if err != nil {
 				return nil, err

@@ -88,13 +88,12 @@ func (s *ExecutionState) Hash() common.Hash {
 //  8. a dummy InterState
 //  9. the BlockState of the block B
 func GenerateStates(backend Backend, ctx context.Context, startNum, endNum uint64, config *ProverConfig) ([]*ExecutionState, error) {
-	var blockHashTree *proofState.BlockHashTree
 	var states []*ExecutionState
-	var blockCtx *vm.Context
 	var msg types.Message
 	var block *types.Block
 	var err error
 
+	chainCtx := createChainContext(backend, ctx)
 	parent, err := backend.BlockByNumber(ctx, rpc.BlockNumber(startNum-1))
 	if err != nil {
 		return nil, err
@@ -103,6 +102,7 @@ func GenerateStates(backend Backend, ctx context.Context, startNum, endNum uint6
 	if err != nil {
 		return nil, err
 	}
+
 	states = append(states, &ExecutionState{
 		VMHash:         bs.Hash(),
 		BlockGasUsed:   common.Big0,
@@ -120,34 +120,34 @@ func GenerateStates(backend Backend, ctx context.Context, startNum, endNum uint6
 		if block == nil {
 			return nil, fmt.Errorf("block #%d not found", num)
 		}
-		if blockCtx, err = generateBlockCtx(backend, ctx, block); err != nil {
+		blockCtx := core.NewEVMBlockContext(block.Header(), chainCtx, nil)
+		blockHashTree, err := proofState.BlockHashTreeFromBlockContext(&blockCtx)
+		if err != nil {
 			return nil, err
 		}
+
 		transactions := block.Transactions()
 		receipts, _ := backend.GetReceipts(ctx, block.Hash())
-		startBlockGasUsed := new(big.Int).SetUint64(block.GasUsed())
+
+		blockGasUsed := new(big.Int).SetUint64(block.GasUsed())
 		localBlockGasUsed := new(big.Int)
 		// Trace all the transactions contained within
 		for i, tx := range transactions {
 			// Call Prepare to clear out the statedb access list
 			statedb.Prepare(tx.Hash(), block.Hash(), i)
-			// Calculate block hash tree
-			if blockHashTree, err = proofState.BlockHashTreeFromBlockContext(blockCtx); err != nil {
-				return nil, err
-			}
 			// Push the interstate before transaction i
 			its := proofState.InterStateFromCaptured(
 				block.NumberU64(),
 				uint64(i),
 				statedb,
-				startBlockGasUsed,
+				blockGasUsed,
 				transactions,
 				receipts,
 				blockHashTree,
 			)
 			states = append(states, &ExecutionState{
 				VMHash:         its.Hash(),
-				BlockGasUsed:   startBlockGasUsed,
+				BlockGasUsed:   blockGasUsed,
 				StateType:      proofState.InterStateType,
 				Block:          block,
 				TransactionIdx: uint64(i),
@@ -156,7 +156,11 @@ func GenerateStates(backend Backend, ctx context.Context, startNum, endNum uint6
 
 			// Execute transaction i with intra state generator enabled.
 			stateGenerator := prover.NewIntraStateGenerator(block.NumberU64(), uint64(i), statedb, *its, blockHashTree)
-			vmenv := vm.NewEVM(*blockCtx, statedb, backend.ChainConfig(), vm.Config{Debug: true, Tracer: stateGenerator})
+			txCtx, err := generateTxCtx(backend, ctx, block, tx)
+			if err != nil {
+				return nil, err
+			}
+			vmenv := vm.NewEVM(*txCtx, statedb, backend.ChainConfig(), vm.Config{Debug: true, Tracer: stateGenerator})
 			signer := types.MakeSigner(backend.ChainConfig(), block.Number())
 			if msg, err = tx.AsMessage(signer); err != nil {
 				return nil, err
@@ -172,7 +176,7 @@ func GenerateStates(backend Backend, ctx context.Context, startNum, endNum uint6
 			for idx, s := range generatedStates {
 				states = append(states, &ExecutionState{
 					VMHash:         s.VMHash,
-					BlockGasUsed:   new(big.Int).Add(startBlockGasUsed, new(big.Int).SetUint64(tx.Gas()-s.Gas)),
+					BlockGasUsed:   new(big.Int).Add(blockGasUsed, new(big.Int).SetUint64(tx.Gas()-s.Gas)),
 					StateType:      proofState.IntraStateType,
 					Block:          block,
 					TransactionIdx: uint64(i),
@@ -232,23 +236,9 @@ func GenerateProof(backend Backend, ctx context.Context, startState *ExecutionSt
 	if startState.Block == nil {
 		return nil, fmt.Errorf("bad start state")
 	}
-
-	parent, err := backend.BlockByNumber(ctx, rpc.BlockNumber(big.NewInt(0).Sub(startState.Block.Number(), big.NewInt(1)).Int64()))
-	if err != nil {
-		return nil, err
-	}
-
 	transactions := startState.Block.Transactions()
 	if startState.TransactionIdx > uint64(len(transactions)) {
 		return nil, fmt.Errorf("bad start state")
-	}
-
-	if len(transactions) > 1 {
-		return nil, fmt.Errorf("unsuported protocal, too many transactions in one block")
-	}
-	msg, err := transactions[0].AsMessage(types.MakeSigner(backend.ChainConfig(), parent.Number()))
-	if err != nil {
-		return nil, err
 	}
 
 	reexec := defaultProveReexec
@@ -263,7 +253,7 @@ func GenerateProof(backend Backend, ctx context.Context, startState *ExecutionSt
 			return nil, err
 		}
 		chainCtx := createChainContext(backend, ctx)
-		vmctx := core.NewEVMContext(msg, startState.Block.Header(), chainCtx, nil)
+		vmctx := core.NewEVMBlockContext(startState.Block.Header(), chainCtx, nil)
 		blockHashTree, err := proofState.BlockHashTreeFromBlockContext(&vmctx)
 		if err != nil {
 			return nil, err
@@ -292,10 +282,12 @@ func GenerateProof(backend Backend, ctx context.Context, startState *ExecutionSt
 	}
 
 	// Prepare block and transaction context
-	_, vmctx, statedb, err := backend.StateAtTransaction(ctx, startState.Block, int(startState.TransactionIdx), reexec)
+	msg, txCtx, statedb, err := backend.StateAtTransaction(ctx, startState.Block, int(startState.TransactionIdx), reexec)
 	if err != nil {
 		return nil, err
 	}
+	chainCtx := createChainContext(backend, ctx)
+	vmctx := core.NewEVMBlockContext(startState.Block.Header(), chainCtx, nil)
 	receipts, err := backend.GetReceipts(ctx, startState.Block.Hash())
 	if err != nil {
 		return nil, err
@@ -320,7 +312,7 @@ func GenerateProof(backend Backend, ctx context.Context, startState *ExecutionSt
 
 	if startState.StateType == proofState.InterStateType {
 		// Type 2: transaction initiation or Type 3: EOA transfer transaction
-		return proof.GetTransactionInitaitionProof(backend.ChainConfig(), &vmctx, transaction, its, statedb)
+		return proof.GetTransactionInitaitionProof(backend.ChainConfig(), &vmctx, transaction, &txCtx, its, statedb)
 	}
 	// Type 4: one-step EVM execution or Type 5: transaction finalization. Both require tracing.
 
@@ -338,7 +330,7 @@ func GenerateProof(backend Backend, ctx context.Context, startState *ExecutionSt
 		receipts[startState.TransactionIdx],
 	)
 	// Run the transaction with prover enabled.
-	vmenv := vm.NewEVM(vmctx, statedb, backend.ChainConfig(), vm.Config{Debug: true, Tracer: prover})
+	vmenv := vm.NewEVM(txCtx, statedb, backend.ChainConfig(), vm.Config{Debug: true, Tracer: prover})
 	// Call Prepare to clear out the statedb access list
 	txHash := transactions[startState.TransactionIdx].Hash()
 	statedb.Prepare(txHash, startState.Block.Hash(), int(startState.TransactionIdx))
@@ -349,15 +341,14 @@ func GenerateProof(backend Backend, ctx context.Context, startState *ExecutionSt
 	return prover.GetProof()
 }
 
-func generateBlockCtx(backend Backend, ctx context.Context, startBlock *types.Block) (*vm.Context, error) {
-	tx := startBlock.Transactions()[0]
-	signer := types.MakeSigner(backend.ChainConfig(), startBlock.Number())
+func generateTxCtx(backend Backend, ctx context.Context, block *types.Block, tx *types.Transaction) (*vm.Context, error) {
+	signer := types.MakeSigner(backend.ChainConfig(), block.Number())
 	msg, err := tx.AsMessage(signer)
 	if err != nil {
 		return nil, err
 	}
 	chainCtx := createChainContext(backend, ctx)
-	blockCtx := core.NewEVMContext(msg, startBlock.Header(), chainCtx, nil)
+	blockCtx := core.NewEVMContext(msg, block.Header(), chainCtx, nil)
 	return &blockCtx, nil
 }
 
@@ -373,19 +364,12 @@ func generateStartBlockState(backend Backend, ctx context.Context, startBlock *t
 	}
 	chainCtx := createChainContext(backend, ctx)
 
-	// mantle protocol, one block one transaction
-	tx := startBlock.Transactions()[0]
-	signer := types.MakeSigner(backend.ChainConfig(), startBlock.Number())
-	msg, err := tx.AsMessage(signer)
+	parentBlockCtx := core.NewEVMBlockContext(startBlock.Header(), chainCtx, nil)
+	blockHashTree, err := proofState.BlockHashTreeFromBlockContext(&parentBlockCtx)
 	if err != nil {
 		return nil, nil, err
 	}
-	blockCtx := core.NewEVMContext(msg, startBlock.Header(), chainCtx, nil)
-	blockHashTree, err := proofState.BlockHashTreeFromBlockContext(&blockCtx)
-	if err != nil {
-		return nil, nil, err
-	}
-	bs, err := proofState.BlockStateFromBlock(blockCtx.BlockNumber.Uint64(), statedb, blockHashTree)
+	bs, err := proofState.BlockStateFromBlock(parentBlockCtx.BlockNumber.Uint64(), statedb, blockHashTree)
 	if err != nil {
 		return nil, nil, err
 	}

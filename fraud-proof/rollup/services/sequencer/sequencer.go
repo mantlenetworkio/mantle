@@ -1,19 +1,20 @@
 package sequencer
 
 import (
+	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {
@@ -27,8 +28,8 @@ func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *serv
 
 type challengeCtx struct {
 	challengeAddr common.Address
-	parent        *rollupTypes.Assertion
 	assertion     *rollupTypes.Assertion
+	parent        *rollupTypes.Assertion
 }
 
 // Sequencer run confirming loop and respond challenge, assumes no Berlin+London fork on L2
@@ -185,6 +186,35 @@ func (s *Sequencer) confirmationLoop() {
 				//	}
 				//	isInChallenge = true
 				//}
+				challengeAssertion := new(rollupTypes.Assertion)
+				perent := new(rollupTypes.Assertion)
+				if ret, err := s.AssertionMap.Assertions(ev.AssertionID); err != nil {
+					log.Crit("Get assertion failed", "id", ev.AssertionID, "err", err)
+				} else {
+					challengeAssertion.ID = ev.AssertionID
+					challengeAssertion.VmHash = ret.StateHash
+					challengeAssertion.InboxSize = ret.InboxSize
+					challengeAssertion.Parent = ret.Parent
+					challengeAssertion.Deadline = ret.Deadline
+					challengeAssertion.ProposalTime = ret.ProposalTime
+				}
+				if ret, err := s.AssertionMap.Assertions(challengeAssertion.Parent); err != nil {
+					log.Crit("Get assertion failed", "id", challengeAssertion.Parent, "err", err)
+				} else {
+					perent.ID = ev.AssertionID
+					perent.VmHash = ret.StateHash
+					perent.InboxSize = ret.InboxSize
+					perent.Parent = ret.Parent
+					perent.Deadline = ret.Deadline
+					perent.ProposalTime = ret.ProposalTime
+				}
+
+				s.challengeCh <- &challengeCtx{
+					common.Address(ev.ChallengeAddr),
+					challengeAssertion,
+					perent,
+				}
+				isInChallenge = true
 			case <-s.Ctx.Done():
 				return
 			}
@@ -247,7 +277,7 @@ func (s *Sequencer) challengeLoop() {
 						log.Error("Can not get current responder left time", "error", err)
 						continue
 					}
-					log.Info("[challenge] Opponent time left", "time", opponentTimeLeft)
+					log.Info("[Sequencer] Opponent time left", "time", opponentTimeLeft)
 					opponentTimeoutBlock = ev.Raw.BlockNumber + opponentTimeLeft.Uint64()
 				}
 			case header := <-headCh:
@@ -280,44 +310,43 @@ func (s *Sequencer) challengeLoop() {
 		} else {
 			select {
 			case ctx := <-s.challengeCh:
-				log.Warn("new challenge rise", "handle it", ctx)
-				//challenge, err := bindings.NewIChallenge(ethc.Address(ctx.challengeAddr), s.L1)
-				//if err != nil {
-				//	log.Crit("Failed to access ongoing challenge", "address", ctx.challengeAddr, "err", err)
-				//}
-				//challengeSession = &bindings.IChallengeSession{
-				//	Contract:     challenge,
-				//	CallOpts:     bind.CallOpts{Pending: true, Context: s.Ctx},
-				//	TransactOpts: *s.TransactOpts,
-				//}
-				//bisectedCh = make(chan *bindings.IChallengeBisected, 4096)
-				//bisectedSub, err = challenge.WatchBisected(&bind.WatchOpts{Context: s.Ctx}, bisectedCh)
-				//if err != nil {
-				//	log.Crit("Failed to watch challenge event", "err", err)
-				//}
-				//challengeCompletedCh = make(chan *bindings.IChallengeChallengeCompleted, 4096)
-				//challengeCompletedSub, err = challenge.WatchChallengeCompleted(&bind.WatchOpts{Context: s.Ctx}, challengeCompletedCh)
-				//if err != nil {
-				//	log.Crit("Failed to watch challenge event", "err", err)
-				//}
-				//log.Info("to generate state from", "start", ctx.assertion.StartBlock, "to", ctx.assertion.InboxSize)
-				//log.Info("backend", "start", ctx.assertion.StartBlock, "to", ctx.assertion.EndBlock)
-				//states, err = proof.GenerateStates(
-				//	s.ProofBackend,
-				//	s.Ctx,
-				//	ctx.assertion.PrevCumulativeGasUsed,
-				//	ctx.assertion.StartBlock,
-				//	ctx.assertion.EndBlock+1,
-				//	nil,
-				//)
-				//if err != nil {
-				//	log.Crit("Failed to generate states", "err", err)
-				//}
-				//_, err = challengeSession.InitializeChallengeLength(new(big.Int).SetUint64(uint64(len(states)) - 1))
-				//if err != nil {
-				//	log.Crit("Failed to initialize challenge", "err", err)
-				//}
-				//inChallenge = true
+				log.Warn("Sequencer receive new challenge!!!", "handle it", ctx)
+				challenge, err := bindings.NewIChallenge(ethc.Address(ctx.challengeAddr), s.L1)
+				if err != nil {
+					log.Crit("Failed to access ongoing challenge", "address", ctx.challengeAddr, "err", err)
+				}
+				challengeSession = &bindings.IChallengeSession{
+					Contract:     challenge,
+					CallOpts:     bind.CallOpts{Pending: true, Context: s.Ctx},
+					TransactOpts: *s.TransactOpts,
+				}
+				bisectedCh = make(chan *bindings.IChallengeBisected, 4096)
+				bisectedSub, err = challenge.WatchBisected(&bind.WatchOpts{Context: s.Ctx}, bisectedCh)
+				if err != nil {
+					log.Crit("Failed to watch challenge event", "err", err)
+				}
+				challengeCompletedCh = make(chan *bindings.IChallengeChallengeCompleted, 4096)
+				challengeCompletedSub, err = challenge.WatchChallengeCompleted(&bind.WatchOpts{Context: s.Ctx}, challengeCompletedCh)
+				if err != nil {
+					log.Crit("Failed to watch challenge event", "err", err)
+				}
+				log.Info("Sequencer generate state...")
+				states, err = proof.GenerateStates(
+					s.ProofBackend,
+					s.Ctx,
+					ctx.parent.InboxSize.Uint64(),
+					ctx.assertion.InboxSize.Uint64(),
+					nil,
+				)
+				if err != nil {
+					log.Crit("Failed to generate states", "err", err)
+				}
+				log.Info("Sequencer generate state end...")
+				_, err = challengeSession.InitializeChallengeLength(new(big.Int).SetUint64(uint64(len(states)) - 1))
+				if err != nil {
+					log.Crit("Failed to initialize challenge", "err", err)
+				}
+				inChallenge = true
 			case <-headCh:
 				continue // consume channel values
 			case <-s.Ctx.Done():

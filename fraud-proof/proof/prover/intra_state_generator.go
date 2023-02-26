@@ -87,7 +87,8 @@ func (l *IntraStateGenerator) CaptureStart(from common.Address, to common.Addres
 	l.accessListTrie = state.NewAccessListTrie()
 	// We manually accumulate the selfdestruct set during tracing to preserve order
 	l.selfDestructSet = state.NewSelfDestructSet()
-	l.startInterState.GlobalState = l.env.StateDB.Copy() // This state includes gas-buying and nonce-increment
+	//log.Info("check nil ref", "l.startInterState", l.startInterState, "l.env", l.env)
+	//l.startInterState.GlobalState = l.env.StateDB.Copy() // This state includes gas-buying and nonce-increment
 	l.lastDepthState = l.startInterState
 	// log.Info("Capture Start", "from", from, "to", to)
 	return nil
@@ -109,7 +110,7 @@ func (l *IntraStateGenerator) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode,
 		l.selfDestructSet,
 		l.blockHashTree,
 		l.accessListTrie,
-		l.env,
+		env,
 		l.lastDepthState,
 		l.callFlag,
 		l.input,

@@ -64,7 +64,7 @@ abstract contract RollupBase is IRollup, Initializable {
 contract Rollup is Lib_AddressResolver, RollupBase {
     modifier stakedOnly() {
         if (!isStaked(msg.sender)) {
-            revert NotStaked();
+            revert("NotStaked");
         }
         _;
     }
@@ -97,19 +97,19 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         bytes32 _initialVMhash
     ) public initializer {
         if (_owner == address(0) || _verifier == address(0)) {
-            revert ZeroAddress();
+            revert("ZeroAddress");
         }
         owner = _owner;
         stakeToken = IERC20(_stakeToken);
         verifier = IVerifierEntry(_verifier);
 
         if (address(libAddressManager) != address(0)) {
-            revert RedundantInitialized();
+            revert("RedundantInitialized");
         }
         libAddressManager = Lib_AddressManager(_libAddressManager);
 
         if (address(assertions) != address(0)) {
-            revert RedundantInitialized();
+            revert("RedundantInitialized");
         }
         assertions = AssertionMap(_assertionMap);
 
@@ -149,7 +149,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
             stakers[msg.sender].amountStaked += msg.value;
         } else {
             if (msg.value < baseStakeAmount) {
-                revert InsufficientStake();
+                revert("InsufficientStake");
             }
             stakers[msg.sender] = Staker(true, msg.value, 0, address(0));
             numStakers++;
@@ -163,15 +163,15 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         // Require that staker is staked on a confirmed assertion.
         Staker storage staker = stakers[msg.sender];
         if (staker.assertionID > lastConfirmedAssertionID) {
-            revert StakedOnUnconfirmedAssertion();
+            revert("StakedOnUnconfirmedAssertion");
         }
         if (stakeAmount > staker.amountStaked - currentRequiredStake()) {
-            revert InsufficientStake();
+            revert("InsufficientStake");
         }
         staker.amountStaked -= stakeAmount;
         // Note: we don't need to modify assertion state because you can only unstake from a confirmed assertion.
         (bool success,) = msg.sender.call{value: stakeAmount}("");
-        if (!success) revert TransferFailed();
+        if (!success) revert("TransferFailed");
     }
 
     // WARNING: this function is vulnerable to reentrancy attack!
@@ -181,23 +181,23 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         // Require that staker is staked on a confirmed assertion.
         Staker storage staker = stakers[stakerAddress];
         if (staker.assertionID > lastConfirmedAssertionID) {
-            revert StakedOnUnconfirmedAssertion();
+            revert("StakedOnUnconfirmedAssertion");
         }
         deleteStaker(stakerAddress);
         // Note: we don't need to modify assertion state because you can only unstake from a confirmed assertion.
         (bool success,) = stakerAddress.call{value: staker.amountStaked}("");
-        if (!success) revert TransferFailed();
+        if (!success) revert("TransferFailed");
     }
 
     /// @inheritdoc IRollup
     function advanceStake(uint256 assertionID) external override stakedOnly {
         Staker storage staker = stakers[msg.sender];
         if (assertionID <= staker.assertionID && assertionID > lastCreatedAssertionID) {
-            revert AssertionOutOfRange();
+            revert("AssertionOutOfRange");
         }
         // TODO: allow arbitrary descendant of current staked assertionID, not just child.
         if (staker.assertionID != assertions.getParentID(assertionID)) {
-            revert ParentAssertionUnstaked();
+            revert("ParentAssertionUnstaked");
         }
         stakeOnAssertion(msg.sender, assertionID);
     }
@@ -210,11 +210,11 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         uint256 parentID = stakers[msg.sender].assertionID;
         // Require that enough time has passed since the last assertion.
         if (block.number - assertions.getProposalTime(parentID) < minimumAssertionPeriod) {
-            revert MinimumAssertionPeriodNotPassed();
+            revert("MinimumAssertionPeriodNotPassed");
         }
         // Require that the assertion at least includes one transaction
         if (inboxSize <= assertions.getInboxSize(parentID)) {
-            revert EmptyAssertion();
+            revert("EmptyAssertion");
         }
 
         // Initialize assertion.
@@ -283,20 +283,25 @@ contract Rollup is Lib_AddressResolver, RollupBase {
     {
         uint256 defenderAssertionID = assertionIDs[0];
         uint256 challengerAssertionID = assertionIDs[1];
+        console.log(
+            "challengeAssertion...",
+            defenderAssertionID,
+            challengerAssertionID
+        );
         // Require IDs ordered and in-range.
         if (defenderAssertionID >= challengerAssertionID) {
-            revert WrongOrder();
+            revert("WrongOrder");
         }
         if (challengerAssertionID > lastCreatedAssertionID) {
-            revert UnproposedAssertion();
+            revert("UnproposedAssertion");
         }
         if (lastConfirmedAssertionID >= defenderAssertionID) {
-            revert AssertionAlreadyResolved();
+            revert("AssertionAlreadyResolved");
         }
         // Require that players have attested to sibling assertions.
         uint256 parentID = assertions.getParentID(defenderAssertionID);
         if (parentID != assertions.getParentID(challengerAssertionID)) {
-            revert DifferentParent();
+            revert("DifferentParent");
         }
 
         // Require that neither player is currently engaged in a challenge.
@@ -335,7 +340,6 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         );
         if (lastResolvedAssertionID >= lastCreatedAssertionID) {
             revert("NoUnresolvedAssertion");
-//            revert NoUnresolvedAssertion();
         }
 
         console.log(
@@ -344,7 +348,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         );
 
         // (1) there is at least one staker, and
-        if (numStakers <= 0) revert NoStaker();
+        if (numStakers <= 0) revert("NoStaker");
 
         uint256 lastUnresolvedID = lastResolvedAssertionID + 1;
 
@@ -357,7 +361,6 @@ contract Rollup is Lib_AddressResolver, RollupBase {
 
         // (2) challenge period has passed
         if (block.timestamp < assertions.getDeadline(lastUnresolvedID)) {
-//            revert ChallengePeriodPending();
             revert("ChallengePeriodPending");
         }
 
@@ -370,7 +373,6 @@ contract Rollup is Lib_AddressResolver, RollupBase {
 
         // (3) predecessor has been confirmed
         if (assertions.getParentID(lastUnresolvedID) != lastConfirmedAssertionID) {
-//            revert InvalidParent();
             revert("InvalidParent");
         }
 
@@ -399,7 +401,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
     /// @inheritdoc IRollup
     function rejectFirstUnresolvedAssertion(address stakerAddress) external override {
         if (lastResolvedAssertionID >= lastCreatedAssertionID) {
-            revert NoUnresolvedAssertion();
+            revert("NoUnresolvedAssertion");
         }
 
         uint256 firstUnresolvedAssertionID = lastResolvedAssertionID + 1;
@@ -418,18 +420,18 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         if (assertions.getParentID(firstUnresolvedAssertionID) == lastConfirmedAssertionID) {
             // 1a. challenge period has passed.
             if (block.timestamp < assertions.getDeadline(firstUnresolvedAssertionID)) {
-                revert ChallengePeriodPending();
+                revert("ChallengePeriodPending");
             }
             // 1b. at least one staker exists (on a sibling)
             // - stakerAddress is indeed a staker
             requireStaked(stakerAddress);
             // - staker's assertion can't be a ancestor of firstUnresolved (because staker's assertion is also unresolved)
             if (stakers[stakerAddress].assertionID < firstUnresolvedAssertionID) {
-                revert AssertionAlreadyResolved();
+                revert("AssertionAlreadyResolved");
             }
             // - staker's assertion can't be a descendant of firstUnresolved (because staker has never staked on firstUnresolved)
             if (assertions.isStaker(firstUnresolvedAssertionID, stakerAddress)) {
-                revert StakerStakedOnTarget();
+                revert("StakerStakedOnTarget");
             }
             // If a staker is staked on an assertion that is neither an ancestor nor a descendant of firstUnresolved, it must be a sibling, QED
 
@@ -437,7 +439,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
             // removeOldZombies();
             if (assertions.getNumStakers(firstUnresolvedAssertionID) != countStakedZombies(firstUnresolvedAssertionID))
             {
-                revert StakersPresent();
+                revert("StakersPresent");
             }
         }
 
@@ -451,7 +453,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
     function completeChallenge(address winner, address loser) external override {
         address challenge = getChallenge(winner, loser);
         if (msg.sender != challenge) {
-            revert NotChallenge(msg.sender, challenge);
+            revert("NotChallenge");
         }
 
         uint256 remainingLoserStake = stakers[loser].amountStaked;
@@ -507,10 +509,10 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         Staker storage staker2 = stakers[staker2Address];
         address challenge = staker1.currentChallenge;
         if (challenge == address(0)) {
-            revert NotInChallenge();
+            revert("NotInChallenge");
         }
         if (challenge != staker2.currentChallenge) {
-            revert InDifferentChallenge(challenge, staker2.currentChallenge);
+            revert("InDifferentChallenge");
         }
         return challenge;
     }
@@ -562,14 +564,14 @@ contract Rollup is Lib_AddressResolver, RollupBase {
 
     function requireStaked(address stakerAddress) private view {
         if (!isStaked(stakerAddress)) {
-            revert NotStaked();
+            revert("NotStaked");
         }
     }
 
     function requireUnchallengedStaker(address stakerAddress) private view {
         requireStaked(stakerAddress);
         if (stakers[stakerAddress].currentChallenge != address(0)) {
-            revert ChallengedStaker();
+            revert("ChallengedStaker");
         }
     }
 }
