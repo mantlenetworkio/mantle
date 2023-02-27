@@ -142,6 +142,19 @@ func (s *Service) eventLoop() {
 	for {
 		select {
 		case <-ticker.C:
+			startTime := time.Now().UnixMilli()
+			go func() {
+				for {
+					if time.Now().UnixMilli()-startTime > 2*60*1000 {
+						err := s.cfg.Driver.ClearPendingTx(s.ctx, s.txMgr, s.cfg.L1Client)
+						if err == nil {
+							break
+						}
+						log.Error(name + "'s Tx has delayed for 2 minites,try to clear pending tx")
+					}
+					time.Sleep(time.Second * time.Duration(10))
+				}
+			}()
 			// Record the submitter's current ETH balance. This is done first in
 			// case any of the remaining steps fail, we can at least have an
 			// accurate view of the submitter's balance.
