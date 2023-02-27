@@ -63,7 +63,7 @@ func (s *Sequencer) confirmationLoop() {
 	defer s.Wg.Done()
 
 	// Watch AssertionCreated event
-	createdCh := make(chan *bindings.IRollupAssertionCreated, 4096)
+	createdCh := make(chan *bindings.RollupAssertionCreated, 4096)
 	createdSub, err := s.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Context: s.Ctx}, createdCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
@@ -71,7 +71,7 @@ func (s *Sequencer) confirmationLoop() {
 	defer createdSub.Unsubscribe()
 
 	// Watch AssertionConfirmed event
-	confirmedCh := make(chan *bindings.IRollupAssertionConfirmed, 4096)
+	confirmedCh := make(chan *bindings.RollupAssertionConfirmed, 4096)
 	confirmedSub, err := s.Rollup.Contract.WatchAssertionConfirmed(&bind.WatchOpts{Context: s.Ctx}, confirmedCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
@@ -86,7 +86,7 @@ func (s *Sequencer) confirmationLoop() {
 	}
 	defer headSub.Unsubscribe()
 
-	challengedCh := make(chan *bindings.IRollupAssertionChallenged, 4096)
+	challengedCh := make(chan *bindings.RollupAssertionChallenged, 4096)
 	challengedSub, err := s.Rollup.Contract.WatchAssertionChallenged(&bind.WatchOpts{Context: s.Ctx}, challengedCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)

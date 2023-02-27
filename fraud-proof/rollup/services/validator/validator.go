@@ -59,7 +59,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 	defer v.Wg.Done()
 
 	// Listen to AssertionCreated event
-	assertionEventCh := make(chan *bindings.IRollupAssertionCreated, 4096)
+	assertionEventCh := make(chan *bindings.RollupAssertionCreated, 4096)
 	assertionEventSub, err := v.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Context: v.Ctx}, assertionEventCh)
 	if err != nil {
 		log.Crit("Failed to watch rollup event", "err", err)
@@ -92,10 +92,10 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					ID:        ev.AssertionID,
 					VmHash:    ev.VmHash,
 					InboxSize: ev.InboxSize,
-					Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
+					//Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
 				}
 
-				block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
+				block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
 				if err != nil {
 					log.Error("Validator get block failed", "err", err)
 				}
@@ -110,11 +110,20 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					v.challengeCh <- &challengeCtx{checkAssertion, ourAssertion}
 					isInChallenge = true
 				} else {
-					// Validation succeeded, confirm assertion and advance stake
-					log.Info("Validator advance stake into assertion", "ID", ev.AssertionID)
-					_, err = v.Rollup.AdvanceStake(ev.AssertionID)
+					stakerStatus, err := v.Rollup.Stakers(v.Rollup.TransactOpts.From)
 					if err != nil {
 						log.Crit("UNHANDELED: Can't advance stake, validator state corrupted", "err", err)
+					}
+					startID := stakerStatus.AssertionID.Uint64()
+					// advance the assertion that has fallen behind
+					for ; startID < ev.AssertionID.Uint64(); startID++ {
+						// Validation succeeded, confirm assertion and advance stake
+						log.Info("Validator advance stake into assertion", "ID", ev.AssertionID, "now", startID)
+						// todo ：During frequent interactions, it is necessary to check the results of the previous interaction
+						_, err = v.Rollup.AdvanceStake(new(big.Int).SetUint64(startID + 1))
+						if err != nil {
+							log.Crit("UNHANDELED: Can't advance stake, validator state corrupted", "err", err)
+						}
 					}
 				}
 			case <-v.Ctx.Done():
@@ -133,14 +142,14 @@ func (v *Validator) challengeLoop() {
 	}
 
 	// Watch AssertionCreated event
-	createdCh := make(chan *bindings.IRollupAssertionCreated, 4096)
+	createdCh := make(chan *bindings.RollupAssertionCreated, 4096)
 	createdSub, err := v.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Context: v.Ctx}, createdCh)
 	if err != nil {
 		log.Crit("Failed to watch rollup event", "err", err)
 	}
 	defer createdSub.Unsubscribe()
 
-	challengedCh := make(chan *bindings.IRollupAssertionChallenged, 4096)
+	challengedCh := make(chan *bindings.RollupAssertionChallenged, 4096)
 	challengedSub, err := v.Rollup.Contract.WatchAssertionChallenged(&bind.WatchOpts{Context: v.Ctx}, challengedCh)
 	if err != nil {
 		log.Crit("Failed to watch rollup event", "err", err)
