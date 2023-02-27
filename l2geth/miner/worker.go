@@ -253,7 +253,6 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	worker.rollupSub = eth.SyncService().SubscribeNewTxsEvent(worker.rollupCh)
 
 	worker.bpsSub = worker.mux.Subscribe(core.BatchPeriodStartEvent{})
-	worker.bpaSub = worker.mux.Subscribe(core.BatchPeriodAnswerEvent{})
 
 	worker.l1ToL2Sub = worker.mux.Subscribe(core.L1ToL2TxStartEvent{})
 
@@ -276,9 +275,10 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	go worker.resultLoop()
 	go worker.taskLoop()
 	go worker.batchStartLoop()
-	go worker.batchAnswerLoop()
 
 	if worker.eth.SyncService().GetRollupRole() == rollup.SCHEDULER_NODE {
+		worker.bpaSub = worker.mux.Subscribe(core.BatchPeriodAnswerEvent{})
+		go worker.batchAnswerLoop()
 		go worker.l1Tol2StartLoop()
 	}
 
@@ -326,20 +326,6 @@ func (w *worker) pendingBlock() *types.Block {
 	defer w.snapshotMu.RUnlock()
 	return w.snapshotBlock
 }
-
-//// setAnswerInterval set answer interval of batch
-//func (w *worker) setAnswerInterval(answerInterval uint64) {
-//	w.answerMutex.Lock()
-//	w.answerInterval = answerInterval
-//	w.answerMutex.Unlock()
-//}
-//
-//// getAnswerInterval return answer interval of batch
-//func (w *worker) getAnswerInterval() uint64 {
-//	w.answerMutex.RLock()
-//	defer w.answerMutex.RUnlock()
-//	return w.answerInterval
-//}
 
 // setCurrentBps set current BatchPeriodStartMsg
 func (w *worker) setCurrentBps(currentBps *types.BatchPeriodStartMsg) {

@@ -115,7 +115,6 @@ func NewScheduler(db ethdb.Database, config *Config, clique *Clique, blockchain 
 	if config.BatchEpoch != 0 {
 		batchEpoch = time.Duration(config.BatchEpoch) * time.Second
 	}
-
 	schedulerInst := &Scheduler{
 		config:            config,
 		running:           0,
@@ -298,11 +297,11 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 				return fmt.Errorf("sign BatchPeriodStartEvent error %s", err.Error())
 			}
 			msg.Signature = signature
-			expectMinTxsCount, err := schedulerInst.getExpectMinTxsCount(uint64(batchSize))
-			if err != nil {
-				return fmt.Errorf("get minimum block count failed %s", err.Error())
-			}
-			schedulerInst.expectMinTxsCount = expectMinTxsCount
+			//expectMinTxsCount, err := schedulerInst.getExpectMinTxsCount(uint64(batchSize))
+			//if err != nil {
+			//	return fmt.Errorf("get minimum block count failed %s", err.Error())
+			//}
+			//schedulerInst.expectMinTxsCount = expectMinTxsCount
 			// store msg as currentStartMsg
 			schedulerInst.currentStartMsg = msg
 			// set BatchIndex to db
@@ -368,6 +367,11 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 // syncSequencerSetRoutine uses the batchEpoch parameter set in the config to regularly obtain
 // the sequencer set from L1 and update the schedulerInst.sequencerSet
 func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
+	interval, err := diffMorningTime()
+	if err != nil {
+		log.Crit("get diffMorningTime failed", "error_msg", err.Error())
+	}
+	time.Sleep(time.Duration(interval) * time.Second)
 	for {
 		select {
 		case <-schedulerInst.ticker.C:
@@ -402,6 +406,15 @@ func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 			return
 		}
 	}
+}
+
+func diffMorningTime() (int64, error) {
+	layout := "2006-01-02"
+	t, err := time.ParseInLocation(layout, time.Now().Format(layout), time.UTC)
+	if err != nil {
+		return 0, err
+	}
+	return 86400 - (time.Now().Unix() - t.Unix()), nil
 }
 
 // compareSequencerSet will return the update with Driver.seqz
