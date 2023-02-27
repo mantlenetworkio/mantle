@@ -78,9 +78,6 @@ const (
 
 	// staleThreshold is the maximum depth of the acceptable stale block.
 	staleThreshold = 7
-
-	// defaultAnswerInterval is the default answer interval of batch
-	defaultAnswerInterval = 5
 )
 
 var (
@@ -261,7 +258,7 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
 
 	// set answer interval
-	worker.answerInterval = defaultAnswerInterval
+	worker.answerInterval = config.BatchAnswerInterval
 
 	// Sanitize recommit interval if the user-specified one is too short.
 	recommit := worker.config.Recommit
