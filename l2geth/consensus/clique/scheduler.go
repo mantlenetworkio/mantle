@@ -367,11 +367,7 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 // syncSequencerSetRoutine uses the batchEpoch parameter set in the config to regularly obtain
 // the sequencer set from L1 and update the schedulerInst.sequencerSet
 func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
-	interval, err := diffMorningTime()
-	if err != nil {
-		log.Crit("get diffMorningTime failed", "error_msg", err.Error())
-	}
-	time.Sleep(time.Duration(interval) * time.Second)
+	time.Sleep(getTimeDiffToMidnight())
 	for {
 		select {
 		case <-schedulerInst.ticker.C:
@@ -408,13 +404,10 @@ func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 	}
 }
 
-func diffMorningTime() (int64, error) {
-	layout := "2006-01-02"
-	t, err := time.ParseInLocation(layout, time.Now().Format(layout), time.UTC)
-	if err != nil {
-		return 0, err
-	}
-	return 86400 - (time.Now().Unix() - t.Unix()), nil
+func getTimeDiffToMidnight() time.Duration {
+	now := time.Now().UTC()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	return today.Add(time.Hour * 24).Sub(now)
 }
 
 // compareSequencerSet will return the update with Driver.seqz
