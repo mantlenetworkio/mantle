@@ -404,9 +404,10 @@ func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 	}
 }
 
+// getTimeDiffToMidnight returns the time difference to midnight
 func getTimeDiffToMidnight() time.Duration {
-	now := time.Now().UTC()
-	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	now := time.Now()                                                                  // Get the current time
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()) // Get the zero time of the day
 	return today.Add(time.Hour * 24).Sub(now)
 }
 
