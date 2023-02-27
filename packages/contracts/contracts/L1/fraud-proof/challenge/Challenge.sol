@@ -142,7 +142,10 @@ contract Challenge is IChallenge {
         bytes32 prevHash =
             ChallengeLib.computeBisectionHash(prevBisection, prevChallengedSegmentStart, prevChallengedSegmentLength);
         require(prevHash == bisectionHash, BIS_PREV);
-        console.log("log out bisect hash...", prevHash, bisectionHash);
+        console.log("log out bisect hash...");
+        console.logBytes32(prevHash);
+        console.logBytes32(bisectionHash);
+
         require(challengedSegmentIndex > 0 && challengedSegmentIndex < prevBisection.length, "INVALID_INDEX");
         // Require agreed upon start state hash and disagreed upon end state hash.
         require(bisection[0] == prevBisection[challengedSegmentIndex - 1], "INVALID_START");

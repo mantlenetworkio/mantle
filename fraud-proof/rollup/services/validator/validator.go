@@ -122,6 +122,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 						}
 						v.challengeCh <- &challengeCtx{checkAssertion, ourAssertion}
 						isInChallenge = true
+						break
 					} else {
 						// Validation succeeded, confirm assertion and advance stake
 						log.Info("Validator advance stake into assertion", "ID", ev.AssertionID, "now", startID)
