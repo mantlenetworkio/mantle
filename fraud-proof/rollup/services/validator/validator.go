@@ -88,35 +88,41 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 				// New assertion created on Rollup
 				log.Info("Validator get new assertion, check it with local block....")
 				log.Info("check ev.AssertionID....", "id", ev.AssertionID)
-				checkAssertion := &rollupTypes.Assertion{
-					ID:        ev.AssertionID,
-					VmHash:    ev.VmHash,
-					InboxSize: ev.InboxSize,
-					//Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
-				}
 
-				block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
+				stakerStatus, err := v.Rollup.Stakers(v.Rollup.TransactOpts.From)
 				if err != nil {
-					log.Error("Validator get block failed", "err", err)
+					log.Crit("UNHANDELED: Can't find stake, validator state corrupted", "err", err)
 				}
-				if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 {
-					// Validation failed
-					log.Info("Validator check assertion vmHash failed, start challenge assertion....")
-					ourAssertion := &rollupTypes.Assertion{
-						VmHash:    block.Hash(),
-						InboxSize: ev.InboxSize,
-						Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
-					}
-					v.challengeCh <- &challengeCtx{checkAssertion, ourAssertion}
-					isInChallenge = true
-				} else {
-					stakerStatus, err := v.Rollup.Stakers(v.Rollup.TransactOpts.From)
+				startID := stakerStatus.AssertionID.Uint64()
+				// advance the assertion that has fallen behind
+				for ; startID < ev.AssertionID.Uint64(); startID++ {
+					checkID := startID + 1
+					assertion, err := v.AssertionMap.Assertions(new(big.Int).SetUint64(checkID))
 					if err != nil {
-						log.Crit("UNHANDELED: Can't advance stake, validator state corrupted", "err", err)
+						log.Error("Validator get block failed", "err", err)
 					}
-					startID := stakerStatus.AssertionID.Uint64()
-					// advance the assertion that has fallen behind
-					for ; startID < ev.AssertionID.Uint64(); startID++ {
+					checkAssertion := &rollupTypes.Assertion{
+						ID:        new(big.Int).SetUint64(checkID),
+						VmHash:    assertion.StateHash,
+						InboxSize: assertion.InboxSize,
+						Parent:    assertion.Parent,
+					}
+
+					block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
+					if err != nil {
+						log.Error("Validator get block failed", "err", err)
+					}
+					if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 {
+						// Validation failed
+						log.Info("Validator check assertion vmHash failed, start challenge assertion....")
+						ourAssertion := &rollupTypes.Assertion{
+							VmHash:    block.Hash(),
+							InboxSize: ev.InboxSize,
+							Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
+						}
+						v.challengeCh <- &challengeCtx{checkAssertion, ourAssertion}
+						isInChallenge = true
+					} else {
 						// Validation succeeded, confirm assertion and advance stake
 						log.Info("Validator advance stake into assertion", "ID", ev.AssertionID, "now", startID)
 						// todo ：During frequent interactions, it is necessary to check the results of the previous interaction
