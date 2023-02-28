@@ -149,8 +149,7 @@ contract Challenge is IChallenge {
         if (challengedSegmentIndex == 1) {
             prevHash =
             ChallengeLib.computeBisectionHash(bisection[0], prevBisection[prevBisection.length - 1], prevChallengedSegmentStart, prevChallengedSegmentLength);
-        }
-        if (challengedSegmentIndex == 2) {
+        } else if (challengedSegmentIndex == 2) {
             prevHash =
             ChallengeLib.computeBisectionHash(prevBisection[prevBisection.length - 1], prevBisection[2], prevChallengedSegmentStart, prevChallengedSegmentLength);
         } else {
