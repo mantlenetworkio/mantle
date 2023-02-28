@@ -3,12 +3,14 @@ package restorer
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"github.com/Layr-Labs/datalayr/common/graphView"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceRetrieverServer"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 	gecho "github.com/labstack/echo/v4"
+	common2 "github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
@@ -40,6 +42,12 @@ type DataStoreIdRequest struct {
 type TransactionListResponse struct {
 	BlockNumber string `json:"BlockNumber"`
 	TxHash      string `json:"TxHash"`
+}
+
+type TransactionInfoListResponse struct {
+	BlockNumber string                `json:"BlockNumber"`
+	TxHash      string                `json:"TxHash"`
+	TxMeta      types.TransactionMeta `json:"TxMeta"`
 }
 
 func (s *DaService) GetLatestTransactionBatchIndex(c gecho.Context) error {
@@ -104,10 +112,15 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, errors.New("decode data fail"))
 		}
-		var TxnRep []*TransactionListResponse
+		var TxnRep []*TransactionInfoListResponse
 		newBatchTxn := *batchTxn
 		for i := 0; i < len(newBatchTxn); i++ {
 			l2Tx := new(types.Transaction)
+			txDecodeMetaData := new(types.TransactionMeta)
+			err = json.Unmarshal(newBatchTxn[i].TxMeta, txDecodeMetaData)
+			if err != nil {
+				log.Error("Unmarshal json fail")
+			}
 			rlpStream := l2rlp.NewStream(bytes.NewBuffer(newBatchTxn[i].RawTx), 0)
 			if err := l2Tx.DecodeRLP(rlpStream); err != nil {
 				log.Error("Decode RLP fail")
@@ -115,9 +128,33 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 			}
 			log.Info("transaction", "hash", l2Tx.Hash().Hex())
 			newBlockNumber := new(big.Int).SetBytes(newBatchTxn[i].BlockNumber)
-			txSl := &TransactionListResponse{
+
+			var queueOrigin types.QueueOrigin
+			var l1MessageSender *common2.Address
+			if txDecodeMetaData.QueueIndex == nil {
+				queueOrigin = types.QueueOriginSequencer
+				l1MessageSender = nil
+			} else {
+				queueOrigin = types.QueueOriginL1ToL2
+				//TODO still need to add the L1msg
+				addrLs := common2.HexToAddress("")
+				l1MessageSender = &addrLs
+			}
+
+			realTxMeta := &types.TransactionMeta{
+				L1BlockNumber:   txDecodeMetaData.L1BlockNumber,
+				L1Timestamp:     txDecodeMetaData.L1Timestamp,
+				L1MessageSender: l1MessageSender,
+				QueueOrigin:     queueOrigin,
+				Index:           txDecodeMetaData.Index,
+				QueueIndex:      txDecodeMetaData.QueueIndex,
+				RawTransaction:  txDecodeMetaData.RawTransaction,
+			}
+
+			txSl := &TransactionInfoListResponse{
 				BlockNumber: newBlockNumber.String(),
 				TxHash:      l2Tx.Hash().String(),
+				TxMeta:      *realTxMeta,
 			}
 			TxnRep = append(TxnRep, txSl)
 		}
