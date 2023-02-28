@@ -130,7 +130,7 @@ contract Challenge is IChallenge {
     function initializeChallengeLength(bytes32 checkStateHash, uint256 _numSteps) external override onlyOnTurn {
         require(bisectionHash == 0, CHAL_INIT_STATE);
         require(_numSteps > 0, "INVALID_NUM_STEPS");
-        bisectionHash = ChallengeLib.initialBisectionHash(startStateHash, endStateHash, _numSteps);
+        bisectionHash = ChallengeLib.computeBisectionHash(startStateHash, endStateHash, 0, _numSteps);
         prevBisection.push(checkStateHash);
         // TODO: consider emitting a different event?
         emit Bisected(startStateHash, checkStateHash, endStateHash, block.timestamp, 0, _numSteps);
@@ -151,10 +151,24 @@ contract Challenge is IChallenge {
             ChallengeLib.computeBisectionHash(bisection[0], prevBisection[prevBisection.length - 1], prevChallengedSegmentStart, prevChallengedSegmentLength);
         } else if (challengedSegmentIndex == 2) {
             prevHash =
-            ChallengeLib.computeBisectionHash(prevBisection[prevBisection.length - 1], prevBisection[2], prevChallengedSegmentStart, prevChallengedSegmentLength);
+            ChallengeLib.computeBisectionHash(prevBisection[prevBisection.length - 2], bisection[2], prevChallengedSegmentStart, prevChallengedSegmentLength);
         } else {
             revert("INVALID_INDEX");
         }
+        console.log("bisection info");
+        console.logBytes32(bisection[0]);
+        console.logBytes32(bisection[1]);
+        console.logBytes32(bisection[2]);
+        console.log("prevBisection info");
+        console.logBytes32(prevBisection[prevBisection.length - 1]);
+        console.logBytes32(prevBisection[prevBisection.length - 2]);
+        console.log("prev info");
+        console.log(prevChallengedSegmentStart);
+        console.log(prevChallengedSegmentLength);
+        console.log("prevHash");
+        console.logBytes32(prevHash);
+        console.log("bisectionHash");
+        console.logBytes32(bisectionHash);
         require(prevHash == bisectionHash, BIS_PREV);
 
         // Require agreed upon start state hash and disagreed upon end state hash.

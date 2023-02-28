@@ -17,7 +17,7 @@ func SubmitOneStepProof(
 	ctx context.Context,
 	state *proof.ExecutionState,
 	challengedStepIndex *big.Int,
-	//prevBisection [][32]byte,
+//prevBisection [][32]byte,
 	prevChallengedSegmentStart *big.Int,
 	prevChallengedSegmentLength *big.Int,
 ) error {
@@ -55,6 +55,10 @@ func RespondBisection(
 	// Get bisection info from event
 	segStart := ev.ChallengedSegmentStart.Uint64()
 	segLen := ev.ChallengedSegmentLength.Uint64()
+
+	if segStart+segLen >= uint64(len(states)) {
+		log.Crit("RespondBisection out of range", "segStart+segLen", segStart+segLen, "len(states)", len(states))
+	}
 
 	startState := states[segStart].Hash()
 	midState := states[segStart+segLen/2+segLen%2].Hash()
