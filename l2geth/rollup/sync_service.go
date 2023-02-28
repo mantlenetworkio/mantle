@@ -855,7 +855,7 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 	if start > latest {
 		return fmt.Errorf("invalid block number:%v,currentBlock number:%v", start, latest)
 	}
-	var txs []types.Transaction
+	var txs []*types.Transaction
 	var oldBlocks []types.Block
 	for i := start; i <= latest; i++ {
 		block := s.bc.GetBlockByNumber(i)
@@ -876,7 +876,7 @@ func (s *SyncService) SchedulerRollback(start uint64) error {
 				tx = enqueueTx
 			}
 		}
-		txs = append(txs, *tx)
+		txs = append(txs, tx)
 		oldBlocks = append(oldBlocks, *block)
 	}
 	log.Info("setHead start", "currentBlockNumber", s.bc.CurrentHeader().Number.Uint64())
