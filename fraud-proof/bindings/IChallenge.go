@@ -30,7 +30,7 @@ var (
 
 // IChallengeMetaData contains all meta data concerning the IChallenge contract.
 var IChallengeMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"challengeState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"challengedSegmentStart\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"challengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"Bisected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"winner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"loser\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"enumIChallenge.CompletionReason\",\"name\":\"reason\",\"type\":\"uint8\"}],\"name\":\"ChallengeCompleted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"bisection\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentIndex\",\"type\":\"uint256\"},{\"internalType\":\"bytes32[]\",\"name\":\"prevBisection\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"bisectExecution\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentResponder\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentResponderTimeLeft\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_defender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_challenger\",\"type\":\"address\"},{\"internalType\":\"contractIVerifierEntry\",\"name\":\"_verifier\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_resultReceiver\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"_startStateHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_endStateHash\",\"type\":\"bytes32\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_numSteps\",\"type\":\"uint256\"}],\"name\":\"initializeChallengeLength\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"timeout\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"proof\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"challengedStepIndex\",\"type\":\"uint256\"},{\"internalType\":\"bytes32[]\",\"name\":\"prevBisection\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"verifyOneStepProof\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"startState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"midState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"endState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"bisectedTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"challengedSegmentStart\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"challengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"Bisected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"winner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"loser\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"enumIChallenge.CompletionReason\",\"name\":\"reason\",\"type\":\"uint8\"}],\"name\":\"ChallengeCompleted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32[3]\",\"name\":\"bisection\",\"type\":\"bytes32[3]\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentLength\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"bisectExecution\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentResponder\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentResponderTimeLeft\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_defender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_challenger\",\"type\":\"address\"},{\"internalType\":\"contractIVerifierEntry\",\"name\":\"_verifier\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_resultReceiver\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"_startStateHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_endStateHash\",\"type\":\"bytes32\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"checkStateHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"_numSteps\",\"type\":\"uint256\"}],\"name\":\"initializeChallengeLength\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"timeout\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"proof\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"challengedStepIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"verifyOneStepProof\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // IChallengeABI is the input ABI used to generate the binding from.
@@ -241,25 +241,25 @@ func (_IChallenge *IChallengeCallerSession) CurrentResponderTimeLeft() (*big.Int
 	return _IChallenge.Contract.CurrentResponderTimeLeft(&_IChallenge.CallOpts)
 }
 
-// BisectExecution is a paid mutator transaction binding the contract method 0xcc8f6677.
+// BisectExecution is a paid mutator transaction binding the contract method 0x8f2400a8.
 //
-// Solidity: function bisectExecution(bytes32[] bisection, uint256 challengedSegmentIndex, bytes32[] prevBisection, uint256 prevChallengedSegmentStart, uint256 prevChallengedSegmentLength) returns()
-func (_IChallenge *IChallengeTransactor) BisectExecution(opts *bind.TransactOpts, bisection [][32]byte, challengedSegmentIndex *big.Int, prevBisection [][32]byte, prevChallengedSegmentStart *big.Int, prevChallengedSegmentLength *big.Int) (*types.Transaction, error) {
-	return _IChallenge.contract.Transact(opts, "bisectExecution", bisection, challengedSegmentIndex, prevBisection, prevChallengedSegmentStart, prevChallengedSegmentLength)
+// Solidity: function bisectExecution(bytes32[3] bisection, uint256 challengedSegmentIndex, uint256 challengedSegmentStart, uint256 challengedSegmentLength, uint256 prevChallengedSegmentStart, uint256 prevChallengedSegmentLength) returns()
+func (_IChallenge *IChallengeTransactor) BisectExecution(opts *bind.TransactOpts, bisection [3][32]byte, challengedSegmentIndex *big.Int, challengedSegmentStart *big.Int, challengedSegmentLength *big.Int, prevChallengedSegmentStart *big.Int, prevChallengedSegmentLength *big.Int) (*types.Transaction, error) {
+	return _IChallenge.contract.Transact(opts, "bisectExecution", bisection, challengedSegmentIndex, challengedSegmentStart, challengedSegmentLength, prevChallengedSegmentStart, prevChallengedSegmentLength)
 }
 
-// BisectExecution is a paid mutator transaction binding the contract method 0xcc8f6677.
+// BisectExecution is a paid mutator transaction binding the contract method 0x8f2400a8.
 //
-// Solidity: function bisectExecution(bytes32[] bisection, uint256 challengedSegmentIndex, bytes32[] prevBisection, uint256 prevChallengedSegmentStart, uint256 prevChallengedSegmentLength) returns()
-func (_IChallenge *IChallengeSession) BisectExecution(bisection [][32]byte, challengedSegmentIndex *big.Int, prevBisection [][32]byte, prevChallengedSegmentStart *big.Int, prevChallengedSegmentLength *big.Int) (*types.Transaction, error) {
-	return _IChallenge.Contract.BisectExecution(&_IChallenge.TransactOpts, bisection, challengedSegmentIndex, prevBisection, prevChallengedSegmentStart, prevChallengedSegmentLength)
+// Solidity: function bisectExecution(bytes32[3] bisection, uint256 challengedSegmentIndex, uint256 challengedSegmentStart, uint256 challengedSegmentLength, uint256 prevChallengedSegmentStart, uint256 prevChallengedSegmentLength) returns()
+func (_IChallenge *IChallengeSession) BisectExecution(bisection [3][32]byte, challengedSegmentIndex *big.Int, challengedSegmentStart *big.Int, challengedSegmentLength *big.Int, prevChallengedSegmentStart *big.Int, prevChallengedSegmentLength *big.Int) (*types.Transaction, error) {
+	return _IChallenge.Contract.BisectExecution(&_IChallenge.TransactOpts, bisection, challengedSegmentIndex, challengedSegmentStart, challengedSegmentLength, prevChallengedSegmentStart, prevChallengedSegmentLength)
 }
 
-// BisectExecution is a paid mutator transaction binding the contract method 0xcc8f6677.
+// BisectExecution is a paid mutator transaction binding the contract method 0x8f2400a8.
 //
-// Solidity: function bisectExecution(bytes32[] bisection, uint256 challengedSegmentIndex, bytes32[] prevBisection, uint256 prevChallengedSegmentStart, uint256 prevChallengedSegmentLength) returns()
-func (_IChallenge *IChallengeTransactorSession) BisectExecution(bisection [][32]byte, challengedSegmentIndex *big.Int, prevBisection [][32]byte, prevChallengedSegmentStart *big.Int, prevChallengedSegmentLength *big.Int) (*types.Transaction, error) {
-	return _IChallenge.Contract.BisectExecution(&_IChallenge.TransactOpts, bisection, challengedSegmentIndex, prevBisection, prevChallengedSegmentStart, prevChallengedSegmentLength)
+// Solidity: function bisectExecution(bytes32[3] bisection, uint256 challengedSegmentIndex, uint256 challengedSegmentStart, uint256 challengedSegmentLength, uint256 prevChallengedSegmentStart, uint256 prevChallengedSegmentLength) returns()
+func (_IChallenge *IChallengeTransactorSession) BisectExecution(bisection [3][32]byte, challengedSegmentIndex *big.Int, challengedSegmentStart *big.Int, challengedSegmentLength *big.Int, prevChallengedSegmentStart *big.Int, prevChallengedSegmentLength *big.Int) (*types.Transaction, error) {
+	return _IChallenge.Contract.BisectExecution(&_IChallenge.TransactOpts, bisection, challengedSegmentIndex, challengedSegmentStart, challengedSegmentLength, prevChallengedSegmentStart, prevChallengedSegmentLength)
 }
 
 // Initialize is a paid mutator transaction binding the contract method 0xf28c3e37.
@@ -283,25 +283,25 @@ func (_IChallenge *IChallengeTransactorSession) Initialize(_defender common.Addr
 	return _IChallenge.Contract.Initialize(&_IChallenge.TransactOpts, _defender, _challenger, _verifier, _resultReceiver, _startStateHash, _endStateHash)
 }
 
-// InitializeChallengeLength is a paid mutator transaction binding the contract method 0x9909e0d9.
+// InitializeChallengeLength is a paid mutator transaction binding the contract method 0x18ef160d.
 //
-// Solidity: function initializeChallengeLength(uint256 _numSteps) returns()
-func (_IChallenge *IChallengeTransactor) InitializeChallengeLength(opts *bind.TransactOpts, _numSteps *big.Int) (*types.Transaction, error) {
-	return _IChallenge.contract.Transact(opts, "initializeChallengeLength", _numSteps)
+// Solidity: function initializeChallengeLength(bytes32 checkStateHash, uint256 _numSteps) returns()
+func (_IChallenge *IChallengeTransactor) InitializeChallengeLength(opts *bind.TransactOpts, checkStateHash [32]byte, _numSteps *big.Int) (*types.Transaction, error) {
+	return _IChallenge.contract.Transact(opts, "initializeChallengeLength", checkStateHash, _numSteps)
 }
 
-// InitializeChallengeLength is a paid mutator transaction binding the contract method 0x9909e0d9.
+// InitializeChallengeLength is a paid mutator transaction binding the contract method 0x18ef160d.
 //
-// Solidity: function initializeChallengeLength(uint256 _numSteps) returns()
-func (_IChallenge *IChallengeSession) InitializeChallengeLength(_numSteps *big.Int) (*types.Transaction, error) {
-	return _IChallenge.Contract.InitializeChallengeLength(&_IChallenge.TransactOpts, _numSteps)
+// Solidity: function initializeChallengeLength(bytes32 checkStateHash, uint256 _numSteps) returns()
+func (_IChallenge *IChallengeSession) InitializeChallengeLength(checkStateHash [32]byte, _numSteps *big.Int) (*types.Transaction, error) {
+	return _IChallenge.Contract.InitializeChallengeLength(&_IChallenge.TransactOpts, checkStateHash, _numSteps)
 }
 
-// InitializeChallengeLength is a paid mutator transaction binding the contract method 0x9909e0d9.
+// InitializeChallengeLength is a paid mutator transaction binding the contract method 0x18ef160d.
 //
-// Solidity: function initializeChallengeLength(uint256 _numSteps) returns()
-func (_IChallenge *IChallengeTransactorSession) InitializeChallengeLength(_numSteps *big.Int) (*types.Transaction, error) {
-	return _IChallenge.Contract.InitializeChallengeLength(&_IChallenge.TransactOpts, _numSteps)
+// Solidity: function initializeChallengeLength(bytes32 checkStateHash, uint256 _numSteps) returns()
+func (_IChallenge *IChallengeTransactorSession) InitializeChallengeLength(checkStateHash [32]byte, _numSteps *big.Int) (*types.Transaction, error) {
+	return _IChallenge.Contract.InitializeChallengeLength(&_IChallenge.TransactOpts, checkStateHash, _numSteps)
 }
 
 // Timeout is a paid mutator transaction binding the contract method 0x70dea79a.
@@ -325,25 +325,25 @@ func (_IChallenge *IChallengeTransactorSession) Timeout() (*types.Transaction, e
 	return _IChallenge.Contract.Timeout(&_IChallenge.TransactOpts)
 }
 
-// VerifyOneStepProof is a paid mutator transaction binding the contract method 0x45b258a7.
+// VerifyOneStepProof is a paid mutator transaction binding the contract method 0x77dece10.
 //
-// Solidity: function verifyOneStepProof(bytes proof, uint256 challengedStepIndex, bytes32[] prevBisection, uint256 prevChallengedSegmentStart, uint256 prevChallengedSegmentLength) returns()
-func (_IChallenge *IChallengeTransactor) VerifyOneStepProof(opts *bind.TransactOpts, proof []byte, challengedStepIndex *big.Int, prevBisection [][32]byte, prevChallengedSegmentStart *big.Int, prevChallengedSegmentLength *big.Int) (*types.Transaction, error) {
-	return _IChallenge.contract.Transact(opts, "verifyOneStepProof", proof, challengedStepIndex, prevBisection, prevChallengedSegmentStart, prevChallengedSegmentLength)
+// Solidity: function verifyOneStepProof(bytes proof, uint256 challengedStepIndex, uint256 prevChallengedSegmentStart, uint256 prevChallengedSegmentLength) returns()
+func (_IChallenge *IChallengeTransactor) VerifyOneStepProof(opts *bind.TransactOpts, proof []byte, challengedStepIndex *big.Int, prevChallengedSegmentStart *big.Int, prevChallengedSegmentLength *big.Int) (*types.Transaction, error) {
+	return _IChallenge.contract.Transact(opts, "verifyOneStepProof", proof, challengedStepIndex, prevChallengedSegmentStart, prevChallengedSegmentLength)
 }
 
-// VerifyOneStepProof is a paid mutator transaction binding the contract method 0x45b258a7.
+// VerifyOneStepProof is a paid mutator transaction binding the contract method 0x77dece10.
 //
-// Solidity: function verifyOneStepProof(bytes proof, uint256 challengedStepIndex, bytes32[] prevBisection, uint256 prevChallengedSegmentStart, uint256 prevChallengedSegmentLength) returns()
-func (_IChallenge *IChallengeSession) VerifyOneStepProof(proof []byte, challengedStepIndex *big.Int, prevBisection [][32]byte, prevChallengedSegmentStart *big.Int, prevChallengedSegmentLength *big.Int) (*types.Transaction, error) {
-	return _IChallenge.Contract.VerifyOneStepProof(&_IChallenge.TransactOpts, proof, challengedStepIndex, prevBisection, prevChallengedSegmentStart, prevChallengedSegmentLength)
+// Solidity: function verifyOneStepProof(bytes proof, uint256 challengedStepIndex, uint256 prevChallengedSegmentStart, uint256 prevChallengedSegmentLength) returns()
+func (_IChallenge *IChallengeSession) VerifyOneStepProof(proof []byte, challengedStepIndex *big.Int, prevChallengedSegmentStart *big.Int, prevChallengedSegmentLength *big.Int) (*types.Transaction, error) {
+	return _IChallenge.Contract.VerifyOneStepProof(&_IChallenge.TransactOpts, proof, challengedStepIndex, prevChallengedSegmentStart, prevChallengedSegmentLength)
 }
 
-// VerifyOneStepProof is a paid mutator transaction binding the contract method 0x45b258a7.
+// VerifyOneStepProof is a paid mutator transaction binding the contract method 0x77dece10.
 //
-// Solidity: function verifyOneStepProof(bytes proof, uint256 challengedStepIndex, bytes32[] prevBisection, uint256 prevChallengedSegmentStart, uint256 prevChallengedSegmentLength) returns()
-func (_IChallenge *IChallengeTransactorSession) VerifyOneStepProof(proof []byte, challengedStepIndex *big.Int, prevBisection [][32]byte, prevChallengedSegmentStart *big.Int, prevChallengedSegmentLength *big.Int) (*types.Transaction, error) {
-	return _IChallenge.Contract.VerifyOneStepProof(&_IChallenge.TransactOpts, proof, challengedStepIndex, prevBisection, prevChallengedSegmentStart, prevChallengedSegmentLength)
+// Solidity: function verifyOneStepProof(bytes proof, uint256 challengedStepIndex, uint256 prevChallengedSegmentStart, uint256 prevChallengedSegmentLength) returns()
+func (_IChallenge *IChallengeTransactorSession) VerifyOneStepProof(proof []byte, challengedStepIndex *big.Int, prevChallengedSegmentStart *big.Int, prevChallengedSegmentLength *big.Int) (*types.Transaction, error) {
+	return _IChallenge.Contract.VerifyOneStepProof(&_IChallenge.TransactOpts, proof, challengedStepIndex, prevChallengedSegmentStart, prevChallengedSegmentLength)
 }
 
 // IChallengeBisectedIterator is returned from FilterBisected and is used to iterate over the raw logs and unpacked data for Bisected events raised by the IChallenge contract.
@@ -415,15 +415,18 @@ func (it *IChallengeBisectedIterator) Close() error {
 
 // IChallengeBisected represents a Bisected event raised by the IChallenge contract.
 type IChallengeBisected struct {
-	ChallengeState          [32]byte
+	StartState              [32]byte
+	MidState                [32]byte
+	EndState                [32]byte
+	BisectedTime            *big.Int
 	ChallengedSegmentStart  *big.Int
 	ChallengedSegmentLength *big.Int
 	Raw                     types.Log // Blockchain specific contextual infos
 }
 
-// FilterBisected is a free log retrieval operation binding the contract event 0x8c3cfc522d91af51bb14f6db452f8c212ba664a426c79e5ef78872e7a1072074.
+// FilterBisected is a free log retrieval operation binding the contract event 0x4822f2e76ffe02311fb06dedb430ed610bf698838d4b2c751e1d6cf83da7c202.
 //
-// Solidity: event Bisected(bytes32 challengeState, uint256 challengedSegmentStart, uint256 challengedSegmentLength)
+// Solidity: event Bisected(bytes32 startState, bytes32 midState, bytes32 endState, uint256 bisectedTime, uint256 challengedSegmentStart, uint256 challengedSegmentLength)
 func (_IChallenge *IChallengeFilterer) FilterBisected(opts *bind.FilterOpts) (*IChallengeBisectedIterator, error) {
 
 	logs, sub, err := _IChallenge.contract.FilterLogs(opts, "Bisected")
@@ -433,9 +436,9 @@ func (_IChallenge *IChallengeFilterer) FilterBisected(opts *bind.FilterOpts) (*I
 	return &IChallengeBisectedIterator{contract: _IChallenge.contract, event: "Bisected", logs: logs, sub: sub}, nil
 }
 
-// WatchBisected is a free log subscription operation binding the contract event 0x8c3cfc522d91af51bb14f6db452f8c212ba664a426c79e5ef78872e7a1072074.
+// WatchBisected is a free log subscription operation binding the contract event 0x4822f2e76ffe02311fb06dedb430ed610bf698838d4b2c751e1d6cf83da7c202.
 //
-// Solidity: event Bisected(bytes32 challengeState, uint256 challengedSegmentStart, uint256 challengedSegmentLength)
+// Solidity: event Bisected(bytes32 startState, bytes32 midState, bytes32 endState, uint256 bisectedTime, uint256 challengedSegmentStart, uint256 challengedSegmentLength)
 func (_IChallenge *IChallengeFilterer) WatchBisected(opts *bind.WatchOpts, sink chan<- *IChallengeBisected) (event.Subscription, error) {
 
 	logs, sub, err := _IChallenge.contract.WatchLogs(opts, "Bisected")
@@ -470,9 +473,9 @@ func (_IChallenge *IChallengeFilterer) WatchBisected(opts *bind.WatchOpts, sink 
 	}), nil
 }
 
-// ParseBisected is a log parse operation binding the contract event 0x8c3cfc522d91af51bb14f6db452f8c212ba664a426c79e5ef78872e7a1072074.
+// ParseBisected is a log parse operation binding the contract event 0x4822f2e76ffe02311fb06dedb430ed610bf698838d4b2c751e1d6cf83da7c202.
 //
-// Solidity: event Bisected(bytes32 challengeState, uint256 challengedSegmentStart, uint256 challengedSegmentLength)
+// Solidity: event Bisected(bytes32 startState, bytes32 midState, bytes32 endState, uint256 bisectedTime, uint256 challengedSegmentStart, uint256 challengedSegmentLength)
 func (_IChallenge *IChallengeFilterer) ParseBisected(log types.Log) (*IChallengeBisected, error) {
 	event := new(IChallengeBisected)
 	if err := _IChallenge.contract.UnpackLog(event, "Bisected", log); err != nil {
