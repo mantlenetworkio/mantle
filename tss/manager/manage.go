@@ -131,7 +131,7 @@ func (m Manager) recoverGenerateKey() {
 }
 
 func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
-	log.Info("received sign state request", "request", request.String())
+	log.Info("received sign state request", "start block", request.StartBlock, "len", len(request.StateRoots), "index", request.OffsetStartsAtIndex)
 	offsetStartsAtIndex, _ := new(big.Int).SetString(request.OffsetStartsAtIndex, 10)
 	digestBz, err := tss.StateBatchHash(request.StateRoots, offsetStartsAtIndex)
 	if err != nil {
