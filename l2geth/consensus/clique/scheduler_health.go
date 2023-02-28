@@ -91,7 +91,8 @@ func (schedulerInst *Scheduler) deductPoints(sequencer common.Address) {
 		return
 	}
 	if schedulerInst.zeroPoints(sequencer) {
-		schedulerInst.punishSequencer(sequencer)
+		// TODO
+		//schedulerInst.punishSequencer(sequencer)
 	}
 	return
 }
