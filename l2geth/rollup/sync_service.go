@@ -1353,7 +1353,7 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 }
 
 func (s *SyncService) UpdateSyncServiceState(tx *types.Transaction) {
-	if s.GetRollupRole() == SCHEDULER_NODE {
+	if s.GetRollupRole() != SEQUENCER_NODE {
 		return
 	}
 	l1BlockNumber := tx.L1BlockNumber()
