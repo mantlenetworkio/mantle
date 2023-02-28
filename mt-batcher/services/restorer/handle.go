@@ -95,7 +95,34 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 		return c.JSON(http.StatusBadRequest, errors.New("recovery data fail"))
 	}
 	if len(reply.GetData()) >= 31*s.Cfg.EigenLayerNode {
-		return c.JSON(http.StatusOK, reply.GetData())
+
+		data := reply.GetData()
+
+		batchTxn := new([]eigenda.BatchTx)
+		batchRlpStream := rlp.NewStream(bytes.NewBuffer(data), uint64(len(data)))
+		err = batchRlpStream.Decode(batchTxn)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, errors.New("decode data fail"))
+		}
+		var TxnRep []*TransactionListResponse
+		newBatchTxn := *batchTxn
+		for i := 0; i < len(newBatchTxn); i++ {
+			l2Tx := new(types.Transaction)
+			rlpStream := l2rlp.NewStream(bytes.NewBuffer(newBatchTxn[i].RawTx), 0)
+			if err := l2Tx.DecodeRLP(rlpStream); err != nil {
+				log.Error("Decode RLP fail")
+				continue
+			}
+			log.Info("transaction", "hash", l2Tx.Hash().Hex())
+			newBlockNumber := new(big.Int).SetBytes(newBatchTxn[i].BlockNumber)
+			txSl := &TransactionListResponse{
+				BlockNumber: newBlockNumber.String(),
+				TxHash:      l2Tx.Hash().String(),
+			}
+			TxnRep = append(TxnRep, txSl)
+		}
+
+		return c.JSON(http.StatusOK, TxnRep)
 	} else {
 		log.Error("retrieve data is empty, please check da data batch")
 		return c.JSON(http.StatusBadRequest, errors.New("retrieve data is empty, please check da date"))
