@@ -79,8 +79,6 @@ type Scheduler struct {
 	addPeerSub   *event.TypeMuxSubscription
 	batchEndSub  *event.TypeMuxSubscription
 
-	ticker *time.Ticker
-
 	wallet      accounts.Wallet
 	signAccount accounts.Account
 
@@ -110,17 +108,11 @@ func NewScheduler(db ethdb.Database, config *Config, clique *Clique, blockchain 
 		log.Info("sequencer: ", "address", item.MintAddress.String(), "node_ID", hex.EncodeToString(item.NodeID))
 	}
 
-	// default epoch 1 day = 86400 second
-	batchEpoch := defaultBatchEpoch * time.Second
-	if config.BatchEpoch != 0 {
-		batchEpoch = time.Duration(config.BatchEpoch) * time.Second
-	}
 	schedulerInst := &Scheduler{
 		config:            config,
 		running:           0,
 		currentHeight:     0,
 		db:                db,
-		ticker:            time.NewTicker(batchEpoch),
 		consensusEngine:   clique,
 		eventMux:          eventMux,
 		syncer:            syncer,
@@ -368,31 +360,20 @@ func (schedulerInst *Scheduler) handleChainHeadEventLoop() {
 // the sequencer set from L1 and update the schedulerInst.sequencerSet
 func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 	time.Sleep(getTimeDiffToMidnight())
+	err := schedulerInst.syncSequencerSet()
+	if err != nil {
+		log.Error("syncSequencerSetRoutine update sequencer set error", "err_msg", err.Error())
+	}
+	// default epoch 1 day = 86400 second
+	batchEpoch := defaultBatchEpoch * time.Second
+	if schedulerInst.config.BatchEpoch != 0 {
+		batchEpoch = time.Duration(schedulerInst.config.BatchEpoch) * time.Second
+	}
+	ticker := time.NewTicker(batchEpoch)
 	for {
 		select {
-		case <-schedulerInst.ticker.C:
-			err := func() error {
-				log.Info("Sync sequencer set")
-				schedulerInst.sequencerSetMtx.Lock()
-				defer schedulerInst.sequencerSetMtx.Unlock()
-				seqSet, err := schedulerInst.syncer.GetSequencerSet()
-				if err != nil {
-					return fmt.Errorf("get sequencer set failed %s", err.Error())
-				}
-				schedulerInst.setSequencerHealthPoints(seqSet)
-
-				// todo do we need get changes then use UpdateWithChangeSet to update sequencer set or just replace schedulerInst.sequencerSet
-				// get changes
-				changes := compareSequencerSet(schedulerInst.sequencerSet.Sequencers, seqSet)
-				log.Info(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
-
-				// update sequencer set and consensus_engine
-				err = schedulerInst.sequencerSet.UpdateWithChangeSet(changes)
-				if err != nil {
-					return fmt.Errorf("sequencer set update failed %s", err.Error())
-				}
-				return err
-			}()
+		case <-ticker.C:
+			err := schedulerInst.syncSequencerSet()
 			if err != nil {
 				log.Error("syncSequencerSetRoutine update sequencer set error", "err_msg", err.Error())
 				continue
@@ -402,6 +383,29 @@ func (schedulerInst *Scheduler) syncSequencerSetRoutine() {
 			return
 		}
 	}
+}
+
+func (schedulerInst *Scheduler) syncSequencerSet() error {
+	log.Info("Sync sequencer set")
+	schedulerInst.sequencerSetMtx.Lock()
+	defer schedulerInst.sequencerSetMtx.Unlock()
+	seqSet, err := schedulerInst.syncer.GetSequencerSet()
+	if err != nil {
+		return fmt.Errorf("get sequencer set failed %s", err.Error())
+	}
+	schedulerInst.setSequencerHealthPoints(seqSet)
+
+	// todo do we need get changes then use UpdateWithChangeSet to update sequencer set or just replace schedulerInst.sequencerSet
+	// get changes
+	changes := compareSequencerSet(schedulerInst.sequencerSet.Sequencers, seqSet)
+	log.Info(fmt.Sprintf("Get sequencer set success, have changes: %d", len(changes)))
+
+	// update sequencer set and consensus_engine
+	err = schedulerInst.sequencerSet.UpdateWithChangeSet(changes)
+	if err != nil {
+		return fmt.Errorf("sequencer set update failed %s", err.Error())
+	}
+	return err
 }
 
 // getTimeDiffToMidnight returns the time difference to midnight
