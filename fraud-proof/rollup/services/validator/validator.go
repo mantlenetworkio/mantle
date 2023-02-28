@@ -143,10 +143,10 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 func (v *Validator) challengeLoop() {
 	defer v.Wg.Done()
 
-	abi, err := bindings.IChallengeMetaData.GetAbi()
-	if err != nil {
-		log.Crit("Failed to get IChallenge ABI", "err", err)
-	}
+	//abi, err := bindings.IChallengeMetaData.GetAbi()
+	//if err != nil {
+	//	log.Crit("Failed to get IChallenge ABI", "err", err)
+	//}
 
 	// Watch AssertionCreated event
 	createdCh := make(chan *bindings.RollupAssertionCreated, 4096)
@@ -200,7 +200,7 @@ func (v *Validator) challengeLoop() {
 				// If it's our turn
 				if common.Address(responder) == v.Config.StakeAddr {
 					log.Info("Validator start to respond new bisection...")
-					err := services.RespondBisection(v.BaseService, abi, challengeSession, ev, states, ctx.opponentAssertion.VmHash, false)
+					err := services.RespondBisection(v.BaseService, challengeSession, ev, states)
 					if err != nil {
 						// TODO: error handling
 						log.Error("Can not respond to bisection", "error", err)

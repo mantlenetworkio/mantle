@@ -39,7 +39,7 @@ interface IChallenge {
 
     event ChallengeCompleted(address winner, address loser, CompletionReason reason);
 
-    event Bisected(bytes32 challengeState, uint256 challengedSegmentStart, uint256 challengedSegmentLength);
+    event Bisected(bytes32 startState, bytes32 midState, bytes32 endState, uint256 bisectedTime, uint256 challengedSegmentStart, uint256 challengedSegmentLength);
 
     /**
      * @notice Initializes contract.
@@ -64,7 +64,7 @@ interface IChallenge {
      * @param _numSteps Number of steps executed from the start of the assertion to its end.
      * If this parameter is incorrect, the defender will be slashed (assuming successful execution of the protocol by the challenger).
      */
-    function initializeChallengeLength(uint256 _numSteps) external;
+    function initializeChallengeLength(bytes32 checkStateHash, uint256 _numSteps) external;
 
     /**
      * @notice Bisects a segment. The challenged segment is defined by: {`challengedSegmentStart`, `challengedSegmentLength`, `bisection[0]`, `oldEndHash`}
@@ -72,15 +72,17 @@ interface IChallenge {
      * The first element is the last agreed upon state hash. Must be of length MAX_BISECTION_LENGTH for all rounds except the last.
      * In the last round, the bisection segments must be single steps.
      * @param challengedSegmentIndex Index into `prevBisection`. Must be greater than 0 (since the first is agreed upon).
-     * @param prevBisection Bisection in the preceding round.
+     * @param challengedSegmentStart Offset of the segment challenged in the preceding round (in steps).
+     * @param challengedSegmentLength Length of the segment challenged in the preceding round (in steps).
      * @param prevChallengedSegmentStart Offset of the segment challenged in the preceding round (in steps).
      * Note: this is relative to the assertion being challenged (i.e. always between 0 and the initial `numSteps`).
      * @param prevChallengedSegmentLength Length of the segment challenged in the preceding round (in steps).
      */
     function bisectExecution(
-        bytes32[] calldata bisection,
+        bytes32[3] calldata bisection,
         uint256 challengedSegmentIndex,
-        bytes32[] calldata prevBisection,
+        uint256 challengedSegmentStart,
+        uint256 challengedSegmentLength,
         uint256 prevChallengedSegmentStart,
         uint256 prevChallengedSegmentLength
     ) external;
@@ -89,7 +91,6 @@ interface IChallenge {
      * @notice Verifies one step proof and completes challenge protocol.
      * @param proof TODO.
      * @param challengedStepIndex Index into `prevBisection`. Must be greater than 0 (since the first is agreed upon).
-     * @param prevBisection Bisection in the preceding round. Each segment must now be of length 1 (i.e. a single step).
      * @param prevChallengedSegmentStart Offset of the segment challenged in the preceding round (in steps).
      * Note: this is relative to the assertion being challenged (i.e. always between 0 and the initial `numSteps`).
      * @param prevChallengedSegmentLength Length of the segment challenged in the preceding round (in steps).
@@ -97,7 +98,7 @@ interface IChallenge {
     function verifyOneStepProof(
         bytes memory proof,
         uint256 challengedStepIndex,
-        bytes32[] calldata prevBisection,
+//        bytes32[2] calldata prevBisection,
         uint256 prevChallengedSegmentStart,
         uint256 prevChallengedSegmentLength
     ) external;

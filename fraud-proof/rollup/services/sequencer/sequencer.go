@@ -225,10 +225,10 @@ func (s *Sequencer) confirmationLoop() {
 func (s *Sequencer) challengeLoop() {
 	defer s.Wg.Done()
 
-	abi, err := bindings.IChallengeMetaData.GetAbi()
-	if err != nil {
-		log.Error("Failed to get IChallenge ABI", "err", err)
-	}
+	//abi, err := bindings.IChallengeMetaData.GetAbi()
+	//if err != nil {
+	//	log.Error("Failed to get IChallenge ABI", "err", err)
+	//}
 
 	// Watch L1 blockchain for challenge timeout
 	headCh := make(chan *types.Header, 4096)
@@ -247,7 +247,7 @@ func (s *Sequencer) challengeLoop() {
 	var challengeCompletedSub event.Subscription
 
 	inChallenge := false
-	var opponentTimeoutBlock uint64
+	var opponentTimeout uint64
 
 	for {
 		if inChallenge {
@@ -264,7 +264,8 @@ func (s *Sequencer) challengeLoop() {
 				}
 				if common.Address(responder) == s.Config.StakeAddr {
 					// If it's our turn
-					err := services.RespondBisection(s.BaseService, abi, challengeSession, ev, states, common.Hash{}, false)
+					//err := services.RespondBisection(s.BaseService, abi, challengeSession, ev, states, common.Hash{}, false)
+					err := services.RespondBisection(s.BaseService, challengeSession, ev, states)
 					if err != nil {
 						// TODO: error handling
 						log.Error("Can not respond to bisection", "error", err)
@@ -278,15 +279,15 @@ func (s *Sequencer) challengeLoop() {
 						continue
 					}
 					log.Info("[Sequencer] Opponent time left", "time", opponentTimeLeft)
-					opponentTimeoutBlock = ev.Raw.BlockNumber + opponentTimeLeft.Uint64()
+					opponentTimeout = ev.Raw.BlockNumber + opponentTimeLeft.Uint64()
 				}
 			case header := <-headCh:
-				if opponentTimeoutBlock == 0 {
+				if opponentTimeout == 0 {
 					continue
 				}
 				// TODO: can we use >= here?
-				if header.Number.Uint64() > opponentTimeoutBlock {
-					_, err := challengeSession.Timeout()
+				if header.Time > opponentTimeout {
+					_, err = challengeSession.Timeout()
 					if err != nil {
 						log.Error("Can not timeout opponent", "error", err)
 						continue
@@ -342,7 +343,8 @@ func (s *Sequencer) challengeLoop() {
 					log.Crit("Failed to generate states", "err", err)
 				}
 				log.Info("Sequencer generate state end...")
-				_, err = challengeSession.InitializeChallengeLength(new(big.Int).SetUint64(uint64(len(states)) - 1))
+				numSteps := uint64(len(states)) - 1
+				_, err = challengeSession.InitializeChallengeLength(services.MidState(states, 0, numSteps), new(big.Int).SetUint64(numSteps))
 				if err != nil {
 					log.Crit("Failed to initialize challenge", "err", err)
 				}

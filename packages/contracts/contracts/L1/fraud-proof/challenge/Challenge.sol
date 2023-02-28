@@ -67,6 +67,8 @@ contract Challenge is IChallenge {
     Turn public turn;
     // See `ChallengeLib.computeBisectionHash` for the format of this commitment.
     bytes32 public bisectionHash;
+    bytes32[] public prevBisection;
+
     // Initial state used to initialize bisectionHash (write-once).
     bytes32 private startStateHash;
     bytes32 private endStateHash;
@@ -121,72 +123,76 @@ contract Challenge is IChallenge {
         // TODO(ujval): initialize timeout
         defenderTimeLeft = 10;
         challengerTimeLeft = 10;
+        prevBisection.push(_startStateHash);
+        prevBisection.push(_endStateHash);
     }
 
-    function initializeChallengeLength(uint256 _numSteps) external override onlyOnTurn {
+    function initializeChallengeLength(bytes32 checkStateHash, uint256 _numSteps) external override onlyOnTurn {
         require(bisectionHash == 0, CHAL_INIT_STATE);
         require(_numSteps > 0, "INVALID_NUM_STEPS");
-        bisectionHash = ChallengeLib.initialBisectionHash(startStateHash, endStateHash, _numSteps);
+        bisectionHash = ChallengeLib.computeBisectionHash(startStateHash, endStateHash, 0, _numSteps);
+        prevBisection.push(checkStateHash);
         // TODO: consider emitting a different event?
-        emit Bisected(bisectionHash, 0, _numSteps);
+        emit Bisected(startStateHash, checkStateHash, endStateHash, block.timestamp, 0, _numSteps);
     }
 
     function bisectExecution(
-        bytes32[] calldata bisection,
+        bytes32[3] calldata bisection,
         uint256 challengedSegmentIndex,
-        bytes32[] calldata prevBisection,
+        uint256 challengedSegmentStart,
+        uint256 challengedSegmentLength,
         uint256 prevChallengedSegmentStart,
         uint256 prevChallengedSegmentLength
     ) external override onlyOnTurn postInitialization {
+        bytes32 prevHash;
         // Verify provided prev bisection.
-        bytes32 prevHash =
-            ChallengeLib.computeBisectionHash(prevBisection, prevChallengedSegmentStart, prevChallengedSegmentLength);
-        require(prevHash == bisectionHash, BIS_PREV);
-        console.log("log out bisect hash...");
+        if (challengedSegmentIndex == 1) {
+            prevHash =
+            ChallengeLib.computeBisectionHash(bisection[0], prevBisection[prevBisection.length - 1], prevChallengedSegmentStart, prevChallengedSegmentLength);
+        } else if (challengedSegmentIndex == 2) {
+            prevHash =
+            ChallengeLib.computeBisectionHash(prevBisection[prevBisection.length - 2], bisection[2], prevChallengedSegmentStart, prevChallengedSegmentLength);
+        } else {
+            revert("INVALID_INDEX");
+        }
+        console.log("bisection info");
+        console.logBytes32(bisection[0]);
+        console.logBytes32(bisection[1]);
+        console.logBytes32(bisection[2]);
+        console.log("prevBisection info");
+        console.logBytes32(prevBisection[prevBisection.length - 1]);
+        console.logBytes32(prevBisection[prevBisection.length - 2]);
+        console.log("prev info");
+        console.log(prevChallengedSegmentStart);
+        console.log(prevChallengedSegmentLength);
+        console.log("prevHash");
         console.logBytes32(prevHash);
+        console.log("bisectionHash");
         console.logBytes32(bisectionHash);
+        require(prevHash == bisectionHash, BIS_PREV);
 
-        require(challengedSegmentIndex > 0 && challengedSegmentIndex < prevBisection.length, "INVALID_INDEX");
         // Require agreed upon start state hash and disagreed upon end state hash.
-        require(bisection[0] == prevBisection[challengedSegmentIndex - 1], "INVALID_START");
-        require(bisection[bisection.length - 1] != prevBisection[challengedSegmentIndex], "INVALID_END");
+        require(bisection[0] == prevBisection[prevBisection.length - 1] || bisection[2] == prevBisection[prevBisection.length - 1], "INVALID_START_OR_END");
 
         // Compute segment start/length.
-        uint256 challengedSegmentStart = prevChallengedSegmentStart;
-        uint256 challengedSegmentLength = prevChallengedSegmentLength;
-        if (prevBisection.length > 2) {
-            // prevBisection.length == 2 means first round
-            uint256 firstSegmentLength =
-                ChallengeLib.firstSegmentLength(prevChallengedSegmentLength, MAX_BISECTION_DEGREE);
-            uint256 otherSegmentLength =
-                ChallengeLib.otherSegmentLength(prevChallengedSegmentLength, MAX_BISECTION_DEGREE);
-            challengedSegmentLength = challengedSegmentIndex == 1 ? firstSegmentLength : otherSegmentLength;
-
-            if (challengedSegmentIndex > 1) {
-                challengedSegmentStart += firstSegmentLength + (otherSegmentLength * (challengedSegmentIndex - 2));
-            }
-        }
-        require(challengedSegmentLength > 1, "TOO_SHORT");
-
-        // Require that bisection has the correct length. This is only ever less than BISECTION_DEGREE at the last bisection.
-        uint256 target = challengedSegmentLength < MAX_BISECTION_DEGREE ? challengedSegmentLength : MAX_BISECTION_DEGREE;
-        require(bisection.length == target + 1, "CUT_COUNT");
+        require(challengedSegmentLength > 0, "TOO_SHORT");
 
         // Compute new challenge state.
-        bisectionHash = ChallengeLib.computeBisectionHash(bisection, challengedSegmentStart, challengedSegmentLength);
-        emit Bisected(bisectionHash, challengedSegmentStart, challengedSegmentLength);
+        prevBisection.push(bisection[1]);
+        bisectionHash = ChallengeLib.computeBisectionHash(bisection[0], bisection[2], challengedSegmentStart, challengedSegmentLength);
+        emit Bisected(bisection[0], bisection[1], bisection[2], block.timestamp, challengedSegmentStart, challengedSegmentLength);
     }
 
     function verifyOneStepProof(
         bytes calldata proof,
         uint256 challengedStepIndex,
-        bytes32[] calldata prevBisection,
+//        bytes32[2] calldata prevBisection,
         uint256 prevChallengedSegmentStart,
         uint256 prevChallengedSegmentLength
     ) external override onlyOnTurn {
         // Verify provided prev bisection.
         bytes32 prevHash =
-            ChallengeLib.computeBisectionHash(prevBisection, prevChallengedSegmentStart, prevChallengedSegmentLength);
+            ChallengeLib.computeBisectionHash(prevBisection[0], prevBisection[1], prevChallengedSegmentStart, prevChallengedSegmentLength);
         require(prevHash == bisectionHash, BIS_PREV);
         require(challengedStepIndex > 0 && challengedStepIndex < prevBisection.length, "INVALID_INDEX");
         // Require that this is the last round.

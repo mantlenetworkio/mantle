@@ -34,24 +34,23 @@ library ChallengeLib {
         pure
         returns (bytes32)
     {
-        bytes32[] memory bisection = new bytes32[](2);
-        bisection[0] = startStateHash;
-        bisection[1] = endStateHash;
-        return ChallengeLib.computeBisectionHash(bisection, 0, numSteps);
+        return ChallengeLib.computeBisectionHash(startStateHash, endStateHash, 0, numSteps);
     }
 
     /**
      * @notice Computes H(bisection || segmentStart || segmentLength)
-     * @param bisection Array of stateHashes. First element is the last agreed upon state hash.
+     * @param startStateHash start stateHashes. First element of the agreed state hash.
+     * @param endStateHash end stateHashes. Last element of the agreed state hash.
      * @param challengedSegmentStart The number of steps preceding `bisection[1]`, relative to the assertion being challenged.
      * @param challengedSegmentLength Length of bisected segment (in steps), from the start of bisection[1] to the end of bisection[-1].
      */
     function computeBisectionHash(
-        bytes32[] memory bisection,
+        bytes32 startStateHash,
+        bytes32 endStateHash,
         uint256 challengedSegmentStart,
         uint256 challengedSegmentLength
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(bisection, challengedSegmentStart, challengedSegmentLength));
+        return keccak256(abi.encodePacked(startStateHash, endStateHash, challengedSegmentStart, challengedSegmentLength));
     }
 
     /**
