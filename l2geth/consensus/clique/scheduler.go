@@ -295,6 +295,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			//}
 			//schedulerInst.expectMinTxsCount = expectMinTxsCount
 			// store msg as currentStartMsg
+			schedulerInst.dynamicCalibrateExpireTimeAndBatchSize(&schedulerInst.currentStartMsg, &msg)
 			schedulerInst.currentStartMsg = msg
 			// set BatchIndex to db
 			rawdb.WriteCurrentBatchPeriodIndex(schedulerInst.db, msg.BatchIndex)
@@ -332,6 +333,10 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			return
 		}
 	}
+}
+
+func (schedulerInst *Scheduler) dynamicCalibrateExpireTimeAndBatchSize(preMsg, curMsg *types.BatchPeriodStartMsg) {
+
 }
 
 // handleChainHeadEventLoop checks whether the current block height reaches the currentStartMsg.maxHeight,
