@@ -119,8 +119,12 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         baseStakeAmount = _baseStakeAmount;
 
         assertions.setRollupAddress(address(this));
+        lastResolvedAssertionID = 0;
+        lastConfirmedAssertionID = 0;
+        lastCreatedAssertionID = 0;
+
         assertions.createAssertion(
-            0, // assertionID
+            lastResolvedAssertionID, // assertionID
             _initialVMhash,
             0, // inboxSize (genesis)
             0, // parentID
