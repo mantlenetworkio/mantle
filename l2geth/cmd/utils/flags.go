@@ -490,6 +490,11 @@ var (
 		Name:  "miner.noverify",
 		Usage: "Disable remote sealing verification",
 	}
+	BatchAnswerIntervalFlag = cli.Uint64Flag{
+		Name:  "miner.batchanswerinterval",
+		Usage: "Max batch answer interval",
+		Value: 5,
+	}
 	// Account settings
 	UnlockedAccountFlag = cli.StringFlag{
 		Name:  "unlock",
@@ -1576,6 +1581,9 @@ func setMiner(ctx *cli.Context, cfg *miner.Config) {
 	}
 	if ctx.GlobalIsSet(MinerNoVerfiyFlag.Name) {
 		cfg.Noverify = ctx.Bool(MinerNoVerfiyFlag.Name)
+	}
+	if ctx.GlobalIsSet(BatchAnswerIntervalFlag.Name) {
+		cfg.BatchAnswerInterval = ctx.Uint64(BatchAnswerIntervalFlag.Name)
 	}
 }
 
