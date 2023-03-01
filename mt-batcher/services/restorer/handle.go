@@ -116,7 +116,7 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 		newBatchTxn := *batchTxn
 		for i := 0; i < len(newBatchTxn); i++ {
 			l2Tx := new(types.Transaction)
-			txDecodeMetaData := new(types.TransactionMeta)
+			txDecodeMetaData := new(eigenda.TransactionMeta)
 			err = json.Unmarshal(newBatchTxn[i].TxMeta, txDecodeMetaData)
 			if err != nil {
 				log.Error("Unmarshal json fail")
@@ -126,7 +126,7 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 				log.Error("Decode RLP fail")
 				continue
 			}
-			log.Info("transaction", "hash", l2Tx.Hash().Hex())
+			log.Info("transaction", "hash", l2Tx.Hash().Hex(), "txTransaction", l2Tx)
 			newBlockNumber := new(big.Int).SetBytes(newBatchTxn[i].BlockNumber)
 
 			var queueOrigin types.QueueOrigin
@@ -140,7 +140,7 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 				addrLs := common2.HexToAddress("")
 				l1MessageSender = &addrLs
 			}
-
+			log.Info("txDecodeMetaData", "txDecodeMetaData", txDecodeMetaData)
 			realTxMeta := &types.TransactionMeta{
 				L1BlockNumber:   txDecodeMetaData.L1BlockNumber,
 				L1Timestamp:     txDecodeMetaData.L1Timestamp,
