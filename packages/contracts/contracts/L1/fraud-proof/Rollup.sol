@@ -326,7 +326,14 @@ contract Rollup is Lib_AddressResolver, RollupBase {
             assertions.getStateHash(parentID),
             assertions.getStateHash(defenderAssertionID)
         );
-
+        console.log("parent Hash");
+        console.logBytes32(assertions.getStateHash(parentID));
+        console.log("defender Hash");
+        console.logBytes32(assertions.getStateHash(defenderAssertionID));
+        console.log("parent InboxSize");
+        console.log(assertions.getInboxSize(parentID));
+        console.log("defender InboxSize");
+        console.log(assertions.getInboxSize(defenderAssertionID));
         return challengeAddr;
     }
 
