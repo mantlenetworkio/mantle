@@ -1,26 +1,21 @@
 /* Imports: External */
-import { fromHexString, sleep } from '@mantleio/core-utils'
-import { BaseService, Metrics } from '@mantleio/common-ts'
-import { TypedEvent } from '@mantleio/contracts/dist/types/common'
-import { BaseProvider, StaticJsonRpcProvider } from '@ethersproject/providers'
-import { LevelUp } from 'levelup'
-import { constants } from 'ethers'
-import { Gauge, Counter } from 'prom-client'
+import {fromHexString, sleep} from '@mantleio/core-utils'
+import {BaseService, Metrics} from '@mantleio/common-ts'
+import {TypedEvent} from '@mantleio/contracts/dist/types/common'
+import {BaseProvider, StaticJsonRpcProvider} from '@ethersproject/providers'
+import {LevelUp} from 'levelup'
+import {constants} from 'ethers'
+import {Counter, Gauge} from 'prom-client'
 
 /* Imports: Internal */
-import { handleEventsTransactionEnqueued } from './handlers/transaction-enqueued'
-import { handleEventsSequencerBatchAppended } from './handlers/sequencer-batch-appended'
-import { handleEventsStateBatchAppended } from './handlers/state-batch-appended'
-import { MissingElementError } from './handlers/errors'
-import { TransportDB } from '../../db/transport-db'
-import {
-  MantleContracts,
-  loadMantleContracts,
-  loadContract,
-  validators,
-} from '../../utils'
-import { EventHandlerSet } from '../../types'
-import { L1DataTransportServiceOptions } from '../main/service'
+import {handleEventsTransactionEnqueued} from './handlers/transaction-enqueued'
+import {handleEventsSequencerBatchAppended} from './handlers/sequencer-batch-appended'
+import {handleEventsStateBatchAppended} from './handlers/state-batch-appended'
+import {MissingElementError} from './handlers/errors'
+import {TransportDB} from '../../db/transport-db'
+import {loadContract, loadMantleContracts, MantleContracts, validators,} from '../../utils'
+import {EventHandlerSet} from '../../types'
+import {L1DataTransportServiceOptions} from '../main/service'
 
 interface L1IngestionMetrics {
   highestSyncedL1Block: Gauge<string>
@@ -29,9 +24,9 @@ interface L1IngestionMetrics {
 }
 
 const registerMetrics = ({
-  client,
-  registry,
-}: Metrics): L1IngestionMetrics => ({
+                           client,
+                           registry,
+                         }: Metrics): L1IngestionMetrics => ({
   highestSyncedL1Block: new client.Gauge({
     name: 'data_transport_layer_highest_synced_l1_block',
     help: 'Highest Synced L1 Block Number',
@@ -114,7 +109,7 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
         url: this.options.l1RpcProvider,
         user: this.options.l1RpcProviderUser,
         password: this.options.l1RpcProviderPassword,
-        headers: { 'User-Agent': 'data-transport-layer' },
+        headers: {'User-Agent': 'data-transport-layer'},
       })
     } else {
       this.state.l1RpcProvider = this.options.l1RpcProvider
@@ -202,6 +197,19 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
     // sync with events coming from Ethereum. Loops as quickly as it can until it approaches the
     // tip of the chain, after which it starts waiting for a few seconds between each loop to avoid
     // unnecessary spam.
+    const fixHeights: number[] = [115, 2871, 4007, 5456, 6312, 6582, 14152, 9524, 69603, 69604, 69605, 69606, 69607, 85019, 10493, 110458, 110459, 110460, 110461, 110462, 110463, 110464, 110465, 110466, 110467, 110468, 110469, 110470, 110471, 110472, 110473, 110474, 85019, 124737, 126785, 172269, 183837, 183838, 188598, 209138, 217935, 223779, 236943, 237736, 243435, 244198, 247400, 256661, 260722, 267093, 277620, 278907, 279541, 281086, 281128, 306936, 311640, 314047, 334671, 334672, 339294, 339577, 352250, 355668, 358129, 376609, 405829, 410700, 414018, 414019, 423411, 439132, 442227, 443842];
+    // for (let i = 0; i < intArray.length; i++) {
+    for (const fixHeight of fixHeights) {
+      const unConfirmedTx = await this.state.db.getUnconfirmedTransactionByIndex(fixHeight - 1);
+      const enqueue = await this.state.db.getEnqueueByIndex(unConfirmedTx.queueIndex)
+      if (enqueue.data !== unConfirmedTx.data) {
+        console.log(enqueue)
+        enqueue.data = unConfirmedTx.data
+        await this.state.db.putEnqueueEntries([enqueue])
+        console.info("Enqueue fixed,index:",enqueue.index)
+
+      }
+    }
     while (this.running) {
       try {
         const highestSyncedL1Block =
@@ -223,7 +231,6 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
           highestSyncedL1Block,
           targetL1Block,
         })
-
         // I prefer to do this in serial to avoid non-determinism. We could have a discussion about
         // using Promise.all if necessary, but I don't see a good reason to do so unless parsing is
         // really, really slow for all event types.
@@ -332,6 +339,105 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
   }
 
   private async _syncEvents(
+    contractName: string,
+    eventName: string,
+    fromL1Block: number,
+    toL1Block: number,
+    handlers: EventHandlerSet<any, any, any>
+  ): Promise<void> {
+    // Basic sanity checks.
+    if (!this.state.contracts[contractName]) {
+      throw new Error(`Contract ${contractName} does not exist.`)
+    }
+
+    // Basic sanity checks.
+    if (!this.state.contracts[contractName].filters[eventName]) {
+      throw new Error(
+        `Event ${eventName} does not exist on contract ${contractName}`
+      )
+    }
+
+    // We need to figure out how to make this work without Infura. Mark and I think that infura is
+    // doing some indexing of events beyond Geth's native capabilities, meaning some event logic
+    // will only work on Infura and not on a local geth instance. Not great.
+    const addressSetEvents =
+      await this.state.contracts.Lib_AddressManager.queryFilter(
+        this.state.contracts.Lib_AddressManager.filters.AddressSet(
+          contractName
+        ),
+        fromL1Block,
+        toL1Block
+      )
+
+    // We're going to parse things out in ranges because the address of a given contract may have
+    // changed in the range provided by the user.
+    const eventRanges: {
+      address: string
+      fromBlock: number
+      toBlock: number
+    }[] = []
+
+    // Add a range for each address change.
+    let l1BlockRangeStart = fromL1Block
+    for (const addressSetEvent of addressSetEvents) {
+      eventRanges.push({
+        address: await this._getContractAddressAtBlock(
+          contractName,
+          addressSetEvent.blockNumber
+        ),
+        fromBlock: l1BlockRangeStart,
+        toBlock: addressSetEvent.blockNumber,
+      })
+
+      l1BlockRangeStart = addressSetEvent.blockNumber
+    }
+
+    // Add one more range to get us to the end of the user-provided block range.
+    eventRanges.push({
+      address: await this._getContractAddressAtBlock(contractName, toL1Block),
+      fromBlock: l1BlockRangeStart,
+      toBlock: toL1Block,
+    })
+
+    for (const eventRange of eventRanges) {
+      // Find all relevant events within the range.
+      const events: TypedEvent[] = await this.state.contracts[contractName]
+        .attach(eventRange.address)
+        .queryFilter(
+          this.state.contracts[contractName].filters[eventName](),
+          eventRange.fromBlock,
+          eventRange.toBlock
+        )
+
+      // Handle events, if any.
+      if (events.length > 0) {
+        const tick = Date.now()
+
+        for (const event of events) {
+          const extraData = await handlers.getExtraData(
+            event,
+            this.state.l1RpcProvider
+          )
+          const parsedEvent = await handlers.parseEvent(
+            event,
+            extraData,
+            this.options.l2ChainId
+          )
+          await handlers.storeEvent(parsedEvent, this.state.db)
+        }
+
+        const tock = Date.now()
+
+        this.logger.info('Processed events', {
+          eventName,
+          numEvents: events.length,
+          durationMs: tock - tick,
+        })
+      }
+    }
+  }
+
+  private async _fixStoredEvents(
     contractName: string,
     eventName: string,
     fromL1Block: number,

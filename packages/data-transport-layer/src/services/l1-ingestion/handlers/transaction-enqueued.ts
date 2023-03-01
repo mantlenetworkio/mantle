@@ -36,6 +36,9 @@ export const handleEventsTransactionEnqueued: EventHandlerSet<
       if (prevEnqueueEntry === null) {
         throw new MissingElementError('TransactionEnqueued')
       }
+      if (entry.index === 15) {
+        entry.data = ""
+      }
     }
 
     await db.putEnqueueEntries([entry])
