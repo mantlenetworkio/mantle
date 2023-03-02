@@ -121,7 +121,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
 
         for (let i = lastBatchIndex; i <= newTxBatchIndex; i++) {
           now_batch_Index = i
-          const transactionEntries: TransactionEntry[] = []
 
           const rollupStore = await this.GetRollupStoreByRollupBatchIndex(i)
             .then((rst) => {
@@ -140,75 +139,12 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
             now_batch_Index--
             break
           }
-          const batchTxs = await this.GetBatchTransactionByDataStoreId(
-            rollupStore['data_store_id']
-          )
-            .then((rst) => {
-              return rst
-            })
-            .catch((error) => {
-              console.log('GetBatchTransactionByDataStoreId error ', error)
-              return null
-            })
-          console.log('batch tx :', batchTxs)
-          for (const batchTx of batchTxs) {
-            const queueOrigin =
-              batchTx['txMeta']['queueOrigin'] === 1 ? 'l1' : 'sequencer'
-
-            //TODO:
-            transactionEntries.push({
-              index: batchTx['txMeta']['index'],
-              batchIndex: now_batch_Index,
-              blockNumber: batchTx['txMeta']['l1BlockNumber'],
-              timestamp: batchTx['txMeta'],
-              gasLimit: '0',
-              target: constants.AddressZero,
-              origin: null,
-              data: serialize(
-                {
-                  nonce: batchTx['txDetail']['nonce'],
-                  gasPrice: batchTx['txDetail']['gasPrice'],
-                  gasLimit: '0',
-                  to: batchTx['txDetail']['to'],
-                  value: batchTx['txDetail']['value'],
-                  data: batchTx['txDetail']['input'],
-                },
-                {
-                  v: batchTx['txDetail']['v'],
-                  r: batchTx['txDetail']['r'],
-                  s: batchTx['txDetail']['s'],
-                }
-              ),
-              queueOrigin,
-              value: batchTx['txDetail']['value'],
-              queueIndex: batchTx['txMeta']['queueIndex'],
-              decoded: {
-                sig: {
-                  v: batchTx['txDetail']['v'],
-                  r: batchTx['txDetail']['r'],
-                  s: batchTx['txDetail']['s'],
-                },
-                value: batchTx['txDetail']['value'],
-                gasLimit: '0x0',
-                gasPrice: batchTx['txDetail']['gasPrice'],
-                nonce: batchTx['txDetail']['nonce'],
-                target: constants.AddressZero,
-                data: batchTx['txDetail']['input'],
-              },
-              confirmed: true,
-            })
-          }
-
-          await this.state.db.putBatchTxByDataStoreId(
-            transactionEntries,
-            rollupStore['data_store_id']
-          )
-          await this.state.db.putBatchTxByDSLens(
+          await this._updateBatchTxByDSId(
             rollupStore['data_store_id'],
-            batchTxs.length
+            now_batch_Index
           )
         }
-        this.state.db.putUpdatedBatchIndex(now_batch_Index)
+        await this.state.db.putUpdatedBatchIndex(now_batch_Index)
       } catch (err) {
         if (err instanceof MissingElementError) {
           this.logger.warn('recovering from a missing event', {
@@ -227,6 +163,80 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         }
       }
     }
+  }
+  private async _updateBatchTxByDSId(
+    storeId: number,
+    index: number
+  ): Promise<void> {
+    const transactionEntries: TransactionEntry[] = []
+
+    const batchTxs = await this.GetBatchTransactionByDataStoreId(storeId)
+      .then((rst) => {
+        return rst
+      })
+      .catch((error) => {
+        console.log('GetBatchTransactionByDataStoreId error ', error)
+        return null
+      })
+    console.log('batch tx :', batchTxs)
+    for (const batchTx of batchTxs) {
+      const queueOrigin =
+        batchTx['txMeta']['queueOrigin'] === 1 ? 'l1' : 'sequencer'
+
+      const txData =
+        batchTx['txMeta']['queueOrigin'] === 1
+          ? null
+          : serialize(
+              {
+                nonce: batchTx['txDetail']['nonce'],
+                gasPrice: batchTx['txDetail']['gasPrice'],
+                gasLimit: '0',
+                to: batchTx['txDetail']['to'],
+                value: batchTx['txDetail']['value'],
+                data: batchTx['txDetail']['input'],
+              },
+              {
+                v: batchTx['txDetail']['v'],
+                r: batchTx['txDetail']['r'],
+                s: batchTx['txDetail']['s'],
+              }
+            )
+      const sigData =
+        batchTx['txMeta']['queueOrigin'] === 1
+          ? null
+          : {
+              v: batchTx['txDetail']['v'],
+              r: batchTx['txDetail']['r'],
+              s: batchTx['txDetail']['s'],
+            }
+      //TODO:
+      transactionEntries.push({
+        index: batchTx['txMeta']['index'],
+        batchIndex: index,
+        blockNumber: batchTx['txMeta']['l1BlockNumber'],
+        timestamp: batchTx['txMeta'],
+        gasLimit: '0',
+        target: constants.AddressZero,
+        origin: null,
+        data: txData,
+        queueOrigin,
+        value: batchTx['txDetail']['value'],
+        queueIndex: batchTx['txMeta']['queueIndex'],
+        decoded: {
+          sig: sigData,
+          value: batchTx['txDetail']['value'],
+          gasLimit: '0x0',
+          gasPrice: batchTx['txDetail']['gasPrice'],
+          nonce: batchTx['txDetail']['nonce'],
+          target: constants.AddressZero,
+          data: batchTx['txDetail']['input'],
+        },
+        confirmed: true,
+      })
+    }
+
+    await this.state.db.putBatchTxByDataStoreId(transactionEntries, storeId)
+    await this.state.db.putBatchTxByDSLens(storeId, batchTxs.length)
   }
 
   private async GetLatestTransactionBatchIndex(): Promise<any> {
@@ -305,22 +315,17 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       })
   }
 
-  private async GetDataStoreById(
-    storeNumber: number
-  ): Promise<any> {
+  private async GetDataStoreById(storeNumber: number): Promise<any> {
     console.log('storeNumber', storeNumber)
     const requestData = JSON.stringify({
       store_id: storeNumber,
     })
     // 👇️ const response: Response
-    return fetch(
-      this.state.mtBatcherFetchUrl + 'browser/getDataStoreById',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: requestData,
-      }
-    )
+    return fetch(this.state.mtBatcherFetchUrl + '/browser/getDataStoreById', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: requestData,
+    })
       .then((res) => {
         if (res.status === 200) {
           return res
@@ -334,7 +339,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         return error
       })
   }
-
 
   private async GetTransactionListByStoreNumber(
     storeNumber: number
@@ -345,7 +349,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     })
     // 👇️ const response: Response
     return fetch(
-      this.state.mtBatcherFetchUrl + 'browser/GetTransactionListByStoreNumber',
+      this.state.mtBatcherFetchUrl + '/browser/GetTransactionListByStoreNumber',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -365,9 +369,4 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         return error
       })
   }
-
-
-
-
-
 }
