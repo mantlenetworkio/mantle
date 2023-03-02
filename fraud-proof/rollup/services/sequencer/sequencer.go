@@ -2,6 +2,7 @@ package sequencer
 
 import (
 	ethc "github.com/ethereum/go-ethereum/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"math/big"
 
@@ -92,8 +93,7 @@ func (s *Sequencer) confirmationLoop() {
 		log.Error("Failed to watch rollup event", "err", err)
 	}
 	defer challengedSub.Unsubscribe()
-	isInChallenge := false
-
+	isInChallenge := rawdb.ReadFPInChallenge(s.BaseService.ProofBackend.ChainDb())
 	for {
 		if isInChallenge {
 			// Waif for the challenge resolved
@@ -101,6 +101,7 @@ func (s *Sequencer) confirmationLoop() {
 			case <-s.challengeResolutionCh:
 				log.Info("Sequencer finished challenge, reset isInChallenge status")
 				isInChallenge = false
+				rawdb.WriteFPInChallenge(s.BaseService.ProofBackend.ChainDb(), isInChallenge)
 			case <-s.Ctx.Done():
 				return
 			}
@@ -169,6 +170,8 @@ func (s *Sequencer) confirmationLoop() {
 				//	}
 				//	isInChallenge = true
 				//}
+
+				// todo when interrupt at this moment, check staker`s status
 				challengeAssertion := new(rollupTypes.Assertion)
 				perent := new(rollupTypes.Assertion)
 				if ret, err := s.AssertionMap.Assertions(ev.AssertionID); err != nil {
@@ -198,6 +201,7 @@ func (s *Sequencer) confirmationLoop() {
 					perent,
 				}
 				isInChallenge = true
+				rawdb.WriteFPInChallenge(s.ProofBackend.ChainDb(), isInChallenge)
 			case <-s.Ctx.Done():
 				return
 			}
@@ -326,6 +330,8 @@ func (s *Sequencer) challengeLoop() {
 					log.Crit("Failed to generate states", "err", err)
 				}
 				log.Info("Sequencer generate state end...")
+
+				// todo: check weather already initialized
 				numSteps := uint64(len(states)) - 1
 				_, err = challengeSession.InitializeChallengeLength(services.MidState(states, 0, numSteps), new(big.Int).SetUint64(numSteps))
 				if err != nil {
