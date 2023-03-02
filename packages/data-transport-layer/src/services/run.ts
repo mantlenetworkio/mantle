@@ -41,6 +41,11 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       l2ChainId: config.uint('l2-chain-id'),
       syncFromL1: config.bool('sync-from-l1', true),
       syncFromL2: config.bool('sync-from-l2', false),
+      syncToDa: config.bool('sync-to-da', true),
+      mtBatcherHost: config.str('mt-batcher-hostname', 'localhost'),
+      mtBatcherFetchPort: config.uint('mt-batcher-fetch-port', 8089),
+
+
       transactionsPerPollingInterval: config.uint(
         'transactions-per-polling-interval',
         1000
