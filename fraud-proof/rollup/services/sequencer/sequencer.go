@@ -2,6 +2,7 @@ package sequencer
 
 import (
 	ethc "github.com/ethereum/go-ethereum/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"math/big"
 
@@ -63,7 +64,7 @@ func (s *Sequencer) confirmationLoop() {
 	defer s.Wg.Done()
 
 	// Watch AssertionCreated event
-	createdCh := make(chan *bindings.IRollupAssertionCreated, 4096)
+	createdCh := make(chan *bindings.RollupAssertionCreated, 4096)
 	createdSub, err := s.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Context: s.Ctx}, createdCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
@@ -71,7 +72,7 @@ func (s *Sequencer) confirmationLoop() {
 	defer createdSub.Unsubscribe()
 
 	// Watch AssertionConfirmed event
-	confirmedCh := make(chan *bindings.IRollupAssertionConfirmed, 4096)
+	confirmedCh := make(chan *bindings.RollupAssertionConfirmed, 4096)
 	confirmedSub, err := s.Rollup.Contract.WatchAssertionConfirmed(&bind.WatchOpts{Context: s.Ctx}, confirmedCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
@@ -86,19 +87,13 @@ func (s *Sequencer) confirmationLoop() {
 	}
 	defer headSub.Unsubscribe()
 
-	challengedCh := make(chan *bindings.IRollupAssertionChallenged, 4096)
+	challengedCh := make(chan *bindings.RollupAssertionChallenged, 4096)
 	challengedSub, err := s.Rollup.Contract.WatchAssertionChallenged(&bind.WatchOpts{Context: s.Ctx}, challengedCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
 	}
 	defer challengedSub.Unsubscribe()
-	isInChallenge := false
-
-	// Current pending assertion from sequencing goroutine
-	pendingAssertion := new(rollupTypes.Assertion)
-	pendingConfirmationSent := true
-	pendingConfirmed := true
-
+	isInChallenge := rawdb.ReadFPInChallenge(s.BaseService.ProofBackend.ChainDb())
 	for {
 		if isInChallenge {
 			// Waif for the challenge resolved
@@ -106,6 +101,7 @@ func (s *Sequencer) confirmationLoop() {
 			case <-s.challengeResolutionCh:
 				log.Info("Sequencer finished challenge, reset isInChallenge status")
 				isInChallenge = false
+				rawdb.WriteFPInChallenge(s.BaseService.ProofBackend.ChainDb(), isInChallenge)
 			case <-s.Ctx.Done():
 				return
 			}
@@ -115,32 +111,8 @@ func (s *Sequencer) confirmationLoop() {
 				// New assertion created on L1 Rollup
 				log.Info("Get New Assertion...", "AssertionID", ev.AssertionID,
 					"AsserterAddr", ev.AsserterAddr, "VmHash", ev.VmHash, "InboxSize", ev.InboxSize)
-				if common.Address(ev.AsserterAddr) == s.Config.StakeAddr {
-					log.Info("Sequencer saw assertion created, try to confirmAssertion.....")
-					pendingAssertion.ID = ev.AssertionID
-					pendingAssertion.VmHash = ev.VmHash
-					pendingAssertion.InboxSize = ev.InboxSize
-					pendingAssertion.Parent = new(big.Int).Sub(ev.AssertionID, big.NewInt(1))
-					pendingAssertion.Deadline, err = s.AssertionMap.GetDeadline(ev.AssertionID)
-					if err != nil {
-						log.Error("Can not get Assertion deadline", "error", err)
-						continue
-					}
-					pendingAssertion.ProposalTime, err = s.AssertionMap.GetProposalTime(ev.AssertionID)
-					if err != nil {
-						log.Error("Can not get Assertion proposal time", "error", err)
-						continue
-					}
-					// New assertion created by sequencing goroutine
-					if !pendingConfirmed {
-						log.Error("Got another DA request before current is confirmed")
-						continue
-					}
-					log.Info("Sequencer setup confirmAssertion states.....")
-					pendingConfirmationSent = false
-					pendingConfirmed = false
-				}
 			case header := <-headCh:
+				// todo : optimization the check with block height
 				// Get confirm block header
 				if s.confirmations != 0 {
 					num := new(big.Int)
@@ -152,30 +124,42 @@ func (s *Sequencer) confirmationLoop() {
 						continue
 					}
 				}
+				// Get first unresolved confirm assertion and check deadline
+				lastRSAID, err := s.Rollup.LastResolvedAssertionID()
+				if err != nil {
+					log.Error("Failed to get last resolved assertion ID", "err", err)
+					continue
+				}
+				lastCAID, err := s.Rollup.LastCreatedAssertionID()
+				if err != nil {
+					log.Error("Failed to get last created assertion ID", "err", err)
+					continue
+				}
+				if lastCAID.Uint64() <= lastRSAID.Uint64() {
+					continue
+				}
+
 				// New block mined on L1
 				log.Info("Sequencer sync new layer1 block", "height", header.Number)
-				if !pendingConfirmationSent && !pendingConfirmed {
-					if header.Time >= pendingAssertion.Deadline.Uint64() {
-						// Confirmation period has past, confirm it
-						log.Info("Sequencer call ConfirmFirstUnresolvedAssertion...")
-						log.Info("Current pendingAssertion", "id is", pendingAssertion.ID)
-						_, err := s.Rollup.ConfirmFirstUnresolvedAssertion()
-						if err != nil {
-							log.Error("Failed to confirm DA", "err", err)
-							continue
-						}
-						pendingConfirmationSent = true
+				firstUnresolvedID := lastRSAID.Uint64() + 1
+				firstUnconfirmedAssertion, err := s.AssertionMap.Assertions(new(big.Int).SetUint64(firstUnresolvedID))
+				if err != nil {
+					log.Error("Failed to get first unresolved Assertion", "err", err, "ID", firstUnresolvedID)
+					continue
+				}
+				if header.Time >= firstUnconfirmedAssertion.Deadline.Uint64() {
+					// Confirmation period has past, confirm it
+					log.Info("Sequencer call ConfirmFirstUnresolvedAssertion...")
+					log.Info("Current pendingAssertion", "id", firstUnresolvedID)
+					_, err := s.Rollup.ConfirmFirstUnresolvedAssertion()
+					if err != nil {
+						log.Error("Failed to confirm DA", "err", err)
+						continue
 					}
 				}
+
 			case ev := <-confirmedCh:
 				log.Info("New confirmed assertion", "id", ev.AssertionID)
-				// New confirmed assertion
-				if ev.AssertionID.Cmp(pendingAssertion.ID) == 0 {
-					log.Info("Confirmed to latest unsolved assertion...")
-					// Notify sequencing goroutine
-					s.confirmedIDCh <- pendingAssertion.ID
-					pendingConfirmed = true
-				}
 			case ev := <-challengedCh:
 				log.Warn("New challenge rise!!!!!!", "ev", ev)
 				// New challenge raised
@@ -186,6 +170,8 @@ func (s *Sequencer) confirmationLoop() {
 				//	}
 				//	isInChallenge = true
 				//}
+
+				// todo when interrupt at this moment, check staker`s status
 				challengeAssertion := new(rollupTypes.Assertion)
 				perent := new(rollupTypes.Assertion)
 				if ret, err := s.AssertionMap.Assertions(ev.AssertionID); err != nil {
@@ -215,6 +201,7 @@ func (s *Sequencer) confirmationLoop() {
 					perent,
 				}
 				isInChallenge = true
+				rawdb.WriteFPInChallenge(s.ProofBackend.ChainDb(), isInChallenge)
 			case <-s.Ctx.Done():
 				return
 			}
@@ -342,6 +329,8 @@ func (s *Sequencer) challengeLoop() {
 					log.Crit("Failed to generate states", "err", err)
 				}
 				log.Info("Sequencer generate state end...")
+
+				// todo: check weather already initialized
 				numSteps := uint64(len(states)) - 1
 				log.Info("Print generated states", "states[0]", states[0].Hash().String(), "states[numSteps]", states[numSteps].Hash().String())
 				_, err = challengeSession.InitializeChallengeLength(services.MidState(states, 0, numSteps), new(big.Int).SetUint64(numSteps))
