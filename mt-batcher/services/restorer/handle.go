@@ -48,6 +48,7 @@ type TransactionInfoListResponse struct {
 	BlockNumber string                `json:"BlockNumber"`
 	TxHash      string                `json:"TxHash"`
 	TxMeta      types.TransactionMeta `json:"TxMeta"`
+	TxData      types.Transaction     `json:"TxDetail"`
 }
 
 func (s *DaService) GetLatestTransactionBatchIndex(c gecho.Context) error {
@@ -126,7 +127,7 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 				log.Error("Decode RLP fail")
 				continue
 			}
-			log.Info("transaction", "hash", l2Tx.Hash().Hex(), "txTransaction", l2Tx)
+			log.Info("transaction", "hash", l2Tx.Hash().Hex())
 			newBlockNumber := new(big.Int).SetBytes(newBatchTxn[i].BlockNumber)
 
 			var queueOrigin types.QueueOrigin
@@ -155,6 +156,7 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 				BlockNumber: newBlockNumber.String(),
 				TxHash:      l2Tx.Hash().String(),
 				TxMeta:      *realTxMeta,
+				TxData:      *l2Tx,
 			}
 			TxnRep = append(TxnRep, txSl)
 		}
