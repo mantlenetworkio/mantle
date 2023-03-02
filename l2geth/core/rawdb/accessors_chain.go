@@ -30,6 +30,26 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
+func WriteFPInChallenge(db ethdb.Writer, isInChallenge bool) {
+	if isInChallenge {
+		if err := db.Put(FPSchedulerIsInChallenge, []byte("1")); err != nil {
+			log.Crit("Failed to store fp in challenge status", "err", err)
+		}
+	} else {
+		if err := db.Put(FPSchedulerIsInChallenge, []byte("0")); err != nil {
+			log.Crit("Failed to store fp in challenge status", "err", err)
+		}
+	}
+}
+
+func ReadFPInChallenge(db ethdb.Reader) bool {
+	data, _ := db.Get(FPSchedulerIsInChallenge)
+	if bytes.Equal(data, []byte("1")) {
+		return true
+	}
+	return false
+}
+
 // ReadCanonicalHash retrieves the hash assigned to a canonical block number.
 func ReadCanonicalHash(db ethdb.Reader, number uint64) common.Hash {
 	data, _ := db.Ancient(freezerHashTable, number)

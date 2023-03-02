@@ -23,7 +23,7 @@ type BaseService struct {
 	Chain        *core.BlockChain
 	L1           *ethclient.Client
 	TransactOpts *bind.TransactOpts
-	Rollup       *bindings.IRollupSession
+	Rollup       *bindings.RollupSession
 	AssertionMap *bindings.AssertionMapCallerSession
 
 	Ctx    context.Context
@@ -48,12 +48,12 @@ func NewBaseService(eth Backend, proofBackend proof.Backend, cfg *Config, auth *
 		GasPrice: big.NewInt(800000000),
 		Context:  ctx,
 	}
-	rollup, err := bindings.NewIRollup(common.Address(cfg.RollupAddr), l1)
+	rollup, err := bindings.NewRollup(common.Address(cfg.RollupAddr), l1)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
-	rollupSession := &bindings.IRollupSession{
+	rollupSession := &bindings.RollupSession{
 		Contract:     rollup,
 		CallOpts:     callOpts,
 		TransactOpts: transactOpts,

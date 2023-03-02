@@ -59,7 +59,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 	defer v.Wg.Done()
 
 	// Listen to AssertionCreated event
-	assertionEventCh := make(chan *bindings.IRollupAssertionCreated, 4096)
+	assertionEventCh := make(chan *bindings.RollupAssertionCreated, 4096)
 	assertionEventSub, err := v.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Context: v.Ctx}, assertionEventCh)
 	if err != nil {
 		log.Crit("Failed to watch rollup event", "err", err)
@@ -88,34 +88,49 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 				// New assertion created on Rollup
 				log.Info("Validator get new assertion, check it with local block....")
 				log.Info("check ev.AssertionID....", "id", ev.AssertionID)
-				checkAssertion := &rollupTypes.Assertion{
-					ID:        ev.AssertionID,
-					VmHash:    ev.VmHash,
-					InboxSize: ev.InboxSize,
-					Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
-				}
-				// TODO FIXME FRAUD-PROOF TEST, DELETE ME
-				//block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
-				block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
+
+				stakerStatus, err := v.Rollup.Stakers(v.Rollup.TransactOpts.From)
 				if err != nil {
-					log.Error("Validator get block failed", "err", err)
+					log.Crit("UNHANDELED: Can't find stake, validator state corrupted", "err", err)
 				}
-				if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 {
-					// Validation failed
-					log.Info("Validator check assertion vmHash failed, start challenge assertion....")
-					ourAssertion := &rollupTypes.Assertion{
-						VmHash:    block.Hash(),
-						InboxSize: ev.InboxSize,
-						Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
-					}
-					v.challengeCh <- &challengeCtx{checkAssertion, ourAssertion}
-					isInChallenge = true
-				} else {
-					// Validation succeeded, confirm assertion and advance stake
-					log.Info("Validator advance stake into assertion", "ID", ev.AssertionID)
-					_, err = v.Rollup.AdvanceStake(ev.AssertionID)
+				startID := stakerStatus.AssertionID.Uint64()
+				// advance the assertion that has fallen behind
+				for ; startID < ev.AssertionID.Uint64(); startID++ {
+					checkID := startID + 1
+					assertion, err := v.AssertionMap.Assertions(new(big.Int).SetUint64(checkID))
 					if err != nil {
-						log.Crit("UNHANDELED: Can't advance stake, validator state corrupted", "err", err)
+						log.Error("Validator get block failed", "err", err)
+					}
+					checkAssertion := &rollupTypes.Assertion{
+						ID:        new(big.Int).SetUint64(checkID),
+						VmHash:    assertion.StateHash,
+						InboxSize: assertion.InboxSize,
+						Parent:    assertion.Parent,
+					}
+
+					block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
+					if err != nil {
+						log.Error("Validator get block failed", "err", err)
+					}
+					if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 {
+						// Validation failed
+						log.Info("Validator check assertion vmHash failed, start challenge assertion....")
+						ourAssertion := &rollupTypes.Assertion{
+							VmHash:    block.Hash(),
+							InboxSize: ev.InboxSize,
+							Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
+						}
+						v.challengeCh <- &challengeCtx{checkAssertion, ourAssertion}
+						isInChallenge = true
+						break
+					} else {
+						// Validation succeeded, confirm assertion and advance stake
+						log.Info("Validator advance stake into assertion", "ID", ev.AssertionID, "now", startID)
+						// todo ：During frequent interactions, it is necessary to check the results of the previous interaction
+						_, err = v.Rollup.AdvanceStake(new(big.Int).SetUint64(startID + 1))
+						if err != nil {
+							log.Crit("UNHANDELED: Can't advance stake, validator state corrupted", "err", err)
+						}
 					}
 				}
 			case <-v.Ctx.Done():
@@ -134,14 +149,14 @@ func (v *Validator) challengeLoop() {
 	//}
 
 	// Watch AssertionCreated event
-	createdCh := make(chan *bindings.IRollupAssertionCreated, 4096)
+	createdCh := make(chan *bindings.RollupAssertionCreated, 4096)
 	createdSub, err := v.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Context: v.Ctx}, createdCh)
 	if err != nil {
 		log.Crit("Failed to watch rollup event", "err", err)
 	}
 	defer createdSub.Unsubscribe()
 
-	challengedCh := make(chan *bindings.IRollupAssertionChallenged, 4096)
+	challengedCh := make(chan *bindings.RollupAssertionChallenged, 4096)
 	challengedSub, err := v.Rollup.Contract.WatchAssertionChallenged(&bind.WatchOpts{Context: v.Ctx}, challengedCh)
 	if err != nil {
 		log.Crit("Failed to watch rollup event", "err", err)
@@ -183,7 +198,6 @@ func (v *Validator) challengeLoop() {
 					continue
 				}
 				// If it's our turn
-				log.Info("Responder info...", "responder", responder, "staker", v.Config.StakeAddr)
 				if common.Address(responder) == v.Config.StakeAddr {
 					log.Info("Validator start to respond new bisection...")
 					err := services.RespondBisection(v.BaseService, challengeSession, ev, states)
@@ -301,8 +315,6 @@ func (v *Validator) challengeLoop() {
 					if err != nil {
 						log.Crit("Failed to generate states", "err", err)
 					}
-					log.Info("Print generated states", "states[0]", states[0].Hash().String(), "states[numSteps]", states[len(states)-1].Hash().String())
-
 					inChallenge = true
 				}
 			case <-headCh:

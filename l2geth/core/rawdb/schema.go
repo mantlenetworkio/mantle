@@ -73,6 +73,8 @@ var (
 
 	preimageCounter    = metrics.NewRegisteredCounter("db/preimage/total", nil)
 	preimageHitCounter = metrics.NewRegisteredCounter("db/preimage/hits", nil)
+
+	FPSchedulerIsInChallenge = []byte("FPIsInChallenge")
 )
 
 const (
