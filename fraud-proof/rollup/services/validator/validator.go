@@ -94,8 +94,9 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					InboxSize: ev.InboxSize,
 					Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
 				}
-
-				block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
+				// TODO FIXME FRAUD-PROOF TEST, DELETE ME
+				//block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
+				block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
 				if err != nil {
 					log.Error("Validator get block failed", "err", err)
 				}
@@ -182,6 +183,7 @@ func (v *Validator) challengeLoop() {
 					continue
 				}
 				// If it's our turn
+				log.Info("Responder info...", "responder", responder, "staker", v.Config.StakeAddr)
 				if common.Address(responder) == v.Config.StakeAddr {
 					log.Info("Validator start to respond new bisection...")
 					err := services.RespondBisection(v.BaseService, challengeSession, ev, states)
@@ -299,6 +301,8 @@ func (v *Validator) challengeLoop() {
 					if err != nil {
 						log.Crit("Failed to generate states", "err", err)
 					}
+					log.Info("Print generated states", "states[0]", states[0].Hash().String(), "states[numSteps]", states[len(states)-1].Hash().String())
+
 					inChallenge = true
 				}
 			case <-headCh:

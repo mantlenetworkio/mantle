@@ -60,14 +60,14 @@ contract Challenge is IChallenge {
     // Challenge state
     address public defender;
     address public challenger;
-    uint256 public lastMoveBlock;
+    uint256 public lastMoveBlockTime;
     uint256 public defenderTimeLeft;
     uint256 public challengerTimeLeft;
 
     Turn public turn;
     // See `ChallengeLib.computeBisectionHash` for the format of this commitment.
     bytes32 public bisectionHash;
-    bytes32[] public prevBisection;
+    bytes32[2] public prevBisection;
 
     // Initial state used to initialize bisectionHash (write-once).
     bytes32 private startStateHash;
@@ -79,18 +79,18 @@ contract Challenge is IChallenge {
      */
     modifier onlyOnTurn() {
         require(msg.sender == currentResponder(), BIS_SENDER);
-        require(block.number - lastMoveBlock <= currentResponderTimeLeft(), BIS_DEADLINE);
+        require(block.timestamp - lastMoveBlockTime <= currentResponderTimeLeft(), BIS_DEADLINE);
 
         _;
 
         if (turn == Turn.Challenger) {
-            challengerTimeLeft = challengerTimeLeft - (block.number - lastMoveBlock);
+            challengerTimeLeft = challengerTimeLeft - (block.timestamp- lastMoveBlockTime);
             turn = Turn.Defender;
         } else if (turn == Turn.Defender) {
-            defenderTimeLeft = defenderTimeLeft - (block.number - lastMoveBlock);
+            defenderTimeLeft = defenderTimeLeft - (block.timestamp - lastMoveBlockTime);
             turn = Turn.Challenger;
         }
-        lastMoveBlock = block.number;
+        lastMoveBlockTime = block.timestamp;
     }
 
     /**
@@ -119,21 +119,29 @@ contract Challenge is IChallenge {
         endStateHash = _endStateHash;
 
         turn = Turn.Defender;
-        lastMoveBlock = block.number;
+        lastMoveBlockTime = block.timestamp;
         // TODO(ujval): initialize timeout
-        defenderTimeLeft = 10;
-        challengerTimeLeft = 10;
-        prevBisection.push(_startStateHash);
-        prevBisection.push(_endStateHash);
+        defenderTimeLeft = 150;
+        challengerTimeLeft = 150;
+        prevBisection[0] = _startStateHash;
+        prevBisection[1] = _endStateHash;
+
+        console.log("initialize prevBisection...");
+        console.log("_startStateHash");
+        console.logBytes32(_startStateHash);
+        console.log("_endStateHash");
+        console.logBytes32(_endStateHash);
     }
 
     function initializeChallengeLength(bytes32 checkStateHash, uint256 _numSteps) external override onlyOnTurn {
         require(bisectionHash == 0, CHAL_INIT_STATE);
         require(_numSteps > 0, "INVALID_NUM_STEPS");
-        bisectionHash = ChallengeLib.computeBisectionHash(startStateHash, endStateHash, 0, _numSteps);
-        prevBisection.push(checkStateHash);
+        console.log("initializeChallengeLength");
+        console.logBytes32(startStateHash);
+        console.log(_numSteps);
+        bisectionHash = ChallengeLib.computeBisectionHash(0, _numSteps);
         // TODO: consider emitting a different event?
-        emit Bisected(startStateHash, checkStateHash, endStateHash, block.timestamp, 0, _numSteps);
+        emit Bisected(startStateHash, checkStateHash, endStateHash, block.number, block.timestamp, 0, _numSteps);
     }
 
     function bisectExecution(
@@ -144,24 +152,17 @@ contract Challenge is IChallenge {
         uint256 prevChallengedSegmentStart,
         uint256 prevChallengedSegmentLength
     ) external override onlyOnTurn postInitialization {
-        bytes32 prevHash;
         // Verify provided prev bisection.
-        if (challengedSegmentIndex == 1) {
-            prevHash =
-            ChallengeLib.computeBisectionHash(bisection[0], prevBisection[prevBisection.length - 1], prevChallengedSegmentStart, prevChallengedSegmentLength);
-        } else if (challengedSegmentIndex == 2) {
-            prevHash =
-            ChallengeLib.computeBisectionHash(prevBisection[prevBisection.length - 2], bisection[2], prevChallengedSegmentStart, prevChallengedSegmentLength);
-        } else {
-            revert("INVALID_INDEX");
-        }
+        bytes32 prevHash = ChallengeLib.computeBisectionHash(prevChallengedSegmentStart, prevChallengedSegmentLength);
+        console.log("challengedSegmentIndex");
+        console.log(challengedSegmentIndex);
         console.log("bisection info");
         console.logBytes32(bisection[0]);
         console.logBytes32(bisection[1]);
         console.logBytes32(bisection[2]);
         console.log("prevBisection info");
-        console.logBytes32(prevBisection[prevBisection.length - 1]);
-        console.logBytes32(prevBisection[prevBisection.length - 2]);
+        console.logBytes32(prevBisection[0]);
+        console.logBytes32(prevBisection[1]);
         console.log("prev info");
         console.log(prevChallengedSegmentStart);
         console.log(prevChallengedSegmentLength);
@@ -172,15 +173,16 @@ contract Challenge is IChallenge {
         require(prevHash == bisectionHash, BIS_PREV);
 
         // Require agreed upon start state hash and disagreed upon end state hash.
-        require(bisection[0] == prevBisection[prevBisection.length - 1] || bisection[2] == prevBisection[prevBisection.length - 1], "INVALID_START_OR_END");
+        require(bisection[0] == prevBisection[0] || bisection[2] == prevBisection[1], "INVALID_START_OR_END");
 
         // Compute segment start/length.
         require(challengedSegmentLength > 0, "TOO_SHORT");
 
         // Compute new challenge state.
-        prevBisection.push(bisection[1]);
-        bisectionHash = ChallengeLib.computeBisectionHash(bisection[0], bisection[2], challengedSegmentStart, challengedSegmentLength);
-        emit Bisected(bisection[0], bisection[1], bisection[2], block.timestamp, challengedSegmentStart, challengedSegmentLength);
+        prevBisection[0] = bisection[0];
+        prevBisection[1] = bisection[2];
+        bisectionHash = ChallengeLib.computeBisectionHash(challengedSegmentStart, challengedSegmentLength);
+        emit Bisected(bisection[0], bisection[1], bisection[2], block.number, block.timestamp, challengedSegmentStart, challengedSegmentLength);
     }
 
     function verifyOneStepProof(
@@ -192,7 +194,7 @@ contract Challenge is IChallenge {
     ) external override onlyOnTurn {
         // Verify provided prev bisection.
         bytes32 prevHash =
-            ChallengeLib.computeBisectionHash(prevBisection[0], prevBisection[1], prevChallengedSegmentStart, prevChallengedSegmentLength);
+            ChallengeLib.computeBisectionHash(prevChallengedSegmentStart, prevChallengedSegmentLength);
         require(prevHash == bisectionHash, BIS_PREV);
         require(challengedStepIndex > 0 && challengedStepIndex < prevBisection.length, "INVALID_INDEX");
         // Require that this is the last round.
@@ -215,7 +217,7 @@ contract Challenge is IChallenge {
     }
 
     function timeout() external override {
-        require(block.number - lastMoveBlock > currentResponderTimeLeft(), TIMEOUT_DEADLINE);
+        require(block.timestamp - lastMoveBlockTime > currentResponderTimeLeft(), TIMEOUT_DEADLINE);
         if (turn == Turn.Defender) {
             _challengerWin(CompletionReason.TIMEOUT);
         } else {

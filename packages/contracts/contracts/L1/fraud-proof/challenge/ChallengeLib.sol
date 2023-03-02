@@ -25,32 +25,26 @@ pragma solidity ^0.8.0;
 library ChallengeLib {
     /**
      * @notice Computes the initial bisection hash.
-     * @param startStateHash Hash of agreed-upon start state.
-     * @param endStateHash Disagreed-upon end state.
      * @param numSteps Number of steps from the end of `startState` to the end of `endState`.
      */
-    function initialBisectionHash(bytes32 startStateHash, bytes32 endStateHash, uint256 numSteps)
+    function initialBisectionHash(uint256 numSteps)
         internal
         pure
         returns (bytes32)
     {
-        return ChallengeLib.computeBisectionHash(startStateHash, endStateHash, 0, numSteps);
+        return ChallengeLib.computeBisectionHash(0, numSteps);
     }
 
     /**
      * @notice Computes H(bisection || segmentStart || segmentLength)
-     * @param startStateHash start stateHashes. First element of the agreed state hash.
-     * @param endStateHash end stateHashes. Last element of the agreed state hash.
      * @param challengedSegmentStart The number of steps preceding `bisection[1]`, relative to the assertion being challenged.
      * @param challengedSegmentLength Length of bisected segment (in steps), from the start of bisection[1] to the end of bisection[-1].
      */
     function computeBisectionHash(
-        bytes32 startStateHash,
-        bytes32 endStateHash,
         uint256 challengedSegmentStart,
         uint256 challengedSegmentLength
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(startStateHash, endStateHash, challengedSegmentStart, challengedSegmentLength));
+        return keccak256(abi.encodePacked(challengedSegmentStart, challengedSegmentLength));
     }
 
     /**
