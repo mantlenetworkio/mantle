@@ -11,6 +11,7 @@ import {awaitCondition, hexStringEquals} from "@mantleio/core-utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { ethers, upgrades } = require("hardhat");
+const Web3 = require("web3")
 
 const deployFn: DeployFunction = async (hre) => {
   // @ts-ignore
@@ -123,7 +124,7 @@ const deployFn: DeployFunction = async (hre) => {
     0, // uint256 _minimumAssertionPeriod,
     // 1000000000000, // uint256 _maxGasPerAssertion,
     0, // uint256 _baseStakeAmount
-    "0x744c19d2e8593c97867b3b6a3588f51cd9dbc5010a395cf199be4bbb353848b8", // bytes32 _initialVMhash //TODO-FIXME
+    '0x365a761a909633fc9742c81c90b3fc71cebfd64cc1ae1ed1f36b3c5e956e0f28', // bytes32 _initialVMhash //TODO-FIXME
   ]
   callData = Impl__Rollup.interface.encodeFunctionData('initialize', rollupArgs)
   await deployAndVerifyAndThen({

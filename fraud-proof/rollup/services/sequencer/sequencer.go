@@ -212,11 +212,6 @@ func (s *Sequencer) confirmationLoop() {
 func (s *Sequencer) challengeLoop() {
 	defer s.Wg.Done()
 
-	//abi, err := bindings.IChallengeMetaData.GetAbi()
-	//if err != nil {
-	//	log.Error("Failed to get IChallenge ABI", "err", err)
-	//}
-
 	// Watch L1 blockchain for challenge timeout
 	headCh := make(chan *types.Header, 4096)
 	headSub, err := s.L1.SubscribeNewHead(s.Ctx, headCh)
@@ -249,7 +244,9 @@ func (s *Sequencer) challengeLoop() {
 					log.Error("Can not get current responder", "error", err)
 					continue
 				}
+				log.Info("Responder info...", "responder", responder, "staker", s.Config.StakeAddr)
 				if common.Address(responder) == s.Config.StakeAddr {
+					log.Info("Sequencer start to respond new bisection...")
 					// If it's our turn
 					//err := services.RespondBisection(s.BaseService, abi, challengeSession, ev, states, common.Hash{}, false)
 					err := services.RespondBisection(s.BaseService, challengeSession, ev, states)
@@ -265,14 +262,15 @@ func (s *Sequencer) challengeLoop() {
 						log.Error("Can not get current responder left time", "error", err)
 						continue
 					}
-					log.Info("[Sequencer] Opponent time left", "time", opponentTimeLeft)
-					opponentTimeout = ev.Raw.BlockNumber + opponentTimeLeft.Uint64()
+					log.Info("[Sequencer] Opponent time left", "blockTime", ev.BlockTime.Uint64(), "timeLeft", opponentTimeLeft)
+					opponentTimeout = ev.BlockTime.Uint64() + opponentTimeLeft.Uint64()
 				}
 			case header := <-headCh:
 				if opponentTimeout == 0 {
 					continue
 				}
 				// TODO: can we use >= here?
+				log.Info("New header incoming...", "header.Number", header.Number, "header.Time", header.Time, "opponentTimeout", opponentTimeout)
 				if header.Time > opponentTimeout {
 					_, err = challengeSession.Timeout()
 					if err != nil {
@@ -281,6 +279,7 @@ func (s *Sequencer) challengeLoop() {
 						// TODO: wait some time before retry
 						// TODO: fix race condition
 					}
+					log.Info("Timeout challenge...")
 				}
 			case ev := <-challengeCompletedCh:
 				// TODO: handle if we are not winner --> state corrupted
@@ -333,6 +332,7 @@ func (s *Sequencer) challengeLoop() {
 
 				// todo: check weather already initialized
 				numSteps := uint64(len(states)) - 1
+				log.Info("Print generated states", "states[0]", states[0].Hash().String(), "states[numSteps]", states[numSteps].Hash().String())
 				_, err = challengeSession.InitializeChallengeLength(services.MidState(states, 0, numSteps), new(big.Int).SetUint64(numSteps))
 				if err != nil {
 					log.Crit("Failed to initialize challenge", "err", err)

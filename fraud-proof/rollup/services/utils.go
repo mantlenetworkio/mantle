@@ -17,7 +17,7 @@ func SubmitOneStepProof(
 	ctx context.Context,
 	state *proof.ExecutionState,
 	challengedStepIndex *big.Int,
-//prevBisection [][32]byte,
+	//prevBisection [][32]byte,
 	prevChallengedSegmentStart *big.Int,
 	prevChallengedSegmentLength *big.Int,
 ) error {
@@ -46,7 +46,6 @@ func RespondBisection(
 	ev *bindings.IChallengeBisected,
 	states []*proof.ExecutionState,
 ) error {
-	//var prevBisection = [2][32]byte{ev.StartState, ev.EndState}
 	var bisection [3][32]byte
 	var challengeIdx uint64
 	var newStart uint64
@@ -89,7 +88,8 @@ func RespondBisection(
 		} else if !bytes.Equal(endState[:], ev.EndState[:]) {
 			state = states[segStart+segLen]
 		} else {
-			log.Crit("RespondBisection can't find state difference")
+			log.Error("RespondBisection can't find state difference")
+			return nil
 		}
 
 		// We've reached one step

@@ -39,7 +39,7 @@ interface IChallenge {
 
     event ChallengeCompleted(address winner, address loser, CompletionReason reason);
 
-    event Bisected(bytes32 startState, bytes32 midState, bytes32 endState, uint256 bisectedTime, uint256 challengedSegmentStart, uint256 challengedSegmentLength);
+    event Bisected(bytes32 startState, bytes32 midState, bytes32 endState, uint256 blockNum, uint256 blockTime, uint256 challengedSegmentStart, uint256 challengedSegmentLength);
 
     /**
      * @notice Initializes contract.

@@ -14,9 +14,12 @@ describe('RollUp', () => {
   let verifier: Contract
   let token: Contract
   let assertionMap: Contract
+  let addressManager: Contract
 
   before('setup', async () => {
     accounts = await ethers.getSigners()
+    await deployAddressManager()
+    await deploySCC()
     await deployToken()
     await deployVerifier()
     await deployRollUp()
@@ -176,7 +179,7 @@ describe('RollUp', () => {
       await accounts[1].getAddress(), // roll up owner
       verifier.address, // verifier
       token.address, // stake token
-      constants.AddressZero, // address manager
+      addressManager.address, // address manager
       assertionMap.address, // assertionMap
       0, // confirmation period
       0, // challenge period
@@ -213,5 +216,18 @@ describe('RollUp', () => {
 
   const deployVerifier = async () => {
     verifier = await deploy('VerifierEntry')
+  }
+
+  const deployAddressManager = async () => {
+    addressManager = await deploy('Lib_AddressManager')
+    await addressManager.setAddress(
+      'BVM_Rolluper',
+      await accounts[0].getAddress()
+    )
+  }
+
+  const deploySCC = async () => {
+    const scc = await deploy('MockStateCommitmentChain')
+    await addressManager.setAddress('StateCommitmentChain', scc.address)
   }
 })
