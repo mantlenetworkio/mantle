@@ -56,3 +56,5 @@ mantle.iml
 
 ops/data/**
 dist/
+
+packages/contracts/abi/
