@@ -1,21 +1,22 @@
 package sequencer
 
 import (
-	ethc "github.com/ethereum/go-ethereum/common"
-	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/rpc"
+
 	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 )
 
 func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {
@@ -63,9 +64,16 @@ func New(eth services.Backend, proofBackend proof.Backend, cfg *services.Config,
 func (s *Sequencer) confirmationLoop() {
 	defer s.Wg.Done()
 
+	db := s.ProofBackend.ChainDb()
+	cacheNum := rawdb.ReadFPSchedulerNumber(db) - 1
+	var startNum *uint64
+	if cacheNum > 0 {
+		startNum = &cacheNum
+	}
+
 	// Watch AssertionCreated event
 	createdCh := make(chan *bindings.RollupAssertionCreated, 4096)
-	createdSub, err := s.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Context: s.Ctx}, createdCh)
+	createdSub, err := s.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Start: startNum, Context: s.Ctx}, createdCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
 	}
@@ -73,7 +81,7 @@ func (s *Sequencer) confirmationLoop() {
 
 	// Watch AssertionConfirmed event
 	confirmedCh := make(chan *bindings.RollupAssertionConfirmed, 4096)
-	confirmedSub, err := s.Rollup.Contract.WatchAssertionConfirmed(&bind.WatchOpts{Context: s.Ctx}, confirmedCh)
+	confirmedSub, err := s.Rollup.Contract.WatchAssertionConfirmed(&bind.WatchOpts{Start: startNum, Context: s.Ctx}, confirmedCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
 	}
@@ -88,12 +96,13 @@ func (s *Sequencer) confirmationLoop() {
 	defer headSub.Unsubscribe()
 
 	challengedCh := make(chan *bindings.RollupAssertionChallenged, 4096)
-	challengedSub, err := s.Rollup.Contract.WatchAssertionChallenged(&bind.WatchOpts{Context: s.Ctx}, challengedCh)
+	challengedSub, err := s.Rollup.Contract.WatchAssertionChallenged(&bind.WatchOpts{Start: startNum, Context: s.Ctx}, challengedCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
 	}
 	defer challengedSub.Unsubscribe()
-	isInChallenge := rawdb.ReadFPInChallenge(s.BaseService.ProofBackend.ChainDb())
+	isInChallenge := rawdb.ReadFPInChallenge(db)
+
 	for {
 		if isInChallenge {
 			// Waif for the challenge resolved
@@ -101,8 +110,9 @@ func (s *Sequencer) confirmationLoop() {
 			case <-s.challengeResolutionCh:
 				log.Info("Sequencer finished challenge, reset isInChallenge status")
 				isInChallenge = false
-				rawdb.WriteFPInChallenge(s.BaseService.ProofBackend.ChainDb(), isInChallenge)
+				rawdb.WriteFPInChallenge(db, isInChallenge)
 			case <-s.Ctx.Done():
+				log.Error("Scheduler confirmationLoop ctx done")
 				return
 			}
 		} else {
@@ -111,6 +121,7 @@ func (s *Sequencer) confirmationLoop() {
 				// New assertion created on L1 Rollup
 				log.Info("Get New Assertion...", "AssertionID", ev.AssertionID,
 					"AsserterAddr", ev.AsserterAddr, "VmHash", ev.VmHash, "InboxSize", ev.InboxSize)
+				rawdb.WriteFPSchedulerNumber(db, ev.Raw.BlockNumber)
 			case header := <-headCh:
 				// todo : optimization the check with block height
 				// Get confirm block header
@@ -195,13 +206,14 @@ func (s *Sequencer) confirmationLoop() {
 					perent.ProposalTime = ret.ProposalTime
 				}
 
+				isInChallenge = true
+				rawdb.WriteFPInChallenge(db, isInChallenge)
 				s.challengeCh <- &challengeCtx{
 					common.Address(ev.ChallengeAddr),
 					challengeAssertion,
 					perent,
 				}
-				isInChallenge = true
-				rawdb.WriteFPInChallenge(s.ProofBackend.ChainDb(), isInChallenge)
+
 			case <-s.Ctx.Done():
 				return
 			}
@@ -330,7 +342,10 @@ func (s *Sequencer) challengeLoop() {
 				}
 				log.Info("Sequencer generate state end...")
 
-				// todo: check weather already initialized
+				// todo: check weather already initialized.
+				// initialized: get current bisectedCh;
+				// not initialized: InitializeChallengeLength;
+
 				numSteps := uint64(len(states)) - 1
 				log.Info("Print generated states", "states[0]", states[0].Hash().String(), "states[numSteps]", states[numSteps].Hash().String())
 				_, err = challengeSession.InitializeChallengeLength(services.MidState(states, 0, numSteps), new(big.Int).SetUint64(numSteps))

@@ -30,6 +30,22 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
+func WriteFPSchedulerNumber(db ethdb.Writer, num uint64) {
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, num)
+	if err := db.Put(FPSchedulerConfirmLoopNumberCache, b); err != nil {
+		log.Crit("Failed to store fp confirm loop number cache", "err", err)
+	}
+}
+
+func ReadFPSchedulerNumber(db ethdb.Reader) uint64 {
+	data, _ := db.Get(FPSchedulerConfirmLoopNumberCache)
+	if data != nil {
+		return binary.LittleEndian.Uint64(data)
+	}
+	return 0
+}
+
 func WriteFPInChallenge(db ethdb.Writer, isInChallenge bool) {
 	if isInChallenge {
 		if err := db.Put(FPSchedulerIsInChallenge, []byte("1")); err != nil {

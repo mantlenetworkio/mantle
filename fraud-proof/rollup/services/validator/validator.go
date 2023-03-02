@@ -115,8 +115,9 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 						// Validation failed
 						log.Info("Validator check assertion vmHash failed, start challenge assertion....")
 						ourAssertion := &rollupTypes.Assertion{
-							VmHash:    block.Hash(),
-							InboxSize: ev.InboxSize,
+							VmHash: block.Hash(),
+							//VmHash:    common.BigToHash(new(big.Int).SetUint64(1)),
+							InboxSize: checkAssertion.InboxSize,
 							Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
 						}
 						v.challengeCh <- &challengeCtx{checkAssertion, ourAssertion}
