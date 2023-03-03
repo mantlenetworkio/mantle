@@ -116,6 +116,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 						log.Info("Validator check assertion vmHash failed, start challenge assertion....")
 						ourAssertion := &rollupTypes.Assertion{
 							VmHash: block.Root(),
+							// VmHash mock for challenge test
 							//VmHash:    common.BigToHash(new(big.Int).SetUint64(1)),
 							InboxSize: checkAssertion.InboxSize,
 							Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
@@ -171,12 +172,12 @@ func (v *Validator) challengeLoop() {
 	}
 	defer headSub.Unsubscribe()
 
-	var challengeSession *bindings.IChallengeSession
+	var challengeSession *bindings.ChallengeSession
 	var states []*proof.ExecutionState
 
-	var bisectedCh chan *bindings.IChallengeBisected
+	var bisectedCh chan *bindings.ChallengeBisected
 	var bisectedSub event.Subscription
-	var challengeCompletedCh chan *bindings.IChallengeChallengeCompleted
+	var challengeCompletedCh chan *bindings.ChallengeChallengeCompleted
 	var challengeCompletedSub event.Subscription
 
 	inChallenge := false
@@ -281,21 +282,21 @@ func (v *Validator) challengeLoop() {
 				}
 				log.Info("Validator saw new challenge", "assertion id", ev.AssertionID, "expected id", ctx.opponentAssertion.ID, "block", ev.Raw.BlockNumber)
 				if ev.AssertionID.Cmp(ctx.opponentAssertion.ID) == 0 {
-					challenge, err := bindings.NewIChallenge(ev.ChallengeAddr, v.L1)
+					challenge, err := bindings.NewChallenge(ev.ChallengeAddr, v.L1)
 					if err != nil {
 						log.Crit("Failed to access ongoing challenge", "address", ev.ChallengeAddr, "err", err)
 					}
-					challengeSession = &bindings.IChallengeSession{
+					challengeSession = &bindings.ChallengeSession{
 						Contract:     challenge,
 						CallOpts:     bind.CallOpts{Pending: true, Context: v.Ctx},
 						TransactOpts: *v.TransactOpts,
 					}
-					bisectedCh = make(chan *bindings.IChallengeBisected, 4096)
+					bisectedCh = make(chan *bindings.ChallengeBisected, 4096)
 					bisectedSub, err = challenge.WatchBisected(&bind.WatchOpts{Context: v.Ctx}, bisectedCh)
 					if err != nil {
 						log.Crit("Failed to watch challenge event", "err", err)
 					}
-					challengeCompletedCh = make(chan *bindings.IChallengeChallengeCompleted, 4096)
+					challengeCompletedCh = make(chan *bindings.ChallengeChallengeCompleted, 4096)
 					challengeCompletedSub, err = challenge.WatchChallengeCompleted(&bind.WatchOpts{Context: v.Ctx}, challengeCompletedCh)
 					if err != nil {
 						log.Crit("Failed to watch challenge event", "err", err)

@@ -30,6 +30,26 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
+func ReadFPChallengeCtx(db ethdb.Reader) []byte {
+	data, err := db.Get(FPSchedulerChallengeCtx)
+	if err != nil {
+		log.Crit("Failed to get fp challenge ctx", "err", err)
+	}
+	return data
+}
+
+func WriteFPChallengeCtx(db ethdb.Writer, data []byte) {
+	if err := db.Put(FPSchedulerChallengeCtx, data); err != nil {
+		log.Crit("Failed to store fp challenge ctx", "err", err)
+	}
+}
+
+func DeleteFPChallengeCtx(db ethdb.Writer) {
+	if err := db.Delete(FPSchedulerChallengeCtx); err != nil {
+		log.Crit("Failed to store fp challenge ctx", "err", err)
+	}
+}
+
 func WriteFPSchedulerNumber(db ethdb.Writer, num uint64) {
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b, num)

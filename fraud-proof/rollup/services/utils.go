@@ -12,7 +12,7 @@ import (
 )
 
 func SubmitOneStepProof(
-	challengeSession *bindings.IChallengeSession,
+	challengeSession *bindings.ChallengeSession,
 	proofBackend proof.Backend,
 	ctx context.Context,
 	state *proof.ExecutionState,
@@ -42,8 +42,8 @@ func SubmitOneStepProof(
 // Responder -> startStateHash, endStateHash
 func RespondBisection(
 	b *BaseService,
-	challengeSession *bindings.IChallengeSession,
-	ev *bindings.IChallengeBisected,
+	challengeSession *bindings.ChallengeSession,
+	ev *bindings.ChallengeBisected,
 	states []*proof.ExecutionState,
 ) error {
 	var bisection [3][32]byte
