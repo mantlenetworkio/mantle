@@ -200,14 +200,6 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
     const fixHeights: number[] = [115, 2871, 4007, 5456, 6312, 6582, 14152, 9524, 69603, 69604, 69605, 69606, 69607, 85019, 10493, 110458, 110459, 110460, 110461, 110462, 110463, 110464, 110465, 110466, 110467, 110468, 110469, 110470, 110471, 110472, 110473, 110474, 85019, 124737, 126785, 172269, 183837, 183838, 188598, 209138, 217935, 223779, 236943, 237736, 243435, 244198, 247400, 256661, 260722, 267093, 277620, 278907, 279541, 281086, 281128, 306936, 311640, 314047, 334671, 334672, 339294, 339577, 352250, 355668, 358129, 376609, 405829, 410700, 414018, 414019, 423411, 439132, 442227, 443842];
     // for (let i = 0; i < intArray.length; i++) {
     for (const fixHeight of fixHeights) {
-      // l2geth    txvvvvv       123
-
-      // ctc tx
-
-      // event deposit  event    123
-
-      // stateroot
-
       const unConfirmedTx = await this.state.db.getUnconfirmedTransactionByIndex(fixHeight - 1);
       const enqueue = await this.state.db.getEnqueueByIndex(unConfirmedTx.queueIndex)
       if (enqueue.data !== unConfirmedTx.data) {
