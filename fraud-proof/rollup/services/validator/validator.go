@@ -21,14 +21,6 @@ import (
 	rpc2 "github.com/mantlenetworkio/mantle/l2geth/rpc"
 )
 
-//type Step int
-//
-//const (
-//	Assertion Step = iota + 1
-//	Challenge
-//	Bisected
-//)
-
 func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {
 	validator, err := New(eth, proofBackend, cfg, auth)
 	if err != nil {
@@ -263,7 +255,6 @@ func (v *Validator) challengeLoop() {
 	}
 
 	for {
-		//stakeStatus, _ := v.Rollup.Stakers(v.Rollup.TransactOpts.From)
 		if inChallenge {
 			select {
 			case ev := <-bisectedCh:

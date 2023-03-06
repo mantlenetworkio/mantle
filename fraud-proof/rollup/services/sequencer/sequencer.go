@@ -18,7 +18,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
 func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {
@@ -141,8 +140,6 @@ func (s *Sequencer) confirmationLoop() {
 			case <-s.challengeResolutionCh:
 				log.Info("Sequencer finished challenge, reset isInChallenge status")
 				isInChallenge = false
-				rawdb.WriteFPInChallenge(db, isInChallenge)
-				rawdb.DeleteFPSchedulerChallengeCtx(db)
 			case <-s.Ctx.Done():
 				log.Error("Scheduler confirmationLoop ctx done")
 				return
@@ -234,12 +231,9 @@ func (s *Sequencer) confirmationLoop() {
 					challengeAssertion,
 					perent,
 				}
-				data, _ := rlp.EncodeToBytes(challengeCtx)
-				rawdb.WriteFPSchedulerChallengeCtx(db, data)
 
 				s.challengeCh <- &challengeCtx
 				isInChallenge = true
-				rawdb.WriteFPInChallenge(db, isInChallenge)
 
 			case <-s.Ctx.Done():
 				return
