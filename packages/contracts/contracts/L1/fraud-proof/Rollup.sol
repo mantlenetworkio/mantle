@@ -59,6 +59,15 @@ abstract contract RollupBase is IRollup, Initializable {
         address stakerAddress;
         uint256 lastAssertionID;
     }
+
+    struct ChallengeCtx {
+        bool completed;
+        address challengeAddress;
+        address defenderAddress;
+        address challengerAddress;
+        uint256 defenderAssertionID;
+        uint256 challengerAssertionID;
+    }
 }
 
 contract Rollup is Lib_AddressResolver, RollupBase {
@@ -79,6 +88,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
     mapping(address => Staker) public stakers; // mapping from staker addresses to corresponding stakers
     mapping(address => uint256) public withdrawableFunds; // mapping from addresses to withdrawable funds (won in challenge)
     Zombie[] public zombies; // stores stakers that lost a challenge
+    ChallengeCtx public challengeCtx;  // stores challenge context
 
     constructor() Lib_AddressResolver(address(0)) {
         _disableInitializers();
@@ -321,6 +331,8 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         address challengeAddr = address(challenge);
         stakers[challenger].currentChallenge = challengeAddr;
         stakers[defender].currentChallenge = challengeAddr;
+
+        challengeCtx = ChallengeCtx(false,challengeAddr,defender,challenger,defenderAssertionID,challengerAssertionID);
         emit AssertionChallenged(defenderAssertionID, challengeAddr);
         challenge.initialize(
             defender,
@@ -487,6 +499,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         deleteStaker(loser);
         // Track as zombie so we can account for it during assertion resolution.
         zombies.push(Zombie(loser, assertionID));
+        challengeCtx.completed = true;
     }
 
     /**
