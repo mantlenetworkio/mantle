@@ -77,6 +77,9 @@ var (
 	FPSchedulerIsInChallenge          = []byte("FPIsInChallenge")
 	FPSchedulerConfirmLoopNumberCache = []byte("FPSchedulerConfirmLoopNumberCache")
 	FPSchedulerChallengeCtx           = []byte("FPSchedulerChallengeCtx")
+
+	FPValidatorIsInChallenge = []byte("FPValidatorIsInChallenge")
+	FPValidatorChallengeCtx  = []byte("FPValidatorChallengeCtx")
 )
 
 const (

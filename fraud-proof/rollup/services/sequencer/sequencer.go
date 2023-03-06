@@ -107,7 +107,7 @@ func (s *Sequencer) confirmationLoop() {
 
 	// restart with challengeCtx
 	if isInChallenge {
-		challengeCtxEnc := rawdb.ReadFPChallengeCtx(db)
+		challengeCtxEnc := rawdb.ReadFPSchedulerChallengeCtx(db)
 		var challengeCtx ChallengeCtx
 		if err = rlp.DecodeBytes(challengeCtxEnc, &challengeCtx); err != nil {
 			return
@@ -123,6 +123,7 @@ func (s *Sequencer) confirmationLoop() {
 				log.Info("Sequencer finished challenge, reset isInChallenge status")
 				isInChallenge = false
 				rawdb.WriteFPInChallenge(db, isInChallenge)
+				rawdb.DeleteFPSchedulerChallengeCtx(db)
 			case <-s.Ctx.Done():
 				log.Error("Scheduler confirmationLoop ctx done")
 				return
@@ -215,7 +216,7 @@ func (s *Sequencer) confirmationLoop() {
 					perent,
 				}
 				data, _ := rlp.EncodeToBytes(challengeCtx)
-				rawdb.WriteFPChallengeCtx(db, data)
+				rawdb.WriteFPSchedulerChallengeCtx(db, data)
 
 				s.challengeCh <- &challengeCtx
 				isInChallenge = true
@@ -231,7 +232,6 @@ func (s *Sequencer) confirmationLoop() {
 func (s *Sequencer) challengeLoop() {
 	defer s.Wg.Done()
 
-	db := s.ProofBackend.ChainDb()
 	// Watch L1 blockchain for challenge timeout
 	headCh := make(chan *types.Header, 4096)
 	headSub, err := s.L1.SubscribeNewHead(s.Ctx, headCh)
@@ -332,7 +332,6 @@ func (s *Sequencer) challengeLoop() {
 				// 2. challenge exist and already completed
 				stakeStatus, _ := s.Rollup.Stakers(s.Rollup.TransactOpts.From)
 				if bytes.Equal(stakeStatus.CurrentChallenge.Bytes(), common.BigToAddress(common.Big0).Bytes()) {
-					rawdb.DeleteFPChallengeCtx(db)
 					winner, err := challengeSession.Winner()
 					if err != nil || bytes.Equal(winner.Bytes(), common.BigToAddress(common.Big0).Bytes()) {
 						// challenge not exit or winner not exist

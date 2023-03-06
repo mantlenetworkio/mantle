@@ -30,7 +30,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
-func ReadFPChallengeCtx(db ethdb.Reader) []byte {
+func ReadFPValidatorChallengeCtx(db ethdb.Reader) []byte {
 	data, err := db.Get(FPSchedulerChallengeCtx)
 	if err != nil {
 		log.Crit("Failed to get fp challenge ctx", "err", err)
@@ -38,13 +38,53 @@ func ReadFPChallengeCtx(db ethdb.Reader) []byte {
 	return data
 }
 
-func WriteFPChallengeCtx(db ethdb.Writer, data []byte) {
+func WriteFPValidatorChallengeCtx(db ethdb.Writer, data []byte) {
 	if err := db.Put(FPSchedulerChallengeCtx, data); err != nil {
 		log.Crit("Failed to store fp challenge ctx", "err", err)
 	}
 }
 
-func DeleteFPChallengeCtx(db ethdb.Writer) {
+func DeleteFPValidatorChallengeCtx(db ethdb.Writer) {
+	if err := db.Delete(FPSchedulerChallengeCtx); err != nil {
+		log.Crit("Failed to store fp challenge ctx", "err", err)
+	}
+}
+
+func WriteFPValidatorInChallenge(db ethdb.Writer, isInChallenge bool) {
+	if isInChallenge {
+		if err := db.Put(FPValidatorIsInChallenge, []byte("1")); err != nil {
+			log.Crit("Failed to store fp in challenge status", "err", err)
+		}
+	} else {
+		if err := db.Put(FPValidatorIsInChallenge, []byte("0")); err != nil {
+			log.Crit("Failed to store fp in challenge status", "err", err)
+		}
+	}
+}
+
+func ReadFPValidatorInChallenge(db ethdb.Reader) bool {
+	data, _ := db.Get(FPValidatorIsInChallenge)
+	if bytes.Equal(data, []byte("1")) {
+		return true
+	}
+	return false
+}
+
+func ReadFPSchedulerChallengeCtx(db ethdb.Reader) []byte {
+	data, err := db.Get(FPSchedulerChallengeCtx)
+	if err != nil {
+		log.Crit("Failed to get fp challenge ctx", "err", err)
+	}
+	return data
+}
+
+func WriteFPSchedulerChallengeCtx(db ethdb.Writer, data []byte) {
+	if err := db.Put(FPSchedulerChallengeCtx, data); err != nil {
+		log.Crit("Failed to store fp challenge ctx", "err", err)
+	}
+}
+
+func DeleteFPSchedulerChallengeCtx(db ethdb.Writer) {
 	if err := db.Delete(FPSchedulerChallengeCtx); err != nil {
 		log.Crit("Failed to store fp challenge ctx", "err", err)
 	}
