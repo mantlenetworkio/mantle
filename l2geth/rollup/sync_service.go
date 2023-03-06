@@ -1366,9 +1366,24 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 			return fmt.Errorf("Cannot get transaction batch: %w", err)
 		}
 		for _, tx := range txs {
-			verified, err := s.verifyTx(tx)
+			var verified bool
+			verified, err = s.verifyTx(tx)
 			if err != nil {
-				return err
+				if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+					log.Warn("Failed to verify Tx. Sync is about to retrieve Tx from L2 and verify it again", "index", tx.GetMeta().Index)
+					l2Tx, err := s.client.GetTransaction(i, BackendL2)
+					if err != nil {
+						return err
+					}
+					verified, err = s.verifyTx(l2Tx)
+					if err != nil {
+						return err
+					}
+					tx = l2Tx
+				} else {
+					return err
+				}
+
 			}
 			if verified {
 				if err := s.applyBatchedTransaction(tx); err != nil {
@@ -1516,7 +1531,6 @@ func (s *SyncService) verifyTx(tx *types.Transaction) (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("Cannot apply tx : %w", err)
 		}
-
 		if block.Root().String() != stateRoot.Value {
 			log.Error("state root is different", " scc stateroot", stateRoot.Value, "local stateroot", block.Root().String(), "index", index)
 			return false, fmt.Errorf("stateroot is different")
