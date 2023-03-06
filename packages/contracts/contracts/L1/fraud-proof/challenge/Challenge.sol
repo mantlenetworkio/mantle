@@ -30,6 +30,16 @@ import "../verifier/IVerifierEntry.sol";
 import "../IRollup.sol";
 
 contract Challenge is IChallenge {
+    struct BisectedStore {
+        bytes32 startState;
+        bytes32 midState;
+        bytes32 endState;
+        uint256 blockNum;
+        uint256 blockTime;
+        uint256 challengedSegmentStart;
+        uint256 challengedSegmentLength;
+    }
+
     enum Turn {
         NoChallenge,
         Challenger,
@@ -72,6 +82,9 @@ contract Challenge is IChallenge {
     // Initial state used to initialize bisectionHash (write-once).
     bytes32 private startStateHash;
     bytes32 private endStateHash;
+
+    address public winner;
+    BisectedStore public currentBisected;
 
     /**
      * @notice Pre-condition: `msg.sender` is correct and still has time remaining.
@@ -141,6 +154,7 @@ contract Challenge is IChallenge {
         console.log(_numSteps);
         bisectionHash = ChallengeLib.computeBisectionHash(0, _numSteps);
         // TODO: consider emitting a different event?
+        currentBisected = BisectedStore(startStateHash, checkStateHash, endStateHash, block.number, block.timestamp, 0, _numSteps);
         emit Bisected(startStateHash, checkStateHash, endStateHash, block.number, block.timestamp, 0, _numSteps);
     }
 
@@ -182,6 +196,7 @@ contract Challenge is IChallenge {
         prevBisection[0] = bisection[0];
         prevBisection[1] = bisection[2];
         bisectionHash = ChallengeLib.computeBisectionHash(challengedSegmentStart, challengedSegmentLength);
+        currentBisected = BisectedStore(bisection[0], bisection[1], bisection[2], block.number, block.timestamp, challengedSegmentStart, challengedSegmentLength);
         emit Bisected(bisection[0], bisection[1], bisection[2], block.number, block.timestamp, challengedSegmentStart, challengedSegmentLength);
     }
 
@@ -247,8 +262,10 @@ contract Challenge is IChallenge {
 
     function _currentWin(CompletionReason reason) private {
         if (turn == Turn.Defender) {
+            winner = defender;
             _asserterWin(reason);
         } else {
+            winner = challenger;
             _challengerWin(reason);
         }
     }

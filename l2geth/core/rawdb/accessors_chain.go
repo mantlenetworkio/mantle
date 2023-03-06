@@ -30,6 +30,82 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
+func ReadFPValidatorChallengeCtx(db ethdb.Reader) []byte {
+	data, err := db.Get(FPSchedulerChallengeCtx)
+	if err != nil {
+		log.Crit("Failed to get fp challenge ctx", "err", err)
+	}
+	return data
+}
+
+func WriteFPValidatorChallengeCtx(db ethdb.Writer, data []byte) {
+	if err := db.Put(FPSchedulerChallengeCtx, data); err != nil {
+		log.Crit("Failed to store fp challenge ctx", "err", err)
+	}
+}
+
+func DeleteFPValidatorChallengeCtx(db ethdb.Writer) {
+	if err := db.Delete(FPSchedulerChallengeCtx); err != nil {
+		log.Crit("Failed to store fp challenge ctx", "err", err)
+	}
+}
+
+func WriteFPValidatorInChallenge(db ethdb.Writer, isInChallenge bool) {
+	if isInChallenge {
+		if err := db.Put(FPValidatorIsInChallenge, []byte("1")); err != nil {
+			log.Crit("Failed to store fp in challenge status", "err", err)
+		}
+	} else {
+		if err := db.Put(FPValidatorIsInChallenge, []byte("0")); err != nil {
+			log.Crit("Failed to store fp in challenge status", "err", err)
+		}
+	}
+}
+
+func ReadFPValidatorInChallenge(db ethdb.Reader) bool {
+	data, _ := db.Get(FPValidatorIsInChallenge)
+	if bytes.Equal(data, []byte("1")) {
+		return true
+	}
+	return false
+}
+
+func ReadFPSchedulerChallengeCtx(db ethdb.Reader) []byte {
+	data, err := db.Get(FPSchedulerChallengeCtx)
+	if err != nil {
+		log.Crit("Failed to get fp challenge ctx", "err", err)
+	}
+	return data
+}
+
+func WriteFPSchedulerChallengeCtx(db ethdb.Writer, data []byte) {
+	if err := db.Put(FPSchedulerChallengeCtx, data); err != nil {
+		log.Crit("Failed to store fp challenge ctx", "err", err)
+	}
+}
+
+func DeleteFPSchedulerChallengeCtx(db ethdb.Writer) {
+	if err := db.Delete(FPSchedulerChallengeCtx); err != nil {
+		log.Crit("Failed to store fp challenge ctx", "err", err)
+	}
+}
+
+func WriteFPSchedulerNumber(db ethdb.Writer, num uint64) {
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, num)
+	if err := db.Put(FPSchedulerConfirmLoopNumberCache, b); err != nil {
+		log.Crit("Failed to store fp confirm loop number cache", "err", err)
+	}
+}
+
+func ReadFPSchedulerNumber(db ethdb.Reader) uint64 {
+	data, _ := db.Get(FPSchedulerConfirmLoopNumberCache)
+	if data != nil {
+		return binary.LittleEndian.Uint64(data)
+	}
+	return 0
+}
+
 func WriteFPInChallenge(db ethdb.Writer, isInChallenge bool) {
 	if isInChallenge {
 		if err := db.Put(FPSchedulerIsInChallenge, []byte("1")); err != nil {

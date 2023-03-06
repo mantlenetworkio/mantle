@@ -109,11 +109,11 @@ contract AssertionMap is Initializable {
             parentAssertion.childInboxSize = inboxSize;
         } else {
             if (inboxSize != parentChildInboxSize) {
-                revert ChildInboxSizeMismatch();
+                revert("ChildInboxSizeMismatch");
             }
         }
         if (parentAssertion.childStateHashes[stateHash]) {
-            revert SiblingStateHashExists();
+            revert("SiblingStateHashExists");
         }
 
         parentAssertion.childStateHashes[stateHash] = true;
