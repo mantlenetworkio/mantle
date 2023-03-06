@@ -1515,6 +1515,8 @@ func (s *SyncService) SetExtra(extra []byte) error {
 }
 
 func (s *SyncService) verifyTx(tx *types.Transaction) (bool, error) {
+	// TODO delete
+	log.Info("start verify block stateRoot", "txIndex", tx.GetMeta().Index, "txHash", tx.Hash().Hex())
 	if !s.mpcVerifier {
 		index := tx.GetMeta().Index
 		stateRoot, err := s.client.GetStateRoot(*index, s.backend)
