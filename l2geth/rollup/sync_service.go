@@ -1371,7 +1371,7 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 			if err != nil {
 				if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
 					log.Warn("Failed to verify Tx. Sync is about to retrieve Tx from L2 and verify it again", "index", tx.GetMeta().Index)
-					l2Tx, err := s.client.GetTransaction(i, BackendL2)
+					l2Tx, err := s.client.GetTransaction(*tx.GetMeta().Index, BackendL2)
 					if err != nil {
 						return err
 					}
