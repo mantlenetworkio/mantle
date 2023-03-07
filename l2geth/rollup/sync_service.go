@@ -50,6 +50,7 @@ type SyncService struct {
 	cancel                         context.CancelFunc
 	verifier                       bool
 	mpcVerifier                    bool
+	mpcVerifyHeight                uint64
 	db                             ethdb.Database
 	scope                          event.SubscriptionScope
 	txFeed                         event.Feed
@@ -140,6 +141,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		cancel:                         cancel,
 		verifier:                       cfg.IsVerifier,
 		mpcVerifier:                    cfg.MpcVerifier,
+		mpcVerifyHeight:                cfg.MpcVerifyHeight,
 		enable:                         cfg.Eth1SyncServiceEnable,
 		syncing:                        atomic.Value{},
 		bc:                             bc,
@@ -1380,10 +1382,7 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 						return err
 					}
 					tx = l2Tx
-				} else {
-					return err
 				}
-
 			}
 			if verified {
 				if err := s.applyBatchedTransaction(tx); err != nil {
@@ -1515,12 +1514,12 @@ func (s *SyncService) SetExtra(extra []byte) error {
 }
 
 func (s *SyncService) verifyTx(tx *types.Transaction) (bool, error) {
-	if !s.mpcVerifier {
+	if !s.mpcVerifier || s.bc.CurrentHeader().Number.Uint64()+1 < s.mpcVerifyHeight {
 		index := tx.GetMeta().Index
 		stateRoot, err := s.client.GetStateRoot(*index, s.backend)
 		if err != nil {
 			log.Info("waiting stateroot to be append to scc", "index", *index)
-			return false, fmt.Errorf("Cannot get stateroot from dtl : %w", err)
+			return false, nil
 		}
 		next := s.GetNextIndex()
 		if *index < next {

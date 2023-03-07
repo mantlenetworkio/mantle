@@ -46,5 +46,8 @@ type Config struct {
 	// HTTP endpoint of the sequencer
 	SequencerClientHttp string
 
+	// MpcVerifier a verifier dedicated to the mpc node
 	MpcVerifier bool
+	// MpcVerifyHeight if block number small than MpcVerifyHeight verifier will verifyTx before apply transaction
+	MpcVerifyHeight uint64
 }
