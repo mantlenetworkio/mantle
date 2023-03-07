@@ -31,7 +31,14 @@ import (
 )
 
 func ReadFPValidatorChallengeCtx(db ethdb.Reader) []byte {
-	data, err := db.Get(FPSchedulerChallengeCtx)
+	exist, err := db.Has(FPValidatorChallengeCtx)
+	if err != nil {
+		log.Crit("Failed to check fp challenge ctx", "err", err)
+	}
+	if !exist {
+		return nil
+	}
+	data, err := db.Get(FPValidatorChallengeCtx)
 	if err != nil {
 		log.Crit("Failed to get fp challenge ctx", "err", err)
 	}
@@ -39,13 +46,13 @@ func ReadFPValidatorChallengeCtx(db ethdb.Reader) []byte {
 }
 
 func WriteFPValidatorChallengeCtx(db ethdb.Writer, data []byte) {
-	if err := db.Put(FPSchedulerChallengeCtx, data); err != nil {
+	if err := db.Put(FPValidatorChallengeCtx, data); err != nil {
 		log.Crit("Failed to store fp challenge ctx", "err", err)
 	}
 }
 
 func DeleteFPValidatorChallengeCtx(db ethdb.Writer) {
-	if err := db.Delete(FPSchedulerChallengeCtx); err != nil {
+	if err := db.Delete(FPValidatorChallengeCtx); err != nil {
 		log.Crit("Failed to store fp challenge ctx", "err", err)
 	}
 }

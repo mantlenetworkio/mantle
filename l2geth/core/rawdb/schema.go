@@ -74,12 +74,8 @@ var (
 	preimageCounter    = metrics.NewRegisteredCounter("db/preimage/total", nil)
 	preimageHitCounter = metrics.NewRegisteredCounter("db/preimage/hits", nil)
 
-	FPSchedulerIsInChallenge          = []byte("FPIsInChallenge")
 	FPSchedulerConfirmLoopNumberCache = []byte("FPSchedulerConfirmLoopNumberCache")
-	FPSchedulerChallengeCtx           = []byte("FPSchedulerChallengeCtx")
-
-	FPValidatorIsInChallenge = []byte("FPValidatorIsInChallenge")
-	FPValidatorChallengeCtx  = []byte("FPValidatorChallengeCtx")
+	FPValidatorChallengeCtx           = []byte("FPValidatorChallengeCtx")
 )
 
 const (

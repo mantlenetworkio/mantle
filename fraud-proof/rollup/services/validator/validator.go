@@ -129,7 +129,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 						log.Info("Validator check assertion vmHash failed, start challenge assertion....")
 						ourAssertion := &rollupTypes.Assertion{
 							VmHash: block.Root(),
-							//VmHash:    common.BigToHash(new(big.Int).SetUint64(1)), 	// VmHash mock for challenge test
+							//VmHash:    common.BigToHash(new(big.Int).SetUint64(1)), // VmHash mock for challenge test
 							InboxSize: checkAssertion.InboxSize,
 							Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
 						}
@@ -211,48 +211,51 @@ func (v *Validator) challengeLoop() {
 
 	db := v.ProofBackend.ChainDb()
 
-	// The necessity of local storage:
-	// Can't judge whether the interruption has just entered the challenge process and did not create assertions
+	go func() {
+		// The necessity of local storage:
+		// Can't judge whether the interruption has just entered the challenge process and did not create assertions
+		challengeCtxEnc := rawdb.ReadFPValidatorChallengeCtx(db)
+		if challengeCtxEnc != nil {
+			// Before the program was exited last time, it had
+			// entered the challenge state and did not execute it to challenge complete.
+			// we need to re-enter in the challenge process.
+			// Find the entry point through the state of the L1.
+			stakeStatus, _ := v.Rollup.Stakers(v.Rollup.TransactOpts.From)
+			currentAssertion, _ := v.AssertionMap.Assertions(stakeStatus.AssertionID)
+			var challengeCtx ChallengeCtx
+			if err = rlp.DecodeBytes(challengeCtxEnc, &challengeCtx); err != nil {
+				return
+			}
+			ctx = &challengeCtx
+			challengeContext, _ := v.Rollup.ChallengeCtx()
 
-	challengeCtxEnc := rawdb.ReadFPValidatorChallengeCtx(db)
-	if challengeCtxEnc != nil {
-		// Before the program was exited last time, it had
-		// entered the challenge state and did not execute it to challenge complete.
-		// we need to re-enter in the challenge process.
-		// Find the entry point through the state of the L1.
-		stakeStatus, _ := v.Rollup.Stakers(v.Rollup.TransactOpts.From)
-		currentAssertion, _ := v.AssertionMap.Assertions(stakeStatus.AssertionID)
-		var challengeCtx ChallengeCtx
-		if err = rlp.DecodeBytes(challengeCtxEnc, &challengeCtx); err != nil {
-			return
-		}
-		ctx = &challengeCtx
-		challengeContext, _ := v.Rollup.ChallengeCtx()
-		if challengeContext.Completed {
-			// already challenged do nothing
-			v.challengeResoutionCh <- struct{}{}
-			log.Info("Challenge already completed")
-		} else if currentAssertion.InboxSize.Cmp(challengeCtx.OurAssertion.InboxSize) < 0 &&
-			!bytes.Equal(currentAssertion.StateHash[:], challengeCtx.OurAssertion.VmHash[:]) {
-			// did not create assertion
-			v.challengeCh <- &challengeCtx
-		} else if bytes.Equal(stakeStatus.CurrentChallenge.Bytes(), common.BigToHash(common.Big0).Bytes()) {
-			// did not create challenge
-			createdCh <- &bindings.RollupAssertionCreated{
-				AssertionID:  stakeStatus.AssertionID,
-				AsserterAddr: v.Rollup.TransactOpts.From,
-				VmHash:       currentAssertion.StateHash,
-				InboxSize:    currentAssertion.InboxSize,
+			if challengeContext.Completed {
+				// already challenged do nothing
+				v.challengeResoutionCh <- struct{}{}
+				log.Info("Challenge already completed")
+			} else if currentAssertion.InboxSize.Cmp(challengeCtx.OurAssertion.InboxSize) < 0 &&
+				!bytes.Equal(currentAssertion.StateHash[:], challengeCtx.OurAssertion.VmHash[:]) {
+				// did not create assertion
+				v.challengeCh <- &challengeCtx
+				log.Info("Did not create assertion")
+			} else if bytes.Equal(stakeStatus.CurrentChallenge.Bytes(), common.BigToAddress(common.Big0).Bytes()) {
+				// did not create challenge
+				createdCh <- &bindings.RollupAssertionCreated{
+					AssertionID:  stakeStatus.AssertionID,
+					AsserterAddr: v.Rollup.TransactOpts.From,
+					VmHash:       currentAssertion.StateHash,
+					InboxSize:    currentAssertion.InboxSize,
+				}
+			} else {
+				// in bisectedCh
+				challengedCh <- &bindings.RollupAssertionChallenged{
+					AssertionID:   ctx.OpponentAssertion.ID,
+					ChallengeAddr: stakeStatus.CurrentChallenge,
+				}
+				restart = true
 			}
-		} else {
-			// in bisectedCh
-			challengedCh <- &bindings.RollupAssertionChallenged{
-				AssertionID:   ctx.OpponentAssertion.ID,
-				ChallengeAddr: stakeStatus.CurrentChallenge,
-			}
-			restart = true
 		}
-	}
+	}()
 
 	for {
 		if inChallenge {
