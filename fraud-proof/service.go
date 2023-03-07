@@ -2,15 +2,16 @@ package rollup
 
 import (
 	"bytes"
-	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services/sequencer"
-	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services/validator"
-	"github.com/mantlenetworkio/mantle/l2geth/eth"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
+	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services/sequencer"
+	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services/validator"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
+	"github.com/mantlenetworkio/mantle/l2geth/eth"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/node"
 )
