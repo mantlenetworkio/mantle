@@ -124,12 +124,12 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					if err != nil {
 						log.Error("Validator get block failed", "err", err)
 					}
-					if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 {
+					if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) == 0 {
 						// Validation failed
 						log.Info("Validator check assertion vmHash failed, start challenge assertion....")
 						ourAssertion := &rollupTypes.Assertion{
-							VmHash: block.Root(),
-							//VmHash:    common.BigToHash(new(big.Int).SetUint64(1)), // VmHash mock for challenge test
+							//VmHash: block.Root(),
+							VmHash:    common.BigToHash(new(big.Int).SetUint64(1)), // VmHash mock for challenge test
 							InboxSize: checkAssertion.InboxSize,
 							Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
 						}
