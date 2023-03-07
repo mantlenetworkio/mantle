@@ -1530,8 +1530,6 @@ func (s *SyncService) verifyTx(tx *types.Transaction) (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("Cannot apply tx : %w", err)
 		}
-		// TODO delete
-		log.Info("start verify block stateRoot", "txIndex", tx.GetMeta().Index, "txHash", tx.Hash().Hex(), "stateRoot", stateRoot.Value, "blockRoot", block.Root().String())
 		if block.Root().String() != stateRoot.Value {
 			log.Error("state root is different", " scc stateroot", stateRoot.Value, "local stateroot", block.Root().String(), "index", index)
 			return false, fmt.Errorf("stateroot is different")
