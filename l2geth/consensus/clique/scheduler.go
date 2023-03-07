@@ -26,11 +26,13 @@ const (
 
 	// default config of scheduler consensus
 	// defaultBatchSize is the size of batch tx num
-	defaultBatchSize = int64(100)
+	defaultBatchSize = uint64(100)
 	// defaultExpireTime is the default config of a batch timeout
-	defaultExpireTime = int64(60)
+	defaultExpireTime = uint64(60)
 	// defaultBatchEpoch is the epoch time of the scheduler synchronizing the sequencer collection from l1, default 1 day
 	defaultBatchEpoch = time.Duration(86400)
+
+	batchResultListMaxsize = 100
 )
 
 var (
@@ -39,9 +41,15 @@ var (
 
 // Config sets the parameters required for the scheduler service
 type Config struct {
-	BatchSize  int64
-	BatchTime  int64
-	BatchEpoch int64
+	BatchSize  uint64
+	BatchTime  uint64
+	BatchEpoch uint64
+}
+
+type batchResult struct {
+	lastBatchTxCount uint64
+	isBatchFull      bool
+	l1ToL2TxCount    uint64
 }
 
 // Scheduler service has the ability to update the sequencer set
@@ -73,6 +81,7 @@ type Scheduler struct {
 
 	expectMinTxsCount uint64
 	sequencerAssessor *healthAssessor
+	batchResultList   []*batchResult
 
 	chainHeadSub event.Subscription
 	chainHeadCh  chan core.ChainHeadEvent
@@ -249,6 +258,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 		// acceptance check last sequencer
 		schedulerInst.checkSequencer()
 
+		l1ToL2StartHeight := schedulerInst.blockchain.CurrentBlock().NumberU64()
 		schedulerCh := make(chan struct{})
 		err := schedulerInst.eventMux.Post(core.L1ToL2TxStartEvent{
 			ErrCh:       nil,
@@ -280,8 +290,8 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 				RollbackStates: rawdb.ReadRollbackStates(schedulerInst.db),
 				BatchIndex:     currentIndex + 1,
 				StartHeight:    currentBlock.NumberU64() + 1,
-				MaxHeight:      currentBlock.NumberU64() + uint64(batchSize),
-				ExpireTime:     uint64(time.Now().Unix() + expireTime),
+				MaxHeight:      currentBlock.NumberU64() + batchSize,
+				ExpireTime:     uint64(time.Now().Unix()) + expireTime,
 				Sequencer:      seq.Address,
 			}
 			signature, err := schedulerInst.wallet.SignData(schedulerInst.signAccount, accounts.MimetypeTypedData, msg.GetSignData())
@@ -295,7 +305,7 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 			//}
 			//schedulerInst.expectMinTxsCount = expectMinTxsCount
 			// store msg as currentStartMsg
-			schedulerInst.dynamicCalibrateExpireTimeAndBatchSize(&schedulerInst.currentStartMsg, &msg)
+			batchSize, expireTime = schedulerInst.dynamicCalibrateExpireTimeAndBatchSize(batchSize, expireTime, &schedulerInst.currentStartMsg, &msg, l1ToL2StartHeight)
 			schedulerInst.currentStartMsg = msg
 			// set BatchIndex to db
 			rawdb.WriteCurrentBatchPeriodIndex(schedulerInst.db, msg.BatchIndex)
@@ -335,8 +345,31 @@ func (schedulerInst *Scheduler) schedulerRoutine() {
 	}
 }
 
-func (schedulerInst *Scheduler) dynamicCalibrateExpireTimeAndBatchSize(preMsg, curMsg *types.BatchPeriodStartMsg) {
+func (schedulerInst *Scheduler) dynamicCalibrateExpireTimeAndBatchSize(
+	curBatchSize, curExpireTime uint64,
+	preMsg, curMsg *types.BatchPeriodStartMsg,
+	l1ToL2StartHeight uint64) (uint64, uint64) {
 
+	batchSize := curBatchSize
+	expireTime := curExpireTime
+
+	lastBatchTxCount := l1ToL2StartHeight + 1 - preMsg.StartHeight
+
+	schedulerInst.batchResultList = append(schedulerInst.batchResultList, &batchResult{
+		lastBatchTxCount: lastBatchTxCount,
+		isBatchFull:      lastBatchTxCount == curBatchSize,
+		l1ToL2TxCount:    curMsg.StartHeight - 1 - l1ToL2StartHeight,
+	})
+
+	if len(schedulerInst.batchResultList) > batchResultListMaxsize {
+		schedulerInst.batchResultList = schedulerInst.batchResultList[1:]
+	}
+
+	for _, item := range schedulerInst.batchResultList {
+		item.l1ToL2TxCount = 0
+	}
+
+	return batchSize, expireTime
 }
 
 // handleChainHeadEventLoop checks whether the current block height reaches the currentStartMsg.maxHeight,

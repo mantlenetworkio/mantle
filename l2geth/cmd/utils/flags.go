@@ -1212,13 +1212,13 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 // setScheduler configures the scheduler server settings from the command line flags.
 func setScheduler(ctx *cli.Context, cfg *clique.Config) {
 	if ctx.GlobalIsSet(SchedulerBatchTime.Name) {
-		cfg.BatchTime = ctx.GlobalInt64(SchedulerBatchTime.Name)
+		cfg.BatchTime = ctx.GlobalUint64(SchedulerBatchTime.Name)
 	}
 	if ctx.GlobalIsSet(SchedulerBatchSize.Name) {
-		cfg.BatchSize = ctx.GlobalInt64(SchedulerBatchSize.Name)
+		cfg.BatchSize = ctx.GlobalUint64(SchedulerBatchSize.Name)
 	}
 	if ctx.GlobalIsSet(SchedulerBatchEpoch.Name) {
-		cfg.BatchEpoch = ctx.GlobalInt64(SchedulerBatchEpoch.Name)
+		cfg.BatchEpoch = ctx.GlobalUint64(SchedulerBatchEpoch.Name)
 	}
 }
 
