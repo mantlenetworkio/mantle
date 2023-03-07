@@ -32,6 +32,7 @@ import "./challenge/ChallengeLib.sol";
 import "./AssertionMap.sol";
 import "./IRollup.sol";
 import "./RollupLib.sol";
+import "./WhiteList.sol";
 import "./verifier/IVerifier.sol";
 import {Lib_AddressResolver} from "../../libraries/resolver/Lib_AddressResolver.sol";
 import {Lib_AddressManager} from "../../libraries/resolver/Lib_AddressManager.sol";
@@ -43,7 +44,6 @@ abstract contract RollupBase is IRollup, Initializable {
     uint256 public minimumAssertionPeriod; // number of L1 blocks
     uint256 public baseStakeAmount; // number of stake tokens
 
-    address public owner;
     IERC20 public stakeToken;
     AssertionMap public override assertions;
     IVerifierEntry public verifier;
@@ -61,7 +61,7 @@ abstract contract RollupBase is IRollup, Initializable {
     }
 }
 
-contract Rollup is Lib_AddressResolver, RollupBase {
+contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     modifier stakedOnly() {
         if (!isStaked(msg.sender)) {
             revert("NotStaked");
@@ -148,7 +148,7 @@ contract Rollup is Lib_AddressResolver, RollupBase {
     }
 
     /// @inheritdoc IRollup
-    function stake() external payable override {
+    function stake() external payable override onlyOwner {
         if (isStaked(msg.sender)) {
             stakers[msg.sender].amountStaked += msg.value;
         } else {
@@ -178,7 +178,6 @@ contract Rollup is Lib_AddressResolver, RollupBase {
         if (!success) revert("TransferFailed");
     }
 
-    // WARNING: this function is vulnerable to reentrancy attack!
     /// @inheritdoc IRollup
     function removeStake(address stakerAddress) external override {
         requireStaked(stakerAddress);
@@ -204,6 +203,14 @@ contract Rollup is Lib_AddressResolver, RollupBase {
             revert("ParentAssertionUnstaked");
         }
         stakeOnAssertion(msg.sender, assertionID);
+    }
+
+    /// @inheritdoc IRollup
+    function withdraw() external override {
+        uint256 withdrawableFund = withdrawableFunds[msg.sender];
+        withdrawableFunds[msg.sender] = 0;
+        (bool success,) = msg.sender.call{value: withdrawableFund}("");
+        if (!success) revert("TransferFailed");
     }
 
     /// @inheritdoc IRollup
@@ -462,26 +469,27 @@ contract Rollup is Lib_AddressResolver, RollupBase {
 
     /// @inheritdoc IRollup
     function completeChallenge(address winner, address loser) external override {
+        requireStaked(loser);
+
         address challenge = getChallenge(winner, loser);
         if (msg.sender != challenge) {
             revert("NotChallenge");
         }
-
-        uint256 remainingLoserStake = stakers[loser].amountStaked;
+        uint256 amountWon;
+        uint256 loserStake = stakers[loser].amountStaked;
         uint256 winnerStake = stakers[winner].amountStaked;
-        if (remainingLoserStake > winnerStake) {
+        if (loserStake > baseStakeAmount) {
             // If loser has a higher stake than the winner, refund the difference.
             // Loser gets deleted anyways, so maybe unnecessary to set amountStaked.
-            stakers[loser].amountStaked = winnerStake;
-            withdrawableFunds[loser] += (remainingLoserStake - winnerStake);
-            remainingLoserStake = winnerStake;
+//            stakers[loser].amountStaked = winnerStake;
+            withdrawableFunds[loser] += (loserStake - baseStakeAmount);
+            amountWon = baseStakeAmount;
+        } else {
+            amountWon = loserStake;
         }
         // Reward the winner with half the remaining stake
-        uint256 amountWon = remainingLoserStake / 2;
         stakers[winner].amountStaked += amountWon; // why +stake instead of +withdrawable?
         stakers[winner].currentChallenge = address(0);
-        // Credit the other half to the owner address
-        withdrawableFunds[owner] += remainingLoserStake - amountWon;
         // Turning loser into zombie renders the loser's remaining stake inaccessible.
         uint256 assertionID = stakers[loser].assertionID;
         deleteStaker(loser);

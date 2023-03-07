@@ -11,7 +11,6 @@ import {awaitCondition, hexStringEquals} from "@mantleio/core-utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { ethers, upgrades } = require("hardhat");
-const Web3 = require("web3")
 
 const deployFn: DeployFunction = async (hre) => {
   // @ts-ignore
@@ -152,7 +151,7 @@ const deployFn: DeployFunction = async (hre) => {
         5000,
         100
       )
-      console.log('>>>>', contract.assertions())
+      console.log('>>>> assertions ', contract.assertions())
       await awaitCondition(
         async () => {
           return hexStringEquals(
@@ -163,6 +162,37 @@ const deployFn: DeployFunction = async (hre) => {
         5000,
         100
       )
+      // console.log('>>>> init staker white list')
+      // // @ts-ignore
+      // contract.interface.functions.addToWhitelist([
+      //   '0xd5b002298b2e81b4ced1b6c8cf1964023cdc3758',
+      //   '0xd55fe10a1acb32b6183bdfbeb42e9961c3cb8792',
+      //   '0xd55fe2797c18d721ee197d09fa0dda584f92b5af',
+      // ])
+      // // @ts-ignore
+      // await awaitCondition(
+      //   async () => {
+      //     // @ts-ignore
+      //     // eslint-disable-next-line @typescript-eslint/no-shadow
+      //     const wl1 = contract.interface.functions.whitelist(
+      //       '0xd5b002298b2e81b4ced1b6c8cf1964023cdc3758'
+      //     )
+      //     // @ts-ignore
+      //     // eslint-disable-next-line @typescript-eslint/no-shadow
+      //     const wl2 = contract.interface.functions.whitelist(
+      //       '0xd55fe10a1acb32b6183bdfbeb42e9961c3cb8792'
+      //     )
+      //     // @ts-ignore
+      //     // eslint-disable-next-line @typescript-eslint/no-shadow
+      //     const wl3 = contract.interface.functions.whitelist(
+      //       '0xd55fe2797c18d721ee197d09fa0dda584f92b5af'
+      //     )
+      //     return wl1 === true && wl2 === true && wl3 === true
+      //   },
+      //   5000,
+      //   100
+      // )
+      // console.log('>>>> staker all whitelisted !!!!')
     },
   })
   console.log('deploy fraud proof rollup proxy success')
