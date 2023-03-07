@@ -94,7 +94,8 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         uint256 _challengePeriod,
         uint256 _minimumAssertionPeriod,
         uint256 _baseStakeAmount,
-        bytes32 _initialVMhash
+        bytes32 _initialVMhash,
+        address[] calldata whitelists
     ) public initializer {
         if (_owner == address(0) || _verifier == address(0)) {
             revert("ZeroAddress");
@@ -130,6 +131,10 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             0, // parentID
             block.number // deadline (unchallengeable)
         );
+
+        for (uint i = 0; i < whitelists.length; i++) {
+            whitelist[whitelists[i]] = true;
+        }
     }
 
     /// @inheritdoc IRollup
@@ -148,7 +153,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
     /// @inheritdoc IRollup
-    function stake() external payable override onlyOwner {
+    function stake() external payable override whitelistOnly {
         if (isStaked(msg.sender)) {
             stakers[msg.sender].amountStaked += msg.value;
         } else {
@@ -247,43 +252,15 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         uint256 _shouldStartAtElement,
         bytes calldata _signature
         ) external override stakedOnly {
-
-        console.log(
-            "createAssertionWithStateBatch enter",
-            msg.sender,
-            resolve("BVM_Rolluper")
-        );
-
         // permissions only allow rollup proposer to submit assertion, only allow RollupContract to append new batch
         require(msg.sender == resolve("BVM_Rolluper"), "msg.sender is not rollup proposer, can't append batch");
-
-        console.log(
-            "start createAssertion"
-        );
-
         // create assertion
         createAssertion(vmHash, inboxSize);
-
-        console.log(
-            "end createAssertion"
-        );
-
-        console.log(
-            "scc.call ...",
-            resolve("StateCommitmentChain")
-        );
-
         // append state batch
         address scc = resolve("StateCommitmentChain");
         (bool success, ) = scc.call(
             abi.encodeWithSignature("appendStateBatch(bytes32[],uint256,bytes)", _batch, _shouldStartAtElement, _signature)
         );
-
-        console.log(
-            "scc.call end ...",
-            success
-        );
-
         require(success, "scc append state batch failed, revert all");
     }
 
@@ -294,11 +271,6 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     {
         uint256 defenderAssertionID = assertionIDs[0];
         uint256 challengerAssertionID = assertionIDs[1];
-        console.log(
-            "challengeAssertion...",
-            defenderAssertionID,
-            challengerAssertionID
-        );
         // Require IDs ordered and in-range.
         if (defenderAssertionID >= challengerAssertionID) {
             revert("WrongOrder");
@@ -350,20 +322,9 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
 
     /// @inheritdoc IRollup
     function confirmFirstUnresolvedAssertion() external override {
-        console.log(
-            "lastResolvedAssertionID: ",
-            lastResolvedAssertionID,
-            "lastCreatedAssertionID",
-            lastCreatedAssertionID
-        );
         if (lastResolvedAssertionID >= lastCreatedAssertionID) {
             revert("NoUnresolvedAssertion");
         }
-
-        console.log(
-            "numStakers: ",
-            numStakers
-        );
 
         // (1) there is at least one staker, and
         if (numStakers <= 0) revert("NoStaker");
