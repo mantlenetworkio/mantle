@@ -402,10 +402,12 @@ func (d *Driver) SendTransaction(
 
 func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32]byte, shouldStartAtElement *big.Int, signature []byte, blocks []*l2types.Block) (*types.Transaction, error) {
 
-	//if d.fpRollup.InChallenge() {
-	//	log.Warn("currently in challenge, can't submit new assertion")
-	//	return
-	//}
+	challengeContext, _ := d.fpRollup.ChallengeCtx(&bind.CallOpts{})
+	isInChallenge := challengeContext.DefenderAssertionID.Uint64() != 0 && !challengeContext.Completed
+	if isInChallenge {
+		log.Warn("currently in challenge, can't submit new assertion")
+		return nil, nil
+	}
 	var latestAssertion rollupTypes.Assertion
 	var staker rollupTypes.Staker
 	if ret, err := d.fpRollup.Stakers(&bind.CallOpts{}, opts.From); err != nil {

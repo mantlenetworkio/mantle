@@ -4,6 +4,7 @@ import (
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
 	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+
 	"gopkg.in/urfave/cli.v1"
 )
 

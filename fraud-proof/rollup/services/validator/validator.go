@@ -21,14 +21,6 @@ import (
 	rpc2 "github.com/mantlenetworkio/mantle/l2geth/rpc"
 )
 
-type Step int
-
-const (
-	Assertion Step = iota + 1
-	Challenge
-	Bisected
-)
-
 func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {
 	validator, err := New(eth, proofBackend, cfg, auth)
 	if err != nil {
@@ -80,14 +72,10 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 	}
 	defer assertionEventSub.Unsubscribe()
 
-	isInChallenge := rawdb.ReadFPValidatorInChallenge(db)
-	if isInChallenge {
-		challengeCtxEnc := rawdb.ReadFPValidatorChallengeCtx(db)
-		var challengeCtx ChallengeCtx
-		if err = rlp.DecodeBytes(challengeCtxEnc, &challengeCtx); err != nil {
-			return
-		}
-		v.challengeCh <- &challengeCtx
+	isInChallenge := false
+	challengeCtxEnc := rawdb.ReadFPValidatorChallengeCtx(db)
+	if challengeCtxEnc != nil {
+		isInChallenge = true
 	}
 
 	for {
@@ -102,7 +90,6 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 			case <-v.challengeResoutionCh:
 				log.Info("Validator finished challenge, reset isInChallenge status")
 				isInChallenge = false
-				rawdb.WriteFPValidatorInChallenge(db, isInChallenge)
 				rawdb.DeleteFPValidatorChallengeCtx(db)
 			case <-v.Ctx.Done():
 				return
@@ -142,7 +129,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 						log.Info("Validator check assertion vmHash failed, start challenge assertion....")
 						ourAssertion := &rollupTypes.Assertion{
 							VmHash: block.Root(),
-							//VmHash:    common.BigToHash(new(big.Int).SetUint64(1)), 	// VmHash mock for challenge test
+							//VmHash:    common.BigToHash(new(big.Int).SetUint64(1)), // VmHash mock for challenge test
 							InboxSize: checkAssertion.InboxSize,
 							Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
 						}
@@ -151,9 +138,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 						rawdb.WriteFPValidatorChallengeCtx(db, data)
 
 						v.challengeCh <- &challengeCtx
-
 						isInChallenge = true
-						rawdb.WriteFPValidatorInChallenge(db, isInChallenge)
 						break
 					} else {
 						// Validation succeeded, confirm assertion and advance stake
@@ -224,8 +209,55 @@ func (v *Validator) challengeLoop() {
 	var ctx *ChallengeCtx
 	var opponentTimeoutBlock uint64
 
+	db := v.ProofBackend.ChainDb()
+
+	go func() {
+		// The necessity of local storage:
+		// Can't judge whether the interruption has just entered the challenge process and did not create assertions
+		challengeCtxEnc := rawdb.ReadFPValidatorChallengeCtx(db)
+		if challengeCtxEnc != nil {
+			// Before the program was exited last time, it had
+			// entered the challenge state and did not execute it to challenge complete.
+			// we need to re-enter in the challenge process.
+			// Find the entry point through the state of the L1.
+			stakeStatus, _ := v.Rollup.Stakers(v.Rollup.TransactOpts.From)
+			currentAssertion, _ := v.AssertionMap.Assertions(stakeStatus.AssertionID)
+			var challengeCtx ChallengeCtx
+			if err = rlp.DecodeBytes(challengeCtxEnc, &challengeCtx); err != nil {
+				return
+			}
+			ctx = &challengeCtx
+			challengeContext, _ := v.Rollup.ChallengeCtx()
+
+			if challengeContext.Completed {
+				// already challenged do nothing
+				v.challengeResoutionCh <- struct{}{}
+				log.Info("Challenge already completed")
+			} else if currentAssertion.InboxSize.Cmp(challengeCtx.OurAssertion.InboxSize) < 0 &&
+				!bytes.Equal(currentAssertion.StateHash[:], challengeCtx.OurAssertion.VmHash[:]) {
+				// did not create assertion
+				v.challengeCh <- &challengeCtx
+				log.Info("Did not create assertion")
+			} else if bytes.Equal(stakeStatus.CurrentChallenge.Bytes(), common.BigToAddress(common.Big0).Bytes()) {
+				// did not create challenge
+				createdCh <- &bindings.RollupAssertionCreated{
+					AssertionID:  stakeStatus.AssertionID,
+					AsserterAddr: v.Rollup.TransactOpts.From,
+					VmHash:       currentAssertion.StateHash,
+					InboxSize:    currentAssertion.InboxSize,
+				}
+			} else {
+				// in bisectedCh
+				challengedCh <- &bindings.RollupAssertionChallenged{
+					AssertionID:   ctx.OpponentAssertion.ID,
+					ChallengeAddr: stakeStatus.CurrentChallenge,
+				}
+				restart = true
+			}
+		}
+	}()
+
 	for {
-		stakeStatus, _ := v.Rollup.Stakers(v.Rollup.TransactOpts.From)
 		if inChallenge {
 			select {
 			case ev := <-bisectedCh:
@@ -292,21 +324,6 @@ func (v *Validator) challengeLoop() {
 			case ctx = <-v.challengeCh:
 				log.Info("Validator get challenge context, create challenge assertion")
 
-				currentAssertion, _ := v.AssertionMap.Assertions(stakeStatus.AssertionID)
-				if currentAssertion.InboxSize.Cmp(ctx.OurAssertion.InboxSize) == 0 &&
-					bytes.Equal(currentAssertion.StateHash[:], ctx.OurAssertion.VmHash[:]) {
-					// already created assertion
-					createdCh <- &bindings.RollupAssertionCreated{
-						AssertionID:  stakeStatus.AssertionID,
-						AsserterAddr: v.Rollup.TransactOpts.From,
-						VmHash:       currentAssertion.StateHash,
-						InboxSize:    currentAssertion.InboxSize,
-					}
-					// set status to not in challenge
-					continue
-				}
-				// todo, assertion not equal?
-
 				_, err = v.Rollup.CreateAssertion(
 					ctx.OurAssertion.VmHash,
 					ctx.OurAssertion.InboxSize,
@@ -316,17 +333,6 @@ func (v *Validator) challengeLoop() {
 				}
 			case ev := <-createdCh:
 				if common.Address(ev.AsserterAddr) == v.Config.StakeAddr {
-					if !bytes.Equal(stakeStatus.CurrentChallenge.Bytes(), common.BigToHash(common.Big0).Bytes()) {
-						// in challenge and already created challenge
-						challengedCh <- &bindings.RollupAssertionChallenged{
-							AssertionID:   ctx.OpponentAssertion.ID,
-							ChallengeAddr: stakeStatus.CurrentChallenge,
-						}
-						restart = true
-						continue
-					}
-					// todo: challenge finished and challenge has been deleted
-
 					if ev.VmHash == ctx.OurAssertion.VmHash {
 						log.Info("Assertion ID", "opponentAssertion.ID", ctx.OpponentAssertion.ID, "ev.AssertionID", ev.AssertionID)
 						_, err := v.Rollup.ChallengeAssertion(

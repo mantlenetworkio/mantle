@@ -18,7 +18,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
 func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {
@@ -103,14 +102,33 @@ func (s *Sequencer) confirmationLoop() {
 		log.Error("Failed to watch rollup event", "err", err)
 	}
 	defer challengedSub.Unsubscribe()
-	isInChallenge := rawdb.ReadFPInChallenge(db)
 
+	challengeContext, _ := s.Rollup.ChallengeCtx()
+	isInChallenge := challengeContext.DefenderAssertionID.Uint64() != 0 && !challengeContext.Completed
 	// restart with challengeCtx
 	if isInChallenge {
-		challengeCtxEnc := rawdb.ReadFPSchedulerChallengeCtx(db)
-		var challengeCtx ChallengeCtx
-		if err = rlp.DecodeBytes(challengeCtxEnc, &challengeCtx); err != nil {
-			return
+		defenderAssertion, _ := s.AssertionMap.Assertions(challengeContext.DefenderAssertionID)
+		parentAssertionID, _ := s.AssertionMap.GetParentID(challengeContext.DefenderAssertionID)
+		parentAssertion, _ := s.AssertionMap.Assertions(parentAssertionID)
+
+		challengeCtx := ChallengeCtx{
+			ChallengeAddr: common.Address(challengeContext.ChallengeAddress),
+			Assertion: &rollupTypes.Assertion{
+				ID:           challengeContext.DefenderAssertionID,
+				VmHash:       defenderAssertion.StateHash,
+				InboxSize:    defenderAssertion.InboxSize,
+				Parent:       defenderAssertion.Parent,
+				Deadline:     defenderAssertion.Deadline,
+				ProposalTime: defenderAssertion.ProposalTime,
+			},
+			Parent: &rollupTypes.Assertion{
+				ID:           parentAssertionID,
+				VmHash:       parentAssertion.StateHash,
+				InboxSize:    parentAssertion.InboxSize,
+				Parent:       parentAssertion.Parent,
+				Deadline:     parentAssertion.Deadline,
+				ProposalTime: parentAssertion.ProposalTime,
+			},
 		}
 		s.challengeCh <- &challengeCtx
 	}
@@ -122,8 +140,6 @@ func (s *Sequencer) confirmationLoop() {
 			case <-s.challengeResolutionCh:
 				log.Info("Sequencer finished challenge, reset isInChallenge status")
 				isInChallenge = false
-				rawdb.WriteFPInChallenge(db, isInChallenge)
-				rawdb.DeleteFPSchedulerChallengeCtx(db)
 			case <-s.Ctx.Done():
 				log.Error("Scheduler confirmationLoop ctx done")
 				return
@@ -215,12 +231,9 @@ func (s *Sequencer) confirmationLoop() {
 					challengeAssertion,
 					perent,
 				}
-				data, _ := rlp.EncodeToBytes(challengeCtx)
-				rawdb.WriteFPSchedulerChallengeCtx(db, data)
 
 				s.challengeCh <- &challengeCtx
 				isInChallenge = true
-				rawdb.WriteFPInChallenge(db, isInChallenge)
 
 			case <-s.Ctx.Done():
 				return
@@ -366,7 +379,6 @@ func (s *Sequencer) challengeLoop() {
 				}
 				log.Info("Sequencer generate state end...")
 
-				// todo: check weather already initialized.
 				// initialized: get current bisectedCh;
 				// not initialized: InitializeChallengeLength;
 				if bytes.Equal(stakeStatus.CurrentChallenge.Bytes(), ctx.ChallengeAddr.Bytes()) {

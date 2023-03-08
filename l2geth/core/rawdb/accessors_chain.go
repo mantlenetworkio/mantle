@@ -31,7 +31,14 @@ import (
 )
 
 func ReadFPValidatorChallengeCtx(db ethdb.Reader) []byte {
-	data, err := db.Get(FPSchedulerChallengeCtx)
+	exist, err := db.Has(FPValidatorChallengeCtx)
+	if err != nil {
+		log.Crit("Failed to check fp challenge ctx", "err", err)
+	}
+	if !exist {
+		return nil
+	}
+	data, err := db.Get(FPValidatorChallengeCtx)
 	if err != nil {
 		log.Crit("Failed to get fp challenge ctx", "err", err)
 	}
@@ -39,53 +46,13 @@ func ReadFPValidatorChallengeCtx(db ethdb.Reader) []byte {
 }
 
 func WriteFPValidatorChallengeCtx(db ethdb.Writer, data []byte) {
-	if err := db.Put(FPSchedulerChallengeCtx, data); err != nil {
+	if err := db.Put(FPValidatorChallengeCtx, data); err != nil {
 		log.Crit("Failed to store fp challenge ctx", "err", err)
 	}
 }
 
 func DeleteFPValidatorChallengeCtx(db ethdb.Writer) {
-	if err := db.Delete(FPSchedulerChallengeCtx); err != nil {
-		log.Crit("Failed to store fp challenge ctx", "err", err)
-	}
-}
-
-func WriteFPValidatorInChallenge(db ethdb.Writer, isInChallenge bool) {
-	if isInChallenge {
-		if err := db.Put(FPValidatorIsInChallenge, []byte("1")); err != nil {
-			log.Crit("Failed to store fp in challenge status", "err", err)
-		}
-	} else {
-		if err := db.Put(FPValidatorIsInChallenge, []byte("0")); err != nil {
-			log.Crit("Failed to store fp in challenge status", "err", err)
-		}
-	}
-}
-
-func ReadFPValidatorInChallenge(db ethdb.Reader) bool {
-	data, _ := db.Get(FPValidatorIsInChallenge)
-	if bytes.Equal(data, []byte("1")) {
-		return true
-	}
-	return false
-}
-
-func ReadFPSchedulerChallengeCtx(db ethdb.Reader) []byte {
-	data, err := db.Get(FPSchedulerChallengeCtx)
-	if err != nil {
-		log.Crit("Failed to get fp challenge ctx", "err", err)
-	}
-	return data
-}
-
-func WriteFPSchedulerChallengeCtx(db ethdb.Writer, data []byte) {
-	if err := db.Put(FPSchedulerChallengeCtx, data); err != nil {
-		log.Crit("Failed to store fp challenge ctx", "err", err)
-	}
-}
-
-func DeleteFPSchedulerChallengeCtx(db ethdb.Writer) {
-	if err := db.Delete(FPSchedulerChallengeCtx); err != nil {
+	if err := db.Delete(FPValidatorChallengeCtx); err != nil {
 		log.Crit("Failed to store fp challenge ctx", "err", err)
 	}
 }
@@ -104,26 +71,6 @@ func ReadFPSchedulerNumber(db ethdb.Reader) uint64 {
 		return binary.LittleEndian.Uint64(data)
 	}
 	return 0
-}
-
-func WriteFPInChallenge(db ethdb.Writer, isInChallenge bool) {
-	if isInChallenge {
-		if err := db.Put(FPSchedulerIsInChallenge, []byte("1")); err != nil {
-			log.Crit("Failed to store fp in challenge status", "err", err)
-		}
-	} else {
-		if err := db.Put(FPSchedulerIsInChallenge, []byte("0")); err != nil {
-			log.Crit("Failed to store fp in challenge status", "err", err)
-		}
-	}
-}
-
-func ReadFPInChallenge(db ethdb.Reader) bool {
-	data, _ := db.Get(FPSchedulerIsInChallenge)
-	if bytes.Equal(data, []byte("1")) {
-		return true
-	}
-	return false
 }
 
 // ReadCanonicalHash retrieves the hash assigned to a canonical block number.

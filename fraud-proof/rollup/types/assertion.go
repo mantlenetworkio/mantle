@@ -1,9 +1,9 @@
 package types
 
 import (
-	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
 	"math/big"
 
+	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
