@@ -27,8 +27,10 @@ func (m Method) String() string {
 }
 
 type SignStateRequest struct {
+	Type                uint64     `json:"type"`
 	StartBlock          string     `json:"start_block"`
 	OffsetStartsAtIndex string     `json:"offset_starts_at_index"`
+	Challenge           string     `json:"challenge"`
 	StateRoots          [][32]byte `json:"state_roots"`
 	ElectionId          uint64     `json:"election_id"`
 }

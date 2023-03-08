@@ -30,7 +30,7 @@ var (
 
 // IChallengeMetaData contains all meta data concerning the IChallenge contract.
 var IChallengeMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"startState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"midState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"endState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockNum\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"challengedSegmentStart\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"challengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"Bisected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"winner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"loser\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"enumIChallenge.CompletionReason\",\"name\":\"reason\",\"type\":\"uint8\"}],\"name\":\"ChallengeCompleted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32[3]\",\"name\":\"bisection\",\"type\":\"bytes32[3]\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentLength\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"bisectExecution\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentResponder\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentResponderTimeLeft\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_defender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_challenger\",\"type\":\"address\"},{\"internalType\":\"contractIVerifierEntry\",\"name\":\"_verifier\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_resultReceiver\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"_startStateHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_endStateHash\",\"type\":\"bytes32\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"checkStateHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"_numSteps\",\"type\":\"uint256\"}],\"name\":\"initializeChallengeLength\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"timeout\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"proof\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"challengedStepIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"verifyOneStepProof\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"startState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"midState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"endState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockNum\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"challengedSegmentStart\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"challengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"Bisected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"winner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"loser\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"enumIChallenge.CompletionReason\",\"name\":\"reason\",\"type\":\"uint8\"}],\"name\":\"ChallengeCompleted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32[3]\",\"name\":\"bisection\",\"type\":\"bytes32[3]\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentLength\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"bisectExecution\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentResponder\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentResponderTimeLeft\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_defender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_challenger\",\"type\":\"address\"},{\"internalType\":\"contractIVerifierEntry\",\"name\":\"_verifier\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_resultReceiver\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_startInboxSize\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"_startStateHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_endStateHash\",\"type\":\"bytes32\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"checkStateHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"_numSteps\",\"type\":\"uint256\"}],\"name\":\"initializeChallengeLength\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"setRollback\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"timeout\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"proof\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"challengedStepIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"verifyOneStepProof\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // IChallengeABI is the input ABI used to generate the binding from.
@@ -262,25 +262,25 @@ func (_IChallenge *IChallengeTransactorSession) BisectExecution(bisection [3][32
 	return _IChallenge.Contract.BisectExecution(&_IChallenge.TransactOpts, bisection, challengedSegmentIndex, challengedSegmentStart, challengedSegmentLength, prevChallengedSegmentStart, prevChallengedSegmentLength)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xf28c3e37.
+// Initialize is a paid mutator transaction binding the contract method 0xabf48013.
 //
-// Solidity: function initialize(address _defender, address _challenger, address _verifier, address _resultReceiver, bytes32 _startStateHash, bytes32 _endStateHash) returns()
-func (_IChallenge *IChallengeTransactor) Initialize(opts *bind.TransactOpts, _defender common.Address, _challenger common.Address, _verifier common.Address, _resultReceiver common.Address, _startStateHash [32]byte, _endStateHash [32]byte) (*types.Transaction, error) {
-	return _IChallenge.contract.Transact(opts, "initialize", _defender, _challenger, _verifier, _resultReceiver, _startStateHash, _endStateHash)
+// Solidity: function initialize(address _defender, address _challenger, address _verifier, address _resultReceiver, uint256 _startInboxSize, bytes32 _startStateHash, bytes32 _endStateHash) returns()
+func (_IChallenge *IChallengeTransactor) Initialize(opts *bind.TransactOpts, _defender common.Address, _challenger common.Address, _verifier common.Address, _resultReceiver common.Address, _startInboxSize *big.Int, _startStateHash [32]byte, _endStateHash [32]byte) (*types.Transaction, error) {
+	return _IChallenge.contract.Transact(opts, "initialize", _defender, _challenger, _verifier, _resultReceiver, _startInboxSize, _startStateHash, _endStateHash)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xf28c3e37.
+// Initialize is a paid mutator transaction binding the contract method 0xabf48013.
 //
-// Solidity: function initialize(address _defender, address _challenger, address _verifier, address _resultReceiver, bytes32 _startStateHash, bytes32 _endStateHash) returns()
-func (_IChallenge *IChallengeSession) Initialize(_defender common.Address, _challenger common.Address, _verifier common.Address, _resultReceiver common.Address, _startStateHash [32]byte, _endStateHash [32]byte) (*types.Transaction, error) {
-	return _IChallenge.Contract.Initialize(&_IChallenge.TransactOpts, _defender, _challenger, _verifier, _resultReceiver, _startStateHash, _endStateHash)
+// Solidity: function initialize(address _defender, address _challenger, address _verifier, address _resultReceiver, uint256 _startInboxSize, bytes32 _startStateHash, bytes32 _endStateHash) returns()
+func (_IChallenge *IChallengeSession) Initialize(_defender common.Address, _challenger common.Address, _verifier common.Address, _resultReceiver common.Address, _startInboxSize *big.Int, _startStateHash [32]byte, _endStateHash [32]byte) (*types.Transaction, error) {
+	return _IChallenge.Contract.Initialize(&_IChallenge.TransactOpts, _defender, _challenger, _verifier, _resultReceiver, _startInboxSize, _startStateHash, _endStateHash)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xf28c3e37.
+// Initialize is a paid mutator transaction binding the contract method 0xabf48013.
 //
-// Solidity: function initialize(address _defender, address _challenger, address _verifier, address _resultReceiver, bytes32 _startStateHash, bytes32 _endStateHash) returns()
-func (_IChallenge *IChallengeTransactorSession) Initialize(_defender common.Address, _challenger common.Address, _verifier common.Address, _resultReceiver common.Address, _startStateHash [32]byte, _endStateHash [32]byte) (*types.Transaction, error) {
-	return _IChallenge.Contract.Initialize(&_IChallenge.TransactOpts, _defender, _challenger, _verifier, _resultReceiver, _startStateHash, _endStateHash)
+// Solidity: function initialize(address _defender, address _challenger, address _verifier, address _resultReceiver, uint256 _startInboxSize, bytes32 _startStateHash, bytes32 _endStateHash) returns()
+func (_IChallenge *IChallengeTransactorSession) Initialize(_defender common.Address, _challenger common.Address, _verifier common.Address, _resultReceiver common.Address, _startInboxSize *big.Int, _startStateHash [32]byte, _endStateHash [32]byte) (*types.Transaction, error) {
+	return _IChallenge.Contract.Initialize(&_IChallenge.TransactOpts, _defender, _challenger, _verifier, _resultReceiver, _startInboxSize, _startStateHash, _endStateHash)
 }
 
 // InitializeChallengeLength is a paid mutator transaction binding the contract method 0x18ef160d.
@@ -302,6 +302,27 @@ func (_IChallenge *IChallengeSession) InitializeChallengeLength(checkStateHash [
 // Solidity: function initializeChallengeLength(bytes32 checkStateHash, uint256 _numSteps) returns()
 func (_IChallenge *IChallengeTransactorSession) InitializeChallengeLength(checkStateHash [32]byte, _numSteps *big.Int) (*types.Transaction, error) {
 	return _IChallenge.Contract.InitializeChallengeLength(&_IChallenge.TransactOpts, checkStateHash, _numSteps)
+}
+
+// SetRollback is a paid mutator transaction binding the contract method 0x631acced.
+//
+// Solidity: function setRollback() returns()
+func (_IChallenge *IChallengeTransactor) SetRollback(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _IChallenge.contract.Transact(opts, "setRollback")
+}
+
+// SetRollback is a paid mutator transaction binding the contract method 0x631acced.
+//
+// Solidity: function setRollback() returns()
+func (_IChallenge *IChallengeSession) SetRollback() (*types.Transaction, error) {
+	return _IChallenge.Contract.SetRollback(&_IChallenge.TransactOpts)
+}
+
+// SetRollback is a paid mutator transaction binding the contract method 0x631acced.
+//
+// Solidity: function setRollback() returns()
+func (_IChallenge *IChallengeTransactorSession) SetRollback() (*types.Transaction, error) {
+	return _IChallenge.Contract.SetRollback(&_IChallenge.TransactOpts)
 }
 
 // Timeout is a paid mutator transaction binding the contract method 0x70dea79a.

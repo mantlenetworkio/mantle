@@ -272,6 +272,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             abi.encodeWithSignature("appendStateBatch(bytes32[],uint256,bytes)", _batch, _shouldStartAtElement, _signature)
         );
         require(success, "scc append state batch failed, revert all");
+
     }
 
     function challengeAssertion(address[2] calldata players, uint256[2] calldata assertionIDs)
@@ -313,13 +314,17 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
 
         challengeCtx = ChallengeCtx(false,challengeAddr,defender,challenger,defenderAssertionID,challengerAssertionID);
         emit AssertionChallenged(defenderAssertionID, challengeAddr);
+        uint256 inboxSize = assertions.getInboxSize(parentID);
+        bytes32 parentStateHash = assertions.getStateHash(parentID);
+        bytes32 defenderStateHash = assertions.getStateHash(defenderAssertionID);
         challenge.initialize(
             defender,
             challenger,
             verifier,
             address(this),
-            assertions.getStateHash(parentID),
-            assertions.getStateHash(defenderAssertionID)
+            inboxSize,
+            parentStateHash,
+            defenderStateHash
         );
         console.log("parent Hash");
         console.logBytes32(assertions.getStateHash(parentID));

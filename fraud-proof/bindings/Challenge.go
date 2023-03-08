@@ -30,7 +30,7 @@ var (
 
 // ChallengeMetaData contains all meta data concerning the Challenge contract.
 var ChallengeMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"startState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"midState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"endState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockNum\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"challengedSegmentStart\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"challengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"Bisected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"winner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"loser\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"enumIChallenge.CompletionReason\",\"name\":\"reason\",\"type\":\"uint8\"}],\"name\":\"ChallengeCompleted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32[3]\",\"name\":\"bisection\",\"type\":\"bytes32[3]\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentLength\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"bisectExecution\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"bisectionHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"challenger\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"challengerTimeLeft\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentBisected\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"startState\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"midState\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"endState\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"blockNum\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"blockTime\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentLength\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentResponder\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentResponderTimeLeft\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"defender\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"defenderTimeLeft\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_defender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_challenger\",\"type\":\"address\"},{\"internalType\":\"contractIVerifierEntry\",\"name\":\"_verifier\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_resultReceiver\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"_startStateHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_endStateHash\",\"type\":\"bytes32\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"checkStateHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"_numSteps\",\"type\":\"uint256\"}],\"name\":\"initializeChallengeLength\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastMoveBlockTime\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"prevBisection\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"timeout\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"turn\",\"outputs\":[{\"internalType\":\"enumChallenge.Turn\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"proof\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"challengedStepIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"verifyOneStepProof\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"winner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"startState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"midState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"endState\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockNum\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"challengedSegmentStart\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"challengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"Bisected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"winner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"loser\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"enumIChallenge.CompletionReason\",\"name\":\"reason\",\"type\":\"uint8\"}],\"name\":\"ChallengeCompleted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32[3]\",\"name\":\"bisection\",\"type\":\"bytes32[3]\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentLength\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"bisectExecution\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"bisectionHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"challenger\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"challengerTimeLeft\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentBisected\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"startState\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"midState\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"endState\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"blockNum\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"blockTime\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengedSegmentLength\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentResponder\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentResponderTimeLeft\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"defender\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"defenderTimeLeft\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_defender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_challenger\",\"type\":\"address\"},{\"internalType\":\"contractIVerifierEntry\",\"name\":\"_verifier\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_resultReceiver\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_startInboxSize\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"_startStateHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_endStateHash\",\"type\":\"bytes32\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"checkStateHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"_numSteps\",\"type\":\"uint256\"}],\"name\":\"initializeChallengeLength\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastMoveBlockTime\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"prevBisection\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rollback\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"setRollback\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"startInboxSize\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"timeout\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"turn\",\"outputs\":[{\"internalType\":\"enumChallenge.Turn\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"proof\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"challengedStepIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prevChallengedSegmentLength\",\"type\":\"uint256\"}],\"name\":\"verifyOneStepProof\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"winner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // ChallengeABI is the input ABI used to generate the binding from.
@@ -528,6 +528,68 @@ func (_Challenge *ChallengeCallerSession) PrevBisection(arg0 *big.Int) ([32]byte
 	return _Challenge.Contract.PrevBisection(&_Challenge.CallOpts, arg0)
 }
 
+// Rollback is a free data retrieval call binding the contract method 0x9afd9d78.
+//
+// Solidity: function rollback() view returns(bool)
+func (_Challenge *ChallengeCaller) Rollback(opts *bind.CallOpts) (bool, error) {
+	var out []interface{}
+	err := _Challenge.contract.Call(opts, &out, "rollback")
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// Rollback is a free data retrieval call binding the contract method 0x9afd9d78.
+//
+// Solidity: function rollback() view returns(bool)
+func (_Challenge *ChallengeSession) Rollback() (bool, error) {
+	return _Challenge.Contract.Rollback(&_Challenge.CallOpts)
+}
+
+// Rollback is a free data retrieval call binding the contract method 0x9afd9d78.
+//
+// Solidity: function rollback() view returns(bool)
+func (_Challenge *ChallengeCallerSession) Rollback() (bool, error) {
+	return _Challenge.Contract.Rollback(&_Challenge.CallOpts)
+}
+
+// StartInboxSize is a free data retrieval call binding the contract method 0xfaeff41b.
+//
+// Solidity: function startInboxSize() view returns(uint256)
+func (_Challenge *ChallengeCaller) StartInboxSize(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _Challenge.contract.Call(opts, &out, "startInboxSize")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// StartInboxSize is a free data retrieval call binding the contract method 0xfaeff41b.
+//
+// Solidity: function startInboxSize() view returns(uint256)
+func (_Challenge *ChallengeSession) StartInboxSize() (*big.Int, error) {
+	return _Challenge.Contract.StartInboxSize(&_Challenge.CallOpts)
+}
+
+// StartInboxSize is a free data retrieval call binding the contract method 0xfaeff41b.
+//
+// Solidity: function startInboxSize() view returns(uint256)
+func (_Challenge *ChallengeCallerSession) StartInboxSize() (*big.Int, error) {
+	return _Challenge.Contract.StartInboxSize(&_Challenge.CallOpts)
+}
+
 // Turn is a free data retrieval call binding the contract method 0x8b299903.
 //
 // Solidity: function turn() view returns(uint8)
@@ -611,25 +673,25 @@ func (_Challenge *ChallengeTransactorSession) BisectExecution(bisection [3][32]b
 	return _Challenge.Contract.BisectExecution(&_Challenge.TransactOpts, bisection, challengedSegmentIndex, challengedSegmentStart, challengedSegmentLength, prevChallengedSegmentStart, prevChallengedSegmentLength)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xf28c3e37.
+// Initialize is a paid mutator transaction binding the contract method 0xabf48013.
 //
-// Solidity: function initialize(address _defender, address _challenger, address _verifier, address _resultReceiver, bytes32 _startStateHash, bytes32 _endStateHash) returns()
-func (_Challenge *ChallengeTransactor) Initialize(opts *bind.TransactOpts, _defender common.Address, _challenger common.Address, _verifier common.Address, _resultReceiver common.Address, _startStateHash [32]byte, _endStateHash [32]byte) (*types.Transaction, error) {
-	return _Challenge.contract.Transact(opts, "initialize", _defender, _challenger, _verifier, _resultReceiver, _startStateHash, _endStateHash)
+// Solidity: function initialize(address _defender, address _challenger, address _verifier, address _resultReceiver, uint256 _startInboxSize, bytes32 _startStateHash, bytes32 _endStateHash) returns()
+func (_Challenge *ChallengeTransactor) Initialize(opts *bind.TransactOpts, _defender common.Address, _challenger common.Address, _verifier common.Address, _resultReceiver common.Address, _startInboxSize *big.Int, _startStateHash [32]byte, _endStateHash [32]byte) (*types.Transaction, error) {
+	return _Challenge.contract.Transact(opts, "initialize", _defender, _challenger, _verifier, _resultReceiver, _startInboxSize, _startStateHash, _endStateHash)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xf28c3e37.
+// Initialize is a paid mutator transaction binding the contract method 0xabf48013.
 //
-// Solidity: function initialize(address _defender, address _challenger, address _verifier, address _resultReceiver, bytes32 _startStateHash, bytes32 _endStateHash) returns()
-func (_Challenge *ChallengeSession) Initialize(_defender common.Address, _challenger common.Address, _verifier common.Address, _resultReceiver common.Address, _startStateHash [32]byte, _endStateHash [32]byte) (*types.Transaction, error) {
-	return _Challenge.Contract.Initialize(&_Challenge.TransactOpts, _defender, _challenger, _verifier, _resultReceiver, _startStateHash, _endStateHash)
+// Solidity: function initialize(address _defender, address _challenger, address _verifier, address _resultReceiver, uint256 _startInboxSize, bytes32 _startStateHash, bytes32 _endStateHash) returns()
+func (_Challenge *ChallengeSession) Initialize(_defender common.Address, _challenger common.Address, _verifier common.Address, _resultReceiver common.Address, _startInboxSize *big.Int, _startStateHash [32]byte, _endStateHash [32]byte) (*types.Transaction, error) {
+	return _Challenge.Contract.Initialize(&_Challenge.TransactOpts, _defender, _challenger, _verifier, _resultReceiver, _startInboxSize, _startStateHash, _endStateHash)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xf28c3e37.
+// Initialize is a paid mutator transaction binding the contract method 0xabf48013.
 //
-// Solidity: function initialize(address _defender, address _challenger, address _verifier, address _resultReceiver, bytes32 _startStateHash, bytes32 _endStateHash) returns()
-func (_Challenge *ChallengeTransactorSession) Initialize(_defender common.Address, _challenger common.Address, _verifier common.Address, _resultReceiver common.Address, _startStateHash [32]byte, _endStateHash [32]byte) (*types.Transaction, error) {
-	return _Challenge.Contract.Initialize(&_Challenge.TransactOpts, _defender, _challenger, _verifier, _resultReceiver, _startStateHash, _endStateHash)
+// Solidity: function initialize(address _defender, address _challenger, address _verifier, address _resultReceiver, uint256 _startInboxSize, bytes32 _startStateHash, bytes32 _endStateHash) returns()
+func (_Challenge *ChallengeTransactorSession) Initialize(_defender common.Address, _challenger common.Address, _verifier common.Address, _resultReceiver common.Address, _startInboxSize *big.Int, _startStateHash [32]byte, _endStateHash [32]byte) (*types.Transaction, error) {
+	return _Challenge.Contract.Initialize(&_Challenge.TransactOpts, _defender, _challenger, _verifier, _resultReceiver, _startInboxSize, _startStateHash, _endStateHash)
 }
 
 // InitializeChallengeLength is a paid mutator transaction binding the contract method 0x18ef160d.
@@ -651,6 +713,27 @@ func (_Challenge *ChallengeSession) InitializeChallengeLength(checkStateHash [32
 // Solidity: function initializeChallengeLength(bytes32 checkStateHash, uint256 _numSteps) returns()
 func (_Challenge *ChallengeTransactorSession) InitializeChallengeLength(checkStateHash [32]byte, _numSteps *big.Int) (*types.Transaction, error) {
 	return _Challenge.Contract.InitializeChallengeLength(&_Challenge.TransactOpts, checkStateHash, _numSteps)
+}
+
+// SetRollback is a paid mutator transaction binding the contract method 0x631acced.
+//
+// Solidity: function setRollback() returns()
+func (_Challenge *ChallengeTransactor) SetRollback(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _Challenge.contract.Transact(opts, "setRollback")
+}
+
+// SetRollback is a paid mutator transaction binding the contract method 0x631acced.
+//
+// Solidity: function setRollback() returns()
+func (_Challenge *ChallengeSession) SetRollback() (*types.Transaction, error) {
+	return _Challenge.Contract.SetRollback(&_Challenge.TransactOpts)
+}
+
+// SetRollback is a paid mutator transaction binding the contract method 0x631acced.
+//
+// Solidity: function setRollback() returns()
+func (_Challenge *ChallengeTransactorSession) SetRollback() (*types.Transaction, error) {
+	return _Challenge.Contract.SetRollback(&_Challenge.TransactOpts)
 }
 
 // Timeout is a paid mutator transaction binding the contract method 0x70dea79a.

@@ -262,6 +262,11 @@ var (
 		Usage:  "Whether or not to disable HTTP/2 support.",
 		EnvVar: prefixEnvVar("HTTP2_DISABLE"),
 	}
+	SccRollbackFlag = cli.BoolFlag{
+		Name:   "EnableSccRollbackFlag",
+		Usage:  "Whether or not to enable scc rollback.",
+		EnvVar: prefixEnvVar("SCC_ROLLBACK"),
+	}
 )
 
 var requiredFlags = []cli.Flag{
