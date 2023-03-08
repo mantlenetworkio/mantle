@@ -11,7 +11,6 @@ import {awaitCondition, hexStringEquals} from "@mantleio/core-utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { ethers, upgrades } = require("hardhat");
-const Web3 = require("web3")
 
 const deployFn: DeployFunction = async (hre) => {
   // @ts-ignore
@@ -125,6 +124,11 @@ const deployFn: DeployFunction = async (hre) => {
     // 1000000000000, // uint256 _maxGasPerAssertion,
     0, // uint256 _baseStakeAmount
     '0x365a761a909633fc9742c81c90b3fc71cebfd64cc1ae1ed1f36b3c5e956e0f28', // bytes32 _initialVMhash //TODO-FIXME
+    [
+      '0xd5b002298b2e81b4ced1b6c8cf1964023cdc3758',
+      '0xd55fe10a1acb32b6183bdfbeb42e9961c3cb8792',
+      '0xd55fe2797c18d721ee197d09fa0dda584f92b5af',
+    ],
   ]
   callData = Impl__Rollup.interface.encodeFunctionData('initialize', rollupArgs)
   await deployAndVerifyAndThen({
@@ -152,7 +156,7 @@ const deployFn: DeployFunction = async (hre) => {
         5000,
         100
       )
-      console.log('>>>>', contract.assertions())
+      console.log('>>>> assertions ', contract.assertions())
       await awaitCondition(
         async () => {
           return hexStringEquals(
@@ -163,6 +167,17 @@ const deployFn: DeployFunction = async (hre) => {
         5000,
         100
       )
+      // console.log('>>>> whitelists', contract.whitelist())
+      // await awaitCondition(
+      //   async () => {
+      //     return hexStringEquals(
+      //       await contract.whitelist().length,
+      //       "3"
+      //     )
+      //   },
+      //   5000,
+      //   100
+      // )
     },
   })
   console.log('deploy fraud proof rollup proxy success')
@@ -176,6 +191,24 @@ const deployFn: DeployFunction = async (hre) => {
   )
   console.log('Proxy__Rollup Address', Proxy__Rollup.address)
   console.log('deploy fraud proof Proxy__Rollup success')
+  // @ts-ignore
+  // await awaitCondition(
+  //   async () => {
+  //     // @ts-ignore
+  //     // eslint-disable-next-line @typescript-eslint/no-shadow
+  //     const wl1 = Rollup.whitelist('0xd5b002298b2e81b4ced1b6c8cf1964023cdc3758')
+  //     // @ts-ignore
+  //     // eslint-disable-next-line @typescript-eslint/no-shadow
+  //     const wl2 = Rollup.whitelist('0xd55fe10a1acb32b6183bdfbeb42e9961c3cb8792')
+  //     // @ts-ignore
+  //     // eslint-disable-next-line @typescript-eslint/no-shadow
+  //     const wl3 = Rollup.whitelist('0xd55fe2797c18d721ee197d09fa0dda584f92b5af')
+  //     return wl1 === true && wl2 === true && wl3 === true
+  //   },
+  //   5000,
+  //   100
+  // )
+  // console.log('>>>> staker all whitelisted !!!!')
 }
 
 // This is kept during an upgrade. So no upgrade tag.

@@ -163,6 +163,11 @@ interface IRollup {
     function advanceStake(uint256 assertionID) external;
 
     /**
+     * @notice Withdraws all of msg.sender's withdrawable funds.
+     */
+    function withdraw() external;
+
+    /**
      * @notice Creates a new DA representing the rollup state after executing a block of transactions (sequenced in SequencerInbox).
      * Block is represented by all transactions in range [prevInboxSize, inboxSize]. The latest staked DA of the sender
      * is considered to be the predecessor. Moves sender stake onto the new DA.
