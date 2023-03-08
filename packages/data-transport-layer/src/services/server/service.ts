@@ -10,6 +10,8 @@ import * as Sentry from '@sentry/node'
 import * as Tracing from '@sentry/tracing'
 
 /* Imports: Internal */
+
+
 import { TransportDB } from '../../db/transport-db'
 import {
   ContextResponse,
@@ -20,6 +22,11 @@ import {
   SyncingResponse,
   TransactionBatchResponse,
   TransactionResponse,
+  LatestTxBatchIndexResponse,
+  DataStoreListByBatchIndexResponse,
+  BatchTxByDataStoreIdResponse,
+  DataStoreByIdResponse,
+  TxListByStoreIdResponse,
 } from '../../types'
 import { validators } from '../../utils'
 import { L1DataTransportServiceOptions } from '../main/service'
@@ -711,6 +718,94 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         return {
           batch,
           stateRoots,
+        }
+      }
+    )
+
+    this._registerRoute(
+      'get',
+      '/da/getLatestTransactionBatchIndex/',
+      async (): Promise<LatestTxBatchIndexResponse> => {
+        const latestBatchIndex = await this.state.db.getLatestBatchIndex()
+
+        if (latestBatchIndex === null) {
+          return {
+            batchIndex: latestBatchIndex,
+          }
+        }
+      }
+    )
+    this._registerRoute(
+      'get',
+      '/da/getDataStoreListByBatchIndex/:batchIndex',
+      async (req): Promise<DataStoreListByBatchIndexResponse> => {
+        const batch = await this.state.db.getDataStoreListByBatchIndex(
+          BigNumber.from(req.params.batchIndex).toNumber()
+        )
+        if (batch === null || batch.length === 0) {
+          return {
+            batchIndex: null,
+            dataStore: [],
+          }
+        }
+        return {
+          batchIndex: BigNumber.from(req.params.batchIndex).toNumber(),
+          dataStore: batch,
+        }
+      }
+    )
+    this._registerRoute(
+      'get',
+      '/da/getBatchTxsByDataStoreId/:dsId',
+      async (req): Promise<BatchTxByDataStoreIdResponse> => {
+        const batchTxs = await this.state.db.getBatchTxByDataStoreId(
+          BigNumber.from(req.params.dsId).toNumber()
+        )
+        if (batchTxs === null || batchTxs.length === 0) {
+          return {
+            dsId: null,
+            batchTx: [],
+          }
+        }
+        const dsId = BigNumber.from(req.params.dsId).toNumber()
+        return {
+          dsId,
+          batchTx: batchTxs,
+        }
+      }
+    )
+
+    this._registerRoute(
+      'get',
+      '/da/getDataStoreById/:dsId',
+      async (req): Promise<DataStoreByIdResponse> => {
+        const dataStore_ = await this.state.db.getDsById(
+          BigNumber.from(req.params.dsId).toNumber()
+        )
+
+        if (dataStore_ === null) {
+          return {
+            dataStore: null,
+          }
+        }
+        return {
+          dataStore: JSON.stringify(dataStore_),
+        }
+      }
+    )
+
+    this._registerRoute(
+      'get',
+      '/da/getTxsListByDsId/:dsId',
+      async (req): Promise<TxListByStoreIdResponse> => {
+        const batchTxs = await this.state.db.getTxListByDSId(
+          BigNumber.from(req.params.dsId).toNumber()
+        )
+        if (batchTxs === null || batchTxs.length === 0) {
+          return {
+            storeId: null,
+            txList: [],
+          }
         }
       }
     )

@@ -15,7 +15,11 @@ import { MissingElementError } from './handlers/errors'
 import { TransportDB } from '../../db/transport-db'
 import { validators } from '../../utils'
 import { L1DataTransportServiceOptions } from '../main/service'
-import { TransactionEntry } from '../../types'
+import {
+  DataStoreEntry,
+  TransactionEntry,
+  TransactionListEntry,
+} from '../../types'
 
 interface DaIngestionMetrics {
   highestSyncedL1Block: Gauge<string>
@@ -107,44 +111,60 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     // unnecessary spam.
     while (this.running) {
       try {
-        const lastBatchIndex = 0
-        let newTxBatchIndex = -1
+        const lastBatchIndex = await this.state.db.getLatestBatchIndex()
+
+        let newTxBatchIndex: number = -1
         const getNewBatchIndex = async () => {
           const rst = await this.GetLatestTransactionBatchIndex()
           if (typeof rst === 'number') {
-            console.log(rst)
             newTxBatchIndex = rst
           }
         }
         await getNewBatchIndex()
+        if (newTxBatchIndex !== -1) {
+          await this.state.db.putUpdatedBatchIndex(newTxBatchIndex)
+        }
         let now_batch_Index = -1
 
         for (let i = lastBatchIndex; i <= newTxBatchIndex; i++) {
           now_batch_Index = i
 
-          const rollupStore = await this.GetRollupStoreByRollupBatchIndex(i)
+          const dataStore = await this.GetRollupStoreByRollupBatchIndex(i)
             .then((rst) => {
               return rst
             })
             .catch((error) => {
               console.log('getRollupStoreByRollupBatchIndex error : ', error)
             })
-          console.log('rollupStore', rollupStore)
-          if (rollupStore === null) {
+          if (dataStore === null) {
             console.log('HTTP getRollup and get null data')
             now_batch_Index--
             break
           }
-          if (rollupStore['status'] === 0) {
+          if (dataStore['status'] === 0) {
             now_batch_Index--
             break
           }
+          await this.state.db.putRollupStoreByBatchIndex(
+            {
+              index: 0,
+              data_store_id: dataStore['data_store_id'],
+              status: dataStore['status'],
+              confirm_at: dataStore['confirm_at'],
+            },
+            i
+          )
+
           await this._updateBatchTxByDSId(
-            rollupStore['data_store_id'],
+            dataStore['data_store_id'],
             now_batch_Index
           )
+          await this._storeDataStoreById(dataStore['data_store_id'])
+
         }
         await this.state.db.putUpdatedBatchIndex(now_batch_Index)
+
+
       } catch (err) {
         if (err instanceof MissingElementError) {
           this.logger.warn('recovering from a missing event', {
@@ -236,7 +256,60 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     }
 
     await this.state.db.putBatchTxByDataStoreId(transactionEntries, storeId)
-    await this.state.db.putBatchTxByDSLens(storeId, batchTxs.length)
+  }
+
+  private async _storeDataStoreById(storeId: number): Promise<void> {
+    const dataStore = await this.GetDataStoreById(storeId)
+    if (dataStore === null) {
+      return
+    }
+    const dataStoreEntry: DataStoreEntry = {
+      dataStoreId: dataStore['Id'],
+      storeNumber: dataStore['StoreNumber'],
+      durationDataStoreId: dataStore['DurationDataStoreId'],
+      index: dataStore['Index'],
+      dataCommitment: dataStore['DataCommitment'],
+      msgHash: dataStore['MsgHash'],
+      stakesFromBlockNumber: dataStore['StakesFromBlockNumber'],
+      initTime: dataStore['InitTime'],
+      expireTime: dataStore['ExpireTime'],
+      duration: dataStore['Duration'],
+      numSys: dataStore['NumSys'],
+      numPar: dataStore['NumPar'],
+      degree: dataStore['Degree'],
+      storePeriodLength: dataStore['StorePeriodLength'],
+      fee: dataStore['Fee'],
+      confirmer: dataStore['Confirmer'],
+      header: dataStore['Header'],
+      initTxHash: dataStore['InitTxHash'],
+      initGasUsed: dataStore['InitGasUsed'],
+      initBlockNumber: dataStore['InitBlockNumber'],
+      confirmed: dataStore['Confirmed'],
+      ethSigned: dataStore['EthSigned'],
+      eigenSigned: dataStore['EigenSigned'],
+      nonSignerPubKeyHashes: dataStore['NonSignerPubKeyHashes'],
+      signatoryRecord: dataStore['SignatoryRecord'],
+      confirmTxHash: dataStore['ConfirmTxHash'],
+      confirmGasUsed: dataStore['ConfirmGasUsed'],
+    }
+    await this.state.db.putDsById(dataStoreEntry, storeId)
+  }
+
+  private async _storeTransactionListByDSId(storeId: number): Promise<void> {
+    const txList = await this.GetTransactionListByStoreNumber(storeId)
+    if (txList === null || txList.length === 0) {
+      return
+    }
+    const transactionEntries: TransactionListEntry[] = []
+    const i = 0
+    for (const tx of txList) {
+      transactionEntries.push({
+        index: i,
+        blockNumber: tx['BlockNumber'],
+        txHash: tx['TxHash'],
+      })
+    }
+    await this.state.db.putTxListByDSId(transactionEntries, storeId)
   }
 
   private async GetLatestTransactionBatchIndex(): Promise<any> {
@@ -277,7 +350,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     )
       .then((res) => res.json())
       .then((res) => {
-        console.log('HTTP status != 200')
         return res
       })
       .catch((error) => {

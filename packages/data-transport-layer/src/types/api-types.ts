@@ -1,10 +1,13 @@
 import {
+  DataStoreEntry,
   EnqueueEntry,
   StateRootBatchEntry,
   StateRootEntry,
   TransactionBatchEntry,
   TransactionEntry,
-} from './database-types'
+  TransactionListEntry
+
+} from "./database-types";
 
 export type EnqueueResponse = EnqueueEntry & {
   ctcIndex: number | null
@@ -38,6 +41,29 @@ export interface ContextResponse {
 
 export interface GasPriceResponse {
   gasPrice: string
+}
+
+export interface LatestTxBatchIndexResponse {
+  batchIndex: number
+}
+
+export interface DataStoreListByBatchIndexResponse {
+  dataStore: DataStoreEntry[]
+  batchIndex: number
+}
+
+export interface BatchTxByDataStoreIdResponse {
+  dsId: number
+  batchTx: TransactionEntry[]
+}
+
+export interface DataStoreByIdResponse {
+  dataStore: string
+}
+
+export interface TxListByStoreIdResponse {
+  txList: TransactionListEntry[]
+  storeId: number
 }
 
 export type SyncingResponse =
