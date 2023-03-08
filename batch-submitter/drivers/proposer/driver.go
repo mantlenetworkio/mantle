@@ -1,16 +1,18 @@
 package proposer
 
 import (
+	"bytes"
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"strings"
+
 	"github.com/ethereum/go-ethereum/log"
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
-	"math/big"
-	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -278,6 +280,19 @@ func (d *Driver) CraftBatchTx(
 			log.Info("append state with fraud proof")
 			// ##### FRAUD-PROOF modify #####
 			// check stake initialised
+			owner, err := d.fpRollup.Owner(&bind.CallOpts{})
+			if err != nil {
+				return nil, err
+			}
+			assertionInit, err := d.fpAssertion.Assertions(&bind.CallOpts{}, new(big.Int).SetUint64(0))
+			if err != nil {
+				return nil, err
+			}
+			if !bytes.Equal(owner.Bytes(), opts.From.Bytes()) || bytes.Equal(assertionInit.Deadline.Bytes(), common.Big0.Bytes()) {
+				log.Error("fraud proof not init with owner", owner)
+				return nil, nil
+			}
+			// Append state batch
 			tx, err = d.FraudProofAppendStateBatch(
 				opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature, blocks,
 			)
@@ -401,13 +416,13 @@ func (d *Driver) SendTransaction(
 }
 
 func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32]byte, shouldStartAtElement *big.Int, signature []byte, blocks []*l2types.Block) (*types.Transaction, error) {
-
 	challengeContext, _ := d.fpRollup.ChallengeCtx(&bind.CallOpts{})
 	isInChallenge := challengeContext.DefenderAssertionID.Uint64() != 0 && !challengeContext.Completed
 	if isInChallenge {
 		log.Warn("currently in challenge, can't submit new assertion")
 		return nil, nil
 	}
+
 	var latestAssertion rollupTypes.Assertion
 	var staker rollupTypes.Staker
 	if ret, err := d.fpRollup.Stakers(&bind.CallOpts{}, opts.From); err != nil {
@@ -430,6 +445,16 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 	}
 
 	txBatch := rollupTypes.NewTxBatch(blocks, uint64(len(blocks)))
+
+	// First assertion check
+	lastCreatedAssertionID, err := d.fpRollup.LastCreatedAssertionID(&bind.CallOpts{})
+	if err != nil {
+		return nil, err
+	}
+	if lastCreatedAssertionID.Uint64() != 0 && latestAssertion.InboxSize.Uint64()+uint64(len(txBatch.Txs)) != txBatch.LastBlockNumber() {
+		log.Crit("Online total InboxSize not match with local batch's LatestBlockNumber")
+	}
+
 	assertion := txBatch.ToAssertion(&latestAssertion)
 
 	fmt.Println(assertion.VmHash.String())
