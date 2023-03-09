@@ -45,7 +45,8 @@ type Processor struct {
 	askSlashChan              chan tdtypes.RPCRequest
 	signSlashChan             chan tdtypes.RPCRequest
 	keygenRequestChan         chan tdtypes.RPCRequest
-	signRollBachChan          chan tdtypes.RPCRequest
+	askRollBackChan           chan tdtypes.RPCRequest
+	signRollBackChan          chan tdtypes.RPCRequest
 	waitSignLock              *sync.Mutex
 	waitSignMsgs              map[string]common.SignStateRequest
 	waitSignSlashLock         *sync.Mutex
@@ -119,7 +120,8 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 		askSlashChan:              make(chan tdtypes.RPCRequest, 1),
 		signSlashChan:             make(chan tdtypes.RPCRequest, 1),
 		keygenRequestChan:         make(chan tdtypes.RPCRequest, 1),
-		signRollBachChan:          make(chan tdtypes.RPCRequest, 1),
+		askRollBackChan:           make(chan tdtypes.RPCRequest, 1),
+		signRollBackChan:          make(chan tdtypes.RPCRequest, 1),
 		waitSignLock:              &sync.Mutex{},
 		waitSignMsgs:              make(map[string]common.SignStateRequest),
 		waitSignSlashLock:         &sync.Mutex{},
@@ -143,7 +145,7 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 
 func (p *Processor) Start() {
 	p.logger.Info().Msg("Signer is starting")
-	p.wg.Add(8)
+	p.wg.Add(9)
 	p.run()
 }
 
@@ -167,4 +169,5 @@ func (p *Processor) run() {
 	go p.Keygen()
 	go p.deleteSlashing()
 	go p.SignRollBack()
+	go p.VerifyRollBack()
 }

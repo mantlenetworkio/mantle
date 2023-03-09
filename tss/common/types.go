@@ -15,6 +15,7 @@ const (
 	AskSlash       Method = "askSlash"
 	SignSlash      Method = "signSlash"
 	SignRollBack   Method = "signRollBack"
+	AskRollBack    Method = "askRollBack"
 
 	SlashTypeLiveness byte = 1
 	SlashTypeCulprit  byte = 2
