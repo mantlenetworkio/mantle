@@ -10,18 +10,13 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/log"
-	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
-	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
-	"math/big"
-	"strings"
-	"sync"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/ctc"
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/scc"
 	tssClient "github.com/mantlenetworkio/mantle/batch-submitter/tss-client"
@@ -29,8 +24,11 @@ import (
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
 	fpbindings "github.com/mantlenetworkio/mantle/fraud-proof/bindings"
+	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
+	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	tss_types "github.com/mantlenetworkio/mantle/tss/common"
+	"sync"
 )
 
 // stateRootSize is the size in bytes of a state root.
