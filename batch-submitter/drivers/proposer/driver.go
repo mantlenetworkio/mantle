@@ -12,6 +12,7 @@ import (
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"math/big"
 	"strings"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -305,13 +306,17 @@ func (d *Driver) CraftBatchTx(
 				// ##### FRAUD-PROOF modify #####
 				// check stake initialised
 				// check is in challenge status
-				challengeContext, _ := d.fpRollup.ChallengeCtx(&bind.CallOpts{})
+				challengeContext, err := d.fpRollup.ChallengeCtx(&bind.CallOpts{})
+				if err != nil {
+					return nil, err
+				}
 				isInChallenge := challengeContext.DefenderAssertionID.Uint64() != 0 && !challengeContext.Completed
 				if isInChallenge {
 					log.Warn("currently in challenge, can't submit new assertion")
 					return nil, nil
 				}
 				// check rollback status
+				var once sync.Once
 				if d.cfg.SccRollback {
 					fpChallenge, err := fpbindings.NewChallenge(
 						challengeContext.ChallengeAddress, d.cfg.L1Client,
@@ -341,12 +346,6 @@ func (d *Driver) CraftBatchTx(
 							return nil, err
 						}
 						if tssResponse.RollBack {
-							_, err = d.sccContract.RollBackL2Chain(
-								opts, startInboxSize, offsetStartsAtIndex, tssResponse.Signature,
-							)
-							if err != nil {
-								return nil, err
-							}
 							// delete scc batch states one by one
 							totalBatches, err := d.sccContract.GetTotalBatches(&bind.CallOpts{})
 							if err != nil {
@@ -358,7 +357,22 @@ func (d *Driver) CraftBatchTx(
 								return nil, err
 							}
 							if filter.Event.PrevTotalElements.Cmp(startInboxSize) <= 0 {
-								return fpChallenge.SetRollback(opts)
+								var rollbackTx *types.Transaction
+								var rollbackErr error
+								// must ensure all those action done properly until rollback finished
+								// or RollBackL2Chain will happen multiple times
+								once.Do(
+									func() {
+										rollbackTx, rollbackErr = d.sccContract.RollBackL2Chain(
+											opts, startInboxSize, offsetStartsAtIndex, tssResponse.Signature,
+										)
+									},
+								)
+								if rollbackTx != nil || rollbackErr != nil {
+									return rollbackTx, rollbackErr
+								} else {
+									return fpChallenge.SetRollback(opts)
+								}
 							}
 							return d.sccContract.DeleteStateBatch(opts, scc.LibBVMCodecChainBatchHeader{
 								BatchIndex:        filter.Event.BatchIndex,
@@ -369,6 +383,17 @@ func (d *Driver) CraftBatchTx(
 								ExtraData:         filter.Event.ExtraData,
 							})
 						}
+					} else {
+						once.Do(
+							func() {
+								_, err = d.sccContract.RollBackL2Chain(
+									opts, startInboxSize, offsetStartsAtIndex, tssResponse.Signature,
+								)
+								if err != nil {
+									panic(err)
+								}
+							}
+						)
 					}
 				}
 				// rollup assertion

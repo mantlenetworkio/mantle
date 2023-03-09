@@ -272,7 +272,6 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             abi.encodeWithSignature("appendStateBatch(bytes32[],uint256,bytes)", _batch, _shouldStartAtElement, _signature)
         );
         require(success, "scc append state batch failed, revert all");
-
     }
 
     function challengeAssertion(address[2] calldata players, uint256[2] calldata assertionIDs)
