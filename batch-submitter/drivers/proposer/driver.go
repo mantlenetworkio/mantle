@@ -352,15 +352,22 @@ func (d *Driver) CraftBatchTx(
 							if err != nil {
 								return nil, err
 							}
-							//filter, err := d.sccContract.(&bind.FilterOpts{}, []*big.Int{totalBatches})
-							//if err != nil {
-							//	return nil, err
-							//}
-							//for {
-							//	filter.Event
-							//}
-							//d.sccContract.FilterStateBatchAppended(opts)
-							//_, err := d.sccContract.DeleteStateBatch(opts, scc.LibBVMCodecChainBatchHeader{})
+
+							filter, err := d.sccContract.FilterStateBatchAppended(&bind.FilterOpts{}, []*big.Int{totalBatches})
+							if err != nil {
+								return nil, err
+							}
+							if filter.Event.PrevTotalElements.Cmp(startInboxSize) <= 0 {
+								return fpChallenge.SetRollback(opts)
+							}
+							return d.sccContract.DeleteStateBatch(opts, scc.LibBVMCodecChainBatchHeader{
+								BatchIndex:        filter.Event.BatchIndex,
+								BatchRoot:         filter.Event.BatchRoot,
+								BatchSize:         filter.Event.BatchSize,
+								PrevTotalElements: filter.Event.PrevTotalElements,
+								Signature:         filter.Event.Signature,
+								ExtraData:         filter.Event.ExtraData,
+							})
 						}
 					}
 				}
