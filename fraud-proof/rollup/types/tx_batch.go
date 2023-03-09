@@ -8,7 +8,6 @@ import (
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
@@ -79,9 +78,6 @@ func (b *TxBatch) SerializeToArgs() ([]*big.Int, []*big.Int, []byte, error) {
 }
 
 func (b *TxBatch) ToAssertion(parent *Assertion) *Assertion {
-	if parent.InboxSize.Uint64()+uint64(len(b.Txs)) != b.LastBlockNumber() {
-		log.Crit("Online total InboxSize not match with local batch's LatestBlockNumber")
-	}
 	return &Assertion{
 		ID:        new(big.Int).Add(parent.ID, big.NewInt(1)),
 		VmHash:    b.LastBlockRoot(),

@@ -7,13 +7,15 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"strings"
+
 	"github.com/ethereum/go-ethereum/log"
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"math/big"
 	"strings"
 	"sync"
-
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -270,6 +272,19 @@ func (d *Driver) CraftBatchTx(
 			log.Info("append state with fraud proof")
 			// ##### FRAUD-PROOF modify #####
 			// check stake initialised
+			owner, err := d.fpRollup.Owner(&bind.CallOpts{})
+			if err != nil {
+				return nil, err
+			}
+			assertionInit, err := d.fpAssertion.Assertions(&bind.CallOpts{}, new(big.Int).SetUint64(0))
+			if err != nil {
+				return nil, err
+			}
+			if !bytes.Equal(owner.Bytes(), opts.From.Bytes()) || bytes.Equal(assertionInit.Deadline.Bytes(), common.Big0.Bytes()) {
+				log.Error("fraud proof not init with owner", owner)
+				return nil, nil
+			}
+			// Append state batch
 			tx, err = d.FraudProofAppendStateBatch(
 				opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature, blocks,
 			)
@@ -495,6 +510,16 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 	}
 
 	txBatch := rollupTypes.NewTxBatch(blocks, uint64(len(blocks)))
+
+	// First assertion check
+	lastCreatedAssertionID, err := d.fpRollup.LastCreatedAssertionID(&bind.CallOpts{})
+	if err != nil {
+		return nil, err
+	}
+	if lastCreatedAssertionID.Uint64() != 0 && latestAssertion.InboxSize.Uint64()+uint64(len(txBatch.Txs)) != txBatch.LastBlockNumber() {
+		log.Crit("Online total InboxSize not match with local batch's LatestBlockNumber")
+	}
+
 	assertion := txBatch.ToAssertion(&latestAssertion)
 
 	fmt.Println(assertion.VmHash.String())
