@@ -1,8 +1,11 @@
 package signer
 
 import (
-	"bytes"
+	"context"
 	"encoding/json"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	bindings "github.com/mantlenetworkio/mantle/tss/bindings/fp"
 	"github.com/mantlenetworkio/mantle/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
@@ -21,41 +24,17 @@ func (p *Processor) VerifyRollBack() {
 			case <-p.stopChan:
 				return
 			case req := <-p.askRollBackChan:
-				var askRequest common.SignStateRequest
 				var RpcResponse tdtypes.RPCResponse
-				if err := json.Unmarshal(req.Params, &askRequest); err != nil {
-					logger.Error().Msg("failed to unmarshal ask request")
-					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to unmarshal ", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
-					continue
-				}
+
 				var resId = req.ID
 
-				var ret bool
-				if askRequest.SignType == common.SlashTypeCulprit {
-					culprits := p.nodeStore.GetCulprits()
-					if len(culprits) > 0 {
-						for _, v := range culprits {
-							address, err := common.NodeToAddress(v)
-							if err != nil {
-								logger.Err(err).Msg("fail transfer node to address")
-								continue
-							}
-							if bytes.Compare(address.Bytes(), askRequest.Address.Bytes()) == 0 {
-								ret = true
-								break
-							}
-						}
-					}
-				} else if askRequest.SignType == common.SlashTypeLiveness {
-					found, info := p.nodeStore.GetSlashingInfo(askRequest.Address, askRequest.BatchIndex)
-					logger.Info().Msgf("--------- found value %s ", found)
-					if found && info.SlashType == common.SlashTypeLiveness {
-						ret = true
-					}
-				}
-				if ret {
-					p.UpdateWaitSignSlashMsgs(askRequest)
+				ret, err := p.doVerify(req)
+
+				if err != nil {
+					logger.Error().Msgf("failed to do verify for rollback, %s", err.Error())
+					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to do verify for rollback ", err.Error())
+					p.wsClient.SendMsg(RpcResponse)
+					continue
 				}
 				askResponse := common.AskResponse{
 					Result: ret,
@@ -65,5 +44,43 @@ func (p *Processor) VerifyRollBack() {
 			}
 		}
 	}()
+
+}
+
+func (p *Processor) doVerify(req tdtypes.RPCRequest) (bool, error) {
+	var askRequest common.SignStateRequest
+	if err := json.Unmarshal(req.Params, &askRequest); err != nil {
+		return false, err
+	}
+
+	challengeAddr := ethcommon.HexToAddress(askRequest.Challenge)
+	challengeContract, err := bindings.NewChallenge(challengeAddr, p.l1Client)
+	if err != nil {
+		return false, err
+	}
+	winner, err := challengeContract.Winner(&bind.CallOpts{
+		Context: context.Background(),
+	})
+	if err != nil {
+		return false, err
+	}
+	defender, err := challengeContract.Defender(&bind.CallOpts{
+		Context: context.Background(),
+	})
+	if err != nil {
+		return false, err
+	}
+	rollback, err := challengeContract.Rollback(&bind.CallOpts{
+		Context: context.Background(),
+	})
+	if err != nil {
+		return false, err
+	}
+
+	if winner.String() == defender.String() && !rollback {
+		return true, nil
+	} else {
+		return false, nil
+	}
 
 }

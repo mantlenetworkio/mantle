@@ -48,6 +48,10 @@ func (registry *Registry) SignStateHandler() gin.HandlerFunc {
 		if request.Type == 0 {
 			signature, err = registry.signService.SignStateBatch(request)
 		} else if request.Type == 1 {
+			if !common.IsHexAddress(request.Challenge) {
+				c.JSON(http.StatusBadRequest, errors.New("wrong challenge address, can not be converted to hex address"))
+				return
+			}
 			signature, err = registry.signService.SignRollBack(request)
 		}
 		if err != nil {
