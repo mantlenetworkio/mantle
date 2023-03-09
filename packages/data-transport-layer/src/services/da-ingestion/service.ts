@@ -8,7 +8,7 @@ import { constants } from 'ethers'
 import { Gauge, Counter } from 'prom-client'
 
 /* Imports: Internal */
-import { serialize } from '@ethersproject/transactions'
+// import { serialize } from '@ethersproject/transactions'
 import fetch from 'node-fetch'
 
 import { MissingElementError } from './handlers/errors'
@@ -105,63 +105,13 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   }
 
   protected async _start(): Promise<void> {
-    // This is our main function. It's basically just an infinite loop that attempts to stay in
-    // sync with events coming from Ethereum. Loops as quickly as it can until it approaches the
-    // tip of the chain, after which it starts waiting for a few seconds between each loop to avoid
-    // unnecessary spam.
     while (this.running) {
       try {
-        const lastBatchIndex = await this.state.db.getLatestBatchIndex()
+        const maxDsId = await this.updateBatchIndexLoop()
+        await this.updateRollupDataStoreLoop()
+        await this.updateTransactionListByDsIDLoop(maxDsId)
 
-        let newTxBatchIndex: number = -1
-        const getNewBatchIndex = async () => {
-          const rst = await this.GetLatestTransactionBatchIndex()
-          if (typeof rst === 'number') {
-            newTxBatchIndex = rst
-          }
-        }
-        await getNewBatchIndex()
-        if (newTxBatchIndex !== -1) {
-          await this.state.db.putUpdatedBatchIndex(newTxBatchIndex)
-        }
-        let now_batch_Index = -1
-
-        for (let i = lastBatchIndex; i <= newTxBatchIndex; i++) {
-          now_batch_Index = i
-
-          const dataStore = await this.GetRollupStoreByRollupBatchIndex(i)
-            .then((rst) => {
-              return rst
-            })
-            .catch((error) => {
-              console.log('getRollupStoreByRollupBatchIndex error : ', error)
-            })
-          if (dataStore === null) {
-            console.log('HTTP getRollup and get null data')
-            now_batch_Index--
-            break
-          }
-          if (dataStore['status'] === 0) {
-            now_batch_Index--
-            break
-          }
-          await this.state.db.putRollupStoreByBatchIndex(
-            {
-              index: 0,
-              data_store_id: dataStore['data_store_id'],
-              status: dataStore['status'],
-              confirm_at: dataStore['confirm_at'],
-            },
-            i
-          )
-
-          await this._updateBatchTxByDSId(
-            dataStore['data_store_id'],
-            now_batch_Index
-          )
-          await this._storeDataStoreById(dataStore['data_store_id'])
-        }
-        await this.state.db.putUpdatedBatchIndex(now_batch_Index)
+        await sleep(this.options.pollingInterval)
       } catch (err) {
         if (err instanceof MissingElementError) {
           this.logger.warn('recovering from a missing event', {
@@ -181,12 +131,116 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       }
     }
   }
+  private async updateRollupDataStoreLoop(): Promise<void> {
+    const latestBatchIndex = await this.GetLatestTransactionBatchIndex()
+    let updatedBatchIndex = await this.state.db.getUpdatedRollupBatchIndex()
+    console.log(latestBatchIndex,updatedBatchIndex)
+    if (updatedBatchIndex === null) {
+      updatedBatchIndex = 0
+    }
+    if (latestBatchIndex <= updatedBatchIndex) {
+      return
+    }
+    const loopTime =
+      updatedBatchIndex + 10 < latestBatchIndex
+        ? updatedBatchIndex + 10
+        : latestBatchIndex
+    for (let i = updatedBatchIndex; i <= loopTime; i++) {
+      const dataStore = await this.GetRollupStoreByRollupBatchIndex(i)
+        .then((rst) => {
+          return rst
+        })
+        .catch((error) => {
+          console.log('getRollupStoreByRollupBatchIndex error : ', error)
+        })
+      if (dataStore === null) {
+        console.log('HTTP getRollup and get null data')
+        break
+      }
+      if (dataStore['status'] === 0) {
+        break
+      }
+      await this.state.db.putRollupStoreByBatchIndex(
+        {
+          index: 0,
+          data_store_id: dataStore['data_store_id'],
+          status: dataStore['status'],
+          confirm_at: dataStore['confirm_at'],
+        },
+        i
+      )
+      await this.state.db.putUpdatedRollupBatchIndex(i)
+    }
+  }
+  private async updateBatchIndexLoop(): Promise<number> {
+    const lastBatchIndex = await this.state.db.getUpdatedBatchIndex()
+
+    let newTxBatchIndex: number = -1
+    const getNewBatchIndex = async () => {
+      const rst = await this.GetLatestTransactionBatchIndex()
+      if (typeof rst === 'number' && rst !== 0) {
+        newTxBatchIndex = rst
+      }
+    }
+    await getNewBatchIndex()
+    if (newTxBatchIndex !== -1) {
+      await this.state.db.putLatestBatchIndex(newTxBatchIndex)
+    }
+    let maxDsId: number = 0
+    for (let i = lastBatchIndex; i <= newTxBatchIndex; i++) {
+      const now_batchIndex = i
+      const dataStore = await this.GetRollupStoreByRollupBatchIndex(i)
+      if (dataStore === null) {
+        console.log('HTTP getRollup and get null data')
+        break
+      }
+      if (dataStore['status'] === 0) {
+        break
+      }
+      maxDsId =
+        maxDsId < dataStore['data_store_id']
+          ? dataStore['data_store_id']
+          : maxDsId
+      console.log("maxDsId:",maxDsId,dataStore['data_store_id'])
+
+
+      await this._storeDataStoreById(dataStore['data_store_id'])
+      await this._updateBatchTxByDSId(
+        dataStore['data_store_id'],
+        now_batchIndex
+      )
+      await this.state.db.putUpdatedBatchIndex(i)
+    }
+
+    return maxDsId
+  }
+
+  private async updateTransactionListByDsIDLoop(
+    endDsId: number
+  ): Promise<void> {
+    console.log('endDsId : ', endDsId)
+    let startDsId = await this.state.db.getUpdatedDsId()
+    if (startDsId === null) {
+      startDsId = 1
+    }
+    if (startDsId >= endDsId) {
+      return
+    }
+    const loopTime = endDsId - startDsId > 10 ? startDsId + 10 : endDsId
+    for (let dsId = startDsId; dsId <= loopTime; dsId++) {
+      await this._storeDataStoreById(dsId)
+      console.log('updated data store entry ,data store id = ', dsId)
+      await this._storeTransactionListByDSId(dsId)
+      console.log('updated tx list by dsId ,data store id = ', dsId)
+      await this.state.db.putUpdatedDsId(dsId)
+    }
+  }
   private async _updateBatchTxByDSId(
     storeId: number,
     index: number
   ): Promise<void> {
     const transactionEntries: TransactionEntry[] = []
-
+    console.log("start update batch txs by dsid")
     const batchTxs = await this.GetBatchTransactionByDataStoreId(storeId)
       .then((rst) => {
         return rst
@@ -199,24 +253,28 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       const queueOrigin =
         batchTx['TxMeta']['queueOrigin'] === 1 ? 'l1' : 'sequencer'
 
+      // const txData =
+      //   batchTx['TxMeta']['queueOrigin'] === 1
+      //     ? null
+      //     : serialize(
+      //         {
+      //           nonce: batchTx['TxDetail']['nonce'],
+      //           gasPrice: batchTx['TxDetail']['gasPrice'],
+      //           gasLimit: 0,
+      //           to: batchTx['TxDetail']['to'],
+      //           value: batchTx['TxDetail']['value'],
+      //           data: batchTx['TxDetail']['input'],
+      //         },
+      //         {
+      //           v: batchTx['TxDetail']['v'],
+      //           r: batchTx['TxDetail']['r'],
+      //           s: batchTx['TxDetail']['s'],
+      //         }
+      //       )
       const txData =
         batchTx['TxMeta']['queueOrigin'] === 1
           ? null
-          : serialize(
-              {
-                nonce: batchTx['TxDetail']['nonce'],
-                gasPrice: batchTx['TxDetail']['gasPrice'],
-                gasLimit: '0',
-                to: batchTx['TxDetail']['to'],
-                value: batchTx['TxDetail']['value'],
-                data: batchTx['TxDetail']['input'],
-              },
-              {
-                v: batchTx['TxDetail']['v'],
-                r: batchTx['TxDetail']['r'],
-                s: batchTx['TxDetail']['s'],
-              }
-            )
+          : batchTx['TxMeta']['rawTransaction']
       const sigData =
         batchTx['TxMeta']['queueOrigin'] === 1
           ? null
@@ -250,11 +308,14 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         confirmed: true,
       })
     }
-
+    console.log("txs store = ",storeId)
     await this.state.db.putBatchTxByDataStoreId(transactionEntries, storeId)
   }
 
   private async _storeDataStoreById(storeId: number): Promise<void> {
+    if (storeId === null) {
+      return
+    }
     const dataStore = await this.GetDataStoreById(storeId)
     if (dataStore === null) {
       return
@@ -293,6 +354,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
 
   private async _storeTransactionListByDSId(storeId: number): Promise<void> {
     const txList = await this.GetTransactionListByStoreNumber(storeId)
+    console.log('txList :', txList)
     if (txList === null || txList.length === 0) {
       return
     }
@@ -382,7 +444,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
           store_id: storeNumber,
         }),
       })
-        .then(res => res.json())
+        .then((res) => res.json())
         // .then((res) => res.json())
         .catch((error) => {
           console.log('GetDataStoreById HTTP error status != 200 ', error)
@@ -394,7 +456,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   private async GetTransactionListByStoreNumber(
     storeNumber: number
   ): Promise<any> {
-    console.log('storeNumber', storeNumber)
+    console.log('store_number', storeNumber)
     const requestData = JSON.stringify({
       store_number: storeNumber,
     })
@@ -407,16 +469,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         body: requestData,
       }
     )
-      .then((res) => {
-        if (res.status === 200) {
-          return res
-        }
-        console.log(
-          'GetTransactionListByStoreNumber HTTP status != 200 ',
-          res.json()
-        )
-        return res
-      })
       .then((res) => res.json())
       .catch((error) => {
         console.log('GetTransactionListByStoreNumber HTTP error status != 200 ')

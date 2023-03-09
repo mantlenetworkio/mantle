@@ -24,6 +24,9 @@ const TRANSPORT_DA_DB_KEYS = {
   TX_LIST_DS_ID: `da:txlistdsid`,
   DS_LIST_BY_BTACH_ID: `da:dssbybatchid`,
   ROLLUP_STORE_BY_BATCH_INDEX: `da:rollupstorebybatchindex`,
+  UPDATED_ROLLUP_STORE_BY_BATCH_INDEX: `da:updatedrollupstorebybatchindex`,
+
+  UPDATED_DS_ID: `da:updateddsid`,
 }
 
 const TRANSPORT_DB_KEYS = {
@@ -59,9 +62,9 @@ export class TransportDB {
     this.opts = opts || {}
   }
 
-  //=======================
-  //====DA==PART==START====
-  //=======================
+  //======================================================================================
+  //====================================DA==PART==START===================================
+  //======================================================================================
   public async putUpdatedBatchIndex(index: number): Promise<void> {
     await this.db.put([
       {
@@ -74,6 +77,34 @@ export class TransportDB {
 
   public async getUpdatedBatchIndex(): Promise<number> {
     return this.db.get(TRANSPORT_DA_DB_KEYS.UPDATED_BATCH_INDEX, 0)
+  }
+
+  public async putUpdatedRollupBatchIndex(index: number): Promise<void> {
+    await this.db.put([
+      {
+        key: TRANSPORT_DA_DB_KEYS.UPDATED_ROLLUP_STORE_BY_BATCH_INDEX,
+        index: 0,
+        value: index,
+      },
+    ])
+  }
+
+  public async getUpdatedRollupBatchIndex(): Promise<number> {
+    return this.db.get(TRANSPORT_DA_DB_KEYS.UPDATED_ROLLUP_STORE_BY_BATCH_INDEX, 0)
+  }
+
+  public async putUpdatedDsId(index: number): Promise<void> {
+    await this.db.put([
+      {
+        key: TRANSPORT_DA_DB_KEYS.UPDATED_DS_ID,
+        index: 0,
+        value: index,
+      },
+    ])
+  }
+
+  public async getUpdatedDsId(): Promise<number> {
+    return this.db.get(TRANSPORT_DA_DB_KEYS.UPDATED_DS_ID, 0)
   }
 
   public async putRollupStoreByBatchIndex<RollupStoreEntry extends Indexed>(
@@ -114,7 +145,7 @@ export class TransportDB {
     return this._getFullEnties(TRANSPORT_DA_DB_KEYS.TXS_BY_DS_ID + dsId)
   }
 
-  public async getTxListByDSId(dsId: number): Promise<TransactionEntry[]> {
+  public async getTxListByDSId(dsId: number): Promise<TransactionListEntry[]> {
     const lens = await this._getLatestEntryIndex(
       TRANSPORT_DA_DB_KEYS.TX_LIST_DS_ID + dsId
     )
@@ -177,9 +208,9 @@ export class TransportDB {
     ])
   }
 
-  //=======================
-  //======DA===PART==END===
-  //=======================
+  //=====================================================================
+  //=============================DA===PART==END==========================
+  //=====================================================================
 
   public async putEnqueueEntries(entries: EnqueueEntry[]): Promise<void> {
     await this._putEntries(TRANSPORT_DB_KEYS.ENQUEUE, entries)
@@ -569,6 +600,9 @@ export class TransportDB {
       return []
     }
     const lastIndex = await this._getLatestEntryIndex(key)
+    if (lastIndex === null) {
+      return []
+    }
     return this._getEntries(key, 0, lastIndex)
   }
 
@@ -580,6 +614,6 @@ export class TransportDB {
       .map((entry) => entry.index)
       .reduce((a, b) => (a > b ? a : b))
     await this._putLatestEntryIndex(key, maxIndex)
-    this._putEntries(key, entries)
+    await this._putEntries(key, entries)
   }
 }

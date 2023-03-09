@@ -11,7 +11,6 @@ import * as Tracing from '@sentry/tracing'
 
 /* Imports: Internal */
 
-
 import { TransportDB } from '../../db/transport-db'
 import {
   ContextResponse,
@@ -27,6 +26,7 @@ import {
   BatchTxByDataStoreIdResponse,
   DataStoreByIdResponse,
   TxListByStoreIdResponse,
+  TestResponse,
 } from '../../types'
 import { validators } from '../../utils'
 import { L1DataTransportServiceOptions } from '../main/service'
@@ -730,8 +730,11 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
 
         if (latestBatchIndex === null) {
           return {
-            batchIndex: latestBatchIndex,
+            batchIndex: null,
           }
+        }
+        return {
+          batchIndex: latestBatchIndex,
         }
       }
     )
@@ -739,13 +742,13 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       'get',
       '/da/getDataStoreListByBatchIndex/:batchIndex',
       async (req): Promise<DataStoreListByBatchIndexResponse> => {
-        const batch = await this.state.db.getDataStoreListByBatchIndex(
+        const batch = await this.state.db.getRollupStoreByBatchIndex(
           BigNumber.from(req.params.batchIndex).toNumber()
         )
-        if (batch === null || batch.length === 0) {
+        if (batch === null) {
           return {
             batchIndex: null,
-            dataStore: [],
+            dataStore: null,
           }
         }
         return {
@@ -806,6 +809,24 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
             storeId: null,
             txList: [],
           }
+        }
+        return {
+          storeId: BigNumber.from(req.params.dsId).toNumber(),
+          txList: batchTxs,
+        }
+      }
+    )
+
+    this._registerRoute(
+      'get',
+      '/da/test/:batchIndex',
+      async (req): Promise<TestResponse> => {
+        const t = BigNumber.from(req.params.batchIndex).toNumber()
+
+        const data = await this.state.db.putUpdatedBatchIndex(0)
+
+        return {
+          data: JSON.stringify(data),
         }
       }
     )

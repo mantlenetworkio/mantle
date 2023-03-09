@@ -1,6 +1,6 @@
 import {
   DataStoreEntry,
-  EnqueueEntry,
+  EnqueueEntry, RollupStoreEntry,
   StateRootBatchEntry,
   StateRootEntry,
   TransactionBatchEntry,
@@ -48,7 +48,7 @@ export interface LatestTxBatchIndexResponse {
 }
 
 export interface DataStoreListByBatchIndexResponse {
-  dataStore: DataStoreEntry[]
+  dataStore: RollupStoreEntry
   batchIndex: number
 }
 
@@ -60,6 +60,11 @@ export interface BatchTxByDataStoreIdResponse {
 export interface DataStoreByIdResponse {
   dataStore: string
 }
+
+export interface TestResponse{
+  data:string
+}
+
 
 export interface TxListByStoreIdResponse {
   txList: TransactionListEntry[]
