@@ -32,17 +32,17 @@ const registerMetrics = ({
   registry,
 }: Metrics): DaIngestionMetrics => ({
   highestSyncedL1Block: new client.Gauge({
-    name: 'data_transport_layer_highest_synced_l1_block',
-    help: 'Highest Synced L1 Block Number',
+    name: 'data_transport_layer_synced_da_data',
+    help: 'Synced DA  Data',
     registers: [registry],
   }),
   missingElementCount: new client.Counter({
-    name: 'data_transport_layer_missing_element_count',
+    name: 'data_transport_layer_da_missing_element_count',
     help: 'Number of times recovery from missing elements happens',
     registers: [registry],
   }),
   unhandledErrorCount: new client.Counter({
-    name: 'data_transport_layer_l1_unhandled_error_count',
+    name: 'data_transport_layer_da_unhandled_error_count',
     help: 'Number of times recovered from unhandled errors',
     registers: [registry],
   }),
