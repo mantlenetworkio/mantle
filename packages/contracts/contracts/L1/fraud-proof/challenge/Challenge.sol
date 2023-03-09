@@ -84,6 +84,10 @@ contract Challenge is IChallenge {
     bytes32 private endStateHash;
 
     address public winner;
+
+    bool public rollback;
+    uint256 public startInboxSize;
+
     BisectedStore public currentBisected;
 
     /**
@@ -119,6 +123,7 @@ contract Challenge is IChallenge {
         address _challenger,
         IVerifierEntry _verifier,
         address _resultReceiver,
+        uint256 _startInboxSize,
         bytes32 _startStateHash,
         bytes32 _endStateHash
     ) external override {
@@ -139,6 +144,7 @@ contract Challenge is IChallenge {
         prevBisection[0] = _startStateHash;
         prevBisection[1] = _endStateHash;
 
+        startInboxSize = _startInboxSize;
         console.log("initialize prevBisection...");
         console.log("_startStateHash");
         console.logBytes32(_startStateHash);
@@ -229,6 +235,13 @@ contract Challenge is IChallenge {
         // }
 
         _currentWin(CompletionReason.OSP_VERIFIED);
+    }
+
+    function setRollback() public {
+        if (rollback) {
+            revert("ALREADY_SET_ROLLBACK");
+        }
+        rollback = true;
     }
 
     function timeout() external override {

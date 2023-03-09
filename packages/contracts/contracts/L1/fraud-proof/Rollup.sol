@@ -313,13 +313,17 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
 
         challengeCtx = ChallengeCtx(false,challengeAddr,defender,challenger,defenderAssertionID,challengerAssertionID);
         emit AssertionChallenged(defenderAssertionID, challengeAddr);
+        uint256 inboxSize = assertions.getInboxSize(parentID);
+        bytes32 parentStateHash = assertions.getStateHash(parentID);
+        bytes32 defenderStateHash = assertions.getStateHash(defenderAssertionID);
         challenge.initialize(
             defender,
             challenger,
             verifier,
             address(this),
-            assertions.getStateHash(parentID),
-            assertions.getStateHash(defenderAssertionID)
+            inboxSize,
+            parentStateHash,
+            defenderStateHash
         );
         console.log("parent Hash");
         console.logBytes32(assertions.getStateHash(parentID));

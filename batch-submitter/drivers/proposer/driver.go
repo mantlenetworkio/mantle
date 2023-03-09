@@ -13,7 +13,9 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
-
+	"math/big"
+	"strings"
+	"sync"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -49,6 +51,7 @@ type Config struct {
 	FPRollupAddr         common.Address
 	ChainID              *big.Int
 	PrivKey              *ecdsa.PrivateKey
+	SccRollback          bool
 }
 
 type Driver struct {
@@ -60,6 +63,7 @@ type Driver struct {
 	rawFPContract  *bind.BoundContract
 	fpAssertion    *fpbindings.AssertionMap
 	walletAddr     common.Address
+	once           sync.Once
 	metrics        *metrics.Base
 }
 
@@ -129,6 +133,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		rawFPContract:  rawFPContract,
 		fpAssertion:    assertionMap,
 		walletAddr:     walletAddr,
+		once:           sync.Once{},
 		metrics:        metrics.NewBase("batch_submitter", cfg.Name),
 	}, nil
 }
@@ -254,23 +259,10 @@ func (d *Driver) CraftBatchTx(
 	blockOffset := new(big.Int).SetUint64(d.cfg.BlockOffset)
 	offsetStartsAtIndex := new(big.Int).Sub(start, blockOffset)
 	// Assembly data request tss node signature
-	tssReqParams := tss_types.SignStateRequest{
-		StartBlock:          start.String(),
-		OffsetStartsAtIndex: offsetStartsAtIndex.String(),
-		StateRoots:          stateRoots,
-	}
-	tssReponseBytes, err := d.cfg.TssClient.GetSignStateBatch(tssReqParams)
+	tssResponse, err := d.RequestTssSignature(0, start, offsetStartsAtIndex, "", stateRoots)
 	if err != nil {
-		log.Error("get tss manager signature fail", "err", err)
 		return nil, err
 	}
-	var tssResponse tssClient.TssResponse
-	err = json.Unmarshal(tssReponseBytes, &tssResponse)
-	if err != nil {
-		log.Error("failed to unmarshal response from tss", "err", err)
-		return nil, err
-	}
-
 	log.Info("append log", "stateRoots", fmt.Sprintf("%v", stateRoots), "offsetStartsAtIndex", offsetStartsAtIndex, "signature", hex.EncodeToString(tssResponse.Signature), "rollback", tssResponse.RollBack)
 	var tx *types.Transaction
 	if tssResponse.RollBack {
@@ -330,6 +322,86 @@ func (d *Driver) CraftBatchTx(
 				log.Info("append state with fraud proof by gas tip cap")
 				// ##### FRAUD-PROOF modify #####
 				// check stake initialised
+				// check is in challenge status
+				challengeContext, err := d.fpRollup.ChallengeCtx(&bind.CallOpts{})
+				if err != nil {
+					return nil, err
+				}
+				isInChallenge := challengeContext.DefenderAssertionID.Uint64() != 0 && !challengeContext.Completed
+				if isInChallenge {
+					log.Warn("currently in challenge, can't submit new assertion")
+					return nil, nil
+				}
+				// check rollback status
+				if d.cfg.SccRollback {
+					fpChallenge, err := fpbindings.NewChallenge(
+						challengeContext.ChallengeAddress, d.cfg.L1Client,
+					)
+					if err != nil {
+						return nil, err
+					}
+					alreadyRollback, err := fpChallenge.Rollback(&bind.CallOpts{})
+					if err != nil {
+						return nil, err
+					}
+					challenger, err := fpChallenge.Challenger(&bind.CallOpts{})
+					if err != nil {
+						return nil, err
+					}
+					winner, err := fpChallenge.Winner(&bind.CallOpts{})
+					if err != nil {
+						return nil, err
+					}
+					startInboxSize, err := fpChallenge.StartInboxSize(&bind.CallOpts{})
+					if err != nil {
+						return nil, err
+					}
+					if challengeContext.Completed && !alreadyRollback && bytes.Equal(challenger[:], winner[:]) {
+						tssResponse, err = d.RequestTssSignature(1, startInboxSize, offsetStartsAtIndex, challengeContext.ChallengeAddress.String(), nil)
+						if err != nil {
+							return nil, err
+						}
+						if tssResponse.RollBack {
+							// delete scc batch states one by one
+							totalBatches, err := d.sccContract.GetTotalBatches(&bind.CallOpts{})
+							if err != nil {
+								return nil, err
+							}
+
+							filter, err := d.sccContract.FilterStateBatchAppended(&bind.FilterOpts{}, []*big.Int{totalBatches})
+							if err != nil {
+								return nil, err
+							}
+							if filter.Event.PrevTotalElements.Cmp(startInboxSize) <= 0 {
+								var rollbackTx *types.Transaction
+								var rollbackErr error
+								// must ensure all those action done properly until rollback finished
+								// or RollBackL2Chain will happen multiple times
+								d.once.Do(
+									func() {
+										rollbackTx, rollbackErr = d.sccContract.RollBackL2Chain(
+											opts, startInboxSize, offsetStartsAtIndex, tssResponse.Signature,
+										)
+									},
+								)
+								if rollbackTx != nil || rollbackErr != nil {
+									return rollbackTx, rollbackErr
+								} else {
+									return fpChallenge.SetRollback(opts)
+								}
+							}
+							return d.sccContract.DeleteStateBatch(opts, scc.LibBVMCodecChainBatchHeader{
+								BatchIndex:        filter.Event.BatchIndex,
+								BatchRoot:         filter.Event.BatchRoot,
+								BatchSize:         filter.Event.BatchSize,
+								PrevTotalElements: filter.Event.PrevTotalElements,
+								Signature:         filter.Event.Signature,
+								ExtraData:         filter.Event.ExtraData,
+							})
+						}
+					}
+				}
+				// rollup assertion
 				return d.FraudProofAppendStateBatch(
 					opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature, blocks,
 				)
@@ -416,13 +488,6 @@ func (d *Driver) SendTransaction(
 }
 
 func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32]byte, shouldStartAtElement *big.Int, signature []byte, blocks []*l2types.Block) (*types.Transaction, error) {
-	challengeContext, _ := d.fpRollup.ChallengeCtx(&bind.CallOpts{})
-	isInChallenge := challengeContext.DefenderAssertionID.Uint64() != 0 && !challengeContext.Completed
-	if isInChallenge {
-		log.Warn("currently in challenge, can't submit new assertion")
-		return nil, nil
-	}
-
 	var latestAssertion rollupTypes.Assertion
 	var staker rollupTypes.Staker
 	if ret, err := d.fpRollup.Stakers(&bind.CallOpts{}, opts.From); err != nil {
@@ -466,4 +531,26 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 	// create assertion
 	return d.fpRollup.CreateAssertionWithStateBatch(
 		opts, assertion.VmHash, assertion.InboxSize, batch, shouldStartAtElement, signature)
+}
+
+func (d *Driver) RequestTssSignature(requestType uint64, start, offsetStartsAtIndex *big.Int, challenge string, stateRoots [][stateRootSize]byte) (*tssClient.TssResponse, error) {
+	var tssResponse tssClient.TssResponse
+	tssReqParams := tss_types.SignStateRequest{
+		Type:                requestType,
+		StartBlock:          start.String(),
+		OffsetStartsAtIndex: offsetStartsAtIndex.String(),
+		Challenge:           challenge,
+		StateRoots:          stateRoots,
+	}
+	tssReponseBytes, err := d.cfg.TssClient.GetSignStateBatch(tssReqParams)
+	if err != nil {
+		log.Error("get tss manager signature fail", "err", err)
+		return nil, err
+	}
+	err = json.Unmarshal(tssReponseBytes, &tssResponse)
+	if err != nil {
+		log.Error("failed to unmarshal response from tss", "err", err)
+		return nil, err
+	}
+	return &tssResponse, nil
 }

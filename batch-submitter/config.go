@@ -198,6 +198,8 @@ type Config struct {
 
 	// DisableHTTP2 disables HTTP2 support.
 	DisableHTTP2 bool
+
+	EnableSccRollback bool
 }
 
 // NewConfig parses the Config from the provided flags or environment variables.
@@ -245,6 +247,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		MetricsHostname:     ctx.GlobalString(flags.MetricsHostnameFlag.Name),
 		MetricsPort:         ctx.GlobalUint64(flags.MetricsPortFlag.Name),
 		DisableHTTP2:        ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
+		EnableSccRollback:   ctx.GlobalBool(flags.SccRollbackFlag.Name),
 	}
 
 	err := ValidateConfig(&cfg)

@@ -55,6 +55,7 @@ interface IChallenge {
         address _challenger,
         IVerifierEntry _verifier,
         address _resultReceiver,
+        uint256 _startInboxSize,
         bytes32 _startStateHash,
         bytes32 _endStateHash
     ) external;
@@ -102,6 +103,8 @@ interface IChallenge {
         uint256 prevChallengedSegmentStart,
         uint256 prevChallengedSegmentLength
     ) external;
+
+    function setRollback() external;
 
     /**
      * @notice Triggers completion of challenge protocol if a responder timed out.

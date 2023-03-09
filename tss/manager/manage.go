@@ -250,6 +250,60 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	return responseBytes, nil
 }
 
+func (m Manager) SignRollBack(request tss.SignStateRequest) ([]byte, error) {
+	log.Info("received roll back request", "request", request.String())
+
+	tssInfo, err := m.tssQueryService.QueryActiveInfo()
+	if err != nil {
+		return nil, err
+	}
+	availableNodes := m.availableNodes(tssInfo.TssMembers)
+	if len(availableNodes) < tssInfo.Threshold+1 {
+		return nil, errors.New("not enough available nodes to sign state")
+	}
+
+	ctx := types.NewContext().
+		WithAvailableNodes(availableNodes).
+		WithTssInfo(tssInfo).
+		WithRequestId(randomRequestId()).
+		WithElectionId(tssInfo.ElectionId)
+
+	// ask tss nodes for the agreement
+	ctx, err = m.agreement(ctx, request, tss.AskRollBack)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(ctx.Approvers()) < ctx.TssInfos().Threshold+1 {
+		return nil, errors.New("failed to sign roll back, not enough approvals from tss nodes")
+	}
+
+	var resp tss.SignResponse
+
+	startBlock, _ := new(big.Int).SetString(request.StartBlock, 10)
+	rollBackRequest := tss.RollBackRequest{StartBlock: request.StartBlock}
+	rollBackBz, err := tss.RollBackHash(startBlock)
+	if err != nil {
+		return nil, err
+	}
+	resp, _, err = m.sign(ctx, rollBackRequest, rollBackBz, tss.SignRollBack)
+
+	if err != nil {
+		return nil, err
+	}
+
+	response := tss.BatchSubmitterResponse{
+		Signature: resp.Signature,
+		RollBack:  true,
+	}
+	responseBytes, err := json.Marshal(response)
+	if err != nil {
+		log.Error("batch submitter response failed to marshal !")
+		return nil, err
+	}
+	return responseBytes, nil
+}
+
 func (m Manager) SignTxBatch() error {
 	return errors.New("not support for now")
 }
