@@ -160,11 +160,8 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
             now_batch_Index
           )
           await this._storeDataStoreById(dataStore['data_store_id'])
-
         }
         await this.state.db.putUpdatedBatchIndex(now_batch_Index)
-
-
       } catch (err) {
         if (err instanceof MissingElementError) {
           this.logger.warn('recovering from a missing event', {
@@ -198,58 +195,57 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         console.log('GetBatchTransactionByDataStoreId error ', error)
         return null
       })
-    console.log('batch tx :', batchTxs)
     for (const batchTx of batchTxs) {
       const queueOrigin =
-        batchTx['txMeta']['queueOrigin'] === 1 ? 'l1' : 'sequencer'
+        batchTx['TxMeta']['queueOrigin'] === 1 ? 'l1' : 'sequencer'
 
       const txData =
-        batchTx['txMeta']['queueOrigin'] === 1
+        batchTx['TxMeta']['queueOrigin'] === 1
           ? null
           : serialize(
               {
-                nonce: batchTx['txDetail']['nonce'],
-                gasPrice: batchTx['txDetail']['gasPrice'],
+                nonce: batchTx['TxDetail']['nonce'],
+                gasPrice: batchTx['TxDetail']['gasPrice'],
                 gasLimit: '0',
-                to: batchTx['txDetail']['to'],
-                value: batchTx['txDetail']['value'],
-                data: batchTx['txDetail']['input'],
+                to: batchTx['TxDetail']['to'],
+                value: batchTx['TxDetail']['value'],
+                data: batchTx['TxDetail']['input'],
               },
               {
-                v: batchTx['txDetail']['v'],
-                r: batchTx['txDetail']['r'],
-                s: batchTx['txDetail']['s'],
+                v: batchTx['TxDetail']['v'],
+                r: batchTx['TxDetail']['r'],
+                s: batchTx['TxDetail']['s'],
               }
             )
       const sigData =
-        batchTx['txMeta']['queueOrigin'] === 1
+        batchTx['TxMeta']['queueOrigin'] === 1
           ? null
           : {
-              v: batchTx['txDetail']['v'],
-              r: batchTx['txDetail']['r'],
-              s: batchTx['txDetail']['s'],
+              v: batchTx['TxDetail']['v'],
+              r: batchTx['TxDetail']['r'],
+              s: batchTx['TxDetail']['s'],
             }
       //TODO:
       transactionEntries.push({
-        index: batchTx['txMeta']['index'],
+        index: batchTx['TxMeta']['index'],
         batchIndex: index,
-        blockNumber: batchTx['txMeta']['l1BlockNumber'],
-        timestamp: batchTx['txMeta'],
+        blockNumber: batchTx['TxMeta']['l1BlockNumber'],
+        timestamp: batchTx['TxMeta'],
         gasLimit: '0',
         target: constants.AddressZero,
         origin: null,
         data: txData,
         queueOrigin,
-        value: batchTx['txDetail']['value'],
-        queueIndex: batchTx['txMeta']['queueIndex'],
+        value: batchTx['TxDetail']['value'],
+        queueIndex: batchTx['TxMeta']['queueIndex'],
         decoded: {
           sig: sigData,
-          value: batchTx['txDetail']['value'],
+          value: batchTx['TxDetail']['value'],
           gasLimit: '0x0',
-          gasPrice: batchTx['txDetail']['gasPrice'],
-          nonce: batchTx['txDetail']['nonce'],
+          gasPrice: batchTx['TxDetail']['gasPrice'],
+          nonce: batchTx['TxDetail']['nonce'],
           target: constants.AddressZero,
-          data: batchTx['txDetail']['input'],
+          data: batchTx['TxDetail']['input'],
         },
         confirmed: true,
       })
@@ -320,15 +316,12 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         headers: { Accept: 'application/json' },
       }
     )
-      .then((res) => {
-        if (res.status === 200) {
-          return res.json()
-        }
-        console.log('HTTP status error : status!=200')
-        return -1
-      })
+      .then((res) => res.json())
       .catch((error) => {
-        console.log('HTTP  error : status!=200 error info = ', error)
+        console.log(
+          'GetLatestTransactionBatchIndex HTTP  error : status!=200 error info = ',
+          error
+        )
         return -1
       })
   }
@@ -349,9 +342,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       }
     )
       .then((res) => res.json())
-      .then((res) => {
-        return res
-      })
       .catch((error) => {
         return error
       })
@@ -360,7 +350,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   private async GetBatchTransactionByDataStoreId(
     storeNumber: number
   ): Promise<any> {
-    console.log('storeNumber', storeNumber)
     const requestData = JSON.stringify({
       store_number: storeNumber,
     })
@@ -373,43 +362,33 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         body: requestData,
       }
     )
-      .then((res) => {
-        if (res.status === 200) {
-          return res
-        }
-        console.log('HTTP status != 200 ', res.json())
-        return res
-      })
       .then((res) => res.json())
       .catch((error) => {
-        console.log('HTTP error status != 200 ')
+        console.log(
+          'GetBatchTransactionByDataStoreId  HTTP error status != 200 ',
+          error
+        )
         return error
       })
   }
 
   private async GetDataStoreById(storeNumber: number): Promise<any> {
-    console.log('storeNumber', storeNumber)
-    const requestData = JSON.stringify({
-      store_id: storeNumber,
-    })
     // 👇️ const response: Response
-    return fetch(this.state.mtBatcherFetchUrl + '/browser/getDataStoreById', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: requestData,
-    })
-      .then((res) => {
-        if (res.status === 200) {
-          return res
-        }
-        console.log('HTTP status != 200 ', res.json())
-        return res
+    return (
+      fetch(this.state.mtBatcherFetchUrl + '/browser/getDataStoreById', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          store_id: storeNumber,
+        }),
       })
-      .then((res) => res.json())
-      .catch((error) => {
-        console.log('HTTP error status != 200 ')
-        return error
-      })
+        .then(res => res.json())
+        // .then((res) => res.json())
+        .catch((error) => {
+          console.log('GetDataStoreById HTTP error status != 200 ', error)
+          return error
+        })
+    )
   }
 
   private async GetTransactionListByStoreNumber(
@@ -432,12 +411,15 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         if (res.status === 200) {
           return res
         }
-        console.log('HTTP status != 200 ', res.json())
+        console.log(
+          'GetTransactionListByStoreNumber HTTP status != 200 ',
+          res.json()
+        )
         return res
       })
       .then((res) => res.json())
       .catch((error) => {
-        console.log('HTTP error status != 200 ')
+        console.log('GetTransactionListByStoreNumber HTTP error status != 200 ')
         return error
       })
   }
