@@ -61,6 +61,7 @@ type Driver struct {
 	rawFPContract  *bind.BoundContract
 	fpAssertion    *fpbindings.AssertionMap
 	walletAddr     common.Address
+	once           sync.Once
 	metrics        *metrics.Base
 }
 
@@ -130,6 +131,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		rawFPContract:  rawFPContract,
 		fpAssertion:    assertionMap,
 		walletAddr:     walletAddr,
+		once:           sync.Once{},
 		metrics:        metrics.NewBase("batch_submitter", cfg.Name),
 	}, nil
 }
@@ -316,7 +318,6 @@ func (d *Driver) CraftBatchTx(
 					return nil, nil
 				}
 				// check rollback status
-				var once sync.Once
 				if d.cfg.SccRollback {
 					fpChallenge, err := fpbindings.NewChallenge(
 						challengeContext.ChallengeAddress, d.cfg.L1Client,
@@ -361,7 +362,7 @@ func (d *Driver) CraftBatchTx(
 								var rollbackErr error
 								// must ensure all those action done properly until rollback finished
 								// or RollBackL2Chain will happen multiple times
-								once.Do(
+								d.once.Do(
 									func() {
 										rollbackTx, rollbackErr = d.sccContract.RollBackL2Chain(
 											opts, startInboxSize, offsetStartsAtIndex, tssResponse.Signature,
@@ -383,17 +384,6 @@ func (d *Driver) CraftBatchTx(
 								ExtraData:         filter.Event.ExtraData,
 							})
 						}
-					} else {
-						once.Do(
-							func() {
-								_, err = d.sccContract.RollBackL2Chain(
-									opts, startInboxSize, offsetStartsAtIndex, tssResponse.Signature,
-								)
-								if err != nil {
-									panic(err)
-								}
-							}
-						)
 					}
 				}
 				// rollup assertion
