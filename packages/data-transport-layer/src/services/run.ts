@@ -42,7 +42,7 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       syncFromL1: config.bool('sync-from-l1', true),
       syncFromL2: config.bool('sync-from-l2', false),
       syncToDa: config.bool('sync-to-da', true),
-      mtBatcherHost: config.str('mt-batcher-hostname', 'localhost'),
+      mtBatcherHost: config.str('mt-batcher-hostname', 'http://127.0.0.1'),
       mtBatcherFetchPort: config.uint('mt-batcher-fetch-port', 8089),
 
 
