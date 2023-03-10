@@ -16,10 +16,9 @@ import { TransportDB } from '../../db/transport-db'
 import { validators } from '../../utils'
 import { L1DataTransportServiceOptions } from '../main/service'
 import {
-  DataStoreEntry,
-  TransactionEntry,
-  TransactionListEntry,
-} from '../../types'
+  BatchTransactionEntry,
+  DataStoreEntry, TransactionListEntry
+} from "../../types";
 
 interface DaIngestionMetrics {
   highestSyncedL1Block: Gauge<string>
@@ -201,15 +200,13 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         maxDsId < dataStore['data_store_id']
           ? dataStore['data_store_id']
           : maxDsId
-      console.log("maxDsId:",maxDsId,dataStore['data_store_id'])
-
 
       await this._storeDataStoreById(dataStore['data_store_id'])
       await this._updateBatchTxByDSId(
         dataStore['data_store_id'],
         now_batchIndex
       )
-      await this.state.db.putUpdatedBatchIndex(i)
+      await this.state.db.putUpdatedBatchIndex(now_batchIndex)
     }
 
     return maxDsId
@@ -239,7 +236,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     storeId: number,
     index: number
   ): Promise<void> {
-    const transactionEntries: TransactionEntry[] = []
+    const transactionEntries: BatchTransactionEntry[] = []
     console.log("start update batch txs by dsid")
     const batchTxs = await this.GetBatchTransactionByDataStoreId(storeId)
       .then((rst) => {
@@ -284,8 +281,10 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
               s: batchTx['TxDetail']['s'],
             }
       //TODO:
+      const index_ = transactionEntries.length
       transactionEntries.push({
-        index: batchTx['TxMeta']['index'],
+        index: index_,
+        txIndex: batchTx['TxMeta']['index'],
         batchIndex: index,
         blockNumber: batchTx['TxMeta']['l1BlockNumber'],
         timestamp: batchTx['TxMeta'],
@@ -355,14 +354,16 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   private async _storeTransactionListByDSId(storeId: number): Promise<void> {
     const txList = await this.GetTransactionListByStoreNumber(storeId)
     console.log('txList :', txList)
-    if (txList === null || txList.length === 0) {
+    if (txList === null || txList.length === 0 || JSON.stringify(txList) === '{}') {
       return
     }
+
     const transactionEntries: TransactionListEntry[] = []
-    const i = 0
     for (const tx of txList) {
+      const index_ = transactionEntries.length
       transactionEntries.push({
-        index: i,
+        index: index_,
+        txIndex: tx['index'],
         blockNumber: tx['BlockNumber'],
         txHash: tx['TxHash'],
       })

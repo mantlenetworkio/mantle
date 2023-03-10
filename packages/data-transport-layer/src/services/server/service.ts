@@ -27,6 +27,7 @@ import {
   DataStoreByIdResponse,
   TxListByStoreIdResponse,
   TestResponse,
+  TransactionListEntry,
 } from '../../types'
 import { validators } from '../../utils'
 import { L1DataTransportServiceOptions } from '../main/service'
@@ -820,13 +821,44 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     this._registerRoute(
       'get',
       '/da/test/:batchIndex',
-      async (req): Promise<TestResponse> => {
-        const t = BigNumber.from(req.params.batchIndex).toNumber()
+      async (): Promise<TestResponse> => {
+        const batchTxs = [
+          {
+            BlockNumber: '1',
+            TxHash:
+              '0x5c047ccb63b2f03caa45d6279f0d70f96c44782ce344e0c6e15c57f6316560fc',
+          },
+          {
+            BlockNumber: '4',
+            TxHash:
+              '0xe13cf868cc1702f12a58f1d69083a8cbaf1ec29a5c962cb86f24c02529ce45ee',
+          },
+        ]
 
-        const data = await this.state.db.putUpdatedBatchIndex(0)
+        const entries: TransactionListEntry[] = []
+        for (const batchTx of batchTxs) {
+          const index_ = entries.length
+          entries.push({
+            index: index_,
+            txIndex:batchTx['index'],
+            blockNumber: batchTx['BlockNumber'],
+            txHash: batchTx['TxHash'],
+          })
+        }
+        await this.state.db.putTxListByDSId(entries, 5)
+        const lens = await this.state.db._getLatestEntryIndex(
+          'da:txlistdsid' + 5
+        )
+        const response = await this.state.db.getTxListByDSId(5)
+        // await this.state.db.putUpdatedBatchIndex(0)
+        // await this.state.db.putUpdatedRollupBatchIndex(0)
+        // await this.state.db.putUpdatedDsId(0)
+
 
         return {
-          data: JSON.stringify(data),
+          len:lens,
+          putdata: JSON.stringify(entries),
+          data: JSON.stringify(response),
         }
       }
     )

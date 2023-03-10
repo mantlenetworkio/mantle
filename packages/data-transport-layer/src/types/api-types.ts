@@ -1,12 +1,13 @@
 import {
+  BatchTransactionEntry,
   DataStoreEntry,
-  EnqueueEntry, RollupStoreEntry,
+  EnqueueEntry,
+  RollupStoreEntry,
   StateRootBatchEntry,
   StateRootEntry,
   TransactionBatchEntry,
   TransactionEntry,
   TransactionListEntry
-
 } from "./database-types";
 
 export type EnqueueResponse = EnqueueEntry & {
@@ -54,17 +55,18 @@ export interface DataStoreListByBatchIndexResponse {
 
 export interface BatchTxByDataStoreIdResponse {
   dsId: number
-  batchTx: TransactionEntry[]
+  batchTx: BatchTransactionEntry[]
 }
 
 export interface DataStoreByIdResponse {
   dataStore: string
 }
 
-export interface TestResponse{
-  data:string
+export interface TestResponse {
+  len: number
+  putdata: string
+  data: string
 }
-
 
 export interface TxListByStoreIdResponse {
   txList: TransactionListEntry[]
