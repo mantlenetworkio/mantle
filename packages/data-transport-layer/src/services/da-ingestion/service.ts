@@ -133,7 +133,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   private async updateRollupDataStoreLoop(): Promise<void> {
     const latestBatchIndex = await this.GetLatestTransactionBatchIndex()
     let updatedBatchIndex = await this.state.db.getUpdatedRollupBatchIndex()
-    console.log(latestBatchIndex,updatedBatchIndex)
     if (updatedBatchIndex === null) {
       updatedBatchIndex = 0
     }
@@ -215,7 +214,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   private async updateTransactionListByDsIDLoop(
     endDsId: number
   ): Promise<void> {
-    console.log('endDsId : ', endDsId)
     let startDsId = await this.state.db.getUpdatedDsId()
     if (startDsId === null) {
       startDsId = 1
@@ -226,9 +224,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     const loopTime = endDsId - startDsId > 10 ? startDsId + 10 : endDsId
     for (let dsId = startDsId; dsId <= loopTime; dsId++) {
       await this._storeDataStoreById(dsId)
-      console.log('updated data store entry ,data store id = ', dsId)
       await this._storeTransactionListByDSId(dsId)
-      console.log('updated tx list by dsId ,data store id = ', dsId)
       await this.state.db.putUpdatedDsId(dsId)
     }
   }
@@ -237,7 +233,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     index: number
   ): Promise<void> {
     const transactionEntries: BatchTransactionEntry[] = []
-    console.log("start update batch txs by dsid")
     const batchTxs = await this.GetBatchTransactionByDataStoreId(storeId)
       .then((rst) => {
         return rst
@@ -307,7 +302,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         confirmed: true,
       })
     }
-    console.log("txs store = ",storeId)
     await this.state.db.putBatchTxByDataStoreId(transactionEntries, storeId)
   }
 
@@ -353,7 +347,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
 
   private async _storeTransactionListByDSId(storeId: number): Promise<void> {
     const txList = await this.GetTransactionListByStoreNumber(storeId)
-    console.log('txList :', txList)
     if (txList === null || txList.length === 0 || JSON.stringify(txList) === '{}') {
       return
     }
@@ -457,7 +450,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   private async GetTransactionListByStoreNumber(
     storeNumber: number
   ): Promise<any> {
-    console.log('store_number', storeNumber)
     const requestData = JSON.stringify({
       store_number: storeNumber,
     })

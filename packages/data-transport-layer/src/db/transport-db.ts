@@ -166,22 +166,7 @@ export class TransportDB {
   ): Promise<void> {
     await this._putFullEntries(TRANSPORT_DA_DB_KEYS.TX_LIST_DS_ID + dsId, entries)
   }
-  // public async putDataStoreListByBatchIndex(
-  //   entries: DataStoreEntry[],
-  //   dsId: number
-  // ): Promise<void> {
-  //   await this._putFullEntries(
-  //     TRANSPORT_DA_DB_KEYS.DS_LIST_BY_BTACH_ID + dsId,
-  //     entries
-  //   )
-  // }
 
-  // public async getDataStoreListByBatchIndex(
-  //   dsId: number
-  // ): Promise<DataStoreEntry[]> {
-  //   return this._getFullEnties(TRANSPORT_DA_DB_KEYS.DS_LIST_BY_BTACH_ID + dsId)
-  // }
-  //
   public async putDsById(entry: DataStoreEntry, dsId: number): Promise<void> {
     await this.db.put([
       {
