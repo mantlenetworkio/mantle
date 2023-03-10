@@ -90,16 +90,17 @@ interface IChallenge {
 
     /**
      * @notice Verifies one step proof and completes challenge protocol.
-     * @param proof TODO.
-     * @param challengedStepIndex Index into `prevBisection`. Must be greater than 0 (since the first is agreed upon).
+     * @param ctx execution context.
+     * @param verifyType Index into `prevBisection`. Must be greater than 0 (since the first is agreed upon).
+     * @param proof one step proof.
      * @param prevChallengedSegmentStart Offset of the segment challenged in the preceding round (in steps).
      * Note: this is relative to the assertion being challenged (i.e. always between 0 and the initial `numSteps`).
      * @param prevChallengedSegmentLength Length of the segment challenged in the preceding round (in steps).
      */
     function verifyOneStepProof(
-        bytes memory proof,
-        uint256 challengedStepIndex,
-//        bytes32[2] calldata prevBisection,
+        VerificationContext.Context calldata ctx,
+        uint8 verifyType,
+        bytes calldata proof,
         uint256 prevChallengedSegmentStart,
         uint256 prevChallengedSegmentLength
     ) external;

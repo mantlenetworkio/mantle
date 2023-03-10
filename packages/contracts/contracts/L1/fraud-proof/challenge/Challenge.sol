@@ -23,10 +23,8 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
-
 import "./IChallenge.sol";
 import "./ChallengeLib.sol";
-import "../verifier/IVerifierEntry.sol";
 import "../IRollup.sol";
 
 contract Challenge is IChallenge {
@@ -207,34 +205,34 @@ contract Challenge is IChallenge {
     }
 
     function verifyOneStepProof(
+        VerificationContext.Context calldata ctx,
+        uint8 verifyType,
         bytes calldata proof,
-        uint256 challengedStepIndex,
-//        bytes32[2] calldata prevBisection,
         uint256 prevChallengedSegmentStart,
         uint256 prevChallengedSegmentLength
     ) external override onlyOnTurn {
-        // Verify provided prev bisection.
-        bytes32 prevHash =
+         // Verify provided prev bisection.
+         bytes32 prevHash =
             ChallengeLib.computeBisectionHash(prevChallengedSegmentStart, prevChallengedSegmentLength);
-        require(prevHash == bisectionHash, BIS_PREV);
-        require(challengedStepIndex > 0 && challengedStepIndex < prevBisection.length, "INVALID_INDEX");
-        // Require that this is the last round.
-        require(prevChallengedSegmentLength / MAX_BISECTION_DEGREE <= 1, "BISECTION_INCOMPLETE");
+         require(prevHash == bisectionHash, BIS_PREV);
+         // require(challengedStepIndex > 0 && challengedStepIndex < prevBisection.length, "INVALID_INDEX");
+         // Require that this is the last round.
+         require(prevChallengedSegmentLength / MAX_BISECTION_DEGREE <= 1, "BISECTION_INCOMPLETE");
 
-        // TODO: verify OSP
-        // IVerificationContext ctx = <get ctx from sequenced txs>;
-        // bytes32 nextStateHash = verifier.verifyOneStepProof(
-        //     ctx,
-        //     prevBisection[challengedStepIndex - 1],
-        //     proof
-        // );
-        // if (nextStateHash == prevBisection[challengedStepIndex]) {
-        //     // osp verified, current win
-        // } else {
-        //     // current lose?
-        // }
-
-        _currentWin(CompletionReason.OSP_VERIFIED);
+         // verify OSP
+         // IVerificationContext ctx = <get ctx from sequenced txs>;
+         bytes32 nextStateHash = verifier.verifyOneStepProof(
+             ctx,
+             verifyType,
+             prevBisection[1],
+             proof
+         );
+         if (nextStateHash == prevBisection[1]) {
+             // osp verified, current win
+             _currentWin(CompletionReason.OSP_VERIFIED);
+         } else {
+             _currentLose(CompletionReason.OSP_VERIFIED);
+         }
     }
 
     function setRollback() public {
@@ -280,6 +278,16 @@ contract Challenge is IChallenge {
         } else {
             winner = challenger;
             _challengerWin(reason);
+        }
+    }
+
+    function _currentLose(CompletionReason reason) private {
+        if (turn == Turn.Defender) {
+            winner = challenger;
+            _challengerWin(reason);
+        } else {
+            winner = defender;
+            _asserterWin(reason);
         }
     }
 

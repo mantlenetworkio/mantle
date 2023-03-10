@@ -101,7 +101,7 @@ func (api *ProverAPI) ProveBlocksForBenchmark(ctx context.Context, startNum, end
 	var proofs []hexutil.Bytes
 	for _, s := range states {
 		log.Info("Generate for ", "state", s)
-		proof, err := GenerateProof(api.backend, ctx, s, config)
+		proof, err := GenerateProof(ctx, api.backend, s, config)
 		if err != nil {
 			return nil, err
 		}

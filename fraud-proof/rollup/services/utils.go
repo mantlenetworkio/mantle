@@ -3,6 +3,9 @@ package services
 import (
 	"bytes"
 	"context"
+	"fmt"
+	ethc "github.com/ethereum/go-ethereum/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
@@ -17,26 +20,39 @@ func SubmitOneStepProof(
 	ctx context.Context,
 	state *proof.ExecutionState,
 	challengedStepIndex *big.Int,
-	//prevBisection [][32]byte,
 	prevChallengedSegmentStart *big.Int,
 	prevChallengedSegmentLength *big.Int,
 ) error {
-	osp, err := proof.GenerateProof(proofBackend, ctx, state, nil)
+	log.Info("OSP GenerateProof...")
+	osp, err := proof.GenerateProof(ctx, proofBackend, state, nil)
 	if err != nil {
-		log.Crit("UNHANDELED: osp generation failed", "err", err)
+		log.Error("UNHANDELED: osp generation failed", "err", err)
+		return err
 	}
+	log.Info("OSP GenerateProof success")
+
+	log.Info("OSP BuildVerificationContext...")
+	verificationContext, err := BuildVerificationContext(ctx, proofBackend, state)
+	if err != nil {
+		log.Error("UNHANDELED: osp build verification context failed", "err", err)
+		return err
+	}
+	log.Info("OSP BuildVerificationContext success")
+
+	log.Info("OSP VerifyOneStepProof...")
 	_, err = challengeSession.VerifyOneStepProof(
+		*verificationContext,
+		uint8(osp.VerifierType),
 		osp.Encode(),
-		challengedStepIndex,
-		//prevBisection,
 		prevChallengedSegmentStart,
 		prevChallengedSegmentLength,
 	)
-	log.Info("OSP submitted")
 	if err != nil {
 		log.Error("OSP verification failed")
+		return err
 	}
-	return err
+	log.Info("OSP VerifyOneStepProof submitted")
+	return nil
 }
 
 // Responder -> startStateHash, endStateHash
@@ -84,7 +100,7 @@ func RespondBisection(
 		if !bytes.Equal(startState[:], ev.StartState[:]) {
 			state = states[segStart]
 		} else if !bytes.Equal(midState[:], ev.MidState[:]) {
-			state = states[segStart+segLen/2]
+			state = states[segStart+segLen/2+segLen%2]
 		} else if !bytes.Equal(endState[:], ev.EndState[:]) {
 			state = states[segStart+segLen]
 		} else {
@@ -127,4 +143,53 @@ func RespondBisection(
 // MidState mid-states with floor index
 func MidState(states []*proof.ExecutionState, segStart, segLen uint64) common.Hash {
 	return states[segStart+segLen/2].Hash()
+}
+
+func BuildVerificationContext(ctx context.Context, proofBackend proof.Backend, state *proof.ExecutionState) (*bindings.VerificationContextContext, error) {
+	var evmTx bindings.EVMTypesLibTransaction
+	var tx *types.Transaction
+	var header *types.Header
+	var err error
+	// get block
+	if state != nil && state.Block != nil {
+		header = state.Block.Header()
+	} else {
+		return nil, fmt.Errorf("get nil block from ExecutionState status")
+	}
+	// get transaction
+	if state != nil && state.Block.Transactions() != nil {
+		txs := state.Block.Transactions()
+		if uint64(len(txs)) < state.TransactionIdx+1 {
+			return nil, fmt.Errorf("get transaction index from ExecutionState out of range")
+		}
+		tx = state.Block.Transactions()[state.TransactionIdx]
+	} else {
+		return nil, fmt.Errorf("get nil transactions from ExecutionState status")
+	}
+	// build EVMTypesLibTransaction
+	var txOrigin common.Address
+	evmTx.Nonce = tx.Nonce()
+	evmTx.GasPrice = tx.GasPrice()
+	evmTx.To = ethc.Address(*tx.To())
+	evmTx.Value = tx.Value()
+	evmTx.Data = tx.Data()
+	if tx.QueueOrigin() == types.QueueOriginSequencer {
+		evmTx.V, evmTx.R, evmTx.S = tx.RawSignatureValues()
+		signer := types.NewEIP155Signer(tx.ChainId())
+		txOrigin, err = types.Sender(signer, tx)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+
+	}
+	return &bindings.VerificationContextContext{
+		Coinbase:    ethc.Address(header.Coinbase),
+		Timestamp:   new(big.Int).SetUint64(tx.L1Timestamp()),
+		Number:      header.Number,
+		Origin:      ethc.Address(txOrigin),
+		Transaction: evmTx,
+		//InputRoot: ,
+		TxHash: tx.Hash(),
+	}, nil
 }
