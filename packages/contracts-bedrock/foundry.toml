@@ -1,0 +1,27 @@
+[profile.default]
+src = 'contracts'
+out = 'forge-artifacts'
+optimizer = true
+optimizer_runs = 999999
+
+remappings = [
+  '@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/',
+  '@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/',
+  '@rari-capital/solmate/=node_modules/@rari-capital/solmate',
+  'forge-std/=node_modules/forge-std/src',
+  'ds-test/=node_modules/ds-test/src'
+]
+extra_output = ['devdoc', 'userdoc', 'metadata', 'storageLayout']
+bytecode_hash = 'none'
+build_info = true
+build_info_path = 'artifacts/build-info'
+ffi = true
+fuzz_runs = 16
+no_match_contract = 'EchidnaFuzz'
+
+
+[profile.ci]
+fuzz_runs = 512
+
+[profile.echidna]
+bytecode_hash = 'ipfs'

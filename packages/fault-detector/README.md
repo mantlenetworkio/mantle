@@ -4,7 +4,7 @@ The `fault-detector` is a simple service for detecting discrepancies between you
 
 ## Installation
 
-Clone, install, and build the Optimism monorepo:
+Clone, install, and build the Mantle monorepo:
 
 ```
 git clone https://github.com/mantlenetworkio/mantle.git
