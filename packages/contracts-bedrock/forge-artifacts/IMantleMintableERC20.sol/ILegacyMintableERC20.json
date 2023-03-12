@@ -1,0 +1,884 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "burn",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "l1Token",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "mint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "burn(address,uint256)": "9dc29fac",
+    "l1Token()": "c01e1bd6",
+    "mint(address,uint256)": "40c10f19",
+    "supportsInterface(bytes4)": "01ffc9a7"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"burn\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"l1Token\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"mint\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"custom:legacy\":\"@title ILegacyMintableERC20\",\"kind\":\"dev\",\"methods\":{\"supportsInterface(bytes4)\":{\"details\":\"Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"notice\":\"This interface was available on the legacy L2StandardERC20 contract. It remains available         on the MantleMintableERC20 contract for backwards compatibility.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/universal/IMantleMintableERC20.sol\":\"ILegacyMintableERC20\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":999999},\"remappings\":[\":@openzeppelin/=node_modules/@openzeppelin/\",\":@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/\",\":@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/\",\":@rari-capital/=node_modules/@rari-capital/\",\":@rari-capital/solmate/=node_modules/@rari-capital/solmate/\",\":ds-test/=node_modules/ds-test/src/\",\":forge-std/=node_modules/forge-std/src/\"]},\"sources\":{\"contracts/universal/IMantleMintableERC20.sol\":{\"keccak256\":\"0xdc156dcecc45f6a3d4e43ebf32ada4e138b10ba54bd14486a3e5ac245f1fec56\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ae5d3252cb0620ce50c7d3f24ad31a1e7f0f327bfcabde2c91edc917d9e2595e\",\"dweb:/ipfs/QmSJzMvdZRgTeGK9dvm9W1EAPMmzhmNMF9TEBGqDC5E5ve\"]},\"node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f\",\"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.15+commit.e14f2714"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "_from",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_amount",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "burn"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "l1Token",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "_to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_amount",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "mint"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "supportsInterface(bytes4)": {
+            "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@openzeppelin/=node_modules/@openzeppelin/",
+        ":@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/",
+        ":@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+        ":@rari-capital/=node_modules/@rari-capital/",
+        ":@rari-capital/solmate/=node_modules/@rari-capital/solmate/",
+        ":ds-test/=node_modules/ds-test/src/",
+        ":forge-std/=node_modules/forge-std/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 999999
+      },
+      "metadata": {
+        "bytecodeHash": "none"
+      },
+      "compilationTarget": {
+        "contracts/universal/IMantleMintableERC20.sol": "ILegacyMintableERC20"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "contracts/universal/IMantleMintableERC20.sol": {
+        "keccak256": "0xdc156dcecc45f6a3d4e43ebf32ada4e138b10ba54bd14486a3e5ac245f1fec56",
+        "urls": [
+          "bzz-raw://ae5d3252cb0620ce50c7d3f24ad31a1e7f0f327bfcabde2c91edc917d9e2595e",
+          "dweb:/ipfs/QmSJzMvdZRgTeGK9dvm9W1EAPMmzhmNMF9TEBGqDC5E5ve"
+        ],
+        "license": "MIT"
+      },
+      "node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol": {
+        "keccak256": "0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1",
+        "urls": [
+          "bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f",
+          "dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": {}
+  },
+  "userdoc": {
+    "version": 1,
+    "kind": "user",
+    "notice": "This interface was available on the legacy L2StandardERC20 contract. It remains available         on the MantleMintableERC20 contract for backwards compatibility."
+  },
+  "devdoc": {
+    "version": 1,
+    "kind": "dev",
+    "methods": {
+      "supportsInterface(bytes4)": {
+        "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+      }
+    }
+  },
+  "ast": {
+    "absolutePath": "contracts/universal/IMantleMintableERC20.sol",
+    "id": 43165,
+    "exportedSymbols": {
+      "IERC165": [
+        51046
+      ],
+      "ILegacyMintableERC20": [
+        43164
+      ],
+      "IMantleMintableERC20": [
+        43141
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:1081:102",
+    "nodes": [
+      {
+        "id": 43111,
+        "nodeType": "PragmaDirective",
+        "src": "32:23:102",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 43113,
+        "nodeType": "ImportDirective",
+        "src": "57:82:102",
+        "nodes": [],
+        "absolutePath": "node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "file": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 43165,
+        "sourceUnit": 51047,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 43112,
+              "name": "IERC165",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 51046,
+              "src": "66:7:102",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 43141,
+        "nodeType": "ContractDefinition",
+        "src": "389:271:102",
+        "nodes": [
+          {
+            "id": 43121,
+            "nodeType": "FunctionDefinition",
+            "src": "437:50:102",
+            "nodes": [],
+            "functionSelector": "d6c0b2c4",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "remoteToken",
+            "nameLocation": "446:11:102",
+            "parameters": {
+              "id": 43117,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "457:2:102"
+            },
+            "returnParameters": {
+              "id": 43120,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 43119,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43121,
+                  "src": "478:7:102",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 43118,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "478:7:102",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "477:9:102"
+            },
+            "scope": 43141,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 43126,
+            "nodeType": "FunctionDefinition",
+            "src": "493:45:102",
+            "nodes": [],
+            "functionSelector": "e78cea92",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "bridge",
+            "nameLocation": "502:6:102",
+            "parameters": {
+              "id": 43122,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "508:2:102"
+            },
+            "returnParameters": {
+              "id": 43125,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 43124,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43126,
+                  "src": "529:7:102",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 43123,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "529:7:102",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "528:9:102"
+            },
+            "scope": 43141,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 43133,
+            "nodeType": "FunctionDefinition",
+            "src": "544:53:102",
+            "nodes": [],
+            "functionSelector": "40c10f19",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mint",
+            "nameLocation": "553:4:102",
+            "parameters": {
+              "id": 43131,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 43128,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nameLocation": "566:3:102",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43133,
+                  "src": "558:11:102",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 43127,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "558:7:102",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 43130,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "579:7:102",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43133,
+                  "src": "571:15:102",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 43129,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "571:7:102",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "557:30:102"
+            },
+            "returnParameters": {
+              "id": 43132,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "596:0:102"
+            },
+            "scope": 43141,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 43140,
+            "nodeType": "FunctionDefinition",
+            "src": "603:55:102",
+            "nodes": [],
+            "functionSelector": "9dc29fac",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "burn",
+            "nameLocation": "612:4:102",
+            "parameters": {
+              "id": 43138,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 43135,
+                  "mutability": "mutable",
+                  "name": "_from",
+                  "nameLocation": "625:5:102",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43140,
+                  "src": "617:13:102",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 43134,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "617:7:102",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 43137,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "640:7:102",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43140,
+                  "src": "632:15:102",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 43136,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "632:7:102",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "616:32:102"
+            },
+            "returnParameters": {
+              "id": 43139,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "657:0:102"
+            },
+            "scope": 43141,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 43115,
+              "name": "IERC165",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 51046,
+              "src": "423:7:102"
+            },
+            "id": 43116,
+            "nodeType": "InheritanceSpecifier",
+            "src": "423:7:102"
+          }
+        ],
+        "canonicalName": "IMantleMintableERC20",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 43114,
+          "nodeType": "StructuredDocumentation",
+          "src": "141:247:102",
+          "text": " @title IMantleMintableERC20\n @notice This interface is available on the MantleMintableERC20 contract. We declare it as a\n         separate interface so that it can be used in custom implementations of\n         MantleMintableERC20."
+        },
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          43141,
+          51046
+        ],
+        "name": "IMantleMintableERC20",
+        "nameLocation": "399:20:102",
+        "scope": 43165,
+        "usedErrors": []
+      },
+      {
+        "id": 43164,
+        "nodeType": "ContractDefinition",
+        "src": "896:216:102",
+        "nodes": [
+          {
+            "id": 43149,
+            "nodeType": "FunctionDefinition",
+            "src": "944:46:102",
+            "nodes": [],
+            "functionSelector": "c01e1bd6",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "l1Token",
+            "nameLocation": "953:7:102",
+            "parameters": {
+              "id": 43145,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "960:2:102"
+            },
+            "returnParameters": {
+              "id": 43148,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 43147,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43149,
+                  "src": "981:7:102",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 43146,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "981:7:102",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "980:9:102"
+            },
+            "scope": 43164,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 43156,
+            "nodeType": "FunctionDefinition",
+            "src": "996:53:102",
+            "nodes": [],
+            "functionSelector": "40c10f19",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mint",
+            "nameLocation": "1005:4:102",
+            "parameters": {
+              "id": 43154,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 43151,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nameLocation": "1018:3:102",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43156,
+                  "src": "1010:11:102",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 43150,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1010:7:102",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 43153,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "1031:7:102",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43156,
+                  "src": "1023:15:102",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 43152,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1023:7:102",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1009:30:102"
+            },
+            "returnParameters": {
+              "id": 43155,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1048:0:102"
+            },
+            "scope": 43164,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 43163,
+            "nodeType": "FunctionDefinition",
+            "src": "1055:55:102",
+            "nodes": [],
+            "functionSelector": "9dc29fac",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "burn",
+            "nameLocation": "1064:4:102",
+            "parameters": {
+              "id": 43161,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 43158,
+                  "mutability": "mutable",
+                  "name": "_from",
+                  "nameLocation": "1077:5:102",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43163,
+                  "src": "1069:13:102",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 43157,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1069:7:102",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 43160,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "1092:7:102",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43163,
+                  "src": "1084:15:102",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 43159,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1084:7:102",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1068:32:102"
+            },
+            "returnParameters": {
+              "id": 43162,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1109:0:102"
+            },
+            "scope": 43164,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 43143,
+              "name": "IERC165",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 51046,
+              "src": "930:7:102"
+            },
+            "id": 43144,
+            "nodeType": "InheritanceSpecifier",
+            "src": "930:7:102"
+          }
+        ],
+        "canonicalName": "ILegacyMintableERC20",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 43142,
+          "nodeType": "StructuredDocumentation",
+          "src": "662:233:102",
+          "text": " @custom:legacy\n @title ILegacyMintableERC20\n @notice This interface was available on the legacy L2StandardERC20 contract. It remains available\n         on the MantleMintableERC20 contract for backwards compatibility."
+        },
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          43164,
+          51046
+        ],
+        "name": "ILegacyMintableERC20",
+        "nameLocation": "906:20:102",
+        "scope": 43165,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  },
+  "id": 102
+}

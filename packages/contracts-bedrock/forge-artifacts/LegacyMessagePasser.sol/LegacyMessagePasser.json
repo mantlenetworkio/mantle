@@ -1,0 +1,808 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "_message",
+          "type": "bytes"
+        }
+      ],
+      "name": "passMessageToL1",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "sentMessages",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x60e060405234801561001057600080fd5b5060016080819052600060a081905260c081905280610698610048823960006101050152600060dc0152600060b301526106986000f3fe608060405234801561001057600080fd5b50600436106100415760003560e01c806354fd4d501461004657806382e3702d14610064578063cafa81dc14610097575b600080fd5b61004e6100ac565b60405161005b9190610347565b60405180910390f35b610087610072366004610398565b60006020819052908152604090205460ff1681565b604051901515815260200161005b565b6100aa6100a53660046103e0565b61014f565b005b60606100d77f00000000000000000000000000000000000000000000000000000000000000006101da565b6101007f00000000000000000000000000000000000000000000000000000000000000006101da565b6101297f00000000000000000000000000000000000000000000000000000000000000006101da565b60405160200161013b939291906104af565b604051602081830303815290604052905090565b60016000808333604051602001610167929190610525565b604080518083037fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe001815291815281516020928301208352908201929092520160002080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001691151591909117905550565b60608160000361021d57505060408051808201909152600181527f3000000000000000000000000000000000000000000000000000000000000000602082015290565b8160005b811561024757806102318161059e565b91506102409050600a83610605565b9150610221565b60008167ffffffffffffffff811115610262576102626103b1565b6040519080825280601f01601f19166020018201604052801561028c576020820181803683370190505b5090505b841561030f576102a1600183610619565b91506102ae600a86610630565b6102b9906030610644565b60f81b8183815181106102ce576102ce61065c565b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a905350610308600a86610605565b9450610290565b949350505050565b60005b8381101561033257818101518382015260200161031a565b83811115610341576000848401525b50505050565b6020815260008251806020840152610366816040850160208701610317565b601f017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0169190910160400192915050565b6000602082840312156103aa57600080fd5b5035919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b6000602082840312156103f257600080fd5b813567ffffffffffffffff8082111561040a57600080fd5b818401915084601f83011261041e57600080fd5b813581811115610430576104306103b1565b604051601f82017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0908116603f01168101908382118183101715610476576104766103b1565b8160405282815287602084870101111561048f57600080fd5b826020860160208301376000928101602001929092525095945050505050565b600084516104c1818460208901610317565b80830190507f2e0000000000000000000000000000000000000000000000000000000000000080825285516104fd816001850160208a01610317565b60019201918201528351610518816002840160208801610317565b0160020195945050505050565b60008351610537818460208801610317565b60609390931b7fffffffffffffffffffffffffffffffffffffffff000000000000000000000000169190920190815260140192915050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b60007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff82036105cf576105cf61056f565b5060010190565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601260045260246000fd5b600082610614576106146105d6565b500490565b60008282101561062b5761062b61056f565b500390565b60008261063f5761063f6105d6565b500690565b600082198211156106575761065761056f565b500190565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fdfea164736f6c634300080f000a",
+    "sourceMap": "441:513:34:-:0;;;662:32;;;;;;;;;-1:-1:-1;683:1:34;826:22:110;;;;686:1:34;858:22:110;;;;890;;;;686:1:34;441:513;;686:1;441:513;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x608060405234801561001057600080fd5b50600436106100415760003560e01c806354fd4d501461004657806382e3702d14610064578063cafa81dc14610097575b600080fd5b61004e6100ac565b60405161005b9190610347565b60405180910390f35b610087610072366004610398565b60006020819052908152604090205460ff1681565b604051901515815260200161005b565b6100aa6100a53660046103e0565b61014f565b005b60606100d77f00000000000000000000000000000000000000000000000000000000000000006101da565b6101007f00000000000000000000000000000000000000000000000000000000000000006101da565b6101297f00000000000000000000000000000000000000000000000000000000000000006101da565b60405160200161013b939291906104af565b604051602081830303815290604052905090565b60016000808333604051602001610167929190610525565b604080518083037fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe001815291815281516020928301208352908201929092520160002080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001691151591909117905550565b60608160000361021d57505060408051808201909152600181527f3000000000000000000000000000000000000000000000000000000000000000602082015290565b8160005b811561024757806102318161059e565b91506102409050600a83610605565b9150610221565b60008167ffffffffffffffff811115610262576102626103b1565b6040519080825280601f01601f19166020018201604052801561028c576020820181803683370190505b5090505b841561030f576102a1600183610619565b91506102ae600a86610630565b6102b9906030610644565b60f81b8183815181106102ce576102ce61065c565b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a905350610308600a86610605565b9450610290565b949350505050565b60005b8381101561033257818101518382015260200161031a565b83811115610341576000848401525b50505050565b6020815260008251806020840152610366816040850160208701610317565b601f017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0169190910160400192915050565b6000602082840312156103aa57600080fd5b5035919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b6000602082840312156103f257600080fd5b813567ffffffffffffffff8082111561040a57600080fd5b818401915084601f83011261041e57600080fd5b813581811115610430576104306103b1565b604051601f82017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0908116603f01168101908382118183101715610476576104766103b1565b8160405282815287602084870101111561048f57600080fd5b826020860160208301376000928101602001929092525095945050505050565b600084516104c1818460208901610317565b80830190507f2e0000000000000000000000000000000000000000000000000000000000000080825285516104fd816001850160208a01610317565b60019201918201528351610518816002840160208801610317565b0160020195945050505050565b60008351610537818460208801610317565b60609390931b7fffffffffffffffffffffffffffffffffffffffff000000000000000000000000169190920190815260140192915050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b60007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff82036105cf576105cf61056f565b5060010190565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601260045260246000fd5b600082610614576106146105d6565b500490565b60008282101561062b5761062b61056f565b500390565b60008261063f5761063f6105d6565b500690565b600082198211156106575761065761056f565b500190565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fdfea164736f6c634300080f000a",
+    "sourceMap": "441:513:34:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1057:372:110;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;567:44:34;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;1074:14:165;;1067:22;1049:41;;1037:2;1022:18;567:44:34;909:187:165;808:144:34;;;;;;:::i;:::-;;:::i;:::-;;1057:372:110;1097:13;1203:31;1220:13;1203:16;:31::i;:::-;1281;1298:13;1281:16;:31::i;:::-;1359;1376:13;1359:16;:31::i;:::-;1165:243;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;1122:300;;1057:372;:::o;808:144:34:-;941:4;875:12;:63;915:8;925:10;898:38;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;888:49;;898:38;888:49;;;;875:63;;;;;;;;;;-1:-1:-1;875:63:34;:70;;;;;;;;;;;;;-1:-1:-1;808:144:34:o;392:703:138:-;448:13;665:5;674:1;665:10;661:51;;-1:-1:-1;;691:10:138;;;;;;;;;;;;;;;;;;392:703::o;661:51::-;736:5;721:12;775:75;782:9;;775:75;;807:8;;;;:::i;:::-;;-1:-1:-1;829:10:138;;-1:-1:-1;837:2:138;829:10;;:::i;:::-;;;775:75;;;859:19;891:6;881:17;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;881:17:138;;859:39;;908:150;915:10;;908:150;;941:11;951:1;941:11;;:::i;:::-;;-1:-1:-1;1009:10:138;1017:2;1009:5;:10;:::i;:::-;996:24;;:2;:24;:::i;:::-;983:39;;966:6;973;966:14;;;;;;;;:::i;:::-;;;;:56;;;;;;;;;;-1:-1:-1;1036:11:138;1045:2;1036:11;;:::i;:::-;;;908:150;;;1081:6;392:703;-1:-1:-1;;;;392:703:138:o;14:258:165:-;86:1;96:113;110:6;107:1;104:13;96:113;;;186:11;;;180:18;167:11;;;160:39;132:2;125:10;96:113;;;227:6;224:1;221:13;218:48;;;262:1;253:6;248:3;244:16;237:27;218:48;;14:258;;;:::o;277:442::-;426:2;415:9;408:21;389:4;458:6;452:13;501:6;496:2;485:9;481:18;474:34;517:66;576:6;571:2;560:9;556:18;551:2;543:6;539:15;517:66;:::i;:::-;635:2;623:15;640:66;619:88;604:104;;;;710:2;600:113;;277:442;-1:-1:-1;;277:442:165:o;724:180::-;783:6;836:2;824:9;815:7;811:23;807:32;804:52;;;852:1;849;842:12;804:52;-1:-1:-1;875:23:165;;724:180;-1:-1:-1;724:180:165:o;1101:184::-;1153:77;1150:1;1143:88;1250:4;1247:1;1240:15;1274:4;1271:1;1264:15;1290:980;1358:6;1411:2;1399:9;1390:7;1386:23;1382:32;1379:52;;;1427:1;1424;1417:12;1379:52;1467:9;1454:23;1496:18;1537:2;1529:6;1526:14;1523:34;;;1553:1;1550;1543:12;1523:34;1591:6;1580:9;1576:22;1566:32;;1636:7;1629:4;1625:2;1621:13;1617:27;1607:55;;1658:1;1655;1648:12;1607:55;1694:2;1681:16;1716:2;1712;1709:10;1706:36;;;1722:18;;:::i;:::-;1856:2;1850:9;1918:4;1910:13;;1761:66;1906:22;;;1930:2;1902:31;1898:40;1886:53;;;1954:18;;;1974:22;;;1951:46;1948:72;;;2000:18;;:::i;:::-;2040:10;2036:2;2029:22;2075:2;2067:6;2060:18;2115:7;2110:2;2105;2101;2097:11;2093:20;2090:33;2087:53;;;2136:1;2133;2126:12;2087:53;2192:2;2187;2183;2179:11;2174:2;2166:6;2162:15;2149:46;2237:1;2215:15;;;2232:2;2211:24;2204:35;;;;-1:-1:-1;2219:6:165;1290:980;-1:-1:-1;;;;;1290:980:165:o;2275:960::-;2704:3;2742:6;2736:13;2758:53;2804:6;2799:3;2792:4;2784:6;2780:17;2758:53;:::i;:::-;2842:6;2837:3;2833:16;2820:29;;2868:3;2894:2;2887:5;2880:17;2928:6;2922:13;2944:65;3000:8;2996:1;2989:5;2985:13;2978:4;2970:6;2966:17;2944:65;:::i;:::-;3072:1;3028:20;;3064:10;;;3057:22;3104:13;;3126:62;3104:13;3175:1;3167:10;;3160:4;3148:17;;3126:62;:::i;:::-;3208:17;3227:1;3204:25;;2275:960;-1:-1:-1;;;;;2275:960:165:o;3240:450::-;3397:3;3435:6;3429:13;3451:53;3497:6;3492:3;3485:4;3477:6;3473:17;3451:53;:::i;:::-;3573:2;3569:15;;;;3586:66;3565:88;3526:16;;;;3551:103;;;3681:2;3670:14;;3240:450;-1:-1:-1;;3240:450:165:o;3695:184::-;3747:77;3744:1;3737:88;3844:4;3841:1;3834:15;3868:4;3865:1;3858:15;3884:195;3923:3;3954:66;3947:5;3944:77;3941:103;;4024:18;;:::i;:::-;-1:-1:-1;4071:1:165;4060:13;;3884:195::o;4084:184::-;4136:77;4133:1;4126:88;4233:4;4230:1;4223:15;4257:4;4254:1;4247:15;4273:120;4313:1;4339;4329:35;;4344:18;;:::i;:::-;-1:-1:-1;4378:9:165;;4273:120::o;4398:125::-;4438:4;4466:1;4463;4460:8;4457:34;;;4471:18;;:::i;:::-;-1:-1:-1;4508:9:165;;4398:125::o;4528:112::-;4560:1;4586;4576:35;;4591:18;;:::i;:::-;-1:-1:-1;4625:9:165;;4528:112::o;4645:128::-;4685:3;4716:1;4712:6;4709:1;4706:13;4703:39;;;4722:18;;:::i;:::-;-1:-1:-1;4758:9:165;;4645:128::o;4778:184::-;4830:77;4827:1;4820:88;4927:4;4924:1;4917:15;4951:4;4948:1;4941:15",
+    "linkReferences": {},
+    "immutableReferences": {
+      "44632": [
+        {
+          "start": 179,
+          "length": 32
+        }
+      ],
+      "44635": [
+        {
+          "start": 220,
+          "length": 32
+        }
+      ],
+      "44638": [
+        {
+          "start": 261,
+          "length": 32
+        }
+      ]
+    }
+  },
+  "methodIdentifiers": {
+    "passMessageToL1(bytes)": "cafa81dc",
+    "sentMessages(bytes32)": "82e3702d",
+    "version()": "54fd4d50"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_message\",\"type\":\"bytes\"}],\"name\":\"passMessageToL1\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"sentMessages\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"custom:legacy\":\"@custom:proxied\",\"custom:predeploy\":\"0x4200000000000000000000000000000000000000\",\"kind\":\"dev\",\"methods\":{\"constructor\":{\"custom:semver\":\"1.0.0\"},\"passMessageToL1(bytes)\":{\"params\":{\"_message\":\"Message to pass to L1.\"}},\"version()\":{\"returns\":{\"_0\":\"Semver contract version as a string.\"}}},\"title\":\"LegacyMessagePasser\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"passMessageToL1(bytes)\":{\"notice\":\"Passes a message to L1.\"},\"sentMessages(bytes32)\":{\"notice\":\"Mapping of sent message hashes to boolean status.\"},\"version()\":{\"notice\":\"Returns the full semver contract version.\"}},\"notice\":\"The LegacyMessagePasser was the low-level mechanism used to send messages from L2 to L1         before the Bedrock upgrade. It is now deprecated in favor of the new MessagePasser.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/legacy/LegacyMessagePasser.sol\":\"LegacyMessagePasser\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":999999},\"remappings\":[\":@openzeppelin/=node_modules/@openzeppelin/\",\":@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/\",\":@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/\",\":@rari-capital/=node_modules/@rari-capital/\",\":@rari-capital/solmate/=node_modules/@rari-capital/solmate/\",\":ds-test/=node_modules/ds-test/src/\",\":forge-std/=node_modules/forge-std/src/\"]},\"sources\":{\"contracts/legacy/LegacyMessagePasser.sol\":{\"keccak256\":\"0x9ef143f97128996fb915fe7a245d85e834a34b91bd788b1dc5c2280ef6200546\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://0787fcafeb11d236677d7a114c9280a853d5f9bc9ea6ecfb148b2c54f4b2f748\",\"dweb:/ipfs/QmZ5wVLzPtrPFSpN3LBu9DiZyK9kWUx1BQniq9RHBzUFyh\"]},\"contracts/universal/Semver.sol\":{\"keccak256\":\"0x400059d3edb9efc9c23e6fbc18de6710f9235a4ffba4ab23bdb9f825273f093b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://9baf7797439c0ae6512f4639dfc6a1934dbd4e4d7cbb8e63e99264ff47682c9e\",\"dweb:/ipfs/QmawAuhppPyeoZH3rC1uh87xDELa9Lyfw5pYsBqE8myE1m\"]},\"node_modules/@openzeppelin/contracts/utils/Strings.sol\":{\"keccak256\":\"0xaf159a8b1923ad2a26d516089bceca9bdeaeacd04be50983ea00ba63070f08a3\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6f2cf1c531122bc7ca96b8c8db6a60deae60441e5223065e792553d4849b5638\",\"dweb:/ipfs/QmPBdJmBBABMDCfyDjCbdxgiqRavgiSL88SYPGibgbPas9\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.15+commit.e14f2714"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "stateMutability": "nonpayable",
+          "type": "constructor"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes",
+              "name": "_message",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "passMessageToL1"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "sentMessages",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "version",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "constructor": {
+            "custom:semver": "1.0.0"
+          },
+          "passMessageToL1(bytes)": {
+            "params": {
+              "_message": "Message to pass to L1."
+            }
+          },
+          "version()": {
+            "returns": {
+              "_0": "Semver contract version as a string."
+            }
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "passMessageToL1(bytes)": {
+            "notice": "Passes a message to L1."
+          },
+          "sentMessages(bytes32)": {
+            "notice": "Mapping of sent message hashes to boolean status."
+          },
+          "version()": {
+            "notice": "Returns the full semver contract version."
+          }
+        },
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@openzeppelin/=node_modules/@openzeppelin/",
+        ":@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/",
+        ":@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+        ":@rari-capital/=node_modules/@rari-capital/",
+        ":@rari-capital/solmate/=node_modules/@rari-capital/solmate/",
+        ":ds-test/=node_modules/ds-test/src/",
+        ":forge-std/=node_modules/forge-std/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 999999
+      },
+      "metadata": {
+        "bytecodeHash": "none"
+      },
+      "compilationTarget": {
+        "contracts/legacy/LegacyMessagePasser.sol": "LegacyMessagePasser"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "contracts/legacy/LegacyMessagePasser.sol": {
+        "keccak256": "0x9ef143f97128996fb915fe7a245d85e834a34b91bd788b1dc5c2280ef6200546",
+        "urls": [
+          "bzz-raw://0787fcafeb11d236677d7a114c9280a853d5f9bc9ea6ecfb148b2c54f4b2f748",
+          "dweb:/ipfs/QmZ5wVLzPtrPFSpN3LBu9DiZyK9kWUx1BQniq9RHBzUFyh"
+        ],
+        "license": "MIT"
+      },
+      "contracts/universal/Semver.sol": {
+        "keccak256": "0x400059d3edb9efc9c23e6fbc18de6710f9235a4ffba4ab23bdb9f825273f093b",
+        "urls": [
+          "bzz-raw://9baf7797439c0ae6512f4639dfc6a1934dbd4e4d7cbb8e63e99264ff47682c9e",
+          "dweb:/ipfs/QmawAuhppPyeoZH3rC1uh87xDELa9Lyfw5pYsBqE8myE1m"
+        ],
+        "license": "MIT"
+      },
+      "node_modules/@openzeppelin/contracts/utils/Strings.sol": {
+        "keccak256": "0xaf159a8b1923ad2a26d516089bceca9bdeaeacd04be50983ea00ba63070f08a3",
+        "urls": [
+          "bzz-raw://6f2cf1c531122bc7ca96b8c8db6a60deae60441e5223065e792553d4849b5638",
+          "dweb:/ipfs/QmPBdJmBBABMDCfyDjCbdxgiqRavgiSL88SYPGibgbPas9"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 6784,
+        "contract": "contracts/legacy/LegacyMessagePasser.sol:LegacyMessagePasser",
+        "label": "sentMessages",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_bool)"
+      }
+    ],
+    "types": {
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_bytes32,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      }
+    }
+  },
+  "userdoc": {
+    "version": 1,
+    "kind": "user",
+    "methods": {
+      "passMessageToL1(bytes)": {
+        "notice": "Passes a message to L1."
+      },
+      "sentMessages(bytes32)": {
+        "notice": "Mapping of sent message hashes to boolean status."
+      },
+      "version()": {
+        "notice": "Returns the full semver contract version."
+      }
+    },
+    "notice": "The LegacyMessagePasser was the low-level mechanism used to send messages from L2 to L1         before the Bedrock upgrade. It is now deprecated in favor of the new MessagePasser."
+  },
+  "devdoc": {
+    "version": 1,
+    "kind": "dev",
+    "methods": {
+      "constructor": {},
+      "passMessageToL1(bytes)": {
+        "params": {
+          "_message": "Message to pass to L1."
+        }
+      },
+      "version()": {
+        "returns": {
+          "_0": "Semver contract version as a string."
+        }
+      }
+    },
+    "title": "LegacyMessagePasser"
+  },
+  "ast": {
+    "absolutePath": "contracts/legacy/LegacyMessagePasser.sol",
+    "id": 6816,
+    "exportedSymbols": {
+      "LegacyMessagePasser": [
+        6815
+      ],
+      "Semver": [
+        44690
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:923:34",
+    "nodes": [
+      {
+        "id": 6774,
+        "nodeType": "PragmaDirective",
+        "src": "32:23:34",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "0.8",
+          ".15"
+        ]
+      },
+      {
+        "id": 6776,
+        "nodeType": "ImportDirective",
+        "src": "57:49:34",
+        "nodes": [],
+        "absolutePath": "contracts/universal/Semver.sol",
+        "file": "../universal/Semver.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 6816,
+        "sourceUnit": 44691,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 6775,
+              "name": "Semver",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 44690,
+              "src": "66:6:34",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 6815,
+        "nodeType": "ContractDefinition",
+        "src": "441:513:34",
+        "nodes": [
+          {
+            "id": 6784,
+            "nodeType": "VariableDeclaration",
+            "src": "567:44:34",
+            "nodes": [],
+            "constant": false,
+            "documentation": {
+              "id": 6780,
+              "nodeType": "StructuredDocumentation",
+              "src": "486:76:34",
+              "text": " @notice Mapping of sent message hashes to boolean status."
+            },
+            "functionSelector": "82e3702d",
+            "mutability": "mutable",
+            "name": "sentMessages",
+            "nameLocation": "599:12:34",
+            "scope": 6815,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_bytes32_$_t_bool_$",
+              "typeString": "mapping(bytes32 => bool)"
+            },
+            "typeName": {
+              "id": 6783,
+              "keyType": {
+                "id": 6781,
+                "name": "bytes32",
+                "nodeType": "ElementaryTypeName",
+                "src": "575:7:34",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes32",
+                  "typeString": "bytes32"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "567:24:34",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_bytes32_$_t_bool_$",
+                "typeString": "mapping(bytes32 => bool)"
+              },
+              "valueType": {
+                "id": 6782,
+                "name": "bool",
+                "nodeType": "ElementaryTypeName",
+                "src": "586:4:34",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 6794,
+            "nodeType": "FunctionDefinition",
+            "src": "662:32:34",
+            "nodes": [],
+            "body": {
+              "id": 6793,
+              "nodeType": "Block",
+              "src": "692:2:34",
+              "nodes": [],
+              "statements": []
+            },
+            "documentation": {
+              "id": 6785,
+              "nodeType": "StructuredDocumentation",
+              "src": "618:39:34",
+              "text": " @custom:semver 1.0.0"
+            },
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [
+              {
+                "arguments": [
+                  {
+                    "hexValue": "31",
+                    "id": 6788,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "number",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "683:1:34",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_rational_1_by_1",
+                      "typeString": "int_const 1"
+                    },
+                    "value": "1"
+                  },
+                  {
+                    "hexValue": "30",
+                    "id": 6789,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "number",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "686:1:34",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_rational_0_by_1",
+                      "typeString": "int_const 0"
+                    },
+                    "value": "0"
+                  },
+                  {
+                    "hexValue": "30",
+                    "id": 6790,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "number",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "689:1:34",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_rational_0_by_1",
+                      "typeString": "int_const 0"
+                    },
+                    "value": "0"
+                  }
+                ],
+                "id": 6791,
+                "kind": "baseConstructorSpecifier",
+                "modifierName": {
+                  "id": 6787,
+                  "name": "Semver",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 44690,
+                  "src": "676:6:34"
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "676:15:34"
+              }
+            ],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "parameters": {
+              "id": 6786,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "673:2:34"
+            },
+            "returnParameters": {
+              "id": 6792,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "692:0:34"
+            },
+            "scope": 6815,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 6814,
+            "nodeType": "FunctionDefinition",
+            "src": "808:144:34",
+            "nodes": [],
+            "body": {
+              "id": 6813,
+              "nodeType": "Block",
+              "src": "865:87:34",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "id": 6811,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "baseExpression": {
+                        "id": 6800,
+                        "name": "sentMessages",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6784,
+                        "src": "875:12:34",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_bool_$",
+                          "typeString": "mapping(bytes32 => bool)"
+                        }
+                      },
+                      "id": 6809,
+                      "indexExpression": {
+                        "arguments": [
+                          {
+                            "arguments": [
+                              {
+                                "id": 6804,
+                                "name": "_message",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 6797,
+                                "src": "915:8:34",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_bytes_memory_ptr",
+                                  "typeString": "bytes memory"
+                                }
+                              },
+                              {
+                                "expression": {
+                                  "id": 6805,
+                                  "name": "msg",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": -15,
+                                  "src": "925:3:34",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_magic_message",
+                                    "typeString": "msg"
+                                  }
+                                },
+                                "id": 6806,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": false,
+                                "lValueRequested": false,
+                                "memberName": "sender",
+                                "nodeType": "MemberAccess",
+                                "src": "925:10:34",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                }
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_bytes_memory_ptr",
+                                  "typeString": "bytes memory"
+                                },
+                                {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                }
+                              ],
+                              "expression": {
+                                "id": 6802,
+                                "name": "abi",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": -1,
+                                "src": "898:3:34",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_magic_abi",
+                                  "typeString": "abi"
+                                }
+                              },
+                              "id": 6803,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "memberName": "encodePacked",
+                              "nodeType": "MemberAccess",
+                              "src": "898:16:34",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
+                                "typeString": "function () pure returns (bytes memory)"
+                              }
+                            },
+                            "id": 6807,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "898:38:34",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          ],
+                          "id": 6801,
+                          "name": "keccak256",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": -8,
+                          "src": "888:9:34",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                            "typeString": "function (bytes memory) pure returns (bytes32)"
+                          }
+                        },
+                        "id": 6808,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "888:49:34",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "875:63:34",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "hexValue": "74727565",
+                      "id": 6810,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "bool",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "941:4:34",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      },
+                      "value": "true"
+                    },
+                    "src": "875:70:34",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 6812,
+                  "nodeType": "ExpressionStatement",
+                  "src": "875:70:34"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 6795,
+              "nodeType": "StructuredDocumentation",
+              "src": "700:103:34",
+              "text": " @notice Passes a message to L1.\n @param _message Message to pass to L1."
+            },
+            "functionSelector": "cafa81dc",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "passMessageToL1",
+            "nameLocation": "817:15:34",
+            "parameters": {
+              "id": 6798,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6797,
+                  "mutability": "mutable",
+                  "name": "_message",
+                  "nameLocation": "846:8:34",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6814,
+                  "src": "833:21:34",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6796,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "833:5:34",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "832:23:34"
+            },
+            "returnParameters": {
+              "id": 6799,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "865:0:34"
+            },
+            "scope": 6815,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 6778,
+              "name": "Semver",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 44690,
+              "src": "473:6:34"
+            },
+            "id": 6779,
+            "nodeType": "InheritanceSpecifier",
+            "src": "473:6:34"
+          }
+        ],
+        "canonicalName": "LegacyMessagePasser",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 6777,
+          "nodeType": "StructuredDocumentation",
+          "src": "108:332:34",
+          "text": " @custom:legacy\n @custom:proxied\n @custom:predeploy 0x4200000000000000000000000000000000000000\n @title LegacyMessagePasser\n @notice The LegacyMessagePasser was the low-level mechanism used to send messages from L2 to L1\n         before the Bedrock upgrade. It is now deprecated in favor of the new MessagePasser."
+        },
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          6815,
+          44690
+        ],
+        "name": "LegacyMessagePasser",
+        "nameLocation": "450:19:34",
+        "scope": 6816,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  },
+  "id": 34
+}

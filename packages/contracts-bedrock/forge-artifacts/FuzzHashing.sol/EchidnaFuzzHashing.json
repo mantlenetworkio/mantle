@@ -1,0 +1,3143 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "echidna_hash_xdomain_msg_0",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "echidna_hash_xdomain_msg_1",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "echidna_hash_xdomain_msg_high_version",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "_version",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint240",
+          "name": "_nonce",
+          "type": "uint240"
+        },
+        {
+          "internalType": "address",
+          "name": "_sender",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_target",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_gasLimit",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "testHashCrossDomainMessageHighVersion",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint240",
+          "name": "_nonce",
+          "type": "uint240"
+        },
+        {
+          "internalType": "address",
+          "name": "_sender",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_target",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_gasLimit",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "testHashCrossDomainMessageV0",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint240",
+          "name": "_nonce",
+          "type": "uint240"
+        },
+        {
+          "internalType": "address",
+          "name": "_sender",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_target",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_gasLimit",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "testHashCrossDomainMessageV1",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x608060405234801561001057600080fd5b506107ed806100206000396000f3fe608060405234801561001057600080fd5b50600436106100725760003560e01c806386861aed1161005057806386861aed146100c05780639af73da2146100cc5780639bf5feb1146100de57600080fd5b806312372e1b146100775780631c0e9c0f1461009857806347f09a6b146100ad575b600080fd5b600054610100900460ff16155b604051901515815260200160405180910390f35b6100ab6100a63660046105b7565b6100f1565b005b6100ab6100bb366004610653565b610153565b60005460ff1615610084565b60005462010000900460ff1615610084565b6100ab6100ec366004610653565b6101b5565b60006100ff878960f01b1790565b905061010f81878787878761023a565b5060018861ffff16111561014957600080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001660011790555b5050505050505050565b85600061016482888888888861023a565b905060006101748789868661030c565b90508082146101aa57600080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff166101001790555b505050505050505050565b7e01000000000000000000000000000000000000000000000000000000000000861760006101e782888888888861023a565b905060006101f983898989898961032b565b90508082146101aa57600080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ffff1662010000179055505050505050505050565b600060f087901c80820361025c576102548688858b61030c565b915050610302565b8061ffff166001036102765761025488888888888861032b565b6040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152602d60248201527f48617368696e673a20756e6b6e6f776e2063726f737320646f6d61696e206d6560448201527f73736167652076657273696f6e00000000000000000000000000000000000000606482015260840160405180910390fd5b9695505050505050565b600061031a8585858561034e565b805190602001209050949350505050565b600061033b8787878787876103e7565b8051906020012090509695505050505050565b606084848484604051602401610367949392919061073f565b604080517fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe08184030181529190526020810180517bffffffffffffffffffffffffffffffffffffffffffffffffffffffff167fcbd4ece9000000000000000000000000000000000000000000000000000000001790529050949350505050565b606086868686868660405160240161040496959493929190610789565b604080517fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe08184030181529190526020810180517bffffffffffffffffffffffffffffffffffffffffffffffffffffffff167fd764ad0b0000000000000000000000000000000000000000000000000000000017905290509695505050505050565b80357dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff811681146104b457600080fd5b919050565b803573ffffffffffffffffffffffffffffffffffffffff811681146104b457600080fd5b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b600082601f83011261051d57600080fd5b813567ffffffffffffffff80821115610538576105386104dd565b604051601f83017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0908116603f0116810190828211818310171561057e5761057e6104dd565b8160405283815286602085880101111561059757600080fd5b836020870160208301376000602085830101528094505050505092915050565b600080600080600080600060e0888a0312156105d257600080fd5b873561ffff811681146105e457600080fd5b96506105f260208901610486565b9550610600604089016104b9565b945061060e606089016104b9565b93506080880135925060a0880135915060c088013567ffffffffffffffff81111561063857600080fd5b6106448a828b0161050c565b91505092959891949750929550565b60008060008060008060c0878903121561066c57600080fd5b61067587610486565b9550610683602088016104b9565b9450610691604088016104b9565b9350606087013592506080870135915060a087013567ffffffffffffffff8111156106bb57600080fd5b6106c789828a0161050c565b9150509295509295509295565b6000815180845260005b818110156106fa576020818501810151868301820152016106de565b8181111561070c576000602083870101525b50601f017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0169290920160200192915050565b600073ffffffffffffffffffffffffffffffffffffffff80871683528086166020840152506080604083015261077860808301856106d4565b905082606083015295945050505050565b868152600073ffffffffffffffffffffffffffffffffffffffff808816602084015280871660408401525084606083015283608083015260c060a08301526107d460c08301846106d4565b9897505050505050505056fea164736f6c634300080f000a",
+    "sourceMap": "132:5120:24:-:0;;;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x608060405234801561001057600080fd5b50600436106100725760003560e01c806386861aed1161005057806386861aed146100c05780639af73da2146100cc5780639bf5feb1146100de57600080fd5b806312372e1b146100775780631c0e9c0f1461009857806347f09a6b146100ad575b600080fd5b600054610100900460ff16155b604051901515815260200160405180910390f35b6100ab6100a63660046105b7565b6100f1565b005b6100ab6100bb366004610653565b610153565b60005460ff1615610084565b60005462010000900460ff1615610084565b6100ab6100ec366004610653565b6101b5565b60006100ff878960f01b1790565b905061010f81878787878761023a565b5060018861ffff16111561014957600080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001660011790555b5050505050505050565b85600061016482888888888861023a565b905060006101748789868661030c565b90508082146101aa57600080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff166101001790555b505050505050505050565b7e01000000000000000000000000000000000000000000000000000000000000861760006101e782888888888861023a565b905060006101f983898989898961032b565b90508082146101aa57600080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ffff1662010000179055505050505050505050565b600060f087901c80820361025c576102548688858b61030c565b915050610302565b8061ffff166001036102765761025488888888888861032b565b6040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152602d60248201527f48617368696e673a20756e6b6e6f776e2063726f737320646f6d61696e206d6560448201527f73736167652076657273696f6e00000000000000000000000000000000000000606482015260840160405180910390fd5b9695505050505050565b600061031a8585858561034e565b805190602001209050949350505050565b600061033b8787878787876103e7565b8051906020012090509695505050505050565b606084848484604051602401610367949392919061073f565b604080517fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe08184030181529190526020810180517bffffffffffffffffffffffffffffffffffffffffffffffffffffffff167fcbd4ece9000000000000000000000000000000000000000000000000000000001790529050949350505050565b606086868686868660405160240161040496959493929190610789565b604080517fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe08184030181529190526020810180517bffffffffffffffffffffffffffffffffffffffffffffffffffffffff167fd764ad0b0000000000000000000000000000000000000000000000000000000017905290509695505050505050565b80357dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff811681146104b457600080fd5b919050565b803573ffffffffffffffffffffffffffffffffffffffff811681146104b457600080fd5b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b600082601f83011261051d57600080fd5b813567ffffffffffffffff80821115610538576105386104dd565b604051601f83017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0908116603f0116810190828211818310171561057e5761057e6104dd565b8160405283815286602085880101111561059757600080fd5b836020870160208301376000602085830101528094505050505092915050565b600080600080600080600060e0888a0312156105d257600080fd5b873561ffff811681146105e457600080fd5b96506105f260208901610486565b9550610600604089016104b9565b945061060e606089016104b9565b93506080880135925060a0880135915060c088013567ffffffffffffffff81111561063857600080fd5b6106448a828b0161050c565b91505092959891949750929550565b60008060008060008060c0878903121561066c57600080fd5b61067587610486565b9550610683602088016104b9565b9450610691604088016104b9565b9350606087013592506080870135915060a087013567ffffffffffffffff8111156106bb57600080fd5b6106c789828a0161050c565b9150509295509295509295565b6000815180845260005b818110156106fa576020818501810151868301820152016106de565b8181111561070c576000602083870101525b50601f017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0169290920160200192915050565b600073ffffffffffffffffffffffffffffffffffffffff80871683528086166020840152506080604083015261077860808301856106d4565b905082606083015295945050505050565b868152600073ffffffffffffffffffffffffffffffffffffffff808816602084015280871660408401525084606083015283608083015260c060a08301526107d460c08301846106d4565b9897505050505050505056fea164736f6c634300080f000a",
+    "sourceMap": "132:5120:24:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;4466:257;4525:4;4693:23;;;;;;4692:24;4466:257;;;179:14:165;;172:22;154:41;;142:2;127:18;4466:257:24;;;;;;;513:807;;;;;;:::i;:::-;;:::i;:::-;;1536:983;;;;;;:::i;:::-;;:::i;3971:225::-;4041:4;4157:32;;;4156:33;3971:225;;4993:257;5052:4;5220:23;;;;;;5219:24;4993:257;;2735:1026;;;;;;:::i;:::-;;:::i;513:807::-;801:20;824:47;854:6;862:8;5039:3:40;5035:18;5032:30;;4872:228;824:47:24;801:70;;1054:88;1085:12;1099:7;1108;1117:6;1125:9;1136:5;1054:30;:88::i;:::-;;1247:1;1236:8;:12;;;1232:82;;;1264:32;:39;;;;1299:4;1264:39;;;1232:82;751:569;513:807;;;;;;;:::o;1536:983::-;1869:6;1816:20;2025:170;1869:6;2095:7;2116;2137:6;2157:9;2180:5;2025:30;:170::i;:::-;2003:192;;2205:19;2227:129;2273:7;2294;2315:5;2334:12;2227:32;:129::i;:::-;2205:151;;2445:11;2430;:26;2426:87;;2472:23;:30;;;;;;;;2426:87;1740:779;;;1536:983;;;;;;:::o;2735:1026::-;5035:18:40;5032:30;;3015:20:24;3224:170;5032:30:40;3294:7:24;3315;3336:6;3356:9;3379:5;3224:30;:170::i;:::-;3202:192;;3404:19;3426:172;3472:12;3498:7;3519;3540:6;3560:9;3583:5;3426:32;:172::i;:::-;3404:194;;3687:11;3672;:26;3668:87;;3714:23;:30;;;;;;;;2939:822;;;2735:1026;;;;;;:::o;2200:632:41:-;2414:7;5650:3:40;5646:16;;;2505:12:41;;;2501:325;;2540:57;2565:7;2574;2583:5;2590:6;2540:24;:57::i;:::-;2533:64;;;;;2501:325;2618:7;:12;;2629:1;2618:12;2614:212;;2653:76;2678:6;2686:7;2695;2704:6;2712:9;2723:5;2653:24;:76::i;2614:212::-;2760:55;;;;;3334:2:165;2760:55:41;;;3316:21:165;3373:2;3353:18;;;3346:30;3412:34;3392:18;;;3385:62;3483:15;3463:18;;;3456:43;3516:19;;2760:55:41;;;;;;;2200:632;;;;;;;;;:::o;3202:277::-;3367:7;3403:68;3439:7;3448;3457:5;3464:6;3403:35;:68::i;:::-;3393:79;;;;;;3386:86;;3202:277;;;;;;:::o;3973:527::-;4189:7;4254:225;4311:6;4339:7;4368;4397:6;4425:9;4456:5;4254:35;:225::i;:::-;4227:266;;;;;;4208:285;;3973:527;;;;;;;;:::o;3111:414:40:-;3278:12;3425:7;3450;3475:5;3498:6;3321:197;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;3111:414:40;;;;;;:::o;4021:532::-;4239:12;4402:6;4426:7;4451;4476:6;4500:9;4527:5;4282:264;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;4021:532:40;;;;;;;;:::o;206:216:165:-;274:20;;334:62;323:74;;313:85;;303:113;;412:1;409;402:12;303:113;206:216;;;:::o;427:196::-;495:20;;555:42;544:54;;534:65;;524:93;;613:1;610;603:12;628:184;680:77;677:1;670:88;777:4;774:1;767:15;801:4;798:1;791:15;817:777;859:5;912:3;905:4;897:6;893:17;889:27;879:55;;930:1;927;920:12;879:55;966:6;953:20;992:18;1029:2;1025;1022:10;1019:36;;;1035:18;;:::i;:::-;1169:2;1163:9;1231:4;1223:13;;1074:66;1219:22;;;1243:2;1215:31;1211:40;1199:53;;;1267:18;;;1287:22;;;1264:46;1261:72;;;1313:18;;:::i;:::-;1353:10;1349:2;1342:22;1388:2;1380:6;1373:18;1434:3;1427:4;1422:2;1414:6;1410:15;1406:26;1403:35;1400:55;;;1451:1;1448;1441:12;1400:55;1515:2;1508:4;1500:6;1496:17;1489:4;1481:6;1477:17;1464:54;1562:1;1555:4;1550:2;1542:6;1538:15;1534:26;1527:37;1582:6;1573:15;;;;;;817:777;;;;:::o;1599:842::-;1720:6;1728;1736;1744;1752;1760;1768;1821:3;1809:9;1800:7;1796:23;1792:33;1789:53;;;1838:1;1835;1828:12;1789:53;1877:9;1864:23;1927:6;1920:5;1916:18;1909:5;1906:29;1896:57;;1949:1;1946;1939:12;1896:57;1972:5;-1:-1:-1;1996:38:165;2030:2;2015:18;;1996:38;:::i;:::-;1986:48;;2053:38;2087:2;2076:9;2072:18;2053:38;:::i;:::-;2043:48;;2110:38;2144:2;2133:9;2129:18;2110:38;:::i;:::-;2100:48;;2195:3;2184:9;2180:19;2167:33;2157:43;;2247:3;2236:9;2232:19;2219:33;2209:43;;2303:3;2292:9;2288:19;2275:33;2331:18;2323:6;2320:30;2317:50;;;2363:1;2360;2353:12;2317:50;2386:49;2427:7;2418:6;2407:9;2403:22;2386:49;:::i;:::-;2376:59;;;1599:842;;;;;;;;;;:::o;2446:681::-;2559:6;2567;2575;2583;2591;2599;2652:3;2640:9;2631:7;2627:23;2623:33;2620:53;;;2669:1;2666;2659:12;2620:53;2692:29;2711:9;2692:29;:::i;:::-;2682:39;;2740:38;2774:2;2763:9;2759:18;2740:38;:::i;:::-;2730:48;;2797:38;2831:2;2820:9;2816:18;2797:38;:::i;:::-;2787:48;;2882:2;2871:9;2867:18;2854:32;2844:42;;2933:3;2922:9;2918:19;2905:33;2895:43;;2989:3;2978:9;2974:19;2961:33;3017:18;3009:6;3006:30;3003:50;;;3049:1;3046;3039:12;3003:50;3072:49;3113:7;3104:6;3093:9;3089:22;3072:49;:::i;:::-;3062:59;;;2446:681;;;;;;;;:::o;3546:530::-;3587:3;3625:5;3619:12;3652:6;3647:3;3640:19;3677:1;3687:162;3701:6;3698:1;3695:13;3687:162;;;3763:4;3819:13;;;3815:22;;3809:29;3791:11;;;3787:20;;3780:59;3716:12;3687:162;;;3867:6;3864:1;3861:13;3858:87;;;3933:1;3926:4;3917:6;3912:3;3908:16;3904:27;3897:38;3858:87;-1:-1:-1;3990:2:165;3978:15;3995:66;3974:88;3965:98;;;;4065:4;3961:109;;3546:530;-1:-1:-1;;3546:530:165:o;4081:511::-;4275:4;4304:42;4385:2;4377:6;4373:15;4362:9;4355:34;4437:2;4429:6;4425:15;4420:2;4409:9;4405:18;4398:43;;4477:3;4472:2;4461:9;4457:18;4450:31;4498:45;4538:3;4527:9;4523:19;4515:6;4498:45;:::i;:::-;4490:53;;4579:6;4574:2;4563:9;4559:18;4552:34;4081:511;;;;;;;:::o;4597:655::-;4884:6;4873:9;4866:25;4847:4;4910:42;5000:2;4992:6;4988:15;4983:2;4972:9;4968:18;4961:43;5052:2;5044:6;5040:15;5035:2;5024:9;5020:18;5013:43;;5092:6;5087:2;5076:9;5072:18;5065:34;5136:6;5130:3;5119:9;5115:19;5108:35;5180:3;5174;5163:9;5159:19;5152:32;5201:45;5241:3;5230:9;5226:19;5218:6;5201:45;:::i;:::-;5193:53;4597:655;-1:-1:-1;;;;;;;;4597:655:165:o",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "echidna_hash_xdomain_msg_0()": "12372e1b",
+    "echidna_hash_xdomain_msg_1()": "9af73da2",
+    "echidna_hash_xdomain_msg_high_version()": "86861aed",
+    "testHashCrossDomainMessageHighVersion(uint16,uint240,address,address,uint256,uint256,bytes)": "1c0e9c0f",
+    "testHashCrossDomainMessageV0(uint240,address,address,uint256,uint256,bytes)": "47f09a6b",
+    "testHashCrossDomainMessageV1(uint240,address,address,uint256,uint256,bytes)": "9bf5feb1"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"echidna_hash_xdomain_msg_0\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"echidna_hash_xdomain_msg_1\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"echidna_hash_xdomain_msg_high_version\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint16\",\"name\":\"_version\",\"type\":\"uint16\"},{\"internalType\":\"uint240\",\"name\":\"_nonce\",\"type\":\"uint240\"},{\"internalType\":\"address\",\"name\":\"_sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_gasLimit\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"testHashCrossDomainMessageHighVersion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint240\",\"name\":\"_nonce\",\"type\":\"uint240\"},{\"internalType\":\"address\",\"name\":\"_sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_gasLimit\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"testHashCrossDomainMessageV0\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint240\",\"name\":\"_nonce\",\"type\":\"uint240\"},{\"internalType\":\"address\",\"name\":\"_sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_gasLimit\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"testHashCrossDomainMessageV1\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"echidna_hash_xdomain_msg_0()\":{\"custom:invariant\":\"`version` = `0`: `hashCrossDomainMessage` and `hashCrossDomainMessageV0` are equivalent. If the version passed is 0, `hashCrossDomainMessage` and `hashCrossDomainMessageV0` should be equivalent.\"},\"echidna_hash_xdomain_msg_1()\":{\"custom:invariant\":\"`version` = `1`: `hashCrossDomainMessage` and `hashCrossDomainMessageV1` are equivalent. If the version passed is 1, `hashCrossDomainMessage` and `hashCrossDomainMessageV1` should be equivalent.\"},\"echidna_hash_xdomain_msg_high_version()\":{\"custom:invariant\":\"`hashCrossDomainMessage` reverts if `version` is > `1`. The `hashCrossDomainMessage` function should always revert if the `version` passed is > `1`.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"testHashCrossDomainMessageHighVersion(uint16,uint240,address,address,uint256,uint256,bytes)\":{\"notice\":\"Takes the necessary parameters to perform a cross domain hash with a randomly generated version. Only schema versions 0 and 1 are supported and all others should revert.\"},\"testHashCrossDomainMessageV0(uint240,address,address,uint256,uint256,bytes)\":{\"notice\":\"Takes the necessary parameters to perform a cross domain hash using the v0 schema and compares the output of a call to the unversioned function to the v0 function directly\"},\"testHashCrossDomainMessageV1(uint240,address,address,uint256,uint256,bytes)\":{\"notice\":\"Takes the necessary parameters to perform a cross domain hash using the v1 schema and compares the output of a call to the unversioned function to the v1 function directly\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/echidna/FuzzHashing.sol\":\"EchidnaFuzzHashing\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":999999},\"remappings\":[\":@openzeppelin/=node_modules/@openzeppelin/\",\":@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/\",\":@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/\",\":@rari-capital/=node_modules/@rari-capital/\",\":@rari-capital/solmate/=node_modules/@rari-capital/solmate/\",\":ds-test/=node_modules/ds-test/src/\",\":forge-std/=node_modules/forge-std/src/\"]},\"sources\":{\"contracts/echidna/FuzzHashing.sol\":{\"keccak256\":\"0x2887f1b528262be41ee69522a80327d47789729dd7e63ad9afaaf8bcbc2a5d69\",\"urls\":[\"bzz-raw://d912a60a9c1892d3b9d1cbb0498b5603ad1b797ca8fdbe78f1795a61fa93a5e7\",\"dweb:/ipfs/QmcT8RF88wmqm5d7eoRHWdVifn9K2zk1iaGsXHoHRrE9ZF\"]},\"contracts/libraries/Encoding.sol\":{\"keccak256\":\"0x341bfb4dd8b2edde503761b616c9c0cab8610bf39e5891a3128d5407ff71c018\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://27235becbd89ee303dd0b2c5489d73430371b31c8bfc62c303a5bc7f4318198b\",\"dweb:/ipfs/QmZyuPiDmXin8HHYN5BvfK76EHRPVUSehB1Sd8STpscDMM\"]},\"contracts/libraries/Hashing.sol\":{\"keccak256\":\"0x72f50fa349759f9dba30784c77cae2682ec441773f209e569d6810ebc634251c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://12651105767d692acd425c573bc4c22ec798a0052e00244d82b47ba4a20b44c0\",\"dweb:/ipfs/QmQF7XM8cWRkBhWRbj11Mkrd1s5YdGYdUjTMkitRBahP6X\"]},\"contracts/libraries/Types.sol\":{\"keccak256\":\"0x54edbe0a15a54574fb24f32ac58afc6d991f017611438ee450cf459f947b041a\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://7c767f758b6575481dd9aebc8727d7b2521aa032979f34bf581c72fe71d3a3ef\",\"dweb:/ipfs/QmRURQkgaSi9LAqEwnunHsdmmn3ScNuGwfK9W4J5mw3uMF\"]},\"contracts/libraries/rlp/RLPWriter.sol\":{\"keccak256\":\"0x5aa9d21c5b41c9786f23153f819d561ae809a1d55c7b0d423dfeafdfbacedc78\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://921c44e6a0982b9a4011900fda1bda2c06b7a85894967de98b407a83fe9f90c0\",\"dweb:/ipfs/QmSsHLKDUQ82kpKdqB6VntVGKuPDb4W9VdotsubuqWBzio\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.15+commit.e14f2714"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "echidna_hash_xdomain_msg_0",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "echidna_hash_xdomain_msg_1",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "echidna_hash_xdomain_msg_high_version",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint16",
+              "name": "_version",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint240",
+              "name": "_nonce",
+              "type": "uint240"
+            },
+            {
+              "internalType": "address",
+              "name": "_sender",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "_target",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_gasLimit",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "_data",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "testHashCrossDomainMessageHighVersion"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint240",
+              "name": "_nonce",
+              "type": "uint240"
+            },
+            {
+              "internalType": "address",
+              "name": "_sender",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "_target",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_gasLimit",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "_data",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "testHashCrossDomainMessageV0"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint240",
+              "name": "_nonce",
+              "type": "uint240"
+            },
+            {
+              "internalType": "address",
+              "name": "_sender",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "_target",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_gasLimit",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "_data",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "testHashCrossDomainMessageV1"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "echidna_hash_xdomain_msg_0()": {
+            "custom:invariant": "`version` = `0`: `hashCrossDomainMessage` and `hashCrossDomainMessageV0` are equivalent. If the version passed is 0, `hashCrossDomainMessage` and `hashCrossDomainMessageV0` should be equivalent."
+          },
+          "echidna_hash_xdomain_msg_1()": {
+            "custom:invariant": "`version` = `1`: `hashCrossDomainMessage` and `hashCrossDomainMessageV1` are equivalent. If the version passed is 1, `hashCrossDomainMessage` and `hashCrossDomainMessageV1` should be equivalent."
+          },
+          "echidna_hash_xdomain_msg_high_version()": {
+            "custom:invariant": "`hashCrossDomainMessage` reverts if `version` is > `1`. The `hashCrossDomainMessage` function should always revert if the `version` passed is > `1`."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "testHashCrossDomainMessageHighVersion(uint16,uint240,address,address,uint256,uint256,bytes)": {
+            "notice": "Takes the necessary parameters to perform a cross domain hash with a randomly generated version. Only schema versions 0 and 1 are supported and all others should revert."
+          },
+          "testHashCrossDomainMessageV0(uint240,address,address,uint256,uint256,bytes)": {
+            "notice": "Takes the necessary parameters to perform a cross domain hash using the v0 schema and compares the output of a call to the unversioned function to the v0 function directly"
+          },
+          "testHashCrossDomainMessageV1(uint240,address,address,uint256,uint256,bytes)": {
+            "notice": "Takes the necessary parameters to perform a cross domain hash using the v1 schema and compares the output of a call to the unversioned function to the v1 function directly"
+          }
+        },
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@openzeppelin/=node_modules/@openzeppelin/",
+        ":@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/",
+        ":@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+        ":@rari-capital/=node_modules/@rari-capital/",
+        ":@rari-capital/solmate/=node_modules/@rari-capital/solmate/",
+        ":ds-test/=node_modules/ds-test/src/",
+        ":forge-std/=node_modules/forge-std/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 999999
+      },
+      "metadata": {
+        "bytecodeHash": "none"
+      },
+      "compilationTarget": {
+        "contracts/echidna/FuzzHashing.sol": "EchidnaFuzzHashing"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "contracts/echidna/FuzzHashing.sol": {
+        "keccak256": "0x2887f1b528262be41ee69522a80327d47789729dd7e63ad9afaaf8bcbc2a5d69",
+        "urls": [
+          "bzz-raw://d912a60a9c1892d3b9d1cbb0498b5603ad1b797ca8fdbe78f1795a61fa93a5e7",
+          "dweb:/ipfs/QmcT8RF88wmqm5d7eoRHWdVifn9K2zk1iaGsXHoHRrE9ZF"
+        ],
+        "license": null
+      },
+      "contracts/libraries/Encoding.sol": {
+        "keccak256": "0x341bfb4dd8b2edde503761b616c9c0cab8610bf39e5891a3128d5407ff71c018",
+        "urls": [
+          "bzz-raw://27235becbd89ee303dd0b2c5489d73430371b31c8bfc62c303a5bc7f4318198b",
+          "dweb:/ipfs/QmZyuPiDmXin8HHYN5BvfK76EHRPVUSehB1Sd8STpscDMM"
+        ],
+        "license": "MIT"
+      },
+      "contracts/libraries/Hashing.sol": {
+        "keccak256": "0x72f50fa349759f9dba30784c77cae2682ec441773f209e569d6810ebc634251c",
+        "urls": [
+          "bzz-raw://12651105767d692acd425c573bc4c22ec798a0052e00244d82b47ba4a20b44c0",
+          "dweb:/ipfs/QmQF7XM8cWRkBhWRbj11Mkrd1s5YdGYdUjTMkitRBahP6X"
+        ],
+        "license": "MIT"
+      },
+      "contracts/libraries/Types.sol": {
+        "keccak256": "0x54edbe0a15a54574fb24f32ac58afc6d991f017611438ee450cf459f947b041a",
+        "urls": [
+          "bzz-raw://7c767f758b6575481dd9aebc8727d7b2521aa032979f34bf581c72fe71d3a3ef",
+          "dweb:/ipfs/QmRURQkgaSi9LAqEwnunHsdmmn3ScNuGwfK9W4J5mw3uMF"
+        ],
+        "license": "MIT"
+      },
+      "contracts/libraries/rlp/RLPWriter.sol": {
+        "keccak256": "0x5aa9d21c5b41c9786f23153f819d561ae809a1d55c7b0d423dfeafdfbacedc78",
+        "urls": [
+          "bzz-raw://921c44e6a0982b9a4011900fda1bda2c06b7a85894967de98b407a83fe9f90c0",
+          "dweb:/ipfs/QmSsHLKDUQ82kpKdqB6VntVGKuPDb4W9VdotsubuqWBzio"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 5115,
+        "contract": "contracts/echidna/FuzzHashing.sol:EchidnaFuzzHashing",
+        "label": "failedCrossDomainHashHighVersion",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 5117,
+        "contract": "contracts/echidna/FuzzHashing.sol:EchidnaFuzzHashing",
+        "label": "failedCrossDomainHashV0",
+        "offset": 1,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 5119,
+        "contract": "contracts/echidna/FuzzHashing.sol:EchidnaFuzzHashing",
+        "label": "failedCrossDomainHashV1",
+        "offset": 2,
+        "slot": "0",
+        "type": "t_bool"
+      }
+    ],
+    "types": {
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      }
+    }
+  },
+  "userdoc": {
+    "version": 1,
+    "kind": "user",
+    "methods": {
+      "testHashCrossDomainMessageHighVersion(uint16,uint240,address,address,uint256,uint256,bytes)": {
+        "notice": "Takes the necessary parameters to perform a cross domain hash with a randomly generated version. Only schema versions 0 and 1 are supported and all others should revert."
+      },
+      "testHashCrossDomainMessageV0(uint240,address,address,uint256,uint256,bytes)": {
+        "notice": "Takes the necessary parameters to perform a cross domain hash using the v0 schema and compares the output of a call to the unversioned function to the v0 function directly"
+      },
+      "testHashCrossDomainMessageV1(uint240,address,address,uint256,uint256,bytes)": {
+        "notice": "Takes the necessary parameters to perform a cross domain hash using the v1 schema and compares the output of a call to the unversioned function to the v1 function directly"
+      }
+    }
+  },
+  "devdoc": {
+    "version": 1,
+    "kind": "dev",
+    "methods": {
+      "echidna_hash_xdomain_msg_0()": {},
+      "echidna_hash_xdomain_msg_1()": {},
+      "echidna_hash_xdomain_msg_high_version()": {}
+    }
+  },
+  "ast": {
+    "absolutePath": "contracts/echidna/FuzzHashing.sol",
+    "id": 5312,
+    "exportedSymbols": {
+      "EchidnaFuzzHashing": [
+        5311
+      ],
+      "Encoding": [
+        7514
+      ],
+      "Hashing": [
+        7736
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "0:5253:24",
+    "nodes": [
+      {
+        "id": 5109,
+        "nodeType": "PragmaDirective",
+        "src": "0:23:24",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "0.8",
+          ".15"
+        ]
+      },
+      {
+        "id": 5111,
+        "nodeType": "ImportDirective",
+        "src": "25:51:24",
+        "nodes": [],
+        "absolutePath": "contracts/libraries/Hashing.sol",
+        "file": "../libraries/Hashing.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 5312,
+        "sourceUnit": 7737,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 5110,
+              "name": "Hashing",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 7736,
+              "src": "34:7:24",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 5113,
+        "nodeType": "ImportDirective",
+        "src": "77:53:24",
+        "nodes": [],
+        "absolutePath": "contracts/libraries/Encoding.sol",
+        "file": "../libraries/Encoding.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 5312,
+        "sourceUnit": 7515,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 5112,
+              "name": "Encoding",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 7514,
+              "src": "86:8:24",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 5311,
+        "nodeType": "ContractDefinition",
+        "src": "132:5120:24",
+        "nodes": [
+          {
+            "id": 5115,
+            "nodeType": "VariableDeclaration",
+            "src": "166:46:24",
+            "nodes": [],
+            "constant": false,
+            "mutability": "mutable",
+            "name": "failedCrossDomainHashHighVersion",
+            "nameLocation": "180:32:24",
+            "scope": 5311,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bool",
+              "typeString": "bool"
+            },
+            "typeName": {
+              "id": 5114,
+              "name": "bool",
+              "nodeType": "ElementaryTypeName",
+              "src": "166:4:24",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bool",
+                "typeString": "bool"
+              }
+            },
+            "visibility": "internal"
+          },
+          {
+            "id": 5117,
+            "nodeType": "VariableDeclaration",
+            "src": "218:37:24",
+            "nodes": [],
+            "constant": false,
+            "mutability": "mutable",
+            "name": "failedCrossDomainHashV0",
+            "nameLocation": "232:23:24",
+            "scope": 5311,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bool",
+              "typeString": "bool"
+            },
+            "typeName": {
+              "id": 5116,
+              "name": "bool",
+              "nodeType": "ElementaryTypeName",
+              "src": "218:4:24",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bool",
+                "typeString": "bool"
+              }
+            },
+            "visibility": "internal"
+          },
+          {
+            "id": 5119,
+            "nodeType": "VariableDeclaration",
+            "src": "261:37:24",
+            "nodes": [],
+            "constant": false,
+            "mutability": "mutable",
+            "name": "failedCrossDomainHashV1",
+            "nameLocation": "275:23:24",
+            "scope": 5311,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bool",
+              "typeString": "bool"
+            },
+            "typeName": {
+              "id": 5118,
+              "name": "bool",
+              "nodeType": "ElementaryTypeName",
+              "src": "261:4:24",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bool",
+                "typeString": "bool"
+              }
+            },
+            "visibility": "internal"
+          },
+          {
+            "id": 5166,
+            "nodeType": "FunctionDefinition",
+            "src": "513:807:24",
+            "nodes": [],
+            "body": {
+              "id": 5165,
+              "nodeType": "Block",
+              "src": "751:569:24",
+              "nodes": [],
+              "statements": [
+                {
+                  "assignments": [
+                    5138
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5138,
+                      "mutability": "mutable",
+                      "name": "encodedNonce",
+                      "nameLocation": "809:12:24",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5165,
+                      "src": "801:20:24",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 5137,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "801:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5144,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 5141,
+                        "name": "_nonce",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5124,
+                        "src": "854:6:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint240",
+                          "typeString": "uint240"
+                        }
+                      },
+                      {
+                        "id": 5142,
+                        "name": "_version",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5122,
+                        "src": "862:8:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint16",
+                          "typeString": "uint16"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint240",
+                          "typeString": "uint240"
+                        },
+                        {
+                          "typeIdentifier": "t_uint16",
+                          "typeString": "uint16"
+                        }
+                      ],
+                      "expression": {
+                        "id": 5139,
+                        "name": "Encoding",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7514,
+                        "src": "824:8:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_Encoding_$7514_$",
+                          "typeString": "type(library Encoding)"
+                        }
+                      },
+                      "id": 5140,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "encodeVersionedNonce",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7491,
+                      "src": "824:29:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint240_$_t_uint16_$returns$_t_uint256_$",
+                        "typeString": "function (uint240,uint16) pure returns (uint256)"
+                      }
+                    },
+                    "id": 5143,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "824:47:24",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "801:70:24"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 5148,
+                        "name": "encodedNonce",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5138,
+                        "src": "1085:12:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 5149,
+                        "name": "_sender",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5126,
+                        "src": "1099:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 5150,
+                        "name": "_target",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5128,
+                        "src": "1108:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 5151,
+                        "name": "_value",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5130,
+                        "src": "1117:6:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 5152,
+                        "name": "_gasLimit",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5132,
+                        "src": "1125:9:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 5153,
+                        "name": "_data",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5134,
+                        "src": "1136:5:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "expression": {
+                        "id": 5145,
+                        "name": "Hashing",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7736,
+                        "src": "1054:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_Hashing_$7736_$",
+                          "typeString": "type(library Hashing)"
+                        }
+                      },
+                      "id": 5147,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "hashCrossDomainMessage",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7627,
+                      "src": "1054:30:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_address_$_t_address_$_t_uint256_$_t_uint256_$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                        "typeString": "function (uint256,address,address,uint256,uint256,bytes memory) pure returns (bytes32)"
+                      }
+                    },
+                    "id": 5154,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1054:88:24",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "id": 5155,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1054:88:24"
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_uint16",
+                      "typeString": "uint16"
+                    },
+                    "id": 5158,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "id": 5156,
+                      "name": "_version",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5122,
+                      "src": "1236:8:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint16",
+                        "typeString": "uint16"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": ">",
+                    "rightExpression": {
+                      "hexValue": "31",
+                      "id": 5157,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "1247:1:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_1_by_1",
+                        "typeString": "int_const 1"
+                      },
+                      "value": "1"
+                    },
+                    "src": "1236:12:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 5164,
+                  "nodeType": "IfStatement",
+                  "src": "1232:82:24",
+                  "trueBody": {
+                    "id": 5163,
+                    "nodeType": "Block",
+                    "src": "1250:64:24",
+                    "statements": [
+                      {
+                        "expression": {
+                          "id": 5161,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
+                            "id": 5159,
+                            "name": "failedCrossDomainHashHighVersion",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 5115,
+                            "src": "1264:32:24",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bool",
+                              "typeString": "bool"
+                            }
+                          },
+                          "nodeType": "Assignment",
+                          "operator": "=",
+                          "rightHandSide": {
+                            "hexValue": "74727565",
+                            "id": 5160,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "bool",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "1299:4:24",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bool",
+                              "typeString": "bool"
+                            },
+                            "value": "true"
+                          },
+                          "src": "1264:39:24",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        },
+                        "id": 5162,
+                        "nodeType": "ExpressionStatement",
+                        "src": "1264:39:24"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "documentation": {
+              "id": 5120,
+              "nodeType": "StructuredDocumentation",
+              "src": "305:203:24",
+              "text": " @notice Takes the necessary parameters to perform a cross domain hash with a randomly\n generated version. Only schema versions 0 and 1 are supported and all others should revert."
+            },
+            "functionSelector": "1c0e9c0f",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "testHashCrossDomainMessageHighVersion",
+            "nameLocation": "522:37:24",
+            "parameters": {
+              "id": 5135,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5122,
+                  "mutability": "mutable",
+                  "name": "_version",
+                  "nameLocation": "576:8:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5166,
+                  "src": "569:15:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint16",
+                    "typeString": "uint16"
+                  },
+                  "typeName": {
+                    "id": 5121,
+                    "name": "uint16",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "569:6:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint16",
+                      "typeString": "uint16"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5124,
+                  "mutability": "mutable",
+                  "name": "_nonce",
+                  "nameLocation": "602:6:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5166,
+                  "src": "594:14:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint240",
+                    "typeString": "uint240"
+                  },
+                  "typeName": {
+                    "id": 5123,
+                    "name": "uint240",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "594:7:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint240",
+                      "typeString": "uint240"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5126,
+                  "mutability": "mutable",
+                  "name": "_sender",
+                  "nameLocation": "626:7:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5166,
+                  "src": "618:15:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5125,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "618:7:24",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5128,
+                  "mutability": "mutable",
+                  "name": "_target",
+                  "nameLocation": "651:7:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5166,
+                  "src": "643:15:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5127,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "643:7:24",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5130,
+                  "mutability": "mutable",
+                  "name": "_value",
+                  "nameLocation": "676:6:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5166,
+                  "src": "668:14:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5129,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "668:7:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5132,
+                  "mutability": "mutable",
+                  "name": "_gasLimit",
+                  "nameLocation": "700:9:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5166,
+                  "src": "692:17:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5131,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "692:7:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5134,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "732:5:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5166,
+                  "src": "719:18:24",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 5133,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "719:5:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "559:184:24"
+            },
+            "returnParameters": {
+              "id": 5136,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "751:0:24"
+            },
+            "scope": 5311,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 5222,
+            "nodeType": "FunctionDefinition",
+            "src": "1536:983:24",
+            "nodes": [],
+            "body": {
+              "id": 5221,
+              "nodeType": "Block",
+              "src": "1740:779:24",
+              "nodes": [],
+              "statements": [
+                {
+                  "assignments": [
+                    5183
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5183,
+                      "mutability": "mutable",
+                      "name": "encodedNonce",
+                      "nameLocation": "1824:12:24",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5221,
+                      "src": "1816:20:24",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 5182,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1816:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5189,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 5186,
+                        "name": "_nonce",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5169,
+                        "src": "1869:6:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint240",
+                          "typeString": "uint240"
+                        }
+                      },
+                      {
+                        "hexValue": "30",
+                        "id": 5187,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1877:1:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint240",
+                          "typeString": "uint240"
+                        },
+                        {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        }
+                      ],
+                      "expression": {
+                        "id": 5184,
+                        "name": "Encoding",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7514,
+                        "src": "1839:8:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_Encoding_$7514_$",
+                          "typeString": "type(library Encoding)"
+                        }
+                      },
+                      "id": 5185,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "encodeVersionedNonce",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7491,
+                      "src": "1839:29:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint240_$_t_uint16_$returns$_t_uint256_$",
+                        "typeString": "function (uint240,uint16) pure returns (uint256)"
+                      }
+                    },
+                    "id": 5188,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1839:40:24",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1816:63:24"
+                },
+                {
+                  "assignments": [
+                    5191
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5191,
+                      "mutability": "mutable",
+                      "name": "sampleHash1",
+                      "nameLocation": "2011:11:24",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5221,
+                      "src": "2003:19:24",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 5190,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2003:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5201,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 5194,
+                        "name": "encodedNonce",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5183,
+                        "src": "2069:12:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 5195,
+                        "name": "_sender",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5171,
+                        "src": "2095:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 5196,
+                        "name": "_target",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5173,
+                        "src": "2116:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 5197,
+                        "name": "_value",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5175,
+                        "src": "2137:6:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 5198,
+                        "name": "_gasLimit",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5177,
+                        "src": "2157:9:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 5199,
+                        "name": "_data",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5179,
+                        "src": "2180:5:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "expression": {
+                        "id": 5192,
+                        "name": "Hashing",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7736,
+                        "src": "2025:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_Hashing_$7736_$",
+                          "typeString": "type(library Hashing)"
+                        }
+                      },
+                      "id": 5193,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "hashCrossDomainMessage",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7627,
+                      "src": "2025:30:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_address_$_t_address_$_t_uint256_$_t_uint256_$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                        "typeString": "function (uint256,address,address,uint256,uint256,bytes memory) pure returns (bytes32)"
+                      }
+                    },
+                    "id": 5200,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2025:170:24",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2003:192:24"
+                },
+                {
+                  "assignments": [
+                    5203
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5203,
+                      "mutability": "mutable",
+                      "name": "sampleHash2",
+                      "nameLocation": "2213:11:24",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5221,
+                      "src": "2205:19:24",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 5202,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2205:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5211,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 5206,
+                        "name": "_target",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5173,
+                        "src": "2273:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 5207,
+                        "name": "_sender",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5171,
+                        "src": "2294:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 5208,
+                        "name": "_data",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5179,
+                        "src": "2315:5:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      },
+                      {
+                        "id": 5209,
+                        "name": "encodedNonce",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5183,
+                        "src": "2334:12:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "id": 5204,
+                        "name": "Hashing",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7736,
+                        "src": "2227:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_Hashing_$7736_$",
+                          "typeString": "type(library Hashing)"
+                        }
+                      },
+                      "id": 5205,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "hashCrossDomainMessageV0",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7652,
+                      "src": "2227:32:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_address_$_t_address_$_t_bytes_memory_ptr_$_t_uint256_$returns$_t_bytes32_$",
+                        "typeString": "function (address,address,bytes memory,uint256) pure returns (bytes32)"
+                      }
+                    },
+                    "id": 5210,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2227:129:24",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2205:151:24"
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    },
+                    "id": 5214,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "id": 5212,
+                      "name": "sampleHash1",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5191,
+                      "src": "2430:11:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "id": 5213,
+                      "name": "sampleHash2",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5203,
+                      "src": "2445:11:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "src": "2430:26:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 5220,
+                  "nodeType": "IfStatement",
+                  "src": "2426:87:24",
+                  "trueBody": {
+                    "id": 5219,
+                    "nodeType": "Block",
+                    "src": "2458:55:24",
+                    "statements": [
+                      {
+                        "expression": {
+                          "id": 5217,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
+                            "id": 5215,
+                            "name": "failedCrossDomainHashV0",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 5117,
+                            "src": "2472:23:24",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bool",
+                              "typeString": "bool"
+                            }
+                          },
+                          "nodeType": "Assignment",
+                          "operator": "=",
+                          "rightHandSide": {
+                            "hexValue": "74727565",
+                            "id": 5216,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "bool",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "2498:4:24",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bool",
+                              "typeString": "bool"
+                            },
+                            "value": "true"
+                          },
+                          "src": "2472:30:24",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        },
+                        "id": 5218,
+                        "nodeType": "ExpressionStatement",
+                        "src": "2472:30:24"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "documentation": {
+              "id": 5167,
+              "nodeType": "StructuredDocumentation",
+              "src": "1326:205:24",
+              "text": " @notice Takes the necessary parameters to perform a cross domain hash using the v0 schema\n and compares the output of a call to the unversioned function to the v0 function directly"
+            },
+            "functionSelector": "47f09a6b",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "testHashCrossDomainMessageV0",
+            "nameLocation": "1545:28:24",
+            "parameters": {
+              "id": 5180,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5169,
+                  "mutability": "mutable",
+                  "name": "_nonce",
+                  "nameLocation": "1591:6:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5222,
+                  "src": "1583:14:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint240",
+                    "typeString": "uint240"
+                  },
+                  "typeName": {
+                    "id": 5168,
+                    "name": "uint240",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1583:7:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint240",
+                      "typeString": "uint240"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5171,
+                  "mutability": "mutable",
+                  "name": "_sender",
+                  "nameLocation": "1615:7:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5222,
+                  "src": "1607:15:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5170,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1607:7:24",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5173,
+                  "mutability": "mutable",
+                  "name": "_target",
+                  "nameLocation": "1640:7:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5222,
+                  "src": "1632:15:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5172,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1632:7:24",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5175,
+                  "mutability": "mutable",
+                  "name": "_value",
+                  "nameLocation": "1665:6:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5222,
+                  "src": "1657:14:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5174,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1657:7:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5177,
+                  "mutability": "mutable",
+                  "name": "_gasLimit",
+                  "nameLocation": "1689:9:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5222,
+                  "src": "1681:17:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5176,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1681:7:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5179,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "1721:5:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5222,
+                  "src": "1708:18:24",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 5178,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1708:5:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1573:159:24"
+            },
+            "returnParameters": {
+              "id": 5181,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1740:0:24"
+            },
+            "scope": 5311,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 5280,
+            "nodeType": "FunctionDefinition",
+            "src": "2735:1026:24",
+            "nodes": [],
+            "body": {
+              "id": 5279,
+              "nodeType": "Block",
+              "src": "2939:822:24",
+              "nodes": [],
+              "statements": [
+                {
+                  "assignments": [
+                    5239
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5239,
+                      "mutability": "mutable",
+                      "name": "encodedNonce",
+                      "nameLocation": "3023:12:24",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5279,
+                      "src": "3015:20:24",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 5238,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "3015:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5245,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 5242,
+                        "name": "_nonce",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5225,
+                        "src": "3068:6:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint240",
+                          "typeString": "uint240"
+                        }
+                      },
+                      {
+                        "hexValue": "31",
+                        "id": 5243,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "3076:1:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_1_by_1",
+                          "typeString": "int_const 1"
+                        },
+                        "value": "1"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint240",
+                          "typeString": "uint240"
+                        },
+                        {
+                          "typeIdentifier": "t_rational_1_by_1",
+                          "typeString": "int_const 1"
+                        }
+                      ],
+                      "expression": {
+                        "id": 5240,
+                        "name": "Encoding",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7514,
+                        "src": "3038:8:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_Encoding_$7514_$",
+                          "typeString": "type(library Encoding)"
+                        }
+                      },
+                      "id": 5241,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "encodeVersionedNonce",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7491,
+                      "src": "3038:29:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint240_$_t_uint16_$returns$_t_uint256_$",
+                        "typeString": "function (uint240,uint16) pure returns (uint256)"
+                      }
+                    },
+                    "id": 5244,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "3038:40:24",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "3015:63:24"
+                },
+                {
+                  "assignments": [
+                    5247
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5247,
+                      "mutability": "mutable",
+                      "name": "sampleHash1",
+                      "nameLocation": "3210:11:24",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5279,
+                      "src": "3202:19:24",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 5246,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "3202:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5257,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 5250,
+                        "name": "encodedNonce",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5239,
+                        "src": "3268:12:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 5251,
+                        "name": "_sender",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5227,
+                        "src": "3294:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 5252,
+                        "name": "_target",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5229,
+                        "src": "3315:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 5253,
+                        "name": "_value",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5231,
+                        "src": "3336:6:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 5254,
+                        "name": "_gasLimit",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5233,
+                        "src": "3356:9:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 5255,
+                        "name": "_data",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5235,
+                        "src": "3379:5:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "expression": {
+                        "id": 5248,
+                        "name": "Hashing",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7736,
+                        "src": "3224:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_Hashing_$7736_$",
+                          "typeString": "type(library Hashing)"
+                        }
+                      },
+                      "id": 5249,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "hashCrossDomainMessage",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7627,
+                      "src": "3224:30:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_address_$_t_address_$_t_uint256_$_t_uint256_$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                        "typeString": "function (uint256,address,address,uint256,uint256,bytes memory) pure returns (bytes32)"
+                      }
+                    },
+                    "id": 5256,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "3224:170:24",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "3202:192:24"
+                },
+                {
+                  "assignments": [
+                    5259
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5259,
+                      "mutability": "mutable",
+                      "name": "sampleHash2",
+                      "nameLocation": "3412:11:24",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5279,
+                      "src": "3404:19:24",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 5258,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "3404:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5269,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 5262,
+                        "name": "encodedNonce",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5239,
+                        "src": "3472:12:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 5263,
+                        "name": "_sender",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5227,
+                        "src": "3498:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 5264,
+                        "name": "_target",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5229,
+                        "src": "3519:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 5265,
+                        "name": "_value",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5231,
+                        "src": "3540:6:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 5266,
+                        "name": "_gasLimit",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5233,
+                        "src": "3560:9:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 5267,
+                        "name": "_data",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5235,
+                        "src": "3583:5:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "expression": {
+                        "id": 5260,
+                        "name": "Hashing",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7736,
+                        "src": "3426:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_Hashing_$7736_$",
+                          "typeString": "type(library Hashing)"
+                        }
+                      },
+                      "id": 5261,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "hashCrossDomainMessageV1",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7683,
+                      "src": "3426:32:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_address_$_t_address_$_t_uint256_$_t_uint256_$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                        "typeString": "function (uint256,address,address,uint256,uint256,bytes memory) pure returns (bytes32)"
+                      }
+                    },
+                    "id": 5268,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "3426:172:24",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "3404:194:24"
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    },
+                    "id": 5272,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "id": 5270,
+                      "name": "sampleHash1",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5247,
+                      "src": "3672:11:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "id": 5271,
+                      "name": "sampleHash2",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5259,
+                      "src": "3687:11:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "src": "3672:26:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 5278,
+                  "nodeType": "IfStatement",
+                  "src": "3668:87:24",
+                  "trueBody": {
+                    "id": 5277,
+                    "nodeType": "Block",
+                    "src": "3700:55:24",
+                    "statements": [
+                      {
+                        "expression": {
+                          "id": 5275,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
+                            "id": 5273,
+                            "name": "failedCrossDomainHashV1",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 5119,
+                            "src": "3714:23:24",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bool",
+                              "typeString": "bool"
+                            }
+                          },
+                          "nodeType": "Assignment",
+                          "operator": "=",
+                          "rightHandSide": {
+                            "hexValue": "74727565",
+                            "id": 5274,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "bool",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "3740:4:24",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bool",
+                              "typeString": "bool"
+                            },
+                            "value": "true"
+                          },
+                          "src": "3714:30:24",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        },
+                        "id": 5276,
+                        "nodeType": "ExpressionStatement",
+                        "src": "3714:30:24"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "documentation": {
+              "id": 5223,
+              "nodeType": "StructuredDocumentation",
+              "src": "2525:205:24",
+              "text": " @notice Takes the necessary parameters to perform a cross domain hash using the v1 schema\n and compares the output of a call to the unversioned function to the v1 function directly"
+            },
+            "functionSelector": "9bf5feb1",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "testHashCrossDomainMessageV1",
+            "nameLocation": "2744:28:24",
+            "parameters": {
+              "id": 5236,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5225,
+                  "mutability": "mutable",
+                  "name": "_nonce",
+                  "nameLocation": "2790:6:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5280,
+                  "src": "2782:14:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint240",
+                    "typeString": "uint240"
+                  },
+                  "typeName": {
+                    "id": 5224,
+                    "name": "uint240",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2782:7:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint240",
+                      "typeString": "uint240"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5227,
+                  "mutability": "mutable",
+                  "name": "_sender",
+                  "nameLocation": "2814:7:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5280,
+                  "src": "2806:15:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5226,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2806:7:24",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5229,
+                  "mutability": "mutable",
+                  "name": "_target",
+                  "nameLocation": "2839:7:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5280,
+                  "src": "2831:15:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5228,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2831:7:24",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5231,
+                  "mutability": "mutable",
+                  "name": "_value",
+                  "nameLocation": "2864:6:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5280,
+                  "src": "2856:14:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5230,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2856:7:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5233,
+                  "mutability": "mutable",
+                  "name": "_gasLimit",
+                  "nameLocation": "2888:9:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5280,
+                  "src": "2880:17:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5232,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2880:7:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5235,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "2920:5:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5280,
+                  "src": "2907:18:24",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 5234,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2907:5:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2772:159:24"
+            },
+            "returnParameters": {
+              "id": 5237,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2939:0:24"
+            },
+            "scope": 5311,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 5290,
+            "nodeType": "FunctionDefinition",
+            "src": "3971:225:24",
+            "nodes": [],
+            "body": {
+              "id": 5289,
+              "nodeType": "Block",
+              "src": "4047:149:24",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "id": 5287,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "UnaryOperation",
+                    "operator": "!",
+                    "prefix": true,
+                    "src": "4156:33:24",
+                    "subExpression": {
+                      "id": 5286,
+                      "name": "failedCrossDomainHashHighVersion",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5115,
+                      "src": "4157:32:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "functionReturnParameters": 5285,
+                  "id": 5288,
+                  "nodeType": "Return",
+                  "src": "4149:40:24"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 5281,
+              "nodeType": "StructuredDocumentation",
+              "src": "3767:199:24",
+              "text": " @custom:invariant `hashCrossDomainMessage` reverts if `version` is > `1`.\n The `hashCrossDomainMessage` function should always revert if the `version` passed is > `1`."
+            },
+            "functionSelector": "86861aed",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "echidna_hash_xdomain_msg_high_version",
+            "nameLocation": "3980:37:24",
+            "parameters": {
+              "id": 5282,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "4017:2:24"
+            },
+            "returnParameters": {
+              "id": 5285,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5284,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5290,
+                  "src": "4041:4:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 5283,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4041:4:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "4040:6:24"
+            },
+            "scope": 5311,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 5300,
+            "nodeType": "FunctionDefinition",
+            "src": "4466:257:24",
+            "nodes": [],
+            "body": {
+              "id": 5299,
+              "nodeType": "Block",
+              "src": "4531:192:24",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "id": 5297,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "UnaryOperation",
+                    "operator": "!",
+                    "prefix": true,
+                    "src": "4692:24:24",
+                    "subExpression": {
+                      "id": 5296,
+                      "name": "failedCrossDomainHashV0",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5117,
+                      "src": "4693:23:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "functionReturnParameters": 5295,
+                  "id": 5298,
+                  "nodeType": "Return",
+                  "src": "4685:31:24"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 5291,
+              "nodeType": "StructuredDocumentation",
+              "src": "4202:259:24",
+              "text": " @custom:invariant `version` = `0`: `hashCrossDomainMessage` and `hashCrossDomainMessageV0`\n are equivalent.\n If the version passed is 0, `hashCrossDomainMessage` and `hashCrossDomainMessageV0` should be\n equivalent."
+            },
+            "functionSelector": "12372e1b",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "echidna_hash_xdomain_msg_0",
+            "nameLocation": "4475:26:24",
+            "parameters": {
+              "id": 5292,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "4501:2:24"
+            },
+            "returnParameters": {
+              "id": 5295,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5294,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5300,
+                  "src": "4525:4:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 5293,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4525:4:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "4524:6:24"
+            },
+            "scope": 5311,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 5310,
+            "nodeType": "FunctionDefinition",
+            "src": "4993:257:24",
+            "nodes": [],
+            "body": {
+              "id": 5309,
+              "nodeType": "Block",
+              "src": "5058:192:24",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "id": 5307,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "UnaryOperation",
+                    "operator": "!",
+                    "prefix": true,
+                    "src": "5219:24:24",
+                    "subExpression": {
+                      "id": 5306,
+                      "name": "failedCrossDomainHashV1",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5119,
+                      "src": "5220:23:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "functionReturnParameters": 5305,
+                  "id": 5308,
+                  "nodeType": "Return",
+                  "src": "5212:31:24"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 5301,
+              "nodeType": "StructuredDocumentation",
+              "src": "4729:259:24",
+              "text": " @custom:invariant `version` = `1`: `hashCrossDomainMessage` and `hashCrossDomainMessageV1`\n are equivalent.\n If the version passed is 1, `hashCrossDomainMessage` and `hashCrossDomainMessageV1` should be\n equivalent."
+            },
+            "functionSelector": "9af73da2",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "echidna_hash_xdomain_msg_1",
+            "nameLocation": "5002:26:24",
+            "parameters": {
+              "id": 5302,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "5028:2:24"
+            },
+            "returnParameters": {
+              "id": 5305,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5304,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5310,
+                  "src": "5052:4:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 5303,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "5052:4:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "5051:6:24"
+            },
+            "scope": 5311,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "EchidnaFuzzHashing",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          5311
+        ],
+        "name": "EchidnaFuzzHashing",
+        "nameLocation": "141:18:24",
+        "scope": 5312,
+        "usedErrors": []
+      }
+    ]
+  },
+  "id": 24
+}

@@ -1,0 +1,1941 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "DEPOSITOR_ACCOUNT",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "basefee",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "batcherHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "hash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "l1FeeOverhead",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "l1FeeScalar",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "number",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "sequenceNumber",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "_number",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "_timestamp",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_basefee",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_hash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "_sequenceNumber",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_batcherHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_l1FeeOverhead",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_l1FeeScalar",
+          "type": "uint256"
+        }
+      ],
+      "name": "setL1BlockValues",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "timestamp",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x60e060405234801561001057600080fd5b5060016080819052600060a081905260c0819052806107d661004a82396000610371015260006103480152600061031f01526107d66000f3fe608060405234801561001057600080fd5b50600436106100c95760003560e01c80638381f58a11610081578063b80777ea1161005b578063b80777ea14610170578063e591b28214610190578063e81b2c6d146101d057600080fd5b80638381f58a1461014a5780638b239f731461015e5780639e8c49661461016757600080fd5b806354fd4d50116100b257806354fd4d50146100ff5780635cf249691461011457806364ca23ef1461011d57600080fd5b8063015d8eb9146100ce57806309bd5a60146100e3575b600080fd5b6100e16100dc366004610515565b6101d9565b005b6100ec60025481565b6040519081526020015b60405180910390f35b610107610318565b6040516100f691906105b7565b6100ec60015481565b6003546101319067ffffffffffffffff1681565b60405167ffffffffffffffff90911681526020016100f6565b6000546101319067ffffffffffffffff1681565b6100ec60055481565b6100ec60065481565b6000546101319068010000000000000000900467ffffffffffffffff1681565b6101ab73deaddeaddeaddeaddeaddeaddeaddeaddead000181565b60405173ffffffffffffffffffffffffffffffffffffffff90911681526020016100f6565b6100ec60045481565b3373deaddeaddeaddeaddeaddeaddeaddeaddead000114610280576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152603b60248201527f4c31426c6f636b3a206f6e6c7920746865206465706f7369746f72206163636f60448201527f756e742063616e20736574204c3120626c6f636b2076616c7565730000000000606482015260840160405180910390fd5b6000805467ffffffffffffffff98891668010000000000000000027fffffffffffffffffffffffffffffffff00000000000000000000000000000000909116998916999099179890981790975560019490945560029290925560038054919094167fffffffffffffffffffffffffffffffffffffffffffffffff00000000000000009190911617909255600491909155600555600655565b60606103437f00000000000000000000000000000000000000000000000000000000000000006103bb565b61036c7f00000000000000000000000000000000000000000000000000000000000000006103bb565b6103957f00000000000000000000000000000000000000000000000000000000000000006103bb565b6040516020016103a793929190610608565b604051602081830303815290604052905090565b6060816000036103fe57505060408051808201909152600181527f3000000000000000000000000000000000000000000000000000000000000000602082015290565b8160005b81156104285780610412816106ad565b91506104219050600a83610714565b9150610402565b60008167ffffffffffffffff81111561044357610443610728565b6040519080825280601f01601f19166020018201604052801561046d576020820181803683370190505b5090505b84156104f057610482600183610757565b915061048f600a8661076e565b61049a906030610782565b60f81b8183815181106104af576104af61079a565b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053506104e9600a86610714565b9450610471565b949350505050565b803567ffffffffffffffff8116811461051057600080fd5b919050565b600080600080600080600080610100898b03121561053257600080fd5b61053b896104f8565b975061054960208a016104f8565b9650604089013595506060890135945061056560808a016104f8565b979a969950949793969560a0850135955060c08501359460e001359350915050565b60005b838110156105a257818101518382015260200161058a565b838111156105b1576000848401525b50505050565b60208152600082518060208401526105d6816040850160208701610587565b601f017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0169190910160400192915050565b6000845161061a818460208901610587565b80830190507f2e000000000000000000000000000000000000000000000000000000000000008082528551610656816001850160208a01610587565b60019201918201528351610671816002840160208801610587565b0160020195945050505050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b60007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff82036106de576106de61067e565b5060010190565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601260045260246000fd5b600082610723576107236106e5565b500490565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b6000828210156107695761076961067e565b500390565b60008261077d5761077d6106e5565b500690565b600082198211156107955761079561067e565b500190565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fdfea164736f6c634300080f000a",
+    "sourceMap": "586:2330:12:-:0;;;1717:32;;;;;;;;;-1:-1:-1;1738:1:12;826:22:110;;;;1741:1:12;858:22:110;;;;890;;;;1741:1:12;586:2330;;1741:1;586:2330;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x608060405234801561001057600080fd5b50600436106100c95760003560e01c80638381f58a11610081578063b80777ea1161005b578063b80777ea14610170578063e591b28214610190578063e81b2c6d146101d057600080fd5b80638381f58a1461014a5780638b239f731461015e5780639e8c49661461016757600080fd5b806354fd4d50116100b257806354fd4d50146100ff5780635cf249691461011457806364ca23ef1461011d57600080fd5b8063015d8eb9146100ce57806309bd5a60146100e3575b600080fd5b6100e16100dc366004610515565b6101d9565b005b6100ec60025481565b6040519081526020015b60405180910390f35b610107610318565b6040516100f691906105b7565b6100ec60015481565b6003546101319067ffffffffffffffff1681565b60405167ffffffffffffffff90911681526020016100f6565b6000546101319067ffffffffffffffff1681565b6100ec60055481565b6100ec60065481565b6000546101319068010000000000000000900467ffffffffffffffff1681565b6101ab73deaddeaddeaddeaddeaddeaddeaddeaddead000181565b60405173ffffffffffffffffffffffffffffffffffffffff90911681526020016100f6565b6100ec60045481565b3373deaddeaddeaddeaddeaddeaddeaddeaddead000114610280576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152603b60248201527f4c31426c6f636b3a206f6e6c7920746865206465706f7369746f72206163636f60448201527f756e742063616e20736574204c3120626c6f636b2076616c7565730000000000606482015260840160405180910390fd5b6000805467ffffffffffffffff98891668010000000000000000027fffffffffffffffffffffffffffffffff00000000000000000000000000000000909116998916999099179890981790975560019490945560029290925560038054919094167fffffffffffffffffffffffffffffffffffffffffffffffff00000000000000009190911617909255600491909155600555600655565b60606103437f00000000000000000000000000000000000000000000000000000000000000006103bb565b61036c7f00000000000000000000000000000000000000000000000000000000000000006103bb565b6103957f00000000000000000000000000000000000000000000000000000000000000006103bb565b6040516020016103a793929190610608565b604051602081830303815290604052905090565b6060816000036103fe57505060408051808201909152600181527f3000000000000000000000000000000000000000000000000000000000000000602082015290565b8160005b81156104285780610412816106ad565b91506104219050600a83610714565b9150610402565b60008167ffffffffffffffff81111561044357610443610728565b6040519080825280601f01601f19166020018201604052801561046d576020820181803683370190505b5090505b84156104f057610482600183610757565b915061048f600a8661076e565b61049a906030610782565b60f81b8183815181106104af576104af61079a565b60200101907effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916908160001a9053506104e9600a86610714565b9450610471565b949350505050565b803567ffffffffffffffff8116811461051057600080fd5b919050565b600080600080600080600080610100898b03121561053257600080fd5b61053b896104f8565b975061054960208a016104f8565b9650604089013595506060890135945061056560808a016104f8565b979a969950949793969560a0850135955060c08501359460e001359350915050565b60005b838110156105a257818101518382015260200161058a565b838111156105b1576000848401525b50505050565b60208152600082518060208401526105d6816040850160208701610587565b601f017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0169190910160400192915050565b6000845161061a818460208901610587565b80830190507f2e000000000000000000000000000000000000000000000000000000000000008082528551610656816001850160208a01610587565b60019201918201528351610671816002840160208801610587565b0160020195945050505050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b60007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff82036106de576106de61067e565b5060010190565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601260045260246000fd5b600082610723576107236106e5565b500490565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b6000828210156107695761076961067e565b500390565b60008261077d5761077d6106e5565b500690565b600082198211156107955761079561067e565b500190565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fdfea164736f6c634300080f000a",
+    "sourceMap": "586:2330:12:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2232:682;;;;;;:::i;:::-;;:::i;:::-;;1142:19;;;;;;;;;1014:25:165;;;1002:2;987:18;1142:19:12;;;;;;;;1057:372:110;;;:::i;:::-;;;;;;;:::i;:22:12:-;;;;;;1242:28;;;;;;;;;;;;2116:18:165;2104:31;;;2086:50;;2074:2;2059:18;1242:28:12;1942:200:165;867:20:12;;;;;;;;;1507:28;;;;;;1640:26;;;;;;973:23;;;;;;;;;;;;692:86;;736:42;692:86;;;;;2323:42:165;2311:55;;;2293:74;;2281:2;2266:18;692:86:12;2147:226:165;1359:26:12;;;;;;2232:682;2528:10;736:42;2528:31;2507:137;;;;;;;2580:2:165;2507:137:12;;;2562:21:165;2619:2;2599:18;;;2592:30;2658:34;2638:18;;;2631:62;2729:29;2709:18;;;2702:57;2776:19;;2507:137:12;;;;;;;;2655:6;:16;;;2681:22;;;;;;;;;2655:16;;;2681:22;;;;;;;;;;;2655:16;2713:18;;;;2741:4;:12;;;;2763:14;:32;;;;;;2655:16;2763:32;;;;;;;;2805:11;:26;;;;2841:13;:30;2881:11;:26;2232:682::o;1057:372:110:-;1097:13;1203:31;1220:13;1203:16;:31::i;:::-;1281;1298:13;1281:16;:31::i;:::-;1359;1376:13;1359:16;:31::i;:::-;1165:243;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;1122:300;;1057:372;:::o;392:703:138:-;448:13;665:5;674:1;665:10;661:51;;-1:-1:-1;;691:10:138;;;;;;;;;;;;;;;;;;392:703::o;661:51::-;736:5;721:12;775:75;782:9;;775:75;;807:8;;;;:::i;:::-;;-1:-1:-1;829:10:138;;-1:-1:-1;837:2:138;829:10;;:::i;:::-;;;775:75;;;859:19;891:6;881:17;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;881:17:138;;859:39;;908:150;915:10;;908:150;;941:11;951:1;941:11;;:::i;:::-;;-1:-1:-1;1009:10:138;1017:2;1009:5;:10;:::i;:::-;996:24;;:2;:24;:::i;:::-;983:39;;966:6;973;966:14;;;;;;;;:::i;:::-;;;;:56;;;;;;;;;;-1:-1:-1;1036:11:138;1045:2;1036:11;;:::i;:::-;;;908:150;;;1081:6;392:703;-1:-1:-1;;;;392:703:138:o;14:171:165:-;81:20;;141:18;130:30;;120:41;;110:69;;175:1;172;165:12;110:69;14:171;;;:::o;190:673::-;309:6;317;325;333;341;349;357;365;418:3;406:9;397:7;393:23;389:33;386:53;;;435:1;432;425:12;386:53;458:28;476:9;458:28;:::i;:::-;448:38;;505:37;538:2;527:9;523:18;505:37;:::i;:::-;495:47;;589:2;578:9;574:18;561:32;551:42;;640:2;629:9;625:18;612:32;602:42;;663:38;696:3;685:9;681:19;663:38;:::i;:::-;190:673;;;;-1:-1:-1;190:673:165;;;;653:48;748:3;733:19;;720:33;;-1:-1:-1;800:3:165;785:19;;772:33;;852:3;837:19;824:33;;-1:-1:-1;190:673:165;-1:-1:-1;;190:673:165:o;1050:258::-;1122:1;1132:113;1146:6;1143:1;1140:13;1132:113;;;1222:11;;;1216:18;1203:11;;;1196:39;1168:2;1161:10;1132:113;;;1263:6;1260:1;1257:13;1254:48;;;1298:1;1289:6;1284:3;1280:16;1273:27;1254:48;;1050:258;;;:::o;1313:442::-;1462:2;1451:9;1444:21;1425:4;1494:6;1488:13;1537:6;1532:2;1521:9;1517:18;1510:34;1553:66;1612:6;1607:2;1596:9;1592:18;1587:2;1579:6;1575:15;1553:66;:::i;:::-;1671:2;1659:15;1676:66;1655:88;1640:104;;;;1746:2;1636:113;;1313:442;-1:-1:-1;;1313:442:165:o;2806:960::-;3235:3;3273:6;3267:13;3289:53;3335:6;3330:3;3323:4;3315:6;3311:17;3289:53;:::i;:::-;3373:6;3368:3;3364:16;3351:29;;3399:3;3425:2;3418:5;3411:17;3459:6;3453:13;3475:65;3531:8;3527:1;3520:5;3516:13;3509:4;3501:6;3497:17;3475:65;:::i;:::-;3603:1;3559:20;;3595:10;;;3588:22;3635:13;;3657:62;3635:13;3706:1;3698:10;;3691:4;3679:17;;3657:62;:::i;:::-;3739:17;3758:1;3735:25;;2806:960;-1:-1:-1;;;;;2806:960:165:o;3771:184::-;3823:77;3820:1;3813:88;3920:4;3917:1;3910:15;3944:4;3941:1;3934:15;3960:195;3999:3;4030:66;4023:5;4020:77;4017:103;;4100:18;;:::i;:::-;-1:-1:-1;4147:1:165;4136:13;;3960:195::o;4160:184::-;4212:77;4209:1;4202:88;4309:4;4306:1;4299:15;4333:4;4330:1;4323:15;4349:120;4389:1;4415;4405:35;;4420:18;;:::i;:::-;-1:-1:-1;4454:9:165;;4349:120::o;4474:184::-;4526:77;4523:1;4516:88;4623:4;4620:1;4613:15;4647:4;4644:1;4637:15;4663:125;4703:4;4731:1;4728;4725:8;4722:34;;;4736:18;;:::i;:::-;-1:-1:-1;4773:9:165;;4663:125::o;4793:112::-;4825:1;4851;4841:35;;4856:18;;:::i;:::-;-1:-1:-1;4890:9:165;;4793:112::o;4910:128::-;4950:3;4981:1;4977:6;4974:1;4971:13;4968:39;;;4987:18;;:::i;:::-;-1:-1:-1;5023:9:165;;4910:128::o;5043:184::-;5095:77;5092:1;5085:88;5192:4;5189:1;5182:15;5216:4;5213:1;5206:15",
+    "linkReferences": {},
+    "immutableReferences": {
+      "44632": [
+        {
+          "start": 799,
+          "length": 32
+        }
+      ],
+      "44635": [
+        {
+          "start": 840,
+          "length": 32
+        }
+      ],
+      "44638": [
+        {
+          "start": 881,
+          "length": 32
+        }
+      ]
+    }
+  },
+  "methodIdentifiers": {
+    "DEPOSITOR_ACCOUNT()": "e591b282",
+    "basefee()": "5cf24969",
+    "batcherHash()": "e81b2c6d",
+    "hash()": "09bd5a60",
+    "l1FeeOverhead()": "8b239f73",
+    "l1FeeScalar()": "9e8c4966",
+    "number()": "8381f58a",
+    "sequenceNumber()": "64ca23ef",
+    "setL1BlockValues(uint64,uint64,uint256,bytes32,uint64,bytes32,uint256,uint256)": "015d8eb9",
+    "timestamp()": "b80777ea",
+    "version()": "54fd4d50"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"DEPOSITOR_ACCOUNT\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"basefee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"batcherHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"hash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"l1FeeOverhead\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"l1FeeScalar\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"number\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"\",\"type\":\"uint64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"sequenceNumber\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"\",\"type\":\"uint64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint64\",\"name\":\"_number\",\"type\":\"uint64\"},{\"internalType\":\"uint64\",\"name\":\"_timestamp\",\"type\":\"uint64\"},{\"internalType\":\"uint256\",\"name\":\"_basefee\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint64\",\"name\":\"_sequenceNumber\",\"type\":\"uint64\"},{\"internalType\":\"bytes32\",\"name\":\"_batcherHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"_l1FeeOverhead\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_l1FeeScalar\",\"type\":\"uint256\"}],\"name\":\"setL1BlockValues\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"timestamp\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"\",\"type\":\"uint64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"custom:proxied\":\"@custom:predeploy 0x4200000000000000000000000000000000000015\",\"kind\":\"dev\",\"methods\":{\"constructor\":{\"custom:semver\":\"1.0.0\"},\"setL1BlockValues(uint64,uint64,uint256,bytes32,uint64,bytes32,uint256,uint256)\":{\"params\":{\"_basefee\":\"L1 basefee.\",\"_batcherHash\":\"Versioned hash to authenticate batcher by.\",\"_hash\":\"L1 blockhash.\",\"_l1FeeOverhead\":\"L1 fee overhead.\",\"_l1FeeScalar\":\"L1 fee scalar.\",\"_number\":\"L1 blocknumber.\",\"_sequenceNumber\":\"Number of L2 blocks since epoch start.\",\"_timestamp\":\"L1 timestamp.\"}},\"version()\":{\"returns\":{\"_0\":\"Semver contract version as a string.\"}}},\"title\":\"L1Block\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"DEPOSITOR_ACCOUNT()\":{\"notice\":\"Address of the special depositor account.\"},\"basefee()\":{\"notice\":\"The latest L1 basefee.\"},\"batcherHash()\":{\"notice\":\"The versioned hash to authenticate the batcher by.\"},\"hash()\":{\"notice\":\"The latest L1 blockhash.\"},\"l1FeeOverhead()\":{\"notice\":\"The overhead value applied to the L1 portion of the transaction         fee.\"},\"l1FeeScalar()\":{\"notice\":\"The scalar value applied to the L1 portion of the transaction fee.\"},\"number()\":{\"notice\":\"The latest L1 block number known by the L2 system.\"},\"sequenceNumber()\":{\"notice\":\"The number of L2 blocks in the same epoch.\"},\"setL1BlockValues(uint64,uint64,uint256,bytes32,uint64,bytes32,uint256,uint256)\":{\"notice\":\"Updates the L1 block values.\"},\"timestamp()\":{\"notice\":\"The latest L1 timestamp known by the L2 system.\"},\"version()\":{\"notice\":\"Returns the full semver contract version.\"}},\"notice\":\"The L1Block predeploy gives users access to information about the last known L1 block.         Values within this contract are updated once per epoch (every L1 block) and can only be         set by the \\\"depositor\\\" account, a special system address. Depositor account transactions         are created by the protocol whenever we move to a new epoch.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/L2/L1Block.sol\":\"L1Block\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":999999},\"remappings\":[\":@openzeppelin/=node_modules/@openzeppelin/\",\":@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/\",\":@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/\",\":@rari-capital/=node_modules/@rari-capital/\",\":@rari-capital/solmate/=node_modules/@rari-capital/solmate/\",\":ds-test/=node_modules/ds-test/src/\",\":forge-std/=node_modules/forge-std/src/\"]},\"sources\":{\"contracts/L2/L1Block.sol\":{\"keccak256\":\"0xbd2284eeedcdfbb44aeb010c37e109a28a202b6cee62b7091c9a9afb1f461836\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://e8afce8fb5023f16e56f9458b3e9ce998740073ef7668d6aade1c0de0512f870\",\"dweb:/ipfs/QmWQ1FNhqJWraS14qq6wYsPngYv6NghHUwgtmvt9PVzhLo\"]},\"contracts/universal/Semver.sol\":{\"keccak256\":\"0x400059d3edb9efc9c23e6fbc18de6710f9235a4ffba4ab23bdb9f825273f093b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://9baf7797439c0ae6512f4639dfc6a1934dbd4e4d7cbb8e63e99264ff47682c9e\",\"dweb:/ipfs/QmawAuhppPyeoZH3rC1uh87xDELa9Lyfw5pYsBqE8myE1m\"]},\"node_modules/@openzeppelin/contracts/utils/Strings.sol\":{\"keccak256\":\"0xaf159a8b1923ad2a26d516089bceca9bdeaeacd04be50983ea00ba63070f08a3\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6f2cf1c531122bc7ca96b8c8db6a60deae60441e5223065e792553d4849b5638\",\"dweb:/ipfs/QmPBdJmBBABMDCfyDjCbdxgiqRavgiSL88SYPGibgbPas9\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.15+commit.e14f2714"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "stateMutability": "nonpayable",
+          "type": "constructor"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "DEPOSITOR_ACCOUNT",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "basefee",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "batcherHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "hash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "l1FeeOverhead",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "l1FeeScalar",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "number",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "sequenceNumber",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint64",
+              "name": "_number",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "_timestamp",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_basefee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "_hash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "_sequenceNumber",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "_batcherHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_l1FeeOverhead",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_l1FeeScalar",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "setL1BlockValues"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "timestamp",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "version",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "constructor": {
+            "custom:semver": "1.0.0"
+          },
+          "setL1BlockValues(uint64,uint64,uint256,bytes32,uint64,bytes32,uint256,uint256)": {
+            "params": {
+              "_basefee": "L1 basefee.",
+              "_batcherHash": "Versioned hash to authenticate batcher by.",
+              "_hash": "L1 blockhash.",
+              "_l1FeeOverhead": "L1 fee overhead.",
+              "_l1FeeScalar": "L1 fee scalar.",
+              "_number": "L1 blocknumber.",
+              "_sequenceNumber": "Number of L2 blocks since epoch start.",
+              "_timestamp": "L1 timestamp."
+            }
+          },
+          "version()": {
+            "returns": {
+              "_0": "Semver contract version as a string."
+            }
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "DEPOSITOR_ACCOUNT()": {
+            "notice": "Address of the special depositor account."
+          },
+          "basefee()": {
+            "notice": "The latest L1 basefee."
+          },
+          "batcherHash()": {
+            "notice": "The versioned hash to authenticate the batcher by."
+          },
+          "hash()": {
+            "notice": "The latest L1 blockhash."
+          },
+          "l1FeeOverhead()": {
+            "notice": "The overhead value applied to the L1 portion of the transaction         fee."
+          },
+          "l1FeeScalar()": {
+            "notice": "The scalar value applied to the L1 portion of the transaction fee."
+          },
+          "number()": {
+            "notice": "The latest L1 block number known by the L2 system."
+          },
+          "sequenceNumber()": {
+            "notice": "The number of L2 blocks in the same epoch."
+          },
+          "setL1BlockValues(uint64,uint64,uint256,bytes32,uint64,bytes32,uint256,uint256)": {
+            "notice": "Updates the L1 block values."
+          },
+          "timestamp()": {
+            "notice": "The latest L1 timestamp known by the L2 system."
+          },
+          "version()": {
+            "notice": "Returns the full semver contract version."
+          }
+        },
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@openzeppelin/=node_modules/@openzeppelin/",
+        ":@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/",
+        ":@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+        ":@rari-capital/=node_modules/@rari-capital/",
+        ":@rari-capital/solmate/=node_modules/@rari-capital/solmate/",
+        ":ds-test/=node_modules/ds-test/src/",
+        ":forge-std/=node_modules/forge-std/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 999999
+      },
+      "metadata": {
+        "bytecodeHash": "none"
+      },
+      "compilationTarget": {
+        "contracts/L2/L1Block.sol": "L1Block"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "contracts/L2/L1Block.sol": {
+        "keccak256": "0xbd2284eeedcdfbb44aeb010c37e109a28a202b6cee62b7091c9a9afb1f461836",
+        "urls": [
+          "bzz-raw://e8afce8fb5023f16e56f9458b3e9ce998740073ef7668d6aade1c0de0512f870",
+          "dweb:/ipfs/QmWQ1FNhqJWraS14qq6wYsPngYv6NghHUwgtmvt9PVzhLo"
+        ],
+        "license": "MIT"
+      },
+      "contracts/universal/Semver.sol": {
+        "keccak256": "0x400059d3edb9efc9c23e6fbc18de6710f9235a4ffba4ab23bdb9f825273f093b",
+        "urls": [
+          "bzz-raw://9baf7797439c0ae6512f4639dfc6a1934dbd4e4d7cbb8e63e99264ff47682c9e",
+          "dweb:/ipfs/QmawAuhppPyeoZH3rC1uh87xDELa9Lyfw5pYsBqE8myE1m"
+        ],
+        "license": "MIT"
+      },
+      "node_modules/@openzeppelin/contracts/utils/Strings.sol": {
+        "keccak256": "0xaf159a8b1923ad2a26d516089bceca9bdeaeacd04be50983ea00ba63070f08a3",
+        "urls": [
+          "bzz-raw://6f2cf1c531122bc7ca96b8c8db6a60deae60441e5223065e792553d4849b5638",
+          "dweb:/ipfs/QmPBdJmBBABMDCfyDjCbdxgiqRavgiSL88SYPGibgbPas9"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 2866,
+        "contract": "contracts/L2/L1Block.sol:L1Block",
+        "label": "number",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_uint64"
+      },
+      {
+        "astId": 2869,
+        "contract": "contracts/L2/L1Block.sol:L1Block",
+        "label": "timestamp",
+        "offset": 8,
+        "slot": "0",
+        "type": "t_uint64"
+      },
+      {
+        "astId": 2872,
+        "contract": "contracts/L2/L1Block.sol:L1Block",
+        "label": "basefee",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 2875,
+        "contract": "contracts/L2/L1Block.sol:L1Block",
+        "label": "hash",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_bytes32"
+      },
+      {
+        "astId": 2878,
+        "contract": "contracts/L2/L1Block.sol:L1Block",
+        "label": "sequenceNumber",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_uint64"
+      },
+      {
+        "astId": 2881,
+        "contract": "contracts/L2/L1Block.sol:L1Block",
+        "label": "batcherHash",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_bytes32"
+      },
+      {
+        "astId": 2884,
+        "contract": "contracts/L2/L1Block.sol:L1Block",
+        "label": "l1FeeOverhead",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 2887,
+        "contract": "contracts/L2/L1Block.sol:L1Block",
+        "label": "l1FeeScalar",
+        "offset": 0,
+        "slot": "6",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  },
+  "userdoc": {
+    "version": 1,
+    "kind": "user",
+    "methods": {
+      "DEPOSITOR_ACCOUNT()": {
+        "notice": "Address of the special depositor account."
+      },
+      "basefee()": {
+        "notice": "The latest L1 basefee."
+      },
+      "batcherHash()": {
+        "notice": "The versioned hash to authenticate the batcher by."
+      },
+      "hash()": {
+        "notice": "The latest L1 blockhash."
+      },
+      "l1FeeOverhead()": {
+        "notice": "The overhead value applied to the L1 portion of the transaction         fee."
+      },
+      "l1FeeScalar()": {
+        "notice": "The scalar value applied to the L1 portion of the transaction fee."
+      },
+      "number()": {
+        "notice": "The latest L1 block number known by the L2 system."
+      },
+      "sequenceNumber()": {
+        "notice": "The number of L2 blocks in the same epoch."
+      },
+      "setL1BlockValues(uint64,uint64,uint256,bytes32,uint64,bytes32,uint256,uint256)": {
+        "notice": "Updates the L1 block values."
+      },
+      "timestamp()": {
+        "notice": "The latest L1 timestamp known by the L2 system."
+      },
+      "version()": {
+        "notice": "Returns the full semver contract version."
+      }
+    },
+    "notice": "The L1Block predeploy gives users access to information about the last known L1 block.         Values within this contract are updated once per epoch (every L1 block) and can only be         set by the \"depositor\" account, a special system address. Depositor account transactions         are created by the protocol whenever we move to a new epoch."
+  },
+  "devdoc": {
+    "version": 1,
+    "kind": "dev",
+    "methods": {
+      "constructor": {},
+      "setL1BlockValues(uint64,uint64,uint256,bytes32,uint64,bytes32,uint256,uint256)": {
+        "params": {
+          "_basefee": "L1 basefee.",
+          "_batcherHash": "Versioned hash to authenticate batcher by.",
+          "_hash": "L1 blockhash.",
+          "_l1FeeOverhead": "L1 fee overhead.",
+          "_l1FeeScalar": "L1 fee scalar.",
+          "_number": "L1 blocknumber.",
+          "_sequenceNumber": "Number of L2 blocks since epoch start.",
+          "_timestamp": "L1 timestamp."
+        }
+      },
+      "version()": {
+        "returns": {
+          "_0": "Semver contract version as a string."
+        }
+      }
+    },
+    "title": "L1Block"
+  },
+  "ast": {
+    "absolutePath": "contracts/L2/L1Block.sol",
+    "id": 2960,
+    "exportedSymbols": {
+      "L1Block": [
+        2959
+      ],
+      "Semver": [
+        44690
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:2885:12",
+    "nodes": [
+      {
+        "id": 2854,
+        "nodeType": "PragmaDirective",
+        "src": "32:23:12",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "0.8",
+          ".15"
+        ]
+      },
+      {
+        "id": 2856,
+        "nodeType": "ImportDirective",
+        "src": "57:49:12",
+        "nodes": [],
+        "absolutePath": "contracts/universal/Semver.sol",
+        "file": "../universal/Semver.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 2960,
+        "sourceUnit": 44691,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 2855,
+              "name": "Semver",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 44690,
+              "src": "66:6:12",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 2959,
+        "nodeType": "ContractDefinition",
+        "src": "586:2330:12",
+        "nodes": [
+          {
+            "id": 2863,
+            "nodeType": "VariableDeclaration",
+            "src": "692:86:12",
+            "nodes": [],
+            "constant": true,
+            "documentation": {
+              "id": 2860,
+              "nodeType": "StructuredDocumentation",
+              "src": "619:68:12",
+              "text": " @notice Address of the special depositor account."
+            },
+            "functionSelector": "e591b282",
+            "mutability": "constant",
+            "name": "DEPOSITOR_ACCOUNT",
+            "nameLocation": "716:17:12",
+            "scope": 2959,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 2861,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "692:7:12",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "value": {
+              "hexValue": "307844656144444561444465416444654164444541644445616464654164644541644445416430303031",
+              "id": 2862,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "736:42:12",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              },
+              "value": "0xDeaDDEaDDeAdDeAdDEAdDEaddeAddEAdDEAd0001"
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 2866,
+            "nodeType": "VariableDeclaration",
+            "src": "867:20:12",
+            "nodes": [],
+            "constant": false,
+            "documentation": {
+              "id": 2864,
+              "nodeType": "StructuredDocumentation",
+              "src": "785:77:12",
+              "text": " @notice The latest L1 block number known by the L2 system."
+            },
+            "functionSelector": "8381f58a",
+            "mutability": "mutable",
+            "name": "number",
+            "nameLocation": "881:6:12",
+            "scope": 2959,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint64",
+              "typeString": "uint64"
+            },
+            "typeName": {
+              "id": 2865,
+              "name": "uint64",
+              "nodeType": "ElementaryTypeName",
+              "src": "867:6:12",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint64",
+                "typeString": "uint64"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 2869,
+            "nodeType": "VariableDeclaration",
+            "src": "973:23:12",
+            "nodes": [],
+            "constant": false,
+            "documentation": {
+              "id": 2867,
+              "nodeType": "StructuredDocumentation",
+              "src": "894:74:12",
+              "text": " @notice The latest L1 timestamp known by the L2 system."
+            },
+            "functionSelector": "b80777ea",
+            "mutability": "mutable",
+            "name": "timestamp",
+            "nameLocation": "987:9:12",
+            "scope": 2959,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint64",
+              "typeString": "uint64"
+            },
+            "typeName": {
+              "id": 2868,
+              "name": "uint64",
+              "nodeType": "ElementaryTypeName",
+              "src": "973:6:12",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint64",
+                "typeString": "uint64"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 2872,
+            "nodeType": "VariableDeclaration",
+            "src": "1057:22:12",
+            "nodes": [],
+            "constant": false,
+            "documentation": {
+              "id": 2870,
+              "nodeType": "StructuredDocumentation",
+              "src": "1003:49:12",
+              "text": " @notice The latest L1 basefee."
+            },
+            "functionSelector": "5cf24969",
+            "mutability": "mutable",
+            "name": "basefee",
+            "nameLocation": "1072:7:12",
+            "scope": 2959,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 2871,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "1057:7:12",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 2875,
+            "nodeType": "VariableDeclaration",
+            "src": "1142:19:12",
+            "nodes": [],
+            "constant": false,
+            "documentation": {
+              "id": 2873,
+              "nodeType": "StructuredDocumentation",
+              "src": "1086:51:12",
+              "text": " @notice The latest L1 blockhash."
+            },
+            "functionSelector": "09bd5a60",
+            "mutability": "mutable",
+            "name": "hash",
+            "nameLocation": "1157:4:12",
+            "scope": 2959,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bytes32",
+              "typeString": "bytes32"
+            },
+            "typeName": {
+              "id": 2874,
+              "name": "bytes32",
+              "nodeType": "ElementaryTypeName",
+              "src": "1142:7:12",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bytes32",
+                "typeString": "bytes32"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 2878,
+            "nodeType": "VariableDeclaration",
+            "src": "1242:28:12",
+            "nodes": [],
+            "constant": false,
+            "documentation": {
+              "id": 2876,
+              "nodeType": "StructuredDocumentation",
+              "src": "1168:69:12",
+              "text": " @notice The number of L2 blocks in the same epoch."
+            },
+            "functionSelector": "64ca23ef",
+            "mutability": "mutable",
+            "name": "sequenceNumber",
+            "nameLocation": "1256:14:12",
+            "scope": 2959,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint64",
+              "typeString": "uint64"
+            },
+            "typeName": {
+              "id": 2877,
+              "name": "uint64",
+              "nodeType": "ElementaryTypeName",
+              "src": "1242:6:12",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint64",
+                "typeString": "uint64"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 2881,
+            "nodeType": "VariableDeclaration",
+            "src": "1359:26:12",
+            "nodes": [],
+            "constant": false,
+            "documentation": {
+              "id": 2879,
+              "nodeType": "StructuredDocumentation",
+              "src": "1277:77:12",
+              "text": " @notice The versioned hash to authenticate the batcher by."
+            },
+            "functionSelector": "e81b2c6d",
+            "mutability": "mutable",
+            "name": "batcherHash",
+            "nameLocation": "1374:11:12",
+            "scope": 2959,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bytes32",
+              "typeString": "bytes32"
+            },
+            "typeName": {
+              "id": 2880,
+              "name": "bytes32",
+              "nodeType": "ElementaryTypeName",
+              "src": "1359:7:12",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bytes32",
+                "typeString": "bytes32"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 2884,
+            "nodeType": "VariableDeclaration",
+            "src": "1507:28:12",
+            "nodes": [],
+            "constant": false,
+            "documentation": {
+              "id": 2882,
+              "nodeType": "StructuredDocumentation",
+              "src": "1392:110:12",
+              "text": " @notice The overhead value applied to the L1 portion of the transaction\n         fee."
+            },
+            "functionSelector": "8b239f73",
+            "mutability": "mutable",
+            "name": "l1FeeOverhead",
+            "nameLocation": "1522:13:12",
+            "scope": 2959,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 2883,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "1507:7:12",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 2887,
+            "nodeType": "VariableDeclaration",
+            "src": "1640:26:12",
+            "nodes": [],
+            "constant": false,
+            "documentation": {
+              "id": 2885,
+              "nodeType": "StructuredDocumentation",
+              "src": "1542:93:12",
+              "text": " @notice The scalar value applied to the L1 portion of the transaction fee."
+            },
+            "functionSelector": "9e8c4966",
+            "mutability": "mutable",
+            "name": "l1FeeScalar",
+            "nameLocation": "1655:11:12",
+            "scope": 2959,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 2886,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "1640:7:12",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 2897,
+            "nodeType": "FunctionDefinition",
+            "src": "1717:32:12",
+            "nodes": [],
+            "body": {
+              "id": 2896,
+              "nodeType": "Block",
+              "src": "1747:2:12",
+              "nodes": [],
+              "statements": []
+            },
+            "documentation": {
+              "id": 2888,
+              "nodeType": "StructuredDocumentation",
+              "src": "1673:39:12",
+              "text": " @custom:semver 1.0.0"
+            },
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [
+              {
+                "arguments": [
+                  {
+                    "hexValue": "31",
+                    "id": 2891,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "number",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "1738:1:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_rational_1_by_1",
+                      "typeString": "int_const 1"
+                    },
+                    "value": "1"
+                  },
+                  {
+                    "hexValue": "30",
+                    "id": 2892,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "number",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "1741:1:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_rational_0_by_1",
+                      "typeString": "int_const 0"
+                    },
+                    "value": "0"
+                  },
+                  {
+                    "hexValue": "30",
+                    "id": 2893,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "number",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "1744:1:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_rational_0_by_1",
+                      "typeString": "int_const 0"
+                    },
+                    "value": "0"
+                  }
+                ],
+                "id": 2894,
+                "kind": "baseConstructorSpecifier",
+                "modifierName": {
+                  "id": 2890,
+                  "name": "Semver",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 44690,
+                  "src": "1731:6:12"
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "1731:15:12"
+              }
+            ],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "parameters": {
+              "id": 2889,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1728:2:12"
+            },
+            "returnParameters": {
+              "id": 2895,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1747:0:12"
+            },
+            "scope": 2959,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 2958,
+            "nodeType": "FunctionDefinition",
+            "src": "2232:682:12",
+            "nodes": [],
+            "body": {
+              "id": 2957,
+              "nodeType": "Block",
+              "src": "2497:417:12",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "id": 2921,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "expression": {
+                            "id": 2918,
+                            "name": "msg",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": -15,
+                            "src": "2528:3:12",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_message",
+                              "typeString": "msg"
+                            }
+                          },
+                          "id": 2919,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "sender",
+                          "nodeType": "MemberAccess",
+                          "src": "2528:10:12",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "id": 2920,
+                          "name": "DEPOSITOR_ACCOUNT",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2863,
+                          "src": "2542:17:12",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "src": "2528:31:12",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4c31426c6f636b3a206f6e6c7920746865206465706f7369746f72206163636f756e742063616e20736574204c3120626c6f636b2076616c756573",
+                        "id": 2922,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2573:61:12",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_c3c76ba7c08c4e35ee9214a1ee03dd5f5eafa75e54f6dcd9b82029d1cceb0d7b",
+                          "typeString": "literal_string \"L1Block: only the depositor account can set L1 block values\""
+                        },
+                        "value": "L1Block: only the depositor account can set L1 block values"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_c3c76ba7c08c4e35ee9214a1ee03dd5f5eafa75e54f6dcd9b82029d1cceb0d7b",
+                          "typeString": "literal_string \"L1Block: only the depositor account can set L1 block values\""
+                        }
+                      ],
+                      "id": 2917,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        -18,
+                        -18
+                      ],
+                      "referencedDeclaration": -18,
+                      "src": "2507:7:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 2923,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2507:137:12",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2924,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2507:137:12"
+                },
+                {
+                  "expression": {
+                    "id": 2927,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 2925,
+                      "name": "number",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2866,
+                      "src": "2655:6:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 2926,
+                      "name": "_number",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2900,
+                      "src": "2664:7:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "src": "2655:16:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "id": 2928,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2655:16:12"
+                },
+                {
+                  "expression": {
+                    "id": 2931,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 2929,
+                      "name": "timestamp",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2869,
+                      "src": "2681:9:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 2930,
+                      "name": "_timestamp",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2902,
+                      "src": "2693:10:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "src": "2681:22:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "id": 2932,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2681:22:12"
+                },
+                {
+                  "expression": {
+                    "id": 2935,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 2933,
+                      "name": "basefee",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2872,
+                      "src": "2713:7:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 2934,
+                      "name": "_basefee",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2904,
+                      "src": "2723:8:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "2713:18:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 2936,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2713:18:12"
+                },
+                {
+                  "expression": {
+                    "id": 2939,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 2937,
+                      "name": "hash",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2875,
+                      "src": "2741:4:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 2938,
+                      "name": "_hash",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2906,
+                      "src": "2748:5:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "src": "2741:12:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "id": 2940,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2741:12:12"
+                },
+                {
+                  "expression": {
+                    "id": 2943,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 2941,
+                      "name": "sequenceNumber",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2878,
+                      "src": "2763:14:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 2942,
+                      "name": "_sequenceNumber",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2908,
+                      "src": "2780:15:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "src": "2763:32:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "id": 2944,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2763:32:12"
+                },
+                {
+                  "expression": {
+                    "id": 2947,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 2945,
+                      "name": "batcherHash",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2881,
+                      "src": "2805:11:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 2946,
+                      "name": "_batcherHash",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2910,
+                      "src": "2819:12:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "src": "2805:26:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "id": 2948,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2805:26:12"
+                },
+                {
+                  "expression": {
+                    "id": 2951,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 2949,
+                      "name": "l1FeeOverhead",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2884,
+                      "src": "2841:13:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 2950,
+                      "name": "_l1FeeOverhead",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2912,
+                      "src": "2857:14:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "2841:30:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 2952,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2841:30:12"
+                },
+                {
+                  "expression": {
+                    "id": 2955,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 2953,
+                      "name": "l1FeeScalar",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2887,
+                      "src": "2881:11:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 2954,
+                      "name": "_l1FeeScalar",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2914,
+                      "src": "2895:12:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "2881:26:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 2956,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2881:26:12"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 2898,
+              "nodeType": "StructuredDocumentation",
+              "src": "1755:472:12",
+              "text": " @notice Updates the L1 block values.\n @param _number         L1 blocknumber.\n @param _timestamp      L1 timestamp.\n @param _basefee        L1 basefee.\n @param _hash           L1 blockhash.\n @param _sequenceNumber Number of L2 blocks since epoch start.\n @param _batcherHash    Versioned hash to authenticate batcher by.\n @param _l1FeeOverhead  L1 fee overhead.\n @param _l1FeeScalar    L1 fee scalar."
+            },
+            "functionSelector": "015d8eb9",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setL1BlockValues",
+            "nameLocation": "2241:16:12",
+            "parameters": {
+              "id": 2915,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2900,
+                  "mutability": "mutable",
+                  "name": "_number",
+                  "nameLocation": "2274:7:12",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2958,
+                  "src": "2267:14:12",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint64",
+                    "typeString": "uint64"
+                  },
+                  "typeName": {
+                    "id": 2899,
+                    "name": "uint64",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2267:6:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2902,
+                  "mutability": "mutable",
+                  "name": "_timestamp",
+                  "nameLocation": "2298:10:12",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2958,
+                  "src": "2291:17:12",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint64",
+                    "typeString": "uint64"
+                  },
+                  "typeName": {
+                    "id": 2901,
+                    "name": "uint64",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2291:6:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2904,
+                  "mutability": "mutable",
+                  "name": "_basefee",
+                  "nameLocation": "2326:8:12",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2958,
+                  "src": "2318:16:12",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2903,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2318:7:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2906,
+                  "mutability": "mutable",
+                  "name": "_hash",
+                  "nameLocation": "2352:5:12",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2958,
+                  "src": "2344:13:12",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 2905,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2344:7:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2908,
+                  "mutability": "mutable",
+                  "name": "_sequenceNumber",
+                  "nameLocation": "2374:15:12",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2958,
+                  "src": "2367:22:12",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint64",
+                    "typeString": "uint64"
+                  },
+                  "typeName": {
+                    "id": 2907,
+                    "name": "uint64",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2367:6:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2910,
+                  "mutability": "mutable",
+                  "name": "_batcherHash",
+                  "nameLocation": "2407:12:12",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2958,
+                  "src": "2399:20:12",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 2909,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2399:7:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2912,
+                  "mutability": "mutable",
+                  "name": "_l1FeeOverhead",
+                  "nameLocation": "2437:14:12",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2958,
+                  "src": "2429:22:12",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2911,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2429:7:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2914,
+                  "mutability": "mutable",
+                  "name": "_l1FeeScalar",
+                  "nameLocation": "2469:12:12",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2958,
+                  "src": "2461:20:12",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2913,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2461:7:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2257:230:12"
+            },
+            "returnParameters": {
+              "id": 2916,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2497:0:12"
+            },
+            "scope": 2959,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 2858,
+              "name": "Semver",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 44690,
+              "src": "606:6:12"
+            },
+            "id": 2859,
+            "nodeType": "InheritanceSpecifier",
+            "src": "606:6:12"
+          }
+        ],
+        "canonicalName": "L1Block",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 2857,
+          "nodeType": "StructuredDocumentation",
+          "src": "108:477:12",
+          "text": " @custom:proxied\n @custom:predeploy 0x4200000000000000000000000000000000000015\n @title L1Block\n @notice The L1Block predeploy gives users access to information about the last known L1 block.\n         Values within this contract are updated once per epoch (every L1 block) and can only be\n         set by the \"depositor\" account, a special system address. Depositor account transactions\n         are created by the protocol whenever we move to a new epoch."
+        },
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          2959,
+          44690
+        ],
+        "name": "L1Block",
+        "nameLocation": "595:7:12",
+        "scope": 2960,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  },
+  "id": 12
+}

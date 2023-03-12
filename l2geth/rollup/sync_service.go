@@ -40,6 +40,10 @@ var (
 	// with gas price zero and fees are currently enforced
 	errZeroGasPriceTx = errors.New("cannot accept 0 gas price transaction")
 	float1            = big.NewFloat(1)
+
+	// testnet dtl default fix data height
+	defaultFixHeight uint64 = 500000
+	testnetChainID   uint64 = 5001
 )
 
 // SyncService implements the main functionality around pulling in transactions
@@ -161,6 +165,10 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		feeThresholdDown:               cfg.FeeThresholdDown,
 		feeThresholdUp:                 cfg.FeeThresholdUp,
 		executor:                       newExecutor(gasFloor, chainConfig, engine, bc),
+	}
+
+	if service.bc.Config().ChainID.Uint64() == testnetChainID && service.mpcVerifyHeight == 0 && service.verifier && cfg.Backend == BackendL1 {
+		service.mpcVerifyHeight = defaultFixHeight
 	}
 
 	// The chainHeadSub is used to synchronize the SyncService with the chain.
