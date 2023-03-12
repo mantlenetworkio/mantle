@@ -38,21 +38,35 @@ packages/contracts/genesis2.json
 # vim
 *.sw*
 
+# jetbrains
+.idea/
 .env
 .env*
 !.env.example
 *.log
-
 .devnet
+
 
 # Ignore local fuzzing results
 **/testdata/fuzz/
 
 coverage.out
 
-.idea/
-
 mantle.iml
 
 ops/data/**
 dist/
+
+
+# Ignore bedrock go bindings local output files
+mt-bindings/bin
+mt-node/bin
+mt-batcher/bin
+mt-proposer/bin
+mt-exporter
+
+
+__pycache__
+
+# Ignore echidna artifacts
+crytic-export
