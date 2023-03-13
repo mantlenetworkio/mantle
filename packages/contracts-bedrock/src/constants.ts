@@ -2,9 +2,9 @@
  * Predeploys are Solidity contracts that are injected into the initial L2 state and provide
  * various useful functions.
  * Notes:
- * 0x42...04 was the address of the OVM_ProxySequencerEntrypoint. This contract is no longer in
+ * 0x42...04 was the address of the BVM_ProxySequencerEntrypoint. This contract is no longer in
  * use and has therefore been removed. We may place a new predeployed contract at this address
- * in the future. See https://github.com/ethereum-optimism/optimism/pull/549 for more info.
+ * in the future. See https://github.com/mantlenetworkio/mantle/pull/549 for more info.
  */
 export const predeploys = {
   L2ToL1MessagePasser: '0x4200000000000000000000000000000000000016',

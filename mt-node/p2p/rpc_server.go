@@ -144,7 +144,7 @@ func dumpPeer(id peer.ID, nw network.Network, pstore peerstore.Peerstore, connMg
 		info.Direction = c.Stat().Direction
 		break
 	}
-	if dat, err := pstore.Get(id, "optimismChainID"); err == nil {
+	if dat, err := pstore.Get(id, "mantleChainID"); err == nil {
 		chID, ok := dat.(uint64)
 		if ok {
 			info.ChainID = chID

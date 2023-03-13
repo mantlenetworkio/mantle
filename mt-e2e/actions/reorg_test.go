@@ -556,9 +556,9 @@ type rpcWrapper struct {
 	client.RPC
 }
 
-// TestRestartOpGeth tests that the sequencer can restart its execution engine without rollup-node restart,
+// TestRestartMtGeth tests that the sequencer can restart its execution engine without rollup-node restart,
 // including recovering the finalized/safe state of L2 chain without reorging.
-func TestRestartOpGeth(gt *testing.T) {
+func TestRestartMtGeth(gt *testing.T) {
 	t := NewDefaultTesting(gt)
 	dbPath := path.Join(t.TempDir(), "testdb")
 	dbOption := func(_ *ethconfig.Config, nodeCfg *node.Config) error {

@@ -32,7 +32,7 @@ func NewL2Genesis(config *DeployConfig, block *types.Block) (*core.Genesis, erro
 		eip1559Elasticity = 10
 	}
 
-	optimismChainConfig := params.ChainConfig{
+	mantleChainConfig := params.ChainConfig{
 		ChainID:                       new(big.Int).SetUint64(config.L2ChainID),
 		HomesteadBlock:                big.NewInt(0),
 		DAOForkBlock:                  nil,
@@ -55,7 +55,7 @@ func NewL2Genesis(config *DeployConfig, block *types.Block) (*core.Genesis, erro
 		TerminalTotalDifficultyPassed: true,
 		BedrockBlock:                  new(big.Int).SetUint64(uint64(config.L2GenesisBlockNumber)),
 		RegolithTime:                  config.RegolithTime(block.Time()),
-		Optimism: &params.OptimismConfig{
+		Mantle: &params.MantleConfig{
 			EIP1559Denominator: eip1559Denom,
 			EIP1559Elasticity:  eip1559Elasticity,
 		},
@@ -80,7 +80,7 @@ func NewL2Genesis(config *DeployConfig, block *types.Block) (*core.Genesis, erro
 	}
 
 	return &core.Genesis{
-		Config:     &optimismChainConfig,
+		Config:     &mantleChainConfig,
 		Nonce:      uint64(config.L2GenesisBlockNonce),
 		Timestamp:  block.Time(),
 		ExtraData:  BedrockTransitionBlockExtraData,

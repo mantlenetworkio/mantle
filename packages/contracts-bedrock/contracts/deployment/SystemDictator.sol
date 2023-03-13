@@ -39,10 +39,10 @@ contract SystemDictator is OwnableUpgradeable {
      */
     struct ProxyAddressConfig {
         address l2OutputOracleProxy;
-        address MantlePortalProxy;
+        address mantlePortalProxy;
         address l1CrossDomainMessengerProxy;
         address l1StandardBridgeProxy;
-        address MantleMintableERC20FactoryProxy;
+        address mantleMintableERC20FactoryProxy;
         address l1ERC721BridgeProxy;
         address systemConfigProxy;
     }
@@ -52,10 +52,10 @@ contract SystemDictator is OwnableUpgradeable {
      */
     struct ImplementationAddressConfig {
         L2OutputOracle l2OutputOracleImpl;
-        MantlePortal MantlePortalImpl;
+        MantlePortal mantlePortalImpl;
         L1CrossDomainMessenger l1CrossDomainMessengerImpl;
         L1StandardBridge l1StandardBridgeImpl;
-        MantleMintableERC20Factory MantleMintableERC20FactoryImpl;
+        MantleMintableERC20Factory mantleMintableERC20FactoryImpl;
         L1ERC721Bridge l1ERC721BridgeImpl;
         PortalSender portalSenderImpl;
         SystemConfig systemConfigImpl;
@@ -115,7 +115,7 @@ contract SystemDictator is OwnableUpgradeable {
      * @notice Dynamic configuration for the MantlePortal. Determines
      *         if the system should be paused when initialized.
      */
-    bool public MantlePortalDynamicConfig;
+    bool public mantlePortalDynamicConfig;
 
     /**
      * @notice Current step;
@@ -169,14 +169,14 @@ contract SystemDictator is OwnableUpgradeable {
      * @notice Allows the owner to update dynamic config.
      *
      * @param _l2OutputOracleDynamicConfig Dynamic L2OutputOracle config.
-     * @param _MantlePortalDynamicConfig Dynamic MantlePortal config.
+     * @param _mantlePortalDynamicConfig Dynamic MantlePortal config.
      */
     function updateDynamicConfig(
         L2OutputOracleDynamicConfig memory _l2OutputOracleDynamicConfig,
-        bool _MantlePortalDynamicConfig
+        bool _mantlePortalDynamicConfig
     ) external onlyOwner {
         l2OutputOracleDynamicConfig = _l2OutputOracleDynamicConfig;
-        MantlePortalDynamicConfig = _MantlePortalDynamicConfig;
+        mantlePortalDynamicConfig = _mantlePortalDynamicConfig;
         dynamicConfigSet = true;
     }
 
@@ -196,7 +196,7 @@ contract SystemDictator is OwnableUpgradeable {
         // Set the implementation name for the L1CrossDomainMessenger.
         config.globalConfig.proxyAdmin.setImplementationName(
             config.proxyAddressConfig.l1CrossDomainMessengerProxy,
-            "OVM_L1CrossDomainMessenger"
+            "BVM_L1CrossDomainMessenger"
         );
 
         // Set the L1StandardBridge to the CHUGSPLASH proxy type.
@@ -231,13 +231,13 @@ contract SystemDictator is OwnableUpgradeable {
         // Store the address of the old L1CrossDomainMessenger implementation. We will need this
         // address in the case that we have to exit early.
         oldL1CrossDomainMessenger = config.globalConfig.addressManager.getAddress(
-            "OVM_L1CrossDomainMessenger"
+            "BVM_L1CrossDomainMessenger"
         );
 
         // Temporarily brick the L1CrossDomainMessenger by setting its implementation address to
         // address(0) which will cause the ResolvedDelegateProxy to revert. Better than pausing
         // the L1CrossDomainMessenger via pause() because it can be easily reverted.
-        config.globalConfig.addressManager.setAddress("OVM_L1CrossDomainMessenger", address(0));
+        config.globalConfig.addressManager.setAddress("BVM_L1CrossDomainMessenger", address(0));
 
         // Set the DTL shutoff block, which will tell the DTL to stop syncing new deposits from the
         // CanonicalTransactionChain. We do this by setting an address in the AddressManager
@@ -255,22 +255,22 @@ contract SystemDictator is OwnableUpgradeable {
     function step3() external onlyOwner step(EXIT_1_NO_RETURN_STEP) {
         // Remove all deprecated addresses from the AddressManager
         string[17] memory deprecated = [
-            "OVM_CanonicalTransactionChain",
-            "OVM_L2CrossDomainMessenger",
-            "OVM_DecompressionPrecompileAddress",
-            "OVM_Sequencer",
-            "OVM_Proposer",
-            "OVM_ChainStorageContainer-CTC-batches",
-            "OVM_ChainStorageContainer-CTC-queue",
-            "OVM_CanonicalTransactionChain",
-            "OVM_StateCommitmentChain",
-            "OVM_BondManager",
-            "OVM_ExecutionManager",
-            "OVM_FraudVerifier",
-            "OVM_StateManagerFactory",
-            "OVM_StateTransitionerFactory",
-            "OVM_SafetyChecker",
-            "OVM_L1MultiMessageRelayer",
+            "BVM_CanonicalTransactionChain",
+            "BVM_L2CrossDomainMessenger",
+            "BVM_DecompressionPrecompileAddress",
+            "BVM_Sequencer",
+            "BVM_Proposer",
+            "BVM_ChainStorageContainer-CTC-batches",
+            "BVM_ChainStorageContainer-CTC-queue",
+            "BVM_CanonicalTransactionChain",
+            "BVM_StateCommitmentChain",
+            "BVM_BondManager",
+            "BVM_ExecutionManager",
+            "BVM_FraudVerifier",
+            "BVM_StateManagerFactory",
+            "BVM_StateTransitionerFactory",
+            "BVM_SafetyChecker",
+            "BVM_L1MultiMessageRelayer",
             "BondManager"
         ];
 
@@ -321,9 +321,9 @@ contract SystemDictator is OwnableUpgradeable {
 
         // Upgrade and initialize the MantlePortal.
         config.globalConfig.proxyAdmin.upgradeAndCall(
-            payable(config.proxyAddressConfig.MantlePortalProxy),
-            address(config.implementationAddressConfig.MantlePortalImpl),
-            abi.encodeCall(MantlePortal.initialize, (MantlePortalDynamicConfig))
+            payable(config.proxyAddressConfig.mantlePortalProxy),
+            address(config.implementationAddressConfig.mantlePortalImpl),
+            abi.encodeCall(MantlePortal.initialize, (mantlePortalDynamicConfig))
         );
 
         // Upgrade the L1CrossDomainMessenger.
@@ -366,8 +366,8 @@ contract SystemDictator is OwnableUpgradeable {
 
         // Upgrade the MantleMintableERC20Factory (no initializer).
         config.globalConfig.proxyAdmin.upgrade(
-            payable(config.proxyAddressConfig.MantleMintableERC20FactoryProxy),
-            address(config.implementationAddressConfig.MantleMintableERC20FactoryImpl)
+            payable(config.proxyAddressConfig.mantleMintableERC20FactoryProxy),
+            address(config.implementationAddressConfig.mantleMintableERC20FactoryImpl)
         );
 
         // Upgrade the L1ERC721Bridge (no initializer).
@@ -418,7 +418,7 @@ contract SystemDictator is OwnableUpgradeable {
 
         // Reset the L1CrossDomainMessenger to the old implementation.
         config.globalConfig.addressManager.setAddress(
-            "OVM_L1CrossDomainMessenger",
+            "BVM_L1CrossDomainMessenger",
             oldL1CrossDomainMessenger
         );
 

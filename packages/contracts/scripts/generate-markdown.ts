@@ -22,22 +22,15 @@ const PUBLIC_DEPLOYMENTS: DeploymentInfo[] = [
     chainid: 10,
     rpc: 'https://mainnet.mantle.io',
     l1Explorer: 'https://etherscan.io',
-    l2Explorer: 'https://mantle.etherscan.io',
-  },
-  {
-    folder: 'kovan',
-    name: 'Mantle Kovan (public testnet)',
-    chainid: 69,
-    rpc: 'https://kovan.mantle.io',
-    l1Explorer: 'https://kovan.etherscan.io',
-    l2Explorer: 'https://kovan-mantle.etherscan.io',
+    l2Explorer: 'https://optimistic.etherscan.io',
   },
   {
     folder: 'goerli',
-    name: 'Mantle Goerli (internal devnet)',
+    name: 'Mantle Goerli (public testnet)',
     chainid: 420,
-    notice: `Mantle Goerli is an internal Mantle development network. You're probably looking for [Mantle Kovan](../kovan#readme), the public Mantle testnet.`,
+    rpc: 'https://goerli.mantle.io',
     l1Explorer: 'https://goerli.etherscan.io',
+    l2Explorer: 'https://goerli-mantle.etherscan.io/',
   },
 ]
 

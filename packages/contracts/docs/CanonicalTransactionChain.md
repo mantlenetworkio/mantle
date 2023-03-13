@@ -352,8 +352,8 @@ Allows the Burn Admin to update the parameters which determine the amount of gas
 
 | Name | Type | Description |
 |---|---|---|
-| _l2GasDiscountDivisor | uint256 | undefined
-| _enqueueGasCost | uint256 | undefined
+| _l2GasDiscountDivisor | uint256 | The ratio of the cost of L1 gas to the cost of L2 gas
+| _enqueueGasCost | uint256 | The approximate cost of calling the enqueue function
 
 
 
@@ -416,7 +416,7 @@ event SequencerBatchAppended(uint256 _startingQueueIndex, uint256 _numQueueEleme
 ### TransactionBatchAppended
 
 ```solidity
-event TransactionBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint256 _batchSize, uint256 _prevTotalElements, bytes _signature, bytes _extraData)
+event TransactionBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint256 _batchSize, uint256 _prevTotalElements, bytes _extraData)
 ```
 
 
@@ -431,7 +431,6 @@ event TransactionBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, 
 | _batchRoot  | bytes32 | undefined |
 | _batchSize  | uint256 | undefined |
 | _prevTotalElements  | uint256 | undefined |
-| _signature  | bytes | undefined |
 | _extraData  | bytes | undefined |
 
 ### TransactionEnqueued

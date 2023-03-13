@@ -1,4 +1,4 @@
-# @eth-mantle/contracts-bedrock
+# @mantleio/contracts-bedrock
 
 ## 0.13.0
 
@@ -72,7 +72,7 @@
 - 7300a7ca7: Document test function naming convention and create a script for checking.
 - Updated dependencies [c975c9620]
 - Updated dependencies [136ea1785]
-  - @eth-mantle/core-utils@0.12.0
+  - @mantleio/core-utils@0.12.0
 
 ## 0.10.0
 
@@ -112,7 +112,7 @@
 - cc5adbc61: Updates function ordering in ProxyAdmin to match original contract
 - 31c91ea74: Adds another assertion in the CrossDomainMessenger to explicitly identify an invariant which was previously implicit.
 - Updated dependencies [1e76cdb86]
-  - @eth-mantle/core-utils@0.11.0
+  - @mantleio/core-utils@0.11.0
 
 ## 0.8.3
 
@@ -178,7 +178,7 @@
 - 515685f4: Update comments on GovernanceToken to match Seaport style.
 - Updated dependencies [7215f4ce]
 - Updated dependencies [206f6033]
-  - @eth-mantle/core-utils@0.10.1
+  - @mantleio/core-utils@0.10.1
 
 ## 0.6.2
 
@@ -205,7 +205,7 @@
 
 - 63ef1949: Delete hardhat genesis tasks
 - Updated dependencies [dbfea116]
-  - @eth-mantle/core-utils@0.10.0
+  - @mantleio/core-utils@0.10.0
 
 ## 0.5.4
 
@@ -247,7 +247,7 @@
 - Updated dependencies [0df744f6]
 - Updated dependencies [8ae39154]
 - Updated dependencies [dac4a9f0]
-  - @eth-mantle/core-utils@0.9.3
+  - @mantleio/core-utils@0.9.3
 
 ## 0.5.2
 
@@ -270,7 +270,7 @@
 - Updated dependencies [0bf3b9b4]
 - Updated dependencies [8d26459b]
 - Updated dependencies [4477fe9f]
-  - @eth-mantle/core-utils@0.9.2
+  - @mantleio/core-utils@0.9.2
 
 ## 0.5.1
 
@@ -287,7 +287,7 @@
 
 ### Minor Changes
 
-- 42a4cc30: Remove Lib* and OVM* prefixes from all contracts
+- 42a4cc30: Remove Lib* and BVM* prefixes from all contracts
 
 ### Patch Changes
 
@@ -321,7 +321,7 @@
 - 78d7c2ec: Update typechain pipeline
 - 89d01f2e: Update dev deps
 - Updated dependencies [f9fee446]
-  - @eth-mantle/core-utils@0.9.1
+  - @mantleio/core-utils@0.9.1
 
 ## 0.4.1
 
@@ -349,7 +349,7 @@
 - 93e2f750: Fix for incorrect constructor args in deploy config
 - ddf515cb: Make the output oracle upgradeable.
 - Updated dependencies [700dcbb0]
-  - @eth-mantle/core-utils@0.9.0
+  - @mantleio/core-utils@0.9.0
 
 ## 0.3.0
 
@@ -389,7 +389,7 @@
 - 29ff7462: Revert es target back to 2017
 - 14dd80f3: Add proxy contract
 - Updated dependencies [29ff7462]
-  - @eth-mantle/core-utils@0.8.7
+  - @mantleio/core-utils@0.8.7
 
 ## 0.1.3
 

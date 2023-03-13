@@ -320,7 +320,7 @@ export const deployConfigSpec: {
   },
   governanceTokenSymbol: {
     type: 'string',
-    default: 'MT',
+    default: 'OP',
   },
   governanceTokenName: {
     type: 'string',

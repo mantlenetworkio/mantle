@@ -35,13 +35,13 @@ library Predeploys {
     /**
      * @notice Address of the MantleMintableERC20Factory predeploy.
      */
-    address internal constant MANTLE_MINTABLE_ERC20_FACTORY =
+    address internal constant OPTIMISM_MINTABLE_ERC20_FACTORY =
         0x4200000000000000000000000000000000000012;
 
     /**
      * @notice Address of the MantleMintableERC721Factory predeploy.
      */
-    address internal constant MANTLE_MINTABLE_ERC721_FACTORY =
+    address internal constant OPTIMISM_MINTABLE_ERC721_FACTORY =
         0x4200000000000000000000000000000000000017;
 
     /**

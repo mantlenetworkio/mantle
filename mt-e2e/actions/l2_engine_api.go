@@ -194,7 +194,7 @@ func (ea *L2EngineAPI) ForkchoiceUpdatedV1(ctx context.Context, state *eth.Forkc
 		// If the specified head matches with our local head, do nothing and keep
 		// generating the payload. It's a special corner case that a few slots are
 		// missing and we are requested to generate the payload in slot.
-	} else if ea.l2Chain.Config().Optimism == nil { // minor L2Engine API divergence: allow proposers to reorg their own chain
+	} else if ea.l2Chain.Config().Mantle == nil { // minor L2Engine API divergence: allow proposers to reorg their own chain
 		panic("engine not configured as mantle engine")
 	}
 

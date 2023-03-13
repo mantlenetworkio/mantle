@@ -1,5 +1,5 @@
 import { DeployFunction } from 'hardhat-deploy/dist/types'
-import '@eth-mantle/hardhat-deploy-config'
+import '@mantleio/hardhat-deploy-config'
 
 import {
   assertContractVariable,

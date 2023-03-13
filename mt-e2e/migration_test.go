@@ -44,10 +44,10 @@ type migrationTestConfig struct {
 	enabled           bool
 	l1URL             string
 	l2Path            string
-	ovmAddrsPath      string
+	bvmAddrsPath      string
 	evmAddrsPath      string
-	ovmAllowancesPath string
-	ovmMessagesPath   string
+	bvmAllowancesPath string
+	bvmMessagesPath   string
 	evmMessagesPath   string
 }
 
@@ -77,10 +77,10 @@ func init() {
 	}
 
 	migrationDataDir := path.Join(cwd, "..", "packages", "migration-data", "data")
-	config.ovmAddrsPath = path.Join(migrationDataDir, "ovm-addresses.json")
+	config.bvmAddrsPath = path.Join(migrationDataDir, "bvm-addresses.json")
 	config.evmAddrsPath = path.Join(migrationDataDir, "evm-addresses.json")
-	config.ovmAllowancesPath = path.Join(migrationDataDir, "ovm-allowances.json")
-	config.ovmMessagesPath = path.Join(migrationDataDir, "ovm-messages.json")
+	config.bvmAllowancesPath = path.Join(migrationDataDir, "bvm-allowances.json")
+	config.bvmMessagesPath = path.Join(migrationDataDir, "bvm-messages.json")
 	config.evmMessagesPath = path.Join(migrationDataDir, "evm-messages.json")
 }
 
@@ -92,7 +92,7 @@ type storageSlot struct {
 
 const (
 	networkName  = "mainnet-forked"
-	hardhatImage = "docker.io/ethereumoptimism/hardhat-node:latest"
+	hardhatImage = "docker.io/ethereummantle/hardhat-node:latest"
 	forkedL1URL  = "http://127.0.0.1:8545"
 )
 
@@ -398,10 +398,10 @@ func migrateL1(t *testing.T) {
 func migrateL2(t *testing.T, workdir string, deployConfig *genesis.DeployConfig, startingBlockNumber uint64) *genesis.MigrationResult {
 	migCfg := &migration_action.Config{
 		DeployConfig:      deployConfig,
-		OVMAddressesPath:  config.ovmAddrsPath,
+		BVMAddressesPath:  config.bvmAddrsPath,
 		EVMAddressesPath:  config.evmAddrsPath,
-		OVMAllowancesPath: config.ovmAllowancesPath,
-		OVMMessagesPath:   config.ovmMessagesPath,
+		BVMAllowancesPath: config.bvmAllowancesPath,
+		BVMMessagesPath:   config.bvmMessagesPath,
 		EVMMessagesPath:   config.evmMessagesPath,
 		Network:           "mainnet",
 		HardhatDeployments: []string{

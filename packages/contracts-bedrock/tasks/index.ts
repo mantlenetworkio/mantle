@@ -1,6 +1,6 @@
 import './deposits'
 import './rekey'
-import './check-mt-node'
+import './check-op-node'
 import './watch'
 import './forge-verify'
 import './validate-spacers'

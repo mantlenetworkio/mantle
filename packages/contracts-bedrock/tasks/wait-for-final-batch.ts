@@ -3,7 +3,7 @@ import '@nomiclabs/hardhat-ethers'
 import 'hardhat-deploy'
 import { HardhatRuntimeEnvironment } from 'hardhat/types'
 import { Contract } from 'ethers'
-import { sleep } from '@eth-mantle/core-utils'
+import { sleep } from '@mantleio/core-utils'
 
 task('wait-for-final-batch', 'Waits for the final batch to be submitted')
   .addParam(

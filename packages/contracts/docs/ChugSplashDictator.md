@@ -10,40 +10,6 @@
 
 ## Methods
 
-### bitAddressSlotKey
-
-```solidity
-function bitAddressSlotKey() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined
-
-### bitAddressSlotVal
-
-```solidity
-function bitAddressSlotVal() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined
-
 ### bridgeSlotKey
 
 ```solidity

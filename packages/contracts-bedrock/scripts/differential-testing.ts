@@ -7,7 +7,7 @@ import {
   encodeCrossDomainMessage,
   hashWithdrawal,
   hashOutputRootProof,
-} from '@eth-mantle/core-utils'
+} from '@mantleio/core-utils'
 import { SecureTrie } from '@ethereumjs/trie'
 import { Account, Address, toBuffer, bufferToHex } from '@ethereumjs/util'
 

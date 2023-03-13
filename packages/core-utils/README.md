@@ -1,8 +1,10 @@
-# @mantle/core-utils
+# @mantleio/core-utils
+
+[![codecov](https://codecov.io/gh/mantlenetworkio/mantle/branch/develop/graph/badge.svg?token=0VTG7PG7YR&flag=core-utils-tests)](https://codecov.io/gh/mantlenetworkio/mantle)
 
 ## What is this?
 
-`@mantle/core-utils` contains the Bit Virtual Machine core utilities.
+`@mantleio/core-utils` contains the Optimistic Virtual Machine core utilities.
 
 ## Getting started
 
@@ -29,7 +31,7 @@ $ yarn lint
 locally.
 
 ```typescript
-import { TxGasLimit } from '@mantle/core-utils'
+import { TxGasLimit } from '@mantleio/core-utils'
 import { JsonRpcProvider } from 'ethers'
 
 const L2Provider = new JsonRpcProvider('https://mainnet.mantle.io')

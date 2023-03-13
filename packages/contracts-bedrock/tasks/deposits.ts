@@ -8,7 +8,7 @@ import { providers, utils, Wallet, Event } from 'ethers'
 import dotenv from 'dotenv'
 import 'hardhat-deploy'
 import '@nomiclabs/hardhat-ethers'
-import { DepositTx } from '@eth-mantle/core-utils'
+import { DepositTx } from '@mantleio/core-utils'
 
 dotenv.config()
 

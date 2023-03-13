@@ -76,7 +76,7 @@ func validateReceipts(block eth.BlockID, receiptHash common.Hash, txHashes []com
 		// Note: 3 non-consensus L1 receipt fields are ignored:
 		// PostState - not part of L1 ethereum anymore since EIP 658 (part of Byzantium)
 		// ContractAddress - we do not care about contract deployments
-		// And Optimism L1 fee meta-data in the receipt is ignored as well
+		// And Mantle L1 fee meta-data in the receipt is ignored as well
 	}
 
 	// Sanity-check: external L1-RPC sources are notorious for not returning all receipts,

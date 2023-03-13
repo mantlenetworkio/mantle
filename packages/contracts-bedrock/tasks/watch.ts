@@ -1,7 +1,7 @@
 import { task, types } from 'hardhat/config'
 import '@nomiclabs/hardhat-ethers'
 import 'hardhat-deploy'
-import { OpNodeProvider, sleep } from '@eth-mantle/core-utils'
+import { OpNodeProvider, sleep } from '@mantleio/core-utils'
 
 import { predeploys } from '../src'
 
@@ -20,7 +20,7 @@ task('watch', 'Watch an Mantle System')
   )
   .addParam(
     'opNodeProviderUrl',
-    'mt-node provider URL',
+    'op-node provider URL',
     'http://localhost:7545',
     types.string
   )
@@ -44,7 +44,7 @@ task('watch', 'Watch an Mantle System')
 
     const opNodeProvider = new OpNodeProvider(args.opNodeProviderUrl)
     const opNodeConfig = await opNodeProvider.rollupConfig()
-    console.log('mt-node config')
+    console.log('op-node config')
     console.table({
       'layer-one-hash': opNodeConfig.genesis.l1.hash,
       'layer-one-number': opNodeConfig.genesis.l1.number,

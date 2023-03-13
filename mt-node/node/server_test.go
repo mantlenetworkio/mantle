@@ -119,7 +119,7 @@ func TestOutputAtBlock(t *testing.T) {
 	require.NoError(t, err)
 
 	var out *eth.OutputResponse
-	err = client.CallContext(context.Background(), &out, "optimism_outputAtBlock", "0xdcdc89")
+	err = client.CallContext(context.Background(), &out, "mantle_outputAtBlock", "0xdcdc89")
 	require.NoError(t, err)
 
 	require.Equal(t, "0x0000000000000000000000000000000000000000000000000000000000000000", out.Version.String())
@@ -151,7 +151,7 @@ func TestVersion(t *testing.T) {
 	assert.NoError(t, err)
 
 	var out string
-	err = client.CallContext(context.Background(), &out, "optimism_version")
+	err = client.CallContext(context.Background(), &out, "mantle_version")
 	assert.NoError(t, err)
 	assert.Equal(t, version.Version+"-"+version.Meta, out)
 }
@@ -193,7 +193,7 @@ func TestSyncStatus(t *testing.T) {
 	assert.NoError(t, err)
 
 	var out *eth.SyncStatus
-	err = client.CallContext(context.Background(), &out, "optimism_syncStatus")
+	err = client.CallContext(context.Background(), &out, "mantle_syncStatus")
 	assert.NoError(t, err)
 	assert.Equal(t, status, out)
 }

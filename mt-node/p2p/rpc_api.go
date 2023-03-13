@@ -24,7 +24,7 @@ type PeerInfo struct {
 	Connectedness network.Connectedness `json:"connectedness"` // "NotConnected", "Connected", "CanConnect" (gracefully disconnected), or "CannotConnect" (tried but failed)
 	Direction     network.Direction     `json:"direction"`     // "Unknown", "Inbound" (if the peer contacted us), "Outbound" (if we connected to them)
 	Protected     bool                  `json:"protected"`     // Protected peers do not get
-	ChainID       uint64                `json:"chainID"`       // some peers might try to connect, but we figure out they are on a different chain later. This may be 0 if the peer is not an optimism node at all.
+	ChainID       uint64                `json:"chainID"`       // some peers might try to connect, but we figure out they are on a different chain later. This may be 0 if the peer is not an mantle node at all.
 	Latency       time.Duration         `json:"latency"`
 
 	GossipBlocks bool `json:"gossipBlocks"` // if the peer is in our gossip topic

@@ -36,7 +36,6 @@ library Lib_BVMCodec {
         bytes32 batchRoot;
         uint256 batchSize;
         uint256 prevTotalElements;
-        bytes signature;
         bytes extraData;
     }
 
@@ -137,7 +136,6 @@ library Lib_BVMCodec {
                     _batchHeader.batchRoot,
                     _batchHeader.batchSize,
                     _batchHeader.prevTotalElements,
-                    _batchHeader.signature,
                     _batchHeader.extraData
                 )
             );

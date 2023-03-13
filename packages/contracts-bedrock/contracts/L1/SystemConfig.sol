@@ -37,7 +37,7 @@ contract SystemConfig is OwnableUpgradeable, Semver {
     /**
      * @notice Storage slot that the unsafe block signer is stored at. Storing it at this
      *         deterministic storage slot allows for decoupling the storage layout from the way
-     *         that `solc` lays out storage. The `mt-node` uses a storage proof to fetch this value.
+     *         that `solc` lays out storage. The `op-node` uses a storage proof to fetch this value.
      */
     bytes32 public constant UNSAFE_BLOCK_SIGNER_SLOT = keccak256("systemconfig.unsafeblocksigner");
 

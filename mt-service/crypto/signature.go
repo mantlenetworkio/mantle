@@ -16,7 +16,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 
-	hdwallet "github.com/ethereum-optimism/go-ethereum-hdwallet"
+	hdwallet "github.com/mantlenetworkio/go-ethereum-hdwallet"
 	opsigner "github.com/mantlenetworkio/mantle/mt-signer/client"
 )
 

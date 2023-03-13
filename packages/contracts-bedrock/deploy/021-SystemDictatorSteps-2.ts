@@ -2,8 +2,8 @@ import assert from 'assert'
 
 import { ethers } from 'ethers'
 import { DeployFunction } from 'hardhat-deploy/dist/types'
-import { awaitCondition } from '@eth-mantle/core-utils'
-import '@eth-mantle/hardhat-deploy-config'
+import { awaitCondition } from '@mantleio/core-utils'
+import '@mantleio/hardhat-deploy-config'
 import 'hardhat-deploy'
 import '@nomiclabs/hardhat-ethers'
 
@@ -45,15 +45,15 @@ const deployFn: DeployFunction = async (hre) => {
       signerOrProvider: deployer,
     },
     {
-      name: 'Proxy__OVM_L1CrossDomainMessenger',
+      name: 'Proxy__BVM_L1CrossDomainMessenger',
       iface: 'L1CrossDomainMessenger',
       signerOrProvider: deployer,
     },
     {
-      name: 'Proxy__OVM_L1StandardBridge',
+      name: 'Proxy__BVM_L1StandardBridge',
     },
     {
-      name: 'Proxy__OVM_L1StandardBridge',
+      name: 'Proxy__BVM_L1StandardBridge',
       iface: 'L1StandardBridge',
       signerOrProvider: deployer,
     },
@@ -95,22 +95,22 @@ const deployFn: DeployFunction = async (hre) => {
     `,
     checks: async () => {
       const deads = [
-        'OVM_CanonicalTransactionChain',
-        'OVM_L2CrossDomainMessenger',
-        'OVM_DecompressionPrecompileAddress',
-        'OVM_Sequencer',
-        'OVM_Proposer',
-        'OVM_ChainStorageContainer-CTC-batches',
-        'OVM_ChainStorageContainer-CTC-queue',
-        'OVM_CanonicalTransactionChain',
-        'OVM_StateCommitmentChain',
-        'OVM_BondManager',
-        'OVM_ExecutionManager',
-        'OVM_FraudVerifier',
-        'OVM_StateManagerFactory',
-        'OVM_StateTransitionerFactory',
-        'OVM_SafetyChecker',
-        'OVM_L1MultiMessageRelayer',
+        'BVM_CanonicalTransactionChain',
+        'BVM_L2CrossDomainMessenger',
+        'BVM_DecompressionPrecompileAddress',
+        'BVM_Sequencer',
+        'BVM_Proposer',
+        'BVM_ChainStorageContainer-CTC-batches',
+        'BVM_ChainStorageContainer-CTC-queue',
+        'BVM_CanonicalTransactionChain',
+        'BVM_StateCommitmentChain',
+        'BVM_BondManager',
+        'BVM_ExecutionManager',
+        'BVM_FraudVerifier',
+        'BVM_StateManagerFactory',
+        'BVM_StateTransitionerFactory',
+        'BVM_SafetyChecker',
+        'BVM_L1MultiMessageRelayer',
         'BondManager',
       ]
       for (const dead of deads) {

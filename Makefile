@@ -46,7 +46,7 @@ mod-tidy:
 	# can take a while to index new versions.
 	#
 	# See https://proxy.golang.org/ for more info.
-	export GOPRIVATE="github.com/ethereum-optimism" && go mod tidy
+	export GOPRIVATE="github.com/mantlenetworkio" && go mod tidy
 .PHONY: mod-tidy
 
 clean:
@@ -97,7 +97,7 @@ test-integration:
 # Remove the baseline-commit to generate a base reading & show all issues
 semgrep:
 	$(eval DEV_REF := $(shell git rev-parse develop))
-	SEMGREP_REPO_NAME=ethereum-optimism/optimism semgrep ci --baseline-commit=$(DEV_REF)
+	SEMGREP_REPO_NAME=mantlenetworkio/mantle semgrep ci --baseline-commit=$(DEV_REF)
 .PHONY: semgrep
 
 clean-node-modules:
@@ -109,6 +109,6 @@ tag-bedrock-go-modules:
 	./ops/scripts/tag-bedrock-go-modules.sh $(BEDROCK_TAGS_REMOTE) $(VERSION)
 .PHONY: tag-bedrock-go-modules
 
-update-op-geth:
-	./ops/scripts/update-op-geth.py
-.PHONY: update-op-geth
+update-mt-geth:
+	./ops/scripts/update-mt-geth.py
+.PHONY: update-mt-geth

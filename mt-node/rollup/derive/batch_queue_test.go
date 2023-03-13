@@ -75,7 +75,7 @@ func L1Chain(l1Times []uint64) []eth.L1BlockRef {
 
 // TestBatchQueueNewOrigin tests that the batch queue properly saves the new origin
 // when the safehead's origin is ahead of the pipeline's origin (as is after a reset).
-// This issue was fixed in https://github.com/ethereum-optimism/optimism/pull/3694
+// This issue was fixed in https://github.com/mantlenetworkio/mantle/pull/3694
 func TestBatchQueueNewOrigin(t *testing.T) {
 	log := testlog.Logger(t, log.LvlCrit)
 	l1 := L1Chain([]uint64{10, 15, 20, 25})

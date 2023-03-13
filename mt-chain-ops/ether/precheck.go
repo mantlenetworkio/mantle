@@ -34,7 +34,7 @@ func PreCheckBalances(ldb ethdb.Database, db *state.StateDB, addresses []common.
 	// need to iterate over mint events during the migration.
 	for _, addr := range addresses {
 		addrs = append(addrs, addr)
-		slotsInp[CalcOVMETHStorageKey(addr)] = 1
+		slotsInp[CalcBVMETHStorageKey(addr)] = 1
 	}
 
 	// For each known allowance, compute its storage key and add it to the list of addresses.
@@ -47,7 +47,7 @@ func PreCheckBalances(ldb ethdb.Database, db *state.StateDB, addresses []common.
 	// balance but none of our instrumentation could easily find it. Special case.
 	sequencerEntrypointAddr := common.HexToAddress("0x4200000000000000000000000000000000000005")
 	addrs = append(addrs, sequencerEntrypointAddr)
-	slotsInp[CalcOVMETHStorageKey(sequencerEntrypointAddr)] = 1
+	slotsInp[CalcBVMETHStorageKey(sequencerEntrypointAddr)] = 1
 
 	// Build a mapping of every storage slot in the LegacyERC20ETH contract, except the list of
 	// slots that we know we can ignore (totalSupply, name, symbol).
@@ -107,7 +107,7 @@ func PreCheckBalances(ldb ethdb.Database, db *state.StateDB, addresses []common.
 	// than the actual migrated amount because self-destructs will remove ETH supply in a way that
 	// cannot be reflected in the contract. This is fine because self-destructs just mean the L2 is
 	// actually *overcollateralized* by some tiny amount.
-	totalSupply := getOVMETHTotalSupply(db)
+	totalSupply := getBVMETHTotalSupply(db)
 	delta := new(big.Int).Sub(totalSupply, totalFound)
 	if delta.Cmp(params.ExpectedSupplyDelta) != 0 {
 		if noCheck {

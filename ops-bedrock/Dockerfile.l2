@@ -1,4 +1,4 @@
-FROM ethereumoptimism/op-geth:optimism
+FROM ethereummantle/mt-geth:mantle
 
 RUN apk add --no-cache jq
 

@@ -168,9 +168,9 @@ contract L1StandardBridge_DepositETH_Test is PreBridgeETH {
     // depositETH
     // - emits ETHDepositInitiated
     // - emits ETHBridgeInitiated
-    // - calls MantlePortal.depositTransaction
+    // - calls mantlePortal.depositTransaction
     // - only EOA
-    // - ETH ends up in the MantlePortal
+    // - ETH ends up in the mantlePortal
     function test_depositETH_succeeds() external {
         _preBridgeETH({ isLegacy: true });
         L1Bridge.depositETH{ value: 500 }(50000, hex"dead");
@@ -182,9 +182,9 @@ contract L1StandardBridge_BridgeETH_Test is PreBridgeETH {
     // BridgeETH
     // - emits ETHDepositInitiated
     // - emits ETHBridgeInitiated
-    // - calls MantlePortal.depositTransaction
+    // - calls mantlePortal.depositTransaction
     // - only EOA
-    // - ETH ends up in the MantlePortal
+    // - ETH ends up in the mantlePortal
     function test_bridgeETH_succeeds() external {
         _preBridgeETH({ isLegacy: false });
         L1Bridge.bridgeETH{ value: 500 }(50000, hex"dead");
@@ -301,9 +301,9 @@ contract PreBridgeETHTo is Bridge_Initializer {
 contract L1StandardBridge_DepositETHTo_Test is PreBridgeETHTo {
     // depositETHTo
     // - emits ETHDepositInitiated
-    // - calls MantlePortal.depositTransaction
+    // - calls mantlePortal.depositTransaction
     // - EOA or contract can call
-    // - ETH ends up in the MantlePortal
+    // - ETH ends up in the mantlePortal
     function test_depositETHTo_succeeds() external {
         _preBridgeETHTo({ isLegacy: true });
         L1Bridge.depositETHTo{ value: 600 }(bob, 60000, hex"dead");
@@ -315,9 +315,9 @@ contract L1StandardBridge_BridgeETHTo_Test is PreBridgeETHTo {
     // BridgeETHTo
     // - emits ETHDepositInitiated
     // - emits ETHBridgeInitiated
-    // - calls MantlePortal.depositTransaction
+    // - calls mantlePortal.depositTransaction
     // - only EOA
-    // - ETH ends up in the MantlePortal
+    // - ETH ends up in the mantlePortal
     function test_bridgeETHTo_succeeds() external {
         _preBridgeETHTo({ isLegacy: false });
         L1Bridge.bridgeETHTo{ value: 600 }(bob, 60000, hex"dead");
@@ -333,7 +333,7 @@ contract L1StandardBridge_DepositERC20_Test is Bridge_Initializer {
     // depositERC20
     // - updates bridge.deposits
     // - emits ERC20DepositInitiated
-    // - calls MantlePortal.depositTransaction
+    // - calls mantlePortal.depositTransaction
     // - only callable by EOA
     function test_depositERC20_succeeds() external {
         uint256 nonce = L1Messenger.messageNonce();
@@ -443,7 +443,7 @@ contract L1StandardBridge_DepositERC20To_Test is Bridge_Initializer {
     // depositERC20To
     // - updates bridge.deposits
     // - emits ERC20DepositInitiated
-    // - calls MantlePortal.depositTransaction
+    // - calls mantlePortal.depositTransaction
     // - callable by a contract
     function test_depositERC20To_succeeds() external {
         uint256 nonce = L1Messenger.messageNonce();

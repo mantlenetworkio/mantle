@@ -52,12 +52,12 @@ func (s *SentMessage) ToLegacyWithdrawal() (*crossdomain.LegacyWithdrawal, error
 	return &w, nil
 }
 
-// OVMETHAddresses represents a list of addresses that interacted with
+// BVMETHAddresses represents a list of addresses that interacted with
 // the ERC20 representation of ether in the pre-bedrock system.
-type OVMETHAddresses map[common.Address]bool
+type BVMETHAddresses map[common.Address]bool
 
 // NewAddresses will read an addresses.json file from the filesystem.
-func NewAddresses(path string) (OVMETHAddresses, error) {
+func NewAddresses(path string) (BVMETHAddresses, error) {
 	file, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("cannot find addresses json at %s: %w", path, err)
@@ -68,12 +68,12 @@ func NewAddresses(path string) (OVMETHAddresses, error) {
 		return nil, err
 	}
 
-	ovmeth := make(OVMETHAddresses)
+	bvmeth := make(BVMETHAddresses)
 	for _, addr := range addresses {
-		ovmeth[addr] = true
+		bvmeth[addr] = true
 	}
 
-	return ovmeth, nil
+	return bvmeth, nil
 }
 
 // Allowance represents the allowances that were set in the
@@ -83,7 +83,7 @@ type Allowance struct {
 	To   common.Address `json:"to"`
 }
 
-// NewAllowances will read the ovm-allowances.json from the file system.
+// NewAllowances will read the bvm-allowances.json from the file system.
 func NewAllowances(path string) ([]*Allowance, error) {
 	file, err := os.ReadFile(path)
 	if err != nil {
@@ -100,26 +100,26 @@ func NewAllowances(path string) ([]*Allowance, error) {
 
 // MigrationData represents all of the data required to do a migration
 type MigrationData struct {
-	// OvmAddresses represents the set of addresses that interacted with the
+	// BvmAddresses represents the set of addresses that interacted with the
 	// LegacyERC20ETH contract before the evm equivalence upgrade
-	OvmAddresses OVMETHAddresses
+	BvmAddresses BVMETHAddresses
 	// EvmAddresses represents the set of addresses that interacted with the
 	// LegacyERC20ETH contract after the evm equivalence upgrade
-	EvmAddresses OVMETHAddresses
-	// OvmAllowances represents the set of allowances in the LegacyERC20ETH from
+	EvmAddresses BVMETHAddresses
+	// BvmAllowances represents the set of allowances in the LegacyERC20ETH from
 	// before the evm equivalence upgrade
-	OvmAllowances []*Allowance
-	// OvmMessages represents the set of withdrawals through the
+	BvmAllowances []*Allowance
+	// BvmMessages represents the set of withdrawals through the
 	// L2CrossDomainMessenger from before the evm equivalence upgrade
-	OvmMessages []*SentMessage
-	// OvmMessages represents the set of withdrawals through the
+	BvmMessages []*SentMessage
+	// BvmMessages represents the set of withdrawals through the
 	// L2CrossDomainMessenger from after the evm equivalence upgrade
 	EvmMessages []*SentMessage
 }
 
 func (m *MigrationData) ToWithdrawals() (crossdomain.DangerousUnfilteredWithdrawals, error) {
 	messages := make(crossdomain.DangerousUnfilteredWithdrawals, 0)
-	for _, msg := range m.OvmMessages {
+	for _, msg := range m.BvmMessages {
 		wd, err := msg.ToLegacyWithdrawal()
 		if err != nil {
 			return nil, err
@@ -144,7 +144,7 @@ func (m *MigrationData) Addresses() []common.Address {
 	for addr := range m.EvmAddresses {
 		addresses = append(addresses, addr)
 	}
-	for addr := range m.OvmAddresses {
+	for addr := range m.BvmAddresses {
 		addresses = append(addresses, addr)
 	}
 	return addresses

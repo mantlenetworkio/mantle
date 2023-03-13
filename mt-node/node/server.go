@@ -35,7 +35,7 @@ func newRPCServer(ctx context.Context, rpcCfg *RPCConfig, rollupCfg *rollup.Conf
 	r := &rpcServer{
 		endpoint: endpoint,
 		apis: []rpc.API{{
-			Namespace:     "optimism",
+			Namespace:     "mantle",
 			Service:       api,
 			Public:        true,
 			Authenticated: false,

@@ -3,11 +3,11 @@ import assert from 'assert'
 import { ethers, Contract } from 'ethers'
 import { Provider } from '@ethersproject/abstract-provider'
 import { Signer } from '@ethersproject/abstract-signer'
-import { awaitCondition, sleep } from '@eth-mantle/core-utils'
+import { awaitCondition, sleep } from '@mantleio/core-utils'
 import { HardhatRuntimeEnvironment } from 'hardhat/types'
 import { Deployment, DeployResult } from 'hardhat-deploy/dist/types'
 import 'hardhat-deploy'
-import '@eth-mantle/hardhat-deploy-config'
+import '@mantleio/hardhat-deploy-config'
 import '@nomiclabs/hardhat-ethers'
 
 /**

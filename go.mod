@@ -8,7 +8,6 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0
 	github.com/docker/docker v20.10.21+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/ethereum-optimism/go-ethereum-hdwallet v0.1.3
 	github.com/ethereum/go-ethereum v1.11.2
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/golang/snappy v0.0.4
@@ -22,6 +21,7 @@ require (
 	github.com/libp2p/go-libp2p v0.25.1
 	github.com/libp2p/go-libp2p-pubsub v0.9.0
 	github.com/libp2p/go-libp2p-testing v0.12.0
+	github.com/mantlenetworkio/go-ethereum-hdwallet v0.1.4
 	github.com/mattn/go-isatty v0.0.17
 	github.com/multiformats/go-multiaddr v0.8.0
 	github.com/multiformats/go-multiaddr-dns v0.3.1
@@ -190,6 +190,6 @@ require (
 	nhooyr.io/websocket v1.8.7 // indirect
 )
 
-replace github.com/ethereum/go-ethereum v1.11.2 => github.com/ethereum-optimism/op-geth v1.11.2-aea0402.0.20230301232322-c407b2a217b7
+replace github.com/ethereum/go-ethereum v1.11.2 => github.com/mantlenetworkio/mt-geth v0.0.0-20230312080159-f956b531c3d2
 
 //replace github.com/ethereum/go-ethereum v1.11.2 => ../go-ethereum

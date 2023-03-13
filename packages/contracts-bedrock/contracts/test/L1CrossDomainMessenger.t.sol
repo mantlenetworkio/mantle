@@ -35,7 +35,7 @@ contract L1CrossDomainMessenger_Test is Messenger_Initializer {
     // TODO: this same test needs to be done with the legacy message type
     // by setting the message version to 0
     function test_sendMessage_succeeds() external {
-        // deposit transaction on the Mantle portal should be called
+        // deposit transaction on the mantle portal should be called
         vm.expectCall(
             address(op),
             abi.encodeWithSelector(

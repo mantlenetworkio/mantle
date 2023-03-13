@@ -4,12 +4,11 @@ import * as dotenv from 'dotenv'
 import { ethers } from 'ethers'
 
 // Hardhat plugins
-import '@openzeppelin/hardhat-upgrades'
 import '@mantleio/hardhat-deploy-config'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
-// import '@primitivefi/hardhat-dodoc'
+import '@primitivefi/hardhat-dodoc'
 import '@typechain/hardhat'
 import 'hardhat-deploy'
 import 'hardhat-gas-reporter'
@@ -25,71 +24,12 @@ const enableGasReport = !!process.env.ENABLE_GAS_REPORT
 const privateKey = process.env.PRIVATE_KEY || '0x' + '11'.repeat(32) // this is to avoid hardhat error
 const deploy = process.env.DEPLOY_DIRECTORY || 'deploy'
 
-import { copySync, remove } from 'fs-extra'
-import { subtask } from 'hardhat/config'
-import {
-  TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS,
-  TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT,
-  TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE
-} from 'hardhat/builtin-tasks/task-names'
-import { spawnSync } from 'child_process'
-
-subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
-  async (_, __, runSuper) => {
-    console.log('running task')
-    // copySync(
-    //   '../../datalayr-mantle/contracts/eignlayr-contracts/src',
-    //   './contracts/libraries/eigenda/lib'
-    // )
-    const paths = await runSuper()
-    const filteredPaths = paths.filter(function (p) {
-      return !p.includes('eigenda')
-    })
-    console.log('end task')
-    return filteredPaths
-  }
-)
-
-subtask(TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT).setAction(
-  async (_, __, runSuper) => {
-    console.log('running TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT')
-
-    // delete
-    // await remove('./contracts/libraries/eigenda')
-
-    runSuper()
-  }
-)
-
-subtask(TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE).setAction(
-  async (_, __, runSuper) => {
-    console.log('running TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE')
-
-    // delete
-    // await remove('./contracts/libraries/eigenda')
-    runSuper()
-  }
-)
-
 const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       live: false,
       saveDeployments: false,
       tags: ['local'],
-    },
-    local: {
-      chainId: 31337,
-      url: 'http://127.0.0.1:9545',
-      accounts: [privateKey],
-    },
-    dev: {
-      chainId: 31337,
-      url: 'https://mantle-l1chain.dev.davionlabs.com',
-      accounts: [
-        'dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97',
-        'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
-      ],
     },
     mantle: {
       url: 'http://127.0.0.1:8545',
@@ -111,27 +51,6 @@ const config: HardhatUserConfig = {
       chainId: 42069,
       url: 'http://127.0.0.1:8545',
       accounts: [privateKey],
-    },
-    goerlibn: {
-      chainId: 5,
-      url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
-      deploy,
-      accounts: [privateKey],
-    },
-    'goerli-qa': {
-      chainId: 5,
-      url: 'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28',
-      deploy,
-      accounts: [privateKey],
-    },
-    'goerli-testnet': {
-      chainId: 5,
-      //url: 'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28',
-      url: 'https://goerli.davionlabs.com',
-      deploy,
-      accounts: [privateKey],
-      gas: 'auto',
-      gasPrice: 'auto',
     },
     kovan: {
       chainId: 42,
@@ -198,6 +117,7 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       mainnet: process.env.ETHERSCAN_API_KEY,
+      optimisticEthereum: process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
       goerli: process.env.ETHERSCAN_API_KEY,
     },
   },
@@ -263,15 +183,6 @@ const config: HardhatUserConfig = {
     sccSequencerPublishWindowSeconds: {
       type: 'number',
     },
-    blockStaleMeasure: {
-      type: 'number',
-    },
-    daFraudProofPeriod: {
-      type: 'number',
-    },
-    l2SubmittedBlockNumber: {
-      type: 'number',
-    },
     bvmSequencerAddress: {
       type: 'address',
     },
@@ -290,22 +201,9 @@ const config: HardhatUserConfig = {
     bvmGasPriceOracleOwner: {
       type: 'address',
     },
-    bvmFeeWalletOwner: {
-      type: 'address',
-    },
     bvmWhitelistOwner: {
       type: 'address',
       default: ethers.constants.AddressZero,
-    },
-    dataManagerAddress: {
-      type: 'address',
-    },
-    bvmEigenSequencerAddress: {
-      type: 'address',
-    },
-    sccAddress: {
-      type: 'address',
-      default: 0,
     },
     gasPriceOracleOverhead: {
       type: 'number',
@@ -318,14 +216,6 @@ const config: HardhatUserConfig = {
     gasPriceOracleDecimals: {
       type: 'number',
       default: 6,
-    },
-    gasPriceOracleIsBurning: {
-      type: 'number',
-      default: 1,
-    },
-    gasPriceOracleCharge: {
-      type: 'number',
-      default: 0,
     },
     gasPriceOracleL1BaseFee: {
       type: 'number',
@@ -352,8 +242,6 @@ if (
     url: process.env.CONTRACTS_RPC_URL,
     live: true,
     saveDeployments: true,
-    gas: 'auto',
-    gasPrice: 'auto',
     tags: [process.env.CONTRACTS_TARGET_NETWORK],
   }
 }

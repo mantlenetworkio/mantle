@@ -23,13 +23,13 @@
     "nohoist": [
       "**/typechain/*",
       "**/@typechain/*",
-      "@eth-mantle/contracts-bedrock/ds-test",
-      "@eth-mantle/contracts-bedrock/forge-std",
-      "@eth-mantle/contracts-bedrock/@rari-capital/solmate",
+      "@mantleio/contracts-bedrock/ds-test",
+      "@mantleio/contracts-bedrock/forge-std",
+      "@mantleio/contracts-bedrock/@rari-capital/solmate",
       "**/@openzeppelin/*",
-      "@eth-mantle/contracts-periphery/ds-test",
-      "@eth-mantle/contracts-periphery/forge-std",
-      "@eth-mantle/contracts-periphery/@rari-capital/solmate",
+      "@mantleio/contracts-periphery/ds-test",
+      "@mantleio/contracts-periphery/forge-std",
+      "@mantleio/contracts-periphery/@rari-capital/solmate",
       "forta-agent"
     ]
   },

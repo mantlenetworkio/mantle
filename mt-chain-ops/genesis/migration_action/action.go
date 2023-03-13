@@ -13,10 +13,10 @@ import (
 
 type Config struct {
 	DeployConfig          *genesis.DeployConfig
-	OVMAddressesPath      string
+	BVMAddressesPath      string
 	EVMAddressesPath      string
-	OVMAllowancesPath     string
-	OVMMessagesPath       string
+	BVMAllowancesPath     string
+	BVMMessagesPath       string
 	EVMMessagesPath       string
 	Network               string
 	HardhatDeployments    []string
@@ -30,7 +30,7 @@ type Config struct {
 func Migrate(cfg *Config) (*genesis.MigrationResult, error) {
 	deployConfig := cfg.DeployConfig
 
-	ovmAddresses, err := migration.NewAddresses(cfg.OVMAddressesPath)
+	bvmAddresses, err := migration.NewAddresses(cfg.BVMAddressesPath)
 	if err != nil {
 		return nil, err
 	}
@@ -38,11 +38,11 @@ func Migrate(cfg *Config) (*genesis.MigrationResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	ovmAllowances, err := migration.NewAllowances(cfg.OVMAllowancesPath)
+	bvmAllowances, err := migration.NewAllowances(cfg.BVMAllowancesPath)
 	if err != nil {
 		return nil, err
 	}
-	ovmMessages, err := migration.NewSentMessage(cfg.OVMMessagesPath)
+	bvmMessages, err := migration.NewSentMessage(cfg.BVMMessagesPath)
 	if err != nil {
 		return nil, err
 	}
@@ -52,10 +52,10 @@ func Migrate(cfg *Config) (*genesis.MigrationResult, error) {
 	}
 
 	migrationData := migration.MigrationData{
-		OvmAddresses:  ovmAddresses,
+		BvmAddresses:  bvmAddresses,
 		EvmAddresses:  evmAddresess,
-		OvmAllowances: ovmAllowances,
-		OvmMessages:   ovmMessages,
+		BvmAllowances: bvmAllowances,
+		BvmMessages:   bvmMessages,
 		EvmMessages:   evmMessages,
 	}
 

@@ -3,7 +3,7 @@ import '@nomiclabs/hardhat-ethers'
 import 'hardhat-deploy'
 import { HardhatRuntimeEnvironment } from 'hardhat/types'
 import { BigNumber } from 'ethers'
-import { sleep, toRpcHexString } from '@eth-mantle/core-utils'
+import { sleep, toRpcHexString } from '@mantleio/core-utils'
 
 task('wait-for-final-deposit', 'Waits for the final deposit to be ingested')
   .addParam(

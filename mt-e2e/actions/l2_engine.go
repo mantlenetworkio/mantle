@@ -113,7 +113,7 @@ func NewL2Engine(t Testing, log log.Logger, genesis *core.Genesis, rollupGenesis
 			Authenticated: true,
 		},
 	})
-	require.NoError(t, n.Start(), "failed to start L2 op-geth node")
+	require.NoError(t, n.Start(), "failed to start L2 mt-geth node")
 
 	return eng
 }

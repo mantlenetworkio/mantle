@@ -99,8 +99,8 @@ func main() {
 				Usage: "Address of the L1StandardBridge",
 			},
 			&cli.StringFlag{
-				Name:  "ovm-messages",
-				Usage: "Path to ovm-messages.json",
+				Name:  "bvm-messages",
+				Usage: "Path to bvm-messages.json",
 			},
 			&cli.StringFlag{
 				Name:  "evm-messages",
@@ -764,20 +764,20 @@ func newClients(ctx *cli.Context) (*clients, error) {
 
 // newWithdrawals will create a set of legacy withdrawals
 func newWithdrawals(ctx *cli.Context, l1ChainID *big.Int) ([]*crossdomain.LegacyWithdrawal, error) {
-	ovmMsgs := ctx.String("ovm-messages")
+	bvmMsgs := ctx.String("bvm-messages")
 	evmMsgs := ctx.String("evm-messages")
 
-	log.Debug("Migration data", "ovm-path", ovmMsgs, "evm-messages", evmMsgs)
-	ovmMessages, err := migration.NewSentMessage(ovmMsgs)
+	log.Debug("Migration data", "bvm-path", bvmMsgs, "evm-messages", evmMsgs)
+	bvmMessages, err := migration.NewSentMessage(bvmMsgs)
 	if err != nil {
 		return nil, err
 	}
 
-	// use empty ovmMessages if its not mainnet. The mainnet messages are
+	// use empty bvmMessages if its not mainnet. The mainnet messages are
 	// committed to in git.
 	if l1ChainID.Cmp(common.Big1) != 0 {
-		log.Info("not using ovm messages because its not mainnet")
-		ovmMessages = []*migration.SentMessage{}
+		log.Info("not using bvm messages because its not mainnet")
+		bvmMessages = []*migration.SentMessage{}
 	}
 
 	evmMessages, err := migration.NewSentMessage(evmMsgs)
@@ -786,7 +786,7 @@ func newWithdrawals(ctx *cli.Context, l1ChainID *big.Int) ([]*crossdomain.Legacy
 	}
 
 	migrationData := migration.MigrationData{
-		OvmMessages: ovmMessages,
+		BvmMessages: bvmMessages,
 		EvmMessages: evmMessages,
 	}
 

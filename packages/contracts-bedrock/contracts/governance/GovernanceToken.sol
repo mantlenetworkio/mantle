@@ -15,7 +15,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  *         schedule.
  */
 contract GovernanceToken is ERC20Burnable, ERC20Votes, Ownable {
-    constructor() ERC20("Mantle", "MT") ERC20Permit("Mantle") {}
+    constructor() ERC20("Mantle", "OP") ERC20Permit("Mantle") {}
 
     /**
      * @notice Allows the owner to mint tokens.

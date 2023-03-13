@@ -84,7 +84,7 @@ func NewNodeAPI(config *rollup.Config, l2Client l2EthClient, dr driverClient, lo
 }
 
 func (n *nodeAPI) OutputAtBlock(ctx context.Context, number hexutil.Uint64) (*eth.OutputResponse, error) {
-	recordDur := n.m.RecordRPCServerRequest("optimism_outputAtBlock")
+	recordDur := n.m.RecordRPCServerRequest("mantle_outputAtBlock")
 	defer recordDur()
 
 	ref, status, err := n.dr.BlockRefWithStatus(ctx, uint64(number))
@@ -127,19 +127,19 @@ func (n *nodeAPI) OutputAtBlock(ctx context.Context, number hexutil.Uint64) (*et
 }
 
 func (n *nodeAPI) SyncStatus(ctx context.Context) (*eth.SyncStatus, error) {
-	recordDur := n.m.RecordRPCServerRequest("optimism_syncStatus")
+	recordDur := n.m.RecordRPCServerRequest("mantle_syncStatus")
 	defer recordDur()
 	return n.dr.SyncStatus(ctx)
 }
 
 func (n *nodeAPI) RollupConfig(_ context.Context) (*rollup.Config, error) {
-	recordDur := n.m.RecordRPCServerRequest("optimism_rollupConfig")
+	recordDur := n.m.RecordRPCServerRequest("mantle_rollupConfig")
 	defer recordDur()
 	return n.config, nil
 }
 
 func (n *nodeAPI) Version(ctx context.Context) (string, error) {
-	recordDur := n.m.RecordRPCServerRequest("optimism_version")
+	recordDur := n.m.RecordRPCServerRequest("mantle_version")
 	defer recordDur()
 	return version.Version + "-" + version.Meta, nil
 }

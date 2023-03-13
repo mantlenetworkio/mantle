@@ -10,7 +10,7 @@ import { Semver } from "../universal/Semver.sol";
  * @title MantleMintableERC20
  * @notice MantleMintableERC20 is a standard extension of the base ERC20 token contract designed
  *         to allow the StandardBridge contracts to mint and burn tokens. This makes it possible to
- *         use an MantleMintableRC20 as the L2 representation of an L1 token, or vice-versa.
+ *         use an MantleMintablERC20 as the L2 representation of an L1 token, or vice-versa.
  *         Designed to be backwards compatible with the older StandardL2ERC20 token which was only
  *         meant for use on L2.
  */

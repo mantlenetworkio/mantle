@@ -9,7 +9,7 @@ import {
 const deployFn: DeployFunction = async (hre) => {
   const L1StandardBridgeProxy = await getContractFromArtifact(
     hre,
-    'Proxy__OVM_L1StandardBridge'
+    'Proxy__BVM_L1StandardBridge'
   )
 
   await deploy({

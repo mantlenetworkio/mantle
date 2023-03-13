@@ -95,23 +95,6 @@ function burn(address _from, uint256 _amount) external nonpayable
 | _from | address | undefined
 | _amount | uint256 | undefined
 
-### decimal
-
-```solidity
-function decimal() external view returns (uint8)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint8 | undefined
-
 ### decimals
 
 ```solidity

@@ -239,10 +239,10 @@ contract Messenger_Initializer is L2OutputOracle_Initializer {
 
         // Setup the address manager and proxy
         vm.prank(multisig);
-        addressManager.setAddress("OVM_L1CrossDomainMessenger", address(L1MessengerImpl));
+        addressManager.setAddress("BVM_L1CrossDomainMessenger", address(L1MessengerImpl));
         ResolvedDelegateProxy proxy = new ResolvedDelegateProxy(
             addressManager,
-            "OVM_L1CrossDomainMessenger"
+            "BVM_L1CrossDomainMessenger"
         );
         L1Messenger = L1CrossDomainMessenger(address(proxy));
         L1Messenger.initialize();
@@ -360,7 +360,7 @@ contract Bridge_Initializer is Messenger_Initializer {
         super.setUp();
 
         vm.label(Predeploys.L2_STANDARD_BRIDGE, "L2StandardBridge");
-        vm.label(Predeploys.MANTLE_MINTABLE_ERC20_FACTORY, "MantleMintableERC20Factory");
+        vm.label(Predeploys.OPTIMISM_MINTABLE_ERC20_FACTORY, "MantleMintableERC20Factory");
 
         // Deploy the L1 bridge and initialize it with the address of the
         // L1CrossDomainMessenger
@@ -391,8 +391,8 @@ contract Bridge_Initializer is Messenger_Initializer {
         MantleMintableERC20Factory factory = new MantleMintableERC20Factory(
             Predeploys.L2_STANDARD_BRIDGE
         );
-        vm.etch(Predeploys.MANTLE_MINTABLE_ERC20_FACTORY, address(factory).code);
-        L2TokenFactory = MantleMintableERC20Factory(Predeploys.MANTLE_MINTABLE_ERC20_FACTORY);
+        vm.etch(Predeploys.OPTIMISM_MINTABLE_ERC20_FACTORY, address(factory).code);
+        L2TokenFactory = MantleMintableERC20Factory(Predeploys.OPTIMISM_MINTABLE_ERC20_FACTORY);
 
         vm.etch(Predeploys.LEGACY_ERC20_ETH, address(new LegacyERC20ETH()).code);
 

@@ -22,7 +22,7 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-node/sources"
 )
 
-type OpNode struct {
+type MtNode struct {
 	log        log.Logger
 	appVersion string
 	metrics    *metrics.Metrics
@@ -46,15 +46,15 @@ type OpNode struct {
 	resourcesClose context.CancelFunc
 }
 
-// The OpNode handles incoming gossip
-var _ p2p.GossipIn = (*OpNode)(nil)
+// The MtNode handles incoming gossip
+var _ p2p.GossipIn = (*MtNode)(nil)
 
-func New(ctx context.Context, cfg *Config, log log.Logger, snapshotLog log.Logger, appVersion string, m *metrics.Metrics) (*OpNode, error) {
+func New(ctx context.Context, cfg *Config, log log.Logger, snapshotLog log.Logger, appVersion string, m *metrics.Metrics) (*MtNode, error) {
 	if err := cfg.Check(); err != nil {
 		return nil, err
 	}
 
-	n := &OpNode{
+	n := &MtNode{
 		log:        log,
 		appVersion: appVersion,
 		metrics:    m,
@@ -76,7 +76,7 @@ func New(ctx context.Context, cfg *Config, log log.Logger, snapshotLog log.Logge
 	return n, nil
 }
 
-func (n *OpNode) init(ctx context.Context, cfg *Config, snapshotLog log.Logger) error {
+func (n *MtNode) init(ctx context.Context, cfg *Config, snapshotLog log.Logger) error {
 	if err := n.initTracer(ctx, cfg); err != nil {
 		return err
 	}
@@ -105,7 +105,7 @@ func (n *OpNode) init(ctx context.Context, cfg *Config, snapshotLog log.Logger) 
 	return nil
 }
 
-func (n *OpNode) initTracer(ctx context.Context, cfg *Config) error {
+func (n *MtNode) initTracer(ctx context.Context, cfg *Config) error {
 	if cfg.Tracer != nil {
 		n.tracer = cfg.Tracer
 	} else {
@@ -114,7 +114,7 @@ func (n *OpNode) initTracer(ctx context.Context, cfg *Config) error {
 	return nil
 }
 
-func (n *OpNode) initL1(ctx context.Context, cfg *Config) error {
+func (n *MtNode) initL1(ctx context.Context, cfg *Config) error {
 	l1Node, trustRPC, rpcProvKind, err := cfg.L1.Setup(ctx, n.log)
 	if err != nil {
 		return fmt.Errorf("failed to get L1 RPC client: %w", err)
@@ -155,7 +155,7 @@ func (n *OpNode) initL1(ctx context.Context, cfg *Config) error {
 	return nil
 }
 
-func (n *OpNode) initRuntimeConfig(ctx context.Context, cfg *Config) error {
+func (n *MtNode) initRuntimeConfig(ctx context.Context, cfg *Config) error {
 	// attempt to load runtime config, repeat N times
 	n.runCfg = NewRuntimeConfig(n.log, n.l1Source, &cfg.Rollup)
 
@@ -182,7 +182,7 @@ func (n *OpNode) initRuntimeConfig(ctx context.Context, cfg *Config) error {
 	return errors.New("failed to load runtime configuration repeatedly")
 }
 
-func (n *OpNode) initL2(ctx context.Context, cfg *Config, snapshotLog log.Logger) error {
+func (n *MtNode) initL2(ctx context.Context, cfg *Config, snapshotLog log.Logger) error {
 	rpcClient, err := cfg.L2.Setup(ctx, n.log)
 	if err != nil {
 		return fmt.Errorf("failed to setup L2 execution-engine RPC client: %w", err)
@@ -205,7 +205,7 @@ func (n *OpNode) initL2(ctx context.Context, cfg *Config, snapshotLog log.Logger
 	return nil
 }
 
-func (n *OpNode) initRPCServer(ctx context.Context, cfg *Config) error {
+func (n *MtNode) initRPCServer(ctx context.Context, cfg *Config) error {
 	server, err := newRPCServer(ctx, &cfg.RPC, &cfg.Rollup, n.l2Source.L2Client, n.l2Driver, n.log, n.appVersion, n.metrics)
 	if err != nil {
 		return err
@@ -225,7 +225,7 @@ func (n *OpNode) initRPCServer(ctx context.Context, cfg *Config) error {
 	return nil
 }
 
-func (n *OpNode) initMetricsServer(ctx context.Context, cfg *Config) error {
+func (n *MtNode) initMetricsServer(ctx context.Context, cfg *Config) error {
 	if !cfg.Metrics.Enabled {
 		n.log.Info("metrics disabled")
 		return nil
@@ -239,7 +239,7 @@ func (n *OpNode) initMetricsServer(ctx context.Context, cfg *Config) error {
 	return nil
 }
 
-func (n *OpNode) initP2P(ctx context.Context, cfg *Config) error {
+func (n *MtNode) initP2P(ctx context.Context, cfg *Config) error {
 	if cfg.P2P != nil {
 		p2pNode, err := p2p.NewNodeP2P(n.resourcesCtx, &cfg.Rollup, n.log, cfg.P2P, n, n.runCfg, n.metrics)
 		if err != nil || p2pNode == nil {
@@ -253,7 +253,7 @@ func (n *OpNode) initP2P(ctx context.Context, cfg *Config) error {
 	return nil
 }
 
-func (n *OpNode) initP2PSigner(ctx context.Context, cfg *Config) error {
+func (n *MtNode) initP2PSigner(ctx context.Context, cfg *Config) error {
 	// the p2p signer setup is optional
 	if cfg.P2PSigner == nil {
 		return nil
@@ -264,7 +264,7 @@ func (n *OpNode) initP2PSigner(ctx context.Context, cfg *Config) error {
 	return err
 }
 
-func (n *OpNode) Start(ctx context.Context) error {
+func (n *MtNode) Start(ctx context.Context) error {
 	n.log.Info("Starting execution engine driver")
 	// start driving engine: sync blocks by deriving them from L1 and driving them into the engine
 	err := n.l2Driver.Start()
@@ -276,7 +276,7 @@ func (n *OpNode) Start(ctx context.Context) error {
 	return nil
 }
 
-func (n *OpNode) OnNewL1Head(ctx context.Context, sig eth.L1BlockRef) {
+func (n *MtNode) OnNewL1Head(ctx context.Context, sig eth.L1BlockRef) {
 	n.tracer.OnNewL1Head(ctx, sig)
 
 	if n.l2Driver == nil {
@@ -290,7 +290,7 @@ func (n *OpNode) OnNewL1Head(ctx context.Context, sig eth.L1BlockRef) {
 	}
 }
 
-func (n *OpNode) OnNewL1Safe(ctx context.Context, sig eth.L1BlockRef) {
+func (n *MtNode) OnNewL1Safe(ctx context.Context, sig eth.L1BlockRef) {
 	if n.l2Driver == nil {
 		return
 	}
@@ -302,7 +302,7 @@ func (n *OpNode) OnNewL1Safe(ctx context.Context, sig eth.L1BlockRef) {
 	}
 }
 
-func (n *OpNode) OnNewL1Finalized(ctx context.Context, sig eth.L1BlockRef) {
+func (n *MtNode) OnNewL1Finalized(ctx context.Context, sig eth.L1BlockRef) {
 	if n.l2Driver == nil {
 		return
 	}
@@ -314,7 +314,7 @@ func (n *OpNode) OnNewL1Finalized(ctx context.Context, sig eth.L1BlockRef) {
 	}
 }
 
-func (n *OpNode) PublishL2Payload(ctx context.Context, payload *eth.ExecutionPayload) error {
+func (n *MtNode) PublishL2Payload(ctx context.Context, payload *eth.ExecutionPayload) error {
 	n.tracer.OnPublishL2Payload(ctx, payload)
 
 	// publish to p2p, if we are running p2p at all
@@ -329,7 +329,7 @@ func (n *OpNode) PublishL2Payload(ctx context.Context, payload *eth.ExecutionPay
 	return nil
 }
 
-func (n *OpNode) OnUnsafeL2Payload(ctx context.Context, from peer.ID, payload *eth.ExecutionPayload) error {
+func (n *MtNode) OnUnsafeL2Payload(ctx context.Context, from peer.ID, payload *eth.ExecutionPayload) error {
 	// ignore if it's from ourselves
 	if n.p2pNode != nil && from == n.p2pNode.Host().ID() {
 		return nil
@@ -349,12 +349,12 @@ func (n *OpNode) OnUnsafeL2Payload(ctx context.Context, from peer.ID, payload *e
 	return nil
 }
 
-func (n *OpNode) P2P() p2p.Node {
+func (n *MtNode) P2P() p2p.Node {
 	return n.p2pNode
 }
 
 // Close closes all resources.
-func (n *OpNode) Close() error {
+func (n *MtNode) Close() error {
 	var result *multierror.Error
 
 	if n.server != nil {
@@ -399,10 +399,10 @@ func (n *OpNode) Close() error {
 	return result.ErrorOrNil()
 }
 
-func (n *OpNode) ListenAddr() string {
+func (n *MtNode) ListenAddr() string {
 	return n.server.listenAddr.String()
 }
 
-func (n *OpNode) HTTPEndpoint() string {
+func (n *MtNode) HTTPEndpoint() string {
 	return fmt.Sprintf("http://%s", n.ListenAddr())
 }

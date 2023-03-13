@@ -17,7 +17,7 @@ func TestGethAddresses(t *testing.T) {
 }
 
 // TestL1BlockSlots ensures that the storage layout of the L1Block
-// contract matches the hardcoded values in `op-geth`.
+// contract matches the hardcoded values in `mt-geth`.
 func TestL1BlockSlots(t *testing.T) {
 	layout, err := bindings.GetStorageLayout("L1Block")
 	require.NoError(t, err)

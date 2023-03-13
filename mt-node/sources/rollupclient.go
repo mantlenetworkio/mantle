@@ -20,24 +20,24 @@ func NewRollupClient(rpc client.RPC) *RollupClient {
 
 func (r *RollupClient) OutputAtBlock(ctx context.Context, blockNum uint64) (*eth.OutputResponse, error) {
 	var output *eth.OutputResponse
-	err := r.rpc.CallContext(ctx, &output, "optimism_outputAtBlock", hexutil.Uint64(blockNum))
+	err := r.rpc.CallContext(ctx, &output, "mantle_outputAtBlock", hexutil.Uint64(blockNum))
 	return output, err
 }
 
 func (r *RollupClient) SyncStatus(ctx context.Context) (*eth.SyncStatus, error) {
 	var output *eth.SyncStatus
-	err := r.rpc.CallContext(ctx, &output, "optimism_syncStatus")
+	err := r.rpc.CallContext(ctx, &output, "mantle_syncStatus")
 	return output, err
 }
 
 func (r *RollupClient) RollupConfig(ctx context.Context) (*rollup.Config, error) {
 	var output *rollup.Config
-	err := r.rpc.CallContext(ctx, &output, "optimism_rollupConfig")
+	err := r.rpc.CallContext(ctx, &output, "mantle_rollupConfig")
 	return output, err
 }
 
 func (r *RollupClient) Version(ctx context.Context) (string, error) {
 	var output string
-	err := r.rpc.CallContext(ctx, &output, "optimism_version")
+	err := r.rpc.CallContext(ctx, &output, "mantle_version")
 	return output, err
 }

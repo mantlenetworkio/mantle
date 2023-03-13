@@ -41,7 +41,7 @@ function approve(address spender, uint256 amount) external nonpayable returns (b
 
 
 
-*See {IERC20-approve}. Requirements: - `spender` cannot be the zero address.*
+*Sets `amount` as the allowance of `spender` over the caller&#39;s tokens. Returns a boolean value indicating whether the operation succeeded. IMPORTANT: Beware that changing an allowance with this method brings the risk that someone may use both the old and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this race condition is to first reduce the spender&#39;s allowance to 0 and set the desired value afterwards: https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729 Emits an {Approval} event.*
 
 #### Parameters
 
@@ -94,23 +94,6 @@ function burn(address _from, uint256 _amount) external nonpayable
 |---|---|---|
 | _from | address | undefined
 | _amount | uint256 | undefined
-
-### decimal
-
-```solidity
-function decimal() external view returns (uint8)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint8 | undefined
 
 ### decimals
 
@@ -307,7 +290,7 @@ function transfer(address recipient, uint256 amount) external nonpayable returns
 
 
 
-*See {IERC20-transfer}. Requirements: - `recipient` cannot be the zero address. - the caller must have a balance of at least `amount`.*
+*Moves `amount` tokens from the caller&#39;s account to `recipient`. Returns a boolean value indicating whether the operation succeeded. Emits a {Transfer} event.*
 
 #### Parameters
 
@@ -330,7 +313,7 @@ function transferFrom(address sender, address recipient, uint256 amount) externa
 
 
 
-*See {IERC20-transferFrom}. Emits an {Approval} event indicating the updated allowance. This is not required by the EIP. See the note at the beginning of {ERC20}. Requirements: - `sender` and `recipient` cannot be the zero address. - `sender` must have a balance of at least `amount`. - the caller must have allowance for ``sender``&#39;s tokens of at least `amount`.*
+*Moves `amount` tokens from `sender` to `recipient` using the allowance mechanism. `amount` is then deducted from the caller&#39;s allowance. Returns a boolean value indicating whether the operation succeeded. Emits a {Transfer} event.*
 
 #### Parameters
 

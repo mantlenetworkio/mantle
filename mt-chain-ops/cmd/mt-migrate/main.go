@@ -42,8 +42,8 @@ func main() {
 				Required: true,
 			},
 			&cli.StringFlag{
-				Name:     "ovm-addresses",
-				Usage:    "Path to ovm-addresses.json",
+				Name:     "bvm-addresses",
+				Usage:    "Path to bvm-addresses.json",
 				Required: true,
 			},
 			&cli.StringFlag{
@@ -52,13 +52,13 @@ func main() {
 				Required: true,
 			},
 			&cli.StringFlag{
-				Name:     "ovm-allowances",
-				Usage:    "Path to ovm-allowances.json",
+				Name:     "bvm-allowances",
+				Usage:    "Path to bvm-allowances.json",
 				Required: true,
 			},
 			&cli.StringFlag{
-				Name:     "ovm-messages",
-				Usage:    "Path to ovm-messages.json",
+				Name:     "bvm-messages",
+				Usage:    "Path to bvm-messages.json",
 				Required: true,
 			},
 			&cli.StringFlag{
@@ -118,7 +118,7 @@ func main() {
 				return err
 			}
 
-			ovmAddresses, err := migration.NewAddresses(ctx.String("ovm-addresses"))
+			bvmAddresses, err := migration.NewAddresses(ctx.String("bvm-addresses"))
 			if err != nil {
 				return err
 			}
@@ -126,11 +126,11 @@ func main() {
 			if err != nil {
 				return err
 			}
-			ovmAllowances, err := migration.NewAllowances(ctx.String("ovm-allowances"))
+			bvmAllowances, err := migration.NewAllowances(ctx.String("bvm-allowances"))
 			if err != nil {
 				return err
 			}
-			ovmMessages, err := migration.NewSentMessage(ctx.String("ovm-messages"))
+			bvmMessages, err := migration.NewSentMessage(ctx.String("bvm-messages"))
 			if err != nil {
 				return err
 			}
@@ -140,10 +140,10 @@ func main() {
 			}
 
 			migrationData := migration.MigrationData{
-				OvmAddresses:  ovmAddresses,
+				BvmAddresses:  bvmAddresses,
 				EvmAddresses:  evmAddresess,
-				OvmAllowances: ovmAllowances,
-				OvmMessages:   ovmMessages,
+				BvmAllowances: bvmAllowances,
+				BvmMessages:   bvmMessages,
 				EvmMessages:   evmMessages,
 			}
 

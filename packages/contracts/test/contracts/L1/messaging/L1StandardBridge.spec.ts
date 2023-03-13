@@ -17,7 +17,6 @@ const ERROR_STRINGS = {
 
 const DUMMY_L2_ERC20_ADDRESS = '0xaBBAABbaaBbAABbaABbAABbAABbaAbbaaBbaaBBa'
 const DUMMY_L2_BRIDGE_ADDRESS = '0xACDCacDcACdCaCDcacdcacdCaCdcACdCAcDcaCdc'
-const DUMMY_L1_BIT_TOKEN_ADDRESS = '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5'
 const INITIAL_TOTAL_L1_SUPPLY = 5000
 const FINALIZATION_GAS = 1_200_000
 
@@ -43,8 +42,7 @@ describe('L1StandardBridge', () => {
     L1StandardBridge = await deploy('L1StandardBridge')
     await L1StandardBridge.initialize(
       Fake__L1CrossDomainMessenger.address,
-      DUMMY_L2_BRIDGE_ADDRESS,
-      DUMMY_L1_BIT_TOKEN_ADDRESS
+      DUMMY_L2_BRIDGE_ADDRESS
     )
 
     L1ERC20 = await (
@@ -61,8 +59,7 @@ describe('L1StandardBridge', () => {
       await expect(
         L1StandardBridge.initialize(
           ethers.constants.AddressZero,
-          DUMMY_L2_BRIDGE_ADDRESS,
-          DUMMY_L1_BIT_TOKEN_ADDRESS
+          DUMMY_L2_BRIDGE_ADDRESS
         )
       ).to.be.revertedWith(ERROR_STRINGS.ALREADY_INITIALIZED)
     })

@@ -183,7 +183,7 @@ var (
 		Name:   "heartbeat.url",
 		Usage:  "Sets the URL to heartbeat to",
 		EnvVar: prefixEnvVar("HEARTBEAT_URL"),
-		Value:  "https://heartbeat.optimism.io",
+		Value:  "https://heartbeat.mantle.io",
 	}
 )
 

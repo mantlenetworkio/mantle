@@ -22,7 +22,7 @@
   },
   "settings": {
     "remappings": [
-      "@eth-mantle/contracts-periphery/=node_modules/@eth-mantle/contracts-periphery/contracts/",
+      "@mantleio/contracts-periphery/=node_modules/@mantleio/contracts-periphery/contracts/",
       "@openzeppelin/=node_modules/@openzeppelin/",
       "@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/",
       "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",

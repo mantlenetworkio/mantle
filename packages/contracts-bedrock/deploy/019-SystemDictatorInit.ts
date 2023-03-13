@@ -2,8 +2,8 @@ import assert from 'assert'
 
 import { ethers } from 'ethers'
 import { DeployFunction } from 'hardhat-deploy/dist/types'
-import { awaitCondition } from '@eth-mantle/core-utils'
-import '@eth-mantle/hardhat-deploy-config'
+import { awaitCondition } from '@mantleio/core-utils'
+import '@mantleio/hardhat-deploy-config'
 import 'hardhat-deploy'
 
 import {
@@ -52,19 +52,19 @@ const deployFn: DeployFunction = async (hre) => {
         hre,
         'L2OutputOracleProxy'
       ),
-      MantlePortalProxy: await getDeploymentAddress(
+      mantlePortalProxy: await getDeploymentAddress(
         hre,
         'MantlePortalProxy'
       ),
       l1CrossDomainMessengerProxy: await getDeploymentAddress(
         hre,
-        'Proxy__OVM_L1CrossDomainMessenger'
+        'Proxy__BVM_L1CrossDomainMessenger'
       ),
       l1StandardBridgeProxy: await getDeploymentAddress(
         hre,
-        'Proxy__OVM_L1StandardBridge'
+        'Proxy__BVM_L1StandardBridge'
       ),
-      MantleMintableERC20FactoryProxy: await getDeploymentAddress(
+      mantleMintableERC20FactoryProxy: await getDeploymentAddress(
         hre,
         'MantleMintableERC20FactoryProxy'
       ),
@@ -76,13 +76,13 @@ const deployFn: DeployFunction = async (hre) => {
     },
     implementationAddressConfig: {
       l2OutputOracleImpl: await getDeploymentAddress(hre, 'L2OutputOracle'),
-      MantlePortalImpl: await getDeploymentAddress(hre, 'MantlePortal'),
+      mantlePortalImpl: await getDeploymentAddress(hre, 'MantlePortal'),
       l1CrossDomainMessengerImpl: await getDeploymentAddress(
         hre,
         'L1CrossDomainMessenger'
       ),
       l1StandardBridgeImpl: await getDeploymentAddress(hre, 'L1StandardBridge'),
-      MantleMintableERC20FactoryImpl: await getDeploymentAddress(
+      mantleMintableERC20FactoryImpl: await getDeploymentAddress(
         hre,
         'MantleMintableERC20Factory'
       ),

@@ -2,8 +2,8 @@ import assert from 'assert'
 
 import { ethers } from 'ethers'
 import { DeployFunction } from 'hardhat-deploy/dist/types'
-import { awaitCondition } from '@eth-mantle/core-utils'
-import '@eth-mantle/hardhat-deploy-config'
+import { awaitCondition } from '@mantleio/core-utils'
+import '@mantleio/hardhat-deploy-config'
 import 'hardhat-deploy'
 import '@nomiclabs/hardhat-ethers'
 
@@ -44,15 +44,15 @@ const deployFn: DeployFunction = async (hre) => {
       signerOrProvider: deployer,
     },
     {
-      name: 'Proxy__OVM_L1CrossDomainMessenger',
+      name: 'Proxy__BVM_L1CrossDomainMessenger',
       iface: 'L1CrossDomainMessenger',
       signerOrProvider: deployer,
     },
     {
-      name: 'Proxy__OVM_L1StandardBridge',
+      name: 'Proxy__BVM_L1StandardBridge',
     },
     {
-      name: 'Proxy__OVM_L1StandardBridge',
+      name: 'Proxy__BVM_L1StandardBridge',
       signerOrProvider: deployer,
     },
     {
@@ -121,7 +121,7 @@ const deployFn: DeployFunction = async (hre) => {
   // Transfer ownership of the L1CrossDomainMessenger to SystemDictator.
   if (
     needsProxyTransfer &&
-    (await AddressManager.getAddress('OVM_L1CrossDomainMessenger')) !==
+    (await AddressManager.getAddress('BVM_L1CrossDomainMessenger')) !==
       ethers.constants.AddressZero &&
     (await L1CrossDomainMessenger.owner()) !== SystemDictator.address
   ) {
@@ -244,17 +244,17 @@ const deployFn: DeployFunction = async (hre) => {
       )
       assert(
         (await ProxyAdmin.implementationName(
-          getDeploymentAddress(hre, 'Proxy__OVM_L1CrossDomainMessenger')
-        )) === 'OVM_L1CrossDomainMessenger'
+          getDeploymentAddress(hre, 'Proxy__BVM_L1CrossDomainMessenger')
+        )) === 'BVM_L1CrossDomainMessenger'
       )
       assert(
         (await ProxyAdmin.proxyType(
-          getDeploymentAddress(hre, 'Proxy__OVM_L1CrossDomainMessenger')
+          getDeploymentAddress(hre, 'Proxy__BVM_L1CrossDomainMessenger')
         )) === 2
       )
       assert(
         (await ProxyAdmin.proxyType(
-          getDeploymentAddress(hre, 'Proxy__OVM_L1StandardBridge')
+          getDeploymentAddress(hre, 'Proxy__BVM_L1StandardBridge')
         )) === 1
       )
 
@@ -303,7 +303,7 @@ const deployFn: DeployFunction = async (hre) => {
     `,
     checks: async () => {
       assert(
-        (await AddressManager.getAddress('OVM_L1CrossDomainMessenger')) ===
+        (await AddressManager.getAddress('BVM_L1CrossDomainMessenger')) ===
           ethers.constants.AddressZero
       )
     },

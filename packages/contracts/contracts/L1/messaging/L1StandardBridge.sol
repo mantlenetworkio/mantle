@@ -28,7 +28,6 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
      ********************************/
 
     address public l2TokenBridge;
-    address public l1BitAddress;
 
     // Maps L1 token to L2 token to balance of the L1 token deposited
     mapping(address => mapping(address => uint256)) public deposits;
@@ -47,14 +46,12 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
     /**
      * @param _l1messenger L1 Messenger address being used for cross-chain communications.
      * @param _l2TokenBridge L2 standard bridge address.
-     * @param _l1BitAddress initialize L1 bit address
      */
     // slither-disable-next-line external-function
-    function initialize(address _l1messenger, address _l2TokenBridge, address _l1BitAddress) public {
+    function initialize(address _l1messenger, address _l2TokenBridge) public {
         require(messenger == address(0), "Contract has already been initialized.");
         messenger = _l1messenger;
         l2TokenBridge = _l2TokenBridge;
-        l1BitAddress = _l1BitAddress;
     }
 
     /**************
@@ -190,33 +187,15 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
         IERC20(_l1Token).safeTransferFrom(_from, address(this), _amount);
 
         // Construct calldata for _l2Token.finalizeDeposit(_to, _amount)
-        bytes memory message;
-        if (_l1Token == l1BitAddress) {
-            // Construct calldata for finalizeDeposit call
-            _l2Token = Lib_PredeployAddresses.BVM_BIT;
-            message = abi.encodeWithSelector(
-                IL2ERC20Bridge.finalizeDeposit.selector,
-                address(0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5),
-                Lib_PredeployAddresses.BVM_BIT,
-                _from,
-                _to,
-                _amount,
-                _data
-            );
-
-        } else {
-            // Construct calldata for finalizeDeposit call
-            message = abi.encodeWithSelector(
-                IL2ERC20Bridge.finalizeDeposit.selector,
-                _l1Token,
-                _l2Token,
-                _from,
-                _to,
-                _amount,
-                _data
-            );
-        }
-
+        bytes memory message = abi.encodeWithSelector(
+            IL2ERC20Bridge.finalizeDeposit.selector,
+            _l1Token,
+            _l2Token,
+            _from,
+            _to,
+            _amount,
+            _data
+        );
 
         // Send calldata into L2
         // slither-disable-next-line reentrancy-events, reentrancy-benign
@@ -253,18 +232,6 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
     /**
      * @inheritdoc IL1ERC20Bridge
      */
-    function finalizeBitWithdrawal(
-        address _from,
-        address _to,
-        uint256 _amount,
-        bytes calldata _data
-    ) external onlyFromCrossDomainAccount(l2TokenBridge) {
-        finalizeERC20Withdrawal(l1BitAddress, Lib_PredeployAddresses.BVM_BIT, _from, _to, _amount, _data);
-    }
-
-    /**
-     * @inheritdoc IL1ERC20Bridge
-     */
     function finalizeERC20Withdrawal(
         address _l1Token,
         address _l2Token,
@@ -272,7 +239,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
         address _to,
         uint256 _amount,
         bytes calldata _data
-    ) public onlyFromCrossDomainAccount(l2TokenBridge) {
+    ) external onlyFromCrossDomainAccount(l2TokenBridge) {
         deposits[_l1Token][_l2Token] = deposits[_l1Token][_l2Token] - _amount;
 
         // When a withdrawal is finalized on L1, the L1 Bridge transfers the funds to the withdrawer

@@ -37,7 +37,7 @@ To start syncing the rollup:
 Connect to at least one L1 RPC and L2 execution engine:
 
 - L1: use any L1 node / RPC (websocket connection path may differ)
-- L2: run the Optimism fork of geth: [`op-geth`](https://github.com/ethereum-optimism/op-geth)
+- L2: run the Mantle fork of geth: [`mt-geth`](https://github.com/ethereum-mantle/mt-geth)
 
 ```shell
 # websockets or IPC preferred for event notifications to improve sync, http RPC works with adaptive polling.

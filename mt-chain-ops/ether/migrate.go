@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	// OVMETHAddress is the address of the OVM ETH predeploy.
-	OVMETHAddress = common.HexToAddress("0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000")
+	// BVMETHAddress is the address of the BVM ETH predeploy.
+	BVMETHAddress = common.HexToAddress("0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000")
 
 	ignoredSlots = map[common.Hash]bool{
 		// Total Supply
@@ -58,15 +58,15 @@ func MigrateLegacyETH(db *state.StateDB, addresses []common.Address, chainID int
 			}
 		}
 
-		// Pull out the OVM ETH balance.
-		ovmBalance := getOVMETHBalance(db, addr)
+		// Pull out the BVM ETH balance.
+		bvmBalance := getBVMETHBalance(db, addr)
 
 		// Actually perform the migration by setting the appropriate values in state.
-		db.SetBalance(addr, ovmBalance)
-		db.SetState(predeploys.LegacyERC20ETHAddr, CalcOVMETHStorageKey(addr), common.Hash{})
+		db.SetBalance(addr, bvmBalance)
+		db.SetState(predeploys.LegacyERC20ETHAddr, CalcBVMETHStorageKey(addr), common.Hash{})
 
-		// Bump the total OVM balance.
-		totalMigrated = totalMigrated.Add(totalMigrated, ovmBalance)
+		// Bump the total BVM balance.
+		totalMigrated = totalMigrated.Add(totalMigrated, bvmBalance)
 
 		// Log progress.
 		logAccountProgress()
@@ -75,7 +75,7 @@ func MigrateLegacyETH(db *state.StateDB, addresses []common.Address, chainID int
 	// Make sure that the total supply delta matches the expected delta. This is equivalent to
 	// checking that the total migrated is equal to the total found, since we already performed the
 	// same check against the total found (a = b, b = c => a = c).
-	totalSupply := getOVMETHTotalSupply(db)
+	totalSupply := getBVMETHTotalSupply(db)
 	delta := new(big.Int).Sub(totalSupply, totalMigrated)
 	if delta.Cmp(params.ExpectedSupplyDelta) != 0 {
 		if noCheck {
@@ -101,7 +101,7 @@ func MigrateLegacyETH(db *state.StateDB, addresses []common.Address, chainID int
 	// different than the sum of all balances since we no longer track balances inside the contract
 	// itself. The total supply is going to be weird no matter what, might as well set it to zero
 	// so it's explicitly weird instead of implicitly weird.
-	db.SetState(predeploys.LegacyERC20ETHAddr, getOVMETHTotalSupplySlot(), common.Hash{})
+	db.SetState(predeploys.LegacyERC20ETHAddr, getBVMETHTotalSupplySlot(), common.Hash{})
 	log.Info("Set the totalSupply to 0")
 
 	// Fin.

@@ -35,7 +35,7 @@
   "gasPriceOracleOverhead": 2100,
   "gasPriceOracleScalar": 1000000,
 
-  "governanceTokenSymbol": "MT",
+  "governanceTokenSymbol": "OP",
   "governanceTokenName": "Mantle",
   "governanceTokenOwner": "0x038a8825A3C3B0c08d52Cc76E5E361953Cf6Dc76",
 

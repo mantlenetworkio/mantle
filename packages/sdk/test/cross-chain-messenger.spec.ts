@@ -33,7 +33,7 @@ describe('CrossChainMessenger', () => {
           l1SignerOrProvider: ethers.provider,
           l2SignerOrProvider: ethers.provider,
           l1ChainId: L1ChainID.MAINNET,
-          l2ChainId: L2ChainID.MANTLE,
+          l2ChainId: L2ChainID.OPTIMISM,
         })
 
         expect(messenger.l1Provider).to.equal(ethers.provider)
@@ -46,7 +46,7 @@ describe('CrossChainMessenger', () => {
           l1SignerOrProvider: ethers.provider,
           l2SignerOrProvider: ethers.provider,
           l1ChainId: L1ChainID.MAINNET,
-          l2ChainId: L2ChainID.MANTLE,
+          l2ChainId: L2ChainID.OPTIMISM,
         })
 
         expect(messenger.l2Provider).to.equal(ethers.provider)
@@ -59,7 +59,7 @@ describe('CrossChainMessenger', () => {
           l1SignerOrProvider: 'https://localhost:8545',
           l2SignerOrProvider: ethers.provider,
           l1ChainId: L1ChainID.MAINNET,
-          l2ChainId: L2ChainID.MANTLE,
+          l2ChainId: L2ChainID.OPTIMISM,
         })
 
         expect(Provider.isProvider(messenger.l1Provider)).to.be.true
@@ -72,7 +72,7 @@ describe('CrossChainMessenger', () => {
           l1SignerOrProvider: ethers.provider,
           l2SignerOrProvider: 'https://localhost:8545',
           l1ChainId: L1ChainID.MAINNET,
-          l2ChainId: L2ChainID.MANTLE,
+          l2ChainId: L2ChainID.OPTIMISM,
         })
 
         expect(Provider.isProvider(messenger.l2Provider)).to.be.true
@@ -86,7 +86,7 @@ describe('CrossChainMessenger', () => {
             l1SignerOrProvider: ethers.provider,
             l2SignerOrProvider: ethers.provider,
             l1ChainId: undefined as any,
-            l2ChainId: L2ChainID.MANTLE,
+            l2ChainId: L2ChainID.OPTIMISM,
           })
         }).to.throw('L1 chain ID is missing or invalid')
       })
@@ -112,7 +112,7 @@ describe('CrossChainMessenger', () => {
             l1SignerOrProvider: ethers.provider,
             l2SignerOrProvider: 'https://localhost:8545',
             l1ChainId: L1ChainID.MAINNET,
-            l2ChainId: L2ChainID.MANTLE,
+            l2ChainId: L2ChainID.OPTIMISM,
           })
 
           const addresses = CONTRACT_ADDRESSES[messenger.l2ChainId]
@@ -160,7 +160,7 @@ describe('CrossChainMessenger', () => {
             l1SignerOrProvider: ethers.provider,
             l2SignerOrProvider: 'https://localhost:8545',
             l1ChainId: L1ChainID.MAINNET,
-            l2ChainId: L2ChainID.MANTLE,
+            l2ChainId: L2ChainID.OPTIMISM,
             contracts: overrides,
           })
 
@@ -201,6 +201,8 @@ describe('CrossChainMessenger', () => {
                 StateCommitmentChain: '0x' + '14'.repeat(20),
                 CanonicalTransactionChain: '0x' + '15'.repeat(20),
                 BondManager: '0x' + '16'.repeat(20),
+                MantlePortal: '0x' + '17'.repeat(20),
+                L2OutputOracle: '0x' + '18'.repeat(20),
               },
               l2: {
                 L2CrossDomainMessenger: '0x' + '22'.repeat(20),
@@ -215,7 +217,7 @@ describe('CrossChainMessenger', () => {
               contracts: overrides,
             })
 
-            const addresses = CONTRACT_ADDRESSES[L2ChainID.MANTLE]
+            const addresses = CONTRACT_ADDRESSES[L2ChainID.OPTIMISM]
             for (const [contractName, contractAddress] of Object.entries(
               addresses.l1
             )) {
@@ -284,7 +286,7 @@ describe('CrossChainMessenger', () => {
         l1SignerOrProvider: ethers.provider,
         l2SignerOrProvider: ethers.provider,
         l1ChainId: L1ChainID.HARDHAT_LOCAL,
-        l2ChainId: L2ChainID.MANTLE_HARDHAT_LOCAL,
+        l2ChainId: L2ChainID.OPTIMISM_HARDHAT_LOCAL,
         contracts: {
           l1: {
             L1CrossDomainMessenger: l1Messenger.address,
@@ -309,22 +311,21 @@ describe('CrossChainMessenger', () => {
               const found = await messenger.getMessagesByTransaction(tx, {
                 direction: MessageDirection.L1_TO_L2,
               })
-              const resultMsg = messages.map((message, i) => {
-                return {
-                  direction: MessageDirection.L1_TO_L2,
-                  target: message.target,
-                  sender: message.sender,
-                  message: message.message,
-                  messageNonce: ethers.BigNumber.from(message.messageNonce),
-                  value: ethers.BigNumber.from(message.value),
-                  minGasLimit: ethers.BigNumber.from(message.minGasLimit),
-                  logIndex: i,
-                  blockNumber: tx.blockNumber,
-                  transactionHash: tx.hash,
-                }
-              })
-              expect(JSON.stringify(found)).to.deep.equal(
-                JSON.stringify(resultMsg)
+              expect(found).to.deep.equal(
+                messages.map((message, i) => {
+                  return {
+                    direction: MessageDirection.L1_TO_L2,
+                    sender: message.sender,
+                    target: message.target,
+                    message: message.message,
+                    messageNonce: ethers.BigNumber.from(message.messageNonce),
+                    minGasLimit: ethers.BigNumber.from(message.minGasLimit),
+                    value: ethers.BigNumber.from(message.value),
+                    logIndex: i,
+                    blockNumber: tx.blockNumber,
+                    transactionHash: tx.hash,
+                  }
+                })
               )
             })
           }
@@ -363,22 +364,21 @@ describe('CrossChainMessenger', () => {
 
               const tx = await l1Messenger.triggerSentMessageEvents(messages)
               const found = await messenger.getMessagesByTransaction(tx)
-              const resultMsg = messages.map((message, i) => {
-                return {
-                  direction: MessageDirection.L1_TO_L2,
-                  target: message.target,
-                  sender: message.sender,
-                  message: message.message,
-                  messageNonce: ethers.BigNumber.from(message.messageNonce),
-                  value: ethers.BigNumber.from(message.value),
-                  minGasLimit: ethers.BigNumber.from(message.minGasLimit),
-                  logIndex: i,
-                  blockNumber: tx.blockNumber,
-                  transactionHash: tx.hash,
-                }
-              })
-              expect(JSON.stringify(found)).to.deep.equal(
-                JSON.stringify(resultMsg)
+              expect(found).to.deep.equal(
+                messages.map((message, i) => {
+                  return {
+                    direction: MessageDirection.L1_TO_L2,
+                    sender: message.sender,
+                    target: message.target,
+                    message: message.message,
+                    messageNonce: ethers.BigNumber.from(message.messageNonce),
+                    minGasLimit: ethers.BigNumber.from(message.minGasLimit),
+                    value: ethers.BigNumber.from(message.value),
+                    logIndex: i,
+                    blockNumber: tx.blockNumber,
+                    transactionHash: tx.hash,
+                  }
+                })
               )
             })
           }
@@ -476,7 +476,7 @@ describe('CrossChainMessenger', () => {
         l1SignerOrProvider: ethers.provider,
         l2SignerOrProvider: ethers.provider,
         l1ChainId: L1ChainID.HARDHAT_LOCAL,
-        l2ChainId: L2ChainID.MANTLE_HARDHAT_LOCAL,
+        l2ChainId: L2ChainID.OPTIMISM_HARDHAT_LOCAL,
         contracts: {
           l1: {
             L1CrossDomainMessenger: l1Messenger.address,
@@ -510,34 +510,35 @@ describe('CrossChainMessenger', () => {
       })
     })
 
-    // describe('when the input is a TokenBridgeMessage', () => {
-    //   // TODO: There are some edge cases here with custom bridges that conform to the interface but
-    //   // not to the behavioral spec. Possibly worth testing those. For now this is probably
-    //   // sufficient.
-    //   it('should return the sent message event that came after the deposit or withdrawal', async () => {
-    //     const from = '0x' + '99'.repeat(20)
-    //     const deposit = {
-    //       l1Token: '0x' + '11'.repeat(20),
-    //       l2Token: '0x' + '22'.repeat(20),
-    //       from,
-    //       to: '0x' + '44'.repeat(20),
-    //       amount: ethers.BigNumber.from(1234),
-    //       data: '0x1234',
-    //     }
-    //
-    //     const tx = await l1Bridge.emitERC20DepositInitiated(deposit)
-    //
-    //     const foundCrossChainMessages = await messenger.getMessagesByTransaction(tx)
-    //     const foundTokenBridgeMessages = await messenger.getDepositsByAddress(
-    //       from
-    //     )
-    //     const resolved = await messenger.toCrossChainMessage(
-    //       foundTokenBridgeMessages[0]
-    //     )
-    //
-    //     expect(resolved).to.deep.equal(foundCrossChainMessages[0])
-    //   })
-    // })
+    describe('when the input is a TokenBridgeMessage', () => {
+      // TODO: There are some edge cases here with custom bridges that conform to the interface but
+      // not to the behavioral spec. Possibly worth testing those. For now this is probably
+      // sufficient.
+      it('should return the sent message event that came after the deposit or withdrawal', async () => {
+        const from = '0x' + '99'.repeat(20)
+        const deposit = {
+          l1Token: '0x' + '11'.repeat(20),
+          l2Token: '0x' + '22'.repeat(20),
+          from,
+          to: '0x' + '44'.repeat(20),
+          amount: ethers.BigNumber.from(1234),
+          data: '0x1234',
+        }
+
+        const tx = await l1Bridge.emitERC20DepositInitiated(deposit)
+
+        const foundCrossChainMessages =
+          await messenger.getMessagesByTransaction(tx)
+        const foundTokenBridgeMessages = await messenger.getDepositsByAddress(
+          from
+        )
+        const resolved = await messenger.toCrossChainMessage(
+          foundTokenBridgeMessages[0]
+        )
+
+        expect(resolved).to.deep.equal(foundCrossChainMessages[0])
+      })
+    })
 
     describe('when the input is a TransactionLike', () => {
       describe('when the transaction sent exactly one message', () => {
@@ -593,7 +594,7 @@ describe('CrossChainMessenger', () => {
         l1SignerOrProvider: ethers.provider,
         l2SignerOrProvider: ethers.provider,
         l1ChainId: L1ChainID.HARDHAT_LOCAL,
-        l2ChainId: L2ChainID.MANTLE_HARDHAT_LOCAL,
+        l2ChainId: L2ChainID.OPTIMISM_HARDHAT_LOCAL,
         contracts: {
           l1: {
             L1CrossDomainMessenger: l1Messenger.address,
@@ -625,10 +626,9 @@ describe('CrossChainMessenger', () => {
         batchRoot: ethers.constants.HashZero,
         batchSize: 1,
         prevTotalElements: message.blockNumber,
-        signature: '0x',
         extraData: '0x',
       })
-      await scc.appendStateBatch([ethers.constants.HashZero], 0, '0x')
+      await scc.appendStateBatch([ethers.constants.HashZero], 0)
     }
 
     describe('when the message is an L1 => L2 message', () => {
@@ -711,6 +711,7 @@ describe('CrossChainMessenger', () => {
           )
 
           await submitStateRootBatchForMessage(message)
+
           expect(await messenger.getMessageStatus(message)).to.equal(
             MessageStatus.IN_CHALLENGE_PERIOD
           )
@@ -787,6 +788,7 @@ describe('CrossChainMessenger', () => {
             const challengePeriod = await messenger.getChallengePeriodSeconds()
             ethers.provider.send('evm_increaseTime', [challengePeriod + 1])
             ethers.provider.send('evm_mine', [])
+
             expect(await messenger.getMessageStatus(message)).to.equal(
               MessageStatus.READY_FOR_RELAY
             )
@@ -825,7 +827,7 @@ describe('CrossChainMessenger', () => {
         l1SignerOrProvider: ethers.provider,
         l2SignerOrProvider: ethers.provider,
         l1ChainId: L1ChainID.HARDHAT_LOCAL,
-        l2ChainId: L2ChainID.MANTLE_HARDHAT_LOCAL,
+        l2ChainId: L2ChainID.OPTIMISM_HARDHAT_LOCAL,
         contracts: {
           l1: {
             L1CrossDomainMessenger: l1Messenger.address,
@@ -975,7 +977,7 @@ describe('CrossChainMessenger', () => {
         l1SignerOrProvider: ethers.provider,
         l2SignerOrProvider: ethers.provider,
         l1ChainId: L1ChainID.HARDHAT_LOCAL,
-        l2ChainId: L2ChainID.MANTLE_HARDHAT_LOCAL,
+        l2ChainId: L2ChainID.OPTIMISM_HARDHAT_LOCAL,
         contracts: {
           l2: {
             L2CrossDomainMessenger: l2Messenger.address,
@@ -1073,7 +1075,7 @@ describe('CrossChainMessenger', () => {
         l1SignerOrProvider: ethers.provider,
         l2SignerOrProvider: ethers.provider,
         l1ChainId: L1ChainID.HARDHAT_LOCAL,
-        l2ChainId: L2ChainID.MANTLE_HARDHAT_LOCAL,
+        l2ChainId: L2ChainID.OPTIMISM_HARDHAT_LOCAL,
       })
     })
 
@@ -1177,7 +1179,7 @@ describe('CrossChainMessenger', () => {
         l1SignerOrProvider: ethers.provider,
         l2SignerOrProvider: ethers.provider,
         l1ChainId: L1ChainID.HARDHAT_LOCAL,
-        l2ChainId: L2ChainID.MANTLE_HARDHAT_LOCAL,
+        l2ChainId: L2ChainID.OPTIMISM_HARDHAT_LOCAL,
         contracts: {
           l1: {
             L1CrossDomainMessenger: l1Messenger.address,
@@ -1209,10 +1211,9 @@ describe('CrossChainMessenger', () => {
         batchRoot: ethers.constants.HashZero,
         batchSize: 1,
         prevTotalElements: message.blockNumber,
-        signature: '0x',
         extraData: '0x',
       })
-      await scc.appendStateBatch([ethers.constants.HashZero], 0, '0x')
+      await scc.appendStateBatch([ethers.constants.HashZero], 0)
     }
 
     describe('when the message is an L1 => L2 message', () => {
@@ -1351,7 +1352,7 @@ describe('CrossChainMessenger', () => {
         l1SignerOrProvider: l1Signer,
         l2SignerOrProvider: l2Signer,
         l1ChainId: L1ChainID.HARDHAT_LOCAL,
-        l2ChainId: L2ChainID.MANTLE_HARDHAT_LOCAL,
+        l2ChainId: L2ChainID.OPTIMISM_HARDHAT_LOCAL,
         contracts: {
           l1: {
             L1CrossDomainMessenger: l1Messenger.address,
@@ -1447,7 +1448,7 @@ describe('CrossChainMessenger', () => {
         l1SignerOrProvider: l1Signer,
         l2SignerOrProvider: l2Signer,
         l1ChainId: L1ChainID.HARDHAT_LOCAL,
-        l2ChainId: L2ChainID.MANTLE_HARDHAT_LOCAL,
+        l2ChainId: L2ChainID.OPTIMISM_HARDHAT_LOCAL,
         contracts: {
           l1: {
             L1CrossDomainMessenger: l1Messenger.address,
@@ -1544,7 +1545,7 @@ describe('CrossChainMessenger', () => {
         l1SignerOrProvider: l1Signer,
         l2SignerOrProvider: l2Signer,
         l1ChainId: L1ChainID.HARDHAT_LOCAL,
-        l2ChainId: L2ChainID.MANTLE_HARDHAT_LOCAL,
+        l2ChainId: L2ChainID.OPTIMISM_HARDHAT_LOCAL,
         contracts: {
           l1: {
             L1CrossDomainMessenger: l1Messenger.address,
@@ -1601,7 +1602,7 @@ describe('CrossChainMessenger', () => {
         l1SignerOrProvider: l1Signer,
         l2SignerOrProvider: l2Signer,
         l1ChainId: L1ChainID.HARDHAT_LOCAL,
-        l2ChainId: L2ChainID.MANTLE_HARDHAT_LOCAL,
+        l2ChainId: L2ChainID.OPTIMISM_HARDHAT_LOCAL,
         contracts: {
           l1: {
             L1CrossDomainMessenger: l1Messenger.address,

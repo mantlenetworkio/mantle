@@ -201,7 +201,7 @@ type System struct {
 	Nodes             map[string]*node.Node
 	Backends          map[string]*geth_eth.Ethereum
 	Clients           map[string]*ethclient.Client
-	RollupNodes       map[string]*rollupNode.OpNode
+	RollupNodes       map[string]*rollupNode.MtNode
 	L2OutputSubmitter *l2os.L2OutputSubmitter
 	BatchSubmitter    *bss.BatchSubmitter
 	Mocknet           mocknet.Mocknet
@@ -230,7 +230,7 @@ func (cfg SystemConfig) Start() (*System, error) {
 		Nodes:       make(map[string]*node.Node),
 		Backends:    make(map[string]*geth_eth.Ethereum),
 		Clients:     make(map[string]*ethclient.Client),
-		RollupNodes: make(map[string]*rollupNode.OpNode),
+		RollupNodes: make(map[string]*rollupNode.MtNode),
 	}
 	didErrAfterStart := false
 	defer func() {

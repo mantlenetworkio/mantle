@@ -8,7 +8,7 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-node/eth"
 )
 
-// Tracer configures the OpNode to share events
+// Tracer configures the MtNode to share events
 type Tracer interface {
 	OnNewL1Head(ctx context.Context, sig eth.L1BlockRef)
 	OnUnsafeL2Payload(ctx context.Context, from peer.ID, payload *eth.ExecutionPayload)

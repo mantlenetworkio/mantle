@@ -15,13 +15,13 @@ contract MessageEncodingHelper {
         uint256 _messageNonce
     ) public pure returns (bytes memory) {
         return
-        abi.encodeWithSignature(
-            "relayMessage(address,address,bytes,uint256)",
-            _target,
-            _sender,
-            _message,
-            _messageNonce
-        );
+            abi.encodeWithSignature(
+                "relayMessage(address,address,bytes,uint256)",
+                _target,
+                _sender,
+                _message,
+                _messageNonce
+            );
     }
 
     function hashXDomainCalldata(

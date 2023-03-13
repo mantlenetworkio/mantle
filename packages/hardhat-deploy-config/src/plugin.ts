@@ -10,6 +10,7 @@ import {
 import { lazyObject } from 'hardhat/plugins'
 import { ethers } from 'ethers'
 
+// From: https://github.com/wighawag/hardhat-deploy/blob/master/src/index.ts#L63-L76
 const normalizePath = (
   config: HardhatConfig,
   userPath: string | undefined,
@@ -105,7 +106,7 @@ extendConfig(
   (config: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) => {
     config.paths.deployConfig = normalizePath(
       config,
-      userConfig.paths.deployConfig,
+      userConfig.paths?.deployConfig,
       'deploy-config'
     )
   }

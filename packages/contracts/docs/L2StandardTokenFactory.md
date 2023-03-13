@@ -13,7 +13,7 @@
 ### createStandardL2Token
 
 ```solidity
-function createStandardL2Token(address _l1Token, string _name, string _symbol, uint8 _decimal) external nonpayable
+function createStandardL2Token(address _l1Token, string _name, string _symbol) external nonpayable
 ```
 
 
@@ -27,7 +27,6 @@ function createStandardL2Token(address _l1Token, string _name, string _symbol, u
 | _l1Token | address | Address of the corresponding L1 token.
 | _name | string | ERC20 name.
 | _symbol | string | ERC20 symbol.
-| _decimal | uint8 | undefined
 
 
 
@@ -36,7 +35,7 @@ function createStandardL2Token(address _l1Token, string _name, string _symbol, u
 ### StandardL2TokenCreated
 
 ```solidity
-event StandardL2TokenCreated(address indexed _l1Token, address indexed _l2Token, uint8 decimal)
+event StandardL2TokenCreated(address indexed _l1Token, address indexed _l2Token)
 ```
 
 
@@ -49,7 +48,6 @@ event StandardL2TokenCreated(address indexed _l1Token, address indexed _l2Token,
 |---|---|---|
 | _l1Token `indexed` | address | undefined |
 | _l2Token `indexed` | address | undefined |
-| decimal  | uint8 | undefined |
 
 
 

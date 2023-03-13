@@ -1,6 +1,6 @@
 # Mantle Smart Contracts (Bedrock)
 
-[![codecov](https://codecov.io/gh/ethereum-optimism/optimism/branch/develop/graph/badge.svg?token=0VTG7PG7YR&flag=contracts-bedrock-tests)](https://codecov.io/gh/ethereum-optimism/optimism)
+[![codecov](https://codecov.io/gh/mantlenetworkio/mantle/branch/develop/graph/badge.svg?token=0VTG7PG7YR&flag=contracts-bedrock-tests)](https://codecov.io/gh/mantlenetworkio/mantle)
 
 This package contains the smart contracts that compose the on-chain component of Mantle's upcoming Bedrock upgrade.
 We've tried to maintain 100% backwards compatibility with the existing system while also introducing new useful features.
@@ -16,20 +16,20 @@ You can find detailed specifications for the contracts contained within this pac
 | [`L1StandardBridge`](../../specs/bridges.md)                                             | [`L1ChugSplashProxy`](./contracts/legacy/L1ChugSplashProxy.sol)         | Standardized system for transfering ERC20 tokens to/from Mantle                                   |
 | [`L2OutputOracle`](../../specs/proposals.md#l2-output-oracle-smart-contract)             | [`Proxy`](./contracts/universal/Proxy.sol)                              | Stores commitments to the state of Mantle which can be used by contracts on L1 to access L2 state |
 | [`MantlePortal`](../../specs/deposits.md#deposit-contract)                             | [`Proxy`](./contracts/universal/Proxy.sol)                              | Low-level message passing interface                                                                 |
-| [`MantleMintableERC20Factory`](../../specs/predeploys.md#MantleMintableerc20factory) | [`Proxy`](./contracts/universal/Proxy.sol)                              | Deploys standard `MantleMintableERC20` tokens that are compatible with either `StandardBridge`    |
+| [`MantleMintableERC20Factory`](../../specs/predeploys.md#mantlemintableerc20factory) | [`Proxy`](./contracts/universal/Proxy.sol)                              | Deploys standard `MantleMintableERC20` tokens that are compatible with either `StandardBridge`    |
 | [`ProxyAdmin`](../../specs/TODO)                                                         | -                                                                       | Contract that can upgrade L1 contracts                                                              |
 
 ### Contracts deployed to L2
 
 | Name                                                                                     | Proxy Type                                 | Description                                                                                      |
 | ---------------------------------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| [`GasPriceOracle`](../../specs/predeploys.md#ovm_gaspriceoracle)                         | [`Proxy`](./contracts/universal/Proxy.sol) | Stores L2 gas price configuration values                                                         |
+| [`GasPriceOracle`](../../specs/predeploys.md#bvm_gaspriceoracle)                         | [`Proxy`](./contracts/universal/Proxy.sol) | Stores L2 gas price configuration values                                                         |
 | [`L1Block`](../../specs/predeploys.md#l1block)                                           | [`Proxy`](./contracts/universal/Proxy.sol) | Stores L1 block context information (e.g., latest known L1 block hash)                           |
 | [`L2CrossDomainMessenger`](../../specs/predeploys.md#l2crossdomainmessenger)             | [`Proxy`](./contracts/universal/Proxy.sol) | High-level interface for sending messages to and receiving messages from L1                      |
 | [`L2StandardBridge`](../../specs/predeploys.md#l2standardbridge)                         | [`Proxy`](./contracts/universal/Proxy.sol) | Standardized system for transferring ERC20 tokens to/from L1                                     |
-| [`L2ToL1MessagePasser`](../../specs/predeploys.md#ovm_l2tol1messagepasser)               | [`Proxy`](./contracts/universal/Proxy.sol) | Low-level message passing interface                                                              |
+| [`L2ToL1MessagePasser`](../../specs/predeploys.md#bvm_l2tol1messagepasser)               | [`Proxy`](./contracts/universal/Proxy.sol) | Low-level message passing interface                                                              |
 | [`SequencerFeeVault`](../../specs/predeploys.md#sequencerfeevault)                       | [`Proxy`](./contracts/universal/Proxy.sol) | Vault for L2 transaction fees                                                                    |
-| [`MantleMintableERC20Factory`](../../specs/predeploys.md#MantleMintableerc20factory) | [`Proxy`](./contracts/universal/Proxy.sol) | Deploys standard `MantleMintableERC20` tokens that are compatible with either `StandardBridge` |
+| [`MantleMintableERC20Factory`](../../specs/predeploys.md#mantlemintableerc20factory) | [`Proxy`](./contracts/universal/Proxy.sol) | Deploys standard `MantleMintableERC20` tokens that are compatible with either `StandardBridge` |
 | [`L2ProxyAdmin`](../../specs/TODO)                                                       | -                                          | Contract that can upgrade L2 contracts when sent a transaction from L1                           |
 
 ### Legacy and deprecated contracts
@@ -45,7 +45,7 @@ You can find detailed specifications for the contracts contained within this pac
 We export contract ABIs, contract source code, and contract deployment information for this package via `npm`:
 
 ```shell
-npm install @eth-mantle/contracts-bedrock
+npm install @mantleio/contracts-bedrock
 ```
 
 ## Development
@@ -149,7 +149,7 @@ We also have the following custom tags:
 #### Errors
 
 - Use `require` statements when making simple assertions.
-- Use `revert` if throwing an error where an assertion is not being made (no custom errors). See [here](https://github.com/ethereum-optimism/optimism/blob/861ae315a6db698a8c0adb1f8eab8311fd96be4c/packages/contracts-bedrock/contracts/L2/OVM_ETH.sol#L31) for an example of this in practice.
+- Use `revert` if throwing an error where an assertion is not being made (no custom errors). See [here](https://github.com/mantlenetworkio/mantle/blob/861ae315a6db698a8c0adb1f8eab8311fd96be4c/packages/contracts-bedrock/contracts/L2/BVM_ETH.sol#L31) for an example of this in practice.
 - Error strings MUST have the format `"{ContractName}: {message}"` where `message` is a lower case string.
 
 #### Function Parameters

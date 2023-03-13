@@ -6,7 +6,7 @@ import {
 import { Signer } from '@ethersproject/abstract-signer'
 import { Contract, BigNumber } from 'ethers'
 
-import { ICrossChainMessenger } from './cross-chain-messenger'
+import { CrossChainMessenger } from '../cross-chain-messenger'
 import { IBridgeAdapter } from './bridge-adapter'
 
 /**
@@ -15,20 +15,20 @@ import { IBridgeAdapter } from './bridge-adapter'
 export enum L1ChainID {
   MAINNET = 1,
   GOERLI = 5,
-  KOVAN = 42,
   HARDHAT_LOCAL = 31337,
+  BEDROCK_LOCAL_DEVNET = 900,
 }
 
 /**
  * L2 network chain IDs
  */
 export enum L2ChainID {
-  MANTLE = 10,
-  MANTLE_TESTNET = 5001,
-  MANTLE_GOERLIQA = 1705003,
-  MANTLE_KOVAN = 69,
-  MANTLE_HARDHAT_LOCAL = 31337,
-  MANTLE_HARDHAT_DEVNET = 17,
+  OPTIMISM = 10,
+  OPTIMISM_GOERLI = 420,
+  OPTIMISM_HARDHAT_LOCAL = 31337,
+  OPTIMISM_HARDHAT_DEVNET = 17,
+  OPTIMISM_BEDROCK_LOCAL_DEVNET = 901,
+  OPTIMISM_BEDROCK_ALPHA_TESTNET = 28528,
 }
 
 /**
@@ -41,6 +41,9 @@ export interface OEL1Contracts {
   StateCommitmentChain: Contract
   CanonicalTransactionChain: Contract
   BondManager: Contract
+  // Bedrock
+  MantlePortal: Contract
+  L2OutputOracle: Contract
 }
 
 /**
@@ -49,15 +52,15 @@ export interface OEL1Contracts {
 export interface OEL2Contracts {
   L2CrossDomainMessenger: Contract
   L2StandardBridge: Contract
+  L2ToL1MessagePasser: Contract
   BVM_L1BlockNumber: Contract
   BVM_L2ToL1MessagePasser: Contract
   BVM_DeployerWhitelist: Contract
   BVM_ETH: Contract
-  BVM_BIT: Contract
   BVM_GasPriceOracle: Contract
   BVM_SequencerFeeVault: Contract
   WETH: Contract
-  TssRewardContract: Contract
+  BedrockMessagePasser: Contract
 }
 
 /**
@@ -100,7 +103,7 @@ export interface OEContractsLike {
 export interface BridgeAdapterData {
   [name: string]: {
     Adapter: new (opts: {
-      messenger: ICrossChainMessenger
+      messenger: CrossChainMessenger
       l1Bridge: AddressLike
       l2Bridge: AddressLike
     }) => IBridgeAdapter
@@ -138,7 +141,12 @@ export enum MessageStatus {
   STATE_ROOT_NOT_PUBLISHED,
 
   /**
-   * Message is an L2 to L1 message and awaiting the challenge period.
+   * Message is ready to be proved on L1 to initiate the challenge period.
+   */
+  READY_TO_PROVE,
+
+  /**
+   * Message is a proved L2 to L1 message and is undergoing the challenge period.
    */
   IN_CHALLENGE_PERIOD,
 
@@ -194,6 +202,12 @@ export interface CrossChainMessage extends CoreCrossChainMessage {
 }
 
 /**
+ * Describes messages sent inside the L2ToL1MessagePasser on L2. Happens to be the same structure
+ * as the CoreCrossChainMessage so we'll reuse the type for now.
+ */
+export type LowLevelMessage = CoreCrossChainMessage
+
+/**
  * Describes a token withdrawal or deposit, along with the underlying raw cross chain message
  * behind the deposit or withdrawal.
  */
@@ -208,6 +222,14 @@ export interface TokenBridgeMessage {
   logIndex: number
   blockNumber: number
   transactionHash: string
+}
+
+/**
+ * Represents a withdrawal entry within the logs of a L2 to L1
+ * CrossChainMessage
+ */
+export interface WithdrawalEntry {
+  MessagePassed: any
 }
 
 /**
@@ -227,6 +249,15 @@ export interface MessageReceipt {
 }
 
 /**
+ * ProvenWithdrawal in MantlePortal
+ */
+export interface ProvenWithdrawal {
+  outputRoot: string
+  timestamp: BigNumber
+  l2BlockNumber: BigNumber
+}
+
+/**
  * Header for a state root batch.
  */
 export interface StateRootBatchHeader {
@@ -234,7 +265,6 @@ export interface StateRootBatchHeader {
   batchRoot: string
   batchSize: BigNumber
   prevTotalElements: BigNumber
-  signature: string
   extraData: string
 }
 

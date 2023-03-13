@@ -1,11 +1,12 @@
 {
   "name": "@mantleio/sdk",
-  "version": "0.1.4",
+  "version": "2.0.0",
   "description": "[Mantle] Tools for working with Mantle",
   "main": "dist/index",
   "types": "dist/index",
   "files": [
-    "dist/*"
+    "dist/*",
+    "src/*"
   ],
   "scripts": {
     "all": "yarn clean && yarn build && yarn test && yarn lint:fix && yarn lint",
@@ -32,23 +33,24 @@
     "url": "https://github.com/mantlenetworkio/mantle.git"
   },
   "devDependencies": {
-    "@ethersproject/abstract-provider": "^5.6.1",
-    "@ethersproject/abstract-signer": "^5.6.2",
-    "@ethersproject/transactions": "^5.6.2",
+    "@ethersproject/abstract-provider": "^5.7.0",
+    "@ethersproject/abstract-signer": "^5.7.0",
+    "@ethersproject/transactions": "^5.7.0",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "chai-as-promised": "^7.1.1",
     "ethereum-waffle": "^3.4.0",
-    "ethers": "^5.6.8",
+    "ethers": "^5.7.0",
     "hardhat": "^2.9.6",
     "hardhat-deploy": "^0.11.4",
-    "mocha": "^10.0.0",
     "nyc": "^15.1.0",
-    "typedoc": "^0.22.13"
+    "typedoc": "^0.22.13",
+    "mocha": "^10.0.0"
   },
   "dependencies": {
-    "@mantleio/contracts": "0.1.0",
-    "@mantleio/core-utils": "0.1.0",
+    "@mantleio/contracts": "0.5.40",
+    "@mantleio/core-utils": "0.12.0",
+    "@mantleio/contracts-bedrock": "0.13.0",
     "lodash": "^4.17.21",
     "merkletreejs": "^0.2.27",
     "rlp": "^2.2.7"

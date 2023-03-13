@@ -1,5 +1,5 @@
 {
-  "name": "@eth-mantle/contracts-bedrock",
+  "name": "@mantleio/contracts-bedrock",
   "version": "0.13.0",
   "description": "Contracts for Mantle Specs",
   "main": "dist/index",
@@ -14,7 +14,7 @@
     "contracts/**/*.sol"
   ],
   "scripts": {
-    "bindings": "cd ../../mt-bindings && make",
+    "bindings": "cd ../../op-bindings && make",
     "build:forge": "forge build",
     "build:with-metadata": "FOUNDRY_PROFILE=echidna yarn build:forge",
     "build:differential": "tsc scripts/differential-testing.ts --outDir dist --moduleResolution node --esModuleInterop",
@@ -51,14 +51,14 @@
     "echidna:metering": "echidna-test --contract EchidnaFuzzResourceMetering --config ./echidna.yaml ."
   },
   "dependencies": {
-    "@eth-mantle/core-utils": "^0.12.0",
+    "@mantleio/core-utils": "^0.12.0",
     "@openzeppelin/contracts": "4.7.3",
     "@openzeppelin/contracts-upgradeable": "4.7.3",
     "ethers": "^5.7.0",
     "hardhat": "^2.9.6"
   },
   "devDependencies": {
-    "@eth-mantle/hardhat-deploy-config": "^0.2.5",
+    "@mantleio/hardhat-deploy-config": "^0.2.5",
     "@ethereumjs/trie": "^5.0.0-beta.1",
     "@ethereumjs/util": "^8.0.0-beta.1",
     "@ethersproject/abstract-provider": "^5.7.0",

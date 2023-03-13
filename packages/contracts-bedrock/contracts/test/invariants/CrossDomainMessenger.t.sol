@@ -65,7 +65,7 @@ contract RelayActor is StdUtils {
             _message
         );
 
-        // Act as the Mantle portal and call `relayMessage` on the `L1CrossDomainMessenger` with
+        // Act as the mantle portal and call `relayMessage` on the `L1CrossDomainMessenger` with
         // the outer min gas limit.
         vm.startPrank(address(op));
         vm.expectCall(target, _message);

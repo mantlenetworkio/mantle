@@ -975,7 +975,7 @@ contract MantlePortal_FinalizeWithdrawal_Test is Portal_Initializer {
         uint256 _gasLimit,
         bytes memory _data
     ) external {
-        // Cannot call the Mantle portal
+        // Cannot call the mantle portal
         vm.assume(_target != address(op));
         // Total ETH supply is currently about 120M ETH.
         uint256 value = bound(_value, 0, 200_000_000 ether);
