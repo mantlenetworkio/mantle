@@ -1,0 +1,41 @@
+{
+  "private": true,
+  "name": "@mantleio/migration-data",
+  "version": "0.0.2",
+  "description": "[Mantle] Data collection scripts for Bedrock migration",
+  "main": "dist/index",
+  "types": "dist/index",
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "start": "ts-node ./src/service.ts",
+    "test:coverage": "echo 'No tests defined.'",
+    "build": "tsc -p ./tsconfig.json",
+    "clean": "rimraf  dist/ ./tsconfig.tsbuildinfo",
+    "lint": "yarn lint:fix && yarn lint:check",
+    "pre-commit": "lint-staged",
+    "lint:fix": "yarn lint:check --fix",
+    "lint:check": "eslint . --max-warnings=0"
+  },
+  "keywords": [
+    "mantle",
+    "ethereum",
+    "migration",
+    "bedrock"
+  ],
+  "homepage": "https://github.com/mantlenetworkio/mantle/tree/develop/packages/migration-data#readme",
+  "license": "MIT",
+  "author": "Mantle PBC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mantlenetworkio/mantle.git"
+  },
+  "devDependencies": {
+    "commander": "^9.0.0",
+    "@mantleio/contracts": "0.5.40",
+    "@mantleio/old-contracts": "npm:@mantleio/contracts@0.4.10",
+    "ethers": "^5.7.0",
+    "ts-node": "^10.9.1"
+  }
+}

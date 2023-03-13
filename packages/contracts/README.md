@@ -1,7 +1,9 @@
 # Mantle Smart Contracts
 
+[![codecov](https://codecov.io/gh/mantlenetworkio/mantle/branch/master/graph/badge.svg?token=0VTG7PG7YR&flag=contracts-tests)](https://codecov.io/gh/mantlenetworkio/mantle)
+
 `@mantleio/contracts` contains the various Solidity smart contracts used within the Mantle system.
-Some of these contracts are [meant to be deployed to Ethereum ("Layer 1")](https://github.com/mantlenetworkio/mantle/tree/main/packages/contracts/contracts/L1), while others are [meant to be deployed to Mantle ("Layer 2")](https://github.com/mantlenetworkio/mantle/tree/main/packages/contracts/contracts/L2).
+Some of these contracts are [meant to be deployed to Ethereum ("Layer 1")](https://github.com/mantlenetworkio/mantle/tree/develop/packages/contracts/contracts/L1), while others are [meant to be deployed to Mantle ("Layer 2")](https://github.com/mantlenetworkio/mantle/tree/develop/packages/contracts/contracts/L2).
 Within each contract file you'll find the network upon which the contract is meant to be deloyed, listed as either `EVM` (for Ethereum) or `BVM` (for Mantle).
 If neither `EVM` nor `BVM` are listed, the contract is likely intended to be used on either network.
 
@@ -20,8 +22,8 @@ Within your contracts:
 import { SomeContract } from "@mantleio/contracts/path/to/SomeContract.sol";
 ```
 
-Note that the `/path/to/SomeContract.sol` is the path to the target contract within the [contracts folder](https://github.com/mantlenetworkio/mantle/tree/main/packages/contracts/contracts) inside of this package.
-For example, the [L1CrossDomainMessenger](https://github.com/mantlenetworkio/mantle/blob/main/packages/contracts/contracts/L1/messaging/L1CrossDomainMessenger.sol) contract is located at `packages/contracts/contracts/L1/messaging/L1CrossDomainMessenger.sol`, relative to this README.
+Note that the `/path/to/SomeContract.sol` is the path to the target contract within the [contracts folder](https://github.com/mantlenetworkio/mantle/tree/develop/packages/contracts/contracts) inside of this package.
+For example, the [L1CrossDomainMessenger](https://github.com/mantlenetworkio/mantle/blob/develop/packages/contracts/contracts/L1/messaging/L1CrossDomainMessenger.sol) contract is located at `packages/contracts/contracts/L1/messaging/L1CrossDomainMessenger.sol`, relative to this README.
 You would therefore import the contract as:
 
 
@@ -41,7 +43,7 @@ Install the following:
 Clone the repo:
 
 ```shell
-git clone https://github.com/mantlenetworkio/mantle.git
+git clone https://github.com/mantlenetworkio/contracts.git
 cd contracts
 ```
 

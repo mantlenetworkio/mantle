@@ -5,6 +5,7 @@
  * Notes:
  * 0x42...04 was the address of the BVM_ProxySequencerEntrypoint. This contract is no longer in
  * use and has therefore been removed. We may place a new predeployed contract at this address
+ * in the future. See https://github.com/mantlenetworkio/mantle/pull/549 for more info.
  */
 export const predeploys = {
   BVM_L2ToL1MessagePasser: '0x4200000000000000000000000000000000000000',
@@ -16,14 +17,16 @@ export const predeploys = {
   L2StandardTokenFactory: '0x4200000000000000000000000000000000000012',
   BVM_L1BlockNumber: '0x4200000000000000000000000000000000000013',
 
-  // We're temporarily disabling BVM_BIT because the jury is still out on whether BIT as an
-  // ERC20 is desirable. ETH on Layer 2 will be the standard ERC20 token
-  BVM_BIT: '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000',
-  BVM_ETH: '0xdEAddEaDdeadDEadDEADDEAddEADDEAddead1111',
+  // We're temporarily disabling BVM_ETH because the jury is still out on whether or not ETH as an
+  // ERC20 is desirable.
+  BVM_ETH: '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000',
 
   // We're also putting WETH9 at the old BVM_ETH address.
   WETH9: '0x4200000000000000000000000000000000000006',
+}
 
-  // Tss rewards default contract
-  TssRewardContract: '0x4200000000000000000000000000000000000020',
+export const futurePredeploys = {
+  // System addresses, for use later
+  System0: '0x4200000000000000000000000000000000000042',
+  System1: '0x4200000000000000000000000000000000000014',
 }

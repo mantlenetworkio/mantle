@@ -1,7 +1,10 @@
 import hre from 'hardhat'
 import { Contract } from 'ethers'
 import { toRpcHexString } from '@mantleio/core-utils'
-import { getContractFactory, getContractInterface } from '@mantleio/contracts'
+import {
+  getContractFactory,
+  getContractInterface,
+} from '@mantleio/contracts'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { smock, FakeContract } from '@defi-wonderland/smock'
 
@@ -9,6 +12,7 @@ import { expect } from './setup'
 import {
   findEventForStateBatch,
   findFirstUnfinalizedStateBatchIndex,
+  OutputOracle,
 } from '../src'
 
 describe('helpers', () => {
@@ -25,6 +29,7 @@ describe('helpers', () => {
   let AddressManager: Contract
   let ChainStorageContainer: Contract
   let StateCommitmentChain: Contract
+  let oracle: OutputOracle<any>
   beforeEach(async () => {
     // Set up fakes
     FakeBondManager = await smock.fake(getContractInterface('BondManager'))
@@ -64,7 +69,15 @@ describe('helpers', () => {
     // Set up mock returns
     FakeCanonicalTransactionChain.getTotalElements.returns(1000000000) // just needs to be large
     FakeBondManager.isCollateralized.returns(true)
+
+    oracle = {
+      contract: StateCommitmentChain,
+      filter: StateCommitmentChain.filters.StateBatchAppended(),
+      getTotalElements: async () => StateCommitmentChain.getTotalBatches(),
+      getEventIndex: (args: any) => args._batchIndex,
+    }
   })
+
   describe('findEventForStateBatch', () => {
     describe('when the event exists once', () => {
       beforeEach(async () => {
@@ -75,7 +88,8 @@ describe('helpers', () => {
       })
 
       it('should return the event', async () => {
-        const event = await findEventForStateBatch(StateCommitmentChain, 0)
+        const event = await findEventForStateBatch(oracle, 0)
+
         expect(event.args._batchIndex).to.equal(0)
       })
     })
@@ -83,32 +97,8 @@ describe('helpers', () => {
     describe('when the event does not exist', () => {
       it('should throw an error', async () => {
         await expect(
-          findEventForStateBatch(StateCommitmentChain, 0)
+          findEventForStateBatch(oracle, 0)
         ).to.eventually.be.rejectedWith('unable to find event for batch')
-      })
-    })
-
-    describe('when more than one event exists', () => {
-      beforeEach(async () => {
-        await StateCommitmentChain.appendStateBatch(
-          [hre.ethers.constants.HashZero],
-          0
-        )
-        await hre.ethers.provider.send('hardhat_setStorageAt', [
-          ChainStorageContainer.address,
-          '0x2',
-          hre.ethers.constants.HashZero,
-        ])
-        await StateCommitmentChain.appendStateBatch(
-          [hre.ethers.constants.HashZero],
-          0
-        )
-      })
-
-      it('should throw an error', async () => {
-        await expect(
-          findEventForStateBatch(StateCommitmentChain, 0)
-        ).to.eventually.be.rejectedWith('found too many events for batch')
       })
     })
   })
@@ -138,7 +128,8 @@ describe('helpers', () => {
 
       it('should find the first batch older than the FPW', async () => {
         const first = await findFirstUnfinalizedStateBatchIndex(
-          StateCommitmentChain
+          oracle,
+          challengeWindowSeconds
         )
 
         expect(first).to.equal(1)
@@ -163,7 +154,8 @@ describe('helpers', () => {
 
       it('should return zero', async () => {
         const first = await findFirstUnfinalizedStateBatchIndex(
-          StateCommitmentChain
+          oracle,
+          challengeWindowSeconds
         )
 
         expect(first).to.equal(0)
@@ -196,7 +188,8 @@ describe('helpers', () => {
 
       it('should return undefined', async () => {
         const first = await findFirstUnfinalizedStateBatchIndex(
-          StateCommitmentChain
+          oracle,
+          challengeWindowSeconds
         )
 
         expect(first).to.equal(undefined)

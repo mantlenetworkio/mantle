@@ -275,7 +275,7 @@ event SequencerBatchAppended(uint256 _startingQueueIndex, uint256 _numQueueEleme
 ### TransactionBatchAppended
 
 ```solidity
-event TransactionBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint256 _batchSize, uint256 _prevTotalElements, bytes _signature, bytes _extraData)
+event TransactionBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, uint256 _batchSize, uint256 _prevTotalElements, bytes _extraData)
 ```
 
 
@@ -290,7 +290,6 @@ event TransactionBatchAppended(uint256 indexed _batchIndex, bytes32 _batchRoot, 
 | _batchRoot  | bytes32 | undefined |
 | _batchSize  | uint256 | undefined |
 | _prevTotalElements  | uint256 | undefined |
-| _signature  | bytes | undefined |
 | _extraData  | bytes | undefined |
 
 ### TransactionEnqueued

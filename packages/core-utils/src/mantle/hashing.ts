@@ -1,13 +1,22 @@
-import { BigNumberish, BigNumber, utils } from 'ethers'
-const { keccak256, defaultAbiCoder } = utils
+import { BigNumberish, BigNumber } from '@ethersproject/bignumber'
+import { keccak256 } from '@ethersproject/keccak256'
+import { defaultAbiCoder } from '@ethersproject/abi'
 
 import {
   decodeVersionedNonce,
   encodeCrossDomainMessageV0,
   encodeCrossDomainMessageV1,
-  big0,
-  big1,
 } from './encoding'
+
+/**
+ * Bedrock output oracle data.
+ */
+export interface BedrockOutputData {
+  outputRoot: string
+  l1Timestamp: number
+  l2BlockNumber: number
+  l2OutputIndex: number
+}
 
 /**
  * Bedrock state commitment
@@ -15,8 +24,26 @@ import {
 export interface OutputRootProof {
   version: string
   stateRoot: string
-  withdrawerStorageRoot: string
+  messagePasserStorageRoot: string
   latestBlockhash: string
+}
+
+/**
+ * Bedrock proof data required to finalize an L2 to L1 message.
+ */
+export interface BedrockCrossChainMessageProof {
+  l2OutputIndex: number
+  outputRootProof: OutputRootProof
+  withdrawalProof: string[]
+}
+
+/**
+ * Parameters that govern the L2OutputOracle.
+ */
+export type L2OutputOracleParameters = {
+  submissionInterval: number
+  startingBlockNumber: number
+  l2BlockTime: number
 }
 
 /**
@@ -37,10 +64,10 @@ export const hashCrossDomainMessage = (
   gasLimit: BigNumber,
   data: string
 ) => {
-  const [, version] = decodeVersionedNonce(nonce)
-  if (version.eq(big0)) {
+  const { version } = decodeVersionedNonce(nonce)
+  if (version.eq(0)) {
     return hashCrossDomainMessagev0(target, sender, data, nonce)
-  } else if (version.eq(big1)) {
+  } else if (version.eq(1)) {
     return hashCrossDomainMessagev1(
       nonce,
       sender,
@@ -135,7 +162,7 @@ export const hashOutputRootProof = (proof: OutputRootProof): string => {
       [
         proof.version,
         proof.stateRoot,
-        proof.withdrawerStorageRoot,
+        proof.messagePasserStorageRoot,
         proof.latestBlockhash,
       ]
     )

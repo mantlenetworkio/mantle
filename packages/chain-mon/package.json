@@ -1,0 +1,48 @@
+{
+  "private": true,
+  "name": "@mantleio/chain-mon",
+  "version": "0.2.0",
+  "description": "[Mantle] Chain monitoring services",
+  "main": "dist/index",
+  "types": "dist/index",
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "start:drippie-mon": "ts-node ./src/drippie-mon/service.ts",
+    "start:wd-mon": "ts-node ./src/wd-mon/service.ts",
+    "test:coverage": "echo 'No tests defined.'",
+    "build": "tsc -p ./tsconfig.json",
+    "clean": "rimraf  dist/ ./tsconfig.tsbuildinfo",
+    "lint": "yarn lint:fix && yarn lint:check",
+    "pre-commit": "lint-staged",
+    "lint:fix": "yarn lint:check --fix",
+    "lint:check": "eslint . --max-warnings=0"
+  },
+  "keywords": [
+    "mantle",
+    "ethereum",
+    "monitoring"
+  ],
+  "homepage": "https://github.com/mantlenetworkio/mantle/tree/develop/packages/chain-mon#readme",
+  "license": "MIT",
+  "author": "Mantle PBC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mantlenetworkio/mantle.git"
+  },
+  "dependencies": {
+    "@mantleio/common-ts": "0.8.0",
+    "@mantleio/contracts-periphery": "1.0.7",
+    "@mantleio/core-utils": "0.12.0",
+    "@mantleio/sdk": "2.0.0",
+    "ethers": "^5.7.0",
+    "@types/dateformat": "^5.0.0",
+    "chai-as-promised": "^7.1.1",
+    "dateformat": "^4.5.1"
+  },
+  "devDependencies": {
+    "@ethersproject/abstract-provider": "^5.7.0",
+    "ts-node": "^10.9.1"
+  }
+}

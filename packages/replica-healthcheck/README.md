@@ -1,4 +1,6 @@
-# @mantlenetworkio/replica-healthcheck
+# @mantleio/replica-healthcheck
+
+[![codecov](https://codecov.io/gh/mantlenetworkio/mantle/branch/develop/graph/badge.svg?token=0VTG7PG7YR&flag=replica-healthcheck-tests)](https://codecov.io/gh/mantlenetworkio/mantle)
 
 ## What is this?
 

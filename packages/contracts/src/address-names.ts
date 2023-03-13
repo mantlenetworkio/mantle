@@ -11,21 +11,9 @@ export const names = {
       BondManager: 'BondManager',
       BVM_L1CrossDomainMessenger: 'BVM_L1CrossDomainMessenger',
       Proxy__BVM_L1CrossDomainMessenger: 'Proxy__BVM_L1CrossDomainMessenger',
-      TssGroupManager: 'TssGroupManager',
-      TssStakingSlashing: 'TssStakingSlashing',
       Proxy__BVM_L1StandardBridge: 'Proxy__BVM_L1StandardBridge',
-      Proxy__TSS_GroupManager: 'Proxy__TSS_GroupManager',
-      Proxy__TSS_StakingSlashing: 'Proxy__TSS_StakingSlashing',
-    },
-    da: {
-      BVM_EigenDataLayrChain: 'BVM_EigenDataLayrChain',
-      Proxy__BVM_EigenDataLayrChain: 'Proxy__BVM_EigenDataLayrChain',
     },
     accounts: { BVM_Sequencer: 'BVM_Sequencer', BVM_Proposer: 'BVM_Proposer' },
-    configs: {
-      L1_BIT_ADDRESS: 'L1_BitAddress',
-      Local_Bit_Token: 'TestBitToken',
-    },
   },
   unmanaged: {
     AddressDictator: 'AddressDictator',

@@ -1,6 +1,6 @@
 {
   "name": "@mantleio/contracts",
-  "version": "0.1.1",
+  "version": "0.5.40",
   "description": "[Mantle] L1 and L2 smart contracts for Mantle",
   "main": "dist/index",
   "types": "dist/index",
@@ -8,8 +8,11 @@
     "dist/**/*.js",
     "dist/**/*.d.ts",
     "dist/types",
-    "artifacts/contracts/**/*.json",
-    "deployments/**/*.json",
+    "artifacts/contracts/chugsplash/**/*.json",
+    "artifacts/contracts/L1/**/*.json",
+    "artifacts/contracts/L2/**/*.json",
+    "artifacts/contracts/libraries/**/*.json",
+    "artifacts/contracts/standards/**/*.json",
     "chugsplash",
     "L1",
     "L2",
@@ -17,11 +20,12 @@
     "standards"
   ],
   "scripts": {
-    "build": "yarn build:contracts && yarn autogen:artifacts && yarn build:typescript",
+    "build": "yarn build:contracts && yarn copy:contracts && yarn autogen:artifacts && yarn build:typescript",
     "build:typescript": "tsc -p ./tsconfig.json",
     "build:contracts": "hardhat compile --show-stack-traces",
     "autogen:markdown": "ts-node scripts/generate-markdown.ts",
     "autogen:artifacts": "ts-node scripts/generate-artifacts.ts && ts-node scripts/generate-deployed-artifacts.ts",
+    "copy:contracts": "yarn copyfiles -u 1 -e \"**/test-*/**/*\" \"contracts/**/*\" ./",
     "test": "yarn test:contracts",
     "test:contracts": "hardhat test --show-stack-traces",
     "test:coverage": "NODE_OPTIONS=--max_old_space_size=8192 hardhat coverage && istanbul check-coverage --statements 90 --branches 84 --functions 88 --lines 90",
@@ -35,11 +39,7 @@
     "lint:contracts:fix": "yarn prettier --write 'contracts/**/*.sol'",
     "lint:fix": "yarn lint:contracts:fix && yarn lint:ts:fix",
     "lint": "yarn lint:fix && yarn lint:check",
-    "clean": "rm -rf ./dist ./artifacts ./cache ./coverage ./tsconfig.tsbuildinfo",
-    "prepublishOnly": "yarn copyfiles -u 1 -e \"**/test-*/**/*\" \"contracts/**/*\" ./",
-    "postpublish": "rimraf chugsplash L1 L2 libraries standards",
-    "prepack": "yarn prepublishOnly",
-    "postpack": "yarn postpublish",
+    "clean": "rm -rf ./dist ./artifacts ./cache ./coverage ./tsconfig.tsbuildinfo ./chugsplash ./L1 ./L2 ./libraries ./standards",
     "pre-commit": "lint-staged",
     "validateDocs": "hardhat validateOutput"
   },
@@ -49,7 +49,7 @@
     "contracts",
     "solidity"
   ],
-  "homepage": "https://github.com/mantlenetworkio/mantle/tree/main/packages/contracts#readme",
+  "homepage": "https://github.com/mantlenetworkio/mantle/tree/develop/packages/contracts#readme",
   "license": "MIT",
   "author": "Mantle PBC",
   "repository": {
@@ -57,23 +57,22 @@
     "url": "https://github.com/mantlenetworkio/mantle.git"
   },
   "dependencies": {
-    "@mantleio/core-utils": "0.1.0",
-    "@ethersproject/abstract-provider": "^5.6.1",
-    "@ethersproject/abstract-signer": "^5.6.2"
+    "@mantleio/core-utils": "0.12.0",
+    "@ethersproject/abstract-provider": "^5.7.0",
+    "@ethersproject/abstract-signer": "^5.7.0"
   },
   "devDependencies": {
     "@codechecks/client": "^0.1.11",
     "@defi-wonderland/smock": "^2.0.2",
-    "@mantleio/hardhat-deploy-config": "0.1.0",
-    "@ethersproject/abi": "^5.6.3",
-    "@ethersproject/bytes": "^5.6.1",
-    "@ethersproject/hardware-wallets": "^5.6.1",
-    "@ethersproject/providers": "^5.6.8",
+    "@mantleio/hardhat-deploy-config": "^0.2.5",
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/bytes": "^5.7.0",
+    "@ethersproject/hardware-wallets": "^5.7.0",
+    "@ethersproject/providers": "^5.7.0",
     "@nomiclabs/ethereumjs-vm": "^4.2.2",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
-    "@openzeppelin/hardhat-upgrades": "1.13.0",
     "@openzeppelin/contracts": "4.3.2",
     "@openzeppelin/contracts-upgradeable": "4.7.1",
     "@primitivefi/hardhat-dodoc": "^0.1.3",
@@ -89,7 +88,7 @@
     "directory-tree": "^2.2.7",
     "dotenv": "^10.0.0",
     "ethereum-waffle": "^3.3.0",
-    "ethers": "^5.6.8",
+    "ethers": "^5.7.0",
     "glob": "^7.1.6",
     "hardhat": "^2.9.6",
     "hardhat-deploy": "^0.11.10",
@@ -102,7 +101,7 @@
     "merkletreejs": "^0.2.18",
     "mkdirp": "^1.0.4",
     "mocha": "^8.4.0",
-    "prettier": "^2.3.1",
+    "prettier": "^2.8.0",
     "prettier-plugin-solidity": "^1.0.0-beta.18",
     "random-bytes-seed": "^1.0.3",
     "rlp": "^2.2.6",
@@ -111,9 +110,9 @@
     "solidity-coverage": "^0.7.17",
     "squirrelly": "^8.0.8",
     "ts-generator": "0.0.8",
-    "ts-node": "^10.0.0",
+    "ts-node": "^10.9.1",
     "typechain": "^8.1.0",
-    "typescript": "^4.6.2"
+    "typescript": "^4.9.3"
   },
   "peerDependencies": {
     "ethers": "^5"

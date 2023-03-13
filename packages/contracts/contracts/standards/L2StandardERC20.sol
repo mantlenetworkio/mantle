@@ -7,7 +7,6 @@ import "./IL2StandardERC20.sol";
 contract L2StandardERC20 is IL2StandardERC20, ERC20 {
     address public l1Token;
     address public l2Bridge;
-    uint8 public decimal;
 
     /**
      * @param _l2Bridge Address of the L2 standard bridge.
@@ -19,12 +18,10 @@ contract L2StandardERC20 is IL2StandardERC20, ERC20 {
         address _l2Bridge,
         address _l1Token,
         string memory _name,
-        string memory _symbol,
-        uint8 _decimal
+        string memory _symbol
     ) ERC20(_name, _symbol) {
         l1Token = _l1Token;
         l2Bridge = _l2Bridge;
-        decimal = _decimal;
     }
 
     modifier onlyL2Bridge() {
@@ -54,10 +51,4 @@ contract L2StandardERC20 is IL2StandardERC20, ERC20 {
 
         emit Burn(_from, _amount);
     }
-
-    // slither-disable-next-line external-function
-    function decimals() public view virtual override returns (uint8) {
-        return decimal;
-    }
-
 }

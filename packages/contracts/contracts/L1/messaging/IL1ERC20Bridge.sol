@@ -101,24 +101,4 @@ interface IL1ERC20Bridge {
         uint256 _amount,
         bytes calldata _data
     ) external;
-
-    /**
-     * @dev Complete a bit withdrawal from L2 to L1, and credit funds to the recipient's balance of the
-     * L1 ERC20 token.
-     * This call will fail if the initialized withdrawal from L2 has not been finalized.
-     *
-     * @param _from L2 address initiating the transfer.
-     * @param _to L1 address to credit the withdrawal to.
-     * @param _amount Amount of the ERC20 to deposit.
-     * @param _data Data provided by the sender on L2. This data is provided
-     *   solely as a convenience for external contracts. Aside from enforcing a maximum
-     *   length, these contracts provide no guarantees about its content.
-     */
-    function finalizeBitWithdrawal(
-        address _from,
-        address _to,
-        uint256 _amount,
-        bytes calldata _data
-    ) external;
-
 }

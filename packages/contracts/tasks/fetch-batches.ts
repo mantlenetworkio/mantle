@@ -1,7 +1,11 @@
 import { ethers } from 'ethers'
 import { task } from 'hardhat/config'
 import * as types from 'hardhat/internal/core/params/argumentTypes'
-import { BatchType, SequencerBatch, calldataCost } from '@mantleio/core-utils'
+import {
+  BatchType,
+  SequencerBatch,
+  calldataCost,
+} from '@mantleio/core-utils'
 
 import { names } from '../src/address-names'
 import { getContractFromArtifact } from '../src/deploy-utils'
