@@ -12,9 +12,10 @@ type BatchTx struct {
 }
 
 type RollupStoreResponse struct {
-	DataStoreId uint32 `json:"data_store_id"`
-	ConfirmAt   uint32 `json:"confirm_at"`
-	Status      uint8  `json:"status"`
+	OriginDataStoreId uint32 `json:"origin_data_store_id"`
+	DataStoreId       uint32 `json:"data_store_id"`
+	ConfirmAt         uint32 `json:"confirm_at"`
+	Status            uint8  `json:"status"`
 }
 
 type TransactionMeta struct {

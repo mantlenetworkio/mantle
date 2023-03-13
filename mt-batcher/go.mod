@@ -6,24 +6,31 @@ replace github.com/Layr-Labs/datalayr/common => ../datalayr-mantle/common
 
 replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr-mantle/lib/merkzg
 
+replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
+
 require (
+	//github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 	github.com/ethereum/go-ethereum v1.10.26
-	github.com/mantlenetworkio/mantle/l2geth v0.0.0-20230216130801-c4a7cf4f8ff9
+	github.com/mantlenetworkio/mantle/l2geth v0.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.1
+	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	github.com/urfave/cli v1.22.10
 	google.golang.org/grpc v1.49.0
 )
 
 require (
-	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
+	// github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 	github.com/decred/dcrd/hdkeychain/v3 v3.0.0
 	github.com/labstack/echo/v4 v4.9.0
 	github.com/prometheus/client_golang v1.11.0
 	github.com/tyler-smith/go-bip39 v1.1.0
 )
 
+//github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 require github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
+
+require github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 
 require (
 	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0-00010101000000-000000000000 // indirect
@@ -75,7 +82,6 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/steakknife/bloomfilter v0.0.0-20180922174646-6819c0d2a570 // indirect
 	github.com/steakknife/hamming v0.0.0-20180906055917-c99c65617cd3 // indirect
-	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
