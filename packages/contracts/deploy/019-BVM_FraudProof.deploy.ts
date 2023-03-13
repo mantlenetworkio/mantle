@@ -21,7 +21,8 @@ const deployFn: DeployFunction = async (hre) => {
     names.unmanaged.Lib_AddressManager
   )
   // @ts-ignore
-  const owner = hre.deployConfig.bvmAddressManagerOwner
+  const owner = hre.deployConfig.bvmProposerAddress
+  console.log('rollup owner is: ', owner)
   // @ts-ignore
   const l1BitAddress = hre.deployConfig.l1BitAddress
 
