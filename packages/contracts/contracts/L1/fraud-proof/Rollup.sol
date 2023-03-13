@@ -261,7 +261,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         bytes32[] calldata _batch,
         uint256 _shouldStartAtElement,
         bytes calldata _signature
-        ) external override stakedOnly {
+        ) external override stakedOnly { // todo batch submitter only
         // permissions only allow rollup proposer to submit assertion, only allow RollupContract to append new batch
         require(msg.sender == resolve("BVM_Rolluper"), "msg.sender is not rollup proposer, can't append batch");
         // create assertion

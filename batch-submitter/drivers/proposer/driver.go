@@ -10,6 +10,8 @@ import (
 	"math/big"
 	"strings"
 
+	"sync"
+
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -28,7 +30,6 @@ import (
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	tss_types "github.com/mantlenetworkio/mantle/tss/common"
-	"sync"
 )
 
 // stateRootSize is the size in bytes of a state root.
@@ -270,16 +271,12 @@ func (d *Driver) CraftBatchTx(
 			log.Info("append state with fraud proof")
 			// ##### FRAUD-PROOF modify #####
 			// check stake initialised
-			owner, err := d.fpRollup.Owner(&bind.CallOpts{})
-			if err != nil {
-				return nil, err
-			}
 			assertionInit, err := d.fpAssertion.Assertions(&bind.CallOpts{}, new(big.Int).SetUint64(0))
 			if err != nil {
 				return nil, err
 			}
-			if !bytes.Equal(owner.Bytes(), opts.From.Bytes()) || bytes.Equal(assertionInit.Deadline.Bytes(), common.Big0.Bytes()) {
-				log.Error("fraud proof not init with owner", owner)
+			if bytes.Equal(assertionInit.Deadline.Bytes(), common.Big0.Bytes()) {
+				log.Error("fraud proof not init")
 				return nil, nil
 			}
 			// Append state batch
@@ -287,7 +284,7 @@ func (d *Driver) CraftBatchTx(
 				opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature, blocks,
 			)
 			if err != nil {
-				log.Error("fraud proof append state batch in error: ", err.Error())
+				log.Error("fraud proof append state batch in failed", "err", err)
 			}
 			// ##### FRAUD-PROOF modify ##### //
 		} else {

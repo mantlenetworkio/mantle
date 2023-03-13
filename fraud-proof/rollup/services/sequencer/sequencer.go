@@ -61,6 +61,43 @@ func New(eth services.Backend, proofBackend proof.Backend, cfg *services.Config,
 	return s, nil
 }
 
+//func (s *Sequencer) proofGen() {
+//	states, _ := proof.GenerateStates(
+//		s.ProofBackend,
+//		s.Ctx,
+//		s.Eth.BlockChain().CurrentHeader().Number.Uint64()-1,
+//		s.Eth.BlockChain().CurrentHeader().Number.Uint64(),
+//		nil,
+//	)
+//	state := states[len(states)-1]
+//
+//	// state.json
+//	json, _ := state.MarshalJson()
+//	f, _ := os.OpenFile("state.json", os.O_CREATE|os.O_WRONLY, 0644)
+//	defer func(f *os.File) {
+//		err := f.Close()
+//		if err != nil {
+//
+//		}
+//	}(f)
+//	_, _ = f.Write(json)
+//
+//	// tx.json
+//	tx := state.Block.Transactions()[state.TransactionIdx]
+//	txData, _ := tx.MarshalJSON()
+//	txJson, _ := os.OpenFile("tx.json", os.O_CREATE|os.O_WRONLY, 0644)
+//	defer func(f *os.File) {
+//		err := f.Close()
+//		if err != nil {
+//
+//		}
+//	}(f)
+//	_, _ = txJson.Write(txData)
+//
+//	osp, _ := proof.GenerateProof(s.Ctx, s.ProofBackend, state, nil)
+//	osp.Encode()
+//}
+
 // This goroutine tries to confirm created assertions
 func (s *Sequencer) confirmationLoop() {
 	defer s.Wg.Done()
@@ -150,6 +187,7 @@ func (s *Sequencer) confirmationLoop() {
 				// New assertion created on L1 Rollup
 				log.Info("Get New Assertion...", "AssertionID", ev.AssertionID,
 					"AsserterAddr", ev.AsserterAddr, "VmHash", ev.VmHash, "InboxSize", ev.InboxSize)
+				//s.proofGen()
 				rawdb.WriteFPSchedulerNumber(db, ev.Raw.BlockNumber)
 			case header := <-headCh:
 				// todo : optimization the check with block height
