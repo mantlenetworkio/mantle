@@ -127,7 +127,7 @@ func APIs(backend Backend) []rpc.API {
 	// Append all the local APIs and return
 	return []rpc.API{
 		{
-			Namespace: "proof",
+			Namespace: "debug",
 			Version:   "1.0",
 			Service:   NewAPI(backend),
 			Public:    false,
