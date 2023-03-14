@@ -189,7 +189,7 @@ func BuildVerificationContext(ctx context.Context, proofBackend proof.Backend, s
 		Number:      header.Number,
 		Origin:      ethc.Address(txOrigin),
 		Transaction: evmTx,
-		//InputRoot: ,
-		TxHash: tx.Hash(),
+		InputRoot:   [32]byte{0},
+		TxHash:      tx.Hash(),
 	}, nil
 }
