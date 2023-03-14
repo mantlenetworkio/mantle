@@ -271,16 +271,10 @@ func (d *Driver) CraftBatchTx(
 			log.Info("append state with fraud proof")
 			// ##### FRAUD-PROOF modify #####
 			// check stake initialised
-			owner, err := d.fpRollup.Owner(&bind.CallOpts{})
-			if err != nil {
-				return nil, err
-			}
-			assertionInit, err := d.fpAssertion.Assertions(&bind.CallOpts{}, new(big.Int).SetUint64(0))
-			if err != nil {
-				return nil, err
-			}
+			owner, _ := d.fpRollup.Owner(&bind.CallOpts{})
+			assertionInit, _ := d.fpAssertion.Assertions(&bind.CallOpts{}, new(big.Int).SetUint64(0))
 			if !bytes.Equal(owner.Bytes(), opts.From.Bytes()) || bytes.Equal(assertionInit.Deadline.Bytes(), common.Big0.Bytes()) {
-				log.Error("fraud proof not init")
+				log.Error("fraud proof not init", "owner", owner, "expect", opts.From)
 				return nil, nil
 			}
 			// Append state batch
