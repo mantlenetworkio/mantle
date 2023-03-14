@@ -157,8 +157,8 @@ func (l *TestProver) CaptureTxStart(gasLimit uint64) {}
 
 func (l *TestProver) CaptureTxEnd(restGas uint64) {}
 
-func (l *TestProver) CaptureStart(from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) error {
-	//l.env = env
+func (l *TestProver) CaptureStart(env *vm.EVM, from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) error {
+	l.env = env
 	l.counter = 1
 	if create {
 		l.callFlag = state.CALLFLAG_CREATE

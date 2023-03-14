@@ -75,7 +75,8 @@ func (l *IntraStateGenerator) CaptureTxStart(gasLimit uint64) {}
 
 func (l *IntraStateGenerator) CaptureTxEnd(restGas uint64) {}
 
-func (l *IntraStateGenerator) CaptureStart(from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) error {
+func (l *IntraStateGenerator) CaptureStart(env *vm.EVM, from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) error {
+	l.env = env
 	// To be consistent with stepIdx, but not necessary for state generation
 	l.counter = 1
 	if create {
@@ -87,8 +88,7 @@ func (l *IntraStateGenerator) CaptureStart(from common.Address, to common.Addres
 	l.accessListTrie = state.NewAccessListTrie()
 	// We manually accumulate the selfdestruct set during tracing to preserve order
 	l.selfDestructSet = state.NewSelfDestructSet()
-	//log.Info("check nil ref", "l.startInterState", l.startInterState, "l.env", l.env)
-	//l.startInterState.GlobalState = l.env.StateDB.Copy() // This state includes gas-buying and nonce-increment
+	l.startInterState.GlobalState = l.env.StateDB.Copy() // This state includes gas-buying and nonce-increment
 	l.lastDepthState = l.startInterState
 	// log.Info("Capture Start", "from", from, "to", to)
 	return nil

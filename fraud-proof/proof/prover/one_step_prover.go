@@ -106,8 +106,9 @@ func (l *OneStepProver) CaptureTxStart(gasLimit uint64) {}
 
 func (l *OneStepProver) CaptureTxEnd(restGas uint64) {}
 
-func (l *OneStepProver) CaptureStart(from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) error {
+func (l *OneStepProver) CaptureStart(env *vm.EVM, from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) error {
 	// We won't handle transaction initiation proof here, it should be handled outside tracing
+	l.env = env
 	l.counter = 1
 	if create {
 		l.callFlag = state.CALLFLAG_CREATE
