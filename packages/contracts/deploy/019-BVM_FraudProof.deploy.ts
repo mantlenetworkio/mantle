@@ -21,8 +21,8 @@ const deployFn: DeployFunction = async (hre) => {
     names.unmanaged.Lib_AddressManager
   )
   // @ts-ignore
-  const owner = hre.deployConfig.bvmProposerAddress
-  console.log('rollup owner is: ', owner)
+  const owner = hre.deployConfig.bvmAddressManagerOwner
+
   // @ts-ignore
   const l1BitAddress = hre.deployConfig.l1BitAddress
 
@@ -112,9 +112,12 @@ const deployFn: DeployFunction = async (hre) => {
   })
   console.log('deploy fraud proof verifier proxy success')
 
+  const proposer = hre.deployConfig.bvmRolluperAddress
+  console.log('proposer address :',proposer)
+
   // deploy rollup proxy
   const rollupArgs = [
-    owner, // address _owner
+    proposer, // address _owner
     Impl__Verifier.address, // address _verifier,
     l1BitAddress, // address _stakeToken,
     Lib_AddressManager.address, // address _libAddressManager,
@@ -157,12 +160,23 @@ const deployFn: DeployFunction = async (hre) => {
         5000,
         100
       )
-      console.log('>>>> assertions ', contract.assertions())
+      console.log('>>>> assertions ',await contract.assertions())
       await awaitCondition(
         async () => {
           return hexStringEquals(
             await contract.assertions(),
             Proxy__AssertionMap.address
+          )
+        },
+        5000,
+        100
+      )
+      console.log('>>>> owner ',await contract.owner())
+      await awaitCondition(
+        async () => {
+          return hexStringEquals(
+            await contract.owner(),
+            proposer
           )
         },
         5000,

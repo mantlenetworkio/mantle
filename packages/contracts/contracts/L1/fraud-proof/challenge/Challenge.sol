@@ -143,19 +143,11 @@ contract Challenge is IChallenge {
         prevBisection[1] = _endStateHash;
 
         startInboxSize = _startInboxSize;
-        console.log("initialize prevBisection...");
-        console.log("_startStateHash");
-        console.logBytes32(_startStateHash);
-        console.log("_endStateHash");
-        console.logBytes32(_endStateHash);
     }
 
     function initializeChallengeLength(bytes32 checkStateHash, uint256 _numSteps) external override onlyOnTurn {
         require(bisectionHash == 0, CHAL_INIT_STATE);
         require(_numSteps > 0, "INVALID_NUM_STEPS");
-        console.log("initializeChallengeLength");
-        console.logBytes32(startStateHash);
-        console.log(_numSteps);
         bisectionHash = ChallengeLib.computeBisectionHash(0, _numSteps);
         // TODO: consider emitting a different event?
         currentBisected = BisectedStore(startStateHash, checkStateHash, endStateHash, block.number, block.timestamp, 0, _numSteps);
@@ -172,22 +164,6 @@ contract Challenge is IChallenge {
     ) external override onlyOnTurn postInitialization {
         // Verify provided prev bisection.
         bytes32 prevHash = ChallengeLib.computeBisectionHash(prevChallengedSegmentStart, prevChallengedSegmentLength);
-        console.log("challengedSegmentIndex");
-        console.log(challengedSegmentIndex);
-        console.log("bisection info");
-        console.logBytes32(bisection[0]);
-        console.logBytes32(bisection[1]);
-        console.logBytes32(bisection[2]);
-        console.log("prevBisection info");
-        console.logBytes32(prevBisection[0]);
-        console.logBytes32(prevBisection[1]);
-        console.log("prev info");
-        console.log(prevChallengedSegmentStart);
-        console.log(prevChallengedSegmentLength);
-        console.log("prevHash");
-        console.logBytes32(prevHash);
-        console.log("bisectionHash");
-        console.logBytes32(bisectionHash);
         require(prevHash == bisectionHash, BIS_PREV);
 
         // Require agreed upon start state hash and disagreed upon end state hash.

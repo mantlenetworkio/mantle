@@ -2,7 +2,9 @@ package sequencer
 
 import (
 	"bytes"
+	"encoding/json"
 	"math/big"
+	"os"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
@@ -61,42 +63,67 @@ func New(eth services.Backend, proofBackend proof.Backend, cfg *services.Config,
 	return s, nil
 }
 
-//func (s *Sequencer) proofGen() {
-//	states, _ := proof.GenerateStates(
-//		s.ProofBackend,
-//		s.Ctx,
-//		s.Eth.BlockChain().CurrentHeader().Number.Uint64()-1,
-//		s.Eth.BlockChain().CurrentHeader().Number.Uint64(),
-//		nil,
-//	)
-//	state := states[len(states)-1]
-//
-//	// state.json
-//	json, _ := state.MarshalJson()
-//	f, _ := os.OpenFile("state.json", os.O_CREATE|os.O_WRONLY, 0644)
-//	defer func(f *os.File) {
-//		err := f.Close()
-//		if err != nil {
-//
-//		}
-//	}(f)
-//	_, _ = f.Write(json)
-//
-//	// tx.json
-//	tx := state.Block.Transactions()[state.TransactionIdx]
-//	txData, _ := tx.MarshalJSON()
-//	txJson, _ := os.OpenFile("tx.json", os.O_CREATE|os.O_WRONLY, 0644)
-//	defer func(f *os.File) {
-//		err := f.Close()
-//		if err != nil {
-//
-//		}
-//	}(f)
-//	_, _ = txJson.Write(txData)
-//
-//	osp, _ := proof.GenerateProof(s.Ctx, s.ProofBackend, state, nil)
-//	osp.Encode()
-//}
+func (s *Sequencer) proofGen() {
+	states, err := proof.GenerateStates(
+		s.ProofBackend,
+		s.Ctx,
+		s.Eth.BlockChain().CurrentHeader().Number.Uint64()-1,
+		s.Eth.BlockChain().CurrentHeader().Number.Uint64(),
+		nil,
+	)
+	if err != nil {
+		return
+	}
+	state := states[len(states)-1]
+
+	// state.json
+	stateJson, err := state.MarshalJson()
+	if err != nil {
+		return
+	}
+	f, err := os.OpenFile("/Users/kukoomomo/yjc/rde/tmp/state.json", os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	_, err = f.Write(stateJson)
+	if err != nil {
+		return
+	}
+	// tx.json
+	tx := state.Block.Transactions()[state.TransactionIdx]
+	txData, err := tx.MarshalJSON()
+	if err != nil {
+		return
+	}
+	txJson, err := os.OpenFile("/Users/kukoomomo/yjc/rde/tmp/tx.json", os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return
+	}
+	defer txJson.Close()
+	_, err = txJson.Write(txData)
+	if err != nil {
+		return
+	}
+	osp, err := proof.GenerateProof(s.Ctx, s.ProofBackend, state, nil)
+	if err != nil {
+		return
+	}
+	//proof.StateProofFromState()
+	proofJson, err := os.OpenFile("/Users/kukoomomo/yjc/rde/tmp/proof.json", os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return
+	}
+	defer proofJson.Close()
+	ospData, err := json.Marshal(osp)
+	if err != nil {
+		return
+	}
+	_, err = proofJson.Write(ospData)
+	if err != nil {
+		return
+	}
+}
 
 // This goroutine tries to confirm created assertions
 func (s *Sequencer) confirmationLoop() {
@@ -187,7 +214,6 @@ func (s *Sequencer) confirmationLoop() {
 				// New assertion created on L1 Rollup
 				log.Info("Get New Assertion...", "AssertionID", ev.AssertionID,
 					"AsserterAddr", ev.AsserterAddr, "VmHash", ev.VmHash, "InboxSize", ev.InboxSize)
-				//s.proofGen()
 				rawdb.WriteFPSchedulerNumber(db, ev.Raw.BlockNumber)
 			case header := <-headCh:
 				// todo : optimization the check with block height
@@ -202,6 +228,7 @@ func (s *Sequencer) confirmationLoop() {
 						continue
 					}
 				}
+				//s.proofGen()
 				// Get first unresolved confirm assertion and check deadline
 				lastRSAID, err := s.Rollup.LastResolvedAssertionID()
 				if err != nil {
@@ -216,7 +243,6 @@ func (s *Sequencer) confirmationLoop() {
 				if lastCAID.Uint64() <= lastRSAID.Uint64() {
 					continue
 				}
-
 				// New block mined on L1
 				log.Info("Sequencer sync new layer1 block", "height", header.Number)
 				firstUnresolvedID := lastRSAID.Uint64() + 1
