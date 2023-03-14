@@ -22,7 +22,6 @@ const deployFn: DeployFunction = async (hre) => {
   )
   // @ts-ignore
   const owner = hre.deployConfig.bvmAddressManagerOwner
-
   // @ts-ignore
   const l1BitAddress = hre.deployConfig.l1BitAddress
 
