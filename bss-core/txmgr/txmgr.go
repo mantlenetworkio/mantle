@@ -116,6 +116,7 @@ func (m *SimpleTxManager) Send(
 ) (*types.Receipt, error) {
 
 	name := m.name
+	errorCount := 0
 
 	// Initialize a wait group to track any spawned goroutines, and ensure
 	// we properly clean up any dangling resources this method generates.
@@ -145,6 +146,7 @@ func (m *SimpleTxManager) Send(
 				return
 			}
 			log.Error(name+" unable to update txn gas price", "err", err)
+			errorCount++
 			return
 		}
 
@@ -223,6 +225,9 @@ func (m *SimpleTxManager) Send(
 			// Submit and wait for the bumped traction to confirm.
 			wg.Add(1)
 			go sendTxAsync()
+			if errorCount > 10 {
+				return nil, errors.New("send transaction error ：out of retry times")
+			}
 
 		// The passed context has been canceled, i.e. in the event of a
 		// shutdown.
@@ -330,7 +335,8 @@ func waitMined(
 
 // CalcGasFeeCap deterministically computes the recommended gas fee cap given
 // the base fee and gasTipCap. The resulting gasFeeCap is equal to:
-//   gasTipCap + 2*baseFee.
+//
+//	gasTipCap + 2*baseFee.
 func CalcGasFeeCap(baseFee, gasTipCap *big.Int) *big.Int {
 	return new(big.Int).Add(
 		gasTipCap,
