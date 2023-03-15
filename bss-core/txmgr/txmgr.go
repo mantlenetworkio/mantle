@@ -226,6 +226,7 @@ func (m *SimpleTxManager) Send(
 			wg.Add(1)
 			go sendTxAsync()
 			if errorCount > 10 {
+				log.Error("send transaction error ：out of retry times")
 				return nil, errors.New("send transaction error ：out of retry times")
 			}
 

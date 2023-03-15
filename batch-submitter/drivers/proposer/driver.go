@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum"
 	"math/big"
 	"strings"
 
@@ -294,15 +295,47 @@ func (d *Driver) UpdateGasPrice(
 	tx *types.Transaction,
 ) (*types.Transaction, error) {
 
+	gasTipCap, err := d.cfg.L1Client.SuggestGasTipCap(ctx)
+	if err != nil {
+
+		if !drivers.IsMaxPriorityFeePerGasNotFoundError(err) {
+			return nil, err
+		}
+
+		log.Warn(d.cfg.Name + " eth_maxPriorityFeePerGas is unsupported " +
+			"by current backend, using fallback gasTipCap")
+		gasTipCap = drivers.FallbackGasTipCap
+	}
+
+	header, err := d.cfg.L1Client.HeaderByNumber(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	gasFeeCap := txmgr.CalcGasFeeCap(header.BaseFee, gasTipCap)
+	gasLimit, err := d.cfg.L1Client.EstimateGas(ctx, ethereum.CallMsg{
+		From:      d.walletAddr,
+		To:        &d.cfg.CTCAddr,
+		GasPrice:  nil,
+		GasTipCap: gasTipCap,
+		GasFeeCap: gasFeeCap,
+		Value:     nil,
+		Data:      tx.Data(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	opts, err := bind.NewKeyedTransactorWithChainID(
 		d.cfg.PrivKey, d.cfg.ChainID,
 	)
 	if err != nil {
 		return nil, err
 	}
+
 	opts.Context = ctx
 	opts.Nonce = new(big.Int).SetUint64(tx.Nonce())
 	opts.NoSend = true
+	opts.GasLimit = 6 * gasLimit / 5 // add 20% buffer to gas limit
 
 	finalTx, err := d.rawSccContract.RawTransact(opts, tx.Data())
 	switch {
