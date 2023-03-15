@@ -14,7 +14,6 @@ import (
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 )
@@ -64,16 +63,9 @@ func New(eth services.Backend, proofBackend proof.Backend, cfg *services.Config,
 func (s *Sequencer) confirmationLoop() {
 	defer s.Wg.Done()
 
-	db := s.ProofBackend.ChainDb()
-	cacheNum := rawdb.ReadFPSchedulerNumber(db) - 1
-	var startNum *uint64
-	if cacheNum > 0 {
-		startNum = &cacheNum
-	}
-
 	// Watch AssertionCreated event
 	createdCh := make(chan *bindings.RollupAssertionCreated, 4096)
-	createdSub, err := s.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Start: startNum, Context: s.Ctx}, createdCh)
+	createdSub, err := s.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Context: s.Ctx}, createdCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
 	}
@@ -81,7 +73,7 @@ func (s *Sequencer) confirmationLoop() {
 
 	// Watch AssertionConfirmed event
 	confirmedCh := make(chan *bindings.RollupAssertionConfirmed, 4096)
-	confirmedSub, err := s.Rollup.Contract.WatchAssertionConfirmed(&bind.WatchOpts{Start: startNum, Context: s.Ctx}, confirmedCh)
+	confirmedSub, err := s.Rollup.Contract.WatchAssertionConfirmed(&bind.WatchOpts{Context: s.Ctx}, confirmedCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
 	}
@@ -96,7 +88,7 @@ func (s *Sequencer) confirmationLoop() {
 	defer headSub.Unsubscribe()
 
 	challengedCh := make(chan *bindings.RollupAssertionChallenged, 4096)
-	challengedSub, err := s.Rollup.Contract.WatchAssertionChallenged(&bind.WatchOpts{Start: startNum, Context: s.Ctx}, challengedCh)
+	challengedSub, err := s.Rollup.Contract.WatchAssertionChallenged(&bind.WatchOpts{Context: s.Ctx}, challengedCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
 	}
@@ -150,7 +142,6 @@ func (s *Sequencer) confirmationLoop() {
 				log.Info("Get New Assertion...", "AssertionID", ev.AssertionID,
 					"AsserterAddr", ev.AsserterAddr, "VmHash", ev.VmHash, "InboxSize", ev.InboxSize)
 				//s.proofGen()
-				rawdb.WriteFPSchedulerNumber(db, ev.Raw.BlockNumber)
 			case header := <-headCh:
 				// todo : optimization the check with block height
 				// Get confirm block header

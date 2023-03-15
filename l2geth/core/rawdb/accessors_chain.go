@@ -57,22 +57,6 @@ func DeleteFPValidatorChallengeCtx(db ethdb.Writer) {
 	}
 }
 
-func WriteFPSchedulerNumber(db ethdb.Writer, num uint64) {
-	b := make([]byte, 8)
-	binary.LittleEndian.PutUint64(b, num)
-	if err := db.Put(FPSchedulerConfirmLoopNumberCache, b); err != nil {
-		log.Crit("Failed to store fp confirm loop number cache", "err", err)
-	}
-}
-
-func ReadFPSchedulerNumber(db ethdb.Reader) uint64 {
-	data, _ := db.Get(FPSchedulerConfirmLoopNumberCache)
-	if data != nil {
-		return binary.LittleEndian.Uint64(data)
-	}
-	return 0
-}
-
 // ReadCanonicalHash retrieves the hash assigned to a canonical block number.
 func ReadCanonicalHash(db ethdb.Reader, number uint64) common.Hash {
 	data, _ := db.Ancient(freezerHashTable, number)
