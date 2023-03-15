@@ -125,6 +125,11 @@ export interface DeployConfig {
   sccAddress: string
 
   /**
+   * Address of ctc contract.
+   */
+  ctcAddress: string
+
+  /**
    * Optional initial overhead value for GPO (default: 2750).
    */
   gasPriceOracleOverhead?: number
@@ -248,6 +253,9 @@ const configSpec: {
     type: 'address',
   },
   sccAddress: {
+    type: 'address',
+  },
+  ctcAddress: {
     type: 'address',
   },
   gasPriceOracleOverhead: {

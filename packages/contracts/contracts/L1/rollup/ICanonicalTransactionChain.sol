@@ -148,6 +148,24 @@ interface ICanonicalTransactionChain {
     ) external;
 
     /**
+     * Allows the da sequencer to append a batch of transactions elements.
+     * .param _shouldStartAtElement Specific batch we expect to start appending to.
+     * .param _totalElementsToAppend Total number of batch elements we expect to append.
+     * .param _numSequencedTransactions batch of sequencer transactions.
+     * .param _numSubsequentQueueTransactions batch of queue transactions.
+     * .param _timestamp batch of and block timestamp.
+     * .param _blockNumber batch of and block blockNumber.
+     */
+    function appendDaSequencerBatch(
+        uint40 _shouldStartAtElement,
+        uint24 _totalElementsToAppend,
+        uint32 _numSequencedTransactions,
+        uint40 _numSubsequentQueueTransactions,
+        uint40 _timestamp,
+        uint40 _blockNumber
+    ) external;
+
+    /**
      * Allows the sequencer to append a batch of transactions.
      * @dev This function uses a custom encoding scheme for efficiency reasons.
      * .param _shouldStartAtElement Specific batch we expect to start appending to.

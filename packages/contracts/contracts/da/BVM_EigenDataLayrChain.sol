@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import { DataLayrDisclosureLogic } from "../libraries/eigenda/DataLayrDisclosureLogic.sol";
 import { IDataLayrServiceManager } from "../libraries/eigenda/lib/contracts/interfaces/IDataLayrServiceManager.sol";
+import { ICanonicalTransactionChain } from "../L1/rollup/ICanonicalTransactionChain.sol";
 import { BN254 } from "../libraries/eigenda/BN254.sol";
 import { DataStoreUtils } from "../libraries/eigenda/lib/contracts/libraries/DataStoreUtils.sol";
 import { Parser } from "../libraries/eigenda/Parse.sol";
@@ -34,6 +35,7 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
 
     address public sequencer;
     address public dataManageAddress;
+    address public ctcAddress;
     uint256 public BLOCK_STALE_MEASURE;
     uint256 public l2StoredBlockNumber;
     uint256 public l2ConfirmedBlockNumber;
@@ -66,10 +68,11 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
     event RollupStoreConfirmed(uint256 rollupBatchIndex, uint32 dataStoreId, uint256 stratL2BlockNumber, uint256 endL2BlockNumber);
     event RollupStoreReverted(uint256 rollupBatchIndex, uint32 dataStoreId, uint256 stratL2BlockNumber, uint256 endL2BlockNumber);
 
-    function initialize(address _sequencer, address _dataManageAddress, uint256 _block_stale_measure, uint256 _fraudProofPeriod, uint256 _l2SubmittedBlockNumber) public initializer {
+    function initialize(address _sequencer, address _dataManageAddress, address _ctcAddress, uint256 _block_stale_measure, uint256 _fraudProofPeriod, uint256 _l2SubmittedBlockNumber) public initializer {
         __Ownable_init();
         sequencer = _sequencer;
         dataManageAddress = _dataManageAddress;
+        ctcAddress = _ctcAddress;
         BLOCK_STALE_MEASURE = _block_stale_measure;
         fraudProofPeriod = _fraudProofPeriod;
         l2StoredBlockNumber = _l2SubmittedBlockNumber;
@@ -251,7 +254,10 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         uint256 endL2Block,
         uint32 originDataStoreId,
         uint256 reConfirmedBatchIndex,
-        bool isReRollup
+        bool isReRollup,
+        uint32 numSequencedTransactions,
+        uint40 numSubsequentQueueTransactions,
+        uint40 timestamp
     ) external {
         require(msg.sender == sequencer, "Only the sequencer can store data");
         require(dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].startL2BlockNumber == startL2Block &&
@@ -273,6 +279,10 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
             });
             l2ConfirmedBlockNumber = endL2Block;
             dataStoreIdToRollupStoreNumber[searchData.metadata.globalDataStoreId] = rollupBatchIndex;
+            // add elements to ctc contract
+            uint40 shouldStartAtElement = uint40(startL2Block);
+            uint24 totalElementsToAppend = uint24(endL2Block - startL2Block);
+            ICanonicalTransactionChain(ctcAddress).appendDaSequencerBatch(shouldStartAtElement, totalElementsToAppend, numSequencedTransactions, numSubsequentQueueTransactions, timestamp, uint40(endL2Block));
             emit RollupStoreConfirmed(uint32(rollupBatchIndex++), searchData.metadata.globalDataStoreId, startL2Block, endL2Block);
         } else {
             rollupBatchIndexRollupStores[reConfirmedBatchIndex] = RollupStore({

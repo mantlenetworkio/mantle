@@ -307,6 +307,9 @@ const config: HardhatUserConfig = {
       type: 'address',
       default: 0,
     },
+    ctcAddress: {
+      type: 'address',
+    },
     gasPriceOracleOverhead: {
       type: 'number',
       default: 2750,

@@ -52,6 +52,7 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
      *************/
 
     uint256 public maxTransactionGasLimit;
+    address public mt_batcher;
 
     /***************
      * Queue State *
@@ -68,12 +69,14 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
         address _libAddressManager,
         uint256 _maxTransactionGasLimit,
         uint256 _l2GasDiscountDivisor,
-        uint256 _enqueueGasCost
+        uint256 _enqueueGasCost,
+        address _mt_batcher
     ) Lib_AddressResolver(_libAddressManager) {
         maxTransactionGasLimit = _maxTransactionGasLimit;
         l2GasDiscountDivisor = _l2GasDiscountDivisor;
         enqueueGasCost = _enqueueGasCost;
         enqueueL2GasPrepaid = _l2GasDiscountDivisor * _enqueueGasCost;
+        mt_batcher = _mt_batcher;
     }
 
     /**********************
@@ -86,6 +89,15 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
      */
     modifier onlyBurnAdmin() {
         require(msg.sender == libAddressManager.owner(), "Only callable by the Burn Admin.");
+        _;
+    }
+
+    /**
+    * Modifier to enforce that, if configured, only the mt batcher may
+    * successfully call a method.
+    */
+    modifier onlyMtBatcher() {
+        require(msg.sender == libAddressManager.owner(), "Only callable by the mt batcher.");
         _;
     }
 
@@ -273,6 +285,74 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
         );
         uint256 queueIndex = queueElements.length - 1;
         emit TransactionEnqueued(sender, _target, _gasLimit, _data, queueIndex, block.timestamp);
+    }
+
+
+    /**
+     * Allows the da sequencer to append a batch of transactions elements.
+     * .param _shouldStartAtElement Specific batch we expect to start appending to.
+     * .param _totalElementsToAppend Total number of batch elements we expect to append.
+     * .param _numSequencedTransactions batch of sequencer transactions.
+     * .param _numSubsequentQueueTransactions batch of queue transactions.
+     * .param _timestamp batch of and block timestamp.
+     * .param _blockNumber batch of and block blockNumber.
+     */
+    function appendDaSequencerBatch(
+        uint40 _shouldStartAtElement,
+        uint24 _totalElementsToAppend,
+        uint32 _numSequencedTransactions,
+        uint40 _numSubsequentQueueTransactions,
+        uint40 _timestamp,
+        uint40 _blockNumber
+    )
+    external
+    onlyMtBatcher
+    {
+        uint40 shouldStartAtElement = _shouldStartAtElement;
+        uint24 totalElementsToAppend = _totalElementsToAppend;
+        require(
+            shouldStartAtElement == getTotalElements(),
+            "Actual batch start index does not match expected start index."
+        );
+        uint32 numSequencerTransactions = _numSequencedTransactions;
+        uint40 nextQueueIndex = _nextQueueIndex + _numSubsequentQueueTransactions;
+        require(
+            nextQueueIndex <= queueElements.length,
+            "Attempted to append more elements than are available in the queue."
+        );
+
+        uint40 numQueuedTransactions = totalElementsToAppend - numSequencerTransactions;
+        uint40 blockTimestamp;
+        uint40 blockNumber;
+        if (_numSubsequentQueueTransactions == 0) {
+            blockTimestamp = uint40(_timestamp);
+            blockNumber = uint40(_blockNumber);
+        } else {
+            Lib_BVMCodec.QueueElement memory lastElement = queueElements[nextQueueIndex - 1];
+
+            blockTimestamp = lastElement.timestamp;
+            blockNumber = lastElement.blockNumber;
+        }
+
+        // slither-disable-next-line reentrancy-no-eth, reentrancy-events
+        _appendBatch(
+            blockhash(block.number - 1),
+            totalElementsToAppend,
+            numQueuedTransactions,
+            blockTimestamp,
+            blockNumber
+        );
+
+        // slither-disable-next-line reentrancy-events
+        emit SequencerBatchAppended(
+            nextQueueIndex - numQueuedTransactions,
+            numQueuedTransactions,
+            getTotalElements()
+        );
+
+        // Update the _nextQueueIndex storage variable.
+        // slither-disable-next-line reentrancy-no-eth
+        _nextQueueIndex = nextQueueIndex;
     }
 
     /**
