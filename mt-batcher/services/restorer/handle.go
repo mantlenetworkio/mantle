@@ -3,6 +3,7 @@ package restorer
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"github.com/Layr-Labs/datalayr/common/graphView"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceRetrieverServer"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
