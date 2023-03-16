@@ -3,16 +3,32 @@ import { LevelUp } from 'levelup'
 import { BigNumber } from 'ethers'
 import { BatchType } from '@mantleio/core-utils'
 
-/* Imports: Internal */
 import { SimpleDB } from './simple-db'
 import { PATCH_CONTEXTS, BSS_HF1_INDEX } from '../config'
 import {
+  BatchTransactionEntry,
+  DataStoreEntry,
   EnqueueEntry,
+  RollupStoreEntry,
   StateRootBatchEntry,
   StateRootEntry,
   TransactionBatchEntry,
   TransactionEntry,
-} from '../types/database-types'
+  TransactionListEntry
+} from "../types/database-types";
+
+const TRANSPORT_DA_DB_KEYS = {
+  UPDATED_BATCH_INDEX: `da:updatedbatchindex`,
+  BATCH_INDEX: `da:batchindex`,
+  TXS_BY_DS_ID: `da:txsbydsid`,
+  DATA_STORE_BY_ID: `da:datastorebyid`,
+  TX_LIST_DS_ID: `da:txlistdsid`,
+  DS_LIST_BY_BTACH_ID: `da:dssbybatchid`,
+  ROLLUP_STORE_BY_BATCH_INDEX: `da:rollupstorebybatchindex`,
+  UPDATED_ROLLUP_STORE_BY_BATCH_INDEX: `da:updatedrollupstorebybatchindex`,
+
+  UPDATED_DS_ID: `da:updateddsid`,
+}
 
 const TRANSPORT_DB_KEYS = {
   ENQUEUE: `enqueue`,
@@ -46,6 +62,148 @@ export class TransportDB {
     this.db = new SimpleDB(leveldb)
     this.opts = opts || {}
   }
+
+  //======================================================================================
+  //====================================DA==PART==START===================================
+  //======================================================================================
+  public async putUpdatedBatchIndex(index: number): Promise<void> {
+    await this.db.put([
+      {
+        key: TRANSPORT_DA_DB_KEYS.UPDATED_BATCH_INDEX,
+        index: 0,
+        value: index,
+      },
+    ])
+  }
+
+  public async getUpdatedBatchIndex(): Promise<number> {
+    return this.db.get(TRANSPORT_DA_DB_KEYS.UPDATED_BATCH_INDEX, 0)
+  }
+
+  public async putUpdatedRollupBatchIndex(index: number): Promise<void> {
+    await this.db.put([
+      {
+        key: TRANSPORT_DA_DB_KEYS.UPDATED_ROLLUP_STORE_BY_BATCH_INDEX,
+        index: 0,
+        value: index,
+      },
+    ])
+  }
+
+  public async getUpdatedRollupBatchIndex(): Promise<number> {
+    return this.db.get(TRANSPORT_DA_DB_KEYS.UPDATED_ROLLUP_STORE_BY_BATCH_INDEX, 0)
+  }
+
+  public async putUpdatedDsId(index: number): Promise<void> {
+    await this.db.put([
+      {
+        key: TRANSPORT_DA_DB_KEYS.UPDATED_DS_ID,
+        index: 0,
+        value: index,
+      },
+    ])
+  }
+
+  public async getUpdatedDsId(): Promise<number> {
+    return this.db.get(TRANSPORT_DA_DB_KEYS.UPDATED_DS_ID, 0)
+  }
+
+  public async putRollupStoreByBatchIndex<RollupStoreEntry extends Indexed>(
+    entry: RollupStoreEntry,
+    batchIndex: number
+  ): Promise<void> {
+    await this.db.put([
+      {
+        key: TRANSPORT_DA_DB_KEYS.ROLLUP_STORE_BY_BATCH_INDEX + batchIndex,
+        index: 0,
+        value: entry,
+      },
+    ])
+  }
+
+  public async getRollupStoreByBatchIndex(
+    batchIndex: number
+  ): Promise<RollupStoreEntry> {
+    return this.db.get(
+      TRANSPORT_DA_DB_KEYS.ROLLUP_STORE_BY_BATCH_INDEX + batchIndex,
+      0
+    )
+  }
+
+  public async putBatchTxByDataStoreId(
+    entries: BatchTransactionEntry[],
+    dsId: number
+  ): Promise<void> {
+    await this._putFullEntries(
+      TRANSPORT_DA_DB_KEYS.TXS_BY_DS_ID + dsId,
+      entries
+    )
+  }
+
+  public async getBatchTxByDataStoreId(
+    dsId: number
+  ): Promise<BatchTransactionEntry[]> {
+    return this._getFullEnties(TRANSPORT_DA_DB_KEYS.TXS_BY_DS_ID + dsId)
+  }
+
+  // public async getTxListByDSId(dsId: number): Promise<TransactionListEntry[]> {
+  //   const lens = await this._getLatestEntryIndex(
+  //     TRANSPORT_DA_DB_KEYS.TX_LIST_DS_ID + dsId
+  //   )
+  //   return this._getEntries(TRANSPORT_DA_DB_KEYS.TX_LIST_DS_ID + dsId, 0, lens+1)
+  // }
+
+  public async getTxListByDSId(dsId: number): Promise<TransactionListEntry[]> {
+
+    return this._getFullEnties(TRANSPORT_DA_DB_KEYS.TX_LIST_DS_ID + dsId)
+  }
+
+
+
+  public async putTxListByDSId(
+    entries: TransactionListEntry[],
+    dsId: number
+  ): Promise<void> {
+    await this._putFullEntries(TRANSPORT_DA_DB_KEYS.TX_LIST_DS_ID + dsId, entries)
+  }
+
+  public async putDsById(entry: DataStoreEntry, dsId: number): Promise<void> {
+    await this.db.put([
+      {
+        key: TRANSPORT_DA_DB_KEYS.DATA_STORE_BY_ID,
+        index: dsId,
+        value: entry,
+      },
+    ])
+  }
+
+  public async getDsById<DataStoreEntry extends Indexed>(
+    dsId: number
+  ): Promise<DataStoreEntry> {
+    if (dsId === null) {
+      return null
+    }
+
+    return this._getEntryByIndex(TRANSPORT_DA_DB_KEYS.DATA_STORE_BY_ID, dsId)
+  }
+
+  public async getLatestBatchIndex(): Promise<number> {
+    return this.db.get(TRANSPORT_DA_DB_KEYS.BATCH_INDEX, 0)
+  }
+
+  public async putLatestBatchIndex(newBatchIndex: number): Promise<void> {
+    return this.db.put([
+      {
+        key: TRANSPORT_DA_DB_KEYS.BATCH_INDEX,
+        index: 0,
+        value: newBatchIndex,
+      },
+    ])
+  }
+
+  //=====================================================================
+  //=============================DA===PART==END==========================
+  //=====================================================================
 
   public async putEnqueueEntries(entries: EnqueueEntry[]): Promise<void> {
     await this._putEntries(TRANSPORT_DB_KEYS.ENQUEUE, entries)
@@ -356,7 +514,7 @@ export class TransportDB {
     }
   }
 
-  private async _getLatestEntryIndex(key: string): Promise<number> {
+  public async _getLatestEntryIndex(key: string): Promise<number> {
     return this.db.get<number>(`${key}:latest`, 0) || 0
   }
 
@@ -426,5 +584,26 @@ export class TransportDB {
     endIndex: number
   ): Promise<TEntry[] | []> {
     return this.db.range<TEntry>(`${key}:index`, startIndex, endIndex)
+  }
+
+  private async _getFullEnties<TEntry extends Indexed>(
+    key: string
+  ): Promise<TEntry[] | []> {
+    if (key === null) {
+      return []
+    }
+    const lastIndex = await this._getLatestEntryIndex(key)
+    if (lastIndex === null) {
+      return []
+    }
+    return this._getEntries(key, 0, lastIndex+1)
+  }
+
+  private async _putFullEntries<TEntry extends Indexed>(
+    key: string,
+    entries: TEntry[]
+  ): Promise<void> {
+    await this._putLatestEntryIndex(key, entries.length -1)
+    await this._putEntries(key, entries)
   }
 }
