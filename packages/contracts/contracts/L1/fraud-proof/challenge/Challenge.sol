@@ -75,7 +75,7 @@ contract Challenge is IChallenge {
     Turn public turn;
     // See `ChallengeLib.computeBisectionHash` for the format of this commitment.
     bytes32 public bisectionHash;
-    bytes32[2] public prevBisection;
+    bytes32[3] public prevBisection;
 
     // Initial state used to initialize bisectionHash (write-once).
     bytes32 private startStateHash;
@@ -139,8 +139,13 @@ contract Challenge is IChallenge {
         // TODO(ujval): initialize timeout
         defenderTimeLeft = 150;
         challengerTimeLeft = 150;
+        console.log("_startStateHash");
+        console.logBytes32(_startStateHash);
+        console.log("_endStateHash");
+        console.logBytes32(_endStateHash);
         prevBisection[0] = _startStateHash;
-        prevBisection[1] = _endStateHash;
+        prevBisection[1] = bytes32(0);
+        prevBisection[2] = _endStateHash;
 
         startInboxSize = _startInboxSize;
     }
@@ -167,14 +172,18 @@ contract Challenge is IChallenge {
         require(prevHash == bisectionHash, BIS_PREV);
 
         // Require agreed upon start state hash and disagreed upon end state hash.
-        require(bisection[0] == prevBisection[0] || bisection[2] == prevBisection[1], "INVALID_START_OR_END");
+        if (prevBisection[1] != bytes32(0)) {
+            require(bisection[0] == prevBisection[0] || bisection[0] == prevBisection[1], "AMBIGUOUS_START");
+        }
+        require(bisection[2] != prevBisection[2], "INVALID_END");
 
         // Compute segment start/length.
         require(challengedSegmentLength > 0, "TOO_SHORT");
 
         // Compute new challenge state.
         prevBisection[0] = bisection[0];
-        prevBisection[1] = bisection[2];
+        prevBisection[1] = bisection[1];
+        prevBisection[2] = bisection[2];
         bisectionHash = ChallengeLib.computeBisectionHash(challengedSegmentStart, challengedSegmentLength);
         currentBisected = BisectedStore(bisection[0], bisection[1], bisection[2], block.number, block.timestamp, challengedSegmentStart, challengedSegmentLength);
         emit Bisected(bisection[0], bisection[1], bisection[2], block.number, block.timestamp, challengedSegmentStart, challengedSegmentLength);
@@ -200,10 +209,10 @@ contract Challenge is IChallenge {
          bytes32 nextStateHash = verifier.verifyOneStepProof(
              ctx,
              verifyType,
-             prevBisection[1],
+             prevBisection[2],
              proof
          );
-         if (nextStateHash == prevBisection[1]) {
+         if (nextStateHash == prevBisection[2]) {
              // osp verified, current win
              _currentWin(CompletionReason.OSP_VERIFIED);
          } else {

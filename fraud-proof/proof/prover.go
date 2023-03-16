@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"math/rand"
 
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/proof"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/prover"
@@ -248,9 +249,10 @@ func GenerateStates(backend Backend, ctx context.Context, startNum, endNum uint6
 	}
 
 	// TODO FIXME FRAUD-PROOF TEST, DELETE ME
-	//randNum := byte(rand.Int())
-	//log.Info("TEST change last state", "from", endHeader.Root[0], "diff", randNum)
-	//endHeader.Root[0] += randNum
+	randNum := byte(rand.Int())
+	log.Info("TEST change last inter state", "from", states[len(states)-1].VMHash[0], "diff", randNum)
+	states[len(states)-1].VMHash[0] += randNum
+	endHeader.Root[0] += randNum
 
 	states = append(states, &ExecutionState{
 		VMHash:         endHeader.Root,

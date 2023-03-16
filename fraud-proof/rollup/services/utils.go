@@ -3,6 +3,7 @@ package services
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"fmt"
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
@@ -72,32 +73,32 @@ func RespondBisection(
 	segLen := ev.ChallengedSegmentLength.Uint64()
 
 	if segStart+segLen >= uint64(len(states)) {
-		log.Crit("RespondBisection out of range", "segStart+segLen", segStart+segLen, "len(states)", len(states))
+		log.Crit("RespondBisection out of range", "segStart", segStart, "segLen", segLen, "len(states)", len(states))
 	}
 
 	startState := states[segStart].Hash()
-	midState := states[segStart+segLen/2+segLen%2].Hash()
+	midState := MidState(states, segStart, segLen)
 	endState := states[segStart+segLen].Hash()
-
 	if segLen >= 3 {
 		if !bytes.Equal(midState[:], ev.MidState[:]) {
+			newLen = MidLen(segLen)
 			newStart = segStart
-			newLen = segLen/2 + segLen%2
 			bisection[0] = startState
-			bisection[1] = states[segStart+newLen/2+newLen%2].Hash()
+			bisection[1] = MidState(states, newStart, newLen)
 			bisection[2] = midState
 			challengeIdx = 1
 		} else {
-			newStart = segStart + segLen/2 + segLen%2
-			newLen = segLen / 2
+			newLen = MidLen(segLen)
+			newStart = segStart + MidLenWithMod(segLen)
 			bisection[0] = midState
-			bisection[1] = states[segStart+segLen/2+segLen%2+newLen/2+newLen%2].Hash()
+			bisection[1] = MidState(states, newStart, newLen)
 			bisection[2] = endState
 			challengeIdx = 2
 		}
 	} else if segLen <= 2 && segLen > 0 {
 		var state *proof.ExecutionState
 		if !bytes.Equal(startState[:], ev.StartState[:]) {
+			log.Warn("bisection find different start state")
 			state = states[segStart]
 		} else if !bytes.Equal(midState[:], ev.MidState[:]) {
 			state = states[segStart+segLen/2+segLen%2]
@@ -119,13 +120,13 @@ func RespondBisection(
 			ev.ChallengedSegmentLength,
 		)
 		if err != nil {
-			log.Crit("UNHANDELED: osp failed")
+			log.Crit("UNHANDELED: osp failed", "err", err)
 		}
 		return err
 	} else {
 		log.Crit("RespondBisection segLen in event is illegal")
 	}
-	log.Info("BisectExecution", "bisection", bisection, "cidx", challengeIdx, "psegStart", segStart, "psegLen", segLen)
+	log.Info("BisectExecution", "bisection[0]", hex.EncodeToString(bisection[0][:]), "bisection[1]", hex.EncodeToString(bisection[1][:]), "bisection[2]", hex.EncodeToString(bisection[2][:]), "cidx", challengeIdx, "segStart", segStart, "segLen", segLen)
 	_, err = challengeSession.BisectExecution(
 		bisection,
 		new(big.Int).SetUint64(challengeIdx),
@@ -140,9 +141,19 @@ func RespondBisection(
 	return nil
 }
 
+// MidLen middle index with ceil
+func MidLen(segLen uint64) uint64 {
+	return segLen / 2
+}
+
+// MidLenWithMod middle index with ceil
+func MidLenWithMod(segLen uint64) uint64 {
+	return segLen/2 + segLen%2
+}
+
 // MidState mid-states with floor index
 func MidState(states []*proof.ExecutionState, segStart, segLen uint64) common.Hash {
-	return states[segStart+segLen/2].Hash()
+	return states[segStart+MidLenWithMod(segLen)].Hash()
 }
 
 func BuildVerificationContext(ctx context.Context, proofBackend proof.Backend, state *proof.ExecutionState) (*bindings.VerificationContextContext, error) {

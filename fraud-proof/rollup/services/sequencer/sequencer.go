@@ -64,7 +64,7 @@ func (s *Sequencer) confirmationLoop() {
 	defer s.Wg.Done()
 
 	// Watch AssertionCreated event
-	createdCh := make(chan *bindings.RollupAssertionCreated, 4096)
+	var createdCh = make(chan *bindings.RollupAssertionCreated, 4096)
 	createdSub, err := s.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Context: s.Ctx}, createdCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
@@ -72,7 +72,7 @@ func (s *Sequencer) confirmationLoop() {
 	defer createdSub.Unsubscribe()
 
 	// Watch AssertionConfirmed event
-	confirmedCh := make(chan *bindings.RollupAssertionConfirmed, 4096)
+	var confirmedCh = make(chan *bindings.RollupAssertionConfirmed, 4096)
 	confirmedSub, err := s.Rollup.Contract.WatchAssertionConfirmed(&bind.WatchOpts{Context: s.Ctx}, confirmedCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
@@ -80,14 +80,14 @@ func (s *Sequencer) confirmationLoop() {
 	defer confirmedSub.Unsubscribe()
 
 	// Watch L1 blockchain for confirmation period
-	headCh := make(chan *types.Header, 4096)
+	var headCh = make(chan *types.Header, 4096)
 	headSub, err := s.L1.SubscribeNewHead(s.Ctx, headCh)
 	if err != nil {
 		log.Error("Failed to watch l1 chain head", "err", err)
 	}
 	defer headSub.Unsubscribe()
 
-	challengedCh := make(chan *bindings.RollupAssertionChallenged, 4096)
+	var challengedCh = make(chan *bindings.RollupAssertionChallenged, 4096)
 	challengedSub, err := s.Rollup.Contract.WatchAssertionChallenged(&bind.WatchOpts{Context: s.Ctx}, challengedCh)
 	if err != nil {
 		log.Error("Failed to watch rollup event", "err", err)
@@ -194,7 +194,7 @@ func (s *Sequencer) confirmationLoop() {
 				log.Warn("New challenge rise!!!!!!", "ev", ev)
 				// todo when interrupt at this moment, check staker`s status
 				challengeAssertion := new(rollupTypes.Assertion)
-				perent := new(rollupTypes.Assertion)
+				parent := new(rollupTypes.Assertion)
 				if ret, err := s.AssertionMap.Assertions(ev.AssertionID); err != nil {
 					log.Crit("Get assertion failed", "id", ev.AssertionID, "err", err)
 				} else {
@@ -208,18 +208,18 @@ func (s *Sequencer) confirmationLoop() {
 				if ret, err := s.AssertionMap.Assertions(challengeAssertion.Parent); err != nil {
 					log.Crit("Get assertion failed", "id", challengeAssertion.Parent, "err", err)
 				} else {
-					perent.ID = ev.AssertionID
-					perent.VmHash = ret.StateHash
-					perent.InboxSize = ret.InboxSize
-					perent.Parent = ret.Parent
-					perent.Deadline = ret.Deadline
-					perent.ProposalTime = ret.ProposalTime
+					parent.ID = ev.AssertionID
+					parent.VmHash = ret.StateHash
+					parent.InboxSize = ret.InboxSize
+					parent.Parent = ret.Parent
+					parent.Deadline = ret.Deadline
+					parent.ProposalTime = ret.ProposalTime
 				}
 
 				challengeCtx := ChallengeCtx{
 					common.Address(ev.ChallengeAddr),
 					challengeAssertion,
-					perent,
+					parent,
 				}
 
 				s.challengeCh <- &challengeCtx
@@ -236,7 +236,7 @@ func (s *Sequencer) challengeLoop() {
 	defer s.Wg.Done()
 
 	// Watch L1 blockchain for challenge timeout
-	headCh := make(chan *types.Header, 4096)
+	var headCh = make(chan *types.Header, 4096)
 	headSub, err := s.L1.SubscribeNewHead(s.Ctx, headCh)
 	if err != nil {
 		log.Error("Failed to watch l1 chain head", "err", err)
@@ -246,9 +246,9 @@ func (s *Sequencer) challengeLoop() {
 	var challengeSession *bindings.ChallengeSession
 	var states []*proof.ExecutionState
 
-	var bisectedCh chan *bindings.ChallengeBisected
+	var bisectedCh = make(chan *bindings.ChallengeBisected, 4096)
 	var bisectedSub event.Subscription
-	var challengeCompletedCh chan *bindings.ChallengeChallengeCompleted
+	var challengeCompletedCh = make(chan *bindings.ChallengeChallengeCompleted, 4096)
 	var challengeCompletedSub event.Subscription
 
 	inChallenge := false
@@ -345,13 +345,10 @@ func (s *Sequencer) challengeLoop() {
 					}
 					continue
 				}
-
-				bisectedCh = make(chan *bindings.ChallengeBisected, 4096)
 				bisectedSub, err = challenge.WatchBisected(&bind.WatchOpts{Context: s.Ctx}, bisectedCh)
 				if err != nil {
 					log.Crit("Failed to watch challenge event", "err", err)
 				}
-				challengeCompletedCh = make(chan *bindings.ChallengeChallengeCompleted, 4096)
 				challengeCompletedSub, err = challenge.WatchChallengeCompleted(&bind.WatchOpts{Context: s.Ctx}, challengeCompletedCh)
 				if err != nil {
 					log.Crit("Failed to watch challenge event", "err", err)
@@ -376,7 +373,7 @@ func (s *Sequencer) challengeLoop() {
 					if bytes.Equal(bisectionHash[:], common.BigToHash(common.Big0).Bytes()) {
 						// when not init
 						numSteps := uint64(len(states)) - 1
-						log.Info("Print generated states", "states[0]", states[0].Hash().String(), "states[numSteps]", states[numSteps].Hash().String())
+						log.Info("Print generated states", "states[0]", states[0].Hash().String(), "states[numSteps]", states[numSteps].Hash().String(), "numSteps", numSteps)
 						_, err = challengeSession.InitializeChallengeLength(services.MidState(states, 0, numSteps), new(big.Int).SetUint64(numSteps))
 						if err != nil {
 							log.Crit("Failed to initialize challenge", "err", err)

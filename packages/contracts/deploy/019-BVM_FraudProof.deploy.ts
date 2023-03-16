@@ -126,7 +126,7 @@ const deployFn: DeployFunction = async (hre) => {
     0, // uint256 _minimumAssertionPeriod,
     // 1000000000000, // uint256 _maxGasPerAssertion,
     0, // uint256 _baseStakeAmount
-    '0x365a761a909633fc9742c81c90b3fc71cebfd64cc1ae1ed1f36b3c5e956e0f28', // bytes32 _initialVMhash //TODO-FIXME
+    '0x89e2ce7fd44675606b4ced40dd2ccc67f7ae2851dd1b86409bdaeac791a60d3e', // bytes32 _initialVMhash //TODO-FIXME
     [
       '0xd5b002298b2e81b4ced1b6c8cf1964023cdc3758',
       '0xd55fe10a1acb32b6183bdfbeb42e9961c3cb8792',

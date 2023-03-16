@@ -157,13 +157,13 @@ const config: HardhatUserConfig = {
       {
         version: '0.8.9',
         settings: {
-          optimizer: { enabled: true, runs: 10_000 },
+          optimizer: { enabled: true, runs: 200 },
         },
       },
       {
         version: '0.5.17', // Required for WETH9
         settings: {
-          optimizer: { enabled: true, runs: 10_000 },
+          optimizer: { enabled: true, runs: 200 },
         },
       },
     ],
