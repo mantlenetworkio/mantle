@@ -2,6 +2,8 @@ package batchsubmitter
 
 import (
 	"context"
+	ethc "github.com/ethereum/go-ethereum/common"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"os"
 	"time"
 
@@ -132,6 +134,8 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				MinTxSize:             cfg.MinL1TxSize,
 				MaxTxSize:             cfg.MaxL1TxSize,
 				MaxPlaintextBatchSize: cfg.MaxPlaintextBatchSize,
+				DaUpgradeBlock:        cfg.DaUpgradeBlock,
+				DAAddr:                ethc.Address(common.HexToAddress(cfg.DAAddress)),
 				CTCAddr:               ctcAddress,
 				ChainID:               chainID,
 				PrivKey:               sequencerPrivKey,
