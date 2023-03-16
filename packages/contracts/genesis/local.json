@@ -1,5 +1,5 @@
 {
-    "commit": "c0c59259e57ddc4df602d9a1735e879c4f4c7162",
+    "commit": "7accccb28a63b7701eaa79033c1aeb914b3395b3",
     "config": {
         "chainId": 17,
         "homesteadBlock": 0,
@@ -12,6 +12,7 @@
         "istanbulBlock": 0,
         "muirGlacierBlock": 0,
         "berlinBlock": 0,
+        "updateGaslimitBlock": 10,
         "clique": {
             "period": 0,
             "epoch": 30000
