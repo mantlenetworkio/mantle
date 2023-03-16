@@ -48,7 +48,7 @@ func (p *Processor) Verify() {
 
 					wg := &sync.WaitGroup{}
 					wg.Add(offset)
-
+					logger.Info().Msgf("start to verify %d ", k)
 					for index, stateRoot := range v {
 						go func(fIndex int, fStateRoot [32]byte) {
 							resultTmp, err := p.verify(askRequest.StartBlock, fIndex+k, fStateRoot, logger, wg)
@@ -63,7 +63,7 @@ func (p *Processor) Verify() {
 						}(index, stateRoot)
 					}
 					wg.Wait()
-
+					logger.Info().Msgf("end to verify %d ", k)
 					if !result || getBlockErr {
 						break
 					}
@@ -102,12 +102,10 @@ func (p *Processor) Verify() {
 
 func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger zerolog.Logger, wg *sync.WaitGroup) (bool, error) {
 	defer wg.Done()
-	defer logger.Info().Msgf("start block number:(%s),index (%d), verify done", start, index)
 
 	offset := new(big.Int).SetInt64(int64(index))
 	startBig, _ := new(big.Int).SetString(start, 10)
 	blockNumber := offset.Add(offset, startBig)
-	logger.Info().Msgf("verify block number %d", blockNumber)
 
 	value, ok := p.GetVerify(blockNumber.String())
 	if ok {
@@ -132,13 +130,11 @@ func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger z
 	} else {
 		if hexutil.Encode(stateRoot[:]) != block.Root().String() {
 			logger.Info().Msgf("block number (%d) state root doesn't same, state root (%s) , block root (%s)", blockNumber, hexutil.Encode(stateRoot[:]), block.Root().String())
-			bol := p.CacheVerify(blockNumber.String(), false)
-			logger.Info().Msgf("cache verify behavior %s ", bol)
+			p.CacheVerify(blockNumber.String(), false)
 			return false, nil
 		} else {
 			logger.Info().Msgf("block number (%d) verify success", blockNumber)
-			bol := p.CacheVerify(blockNumber.String(), true)
-			logger.Info().Msgf("cache verify behavior %s ", bol)
+			p.CacheVerify(blockNumber.String(), true)
 			return true, nil
 		}
 	}

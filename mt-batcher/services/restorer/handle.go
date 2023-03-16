@@ -104,6 +104,7 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 		return c.JSON(http.StatusBadRequest, errors.New("recovery data fail"))
 	}
 	if len(reply.GetData()) >= 31*s.Cfg.EigenLayerNode {
+<<<<<<< HEAD
 
 		data := reply.GetData()
 
@@ -162,6 +163,9 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 		}
 
 		return c.JSON(http.StatusOK, TxnRep)
+=======
+		return c.JSON(http.StatusOK, reply.GetData())
+>>>>>>> feature/ctc-rollup-switch-to-eigenlayer
 	} else {
 		log.Error("retrieve data is empty, please check da data batch")
 		return c.JSON(http.StatusBadRequest, errors.New("retrieve data is empty, please check da date"))
