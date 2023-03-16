@@ -411,7 +411,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     })
     // 👇️ const response: Response
     return fetch(
-      this.state.mtBatcherFetchUrl + '/eigen/getBatchTransactionByDataStoreId',
+      this.state.mtBatcherFetchUrl + '/dtl/getBatchTransactionByDataStoreId',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

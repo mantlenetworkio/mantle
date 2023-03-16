@@ -3,7 +3,6 @@ package restorer
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"github.com/Layr-Labs/datalayr/common/graphView"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceRetrieverServer"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -104,8 +103,37 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 		return c.JSON(http.StatusBadRequest, errors.New("recovery data fail"))
 	}
 	if len(reply.GetData()) >= 31*s.Cfg.EigenLayerNode {
-<<<<<<< HEAD
+		return c.JSON(http.StatusOK, reply.GetData())
+	} else {
+		return c.JSON(http.StatusBadRequest, errors.New("retrieve data is empty, please check da date"))
+	}
+}
 
+func (s *DaService) GetDtlBatchTransactionByDataStoreId(c gecho.Context) error {
+	var txReq TransactionRequest
+	if err := c.Bind(&txReq); err != nil {
+		log.Error("invalid request params", "err", err)
+		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
+	}
+	log.Info("GetBatchTransactionByDataStoreId Request para", "StoreNumber", txReq.StoreNumber)
+	conn, err := grpc.Dial(s.Cfg.RetrieverSocket, grpc.WithInsecure())
+	if err != nil {
+		log.Error("disperser Cannot connect to", "err", err)
+		return c.JSON(http.StatusBadRequest, errors.New("disperser Cannot connect to"))
+	}
+	defer conn.Close()
+	client := pb.NewDataRetrievalClient(conn)
+
+	opt := grpc.MaxCallRecvMsgSize(1024 * 1024 * 300)
+	request := &pb.FramesAndDataRequest{
+		DataStoreId: txReq.StoreNumber,
+	}
+	reply, err := client.RetrieveFramesAndData(s.Ctx, request, opt)
+	if err != nil {
+		log.Error("retrieve frames and data error", "err", err)
+		return c.JSON(http.StatusBadRequest, errors.New("recovery data fail"))
+	}
+	if len(reply.GetData()) >= 31*s.Cfg.EigenLayerNode {
 		data := reply.GetData()
 
 		batchTxn := new([]eigenda.BatchTx)
@@ -152,7 +180,6 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 				QueueIndex:      txDecodeMetaData.QueueIndex,
 				RawTransaction:  txDecodeMetaData.RawTransaction,
 			}
-
 			txSl := &TransactionInfoListResponse{
 				BlockNumber: newBlockNumber.String(),
 				TxHash:      l2Tx.Hash().String(),
@@ -161,13 +188,8 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 			}
 			TxnRep = append(TxnRep, txSl)
 		}
-
 		return c.JSON(http.StatusOK, TxnRep)
-=======
-		return c.JSON(http.StatusOK, reply.GetData())
->>>>>>> feature/ctc-rollup-switch-to-eigenlayer
 	} else {
-		log.Error("retrieve data is empty, please check da data batch")
 		return c.JSON(http.StatusBadRequest, errors.New("retrieve data is empty, please check da date"))
 	}
 }
