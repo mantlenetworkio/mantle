@@ -14,7 +14,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/log"
 
-	opnode "github.com/mantlenetworkio/mantle/mt-node"
+	mtnode "github.com/mantlenetworkio/mantle/mt-node"
 	"github.com/mantlenetworkio/mantle/mt-node/cmd/genesis"
 	"github.com/mantlenetworkio/mantle/mt-node/cmd/p2p"
 	"github.com/mantlenetworkio/mantle/mt-node/flags"
@@ -22,7 +22,7 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-node/metrics"
 	"github.com/mantlenetworkio/mantle/mt-node/node"
 	"github.com/mantlenetworkio/mantle/mt-node/version"
-	oppprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
+	mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
 )
 
 var (
@@ -85,7 +85,7 @@ func main() {
 
 func RollupNodeMain(ctx *cli.Context) error {
 	log.Info("Initializing Rollup Node")
-	logCfg, err := opnode.NewLogConfig(ctx)
+	logCfg, err := mtnode.NewLogConfig(ctx)
 	if err != nil {
 		log.Error("Unable to create the log config", "error", err)
 		return err
@@ -93,12 +93,12 @@ func RollupNodeMain(ctx *cli.Context) error {
 	log := logCfg.NewLogger()
 	m := metrics.NewMetrics("default")
 
-	cfg, err := opnode.NewConfig(ctx, log)
+	cfg, err := mtnode.NewConfig(ctx, log)
 	if err != nil {
 		log.Error("Unable to create the rollup node config", "error", err)
 		return err
 	}
-	snapshotLog, err := opnode.NewSnapshotLogger(ctx)
+	snapshotLog, err := mtnode.NewSnapshotLogger(ctx)
 	if err != nil {
 		log.Error("Unable to create snapshot root logger", "error", err)
 		return err
@@ -149,7 +149,7 @@ func RollupNodeMain(ctx *cli.Context) error {
 		pprofCtx, pprofCancel := context.WithCancel(context.Background())
 		go func() {
 			log.Info("pprof server started", "addr", net.JoinHostPort(cfg.Pprof.ListenAddr, strconv.Itoa(cfg.Pprof.ListenPort)))
-			if err := oppprof.ListenAndServe(pprofCtx, cfg.Pprof.ListenAddr, cfg.Pprof.ListenPort); err != nil {
+			if err := mtpprof.ListenAndServe(pprofCtx, cfg.Pprof.ListenAddr, cfg.Pprof.ListenPort); err != nil {
 				log.Error("error starting pprof", "err", err)
 			}
 		}()

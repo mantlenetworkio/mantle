@@ -171,7 +171,7 @@ func NewMetrics(procName string) *Metrics {
 			Namespace: ns,
 			Subsystem: RPCClientSubsystem,
 			Name:      "requests_total",
-			Help:      "Total RPC requests initiated by the opnode's RPC client",
+			Help:      "Total RPC requests initiated by the mtnode's RPC client",
 		}, []string{
 			"method",
 		}),
@@ -188,7 +188,7 @@ func NewMetrics(procName string) *Metrics {
 			Namespace: ns,
 			Subsystem: RPCClientSubsystem,
 			Name:      "responses_total",
-			Help:      "Total RPC request responses received by the opnode's RPC client",
+			Help:      "Total RPC request responses received by the mtnode's RPC client",
 		}, []string{
 			"method",
 			"error",
@@ -337,7 +337,7 @@ func NewMetrics(procName string) *Metrics {
 }
 
 // RecordInfo sets a pseudo-metric that contains versioning and
-// config info for the opnode.
+// config info for the mtnode.
 func (m *Metrics) RecordInfo(version string) {
 	m.Info.WithLabelValues(version).Set(1)
 }
@@ -349,7 +349,7 @@ func (m *Metrics) RecordUp() {
 }
 
 // RecordRPCServerRequest is a helper method to record an incoming RPC
-// call to the opnode's RPC server. It bumps the requests metric,
+// call to the mtnode's RPC server. It bumps the requests metric,
 // and tracks how long it takes to serve a response.
 func (m *Metrics) RecordRPCServerRequest(method string) func() {
 	m.RPCServerRequestsTotal.WithLabelValues(method).Inc()

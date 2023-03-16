@@ -13,7 +13,7 @@ import (
 	opcrypto "github.com/mantlenetworkio/mantle/mt-service/crypto"
 	oplog "github.com/mantlenetworkio/mantle/mt-service/log"
 	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
-	oppprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
+	mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
 	oprpc "github.com/mantlenetworkio/mantle/mt-service/rpc"
 	"github.com/mantlenetworkio/mantle/mt-service/txmgr"
 	opsigner "github.com/mantlenetworkio/mantle/mt-signer/client"
@@ -88,7 +88,7 @@ type CLIConfig struct {
 
 	MetricsConfig opmetrics.CLIConfig
 
-	PprofConfig oppprof.CLIConfig
+	PprofConfig mtpprof.CLIConfig
 
 	// SignerConfig contains the client config for mt-signer service
 	SignerConfig opsigner.CLIConfig
@@ -132,7 +132,7 @@ func NewConfig(ctx *cli.Context) CLIConfig {
 		RPCConfig:         oprpc.ReadCLIConfig(ctx),
 		LogConfig:         oplog.ReadCLIConfig(ctx),
 		MetricsConfig:     opmetrics.ReadCLIConfig(ctx),
-		PprofConfig:       oppprof.ReadCLIConfig(ctx),
+		PprofConfig:       mtpprof.ReadCLIConfig(ctx),
 		SignerConfig:      opsigner.ReadCLIConfig(ctx),
 	}
 }

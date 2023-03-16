@@ -22,7 +22,7 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-service/httputil"
 	oplog "github.com/mantlenetworkio/mantle/mt-service/log"
 	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
-	oppprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
+	mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
 )
 
 const (
@@ -77,7 +77,7 @@ func Start(ctx context.Context, l log.Logger, cfg Config, version string) error 
 	if pprofCfg.Enabled {
 		l.Info("starting pprof server", "addr", pprofCfg.ListenAddr, "port", pprofCfg.ListenPort)
 		go func() {
-			if err := oppprof.ListenAndServe(ctx, pprofCfg.ListenAddr, pprofCfg.ListenPort); err != nil {
+			if err := mtpprof.ListenAndServe(ctx, pprofCfg.ListenAddr, pprofCfg.ListenPort); err != nil {
 				l.Error("error starting pprof server", err)
 			}
 		}()

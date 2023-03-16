@@ -30,7 +30,7 @@ var (
 		Usage: "Read the hex-encoded 32-byte private key for the peer ID from this txt file. Created if not already exists." +
 			"Important to persist to keep the same network identity after restarting, maintaining the previous advertised identity.",
 		Required:  false,
-		Value:     "opnode_p2p_priv.txt",
+		Value:     "mtnode_p2p_priv.txt",
 		EnvVar:    p2pEnv("PRIV_PATH"),
 		TakesFile: true,
 	}
@@ -183,7 +183,7 @@ var (
 			"Warning: a copy of the priv network key of the local peer will be persisted here.", // TODO: bad design of libp2p, maybe we can avoid this from happening
 		Required:  false,
 		TakesFile: true,
-		Value:     "opnode_peerstore_db",
+		Value:     "mtnode_peerstore_db",
 		EnvVar:    p2pEnv("PEERSTORE_PATH"),
 	}
 	DiscoveryPath = cli.StringFlag{
@@ -191,7 +191,7 @@ var (
 		Usage:     "Discovered ENRs are persisted in a database to recover from a restart without having to bootstrap the discovery process again. Set to 'memory' to never persist the peerstore.",
 		Required:  false,
 		TakesFile: true,
-		Value:     "opnode_discovery_db",
+		Value:     "mtnode_discovery_db",
 		EnvVar:    p2pEnv("DISCOVERY_PATH"),
 	}
 	SequencerP2PKeyFlag = cli.StringFlag{

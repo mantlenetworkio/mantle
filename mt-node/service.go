@@ -1,4 +1,4 @@
-package opnode
+package mtnode
 
 import (
 	"crypto/rand"
@@ -10,7 +10,7 @@ import (
 
 	"github.com/mantlenetworkio/mantle/mt-node/chaincfg"
 	"github.com/mantlenetworkio/mantle/mt-node/sources"
-	oppprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
+	mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
 
 	"github.com/urfave/cli"
 
@@ -76,7 +76,7 @@ func NewConfig(ctx *cli.Context, log log.Logger) (*node.Config, error) {
 			ListenAddr: ctx.GlobalString(flags.MetricsAddrFlag.Name),
 			ListenPort: ctx.GlobalInt(flags.MetricsPortFlag.Name),
 		},
-		Pprof: oppprof.CLIConfig{
+		Pprof: mtpprof.CLIConfig{
 			Enabled:    ctx.GlobalBool(flags.PprofEnabledFlag.Name),
 			ListenAddr: ctx.GlobalString(flags.PprofAddrFlag.Name),
 			ListenPort: ctx.GlobalInt(flags.PprofPortFlag.Name),

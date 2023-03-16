@@ -6,7 +6,7 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-heartbeat/flags"
 	oplog "github.com/mantlenetworkio/mantle/mt-service/log"
 	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
-	oppprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
+	mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
 	"github.com/urfave/cli"
 )
 
@@ -18,7 +18,7 @@ type Config struct {
 
 	Metrics opmetrics.CLIConfig
 
-	Pprof oppprof.CLIConfig
+	Pprof mtpprof.CLIConfig
 }
 
 func (c Config) Check() error {
@@ -46,6 +46,6 @@ func NewConfig(ctx *cli.Context) Config {
 		HTTPPort: ctx.GlobalInt(flags.HTTPPortFlag.Name),
 		Log:      oplog.ReadCLIConfig(ctx),
 		Metrics:  opmetrics.ReadCLIConfig(ctx),
-		Pprof:    oppprof.ReadCLIConfig(ctx),
+		Pprof:    mtpprof.ReadCLIConfig(ctx),
 	}
 }

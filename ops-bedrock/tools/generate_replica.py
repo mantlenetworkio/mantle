@@ -86,7 +86,7 @@ def main():
     m.update(token_bytes(32))
     dump_file(outdir, 'p2p-node-key.txt', m.hexdigest())
 
-    log.info('Writing opnode environment.')
+    log.info('Writing mtnode environment.')
     dump_file(outdir, 'mt-node.env', op_node_env_tmpl(l1_rpc, f'ws://l2:{args.geth_ws_port}', args.op_node_http_port))
 
     log.info('Writing entrypoint.')

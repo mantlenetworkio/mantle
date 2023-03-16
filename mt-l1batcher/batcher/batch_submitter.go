@@ -15,7 +15,7 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-l1batcher/rpc"
 	oplog "github.com/mantlenetworkio/mantle/mt-service/log"
 	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
-	oppprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
+	mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
 	oprpc "github.com/mantlenetworkio/mantle/mt-service/rpc"
 )
 
@@ -58,7 +58,7 @@ func Main(version string, cliCtx *cli.Context) error {
 	if pprofConfig.Enabled {
 		l.Info("starting pprof", "addr", pprofConfig.ListenAddr, "port", pprofConfig.ListenPort)
 		go func() {
-			if err := oppprof.ListenAndServe(ctx, pprofConfig.ListenAddr, pprofConfig.ListenPort); err != nil {
+			if err := mtpprof.ListenAndServe(ctx, pprofConfig.ListenAddr, pprofConfig.ListenPort); err != nil {
 				l.Error("error starting pprof", "err", err)
 			}
 		}()

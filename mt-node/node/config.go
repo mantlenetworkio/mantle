@@ -9,7 +9,7 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-node/p2p"
 	"github.com/mantlenetworkio/mantle/mt-node/rollup"
 	"github.com/mantlenetworkio/mantle/mt-node/rollup/driver"
-	oppprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
+	mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
 )
 
 type Config struct {
@@ -30,7 +30,7 @@ type Config struct {
 
 	Metrics MetricsConfig
 
-	Pprof oppprof.CLIConfig
+	Pprof mtpprof.CLIConfig
 
 	// Used to poll the L1 for new finalized or safe blocks
 	L1EpochPollInterval time.Duration
