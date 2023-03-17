@@ -45,6 +45,7 @@ func SubmitOneStepProof(
 		*verificationContext,
 		uint8(osp.VerifierType),
 		osp.Encode(),
+		challengedStepIndex,
 		prevChallengedSegmentStart,
 		prevChallengedSegmentLength,
 	)
@@ -63,6 +64,7 @@ func RespondBisection(
 	ev *bindings.ChallengeBisected,
 	states []*proof.ExecutionState,
 ) error {
+	var challengedStepIndex = new(big.Int)
 	var bisection [3][32]byte
 	var challengeIdx uint64
 	var newStart uint64
@@ -98,12 +100,15 @@ func RespondBisection(
 	} else if segLen <= 2 && segLen > 0 {
 		var state *proof.ExecutionState
 		if !bytes.Equal(startState[:], ev.StartState[:]) {
-			log.Warn("bisection find different start state")
+			log.Error("bisection find different start state")
 			state = states[segStart]
+			challengedStepIndex.SetUint64(0)
 		} else if !bytes.Equal(midState[:], ev.MidState[:]) {
 			state = states[segStart+segLen/2+segLen%2]
+			challengedStepIndex.SetUint64(1)
 		} else if !bytes.Equal(endState[:], ev.EndState[:]) {
 			state = states[segStart+segLen]
+			challengedStepIndex.SetUint64(2)
 		} else {
 			log.Error("RespondBisection can't find state difference")
 			return nil
@@ -115,7 +120,7 @@ func RespondBisection(
 			b.ProofBackend,
 			b.Ctx,
 			state,
-			common.Big1,
+			challengedStepIndex,
 			ev.ChallengedSegmentStart,
 			ev.ChallengedSegmentLength,
 		)

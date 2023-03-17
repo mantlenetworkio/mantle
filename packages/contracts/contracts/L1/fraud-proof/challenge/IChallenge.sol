@@ -101,6 +101,7 @@ interface IChallenge {
         VerificationContext.Context calldata ctx,
         uint8 verifyType,
         bytes calldata proof,
+        uint256 challengedStepIndex,
         uint256 prevChallengedSegmentStart,
         uint256 prevChallengedSegmentLength
     ) external;

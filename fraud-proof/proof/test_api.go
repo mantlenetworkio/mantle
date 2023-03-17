@@ -34,20 +34,6 @@ func (api *ProverAPI) GenerateProofForTest(ctx context.Context, hash common.Hash
 	if err != nil {
 		return nil, err
 	}
-	block, err := api.backend.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
-	if err != nil {
-		return nil, err
-	}
-	if block == nil {
-		return nil, fmt.Errorf("block #%d not found", blockNumber)
-	}
-	parent, err := api.backend.BlockByNumber(ctx, rpc.BlockNumber(blockNumber-1))
-	if err != nil {
-		return nil, err
-	}
-	if parent == nil {
-		return nil, fmt.Errorf("parent block #%d not found", blockNumber-1)
-	}
 	// It shouldn't happen in practice.
 	if blockNumber == 0 {
 		return nil, errors.New("genesis is not traceable")
@@ -56,18 +42,27 @@ func (api *ProverAPI) GenerateProofForTest(ctx context.Context, hash common.Hash
 	if config != nil && config.Reexec != nil {
 		reexec = *config.Reexec
 	}
+	block, err := api.backend.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
+	if err != nil {
+		return nil, err
+	}
+	if block == nil {
+		return nil, fmt.Errorf("block #%d not found", blockNumber)
+	}
+
 	// get tx ctx
 	msg, txContext, statedb, err := api.backend.StateAtTransaction(ctx, block, int(index), reexec)
 	if err != nil {
 		return nil, err
 	}
+	// get block ctx
+	chainCtx := createChainContext(api.backend, ctx)
+	vmctx := core.NewEVMBlockContext(block.Header(), chainCtx, nil)
+
 	receipts, err := api.backend.GetReceipts(ctx, blockHash)
 	if err != nil {
 		return nil, err
 	}
-	// get block ctx
-	chainCtx := createChainContext(api.backend, ctx)
-	vmctx := core.NewEVMBlockContext(parent.Header(), chainCtx, nil)
 	// calc block state hash
 	blockHashTree, err := oss.BlockHashTreeFromBlockContext(&vmctx)
 	if err != nil {
@@ -78,7 +73,7 @@ func (api *ProverAPI) GenerateProofForTest(ctx context.Context, hash common.Hash
 		blockNumber,
 		index,
 		statedb,
-		blockGasUsed,
+		new(big.Int).SetUint64(block.Header().GasUsed),
 		block.Transactions(),
 		receipts,
 		blockHashTree,

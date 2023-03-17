@@ -60,6 +60,7 @@ type OneStepProver struct {
 	// Current Call Frame
 	callFlag       state.CallFlag
 	lastState      *state.IntraState
+	lastCost       uint64
 	lastCode       []byte
 	lastDepthState state.OneStepState
 	input          *state.Memory
@@ -223,7 +224,7 @@ func (l *OneStepProver) CaptureEnter(typ vm.OpCode, from common.Address, to comm
 		l.outSize = l.lastState.Stack.Back(5).Uint64()
 	}
 	l.callFlag = state.OpCodeToCallFlag(typ)
-	l.lastDepthState = l.lastState.StateAsLastDepth(l.callFlag)
+	l.lastDepthState = l.lastState.StateAsLastDepth(l.callFlag, l.lastCost)
 	l.input = state.NewMemoryFromBytes(input)
 }
 

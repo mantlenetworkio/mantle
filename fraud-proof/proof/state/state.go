@@ -66,63 +66,69 @@ type IntraState struct {
 	AccessListTrie       *AccessListTrie
 }
 
-func (s *IntraState) Hash() common.Hash {
-	items := [][]byte{}
+func (s *IntraState) Encode() []byte {
+	items := []byte{}
 	blockNumBytes := make([]byte, 8)
 	binary.BigEndian.PutUint64(blockNumBytes, s.BlockNumber)
-	items = append(items, blockNumBytes)
+	items = append(items, blockNumBytes...)
 	txIdxBytes := make([]byte, 8)
 	binary.BigEndian.PutUint64(txIdxBytes, s.TransactionIdx)
-	items = append(items, txIdxBytes)
+	items = append(items, txIdxBytes...)
 	depth := make([]byte, 2)
 	binary.BigEndian.PutUint16(depth, s.Depth)
-	items = append(items, depth)
+	items = append(items, depth...)
 	gas := make([]byte, 8)
 	binary.BigEndian.PutUint64(gas, s.Gas)
-	items = append(items, gas)
+	items = append(items, gas...)
 	refund := make([]byte, 8)
 	binary.BigEndian.PutUint64(refund, s.Refund)
-	items = append(items, refund)
+	items = append(items, refund...)
+	items = append(items, s.LastDepthState.Hash().Bytes()...)
 	if s.Depth != 1 {
-		items = append(items, s.LastDepthState.Hash().Bytes())
-		items = append(items, s.ContractAddress.Bytes())
-		items = append(items, s.Caller.Bytes())
+		items = append(items, s.ContractAddress.Bytes()...)
+		items = append(items, s.Caller.Bytes()...)
 		valueBytes := s.Value.Bytes32()
-		items = append(items, valueBytes[:])
+		items = append(items, valueBytes[:]...)
 		out := make([]byte, 8)
 		binary.BigEndian.PutUint64(out, s.Out)
 		outSize := make([]byte, 8)
 		binary.BigEndian.PutUint64(outSize, s.OutSize)
-		items = append(items, []byte{byte(s.CallFlag)})
-		items = append(items, out)
-		items = append(items, outSize)
+		items = append(items, []byte{byte(s.CallFlag)}...)
+		items = append(items, out...)
+		items = append(items, outSize...)
 	}
 	pc := make([]byte, 8)
 	binary.BigEndian.PutUint64(pc, s.Pc)
-	items = append(items, pc)
-	items = append(items, []byte{byte(s.OpCode)})
-	items = append(items, s.CodeHash.Bytes())
-	items = append(items, s.Stack.EncodeState())
-	items = append(items, s.Memory.EncodeState())
+	items = append(items, pc...)
+	items = append(items, []byte{byte(s.OpCode)}...)
+	items = append(items, s.CodeHash.Bytes()...)
+	items = append(items, s.Stack.EncodeState()...)
+	items = append(items, s.Memory.EncodeState()...)
 	if s.Depth != 1 {
-		items = append(items, s.InputData.EncodeState())
+		items = append(items, s.InputData.EncodeState()...)
 	}
-	items = append(items, s.ReturnData.EncodeState())
-	items = append(items, s.CommittedGlobalState.GetRootForProof().Bytes())
-	items = append(items, s.GlobalState.GetRootForProof().Bytes())
-	items = append(items, s.SelfDestructSet.EncodeState())
-	items = append(items, s.LogSeries.EncodeState())
-	items = append(items, s.BlockHashTree.EncodeState())
-	items = append(items, s.AccessListTrie.EncodeState())
-	return crypto.Keccak256Hash(items...)
+	items = append(items, s.ReturnData.EncodeState()...)
+	items = append(items, s.CommittedGlobalState.GetRootForProof().Bytes()...)
+	items = append(items, s.GlobalState.GetRootForProof().Bytes()...)
+	items = append(items, s.SelfDestructSet.EncodeState()...)
+	items = append(items, s.LogSeries.EncodeState()...)
+	items = append(items, s.BlockHashTree.EncodeState()...)
+	items = append(items, s.AccessListTrie.EncodeState()...)
+	return items
+}
+
+func (s *IntraState) Hash() common.Hash {
+	return crypto.Keccak256Hash(s.Encode())
 }
 
 func (s *IntraState) IsInter() bool {
 	return false
 }
 
-func (s *IntraState) StateAsLastDepth(callFlag CallFlag) *IntraState {
+// Make sure the cost is less than the current gas
+func (s *IntraState) StateAsLastDepth(callFlag CallFlag, cost uint64) *IntraState {
 	s_ := *s
+	s_.Gas -= cost
 	s_.Stack = s.Stack.Copy()
 	if callFlag == CALLFLAG_CALL || callFlag == CALLFLAG_CALLCODE {
 		s_.Stack.PopN(7)
@@ -136,8 +142,8 @@ func (s *IntraState) StateAsLastDepth(callFlag CallFlag) *IntraState {
 	return &s_
 }
 
-func (s *IntraState) HashAsLastDepth(callFlag CallFlag) common.Hash {
-	return s.StateAsLastDepth(callFlag).Hash()
+func (s *IntraState) HashAsLastDepth(callFlag CallFlag, cost uint64) common.Hash {
+	return s.StateAsLastDepth(callFlag, cost).Hash()
 }
 
 func StateFromCaptured(

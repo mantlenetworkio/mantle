@@ -25,4 +25,5 @@ const (
 	VerifierTypeInvalidOp       VerifierType = 5
 	VerifierTypeInterTx         VerifierType = 6
 	VerifierTypeBlockInit       VerifierType = 7
+	VerifierTypeBlockFinal      VerifierType = 8
 )
