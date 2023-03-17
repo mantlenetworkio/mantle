@@ -4,25 +4,21 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
-	"github.com/mantlenetworkio/mantle/tss/common"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup"
+	"strconv"
 )
 
-var errTssHTTPError = errors.New("tss http error")
+var errDtlHTTPError = errors.New("dtl http error")
 
-type TssClient interface {
-	GetSignStateBatch(BatchData common.SignStateRequest) ([]byte, error)
+type DtlClient interface {
+	GetEnqueueByIndex(index uint64) (string, error)
 }
 
 type Client struct {
 	client *resty.Client
 }
 
-type TssResponse struct {
-	Signature []byte `json:"signature"`
-	RollBack  bool   `json:"roll_back"`
-}
-
-func NewClient(url string) *Client {
+func NewDtlClient(url string) *Client {
 	client := resty.New()
 	client.SetHostURL(url)
 	client.OnAfterResponse(func(c *resty.Client, r *resty.Response) error {
@@ -30,7 +26,7 @@ func NewClient(url string) *Client {
 		if statusCode >= 400 {
 			method := r.Request.Method
 			url := r.Request.URL
-			return fmt.Errorf("%d cannot %s %s: %w", statusCode, method, url, errTssHTTPError)
+			return fmt.Errorf("%d cannot %s %s: %w", statusCode, method, url, errDtlHTTPError)
 		}
 		return nil
 	})
@@ -39,18 +35,23 @@ func NewClient(url string) *Client {
 	}
 }
 
-func (c *Client) GetSignStateBatch(BatchData common.SignStateRequest) ([]byte, error) {
-	var signature []byte
+func (c *Client) GetEnqueueByIndex(index uint64) (string, error) {
+	str := strconv.FormatUint(index, 10)
 	response, err := c.client.R().
-		SetBody(map[string]interface{}{"start_block": BatchData.StartBlock, "offset_starts_at_index": BatchData.OffsetStartsAtIndex, "state_roots": BatchData.StateRoots}).
-		SetResult(signature).
-		Post("/api/v1/sign/state")
+		SetPathParams(map[string]string{
+			"index": str,
+		}).
+		SetResult(&rollup.Enqueue{}).
+		Get("/enqueue/index/{index}")
 	if err != nil {
-		return nil, fmt.Errorf("cannot get signature: %w", err)
+		return "", fmt.Errorf("cannot fetch enqueue: %w", err)
 	}
-	if response.StatusCode() == 200 {
-		return response.Body(), nil
-	} else {
-		return nil, errors.New("fetch tss manager signature faill")
+	enqueue, ok := response.Result().(*rollup.Enqueue)
+	if !ok {
+		return "", fmt.Errorf("cannot fetch enqueue %d", index)
 	}
+	if enqueue == nil {
+		return "", fmt.Errorf("cannot deserialize enqueue %d", index)
+	}
+	return enqueue.Origin.String(), nil
 }

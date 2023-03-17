@@ -44,7 +44,7 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       syncToDa: config.bool('sync-to-da', false),
       mtBatcherHost: config.str('mt-batcher-hostname', 'http://127.0.0.1'),
       mtBatcherFetchPort: config.uint('mt-batcher-fetch-port', 8089),
-
+      eigenUpgradeEnable: config.bool('eigen-upgrade-enable', true),
 
       transactionsPerPollingInterval: config.uint(
         'transactions-per-polling-interval',
