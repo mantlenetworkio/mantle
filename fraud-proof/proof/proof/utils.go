@@ -50,7 +50,7 @@ func GetStorageProof(
 }
 
 func calcCellNum(offset, size uint64) uint64 {
-	return (offset+size-1)/32 - offset/32 + 1
+	return (offset+size+31)/32 - offset/32
 }
 
 func IsStackError(err error) bool {

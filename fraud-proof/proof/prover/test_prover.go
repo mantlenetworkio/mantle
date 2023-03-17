@@ -17,6 +17,7 @@ package prover
 import (
 	"encoding/json"
 	"errors"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"math/big"
 	"strconv"
 	"strings"
@@ -264,6 +265,11 @@ func (l *TestProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, cos
 				Proof:     bytesToHex(encoded),
 				Idx:       l.counter - 1,
 			}
+			log.Info("SHOW STATE", "length of lastState", len(l.lastState.Encode()))
+			log.Info("SHOW STATE", "length of encoded", len(encoded))
+
+			log.Info("SHOW STATE", "hash of lastState", l.lastState.Hash().String())
+			log.Info("SHOW STATE", "hash of encoded", crypto.Keccak256Hash(encoded[:len(l.lastState.Encode())]).String())
 		}
 		return vmerr
 	}
@@ -307,7 +313,7 @@ func (l *TestProver) CaptureEnter(typ vm.OpCode, from common.Address, to common.
 		l.outSize = l.lastState.Stack.Back(5).Uint64()
 	}
 	l.callFlag = state.OpCodeToCallFlag(typ)
-	l.lastDepthState = l.lastState.StateAsLastDepth(l.callFlag)
+	l.lastDepthState = l.lastState.StateAsLastDepth(l.callFlag, l.lastCost)
 	l.input = state.NewMemoryFromBytes(input)
 }
 
@@ -387,5 +393,10 @@ func (l *TestProver) GetResult() (json.RawMessage, error) {
 		log.Error("Err", "err", err)
 		return nil, err
 	}
+	//l.proof.Proof
 	return json.RawMessage(res), nil
+}
+
+func decodeProof() {
+
 }

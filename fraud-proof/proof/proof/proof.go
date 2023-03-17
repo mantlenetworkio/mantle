@@ -59,22 +59,22 @@ func EmptyProof() *OneStepProof {
 	return &OneStepProof{}
 }
 
-func (osp *OneStepProof) AddProof(proof Proof) {
-	osp.Proofs = append(osp.Proofs, proof)
+func (p *OneStepProof) AddProof(proof Proof) {
+	p.Proofs = append(p.Proofs, proof)
 }
 
-func (osp *OneStepProof) SetVerifierType(ty VerifierType) {
-	osp.VerifierType = ty
+func (p *OneStepProof) SetVerifierType(ty VerifierType) {
+	p.VerifierType = ty
 }
 
-func (osp *OneStepProof) Encode() []byte {
-	if len(osp.Proofs) == 0 {
+func (p *OneStepProof) Encode() []byte {
+	if len(p.Proofs) == 0 {
 		// Empty proof!
 		return []byte{}
 	}
 	encodedLen := 0
-	encodedProofs := make([][]byte, len(osp.Proofs))
-	for idx, proof := range osp.Proofs {
+	encodedProofs := make([][]byte, len(p.Proofs))
+	for idx, proof := range p.Proofs {
 		encodedProofs[idx] = proof.Encode()
 		encodedLen += len(encodedProofs[idx])
 	}
@@ -106,12 +106,22 @@ func GetBlockInitiationProof(blockState *state.BlockState) (*OneStepProof, error
 // using the plain Merkle tree proof.
 func GetBlockFinalizationProof(interState *state.InterState) (*OneStepProof, error) {
 	osp := EmptyProof()
-	osp.SetVerifierType(VerifierTypeInterTx)
+	osp.SetVerifierType(VerifierTypeBlockFinal)
 	// This proof reveals the transaction trie root, receipt trie root, logs bloom,
 	// and block gas used. Verifier can calculate the block hash from these values.
 	osp.AddProof(InterStateProofFromInterState(interState))
+	// Prove the parent block hash
+	osp.AddProof(&BlockHashProof{interState.BlockHashTree.GetBlockHash(interState.BlockNumber - 1)})
+	// This proof provides the block hash tree Merkle proof of the parent block.
+	blockHashMerkleProof, err := GetBlockHashMerkleProof(interState.BlockHashTree, interState.BlockNumber-1)
+	if err != nil {
+		return nil, err
+	}
+	osp.AddProof(blockHashMerkleProof)
+	// Prove the current block hash to be updated
+	osp.AddProof(&BlockHashProof{interState.BlockHashTree.GetBlockHash(interState.BlockNumber)})
 	// This proof provides the block hash tree Merkle proof at the designated index.
-	blockHashMerkleProof, err := GetBlockHashMerkleProof(interState.BlockHashTree, interState.BlockNumber)
+	blockHashMerkleProof, err = GetBlockHashMerkleProof(interState.BlockHashTree, interState.BlockNumber)
 	if err != nil {
 		return nil, err
 	}

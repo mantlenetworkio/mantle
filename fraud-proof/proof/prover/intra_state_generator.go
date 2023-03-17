@@ -49,6 +49,7 @@ type IntraStateGenerator struct {
 	// Current Call Frame
 	callFlag       state.CallFlag
 	lastState      *state.IntraState
+	lastCost       uint64
 	lastDepthState state.OneStepState
 	input          *state.Memory
 	out            uint64
@@ -125,6 +126,7 @@ func (l *IntraStateGenerator) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode,
 	)
 	l.states = append(l.states, GeneratedIntraState{s.Hash(), gas})
 	l.lastState = s
+	l.lastCost = cost
 	l.counter += 1
 	return nil
 }
@@ -152,7 +154,7 @@ func (l *IntraStateGenerator) CaptureEnter(typ vm.OpCode, from common.Address, t
 		l.outSize = l.lastState.Stack.Back(5).Uint64()
 	}
 	l.callFlag = state.OpCodeToCallFlag(typ)
-	l.lastDepthState = l.lastState.StateAsLastDepth(l.callFlag)
+	l.lastDepthState = l.lastState.StateAsLastDepth(l.callFlag, l.lastCost)
 	l.input = state.NewMemoryFromBytes(input)
 }
 

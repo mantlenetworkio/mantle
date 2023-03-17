@@ -52,13 +52,15 @@ type MemoryReadProof struct {
 }
 
 func (m *MemoryReadProof) Encode() []byte {
-	encoded := make([]byte, 32*len(m.Cells)+1+32*len(m.Proof))
+	encoded := make([]byte, 32*len(m.Cells)+8+32*len(m.Proof))
 	for idx, cell := range m.Cells {
 		cellBytes := cell.Bytes32()
 		copy(encoded[32*idx:], cellBytes[:])
 	}
-	encoded[32*len(m.Cells)] = byte(len(m.Proof))
-	encodedOffset := 32*len(m.Cells) + 1
+	lenBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(lenBytes, uint64(len(m.Proof)))
+	copy(encoded[32*len(m.Cells):], lenBytes)
+	encodedOffset := 32*len(m.Cells) + 8
 	for _, hash := range m.Proof {
 		copy(encoded[encodedOffset:], hash.Bytes())
 		encodedOffset += 32
@@ -67,24 +69,26 @@ func (m *MemoryReadProof) Encode() []byte {
 }
 
 type MemoryWriteProof struct {
-	Cells       []uint256.Int
-	UpdateCells []uint256.Int
-	Proof       []common.Hash
+	Cells        []uint256.Int
+	UpdatedCells []uint256.Int
+	Proof        []common.Hash
 }
 
 func (m *MemoryWriteProof) Encode() []byte {
-	encoded := make([]byte, 32*len(m.Cells)+32*len(m.UpdateCells)+1+32*len(m.Proof))
+	encoded := make([]byte, 32*len(m.Cells)+32*len(m.UpdatedCells)+8+32*len(m.Proof))
 	for idx, cell := range m.Cells {
 		cellBytes := cell.Bytes32()
 		copy(encoded[32*idx:], cellBytes[:])
 	}
 	encodedOffset := 32 * len(m.Cells)
-	for idx, cell := range m.UpdateCells {
+	for idx, cell := range m.UpdatedCells {
 		cellBytes := cell.Bytes32()
 		copy(encoded[32*idx+encodedOffset:], cellBytes[:])
 	}
-	encoded[32*(len(m.Cells)+len(m.UpdateCells))] = byte(len(m.Proof))
-	encodedOffset += 32*len(m.UpdateCells) + 1
+	lenBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(lenBytes, uint64(len(m.Proof)))
+	copy(encoded[32*(len(m.Cells)+len(m.UpdatedCells)):], lenBytes)
+	encodedOffset += 32*len(m.UpdatedCells) + 8
 	for _, hash := range m.Proof {
 		copy(encoded[encodedOffset:], hash.Bytes())
 		encodedOffset += 32
@@ -98,13 +102,15 @@ type MemoryAppendProof struct {
 }
 
 func (m *MemoryAppendProof) Encode() []byte {
-	encoded := make([]byte, 32*len(m.AppendCells)+1+32*len(m.Proof))
+	encoded := make([]byte, 32*len(m.AppendCells)+8+32*len(m.Proof))
 	for idx, cell := range m.AppendCells {
 		cellBytes := cell.Bytes32()
 		copy(encoded[32*idx:], cellBytes[:])
 	}
-	encoded[32*len(m.AppendCells)] = byte(len(m.Proof))
-	encodedOffset := 32*len(m.AppendCells) + 1
+	lenBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(lenBytes, uint64(len(m.Proof)))
+	copy(encoded[32*len(m.AppendCells):], lenBytes)
+	encodedOffset := 32*len(m.AppendCells) + 8
 	for _, hash := range m.Proof {
 		copy(encoded[encodedOffset:], hash.Bytes())
 		encodedOffset += 32
@@ -119,7 +125,7 @@ type MemoryCombinedReadProof struct {
 }
 
 func (m *MemoryCombinedReadProof) Encode() []byte {
-	encoded := make([]byte, 32*len(m.Cells)+32*len(m.AppendCells)+1+32*len(m.Proof))
+	encoded := make([]byte, 32*len(m.Cells)+32*len(m.AppendCells)+8+32*len(m.Proof))
 	for idx, cell := range m.Cells {
 		cellBytes := cell.Bytes32()
 		copy(encoded[32*idx:], cellBytes[:])
@@ -129,8 +135,10 @@ func (m *MemoryCombinedReadProof) Encode() []byte {
 		cellBytes := cell.Bytes32()
 		copy(encoded[32*idx+encodedOffset:], cellBytes[:])
 	}
-	encoded[32*(len(m.Cells)+len(m.AppendCells))] = byte(len(m.Proof))
-	encodedOffset += 32*len(m.AppendCells) + 1
+	lenBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(lenBytes, uint64(len(m.Proof)))
+	copy(encoded[32*(len(m.Cells)+len(m.AppendCells)):], lenBytes)
+	encodedOffset += 32*len(m.AppendCells) + 8
 	for _, hash := range m.Proof {
 		copy(encoded[encodedOffset:], hash.Bytes())
 		encodedOffset += 32
@@ -146,7 +154,7 @@ type MemoryCombinedWriteProof struct {
 }
 
 func (m *MemoryCombinedWriteProof) Encode() []byte {
-	encoded := make([]byte, 32*len(m.Cells)+32*len(m.UpdatedCells)+32*len(m.AppendCells)+1+32*len(m.Proof))
+	encoded := make([]byte, 32*len(m.Cells)+32*len(m.UpdatedCells)+32*len(m.AppendCells)+8+32*len(m.Proof))
 	for idx, cell := range m.Cells {
 		cellBytes := cell.Bytes32()
 		copy(encoded[32*idx:], cellBytes[:])
@@ -161,8 +169,10 @@ func (m *MemoryCombinedWriteProof) Encode() []byte {
 		cellBytes := cell.Bytes32()
 		copy(encoded[32*idx+encodedOffset:], cellBytes[:])
 	}
-	encoded[32*(len(m.Cells)+len(m.UpdatedCells)+len(m.AppendCells))] = byte(len(m.Proof))
-	encodedOffset += 32*len(m.AppendCells) + 1
+	lenBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(lenBytes, uint64(len(m.Proof)))
+	copy(encoded[32*(len(m.Cells)+len(m.UpdatedCells)+len(m.AppendCells)):], lenBytes)
+	encodedOffset += 32*len(m.AppendCells) + 8
 	for _, hash := range m.Proof {
 		copy(encoded[encodedOffset:], hash.Bytes())
 		encodedOffset += 32
@@ -171,6 +181,9 @@ func (m *MemoryCombinedWriteProof) Encode() []byte {
 }
 
 func generateMemoryReadProof(memory *state.Memory, offset uint64, size uint64) (Proof, error) {
+	if size == 0 {
+		return nil, nil
+	}
 	startCell := offset / 32
 	cellNum := calcCellNum(offset, size)
 	if memory.CellNum() <= startCell {
@@ -223,6 +236,9 @@ func generateMemoryReadProof(memory *state.Memory, offset uint64, size uint64) (
 }
 
 func generateMemoryReadProofNoAppend(memory *state.Memory, offset uint64, size uint64) (Proof, error) {
+	if size == 0 {
+		return nil, nil
+	}
 	startCell := offset / 32
 	cellNum := calcCellNum(offset, size)
 	if memory.CellNum() <= startCell {
@@ -250,10 +266,7 @@ func generateMemoryReadProofNoAppend(memory *state.Memory, offset uint64, size u
 	for i := startCell; i < memory.CellNum(); i++ {
 		indices[i-startCell] = i
 	}
-	pf, err := memory.GetCombinedProof(indices)
-	if err != nil {
-		return nil, err
-	}
+	pf := memory.GetProof(indices)
 	cells := make([]uint256.Int, memory.CellNum()-startCell)
 	for i := startCell; i < memory.CellNum(); i++ {
 		cells[i-startCell] = *memory.Cell(i)
@@ -265,6 +278,9 @@ func generateMemoryReadProofNoAppend(memory *state.Memory, offset uint64, size u
 }
 
 func generateMemoryWriteProof(memory, memoryAfter *state.Memory, offset uint64, size uint64) (Proof, error) {
+	if size == 0 {
+		return nil, nil
+	}
 	startCell := offset / 32
 	cellNum := calcCellNum(offset, size)
 	if memory.CellNum() <= startCell {
@@ -277,13 +293,13 @@ func generateMemoryWriteProof(memory, memoryAfter *state.Memory, offset uint64, 
 			appendCells[i] = *memoryAfter.Cell(i + memory.CellNum())
 		}
 		return &MemoryAppendProof{
-			AppendCells: make([]uint256.Int, cellNum), // All empty
+			AppendCells: appendCells,
 			Proof:       pf,
 		}, nil
 	}
 	if memory.CellNum() >= startCell+cellNum {
 		// The end position is within the memory
-		// ReadProof
+		// WriteProof
 		indices := make([]uint64, cellNum)
 		for i := uint64(0); i < cellNum; i++ {
 			indices[i] = startCell + i
@@ -296,14 +312,15 @@ func generateMemoryWriteProof(memory, memoryAfter *state.Memory, offset uint64, 
 			updatecCells[i] = *memoryAfter.Cell(startCell + i)
 		}
 		return &MemoryWriteProof{
-			Cells:       cells,
-			UpdateCells: updatecCells,
-			Proof:       pf,
+			Cells:        cells,
+			UpdatedCells: updatecCells,
+			Proof:        pf,
 		}, nil
 	}
 	// The start position is within the memory, but the end position is not
-	// CombinedReadProof
-	indices := make([]uint64, memory.CellNum()-startCell)
+	// CombinedWriteProof
+	existingCellNum := memory.CellNum() - startCell
+	indices := make([]uint64, existingCellNum)
 	for i := startCell; i < memory.CellNum(); i++ {
 		indices[i-startCell] = i
 	}
@@ -311,19 +328,19 @@ func generateMemoryWriteProof(memory, memoryAfter *state.Memory, offset uint64, 
 	if err != nil {
 		return nil, err
 	}
-	cells := make([]uint256.Int, memory.CellNum()-startCell)
-	updatecCells := make([]uint256.Int, cellNum)
+	cells := make([]uint256.Int, existingCellNum)
+	updatedCells := make([]uint256.Int, existingCellNum)
 	for i := startCell; i < memory.CellNum(); i++ {
 		cells[i-startCell] = *memory.Cell(i)
-		updatecCells[i-startCell] = *memoryAfter.Cell(i)
+		updatedCells[i-startCell] = *memoryAfter.Cell(i)
 	}
-	appendCells := make([]uint256.Int, cellNum-(memory.CellNum()-startCell))
-	for i := memory.CellNum() - startCell; i < cellNum; i++ {
-		appendCells[i-(memory.CellNum()-startCell)] = *memoryAfter.Cell(i + startCell)
+	appendCells := make([]uint256.Int, cellNum-existingCellNum)
+	for i := existingCellNum; i < cellNum; i++ {
+		appendCells[i-existingCellNum] = *memoryAfter.Cell(i + startCell)
 	}
 	return &MemoryCombinedWriteProof{
 		Cells:        cells,
-		UpdatedCells: updatecCells,
+		UpdatedCells: updatedCells,
 		AppendCells:  appendCells,
 		Proof:        pf,
 	}, nil
@@ -413,5 +430,26 @@ func (p *LogProof) Encode() []byte {
 	encoded := make([]byte, 32+256)
 	copy(encoded, p.AccumulateHash.Bytes())
 	copy(encoded[32:], p.Bloom.Bytes())
+	return encoded
+}
+
+type SelfDestructSetProof struct {
+	Contracts []common.Address
+}
+
+func SelfDestructSetProofFromSelfDestructSet(selfDestructSet *state.SelfDestructSet) *SelfDestructSetProof {
+	return &SelfDestructSetProof{
+		Contracts: selfDestructSet.Contracts,
+	}
+}
+
+func (p *SelfDestructSetProof) Encode() []byte {
+	encoded := make([]byte, 8+20*len(p.Contracts))
+	binary.BigEndian.PutUint64(encoded, uint64(len(p.Contracts)))
+	encodedOffset := 8
+	for _, addr := range p.Contracts {
+		copy(encoded[encodedOffset:], addr.Bytes())
+		encodedOffset += 20
+	}
 	return encoded
 }

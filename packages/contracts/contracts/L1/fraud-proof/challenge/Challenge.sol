@@ -193,6 +193,7 @@ contract Challenge is IChallenge {
         VerificationContext.Context calldata ctx,
         uint8 verifyType,
         bytes calldata proof,
+        uint256 challengedStepIndex,
         uint256 prevChallengedSegmentStart,
         uint256 prevChallengedSegmentLength
     ) external override onlyOnTurn {
@@ -206,13 +207,14 @@ contract Challenge is IChallenge {
 
          // verify OSP
          // IVerificationContext ctx = <get ctx from sequenced txs>;
+
          bytes32 nextStateHash = verifier.verifyOneStepProof(
              ctx,
              verifyType,
-             prevBisection[2],
+             prevBisection[challengedStepIndex-1],
              proof
          );
-         if (nextStateHash == prevBisection[2]) {
+         if (nextStateHash == prevBisection[challengedStepIndex]) {
              // osp verified, current win
              _currentWin(CompletionReason.OSP_VERIFIED);
          } else {
