@@ -16,12 +16,14 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+	l2gethcommon "github.com/mantlenetworkio/mantle/l2geth/common"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
 	common3 "github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	rc "github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	common2 "github.com/mantlenetworkio/mantle/mt-batcher/common"
+	"github.com/mantlenetworkio/mantle/mt-batcher/services/client"
 	common4 "github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/sequencer/db"
 	"github.com/mantlenetworkio/mantle/mt-batcher/txmgr"
@@ -40,6 +42,7 @@ type SignerFn func(context.Context, common.Address, *types.Transaction) (*types.
 type DriverConfig struct {
 	L1Client                  *ethclient.Client
 	L2Client                  *l2ethclient.Client
+	DtlClientUrl              string
 	EigenDaContract           *bindings.BVMEigenDataLayrChain
 	RawEigenContract          *bind.BoundContract
 	EigenABI                  *abi.ABI
@@ -72,6 +75,7 @@ type Driver struct {
 	WalletAddr    common.Address
 	GraphClient   *graphView.GraphClient
 	GraphqlClient *graphql.Client
+	DtlClient     client.DtlClient
 	txMgr         txmgr.TxManager
 	LevelDBStore  *db.Store
 	cancel        func()
@@ -100,7 +104,7 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 		log.Error("init leveldb fail", "err", err)
 		return nil, err
 	}
-
+	dtlClient := client.NewDtlClient(cfg.DtlClientUrl)
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
 	return &Driver{
 		Cfg:           cfg,
@@ -108,6 +112,7 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 		WalletAddr:    walletAddr,
 		GraphClient:   graphClient,
 		GraphqlClient: graphqlClient,
+		DtlClient:     dtlClient,
 		txMgr:         txMgr,
 		LevelDBStore:  levelDBStore,
 		cancel:        cancel,
@@ -179,15 +184,24 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 			panic(fmt.Sprintf("MtBatcher attempting to create batch element from block %d, "+
 				"found %d txs instead of 1", block.Number(), len(txs)))
 		}
-		log.Info("MtBatcher origin transactions", "TxHash", txs[0].Hash().String(), "l2BlockNumber", block.Number(), "QueueOrigin", txs[0].QueueOrigin(), "Index", txs[0].GetMeta().Index, "i", i)
+		log.Info("MtBatcher origin transactions", "TxHash", txs[0].Hash().String(), "l2BlockNumber", block.Number(), "QueueOrigin", txs[0].QueueOrigin(), "Index", *txs[0].GetMeta().Index, "QueueIndex", txs[0].GetMeta().QueueIndex, "i", i)
 		var txBuf bytes.Buffer
 		if err := txs[0].EncodeRLP(&txBuf); err != nil {
 			panic(fmt.Sprintf("MtBatcher Unable to encode tx: %v", err))
 		}
+		var l1MessageSender *l2gethcommon.Address
+		l1Origin, err := d.DtlClient.GetEnqueueByIndex(*txs[0].GetMeta().QueueIndex)
+		if err != nil {
+			l1MessageSender = txs[0].GetMeta().L1MessageSender
+		} else {
+			originAddress := l2gethcommon.HexToAddress(l1Origin)
+			l1MessageSender = &originAddress
+		}
+		log.Info("MtBatcher l1 tx origin", "address", l1MessageSender)
 		txMeta := &common3.TransactionMeta{
 			L1BlockNumber:   txs[0].GetMeta().L1BlockNumber,
 			L1Timestamp:     txs[0].GetMeta().L1Timestamp,
-			L1MessageSender: txs[0].GetMeta().L1MessageSender,
+			L1MessageSender: l1MessageSender,
 			Index:           txs[0].GetMeta().Index,
 			QueueIndex:      txs[0].GetMeta().QueueIndex,
 			RawTransaction:  txs[0].GetMeta().RawTransaction,

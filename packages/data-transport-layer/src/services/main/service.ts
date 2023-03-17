@@ -37,6 +37,7 @@ export interface L1DataTransportServiceOptions {
   syncToDa?: boolean
   mtBatcherHost?: string
   mtBatcherFetchPort?: number
+  eigenUpgradeEnable?: boolean
 
   transactionsPerPollingInterval: number
   legacySequencerCompatibility: boolean

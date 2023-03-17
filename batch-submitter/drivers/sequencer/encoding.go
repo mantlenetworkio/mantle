@@ -226,6 +226,9 @@ func (p *AppendSequencerBatchParams) Write(
 	//if len(p.Txs) == 0 && len(p.Contexts) != 0 {
 	//	return ErrMalformedBatch
 	//}
+	if len(p.Contexts) == 0 {
+		return ErrMalformedBatch
+	}
 
 	// copy the contexts as to not malleate the struct
 	// when it is a typed batch
