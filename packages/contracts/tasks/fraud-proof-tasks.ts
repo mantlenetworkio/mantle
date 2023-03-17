@@ -1,10 +1,10 @@
-
 import { task } from 'hardhat/config'
 import { ethers } from 'ethers'
 import { hexStringEquals } from '@mantleio/core-utils'
 
 import { getContractFactory } from '../src'
 import { names } from '../src/address-names'
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
 
@@ -258,7 +258,7 @@ task(`genOsp`)
   })
 
 task(`verifyOsp`)
-  .addParam('addr', 'VerifierTestDriver contract address')
+  // .addParam('addr', 'VerifierTestDriver contract address')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:9545'
@@ -269,8 +269,7 @@ task(`verifyOsp`)
     )
     const verifierTestDriver = await getContractFactory(
       'VerifierTestDriver'
-    ).attach(taskArgs.addr)
-
+    ).attach('0xc6e7DF5E7b4f2A278906862b61205850344D4e7d')
     const { ctx, proof } = JSON.parse(
       fs.readFileSync('./test/data/json/fraud-proof/osp.json')
     )
