@@ -31,9 +31,16 @@ echo "test point1"
 if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
   DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
 
+  # todo: remove
+  # fraud proof verifier deploy
+  DEPLOY_VERIFIER="npx hardhat deployVerifier --address 0x86E10B59cFDFeFBCf3ED5b40D018949CbFCE8B59 --network $CONTRACTS_TARGET_NETWORK"
+
   echo "Deploying contracts. Deployment command:"
   echo "$DEPLOY_CMD"
   eval "$DEPLOY_CMD"
+  echo "$DEPLOY_VERIFIER"
+  eval "$DEPLOY_VERIFIER"
+
 elif [ $SKIP_CONTRACT_DEPLOY == "NO" ] ; then
   DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
   echo $PWD
