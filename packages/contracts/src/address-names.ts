@@ -28,6 +28,17 @@ export const names = {
       Proxy__AssertionMap: 'Proxy__AssertionMap',
       Proxy__Verifier: 'Proxy__Verifier',
       Proxy__Rollup: 'Proxy__Rollup',
+      SubVerifiers:{
+        BlockInitiationVerifier: 'BlockInitiationVerifier',
+        BlockFinalizationVerifier: 'BlockFinalizationVerifier',
+        InterTxVerifier: 'InterTxVerifier',
+        StackOpVerifier: 'StackOpVerifier',
+        EnvironmentalOpVerifier: 'EnvironmentalOpVerifier',
+        MemoryOpVerifier: 'MemoryOpVerifier',
+        StorageOpVerifier: 'StorageOpVerifier',
+        CallOpVerifier: 'CallOpVerifier',
+        InvalidOpVerifier: 'InvalidOpVerifier',
+      },
     },
     accounts: {
       BVM_Sequencer: 'BVM_Sequencer',

@@ -65,7 +65,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 	db := v.ProofBackend.ChainDb()
 
 	// Listen to AssertionCreated event
-	assertionEventCh := make(chan *bindings.RollupAssertionCreated, 4096)
+	var assertionEventCh = make(chan *bindings.RollupAssertionCreated, 4096)
 	assertionEventSub, err := v.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Context: v.Ctx}, assertionEventCh)
 	if err != nil {
 		log.Crit("Failed to watch rollup event", "err", err)
@@ -120,7 +120,9 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 						Parent:    assertion.Parent,
 					}
 
-					block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
+					// TODO FIXME FRAUD-PROOF TEST, DELETE ME
+					//block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
+					block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
 					if err != nil {
 						log.Error("Validator get block failed", "err", err)
 					}
@@ -174,14 +176,14 @@ func (v *Validator) challengeLoop() {
 	// 3.2 already finished challenge
 
 	// Watch AssertionCreated event
-	createdCh := make(chan *bindings.RollupAssertionCreated, 4096)
+	var createdCh = make(chan *bindings.RollupAssertionCreated, 4096)
 	createdSub, err := v.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Context: v.Ctx}, createdCh)
 	if err != nil {
 		log.Crit("Failed to watch rollup event", "err", err)
 	}
 	defer createdSub.Unsubscribe()
 
-	challengedCh := make(chan *bindings.RollupAssertionChallenged, 4096)
+	var challengedCh = make(chan *bindings.RollupAssertionChallenged, 4096)
 	challengedSub, err := v.Rollup.Contract.WatchAssertionChallenged(&bind.WatchOpts{Context: v.Ctx}, challengedCh)
 	if err != nil {
 		log.Crit("Failed to watch rollup event", "err", err)
@@ -189,7 +191,7 @@ func (v *Validator) challengeLoop() {
 	defer challengedSub.Unsubscribe()
 
 	// Watch L1 blockchain for challenge timeout
-	headCh := make(chan *ethtypes.Header, 4096)
+	var headCh = make(chan *ethtypes.Header, 4096)
 	headSub, err := v.L1.SubscribeNewHead(v.Ctx, headCh)
 	if err != nil {
 		log.Crit("Failed to watch l1 chain head", "err", err)
@@ -199,9 +201,9 @@ func (v *Validator) challengeLoop() {
 	var challengeSession *bindings.ChallengeSession
 	var states []*proof.ExecutionState
 
-	var bisectedCh chan *bindings.ChallengeBisected
+	var bisectedCh = make(chan *bindings.ChallengeBisected, 4096)
 	var bisectedSub event.Subscription
-	var challengeCompletedCh chan *bindings.ChallengeChallengeCompleted
+	var challengeCompletedCh = make(chan *bindings.ChallengeChallengeCompleted, 4096)
 	var challengeCompletedSub event.Subscription
 
 	restart := false
@@ -365,12 +367,10 @@ func (v *Validator) challengeLoop() {
 						CallOpts:     bind.CallOpts{Pending: true, Context: v.Ctx},
 						TransactOpts: *v.TransactOpts,
 					}
-					bisectedCh = make(chan *bindings.ChallengeBisected, 4096)
 					bisectedSub, err = challenge.WatchBisected(&bind.WatchOpts{Context: v.Ctx}, bisectedCh)
 					if err != nil {
 						log.Crit("Failed to watch challenge event", "err", err)
 					}
-					challengeCompletedCh = make(chan *bindings.ChallengeChallengeCompleted, 4096)
 					challengeCompletedSub, err = challenge.WatchChallengeCompleted(&bind.WatchOpts{Context: v.Ctx}, challengeCompletedCh)
 					if err != nil {
 						log.Crit("Failed to watch challenge event", "err", err)

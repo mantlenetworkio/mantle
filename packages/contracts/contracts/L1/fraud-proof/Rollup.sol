@@ -261,7 +261,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         bytes32[] calldata _batch,
         uint256 _shouldStartAtElement,
         bytes calldata _signature
-        ) external override stakedOnly {
+        ) external override stakedOnly { // todo batch submitter only
         // permissions only allow rollup proposer to submit assertion, only allow RollupContract to append new batch
         require(msg.sender == resolve("BVM_Rolluper"), "msg.sender is not rollup proposer, can't append batch");
         // create assertion
@@ -325,14 +325,6 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             parentStateHash,
             defenderStateHash
         );
-        console.log("parent Hash");
-        console.logBytes32(assertions.getStateHash(parentID));
-        console.log("defender Hash");
-        console.logBytes32(assertions.getStateHash(defenderAssertionID));
-        console.log("parent InboxSize");
-        console.log(assertions.getInboxSize(parentID));
-        console.log("defender InboxSize");
-        console.log(assertions.getInboxSize(defenderAssertionID));
         return challengeAddr;
     }
 
@@ -347,36 +339,15 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
 
         uint256 lastUnresolvedID = lastResolvedAssertionID + 1;
 
-        console.log(
-            "assertions.getDeadline(lastUnresolvedID)): ",
-            assertions.getDeadline(lastUnresolvedID),
-            "block.timestamp: ",
-            block.timestamp
-        );
-
         // (2) challenge period has passed
         if (block.timestamp < assertions.getDeadline(lastUnresolvedID)) {
             revert("ChallengePeriodPending");
         }
 
-        console.log(
-            "assertions.getParentID(lastUnresolvedID): ",
-            assertions.getDeadline(lastUnresolvedID),
-            "lastConfirmedAssertionID: ",
-            lastConfirmedAssertionID
-        );
-
         // (3) predecessor has been confirmed
         if (assertions.getParentID(lastUnresolvedID) != lastConfirmedAssertionID) {
             revert("InvalidParent");
         }
-
-        console.log(
-            "assertions.getNumStakers(lastUnresolvedID): ",
-            assertions.getNumStakers(lastUnresolvedID),
-            "countStakedZombies(lastUnresolvedID) + numStakers): ",
-            countStakedZombies(lastUnresolvedID) + numStakers
-        );
 
         // Remove old zombies
         // removeOldZombies();

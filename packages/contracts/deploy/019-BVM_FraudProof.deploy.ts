@@ -8,6 +8,7 @@ import {
   getContractFromArtifact,
 } from '../src/deploy-utils'
 import {awaitCondition, hexStringEquals} from "@mantleio/core-utils";
+import {deploy} from "../test/helpers";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { ethers, upgrades } = require("hardhat");
@@ -43,6 +44,135 @@ const deployFn: DeployFunction = async (hre) => {
   console.log('AssertionMap Implementation Address', Impl__AssertionMap.address)
   console.log('deploy fraud proof assertionMap success')
 
+  // await deployAndVerifyAndThen({
+  //   hre,
+  //   name: names.managed.fraud_proof.SubVerifiers.StackOpVerifier,
+  //   contract: 'StackOpVerifier',
+  //   args: [],
+  // })
+  // await deployAndVerifyAndThen({
+  //   hre,
+  //   name: names.managed.fraud_proof.SubVerifiers.BlockInitiationVerifier,
+  //   contract: 'BlockInitiationVerifier',
+  //   args: [],
+  // })
+  // await deployAndVerifyAndThen({
+  //   hre,
+  //   name: names.managed.fraud_proof.SubVerifiers.BlockFinalizationVerifier,
+  //   contract: 'BlockFinalizationVerifier',
+  //   args: [],
+  // })
+  // await deployAndVerifyAndThen({
+  //   hre,
+  //   name: names.managed.fraud_proof.SubVerifiers.InterTxVerifier,
+  //   contract: 'InterTxVerifier',
+  //   args: [],
+  // })
+  // await deployAndVerifyAndThen({
+  //   hre,
+  //   name: names.managed.fraud_proof.SubVerifiers.EnvironmentalOpVerifier,
+  //   contract: 'EnvironmentalOpVerifier',
+  //   args: [],
+  // })
+  // await deployAndVerifyAndThen({
+  //   hre,
+  //   name: names.managed.fraud_proof.SubVerifiers.MemoryOpVerifier,
+  //   contract: 'MemoryOpVerifier',
+  //   args: [],
+  // })
+  // await deployAndVerifyAndThen({
+  //   hre,
+  //   name: names.managed.fraud_proof.SubVerifiers.StorageOpVerifier,
+  //   contract: 'StorageOpVerifier',
+  //   args: [],
+  // })
+  // await deployAndVerifyAndThen({
+  //   hre,
+  //   name: names.managed.fraud_proof.SubVerifiers.CallOpVerifier,
+  //   contract: 'CallOpVerifier',
+  //   args: [],
+  // })
+  // await deployAndVerifyAndThen({
+  //   hre,
+  //   name: names.managed.fraud_proof.SubVerifiers.InvalidOpVerifier,
+  //   contract: 'InvalidOpVerifier',
+  //   args: [],
+  // })
+  //
+  // const blockInitiationVerifier = await getContractFromArtifact(
+  //   hre,
+  //   names.managed.fraud_proof.SubVerifiers.BlockInitiationVerifier,
+  //   {
+  //     iface: 'BlockInitiationVerifier',
+  //     signerOrProvider: deployer,
+  //   }
+  // )
+  // const blockFinalizationVerifier = await getContractFromArtifact(
+  //   hre,
+  //   names.managed.fraud_proof.SubVerifiers.BlockFinalizationVerifier,
+  //   {
+  //     iface: 'BlockFinalizationVerifier',
+  //     signerOrProvider: deployer,
+  //   }
+  // )
+  //
+  // const interTxVerifier = await getContractFromArtifact(
+  //   hre,
+  //   names.managed.fraud_proof.SubVerifiers.InterTxVerifier,
+  //   {
+  //     iface: 'InterTxVerifier',
+  //     signerOrProvider: deployer,
+  //   }
+  // )
+  // const stackOpVerifier = await getContractFromArtifact(
+  //   hre,
+  //   names.managed.fraud_proof.SubVerifiers.StackOpVerifier,
+  //   {
+  //     iface: 'StackOpVerifier',
+  //     signerOrProvider: deployer,
+  //   }
+  // )
+  // const environmentalOpVerifier = await getContractFromArtifact(
+  //   hre,
+  //   names.managed.fraud_proof.SubVerifiers.EnvironmentalOpVerifier,
+  //   {
+  //     iface: 'EnvironmentalOpVerifier',
+  //     signerOrProvider: deployer,
+  //   }
+  // )
+  // const memoryOpVerifier = await getContractFromArtifact(
+  //   hre,
+  //   names.managed.fraud_proof.SubVerifiers.MemoryOpVerifier,
+  //   {
+  //     iface: 'MemoryOpVerifier',
+  //     signerOrProvider: deployer,
+  //   }
+  // )
+  // const storageOpVerifier = await getContractFromArtifact(
+  //   hre,
+  //   names.managed.fraud_proof.SubVerifiers.StorageOpVerifier,
+  //   {
+  //     iface: 'StorageOpVerifier',
+  //     signerOrProvider: deployer,
+  //   }
+  // )
+  // const callOpVerifier = await getContractFromArtifact(
+  //   hre,
+  //   names.managed.fraud_proof.SubVerifiers.CallOpVerifier,
+  //   {
+  //     iface: 'CallOpVerifier',
+  //     signerOrProvider: deployer,
+  //   }
+  // )
+  // const invalidOpVerifier = await getContractFromArtifact(
+  //   hre,
+  //   names.managed.fraud_proof.SubVerifiers.InvalidOpVerifier,
+  //   {
+  //     iface: 'InvalidOpVerifier',
+  //     signerOrProvider: deployer,
+  //   }
+  // )
+
   // deploy verifier impl
   await deployAndVerifyAndThen({
     hre,
@@ -50,7 +180,7 @@ const deployFn: DeployFunction = async (hre) => {
     contract: 'VerifierEntry',
     args: [],
   })
-  const Impl__Verifier = await getContractFromArtifact(
+  const Impl__VerifierEntry = await getContractFromArtifact(
     hre,
     names.managed.fraud_proof.VerifierEntry,
     {
@@ -58,7 +188,7 @@ const deployFn: DeployFunction = async (hre) => {
       signerOrProvider: deployer,
     }
   )
-  console.log('Verifier Implementation Address', Impl__Verifier.address)
+  console.log('Verifier Implementation Address', Impl__VerifierEntry.address)
   console.log('deploy fraud proof verifier success')
 
   // deploy rollup impl
@@ -80,7 +210,7 @@ const deployFn: DeployFunction = async (hre) => {
   console.log('deploy fraud proof assertion rollup success')
 
   // deploy assertionMap proxy
-  let callData = Impl__Verifier.interface.encodeFunctionData('initialize', [])
+  let callData = Impl__AssertionMap.interface.encodeFunctionData('initialize', [])
   await deployAndVerifyAndThen({
     hre,
     name: names.managed.fraud_proof.Proxy__AssertionMap,
@@ -100,21 +230,32 @@ const deployFn: DeployFunction = async (hre) => {
   console.log('Proxy__AssertionMap Address', Proxy__AssertionMap.address)
   console.log('deploy fraud proof Proxy__AssertionMap success')
 
-  // deploy verifier proxy
-  callData = Impl__Verifier.interface.encodeFunctionData('initialize', [])
+  callData = Impl__VerifierEntry.interface.encodeFunctionData('initialize', [])
   await deployAndVerifyAndThen({
     hre,
     name: names.managed.fraud_proof.Proxy__Verifier,
     contract: 'TransparentUpgradeableProxy',
     iface: 'VerifierEntry',
-    args: [Impl__Verifier.address, owner, callData],
+    args: [Impl__VerifierEntry.address, owner, callData],
   })
+
+  const Proxy__VerifierEntry = await getContractFromArtifact(
+    hre,
+    names.managed.fraud_proof.Proxy__Verifier,
+    {
+      iface: 'VerifierEntry',
+      signerOrProvider: deployer,
+    }
+  )
   console.log('deploy fraud proof verifier proxy success')
+
+  const proposer = hre.deployConfig.bvmRolluperAddress
+  console.log('proposer address :',proposer)
 
   // deploy rollup proxy
   const rollupArgs = [
-    owner, // address _owner
-    Impl__Verifier.address, // address _verifier,
+    proposer, // address _owner
+    Proxy__VerifierEntry.address, // address _verifier,
     l1BitAddress, // address _stakeToken,
     Lib_AddressManager.address, // address _libAddressManager,
     Proxy__AssertionMap.address, // address _assertionMap,
@@ -123,7 +264,7 @@ const deployFn: DeployFunction = async (hre) => {
     0, // uint256 _minimumAssertionPeriod,
     // 1000000000000, // uint256 _maxGasPerAssertion,
     0, // uint256 _baseStakeAmount
-    '0x365a761a909633fc9742c81c90b3fc71cebfd64cc1ae1ed1f36b3c5e956e0f28', // bytes32 _initialVMhash //TODO-FIXME
+    '0x89e2ce7fd44675606b4ced40dd2ccc67f7ae2851dd1b86409bdaeac791a60d3e', // bytes32 _initialVMhash //TODO-FIXME
     [
       '0xd5b002298b2e81b4ced1b6c8cf1964023cdc3758',
       '0xd55fe10a1acb32b6183bdfbeb42e9961c3cb8792',
@@ -156,12 +297,23 @@ const deployFn: DeployFunction = async (hre) => {
         5000,
         100
       )
-      console.log('>>>> assertions ', contract.assertions())
+      console.log('>>>> assertions ',await contract.assertions())
       await awaitCondition(
         async () => {
           return hexStringEquals(
             await contract.assertions(),
             Proxy__AssertionMap.address
+          )
+        },
+        5000,
+        100
+      )
+      console.log('>>>> owner ',await contract.owner())
+      await awaitCondition(
+        async () => {
+          return hexStringEquals(
+            await contract.owner(),
+            proposer
           )
         },
         5000,

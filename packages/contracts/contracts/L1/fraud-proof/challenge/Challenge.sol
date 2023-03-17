@@ -23,10 +23,8 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
-
 import "./IChallenge.sol";
 import "./ChallengeLib.sol";
-import "../verifier/IVerifierEntry.sol";
 import "../IRollup.sol";
 
 contract Challenge is IChallenge {
@@ -77,7 +75,7 @@ contract Challenge is IChallenge {
     Turn public turn;
     // See `ChallengeLib.computeBisectionHash` for the format of this commitment.
     bytes32 public bisectionHash;
-    bytes32[2] public prevBisection;
+    bytes32[3] public prevBisection;
 
     // Initial state used to initialize bisectionHash (write-once).
     bytes32 private startStateHash;
@@ -141,23 +139,20 @@ contract Challenge is IChallenge {
         // TODO(ujval): initialize timeout
         defenderTimeLeft = 150;
         challengerTimeLeft = 150;
-        prevBisection[0] = _startStateHash;
-        prevBisection[1] = _endStateHash;
-
-        startInboxSize = _startInboxSize;
-        console.log("initialize prevBisection...");
         console.log("_startStateHash");
         console.logBytes32(_startStateHash);
         console.log("_endStateHash");
         console.logBytes32(_endStateHash);
+        prevBisection[0] = _startStateHash;
+        prevBisection[1] = bytes32(0);
+        prevBisection[2] = _endStateHash;
+
+        startInboxSize = _startInboxSize;
     }
 
     function initializeChallengeLength(bytes32 checkStateHash, uint256 _numSteps) external override onlyOnTurn {
         require(bisectionHash == 0, CHAL_INIT_STATE);
         require(_numSteps > 0, "INVALID_NUM_STEPS");
-        console.log("initializeChallengeLength");
-        console.logBytes32(startStateHash);
-        console.log(_numSteps);
         bisectionHash = ChallengeLib.computeBisectionHash(0, _numSteps);
         // TODO: consider emitting a different event?
         currentBisected = BisectedStore(startStateHash, checkStateHash, endStateHash, block.number, block.timestamp, 0, _numSteps);
@@ -174,67 +169,57 @@ contract Challenge is IChallenge {
     ) external override onlyOnTurn postInitialization {
         // Verify provided prev bisection.
         bytes32 prevHash = ChallengeLib.computeBisectionHash(prevChallengedSegmentStart, prevChallengedSegmentLength);
-        console.log("challengedSegmentIndex");
-        console.log(challengedSegmentIndex);
-        console.log("bisection info");
-        console.logBytes32(bisection[0]);
-        console.logBytes32(bisection[1]);
-        console.logBytes32(bisection[2]);
-        console.log("prevBisection info");
-        console.logBytes32(prevBisection[0]);
-        console.logBytes32(prevBisection[1]);
-        console.log("prev info");
-        console.log(prevChallengedSegmentStart);
-        console.log(prevChallengedSegmentLength);
-        console.log("prevHash");
-        console.logBytes32(prevHash);
-        console.log("bisectionHash");
-        console.logBytes32(bisectionHash);
         require(prevHash == bisectionHash, BIS_PREV);
 
         // Require agreed upon start state hash and disagreed upon end state hash.
-        require(bisection[0] == prevBisection[0] || bisection[2] == prevBisection[1], "INVALID_START_OR_END");
+        if (prevBisection[1] != bytes32(0)) {
+            require(bisection[0] == prevBisection[0] || bisection[0] == prevBisection[1], "AMBIGUOUS_START");
+        }
+        require(bisection[2] != prevBisection[2], "INVALID_END");
 
         // Compute segment start/length.
         require(challengedSegmentLength > 0, "TOO_SHORT");
 
         // Compute new challenge state.
         prevBisection[0] = bisection[0];
-        prevBisection[1] = bisection[2];
+        prevBisection[1] = bisection[1];
+        prevBisection[2] = bisection[2];
         bisectionHash = ChallengeLib.computeBisectionHash(challengedSegmentStart, challengedSegmentLength);
         currentBisected = BisectedStore(bisection[0], bisection[1], bisection[2], block.number, block.timestamp, challengedSegmentStart, challengedSegmentLength);
         emit Bisected(bisection[0], bisection[1], bisection[2], block.number, block.timestamp, challengedSegmentStart, challengedSegmentLength);
     }
 
     function verifyOneStepProof(
+        VerificationContext.Context calldata ctx,
+        uint8 verifyType,
         bytes calldata proof,
         uint256 challengedStepIndex,
-//        bytes32[2] calldata prevBisection,
         uint256 prevChallengedSegmentStart,
         uint256 prevChallengedSegmentLength
     ) external override onlyOnTurn {
-        // Verify provided prev bisection.
-        bytes32 prevHash =
+         // Verify provided prev bisection.
+         bytes32 prevHash =
             ChallengeLib.computeBisectionHash(prevChallengedSegmentStart, prevChallengedSegmentLength);
-        require(prevHash == bisectionHash, BIS_PREV);
-        require(challengedStepIndex > 0 && challengedStepIndex < prevBisection.length, "INVALID_INDEX");
-        // Require that this is the last round.
-        require(prevChallengedSegmentLength / MAX_BISECTION_DEGREE <= 1, "BISECTION_INCOMPLETE");
+         require(prevHash == bisectionHash, BIS_PREV);
+         // require(challengedStepIndex > 0 && challengedStepIndex < prevBisection.length, "INVALID_INDEX");
+         // Require that this is the last round.
+         require(prevChallengedSegmentLength / MAX_BISECTION_DEGREE <= 1, "BISECTION_INCOMPLETE");
 
-        // TODO: verify OSP
-        // IVerificationContext ctx = <get ctx from sequenced txs>;
-        // bytes32 nextStateHash = verifier.verifyOneStepProof(
-        //     ctx,
-        //     prevBisection[challengedStepIndex - 1],
-        //     proof
-        // );
-        // if (nextStateHash == prevBisection[challengedStepIndex]) {
-        //     // osp verified, current win
-        // } else {
-        //     // current lose?
-        // }
+         // verify OSP
+         // IVerificationContext ctx = <get ctx from sequenced txs>;
 
-        _currentWin(CompletionReason.OSP_VERIFIED);
+         bytes32 nextStateHash = verifier.verifyOneStepProof(
+             ctx,
+             verifyType,
+             prevBisection[challengedStepIndex-1],
+             proof
+         );
+         if (nextStateHash == prevBisection[challengedStepIndex]) {
+             // osp verified, current win
+             _currentWin(CompletionReason.OSP_VERIFIED);
+         } else {
+             _currentLose(CompletionReason.OSP_VERIFIED);
+         }
     }
 
     function setRollback() public {
@@ -280,6 +265,16 @@ contract Challenge is IChallenge {
         } else {
             winner = challenger;
             _challengerWin(reason);
+        }
+    }
+
+    function _currentLose(CompletionReason reason) private {
+        if (turn == Turn.Defender) {
+            winner = challenger;
+            _challengerWin(reason);
+        } else {
+            winner = defender;
+            _asserterWin(reason);
         }
     }
 

@@ -16,7 +16,7 @@ package bindings
 
 //go:generate ./compile.sh
 //go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../packages/contracts/abi/contracts/L1/fraud-proof/AssertionMap.sol/AssertionMap.json --pkg bindings --type AssertionMap --out AssertionMap.go
-//go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../packages/contracts/abi/contracts/L1/fraud-proof/challenge/IChallenge.sol/IChallenge.json --pkg bindings --type IChallenge --out IChallenge.go
-//go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../packages/contracts/abi/contracts/L1/fraud-proof/IRollup.sol/IRollup.json --pkg bindings --type IRollup --out IRollup.go
+// //go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../packages/contracts/abi/contracts/L1/fraud-proof/challenge/IChallenge.sol/IChallenge.json --pkg bindings --type IChallenge --out IChallenge.go
+// //go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../packages/contracts/abi/contracts/L1/fraud-proof/IRollup.sol/IRollup.json --pkg bindings --type IRollup --out IRollup.go
 //go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../packages/contracts/abi/contracts/L1/fraud-proof/Rollup.sol/Rollup.json --pkg bindings --type Rollup --out Rollup.go
 //go:generate go run github.com/ethereum/go-ethereum/cmd/abigen --abi ../../packages/contracts/abi/contracts/L1/fraud-proof/challenge/Challenge.sol/Challenge.json --pkg bindings --type Challenge --out Challenge.go

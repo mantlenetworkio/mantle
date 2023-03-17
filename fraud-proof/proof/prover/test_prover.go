@@ -15,9 +15,12 @@
 package prover
 
 import (
+	"encoding/json"
 	"errors"
-	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"math/big"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/proof"
@@ -30,30 +33,86 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 )
 
-var ErrStepIdxAndHashMismatch = errors.New("step index and hash mismatch")
+func bytesToHex(s []byte) string {
+	return "0x" + common.Bytes2Hex(s)
+}
 
-type OneStepProver struct {
+func bigToHex(n *big.Int) string {
+	if n == nil {
+		return "0x0"
+	}
+	return "0x" + n.Text(16)
+}
+
+func uintToHex(n uint64) string {
+	return "0x" + strconv.FormatUint(n, 16)
+}
+
+func addrToHex(a common.Address) string {
+	return strings.ToLower(a.Hex())
+}
+
+type OspTestResult struct {
+	Ctx   OspTestGeneratedCtx `json:"ctx"`
+	Proof OspTestProof        `json:"proof"`
+}
+
+type OspTestGeneratedCtx struct {
+	TxnHash     string `json:"txnHash"`
+	TxNonce     string `json:"txNonce"`
+	TxV         string `json:"txV"`
+	TxR         string `json:"txR"`
+	TxS         string `json:"txS"`
+	Coinbase    string `json:"coinbase"`
+	Timestamp   string `json:"timestamp"`
+	BlockNumber string `json:"blockNumber"`
+	Difficulty  string `json:"difficulty"`
+	GasLimit    string `json:"gasLimit"`
+	ChainID     string `json:"chainID"`
+	BaseFee     string `json:"baseFee"`
+	Origin      string `json:"origin"`
+	Recipient   string `json:"recipient"`
+	Value       string `json:"value"`
+	Gas         string `json:"gas"`
+	GasPrice    string `json:"gasPrice"`
+	Input       string `json:"input"`
+	InputSize   string `json:"inputSize"`
+}
+
+type OspTestProof struct {
+	Opcode    string `json:"opcode"`
+	Verifier  uint64 `json:"verifier"`
+	CurrHash  string `json:"currHash"`
+	NextHash  string `json:"nextHash"`
+	ProofSize string `json:"proofSize"`
+	CodeSize  string `json:"codeSize"`
+	Proof     string `json:"proof"`
+	Idx       uint64 `json:"idx"`
+}
+
+type TestProver struct {
 	// Config
-	target common.Hash
-	step   uint64
+	step uint64
 
 	// Context (read-only)
+	transaction          *types.Transaction
+	txctx                *vm.Context
+	receipt              *types.Receipt
 	rules                params.Rules
 	blockNumber          uint64
 	transactionIdx       uint64
 	committedGlobalState vm.StateDB
 	startInterState      *state.InterState
 	blockHashTree        *state.BlockHashTree
-	transaction          *types.Transaction
-	receipt              *types.Receipt
 
 	// Global
 	env             *vm.EVM
 	counter         uint64
-	proof           *proof.OneStepProof
 	vmerr           error // Error from EVM execution
 	err             error // Error from the tracer
 	done            bool
+	ctx             OspTestGeneratedCtx
+	proof           OspTestProof
 	selfDestructSet *state.SelfDestructSet
 	accessListTrie  *state.AccessListTrie
 
@@ -69,46 +128,37 @@ type OneStepProver struct {
 	selfDestructed bool
 }
 
-// [NewProver] creates a new tracer that generates proofs for:
-//   - Type 4 IntraState -> IntraState: one-step EVM execution
-//   - Type 5 IntraState -> InterState: transaction finalization
-//
-// target is the hash of the start state that we want to prove
-// step is the step number of the start state (step 0 is the InterState before the transaction)
-// The target hash and step should be matched, otherwise [ErrStepIdxAndHashMismatch] will be returned
-// receipt is the receipt of the *current* transaction traced
-func NewProver(
-	target common.Hash,
+func NewTestProver(
 	step uint64,
+	transaction *types.Transaction,
+	txctx *vm.Context,
+	receipt *types.Receipt,
 	rules params.Rules,
 	blockNumber uint64,
 	transactionIdx uint64,
 	committedGlobalState vm.StateDB,
 	interState state.InterState,
 	blockHashTree *state.BlockHashTree,
-	transaction *types.Transaction,
-	receipt *types.Receipt,
-) *OneStepProver {
-	return &OneStepProver{
-		target:               target,
+) *TestProver {
+	return &TestProver{
 		step:                 step,
+		transaction:          transaction,
+		txctx:                txctx,
+		receipt:              receipt,
 		rules:                rules,
 		blockNumber:          blockNumber,
 		transactionIdx:       transactionIdx,
 		committedGlobalState: committedGlobalState,
 		startInterState:      &interState,
 		blockHashTree:        blockHashTree,
-		transaction:          transaction,
-		receipt:              receipt,
 	}
 }
 
-func (l *OneStepProver) CaptureTxStart(gasLimit uint64) {}
+func (l *TestProver) CaptureTxStart(gasLimit uint64) {}
 
-func (l *OneStepProver) CaptureTxEnd(restGas uint64) {}
+func (l *TestProver) CaptureTxEnd(restGas uint64) {}
 
-func (l *OneStepProver) CaptureStart(env *vm.EVM, from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) error {
-	// We won't handle transaction initiation proof here, it should be handled outside tracing
+func (l *TestProver) CaptureStart(env *vm.EVM, from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) error {
 	l.env = env
 	l.counter = 1
 	if create {
@@ -121,17 +171,40 @@ func (l *OneStepProver) CaptureStart(env *vm.EVM, from common.Address, to common
 	l.selfDestructSet = state.NewSelfDestructSet()
 	l.startInterState.GlobalState = l.env.StateDB.Copy() // This state includes gas-buying and nonce-increment
 	l.lastDepthState = l.startInterState
+	vmctx := l.env.Context
+	recipient := common.Address{}
+	if l.transaction.To() != nil {
+		recipient = *l.transaction.To()
+	}
+	v, r, s := l.transaction.RawSignatureValues()
+	l.ctx = OspTestGeneratedCtx{
+		TxnHash:     bytesToHex(l.transaction.Hash().Bytes()),
+		TxNonce:     uintToHex(l.transaction.Nonce()),
+		TxV:         bigToHex(v),
+		TxR:         bigToHex(r),
+		TxS:         bigToHex(s),
+		Coinbase:    addrToHex(vmctx.Coinbase),
+		Timestamp:   bigToHex(vmctx.Time),
+		BlockNumber: bigToHex(vmctx.BlockNumber),
+		Difficulty:  bigToHex(vmctx.Difficulty),
+		GasLimit:    uintToHex(vmctx.GasLimit),
+		ChainID:     bigToHex(l.transaction.ChainId()),
+		//BaseFee:     bigToHex(vmctx.BaseFee),
+		Origin:    addrToHex(l.txctx.Origin),
+		Recipient: addrToHex(recipient),
+		Value:     bigToHex(l.transaction.Value()),
+		Gas:       uintToHex(l.transaction.Gas()),
+		GasPrice:  bigToHex(l.txctx.GasPrice),
+		Input:     bytesToHex(input),
+		InputSize: uintToHex(l.input.Size()),
+	}
 	log.Info("Capture Start", "from", from, "to", to)
 	return nil
 }
 
-// CaptureState will be called before the opcode execution
-// vmerr is for stack validation and gas validation
-// the execution error is captured in CaptureFault
-func (l *OneStepProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, cost uint64, memory *vm.Memory, stack *vm.Stack, contract *vm.Contract, rData []byte, depth int, vmerr error) error {
+func (l *TestProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, cost uint64, memory *vm.Memory, stack *vm.Stack, contract *vm.Contract, rData []byte, depth int, vmerr error) error {
 	if l.done {
-		// Something went wrong during tracing, exit early
-		return nil
+		return vmerr
 	}
 
 	defer func() {
@@ -161,18 +234,18 @@ func (l *OneStepProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, 
 	)
 
 	log.Info("Generated state", "idx", l.counter, "hash", hexutil.Encode(s.Hash().Bytes()), "op", op)
-	log.Info("State", "state", fmt.Sprintf("%+v", s))
-	log.Info("State", "stack", fmt.Sprintf("%+v", s.Stack))
-	log.Info("State", "memory", fmt.Sprintf("%+v", s.Memory))
-	log.Info("State", "input", fmt.Sprintf("%+v", s.InputData))
-	log.Info("State", "output", fmt.Sprintf("%+v", s.ReturnData))
+	// log.Info("State", "state", fmt.Sprintf("%+v", s))
+	// log.Info("State", "stack", fmt.Sprintf("%+v", s.Stack))
+	// log.Info("State", "memory", fmt.Sprintf("%+v", s.Memory))
+	// log.Info("State", "input", fmt.Sprintf("%+v", s.InputData))
+	// log.Info("State", "output", fmt.Sprintf("%+v", s.ReturnData))
 
 	// The target state is found, generate the one-step proof
 	if l.counter-1 == l.step {
 		l.done = true
-		if l.lastState == nil || l.lastState.Hash() != l.target {
+		if l.lastState == nil {
 			l.err = ErrStepIdxAndHashMismatch
-			return nil
+			return vmerr
 		}
 		// l.vmerr is the error of l.lastState, either before/during the opcode execution
 		// if l.vmerr is not nil, the current state s must be in the parent call frame of l.lastState
@@ -181,21 +254,37 @@ func (l *OneStepProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, 
 		if err != nil {
 			l.err = err
 		} else {
-			l.proof = osp
+			encoded := osp.Encode()
+			l.proof = OspTestProof{
+				Opcode:    l.lastState.OpCode.String(),
+				Verifier:  uint64(osp.VerifierType),
+				CurrHash:  bytesToHex(l.lastState.Hash().Bytes()),
+				NextHash:  bytesToHex(s.Hash().Bytes()),
+				ProofSize: uintToHex(uint64(len(encoded))),
+				CodeSize:  uintToHex(osp.TotalCodeSize),
+				Proof:     bytesToHex(encoded),
+				Idx:       l.counter - 1,
+			}
+			log.Info("SHOW STATE", "length of lastState", len(l.lastState.Encode()))
+			log.Info("SHOW STATE", "length of encoded", len(encoded))
+
+			log.Info("SHOW STATE", "hash of lastState", l.lastState.Hash().String())
+			log.Info("SHOW STATE", "hash of encoded", crypto.Keccak256Hash(encoded[:len(l.lastState.Encode())]).String())
 		}
-		return nil
+		return vmerr
 	}
 	l.lastState = s
 	l.lastCode = contract.Code
+	l.lastCost = cost
 	// vmerr is not nil means the gas/stack validation failed, the opcode execution will
 	// not happen and the current call frame will be immediately reverted. This is the
 	// last CaptureState call for this call frame and there won't be any CaptureFault call.
 	// Otherwise, vmerr should be cleared.
 	l.vmerr = vmerr
-	return nil
+	return vmerr
 }
 
-func (l *OneStepProver) CaptureEnter(typ vm.OpCode, from common.Address, to common.Address, input []byte, gas uint64, value *big.Int) {
+func (l *TestProver) CaptureEnter(typ vm.OpCode, from common.Address, to common.Address, input []byte, gas uint64, value *big.Int) {
 	if l.done {
 		// Something went wrong during tracing, exit early
 		return
@@ -228,7 +317,7 @@ func (l *OneStepProver) CaptureEnter(typ vm.OpCode, from common.Address, to comm
 	l.input = state.NewMemoryFromBytes(input)
 }
 
-func (l *OneStepProver) CaptureExit(output []byte, gasUsed uint64, vmerr error) {
+func (l *TestProver) CaptureExit(output []byte, gasUsed uint64, vmerr error) {
 	if l.done {
 		// Something went wrong during tracing, exit early
 		return
@@ -254,29 +343,21 @@ func (l *OneStepProver) CaptureExit(output []byte, gasUsed uint64, vmerr error) 
 		}
 	}
 }
-
-// CaptureFault will be called when the stack/gas validation is passed but
-// the execution failed. The current call will immediately be reverted.
-func (l *OneStepProver) CaptureFault(env *vm.EVM, pc uint64, op vm.OpCode, gas, cost uint64, memory *vm.Memory, stack *vm.Stack, contract *vm.Contract, depth int, vmerr error) error {
+func (l *TestProver) CaptureFault(env *vm.EVM, pc uint64, op vm.OpCode, gas, cost uint64, memory *vm.Memory, stack *vm.Stack, contract *vm.Contract, depth int, vmerr error) error {
 	l.vmerr = vmerr
 	// The next CaptureState or CaptureEnd will handle the proof generation if needed
-	return nil
+	return vmerr
 }
 
-func (l *OneStepProver) CaptureEnd(output []byte, gasUsed uint64, t time.Duration, err error) error {
+func (l *TestProver) CaptureEnd(output []byte, gasUsed uint64, t time.Duration, vmerr error) error {
 	log.Info("Capture End", "output", output)
 	if l.done {
 		// Something went wrong during tracing, exit early
-		return nil
+		return vmerr
 	}
 
-	// If the last state is the target state, generate the transaction finalization proof
 	if l.counter-1 == l.step {
 		l.done = true
-		if l.lastState.Hash() != l.target {
-			l.err = ErrStepIdxAndHashMismatch
-			return nil
-		}
 		// If l.vmerr is not nil, the entire transaction execution will be reverted.
 		// Otherwise, the execution ended through STOP or RETURN opcode.
 		ctx := proof.NewProofGenContext(l.rules, l.env.Context.Coinbase, l.transaction, l.receipt, l.lastCode)
@@ -284,15 +365,38 @@ func (l *OneStepProver) CaptureEnd(output []byte, gasUsed uint64, t time.Duratio
 		if err != nil {
 			l.err = err
 		} else {
-			l.proof = osp
+			encoded := osp.Encode()
+			l.proof = OspTestProof{
+				Opcode:    l.lastState.OpCode.String(),
+				CurrHash:  bytesToHex(l.lastState.Hash().Bytes()),
+				NextHash:  bytesToHex(common.Hash{}.Bytes()), // TODO: get the hash of next InterState
+				ProofSize: uintToHex(uint64(len(encoded))),
+				Proof:     bytesToHex(encoded),
+				CodeSize:  uintToHex(osp.TotalCodeSize),
+				Idx:       l.counter - 1,
+			}
 		}
 	}
-	return nil
+	return vmerr
 }
 
-func (l *OneStepProver) GetProof() (*proof.OneStepProof, error) {
-	if !l.done {
-		return nil, errors.New("proof not generated")
+func (l *TestProver) GetResult() (json.RawMessage, error) {
+	if l.err != nil {
+		return nil, l.err
 	}
-	return l.proof, l.err
+	result := OspTestResult{
+		Ctx:   l.ctx,
+		Proof: l.proof,
+	}
+	res, err := json.Marshal(result)
+	if err != nil {
+		log.Error("Err", "err", err)
+		return nil, err
+	}
+	//l.proof.Proof
+	return json.RawMessage(res), nil
+}
+
+func decodeProof() {
+
 }
