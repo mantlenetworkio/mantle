@@ -92,7 +92,7 @@ contract VerifierTestDriver {
         uint8 verifier,
         bytes32 currStateHash,
         bytes calldata proof
-    ) external returns (bytes32) {
+    ) external view returns (bytes32) {
         VerificationContext.Context memory ctx =
             VerificationContext.Context(sequencerAddress, timestamp, number, origin, transaction, bytes32(0), txHash);
         bytes32 res = getVerifier(verifier).verifyOneStepProof(ctx, currStateHash, proof);
