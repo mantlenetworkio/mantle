@@ -20,6 +20,9 @@ type Config struct {
 
 	Rollup rollup.Config
 
+	// TPCfg token price config
+	TPCfg TPConfig
+
 	// P2PSigner will be used for signing off on published content
 	// if the node is sequencing and if the p2p stack is enabled
 	P2PSigner p2p.SignerSetup
@@ -38,6 +41,12 @@ type Config struct {
 	// Optional
 	Tracer    Tracer
 	Heartbeat HeartbeatConfig
+}
+
+type TPConfig struct {
+	Url             string
+	SourceName      string
+	SecondFrequency uint64
 }
 
 type RPCConfig struct {

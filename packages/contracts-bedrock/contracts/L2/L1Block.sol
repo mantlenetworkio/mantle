@@ -60,6 +60,11 @@ contract L1Block is Semver {
     uint256 public l1FeeScalar;
 
     /**
+     * @notice The scalar value applied to the L1 portion of the transaction fee.
+     */
+    uint256 public conversionRatio;
+
+    /**
      * @custom:semver 1.0.0
      */
     constructor() Semver(1, 0, 0) {}
@@ -84,7 +89,8 @@ contract L1Block is Semver {
         uint64 _sequenceNumber,
         bytes32 _batcherHash,
         uint256 _l1FeeOverhead,
-        uint256 _l1FeeScalar
+        uint256 _l1FeeScalar,
+        uint256 _conversionRatio
     ) external {
         require(
             msg.sender == DEPOSITOR_ACCOUNT,
@@ -99,5 +105,6 @@ contract L1Block is Semver {
         batcherHash = _batcherHash;
         l1FeeOverhead = _l1FeeOverhead;
         l1FeeScalar = _l1FeeScalar;
+        conversionRatio = _conversionRatio;
     }
 }
