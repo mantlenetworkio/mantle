@@ -18,9 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math/big"
-	"math/rand"
-
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/proof"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/prover"
 	proofState "github.com/mantlenetworkio/mantle/fraud-proof/proof/state"
@@ -31,6 +28,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
+	"math/big"
 )
 
 const (
@@ -249,10 +247,10 @@ func GenerateStates(backend Backend, ctx context.Context, startNum, endNum uint6
 	}
 
 	// TODO FIXME FRAUD-PROOF TEST, DELETE ME
-	randNum := byte(rand.Int())
-	log.Info("TEST change last inter state", "from", states[len(states)-1].VMHash[0], "diff", randNum)
-	states[len(states)-1].VMHash[0] += randNum
-	endHeader.Root[0] += randNum
+	//randNum := byte(rand.Int())
+	//log.Info("TEST change last inter state", "from", states[len(states)-1].VMHash[0], "diff", randNum)
+	//states[len(states)-1].VMHash[0] += randNum
+	//endHeader.Root[0] += randNum
 
 	states = append(states, &ExecutionState{
 		VMHash:         endHeader.Root,

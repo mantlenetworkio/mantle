@@ -121,8 +121,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					}
 
 					// TODO FIXME FRAUD-PROOF TEST, DELETE ME
-					//block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
-					block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
+					block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
 					if err != nil {
 						log.Error("Validator get block failed", "err", err)
 					}
@@ -133,7 +132,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 							VmHash: block.Root(),
 							//VmHash:    common.BigToHash(new(big.Int).SetUint64(1)), // VmHash mock for challenge test
 							InboxSize: checkAssertion.InboxSize,
-							Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
+							Parent:    assertion.Parent,
 						}
 						challengeCtx := ChallengeCtx{checkAssertion, ourAssertion}
 						data, _ := rlp.EncodeToBytes(challengeCtx)

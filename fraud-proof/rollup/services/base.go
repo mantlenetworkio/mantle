@@ -120,7 +120,7 @@ func (b *BaseService) Start(cleanL1, stake bool) *types.Block {
 			stakeOpts.Value = big.NewInt(int64(b.Config.StakeAmount))
 			_, err = b.Rollup.Contract.Stake(&stakeOpts)
 			if err != nil {
-				log.Crit("Failed to stake", "err", err)
+				log.Crit("Failed to stake", "from", stakeOpts.From.String(), "amount", stakeOpts.Value, "err", err)
 			}
 		}
 	}
