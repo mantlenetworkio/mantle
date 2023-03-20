@@ -27,7 +27,9 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0
 )
 
-require github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
+require (
+	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
+)
 
 require (
 	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0-00010101000000-000000000000 // indirect
