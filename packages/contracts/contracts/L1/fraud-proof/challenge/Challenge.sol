@@ -22,7 +22,6 @@
 
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
 import "./IChallenge.sol";
 import "./ChallengeLib.sol";
 import "../IRollup.sol";
@@ -139,10 +138,6 @@ contract Challenge is IChallenge {
         // TODO(ujval): initialize timeout
         defenderTimeLeft = 150;
         challengerTimeLeft = 150;
-        console.log("_startStateHash");
-        console.logBytes32(_startStateHash);
-        console.log("_endStateHash");
-        console.logBytes32(_endStateHash);
         prevBisection[0] = _startStateHash;
         prevBisection[1] = bytes32(0);
         prevBisection[2] = _endStateHash;
