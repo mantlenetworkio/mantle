@@ -42,6 +42,7 @@ require (
 	github.com/decred/dcrd/hdkeychain/v3 v3.0.0 // indirect
 	github.com/elastic/gosigar v0.14.2 // indirect
 	github.com/getsentry/sentry-go v0.15.0 // indirect
+	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect

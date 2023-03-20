@@ -77,7 +77,6 @@ func GenSequencerBatchParams(
 	shouldStartAtElement uint64,
 	blockOffset uint64,
 	batch []BatchElement,
-	UpgradeBlock uint64,
 ) (*AppendSequencerBatchParams, error) {
 	var (
 		contexts               []BatchContext
@@ -146,7 +145,6 @@ func GenSequencerBatchParams(
 	}
 
 	// For each group, construct the resulting BatchContext.
-	var l2Block uint64
 	for _, block := range groupedBlocks {
 		numSequencedTxs := uint64(len(block.sequenced))
 		numSubsequentQueueTxs := uint64(len(block.queued))
@@ -180,18 +178,11 @@ func GenSequencerBatchParams(
 			Timestamp:             timestamp,
 			BlockNumber:           blockNumber,
 		})
-		l2Block = blockNumber
-	}
-	var txsUpgrade []*CachedTx
-	if l2Block > UpgradeBlock {
-		txsUpgrade = nil
-	} else {
-		txsUpgrade = txs
 	}
 	return &AppendSequencerBatchParams{
 		ShouldStartAtElement:  shouldStartAtElement - blockOffset,
 		TotalElementsToAppend: uint64(len(batch)),
 		Contexts:              contexts,
-		Txs:                   txsUpgrade,
+		Txs:                   txs,
 	}, nil
 }
