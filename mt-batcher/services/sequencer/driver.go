@@ -35,6 +35,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"net/http"
+	gecho "github.com/labstack/echo/v4"
 )
 
 type SignerFn func(context.Context, common.Address, *types.Transaction) (*types.Transaction, error)
@@ -147,6 +149,30 @@ func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction) (*ty
 	}
 }
 
+func (s *Driver) getEigenLayerNode(c gecho.Context) error {
+	var elNodeReq EigenLayerNode 
+	if err := c.Bind(&elNodeReq); err != nil {
+		log.Error("invalid request params", "err", err)
+		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
+	}
+	var query struct {
+		operator graphView.OperatorGql `graphql:"operator(number: $ToBlockNumber)"`
+	}
+	variables := map[string]interface{}{
+		"EigenLayerNode": graphql.String(elNodeReq.EigenLayerNode),
+	}
+	err := s.GraphqlClient.Query(context.Background(), &query, variables)
+	if err != nil {
+		log.Error("query data from graphql fail", "err", err)
+		return c.JSON(http.StatusBadRequest, errors.New("query data from graphql fail"))
+	}
+	return c.JSON(http.StatusOK, query.operator)
+}
+
+type EigenLayerNode struct {
+	EigenLayerNode string `json:"store_id"`
+}
+
 func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, error) {
 	blockOffset := new(big.Int).SetUint64(d.Cfg.BlockOffset)
 	var end *big.Int
@@ -190,16 +216,12 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 			panic(fmt.Sprintf("MtBatcher Unable to encode tx: %v", err))
 		}
 		var l1MessageSender *l2gethcommon.Address
-		if txs[0].GetMeta().QueueIndex != nil {
-			l1Origin, err := d.DtlClient.GetEnqueueByIndex(*txs[0].GetMeta().QueueIndex)
-			if err != nil {
-				l1MessageSender = txs[0].GetMeta().L1MessageSender
-			} else {
-				originAddress := l2gethcommon.HexToAddress(l1Origin)
-				l1MessageSender = &originAddress
-			}
-		} else {
+		l1Origin, err := d.DtlClient.GetEnqueueByIndex(*txs[0].GetMeta().QueueIndex)
+		if err != nil {
 			l1MessageSender = txs[0].GetMeta().L1MessageSender
+		} else {
+			originAddress := l2gethcommon.HexToAddress(l1Origin)
+			l1MessageSender = &originAddress
 		}
 		log.Info("MtBatcher l1 tx origin", "address", l1MessageSender)
 		txMeta := &common3.TransactionMeta{
@@ -360,30 +382,6 @@ func (d *Driver) DisperseStoreData(data []byte, startl2BlockNumber *big.Int, end
 		return params, nil, err
 	}
 	return params, receipt, nil
-}
-
-func (s *Driver) getEigenLayerNode(c gecho.Context) error {
-	var elNodeReq EigenLayerNode 
-	if err := c.Bind(&elNodeReq); err != nil {
-		log.Error("invalid request params", "err", err)
-		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
-	}
-	var query struct {
-		operator graphView.OperatorGql `graphql:"operator(number: $ToBlockNumber)"`
-	}
-	variables := map[string]interface{}{
-		"EigenLayerNode": graphql.String(elNodeReq.EigenLayerNode),
-	}
-	err := s.GraphqlClient.Query(context.Background(), &query, variables)
-	if err != nil {
-		log.Error("query data from graphql fail", "err", err)
-		return c.JSON(http.StatusBadRequest, errors.New("query data from graphql fail"))
-	}
-	return c.JSON(http.StatusOK, query.operator)
-}
-
-type EigenLayerNode struct {
-	EigenLayerNode string `json:"store_id"`
 }
 
 func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, startl2BlockNumber, endl2BlockNumber *big.Int, originDataStoreId uint32, reConfirmedBatchIndex *big.Int, isReRollup bool) (*types.Receipt, error) {
