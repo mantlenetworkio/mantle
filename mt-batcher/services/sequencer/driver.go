@@ -190,12 +190,16 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 			panic(fmt.Sprintf("MtBatcher Unable to encode tx: %v", err))
 		}
 		var l1MessageSender *l2gethcommon.Address
-		l1Origin, err := d.DtlClient.GetEnqueueByIndex(*txs[0].GetMeta().QueueIndex)
-		if err != nil {
-			l1MessageSender = txs[0].GetMeta().L1MessageSender
+		if txs[0].GetMeta().QueueIndex != nil {
+			l1Origin, err := d.DtlClient.GetEnqueueByIndex(*txs[0].GetMeta().QueueIndex)
+			if err != nil {
+				l1MessageSender = txs[0].GetMeta().L1MessageSender
+			} else {
+				originAddress := l2gethcommon.HexToAddress(l1Origin)
+				l1MessageSender = &originAddress
+			}
 		} else {
-			originAddress := l2gethcommon.HexToAddress(l1Origin)
-			l1MessageSender = &originAddress
+			l1MessageSender = txs[0].GetMeta().L1MessageSender
 		}
 		log.Info("MtBatcher l1 tx origin", "address", l1MessageSender)
 		txMeta := &common3.TransactionMeta{
