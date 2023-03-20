@@ -362,6 +362,30 @@ func (d *Driver) DisperseStoreData(data []byte, startl2BlockNumber *big.Int, end
 	return params, receipt, nil
 }
 
+func (s *Driver) getEigenLayerNode(c gecho.Context) error {
+	var elNodeReq EigenLayerNode 
+	if err := c.Bind(&elNodeReq); err != nil {
+		log.Error("invalid request params", "err", err)
+		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
+	}
+	var query struct {
+		operator graphView.OperatorGql `graphql:"operator(number: $ToBlockNumber)"`
+	}
+	variables := map[string]interface{}{
+		"EigenLayerNode": graphql.String(elNodeReq.EigenLayerNode),
+	}
+	err := s.GraphqlClient.Query(context.Background(), &query, variables)
+	if err != nil {
+		log.Error("query data from graphql fail", "err", err)
+		return c.JSON(http.StatusBadRequest, errors.New("query data from graphql fail"))
+	}
+	return c.JSON(http.StatusOK, query.operator)
+}
+
+type EigenLayerNode struct {
+	EigenLayerNode string `json:"store_id"`
+}
+
 func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, startl2BlockNumber, endl2BlockNumber *big.Int, originDataStoreId uint32, reConfirmedBatchIndex *big.Int, isReRollup bool) (*types.Receipt, error) {
 	event, ok := graphView.PollingInitDataStore(
 		d.GraphClient,
