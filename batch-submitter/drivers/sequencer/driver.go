@@ -7,7 +7,6 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -177,9 +176,12 @@ func (d *Driver) GetBatchBlockRange(
 		// Add one because end is *exclusive*.
 		end = new(big.Int).Add(latestHeader.Number, bigOne)
 	} else {
-		end, _ = d.daContract.GetL2ConfirmedBlockNumber(&bind.CallOpts{
+		end, err = d.daContract.GetL2ConfirmedBlockNumber(&bind.CallOpts{
 			Context: context.Background(),
 		})
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 	if start.Cmp(end) > 0 {
 		return nil, nil, fmt.Errorf("invalid range, "+
