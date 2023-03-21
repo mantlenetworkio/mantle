@@ -139,7 +139,7 @@ func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction) (*ty
 
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
 		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
-		opts.GasTipCap = common4.FallbackGasTipCapCall
+		opts.GasTipCap = common4.FallbackGasTipCap
 		return d.Cfg.RawEigenContract.RawTransact(opts, tx.Data())
 
 	default:
@@ -190,12 +190,16 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 			panic(fmt.Sprintf("MtBatcher Unable to encode tx: %v", err))
 		}
 		var l1MessageSender *l2gethcommon.Address
-		l1Origin, err := d.DtlClient.GetEnqueueByIndex(*txs[0].GetMeta().QueueIndex)
-		if err != nil {
-			l1MessageSender = txs[0].GetMeta().L1MessageSender
+		if txs[0].GetMeta().QueueIndex != nil {
+			l1Origin, err := d.DtlClient.GetEnqueueByIndex(*txs[0].GetMeta().QueueIndex)
+			if err != nil {
+				l1MessageSender = txs[0].GetMeta().L1MessageSender
+			} else {
+				originAddress := l2gethcommon.HexToAddress(l1Origin)
+				l1MessageSender = &originAddress
+			}
 		} else {
-			originAddress := l2gethcommon.HexToAddress(l1Origin)
-			l1MessageSender = &originAddress
+			l1MessageSender = txs[0].GetMeta().L1MessageSender
 		}
 		log.Info("MtBatcher l1 tx origin", "address", l1MessageSender)
 		txMeta := &common3.TransactionMeta{
@@ -231,7 +235,16 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 	if err != nil {
 		panic(fmt.Sprintf("MtBatcher Unable to encode txn: %v", err))
 	}
-	if len(txnBufBytes) > 31*d.Cfg.EigenLayerNode {
+	var totalNode int
+	daNodes, err := d.GetEigenLayerNode()
+	if err != nil {
+		log.Error("get da node fail", "err", err)
+		totalNode = d.Cfg.EigenLayerNode
+	} else {
+		log.Info("MtBatcher current da node", "totalNode", daNodes)
+		totalNode = daNodes
+	}
+	if len(txnBufBytes) > 31*totalNode {
 		transactionByte = txnBufBytes
 	} else {
 		paddingBytes := make([]byte, (31*d.Cfg.EigenLayerNode)-len(txnBufBytes))
@@ -278,30 +291,6 @@ func (d *Driver) StoreData(ctx context.Context, uploadHeader []byte, duration ui
 	default:
 		return nil, err
 	}
-}
-
-func (s *Driver) getEigenLayerNode(c gecho.Context) error {
-	var elNodeReq EigenLayerNode 
-	if err := c.Bind(&elNodeReq); err != nil {
-		log.Error("invalid request params", "err", err)
-		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
-	}
-	var query struct {
-		operator graphView.OperatorGql `graphql:"operator(number: $ToBlockNumber)"`
-	}
-	variables := map[string]interface{}{
-		"EigenLayerNode": graphql.String(elNodeReq.EigenLayerNode),
-	}
-	err := s.GraphqlClient.Query(context.Background(), &query, variables)
-	if err != nil {
-		log.Error("query data from graphql fail", "err", err)
-		return c.JSON(http.StatusBadRequest, errors.New("query data from graphql fail"))
-	}
-	return c.JSON(http.StatusOK, query.operator)
-}
-
-type EigenLayerNode struct {
-	EigenLayerNode string `json:"store_id"`
 }
 
 func (d *Driver) ConfirmData(ctx context.Context, callData []byte, searchData rc.IDataLayrServiceManagerDataStoreSearchData, startL2BlockNumber, endL2BlockNumber *big.Int, originDataStoreId uint32, reConfirmedBatchIndex *big.Int, isReRollup bool) (*types.Transaction, error) {
@@ -380,6 +369,15 @@ func (d *Driver) DisperseStoreData(data []byte, startl2BlockNumber *big.Int, end
 		return params, nil, err
 	}
 	return params, receipt, nil
+}
+
+func (d *Driver) GetEigenLayerNode() (int, error) {
+	operators, err := d.GraphClient.QueryOperators()
+	if err != nil {
+		log.Error("MtBatcher query operators fail", "err", err)
+		return 0, err
+	}
+	return len(operators), nil
 }
 
 func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, startl2BlockNumber, endl2BlockNumber *big.Int, originDataStoreId uint32, reConfirmedBatchIndex *big.Int, isReRollup bool) (*types.Receipt, error) {
@@ -705,3 +703,5 @@ func (d *Driver) CheckConfirmedWorker() {
 		}
 	}
 }
+
+
