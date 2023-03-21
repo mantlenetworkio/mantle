@@ -1,4 +1,6 @@
 /* Imports: External */
+import { start } from 'repl'
+
 import { LevelUp } from 'levelup'
 import { BigNumber } from 'ethers'
 import { BatchType } from '@mantleio/core-utils'
@@ -14,8 +16,10 @@ import {
   StateRootEntry,
   TransactionBatchEntry,
   TransactionEntry,
-  TransactionListEntry
-} from "../types/database-types";
+  TransactionListEntry,
+  BatchTxByDsIdEntry,
+} from '../types/database-types'
+import {da} from "@mantleio/contracts/dist/types/contracts";
 
 const TRANSPORT_DA_DB_KEYS = {
   UPDATED_BATCH_INDEX: `da:updatedbatchindex`,
@@ -26,6 +30,8 @@ const TRANSPORT_DA_DB_KEYS = {
   DS_LIST_BY_BTACH_ID: `da:dssbybatchid`,
   ROLLUP_STORE_BY_BATCH_INDEX: `da:rollupstorebybatchindex`,
   UPDATED_ROLLUP_STORE_BY_BATCH_INDEX: `da:updatedrollupstorebybatchindex`,
+  TRANSACTION: `da:transaction`,
+  BATCH_TXS_DS_ID:`da:batchtxindexdsid`
 
   UPDATED_DS_ID: `da:updateddsid`,
 }
@@ -66,6 +72,21 @@ export class TransportDB {
   //======================================================================================
   //====================================DA==PART==START===================================
   //======================================================================================
+
+  public async getLatestBatchIndex(): Promise<number> {
+    return this.db.get(TRANSPORT_DA_DB_KEYS.BATCH_INDEX, 0)
+  }
+
+  public async putLatestBatchIndex(newBatchIndex: number): Promise<void> {
+    return this.db.put([
+      {
+        key: TRANSPORT_DA_DB_KEYS.BATCH_INDEX,
+        index: 0,
+        value: newBatchIndex,
+      },
+    ])
+  }
+
   public async putUpdatedBatchIndex(index: number): Promise<void> {
     await this.db.put([
       {
@@ -91,7 +112,10 @@ export class TransportDB {
   }
 
   public async getUpdatedRollupBatchIndex(): Promise<number> {
-    return this.db.get(TRANSPORT_DA_DB_KEYS.UPDATED_ROLLUP_STORE_BY_BATCH_INDEX, 0)
+    return this.db.get(
+      TRANSPORT_DA_DB_KEYS.UPDATED_ROLLUP_STORE_BY_BATCH_INDEX,
+      0
+    )
   }
 
   public async putUpdatedDsId(index: number): Promise<void> {
@@ -130,41 +154,79 @@ export class TransportDB {
     )
   }
 
-  public async putBatchTxByDataStoreId(
-    entries: BatchTransactionEntry[],
-    dsId: number
+  public async putBatchTxByDsId(
+    _startIndex: number,
+    _endIndex: number,
+    _dsId: number
   ): Promise<void> {
-    await this._putFullEntries(
-      TRANSPORT_DA_DB_KEYS.TXS_BY_DS_ID + dsId,
-      entries
-    )
+    const batchTxByDsIdEntry = {
+      index: 0,
+      startTxIndex: _startIndex,
+      endTxIndex: _endIndex,
+      dsId: _dsId,
+    }
+    return this.db.put([
+      {
+        key: TRANSPORT_DA_DB_KEYS.BATCH_TXS_DS_ID + _dsId,
+        index: 0,
+        value: batchTxByDsIdEntry,
+      },
+    ])
   }
+
+  public async getBatchTxByDsId(
+    _dsId: number
+  ): Promise<BatchTxByDsIdEntry> {
+
+    return this.db.get(
+        TRANSPORT_DA_DB_KEYS.BATCH_TXS_DS_ID + _dsId,0)
+
+  }
+
+
+
 
   public async getBatchTxByDataStoreId(
     dsId: number
-  ): Promise<BatchTransactionEntry[]> {
-    return this._getFullEnties(TRANSPORT_DA_DB_KEYS.TXS_BY_DS_ID + dsId)
+  ): Promise<TransactionEntry[]> {
+    const batchTxByDsIdEntry = await this.getBatchTxByDsId(dsId)
+    if (batchTxByDsIdEntry===null){
+      return []
+    }
+    return this.getDaTransactionsByIndexRange(batchTxByDsIdEntry.startTxIndex,batchTxByDsIdEntry.endTxIndex)
+
+
+  }
+  public async getDaTransactionsByIndexRange(
+    start: number,
+    end: number
+  ): Promise<TransactionEntry[]> {
+    return this._getEntries(TRANSPORT_DA_DB_KEYS.TRANSACTION, start, end)
   }
 
-  // public async getTxListByDSId(dsId: number): Promise<TransactionListEntry[]> {
-  //   const lens = await this._getLatestEntryIndex(
-  //     TRANSPORT_DA_DB_KEYS.TX_LIST_DS_ID + dsId
-  //   )
-  //   return this._getEntries(TRANSPORT_DA_DB_KEYS.TX_LIST_DS_ID + dsId, 0, lens+1)
-  // }
+  public async getDaTransactionByIndex(index: number): Promise<TransactionEntry> {
+    return this._getEntryByIndex(TRANSPORT_DA_DB_KEYS.TRANSACTION, index)
+  }
+  public async getDaLatestTransaction(): Promise<TransactionEntry> {
+    return this._getLatestEntry(TRANSPORT_DA_DB_KEYS.TRANSACTION)
+  }
 
+
+  public async putTransactions(entries: TransactionEntry[]): Promise<void> {
+    await this._putEntries(TRANSPORT_DA_DB_KEYS.TRANSACTION, entries)
+  }
   public async getTxListByDSId(dsId: number): Promise<TransactionListEntry[]> {
-
     return this._getFullEnties(TRANSPORT_DA_DB_KEYS.TX_LIST_DS_ID + dsId)
   }
-
-
 
   public async putTxListByDSId(
     entries: TransactionListEntry[],
     dsId: number
   ): Promise<void> {
-    await this._putFullEntries(TRANSPORT_DA_DB_KEYS.TX_LIST_DS_ID + dsId, entries)
+    await this._putFullEntries(
+      TRANSPORT_DA_DB_KEYS.TX_LIST_DS_ID + dsId,
+      entries
+    )
   }
 
   public async putDsById(entry: DataStoreEntry, dsId: number): Promise<void> {
@@ -187,19 +249,7 @@ export class TransportDB {
     return this._getEntryByIndex(TRANSPORT_DA_DB_KEYS.DATA_STORE_BY_ID, dsId)
   }
 
-  public async getLatestBatchIndex(): Promise<number> {
-    return this.db.get(TRANSPORT_DA_DB_KEYS.BATCH_INDEX, 0)
-  }
 
-  public async putLatestBatchIndex(newBatchIndex: number): Promise<void> {
-    return this.db.put([
-      {
-        key: TRANSPORT_DA_DB_KEYS.BATCH_INDEX,
-        index: 0,
-        value: newBatchIndex,
-      },
-    ])
-  }
 
   //=====================================================================
   //=============================DA===PART==END==========================
@@ -596,14 +646,14 @@ export class TransportDB {
     if (lastIndex === null) {
       return []
     }
-    return this._getEntries(key, 0, lastIndex+1)
+    return this._getEntries(key, 0, lastIndex + 1)
   }
 
   private async _putFullEntries<TEntry extends Indexed>(
     key: string,
     entries: TEntry[]
   ): Promise<void> {
-    await this._putLatestEntryIndex(key, entries.length -1)
+    await this._putLatestEntryIndex(key, entries.length - 1)
     await this._putEntries(key, entries)
   }
 }

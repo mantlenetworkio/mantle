@@ -53,28 +53,10 @@ export interface DataStoreEntry {
 }
 export interface TransactionListEntry {
   index: number
-  txIndex:number
+  txIndex: number
   blockNumber: string
   txHash: string
 }
-export interface BatchTransactionEntry {
-  index: number
-  txIndex:number
-  batchIndex: number
-  data: string
-  blockNumber: number
-  timestamp: number
-  gasLimit: string
-  target: string
-  origin: string
-  value: string
-  queueOrigin: 'sequencer' | 'l1'
-  queueIndex: number | null
-  decoded: DecodedSequencerBatchTransaction | null
-  confirmed: boolean
-}
-
-
 
 export interface TransactionEntry {
   index: number
@@ -110,6 +92,13 @@ interface BatchEntry {
   extraData: string
   l1TransactionHash: string
   type: string
+}
+
+export interface BatchTxByDsIdEntry {
+  index: number
+  startTxIndex: number
+  endTxIndex: number
+  dsId:number
 }
 
 export type TransactionBatchEntry = BatchEntry
