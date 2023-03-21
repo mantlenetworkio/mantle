@@ -235,7 +235,16 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 	if err != nil {
 		panic(fmt.Sprintf("MtBatcher Unable to encode txn: %v", err))
 	}
-	if len(txnBufBytes) > 31*d.Cfg.EigenLayerNode {
+	var totalNode int
+	daNodes, err := d.GetEigenLayerNode()
+	if err != nil {
+		log.Error("get da node fail", "err", err)
+		totalNode = d.Cfg.EigenLayerNode
+	} else {
+		log.Info("MtBatcher current da node", "totalNode", daNodes)
+		totalNode = daNodes
+	}
+	if len(txnBufBytes) > 31*totalNode {
 		transactionByte = txnBufBytes
 	} else {
 		paddingBytes := make([]byte, (31*d.Cfg.EigenLayerNode)-len(txnBufBytes))
@@ -360,6 +369,15 @@ func (d *Driver) DisperseStoreData(data []byte, startl2BlockNumber *big.Int, end
 		return params, nil, err
 	}
 	return params, receipt, nil
+}
+
+func (d *Driver) GetEigenLayerNode() (int, error) {
+	operators, err := d.GraphClient.QueryOperators()
+	if err != nil {
+		log.Error("MtBatcher query operators fail", "err", err)
+		return 0, err
+	}
+	return len(operators), nil
 }
 
 func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, startl2BlockNumber, endl2BlockNumber *big.Int, originDataStoreId uint32, reConfirmedBatchIndex *big.Int, isReRollup bool) (*types.Receipt, error) {
