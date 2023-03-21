@@ -116,4 +116,6 @@ interface IChallenge {
     function currentResponder() external view returns (address);
 
     function currentResponderTimeLeft() external view returns (uint256);
+
+    function completeChallenge(bool) external;
 }

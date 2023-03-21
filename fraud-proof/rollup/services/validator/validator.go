@@ -133,7 +133,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 							VmHash: block.Root(),
 							//VmHash:    common.BigToHash(new(big.Int).SetUint64(1)), // VmHash mock for challenge test
 							InboxSize: checkAssertion.InboxSize,
-							Parent:    new(big.Int).Sub(ev.AssertionID, new(big.Int).SetUint64(1)),
+							Parent:    assertion.Parent,
 						}
 						challengeCtx := ChallengeCtx{checkAssertion, ourAssertion}
 						data, _ := rlp.EncodeToBytes(challengeCtx)

@@ -116,6 +116,12 @@ contract Challenge is IChallenge {
         _;
     }
 
+    modifier onlyDefender(){
+        require(defender != address(0),"Defender not set");
+        require(msg.sender==defender,"Caller not defender");
+        _;
+    }
+
     function initialize(
         address _defender,
         address _challenger,
@@ -260,7 +266,6 @@ contract Challenge is IChallenge {
 
     function _currentWin(CompletionReason reason) private {
         if (turn == Turn.Defender) {
-            winner = defender;
             _asserterWin(reason);
         } else {
             winner = challenger;
@@ -270,21 +275,35 @@ contract Challenge is IChallenge {
 
     function _currentLose(CompletionReason reason) private {
         if (turn == Turn.Defender) {
-            winner = challenger;
             _challengerWin(reason);
         } else {
-            winner = defender;
             _asserterWin(reason);
         }
     }
 
     function _asserterWin(CompletionReason reason) private {
+        winner = defender;
         emit ChallengeCompleted(defender, challenger, reason);
-        IRollup(resultReceiver).completeChallenge(defender, challenger); // safeSelfDestruct(msg.sender);
     }
 
     function _challengerWin(CompletionReason reason) private {
+        winner = challenger;
         emit ChallengeCompleted(challenger, defender, reason);
-        IRollup(resultReceiver).completeChallenge(challenger, defender); // safeSelfDestruct(msg.sender);
+    }
+
+    function completeChallenge(bool result) external onlyDefender{
+        require(winner != address(0),"Do not have owner");
+        address loser = address(0);
+        if (winner == defender){
+            loser = challenger;
+        }else{
+            loser = defender;
+        }
+
+        if (result){
+            IRollup(resultReceiver).completeChallenge(winner, loser);
+        }else{
+            IRollup(resultReceiver).completeChallenge(loser, winner);
+        }
     }
 }
