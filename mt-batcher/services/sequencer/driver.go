@@ -35,8 +35,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"net/http"
-	gecho "github.com/labstack/echo/v4"
 )
 
 type SignerFn func(context.Context, common.Address, *types.Transaction) (*types.Transaction, error)
@@ -141,36 +139,12 @@ func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction) (*ty
 
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
 		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
-		opts.GasTipCap = common4.FallbackGasTipCap
+		opts.GasTipCap = common4.FallbackGasTipCapCall
 		return d.Cfg.RawEigenContract.RawTransact(opts, tx.Data())
 
 	default:
 		return nil, err
 	}
-}
-
-func (s *Driver) getEigenLayerNode(c gecho.Context) error {
-	var elNodeReq EigenLayerNode 
-	if err := c.Bind(&elNodeReq); err != nil {
-		log.Error("invalid request params", "err", err)
-		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
-	}
-	var query struct {
-		operator graphView.OperatorGql `graphql:"operator(number: $ToBlockNumber)"`
-	}
-	variables := map[string]interface{}{
-		"EigenLayerNode": graphql.String(elNodeReq.EigenLayerNode),
-	}
-	err := s.GraphqlClient.Query(context.Background(), &query, variables)
-	if err != nil {
-		log.Error("query data from graphql fail", "err", err)
-		return c.JSON(http.StatusBadRequest, errors.New("query data from graphql fail"))
-	}
-	return c.JSON(http.StatusOK, query.operator)
-}
-
-type EigenLayerNode struct {
-	EigenLayerNode string `json:"store_id"`
 }
 
 func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, error) {
@@ -304,6 +278,30 @@ func (d *Driver) StoreData(ctx context.Context, uploadHeader []byte, duration ui
 	default:
 		return nil, err
 	}
+}
+
+func (s *Driver) getEigenLayerNode(c gecho.Context) error {
+	var elNodeReq EigenLayerNode 
+	if err := c.Bind(&elNodeReq); err != nil {
+		log.Error("invalid request params", "err", err)
+		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
+	}
+	var query struct {
+		operator graphView.OperatorGql `graphql:"operator(number: $ToBlockNumber)"`
+	}
+	variables := map[string]interface{}{
+		"EigenLayerNode": graphql.String(elNodeReq.EigenLayerNode),
+	}
+	err := s.GraphqlClient.Query(context.Background(), &query, variables)
+	if err != nil {
+		log.Error("query data from graphql fail", "err", err)
+		return c.JSON(http.StatusBadRequest, errors.New("query data from graphql fail"))
+	}
+	return c.JSON(http.StatusOK, query.operator)
+}
+
+type EigenLayerNode struct {
+	EigenLayerNode string `json:"store_id"`
 }
 
 func (d *Driver) ConfirmData(ctx context.Context, callData []byte, searchData rc.IDataLayrServiceManagerDataStoreSearchData, startL2BlockNumber, endL2BlockNumber *big.Int, originDataStoreId uint32, reConfirmedBatchIndex *big.Int, isReRollup bool) (*types.Transaction, error) {
@@ -591,6 +589,38 @@ func (d *Driver) RollupMainWorker() {
 			return
 		}
 	}
+}
+
+func (d *Driver) ReRollupWorker() {
+	// call 合约, star, end 或者配置
+	blockOffset := new(big.Int).SetUint64(d.Cfg.BlockOffset)
+	var end *big.Int
+	log.Info("MtBatcher GetBatchBlockRange", "blockOffset", blockOffset)
+	start, err := d.Cfg.EigenDaContract.GetL2ConfirmedBlockNumber(&bind.CallOpts{
+		Context: context.Background(),
+	})
+	aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
+		d.Ctx, start, end,
+	)
+	if err != nil {
+		log.Error("MtBatcher eigenDa sequencer unable to craft batch tx", "err", err)
+		continue
+	}
+	params, receipt, err := d.DisperseStoreData(aggregateTxData, startL2BlockNumber, endL2BlockNumber, false)
+	if err != nil {
+		log.Error("MtBatcher disperse store data fail", "err", err)
+		continue
+	}
+	log.Info("MtBatcher disperse store data success", "txHash", receipt.TxHash.String())
+	csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, 0, big.NewInt(0), false)
+	if err != nil {
+		log.Error("MtBatcher confirm store data fail", "err", err)
+		continue
+	}
+	log.Info("MtBatcher confirm store data success", "txHash", csdReceipt.TxHash.String())
+case err := <-d.Ctx.Done():
+	log.Error("MtBatcher eigenDa sequencer service shutting down", "err", err)
+	return start, end, nil
 }
 
 func (d *Driver) CheckConfirmedWorker() {
