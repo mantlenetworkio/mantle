@@ -797,6 +797,50 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         }
       }
     )
+    this._registerRoute(
+      'get',
+      '/da/transaction/latest',
+      async (): Promise<TransactionResponse> => {
+        const transactionEntry = await this.state.db.getDaLatestTransaction(
+        )
+
+        if (transactionEntry === null) {
+          return {
+            transaction: null,
+            batch:null
+          }
+        }
+        return {
+          transaction: transactionEntry,
+          batch:null
+        }
+      }
+    )
+    this._registerRoute(
+      'get',
+      '/da/transaction/index/{index}',
+      async (req): Promise<TransactionResponse> => {
+        const transactionEntry = await this.state.db.getDaTransactionByIndex(
+          BigNumber.from(req.params.index).toNumber()
+        )
+
+        if (transactionEntry === null) {
+          return {
+            transaction: null,
+            batch:null
+          }
+        }
+        return {
+          transaction: transactionEntry,
+          batch:null
+        }
+      }
+    )
+
+
+
+
+
 
     this._registerRoute(
       'get',
@@ -816,7 +860,29 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           txList: batchTxs,
         }
       }
+
+
+
+
+
     )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     this._registerRoute(
       'get',
