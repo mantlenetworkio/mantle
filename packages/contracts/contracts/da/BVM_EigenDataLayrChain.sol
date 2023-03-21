@@ -50,12 +50,23 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         RollupStoreStatus status;
     }
 
+    struct RollupIndex {
+        uint256 startBlock;
+        uint256 endTimeBlock;
+        uint32 originDataStoreId;
+        uint32 dataStoreId;
+        uint32 confirmAt;
+        RollupStoreStatus status;
+        bool    isReRollup;
+    }
+
     struct BatchRollupBlock {
         uint256 startL2BlockNumber;
         uint256 endBL2BlockNumber;
         bool    isReRollup;
     }
-
+    
+    mapping(uint256 => RollupIndex) public rollupBatchIndex;
     mapping(uint256 => RollupStore) public rollupBatchIndexRollupStores;
     mapping(uint32 => BatchRollupBlock) public dataStoreIdToL2RollUpBlock;
     mapping(uint32 => uint256) public dataStoreIdToRollupStoreNumber;
@@ -100,12 +111,24 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         return rollupBatchIndexRollupStores[_rollupBatchIndex];
     }
 
+    function getRollupIndex(uint256 _rollupBatchIndex) public view returns (RollupStore memory) {
+        return rollupBatchIndex[_rollupBatchIndex];
+    }
+    //rollupBatchIndex
     /**
     * @notice Returns the l2 block number by store id
      * @return BatchRollupBlock.
      */
     function getL2RollUpBlockByDataStoreId(uint32 _dataStoreId) public view returns (BatchRollupBlock memory) {
         return dataStoreIdToL2RollUpBlock[_dataStoreId];
+    }
+
+    /**
+    * @notice Returns the l2 block number by store id
+     * @return RollupIndex.
+     */
+    function getL2RollUpBlockByDataStoreId(uint32 _dataStoreId) public view returns (BatchRollupBlock memory) {
+        return rollupBatchIndex[_dataStoreId];
     }
 
     /**
@@ -194,6 +217,16 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         l2ConfirmedBlockNumber = 1;
     }
 
+    function resetRollupBatchIndex(uint256 _rollupBatchIndex) external {
+        require(msg.sender == sequencer, "Only the sequencer can update sequencer address");
+        for (uint256 i = 0; i < rollupBatchIndex; i++) {
+            delete rollupBatchIndex[i];
+        }
+        rollupBatchIndex = _rollupBatchIndex;
+        l2StoredBlockNumber = 1;
+        l2ConfirmedBlockNumber = 1;
+    }
+
     /**
      * @notice Called by the (staked) sequencer to pay for a datastore and post some metadata (in the `header` parameter) about it on chain.
      * Since the sequencer must encode the data before they post the header on chain, they must use a *snapshot* of the number and stakes of DataLayr operators
@@ -225,6 +258,12 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
             header
         );
         dataStoreIdToL2RollUpBlock[dataStoreId] = BatchRollupBlock({
+            startL2BlockNumber: startL2Block,
+            endBL2BlockNumber: endL2Block,
+            isReRollup: isReRollup
+        });
+        //rollupBatchIndex RollupIndex
+        rollupBatchIndex[dataStoreId] = RollupIndex({
             startL2BlockNumber: startL2Block,
             endBL2BlockNumber: endL2Block,
             isReRollup: isReRollup
@@ -271,11 +310,23 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
                 confirmAt: uint32(block.timestamp + fraudProofPeriod),
                 status: RollupStoreStatus.COMMITTED
             });
+            rollupBatchIndex[rollupBatchIndex] = RollupStore({
+                originDataStoreId: searchData.metadata.globalDataStoreId,
+                dataStoreId: searchData.metadata.globalDataStoreId,
+                confirmAt: uint32(block.timestamp + fraudProofPeriod),
+                status: RollupStoreStatus.COMMITTED
+            });
             l2ConfirmedBlockNumber = endL2Block;
             dataStoreIdToRollupStoreNumber[searchData.metadata.globalDataStoreId] = rollupBatchIndex;
             emit RollupStoreConfirmed(uint32(rollupBatchIndex++), searchData.metadata.globalDataStoreId, startL2Block, endL2Block);
         } else {
             rollupBatchIndexRollupStores[reConfirmedBatchIndex] = RollupStore({
+                originDataStoreId: originDataStoreId,
+                dataStoreId: searchData.metadata.globalDataStoreId,
+                confirmAt: uint32(block.timestamp + fraudProofPeriod),
+                status: RollupStoreStatus.COMMITTED
+            });
+            rollupBatchIndex[reConfirmedBatchIndex] = RollupStore({
                 originDataStoreId: originDataStoreId,
                 dataStoreId: searchData.metadata.globalDataStoreId,
                 confirmAt: uint32(block.timestamp + fraudProofPeriod),
@@ -308,6 +359,7 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
     ) external {
         require(fraudProofWhitelist[msg.sender] == true, "Only fraud proof white list can challenge data");
         RollupStore memory rollupStore = rollupBatchIndexRollupStores[fraudulentStoreNumber];
+        RollupStore memory rollupStore = rollupBatchIndex[fraudulentStoreNumber];
         require(rollupStore.status == RollupStoreStatus.COMMITTED && rollupStore.confirmAt > block.timestamp, "RollupStore must be committed and unconfirmed");
         require(
             IDataLayrServiceManager(dataManageAddress).getDataStoreHashesForDurationAtTimestamp(
@@ -332,6 +384,7 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         require(provenString.length == FRAUD_STRING.length, "Parsing error, proven string is different length than fraud string");
         require(keccak256(provenString) == keccak256(FRAUD_STRING), "proven string != fraud string");
         rollupBatchIndexRollupStores[fraudulentStoreNumber].status = RollupStoreStatus.REVERTED;
+        rollupBatchIndex[fraudulentStoreNumber].status = RollupStoreStatus.REVERTED;
         emit RollupStoreReverted(
             fraudulentStoreNumber,
             searchData.metadata.globalDataStoreId,
