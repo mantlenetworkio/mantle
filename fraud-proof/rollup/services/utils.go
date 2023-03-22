@@ -41,6 +41,13 @@ func SubmitOneStepProof(
 	log.Info("OSP BuildVerificationContext success")
 
 	log.Info("OSP VerifyOneStepProof...")
+	log.Warn("OSP verificationContext: ", "verificationContext", verificationContext)
+	log.Warn("OSP VerifierType: ", "VerifierType", uint8(osp.VerifierType))
+	log.Warn("OSP encode: ", "osp", osp.Encode())
+	log.Warn("challengedStepIndex: ", "challengedStepIndex", challengedStepIndex)
+	log.Warn("prevChallengedSegmentStart: ", "prevChallengedSegmentStart", prevChallengedSegmentStart)
+	log.Warn("prevChallengedSegmentLength: ", "prevChallengedSegmentLength", prevChallengedSegmentLength)
+
 	_, err = challengeSession.VerifyOneStepProof(
 		*verificationContext,
 		uint8(osp.VerifierType),

@@ -307,10 +307,20 @@ func (s *Sequencer) challengeLoop() {
 			case ev := <-challengeCompletedCh:
 				// TODO: handle if we are not winner --> state corrupted
 				log.Info("[challenge] Challenge completed", "winner", ev.Winner)
+				if !bytes.Equal(ev.Winner.Bytes(), s.TransactOpts.From.Bytes()) {
+					log.Info("[challenge] Challenge verify")
+					// todo Challenge verify
+					_, err = challengeSession.CompleteChallenge(false)
+					if err != nil {
+						log.Error("Can not complete challenge", "error", err)
+						continue
+					}
+				}
 				bisectedSub.Unsubscribe()
 				challengeCompletedSub.Unsubscribe()
 				states = []*proof.ExecutionState{}
 				inChallenge = false
+				challengeSession = nil
 				s.challengeResolutionCh <- struct{}{}
 			case <-s.Ctx.Done():
 				bisectedSub.Unsubscribe()
@@ -330,7 +340,7 @@ func (s *Sequencer) challengeLoop() {
 					CallOpts:     bind.CallOpts{Pending: true, Context: s.Ctx},
 					TransactOpts: *s.TransactOpts,
 				}
-				// use stake to check challenge status
+				// use staker status to check challenge status
 				// 1. challenge contract not exist
 				// 2. challenge exist and already completed
 				stakeStatus, _ := s.Rollup.Stakers(s.Rollup.TransactOpts.From)
