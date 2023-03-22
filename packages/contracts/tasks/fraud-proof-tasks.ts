@@ -1,12 +1,15 @@
+import { exists, existsSync } from 'fs'
+
 import { task } from 'hardhat/config'
 import { ethers } from 'ethers'
 import { hexStringEquals } from '@mantleio/core-utils'
 
 import { getContractFactory } from '../src'
 import { names } from '../src/address-names'
+import {boolean, int} from "hardhat/internal/core/params/argumentTypes";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require('fs');
+const fs = require('fs')
 
 task(`deployVerifier`)
   .addParam('address', 'verifier entry address')
@@ -237,24 +240,44 @@ task(`deployVerifier`)
     console.log('verifierTestDriver deployed to:', verifierTestDriver.address)
   })
 
-task(`genOsp`)
+task(`genOspForStep`)
+  .addParam('fraud', '', false, boolean)
   .addParam('hash', 'the transaction hash to prove')
-  .addParam('step', 'the step to prove')
+  .addParam('step', 'the step to prove', 1, int)
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:8545'
     )
-    const res = await provider.send('debug_generateProofForTest', [
+    const res = await provider.send('debug_generateProofForStep', [
+      taskArgs.fraud,
       taskArgs.hash,
-      0,
-      0,
-      parseInt(taskArgs.step, 10),
+      taskArgs.step,
     ])
     fs.writeFileSync(
-      './test/data/json/fraud-proof/osp.json',
+      './test/data/json/fraud-proof/ospStep.json',
       JSON.stringify(res)
     )
-    console.log('wrote proof to ./test/data/json/fraud-proof/osp.json')
+    console.log('wrote proof to ./test/data/json/fraud-proof/ospStep.json')
+  })
+
+task(`genOspForOpcode`)
+  .addParam('fraud', '', false, boolean)
+  .addParam('hash', 'the transaction hash to prove')
+  .addParam('opcode', 'the op code to prove', 82, int)
+  .setAction(async (taskArgs) => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://localhost:8545'
+    )
+    const res = await provider.send('debug_generateProofForOpcode', [
+      taskArgs.fraud,
+      taskArgs.hash,
+      taskArgs.opcode,
+    ])
+    fs.writeFileSync(
+      './test/data/json/fraud-proof/ospOp.json',
+      JSON.stringify(res)
+    )
+    console.log('wrote proof to ./test/data/json/fraud-proof/ospOp.json')
   })
 
 task(`verifyOsp`)
@@ -270,46 +293,55 @@ task(`verifyOsp`)
     const verifierTestDriver = await getContractFactory(
       'VerifierTestDriver'
     ).attach('0xc6e7DF5E7b4f2A278906862b61205850344D4e7d')
-    const { ctx, proof } = JSON.parse(
-      fs.readFileSync('./test/data/json/fraud-proof/osp.json')
-    )
-    console.log(`processing tx ${ctx.txnHash}`)
 
-    const transaction = [
-      ctx.txNonce,
-      ctx.gasPrice,
-      ctx.gas,
-      ctx.recipient,
-      ctx.value,
-      ctx.input,
-      ctx.txV,
-      ctx.txR,
-      ctx.txS,
-    ]
+    const path = []
+    if (fs.existsSync('./test/data/json/fraud-proof/ospStep.json')) {
+      path.push('./test/data/json/fraud-proof/ospStep.json')
+    }
+    if (fs.existsSync('./test/data/json/fraud-proof/ospOp.json')) {
+      path.push('./test/data/json/fraud-proof/ospOp.json')
+    }
 
-    const res = await verifierTestDriver
-      .connect(ownerWallet)
-      .verifyProof(
-        ctx.coinbase,
-        ctx.timestamp,
-        ctx.blockNumber,
-        ctx.origin,
-        ctx.txnHash,
-        transaction,
-        proof.verifier,
-        proof.currHash,
-        proof.proof
-      )
+    for (const item of path) {
+      const { ctx, proof } = JSON.parse(fs.readFileSync(item))
+      console.log(`processing tx ${ctx.txnHash}`)
 
-    if (!hexStringEquals(proof.nextHash, res)) {
-      console.log(
-        'next hash not equal with proof: ',
-        proof.nextHash,
-        ' res: ',
-        res
-      )
-    } else {
-      console.log('verify success')
+      const transaction = [
+        ctx.txNonce,
+        ctx.gasPrice,
+        ctx.gas,
+        ctx.recipient,
+        ctx.value,
+        ctx.input,
+        ctx.txV,
+        ctx.txR,
+        ctx.txS,
+      ]
+
+      const res = await verifierTestDriver
+        .connect(ownerWallet)
+        .verifyProof(
+          ctx.coinbase,
+          ctx.timestamp,
+          ctx.blockNumber,
+          ctx.origin,
+          ctx.txnHash,
+          transaction,
+          proof.verifier,
+          proof.currHash,
+          proof.proof
+        )
+
+      if (!hexStringEquals(proof.nextHash, res)) {
+        console.log(
+          'next hash not equal with proof: ',
+          proof.nextHash,
+          ' res: ',
+          res
+        )
+      } else {
+        console.log('verify success')
+      }
     }
   })
 
