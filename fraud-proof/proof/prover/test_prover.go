@@ -92,8 +92,8 @@ type OspTestProof struct {
 
 type TestProver struct {
 	// Config
-	step uint64
-
+	step   int64
+	opcode int64
 	// Context (read-only)
 	transaction          *types.Transaction
 	txctx                *vm.Context
@@ -129,7 +129,8 @@ type TestProver struct {
 }
 
 func NewTestProver(
-	step uint64,
+	step int64,
+	opcode int64,
 	transaction *types.Transaction,
 	txctx *vm.Context,
 	receipt *types.Receipt,
@@ -142,6 +143,7 @@ func NewTestProver(
 ) *TestProver {
 	return &TestProver{
 		step:                 step,
+		opcode:               opcode,
 		transaction:          transaction,
 		txctx:                txctx,
 		receipt:              receipt,
@@ -241,7 +243,7 @@ func (l *TestProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, cos
 	// log.Info("State", "output", fmt.Sprintf("%+v", s.ReturnData))
 
 	// The target state is found, generate the one-step proof
-	if l.counter-1 == l.step {
+	if int64(l.counter-1) == l.step || int64(op) == l.opcode {
 		l.done = true
 		if l.lastState == nil {
 			l.err = ErrStepIdxAndHashMismatch
@@ -356,7 +358,7 @@ func (l *TestProver) CaptureEnd(output []byte, gasUsed uint64, t time.Duration, 
 		return vmerr
 	}
 
-	if l.counter-1 == l.step {
+	if int64(l.counter-1) == l.step {
 		l.done = true
 		// If l.vmerr is not nil, the entire transaction execution will be reverted.
 		// Otherwise, the execution ended through STOP or RETURN opcode.
@@ -393,10 +395,5 @@ func (l *TestProver) GetResult() (json.RawMessage, error) {
 		log.Error("Err", "err", err)
 		return nil, err
 	}
-	//l.proof.Proof
 	return json.RawMessage(res), nil
-}
-
-func decodeProof() {
-
 }

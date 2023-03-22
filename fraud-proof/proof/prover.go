@@ -18,6 +18,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/big"
+
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/proof"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/prover"
 	proofState "github.com/mantlenetworkio/mantle/fraud-proof/proof/state"
@@ -28,7 +30,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
-	"math/big"
 )
 
 const (
@@ -167,6 +168,13 @@ func GenerateStates(backend Backend, ctx context.Context, startNum, endNum uint6
 				TransactionIdx: uint64(i),
 				StepIdx:        0,
 			})
+
+			// TODO FIXME FRAUD-PROOF TEST, DELETE ME
+			//if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+			//	randNum := byte(rand.Int())
+			//	log.Info("TEST change last inter state", "from", states[len(states)-1].VMHash[0], "diff", randNum)
+			//	states[len(states)-1].VMHash[0] += randNum
+			//}
 
 			// Execute transaction i with intra state generator enabled.
 			stateGenerator := prover.NewIntraStateGenerator(block.NumberU64(), uint64(i), statedb, *its, blockHashTree)
