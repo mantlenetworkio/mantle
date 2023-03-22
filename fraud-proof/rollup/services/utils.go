@@ -204,7 +204,10 @@ func BuildVerificationContext(ctx context.Context, proofBackend proof.Backend, s
 			return nil, err
 		}
 	} else {
-
+		evmTx.V = big.NewInt(0)
+		evmTx.R = big.NewInt(0)
+		evmTx.S = big.NewInt(0)
+		txOrigin = common.BigToAddress(common.Big0)
 	}
 	return &bindings.VerificationContextContext{
 		Coinbase:    ethc.Address(header.Coinbase),

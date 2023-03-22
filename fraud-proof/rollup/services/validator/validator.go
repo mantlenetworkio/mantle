@@ -120,18 +120,27 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 						Parent:    assertion.Parent,
 					}
 
-					// TODO FIXME FRAUD-PROOF TEST, DELETE ME
-					//block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
-					block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
+					block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
 					if err != nil {
 						log.Error("Validator get block failed", "err", err)
 					}
+					// TODO FIXME FRAUD-PROOF TEST, DELETE ME
+					//block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
+					//if err != nil {
+					//	log.Error("Validator get block failed", "err", err)
+					//}
+					//DebugFlag := false
+					//for _, tx := range block.Transactions() {
+					//	if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+					//		DebugFlag = true
+					//	}
+					//}
+					//if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 && DebugFlag {
 					if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 {
 						// Validation failed
 						log.Info("Validator check assertion vmHash failed, start challenge assertion....")
 						ourAssertion := &rollupTypes.Assertion{
-							VmHash: block.Root(),
-							//VmHash:    common.BigToHash(new(big.Int).SetUint64(1)), // VmHash mock for challenge test
+							VmHash:    block.Root(),
 							InboxSize: checkAssertion.InboxSize,
 							Parent:    assertion.Parent,
 						}

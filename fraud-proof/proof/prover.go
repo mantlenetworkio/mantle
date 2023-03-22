@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"math/rand"
 
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/proof"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/prover"
@@ -170,6 +169,13 @@ func GenerateStates(backend Backend, ctx context.Context, startNum, endNum uint6
 				StepIdx:        0,
 			})
 
+			// TODO FIXME FRAUD-PROOF TEST, DELETE ME
+			//if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+			//	randNum := byte(rand.Int())
+			//	log.Info("TEST change last inter state", "from", states[len(states)-1].VMHash[0], "diff", randNum)
+			//	states[len(states)-1].VMHash[0] += randNum
+			//}
+
 			// Execute transaction i with intra state generator enabled.
 			stateGenerator := prover.NewIntraStateGenerator(block.NumberU64(), uint64(i), statedb, *its, blockHashTree)
 			txCtx, err := generateTxCtx(backend, ctx, block, tx)
@@ -247,12 +253,6 @@ func GenerateStates(backend Backend, ctx context.Context, startNum, endNum uint6
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO FIXME FRAUD-PROOF TEST, DELETE ME
-	randNum := byte(rand.Int())
-	log.Info("TEST change last inter state", "from", states[len(states)-1].VMHash[0], "diff", randNum)
-	states[len(states)-1].VMHash[0] += randNum
-	endHeader.Root[0] += randNum
 
 	states = append(states, &ExecutionState{
 		VMHash:         endHeader.Root,
