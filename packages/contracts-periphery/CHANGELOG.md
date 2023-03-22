@@ -141,7 +141,7 @@
 - 61a30273: Simplify, cleanup, and standardize ERC721 bridge contracts.
 - a320e744: Updates contracts-periphery to use the standardized hardhat deploy config plugin
 - 29ff7462: Revert es target back to 2017
-- 604dd315: Deploy Drippie to kovan and OP kovan
+- 604dd315: Deploy Drippie to kovan and MT kovan
 
 ## 0.1.2
 
