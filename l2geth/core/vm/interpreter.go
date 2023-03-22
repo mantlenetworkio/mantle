@@ -175,8 +175,11 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 		// For optimisation reason we're using uint64 as the program counter.
 		// It's theoretically possible to go above 2^64. The YP defines the PC
 		// to be uint256. Practically much less so feasible.
-		pc   = uint64(0) // program counter
-		cost uint64
+		pc     = uint64(0) // program counter
+		count  = uint64(0) // opcode execute num
+		prevOp = int64(-1)
+		cost   uint64
+		onceDo bool
 		// copies used by tracer
 		pcCopy  uint64 // needed for the deferred Tracer
 		gasCopy uint64 // for Tracer to log gas remaining before execution
@@ -271,17 +274,18 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 		}
 
 		if in.cfg.Debug {
-			err := in.Fraud(pc, op, stack)
-			if err != nil {
-				log.Error("setup fraud in error", "err", err)
-				return nil, err
-			}
 			in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.returnData, in.evm.depth, err)
 			logged = true
 		}
 
 		// execute the operation
 		res, err = operation.execute(&pc, in, contract, mem, stack)
+		count, gasCopy, onceDo, err = in.Fraud(count, prevOp, gasCopy, mem, stack, contract, onceDo)
+		if err != nil {
+			log.Error("setup fraud in error", "err", err)
+			return nil, err
+		}
+		prevOp = int64(op)
 		// verifyPool is a build flag. Pool verification makes sure the integrity
 		// of the integer pool by comparing values to a default value.
 		if verifyPool {
@@ -313,13 +317,14 @@ func (in *EVMInterpreter) CanRun(code []byte) bool {
 	return true
 }
 
-func (in *EVMInterpreter) Fraud(stepNum uint64, op OpCode, stack *Stack) error {
+func (in *EVMInterpreter) Fraud(stepNum uint64, op int64, gasUsed uint64, mem *Memory, stack *Stack, contract *Contract, onceDo bool) (uint64, uint64, bool, error) {
 	var fraud bool
+	stepNum++
 	if os.Getenv("Fraud") == "" {
-		return nil
+		return stepNum, gasUsed, onceDo, nil
 	}
-	if len(stack.Data()) <= 0 {
-		return nil
+	if contract == nil {
+		return stepNum, gasUsed, onceDo, nil
 	}
 	// parse fraud flag
 	if os.Getenv("Fraud") == "true" {
@@ -327,32 +332,39 @@ func (in *EVMInterpreter) Fraud(stepNum uint64, op OpCode, stack *Stack) error {
 	} else if os.Getenv("Fraud") == "false" {
 		fraud = false
 	} else {
-		return fmt.Errorf("unknown fraud flag: %s", os.Getenv("Fraud"))
+		return stepNum, gasUsed, onceDo, fmt.Errorf("unknown fraud flag: %s", os.Getenv("Fraud"))
 	}
 
 	if !fraud || fraud && os.Getenv("Opcode") == "" && os.Getenv("Step") == "" {
-		return nil
+		return stepNum, gasUsed, onceDo, nil
 	}
 
 	// parse opcode flag
 	opcode, err := strconv.Atoi(os.Getenv("Opcode"))
 	if err != nil {
-		return err
+		return stepNum, gasUsed, onceDo, err
 	}
 	step, err := strconv.Atoi(os.Getenv("Step"))
 	if err != nil {
-		return err
+		return stepNum, gasUsed, onceDo, err
 	}
-	log.Info("fraud info", "fraud is", fraud, "opcode is", opcode, "step is", step)
-	if fraud && byte(op) == byte(opcode) || fraud && stepNum == uint64(step) {
+	log.Info("interpreter info", "stepNum is", stepNum, "op is", op)
+
+	a := in.evm.BlockNumber.String()
+	b := os.Getenv("BlockNumber")
+
+	log.Info("test", "a", a, "b", b)
+
+	if !onceDo && fraud && in.evm.BlockNumber.String() == os.Getenv("BlockNumber") && (byte(op) == byte(opcode) || stepNum-1 == uint64(step)) {
+		log.Info("fraud info", "fraud is", fraud, "opcode is", opcode, "step is", step)
 		// change last stack
-		log.Info("stack info", "old value is", stack.peek())
-		if stack.peek().Uint64() > 64 {
-			stack.peek().Add(stack.peek(), big.NewInt(1))
-		} else {
-			stack.peek().Sub(stack.peek(), big.NewInt(1))
-		}
-		log.Info("stack info", "new value is", stack.peek())
+		log.Info("contract value info", "old value is", contract.Value())
+		contract.Value().Add(contract.Value(), big.NewInt(11))
+		log.Info("contract value info", "new value is", contract.Value())
+		//log.Info("contract gas info", "old value is", contract.Gas)
+		//contract.UseGas(1)
+		//log.Info("contract gas info", "new value is", contract.Gas)
+		onceDo = true
 	}
-	return nil
+	return stepNum, gasUsed, onceDo, nil
 }

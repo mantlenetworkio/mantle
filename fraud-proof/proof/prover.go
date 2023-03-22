@@ -18,9 +18,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/fraud-proof/proof/proof"
 	"math/big"
 
-	"github.com/mantlenetworkio/mantle/fraud-proof/proof/proof"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/prover"
 	proofState "github.com/mantlenetworkio/mantle/fraud-proof/proof/state"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -125,7 +125,7 @@ func GenerateStates(backend Backend, ctx context.Context, startNum, endNum uint6
 		TransactionIdx: 0,
 		StepIdx:        0,
 	})
-	log.Info("Get start state", "startNum", startNum, "VMHash", startHeader.Root.String())
+	log.Info("Get start state", "startNum", startNum, "endNum", endNum, "VMHash", startHeader.Root.String())
 
 	for num := startNum; num < endNum; num++ {
 		// Preparation of block context
@@ -376,6 +376,132 @@ func GenerateProof(ctx context.Context, backend Backend, startState *ExecutionSt
 	}
 	return prover.GetProof()
 }
+
+//// [GenerateProof] serves as an entrypoint for one-step proof generation.
+//// There are 6 types of one-step proofs:
+////  1. BlockState -> InterState: block initiation
+////  2. InterState -> IntraState: transaction initiation (contract call or creation)
+////  3. InterState -> InterState: EOA transfer transaction
+////  4. IntraState -> IntraState: one-step EVM execution (require tracing)
+////  5. IntraState -> InterState: transaction finalization (require tracing)
+////  6. InterState -> BlockState: block finalization
+//func GenerateProof(ctx context.Context, backend Backend, startState *ExecutionState, config *ProverConfig) (*proof.OneStepProof, error) {
+//	if startState.Block == nil {
+//		return nil, fmt.Errorf("bad start state")
+//	}
+//	transactions := startState.Block.Transactions()
+//	if startState.TransactionIdx > uint64(len(transactions)) {
+//		return nil, fmt.Errorf("bad start state")
+//	}
+//
+//	reexec := defaultProveReexec
+//	if config != nil && config.Reexec != nil {
+//		reexec = *config.Reexec
+//	}
+//
+//	// Type 1: block initiation or Type 6: block finalization
+//	if startState.StateType == proofState.BlockStateType || (startState.StateType == proofState.InterStateType && startState.TransactionIdx == uint64(len(transactions))) {
+//		statedb, err := backend.StateAtBlock(ctx, startState.Block, reexec, nil, true, false)
+//		if err != nil {
+//			return nil, err
+//		}
+//		chainCtx := createChainContext(backend, ctx)
+//		vmctx := core.NewEVMBlockContext(startState.Block.Header(), chainCtx, nil)
+//		blockHashTree, err := proofState.BlockHashTreeFromBlockContext(&vmctx)
+//		if err != nil {
+//			return nil, err
+//		}
+//		if startState.StateType == proofState.BlockStateType {
+//			// Type 1: block initiation
+//			bs, err := proofState.BlockStateFromBlock(startState.Block.NumberU64(), statedb, blockHashTree)
+//			if err != nil {
+//				return nil, err
+//			}
+//			return proof.GetBlockInitiationProof(bs)
+//		} else {
+//			// Type 6: block finalization
+//			receipts, _ := backend.GetReceipts(ctx, startState.Block.Hash())
+//			its := proofState.InterStateFromCaptured(
+//				startState.Block.NumberU64(),
+//				startState.TransactionIdx,
+//				statedb,
+//				startState.BlockGasUsed,
+//				transactions,
+//				receipts,
+//				blockHashTree,
+//			)
+//			return proof.GetBlockFinalizationProof(its)
+//		}
+//	}
+//
+//	// Prepare block and transaction context
+//	msg, txCtx, statedb, err := backend.StateAtTransaction(ctx, startState.Block, int(startState.TransactionIdx), reexec)
+//	if err != nil {
+//		return nil, err
+//	}
+//	chainCtx := createChainContext(backend, ctx)
+//	vmctx := core.NewEVMBlockContext(startState.Block.Header(), chainCtx, nil)
+//	receipts, err := backend.GetReceipts(ctx, startState.Block.Hash())
+//	if err != nil {
+//		return nil, err
+//	}
+//	blockHashTree, err := proofState.BlockHashTreeFromBlockContext(&vmctx)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	// Prepare the inter state before transaction for the prover
+//	its := proofState.InterStateFromCaptured(
+//		startState.Block.NumberU64(),
+//		startState.TransactionIdx,
+//		statedb,
+//		startState.BlockGasUsed,
+//		transactions,
+//		receipts,
+//		blockHashTree,
+//	)
+//
+//	transaction := transactions[startState.TransactionIdx]
+//
+//	if startState.StateType == proofState.InterStateType {
+//		// Type 2: transaction initiation or Type 3: EOA transfer transaction
+//		return proof.GetTransactionInitaitionProof(backend.ChainConfig(), &vmctx, transaction, &txCtx, its, statedb)
+//	}
+//	// Type 4: one-step EVM execution or Type 5: transaction finalization. Both require tracing.
+//
+//	// Set up the prover
+//	prover := prover.NewTestProver(
+//		int64(startState.StepIdx),
+//		-1, // none exist opcode
+//		transaction,
+//		&txCtx,
+//		receipts[startState.TransactionIdx],
+//		backend.ChainConfig().Rules(vmctx.BlockNumber),
+//		startState.Block.NumberU64(),
+//		startState.TransactionIdx,
+//		statedb,
+//		*its,
+//		blockHashTree,
+//	)
+//	// Run the transaction with prover enabled.
+//	vmenv := vm.NewEVM(txCtx, statedb, backend.ChainConfig(), vm.Config{Debug: true, Tracer: prover})
+//	// Call Prepare to clear out the statedb access list
+//	txHash := transactions[startState.TransactionIdx].Hash()
+//	statedb.Prepare(txHash, startState.Block.Hash(), int(startState.TransactionIdx))
+//	_, _, _, err = core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.Gas()))
+//	if err != nil {
+//		return nil, fmt.Errorf("tracing failed: %w", err)
+//	}
+//	//prover.GetCtx()
+//	TotalCodeSize, err := hexutil.DecodeUint64(prover.GetProof().CodeSize)
+//	osp := proof.OneStepProof{
+//		VerifierType: proof.VerifierType(prover.GetProof().Verifier),
+//		Proofs:       []proof.Proof{prover.GetProof().Proof},
+//
+//		TotalCodeSize:  TotalCodeSize, // for statistics
+//	}
+//	return &osp, nil
+//}
 
 func generateTxCtx(backend Backend, ctx context.Context, block *types.Block, tx *types.Transaction) (*vm.Context, error) {
 	signer := types.MakeSigner(backend.ChainConfig(), block.Number())

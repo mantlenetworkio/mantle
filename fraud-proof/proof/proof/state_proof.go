@@ -16,6 +16,7 @@ package proof
 
 import (
 	"encoding/binary"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 
 	"github.com/holiman/uint256"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/state"
@@ -63,6 +64,7 @@ func StateProofFromState(s *state.IntraState) *IntraStateProof {
 	if s.LastDepthState != nil {
 		lastDepthHash = s.LastDepthState.Hash()
 	}
+	log.Info("SHOW DEPTH", "depth", s.Depth)
 	return &IntraStateProof{
 		BlockNumber:              s.BlockNumber,
 		TransactionIdx:           s.TransactionIdx,

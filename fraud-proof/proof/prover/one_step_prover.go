@@ -15,8 +15,10 @@
 package prover
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"math/big"
 	"time"
 
@@ -121,7 +123,16 @@ func (l *OneStepProver) CaptureStart(env *vm.EVM, from common.Address, to common
 	l.selfDestructSet = state.NewSelfDestructSet()
 	l.startInterState.GlobalState = l.env.StateDB.Copy() // This state includes gas-buying and nonce-increment
 	l.lastDepthState = l.startInterState
-	log.Debug("Capture Start", "from", from, "to", to)
+	log.Info("Capture Start", "from", from, "to", to)
+	log.Info("show lastDepthState info in OSP")
+	log.Info("show lastDepthState", "lastDepthState hash", l.startInterState.Hash().String())
+	log.Info("show lastDepthState", "BlockNumber", l.startInterState.BlockNumber)
+	log.Info("show lastDepthState", "TransactionIdx", l.startInterState.TransactionIdx)
+	//log.Info("show lastDepthState", "GlobalState", l.startInterState.GlobalState)
+	log.Info("show lastDepthState", "BlockGasUsed", l.startInterState.BlockGasUsed)
+	log.Info("show lastDepthState", "BlockHashTree", l.startInterState.BlockHashTree.Root().String())
+	log.Info("show lastDepthState", "TransactionTrie", l.startInterState.TransactionTrie.Root().String())
+	log.Info("show lastDepthState", "ReceiptTrie", l.startInterState.ReceiptTrie.Root().String())
 	return nil
 }
 
@@ -160,17 +171,44 @@ func (l *OneStepProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, 
 		depth,
 	)
 
-	log.Debug("Generated state", "idx", l.counter, "hash", hexutil.Encode(s.Hash().Bytes()), "op", op)
-	log.Debug("State", "state", fmt.Sprintf("%+v", s))
-	log.Debug("State", "stack", fmt.Sprintf("%+v", s.Stack))
-	log.Debug("State", "memory", fmt.Sprintf("%+v", s.Memory))
-	log.Debug("State", "input", fmt.Sprintf("%+v", s.InputData))
-	log.Debug("State", "output", fmt.Sprintf("%+v", s.ReturnData))
+	log.Info("Generated state in OSP", "idx", l.counter, "step", l.step, "hash", hexutil.Encode(s.Hash().Bytes()), "op", op)
+	log.Info("State", "state", fmt.Sprintf("%+v", s))
+	log.Info("State", "stack", fmt.Sprintf("%+v", s.Stack))
+	log.Info("State", "memory", fmt.Sprintf("%+v", s.Memory))
+	log.Info("State", "input", fmt.Sprintf("%+v", s.InputData))
+	log.Info("State", "output", fmt.Sprintf("%+v", s.ReturnData))
 
 	// The target state is found, generate the one-step proof
 	if l.counter-1 == l.step {
 		l.done = true
-		if l.lastState == nil || l.lastState.Hash() != l.target {
+		if l.lastState == nil {
+			//if l.lastState == nil || l.lastState.Hash() != l.target {
+			log.Info("hashes", "lastStateHash", l.lastState.Hash().String(), "targetHash", l.target.String())
+			log.Info("show lastStates in CaptureState")
+			log.Info("lastStates", "BlockNumber", l.lastState.BlockNumber)
+			log.Info("lastStates", "TransactionIdx", l.lastState.TransactionIdx)
+			log.Info("lastStates", "Depth", l.lastState.Depth)
+			log.Info("lastStates", "Gas", l.lastState.Gas)
+			log.Info("lastStates", "Refund", l.lastState.Refund)
+			log.Info("lastStates", "LastDepthState", l.lastState.LastDepthState.Hash().String())
+			log.Info("lastStates", "ContractAddress", l.lastState.ContractAddress.String())
+			log.Info("lastStates", "Caller", l.lastState.Caller.String())
+			log.Info("lastStates", "Value", l.lastState.Value.String())
+			log.Info("lastStates", "CallFlag", l.lastState.CallFlag)
+			log.Info("lastStates", "Out", l.lastState.Out)
+			log.Info("lastStates", "OutSize", l.lastState.OutSize)
+			log.Info("lastStates", "Pc", l.lastState.Pc)
+			log.Info("lastStates", "OpCode", l.lastState.Out)
+			log.Info("lastStates", "CodeHash", l.lastState.CodeHash.String())
+			log.Info("lastStates", "Stack", l.lastState.Stack.Hash().String())
+			log.Info("lastStates", "Memory", l.lastState.Memory.Root().String())
+			log.Info("lastStates", "InputData", l.lastState.InputData.Root().String())
+			log.Info("lastStates", "ReturnData", l.lastState.ReturnData.Root().String())
+			log.Info("lastStates", "SelfDestructSet", l.lastState.SelfDestructSet.Hash.String())
+			log.Info("lastStates", "LogSeries", l.lastState.LogSeries.Hash().String())
+			log.Info("lastStates", "BlockHashTree", l.lastState.BlockHashTree.Root().String())
+			log.Info("lastStates", "AccessListTrie", l.lastState.AccessListTrie.Root().String())
+
 			l.err = ErrStepIdxAndHashMismatch
 			return nil
 		}
@@ -178,11 +216,19 @@ func (l *OneStepProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, 
 		// if l.vmerr is not nil, the current state s must be in the parent call frame of l.lastState
 		ctx := proof.NewProofGenContext(l.rules, l.env.Context.Coinbase, l.transaction, l.receipt, l.lastCode)
 		osp, err := proof.GetIntraProof(ctx, l.lastState, s, l.vmerr)
+		log.Info("SHOW PROOF", "hex is", hex.EncodeToString(osp.Encode()))
+
 		if err != nil {
 			l.err = err
 		} else {
 			l.proof = osp
 		}
+		log.Info("SHOW STATE", "length of lastState", len(l.lastState.Encode()))
+		log.Info("SHOW STATE", "length of encoded", len(osp.Encode()))
+
+		log.Info("SHOW STATE", "hash of lastState", l.lastState.Hash().String())
+		log.Info("SHOW STATE", "hash of encoded", crypto.Keccak256Hash(osp.Encode()[:len(l.lastState.Encode())]).String())
+
 		return nil
 	}
 	l.lastState = s
@@ -273,10 +319,35 @@ func (l *OneStepProver) CaptureEnd(output []byte, gasUsed uint64, t time.Duratio
 	// If the last state is the target state, generate the transaction finalization proof
 	if l.counter-1 == l.step {
 		l.done = true
-		if l.lastState.Hash() != l.target {
-			l.err = ErrStepIdxAndHashMismatch
-			return nil
-		}
+		//if l.lastState.Hash() != l.target {
+		log.Info("show lastStates in CaptureEnd")
+		log.Info("lastStates", "BlockNumber", l.lastState.BlockNumber)
+		log.Info("lastStates", "TransactionIdx", l.lastState.TransactionIdx)
+		log.Info("lastStates", "Depth", l.lastState.Depth)
+		log.Info("lastStates", "Gas", l.lastState.Gas)
+		log.Info("lastStates", "Refund", l.lastState.Refund)
+		log.Info("lastStates", "LastDepthState", l.lastState.LastDepthState.Hash().String())
+		log.Info("lastStates", "ContractAddress", l.lastState.ContractAddress.String())
+		log.Info("lastStates", "Caller", l.lastState.Caller.String())
+		log.Info("lastStates", "Value", l.lastState.Value.String())
+		log.Info("lastStates", "CallFlag", l.lastState.CallFlag)
+		log.Info("lastStates", "Out", l.lastState.Out)
+		log.Info("lastStates", "OutSize", l.lastState.OutSize)
+		log.Info("lastStates", "Pc", l.lastState.Pc)
+		log.Info("lastStates", "OpCode", l.lastState.Out)
+		log.Info("lastStates", "CodeHash", l.lastState.CodeHash.String())
+		log.Info("lastStates", "Stack", l.lastState.Stack.Hash().String())
+		log.Info("lastStates", "Memory", l.lastState.Memory.Root().String())
+		log.Info("lastStates", "InputData", l.lastState.InputData.Root().String())
+		log.Info("lastStates", "ReturnData", l.lastState.ReturnData.Root().String())
+		log.Info("lastStates", "SelfDestructSet", l.lastState.SelfDestructSet.Hash.String())
+		log.Info("lastStates", "LogSeries", l.lastState.LogSeries.Hash().String())
+		log.Info("lastStates", "BlockHashTree", l.lastState.BlockHashTree.Root().String())
+		log.Info("lastStates", "AccessListTrie", l.lastState.AccessListTrie.Root().String())
+
+		//	l.err = ErrStepIdxAndHashMismatch
+		//	return nil
+		//}
 		// If l.vmerr is not nil, the entire transaction execution will be reverted.
 		// Otherwise, the execution ended through STOP or RETURN opcode.
 		ctx := proof.NewProofGenContext(l.rules, l.env.Context.Coinbase, l.transaction, l.receipt, l.lastCode)

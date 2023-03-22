@@ -95,8 +95,8 @@ func (api *ProverAPI) GenerateProofForStep(ctx context.Context, fraud bool, hash
 		blockHashTree,
 	)
 	// set fraud proof status
-	api.SetFraudProof(ctx, fraud, step, -1, config)
-	defer api.SetFraudProof(ctx, false, -1, -1, config)
+	api.SetFraudProof(ctx, fraud, step, -1, int64(block.NumberU64()-1), config)
+	defer api.SetFraudProof(ctx, false, -1, -1, int64(-1), config)
 	// new evm
 	vmenv := vm.NewEVM(txContext, statedb, api.backend.ChainConfig(), vm.Config{Debug: true, Tracer: testProver})
 	statedb.Prepare(hash, block.Hash(), int(index))
@@ -171,8 +171,8 @@ func (api *ProverAPI) GenerateProofForOpcode(ctx context.Context, fraud bool, ha
 		blockHashTree,
 	)
 	// set fraud proof status
-	api.SetFraudProof(ctx, fraud, -1, opcode, config)
-	defer api.SetFraudProof(ctx, false, -1, -1, config)
+	api.SetFraudProof(ctx, fraud, -1, int64(block.NumberU64()-1), opcode, config)
+	defer api.SetFraudProof(ctx, false, -1, -1, int64(-1), config)
 	// new evm
 	vmenv := vm.NewEVM(txContext, statedb, api.backend.ChainConfig(), vm.Config{Debug: true, Tracer: testProver})
 	statedb.Prepare(hash, block.Hash(), int(index))
@@ -183,7 +183,7 @@ func (api *ProverAPI) GenerateProofForOpcode(ctx context.Context, fraud bool, ha
 	return testProver.GetResult()
 }
 
-func (api *ProverAPI) SetFraudProof(ctx context.Context, fraud bool, step, opcode int64, config *ProverConfig) (json.RawMessage, error) {
+func (api *ProverAPI) SetFraudProof(ctx context.Context, fraud bool, step, opcode int64, blockNumber int64, config *ProverConfig) (json.RawMessage, error) {
 	if api.backend.ChainConfig().ChainID.Cmp(big.NewInt(17)) != 0 {
 		return nil, nil
 	}
@@ -204,6 +204,12 @@ func (api *ProverAPI) SetFraudProof(ctx context.Context, fraud bool, step, opcod
 	} else {
 		os.Setenv("Opcode", "-1")
 	}
+	// set block height for re execution
+	block, err := api.backend.HeaderByNumber(ctx, rpc.BlockNumber(blockNumber))
+	if err != nil {
+		return nil, err
+	}
+	os.Setenv("BlockNumber", block.Number.Add(block.Number, big.NewInt(1)).String())
 
 	res, _ := json.Marshal(os.Getenv("Fraud"))
 	return json.RawMessage(res), nil

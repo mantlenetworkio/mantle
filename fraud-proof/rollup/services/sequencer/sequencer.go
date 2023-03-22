@@ -430,7 +430,7 @@ func (s *Sequencer) challengeLoop() {
 					if bytes.Equal(bisectionHash[:], common.BigToHash(common.Big0).Bytes()) {
 						// when not init
 						numSteps := uint64(len(states)) - 1
-						log.Info("Print generated states", "states[0]", states[0].Hash().String(), "states[numSteps]", states[numSteps].Hash().String(), "numSteps", numSteps)
+						log.Info("Print generated states", "states[0]", states[0].Hash().String(), "stateMid", services.MidState(states, 0, numSteps), "states[numSteps]", states[numSteps].Hash().String(), "numSteps", numSteps)
 						_, err = challengeSession.InitializeChallengeLength(services.MidState(states, 0, numSteps), new(big.Int).SetUint64(numSteps))
 						if err != nil {
 							log.Error("Failed to initialize challenge", "err", err)

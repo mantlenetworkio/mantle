@@ -16,6 +16,7 @@ package prover
 
 import (
 	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"math/big"
 	"time"
 
@@ -92,7 +93,16 @@ func (l *IntraStateGenerator) CaptureStart(env *vm.EVM, from common.Address, to 
 	l.selfDestructSet = state.NewSelfDestructSet()
 	l.startInterState.GlobalState = l.env.StateDB.Copy() // This state includes gas-buying and nonce-increment
 	l.lastDepthState = l.startInterState
-	log.Debug("Capture Start", "from", from, "to", to)
+	log.Info("Capture Start", "from", from, "to", to)
+	log.Info("show lastDepthState info in ISG")
+	log.Info("show lastDepthState", "lastDepthState hash", l.startInterState.Hash().String())
+	log.Info("show lastDepthState", "BlockNumber", l.startInterState.BlockNumber)
+	log.Info("show lastDepthState", "TransactionIdx", l.startInterState.TransactionIdx)
+	//log.Info("show lastDepthState", "GlobalState", l.startInterState.GlobalState)
+	log.Info("show lastDepthState", "BlockGasUsed", l.startInterState.BlockGasUsed)
+	log.Info("show lastDepthState", "BlockHashTree", l.startInterState.BlockHashTree.Root().String())
+	log.Info("show lastDepthState", "TransactionTrie", l.startInterState.TransactionTrie.Root().String())
+	log.Info("show lastDepthState", "ReceiptTrie", l.startInterState.ReceiptTrie.Root().String())
 	return nil
 }
 
@@ -125,6 +135,38 @@ func (l *IntraStateGenerator) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode,
 		rData,
 		depth,
 	)
+
+	log.Info("Generated state in ISG", "idx", l.counter, "hash", s.Hash().String(), "op", op)
+	//log.Info("State", "state", fmt.Sprintf("%+v", s))
+	//log.Info("State", "stack", fmt.Sprintf("%+v", s.Stack))
+	//log.Info("State", "memory", fmt.Sprintf("%+v", s.Memory))
+	//log.Info("State", "input", fmt.Sprintf("%+v", s.InputData))
+	//log.Info("State", "output", fmt.Sprintf("%+v", s.ReturnData))
+	log.Info("show lastStates in intra CaptureState")
+	log.Info("lastStates", "BlockNumber", s.BlockNumber)
+	log.Info("lastStates", "TransactionIdx", s.TransactionIdx)
+	log.Info("lastStates", "Depth", s.Depth)
+	log.Info("lastStates", "Gas", s.Gas)
+	log.Info("lastStates", "Refund", s.Refund)
+	log.Info("lastStates", "LastDepthState", s.LastDepthState.Hash().String())
+	log.Info("lastStates", "ContractAddress", s.ContractAddress.String())
+	log.Info("lastStates", "Caller", s.Caller.String())
+	log.Info("lastStates", "Value", s.Value.String())
+	log.Info("lastStates", "CallFlag", s.CallFlag)
+	log.Info("lastStates", "Out", s.Out)
+	log.Info("lastStates", "OutSize", s.OutSize)
+	log.Info("lastStates", "Pc", s.Pc)
+	log.Info("lastStates", "OpCode", s.Out)
+	log.Info("lastStates", "CodeHash", s.CodeHash.String())
+	log.Info("lastStates", "Stack", s.Stack.Hash().String())
+	log.Info("lastStates", "Memory", s.Memory.Root().String())
+	log.Info("lastStates", "InputData", s.InputData.Root().String())
+	log.Info("lastStates", "ReturnData", s.ReturnData.Root().String())
+	log.Info("lastStates", "SelfDestructSet", s.SelfDestructSet.Hash.String())
+	log.Info("lastStates", "LogSeries", s.LogSeries.Hash().String())
+	log.Info("lastStates", "BlockHashTree", s.BlockHashTree.Root().String())
+	log.Info("lastStates", "AccessListTrie", s.AccessListTrie.Root().String())
+
 	l.states = append(l.states, GeneratedIntraState{s.Hash(), gas})
 	l.lastState = s
 	l.lastCost = cost
