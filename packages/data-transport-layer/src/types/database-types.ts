@@ -51,6 +51,7 @@ export interface DataStoreEntry {
   confirmTxHash: string
   confirmGasUsed: string
 }
+
 export interface TransactionListEntry {
   index: number
   txIndex: number

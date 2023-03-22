@@ -1,6 +1,4 @@
 import {
-  BatchTransactionEntry,
-  DataStoreEntry,
   EnqueueEntry,
   RollupStoreEntry,
   StateRootBatchEntry,
@@ -55,7 +53,7 @@ export interface DataStoreListByBatchIndexResponse {
 
 export interface BatchTxByDataStoreIdResponse {
   dsId: number
-  batchTx: BatchTransactionEntry[]
+  batchTx: TransactionEntry[]
 }
 
 export interface DataStoreByIdResponse {
