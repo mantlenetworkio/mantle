@@ -121,6 +121,7 @@ type TestProver struct {
 	lastState      *state.IntraState
 	lastCost       uint64
 	lastCode       []byte
+	lastOpcode     byte
 	lastDepthState state.OneStepState
 	input          *state.Memory
 	out            uint64
@@ -243,7 +244,7 @@ func (l *TestProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, cos
 	// log.Info("State", "output", fmt.Sprintf("%+v", s.ReturnData))
 
 	// The target state is found, generate the one-step proof
-	if int64(l.counter-1) == l.step || int64(op) == l.opcode {
+	if int64(l.counter-1) == l.step || int64(l.lastOpcode) == l.opcode {
 		l.done = true
 		if l.lastState == nil {
 			l.err = ErrStepIdxAndHashMismatch
@@ -278,6 +279,7 @@ func (l *TestProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, cos
 	l.lastState = s
 	l.lastCode = contract.Code
 	l.lastCost = cost
+	l.lastOpcode = byte(op)
 	// vmerr is not nil means the gas/stack validation failed, the opcode execution will
 	// not happen and the current call frame will be immediately reverted. This is the
 	// last CaptureState call for this call frame and there won't be any CaptureFault call.
