@@ -18,8 +18,6 @@
 
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
-
 import "../IVerifier.sol";
 import "../libraries/Params.sol";
 import "../libraries/EVMTypesLib.sol";
@@ -96,7 +94,6 @@ contract VerifierTestDriver {
         VerificationContext.Context memory ctx =
             VerificationContext.Context(sequencerAddress, timestamp, number, origin, transaction, bytes32(0), txHash);
         bytes32 res = getVerifier(verifier).verifyOneStepProof(ctx, currStateHash, proof);
-        console.logBytes32(res);
         return res;
     }
 }
