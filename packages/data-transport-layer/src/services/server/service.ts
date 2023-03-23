@@ -417,7 +417,6 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
             ctcIndex: null,
           }
         }
-
         const ctcIndex = await this.state.db.getTransactionIndexByQueueIndex(
           enqueue.index
         )
@@ -774,7 +773,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         const dsId = BigNumber.from(req.params.dsId).toNumber()
         return {
           dsId,
-          batchTx: batchTxs,
+          batchTx: [],
         }
       }
     )
@@ -818,7 +817,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     )
     this._registerRoute(
       'get',
-      '/da/transaction/index/{index}',
+      '/da/transaction/index/:index',
       async (req): Promise<TransactionResponse> => {
         const transactionEntry = await this.state.db.getDaTransactionByIndex(
           BigNumber.from(req.params.index).toNumber()
@@ -836,11 +835,6 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         }
       }
     )
-
-
-
-
-
 
     this._registerRoute(
       'get',
@@ -860,29 +854,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           txList: batchTxs,
         }
       }
-
-
-
-
-
     )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     this._registerRoute(
       'get',

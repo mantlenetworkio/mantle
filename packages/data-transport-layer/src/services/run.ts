@@ -30,6 +30,7 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       l1RpcProviderPassword: config.str('l1-rpc-password'),
       addressManager: config.str('address-manager'),
       pollingInterval: config.uint('polling-interval', 5000),
+      daPollingInterval: config.uint('da-polling-interval', 15000),
       logsPerPollingInterval: config.uint('logs-per-polling-interval', 2000),
       dangerouslyCatchAllErrors: config.bool(
         'dangerously-catch-all-errors',
@@ -39,7 +40,7 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       l2RpcProviderUser: config.str('l2-rpc-user'),
       l2RpcProviderPassword: config.str('l2-rpc-password'),
       l2ChainId: config.uint('l2-chain-id'),
-      syncFromL1: config.bool('sync-from-l1', true),
+      syncFromL1: config.bool('sync-from-l1', false),
       syncFromL2: config.bool('sync-from-l2', false),
       syncToDa: config.bool('sync-to-da', false),
       mtBatcherHost: config.str('mt-batcher-hostname', 'http://127.0.0.1'),

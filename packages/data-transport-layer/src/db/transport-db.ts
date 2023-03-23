@@ -8,7 +8,6 @@ import { BatchType } from '@mantleio/core-utils'
 import { SimpleDB } from './simple-db'
 import { PATCH_CONTEXTS, BSS_HF1_INDEX } from '../config'
 import {
-  BatchTransactionEntry,
   DataStoreEntry,
   EnqueueEntry,
   RollupStoreEntry,
@@ -19,7 +18,7 @@ import {
   TransactionListEntry,
   BatchTxByDsIdEntry,
 } from '../types/database-types'
-import {da} from "@mantleio/contracts/dist/types/contracts";
+
 
 const TRANSPORT_DA_DB_KEYS = {
   UPDATED_BATCH_INDEX: `da:updatedbatchindex`,
@@ -31,8 +30,7 @@ const TRANSPORT_DA_DB_KEYS = {
   ROLLUP_STORE_BY_BATCH_INDEX: `da:rollupstorebybatchindex`,
   UPDATED_ROLLUP_STORE_BY_BATCH_INDEX: `da:updatedrollupstorebybatchindex`,
   TRANSACTION: `da:transaction`,
-  BATCH_TXS_DS_ID:`da:batchtxindexdsid`
-
+  BATCH_TXS_DS_ID:`da:batchtxindexdsid`,
   UPDATED_DS_ID: `da:updateddsid`,
 }
 

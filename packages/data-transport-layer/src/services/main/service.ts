@@ -31,6 +31,7 @@ export interface L1DataTransportServiceOptions {
   dbPath: string
   logsPerPollingInterval: number
   pollingInterval: number
+  daPollingInterval: number
   port: number
   syncFromL1?: boolean
   syncFromL2?: boolean
