@@ -347,25 +347,51 @@ task(`verifyOsp`)
 
 task(`testOpcode`)
   .addParam('fraud', '', false, boolean)
-  .addParam('hash', 'the transaction hash to prove')
   .setAction(async (taskArgs) => {
-    const provider = new ethers.providers.JsonRpcProvider(
+    const providerL1 = new ethers.providers.JsonRpcProvider(
+      'http://localhost:9545'
+    )
+    const providerL2 = new ethers.providers.JsonRpcProvider(
       'http://localhost:8545'
     )
+    const ownerWalletL1 = new ethers.Wallet(
+      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
+      providerL1
+    )
+    const ownerWalletL2 = new ethers.Wallet(
+      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
+      providerL2
+    )
+    const tokenFactory = getContractFactory('TestERC20')
+    const token = await tokenFactory
+      .connect(ownerWalletL2)
+      .deploy()
+    await token.deployed()
+    console.log('token : ', token.address)
+    console.log('deploy tx : ', token.deployTransaction.hash)
+    const TestFactory = getContractFactory('TestOSP')
+    const test = await TestFactory.connect(ownerWalletL2).deploy(token.address)
+    await test.deployed()
+    const mintRes = await test.newToken({ gasLimit: 1000000 })
+    console.log('mint tx', mintRes.hash)
+
     const opcode = [
       1, // opcode: ADD stakeOp verifier 0
-      64, // opcode: BLOCKHASH EnvironmentalOp verifier 1
-      48, // opcode: ADDRESS EnvironmentalOp verifier 1
-      160, // opcode: LOG0 MemoryOp verifier 2
-      49, // opcode: BALANCE StorageOp verifier 3
-      240, // opcode: CREATE CallOp verifier 4
+      52, // opcode: CALLVALUE EnvironmentalOp verifier 1
+      // todo : cannot verify
+      // 82, // opcode: MSTORE MemoryOp verifier 2
+      // 84, // opcode: SLOAD StorageOp verifier 3
+      // todo : cannot generate proof
+      // 241, // opcode: CALL CallOp verifier 4
+      // 240,
       256, // opcode: Invalid InvalidOp verifier 5
     ]
     const osp = []
     for (const item of opcode) {
-      const res = await provider.send('debug_generateProofForOpcode', [
+      console.log('\n Start opcode: ', item)
+      const res = await providerL2.send('debug_generateProofForOpcode', [
         taskArgs.fraud,
-        taskArgs.hash,
+        mintRes.hash,
         item,
       ])
       const json = JSON.stringify(res)
@@ -374,8 +400,49 @@ task(`testOpcode`)
       if (proof.opcode != '') {
         console.log('proof for opcode', item, 'success')
         osp.push(json)
+        continue
+      }
+      console.log('tx do not have action about opcode:', item)
+    }
+    const verifierTestDriver = await getContractFactory(
+      'VerifierTestDriver'
+    ).attach('0xc6e7DF5E7b4f2A278906862b61205850344D4e7d')
+
+    for (const item of osp) {
+      const { ctx, proof } = JSON.parse(item)
+      console.log(`processing verifier ${proof.verifier}`)
+
+      const transaction = [
+        ctx.txNonce,
+        ctx.gasPrice,
+        ctx.gas,
+        ctx.recipient,
+        ctx.value,
+        ctx.input,
+        ctx.txV,
+        ctx.txR,
+        ctx.txS,
+      ]
+
+      const res = await verifierTestDriver
+        .connect(ownerWalletL1)
+        .verifyProof(
+          ctx.coinbase,
+          ctx.timestamp,
+          ctx.blockNumber,
+          ctx.origin,
+          ctx.txnHash,
+          transaction,
+          proof.verifier,
+          proof.currHash,
+          proof.proof
+        )
+
+      if (!hexStringEquals(proof.nextHash, res)) {
+        console.log('next hash not equal with proof: ', proof.nextHash)
+      } else {
+        console.log('verify success')
       }
     }
-    // console.log(osp.length)
   })
 module.exports = {}
