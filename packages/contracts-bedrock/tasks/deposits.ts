@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, OP Labs PBC (MIT License)
+ * Copyright (c) 2022, MT Labs PBC (MIT License)
  * https://github.com/mantlenetworkio/mantle
  */
 

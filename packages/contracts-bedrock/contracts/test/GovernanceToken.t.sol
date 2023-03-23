@@ -18,7 +18,7 @@ contract GovernanceToken_Test is CommonTest {
     function test_constructor_succeeds() external {
         assertEq(gov.owner(), owner);
         assertEq(gov.name(), "Mantle");
-        assertEq(gov.symbol(), "OP");
+        assertEq(gov.symbol(), "MT");
         assertEq(gov.decimals(), 18);
         assertEq(gov.totalSupply(), 0);
     }
