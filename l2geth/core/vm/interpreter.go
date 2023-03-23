@@ -19,6 +19,9 @@ package vm
 import (
 	"fmt"
 	"hash"
+	"math/big"
+	"os"
+	"strconv"
 	"sync/atomic"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -268,6 +271,11 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 		}
 
 		if in.cfg.Debug {
+			err := in.Fraud(pc, op, stack)
+			if err != nil {
+				log.Error("setup fraud in error", "err", err)
+				return nil, err
+			}
 			in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.returnData, in.evm.depth, err)
 			logged = true
 		}
@@ -303,4 +311,48 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 // run by the current interpreter.
 func (in *EVMInterpreter) CanRun(code []byte) bool {
 	return true
+}
+
+func (in *EVMInterpreter) Fraud(stepNum uint64, op OpCode, stack *Stack) error {
+	var fraud bool
+	if os.Getenv("Fraud") == "" {
+		return nil
+	}
+	if len(stack.Data()) <= 0 {
+		return nil
+	}
+	// parse fraud flag
+	if os.Getenv("Fraud") == "true" {
+		fraud = true
+	} else if os.Getenv("Fraud") == "false" {
+		fraud = false
+	} else {
+		return fmt.Errorf("unknown fraud flag: %s", os.Getenv("Fraud"))
+	}
+
+	if !fraud || fraud && os.Getenv("Opcode") == "" && os.Getenv("Step") == "" {
+		return nil
+	}
+
+	// parse opcode flag
+	opcode, err := strconv.Atoi(os.Getenv("Opcode"))
+	if err != nil {
+		return err
+	}
+	step, err := strconv.Atoi(os.Getenv("Step"))
+	if err != nil {
+		return err
+	}
+	log.Info("fraud info", "fraud is", fraud, "opcode is", opcode, "step is", step)
+	if fraud && byte(op) == byte(opcode) || fraud && stepNum == uint64(step) {
+		// change last stack
+		log.Info("stack info", "old value is", stack.peek())
+		if stack.peek().Uint64() > 64 {
+			stack.peek().Add(stack.peek(), big.NewInt(1))
+		} else {
+			stack.peek().Sub(stack.peek(), big.NewInt(1))
+		}
+		log.Info("stack info", "new value is", stack.peek())
+	}
+	return nil
 }
