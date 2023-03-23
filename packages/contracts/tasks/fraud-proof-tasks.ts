@@ -1,12 +1,12 @@
-import { exists, existsSync } from 'fs'
-
 import { task } from 'hardhat/config'
 import { ethers } from 'ethers'
 import { hexStringEquals } from '@mantleio/core-utils'
+import { boolean, int } from 'hardhat/internal/core/params/argumentTypes'
 
+// @ts-ignore
 import { getContractFactory } from '../src'
+// @ts-ignore
 import { names } from '../src/address-names'
-import {boolean, int} from "hardhat/internal/core/params/argumentTypes";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs')
@@ -263,7 +263,7 @@ task(`genOspForStep`)
 task(`genOspForOpcode`)
   .addParam('fraud', '', false, boolean)
   .addParam('hash', 'the transaction hash to prove')
-  .addParam('opcode', 'the op code to prove', 82, int)
+  .addParam('opcode', 'the op code to prove', 22, int)
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:8545'
@@ -345,4 +345,37 @@ task(`verifyOsp`)
     }
   })
 
+task(`testOpcode`)
+  .addParam('fraud', '', false, boolean)
+  .addParam('hash', 'the transaction hash to prove')
+  .setAction(async (taskArgs) => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://localhost:8545'
+    )
+    const opcode = [
+      1, // opcode: ADD stakeOp verifier 0
+      64, // opcode: BLOCKHASH EnvironmentalOp verifier 1
+      48, // opcode: ADDRESS EnvironmentalOp verifier 1
+      160, // opcode: LOG0 MemoryOp verifier 2
+      49, // opcode: BALANCE StorageOp verifier 3
+      240, // opcode: CREATE CallOp verifier 4
+      256, // opcode: Invalid InvalidOp verifier 5
+    ]
+    const osp = []
+    for (const item of opcode) {
+      const res = await provider.send('debug_generateProofForOpcode', [
+        taskArgs.fraud,
+        taskArgs.hash,
+        item,
+      ])
+      const json = JSON.stringify(res)
+      const { proof } = JSON.parse(json)
+      // eslint-disable-next-line eqeqeq
+      if (proof.opcode != '') {
+        console.log('proof for opcode', item, 'success')
+        osp.push(json)
+      }
+    }
+    // console.log(osp.length)
+  })
 module.exports = {}
