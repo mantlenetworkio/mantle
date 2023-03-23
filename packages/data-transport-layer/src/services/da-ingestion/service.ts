@@ -135,7 +135,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
             stack: err.stack,
             code: err.code,
           })
-          await sleep(this.options.pollingInterval)
+          await sleep(this.options.daPollingInterval)
         } else {
           throw err
         }
@@ -309,10 +309,10 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
           index: batchTx['TxMeta']['index'],
           batchIndex: 0,
           blockNumber: batchTx['TxMeta']['l1BlockNumber'],
-          timestamp: batchTx['TxMeta'],
+          timestamp: batchTx['TxMeta']['l1Timestamp'],
           gasLimit: '0',
           target: constants.AddressZero,
-          origin: null,
+          origin: batchTx['TxMeta']['l1MessageSender'],
           data: txData,
           queueOrigin,
           value: batchTx['TxDetail']['value'],

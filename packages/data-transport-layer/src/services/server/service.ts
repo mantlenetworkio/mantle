@@ -817,7 +817,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     )
     this._registerRoute(
       'get',
-      '/da/transaction/index/{index}',
+      '/da/transaction/index/:index',
       async (req): Promise<TransactionResponse> => {
         const transactionEntry = await this.state.db.getDaTransactionByIndex(
           BigNumber.from(req.params.index).toNumber()
