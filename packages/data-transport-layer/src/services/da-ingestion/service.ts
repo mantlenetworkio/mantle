@@ -100,6 +100,8 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       l2ChainId: this.options.l2ChainId,
     })
 
+    await this.state.db.putUpdatedBatchIndex(this.options.daInitBatch)
+
     this.daIngestionMetrics = registerMetrics(this.metrics)
 
     this.state.mtBatcherFetchUrl =
@@ -112,6 +114,9 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     while (this.running) {
       try {
         const batchIndexRange = await this.getBatchIndexRange()
+        if (batchIndexRange.start >= batchIndexRange.end) {
+          continue
+        }
         const dataStoreIdRange = await this.getDataStoreIdRange(batchIndexRange)
         if (dataStoreIdRange === null) {
           await sleep(this.options.pollingInterval)
@@ -188,19 +193,20 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     }
   }
   private async getBatchIndexRange(): Promise<Range> {
-    const lastBatchIndex = (await this.state.db.getUpdatedBatchIndex()) || 1
+    const lastBatchIndex = await this.state.db.getUpdatedBatchIndex()
     const newTxBatchIndex: number = await this.GetLatestTransactionBatchIndex()
-    if (newTxBatchIndex <= lastBatchIndex) {
-      return null
-    }
-    await this.state.db.putLatestBatchIndex(newTxBatchIndex)
-    const loopTime =
-      newTxBatchIndex > lastBatchIndex + 10
-        ? lastBatchIndex + 10
-        : newTxBatchIndex
-    return {
-      start: lastBatchIndex,
-      end: loopTime,
+    await this.state.db.putUpdatedBatchIndex(newTxBatchIndex)
+    if (newTxBatchIndex > lastBatchIndex + this.options.daSyncStep) {
+      const loopTimes = lastBatchIndex + this.options.daSyncStep
+      return {
+        start: lastBatchIndex,
+        end: loopTimes,
+      }
+    } else {
+      return {
+        start: lastBatchIndex,
+        end: newTxBatchIndex,
+      }
     }
   }
 
