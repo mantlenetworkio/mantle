@@ -28,8 +28,8 @@ task('deposit-eth', 'Deposits ether to L2.')
     types.string
   )
   .addParam(
-    'opNodeProviderUrl',
-    'op-node provider URL',
+    'mtNodeProviderUrl',
+    'mt-node provider URL',
     'http://localhost:7545',
     types.string
   )

@@ -1,20 +1,20 @@
-package op_e2e
+package mt-e2e
 
 import (
-	"context"
-	"math/big"
-	"testing"
-	"time"
+"context"
+"math/big"
+"testing"
+"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/mantlenetworkio/mantle/mt-node/eth"
-	"github.com/mantlenetworkio/mantle/mt-node/rollup/derive"
-	"github.com/stretchr/testify/require"
+"github.com/ethereum/go-ethereum/common"
+"github.com/ethereum/go-ethereum/common/hexutil"
+"github.com/ethereum/go-ethereum/core/types"
+"github.com/ethereum/go-ethereum/core/vm"
+"github.com/ethereum/go-ethereum/crypto"
+"github.com/ethereum/go-ethereum/params"
+"github.com/mantlenetworkio/mantle/mt-node/eth"
+"github.com/mantlenetworkio/mantle/mt-node/rollup/derive"
+"github.com/stretchr/testify/require"
 )
 
 // TestMissingGasLimit tests that mt-geth cannot build a block without gas limit while mantle is active in the chain config.
@@ -243,7 +243,7 @@ func TestPreregolith(t *testing.T) {
 			require.NoError(t, err)
 			defer opGeth.Close()
 
-			systemTx, err := derive.L1InfoDeposit(1, opGeth.L1Head, opGeth.SystemConfig, false)
+			systemTx, err := derive.L1InfoDeposit(1, opGeth.L1Head, opGeth.SystemConfig, 1, nil, eth.Bytes32{}, false)
 			systemTx.IsSystemTransaction = true
 			require.NoError(t, err)
 
@@ -428,7 +428,7 @@ func TestRegolith(t *testing.T) {
 
 			test.activateRegolith(ctx, opGeth)
 
-			systemTx, err := derive.L1InfoDeposit(1, opGeth.L1Head, opGeth.SystemConfig, false)
+			systemTx, err := derive.L1InfoDeposit(1, opGeth.L1Head, opGeth.SystemConfig, 1, nil, eth.Bytes32{}, false)
 			systemTx.IsSystemTransaction = true
 			require.NoError(t, err)
 

@@ -1,14 +1,13 @@
-package op_e2e
+package mt-e2e
 
 import (
-	"context"
+"context"
 
-	"github.com/libp2p/go-libp2p/core/peer"
+"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/mantlenetworkio/mantle/mt-node/eth"
-	"github.com/mantlenetworkio/mantle/mt-node/node"
+"github.com/mantlenetworkio/mantle/mt-node/eth"
+"github.com/mantlenetworkio/mantle/mt-node/node"
 )
-
 type FnTracer struct {
 	OnNewL1HeadFn        func(ctx context.Context, sig eth.L1BlockRef)
 	OnUnsafeL2PayloadFn  func(ctx context.Context, from peer.ID, payload *eth.ExecutionPayload)

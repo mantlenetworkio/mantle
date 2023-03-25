@@ -1,29 +1,29 @@
-package op_e2e
+package mt-e2e
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"math/big"
-	"reflect"
-	"testing"
+"context"
+"errors"
+"fmt"
+"math/big"
+"reflect"
+"testing"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/log"
-	gn "github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/mantlenetworkio/mantle/mt-chain-ops/genesis"
-	"github.com/mantlenetworkio/mantle/mt-e2e/e2eutils"
-	"github.com/mantlenetworkio/mantle/mt-node/client"
-	"github.com/mantlenetworkio/mantle/mt-node/eth"
-	"github.com/mantlenetworkio/mantle/mt-node/rollup"
-	"github.com/mantlenetworkio/mantle/mt-node/rollup/derive"
-	"github.com/mantlenetworkio/mantle/mt-node/sources"
-	"github.com/mantlenetworkio/mantle/mt-node/testlog"
-	"github.com/stretchr/testify/require"
+"github.com/ethereum/go-ethereum/common/hexutil"
+"github.com/ethereum/go-ethereum/core/types"
+"github.com/ethereum/go-ethereum/ethclient"
+"github.com/ethereum/go-ethereum/log"
+gn "github.com/ethereum/go-ethereum/node"
+"github.com/ethereum/go-ethereum/params"
+"github.com/ethereum/go-ethereum/rpc"
+"github.com/mantlenetworkio/mantle/mt-chain-ops/genesis"
+"github.com/mantlenetworkio/mantle/mt-e2e/e2eutils"
+"github.com/mantlenetworkio/mantle/mt-node/client"
+"github.com/mantlenetworkio/mantle/mt-node/eth"
+"github.com/mantlenetworkio/mantle/mt-node/rollup"
+"github.com/mantlenetworkio/mantle/mt-node/rollup/derive"
+"github.com/mantlenetworkio/mantle/mt-node/sources"
+"github.com/mantlenetworkio/mantle/mt-node/testlog"
+"github.com/stretchr/testify/require"
 )
 
 var (
@@ -180,7 +180,7 @@ func (d *MtGeth) StartBlockBuilding(ctx context.Context, attrs *eth.PayloadAttri
 func (d *MtGeth) CreatePayloadAttributes(txs ...*types.Transaction) (*eth.PayloadAttributes, error) {
 	timestamp := d.L2Head.Timestamp + 2
 	regolith := d.L2ChainConfig.IsRegolith(uint64(timestamp))
-	l1Info, err := derive.L1InfoDepositBytes(d.sequenceNum, d.L1Head, d.SystemConfig, regolith)
+	l1Info, err := derive.L1InfoDepositBytes(d.sequenceNum, d.L1Head, d.SystemConfig, 1, regolith)
 	if err != nil {
 		return nil, err
 	}

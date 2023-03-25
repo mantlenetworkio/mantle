@@ -62,7 +62,7 @@ func TestChannelManagerReturnsErrReorgWhenDrained(t *testing.T) {
 		Difficulty: common.Big0,
 		Number:     big.NewInt(100),
 	}, nil, nil, nil, trie.NewStackTrie(nil))
-	l1InfoTx, err := derive.L1InfoDeposit(0, lBlock, eth.SystemConfig{}, false)
+	l1InfoTx, err := derive.L1InfoDeposit(0, lBlock, eth.SystemConfig{}, 1, nil, eth.Bytes32{}, false)
 	require.NoError(t, err)
 	txs := []*types.Transaction{types.NewTx(l1InfoTx)}
 

@@ -202,7 +202,9 @@ func (n *MtNode) initL2(ctx context.Context, cfg *Config, snapshotLog log.Logger
 	}
 
 	tp := derive.NewTPClient(cfg.TPCfg.Url, cfg.TPCfg.SourceName, cfg.TPCfg.SecondFrequency)
-
+	if tp.IsNil() {
+		log.Crit("token price client is nil")
+	}
 	n.l2Driver = driver.NewDriver(&cfg.Driver, &cfg.Rollup, n.l2Source, n.l1Source, n, tp, n.log, snapshotLog, n.metrics)
 
 	return nil

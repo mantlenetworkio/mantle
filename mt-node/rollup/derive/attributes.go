@@ -3,6 +3,7 @@ package derive
 import (
 	"context"
 	"fmt"
+	"github.com/ethereum/go-ethereum/log"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -100,7 +101,13 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 		return nil, NewResetError(fmt.Errorf("cannot build L2 block on top %s for time %d before L1 origin %s at time %d",
 			l2Parent, nextL2Time, eth.ToBlockID(l1Info), l1Info.Time()))
 	}
-	ratio, err := ba.tp.PriceRatio()
+	var ratio int64
+	if ba.tp != nil {
+		ratio, err = ba.tp.PriceRatio()
+	} else {
+		ratio = 1
+		log.Warn("ba miss token price client,set default 1")
+	}
 	l1InfoTx, err := L1InfoDepositBytes(seqNumber, l1Info, sysConfig, ratio, ba.cfg.IsRegolith(nextL2Time))
 	if err != nil {
 		return nil, NewCriticalError(fmt.Errorf("failed to create l1InfoTx: %w", err))

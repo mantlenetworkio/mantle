@@ -3,8 +3,8 @@ pragma solidity 0.8.15;
 
 /* Testing utilities */
 import { Test } from "forge-std/Test.sol";
-import { AttestationStation } from "../universal/op-nft/AttestationStation.sol";
-import { Optimist } from "../universal/op-nft/Optimist.sol";
+import { AttestationStation } from "../universal/mt-nft/AttestationStation.sol";
+import { Optimist } from "../universal/mt-nft/Optimist.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 

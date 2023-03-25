@@ -8,7 +8,7 @@ volumes:
   l1_data:
   l2_data:
   l2-1_data:
-  op_log:
+  mt-log:
 
 
 services:
@@ -78,7 +78,7 @@ services:
       --p2p.listen.ip=0.0.0.0
       --p2p.listen.tcp=9003
       --p2p.listen.udp=9003
-      --snapshotlog.file=/op_log/snapshot.log
+      --snapshotlog.file=/mt-log/snapshot.log
       --p2p.priv.path=/config/p2p-node-key.txt
       --metrics.enabled
       --metrics.addr=0.0.0.0
@@ -95,7 +95,7 @@ services:
       - "${PWD}/p2p-node-key.txt:/config/p2p-node-key.txt"
       - "${PWD}/test-jwt-secret.txt:/config/test-jwt-secret.txt"
       - "${PWD}/../.devnet/rollup.json:/rollup.json"
-      - op_log:/op_log
+      - mt-log:/mt-log
 
   mt-node:
     depends_on:
@@ -119,7 +119,7 @@ services:
       --p2p.listen.ip=0.0.0.0
       --p2p.listen.tcp=9003
       --p2p.listen.udp=9003
-      --snapshotlog.file=/op_log/snapshot.log
+      --snapshotlog.file=/mt-log/snapshot.log
       --p2p.priv.path=/config/p2p-node-key.txt
       --metrics.enabled
       --metrics.addr=0.0.0.0
@@ -136,7 +136,7 @@ services:
       - "${PWD}/p2p-node-key.txt:/config/p2p-node-key.txt"
       - "${PWD}/test-jwt-secret.txt:/config/test-jwt-secret.txt"
       - "${PWD}/../.devnet/rollup.json:/rollup.json"
-      - op_log:/op_log
+      - mt-log:/mt-log
 
   mt-proposer:
     depends_on:
@@ -204,9 +204,9 @@ services:
     command:
       - stateviz
       - -addr=0.0.0.0:8080
-      - -snapshot=/op_log/snapshot.log
+      - -snapshot=/mt-log/snapshot.log
       - -refresh=10s
     ports:
       - "9090:8080"
     volumes:
-      - op_log:/op_log:ro
+      - mt-log:/mt-log:ro

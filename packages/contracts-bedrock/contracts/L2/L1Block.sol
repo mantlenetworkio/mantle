@@ -60,9 +60,14 @@ contract L1Block is Semver {
     uint256 public l1FeeScalar;
 
     /**
-     * @notice The scalar value applied to the L1 portion of the transaction fee.
+     * @notice The latest da fee.
      */
-    uint256 public conversionRatio;
+    uint256 public daFee;
+
+    /**
+     * @notice The scalar value applied to the da portion of the data fee.
+     */
+    uint256 public daFeeScalar;
 
     /**
      * @custom:semver 1.0.0
@@ -80,6 +85,8 @@ contract L1Block is Semver {
      * @param _batcherHash    Versioned hash to authenticate batcher by.
      * @param _l1FeeOverhead  L1 fee overhead.
      * @param _l1FeeScalar    L1 fee scalar.
+     * @param _daFee          da fee.
+     * @param _daFeeScalar    da fee scalar.
      */
     function setL1BlockValues(
         uint64 _number,
@@ -90,7 +97,8 @@ contract L1Block is Semver {
         bytes32 _batcherHash,
         uint256 _l1FeeOverhead,
         uint256 _l1FeeScalar,
-        uint256 _conversionRatio
+        uint256 _daFee,
+        uint256 _daFeeScalar
     ) external {
         require(
             msg.sender == DEPOSITOR_ACCOUNT,
@@ -105,6 +113,7 @@ contract L1Block is Semver {
         batcherHash = _batcherHash;
         l1FeeOverhead = _l1FeeOverhead;
         l1FeeScalar = _l1FeeScalar;
-        conversionRatio = _conversionRatio;
+        daFee = _daFee;
+        daFeeScalar = _daFeeScalar;
     }
 }

@@ -48,7 +48,7 @@ type TPClient struct {
 	client     *resty.Client
 	frequency  time.Duration
 	sourceName string
-	lastRatio  uint64
+	lastRatio  int64
 	lastUpdate time.Time
 }
 
@@ -60,6 +60,10 @@ type TokenPrice struct {
 type Result struct {
 	RetCode int
 	Result  TokenPrice
+}
+
+func (c *TPClient) IsNil() bool {
+	return c.client == nil
 }
 
 func (c *TPClient) Query(tokenA, tokenB string) (*big.Float, error) {
@@ -93,7 +97,7 @@ func (c *TPClient) bybitQuery(tokenA, tokenB string) (*big.Float, error) {
 	return bigPrice, nil
 }
 
-func (c *TPClient) PriceRatio() (uint64, error) {
+func (c *TPClient) PriceRatio() (int64, error) {
 	if time.Now().Sub(c.lastUpdate) < c.frequency {
 		return c.lastRatio, nil
 	}
@@ -114,6 +118,6 @@ func (c *TPClient) PriceRatio() (uint64, error) {
 	}
 	ratio, _ := ethPrice.Quo(ethPrice, bitPrice).Float64()
 	c.lastUpdate = time.Now()
-	c.lastRatio = uint64(math.Ceil(ratio))
+	c.lastRatio = int64(math.Ceil(ratio))
 	return c.lastRatio, nil
 }

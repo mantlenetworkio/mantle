@@ -20,7 +20,7 @@ go test ./...
 
 Run end-to-end tests:
 ```shell
-cd op-e2e
+cd mt-e2e
 go test ./...
 ```
 

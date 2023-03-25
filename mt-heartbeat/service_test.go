@@ -1,21 +1,21 @@
-package op_heartbeat
+package mt-heartbeat
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net"
-	"net/http"
-	"testing"
-	"time"
+"bytes"
+"context"
+"encoding/json"
+"fmt"
+"io"
+"net"
+"net/http"
+"testing"
+"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/stretchr/testify/require"
+"github.com/ethereum/go-ethereum/log"
+"github.com/stretchr/testify/require"
 
-	"github.com/mantlenetworkio/mantle/mt-node/heartbeat"
-	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
+"github.com/mantlenetworkio/mantle/mt-node/heartbeat"
+opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
 )
 
 func TestService(t *testing.T) {
@@ -60,7 +60,7 @@ func TestService(t *testing.T) {
 				PeerID:  "1X2398ug",
 				ChainID: 10,
 			}},
-			`op_heartbeat_heartbeats{chain_id="10",version="unknown"} 1`,
+			`mt-heartbeat_heartbeats{chain_id="10",version="unknown"} 1`,
 			"1.2.3.100",
 		},
 		{
@@ -72,7 +72,7 @@ func TestService(t *testing.T) {
 				PeerID:  "1X2398ug",
 				ChainID: 999,
 			}},
-			`op_heartbeat_heartbeats{chain_id="unknown",version="v0.1.0-beta.1"} 1`,
+			`mt-heartbeat_heartbeats{chain_id="unknown",version="v0.1.0-beta.1"} 1`,
 			"1.2.3.101",
 		},
 		{
@@ -84,7 +84,7 @@ func TestService(t *testing.T) {
 				PeerID:  "1X2398ug",
 				ChainID: 10,
 			}},
-			`op_heartbeat_heartbeats{chain_id="10",version="v0.1.0-beta.1"} 1`,
+			`mt-heartbeat_heartbeats{chain_id="10",version="v0.1.0-beta.1"} 1`,
 			"1.2.3.102",
 		},
 		{
@@ -105,7 +105,7 @@ func TestService(t *testing.T) {
 					ChainID: 10,
 				},
 			},
-			`op_heartbeat_heartbeat_same_ip_bucket{chain_id="10",version="v0.1.0-goerli-rehearsal.1",le="32"} 1`,
+			`mt-heartbeat_heartbeat_same_ip_bucket{chain_id="10",version="v0.1.0-goerli-rehearsal.1",le="32"} 1`,
 			"1.2.3.103",
 		},
 	}

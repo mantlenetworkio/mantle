@@ -87,7 +87,7 @@ def main():
     dump_file(outdir, 'p2p-node-key.txt', m.hexdigest())
 
     log.info('Writing mtnode environment.')
-    dump_file(outdir, 'mt-node.env', op_node_env_tmpl(l1_rpc, f'ws://l2:{args.geth_ws_port}', args.op_node_http_port))
+    dump_file(outdir, 'mt-node.env', mt_node_env_tmpl(l1_rpc, f'ws://l2:{args.geth_ws_port}', args.mt_node_http_port))
 
     log.info('Writing entrypoint.')
     dump_file(outdir, 'entrypoint.sh', ENTRYPOINT)
@@ -98,10 +98,10 @@ def main():
         args.geth_tag,
         args.geth_http_port,
         args.geth_ws_port,
-        args.op_node_tag,
-        args.op_node_http_port,
-        args.op_node_pprof_port,
-        args.op_node_metrics_port
+        args.mt_node_tag,
+        args.mt_node_http_port,
+        args.mt_node_pprof_port,
+        args.mt_node_metrics_port
     ))
 
 
@@ -129,47 +129,47 @@ def dump_file(outdir, filename, content):
         f.write(content)
 
 
-def op_node_env_tmpl(l1_rpc, l2_rpc, op_node_http_port):
+def mt_node_env_tmpl(l1_rpc, l2_rpc, mt_node_http_port):
     return f"""
-OP_NODE_L1_ETH_RPC={l1_rpc}
-OP_NODE_L2_ETH_RPC={l2_rpc}
-OP_NODE_ROLLUP_CONFIG=/config/rollup.json
-OP_NODE_L2_ENGINE_RPC={l2_rpc}
-OP_NODE_RPC_ADDR=0.0.0.0
-OP_NODE_RPC_PORT={op_node_http_port}
-OP_NODE_P2P_LISTEN_IP=0.0.0.0
-OP_NODE_P2P_LISTEN_TCP_PORT=9003
-OP_NODE_P2P_LISTEN_UDP_PORT=9003
-OP_NODE_P2P_PRIV_PATH=/config/p2p-node-key.txt
-OP_NODE_P2P_PEERSTORE_PATH=/p2p/peerstore
-OP_NODE_P2P_DISCOVERY_PATH=/p2p/discovery
-OP_NODE_L2_ENGINE_AUTH=/config/jwt-secret.txt
-OP_NODE_VERIFIER_L1_CONFS=3
-OP_NODE_LOG_FORMAT=json
+MT_NODE_L1_ETH_RPC={l1_rpc}
+MT_NODE_L2_ETH_RPC={l2_rpc}
+MT_NODE_ROLLUP_CONFIG=/config/rollup.json
+MT_NODE_L2_ENGINE_RPC={l2_rpc}
+MT_NODE_RPC_ADDR=0.0.0.0
+MT_NODE_RPC_PORT={mt_node_http_port}
+MT_NODE_P2P_LISTEN_IP=0.0.0.0
+MT_NODE_P2P_LISTEN_TCP_PORT=9003
+MT_NODE_P2P_LISTEN_UDP_PORT=9003
+MT_NODE_P2P_PRIV_PATH=/config/p2p-node-key.txt
+MT_NODE_P2P_PEERSTORE_PATH=/p2p/peerstore
+MT_NODE_P2P_DISCOVERY_PATH=/p2p/discovery
+MT_NODE_L2_ENGINE_AUTH=/config/jwt-secret.txt
+MT_NODE_VERIFIER_L1_CONFS=3
+MT_NODE_LOG_FORMAT=json
 
-# OP_NODE_P2P_ADVERTISE_IP=
-# OP_NODE_P2P_ADVERTISE_TCP=9003
-# OP_NODE_P2P_ADVERTISE_TCP=9003
+# MT_NODE_P2P_ADVERTISE_IP=
+# MT_NODE_P2P_ADVERTISE_TCP=9003
+# MT_NODE_P2P_ADVERTISE_TCP=9003
 
-OP_NODE_METRICS_ENABLED=true
-OP_NODE_METRICS_ADDR=127.0.0.1
-OP_NODE_METRICS_PORT=7300
+MT_NODE_METRICS_ENABLED=true
+MT_NODE_METRICS_ADDR=127.0.0.1
+MT_NODE_METRICS_PORT=7300
 
-OP_NODE_PPROF_ENABLED=true
-OP_NODE_PPROF_PORT=6666
-OP_NODE_PPROF_ADDR=127.0.0.1
+MT_NODE_PPROF_ENABLED=true
+MT_NODE_PPROF_PORT=6666
+MT_NODE_PPROF_ADDR=127.0.0.1
     """
 
 
-def docker_compose_tmpl(network, geth_tag, geth_http_port, geth_ws_port, op_node_tag, op_node_http_port,
-                        op_node_pprof_port,
-                        op_node_metrics_port):
+def docker_compose_tmpl(network, geth_tag, geth_http_port, geth_ws_port, mt_node_tag, mt_node_http_port,
+                        mt_node_pprof_port,
+                        mt_node_metrics_port):
     return f"""
 version: '3.4'
 
 volumes:
   {network}_l2_data:
-  {network}_op_log:
+  {network}_mt-log:
 
 services:
   l2:
@@ -190,19 +190,19 @@ services:
   mt-node:
     depends_on:
       - l2
-    image: us-central1-docker.pkg.dev/bedrock-goerli-development/images/mt-node:{op_node_tag}
+    image: us-central1-docker.pkg.dev/bedrock-goerli-development/images/mt-node:{mt_node_tag}
     command: mt-node
     ports:
-      - "{op_node_http_port}:8545"
-      - "{op_node_pprof_port}:6666"
-      - "{op_node_metrics_port}:7300"
+      - "{mt_node_http_port}:8545"
+      - "{mt_node_pprof_port}:6666"
+      - "{mt_node_metrics_port}:7300"
     env_file:
       - ./mt-node.env
     volumes:
       - ./jwt-secret.txt:/config/jwt-secret.txt
       - ./rollup.json:/config/rollup.json
       - ./p2p-node-key.txt:/config/p2p-node-key.txt
-      - {network}_op_log:/op_log
+      - {network}_mt-log:/mt-log
     """
 
 

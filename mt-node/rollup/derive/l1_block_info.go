@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	L1InfoFuncSignature = "setL1BlockValues(uint64,uint64,uint256,bytes32,uint64,bytes32,uint256,uint256)"
-	L1InfoArguments     = 8
+	L1InfoFuncSignature = "setL1BlockValues(uint64,uint64,uint256,bytes32,uint64,bytes32,uint256,uint256,uint256,uint256)"
+	L1InfoArguments     = 10
 	L1InfoLen           = 4 + 32*L1InfoArguments
 )
 
@@ -43,7 +43,8 @@ type L1BlockInfo struct {
 	BatcherAddr   common.Address
 	L1FeeOverhead eth.Bytes32
 	L1FeeScalar   eth.Bytes32
-	BitRatio      uint64
+	DaFee         *big.Int
+	DaFeeScalar   eth.Bytes32
 }
 
 func (info *L1BlockInfo) MarshalBinary() ([]byte, error) {
@@ -71,7 +72,12 @@ func (info *L1BlockInfo) MarshalBinary() ([]byte, error) {
 	offset += 32
 	copy(data[offset:offset+32], info.L1FeeScalar[:])
 	offset += 32
-	binary.BigEndian.PutUint64(data[offset+24:offset+32], info.BitRatio)
+	if info.DaFee.BitLen() > 256 {
+		return nil, fmt.Errorf("base fee exceeds 256 bits: %d", info.BaseFee)
+	}
+	info.DaFee.FillBytes(data[offset : offset+32])
+	offset += 32
+	copy(data[offset:offset+32], info.DaFeeScalar[:])
 	return data, nil
 }
 
@@ -111,10 +117,9 @@ func (info *L1BlockInfo) UnmarshalBinary(data []byte) error {
 	offset += 32
 	copy(info.L1FeeScalar[:], data[offset:offset+32])
 	offset += 32
-	binary.BigEndian.PutUint64(data[offset+24:offset+32], info.BitRatio)
-	if !bytes.Equal(data[offset:offset+24], padding[:]) {
-		return fmt.Errorf("bit ratio number exceeds uint64 bounds: %x", data[offset:offset+32])
-	}
+	info.DaFee = new(big.Int).SetBytes(data[offset : offset+32])
+	offset += 32
+	copy(info.DaFeeScalar[:], data[offset:offset+32])
 	return nil
 }
 
@@ -127,22 +132,32 @@ func L1InfoDepositTxData(data []byte) (L1BlockInfo, error) {
 
 // L1InfoDeposit creates a L1 Info deposit transaction based on the L1 block,
 // and the L2 block-height difference with the start of the epoch.
-func L1InfoDeposit(seqNumber uint64, block eth.BlockInfo, sysCfg eth.SystemConfig, ratio uint64, regolith bool) (*types.DepositTx, error) {
+func L1InfoDeposit(seqNumber uint64, block eth.BlockInfo, sysCfg eth.SystemConfig, ratio int64, DaFee *big.Int, DaFeeScalar eth.Bytes32, regolith bool) (*types.DepositTx, error) {
 	infoDat := L1BlockInfo{
 		Number:         block.NumberU64(),
 		Time:           block.Time(),
-		BaseFee:        block.BaseFee(),
+		BaseFee:        new(big.Int).Mul(block.BaseFee(), big.NewInt(ratio)),
 		BlockHash:      block.Hash(),
 		SequenceNumber: seqNumber,
 		BatcherAddr:    sysCfg.BatcherAddr,
 		L1FeeOverhead:  sysCfg.Overhead,
 		L1FeeScalar:    sysCfg.Scalar,
-		BitRatio:       ratio,
+		DaFee:          DaFee,
+		DaFeeScalar:    DaFeeScalar,
+	}
+	if infoDat.DaFee == nil {
+		// default da is l1
+		infoDat.DaFee = new(big.Int).Mul(block.BaseFee(), big.NewInt(ratio))
+		infoDat.DaFeeScalar = sysCfg.Scalar
 	}
 	data, err := infoDat.MarshalBinary()
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("infoDat==============", infoDat)
+	fmt.Println("infoDat==============", infoDat)
+	fmt.Println("infoDat==============", infoDat)
+	fmt.Println("infoDat==============", infoDat)
 
 	source := L1InfoDepositSource{
 		L1BlockHash: block.Hash(),
@@ -169,8 +184,9 @@ func L1InfoDeposit(seqNumber uint64, block eth.BlockInfo, sysCfg eth.SystemConfi
 }
 
 // L1InfoDepositBytes returns a serialized L1-info attributes transaction.
-func L1InfoDepositBytes(seqNumber uint64, l1Info eth.BlockInfo, sysCfg eth.SystemConfig, ratio uint64, regolith bool) ([]byte, error) {
-	dep, err := L1InfoDeposit(seqNumber, l1Info, sysCfg, ratio, regolith)
+func L1InfoDepositBytes(seqNumber uint64, l1Info eth.BlockInfo, sysCfg eth.SystemConfig, ratio int64, regolith bool) ([]byte, error) {
+	// TODO add data fee
+	dep, err := L1InfoDeposit(seqNumber, l1Info, sysCfg, ratio, nil, eth.Bytes32{}, regolith)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create L1 info tx: %w", err)
 	}

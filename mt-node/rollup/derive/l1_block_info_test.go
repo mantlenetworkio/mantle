@@ -65,7 +65,7 @@ func TestParseL1InfoDepositTxData(t *testing.T) {
 			info := testCase.mkInfo(rng)
 			l1Cfg := testCase.mkL1Cfg(rng, info)
 			seqNr := testCase.seqNr(rng)
-			depTx, err := L1InfoDeposit(seqNr, info, l1Cfg, false)
+			depTx, err := L1InfoDeposit(seqNr, info, l1Cfg, 1, nil, eth.Bytes32{}, false)
 			require.NoError(t, err)
 			res, err := L1InfoDepositTxData(depTx.Data)
 			require.NoError(t, err, "expected valid deposit info")
@@ -95,7 +95,7 @@ func TestParseL1InfoDepositTxData(t *testing.T) {
 	t.Run("invalid selector", func(t *testing.T) {
 		rng := rand.New(rand.NewSource(1234))
 		info := testutils.MakeBlockInfo(nil)(rng)
-		depTx, err := L1InfoDeposit(randomSeqNr(rng), info, randomL1Cfg(rng, info), false)
+		depTx, err := L1InfoDeposit(randomSeqNr(rng), info, randomL1Cfg(rng, info), 1, nil, eth.Bytes32{}, false)
 		require.NoError(t, err)
 		_, err = rand.Read(depTx.Data[0:4])
 		require.NoError(t, err)
@@ -105,7 +105,7 @@ func TestParseL1InfoDepositTxData(t *testing.T) {
 	t.Run("regolith", func(t *testing.T) {
 		rng := rand.New(rand.NewSource(1234))
 		info := testutils.MakeBlockInfo(nil)(rng)
-		depTx, err := L1InfoDeposit(randomSeqNr(rng), info, randomL1Cfg(rng, info), true)
+		depTx, err := L1InfoDeposit(randomSeqNr(rng), info, randomL1Cfg(rng, info), 1, nil, eth.Bytes32{}, true)
 		require.NoError(t, err)
 		require.False(t, depTx.IsSystemTransaction)
 		require.Equal(t, depTx.Gas, uint64(RegolithSystemTxGas))

@@ -21,7 +21,7 @@ actor('Deployer', () => {
       Math.floor(1_000_000 * Math.random()),
       'Test Token',
       18,
-      'OP'
+      'MT'
     )
     logger.log(
       `Awaiting receipt for deployment tx ${deployment.deployTransaction.hash}.`

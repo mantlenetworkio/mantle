@@ -2,7 +2,7 @@ import { task, types } from 'hardhat/config'
 import { OpNodeProvider } from '@mantleio/core-utils'
 
 // TODO(tynes): add in config validation
-task('check-op-node', 'Validate the config of the op-node')
+task('check-mt-node', 'Validate the config of the mt-node')
   .addParam(
     'opNodeUrl',
     'URL of the MT Node.',

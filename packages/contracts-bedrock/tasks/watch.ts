@@ -19,8 +19,8 @@ task('watch', 'Watch an Mantle System')
     types.string
   )
   .addParam(
-    'opNodeProviderUrl',
-    'op-node provider URL',
+    'mtNodeProviderUrl',
+    'mt-node provider URL',
     'http://localhost:7545',
     types.string
   )
@@ -42,9 +42,9 @@ task('watch', 'Watch an Mantle System')
     console.log('Deployed Contracts')
     console.table(contracts)
 
-    const opNodeProvider = new OpNodeProvider(args.opNodeProviderUrl)
+    const opNodeProvider = new OpNodeProvider(args.mtNodeProviderUrl)
     const opNodeConfig = await opNodeProvider.rollupConfig()
-    console.log('op-node config')
+    console.log('mt-node config')
     console.table({
       'layer-one-hash': opNodeConfig.genesis.l1.hash,
       'layer-one-number': opNodeConfig.genesis.l1.number,

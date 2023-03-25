@@ -108,8 +108,8 @@ task('deposit-erc20', 'Deposits WETH9 onto L2.')
     types.string
   )
   .addParam(
-    'opNodeProviderUrl',
-    'op-node provider URL',
+    'mtNodeProviderUrl',
+    'mt-node provider URL',
     'http://localhost:7545',
     types.string
   )

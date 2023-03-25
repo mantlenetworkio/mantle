@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	Namespace = "op_node"
+	Namespace = "mt_node"
 
 	RPCServerSubsystem = "rpc_server"
 	RPCClientSubsystem = "rpc_client"

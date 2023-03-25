@@ -1,15 +1,14 @@
-package op_heartbeat
+package mt-heartbeat
 
 import (
-	"errors"
+"errors"
 
-	"github.com/mantlenetworkio/mantle/mt-heartbeat/flags"
-	oplog "github.com/mantlenetworkio/mantle/mt-service/log"
-	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
-	mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
-	"github.com/urfave/cli"
+"github.com/mantlenetworkio/mantle/mt-heartbeat/flags"
+oplog "github.com/mantlenetworkio/mantle/mt-service/log"
+opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
+mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
+"github.com/urfave/cli"
 )
-
 type Config struct {
 	HTTPAddr string
 	HTTPPort int
