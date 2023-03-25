@@ -5,7 +5,7 @@ import { OpNodeProvider } from '@mantleio/core-utils'
 task('check-op-node', 'Validate the config of the op-node')
   .addParam(
     'opNodeUrl',
-    'URL of the OP Node.',
+    'URL of the MT Node.',
     'http://localhost:7545',
     types.string
   )
