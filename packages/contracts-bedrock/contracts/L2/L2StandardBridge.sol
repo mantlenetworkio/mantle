@@ -65,7 +65,7 @@ contract L2StandardBridge is StandardBridge, Semver {
      */
     constructor(address payable _otherBridge)
         Semver(1, 1, 0)
-        StandardBridge(payable(Predeploys.L2_CROSS_DOMAIN_MESSENGER), _otherBridge)
+        StandardBridge(payable(Predeploys.L2_CROSS_DOMAIN_MESSENGER), _otherBridge,Predeploys.L1_BIT_ADDRESS)
     {}
 
     /**
@@ -73,7 +73,7 @@ contract L2StandardBridge is StandardBridge, Semver {
      */
     receive() external payable override onlyEOA {
         _initiateWithdrawal(
-            Predeploys.LEGACY_ERC20_ETH,
+            Predeploys.L2_BIT_ADDRESS,
             msg.sender,
             msg.sender,
             msg.value,
@@ -184,8 +184,14 @@ contract L2StandardBridge is StandardBridge, Semver {
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
-        if (_l2Token == Predeploys.LEGACY_ERC20_ETH) {
+        if (_l2Token==Predeploys.L2_BIT_ADDRESS){
+            _initiateBridgeERC20(_l2Token, l1Token, _from, _to, _amount, _minGasLimit, _extraData);
+        } else if (_l2Token == Predeploys.LEGACY_ERC20_ETH) {
             _initiateBridgeETH(_from, _to, _amount, _minGasLimit, _extraData);
+        } else if (_l2Token == Predeploys.L2_ETH_ADDRESS){
+            _initiateBridgeERC20(_l2Token, address(0) ,_from, _to, _amount, _minGasLimit, _extraData);
+
+
         } else {
             address l1Token = MantleMintableERC20(_l2Token).l1Token();
             _initiateBridgeERC20(_l2Token, l1Token, _from, _to, _amount, _minGasLimit, _extraData);

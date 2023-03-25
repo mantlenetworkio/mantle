@@ -9,6 +9,7 @@ import { SafeCall } from "../libraries/SafeCall.sol";
 import { IMantleMintableERC20, ILegacyMintableERC20 } from "./IMantleMintableERC20.sol";
 import { CrossDomainMessenger } from "./CrossDomainMessenger.sol";
 import { MantleMintableERC20 } from "./MantleMintableERC20.sol";
+import { Predeploys } from "../libraries/Predeploys.sol";
 
 /**
  * @custom:upgradeable
@@ -19,6 +20,8 @@ import { MantleMintableERC20 } from "./MantleMintableERC20.sol";
  */
 abstract contract StandardBridge {
     using SafeERC20 for IERC20;
+
+    address public l1BitAddress;
 
     /**
      * @notice The L2 gas limit set when eth is depoisited using the receive() function.
@@ -158,9 +161,12 @@ abstract contract StandardBridge {
      * @param _messenger   Address of CrossDomainMessenger on this network.
      * @param _otherBridge Address of the other StandardBridge contract.
      */
-    constructor(address payable _messenger, address payable _otherBridge) {
+    constructor(address payable _messenger, address payable _otherBridge,address _l1BitAddress) {
+        require(_l1BitAddress == Predeploys.L1_BIT_ADDRESS,"init failed by cant get right l1 bit address");
         MESSENGER = CrossDomainMessenger(_messenger);
         OTHER_BRIDGE = StandardBridge(_otherBridge);
+
+        l1BitAddress = _l1BitAddress;
     }
 
     /**
@@ -323,8 +329,8 @@ abstract contract StandardBridge {
      *                     to identify the transaction.
      */
     function finalizeBridgeERC20(
-        address _localToken,
-        address _remoteToken,
+        address _localToken, //  l2eth
+        address _remoteToken, // 0
         address _from,
         address _to,
         uint256 _amount,
@@ -346,7 +352,7 @@ abstract contract StandardBridge {
         // contracts may override this function in order to emit legacy events as well.
         _emitERC20BridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
     }
-
+    //TODO 改变eth绑定关系
     /**
      * @notice Initiates a bridge of ETH through the CrossDomainMessenger.
      *
@@ -400,15 +406,67 @@ abstract contract StandardBridge {
      *                     to identify the transaction.
      */
     function _initiateBridgeERC20(
-        address _localToken,
-        address _remoteToken,
+        address _localToken,  // l2bit
+        address _remoteToken, // l1bit
         address _from,
         address _to,
         uint256 _amount,
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
-        if (_isMantleMintableERC20(_localToken)) {
+    //TODO 改变erc20绑定关系
+    //TODO 绑定bit到 mintable list
+        if (_localToken == address(0)  ){
+            require(_remoteToken == Predeploys.L2_BIT_ADDRESS,"the target mint token has to be bit");
+            require(msg.value == _amount,"bit amount can't equal the params");
+            MESSENGER.sendMessage(
+                    address(OTHER_BRIDGE),
+                    abi.encodeWithSelector(
+                        this.finalizeBridgeERC20.selector,
+                    // Because this call will be executed on the remote chain, we reverse the order of
+                    // the remote and local token addreses relative to their order in the
+                    // finalizeBridgeERC20 function.s
+                        _remoteToken,
+                        _localToken,
+                        _from,
+                        _to,
+                        _amount,
+                        _extraData
+                    ),
+                    _minGasLimit
+                );
+
+            _emitETHBridgeInitiated( _from, _to, _amount, _extraData);
+
+            return;
+
+        }
+        else if (_remoteToken== address(0) ){
+            require(_localToken == Predeploys.L2_BIT_ADDRESS,"the target mint token has to be bit");
+                require(
+                    _isCorrectTokenPair(_localToken, _remoteToken),
+                    "StandardBridge: wrong remote token for Mantle Mintable ERC20 local token"
+                );
+
+                MantleMintableERC20(_localToken).burn(_from, _amount);
+                _emitERC20BridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+
+                MESSENGER.sendMessage(
+                    address(OTHER_BRIDGE),
+                    abi.encodeWithSelector(
+                        this.finalizeBridgeETH.selector,
+                        _from,
+                        _to,
+                        _amount,
+                        _extraData
+                    ),
+                    _minGasLimit
+                );
+            }
+
+
+        else if (_isMantleMintableERC20(_localToken)) {
+            //TODO burn 流程
             require(
                 _isCorrectTokenPair(_localToken, _remoteToken),
                 "StandardBridge: wrong remote token for Mantle Mintable ERC20 local token"

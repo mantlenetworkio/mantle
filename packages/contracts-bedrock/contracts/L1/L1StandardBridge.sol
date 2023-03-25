@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
 
-import { Predeploys } from "../libraries/Predeploys.sol";
-import { StandardBridge } from "../universal/StandardBridge.sol";
-import { Semver } from "../universal/Semver.sol";
+import {Predeploys} from "../libraries/Predeploys.sol";
+import {StandardBridge} from "../universal/StandardBridge.sol";
+import {Semver} from "../universal/Semver.sol";
 
 /**
  * @custom:proxied
@@ -18,6 +18,8 @@ import { Semver } from "../universal/Semver.sol";
  *         not limited to: tokens with transfer fees, rebasing tokens, and tokens with blocklists.
  */
 contract L1StandardBridge is StandardBridge, Semver {
+
+    address public l1BitAddress;
     /**
      * @custom:legacy
      * @notice Emitted whenever a deposit of ETH from L1 into L2 is initiated.
@@ -96,9 +98,10 @@ contract L1StandardBridge is StandardBridge, Semver {
      * @param _messenger Address of the L1CrossDomainMessenger.
      */
     constructor(address payable _messenger)
-        Semver(1, 1, 0)
-        StandardBridge(_messenger, payable(Predeploys.L2_STANDARD_BRIDGE))
-    {}
+    Semver(1, 1, 0)
+    StandardBridge(_messenger, payable(Predeploys.L2_STANDARD_BRIDGE), Predeploys.L1_BIT_ADDRESS)
+    {
+    }
 
     /**
      * @notice Allows EOAs to bridge ETH by sending directly to the bridge.
@@ -245,6 +248,25 @@ contract L1StandardBridge is StandardBridge, Semver {
     }
 
     /**
+     * @inheritdoc IL1ERC20Bridge
+     */
+    function finalizeBitWithdrawal(
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes calldata _data
+    ) external  {
+        finalizeERC20Withdrawal(
+            l1BitAddress,
+            Predeploys.L2_BIT_ADDRESS,
+            _from,
+            _to,
+            _amount,
+            _data
+        );
+    }
+
+    /**
      * @custom:legacy
      * @notice Retrieves the access of the corresponding L2 bridge contract.
      *
@@ -268,7 +290,7 @@ contract L1StandardBridge is StandardBridge, Semver {
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
-        _initiateBridgeETH(_from, _to, msg.value, _minGasLimit, _extraData);
+        _initiateBridgeERC20(address(0), Predeploys.L2_ETH_ADDRESS, _from, _to, msg.value, _minGasLimit, _extraData);
     }
 
     /**

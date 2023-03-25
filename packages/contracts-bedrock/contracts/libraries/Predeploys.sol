@@ -6,6 +6,14 @@ pragma solidity ^0.8.0;
  * @notice Contains constant addresses for contracts that are pre-deployed to the L2 system.
  */
 library Predeploys {
+
+    address internal constant L1_BIT_ADDRESS = 0x4200000000000000000000000000000000000016;
+
+    address internal constant L2_BIT_ADDRESS = 0x4200000000000000000000000000000000000016;
+
+    address internal constant L2_ETH_ADDRESS = 0x4200000000000000000000000000000000000016;
+
+
     /**
      * @notice Address of the L2ToL1MessagePasser predeploy.
      */
