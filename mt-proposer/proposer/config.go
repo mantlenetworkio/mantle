@@ -12,7 +12,7 @@ import (
 
 	opcrypto "github.com/mantlenetworkio/mantle/mt-service/crypto"
 	oplog "github.com/mantlenetworkio/mantle/mt-service/log"
-	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
+	mtmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
 	mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
 	oprpc "github.com/mantlenetworkio/mantle/mt-service/rpc"
 	"github.com/mantlenetworkio/mantle/mt-service/txmgr"
@@ -86,7 +86,7 @@ type CLIConfig struct {
 
 	LogConfig oplog.CLIConfig
 
-	MetricsConfig opmetrics.CLIConfig
+	MetricsConfig mtmetrics.CLIConfig
 
 	PprofConfig mtpprof.CLIConfig
 
@@ -131,7 +131,7 @@ func NewConfig(ctx *cli.Context) CLIConfig {
 		AllowNonFinalized: ctx.GlobalBool(flags.AllowNonFinalizedFlag.Name),
 		RPCConfig:         oprpc.ReadCLIConfig(ctx),
 		LogConfig:         oplog.ReadCLIConfig(ctx),
-		MetricsConfig:     opmetrics.ReadCLIConfig(ctx),
+		MetricsConfig:     mtmetrics.ReadCLIConfig(ctx),
 		PprofConfig:       mtpprof.ReadCLIConfig(ctx),
 		SignerConfig:      opsigner.ReadCLIConfig(ctx),
 	}

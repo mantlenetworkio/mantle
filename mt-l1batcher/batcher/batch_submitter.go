@@ -14,7 +14,7 @@ import (
 
 	"github.com/mantlenetworkio/mantle/mt-l1batcher/rpc"
 	oplog "github.com/mantlenetworkio/mantle/mt-service/log"
-	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
+	mtmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
 	mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
 	oprpc "github.com/mantlenetworkio/mantle/mt-service/rpc"
 )
@@ -64,16 +64,16 @@ func Main(version string, cliCtx *cli.Context) error {
 		}()
 	}
 
-	registry := opmetrics.NewRegistry()
+	registry := mtmetrics.NewRegistry()
 	metricsCfg := cfg.MetricsConfig
 	if metricsCfg.Enabled {
 		l.Info("starting metrics server", "addr", metricsCfg.ListenAddr, "port", metricsCfg.ListenPort)
 		go func() {
-			if err := opmetrics.ListenAndServe(ctx, registry, metricsCfg.ListenAddr, metricsCfg.ListenPort); err != nil {
+			if err := mtmetrics.ListenAndServe(ctx, registry, metricsCfg.ListenAddr, metricsCfg.ListenPort); err != nil {
 				l.Error("error starting metrics server", err)
 			}
 		}()
-		opmetrics.LaunchBalanceMetrics(ctx, l, registry, "", batchSubmitter.L1Client, batchSubmitter.From)
+		mtmetrics.LaunchBalanceMetrics(ctx, l, registry, "", batchSubmitter.L1Client, batchSubmitter.From)
 	}
 
 	rpcCfg := cfg.RPCConfig

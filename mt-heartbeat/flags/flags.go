@@ -3,7 +3,7 @@ package flags
 import (
 	opservice "github.com/mantlenetworkio/mantle/mt-service"
 	oplog "github.com/mantlenetworkio/mantle/mt-service/log"
-	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
+	mtmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
 	"github.com/urfave/cli"
 )
 
@@ -38,5 +38,5 @@ func init() {
 	}
 
 	Flags = append(Flags, oplog.CLIFlags(envPrefix)...)
-	Flags = append(Flags, opmetrics.CLIFlags(envPrefix)...)
+	Flags = append(Flags, mtmetrics.CLIFlags(envPrefix)...)
 }

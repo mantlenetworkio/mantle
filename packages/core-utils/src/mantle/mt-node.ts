@@ -1,4 +1,4 @@
-export interface OpNodeConfig {
+export interface MtNodeConfig {
   genesis: {
     l1: {
       hash: string

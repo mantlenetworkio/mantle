@@ -11,7 +11,7 @@ import (
 	"time"
 
 	oplog "github.com/mantlenetworkio/mantle/mt-service/log"
-	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
+	mtmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
 	optls "github.com/mantlenetworkio/mantle/mt-service/tls"
 
 	"github.com/ethereum/go-ethereum/log"
@@ -31,7 +31,7 @@ type Server struct {
 	jwtSecret      []byte
 	rpcPath        string
 	healthzPath    string
-	httpRecorder   opmetrics.HTTPRecorder
+	httpRecorder   mtmetrics.HTTPRecorder
 	httpServer     *http.Server
 	log            log.Logger
 	tls            *ServerTLSConfig
@@ -89,7 +89,7 @@ func WithHealthzPath(path string) ServerOption {
 	}
 }
 
-func WithHTTPRecorder(recorder opmetrics.HTTPRecorder) ServerOption {
+func WithHTTPRecorder(recorder mtmetrics.HTTPRecorder) ServerOption {
 	return func(b *Server) {
 		b.httpRecorder = recorder
 	}
@@ -127,7 +127,7 @@ func NewServer(host string, port int, appVersion string, opts ...ServerOption) *
 		vHosts:         wildcardHosts,
 		rpcPath:        "/",
 		healthzPath:    "/healthz",
-		httpRecorder:   opmetrics.NoopHTTPRecorder,
+		httpRecorder:   mtmetrics.NoopHTTPRecorder,
 		httpServer: &http.Server{
 			Addr: endpoint,
 		},
@@ -176,7 +176,7 @@ func (b *Server) Start() error {
 	// http middleware
 	var handler http.Handler = mux
 	handler = optls.NewPeerTLSMiddleware(handler)
-	handler = opmetrics.NewHTTPRecordingMiddleware(b.httpRecorder, handler)
+	handler = mtmetrics.NewHTTPRecordingMiddleware(b.httpRecorder, handler)
 	handler = oplog.NewLoggingMiddleware(b.log, handler)
 	b.httpServer.Handler = handler
 

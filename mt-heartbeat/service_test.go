@@ -15,7 +15,7 @@ import (
 "github.com/stretchr/testify/require"
 
 "github.com/mantlenetworkio/mantle/mt-node/heartbeat"
-opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
+mtmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
 )
 
 func TestService(t *testing.T) {
@@ -24,7 +24,7 @@ func TestService(t *testing.T) {
 	cfg := Config{
 		HTTPAddr: "127.0.0.1",
 		HTTPPort: httpPort,
-		Metrics: opmetrics.CLIConfig{
+		Metrics: mtmetrics.CLIConfig{
 			Enabled:    true,
 			ListenAddr: "127.0.0.1",
 			ListenPort: metricsPort,
