@@ -726,7 +726,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       'get',
       '/da/getLatestTransactionBatchIndex/',
       async (): Promise<LatestTxBatchIndexResponse> => {
-        const latestBatchIndex = await this.state.db.getLatestBatchIndex()
+        const latestBatchIndex = await this.state.db.getLastBatchIndex()
 
         if (latestBatchIndex === null) {
           return {
@@ -773,7 +773,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         const dsId = BigNumber.from(req.params.dsId).toNumber()
         return {
           dsId,
-          batchTx: [],
+          batchTx: batchTxs,
         }
       }
     )
@@ -792,7 +792,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           }
         }
         return {
-          dataStore: JSON.stringify(dataStore_),
+          dataStore: dataStore_,
         }
       }
     )

@@ -17,7 +17,7 @@ import { L1DataTransportServiceOptions } from '../main/service'
 import {
   TransactionEntry,
   DataStoreEntry,
-  TransactionListEntry,
+  TransactionListEntry, RollupStoreEntry,
 } from '../../types'
 
 interface DaIngestionMetrics {
@@ -100,7 +100,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       l2ChainId: this.options.l2ChainId,
     })
 
-    await this.state.db.putUpdatedBatchIndex(this.options.daInitBatch)
+    await this.state.db.putLastBatchIndex(this.options.daInitBatch)
 
     this.daIngestionMetrics = registerMetrics(this.metrics)
 
@@ -117,16 +117,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         if (batchIndexRange.start >= batchIndexRange.end) {
           continue
         }
-        const dataStoreIdRange = await this.getDataStoreIdRange(batchIndexRange)
-        if (dataStoreIdRange === null) {
-          await sleep(this.options.pollingInterval)
-          continue
-        }
-        await this.updateBatchTransactionsByDataStoreIdRange(dataStoreIdRange)
-
-        await this.updateTransactionListAndDataStoreByDsIDLoop(dataStoreIdRange)
-        await this.updateRollupDataStoreLoop(batchIndexRange)
-
+        await this.pareTransaction(batchIndexRange)
         await sleep(this.options.pollingInterval)
       } catch (err) {
         if (err instanceof MissingElementError) {
@@ -147,134 +138,87 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       }
     }
   }
-  private async updateRollupDataStoreLoop(
-    batchIndexRange: Range
-  ): Promise<void> {
-    if (batchIndexRange === null) {
-      return
-    }
-    const latestBatchIndex = batchIndexRange.end
-    let updatedBatchIndex = await this.state.db.getUpdatedRollupBatchIndex()
-    if (updatedBatchIndex === null) {
-      updatedBatchIndex = 0
-    }
-    if (
-      latestBatchIndex <= updatedBatchIndex ||
-      latestBatchIndex - updatedBatchIndex > 10 * 2
-    ) {
-      return
-    }
 
-    for (let i = updatedBatchIndex; i <= latestBatchIndex; i++) {
-      const dataStore = await this.GetRollupStoreByRollupBatchIndex(i)
-        .then((rst) => {
-          return rst
-        })
-        .catch((error) => {
-          console.log('getRollupStoreByRollupBatchIndex error : ', error)
-        })
+  private async pareTransaction(batchIndexRange: Range) {
+    const dataStore: DataStoreEntry[] = []
+    const transactionEntries: TransactionEntry[] = []
+    const exploreTransactionEntries: TransactionEntry[] = []
+    for ( let index = batchIndexRange.start; index <= batchIndexRange.end;  index++) {
+      const dataStoreRollupId = await this.GetRollupStoreByRollupBatchIndex(index)
+      if (dataStoreRollupId['data_store_id'] === 0) {
+        continue
+      }
+      const dataStore = await this.GetDataStoreById(dataStoreRollupId['data_store_id'].toString())
       if (dataStore === null) {
-        console.log('HTTP getRollup and get null data')
-        break
+        continue
       }
-      if (dataStore['status'] === 0) {
-        break
+      if (dataStore['Confirmed']) {
+        // explore transaction list
+        await this._storeTransactionListByDSId(dataStoreRollupId['data_store_id'])
+
+        // batch transaction list
+        await this._storeBatchTransactionsByDSId(dataStoreRollupId['data_store_id'])
+
+        // put rollup store info to db
+        await this.state.db.putRollupStoreByBatchIndex(
+          {
+            index: 0,
+            data_store_id: dataStoreRollupId['data_store_id'],
+            status: dataStoreRollupId['status'],
+            confirm_at: dataStoreRollupId['confirm_at'],
+          },
+          index
+        )
+        // put data store to db
+        const dataStoreEntry: DataStoreEntry = {
+          dataStoreId: dataStore['Id'],
+          storeNumber: dataStore['StoreNumber'],
+          durationDataStoreId: dataStore['DurationDataStoreId'],
+          index: dataStore['Index'],
+          dataCommitment: dataStore['DataCommitment'],
+          msgHash: dataStore['MsgHash'],
+          stakesFromBlockNumber: dataStore['StakesFromBlockNumber'],
+          initTime: dataStore['InitTime'],
+          expireTime: dataStore['ExpireTime'],
+          duration: dataStore['Duration'],
+          numSys: dataStore['NumSys'],
+          numPar: dataStore['NumPar'],
+          degree: dataStore['Degree'],
+          storePeriodLength: dataStore['StorePeriodLength'],
+          fee: dataStore['Fee'],
+          confirmer: dataStore['Confirmer'],
+          header: dataStore['Header'],
+          initTxHash: dataStore['InitTxHash'],
+          initGasUsed: dataStore['InitGasUsed'],
+          initBlockNumber: dataStore['InitBlockNumber'],
+          confirmed: dataStore['Confirmed'],
+          ethSigned: dataStore['EthSigned'],
+          eigenSigned: dataStore['EigenSigned'],
+          nonSignerPubKeyHashes: dataStore['NonSignerPubKeyHashes'],
+          signatoryRecord: dataStore['SignatoryRecord'],
+          confirmTxHash: dataStore['ConfirmTxHash'],
+          confirmGasUsed: dataStore['ConfirmGasUsed'],
+        }
+        await this.state.db.putDsById(dataStoreEntry, dataStoreRollupId['data_store_id'])
       }
-      await this.state.db.putRollupStoreByBatchIndex(
-        {
-          index: 0,
-          data_store_id: dataStore['data_store_id'],
-          status: dataStore['status'],
-          confirm_at: dataStore['confirm_at'],
-        },
-        i
-      )
-      await this.state.db.putUpdatedRollupBatchIndex(i)
     }
   }
+
   private async getBatchIndexRange(): Promise<Range> {
-    const lastBatchIndex = await this.state.db.getUpdatedBatchIndex()
+    const latestBatchIndex = await this.state.db.getLastBatchIndex()
     const newTxBatchIndex: number = await this.GetLatestTransactionBatchIndex()
-    await this.state.db.putUpdatedBatchIndex(newTxBatchIndex)
-    if (newTxBatchIndex > lastBatchIndex + this.options.daSyncStep) {
-      const loopTimes = lastBatchIndex + this.options.daSyncStep
+    const end = latestBatchIndex + this.options.daSyncStep
+    if (newTxBatchIndex > latestBatchIndex) {
+      await this.state.db.putLastBatchIndex(end)
       return {
-        start: lastBatchIndex,
-        end: loopTimes,
+        start: latestBatchIndex,
+        end: end,
       }
     } else {
       return {
-        start: lastBatchIndex,
+        start: latestBatchIndex,
         end: newTxBatchIndex,
       }
-    }
-  }
-
-  private async getDataStoreIdRange(batchIndexRange: Range): Promise<Range> {
-    if (batchIndexRange === null) {
-      return null
-    }
-    const dataStore = await this.GetRollupStoreByRollupBatchIndex(
-      batchIndexRange.start
-    )
-    if (dataStore === null || dataStore['status'] === 0) {
-      console.log('HTTP getRollup and get null data')
-      return null
-    }
-    const startDsId = dataStore['data_store_id']
-    let dataStore_ = await this.GetRollupStoreByRollupBatchIndex(
-      batchIndexRange.end
-    )
-    if (dataStore_ === null) {
-      console.log('HTTP getRollup and get null data')
-      return null
-    } else if (dataStore_['status'] === 0) {
-      dataStore_ = await this.GetRollupStoreByRollupBatchIndex(
-        batchIndexRange.end - 1
-      )
-      if (dataStore_ === null) {
-        console.log('HTTP getRollup and get null data')
-        return null
-      }
-    }
-    const endDsId = dataStore_['data_store_id']
-    return {
-      start: startDsId,
-      end: endDsId,
-    }
-  }
-
-  private async updateTransactionListAndDataStoreByDsIDLoop(
-    dataStoreIdRange: Range
-  ): Promise<void> {
-    let startDsId = await this.state.db.getUpdatedDsId()
-    if (startDsId === null) {
-      startDsId = 1
-    }
-    if (startDsId >= dataStoreIdRange.end) {
-      return
-    }
-    startDsId =
-      startDsId > dataStoreIdRange.start ? dataStoreIdRange.start : startDsId
-    for (let dsId = startDsId; dsId <= dataStoreIdRange.end; dsId++) {
-      await this._storeDataStoreById(dsId)
-      await this._storeTransactionListByDSId(dsId)
-      await this.state.db.putUpdatedDsId(dsId)
-    }
-  }
-  private async updateBatchTransactionsByDataStoreIdRange(
-    dataStoreIdRange: Range
-  ): Promise<void> {
-    if (dataStoreIdRange == null) {
-      return
-    }
-
-    for (
-      let dataStoreId = dataStoreIdRange.start;
-      dataStoreId <= dataStoreIdRange.end;
-      dataStoreId++
-    ) {
-      this._storeBatchTransactionsByDSId(dataStoreId)
     }
   }
 
@@ -295,7 +239,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       if (batchTxs.length === 0) {
         return
       }
-      await this.state.db.putBatchTxByDsId(batchTxs[0]['TxMeta']['index'], batchTxs[batchTxs.length -1]['TxMeta']['index'], storeId);
       for (const batchTx of batchTxs) {
         const queueOrigin =
           batchTx['TxMeta']['queueOrigin'] === 1 ? 'l1' : 'sequencer'
@@ -336,49 +279,12 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         })
       }
       await this.state.db.putTransactions(transactionEntries)
+      await this.state.db.putBatchTransactionByDsId(transactionEntries, storeId);
     }catch (error) {
-      console.log("eigen layer sync finish")
+      throw new Error(
+        `eigen layer sync finish, error is: ${error}`
+      )
     }
-  }
-
-  private async _storeDataStoreById(storeId: number): Promise<void> {
-    if (storeId === null) {
-      return
-    }
-    const dataStore = await this.GetDataStoreById(storeId)
-    if (dataStore === null) {
-      return
-    }
-    const dataStoreEntry: DataStoreEntry = {
-      dataStoreId: dataStore['Id'],
-      storeNumber: dataStore['StoreNumber'],
-      durationDataStoreId: dataStore['DurationDataStoreId'],
-      index: dataStore['Index'],
-      dataCommitment: dataStore['DataCommitment'],
-      msgHash: dataStore['MsgHash'],
-      stakesFromBlockNumber: dataStore['StakesFromBlockNumber'],
-      initTime: dataStore['InitTime'],
-      expireTime: dataStore['ExpireTime'],
-      duration: dataStore['Duration'],
-      numSys: dataStore['NumSys'],
-      numPar: dataStore['NumPar'],
-      degree: dataStore['Degree'],
-      storePeriodLength: dataStore['StorePeriodLength'],
-      fee: dataStore['Fee'],
-      confirmer: dataStore['Confirmer'],
-      header: dataStore['Header'],
-      initTxHash: dataStore['InitTxHash'],
-      initGasUsed: dataStore['InitGasUsed'],
-      initBlockNumber: dataStore['InitBlockNumber'],
-      confirmed: dataStore['Confirmed'],
-      ethSigned: dataStore['EthSigned'],
-      eigenSigned: dataStore['EigenSigned'],
-      nonSignerPubKeyHashes: dataStore['NonSignerPubKeyHashes'],
-      signatoryRecord: dataStore['SignatoryRecord'],
-      confirmTxHash: dataStore['ConfirmTxHash'],
-      confirmGasUsed: dataStore['ConfirmGasUsed'],
-    }
-    await this.state.db.putDsById(dataStoreEntry, storeId)
   }
 
   private async _storeTransactionListByDSId(storeId: number): Promise<void> {
@@ -471,7 +377,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       })
   }
 
-  private async GetDataStoreById(storeNumber: number): Promise<any> {
+  private async GetDataStoreById(storeNumber: string): Promise<any> {
     // 👇️ const response: Response
     return (
       fetch(this.state.mtBatcherFetchUrl + '/browser/getDataStoreById', {
@@ -482,7 +388,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         }),
       })
         .then((res) => res.json())
-        // .then((res) => res.json())
         .catch((error) => {
           console.log('GetDataStoreById HTTP error status != 200 ', error)
           return error

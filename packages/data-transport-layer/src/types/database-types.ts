@@ -95,13 +95,6 @@ interface BatchEntry {
   type: string
 }
 
-export interface BatchTxByDsIdEntry {
-  index: number
-  startTxIndex: number
-  endTxIndex: number
-  dsId:number
-}
-
 export type TransactionBatchEntry = BatchEntry
 export type StateRootBatchEntry = BatchEntry
 
