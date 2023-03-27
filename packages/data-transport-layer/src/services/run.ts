@@ -33,7 +33,7 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       daPollingInterval: config.uint('da-polling-interval', 15000),
       logsPerPollingInterval: config.uint('logs-per-polling-interval', 2000),
       daSyncStep: config.uint('da-sync-step', 1),
-      daInitBatch: config.uint('da-init-batch', 1),
+      daInitBatch: config.uint('da-init-batch', 0),
       dangerouslyCatchAllErrors: config.bool(
         'dangerously-catch-all-errors',
         false
@@ -44,7 +44,7 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       l2ChainId: config.uint('l2-chain-id'),
       syncFromL1: config.bool('sync-from-l1', false),
       syncFromL2: config.bool('sync-from-l2', false),
-      syncToDa: config.bool('sync-to-da', false),
+      syncToDa: config.bool('sync-to-da', true),
       mtBatcherHost: config.str('mt-batcher-hostname', 'http://127.0.0.1'),
       mtBatcherFetchPort: config.uint('mt-batcher-fetch-port', 8089),
       eigenUpgradeEnable: config.bool('eigen-upgrade-enable', true),

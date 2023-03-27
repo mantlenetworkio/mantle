@@ -1,4 +1,5 @@
 import {
+  DataStoreEntry,
   EnqueueEntry,
   RollupStoreEntry,
   StateRootBatchEntry,
@@ -57,7 +58,7 @@ export interface BatchTxByDataStoreIdResponse {
 }
 
 export interface DataStoreByIdResponse {
-  dataStore: string
+  dataStore: DataStoreEntry
 }
 
 export interface TestResponse {
