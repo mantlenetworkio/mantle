@@ -4,6 +4,7 @@ pragma solidity 0.8.15;
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { Semver } from "../universal/Semver.sol";
 import { Types } from "../libraries/Types.sol";
+import {ITssGroupManager} from "../tss/ITssGroupManager.sol";
 
 /**
  * @custom:proxied
@@ -180,7 +181,8 @@ contract L2OutputOracle is Initializable, Semver {
         bytes32 _outputRoot,
         uint256 _l2BlockNumber,
         bytes32 _l1BlockHash,
-        uint256 _l1BlockNumber
+        uint256 _l1BlockNumber,
+        bytes memory _signature
     ) external payable {
         require(
             msg.sender == PROPOSER,
@@ -216,6 +218,8 @@ contract L2OutputOracle is Initializable, Semver {
                 "L2OutputOracle: block hash does not match the hash at the expected height"
             );
         }
+        // Call tss group register contract to verify the signature
+        _checkClusterSignature(_outputRoot, _l2BlockNumber,_l1BlockHash,_l1BlockNumber, _signature);
 
         emit OutputProposed(_outputRoot, nextOutputIndex(), _l2BlockNumber, block.timestamp);
 
@@ -346,5 +350,23 @@ contract L2OutputOracle is Initializable, Semver {
      */
     function computeL2Timestamp(uint256 _l2BlockNumber) public view returns (uint256) {
         return startingTimestamp + ((_l2BlockNumber - startingBlockNumber) * L2_BLOCK_TIME);
+    }
+
+
+    /**
+     * Appends a batch to the chain.
+     * @param _batch Elements within the batch.
+     * @param _shouldStartAtElement Relative rollup block height.
+     * @param _signature Signature of batch roots and rollup start height.
+     */
+    function _checkClusterSignature(bytes32 _outputRoot, uint256 _l2BlockNumber, bytes32 _l1BlockHash, uint256 _l1BlockNumber, bytes memory _signature)
+    internal
+    {
+        // abi hash encode to bytes
+        require(
+            ITssGroupManager(resolve("Proxy__TSS_GroupManager")).verifySign(
+                keccak256(abi.encode(_outputRoot, _l2BlockNumber, _l1BlockHash, _l1BlockNumber)), _signature),
+            "verify signature failed"
+        );
     }
 }

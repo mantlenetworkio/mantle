@@ -10,6 +10,7 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-node/sources"
 	"github.com/mantlenetworkio/mantle/mt-proposer/flags"
 
+	tssClient "github.com/mantlenetworkio/mantle/mt-proposer/tss-client"
 	opcrypto "github.com/mantlenetworkio/mantle/mt-service/crypto"
 	oplog "github.com/mantlenetworkio/mantle/mt-service/log"
 	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
@@ -27,6 +28,7 @@ type Config struct {
 	TxManagerConfig    txmgr.Config
 	L1Client           *ethclient.Client
 	RollupClient       *sources.RollupClient
+	TssClient          *tssClient.Client
 	AllowNonFinalized  bool
 	From               common.Address
 	SignerFnFactory    opcrypto.SignerFactory
@@ -43,6 +45,9 @@ type CLIConfig struct {
 
 	// RollupRpc is the HTTP provider URL for the rollup node.
 	RollupRpc string
+
+	// Tss manager client url
+	TssClientUrl string
 
 	// L2OOAddress is the L2OutputOracle contract address.
 	L2OOAddress string
@@ -119,6 +124,7 @@ func NewConfig(ctx *cli.Context) CLIConfig {
 		// Required Flags
 		L1EthRpc:                  ctx.GlobalString(flags.L1EthRpcFlag.Name),
 		RollupRpc:                 ctx.GlobalString(flags.RollupRpcFlag.Name),
+		TssClientUrl:              ctx.GlobalString(flags.TssClientUrl.Name),
 		L2OOAddress:               ctx.GlobalString(flags.L2OOAddressFlag.Name),
 		PollInterval:              ctx.GlobalDuration(flags.PollIntervalFlag.Name),
 		NumConfirmations:          ctx.GlobalUint64(flags.NumConfirmationsFlag.Name),

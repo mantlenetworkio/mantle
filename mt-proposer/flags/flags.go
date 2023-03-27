@@ -28,6 +28,12 @@ var (
 		Required: true,
 		EnvVar:   opservice.PrefixEnvVar(envVarPrefix, "ROLLUP_RPC"),
 	}
+	TssClientUrl = cli.StringFlag{
+		Name:     "tss-client-url",
+		Usage:    "HTTP provider URL for tss",
+		Required: true,
+		EnvVar:   "TSS_CLIENT_RPC",
+	}
 	L2OOAddressFlag = cli.StringFlag{
 		Name:     "l2oo-address",
 		Usage:    "Address of the L2OutputOracle contract",

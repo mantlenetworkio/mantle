@@ -2,6 +2,8 @@ package proposer
 
 import (
 	"context"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
@@ -24,12 +26,14 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-bindings/bindings"
 	"github.com/mantlenetworkio/mantle/mt-node/eth"
 	"github.com/mantlenetworkio/mantle/mt-node/sources"
+	tss "github.com/mantlenetworkio/mantle/mt-proposer/tss-client"
 	opcrypto "github.com/mantlenetworkio/mantle/mt-service/crypto"
 	oplog "github.com/mantlenetworkio/mantle/mt-service/log"
 	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
 	oppprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
 	oprpc "github.com/mantlenetworkio/mantle/mt-service/rpc"
 	"github.com/mantlenetworkio/mantle/mt-service/txmgr"
+	tss_types "github.com/mantlenetworkio/mantle/mt-tss/common"
 )
 
 const (
@@ -125,6 +129,8 @@ type L2OutputSubmitter struct {
 	l1Client *ethclient.Client
 	// RollupClient is used to retrieve output roots from
 	rollupClient *sources.RollupClient
+	//tss manager client url
+	tssClient *tss.Client
 
 	l2ooContract    *bindings.L2OutputOracle
 	rawL2ooContract *bind.BoundContract
@@ -165,6 +171,8 @@ func NewL2OutputSubmitterFromCLIConfig(cfg CLIConfig, l log.Logger) (*L2OutputSu
 	if err != nil {
 		return nil, err
 	}
+	tssClient := tss.NewClient(cfg.TssClientUrl)
+	log.Info("Configured tss client", "url", cfg.TssClientUrl)
 
 	txMgrConfg := txmgr.Config{
 		ResubmissionTimeout:       cfg.ResubmissionTimeout,
@@ -180,6 +188,7 @@ func NewL2OutputSubmitterFromCLIConfig(cfg CLIConfig, l log.Logger) (*L2OutputSu
 		TxManagerConfig:    txMgrConfg,
 		L1Client:           l1Client,
 		RollupClient:       rollupClient,
+		TssClient:          tssClient,
 		AllowNonFinalized:  cfg.AllowNonFinalized,
 		From:               fromAddress,
 		SignerFnFactory:    signer,
@@ -224,6 +233,7 @@ func NewL2OutputSubmitter(cfg Config, l log.Logger) (*L2OutputSubmitter, error) 
 
 		l1Client:     cfg.L1Client,
 		rollupClient: cfg.RollupClient,
+		tssClient:    cfg.TssClient,
 
 		l2ooContract:    l2ooContract,
 		rawL2ooContract: rawL2ooContract,
@@ -395,6 +405,30 @@ func (l *L2OutputSubmitter) loop() {
 				cancel()
 				break
 			}
+			//Interacting with mpc
+			// Assembly data request tss node signature
+
+			tssReqParams := tss_types.SignOutputRequest{
+				OutputRoot:    output.OutputRoot,
+				L2BlockNumber: output.BlockRef.Number,
+				L1BlockHash:   output.Status.CurrentL1.Hash.String(),
+				L1BlockNumber: output.Status.CurrentL1.Number,
+			}
+			tssReponseBytes, err := l.tssClient.GetSignStateBatch(tssReqParams)
+			if err != nil {
+				l.log.Error(" get tss manager signature fail", "err", err)
+				cancel()
+				break
+			}
+			var tssResponse tss.TssResponse
+			err = json.Unmarshal(tssReponseBytes, &tssResponse)
+			if err != nil {
+				l.log.Error(" failed to unmarshal response from tss", "err", err)
+				cancel()
+				break
+			}
+
+			l.log.Info(" append log", "output ", tssReqParams.String(), "signature", hex.EncodeToString(tssResponse.Signature), "rollback", tssResponse.RollBack)
 
 			tx, err := l.CreateProposalTx(cCtx, output)
 			if err != nil {

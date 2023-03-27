@@ -34,7 +34,6 @@
   "devDependencies": {
     "commander": "^9.0.0",
     "@mantleio/contracts": "0.5.40",
-    "@mantleio/old-contracts": "npm:@mantleio/contracts@0.4.10",
     "ethers": "^5.7.0",
     "ts-node": "^10.9.1"
   }
