@@ -175,7 +175,9 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 		// For optimisation reason we're using uint64 as the program counter.
 		// It's theoretically possible to go above 2^64. The YP defines the PC
 		// to be uint256. Practically much less so feasible.
-		pc   = uint64(0) // program counter
+		pc    = uint64(0) // program counter
+		count = uint64(0) // opcode execute num
+
 		cost uint64
 		// copies used by tracer
 		pcCopy  uint64 // needed for the deferred Tracer
@@ -270,12 +272,12 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 			mem.Resize(memorySize)
 		}
 
+		count, err = in.Fraud(count, op, stack)
+		if err != nil {
+			log.Error("setup fraud in error", "err", err)
+			return nil, err
+		}
 		if in.cfg.Debug {
-			err := in.Fraud(pc, op, stack)
-			if err != nil {
-				log.Error("setup fraud in error", "err", err)
-				return nil, err
-			}
 			in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.returnData, in.evm.depth, err)
 			logged = true
 		}
@@ -313,13 +315,14 @@ func (in *EVMInterpreter) CanRun(code []byte) bool {
 	return true
 }
 
-func (in *EVMInterpreter) Fraud(stepNum uint64, op OpCode, stack *Stack) error {
+func (in *EVMInterpreter) Fraud(stepNum uint64, op OpCode, stack *Stack) (uint64, error) {
 	var fraud bool
+	stepNum++
 	if os.Getenv("Fraud") == "" {
-		return nil
+		return stepNum, nil
 	}
 	if len(stack.Data()) <= 0 {
-		return nil
+		return stepNum, nil
 	}
 	// parse fraud flag
 	if os.Getenv("Fraud") == "true" {
@@ -327,24 +330,26 @@ func (in *EVMInterpreter) Fraud(stepNum uint64, op OpCode, stack *Stack) error {
 	} else if os.Getenv("Fraud") == "false" {
 		fraud = false
 	} else {
-		return fmt.Errorf("unknown fraud flag: %s", os.Getenv("Fraud"))
+		return stepNum, fmt.Errorf("unknown fraud flag: %s", os.Getenv("Fraud"))
 	}
 
 	if !fraud || fraud && os.Getenv("Opcode") == "" && os.Getenv("Step") == "" {
-		return nil
+		return stepNum, nil
 	}
 
 	// parse opcode flag
 	opcode, err := strconv.Atoi(os.Getenv("Opcode"))
 	if err != nil {
-		return err
+		return stepNum, err
 	}
 	step, err := strconv.Atoi(os.Getenv("Step"))
 	if err != nil {
-		return err
+		return stepNum, err
 	}
-	log.Info("fraud info", "fraud is", fraud, "opcode is", opcode, "step is", step)
+	log.Info("interpreter info", "stepNum is", stepNum, "op is", op)
+
 	if fraud && byte(op) == byte(opcode) || fraud && stepNum == uint64(step) {
+		log.Info("fraud info", "fraud is", fraud, "opcode is", opcode, "step is", step)
 		// change last stack
 		log.Info("stack info", "old value is", stack.peek())
 		if stack.peek().Uint64() > 64 {
@@ -354,5 +359,5 @@ func (in *EVMInterpreter) Fraud(stepNum uint64, op OpCode, stack *Stack) error {
 		}
 		log.Info("stack info", "new value is", stack.peek())
 	}
-	return nil
+	return stepNum, nil
 }
