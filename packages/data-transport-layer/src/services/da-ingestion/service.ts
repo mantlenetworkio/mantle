@@ -100,7 +100,10 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       l2ChainId: this.options.l2ChainId,
     })
 
-    await this.state.db.putLastBatchIndex(this.options.daInitBatch)
+    const lastBatchIndex =  await this.state.db.getLastBatchIndex()
+    if (lastBatchIndex <= 0 || lastBatchIndex === null) {
+      await this.state.db.putLastBatchIndex(this.options.daInitBatch)
+    }
 
     this.daIngestionMetrics = registerMetrics(this.metrics)
 
