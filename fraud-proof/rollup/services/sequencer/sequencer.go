@@ -324,6 +324,7 @@ func (s *Sequencer) challengeLoop() {
 				inChallenge = false
 				challengeSession = nil
 				s.challengeResolutionCh <- struct{}{}
+				log.Info("[challenge] Challenge completed", "winner", ev.Winner)
 			case <-s.Ctx.Done():
 				bisectedSub.Unsubscribe()
 				challengeCompletedSub.Unsubscribe()
