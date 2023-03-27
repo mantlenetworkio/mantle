@@ -116,6 +116,12 @@ erc20-bindings: compile
 weth9-bindings: compile
 	./gen_bindings.sh contracts/vendor/WETH9.sol:WETH9 $(pkg)
 
+l1bit-bindings:compile
+	./gen_bindings.sh ../packages/contracts-bedrock/contracts/local/TestBitToken.sol:BitTokenERC20
+
+l2bit-bindings:compile
+	./gen_bindings.sh ../packages/contracts-bedrock/contracts/L2/predeploys/BVM_BIT.sol:BVM_BIT
+
 deployer-whitelist-bindings: compile
 	./gen_bindings.sh contracts/legacy/DeployerWhitelist.sol:DeployerWhitelist $(pkg)
 
