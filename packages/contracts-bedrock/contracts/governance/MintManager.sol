@@ -6,7 +6,7 @@ import "./GovernanceToken.sol";
 
 /**
  * @title  MintManager
- * @notice Set as `owner` of the OP token and responsible for the token inflation schedule.
+ * @notice Set as `owner` of the MT token and responsible for the token inflation schedule.
  *         Contract acts as the token "mint manager" with permission to the `mint` function only.
  *         Currently permitted to mint once per year of up to 2% of the total token supply.
  *         Upgradable to allow changes in the inflation schedule.
@@ -50,7 +50,7 @@ contract MintManager is Ownable {
     }
 
     /**
-     * @notice Only the token owner is allowed to mint a certain amount of OP per year.
+     * @notice Only the token owner is allowed to mint a certain amount of MT per year.
      *
      * @param _account Address to mint new tokens to.
      * @param _amount  Amount of tokens to be minted.
