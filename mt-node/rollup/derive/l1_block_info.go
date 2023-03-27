@@ -154,10 +154,6 @@ func L1InfoDeposit(seqNumber uint64, block eth.BlockInfo, sysCfg eth.SystemConfi
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("infoDat==============", infoDat)
-	fmt.Println("infoDat==============", infoDat)
-	fmt.Println("infoDat==============", infoDat)
-	fmt.Println("infoDat==============", infoDat)
 
 	source := L1InfoDepositSource{
 		L1BlockHash: block.Hash(),
