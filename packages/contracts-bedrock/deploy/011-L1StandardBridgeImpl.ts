@@ -12,11 +12,16 @@ const deployFn: DeployFunction = async (hre) => {
     hre,
     'Proxy__BVM_L1CrossDomainMessenger'
   )
+  const L1BitToken = await getContractFromArtifact(
+    hre,
+    'TestBitToken'
+  )
+
 
   await deploy({
     hre,
     name: 'L1StandardBridge',
-    args: [L1CrossDomainMessengerProxy.address],
+    args: [L1CrossDomainMessengerProxy.address,L1BitToken.address],
     postDeployAction: async (contract) => {
       await assertContractVariable(
         contract,

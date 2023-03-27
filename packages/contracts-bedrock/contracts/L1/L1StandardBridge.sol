@@ -97,9 +97,9 @@ contract L1StandardBridge is StandardBridge, Semver {
      *
      * @param _messenger Address of the L1CrossDomainMessenger.
      */
-    constructor(address payable _messenger)
+    constructor(address payable _messenger,address _l1bitaddress)
     Semver(1, 1, 0)
-    StandardBridge(_messenger, payable(Predeploys.L2_STANDARD_BRIDGE), Predeploys.L1_BIT_ADDRESS)
+    StandardBridge(_messenger, payable(Predeploys.L2_STANDARD_BRIDGE),_l1bitaddress)
     {
     }
 

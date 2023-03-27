@@ -3,6 +3,8 @@ package predeploys
 import "github.com/ethereum/go-ethereum/common"
 
 const (
+	L1Bit                       = "0x4200000000000000000000000000000000000023"
+	L2Bit                       = "0x4200000000000000000000000000000000000024"
 	L2ToL1MessagePasser         = "0x4200000000000000000000000000000000000016"
 	DeployerWhitelist           = "0x4200000000000000000000000000000000000002"
 	LegacyERC20ETH              = "0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000"
@@ -24,6 +26,8 @@ const (
 )
 
 var (
+	L2BitAddress                    = common.HexToAddress(L2Bit)
+	L1BitAddress                    = common.HexToAddress(L1Bit)
 	L2ToL1MessagePasserAddr         = common.HexToAddress(L2ToL1MessagePasser)
 	DeployerWhitelistAddr           = common.HexToAddress(DeployerWhitelist)
 	LegacyERC20ETHAddr              = common.HexToAddress(LegacyERC20ETH)
@@ -47,6 +51,9 @@ var (
 )
 
 func init() {
+	Predeploys["L1BitAddress"] = &L1BitAddress
+	Predeploys["L2BitAddress"] = &L2BitAddress
+
 	Predeploys["L2ToL1MessagePasser"] = &L2ToL1MessagePasserAddr
 	Predeploys["DeployerWhitelist"] = &DeployerWhitelistAddr
 	Predeploys["LegacyERC20ETH"] = &LegacyERC20ETHAddr
