@@ -30,9 +30,9 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       l1RpcProviderPassword: config.str('l1-rpc-password'),
       addressManager: config.str('address-manager'),
       pollingInterval: config.uint('polling-interval', 5000),
-      daPollingInterval: config.uint('da-polling-interval', 15000),
+      daPollingInterval: config.uint('da-polling-interval', 25000),
       logsPerPollingInterval: config.uint('logs-per-polling-interval', 2000),
-      daSyncStep: config.uint('da-sync-step', 1),
+      daSyncStep: config.uint('da-sync-step', 10),
       daInitBatch: config.uint('da-init-batch', 0),
       dangerouslyCatchAllErrors: config.bool(
         'dangerously-catch-all-errors',

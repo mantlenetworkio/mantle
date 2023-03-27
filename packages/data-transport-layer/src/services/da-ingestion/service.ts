@@ -120,8 +120,12 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         if (batchIndexRange.start >= batchIndexRange.end) {
           continue
         }
+        this.logger.info('Synchronizing batch index range from(EigenLayer)', {
+          start: batchIndexRange.start,
+          end: batchIndexRange.end,
+        })
         await this.pareTransaction(batchIndexRange)
-        await sleep(this.options.pollingInterval)
+        await sleep(this.options.daPollingInterval)
       } catch (err) {
         if (err instanceof MissingElementError) {
           this.logger.warn('recovering from a missing event', {
@@ -146,14 +150,17 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     const dataStore: DataStoreEntry[] = []
     const transactionEntries: TransactionEntry[] = []
     const exploreTransactionEntries: TransactionEntry[] = []
-    for ( let index = batchIndexRange.start; index <= batchIndexRange.end;  index++) {
+    for ( let index = batchIndexRange.start; index < batchIndexRange.end;  index++) {
+      this.logger.info('Synchronizing transaction from(EigenLayer)', {
+        index: index
+      })
       const dataStoreRollupId = await this.GetRollupStoreByRollupBatchIndex(index)
       if (dataStoreRollupId['data_store_id'] === 0) {
-        continue
+        break
       }
       const dataStore = await this.GetDataStoreById(dataStoreRollupId['data_store_id'].toString())
       if (dataStore === null) {
-        continue
+        break
       }
       if (dataStore['Confirmed']) {
         // explore transaction list
@@ -204,18 +211,21 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         }
         await this.state.db.putDsById(dataStoreEntry, dataStoreRollupId['data_store_id'])
       }
+      await this.state.db.putLastBatchIndex(index)
     }
   }
 
   private async getBatchIndexRange(): Promise<Range> {
     const latestBatchIndex = await this.state.db.getLastBatchIndex()
     const newTxBatchIndex: number = await this.GetLatestTransactionBatchIndex()
-    const end = latestBatchIndex + this.options.daSyncStep
     if (newTxBatchIndex > latestBatchIndex) {
-      await this.state.db.putLastBatchIndex(end)
+      let step = latestBatchIndex + this.options.daSyncStep
+      if (this.options.daSyncStep > (newTxBatchIndex - latestBatchIndex)) {
+         step = latestBatchIndex + (newTxBatchIndex - latestBatchIndex)
+      }
       return {
         start: latestBatchIndex,
-        end: end,
+        end: step,
       }
     } else {
       return {
