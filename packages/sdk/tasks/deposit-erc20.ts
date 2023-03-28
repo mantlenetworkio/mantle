@@ -5,10 +5,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types'
 import '@nomiclabs/hardhat-ethers'
 import 'hardhat-deploy'
 import { Event, Contract, Wallet, providers, utils } from 'ethers'
-import {
-  predeploys,
-  getContractDefinition,
-} from '@mantleio/contracts-bedrock'
+import { predeploys, getContractDefinition } from '@mantleio/contracts-bedrock'
 import { sleep } from '@mantleio/core-utils'
 
 import {
@@ -58,8 +55,9 @@ const createMantleMintableERC20 = async (
     'MantleMintableERC20'
   )
 
-  const Artifact__MantleMintableERC20TokenFactory =
-    await getContractDefinition('MantleMintableERC20Factory')
+  const Artifact__MantleMintableERC20TokenFactory = await getContractDefinition(
+    'MantleMintableERC20Factory'
+  )
 
   const MantleMintableERC20TokenFactory = new Contract(
     predeploys.MantleMintableERC20Factory,
@@ -70,12 +68,11 @@ const createMantleMintableERC20 = async (
   const name = await L1ERC20.name()
   const symbol = await L1ERC20.symbol()
 
-  const tx =
-    await MantleMintableERC20TokenFactory.createMantleMintableERC20(
-      L1ERC20.address,
-      `L2 ${name}`,
-      `L2-${symbol}`
-    )
+  const tx = await MantleMintableERC20TokenFactory.createMantleMintableERC20(
+    L1ERC20.address,
+    `L2 ${name}`,
+    `L2-${symbol}`
+  )
 
   const receipt = await tx.wait()
   const event = receipt.events.find(
@@ -165,9 +162,7 @@ task('deposit-erc20', 'Deposits WETH9 onto L2.')
       'L2StandardBridge'
     )
 
-    const Artifact__MantlePortal = await getContractDefinition(
-      'MantlePortal'
-    )
+    const Artifact__MantlePortal = await getContractDefinition('MantlePortal')
 
     const Artifact__L1CrossDomainMessenger = await getContractDefinition(
       'L1CrossDomainMessenger'

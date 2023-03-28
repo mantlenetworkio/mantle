@@ -196,7 +196,6 @@ func BuildL1DeveloperGenesis(config *DeployConfig) (*core.Genesis, error) {
 
 	for name, proxyAddr := range predeploys.DevPredeploys {
 		memDB.SetState(*proxyAddr, ImplementationSlot, depsByName[name].Address.Hash())
-
 		// Special case for WETH since it was not designed to be behind a proxy
 		if name == "WETH9" {
 			name, _ := state.EncodeStringValue("Wrapped Ether", 0)
@@ -332,6 +331,15 @@ func l1Deployer(backend *backends.SimulatedBackend, opts *bind.TransactOpts, dep
 	var err error
 
 	switch deployment.Name {
+
+	case "TestBitToken":
+		_, tx, _, err = bindings.DeployBitTokenERC20(
+			opts,
+			backend,
+			"Bit Token",
+			"BIT",
+		)
+
 	case "SystemConfig":
 		_, tx, _, err = bindings.DeploySystemConfig(
 			opts,
@@ -374,6 +382,7 @@ func l1Deployer(backend *backends.SimulatedBackend, opts *bind.TransactOpts, dep
 			opts,
 			backend,
 			predeploys.DevL1CrossDomainMessengerAddr,
+			predeploys.L1BitAddress,
 		)
 	case "MantleMintableERC20Factory":
 		_, tx, _, err = bindings.DeployMantleMintableERC20Factory(
