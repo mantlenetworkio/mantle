@@ -30,7 +30,10 @@ bindings: l1block-bindings \
 	mantle-mintable-erc721-factory-bindings \
 	l1-fee-vault-bindings \
 	basefee-vault-bindings \
-	legacy-erc20-eth-bindings
+	legacy-erc20-eth-bindings \
+	l1bit-bindings \
+	l2bit-bindings \
+	l2eth-bindings
 
 version:
 	forge --version
@@ -117,13 +120,13 @@ weth9-bindings: compile
 	./gen_bindings.sh contracts/vendor/WETH9.sol:WETH9 $(pkg)
 
 l1bit-bindings:compile
-	./gen_bindings.sh ../packages/contracts-bedrock/contracts/L1/local/TestBitToken.sol:BitTokenERC20 $(pkg)
+	./gen_bindings.sh contracts/L1/local/TestBitToken.sol:BitTokenERC20 $(pkg)
 
 l2bit-bindings:compile
-	./gen_bindings.sh ../packages/contracts-bedrock/contracts/L2/BVM_BIT.sol:BVM_BIT $(pkg)
+	./gen_bindings.sh contracts/L2/BVM_BIT.sol:BVM_BIT $(pkg)
 
-l-bindings:compile
-	./gen_bindings.sh ../packages/contracts-bedrock/contracts/L2/BVM_ETH.sol:BVM_ETH $(pkg)
+l2eth-bindings:compile
+	./gen_bindings.sh contracts/L2/BVM_ETH.sol:BVM_ETH $(pkg)
 
 deployer-whitelist-bindings: compile
 	./gen_bindings.sh contracts/legacy/DeployerWhitelist.sol:DeployerWhitelist $(pkg)
@@ -135,7 +138,7 @@ more:
 	go run ./gen/main.go \
 		-artifacts ../packages/contracts-bedrock/artifacts \
 		-out ./bindings \
-		-contracts SystemConfig,MantleMintableERC20Factory,L2StandardBridge,L1BlockNumber,LegacyMessagePasser,DeployerWhitelist,Proxy,MantlePortal,L2ToL1MessagePasser,L2CrossDomainMessenger,SequencerFeeVault,L1Block,LegacyERC20ETH,WETH9,GovernanceToken,L1CrossDomainMessenger,L2ERC721Bridge,MantleMintableERC721Factory,ProxyAdmin \
+		-contracts SystemConfig,MantleMintableERC20Factory,L2StandardBridge,L1BlockNumber,LegacyMessagePasser,DeployerWhitelist,Proxy,MantlePortal,L2ToL1MessagePasser,L2CrossDomainMessenger,SequencerFeeVault,L1Block,LegacyERC20ETH,WETH9,GovernanceToken,L1CrossDomainMessenger,L2ERC721Bridge,MantleMintableERC721Factory,ProxyAdmin,BitTokenERC20,BVM_ETH,BVM_BIT \
 		-package bindings
 
 mkdir:
