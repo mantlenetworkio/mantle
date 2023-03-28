@@ -185,6 +185,7 @@ contract L2StandardBridge is StandardBridge, Semver {
         bytes memory _extraData
     ) internal {
         if (_l2Token==Predeploys.L2_BIT_ADDRESS){
+            address l1Token = MantleMintableERC20(_l2Token).l1Token();
             _initiateBridgeERC20(_l2Token, l1Token, _from, _to, _amount, _minGasLimit, _extraData);
         } else if (_l2Token == Predeploys.LEGACY_ERC20_ETH) {
             _initiateBridgeETH(_from, _to, _amount, _minGasLimit, _extraData);

@@ -19,7 +19,6 @@ import {Semver} from "../universal/Semver.sol";
  */
 contract L1StandardBridge is StandardBridge, Semver {
 
-    address public l1BitAddress;
     /**
      * @custom:legacy
      * @notice Emitted whenever a deposit of ETH from L1 into L2 is initiated.
@@ -248,7 +247,6 @@ contract L1StandardBridge is StandardBridge, Semver {
     }
 
     /**
-     * @inheritdoc IL1ERC20Bridge
      */
     function finalizeBitWithdrawal(
         address _from,
@@ -256,7 +254,7 @@ contract L1StandardBridge is StandardBridge, Semver {
         uint256 _amount,
         bytes calldata _data
     ) external  {
-        finalizeERC20Withdrawal(
+        finalizeBridgeERC20(
             l1BitAddress,
             Predeploys.L2_BIT_ADDRESS,
             _from,
