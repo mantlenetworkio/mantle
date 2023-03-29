@@ -63,6 +63,7 @@ func (s *DaService) routes() {
 	s.echo.GET("eigen/getLatestTransactionBatchIndex", s.GetLatestTransactionBatchIndex)
 	s.echo.POST("eigen/getRollupStoreByRollupBatchIndex", s.GetRollupStoreByRollupBatchIndex)
 	s.echo.POST("eigen/getBatchTransactionByDataStoreId", s.GetBatchTransactionByDataStoreId)
+	s.echo.POST("dtl/getBatchTransactionByDataStoreId", s.GetDtlBatchTransactionByDataStoreId)
 	s.echo.POST("browser/getDataStoreList", s.GetDataStoreList)
 	s.echo.POST("browser/getDataStoreById", s.getDataStoreById)
 	s.echo.POST("browser/GetTransactionListByStoreNumber", s.GetTransactionListByStoreNumber)
