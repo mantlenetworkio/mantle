@@ -228,12 +228,14 @@ interface IRollup {
      * (c) no staker remains staked on the assertion (all have been destroyed).
      * OR
      * (2) predecessor has been rejected
-     * @param stakerAddress Address of a staker staked on a different branch to the first unresolved assertion.
-     * If the first unresolved assertion's parent is confirmed, this parameter is used to establish that a staker exists
-     * on a different branch of the assertion chain. This parameter is ignored when the parent of the first unresolved
-     * assertion is not the last confirmed assertion.
      */
-    function rejectFirstUnresolvedAssertion(address stakerAddress) external;
+    function rejectFirstUnresolvedAssertion() external;
+
+//* @param stakerAddress Address of a staker staked on a different branch to the first unresolved assertion.
+//* If the first unresolved assertion's parent is confirmed, this parameter is used to establish that a staker exists
+//* on a different branch of the assertion chain. This parameter is ignored when the parent of the first unresolved
+//* assertion is not the last confirmed assertion.
+//    function rejectFirstUnresolvedAssertion(address stakerAddress) external;
 
     /**
      * @notice Completes ongoing challenge. Callback, called by a challenge contract.
