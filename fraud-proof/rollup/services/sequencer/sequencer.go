@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/rpc"
+
 	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
@@ -94,6 +95,8 @@ func (s *Sequencer) confirmationLoop() {
 	}
 	defer challengedSub.Unsubscribe()
 
+	challengeAssertions := make(map[uint64]bool)
+
 	challengeContext, _ := s.Rollup.ChallengeCtx()
 	isInChallenge := challengeContext.DefenderAssertionID.Uint64() != 0 && !challengeContext.Completed
 	// restart with challengeCtx
@@ -141,7 +144,10 @@ func (s *Sequencer) confirmationLoop() {
 				// New assertion created on L1 Rollup
 				log.Info("Get New Assertion...", "AssertionID", ev.AssertionID,
 					"AsserterAddr", ev.AsserterAddr, "VmHash", ev.VmHash, "InboxSize", ev.InboxSize)
-				//s.proofGen()
+				if !bytes.Equal(ev.AsserterAddr.Bytes(), s.Config.StakeAddr.Bytes()) {
+					log.Info("Get Assertion for challenge,store it")
+					challengeAssertions[ev.AssertionID.Uint64()] = true
+				}
 			case header := <-headCh:
 				// todo : optimization the check with block height
 				// Get confirm block header
@@ -172,20 +178,38 @@ func (s *Sequencer) confirmationLoop() {
 				// New block mined on L1
 				log.Info("Sequencer sync new layer1 block", "height", header.Number)
 				firstUnresolvedID := lastRSAID.Uint64() + 1
-				firstUnconfirmedAssertion, err := s.AssertionMap.Assertions(new(big.Int).SetUint64(firstUnresolvedID))
+				firstUnresolvedAssertion, err := s.AssertionMap.Assertions(new(big.Int).SetUint64(firstUnresolvedID))
 				if err != nil {
 					log.Error("Failed to get first unresolved Assertion", "err", err, "ID", firstUnresolvedID)
 					continue
 				}
-				if header.Time >= firstUnconfirmedAssertion.Deadline.Uint64() {
-					// Confirmation period has past, confirm it
-					log.Info("Sequencer call ConfirmFirstUnresolvedAssertion...")
+				if header.Time >= firstUnresolvedAssertion.Deadline.Uint64() {
 					log.Info("Current assertion", "id", firstUnresolvedID)
-					_, err := s.Rollup.ConfirmFirstUnresolvedAssertion()
-					if err != nil {
-						log.Error("Failed to confirm DA", "err", err)
+					if !challengeAssertions[firstUnresolvedID] {
+						// Confirmation period has past, confirm it
+						log.Info("Sequencer call ConfirmFirstUnresolvedAssertion...")
+						_, err := s.Rollup.ConfirmFirstUnresolvedAssertion()
+						if err != nil {
+							if err.Error() == "execution reverted: InvalidParent" {
+								challengeAssertions[firstUnresolvedID] = true
+							}
+							log.Error("Failed to confirm DA", "err", err)
+						}
 						continue
 					}
+					log.Info("Sequencer call RejectFirstUnresolvedAssertion...")
+					// reject challenge assertion
+					_, err := s.Rollup.RejectFirstUnresolvedAssertion()
+					if err != nil {
+						log.Error("Failed to reject DA", "err", err)
+						continue
+					}
+					_, err = s.Rollup.RemoveOldZombies()
+					if err != nil {
+						log.Error("Failed to remove zombies", "err", err)
+						continue
+					}
+					delete(challengeAssertions, firstUnresolvedID)
 				}
 
 			case ev := <-confirmedCh:
