@@ -430,7 +430,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         if (loserStake > baseStakeAmount) {
             // If loser has a higher stake than the winner, refund the difference.
             // Loser gets deleted anyways, so maybe unnecessary to set amountStaked.
-            // stakers[loser].amountStaked = witannerStake;
+            // stakers[loser].amountStaked = winnerStake;
             withdrawableFunds[loser] += (loserStake - baseStakeAmount);
             amountWon = baseStakeAmount;
         } else {
