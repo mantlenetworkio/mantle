@@ -10,6 +10,7 @@ import * as Sentry from '@sentry/node'
 import * as Tracing from '@sentry/tracing'
 
 /* Imports: Internal */
+
 import { TransportDB } from '../../db/transport-db'
 import {
   ContextResponse,
@@ -20,6 +21,13 @@ import {
   SyncingResponse,
   TransactionBatchResponse,
   TransactionResponse,
+  LatestTxBatchIndexResponse,
+  DataStoreListByBatchIndexResponse,
+  BatchTxByDataStoreIdResponse,
+  DataStoreByIdResponse,
+  TxListByStoreIdResponse,
+  TestResponse,
+  TransactionListEntry,
 } from '../../types'
 import { validators } from '../../utils'
 import { L1DataTransportServiceOptions } from '../main/service'
@@ -409,7 +417,6 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
             ctcIndex: null,
           }
         }
-
         const ctcIndex = await this.state.db.getTransactionIndexByQueueIndex(
           enqueue.index
         )
@@ -711,6 +718,185 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         return {
           batch,
           stateRoots,
+        }
+      }
+    )
+
+    this._registerRoute(
+      'get',
+      '/da/getLatestTransactionBatchIndex/',
+      async (): Promise<LatestTxBatchIndexResponse> => {
+        const latestBatchIndex = await this.state.db.getLastBatchIndex()
+
+        if (latestBatchIndex === null) {
+          return {
+            batchIndex: null,
+          }
+        }
+        return {
+          batchIndex: latestBatchIndex,
+        }
+      }
+    )
+    this._registerRoute(
+      'get',
+      '/da/getDataStoreListByBatchIndex/:batchIndex',
+      async (req): Promise<DataStoreListByBatchIndexResponse> => {
+        const batch = await this.state.db.getRollupStoreByBatchIndex(
+          BigNumber.from(req.params.batchIndex).toNumber()
+        )
+        if (batch === null) {
+          return {
+            batchIndex: null,
+            dataStore: null,
+          }
+        }
+        return {
+          batchIndex: BigNumber.from(req.params.batchIndex).toNumber(),
+          dataStore: batch,
+        }
+      }
+    )
+    this._registerRoute(
+      'get',
+      '/da/getBatchTxsByDataStoreId/:dsId',
+      async (req): Promise<BatchTxByDataStoreIdResponse> => {
+        const batchTxs = await this.state.db.getBatchTxByDataStoreId(
+          BigNumber.from(req.params.dsId).toNumber()
+        )
+        if (batchTxs === null || batchTxs.length === 0) {
+          return {
+            dsId: null,
+            batchTx: [],
+          }
+        }
+        const dsId = BigNumber.from(req.params.dsId).toNumber()
+        return {
+          dsId,
+          batchTx: batchTxs,
+        }
+      }
+    )
+
+    this._registerRoute(
+      'get',
+      '/da/getDataStoreById/:dsId',
+      async (req): Promise<DataStoreByIdResponse> => {
+        const dataStore_ = await this.state.db.getDsById(
+          BigNumber.from(req.params.dsId).toNumber()
+        )
+
+        if (dataStore_ === null) {
+          return {
+            dataStore: null,
+          }
+        }
+        return {
+          dataStore: dataStore_,
+        }
+      }
+    )
+    this._registerRoute(
+      'get',
+      '/da/transaction/latest',
+      async (): Promise<TransactionResponse> => {
+        const transactionEntry = await this.state.db.getDaLatestTransaction(
+        )
+
+        if (transactionEntry === null) {
+          return {
+            transaction: null,
+            batch:null
+          }
+        }
+        return {
+          transaction: transactionEntry,
+          batch:null
+        }
+      }
+    )
+    this._registerRoute(
+      'get',
+      '/da/transaction/index/:index',
+      async (req): Promise<TransactionResponse> => {
+        const transactionEntry = await this.state.db.getDaTransactionByIndex(
+          BigNumber.from(req.params.index).toNumber()
+        )
+
+        if (transactionEntry === null) {
+          return {
+            transaction: null,
+            batch:null
+          }
+        }
+        return {
+          transaction: transactionEntry,
+          batch:null
+        }
+      }
+    )
+
+    this._registerRoute(
+      'get',
+      '/da/getTxsListByDsId/:dsId',
+      async (req): Promise<TxListByStoreIdResponse> => {
+        const batchTxs = await this.state.db.getTxListByDSId(
+          BigNumber.from(req.params.dsId).toNumber()
+        )
+        if (batchTxs === null || batchTxs.length === 0) {
+          return {
+            storeId: null,
+            txList: [],
+          }
+        }
+        return {
+          storeId: BigNumber.from(req.params.dsId).toNumber(),
+          txList: batchTxs,
+        }
+      }
+    )
+
+    this._registerRoute(
+      'get',
+      '/da/test/:batchIndex',
+      async (): Promise<TestResponse> => {
+        const batchTxs = [
+          {
+            BlockNumber: '1',
+            TxHash:
+              '0x5c047ccb63b2f03caa45d6279f0d70f96c44782ce344e0c6e15c57f6316560fc',
+          },
+          {
+            BlockNumber: '4',
+            TxHash:
+              '0xe13cf868cc1702f12a58f1d69083a8cbaf1ec29a5c962cb86f24c02529ce45ee',
+          },
+        ]
+
+        const entries: TransactionListEntry[] = []
+        for (const batchTx of batchTxs) {
+          const index_ = entries.length
+          entries.push({
+            index: index_,
+            txIndex:batchTx['index'],
+            blockNumber: batchTx['BlockNumber'],
+            txHash: batchTx['TxHash'],
+          })
+        }
+        await this.state.db.putTxListByDSId(entries, 5)
+        const lens = await this.state.db._getLatestEntryIndex(
+          'da:txlistdsid' + 5
+        )
+        const response = await this.state.db.getTxListByDSId(5)
+        // await this.state.db.putUpdatedBatchIndex(0)
+        // await this.state.db.putUpdatedRollupBatchIndex(0)
+        // await this.state.db.putUpdatedDsId(0)
+
+
+        return {
+          len:lens,
+          putdata: JSON.stringify(entries),
+          data: JSON.stringify(response),
         }
       }
     )
