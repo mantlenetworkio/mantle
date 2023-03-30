@@ -166,7 +166,6 @@ func SetImplementations(db vm.StateDB, storage state.StorageConfig, immutable im
 		if !db.Exist(codeAddr) {
 			db.CreateAccount(codeAddr)
 		}
-
 		db.SetState(*address, ImplementationSlot, codeAddr.Hash())
 
 		if err := setupPredeploy(db, deployResults, storage, name, *address, codeAddr); err != nil {

@@ -3,9 +3,7 @@ package predeploys
 import "github.com/ethereum/go-ethereum/common"
 
 const (
-	DevL1Bit  = "0x6900000000000000000000000000000000000023"
-	DevBVMBIT = "0x6900000000000000000000000000000000000024"
-	DevBVMETH = "0x6900000000000000000000000000000000000025"
+	DevL1Bit = "0x6900000000000000000000000000000000000020"
 
 	DevL2OutputOracle             = "0x6900000000000000000000000000000000000000"
 	DevMantlePortal               = "0x6900000000000000000000000000000000000001"
@@ -20,10 +18,6 @@ const (
 )
 
 var (
-	DevBVMBitAddress = common.HexToAddress(DevBVMBIT)
-	DevBVMETHAddress = common.HexToAddress(DevBVMETH)
-	DevL1BitAddress  = common.HexToAddress(DevL1Bit)
-
 	DevL2OutputOracleAddr             = common.HexToAddress(DevL2OutputOracle)
 	DevMantlePortalAddr               = common.HexToAddress(DevMantlePortal)
 	DevL1CrossDomainMessengerAddr     = common.HexToAddress(DevL1CrossDomainMessenger)
@@ -34,14 +28,13 @@ var (
 	DevWETH9Addr                      = common.HexToAddress(DevWETH9)
 	DevL1ERC721BridgeAddr             = common.HexToAddress(DevL1ERC721Bridge)
 	DevSystemConfigAddr               = common.HexToAddress(DevSystemConfig)
+	DevL1BitAddress                   = common.HexToAddress(DevL1Bit)
 
 	DevPredeploys = make(map[string]*common.Address)
 )
 
 func init() {
-	Predeploys["L1BitAddress"] = &DevL1BitAddress
-	Predeploys["BVMBIT"] = &DevBVMBitAddress
-	Predeploys["BVMETH"] = &DevBVMETHAddress
+	DevPredeploys["L1BitAddress"] = &DevL1BitAddress
 
 	DevPredeploys["L2OutputOracle"] = &DevL2OutputOracleAddr
 	DevPredeploys["MantlePortal"] = &DevMantlePortalAddr

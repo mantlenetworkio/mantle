@@ -382,7 +382,7 @@ func l1Deployer(backend *backends.SimulatedBackend, opts *bind.TransactOpts, dep
 			opts,
 			backend,
 			predeploys.DevL1CrossDomainMessengerAddr,
-			predeploys.L1BitAddress,
+			predeploys.DevL1BitAddress,
 		)
 	case "MantleMintableERC20Factory":
 		_, tx, _, err = bindings.DeployMantleMintableERC20Factory(
