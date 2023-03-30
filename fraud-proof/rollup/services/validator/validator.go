@@ -2,7 +2,6 @@ package validator
 
 import (
 	"bytes"
-	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -17,6 +16,7 @@ import (
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	rpc2 "github.com/mantlenetworkio/mantle/l2geth/rpc"
