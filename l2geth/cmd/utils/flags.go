@@ -924,6 +924,11 @@ var (
 		EnvVar: "STAKE_AMOUNT",
 		Value:  1000000000000000000,
 	}
+	FraudProofChallengeVerify = &cli.BoolTFlag{
+		Name:   "fp.challenge-verify",
+		Usage:  "Challenge verify",
+		EnvVar: "CHALLENGE_VERIFY",
+	}
 )
 
 // MakeDataDir retrieves the currently requested data directory, terminating
