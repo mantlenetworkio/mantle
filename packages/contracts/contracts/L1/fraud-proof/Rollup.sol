@@ -233,6 +233,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         bytes32 vmHash,
         uint256 inboxSize
     ) public override stakedOnly {
+        require(stakers[msg.sender].currentChallenge == address(0),"can not create assertion when staker in challenge");
         uint256 parentID = stakers[msg.sender].assertionID;
         // Require that enough time has passed since the last assertion.
         if (block.number - assertions.getProposalTime(parentID) < minimumAssertionPeriod) {
@@ -353,9 +354,9 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         // removeOldZombies();
 
         // (4) all stakers are staked on the block.
-//        if (assertions.getNumStakers(lastUnresolvedID) != countStakedZombies(lastUnresolvedID) + numStakers) {
-//            revert NotAllStaked();
-//        }
+        // if (assertions.getNumStakers(lastUnresolvedID) != numStakers) {
+        //    revert("NotAllStaked");
+        // }
 
         // Confirm assertion.
         // assertions.deleteAssertion(lastConfirmedAssertionID);
@@ -365,7 +366,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
     /// @inheritdoc IRollup
-    function rejectFirstUnresolvedAssertion(address stakerAddress) external override {
+    function rejectFirstUnresolvedAssertion() external override {
         if (lastResolvedAssertionID >= lastCreatedAssertionID) {
             revert("NoUnresolvedAssertion");
         }
@@ -390,15 +391,15 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             }
             // 1b. at least one staker exists (on a sibling)
             // - stakerAddress is indeed a staker
-            requireStaked(stakerAddress);
+            // requireStaked(stakerAddress);
             // - staker's assertion can't be a ancestor of firstUnresolved (because staker's assertion is also unresolved)
-            if (stakers[stakerAddress].assertionID < firstUnresolvedAssertionID) {
-                revert("AssertionAlreadyResolved");
-            }
+            // if (stakers[stakerAddress].assertionID < firstUnresolvedAssertionID) {
+            //    revert("AssertionAlreadyResolved");
+            // }
             // - staker's assertion can't be a descendant of firstUnresolved (because staker has never staked on firstUnresolved)
-            if (assertions.isStaker(firstUnresolvedAssertionID, stakerAddress)) {
-                revert("StakerStakedOnTarget");
-            }
+            // if (assertions.isStaker(firstUnresolvedAssertionID, stakerAddress)) {
+            //    revert("StakerStakedOnTarget");
+            // }
             // If a staker is staked on an assertion that is neither an ancestor nor a descendant of firstUnresolved, it must be a sibling, QED
 
             // 1c. no staker is staked on this assertion
@@ -500,6 +501,9 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     // zombie processing
     // *****************
 
+    function removeOldZombies() external stakedOnly {
+        delete zombies;
+    }
     /**
      * @notice Removes any zombies whose latest stake is earlier than the first unresolved assertion.
      * @dev Uses pop() instead of delete to prevent gaps, although order is not preserved

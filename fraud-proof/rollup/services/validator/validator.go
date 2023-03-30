@@ -97,7 +97,17 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 		} else {
 			select {
 			case ev := <-assertionEventCh:
+				// only one verifier and check it
+				if !bytes.Equal(stakerStatus.CurrentChallenge.Bytes(), common.BigToAddress(common.Big0).Bytes()) {
+					continue
+				}
+				zombies, _ := v.Rollup.Zombies(big.NewInt(0))
+				if !bytes.Equal(zombies.StakerAddress.Bytes(), common.BigToAddress(common.Big0).Bytes()) {
+					continue
+				}
+
 				if common.Address(ev.AsserterAddr) == v.Config.StakeAddr {
+					log.Info("Stake address", "address", v.Config.StakeAddr)
 					// Create by our own for challenge
 					continue
 				}
@@ -113,19 +123,22 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					if err != nil {
 						log.Error("Validator get block failed", "err", err)
 					}
+					if assertion.InboxSize.Uint64() == 0 {
+						// Skip assertions that have been deleted
+						continue
+					}
 					checkAssertion := &rollupTypes.Assertion{
 						ID:        new(big.Int).SetUint64(checkID),
 						VmHash:    assertion.StateHash,
 						InboxSize: assertion.InboxSize,
 						Parent:    assertion.Parent,
 					}
-
 					block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
 					if err != nil {
 						log.Error("Validator get block failed", "err", err)
 					}
 					// TODO FIXME FRAUD-PROOF TEST, DELETE ME
-					//block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
+					//block, err = v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
 					//if err != nil {
 					//	log.Error("Validator get block failed", "err", err)
 					//}
@@ -137,7 +150,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					//}
 					//if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 && DebugFlag {
 					if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 {
-						// Validation failed
+						//Validation ftailed
 						log.Info("Validator check assertion vmHash failed, start challenge assertion....")
 						ourAssertion := &rollupTypes.Assertion{
 							VmHash:    block.Root(),
@@ -240,11 +253,7 @@ func (v *Validator) challengeLoop() {
 			ctx = &challengeCtx
 			challengeContext, _ := v.Rollup.ChallengeCtx()
 
-			if challengeContext.Completed {
-				// already challenged do nothing
-				v.challengeResoutionCh <- struct{}{}
-				log.Info("Challenge already completed")
-			} else if currentAssertion.InboxSize.Cmp(challengeCtx.OurAssertion.InboxSize) < 0 &&
+			if currentAssertion.InboxSize.Cmp(challengeCtx.OurAssertion.InboxSize) < 0 &&
 				!bytes.Equal(currentAssertion.StateHash[:], challengeCtx.OurAssertion.VmHash[:]) {
 				// did not create assertion
 				v.challengeCh <- &challengeCtx
@@ -257,6 +266,10 @@ func (v *Validator) challengeLoop() {
 					VmHash:       currentAssertion.StateHash,
 					InboxSize:    currentAssertion.InboxSize,
 				}
+			} else if challengeContext.Completed {
+				// already challenged do nothing
+				v.challengeResoutionCh <- struct{}{}
+				log.Info("Challenge already completed")
 			} else {
 				// in bisectedCh
 				challengedCh <- &bindings.RollupAssertionChallenged{
