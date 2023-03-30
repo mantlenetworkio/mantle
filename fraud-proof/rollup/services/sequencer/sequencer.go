@@ -331,8 +331,7 @@ func (s *Sequencer) challengeLoop() {
 			case ev := <-challengeCompletedCh:
 				// TODO: handle if we are not winner --> state corrupted
 				log.Info("[challenge] Try to challenge completed", "winner", ev.Winner)
-				challengeVerify := s.Config.ChallengeVerify
-				_, err = challengeSession.CompleteChallenge(challengeVerify)
+				_, err = challengeSession.CompleteChallenge(s.Config.ChallengeVerify)
 				if err != nil {
 					log.Error("Can not complete challenge", "error", err)
 					continue
