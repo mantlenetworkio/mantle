@@ -125,6 +125,32 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 	)
 	log.Info("contract init success", "EigenContractAddress", cfg.EigenContractAddress)
 
+	eigenFeeContract, err := bindings.NewBVMEigenDataLayrFee(
+		ethc.Address(common.HexToAddress(cfg.EigenFeeContractAddress)),
+		l1Client,
+	)
+	if err != nil {
+		log.Error("MtBatcher binding eigen fee contract fail", "err", err)
+		return nil, err
+	}
+
+	feeParsed, err := abi.JSON(strings.NewReader(
+		bindings.BVMEigenDataLayrFeeABI,
+	))
+	if err != nil {
+		log.Error("MtBatcher parse eigen fee contract abi fail", "err", err)
+		return nil, err
+	}
+	eigenFeeABI, err := bindings.BVMEigenDataLayrFeeMetaData.GetAbi()
+	if err != nil {
+		log.Error("MtBatcher get eigen fee contract abi fail", "err", err)
+		return nil, err
+	}
+	rawEigenFeeContract := bind.NewBoundContract(
+		ethc.Address(common.HexToAddress(cfg.EigenFeeContractAddress)), feeParsed, l1Client, l1Client,
+		l1Client,
+	)
+
 	driverConfig := &sequencer.DriverConfig{
 		L1Client:                  l1Client,
 		L2Client:                  l2Client,
@@ -132,6 +158,11 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		EigenDaContract:           eigenContract,
 		RawEigenContract:          rawEigenContract,
 		EigenABI:                  eignenABI,
+		EigenFeeContract:          eigenFeeContract,
+		RawEigenFeeContract:       rawEigenFeeContract,
+		EigenFeeABI:               eigenFeeABI,
+		FeeModelEnable:            cfg.FeeModelEnable,
+		FeeSizeSec:                cfg.FeeSizeSec,
 		Logger:                    logger,
 		PrivKey:                   sequencerPrivKey,
 		BlockOffset:               cfg.BlockOffset,

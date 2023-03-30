@@ -23,6 +23,7 @@ type Config struct {
 	Mnemonic                  string
 	SequencerHDPath           string
 	EigenContractAddress      string
+	EigenFeeContractAddress   string
 	DataStoreDuration         uint64
 	DataStoreTimeout          uint64
 	SentryEnable              bool
@@ -46,6 +47,8 @@ type Config struct {
 	SafeAbortNonceTooLowCount uint64
 	EchoDebug                 bool
 	MtlBatcherEnable          bool
+	FeeSizeSec                string
+	FeeModelEnable            bool
 	DisableHTTP2              bool
 	DbPath                    string
 	CheckerBatchIndex         uint64
@@ -68,6 +71,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		Mnemonic:                  ctx.GlobalString(flags.MnemonicFlag.Name),
 		SequencerHDPath:           ctx.GlobalString(flags.SequencerHDPathFlag.Name),
 		EigenContractAddress:      ctx.GlobalString(flags.EigenContractAddressFlag.Name),
+		EigenFeeContractAddress:   ctx.GlobalString(flags.EigenFeeContractAddressFlag.Name),
 		DataStoreDuration:         ctx.GlobalUint64(flags.DataStoreDurationFlag.Name),
 		DataStoreTimeout:          ctx.GlobalUint64(flags.DataStoreTimeoutFlag.Name),
 		MainWorkerPollInterval:    ctx.GlobalDuration(flags.MainWorkerPollIntervalFlag.Name),
@@ -89,6 +93,8 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		SentryEnable:              ctx.GlobalBool(flags.SentryEnableFlag.Name),
 		SentryDsn:                 ctx.GlobalString(flags.SentryDsnFlag.Name),
 		SentryTraceRate:           ctx.GlobalDuration(flags.SentryTraceRateFlag.Name),
+		FeeSizeSec:                ctx.GlobalString(flags.FeeSizeSecFlag.Name),
+		FeeModelEnable:            ctx.GlobalBool(flags.FeeModelEnableFlags.Name),
 		DisableHTTP2:              ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
 		EchoDebug:                 ctx.GlobalBool(flags.EchoDebugFlag.Name),
 		MtlBatcherEnable:          ctx.GlobalBool(flags.MtlBatcherEnableFlag.Name),

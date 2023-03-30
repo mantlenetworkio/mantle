@@ -39,7 +39,7 @@ var (
 	}
 	DtlClientUrlFlag = cli.StringFlag{
 		Name:     "dtl-client-url",
-		Usage:    "HTTP provider URL for dtl client",
+		Usage:    "dtl client url for mt batcher",
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "DTL_CLIENT_URL"),
 	}
@@ -91,6 +91,12 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "ROLLUP_ADDRESS"),
 	}
+	EigenFeeContractAddressFlag = cli.StringFlag{
+		Name:     "eigen-fee-address",
+		Usage:    "Address of the datalayr fee contract",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "ROLLUP_FEE_ADDRESS"),
+	}
 	BlockOffsetFlag = cli.Uint64Flag{
 		Name:   "block-offset",
 		Usage:  "The offset between the eigenda contract start and the L2 geth blocks",
@@ -102,6 +108,12 @@ var (
 		Usage:  "Rollup transaction min size data for eigen da",
 		Value:  1000,
 		EnvVar: prefixEnvVar(envVarPrefix, "ROLLUP_MIN_SIZE"),
+	}
+	FeeSizeSecFlag = cli.StringFlag{
+		Name:   "fee-size-sec",
+		Usage:  "Rollup transaction fee size",
+		Value:  "102400", //
+		EnvVar: prefixEnvVar(envVarPrefix, "FEE_SIZE_SEC"),
 	}
 	RollUpMaxSizeFlag = cli.Uint64Flag{
 		Name:   "rollup-max-size",
@@ -208,6 +220,11 @@ var (
 			"ignored and logs are printed using JSON",
 		EnvVar: prefixEnvVar(envVarPrefix, "LOG_TERMINAL"),
 	}
+	FeeModelEnableFlags = cli.BoolFlag{
+		Name:   "fee-model-enable",
+		Usage:  "fee model enable",
+		EnvVar: prefixEnvVar(envVarPrefix, "FEE_MODEL_ENABLE"),
+	}
 	SentryEnableFlag = cli.BoolFlag{
 		Name:   "sentry-enable",
 		Usage:  "Whether or not to enable Sentry. If true, sentry-dsn must also be set",
@@ -258,7 +275,6 @@ var requiredFlags = []cli.Flag{
 	MtlNetworkNameFlag,
 	L1EthRpcFlag,
 	L2MtlRpcFlag,
-	DtlClientUrlFlag,
 	DisperserEndpointFlag,
 	RetrieverSocketFlag,
 	EigenDaHttpPortFlag,
@@ -268,9 +284,11 @@ var requiredFlags = []cli.Flag{
 	MnemonicFlag,
 	SequencerHDPathFlag,
 	EigenContractAddressFlag,
+	EigenFeeContractAddressFlag,
 	BlockOffsetFlag,
 	RollUpMinSizeFlag,
 	RollUpMaxSizeFlag,
+	FeeSizeSecFlag,
 	MainWorkerPollIntervalFlag,
 	CheckerWorkerPollIntervalFlag,
 	DataStoreDurationFlag,
@@ -281,6 +299,7 @@ var requiredFlags = []cli.Flag{
 	CheckerEnableFlag,
 	ResubmissionTimeoutFlag,
 	NumConfirmationsFlag,
+	FeeModelEnableFlags,
 	SafeAbortNonceTooLowCountFlag,
 	MtlBatcherEnableFlag,
 }
