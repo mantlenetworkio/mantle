@@ -16,7 +16,6 @@ import (
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
-	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	rpc2 "github.com/mantlenetworkio/mantle/l2geth/rpc"
@@ -139,19 +138,19 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 						log.Error("Validator get block failed", "err", err)
 					}
 					// TODO FIXME FRAUD-PROOF TEST, DELETE ME
-					block, err = v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
-					if err != nil {
-						log.Error("Validator get block failed", "err", err)
-					}
-					DebugFlag := false
-					for _, tx := range block.Transactions() {
-						if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
-							DebugFlag = true
-						}
-					}
-					if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 && DebugFlag {
-						//if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 {
-						//Validation failed
+					//block, err = v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
+					//if err != nil {
+					//	log.Error("Validator get block failed", "err", err)
+					//}
+					//DebugFlag := false
+					//for _, tx := range block.Transactions() {
+					//	if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
+					//		DebugFlag = true
+					//	}
+					//}
+					//if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 && DebugFlag {
+					if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 {
+						//Validation ftailed
 						log.Info("Validator check assertion vmHash failed, start challenge assertion....")
 						ourAssertion := &rollupTypes.Assertion{
 							VmHash:    block.Root(),
