@@ -20,4 +20,5 @@ type Config struct {
 	RollupAddr      common.Address // L1 Rollup contract address
 	StakeAddr       common.Address // The account used for rollup assertion stake
 	StakeAmount     uint64         // Amount of stake
+	ChallengeVerify bool
 }

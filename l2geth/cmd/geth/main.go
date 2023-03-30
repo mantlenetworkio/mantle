@@ -177,6 +177,7 @@ var (
 		utils.FraudProofRollupAddrFlag,
 		utils.FraudProofStakeAddrFlag,
 		utils.FraudProofStakeAmount,
+		utils.FraudProofChallengeVerify,
 	}
 
 	rpcFlags = []cli.Flag{

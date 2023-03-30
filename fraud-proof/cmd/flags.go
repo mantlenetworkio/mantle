@@ -54,6 +54,11 @@ var (
 		EnvVar: "STAKE_AMOUNT",
 		Value:  1000000000000000000,
 	}
+	FraudProofChallengeVerify = &cli.BoolTFlag{
+		Name:   "fp.challenge-verify",
+		Usage:  "Challenge verify",
+		EnvVar: "CHALLENGE_VERIFY",
+	}
 )
 
 //// RegisterEthService adds an Ethereum client to the stack.
@@ -99,6 +104,7 @@ func MakeFraudProofConfig(ctx *cli.Context) *services.Config {
 		RollupAddr:      common.HexToAddress(ctx.String(FraudProofRollupAddrFlag.Name)),
 		StakeAddr:       common.HexToAddress(ctx.String(FraudProofStakeAddrFlag.Name)),
 		StakeAmount:     ctx.Uint64(FraudProofStakeAmount.Name),
+		ChallengeVerify: ctx.Bool(FraudProofChallengeVerify.Name),
 	}
 	return cfg
 }

@@ -331,12 +331,7 @@ func (s *Sequencer) challengeLoop() {
 			case ev := <-challengeCompletedCh:
 				// TODO: handle if we are not winner --> state corrupted
 				log.Info("[challenge] Try to challenge completed", "winner", ev.Winner)
-				challengeVerify := true
-				if !bytes.Equal(ev.Winner.Bytes(), s.TransactOpts.From.Bytes()) {
-					log.Info("[challenge] Challenge verify")
-					// todo Challenge verify
-					challengeVerify = false
-				}
+				challengeVerify := s.Config.ChallengeVerify
 				_, err = challengeSession.CompleteChallenge(challengeVerify)
 				if err != nil {
 					log.Error("Can not complete challenge", "error", err)

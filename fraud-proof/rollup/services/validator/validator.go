@@ -98,9 +98,20 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 			select {
 			case ev := <-assertionEventCh:
 				// only one verifier and check it
+				// re-stake check
+				if !stakerStatus.IsStaked {
+					stakeOpts := v.Rollup.TransactOpts
+					stakeOpts.Value = big.NewInt(int64(v.Config.StakeAmount))
+					_, err = v.Rollup.Contract.Stake(&stakeOpts)
+					if err != nil {
+						log.Crit("Failed to stake", "from", stakeOpts.From.String(), "amount", stakeOpts.Value, "err", err)
+					}
+				}
+				// check challenge status
 				if !bytes.Equal(stakerStatus.CurrentChallenge.Bytes(), common.BigToAddress(common.Big0).Bytes()) {
 					continue
 				}
+				// check staker status
 				zombies, _ := v.Rollup.Zombies(big.NewInt(0))
 				if !bytes.Equal(zombies.StakerAddress.Bytes(), common.BigToAddress(common.Big0).Bytes()) {
 					continue
