@@ -71,6 +71,7 @@ type DriverConfig struct {
 	CheckerBatchIndex         uint64
 	CheckerEnable             bool
 	FeeSizeSec                string
+	FeePerBytePerTime         uint64
 	FeeModelEnable            bool
 }
 
@@ -553,7 +554,7 @@ func (d *Driver) CalcUserFeeByRules(rollupDateSize *big.Int) (*big.Int, error) {
 	if rollSizeSec.Cmp(feeSs) < 0 {
 		return big.NewInt(0), nil
 	}
-	return big.NewInt(10000), nil
+	return new(big.Int).Mul(new(big.Int).Div(rollSizeSec, feeSs), new(big.Int).SetUint64(d.Cfg.FeePerBytePerTime)), nil
 }
 
 func (d *Driver) UpdateFee(ctx context.Context, l2Block, daFee *big.Int) (*types.Transaction, error) {

@@ -163,6 +163,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		EigenFeeABI:               eigenFeeABI,
 		FeeModelEnable:            cfg.FeeModelEnable,
 		FeeSizeSec:                cfg.FeeSizeSec,
+		FeePerBytePerTime:         cfg.FeePerBytePerTime,
 		Logger:                    logger,
 		PrivKey:                   sequencerPrivKey,
 		BlockOffset:               cfg.BlockOffset,

@@ -115,6 +115,12 @@ var (
 		Value:  "102400", //
 		EnvVar: prefixEnvVar(envVarPrefix, "FEE_SIZE_SEC"),
 	}
+	FeePerBytePerTimeFlag = cli.Uint64Flag{
+		Name:   "fee-per-byte-time",
+		Usage:  "Fee per byte time",
+		Value:  "1", //
+		EnvVar: prefixEnvVar(envVarPrefix, "FEE_PER_BYTE_TIME"),
+	}
 	RollUpMaxSizeFlag = cli.Uint64Flag{
 		Name:   "rollup-max-size",
 		Usage:  "Rollup transaction max size data for eigen da",
@@ -289,6 +295,7 @@ var requiredFlags = []cli.Flag{
 	RollUpMinSizeFlag,
 	RollUpMaxSizeFlag,
 	FeeSizeSecFlag,
+	FeePerBytePerTimeFlag,
 	MainWorkerPollIntervalFlag,
 	CheckerWorkerPollIntervalFlag,
 	DataStoreDurationFlag,
