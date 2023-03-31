@@ -190,16 +190,6 @@ contract Challenge is IChallenge {
         emit Bisected(bisection[0], bisection[1], bisection[2], block.number, block.timestamp, challengedSegmentStart, challengedSegmentLength);
     }
 
-    // todo: just for test,delete!
-    function setCtx(VerificationContext.Context memory _ctx) public {
-        ctx = _ctx;
-    }
-
-    // todo: just for test,delete!
-    function setCtx(VerificationContext.Context memory _ctx) public {
-        ctx = _ctx;
-    }
-
     function verifyOneStepProof(
         VerificationContext.Context calldata ctx,
         uint8 verifyType,

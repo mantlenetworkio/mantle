@@ -186,9 +186,6 @@ describe('RollUp', () => {
       challengeImp.interface,
       accounts[0]
     )
-    // todo : set for mock ctx
-    await challenge.setCtx(ctxCall)
-
     await challenge.initializeChallengeLength(1)
     const winnerAmount = (
       await rollUp.stakers(winnerAddr)
