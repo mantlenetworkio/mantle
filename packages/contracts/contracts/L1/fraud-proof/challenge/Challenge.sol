@@ -195,6 +195,11 @@ contract Challenge is IChallenge {
         ctx = _ctx;
     }
 
+    // todo: just for test,delete!
+    function setCtx(VerificationContext.Context memory _ctx) public {
+        ctx = _ctx;
+    }
+
     function verifyOneStepProof(
         VerificationContext.Context calldata ctx,
         uint8 verifyType,

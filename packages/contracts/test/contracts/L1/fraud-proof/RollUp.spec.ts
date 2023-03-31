@@ -41,6 +41,30 @@ describe('RollUp', () => {
   }
 
 
+  const tx = [
+    ctx.txNonce,
+    ctx.gasPrice,
+    ctx.gas,
+    ctx.recipient,
+    ctx.value,
+    ctx.input,
+    ctx.txV,
+    ctx.txR,
+    ctx.txS,
+  ]
+
+  const ctxCall = {
+    coinbase: ctx.coinbase,
+    timestamp: ctx.timestamp,
+    number: ctx.blockNumber,
+    origin: ctx.origin,
+    transaction: tx,
+    inputRoot:
+      '0x0000000000000000000000000000000000000000000000000000000000000000',
+    txHash: ctx.txnHash,
+  }
+
+
   before('setup', async () => {
     accounts = await ethers.getSigners()
     await deployAddressManager()
