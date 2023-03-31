@@ -125,6 +125,9 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	}
 	*usedGas += gas
 
+	// Create a new receipt for the transaction, storing the intermediate root and gas used by the tx
+	// based on the eip phase, we're passing whether the root touch-delete accounts.
+	receipt := types.NewReceipt(root, failed, *usedGas)
 	daSwitch := statedb.GetState(rcfg.L2GasPriceOracleAddress, rcfg.DaSwitchSlot).Big()
 	if err != nil {
 		return nil, err
@@ -139,9 +142,6 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 		receipt.DAGasUsed = daGasUsed
 
 	}
-	// Create a new receipt for the transaction, storing the intermediate root and gas used by the tx
-	// based on the eip phase, we're passing whether the root touch-delete accounts.
-	receipt := types.NewReceipt(root, failed, *usedGas)
 	receipt.L1GasPrice = l1GasPrice
 	receipt.L1GasUsed = l1GasUsed
 	receipt.L1Fee = l1Fee
