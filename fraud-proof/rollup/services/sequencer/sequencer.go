@@ -333,7 +333,6 @@ func (s *Sequencer) challengeLoop() {
 					log.Info("Timeout challenge...")
 				}
 			case ev := <-challengeCompletedCh:
-				// TODO: handle if we are not winner --> state corrupted
 				log.Info("[challenge] Try to challenge completed", "winner", ev.Winner)
 				_, err = challengeSession.CompleteChallenge(s.Config.ChallengeVerify)
 				if err != nil {
@@ -443,9 +442,10 @@ func (s *Sequencer) challengeLoop() {
 					}
 					inChallenge = true
 				} else {
-					log.Crit("Unrecognized challenge")
+					log.Error("Unrecognized challenge", "StakerChallenge", stakeStatus.CurrentChallenge.String(), "ChallengeAddr", ctx.ChallengeAddr.String())
+					s.challengeCh <- ctx
+					continue
 				}
-
 			case <-headCh:
 				continue // consume channel values
 			case <-s.Ctx.Done():

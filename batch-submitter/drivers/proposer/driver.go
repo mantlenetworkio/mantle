@@ -6,6 +6,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/big"
 	"strings"
@@ -510,16 +511,17 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 		return nil, err
 	}
 	if lastCreatedAssertionID.Uint64() != 0 && latestAssertion.InboxSize.Uint64()+uint64(len(txBatch.Txs)) != txBatch.LastBlockNumber() {
-		log.Crit("Online total InboxSize not match with local batch's LatestBlockNumber")
+		log.Error("Online total InboxSize not match with local batch's LatestBlockNumber")
+		return nil, errors.New("Online total InboxSize not match with local batch's LatestBlockNumber")
 	}
 
 	assertion := txBatch.ToAssertion(&latestAssertion)
 
-	fmt.Println(assertion.VmHash.String())
-	fmt.Println(assertion.InboxSize)
-	fmt.Println(batch)
-	fmt.Println(shouldStartAtElement)
-	fmt.Println(signature)
+	log.Debug("show assertion", "VmHash", assertion.VmHash.String())
+	log.Debug("show assertion", "InboxSize", assertion.InboxSize)
+	log.Debug("show assertion", "Batch", batch)
+	log.Debug("show assertion", "ShouldStartAtElement", shouldStartAtElement.String())
+	log.Debug("show assertion", "Signature", hex.EncodeToString(signature))
 
 	// create assertion
 	return d.fpRollup.CreateAssertionWithStateBatch(

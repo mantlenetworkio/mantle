@@ -121,7 +121,7 @@ func (l *OneStepProver) CaptureStart(env *vm.EVM, from common.Address, to common
 	l.selfDestructSet = state.NewSelfDestructSet()
 	l.startInterState.GlobalState = l.env.StateDB.Copy() // This state includes gas-buying and nonce-increment
 	l.lastDepthState = l.startInterState
-	log.Info("Capture Start", "from", from, "to", to)
+	log.Debug("Capture Start", "from", from, "to", to)
 	return nil
 }
 
@@ -160,12 +160,12 @@ func (l *OneStepProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, 
 		depth,
 	)
 
-	log.Info("Generated state", "idx", l.counter, "hash", hexutil.Encode(s.Hash().Bytes()), "op", op)
-	log.Info("State", "state", fmt.Sprintf("%+v", s))
-	log.Info("State", "stack", fmt.Sprintf("%+v", s.Stack))
-	log.Info("State", "memory", fmt.Sprintf("%+v", s.Memory))
-	log.Info("State", "input", fmt.Sprintf("%+v", s.InputData))
-	log.Info("State", "output", fmt.Sprintf("%+v", s.ReturnData))
+	log.Debug("Generated state", "idx", l.counter, "hash", hexutil.Encode(s.Hash().Bytes()), "op", op)
+	log.Debug("State", "state", fmt.Sprintf("%+v", s))
+	log.Debug("State", "stack", fmt.Sprintf("%+v", s.Stack))
+	log.Debug("State", "memory", fmt.Sprintf("%+v", s.Memory))
+	log.Debug("State", "input", fmt.Sprintf("%+v", s.InputData))
+	log.Debug("State", "output", fmt.Sprintf("%+v", s.ReturnData))
 
 	// The target state is found, generate the one-step proof
 	if l.counter-1 == l.step {
@@ -264,7 +264,7 @@ func (l *OneStepProver) CaptureFault(env *vm.EVM, pc uint64, op vm.OpCode, gas, 
 }
 
 func (l *OneStepProver) CaptureEnd(output []byte, gasUsed uint64, t time.Duration, err error) error {
-	log.Info("Capture End", "output", output)
+	log.Debug("Capture End", "output", output)
 	if l.done {
 		// Something went wrong during tracing, exit early
 		return nil

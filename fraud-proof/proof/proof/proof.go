@@ -15,15 +15,15 @@
 package proof
 
 import (
-	"math/big"
-
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/state"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"math/big"
 )
 
 type ProofGenContext struct {
@@ -291,6 +291,6 @@ func GetTransactionInitaitionProof(
 // Type 4 IntraState -> IntraState: one-step EVM execution
 // Type 5 IntraState -> InterState: transaction finalization
 func GetIntraProof(ctx ProofGenContext, currState, nextState *state.IntraState, vmerr error) (*OneStepProof, error) {
-	// log.Info("Generating intra proof", "op", currState.OpCode, "gen", proofJumpTable[currState.OpCode])
+	log.Debug("Generating intra proof", "op", currState.OpCode, "gen", proofJumpTable[currState.OpCode])
 	return proofJumpTable[currState.OpCode].genProof(ctx, currState, nextState, vmerr)
 }

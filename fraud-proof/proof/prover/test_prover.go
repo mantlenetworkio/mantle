@@ -201,7 +201,7 @@ func (l *TestProver) CaptureStart(env *vm.EVM, from common.Address, to common.Ad
 		Input:     bytesToHex(input),
 		InputSize: uintToHex(l.input.Size()),
 	}
-	log.Info("Capture Start", "from", from, "to", to)
+	log.Debug("Capture Start", "from", from, "to", to)
 	return nil
 }
 
@@ -236,13 +236,7 @@ func (l *TestProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, cos
 		depth,
 	)
 
-	log.Info("Generated state", "idx", l.counter, "hash", hexutil.Encode(s.Hash().Bytes()), "op", op)
-	// log.Info("State", "state", fmt.Sprintf("%+v", s))
-	// log.Info("State", "stack", fmt.Sprintf("%+v", s.Stack))
-	// log.Info("State", "memory", fmt.Sprintf("%+v", s.Memory))
-	// log.Info("State", "input", fmt.Sprintf("%+v", s.InputData))
-	// log.Info("State", "output", fmt.Sprintf("%+v", s.ReturnData))
-
+	log.Debug("Generated state", "idx", l.counter, "hash", hexutil.Encode(s.Hash().Bytes()), "op", op)
 	// The target state is found, generate the one-step proof
 	if int64(l.counter-1) == l.step || int64(l.lastOpcode) == l.opcode {
 		l.done = true
@@ -268,11 +262,11 @@ func (l *TestProver) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, cos
 				Proof:     bytesToHex(encoded),
 				Idx:       l.counter - 1,
 			}
-			log.Info("SHOW STATE", "length of lastState", len(l.lastState.Encode()))
-			log.Info("SHOW STATE", "length of encoded", len(encoded))
+			log.Debug("SHOW STATE", "length of lastState", len(l.lastState.Encode()))
+			log.Debug("SHOW STATE", "length of encoded", len(encoded))
 
-			log.Info("SHOW STATE", "hash of lastState", l.lastState.Hash().String())
-			log.Info("SHOW STATE", "hash of encoded", crypto.Keccak256Hash(encoded[:len(l.lastState.Encode())]).String())
+			log.Debug("SHOW STATE", "hash of lastState", l.lastState.Hash().String())
+			log.Debug("SHOW STATE", "hash of encoded", crypto.Keccak256Hash(encoded[:len(l.lastState.Encode())]).String())
 		}
 		return vmerr
 	}
@@ -354,7 +348,7 @@ func (l *TestProver) CaptureFault(env *vm.EVM, pc uint64, op vm.OpCode, gas, cos
 }
 
 func (l *TestProver) CaptureEnd(output []byte, gasUsed uint64, t time.Duration, vmerr error) error {
-	log.Info("Capture End", "output", output)
+	log.Debug("Capture End", "output", output)
 	if l.done {
 		// Something went wrong during tracing, exit early
 		return vmerr
