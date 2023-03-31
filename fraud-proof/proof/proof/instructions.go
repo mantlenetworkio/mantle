@@ -813,7 +813,8 @@ func (osp *OneStepProof) addCallPostProof(ctx ProofGenContext, currState *state.
 		in = currState.Stack.Back(2).Uint64()
 		inSize = currState.Stack.Back(3).Uint64()
 	} else {
-		log.Crit("Unreachable")
+		log.Error("Unreachable")
+		return errors.New("unreachable")
 	}
 	// For input data
 	err := osp.addMemoryReadProof(in, inSize, currState)

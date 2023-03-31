@@ -247,12 +247,6 @@ func GenerateStates(backend Backend, ctx context.Context, startNum, endNum uint6
 		return nil, err
 	}
 
-	// TODO FIXME FRAUD-PROOF TEST, DELETE ME
-	//randNum := byte(rand.Int())
-	//log.Info("TEST change last inter state", "from", states[len(states)-1].VMHash[0], "diff", randNum)
-	//states[len(states)-1].VMHash[0] += randNum
-	//endHeader.Root[0] += randNum
-
 	states = append(states, &ExecutionState{
 		VMHash:         endHeader.Root,
 		BlockGasUsed:   common.Big0,

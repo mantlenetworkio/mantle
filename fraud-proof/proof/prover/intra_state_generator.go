@@ -16,6 +16,7 @@ package prover
 
 import (
 	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"math/big"
 	"time"
 
@@ -91,7 +92,7 @@ func (l *IntraStateGenerator) CaptureStart(env *vm.EVM, from common.Address, to 
 	l.selfDestructSet = state.NewSelfDestructSet()
 	l.startInterState.GlobalState = l.env.StateDB.Copy() // This state includes gas-buying and nonce-increment
 	l.lastDepthState = l.startInterState
-	// log.Info("Capture Start", "from", from, "to", to)
+	log.Debug("Capture Start", "from", from, "to", to)
 	return nil
 }
 
