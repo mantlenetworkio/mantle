@@ -29,6 +29,7 @@ type Config struct {
 	SentryEnable              bool
 	MainWorkerPollInterval    time.Duration
 	CheckerWorkerPollInterval time.Duration
+	FeeWorkerPollInterval     time.Duration
 	BlockOffset               uint64
 	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
@@ -48,6 +49,7 @@ type Config struct {
 	EchoDebug                 bool
 	MtlBatcherEnable          bool
 	FeeSizeSec                string
+	FeePerBytePerTime         uint64
 	FeeModelEnable            bool
 	DisableHTTP2              bool
 	DbPath                    string
@@ -76,6 +78,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		DataStoreTimeout:          ctx.GlobalUint64(flags.DataStoreTimeoutFlag.Name),
 		MainWorkerPollInterval:    ctx.GlobalDuration(flags.MainWorkerPollIntervalFlag.Name),
 		CheckerWorkerPollInterval: ctx.GlobalDuration(flags.CheckerWorkerPollIntervalFlag.Name),
+		FeeWorkerPollInterval:     ctx.GlobalDuration(flags.FeeWorkerPollIntervalFlag.Name),
 		BlockOffset:               ctx.GlobalUint64(flags.BlockOffsetFlag.Name),
 		RollUpMinSize:             ctx.GlobalUint64(flags.RollUpMinSizeFlag.Name),
 		RollUpMaxSize:             ctx.GlobalUint64(flags.RollUpMaxSizeFlag.Name),
@@ -94,6 +97,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		SentryDsn:                 ctx.GlobalString(flags.SentryDsnFlag.Name),
 		SentryTraceRate:           ctx.GlobalDuration(flags.SentryTraceRateFlag.Name),
 		FeeSizeSec:                ctx.GlobalString(flags.FeeSizeSecFlag.Name),
+		FeePerBytePerTime:         ctx.GlobalUint64(flags.FeePerBytePerTimeFlag.Name),
 		FeeModelEnable:            ctx.GlobalBool(flags.FeeModelEnableFlags.Name),
 		DisableHTTP2:              ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
 		EchoDebug:                 ctx.GlobalBool(flags.EchoDebugFlag.Name),
