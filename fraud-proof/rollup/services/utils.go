@@ -4,14 +4,16 @@ import (
 	"bytes"
 	"context"
 	"encoding/hex"
+	"errors"
 	"fmt"
-	ethc "github.com/ethereum/go-ethereum/common"
-	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"math/big"
+
+	ethc "github.com/ethereum/go-ethereum/common"
 
 	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
@@ -31,23 +33,21 @@ func SubmitOneStepProof(
 		return err
 	}
 	log.Info("OSP GenerateProof success")
-
 	log.Info("OSP BuildVerificationContext...")
 	verificationContext, err := BuildVerificationContext(ctx, proofBackend, state)
 	if err != nil {
 		log.Error("UNHANDELED: osp build verification context failed", "err", err)
 		return err
 	}
+
 	log.Info("OSP BuildVerificationContext success")
-
-	log.Info("OSP VerifyOneStepProof...")
-	log.Warn("OSP verificationContext: ", "verificationContext", verificationContext)
-	log.Warn("OSP VerifierType: ", "VerifierType", uint8(osp.VerifierType))
-	log.Warn("OSP encode: ", "osp", osp.Encode())
-	log.Warn("challengedStepIndex: ", "challengedStepIndex", challengedStepIndex)
-	log.Warn("prevChallengedSegmentStart: ", "prevChallengedSegmentStart", prevChallengedSegmentStart)
-	log.Warn("prevChallengedSegmentLength: ", "prevChallengedSegmentLength", prevChallengedSegmentLength)
-
+	log.Debug("OSP VerifyOneStepProof...")
+	log.Debug("OSP verificationContext: ", "verificationContext", verificationContext)
+	log.Debug("OSP VerifierType: ", "VerifierType", uint8(osp.VerifierType))
+	log.Debug("OSP encode: ", "osp", osp.Encode())
+	log.Debug("challengedStepIndex: ", "challengedStepIndex", challengedStepIndex)
+	log.Debug("prevChallengedSegmentStart: ", "prevChallengedSegmentStart", prevChallengedSegmentStart)
+	log.Debug("prevChallengedSegmentLength: ", "prevChallengedSegmentLength", prevChallengedSegmentLength)
 	_, err = challengeSession.VerifyOneStepProof(
 		*verificationContext,
 		uint8(osp.VerifierType),
@@ -76,13 +76,14 @@ func RespondBisection(
 	var challengeIdx uint64
 	var newStart uint64
 	var newLen uint64 // New segment length
-	var err error
+
 	// Get bisection info from event
 	segStart := ev.ChallengedSegmentStart.Uint64()
 	segLen := ev.ChallengedSegmentLength.Uint64()
 
 	if segStart+segLen >= uint64(len(states)) {
-		log.Crit("RespondBisection out of range", "segStart", segStart, "segLen", segLen, "len(states)", len(states))
+		log.Error("RespondBisection out of range", "segStart", segStart, "segLen", segLen, "len(states)", len(states))
+		return errors.New("RespondBisection out of range")
 	}
 
 	startState := states[segStart].Hash()
@@ -117,12 +118,11 @@ func RespondBisection(
 			state = states[segStart+segLen]
 			challengedStepIndex.SetUint64(2)
 		} else {
-			log.Error("RespondBisection can't find state difference")
-			return nil
+			return errors.New("RespondBisection can't find state difference")
 		}
 
 		// We've reached one step
-		err = SubmitOneStepProof(
+		err := SubmitOneStepProof(
 			challengeSession,
 			b.ProofBackend,
 			b.Ctx,
@@ -132,14 +132,16 @@ func RespondBisection(
 			ev.ChallengedSegmentLength,
 		)
 		if err != nil {
-			log.Crit("UNHANDELED: osp failed", "err", err)
+			log.Error("UNHANDELED: osp failed", "err", err)
+			return err
 		}
-		return err
+		return nil
 	} else {
-		log.Crit("RespondBisection segLen in event is illegal")
+		log.Error("RespondBisection segLen in event is illegal")
+		return errors.New("RespondBisection segLen in event is illegal")
 	}
 	log.Info("BisectExecution", "bisection[0]", hex.EncodeToString(bisection[0][:]), "bisection[1]", hex.EncodeToString(bisection[1][:]), "bisection[2]", hex.EncodeToString(bisection[2][:]), "cidx", challengeIdx, "segStart", segStart, "segLen", segLen)
-	_, err = challengeSession.BisectExecution(
+	_, err := challengeSession.BisectExecution(
 		bisection,
 		new(big.Int).SetUint64(challengeIdx),
 		new(big.Int).SetUint64(newStart),
@@ -148,7 +150,8 @@ func RespondBisection(
 		ev.ChallengedSegmentLength,
 	)
 	if err != nil {
-		log.Crit("UNHANDELED: bisection excution failed", "err", err)
+		log.Error("UNHANDELED: bisection excution failed", "err", err)
+		return err
 	}
 	return nil
 }

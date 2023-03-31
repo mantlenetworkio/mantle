@@ -19,15 +19,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/big"
+	"os"
+	"strconv"
+
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/prover"
 	oss "github.com/mantlenetworkio/mantle/fraud-proof/proof/state"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
-	"math/big"
-	"os"
-	"strconv"
 )
 
 func (api *ProverAPI) GenerateProofForStep(ctx context.Context, fraud bool, hash common.Hash, step int64, config *ProverConfig) (json.RawMessage, error) {

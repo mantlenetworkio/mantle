@@ -2,7 +2,9 @@ import { task } from 'hardhat/config'
 import { ethers } from 'ethers'
 import { hexStringEquals } from '@mantleio/core-utils'
 
+// @ts-ignore
 import { getContractFactory } from '../src'
+// @ts-ignore
 import { names } from '../src/address-names'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -18,7 +20,8 @@ task(`deployVerifier`)
       '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
       provider
     )
-
+    const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
+    const entryOwner = new ethers.Wallet(deployerKey, provider)
     const BlockInitiationVerifier = getContractFactory(
       names.managed.fraud_proof.SubVerifiers.BlockInitiationVerifier
     )
@@ -100,39 +103,39 @@ task(`deployVerifier`)
     const Proxy__Verifier = getContractFactory(
       names.managed.fraud_proof.VerifierEntry
     ).attach(taskArgs.address)
-    await Proxy__Verifier.connect(ownerWallet).setVerifier(
+    await Proxy__Verifier.connect(entryOwner).setVerifier(
       0,
       await stackOpVerifier.address
     )
-    await Proxy__Verifier.connect(ownerWallet).setVerifier(
+    await Proxy__Verifier.connect(entryOwner).setVerifier(
       1,
       await environmentalOpVerifier.address
     )
-    await Proxy__Verifier.connect(ownerWallet).setVerifier(
+    await Proxy__Verifier.connect(entryOwner).setVerifier(
       2,
       await memoryOpVerifier.address
     )
-    await Proxy__Verifier.connect(ownerWallet).setVerifier(
+    await Proxy__Verifier.connect(entryOwner).setVerifier(
       3,
       await storageOpVerifier.address
     )
-    await Proxy__Verifier.connect(ownerWallet).setVerifier(
+    await Proxy__Verifier.connect(entryOwner).setVerifier(
       4,
       await callOpVerifier.address
     )
-    await Proxy__Verifier.connect(ownerWallet).setVerifier(
+    await Proxy__Verifier.connect(entryOwner).setVerifier(
       5,
       await invalidOpVerifier.address
     )
-    await Proxy__Verifier.connect(ownerWallet).setVerifier(
+    await Proxy__Verifier.connect(entryOwner).setVerifier(
       6,
       await interTxVerifier.address
     )
-    await Proxy__Verifier.connect(ownerWallet).setVerifier(
+    await Proxy__Verifier.connect(entryOwner).setVerifier(
       7,
       await blockInitiationVerifier.address
     )
-    await Proxy__Verifier.connect(ownerWallet).setVerifier(
+    await Proxy__Verifier.connect(entryOwner).setVerifier(
       8,
       await blockFinalizationVerifier.address
     )

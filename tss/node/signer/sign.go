@@ -4,6 +4,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"math"
+	"math/big"
+	"strings"
+
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/influxdata/influxdb/pkg/slices"
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
@@ -14,9 +18,6 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/slash"
 	"github.com/rs/zerolog"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
-	"math"
-	"math/big"
-	"strings"
 )
 
 func (p *Processor) Sign() {
