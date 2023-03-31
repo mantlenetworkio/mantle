@@ -3,6 +3,7 @@ import chai from 'chai'
 
 // @ts-ignore
 import { deploy } from '../../../helpers'
+import { ctx, proof } from '../../../data/json/fraud-proof/fp_challenge.json'
 
 const { expect } = chai
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -15,6 +16,54 @@ describe('RollUp', () => {
   let token: Contract
   let assertionMap: Contract
   let addressManager: Contract
+
+  const tx = [
+    ctx.txNonce,
+    ctx.gasPrice,
+    ctx.gas,
+    ctx.recipient,
+    ctx.value,
+    ctx.input,
+    ctx.txV,
+    ctx.txR,
+    ctx.txS,
+  ]
+
+  const ctxCall = {
+    coinbase: ctx.coinbase,
+    timestamp: ctx.timestamp,
+    number: ctx.blockNumber,
+    origin: ctx.origin,
+    transaction: tx,
+    inputRoot:
+      '0x0000000000000000000000000000000000000000000000000000000000000000',
+    txHash: ctx.txnHash,
+  }
+
+
+  const tx = [
+    ctx.txNonce,
+    ctx.gasPrice,
+    ctx.gas,
+    ctx.recipient,
+    ctx.value,
+    ctx.input,
+    ctx.txV,
+    ctx.txR,
+    ctx.txS,
+  ]
+
+  const ctxCall = {
+    coinbase: ctx.coinbase,
+    timestamp: ctx.timestamp,
+    number: ctx.blockNumber,
+    origin: ctx.origin,
+    transaction: tx,
+    inputRoot:
+      '0x0000000000000000000000000000000000000000000000000000000000000000',
+    txHash: ctx.txnHash,
+  }
+
 
   before('setup', async () => {
     accounts = await ethers.getSigners()
@@ -137,7 +186,6 @@ describe('RollUp', () => {
       challengeImp.interface,
       accounts[0]
     )
-
     await challenge.initializeChallengeLength(1)
     const winnerAmount = (
       await rollUp.stakers(winnerAddr)
@@ -146,9 +194,9 @@ describe('RollUp', () => {
       await rollUp.stakers(loserAddr)
     ).amountStaked.toNumber()
     const withdrawLoser = loserAmount - winnerAmount
-    // todo change to mock data
+
     await challenge.connect(accounts[3]).verifyOneStepProof(
-      '0x0000', // proof
+      proof.proof, // proof
       1, // challengedStepIndex
       [await assertionMap.getStateHash(2), await assertionMap.getStateHash(3)], // prevBisection
       0, // prevChallengedSegmentStart
@@ -215,7 +263,23 @@ describe('RollUp', () => {
   }
 
   const deployVerifier = async () => {
-    verifier = await deploy('VerifierEntry')
+    const stackOpVerifier = await deploy('StackOpVerifier')
+    const verifierEntry = await deploy('VerifierEntry')
+    const callData = verifierEntry.interface.encodeFunctionData('initialize')
+    const verifierProxy = await deploy('TransparentUpgradeableProxy', {
+      args: [
+        verifierEntry.address, // logic
+        await accounts[2].getAddress(), // admin
+        callData, // call data
+      ],
+    })
+
+    verifier = new Contract(
+      verifierProxy.address,
+      verifierEntry.interface,
+      accounts[0]
+    )
+    await verifier.setVerifier(0, stackOpVerifier.address)
   }
 
   const deployAddressManager = async () => {
