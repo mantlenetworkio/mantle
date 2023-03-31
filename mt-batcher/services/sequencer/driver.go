@@ -59,6 +59,7 @@ type DriverConfig struct {
 	DataStoreDuration         uint64
 	DataStoreTimeout          uint64
 	DisperserSocket           string
+	FeeWorkerPollInterval     time.Duration
 	MainWorkerPollInterval    time.Duration
 	CheckerWorkerPollInterval time.Duration
 	GraphProvider             string
@@ -145,10 +146,10 @@ func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction, feeM
 		NoSend:  true,
 	}
 	if feeModelEnable {
-		log.Info("update eigen da use fee", "FeeModelEnable", d.Cfg.FeeModelEnable)
+		log.Info("MtBatcher update eigen da use fee", "FeeModelEnable", d.Cfg.FeeModelEnable)
 		finalTx, err = d.Cfg.RawEigenFeeContract.RawTransact(opts, tx.Data())
 	} else {
-		log.Info("rollup date", "FeeModelEnable", d.Cfg.FeeModelEnable)
+		log.Info("MtBatcher rollup data", "FeeModelEnable", d.Cfg.FeeModelEnable)
 		finalTx, err = d.Cfg.RawEigenContract.RawTransact(opts, tx.Data())
 	}
 	switch {
@@ -701,7 +702,7 @@ func (d *Driver) RollupMainWorker() {
 
 func (d *Driver) RollUpFeeWorker() {
 	defer d.wg.Done()
-	ticker := time.NewTicker(d.Cfg.MainWorkerPollInterval)
+	ticker := time.NewTicker(d.Cfg.FeeWorkerPollInterval)
 	defer ticker.Stop()
 	for {
 		select {
@@ -709,22 +710,22 @@ func (d *Driver) RollUpFeeWorker() {
 			if d.Cfg.FeeModelEnable {
 				chainFee, err := d.Cfg.EigenFeeContract.GetRollupFee(&bind.CallOpts{})
 				if err != nil {
-					log.Error("get chain fee fail", "err", err)
+					log.Error("MtBatcher RollUpFeeWorker get chain fee fail", "err", err)
 					continue
 				}
 				daFee := <-d.FeeCh
-				log.Info("chainFee and daFee", "chainFee", chainFee, "daFee", *daFee)
+				log.Info("MtBatcher RollUpFeeWorker chainFee and daFee", "chainFee", chainFee, "daFee", *daFee)
 				if chainFee.Cmp(daFee.RollUpFee) != 0 {
 					txfRpt, err := d.UpdateUserDaFee(daFee.EndL2BlockNumber, daFee.RollUpFee)
 					if err != nil {
-						log.Error("update user da fee fail", "err", err)
+						log.Error("MtBatcher RollUpFeeWorker update user da fee fail", "err", err)
 						continue
 					}
-					log.Info("update user fee success", "Hash", txfRpt.TxHash.String())
+					log.Info("MtBatcher RollUpFeeWorker update user fee success", "Hash", txfRpt.TxHash.String())
 				}
 			}
 		case err := <-d.Ctx.Done():
-			log.Error("MtBatcher eigenDa sequencer service shutting down", "err", err)
+			log.Error("MtBatcher RollUpFeeWorker eigenDa sequencer service shutting down", "err", err)
 			return
 		}
 	}

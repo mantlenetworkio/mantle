@@ -118,7 +118,7 @@ var (
 	FeePerBytePerTimeFlag = cli.Uint64Flag{
 		Name:   "fee-per-byte-time",
 		Usage:  "Fee per byte time",
-		Value:  "1", //
+		Value:  1,
 		EnvVar: prefixEnvVar(envVarPrefix, "FEE_PER_BYTE_TIME"),
 	}
 	RollUpMaxSizeFlag = cli.Uint64Flag{
@@ -166,6 +166,12 @@ var (
 		Usage:    "checker worker poll interval",
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "CHECKER_WORKER_POLL_INTERVAL"),
+	}
+	FeeWorkerPollIntervalFlag = cli.DurationFlag{
+		Name:     "fee-worker-poll-interval",
+		Usage:    "fee worker poll interval",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "FEE_WORKER_POLL_INTERVAL"),
 	}
 	DataStoreDurationFlag = cli.IntFlag{
 		Name:     "duration",
@@ -298,6 +304,7 @@ var requiredFlags = []cli.Flag{
 	FeePerBytePerTimeFlag,
 	MainWorkerPollIntervalFlag,
 	CheckerWorkerPollIntervalFlag,
+	FeeWorkerPollIntervalFlag,
 	DataStoreDurationFlag,
 	DataStoreTimeoutFlag,
 	EigenLayerNodeFlag,

@@ -176,6 +176,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		DisperserSocket:           cfg.DisperserEndpoint,
 		MainWorkerPollInterval:    cfg.MainWorkerPollInterval,
 		CheckerWorkerPollInterval: cfg.CheckerWorkerPollInterval,
+		FeeWorkerPollInterval:     cfg.FeeWorkerPollInterval,
 		DbPath:                    cfg.DbPath,
 		CheckerBatchIndex:         cfg.CheckerBatchIndex,
 		CheckerEnable:             cfg.CheckerEnable,
