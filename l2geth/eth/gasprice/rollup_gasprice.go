@@ -14,18 +14,22 @@ import (
 type RollupOracle struct {
 	l1GasPrice     *big.Int
 	l2GasPrice     *big.Int
+	daGasPrice     *big.Int
 	overhead       *big.Int
 	scalar         *big.Float
 	isBurning      *big.Int
 	charge         *big.Int
+	daSwitch       *big.Int
 	sccAddress     common.Address
 	l1GasPriceLock sync.RWMutex
 	l2GasPriceLock sync.RWMutex
+	daGasPriceLock sync.RWMutex
 	overheadLock   sync.RWMutex
 	scalarLock     sync.RWMutex
 	isBurningLock  sync.RWMutex
 	chargeLock     sync.RWMutex
 	sccAddressLock sync.RWMutex
+	daSwitchLock   sync.RWMutex
 }
 
 // NewRollupOracle returns an initialized RollupOracle
@@ -74,6 +78,23 @@ func (gpo *RollupOracle) SetL2GasPrice(gasPrice *big.Int) error {
 	return nil
 }
 
+// SuggestDAGasPrice returns the gas price which should be charged per byte of published
+// data by the sequencer.
+func (gpo *RollupOracle) SuggestDAGasPrice(ctx context.Context) (*big.Int, error) {
+	gpo.daGasPriceLock.RLock()
+	defer gpo.daGasPriceLock.RUnlock()
+	return gpo.daGasPrice, nil
+}
+
+// SetDAGasPrice returns the current DA gas price
+func (gpo *RollupOracle) SetDAGasPrice(daGasPrice *big.Int) error {
+	gpo.daGasPriceLock.Lock()
+	defer gpo.daGasPriceLock.Unlock()
+	gpo.daGasPrice = daGasPrice
+	log.Info("Set DA Gas Price", "daGasprice", gpo.daGasPrice)
+	return nil
+}
+
 // SuggestOverhead returns the cached overhead value from the
 // BVM_GasPriceOracle
 func (gpo *RollupOracle) SuggestOverhead(ctx context.Context) (*big.Int, error) {
@@ -97,6 +118,13 @@ func (gpo *RollupOracle) SuggestScalar(ctx context.Context) (*big.Float, error) 
 	gpo.scalarLock.RLock()
 	defer gpo.scalarLock.RUnlock()
 	return gpo.scalar, nil
+}
+
+// DASwitch returns the cached DASwitch value
+func (gpo *RollupOracle) DASwitch() *big.Int {
+	gpo.daSwitchLock.Lock()
+	defer gpo.chargeLock.Unlock()
+	return gpo.daSwitch
 }
 
 // SetScalar sets the scalar value held in the BVM_GasPriceOracle
@@ -124,6 +152,15 @@ func (gpo *RollupOracle) SetCharge(charge *big.Int) error {
 	defer gpo.chargeLock.Unlock()
 	gpo.charge = charge
 	log.Info("Set charge", "charge", charge)
+	return nil
+}
+
+// SetDASwitch sets the daSwitch value held in the BVM_GasPriceOracle
+func (gpo *RollupOracle) SetDASwitch(daSwitch *big.Int) error {
+	gpo.daSwitchLock.Lock()
+	defer gpo.daSwitchLock.Unlock()
+	gpo.daSwitch = daSwitch
+	log.Info("Set daSwitch", "daSwitch", daSwitch)
 	return nil
 }
 

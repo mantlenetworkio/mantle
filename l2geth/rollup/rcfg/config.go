@@ -23,6 +23,8 @@ var (
 	// L2GasPriceOracleAddress is the address of the BVM_GasPriceOracle
 	// predeploy
 	L2GasPriceOracleAddress = common.HexToAddress("0x420000000000000000000000000000000000000F")
+	// code
+	L2GasPriceOracleCode = []byte("")
 	// OverheadSlot refers to the storage slot in the BVM_GasPriceOracle that
 	// holds the per transaction overhead. This is added to the L1 cost portion
 	// of the fee
@@ -42,6 +44,12 @@ var (
 	ChargeSlot = common.BigToHash(big.NewInt(7))
 	// SccAddressSlot refers to the storage slot in the Scc contract address
 	SccAddressSlot = common.BigToHash(big.NewInt(8))
+	// DaGasPriceSlot refers to the storage slot that the da gas price is stored
+	// in the BVM_GasPriceOracle predeploy
+	DaGasPriceSlot = common.BigToHash(big.NewInt(9))
+	// DaSwitchSlot refers to the storage slot in the BVM_GasPriceOracle that
+	// holds switch controls whether enable DA
+	DaSwitchSlot = common.BigToHash(big.NewInt(10))
 )
 
 func init() {

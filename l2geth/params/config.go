@@ -309,7 +309,8 @@ type ChainConfig struct {
 
 	EWASMBlock *big.Int `json:"ewasmBlock,omitempty"` // EWASM switch block (nil = no fork, 0 = already activated)
 
-	UpdateGaslimitBlock *big.Int `json:"updateGaslimitBlock,omitempty"` //  UpdateGaslimitBlock witch block (nil = no fork, 0 = already activated)
+	UpdateGasLimitBlock *big.Int `json:"updateGaslimitBlock,omitempty"` //  UpdateGasLimitBlock witch block (nil = no fork, 0 = already activated)
+	EigenDaBlock        *big.Int `json:"eigenDaBlock,omitempty"`        //  EigenDaBlock witch block (nil = no fork, 0 = already activated)
 
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
@@ -360,7 +361,8 @@ func (c *ChainConfig) String() string {
 		c.IstanbulBlock,
 		c.MuirGlacierBlock,
 		c.BerlinBlock,
-		c.UpdateGaslimitBlock,
+		c.UpdateGasLimitBlock,
+		c.EigenDaBlock,
 		engine,
 	)
 }
@@ -427,9 +429,14 @@ func (c *ChainConfig) IsEWASM(num *big.Int) bool {
 	return isForked(c.EWASMBlock, num)
 }
 
-// ISUpdateGaslimitBlock returns whether num represents a block number after the UpdateGaslimitBlock fork
-func (c *ChainConfig) ISUpdateGaslimitBlock(num *big.Int) bool {
-	return isForked(c.UpdateGaslimitBlock, num)
+// IsUpdateGasLimitBlock returns whether num represents a block number after the UpdateGasLimitBlock fork
+func (c *ChainConfig) IsUpdateGasLimitBlock(num *big.Int) bool {
+	return isForked(c.UpdateGasLimitBlock, num)
+}
+
+// IsEigenDa returns whether num represents a block number after the IsEigenDa fork
+func (c *ChainConfig) IsEigenDa(num *big.Int) bool {
+	return isForked(c.EigenDaBlock, num)
 }
 
 // IsSDUpdate returns whether num represents a block number after the SD update fork
@@ -480,8 +487,8 @@ func (c *ChainConfig) CheckConfigForkOrder() error {
 		{"istanbulBlock", c.IstanbulBlock},
 		{"muirGlacierBlock", c.MuirGlacierBlock},
 		{name: "berlinBlock", block: c.BerlinBlock},
-		//we needn't to check config fork order for UpdateGaslimitBlock
-		//{name: "UpdateGaslimitBlock", block: c.UpdateGaslimitBlock},
+		//we needn't to check config fork order for UpdateGasLimitBlock
+		//{name: "UpdateGasLimitBlock", block: c.UpdateGasLimitBlock},
 	} {
 		if lastFork.name != "" {
 			// Next one must be higher number
@@ -544,8 +551,11 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	if isForkIncompatible(c.EWASMBlock, newcfg.EWASMBlock, head) {
 		return newCompatError("ewasm fork block", c.EWASMBlock, newcfg.EWASMBlock)
 	}
-	if isForkIncompatible(c.UpdateGaslimitBlock, newcfg.UpdateGaslimitBlock, head) {
-		return newCompatError("UpdateGaslimitBlock fork block", c.UpdateGaslimitBlock, newcfg.UpdateGaslimitBlock)
+	if isForkIncompatible(c.UpdateGasLimitBlock, newcfg.UpdateGasLimitBlock, head) {
+		return newCompatError("UpdateGasLimitBlock fork block", c.UpdateGasLimitBlock, newcfg.UpdateGasLimitBlock)
+	}
+	if isForkIncompatible(c.EigenDaBlock, newcfg.EigenDaBlock, head) {
+		return newCompatError("EigenDa fork block", c.EigenDaBlock, newcfg.EigenDaBlock)
 	}
 	return nil
 }
@@ -615,7 +625,8 @@ type Rules struct {
 	IsHomestead, IsEIP150, IsEIP155, IsEIP158               bool
 	IsByzantium, IsConstantinople, IsPetersburg, IsIstanbul bool
 	IsBerlin                                                bool
-	ISUpdateGaslimitBlock                                   bool
+	IsUpdateGasLimitBlock                                   bool
+	IsEigenDa                                               bool
 }
 
 // Rules ensures c's ChainID is not nil.
@@ -635,6 +646,7 @@ func (c *ChainConfig) Rules(num *big.Int) Rules {
 		IsPetersburg:          c.IsPetersburg(num),
 		IsIstanbul:            c.IsIstanbul(num),
 		IsBerlin:              c.IsBerlin(num),
-		ISUpdateGaslimitBlock: c.ISUpdateGaslimitBlock(num),
+		IsUpdateGasLimitBlock: c.IsUpdateGasLimitBlock(num),
+		IsEigenDa:             c.IsEigenDa(num),
 	}
 }

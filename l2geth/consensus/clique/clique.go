@@ -583,7 +583,7 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainReader, header *types.
 
 	//this is only for testnet, if height< fixblockhash branch block height, set gaslimit = 15000000
 	//if height >= fixblockhash branch block height, use the config value
-	if !chain.Config().ISUpdateGaslimitBlock(header.Number) {
+	if !chain.Config().IsUpdateGasLimitBlock(header.Number) {
 		header.GasLimit = preUpgradedGaslimit
 	}
 
