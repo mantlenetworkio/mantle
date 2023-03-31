@@ -169,13 +169,6 @@ func GenerateStates(backend Backend, ctx context.Context, startNum, endNum uint6
 				StepIdx:        0,
 			})
 
-			// TODO FIXME FRAUD-PROOF TEST, DELETE ME
-			//if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
-			//	randNum := byte(rand.Int())
-			//	log.Info("TEST change last inter state", "from", states[len(states)-1].VMHash[0], "diff", randNum)
-			//	states[len(states)-1].VMHash[0] += randNum
-			//}
-
 			// Execute transaction i with intra state generator enabled.
 			stateGenerator := prover.NewIntraStateGenerator(block.NumberU64(), uint64(i), statedb, *its, blockHashTree)
 			txCtx, err := generateTxCtx(backend, ctx, block, tx)

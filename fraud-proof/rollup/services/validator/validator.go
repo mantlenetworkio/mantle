@@ -148,20 +148,8 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					if err != nil {
 						log.Error("Validator get block failed", "err", err)
 					}
-					// TODO FIXME FRAUD-PROOF TEST, DELETE ME
-					//block, err = v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()-1))
-					//if err != nil {
-					//	log.Error("Validator get block failed", "err", err)
-					//}
-					//DebugFlag := false
-					//for _, tx := range block.Transactions() {
-					//	if tx.QueueOrigin() == types.QueueOriginL1ToL2 {
-					//		DebugFlag = true
-					//	}
-					//}
-					//if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 && DebugFlag {
 					if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 {
-						//Validation ftailed
+						//  Validation failed
 						log.Info("Validator check assertion vmHash failed, start challenge assertion....")
 						ourAssertion := &rollupTypes.Assertion{
 							VmHash:    block.Root(),
@@ -297,8 +285,8 @@ func (v *Validator) challengeLoop() {
 			select {
 			case ev := <-bisectedCh:
 				// case get bisection, if is our turn
-				//   if in single step, submit proof
-				//   if multiple step, track current segment, update
+				//   1. In single step, submit proof
+				//   2. In multiple step, track current segment, update
 				log.Info("Validator saw new bisection coming...")
 				responder, err := challengeSession.CurrentResponder()
 				if err != nil {

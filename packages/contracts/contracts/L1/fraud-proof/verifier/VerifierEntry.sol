@@ -46,9 +46,9 @@ contract VerifierEntry is IVerifierEntry, Initializable, OwnableUpgradeable {
         __Ownable_init();
     }
 
-    function setVerifier(uint8 verifier, IVerifier impl) external
-    // todo : owner for deploy
-//    onlyOwner
+    function setVerifier(uint8 verifier, IVerifier impl)
+        external
+        onlyOwner
     {
         if (verifier == Params.V_BLOCK_INIT) {
             blockInitiationVerifier = impl;
