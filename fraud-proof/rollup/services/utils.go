@@ -26,18 +26,28 @@ func SubmitOneStepProof(
 	prevChallengedSegmentStart *big.Int,
 	prevChallengedSegmentLength *big.Int,
 ) error {
+	log.Info("OSP GenerateProof...")
 	osp, err := proof.GenerateProof(ctx, proofBackend, state, nil)
 	if err != nil {
 		log.Error("UNHANDELED: osp generation failed", "err", err)
 		return err
 	}
-
+	log.Info("OSP GenerateProof success")
+	log.Info("OSP BuildVerificationContext...")
 	verificationContext, err := BuildVerificationContext(ctx, proofBackend, state)
 	if err != nil {
 		log.Error("UNHANDELED: osp build verification context failed", "err", err)
 		return err
 	}
 
+	log.Info("OSP BuildVerificationContext success")
+	log.Debug("OSP VerifyOneStepProof...")
+	log.Debug("OSP verificationContext: ", "verificationContext", verificationContext)
+	log.Debug("OSP VerifierType: ", "VerifierType", uint8(osp.VerifierType))
+	log.Debug("OSP encode: ", "osp", osp.Encode())
+	log.Debug("challengedStepIndex: ", "challengedStepIndex", challengedStepIndex)
+	log.Debug("prevChallengedSegmentStart: ", "prevChallengedSegmentStart", prevChallengedSegmentStart)
+	log.Debug("prevChallengedSegmentLength: ", "prevChallengedSegmentLength", prevChallengedSegmentLength)
 	_, err = challengeSession.VerifyOneStepProof(
 		*verificationContext,
 		uint8(osp.VerifierType),
