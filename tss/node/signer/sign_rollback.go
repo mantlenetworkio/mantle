@@ -2,10 +2,11 @@ package signer
 
 import (
 	"encoding/json"
-	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
-	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	"math/big"
 	"strings"
+
+	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
+	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
 func (p *Processor) SignRollBack() {

@@ -3,6 +3,7 @@ package validator
 import (
 	"bytes"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -81,7 +82,9 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 	for {
 		stakerStatus, err := v.Rollup.Stakers(v.Rollup.TransactOpts.From)
 		if err != nil {
-			log.Crit("UNHANDELED: Can't find stake, validator state corrupted", "err", err)
+			log.Error("UNHANDELED: Can't find stake, validator state corrupted", "err", err)
+			time.Sleep(5 * time.Second)
+			continue
 		}
 
 		if isInChallenge {
@@ -104,7 +107,8 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 					stakeOpts.Value = big.NewInt(int64(v.Config.StakeAmount))
 					_, err = v.Rollup.Contract.Stake(&stakeOpts)
 					if err != nil {
-						log.Crit("Failed to stake", "from", stakeOpts.From.String(), "amount", stakeOpts.Value, "err", err)
+						log.Error("Failed to stake", "from", stakeOpts.From.String(), "amount", stakeOpts.Value, "err", err)
+						continue
 					}
 				}
 				// check challenge status
@@ -169,7 +173,8 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 						// todo ：During frequent interactions, it is necessary to check the results of the previous interaction
 						_, err = v.Rollup.AdvanceStake(new(big.Int).SetUint64(startID + 1))
 						if err != nil {
-							log.Crit("UNHANDELED: Can't advance stake, validator state corrupted", "err", err)
+							log.Error("UNHANDELED: Can't advance stake, validator state corrupted", "err", err)
+							break
 						}
 					}
 				}
@@ -352,7 +357,9 @@ func (v *Validator) challengeLoop() {
 					ctx.OurAssertion.InboxSize,
 				)
 				if err != nil {
-					log.Crit("UNHANDELED: Can't create assertion for challenge, validator state corrupted", "err", err)
+					log.Error("UNHANDELED: Can't create assertion for challenge, validator state corrupted", "err", err)
+					v.challengeCh <- ctx
+					continue
 				}
 			case ev := <-createdCh:
 				if common.Address(ev.AsserterAddr) == v.Config.StakeAddr {
@@ -369,7 +376,9 @@ func (v *Validator) challengeLoop() {
 							},
 						)
 						if err != nil {
-							log.Crit("UNHANDELED: Can't start challenge, validator state corrupted", "err", err)
+							log.Error("UNHANDELED: Can't start challenge, validator state corrupted", "err", err)
+							createdCh <- ev
+							continue
 						}
 					}
 				}
@@ -381,7 +390,9 @@ func (v *Validator) challengeLoop() {
 				if ev.AssertionID.Cmp(ctx.OpponentAssertion.ID) == 0 {
 					challenge, err := bindings.NewChallenge(ev.ChallengeAddr, v.L1)
 					if err != nil {
-						log.Crit("Failed to access ongoing challenge", "address", ev.ChallengeAddr, "err", err)
+						log.Error("Failed to access ongoing challenge", "address", ev.ChallengeAddr, "err", err)
+						challengedCh <- ev
+						continue
 					}
 					challengeSession = &bindings.ChallengeSession{
 						Contract:     challenge,
@@ -390,15 +401,21 @@ func (v *Validator) challengeLoop() {
 					}
 					bisectedSub, err = challenge.WatchBisected(&bind.WatchOpts{Context: v.Ctx}, bisectedCh)
 					if err != nil {
-						log.Crit("Failed to watch challenge event", "err", err)
+						log.Error("Failed to watch challenge event", "err", err)
+						challengedCh <- ev
+						continue
 					}
 					challengeCompletedSub, err = challenge.WatchChallengeCompleted(&bind.WatchOpts{Context: v.Ctx}, challengeCompletedCh)
 					if err != nil {
-						log.Crit("Failed to watch challenge event", "err", err)
+						log.Error("Failed to watch challenge event", "err", err)
+						challengedCh <- ev
+						continue
 					}
 					parentAssertion, err := ctx.OurAssertion.GetParentAssertion(v.AssertionMap)
 					if err != nil {
-						log.Crit("Failed to watch challenge event", "err", err)
+						log.Error("Failed to watch challenge event", "err", err)
+						challengedCh <- ev
+						continue
 					}
 					log.Info("Validator start to GenerateStates", "parentAssertion.InboxSize", parentAssertion.InboxSize.Uint64(), "ctx.ourAssertion.InboxSize", ctx.OurAssertion.InboxSize.Uint64())
 					states, err = proof.GenerateStates(
@@ -410,14 +427,18 @@ func (v *Validator) challengeLoop() {
 					)
 					log.Info("Validator generate states end...")
 					if err != nil {
-						log.Crit("Failed to generate states", "err", err)
+						log.Error("Failed to generate states", "err", err)
+						challengedCh <- ev
+						continue
 					}
 					log.Info("Print generated states", "states[0]", states[0].Hash().String(), "states[numSteps]", states[len(states)-1].Hash().String())
 
 					if restart {
 						curr, err := challengeSession.CurrentBisected()
 						if err != nil {
-							log.Crit("Failed to get current bisected", "err", err)
+							log.Error("Failed to get current bisected", "err", err)
+							challengedCh <- ev
+							continue
 						}
 						bisectedCh <- &bindings.ChallengeBisected{
 							StartState:              curr.StartState,

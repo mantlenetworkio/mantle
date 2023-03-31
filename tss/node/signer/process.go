@@ -4,26 +4,26 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"math/big"
+	"sync"
+	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
+	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 
 	ethc "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
+
 	"github.com/mantlenetworkio/mantle/bss-core/dial"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
 	"github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
 	managertypes "github.com/mantlenetworkio/mantle/tss/manager/types"
-
-	"time"
-
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib"
 	"github.com/mantlenetworkio/mantle/tss/node/types"
 	"github.com/mantlenetworkio/mantle/tss/ws/client"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
-
-	"sync"
 )
 
 type Processor struct {

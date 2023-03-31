@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
-
 	"sync"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -19,6 +18,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/ctc"
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/scc"
 	tssClient "github.com/mantlenetworkio/mantle/batch-submitter/tss-client"

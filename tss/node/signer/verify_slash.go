@@ -3,6 +3,7 @@ package signer
 import (
 	"bytes"
 	"encoding/json"
+
 	"github.com/mantlenetworkio/mantle/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )

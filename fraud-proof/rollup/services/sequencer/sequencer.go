@@ -220,7 +220,9 @@ func (s *Sequencer) confirmationLoop() {
 				challengeAssertion := new(rollupTypes.Assertion)
 				parent := new(rollupTypes.Assertion)
 				if ret, err := s.AssertionMap.Assertions(ev.AssertionID); err != nil {
-					log.Crit("Get assertion failed", "id", ev.AssertionID, "err", err)
+					log.Error("Get assertion failed", "id", ev.AssertionID, "err", err)
+					challengedCh <- ev
+					continue
 				} else {
 					challengeAssertion.ID = ev.AssertionID
 					challengeAssertion.VmHash = ret.StateHash
@@ -230,7 +232,9 @@ func (s *Sequencer) confirmationLoop() {
 					challengeAssertion.ProposalTime = ret.ProposalTime
 				}
 				if ret, err := s.AssertionMap.Assertions(challengeAssertion.Parent); err != nil {
-					log.Crit("Get assertion failed", "id", challengeAssertion.Parent, "err", err)
+					log.Error("Get assertion failed", "id", challengeAssertion.Parent, "err", err)
+					challengedCh <- ev
+					continue
 				} else {
 					parent.ID = ev.AssertionID
 					parent.VmHash = ret.StateHash
@@ -354,7 +358,9 @@ func (s *Sequencer) challengeLoop() {
 				log.Warn("Sequencer receive new challenge!!!", "handle it", ctx)
 				challenge, err := bindings.NewChallenge(ethc.Address(ctx.ChallengeAddr), s.L1)
 				if err != nil {
-					log.Crit("Failed to access ongoing challenge", "address", ctx.ChallengeAddr, "err", err)
+					log.Error("Failed to access ongoing challenge", "address", ctx.ChallengeAddr, "err", err)
+					s.challengeCh <- ctx
+					continue
 				}
 				challengeSession = &bindings.ChallengeSession{
 					Contract:     challenge,
@@ -378,11 +384,15 @@ func (s *Sequencer) challengeLoop() {
 				}
 				bisectedSub, err = challenge.WatchBisected(&bind.WatchOpts{Context: s.Ctx}, bisectedCh)
 				if err != nil {
-					log.Crit("Failed to watch challenge event", "err", err)
+					log.Error("Failed to watch challenge event", "err", err)
+					s.challengeCh <- ctx
+					continue
 				}
 				challengeCompletedSub, err = challenge.WatchChallengeCompleted(&bind.WatchOpts{Context: s.Ctx}, challengeCompletedCh)
 				if err != nil {
-					log.Crit("Failed to watch challenge event", "err", err)
+					log.Error("Failed to watch challenge event", "err", err)
+					s.challengeCh <- ctx
+					continue
 				}
 				log.Info("Sequencer generate state...")
 				states, err = proof.GenerateStates(
@@ -393,7 +403,9 @@ func (s *Sequencer) challengeLoop() {
 					nil,
 				)
 				if err != nil {
-					log.Crit("Failed to generate states", "err", err)
+					log.Error("Failed to generate states", "err", err)
+					s.challengeCh <- ctx
+					continue
 				}
 				log.Info("Sequencer generate state end...")
 
@@ -407,13 +419,17 @@ func (s *Sequencer) challengeLoop() {
 						log.Info("Print generated states", "states[0]", states[0].Hash().String(), "states[numSteps]", states[numSteps].Hash().String(), "numSteps", numSteps)
 						_, err = challengeSession.InitializeChallengeLength(services.MidState(states, 0, numSteps), new(big.Int).SetUint64(numSteps))
 						if err != nil {
-							log.Crit("Failed to initialize challenge", "err", err)
+							log.Error("Failed to initialize challenge", "err", err)
+							s.challengeCh <- ctx
+							continue
 						}
 					} else {
 						//bisectedCh chan *bindings.ChallengeBisected
 						curr, err := challengeSession.CurrentBisected()
 						if err != nil {
-							log.Crit("Failed to get current bisected", "err", err)
+							log.Error("Failed to get current bisected", "err", err)
+							s.challengeCh <- ctx
+							continue
 						}
 						bisectedCh <- &bindings.ChallengeBisected{
 							StartState:              curr.StartState,
