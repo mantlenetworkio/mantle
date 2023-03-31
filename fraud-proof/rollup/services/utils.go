@@ -9,7 +9,6 @@ import (
 	"math/big"
 
 	ethc "github.com/ethereum/go-ethereum/common"
-
 	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
 	"github.com/mantlenetworkio/mantle/l2geth/common"

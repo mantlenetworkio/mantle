@@ -17,7 +17,6 @@ package prover
 import (
 	"encoding/json"
 	"errors"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"math/big"
 	"strconv"
 	"strings"
@@ -29,6 +28,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 )

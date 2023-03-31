@@ -15,6 +15,8 @@
 package proof
 
 import (
+	"math/big"
+
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/state"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
@@ -23,7 +25,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
-	"math/big"
 )
 
 type ProofGenContext struct {

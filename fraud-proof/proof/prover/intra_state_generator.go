@@ -16,13 +16,13 @@ package prover
 
 import (
 	"fmt"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"math/big"
 	"time"
 
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/state"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 type GeneratedIntraState struct {
