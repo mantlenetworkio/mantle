@@ -2,7 +2,7 @@ package rollup
 
 import "math/big"
 
-type FraudProover interface {
+type FraudProver interface {
 	Start() error
 
 	Stop() error
