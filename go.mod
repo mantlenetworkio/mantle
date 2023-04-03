@@ -190,6 +190,8 @@ require (
 	nhooyr.io/websocket v1.8.7 // indirect
 )
 
-replace github.com/ethereum/go-ethereum v1.11.2 => github.com/mantlenetworkio/mt-geth v0.0.0-20230312080159-f956b531c3d2
+//replace github.com/ethereum/go-ethereum v1.11.2 => ../mt-geth
 
 //replace github.com/ethereum/go-ethereum v1.11.2 => ../go-ethereum
+
+replace github.com/ethereum/go-ethereum v1.11.2 => github.com/ethandavionlabs/mt-geth v0.0.0-20230331060308-d419cef7c3f9

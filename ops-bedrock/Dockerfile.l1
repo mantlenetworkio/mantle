@@ -1,5 +1,7 @@
 FROM ethereum/client-go:v1.11.2
 
+ENV GO111MODULE=on
+ENV GOPROXY=https://goproxy.cn,direct
 RUN apk add --no-cache jq
 
 COPY entrypoint.sh /entrypoint.sh

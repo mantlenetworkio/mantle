@@ -2,6 +2,9 @@ FROM --platform=$BUILDPLATFORM golang:1.18.0-alpine3.15 as builder
 
 ARG VERSION=v0.0.0
 
+ENV GO111MODULE=on
+ENV GOPROXY=https://goproxy.cn,direct
+
 RUN apk add --no-cache make gcc musl-dev linux-headers git jq bash
 
 # build mt-node with the shared go.mod & go.sum files
