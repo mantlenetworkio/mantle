@@ -5,7 +5,6 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	ethereum "github.com/mantlenetworkio/mantle/l2geth"
 	"math/big"
 	"time"
 
