@@ -881,36 +881,53 @@ var (
 	}
 
 	// fraud proof flags
-	FraudProofCoinBaseFlag = &cli.StringFlag{
-		Name:  "fp.coinbase",
-		Usage: "The sequencer/validator address to be unlocked (pass passphrash via --password)",
-		Value: "",
-	}
 	FraudProofL1EndpointFlag = &cli.StringFlag{
-		Name:  "fp.l1endpoint",
-		Usage: "The api endpoint of L1 client",
-		Value: "",
+		Name:   "fp.l1endpoint",
+		Usage:  "The api endpoint of L1 client",
+		EnvVar: "L1_ENDPOINT",
+		Value:  "",
 	}
 	FraudProofL1ChainIDFlag = &cli.Uint64Flag{
-		Name:  "fp.l1chainid",
-		Usage: "The chain ID of L1 client",
-		Value: 31337,
+		Name:   "fp.l1chainid",
+		Usage:  "The chain ID of L1 client",
+		EnvVar: "L1_CHAIN_ID",
+		Value:  31337,
+	}
+	FraudProofL1ConfirmationsFlag = &cli.Uint64Flag{
+		Name:   "fp.l1confirmations",
+		Usage:  "The confirmation block number of L1",
+		EnvVar: "L1_CONFIRMATIONS",
+		Value:  31337,
 	}
 	FraudProofSequencerAddrFlag = &cli.StringFlag{
-		Name:  "fp.sequencer-addr",
-		Usage: "The account address of sequencer",
-		Value: "",
+		Name:   "fp.sequencer-addr",
+		Usage:  "The account address of sequencer",
+		EnvVar: "SEQUENCER_ADDR",
+		Value:  "",
 	}
+	// FraudProofRollupAddrFlag rollup contract address
 	FraudProofRollupAddrFlag = &cli.StringFlag{
-		Name:  "fp.rollup-addr",
-		Usage: "The contract address of L1 rollup",
-		Value: "",
+		Name:   "fp.rollup-addr",
+		Usage:  "The contract address of L1 rollup",
+		EnvVar: "ROLLUP_ADDR",
+		Value:  "",
 	}
-	FraudProofRollupStakeAmount = &cli.Uint64Flag{
+	FraudProofStakeAddrFlag = &cli.StringFlag{
+		Name:   "fp.stake-addr",
+		Usage:  "The sequencer/validator address to be unlocked (pass passphrash via --password)",
+		EnvVar: "STAKE_ADDR",
+		Value:  "",
+	}
+	FraudProofStakeAmount = &cli.Uint64Flag{
 		Name:   "fp.stake-amount",
 		Usage:  "Required staking amount",
-		EnvVar: "ROLLUP_STAKE_AMOUNT",
+		EnvVar: "STAKE_AMOUNT",
 		Value:  1000000000000000000,
+	}
+	FraudProofChallengeVerify = &cli.BoolTFlag{
+		Name:   "fp.challenge-verify",
+		Usage:  "Challenge verify",
+		EnvVar: "CHALLENGE_VERIFY",
 	}
 )
 

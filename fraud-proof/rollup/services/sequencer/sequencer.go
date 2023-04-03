@@ -1,21 +1,22 @@
 package sequencer
 
 import (
-	"fmt"
-	ethc "github.com/ethereum/go-ethereum/common"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p"
+	"bytes"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
+
 	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/p2p"
 )
 
 func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {
@@ -27,20 +28,19 @@ func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *serv
 	log.Info("Sequencer registered")
 }
 
-type challengeCtx struct {
-	challengeAddr common.Address
-	parent        *rollupTypes.Assertion
-	assertion     *rollupTypes.Assertion
+type ChallengeCtx struct {
+	ChallengeAddr common.Address
+	Assertion     *rollupTypes.Assertion
+	Parent        *rollupTypes.Assertion
 }
 
-// Current Sequencer assumes no Berlin+London fork on L2
+// Sequencer run confirming loop and respond challenge, assumes no Berlin+London fork on L2
 type Sequencer struct {
 	*services.BaseService
 
-	pendingAssertionCh   chan *rollupTypes.Assertion
-	confirmedIDCh        chan *big.Int
-	challengeCh          chan *challengeCtx
-	challengeResoutionCh chan struct{}
+	confirmedIDCh         chan *big.Int
+	challengeCh           chan *ChallengeCtx
+	challengeResolutionCh chan struct{}
 
 	confirmations uint64
 }
@@ -51,12 +51,11 @@ func New(eth services.Backend, proofBackend proof.Backend, cfg *services.Config,
 		return nil, err
 	}
 	s := &Sequencer{
-		BaseService:          base,
-		pendingAssertionCh:   make(chan *rollupTypes.Assertion, 4096),
-		confirmedIDCh:        make(chan *big.Int, 4096),
-		challengeCh:          make(chan *challengeCtx),
-		challengeResoutionCh: make(chan struct{}),
-		confirmations:        cfg.L1Confirmations,
+		BaseService:           base,
+		confirmedIDCh:         make(chan *big.Int, 4096),
+		challengeCh:           make(chan *ChallengeCtx),
+		challengeResolutionCh: make(chan struct{}),
+		confirmations:         cfg.L1Confirmations,
 	}
 	return s, nil
 }
@@ -66,85 +65,91 @@ func (s *Sequencer) confirmationLoop() {
 	defer s.Wg.Done()
 
 	// Watch AssertionCreated event
-	createdCh := make(chan *bindings.IRollupAssertionCreated, 4096)
+	var createdCh = make(chan *bindings.RollupAssertionCreated, 4096)
 	createdSub, err := s.Rollup.Contract.WatchAssertionCreated(&bind.WatchOpts{Context: s.Ctx}, createdCh)
 	if err != nil {
-		log.Crit("Failed to watch rollup event", "err", err)
+		log.Error("Failed to watch rollup event", "err", err)
 	}
 	defer createdSub.Unsubscribe()
 
 	// Watch AssertionConfirmed event
-	confirmedCh := make(chan *bindings.IRollupAssertionConfirmed, 4096)
+	var confirmedCh = make(chan *bindings.RollupAssertionConfirmed, 4096)
 	confirmedSub, err := s.Rollup.Contract.WatchAssertionConfirmed(&bind.WatchOpts{Context: s.Ctx}, confirmedCh)
 	if err != nil {
-		log.Crit("Failed to watch rollup event", "err", err)
+		log.Error("Failed to watch rollup event", "err", err)
 	}
 	defer confirmedSub.Unsubscribe()
 
 	// Watch L1 blockchain for confirmation period
-	headCh := make(chan *types.Header, 4096)
+	var headCh = make(chan *types.Header, 4096)
 	headSub, err := s.L1.SubscribeNewHead(s.Ctx, headCh)
 	if err != nil {
-		log.Crit("Failed to watch l1 chain head", "err", err)
+		log.Error("Failed to watch l1 chain head", "err", err)
 	}
 	defer headSub.Unsubscribe()
 
-	challengedCh := make(chan *bindings.IRollupAssertionChallenged, 4096)
+	var challengedCh = make(chan *bindings.RollupAssertionChallenged, 4096)
 	challengedSub, err := s.Rollup.Contract.WatchAssertionChallenged(&bind.WatchOpts{Context: s.Ctx}, challengedCh)
 	if err != nil {
-		log.Crit("Failed to watch rollup event", "err", err)
+		log.Error("Failed to watch rollup event", "err", err)
 	}
 	defer challengedSub.Unsubscribe()
-	isInChallenge := false
 
-	// Current pending assertion from sequencing goroutine
-	pendingAssertion := new(rollupTypes.Assertion)
-	pendingConfirmationSent := true
-	pendingConfirmed := true
+	challengeAssertions := make(map[uint64]bool)
+
+	challengeContext, _ := s.Rollup.ChallengeCtx()
+	isInChallenge := challengeContext.DefenderAssertionID.Uint64() != 0 && !challengeContext.Completed
+	// restart with challengeCtx
+	if isInChallenge {
+		defenderAssertion, _ := s.AssertionMap.Assertions(challengeContext.DefenderAssertionID)
+		parentAssertionID, _ := s.AssertionMap.GetParentID(challengeContext.DefenderAssertionID)
+		parentAssertion, _ := s.AssertionMap.Assertions(parentAssertionID)
+
+		challengeCtx := ChallengeCtx{
+			ChallengeAddr: common.Address(challengeContext.ChallengeAddress),
+			Assertion: &rollupTypes.Assertion{
+				ID:           challengeContext.DefenderAssertionID,
+				VmHash:       defenderAssertion.StateHash,
+				InboxSize:    defenderAssertion.InboxSize,
+				Parent:       defenderAssertion.Parent,
+				Deadline:     defenderAssertion.Deadline,
+				ProposalTime: defenderAssertion.ProposalTime,
+			},
+			Parent: &rollupTypes.Assertion{
+				ID:           parentAssertionID,
+				VmHash:       parentAssertion.StateHash,
+				InboxSize:    parentAssertion.InboxSize,
+				Parent:       parentAssertion.Parent,
+				Deadline:     parentAssertion.Deadline,
+				ProposalTime: parentAssertion.ProposalTime,
+			},
+		}
+		s.challengeCh <- &challengeCtx
+	}
 
 	for {
 		if isInChallenge {
 			// Waif for the challenge resolved
 			select {
-			case <-s.challengeResoutionCh:
-				log.Info("challenge finished")
+			case <-s.challengeResolutionCh:
+				log.Info("Sequencer finished challenge, reset isInChallenge status")
 				isInChallenge = false
 			case <-s.Ctx.Done():
+				log.Error("Scheduler confirmationLoop ctx done")
 				return
 			}
 		} else {
 			select {
 			case ev := <-createdCh:
 				// New assertion created on L1 Rollup
-				log.Info(fmt.Sprintf("Get New Assertion, AssertionID: %s, AsserterAddress: %s",
-					ev.AssertionID.String(), ev.AsserterAddr.String()))
-				if common.Address(ev.AsserterAddr) == s.Config.Coinbase {
-					log.Info("confirmAssertion.....")
-					pendingAssertion.ID = ev.AssertionID
-					pendingAssertion.VmHash = ev.VmHash
-					pendingAssertion.InboxSize = ev.InboxSize
-					pendingAssertion.GasUsed = ev.L2GasUsed
-					pendingAssertion.Parent = new(big.Int).Sub(ev.AssertionID, big.NewInt(1))
-					pendingAssertion.Deadline, err = s.AssertionMap.GetDeadline(ev.AssertionID)
-					if err != nil {
-						log.Error("Can not get Assertion deadline", "error", err)
-						continue
-					}
-					pendingAssertion.ProposalTime, err = s.AssertionMap.GetProposalTime(ev.AssertionID)
-					if err != nil {
-						log.Error("Can not get Assertion proposal time", "error", err)
-						continue
-					}
-					// New assertion created by sequencing goroutine
-					if !pendingConfirmed {
-						log.Error("Got another DA request before current is confirmed")
-						continue
-					}
-					log.Info("confirmAssertion setup states.....")
-					pendingConfirmationSent = false
-					pendingConfirmed = false
+				log.Info("Get New Assertion...", "AssertionID", ev.AssertionID,
+					"AsserterAddr", ev.AsserterAddr, "VmHash", ev.VmHash, "InboxSize", ev.InboxSize)
+				if !bytes.Equal(ev.AsserterAddr.Bytes(), s.Config.StakeAddr.Bytes()) {
+					log.Info("Get Assertion for challenge,store it")
+					challengeAssertions[ev.AssertionID.Uint64()] = true
 				}
 			case header := <-headCh:
+				// todo : optimization the check with block height
 				// Get confirm block header
 				if s.confirmations != 0 {
 					num := new(big.Int)
@@ -152,52 +157,102 @@ func (s *Sequencer) confirmationLoop() {
 					num.Sub(header.Number, num)
 					header, err = s.L1.HeaderByNumber(s.Ctx, num)
 					if err != nil {
-						log.Crit("Failed to get confirmed header", "err", err)
+						log.Error("Failed to get confirmed header", "err", err)
 						continue
 					}
 				}
-				// New block mined on L1
-				log.Info("sequencer sync new layer1 block...")
-				if !pendingConfirmationSent && !pendingConfirmed {
-					if header.Time >= pendingAssertion.Deadline.Uint64() {
-						// Confirmation period has past, confirm it
-						log.Info("call ConfirmFirstUnresolvedAssertion...")
-						_, err := s.Rollup.ConfirmFirstUnresolvedAssertion()
-						if err != nil {
-							log.Crit("Failed to confirm DA", "err", err)
-							continue
-						}
-						pendingConfirmationSent = true
-					}
-				}
-			case ev := <-confirmedCh:
-				// New confirmed assertion
-				if ev.AssertionID.Cmp(pendingAssertion.ID) == 0 {
-					// Notify sequencing goroutine
-					s.confirmedIDCh <- pendingAssertion.ID
-					pendingConfirmed = true
-				}
-			case newPendingAssertion := <-s.pendingAssertionCh:
-				// New assertion created by sequencing goroutine
-				if !pendingConfirmed {
-					// TODO: support multiple pending assertion
-					log.Error("Got another DA request before current is confirmed")
+				// Get first unresolved confirm assertion and check deadline
+				lastRSAID, err := s.Rollup.LastResolvedAssertionID()
+				if err != nil {
+					log.Error("Failed to get last resolved assertion ID", "err", err)
 					continue
 				}
-				log.Info("confirmAssertion setup states.....")
-				pendingAssertion = newPendingAssertion.Copy()
-				pendingConfirmationSent = false
-				pendingConfirmed = false
+				lastCAID, err := s.Rollup.LastCreatedAssertionID()
+				if err != nil {
+					log.Error("Failed to get last created assertion ID", "err", err)
+					continue
+				}
+				if lastCAID.Uint64() <= lastRSAID.Uint64() {
+					continue
+				}
+				// New block mined on L1
+				log.Info("Sequencer sync new layer1 block", "height", header.Number)
+				firstUnresolvedID := lastRSAID.Uint64() + 1
+				firstUnresolvedAssertion, err := s.AssertionMap.Assertions(new(big.Int).SetUint64(firstUnresolvedID))
+				if err != nil {
+					log.Error("Failed to get first unresolved Assertion", "err", err, "ID", firstUnresolvedID)
+					continue
+				}
+				if header.Time >= firstUnresolvedAssertion.Deadline.Uint64() {
+					log.Info("Current assertion", "id", firstUnresolvedID)
+					if !challengeAssertions[firstUnresolvedID] {
+						// Confirmation period has past, confirm it
+						log.Info("Sequencer call ConfirmFirstUnresolvedAssertion...")
+						_, err := s.Rollup.ConfirmFirstUnresolvedAssertion()
+						if err != nil {
+							if err.Error() == "execution reverted: InvalidParent" {
+								challengeAssertions[firstUnresolvedID] = true
+							}
+							log.Error("Failed to confirm DA", "err", err)
+						}
+						continue
+					}
+					log.Info("Sequencer call RejectFirstUnresolvedAssertion...")
+					// reject challenge assertion
+					_, err := s.Rollup.RejectFirstUnresolvedAssertion()
+					if err != nil {
+						log.Error("Failed to reject DA", "err", err)
+						continue
+					}
+					_, err = s.Rollup.RemoveOldZombies()
+					if err != nil {
+						log.Error("Failed to remove zombies", "err", err)
+						continue
+					}
+					delete(challengeAssertions, firstUnresolvedID)
+				}
+
+			case ev := <-confirmedCh:
+				log.Info("New confirmed assertion", "id", ev.AssertionID)
 			case ev := <-challengedCh:
-				log.Warn("new challenge rise", ev)
-				// New challenge raised
-				//if ev.AssertionID.Cmp(pendingAssertion.ID) == 0 {
-				//	s.challengeCh <- &challengeCtx{
-				//		common.Address(ev.ChallengeAddr),
-				//		pendingAssertion,
-				//	}
-				//	isInChallenge = true
-				//}
+				log.Warn("New challenge rise!!!!!!", "ev", ev)
+				// todo when interrupt at this moment, check staker`s status
+				challengeAssertion := new(rollupTypes.Assertion)
+				parent := new(rollupTypes.Assertion)
+				if ret, err := s.AssertionMap.Assertions(ev.AssertionID); err != nil {
+					log.Error("Get assertion failed", "id", ev.AssertionID, "err", err)
+					challengedCh <- ev
+					continue
+				} else {
+					challengeAssertion.ID = ev.AssertionID
+					challengeAssertion.VmHash = ret.StateHash
+					challengeAssertion.InboxSize = ret.InboxSize
+					challengeAssertion.Parent = ret.Parent
+					challengeAssertion.Deadline = ret.Deadline
+					challengeAssertion.ProposalTime = ret.ProposalTime
+				}
+				if ret, err := s.AssertionMap.Assertions(challengeAssertion.Parent); err != nil {
+					log.Error("Get assertion failed", "id", challengeAssertion.Parent, "err", err)
+					challengedCh <- ev
+					continue
+				} else {
+					parent.ID = ev.AssertionID
+					parent.VmHash = ret.StateHash
+					parent.InboxSize = ret.InboxSize
+					parent.Parent = ret.Parent
+					parent.Deadline = ret.Deadline
+					parent.ProposalTime = ret.ProposalTime
+				}
+
+				challengeCtx := ChallengeCtx{
+					common.Address(ev.ChallengeAddr),
+					challengeAssertion,
+					parent,
+				}
+
+				s.challengeCh <- &challengeCtx
+				isInChallenge = true
+
 			case <-s.Ctx.Done():
 				return
 			}
@@ -208,29 +263,24 @@ func (s *Sequencer) confirmationLoop() {
 func (s *Sequencer) challengeLoop() {
 	defer s.Wg.Done()
 
-	abi, err := bindings.IChallengeMetaData.GetAbi()
-	if err != nil {
-		log.Crit("Failed to get IChallenge ABI", "err", err)
-	}
-
 	// Watch L1 blockchain for challenge timeout
-	headCh := make(chan *types.Header, 4096)
+	var headCh = make(chan *types.Header, 4096)
 	headSub, err := s.L1.SubscribeNewHead(s.Ctx, headCh)
 	if err != nil {
-		log.Crit("Failed to watch l1 chain head", "err", err)
+		log.Error("Failed to watch l1 chain head", "err", err)
 	}
 	defer headSub.Unsubscribe()
 
-	var challengeSession *bindings.IChallengeSession
+	var challengeSession *bindings.ChallengeSession
 	var states []*proof.ExecutionState
 
-	var bisectedCh chan *bindings.IChallengeBisected
+	var bisectedCh = make(chan *bindings.ChallengeBisected, 4096)
 	var bisectedSub event.Subscription
-	var challengeCompletedCh chan *bindings.IChallengeChallengeCompleted
+	var challengeCompletedCh = make(chan *bindings.ChallengeChallengeCompleted, 4096)
 	var challengeCompletedSub event.Subscription
 
 	inChallenge := false
-	var opponentTimeoutBlock uint64
+	var opponentTimeout uint64
 
 	for {
 		if inChallenge {
@@ -245,9 +295,12 @@ func (s *Sequencer) challengeLoop() {
 					log.Error("Can not get current responder", "error", err)
 					continue
 				}
-				if common.Address(responder) == s.Config.Coinbase {
+				log.Info("Responder info...", "responder", responder, "staker", s.Config.StakeAddr)
+				if common.Address(responder) == s.Config.StakeAddr {
+					log.Info("Sequencer start to respond new bisection...")
 					// If it's our turn
-					err := services.RespondBisection(s.BaseService, abi, challengeSession, ev, states, common.Hash{}, false)
+					//err := services.RespondBisection(s.BaseService, abi, challengeSession, ev, states, common.Hash{}, false)
+					err := services.RespondBisection(s.BaseService, challengeSession, ev, states)
 					if err != nil {
 						// TODO: error handling
 						log.Error("Can not respond to bisection", "error", err)
@@ -260,31 +313,39 @@ func (s *Sequencer) challengeLoop() {
 						log.Error("Can not get current responder left time", "error", err)
 						continue
 					}
-					log.Info("[challenge] Opponent time left", "time", opponentTimeLeft)
-					opponentTimeoutBlock = ev.Raw.BlockNumber + opponentTimeLeft.Uint64()
+					log.Info("[Sequencer] Opponent time left", "blockTime", ev.BlockTime.Uint64(), "timeLeft", opponentTimeLeft)
+					opponentTimeout = ev.BlockTime.Uint64() + opponentTimeLeft.Uint64()
 				}
 			case header := <-headCh:
-				if opponentTimeoutBlock == 0 {
+				if opponentTimeout == 0 {
 					continue
 				}
 				// TODO: can we use >= here?
-				if header.Number.Uint64() > opponentTimeoutBlock {
-					_, err := challengeSession.Timeout()
+				log.Info("New header incoming...", "header.Number", header.Number, "header.Time", header.Time, "opponentTimeout", opponentTimeout)
+				if header.Time > opponentTimeout {
+					_, err = challengeSession.Timeout()
 					if err != nil {
 						log.Error("Can not timeout opponent", "error", err)
 						continue
 						// TODO: wait some time before retry
 						// TODO: fix race condition
 					}
+					log.Info("Timeout challenge...")
 				}
 			case ev := <-challengeCompletedCh:
-				// TODO: handle if we are not winner --> state corrupted
-				log.Info("[challenge] Challenge completed", "winner", ev.Winner)
+				log.Info("[challenge] Try to challenge completed", "winner", ev.Winner)
+				_, err = challengeSession.CompleteChallenge(s.Config.ChallengeVerify)
+				if err != nil {
+					log.Error("Can not complete challenge", "error", err)
+					continue
+				}
 				bisectedSub.Unsubscribe()
 				challengeCompletedSub.Unsubscribe()
 				states = []*proof.ExecutionState{}
 				inChallenge = false
-				s.challengeResoutionCh <- struct{}{}
+				challengeSession = nil
+				s.challengeResolutionCh <- struct{}{}
+				log.Info("[challenge] Challenge completed", "winner", ev.Winner)
 			case <-s.Ctx.Done():
 				bisectedSub.Unsubscribe()
 				challengeCompletedSub.Unsubscribe()
@@ -293,44 +354,98 @@ func (s *Sequencer) challengeLoop() {
 		} else {
 			select {
 			case ctx := <-s.challengeCh:
-				log.Warn("new challenge rise, handle it", ctx)
-				//challenge, err := bindings.NewIChallenge(ethc.Address(ctx.challengeAddr), s.L1)
-				//if err != nil {
-				//	log.Crit("Failed to access ongoing challenge", "address", ctx.challengeAddr, "err", err)
-				//}
-				//challengeSession = &bindings.IChallengeSession{
-				//	Contract:     challenge,
-				//	CallOpts:     bind.CallOpts{Pending: true, Context: s.Ctx},
-				//	TransactOpts: *s.TransactOpts,
-				//}
-				//bisectedCh = make(chan *bindings.IChallengeBisected, 4096)
-				//bisectedSub, err = challenge.WatchBisected(&bind.WatchOpts{Context: s.Ctx}, bisectedCh)
-				//if err != nil {
-				//	log.Crit("Failed to watch challenge event", "err", err)
-				//}
-				//challengeCompletedCh = make(chan *bindings.IChallengeChallengeCompleted, 4096)
-				//challengeCompletedSub, err = challenge.WatchChallengeCompleted(&bind.WatchOpts{Context: s.Ctx}, challengeCompletedCh)
-				//if err != nil {
-				//	log.Crit("Failed to watch challenge event", "err", err)
-				//}
-				//log.Info("to generate state from", "start", ctx.assertion.StartBlock, "to", ctx.assertion.InboxSize)
-				//log.Info("backend", "start", ctx.assertion.StartBlock, "to", ctx.assertion.EndBlock)
-				//states, err = proof.GenerateStates(
-				//	s.ProofBackend,
-				//	s.Ctx,
-				//	ctx.assertion.PrevCumulativeGasUsed,
-				//	ctx.assertion.StartBlock,
-				//	ctx.assertion.EndBlock+1,
-				//	nil,
-				//)
-				//if err != nil {
-				//	log.Crit("Failed to generate states", "err", err)
-				//}
-				//_, err = challengeSession.InitializeChallengeLength(new(big.Int).SetUint64(uint64(len(states)) - 1))
-				//if err != nil {
-				//	log.Crit("Failed to initialize challenge", "err", err)
-				//}
-				//inChallenge = true
+				log.Warn("Sequencer receive new challenge!!!", "handle it", ctx)
+				challenge, err := bindings.NewChallenge(ethc.Address(ctx.ChallengeAddr), s.L1)
+				if err != nil {
+					log.Error("Failed to access ongoing challenge", "address", ctx.ChallengeAddr, "err", err)
+					s.challengeCh <- ctx
+					continue
+				}
+				challengeSession = &bindings.ChallengeSession{
+					Contract:     challenge,
+					CallOpts:     bind.CallOpts{Pending: true, Context: s.Ctx},
+					TransactOpts: *s.TransactOpts,
+				}
+				// use staker status to check challenge status
+				// 1. challenge contract not exist
+				// 2. challenge exist and already completed
+				stakeStatus, _ := s.Rollup.Stakers(s.Rollup.TransactOpts.From)
+				if bytes.Equal(stakeStatus.CurrentChallenge.Bytes(), common.BigToAddress(common.Big0).Bytes()) {
+					winner, err := challengeSession.Winner()
+					if err != nil || bytes.Equal(winner.Bytes(), common.BigToAddress(common.Big0).Bytes()) {
+						// challenge not exit or winner not exist
+						log.Info("Challenge not exist", "err", err)
+					}
+					challengeCompletedCh <- &bindings.ChallengeChallengeCompleted{
+						Winner: winner,
+					}
+					continue
+				}
+				bisectedSub, err = challenge.WatchBisected(&bind.WatchOpts{Context: s.Ctx}, bisectedCh)
+				if err != nil {
+					log.Error("Failed to watch challenge event", "err", err)
+					s.challengeCh <- ctx
+					continue
+				}
+				challengeCompletedSub, err = challenge.WatchChallengeCompleted(&bind.WatchOpts{Context: s.Ctx}, challengeCompletedCh)
+				if err != nil {
+					log.Error("Failed to watch challenge event", "err", err)
+					s.challengeCh <- ctx
+					continue
+				}
+				log.Info("Sequencer generate state...")
+				states, err = proof.GenerateStates(
+					s.ProofBackend,
+					s.Ctx,
+					ctx.Parent.InboxSize.Uint64(),
+					ctx.Assertion.InboxSize.Uint64(),
+					nil,
+				)
+				if err != nil {
+					log.Error("Failed to generate states", "err", err)
+					s.challengeCh <- ctx
+					continue
+				}
+				log.Info("Sequencer generate state end...")
+
+				// initialized: get current bisectedCh;
+				// not initialized: InitializeChallengeLength;
+				if bytes.Equal(stakeStatus.CurrentChallenge.Bytes(), ctx.ChallengeAddr.Bytes()) {
+					bisectionHash, _ := challengeSession.BisectionHash()
+					if bytes.Equal(bisectionHash[:], common.BigToHash(common.Big0).Bytes()) {
+						// when not init
+						numSteps := uint64(len(states)) - 1
+						log.Info("Print generated states", "states[0]", states[0].Hash().String(), "states[numSteps]", states[numSteps].Hash().String(), "numSteps", numSteps)
+						_, err = challengeSession.InitializeChallengeLength(services.MidState(states, 0, numSteps), new(big.Int).SetUint64(numSteps))
+						if err != nil {
+							log.Error("Failed to initialize challenge", "err", err)
+							s.challengeCh <- ctx
+							continue
+						}
+					} else {
+						//bisectedCh chan *bindings.ChallengeBisected
+						curr, err := challengeSession.CurrentBisected()
+						if err != nil {
+							log.Error("Failed to get current bisected", "err", err)
+							s.challengeCh <- ctx
+							continue
+						}
+						bisectedCh <- &bindings.ChallengeBisected{
+							StartState:              curr.StartState,
+							MidState:                curr.MidState,
+							EndState:                curr.EndState,
+							BlockNum:                curr.BlockNum,
+							BlockTime:               curr.BlockTime,
+							ChallengedSegmentStart:  curr.ChallengedSegmentStart,
+							ChallengedSegmentLength: curr.ChallengedSegmentLength,
+						}
+					}
+					inChallenge = true
+				} else {
+					log.Error("Unrecognized challenge", "StakerChallenge", stakeStatus.CurrentChallenge.String(), "ChallengeAddr", ctx.ChallengeAddr.String())
+					s.challengeCh <- ctx
+					continue
+				}
 			case <-headCh:
 				continue // consume channel values
 			case <-s.Ctx.Done():
@@ -354,8 +469,8 @@ func (s *Sequencer) Start() error {
 	_ = s.BaseService.Start(true, true)
 
 	s.Wg.Add(2)
-	//go s.confirmationLoop()
-	//go s.challengeLoop()
+	go s.confirmationLoop()
+	go s.challengeLoop()
 	log.Info("fraud-proof defender started")
 	return nil
 }
@@ -363,65 +478,6 @@ func (s *Sequencer) Start() error {
 func (s *Sequencer) Stop() error {
 	log.Info("fraud-proof defender stopped")
 	s.Cancel()
-	//s.Wg.Wait()
+	s.Wg.Wait()
 	return nil
-}
-
-func (s *Sequencer) CreateAssertion(obj interface{}) error {
-	assertion, _ := obj.(rollupTypes.Assertion)
-	_, err := s.Rollup.CreateAssertion(
-		assertion.VmHash,
-		assertion.InboxSize,
-		assertion.GasUsed,
-	)
-	return err
-}
-
-func (s *Sequencer) CreateAssertionWithStateBatch(batches [][32]byte, shouldStartAtElement *big.Int, signature []byte, obj interface{}) error {
-	assertion, _ := obj.(rollupTypes.Assertion)
-	_, err := s.Rollup.CreateAssertionWithStateBatch(
-		assertion.VmHash,
-		assertion.InboxSize,
-		assertion.GasUsed,
-		batches,
-		shouldStartAtElement,
-		signature,
-	)
-	return err
-}
-
-func (s *Sequencer) GetLatestAssertion(staker common.Address) (interface{}, error) {
-	var latestAssertion rollupTypes.Assertion
-	var assertionID *big.Int
-	var err error
-	if assertionID, err = s.AssertionMap.GetLatestAssertionID(ethc.Address(staker)); err != nil {
-		return nil, err
-	}
-	if ret, err := s.AssertionMap.Assertions(assertionID); err != nil {
-		return nil, err
-	} else {
-		latestAssertion.ID = assertionID
-		latestAssertion.VmHash = ret.StateHash
-		latestAssertion.InboxSize = ret.InboxSize
-		latestAssertion.GasUsed = ret.GasUsed
-		latestAssertion.Parent = ret.Parent
-		latestAssertion.Deadline = ret.Deadline
-		latestAssertion.ProposalTime = ret.ProposalTime
-	}
-	return latestAssertion, nil
-}
-
-func (s *Sequencer) GenerateState() (interface{}, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *Sequencer) InChallenge() bool {
-	//TODO implement me
-	return false
-}
-
-func (s *Sequencer) RespondChallenge() error {
-	//TODO implement me
-	panic("implement me")
 }

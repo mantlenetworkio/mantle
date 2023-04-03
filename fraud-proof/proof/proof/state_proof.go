@@ -97,12 +97,15 @@ func StateProofFromState(s *state.IntraState) *IntraStateProof {
 }
 
 func (s *IntraStateProof) Encode() []byte {
-	proofLen := 8 + 8 + 2 + 8 + 8 + 8 + 1 + 32 + 8 + 32 + 8 + 8 + 32 + 32 + 32 + 32 + 32 + 32 // BlockNumber, TransactionIdx, Depth, Gas, Refund, Pc, OpCode, CodeMerkle, StackSize, StackHash, MemorySize, ReturnDataSize, CommittedGlobalStateRoot, GlobalStateRoot, SelfDestructAcc, LogAcc, BlockHashRoot, AccesslistRoot
+	proofLen := 8 + 8 + 2 + 8 + 8 + 32 + 8 + 1 + 32 + 8 + 8 + 8 + 32 + 32 + 32 + 32 + 32 + 32 // BlockNumber, TransactionIdx, Depth, Gas, Refund, LastDepthHash, Pc, OpCode, CodeMerkle, StackSize, MemorySize, ReturnDataSize, CommittedGlobalStateRoot, GlobalStateRoot, SelfDestructAcc, LogAcc, BlockHashRoot, AccesslistRoot
 	if s.Depth != 1 {
-		proofLen += 32 + 20 + 20 + 32 + 8 + 1 + 8 + 8 // LastDepthHash, ContractAddress, Caller, Value, CallFlag, Out, OutSize, InputDataSize
+		proofLen += 20 + 20 + 32 + 8 + 1 + 8 + 8 // ContractAddress, Caller, Value, CallFlag, Out, OutSize, InputDataSize
 		if s.InputDataSize != 0 {
 			proofLen += 32 // InputDataRoot
 		}
+	}
+	if s.StackSize != 0 {
+		proofLen += 32 // StackHash
 	}
 	if s.MemorySize != 0 {
 		proofLen += 32 // MemoryRoot
@@ -139,29 +142,33 @@ func (s *IntraStateProof) Encode() []byte {
 	copy(encoded[16:], depth)
 	copy(encoded[18:], gas)
 	copy(encoded[26:], refund)
-	offset := 34
+	copy(encoded[34:], s.LastDepthHash.Bytes())
+	offset := 66
 	if s.Depth != 1 {
-		copy(encoded[offset:], s.LastDepthHash.Bytes())
-		copy(encoded[offset+32:], s.ContractAddress.Bytes())
-		copy(encoded[offset+32+20:], s.Caller.Bytes())
+		copy(encoded[offset:], s.ContractAddress.Bytes())
+		copy(encoded[offset+20:], s.Caller.Bytes())
 		valueBytes := s.Value.Bytes32()
-		copy(encoded[offset+32+20+20:], valueBytes[:])
+		copy(encoded[offset+20+20:], valueBytes[:])
 		out := make([]byte, 8)
 		binary.BigEndian.PutUint64(out, s.Out)
 		outSize := make([]byte, 8)
 		binary.BigEndian.PutUint64(outSize, s.OutSize)
-		encoded[offset+32+20+20+32] = byte(s.CallFlag)
-		copy(encoded[offset+32+20+20+32+1:], out)
-		copy(encoded[offset+32+20+20+32+1+8:], outSize)
-		offset += 32 + 20 + 20 + 32 + 1 + 8 + 8
+		encoded[offset+20+20+32] = byte(s.CallFlag)
+		copy(encoded[offset+20+20+32+1:], out)
+		copy(encoded[offset+20+20+32+1+8:], outSize)
+		offset += 20 + 20 + 32 + 1 + 8 + 8
 	}
 	copy(encoded[offset:], pc)
 	encoded[offset+8] = byte(s.OpCode)
 	copy(encoded[offset+8+1:], s.CodeHash.Bytes())
 	copy(encoded[offset+8+1+32:], stackSize)
-	copy(encoded[offset+8+1+32+8:], s.StackHash.Bytes())
-	copy(encoded[offset+8+1+32+8+32:], memSize)
-	offset += 8 + 1 + 32 + 8 + 32 + 8
+	offset += 8 + 1 + 32 + 8
+	if s.StackSize != 0 {
+		copy(encoded[offset:], s.StackHash.Bytes())
+		offset += 32
+	}
+	copy(encoded[offset:], memSize)
+	offset += 8
 	if s.MemorySize != 0 {
 		copy(encoded[offset:], s.MemoryRoot.Bytes())
 		offset += 32
@@ -197,7 +204,6 @@ type InterStateProof struct {
 	BlockNumber         uint64
 	TransactionIdx      uint64
 	GlobalStateRoot     common.Hash
-	CumulativeGasUsed   uint256.Int
 	BlockGasUsed        uint256.Int
 	BlockHashRoot       common.Hash
 	TransactionTireRoot common.Hash
@@ -210,7 +216,6 @@ func InterStateProofFromInterState(s *state.InterState) *InterStateProof {
 		BlockNumber:         s.BlockNumber,
 		TransactionIdx:      s.TransactionIdx,
 		GlobalStateRoot:     s.GlobalState.GetRootForProof(),
-		CumulativeGasUsed:   *s.CumulativeGasUsed,
 		BlockGasUsed:        *s.BlockGasUsed,
 		BlockHashRoot:       s.BlockHashTree.Root(),
 		TransactionTireRoot: s.TransactionTrie.Root(),
@@ -224,8 +229,6 @@ func (s *InterStateProof) Encode() []byte {
 	binary.BigEndian.PutUint64(encoded, s.BlockNumber)
 	binary.BigEndian.PutUint64(encoded[8:], s.TransactionIdx)
 	copy(encoded[16:], s.GlobalStateRoot.Bytes())
-	gasBytes := s.CumulativeGasUsed.Bytes32()
-	copy(encoded[48:], gasBytes[:])
 	blockGasBytes := s.BlockGasUsed.Bytes32()
 	copy(encoded[80:], blockGasBytes[:])
 	copy(encoded[112:], s.BlockHashRoot.Bytes())
@@ -236,18 +239,16 @@ func (s *InterStateProof) Encode() []byte {
 }
 
 type BlockStateProof struct {
-	BlockNumber       uint64
-	GlobalStateRoot   common.Hash
-	CumulativeGasUsed uint256.Int
-	BlockHashRoot     common.Hash
+	BlockNumber     uint64
+	GlobalStateRoot common.Hash
+	BlockHashRoot   common.Hash
 }
 
 func BlockStateProofFromBlockState(s *state.BlockState) *BlockStateProof {
 	return &BlockStateProof{
-		BlockNumber:       s.BlockNumber,
-		GlobalStateRoot:   s.GlobalState.GetRootForProof(),
-		CumulativeGasUsed: *s.CumulativeGasUsed,
-		BlockHashRoot:     s.BlockHashTree.Root(),
+		BlockNumber:     s.BlockNumber,
+		GlobalStateRoot: s.GlobalState.GetRootForProof(),
+		BlockHashRoot:   s.BlockHashTree.Root(),
 	}
 }
 
@@ -255,8 +256,6 @@ func (s *BlockStateProof) Encode() []byte {
 	encoded := make([]byte, 104)
 	binary.BigEndian.PutUint64(encoded, s.BlockNumber)
 	copy(encoded[8:], s.GlobalStateRoot.Bytes())
-	gasBytes := s.CumulativeGasUsed.Bytes32()
-	copy(encoded[40:], gasBytes[:])
 	copy(encoded[72:], s.BlockHashRoot.Bytes())
 	return encoded
 }
@@ -273,5 +272,9 @@ func ReceiptProofFromReceipt(r *types.Receipt) *ReceiptProof {
 }
 
 func (s *ReceiptProof) Encode() []byte {
-	return s.RLPEncodedReceipt
+	length := len(s.RLPEncodedReceipt)
+	encoded := make([]byte, 8+length)
+	binary.BigEndian.PutUint64(encoded, uint64(length))
+	copy(encoded[8:], s.RLPEncodedReceipt)
+	return encoded
 }

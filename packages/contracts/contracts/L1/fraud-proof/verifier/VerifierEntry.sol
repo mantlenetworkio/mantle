@@ -27,15 +27,15 @@ import "./IVerifier.sol";
 import "./IVerifierEntry.sol";
 
 contract VerifierEntry is IVerifierEntry, Initializable, OwnableUpgradeable {
-    IVerifier blockInitiationVerifier;
-    IVerifier blockFinalizationVerifier;
-    IVerifier interTxVerifier;
-    IVerifier stackOpVerifier;
-    IVerifier environmentalOpVerifier;
-    IVerifier memoryOpVerifier;
-    IVerifier storageOpVerifier;
-    IVerifier callOpVerifier;
-    IVerifier invalidOpVerifier;
+    IVerifier public  blockInitiationVerifier;
+    IVerifier public blockFinalizationVerifier;
+    IVerifier public interTxVerifier;
+    IVerifier public stackOpVerifier;
+    IVerifier public environmentalOpVerifier;
+    IVerifier public memoryOpVerifier;
+    IVerifier public storageOpVerifier;
+    IVerifier public callOpVerifier;
+    IVerifier public invalidOpVerifier;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -46,7 +46,10 @@ contract VerifierEntry is IVerifierEntry, Initializable, OwnableUpgradeable {
         __Ownable_init();
     }
 
-    function setVerifier(uint8 verifier, IVerifier impl) external onlyOwner {
+    function setVerifier(uint8 verifier, IVerifier impl)
+        external
+        onlyOwner
+    {
         if (verifier == Params.V_BLOCK_INIT) {
             blockInitiationVerifier = impl;
         } else if (verifier == Params.V_BLOCK_FINAL) {

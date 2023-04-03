@@ -9,6 +9,7 @@ import (
 
 type SignService interface {
 	SignStateBatch(request tss.SignStateRequest) ([]byte, error)
+	SignRollBack(request tss.SignStateRequest) ([]byte, error)
 	SignTxBatch() error
 }
 

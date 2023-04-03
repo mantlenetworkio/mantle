@@ -2,15 +2,16 @@ package rollup
 
 import (
 	"bytes"
-	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services/sequencer"
-	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services/validator"
-	"github.com/mantlenetworkio/mantle/l2geth/eth"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
+	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services/sequencer"
+	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services/validator"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
+	"github.com/mantlenetworkio/mantle/l2geth/eth"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/node"
 )
@@ -27,7 +28,7 @@ func RegisterFraudProofService(stack *node.Node, cfg *services.Config) {
 		log.Crit("Failed to register the Rollup service: keystore not found")
 	}
 	chainID := big.NewInt(int64(cfg.L1ChainID))
-	json, err := ks.Export(accounts.Account{Address: cfg.Coinbase}, cfg.Passphrase, cfg.Passphrase)
+	json, err := ks.Export(accounts.Account{Address: cfg.StakeAddr}, cfg.Passphrase, cfg.Passphrase)
 	if err != nil {
 		log.Crit("Failed to register the Rollup service", "err", err)
 	}
@@ -42,10 +43,15 @@ func RegisterFraudProofService(stack *node.Node, cfg *services.Config) {
 	}
 
 	// Register services
+	log.Info("Print log type", "cfg.Node", cfg.Node)
 	if cfg.Node == services.NODE_SCHEDULER {
+		log.Info("Start NODE_SCHEDULER...")
 		sequencer.RegisterService(ethService, ethService.APIBackend, cfg, auth)
+		log.Info("Start NODE_SCHEDULER end...")
 	} else if cfg.Node == services.NODE_VERIFIER {
+		log.Info("Start NODE_VERIFIER...")
 		validator.RegisterService(ethService, ethService.APIBackend, cfg, auth)
+		log.Info("Start NODE_VERIFIER end...")
 	} else {
 		log.Crit("Failed to register the Rollup service: Node type unkown", "type", cfg.Node)
 	}

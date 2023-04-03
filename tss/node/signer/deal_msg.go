@@ -2,6 +2,7 @@ package signer
 
 import (
 	"errors"
+
 	"github.com/mantlenetworkio/mantle/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
@@ -47,8 +48,12 @@ func (p *Processor) ProcessMessage() {
 						logger.Err(err).Msg("failed to write msg to sign slash channel,channel blocked")
 					}
 				} else if rpcReq.Method == common.SignRollBack.String() {
-					if err := p.writeChan(p.signRollBachChan, rpcReq); err != nil {
+					if err := p.writeChan(p.signRollBackChan, rpcReq); err != nil {
 						logger.Err(err).Msg("failed to write msg to sign roll back channel,channel blocked")
+					}
+				} else if rpcReq.Method == common.AskRollBack.String() {
+					if err := p.writeChan(p.askRollBackChan, rpcReq); err != nil {
+						logger.Err(err).Msg("failed to write msg to ask roll back channel,channel blocked")
 					}
 				} else {
 					logger.Error().Msgf("unknown rpc request method : %s ", rpcReq.Method)

@@ -93,15 +93,15 @@ func (api *ProverAPI) ProveTransaction(ctx context.Context, hash common.Hash, ta
 	return hexutil.Bytes{}, nil
 }
 
-func (api *ProverAPI) ProveBlocksForBenchmark(ctx context.Context, startGasUsed *big.Int, startNum, endNum uint64, config *ProverConfig) ([]hexutil.Bytes, error) {
-	states, err := GenerateStates(api.backend, ctx, startGasUsed, startNum, endNum, config)
+func (api *ProverAPI) ProveBlocksForBenchmark(ctx context.Context, startNum, endNum uint64, config *ProverConfig) ([]hexutil.Bytes, error) {
+	states, err := GenerateStates(api.backend, ctx, startNum, endNum, config)
 	if err != nil {
 		return nil, err
 	}
 	var proofs []hexutil.Bytes
 	for _, s := range states {
 		log.Info("Generate for ", "state", s)
-		proof, err := GenerateProof(api.backend, ctx, s, config)
+		proof, err := GenerateProof(ctx, api.backend, s, config)
 		if err != nil {
 			return nil, err
 		}
@@ -110,8 +110,8 @@ func (api *ProverAPI) ProveBlocksForBenchmark(ctx context.Context, startGasUsed 
 	return proofs, nil
 }
 
-func (api *ProverAPI) GenerateStateHashes(ctx context.Context, startGasUsed *big.Int, startNum, endNum uint64, config *ProverConfig) ([]common.Hash, error) {
-	states, err := GenerateStates(api.backend, ctx, startGasUsed, startNum, endNum, config)
+func (api *ProverAPI) GenerateStateHashes(ctx context.Context, startNum, endNum uint64, config *ProverConfig) ([]common.Hash, error) {
+	states, err := GenerateStates(api.backend, ctx, startNum, endNum, config)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,7 @@ func APIs(backend Backend) []rpc.API {
 	// Append all the local APIs and return
 	return []rpc.API{
 		{
-			Namespace: "proof",
+			Namespace: "debug",
 			Version:   "1.0",
 			Service:   NewAPI(backend),
 			Public:    false,

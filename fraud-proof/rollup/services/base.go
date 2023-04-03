@@ -23,7 +23,7 @@ type BaseService struct {
 	Chain        *core.BlockChain
 	L1           *ethclient.Client
 	TransactOpts *bind.TransactOpts
-	Rollup       *bindings.IRollupSession
+	Rollup       *bindings.RollupSession
 	AssertionMap *bindings.AssertionMapCallerSession
 
 	Ctx    context.Context
@@ -48,12 +48,12 @@ func NewBaseService(eth Backend, proofBackend proof.Backend, cfg *Config, auth *
 		GasPrice: big.NewInt(800000000),
 		Context:  ctx,
 	}
-	rollup, err := bindings.NewIRollup(common.Address(cfg.RollupAddr), l1)
+	rollup, err := bindings.NewRollup(common.Address(cfg.RollupAddr), l1)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
-	rollupSession := &bindings.IRollupSession{
+	rollupSession := &bindings.RollupSession{
 		Contract:     rollup,
 		CallOpts:     callOpts,
 		TransactOpts: transactOpts,
@@ -93,20 +93,7 @@ func (b *BaseService) Start(cleanL1, stake bool) *types.Block {
 	// Check if we are at genesis
 	// TODO: if not, sync from L1
 	genesis := b.Eth.BlockChain().CurrentBlock()
-	//if genesis.NumberU64() != 0 { // TODO FIXME
-	//	log.Crit("Sequencer can only start from genesis")
-	//}
 	log.Info("Genesis root", "root", genesis.Root())
-
-	if cleanL1 {
-		//inboxSize, err := b.Inbox.GetInboxSize()
-		//if err != nil {
-		//	log.Crit("Failed to get initial inbox size", "err", err)
-		//}
-		//if inboxSize.Cmp(common.Big0) != 0 {
-		//	log.Crit("Rollup service can only start from genesis")
-		//}
-	}
 
 	if stake {
 		// Initial staking
@@ -117,10 +104,10 @@ func (b *BaseService) Start(cleanL1, stake bool) *types.Block {
 			log.Crit("Failed to query stake", "err", err)
 		}
 		if !isStaked {
-			stakeOpts.Value = big.NewInt(int64(b.Config.RollupStakeAmount))
+			stakeOpts.Value = big.NewInt(int64(b.Config.StakeAmount))
 			_, err = b.Rollup.Contract.Stake(&stakeOpts)
 			if err != nil {
-				log.Crit("Failed to stake", "err", err)
+				log.Crit("Failed to stake", "from", stakeOpts.From.String(), "amount", stakeOpts.Value, "err", err)
 			}
 		}
 	}

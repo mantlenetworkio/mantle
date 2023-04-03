@@ -15,6 +15,31 @@ describe('RollUp', () => {
   let verifier: Contract
   let token: Contract
   let assertionMap: Contract
+  let addressManager: Contract
+
+  const tx = [
+    ctx.txNonce,
+    ctx.gasPrice,
+    ctx.gas,
+    ctx.recipient,
+    ctx.value,
+    ctx.input,
+    ctx.txV,
+    ctx.txR,
+    ctx.txS,
+  ]
+
+  const ctxCall = {
+    coinbase: ctx.coinbase,
+    timestamp: ctx.timestamp,
+    number: ctx.blockNumber,
+    origin: ctx.origin,
+    transaction: tx,
+    inputRoot:
+      '0x0000000000000000000000000000000000000000000000000000000000000000',
+    txHash: ctx.txnHash,
+  }
+
 
   const tx = [
     ctx.txNonce,
@@ -42,6 +67,8 @@ describe('RollUp', () => {
 
   before('setup', async () => {
     accounts = await ethers.getSigners()
+    await deployAddressManager()
+    await deploySCC()
     await deployToken()
     await deployVerifier()
     await deployRollUp()
@@ -86,33 +113,28 @@ describe('RollUp', () => {
 
     await rollUp.createAssertion(
       '0x0000000000000000000000000000000000000000000000000000000000000001',
-      1,
-      100
+      1
     )
     expect(await rollUp.lastCreatedAssertionID()).to.eq(1)
 
     await rollUp.createAssertion(
-      '0xea576c527587e9781b29f73d5f0c3790bb6690bd1b3b080e4b1b213f53e9f872',
-      2,
-      200
+      '0x0000000000000000000000000000000000000000000000000000000000000001',
+      2
     )
     expect(await rollUp.lastCreatedAssertionID()).to.eq(2)
 
     await rollUp.createAssertion(
-      '0x593eedc374701325ac268ad9701765147e200b736b55626323cf9921db5b8a61',
-      3,
-      300
+      '0x0000000000000000000000000000000000000000000000000000000000000001',
+      3
     )
 
     expect(await rollUp.lastCreatedAssertionID()).to.eq(3)
 
     await rollUp.createAssertion(
       '0x0000000000000000000000000000000000000000000000000000000000000001',
-      4,
-      400
+      4
     )
     expect(await rollUp.lastCreatedAssertionID()).to.eq(4)
-
     await rollUp.connect(await accounts[3]).stake({ value: 1000 })
     await rollUp.connect(await accounts[3]).advanceStake(1)
     await rollUp.connect(await accounts[3]).advanceStake(2)
@@ -120,8 +142,7 @@ describe('RollUp', () => {
       .connect(await accounts[3])
       .createAssertion(
         '0x0000000000000000000000000000000000000000000000000000000000000002',
-        3,
-        300
+        3
       )
     expect(await rollUp.lastCreatedAssertionID()).to.eq(5)
   })
@@ -165,9 +186,6 @@ describe('RollUp', () => {
       challengeImp.interface,
       accounts[0]
     )
-    // todo : set for mock ctx
-    await challenge.setCtx(ctxCall)
-
     await challenge.initializeChallengeLength(1)
     const winnerAmount = (
       await rollUp.stakers(winnerAddr)
@@ -209,12 +227,11 @@ describe('RollUp', () => {
       await accounts[1].getAddress(), // roll up owner
       verifier.address, // verifier
       token.address, // stake token
-      constants.AddressZero, // address manager
+      addressManager.address, // address manager
       assertionMap.address, // assertionMap
       0, // confirmation period
       0, // challenge period
       0, // minimum assertion period
-      1000, // maxGasPerAssertion
       100, // baseStakeAmount
       '0x0000000000000000000000000000000000000000000000000000000000000000', // initialVMhash
     ]
@@ -242,8 +259,7 @@ describe('RollUp', () => {
     expect(await rollUp.confirmationPeriod()).to.eq(rollupArgs[5])
     expect(await rollUp.challengePeriod()).to.eq(rollupArgs[6])
     expect(await rollUp.minimumAssertionPeriod()).to.eq(rollupArgs[7])
-    expect(await rollUp.maxGasPerAssertion()).to.eq(rollupArgs[8])
-    expect(await rollUp.baseStakeAmount()).to.eq(rollupArgs[9])
+    expect(await rollUp.baseStakeAmount()).to.eq(rollupArgs[8])
   }
 
   const deployVerifier = async () => {
@@ -264,5 +280,18 @@ describe('RollUp', () => {
       accounts[0]
     )
     await verifier.setVerifier(0, stackOpVerifier.address)
+  }
+
+  const deployAddressManager = async () => {
+    addressManager = await deploy('Lib_AddressManager')
+    await addressManager.setAddress(
+      'BVM_Rolluper',
+      await accounts[0].getAddress()
+    )
+  }
+
+  const deploySCC = async () => {
+    const scc = await deploy('MockStateCommitmentChain')
+    await addressManager.setAddress('StateCommitmentChain', scc.address)
   }
 })

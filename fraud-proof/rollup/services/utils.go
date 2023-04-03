@@ -1,192 +1,223 @@
 package services
 
 import (
+	"bytes"
 	"context"
+	"encoding/hex"
+	"errors"
+	"fmt"
 	"math/big"
 
-	l1abi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 func SubmitOneStepProof(
-	challengeSession *bindings.IChallengeSession,
+	challengeSession *bindings.ChallengeSession,
 	proofBackend proof.Backend,
 	ctx context.Context,
 	state *proof.ExecutionState,
 	challengedStepIndex *big.Int,
-	prevBisection [][32]byte,
 	prevChallengedSegmentStart *big.Int,
 	prevChallengedSegmentLength *big.Int,
 ) error {
-	osp, err := proof.GenerateProof(proofBackend, ctx, state, nil)
+	log.Info("OSP GenerateProof...")
+	osp, err := proof.GenerateProof(ctx, proofBackend, state, nil)
 	if err != nil {
-		log.Crit("UNHANDELED: osp generation failed", "err", err)
+		log.Error("UNHANDELED: osp generation failed", "err", err)
+		return err
 	}
+	log.Info("OSP GenerateProof success")
+	log.Info("OSP BuildVerificationContext...")
+	verificationContext, err := BuildVerificationContext(ctx, proofBackend, state)
+	if err != nil {
+		log.Error("UNHANDELED: osp build verification context failed", "err", err)
+		return err
+	}
+
+	log.Info("OSP BuildVerificationContext success")
+	log.Debug("OSP VerifyOneStepProof...")
+	log.Debug("OSP verificationContext: ", "verificationContext", verificationContext)
+	log.Debug("OSP VerifierType: ", "VerifierType", uint8(osp.VerifierType))
+	log.Debug("OSP encode: ", "osp", osp.Encode())
+	log.Debug("challengedStepIndex: ", "challengedStepIndex", challengedStepIndex)
+	log.Debug("prevChallengedSegmentStart: ", "prevChallengedSegmentStart", prevChallengedSegmentStart)
+	log.Debug("prevChallengedSegmentLength: ", "prevChallengedSegmentLength", prevChallengedSegmentLength)
 	_, err = challengeSession.VerifyOneStepProof(
+		*verificationContext,
+		uint8(osp.VerifierType),
 		osp.Encode(),
 		challengedStepIndex,
-		prevBisection,
 		prevChallengedSegmentStart,
 		prevChallengedSegmentLength,
 	)
-	log.Info("OSP submitted")
 	if err != nil {
 		log.Error("OSP verification failed")
+		return err
 	}
-	return err
+	log.Info("OSP VerifyOneStepProof submitted")
+	return nil
 }
 
+// Responder -> startStateHash, endStateHash
 func RespondBisection(
 	b *BaseService,
-	abi *l1abi.ABI,
-	challengeSession *bindings.IChallengeSession,
-	ev *bindings.IChallengeBisected,
+	challengeSession *bindings.ChallengeSession,
+	ev *bindings.ChallengeBisected,
 	states []*proof.ExecutionState,
-	opponentEndStateHash common.Hash,
-	isSequencer bool,
 ) error {
+	var challengedStepIndex = new(big.Int)
+	var bisection [3][32]byte
+	var challengeIdx uint64
+	var newStart uint64
+	var newLen uint64 // New segment length
+
 	// Get bisection info from event
 	segStart := ev.ChallengedSegmentStart.Uint64()
 	segLen := ev.ChallengedSegmentLength.Uint64()
-	// Get previous bisections from call data
-	tx, _, err := b.L1.TransactionByHash(b.Ctx, ev.Raw.TxHash)
-	if err != nil {
-		// TODO: error handling
-		log.Error("Failed to get challenge data", "error", err)
-		return nil
+
+	if segStart+segLen >= uint64(len(states)) {
+		log.Error("RespondBisection out of range", "segStart", segStart, "segLen", segLen, "len(states)", len(states))
+		return errors.New("RespondBisection out of range")
 	}
-	decoded, err := abi.Methods["bisectExecution"].Inputs.Unpack(tx.Data()[4:])
-	if err != nil {
-		if isSequencer {
-			// Sequencer always start first
-			log.Error("Failed to decode bisection data", "error", err)
-			return nil
-		}
-		// We are in the first round when the defender calls initializeChallengeLength
-		// Get initialized challenge length from event
-		steps := segLen
-		if steps != uint64(len(states)-1) {
-			log.Crit("UNHANDELED: currently not support diverge on steps")
-		}
-		prevBisection := [][32]byte{
-			states[0].Hash(),
-			opponentEndStateHash,
-		}
-		if segLen == 1 {
-			// This assertion only has one step
-			err = SubmitOneStepProof(
-				challengeSession,
-				b.ProofBackend,
-				b.Ctx,
-				states[0],
-				common.Big1,
-				prevBisection,
-				ev.ChallengedSegmentStart,
-				ev.ChallengedSegmentLength,
-			)
-			if err != nil {
-				log.Crit("UNHANDELED: osp failed")
-			}
-		} else {
-			// This assertion has multiple steps
-			startState := states[0].Hash()
-			midState := states[steps/2+steps%2].Hash()
-			endState := states[steps].Hash()
-			bisection := [][32]byte{
-				startState,
-				midState,
-				endState,
-			}
-			_, err := challengeSession.BisectExecution(
-				bisection,
-				common.Big1,
-				prevBisection,
-				ev.ChallengedSegmentStart,
-				ev.ChallengedSegmentLength,
-			)
-			log.Info("BisectExecution", "bisection", bisection, "cidx", common.Big1, "psegStart", segStart, "psegLen", segLen, "prev", prevBisection)
-			if err != nil {
-				log.Crit("UNHANDELED: bisection excution failed", "err", err)
-			}
-		}
-		return nil
-	}
-	prevBisection := decoded[0].([][32]byte)
+
 	startState := states[segStart].Hash()
-	midState := states[segStart+segLen/2+segLen%2].Hash()
+	midState := MidState(states, segStart, segLen)
 	endState := states[segStart+segLen].Hash()
-	if segLen == 1 {
+	if segLen >= 3 {
+		if !bytes.Equal(midState[:], ev.MidState[:]) {
+			newLen = MidLen(segLen)
+			newStart = segStart
+			bisection[0] = startState
+			bisection[1] = MidState(states, newStart, newLen)
+			bisection[2] = midState
+			challengeIdx = 1
+		} else {
+			newLen = MidLen(segLen)
+			newStart = segStart + MidLenWithMod(segLen)
+			bisection[0] = midState
+			bisection[1] = MidState(states, newStart, newLen)
+			bisection[2] = endState
+			challengeIdx = 2
+		}
+	} else if segLen <= 2 && segLen > 0 {
+		var state *proof.ExecutionState
+		if !bytes.Equal(startState[:], ev.StartState[:]) {
+			log.Error("bisection find different start state")
+			state = states[segStart]
+			challengedStepIndex.SetUint64(0)
+		} else if !bytes.Equal(midState[:], ev.MidState[:]) {
+			state = states[segStart+segLen/2+segLen%2]
+			challengedStepIndex.SetUint64(1)
+		} else if !bytes.Equal(endState[:], ev.EndState[:]) {
+			state = states[segStart+segLen]
+			challengedStepIndex.SetUint64(2)
+		} else {
+			return errors.New("RespondBisection can't find state difference")
+		}
+
 		// We've reached one step
-		err = SubmitOneStepProof(
+		err := SubmitOneStepProof(
 			challengeSession,
 			b.ProofBackend,
 			b.Ctx,
-			states[segStart],
-			common.Big1,
-			prevBisection,
+			state,
+			challengedStepIndex,
 			ev.ChallengedSegmentStart,
 			ev.ChallengedSegmentLength,
 		)
 		if err != nil {
-			log.Crit("UNHANDELED: osp failed")
+			log.Error("UNHANDELED: osp failed", "err", err)
+			return err
 		}
+		return nil
 	} else {
-		challengeIdx := uint64(1)
-		if prevBisection[1] == midState {
-			challengeIdx = 2
-		}
-		if segLen == 2 || (segLen == 3 && challengeIdx == 2) {
-			// The next challenge segment is a single step
-			stateIndex := segStart
-			if challengeIdx != 1 {
-				stateIndex = segStart + segLen/2
-			}
-			err = SubmitOneStepProof(
-				challengeSession,
-				b.ProofBackend,
-				b.Ctx,
-				states[stateIndex],
-				new(big.Int).SetUint64(challengeIdx),
-				prevBisection,
-				ev.ChallengedSegmentStart,
-				ev.ChallengedSegmentLength,
-			)
-			if err != nil {
-				log.Crit("UNHANDELED: osp failed")
-			}
-		} else {
-			var newLen uint64 // New segment length
-			var bisection [][32]byte
-			if challengeIdx == 1 {
-				newLen = segLen/2 + segLen%2
-				bisection = [][32]byte{
-					startState,
-					states[segStart+newLen/2+newLen%2].Hash(),
-					midState,
-				}
-			} else {
-				newLen = segLen / 2
-				bisection = [][32]byte{
-					midState,
-					states[segStart+segLen/2+segLen%2+newLen/2+newLen%2].Hash(),
-					endState,
-				}
-			}
-			_, err := challengeSession.BisectExecution(
-				bisection,
-				new(big.Int).SetUint64(challengeIdx),
-				prevBisection,
-				ev.ChallengedSegmentStart,
-				ev.ChallengedSegmentLength,
-			)
-			log.Info("BisectExecution", "bisection", bisection, "cidx", challengeIdx, "psegStart", segStart, "psegLen", segLen, "prev", prevBisection)
-			if err != nil {
-				log.Crit("UNHANDELED: bisection excution failed", "err", err)
-			}
-		}
+		log.Error("RespondBisection segLen in event is illegal")
+		return errors.New("RespondBisection segLen in event is illegal")
+	}
+	log.Info("BisectExecution", "bisection[0]", hex.EncodeToString(bisection[0][:]), "bisection[1]", hex.EncodeToString(bisection[1][:]), "bisection[2]", hex.EncodeToString(bisection[2][:]), "cidx", challengeIdx, "segStart", segStart, "segLen", segLen)
+	_, err := challengeSession.BisectExecution(
+		bisection,
+		new(big.Int).SetUint64(challengeIdx),
+		new(big.Int).SetUint64(newStart),
+		new(big.Int).SetUint64(newLen),
+		ev.ChallengedSegmentStart,
+		ev.ChallengedSegmentLength,
+	)
+	if err != nil {
+		log.Error("UNHANDELED: bisection excution failed", "err", err)
+		return err
 	}
 	return nil
+}
+
+// MidLen middle index with ceil
+func MidLen(segLen uint64) uint64 {
+	return segLen / 2
+}
+
+// MidLenWithMod middle index with ceil
+func MidLenWithMod(segLen uint64) uint64 {
+	return segLen/2 + segLen%2
+}
+
+// MidState mid-states with floor index
+func MidState(states []*proof.ExecutionState, segStart, segLen uint64) common.Hash {
+	return states[segStart+MidLenWithMod(segLen)].Hash()
+}
+
+func BuildVerificationContext(ctx context.Context, proofBackend proof.Backend, state *proof.ExecutionState) (*bindings.VerificationContextContext, error) {
+	var evmTx bindings.EVMTypesLibTransaction
+	var tx *types.Transaction
+	var header *types.Header
+	var err error
+	// get block
+	if state != nil && state.Block != nil {
+		header = state.Block.Header()
+	} else {
+		return nil, fmt.Errorf("get nil block from ExecutionState status")
+	}
+	// get transaction
+	if state != nil && state.Block.Transactions() != nil {
+		txs := state.Block.Transactions()
+		if uint64(len(txs)) < state.TransactionIdx+1 {
+			return nil, fmt.Errorf("get transaction index from ExecutionState out of range")
+		}
+		tx = state.Block.Transactions()[state.TransactionIdx]
+	} else {
+		return nil, fmt.Errorf("get nil transactions from ExecutionState status")
+	}
+	// build EVMTypesLibTransaction
+	var txOrigin common.Address
+	evmTx.Nonce = tx.Nonce()
+	evmTx.GasPrice = tx.GasPrice()
+	evmTx.To = ethc.Address(*tx.To())
+	evmTx.Value = tx.Value()
+	evmTx.Data = tx.Data()
+	if tx.QueueOrigin() == types.QueueOriginSequencer {
+		evmTx.V, evmTx.R, evmTx.S = tx.RawSignatureValues()
+		signer := types.NewEIP155Signer(tx.ChainId())
+		txOrigin, err = types.Sender(signer, tx)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		evmTx.V = big.NewInt(0)
+		evmTx.R = big.NewInt(0)
+		evmTx.S = big.NewInt(0)
+		txOrigin = common.BigToAddress(common.Big0)
+	}
+	return &bindings.VerificationContextContext{
+		Coinbase:    ethc.Address(header.Coinbase),
+		Timestamp:   new(big.Int).SetUint64(tx.L1Timestamp()),
+		Number:      header.Number,
+		Origin:      ethc.Address(txOrigin),
+		Transaction: evmTx,
+		InputRoot:   [32]byte{0},
+		TxHash:      tx.Hash(),
+	}, nil
 }

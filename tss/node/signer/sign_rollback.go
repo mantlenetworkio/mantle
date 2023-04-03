@@ -2,10 +2,11 @@ package signer
 
 import (
 	"encoding/json"
-	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
-	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	"math/big"
 	"strings"
+
+	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
+	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
 func (p *Processor) SignRollBack() {
@@ -22,7 +23,7 @@ func (p *Processor) SignRollBack() {
 			select {
 			case <-p.stopChan:
 				return
-			case req := <-p.signRollBachChan:
+			case req := <-p.signRollBackChan:
 				var resId = req.ID.(tdtypes.JSONRPCStringID).String()
 				logger.Info().Msgf("dealing resId (%s) ", resId)
 

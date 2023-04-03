@@ -23,6 +23,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 )
 
@@ -59,22 +60,22 @@ func EmptyProof() *OneStepProof {
 	return &OneStepProof{}
 }
 
-func (osp *OneStepProof) AddProof(proof Proof) {
-	osp.Proofs = append(osp.Proofs, proof)
+func (p *OneStepProof) AddProof(proof Proof) {
+	p.Proofs = append(p.Proofs, proof)
 }
 
-func (osp *OneStepProof) SetVerifierType(ty VerifierType) {
-	osp.VerifierType = ty
+func (p *OneStepProof) SetVerifierType(ty VerifierType) {
+	p.VerifierType = ty
 }
 
-func (osp *OneStepProof) Encode() []byte {
-	if len(osp.Proofs) == 0 {
+func (p *OneStepProof) Encode() []byte {
+	if len(p.Proofs) == 0 {
 		// Empty proof!
 		return []byte{}
 	}
 	encodedLen := 0
-	encodedProofs := make([][]byte, len(osp.Proofs))
-	for idx, proof := range osp.Proofs {
+	encodedProofs := make([][]byte, len(p.Proofs))
+	for idx, proof := range p.Proofs {
 		encodedProofs[idx] = proof.Encode()
 		encodedLen += len(encodedProofs[idx])
 	}
@@ -106,12 +107,22 @@ func GetBlockInitiationProof(blockState *state.BlockState) (*OneStepProof, error
 // using the plain Merkle tree proof.
 func GetBlockFinalizationProof(interState *state.InterState) (*OneStepProof, error) {
 	osp := EmptyProof()
-	osp.SetVerifierType(VerifierTypeInterTx)
+	osp.SetVerifierType(VerifierTypeBlockFinal)
 	// This proof reveals the transaction trie root, receipt trie root, logs bloom,
 	// and block gas used. Verifier can calculate the block hash from these values.
 	osp.AddProof(InterStateProofFromInterState(interState))
+	// Prove the parent block hash
+	osp.AddProof(&BlockHashProof{interState.BlockHashTree.GetBlockHash(interState.BlockNumber - 1)})
+	// This proof provides the block hash tree Merkle proof of the parent block.
+	blockHashMerkleProof, err := GetBlockHashMerkleProof(interState.BlockHashTree, interState.BlockNumber-1)
+	if err != nil {
+		return nil, err
+	}
+	osp.AddProof(blockHashMerkleProof)
+	// Prove the current block hash to be updated
+	osp.AddProof(&BlockHashProof{interState.BlockHashTree.GetBlockHash(interState.BlockNumber)})
 	// This proof provides the block hash tree Merkle proof at the designated index.
-	blockHashMerkleProof, err := GetBlockHashMerkleProof(interState.BlockHashTree, interState.BlockNumber)
+	blockHashMerkleProof, err = GetBlockHashMerkleProof(interState.BlockHashTree, interState.BlockNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -135,8 +146,9 @@ func GetBlockFinalizationProof(interState *state.InterState) (*OneStepProof, err
 //     trie, and account proof of coinbase so verifier can finalize the transaction.
 func GetTransactionInitaitionProof(
 	chainConfig *params.ChainConfig,
-	vmctx *vm.Context,
+	vmctx *vm.BlockContext,
 	tx *types.Transaction,
+	txctx *vm.Context,
 	interState *state.InterState,
 	statedb vm.StateDB,
 ) (*OneStepProof, error) {
@@ -145,7 +157,7 @@ func GetTransactionInitaitionProof(
 	osp.AddProof(InterStateProofFromInterState(interState))
 
 	// MPT proof of the sender account
-	senderProof, err := statedb.GetProof(vmctx.Origin)
+	senderProof, err := statedb.GetProof(txctx.Origin)
 	if err != nil {
 		return nil, err
 	}
@@ -154,14 +166,14 @@ func GetTransactionInitaitionProof(
 	// Simulate the transaction initiation
 	success := true
 	// 1. Nonce check
-	stNonce := statedb.GetNonce(vmctx.Origin)
+	stNonce := statedb.GetNonce(txctx.Origin)
 	msgNonce := tx.Nonce()
 	if stNonce < msgNonce || stNonce > msgNonce || stNonce+1 < stNonce {
 		// Nonce check failed
 		success = false
 	}
 	// 2. Sender EOA check
-	if success && len(statedb.GetCode(vmctx.Origin)) != 0 {
+	if success && len(statedb.GetCode(txctx.Origin)) != 0 {
 		// Sender is a contract
 		success = false
 	}
@@ -169,7 +181,7 @@ func GetTransactionInitaitionProof(
 	if success {
 		requiredBalance := new(big.Int).SetUint64(tx.Gas())
 		requiredBalance = requiredBalance.Mul(requiredBalance, tx.GasPrice())
-		stBalance := statedb.GetBalance(vmctx.Origin)
+		stBalance := statedb.GetBalance(txctx.Origin)
 		if stBalance.Cmp(requiredBalance) < 0 {
 			success = false
 		}
@@ -177,7 +189,7 @@ func GetTransactionInitaitionProof(
 		// Only happens when the sequencer is malicious.
 		// TODO: reason it or check
 		if success {
-			statedb.SubBalance(vmctx.Origin, requiredBalance)
+			statedb.SubBalance(txctx.Origin, requiredBalance)
 		}
 	}
 	var rules params.Rules
@@ -197,7 +209,7 @@ func GetTransactionInitaitionProof(
 	}
 	// 5. Balance transfer check
 	if success {
-		if tx.Value().Sign() > 0 && !vmctx.CanTransfer(statedb, vmctx.Origin, tx.Value()) {
+		if tx.Value().Sign() > 0 && !vmctx.CanTransfer(statedb, txctx.Origin, tx.Value()) {
 			// ErrInsufficientFunds
 			success = false
 		}
@@ -205,9 +217,9 @@ func GetTransactionInitaitionProof(
 	// 6. Simulate the transaction initiation on the sender account
 	if success {
 		// Increment nonce
-		statedb.SetNonce(vmctx.Origin, stNonce+1)
+		statedb.SetNonce(txctx.Origin, stNonce+1)
 		// Deduct sender's balance
-		statedb.SubBalance(vmctx.Origin, tx.Value())
+		statedb.SubBalance(txctx.Origin, tx.Value())
 		// Commit for new trie root after sender account changes
 		statedb.CommitForProof()
 		// Generate proof for the recipient account
@@ -222,7 +234,7 @@ func GetTransactionInitaitionProof(
 			statedb.AddBalance(*tx.To(), tx.Value())
 		} else {
 			// Contract creation
-			contractAddr := crypto.CreateAddress(vmctx.Origin, stNonce) // stNonce is the nonce before increment
+			contractAddr := crypto.CreateAddress(txctx.Origin, stNonce) // stNonce is the nonce before increment
 			recipientProof, err := statedb.GetProof(contractAddr)
 			if err != nil {
 				return nil, err
@@ -280,6 +292,6 @@ func GetTransactionInitaitionProof(
 // Type 4 IntraState -> IntraState: one-step EVM execution
 // Type 5 IntraState -> InterState: transaction finalization
 func GetIntraProof(ctx ProofGenContext, currState, nextState *state.IntraState, vmerr error) (*OneStepProof, error) {
-	// log.Info("Generating intra proof", "op", currState.OpCode, "gen", proofJumpTable[currState.OpCode])
+	log.Debug("Generating intra proof", "op", currState.OpCode, "gen", proofJumpTable[currState.OpCode])
 	return proofJumpTable[currState.OpCode].genProof(ctx, currState, nextState, vmerr)
 }

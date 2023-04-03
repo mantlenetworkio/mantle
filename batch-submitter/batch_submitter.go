@@ -166,6 +166,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				FPRollupAddr:         common.HexToAddress(cfg.FPRollupAddress),
 				ChainID:              chainID,
 				PrivKey:              proposerPrivKey,
+				SccRollback:          cfg.EnableSccRollback,
 			})
 			if err != nil {
 				return err

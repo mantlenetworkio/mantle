@@ -2,12 +2,12 @@ package signer
 
 import (
 	"context"
+	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/tss/slash"
-	"math/big"
-	"time"
 )
 
 func (p *Processor) deleteSlashing() {

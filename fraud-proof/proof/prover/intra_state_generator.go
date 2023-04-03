@@ -22,6 +22,7 @@ import (
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof/state"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 type GeneratedIntraState struct {
@@ -49,6 +50,7 @@ type IntraStateGenerator struct {
 	// Current Call Frame
 	callFlag       state.CallFlag
 	lastState      *state.IntraState
+	lastCost       uint64
 	lastDepthState state.OneStepState
 	input          *state.Memory
 	out            uint64
@@ -75,7 +77,8 @@ func (l *IntraStateGenerator) CaptureTxStart(gasLimit uint64) {}
 
 func (l *IntraStateGenerator) CaptureTxEnd(restGas uint64) {}
 
-func (l *IntraStateGenerator) CaptureStart(from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) error {
+func (l *IntraStateGenerator) CaptureStart(env *vm.EVM, from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) error {
+	l.env = env
 	// To be consistent with stepIdx, but not necessary for state generation
 	l.counter = 1
 	if create {
@@ -89,7 +92,7 @@ func (l *IntraStateGenerator) CaptureStart(from common.Address, to common.Addres
 	l.selfDestructSet = state.NewSelfDestructSet()
 	l.startInterState.GlobalState = l.env.StateDB.Copy() // This state includes gas-buying and nonce-increment
 	l.lastDepthState = l.startInterState
-	// log.Info("Capture Start", "from", from, "to", to)
+	log.Debug("Capture Start", "from", from, "to", to)
 	return nil
 }
 
@@ -109,7 +112,7 @@ func (l *IntraStateGenerator) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode,
 		l.selfDestructSet,
 		l.blockHashTree,
 		l.accessListTrie,
-		l.env,
+		env,
 		l.lastDepthState,
 		l.callFlag,
 		l.input,
@@ -124,6 +127,7 @@ func (l *IntraStateGenerator) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode,
 	)
 	l.states = append(l.states, GeneratedIntraState{s.Hash(), gas})
 	l.lastState = s
+	l.lastCost = cost
 	l.counter += 1
 	return nil
 }
@@ -151,7 +155,7 @@ func (l *IntraStateGenerator) CaptureEnter(typ vm.OpCode, from common.Address, t
 		l.outSize = l.lastState.Stack.Back(5).Uint64()
 	}
 	l.callFlag = state.OpCodeToCallFlag(typ)
-	l.lastDepthState = l.lastState.StateAsLastDepth(l.callFlag)
+	l.lastDepthState = l.lastState.StateAsLastDepth(l.callFlag, l.lastCost)
 	l.input = state.NewMemoryFromBytes(input)
 }
 

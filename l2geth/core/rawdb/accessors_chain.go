@@ -30,6 +30,33 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 )
 
+func ReadFPValidatorChallengeCtx(db ethdb.Reader) []byte {
+	exist, err := db.Has(FPValidatorChallengeCtx)
+	if err != nil {
+		log.Crit("Failed to check fp challenge ctx", "err", err)
+	}
+	if !exist {
+		return nil
+	}
+	data, err := db.Get(FPValidatorChallengeCtx)
+	if err != nil {
+		log.Crit("Failed to get fp challenge ctx", "err", err)
+	}
+	return data
+}
+
+func WriteFPValidatorChallengeCtx(db ethdb.Writer, data []byte) {
+	if err := db.Put(FPValidatorChallengeCtx, data); err != nil {
+		log.Crit("Failed to store fp challenge ctx", "err", err)
+	}
+}
+
+func DeleteFPValidatorChallengeCtx(db ethdb.Writer) {
+	if err := db.Delete(FPValidatorChallengeCtx); err != nil {
+		log.Crit("Failed to store fp challenge ctx", "err", err)
+	}
+}
+
 // ReadCanonicalHash retrieves the hash assigned to a canonical block number.
 func ReadCanonicalHash(db ethdb.Reader, number uint64) common.Hash {
 	data, _ := db.Ancient(freezerHashTable, number)

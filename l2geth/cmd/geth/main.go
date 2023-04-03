@@ -170,12 +170,14 @@ var (
 		utils.SequencerClientHttpFlag,
 
 		// fraud proof flags
-		utils.FraudProofCoinBaseFlag,
 		utils.FraudProofL1EndpointFlag,
 		utils.FraudProofL1ChainIDFlag,
+		utils.FraudProofL1ConfirmationsFlag,
 		utils.FraudProofSequencerAddrFlag,
 		utils.FraudProofRollupAddrFlag,
-		utils.FraudProofRollupStakeAmount,
+		utils.FraudProofStakeAddrFlag,
+		utils.FraudProofStakeAmount,
+		utils.FraudProofChallengeVerify,
 	}
 
 	rpcFlags = []cli.Flag{

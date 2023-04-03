@@ -24,10 +24,19 @@ pragma solidity ^0.8.0;
 
 import "./IChallenge.sol";
 import "./ChallengeLib.sol";
-import "../verifier/IVerifierEntry.sol";
 import "../IRollup.sol";
 
 contract Challenge is IChallenge {
+    struct BisectedStore {
+        bytes32 startState;
+        bytes32 midState;
+        bytes32 endState;
+        uint256 blockNum;
+        uint256 blockTime;
+        uint256 challengedSegmentStart;
+        uint256 challengedSegmentLength;
+    }
+
     enum Turn {
         NoChallenge,
         Challenger,
@@ -58,37 +67,44 @@ contract Challenge is IChallenge {
     // Challenge state
     address public defender;
     address public challenger;
-    uint256 public lastMoveBlock;
+    uint256 public lastMoveBlockTime;
     uint256 public defenderTimeLeft;
     uint256 public challengerTimeLeft;
 
     Turn public turn;
     // See `ChallengeLib.computeBisectionHash` for the format of this commitment.
     bytes32 public bisectionHash;
+    bytes32[3] public prevBisection;
+
     // Initial state used to initialize bisectionHash (write-once).
     bytes32 private startStateHash;
     bytes32 private endStateHash;
 
-    // todo: just for test,delete!
-    VerificationContext.Context public ctx;
+    address public winner;
+
+    bool public rollback;
+    uint256 public startInboxSize;
+
+    BisectedStore public currentBisected;
+
     /**
      * @notice Pre-condition: `msg.sender` is correct and still has time remaining.
      * Post-condition: `turn` changes and `lastMoveBlock` set to current `block.number`.
      */
     modifier onlyOnTurn() {
         require(msg.sender == currentResponder(), BIS_SENDER);
-        require(block.number - lastMoveBlock <= currentResponderTimeLeft(), BIS_DEADLINE);
+        require(block.timestamp - lastMoveBlockTime <= currentResponderTimeLeft(), BIS_DEADLINE);
 
         _;
 
         if (turn == Turn.Challenger) {
-            challengerTimeLeft = challengerTimeLeft - (block.number - lastMoveBlock);
+            challengerTimeLeft = challengerTimeLeft - (block.timestamp- lastMoveBlockTime);
             turn = Turn.Defender;
         } else if (turn == Turn.Defender) {
-            defenderTimeLeft = defenderTimeLeft - (block.number - lastMoveBlock);
+            defenderTimeLeft = defenderTimeLeft - (block.timestamp - lastMoveBlockTime);
             turn = Turn.Challenger;
         }
-        lastMoveBlock = block.number;
+        lastMoveBlockTime = block.timestamp;
     }
 
     /**
@@ -99,11 +115,18 @@ contract Challenge is IChallenge {
         _;
     }
 
+    modifier onlyDefender(){
+        require(defender != address(0),"Defender not set");
+        require(msg.sender==defender,"Caller not defender");
+        _;
+    }
+
     function initialize(
         address _defender,
         address _challenger,
         IVerifierEntry _verifier,
         address _resultReceiver,
+        uint256 _startInboxSize,
         bytes32 _startStateHash,
         bytes32 _endStateHash
     ) external override {
@@ -117,101 +140,98 @@ contract Challenge is IChallenge {
         endStateHash = _endStateHash;
 
         turn = Turn.Defender;
-        lastMoveBlock = block.number;
+        lastMoveBlockTime = block.timestamp;
         // TODO(ujval): initialize timeout
-        defenderTimeLeft = 10;
-        challengerTimeLeft = 10;
+        defenderTimeLeft = 150;
+        challengerTimeLeft = 150;
+        prevBisection[0] = _startStateHash;
+        prevBisection[1] = bytes32(0);
+        prevBisection[2] = _endStateHash;
+
+        startInboxSize = _startInboxSize;
     }
 
-    function initializeChallengeLength(uint256 _numSteps) external override onlyOnTurn {
+    function initializeChallengeLength(bytes32 checkStateHash, uint256 _numSteps) external override onlyOnTurn {
         require(bisectionHash == 0, CHAL_INIT_STATE);
         require(_numSteps > 0, "INVALID_NUM_STEPS");
-        bisectionHash = ChallengeLib.initialBisectionHash(startStateHash, endStateHash, _numSteps);
+        bisectionHash = ChallengeLib.computeBisectionHash(0, _numSteps);
         // TODO: consider emitting a different event?
-        emit Bisected(bisectionHash, 0, _numSteps);
+        currentBisected = BisectedStore(startStateHash, checkStateHash, endStateHash, block.number, block.timestamp, 0, _numSteps);
+        emit Bisected(startStateHash, checkStateHash, endStateHash, block.number, block.timestamp, 0, _numSteps);
     }
 
     function bisectExecution(
-        bytes32[] calldata bisection,
+        bytes32[3] calldata bisection,
         uint256 challengedSegmentIndex,
-        bytes32[] calldata prevBisection,
+        uint256 challengedSegmentStart,
+        uint256 challengedSegmentLength,
         uint256 prevChallengedSegmentStart,
         uint256 prevChallengedSegmentLength
     ) external override onlyOnTurn postInitialization {
         // Verify provided prev bisection.
-        bytes32 prevHash =
-            ChallengeLib.computeBisectionHash(prevBisection, prevChallengedSegmentStart, prevChallengedSegmentLength);
+        bytes32 prevHash = ChallengeLib.computeBisectionHash(prevChallengedSegmentStart, prevChallengedSegmentLength);
         require(prevHash == bisectionHash, BIS_PREV);
-        require(challengedSegmentIndex > 0 && challengedSegmentIndex < prevBisection.length, "INVALID_INDEX");
+
         // Require agreed upon start state hash and disagreed upon end state hash.
-        require(bisection[0] == prevBisection[challengedSegmentIndex - 1], "INVALID_START");
-        require(bisection[bisection.length - 1] != prevBisection[challengedSegmentIndex], "INVALID_END");
+        if (prevBisection[1] != bytes32(0)) {
+            require(bisection[0] == prevBisection[0] || bisection[0] == prevBisection[1], "AMBIGUOUS_START");
+        }
+        require(bisection[2] != prevBisection[2], "INVALID_END");
 
         // Compute segment start/length.
-        uint256 challengedSegmentStart = prevChallengedSegmentStart;
-        uint256 challengedSegmentLength = prevChallengedSegmentLength;
-        if (prevBisection.length > 2) {
-            // prevBisection.length == 2 means first round
-            uint256 firstSegmentLength =
-                ChallengeLib.firstSegmentLength(prevChallengedSegmentLength, MAX_BISECTION_DEGREE);
-            uint256 otherSegmentLength =
-                ChallengeLib.otherSegmentLength(prevChallengedSegmentLength, MAX_BISECTION_DEGREE);
-            challengedSegmentLength = challengedSegmentIndex == 1 ? firstSegmentLength : otherSegmentLength;
-
-            if (challengedSegmentIndex > 1) {
-                challengedSegmentStart += firstSegmentLength + (otherSegmentLength * (challengedSegmentIndex - 2));
-            }
-        }
-        require(challengedSegmentLength > 1, "TOO_SHORT");
-
-        // Require that bisection has the correct length. This is only ever less than BISECTION_DEGREE at the last bisection.
-        uint256 target = challengedSegmentLength < MAX_BISECTION_DEGREE ? challengedSegmentLength : MAX_BISECTION_DEGREE;
-        require(bisection.length == target + 1, "CUT_COUNT");
+        require(challengedSegmentLength > 0, "TOO_SHORT");
 
         // Compute new challenge state.
-        bisectionHash = ChallengeLib.computeBisectionHash(bisection, challengedSegmentStart, challengedSegmentLength);
-        emit Bisected(bisectionHash, challengedSegmentStart, challengedSegmentLength);
-    }
-
-    // todo: just for test,delete!
-    function setCtx(VerificationContext.Context memory _ctx) public {
-        ctx = _ctx;
+        prevBisection[0] = bisection[0];
+        prevBisection[1] = bisection[1];
+        prevBisection[2] = bisection[2];
+        bisectionHash = ChallengeLib.computeBisectionHash(challengedSegmentStart, challengedSegmentLength);
+        currentBisected = BisectedStore(bisection[0], bisection[1], bisection[2], block.number, block.timestamp, challengedSegmentStart, challengedSegmentLength);
+        emit Bisected(bisection[0], bisection[1], bisection[2], block.number, block.timestamp, challengedSegmentStart, challengedSegmentLength);
     }
 
     function verifyOneStepProof(
+        VerificationContext.Context calldata ctx,
+        uint8 verifyType,
         bytes calldata proof,
         uint256 challengedStepIndex,
-        bytes32[] calldata prevBisection,
         uint256 prevChallengedSegmentStart,
         uint256 prevChallengedSegmentLength
     ) external override onlyOnTurn {
-        // Verify provided prev bisection.
-        bytes32 prevHash =
-            ChallengeLib.computeBisectionHash(prevBisection, prevChallengedSegmentStart, prevChallengedSegmentLength);
-        require(prevHash == bisectionHash, BIS_PREV);
-        require(challengedStepIndex > 0 && challengedStepIndex < prevBisection.length, "INVALID_INDEX");
-        // Require that this is the last round.
-        require(prevChallengedSegmentLength / MAX_BISECTION_DEGREE <= 1, "BISECTION_INCOMPLETE");
+         // Verify provided prev bisection.
+         bytes32 prevHash =
+            ChallengeLib.computeBisectionHash(prevChallengedSegmentStart, prevChallengedSegmentLength);
+         require(prevHash == bisectionHash, BIS_PREV);
+         // require(challengedStepIndex > 0 && challengedStepIndex < prevBisection.length, "INVALID_INDEX");
+         // Require that this is the last round.
+         require(prevChallengedSegmentLength / MAX_BISECTION_DEGREE <= 1, "BISECTION_INCOMPLETE");
 
-        // IVerificationContext ctx = <get ctx from sequenced txs>;
-        bytes32 nextStateHash = verifier.verifyOneStepProof(
-            ctx,
-            0, // todo : mock 0 for V_STACK_OP
-            prevBisection[challengedStepIndex - 1],
-            proof
-        );
+         // verify OSP
+         // IVerificationContext ctx = <get ctx from sequenced txs>;
 
+         bytes32 nextStateHash = verifier.verifyOneStepProof(
+             ctx,
+             verifyType,
+             prevBisection[challengedStepIndex-1],
+             proof
+         );
          if (nextStateHash == prevBisection[challengedStepIndex]) {
              // osp verified, current win
              _currentWin(CompletionReason.OSP_VERIFIED);
          } else {
-             // current lose?
-             _asserterWin(CompletionReason.OSP_VERIFIED);
+             _currentLose(CompletionReason.OSP_VERIFIED);
          }
     }
 
+    function setRollback() public {
+        if (rollback) {
+            revert("ALREADY_SET_ROLLBACK");
+        }
+        rollback = true;
+    }
+
     function timeout() external override {
-        require(block.number - lastMoveBlock > currentResponderTimeLeft(), TIMEOUT_DEADLINE);
+        require(block.timestamp - lastMoveBlockTime > currentResponderTimeLeft(), TIMEOUT_DEADLINE);
         if (turn == Turn.Defender) {
             _challengerWin(CompletionReason.TIMEOUT);
         } else {
@@ -243,17 +263,39 @@ contract Challenge is IChallenge {
         if (turn == Turn.Defender) {
             _asserterWin(reason);
         } else {
+            winner = challenger;
             _challengerWin(reason);
         }
     }
 
+    function _currentLose(CompletionReason reason) private {
+        if (turn == Turn.Defender) {
+            _challengerWin(reason);
+        } else {
+            _asserterWin(reason);
+        }
+    }
+
     function _asserterWin(CompletionReason reason) private {
+        winner = defender;
         emit ChallengeCompleted(defender, challenger, reason);
-        IRollup(resultReceiver).completeChallenge(defender, challenger); // safeSelfDestruct(msg.sender);
     }
 
     function _challengerWin(CompletionReason reason) private {
+        winner = challenger;
         emit ChallengeCompleted(challenger, defender, reason);
-        IRollup(resultReceiver).completeChallenge(challenger, defender); // safeSelfDestruct(msg.sender);
+    }
+
+    function completeChallenge(bool result) external onlyDefender{
+        require(winner != address(0),"Do not have winner");
+        address loser = address(0);
+
+        if (result){
+            winner = defender;
+            IRollup(resultReceiver).completeChallenge(defender, challenger);
+        }else{
+            winner = challenger;
+            IRollup(resultReceiver).completeChallenge(challenger, defender);
+        }
     }
 }

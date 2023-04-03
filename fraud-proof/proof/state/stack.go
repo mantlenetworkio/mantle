@@ -16,6 +16,7 @@ package state
 
 import (
 	"encoding/binary"
+
 	"github.com/holiman/uint256"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
