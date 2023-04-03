@@ -31,7 +31,6 @@ import (
 	"github.com/shurcooL/graphql"
 	"google.golang.org/grpc"
 	"math/big"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -530,10 +529,10 @@ func (d *Driver) Start() error {
 	d.wg.Add(1)
 	go d.RollupMainWorker()
 	if d.Cfg.CheckerEnable {
-		batchIndex, ok := d.LevelDBStore.GetLatestBatchIndex()
+		batchIndex, ok := d.LevelDBStore.GetReRollupBatchIndex()
 		log.Info("get latest batch index", "batchIndex", batchIndex, "ok", ok)
 		if batchIndex == 0 || !ok {
-			d.LevelDBStore.SetLatestBatchIndex(1)
+			d.LevelDBStore.SetReRollupBatchIndex(1)
 		}
 		go d.CheckConfirmedWorker()
 	}
@@ -596,62 +595,58 @@ func (d *Driver) CheckConfirmedWorker() {
 	for {
 		select {
 		case <-ticker.C:
-			lastestBatchIndex, err := d.Cfg.EigenDaContract.RollupBatchIndex(&bind.CallOpts{})
+			latestReRollupBatchIndex, err := d.Cfg.EigenDaContract.ReRollupIndex(&bind.CallOpts{})
 			if err != nil {
 				log.Error("Checker get batch index fail", "err", err)
 				continue
 			}
-			batchIndex, ok := d.LevelDBStore.GetLatestBatchIndex()
+			batchIndex, ok := d.LevelDBStore.GetReRollupBatchIndex()
 			if !ok {
 				log.Error("Checker get batch index from db fail", "err", err)
 				continue
 			}
-			if d.Cfg.CheckerBatchIndex > lastestBatchIndex.Uint64() {
-				log.Info("Checker Batch Index", "DbBatchIndex", batchIndex, "ContractBatchIndex", lastestBatchIndex.Uint64()-d.Cfg.CheckerBatchIndex)
+
+			if batchIndex >= latestReRollupBatchIndex.Uint64() {
+				log.Info("Checker db batch index and contract batch idnex is equal", "DbBatchIndex", batchIndex, "latestReRollupBatchIndex", latestReRollupBatchIndex.Uint64())
 				continue
 			}
-			if batchIndex >= (lastestBatchIndex.Uint64() - d.Cfg.CheckerBatchIndex) {
-				log.Info("Checker db batch index and contract batch idnex is equal", "DbBatchIndex", batchIndex, "ContractBatchIndex", lastestBatchIndex.Uint64()-d.Cfg.CheckerBatchIndex)
-				continue
-			}
-			log.Info("Checker db batch index and contract batch idnex", "DbBatchIndex", batchIndex, "ContractBatchIndex", lastestBatchIndex.Uint64())
-			for i := batchIndex; i <= (lastestBatchIndex.Uint64() - d.Cfg.CheckerBatchIndex); i++ {
+
+			log.Info("Checker db batch index and contract batch idnex", "DbBatchIndex", batchIndex, "ContractBatchIndex", latestReRollupBatchIndex.Uint64())
+			for i := batchIndex; i <= latestReRollupBatchIndex.Uint64(); i++ {
 				log.Info("Checker batch confirm data index", "batchIndex", i)
-				rollupStore, err := d.Cfg.EigenDaContract.GetRollupStoreByRollupBatchIndex(&bind.CallOpts{}, big.NewInt(int64(i)))
+				batchIndex, err := d.Cfg.EigenDaContract.ReRollupBatchIndex(&bind.CallOpts{}, big.NewInt(int64(i)))
 				if err != nil {
-					log.Info("Checker get batch rollup store fail", "err", err)
+					log.Info("Checker get batch index by re rollup index fail", "err", err)
 					continue
 				}
-				var query struct {
-					DataStore graphView.DataStoreGql `graphql:"dataStore(id: $storeId)"`
-				}
-				variables := map[string]interface{}{
-					"storeId": graphql.String(strconv.Itoa(int(rollupStore.DataStoreId))),
-				}
-				err = d.GraphqlClient.Query(d.Ctx, &query, variables)
+
+				rollupStore, err := d.Cfg.EigenDaContract.RollupBatchIndexRollupStores(&bind.CallOpts{}, batchIndex)
 				if err != nil {
-					log.Error("Checker query data from graphql fail", "err", err)
+					log.Info("Checker get rollup store fail", "err", err)
 					continue
 				}
-				log.Info("Checker dataStore confirmed state", "dataStore-confirmed", query.DataStore.Confirmed)
-				if !query.DataStore.Confirmed {
-					rollupBlock, err := d.Cfg.EigenDaContract.GetL2RollUpBlockByDataStoreId(&bind.CallOpts{}, rollupStore.DataStoreId)
+				if rollupStore.DataStoreId > 0 {
+					rollupBlock, err := d.Cfg.EigenDaContract.DataStoreIdToL2RollUpBlock(&bind.CallOpts{}, rollupStore.DataStoreId)
 					if err != nil {
-						log.Error("Checker get batch index fail", "err", err)
+						log.Info("Checker get l2 rollup block fail", "err", err)
 						continue
 					}
+
 					aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
 						d.Ctx, rollupBlock.StartL2BlockNumber, rollupBlock.EndBL2BlockNumber,
 					)
+
 					if err != nil {
 						log.Error("Checker eigenDa sequencer unable to craft batch tx", "err", err)
 						continue
 					}
+
 					params, receipt, err := d.DisperseStoreData(aggregateTxData, startL2BlockNumber, endL2BlockNumber, true)
 					if err != nil {
 						log.Error("Checker disperse store data fail", "err", err)
 						continue
 					}
+
 					log.Info("MtBatcher disperse re-rollup store data success", "txHash", receipt.TxHash.String())
 					csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, rollupStore.DataStoreId, big.NewInt(int64(i)), true)
 					if err != nil {
@@ -659,11 +654,8 @@ func (d *Driver) CheckConfirmedWorker() {
 						continue
 					}
 					log.Info("Checker confirm re-rollup store data success", "txHash", csdReceipt.TxHash.String())
-					d.LevelDBStore.SetLatestBatchIndex(i - (2 * d.Cfg.CheckerBatchIndex))
-				} else {
-					log.Info("Checker rollup batch data is confirmed", "BatchIndex", batchIndex, "DataStoreId", rollupStore.DataStoreId)
-					d.LevelDBStore.SetLatestBatchIndex(i - d.Cfg.CheckerBatchIndex)
 				}
+				d.LevelDBStore.SetReRollupBatchIndex(i)
 			}
 		case err := <-d.Ctx.Done():
 			log.Error("MtBatcher eigenDa sequencer service shutting down", "err", err)
