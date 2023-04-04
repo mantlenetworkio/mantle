@@ -101,8 +101,8 @@ contract L1CrossDomainMessenger is
         _pause();
     }
 
-    function setPauseOwner() external onlyOwner {
-        pauseOwner = msg.sender;
+    function setPauseOwner(address _pauseOwner) external onlyOwner {
+        pauseOwner = _pauseOwner;
     }
 
     function pauseByPOwner() external {
