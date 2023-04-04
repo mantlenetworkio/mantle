@@ -4,6 +4,7 @@ pragma solidity 0.8.15;
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { Semver } from "../universal/Semver.sol";
 import { Types } from "../libraries/Types.sol";
+import { AddressResolver} from "../legacy/AddressResolver.sol";
 import {ITssGroupManager} from "../tss/ITssGroupManager.sol";
 
 /**
@@ -13,7 +14,7 @@ import {ITssGroupManager} from "../tss/ITssGroupManager.sol";
  *         commitment to the state of the L2 chain. Other contracts like the MantlePortal use
  *         these outputs to verify information about the state of L2.
  */
-contract L2OutputOracle is Initializable, Semver {
+contract L2OutputOracle is Initializable, Semver, AddressResolver {
     /**
      * @notice The interval in L2 blocks at which checkpoints must be submitted. Although this is
      *         immutable, it can safely be modified by upgrading the implementation contract.
@@ -95,8 +96,9 @@ contract L2OutputOracle is Initializable, Semver {
         uint256 _startingTimestamp,
         address _proposer,
         address _challenger,
+        address _addressManager,
         uint256 _finalizationPeriodSeconds
-    ) Semver(1, 2, 0) {
+    ) Semver(1, 2, 0) AddressResolver(_addressManager){
         require(_l2BlockTime > 0, "L2OutputOracle: L2 block time must be greater than 0");
         require(
             _submissionInterval > _l2BlockTime,
@@ -355,8 +357,10 @@ contract L2OutputOracle is Initializable, Semver {
 
     /**
      * Appends a batch to the chain.
-     * @param _batch Elements within the batch.
-     * @param _shouldStartAtElement Relative rollup block height.
+     * @param _outputRoot    The L2 output of the checkpoint block.
+     * @param _l2BlockNumber The L2 block number.
+     * @param _l1BlockHash The current L1 block hash.
+     * @param _l1BlockNumber The current L1 block number.
      * @param _signature Signature of batch roots and rollup start height.
      */
     function _checkClusterSignature(bytes32 _outputRoot, uint256 _l2BlockNumber, bytes32 _l1BlockHash, uint256 _l1BlockNumber, bytes memory _signature)

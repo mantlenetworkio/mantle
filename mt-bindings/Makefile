@@ -30,7 +30,9 @@ bindings: l1block-bindings \
 	mantle-mintable-erc721-factory-bindings \
 	l1-fee-vault-bindings \
 	basefee-vault-bindings \
-	legacy-erc20-eth-bindings
+	legacy-erc20-eth-bindings \
+	tss-groupmanager-bindings \
+	tss-stakingslashing-bindings
 
 version:
 	forge --version
@@ -121,6 +123,12 @@ deployer-whitelist-bindings: compile
 
 l1-blocknumber-bindings: compile
 	./gen_bindings.sh contracts/legacy/L1BlockNumber.sol:L1BlockNumber $(pkg)
+
+tss-groupmanager-bindings: compile
+	./gen_bindings.sh contracts/tss/TssGroupManager.sol:TssGroupManager $(pkg)
+
+tss-stakingslashing-bindings: compile
+	./gen_bindings.sh contracts/tss/TssStakingSlashing.sol:TssStakingSlashing $(pkg)
 
 more:
 	go run ./gen/main.go \

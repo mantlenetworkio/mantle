@@ -84,7 +84,7 @@ func (p *L2Proposer) ActMakeProposalTx(t Testing) {
 	}
 	require.NoError(t, err)
 
-	tx, err := p.driver.CreateProposalTx(t.Ctx(), output)
+	tx, err := p.driver.CreateProposalTx(t.Ctx(), output, []byte{})
 	require.NoError(t, err)
 
 	// Note: Use L1 instead of the output submitter's transaction manager because

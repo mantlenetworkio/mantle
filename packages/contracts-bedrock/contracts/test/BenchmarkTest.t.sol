@@ -80,7 +80,7 @@ contract GasBenchMark_MantlePortal is Portal_Initializer {
         // Configure the oracle to return the output root we've prepared.
         vm.warp(oracle.computeL2Timestamp(_proposedBlockNumber) + 1);
         vm.prank(oracle.PROPOSER());
-        oracle.proposeL2Output(_outputRoot, _proposedBlockNumber, 0, 0);
+        oracle.proposeL2Output(_outputRoot, _proposedBlockNumber, 0, 0,hex"");
 
         // Warp beyond the finalization period for the block we've proposed.
         vm.warp(
@@ -198,6 +198,6 @@ contract GasBenchMark_L2OutputOracle is L2OutputOracle_Initializer {
     }
 
     function test_proposeL2Output_benchmark() external {
-        oracle.proposeL2Output(nonZeroHash, nextBlockNumber, 0, 0);
+        oracle.proposeL2Output(nonZeroHash, nextBlockNumber, 0, 0,hex"");
     }
 }

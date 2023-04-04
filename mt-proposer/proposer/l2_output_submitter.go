@@ -333,7 +333,7 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 
 // CreateProposalTx transforms an output response into a signed output transaction.
 // It does not send the transaction to the transaction pool.
-func (l *L2OutputSubmitter) CreateProposalTx(ctx context.Context, output *eth.OutputResponse) (*types.Transaction, error) {
+func (l *L2OutputSubmitter) CreateProposalTx(ctx context.Context, output *eth.OutputResponse, signature []byte) (*types.Transaction, error) {
 	nonce, err := l.l1Client.NonceAt(ctx, l.from, nil)
 	if err != nil {
 		l.log.Error("Failed to get nonce", "err", err, "from", l.from)
@@ -355,7 +355,7 @@ func (l *L2OutputSubmitter) CreateProposalTx(ctx context.Context, output *eth.Ou
 		output.OutputRoot,
 		new(big.Int).SetUint64(output.BlockRef.Number),
 		output.Status.CurrentL1.Hash,
-		new(big.Int).SetUint64(output.Status.CurrentL1.Number))
+		new(big.Int).SetUint64(output.Status.CurrentL1.Number), signature)
 	if err != nil {
 		l.log.Error("failed to create the ProposeL2Output transaction", "err", err)
 		return nil, err
@@ -430,7 +430,7 @@ func (l *L2OutputSubmitter) loop() {
 
 			l.log.Info(" append log", "output ", tssReqParams.String(), "signature", hex.EncodeToString(tssResponse.Signature), "rollback", tssResponse.RollBack)
 
-			tx, err := l.CreateProposalTx(cCtx, output)
+			tx, err := l.CreateProposalTx(cCtx, output, tssResponse.Signature)
 			if err != nil {
 				l.log.Error("Failed to create proposal transaction", "err", err)
 				cancel()

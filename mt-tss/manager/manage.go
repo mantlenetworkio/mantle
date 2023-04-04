@@ -13,8 +13,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/mantlenetworkio/mantle/mt-tss/bindings/tgm"
-	"github.com/mantlenetworkio/mantle/mt-tss/bindings/tsh"
+	"github.com/mantlenetworkio/mantle/mt-bindings/bindings"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
@@ -31,8 +30,8 @@ type Manager struct {
 	tssQueryService          types.TssQueryService
 	store                    types.ManagerStore
 	l1Cli                    *ethclient.Client
-	tssStakingSlashingCaller *tsh.TssStakingSlashingCaller
-	tssGroupManagerCaller    *tgm.TssGroupManagerCaller
+	tssStakingSlashingCaller *bindings.TssStakingSlashingCaller
+	tssGroupManagerCaller    *bindings.TssGroupManagerCaller
 	l1ConfirmBlocks          int
 
 	taskInterval          time.Duration
@@ -81,11 +80,11 @@ func NewManager(wsServer server.IWebsocketManager,
 	if err != nil {
 		return Manager{}, err
 	}
-	tssStakingSlashingCaller, err := tsh.NewTssStakingSlashingCaller(common.HexToAddress(config.TssStakingSlashContractAddress), l1Cli)
+	tssStakingSlashingCaller, err := bindings.NewTssStakingSlashingCaller(common.HexToAddress(config.TssStakingSlashContractAddress), l1Cli)
 	if err != nil {
 		return Manager{}, err
 	}
-	tssGroupManagerCaller, err := tgm.NewTssGroupManagerCaller(common.HexToAddress(config.TssGroupContractAddress), l1Cli)
+	tssGroupManagerCaller, err := bindings.NewTssGroupManagerCaller(common.HexToAddress(config.TssGroupContractAddress), l1Cli)
 	if err != nil {
 		return Manager{}, err
 	}

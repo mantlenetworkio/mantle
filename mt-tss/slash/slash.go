@@ -10,16 +10,16 @@ import (
 )
 
 type Slashing struct {
-	stateBatchStore index.StateBatchStore
-	slashingStore   SlashingStore
+	outputStore   index.OutputStore
+	slashingStore SlashingStore
 
 	signedBatchesWindow int
 	minSignedInWindow   int
 }
 
-func NewSlashing(sbs index.StateBatchStore, ss SlashingStore, signedBatchesWindow, minSignedInWindow int) Slashing {
+func NewSlashing(ops index.OutputStore, ss SlashingStore, signedBatchesWindow, minSignedInWindow int) Slashing {
 	return Slashing{
-		stateBatchStore:     sbs,
+		outputStore:         ops,
 		slashingStore:       ss,
 		signedBatchesWindow: signedBatchesWindow,
 		minSignedInWindow:   minSignedInWindow,
@@ -27,49 +27,49 @@ func NewSlashing(sbs index.StateBatchStore, ss SlashingStore, signedBatchesWindo
 }
 
 func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
-	found, stateBatch := s.stateBatchStore.GetStateBatch(root)
+	found, output := s.outputStore.GetOutput(root)
 	if !found {
 		return errors.New("can not find the state batch with root: " + hexutil.Encode(root[:]))
 	}
 
 	// check whether it is a new round election
 	var electionAdvanced bool
-	if stateBatch.ElectionId > 1 {
-		found, previousBatchRoot := s.stateBatchStore.GetIndexStateBatch(stateBatch.BatchIndex - 1)
+	if output.ElectionId > 1 {
+		found, previousBatchRoot := s.outputStore.GetIndexOutput(output.OutputIndex - 1)
 		if found {
-			_, previousStateBatch := s.stateBatchStore.GetStateBatch(previousBatchRoot)
-			electionAdvanced = stateBatch.ElectionId != previousStateBatch.ElectionId
+			_, previousStateBatch := s.outputStore.GetOutput(previousBatchRoot)
+			electionAdvanced = output.ElectionId != previousStateBatch.ElectionId
 		}
 	}
 
 	maxMissed := s.signedBatchesWindow - s.minSignedInWindow
 	// update signingInfo for working nodes
-	for _, workingNode := range stateBatch.WorkingNodes {
+	for _, workingNode := range output.WorkingNodes {
 		address, err := tss.NodeToAddress(workingNode)
 		if err != nil {
 			return err
 		}
-		s.UpdateSigningInfo(stateBatch.BatchIndex, address, electionAdvanced, false)
+		s.UpdateSigningInfo(output.OutputIndex, address, electionAdvanced, false)
 		if err != nil {
 			return err
 		}
 	}
 
 	// update signingInfo for absent nodes
-	for _, absentNode := range stateBatch.AbsentNodes {
+	for _, absentNode := range output.AbsentNodes {
 		address, err := tss.NodeToAddress(absentNode)
 		if err != nil {
 			return err
 		}
-		updatedSigningInfo := s.UpdateSigningInfo(stateBatch.BatchIndex, address, electionAdvanced, true)
+		updatedSigningInfo := s.UpdateSigningInfo(output.OutputIndex, address, electionAdvanced, true)
 		if err != nil {
 			return err
 		}
 		if updatedSigningInfo.MissedBlocksCounter > uint64(maxMissed) {
 			s.slashingStore.SetSlashingInfo(SlashingInfo{
 				Address:    address,
-				ElectionId: stateBatch.ElectionId,
-				BatchIndex: stateBatch.BatchIndex,
+				ElectionId: output.ElectionId,
+				BatchIndex: output.OutputIndex,
 				SlashType:  tss.SlashTypeLiveness,
 			})
 		}

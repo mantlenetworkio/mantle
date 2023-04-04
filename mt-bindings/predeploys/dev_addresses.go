@@ -13,6 +13,9 @@ const (
 	DevWETH9                      = "0x6900000000000000000000000000000000000007"
 	DevL1ERC721Bridge             = "0x6900000000000000000000000000000000000008"
 	DevSystemConfig               = "0x6900000000000000000000000000000000000009"
+	DevL1BitToken                 = "0x6900000000000000000000000000000000000028"
+	DevTssGroupManager            = "0x6900000000000000000000000000000000000026"
+	DevTssStakingSlashing         = "0x6900000000000000000000000000000000000027"
 )
 
 var (
@@ -26,6 +29,9 @@ var (
 	DevWETH9Addr                      = common.HexToAddress(DevWETH9)
 	DevL1ERC721BridgeAddr             = common.HexToAddress(DevL1ERC721Bridge)
 	DevSystemConfigAddr               = common.HexToAddress(DevSystemConfig)
+	DevL1BitTokenAddr                 = common.HexToAddress(DevL1BitToken)
+	DevTssGroupManagerAddr            = common.HexToAddress(DevTssGroupManager)
+	DevTssStakingSlashingAddr         = common.HexToAddress(DevTssStakingSlashing)
 
 	DevPredeploys = make(map[string]*common.Address)
 )
@@ -41,4 +47,7 @@ func init() {
 	DevPredeploys["WETH9"] = &DevWETH9Addr
 	DevPredeploys["L1ERC721Bridge"] = &DevL1ERC721BridgeAddr
 	DevPredeploys["SystemConfig"] = &DevSystemConfigAddr
+	DevPredeploys["TssGroupManager"] = &DevTssGroupManagerAddr
+	DevPredeploys["TssStakingSlashing"] = &DevTssStakingSlashingAddr
+	DevPredeploys["DevL1BitToken"] = &DevL1BitTokenAddr
 }

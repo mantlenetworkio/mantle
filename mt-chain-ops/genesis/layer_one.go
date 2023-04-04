@@ -29,6 +29,8 @@ var proxies = []string{
 	"L1StandardBridgeProxy",
 	"MantlePortalProxy",
 	"MantleMintableERC20FactoryProxy",
+	"TssGroupManagerProxy",
+	"TssStakingSlashingProxy",
 }
 
 var portalMeteringSlot = common.Hash{31: 0x01}
@@ -165,6 +167,41 @@ func BuildL1DeveloperGenesis(config *DeployConfig) (*core.Genesis, error) {
 		return nil, err
 	}
 
+	tssGroupManager, err := bindings.TssGroupManagerMetaData.GetAbi()
+	if err != nil {
+		return nil, err
+	}
+	data, err = tssGroupManager.Pack("initialize")
+	if err != nil {
+		return nil, fmt.Errorf("cannot abi encode initialize for TssGroupManager: %w", err)
+	}
+	if _, err := upgradeProxy(
+		backend,
+		opts,
+		depsByName["TssGroupManagerProxy"].Address,
+		depsByName["TssGroupManager"].Address,
+		data,
+	); err != nil {
+		return nil, err
+	}
+	tssStakingSlashing, err := bindings.TssStakingSlashingMetaData.GetAbi()
+	if err != nil {
+		return nil, err
+	}
+	data, err = tssStakingSlashing.Pack("initialize", predeploys.DevL1BitTokenAddr, predeploys.DevTssGroupManagerAddr)
+	if err != nil {
+		return nil, fmt.Errorf("cannot abi encode initialize for TssStakingSlashing: %w", err)
+	}
+	if _, err := upgradeProxy(
+		backend,
+		opts,
+		depsByName["TssStakingSlashingProxy"].Address,
+		depsByName["TssStakingSlashing"].Address,
+		data,
+	); err != nil {
+		return nil, err
+	}
+
 	var lastUpgradeTx *types.Transaction
 	if lastUpgradeTx, err = upgradeProxy(
 		backend,
@@ -285,6 +322,7 @@ func deployL1Contracts(config *DeployConfig, backend *backends.SimulatedBackend)
 				uint642Big(uint64(config.L1GenesisBlockTimestamp)),
 				config.L2OutputOracleProposer,
 				config.L2OutputOracleChallenger,
+				predeploys.DevAddressManagerAddr,
 				uint642Big(config.FinalizationPeriodSeconds),
 			},
 		},
@@ -323,6 +361,12 @@ func deployL1Contracts(config *DeployConfig, backend *backends.SimulatedBackend)
 		{
 			Name: "WETH9",
 		},
+		{
+			Name: "TssGroupManager",
+		},
+		{
+			Name: "TssStakingSlashing",
+		},
 	}...)
 	return deployer.Deploy(backend, constructors, l1Deployer)
 }
@@ -353,7 +397,8 @@ func l1Deployer(backend *backends.SimulatedBackend, opts *bind.TransactOpts, dep
 			deployment.Args[3].(*big.Int),
 			deployment.Args[4].(common.Address),
 			deployment.Args[5].(common.Address),
-			deployment.Args[6].(*big.Int),
+			deployment.Args[6].(common.Address),
+			deployment.Args[7].(*big.Int),
 		)
 	case "MantlePortal":
 		_, tx, _, err = bindings.DeployMantlePortal(
@@ -404,6 +449,17 @@ func l1Deployer(backend *backends.SimulatedBackend, opts *bind.TransactOpts, dep
 			predeploys.DevL1CrossDomainMessengerAddr,
 			predeploys.L2ERC721BridgeAddr,
 		)
+	case "TssGroupManager":
+		_, tx, _, err = bindings.DeployTssGroupManager(
+			opts,
+			backend,
+		)
+	case "TssStakingSlashing":
+		_, tx, _, err = bindings.DeployTssStakingSlashing(
+			opts,
+			backend,
+		)
+
 	default:
 		if strings.HasSuffix(deployment.Name, "Proxy") {
 			_, tx, _, err = bindings.DeployProxy(opts, backend, deployer.TestAddress)

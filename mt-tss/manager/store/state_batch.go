@@ -30,7 +30,7 @@ func (s *Storage) IndexOutput(index uint64, root [32]byte) error {
 	return s.db.Put(getIndexOutputKey(index), root[:], nil)
 }
 
-func (s *Storage) GetIndexStateBatch(index uint64) (bool, [32]byte) {
+func (s *Storage) GetIndexOutput(index uint64) (bool, [32]byte) {
 	bz, err := s.db.Get(getIndexOutputKey(index), nil)
 	if err != nil {
 		return handleError2([32]byte{}, err)

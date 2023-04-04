@@ -24,7 +24,7 @@ contract L2OutputOracle_Proposer {
     ) external {
         // Act as the proposer and propose a new output.
         vm.prank(oracle.PROPOSER());
-        oracle.proposeL2Output(_outputRoot, _l2BlockNumber, _l1BlockHash, _l1BlockNumber);
+        oracle.proposeL2Output(_outputRoot, _l2BlockNumber, _l1BlockHash, _l1BlockNumber,hex"");
     }
 }
 

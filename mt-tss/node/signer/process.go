@@ -5,8 +5,8 @@ import (
 	"crypto/ecdsa"
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/mantlenetworkio/mantle/mt-bindings/bindings"
 	"github.com/mantlenetworkio/mantle/mt-node/sources"
-	"github.com/mantlenetworkio/mantle/mt-tss/bindings/tsh"
 	"github.com/mantlenetworkio/mantle/mt-tss/common"
 	"github.com/mantlenetworkio/mantle/mt-tss/manager/l1chain"
 	managertypes "github.com/mantlenetworkio/mantle/mt-tss/manager/types"
@@ -59,7 +59,7 @@ type Processor struct {
 	tssGroupManagerAddress    string
 	tssStakingSlashingAddress string
 	taskInterval              time.Duration
-	tssStakingSlashingCaller  *tsh.TssStakingSlashingCaller
+	tssStakingSlashingCaller  *bindings.TssStakingSlashingCaller
 	tssQueryService           managertypes.TssQueryService
 	l1ConfirmBlocks           int
 	confirmReceiptTimeout     time.Duration
@@ -97,7 +97,7 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 	}
 	rollupClient := sources.NewRollupClient(mtnode.NewBaseRPCClient(rpcCl))
 
-	tssStakingSlashingCaller, err := tsh.NewTssStakingSlashingCaller(ethc.HexToAddress(cfg.TssStakingSlashContractAddress), l1Cli)
+	tssStakingSlashingCaller, err := bindings.NewTssStakingSlashingCaller(ethc.HexToAddress(cfg.TssStakingSlashContractAddress), l1Cli)
 	if err != nil {
 		return nil, err
 	}

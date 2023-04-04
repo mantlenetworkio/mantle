@@ -140,6 +140,7 @@ interface OptionalL1DeployConfig {
   l1GenesisBlockGasUsed: string
   l1GenesisBlockParentHash: string
   l1GenesisBlockBaseFeePerGas: string
+  l1BitAddress: string
 }
 
 /**
@@ -328,5 +329,8 @@ export const deployConfigSpec: {
   },
   governanceTokenOwner: {
     type: 'string',
+  },
+  l1BitAddress: {
+    type: 'address',
   },
 }

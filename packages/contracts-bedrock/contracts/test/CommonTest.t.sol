@@ -100,6 +100,7 @@ contract L2OutputOracle_Initializer is CommonTest {
     uint256 internal startingBlockNumber = 200;
     uint256 internal startingTimestamp = 1000;
     address guardian;
+    address internal addManager = 0x000000000000000000000000000000000000aDda;
 
     // Test data
     uint256 initL1Time;
@@ -135,6 +136,7 @@ contract L2OutputOracle_Initializer is CommonTest {
             _startingTimestamp: startingTimestamp,
             _proposer: proposer,
             _challenger: owner,
+            _addressManager : addManager,
             _finalizationPeriodSeconds: 7 days
         });
         Proxy proxy = new Proxy(multisig);

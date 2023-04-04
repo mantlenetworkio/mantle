@@ -2,7 +2,7 @@ import { DeployFunction } from 'hardhat-deploy/dist/types'
 import '@mantleio/hardhat-deploy-config'
 import '@nomiclabs/hardhat-ethers'
 
-import { assertContractVariable, deploy } from '../src/deploy-utils'
+import {assertContractVariable, deploy, getDeploymentAddress} from '../src/deploy-utils'
 
 const deployFn: DeployFunction = async (hre) => {
   if (hre.deployConfig.l2BlockTime === 0) {
@@ -17,6 +17,8 @@ const deployFn: DeployFunction = async (hre) => {
       'L2OutputOracle deployment: submissionInterval must be greater than the l2BlockTime'
     )
   }
+  const addressManager = await getDeploymentAddress(hre, 'Lib_AddressManager')
+
 
   await deploy({
     hre,
@@ -28,6 +30,7 @@ const deployFn: DeployFunction = async (hre) => {
       0,
       hre.deployConfig.l2OutputOracleProposer,
       hre.deployConfig.l2OutputOracleChallenger,
+      addressManager,
       hre.deployConfig.finalizationPeriodSeconds,
     ],
     postDeployAction: async (contract) => {

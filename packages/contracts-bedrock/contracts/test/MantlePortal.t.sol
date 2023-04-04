@@ -327,7 +327,7 @@ contract MantlePortal_Test is Portal_Initializer {
         vm.roll(checkpoint);
         vm.warp(oracle.computeL2Timestamp(checkpoint) + 1);
         vm.prank(oracle.PROPOSER());
-        oracle.proposeL2Output(keccak256(abi.encode(2)), checkpoint, 0, 0);
+        oracle.proposeL2Output(keccak256(abi.encode(2)), checkpoint, 0, 0,hex"");
 
         // warp to the final second of the finalization period
         uint256 finalizationHorizon = block.timestamp + oracle.FINALIZATION_PERIOD_SECONDS();
@@ -392,7 +392,7 @@ contract MantlePortal_FinalizeWithdrawal_Test is Portal_Initializer {
         // Configure the oracle to return the output root we've prepared.
         vm.warp(oracle.computeL2Timestamp(_proposedBlockNumber) + 1);
         vm.prank(oracle.PROPOSER());
-        oracle.proposeL2Output(_outputRoot, _proposedBlockNumber, 0, 0);
+        oracle.proposeL2Output(_outputRoot, _proposedBlockNumber, 0, 0,hex"");
 
         // Warp beyond the finalization period for the block we've proposed.
         vm.warp(
@@ -571,7 +571,8 @@ contract MantlePortal_FinalizeWithdrawal_Test is Portal_Initializer {
             proposal.outputRoot,
             op.L2_ORACLE().nextBlockNumber(),
             blockhash(block.number),
-            block.number
+            block.number,
+            hex""
         );
         vm.stopPrank();
 
