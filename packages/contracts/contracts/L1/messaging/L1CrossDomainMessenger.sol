@@ -101,6 +101,13 @@ contract L1CrossDomainMessenger is
         _pause();
     }
 
+    /**
+     * UnPause relaying.
+     */
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
     function setPauseOwner(address _pauseOwner) external onlyOwner {
         pauseOwner = _pauseOwner;
     }
