@@ -290,12 +290,13 @@ contract Challenge is IChallenge {
         require(winner != address(0),"Do not have winner");
         address loser = address(0);
 
-        if (result){
+        if (winner == challenger) {
+            if (result) {
+                IRollup(resultReceiver).completeChallenge(challenger, defender);
+                return;
+            }
             winner = defender;
-            IRollup(resultReceiver).completeChallenge(defender, challenger);
-        }else{
-            winner = challenger;
-            IRollup(resultReceiver).completeChallenge(challenger, defender);
         }
+        IRollup(resultReceiver).completeChallenge(defender, challenger);
     }
 }
