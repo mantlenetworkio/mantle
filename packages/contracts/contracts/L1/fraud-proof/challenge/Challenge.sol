@@ -288,7 +288,6 @@ contract Challenge is IChallenge {
 
     function completeChallenge(bool result) external onlyDefender{
         require(winner != address(0),"Do not have winner");
-        address loser = address(0);
 
         if (winner == challenger) {
             if (result) {
