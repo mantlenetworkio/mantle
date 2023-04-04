@@ -11,7 +11,6 @@ import { IDataLayrServiceManager } from "../libraries/eigenda/lib/contracts/inte
 import { BN254 } from "../libraries/eigenda/BN254.sol";
 import { DataStoreUtils } from "../libraries/eigenda/lib/contracts/libraries/DataStoreUtils.sol";
 import { Parser } from "../libraries/eigenda/Parse.sol";
-import "hardhat/console.sol";
 
 
 contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeable, Parser {
@@ -34,11 +33,13 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
 
     address public sequencer;
     address public dataManageAddress;
+    address public reSubmitterAddress;
     uint256 public BLOCK_STALE_MEASURE;
     uint256 public l2StoredBlockNumber;
     uint256 public l2ConfirmedBlockNumber;
     uint256 public fraudProofPeriod;
     uint256 public rollupBatchIndex;
+    uint256 public reRollupIndex;
 
     bytes public constant FRAUD_STRING = '-_(` O `)_- -_(` o `)_- -_(` Q `)_- BITDAO JUST REKT YOU |_(` O `)_| - |_(` o `)_| - |_(` Q `)_|';
     uint256 internal constant DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED = type(uint256).max;
@@ -60,16 +61,18 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
     mapping(uint32 => BatchRollupBlock) public dataStoreIdToL2RollUpBlock;
     mapping(uint32 => uint256) public dataStoreIdToRollupStoreNumber;
     mapping(address => bool) private fraudProofWhitelist;
-
+    mapping(uint256 => uint256) public reRollupBatchIndex;
 
     event RollupStoreInitialized(uint32 dataStoreId, uint256 stratL2BlockNumber, uint256 endL2BlockNumber);
     event RollupStoreConfirmed(uint256 rollupBatchIndex, uint32 dataStoreId, uint256 stratL2BlockNumber, uint256 endL2BlockNumber);
     event RollupStoreReverted(uint256 rollupBatchIndex, uint32 dataStoreId, uint256 stratL2BlockNumber, uint256 endL2BlockNumber);
+    event ReRollupBatchData(uint256 reRollupIndex, uint256 rollupBatchIndex, uint256 stratL2BlockNumber, uint256 endL2BlockNumber);
 
-    function initialize(address _sequencer, address _dataManageAddress, uint256 _block_stale_measure, uint256 _fraudProofPeriod, uint256 _l2SubmittedBlockNumber) public initializer {
+    function initialize(address _sequencer, address _dataManageAddress, address _reSubmitterAddress, uint256 _block_stale_measure, uint256 _fraudProofPeriod, uint256 _l2SubmittedBlockNumber) public initializer {
         __Ownable_init();
         sequencer = _sequencer;
         dataManageAddress = _dataManageAddress;
+        reSubmitterAddress = _reSubmitterAddress;
         BLOCK_STALE_MEASURE = _block_stale_measure;
         fraudProofPeriod = _fraudProofPeriod;
         l2StoredBlockNumber = _l2SubmittedBlockNumber;
@@ -180,6 +183,11 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         sequencer = _sequencer;
     }
 
+    function updateReSubmitterAddress(address _reSubmitterAddress) external {
+        require(msg.sender == sequencer, "Only the sequencer can update re submitter address");
+        reSubmitterAddress = _reSubmitterAddress;
+    }
+
     /**
     * @notice reset batch rollup batch data
     * @param _rollupBatchIndex update rollup index
@@ -192,6 +200,26 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         rollupBatchIndex = _rollupBatchIndex;
         l2StoredBlockNumber = 1;
         l2ConfirmedBlockNumber = 1;
+    }
+
+    /**
+    * @notice submit re-rollup batch index
+    * @param batchIndex need re-rollup batch index
+    */
+    function submitReRollUpInfo(
+        uint256 batchIndex
+    ) external {
+        require(msg.sender == reSubmitterAddress, "Only the re submitter can submit re rollup data");
+        RollupStore memory rStore = rollupBatchIndexRollupStores[batchIndex];
+        if (rStore.dataStoreId > 0) {
+            reRollupBatchIndex[reRollupIndex] = batchIndex;
+            emit ReRollupBatchData(
+                reRollupIndex++,
+                batchIndex,
+                dataStoreIdToL2RollUpBlock[rStore.dataStoreId].startL2BlockNumber,
+                dataStoreIdToL2RollUpBlock[rStore.dataStoreId].endBL2BlockNumber
+            );
+        }
     }
 
     /**

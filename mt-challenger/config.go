@@ -5,23 +5,31 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-challenger/challenger"
 	"github.com/mantlenetworkio/mantle/mt-challenger/flags"
 	"github.com/urfave/cli"
+	"time"
 )
 
 type Config struct {
-	L1EthRpc             string
-	L2MtlRpc             string
-	ChainId              uint64
-	PrivateKey           string
-	Mnemonic             string
-	SequencerHDPath      string
-	EigenContractAddress string
-	GraphProvider        string
-	RetrieverSocket      string
-	KzgConfig            challenger.KzgConfig
-	FromStoreNumber      uint64
-	DisableHTTP2         bool
-
-	LoggingConfig logging.Config
+	L1EthRpc                  string
+	L2MtlRpc                  string
+	ChainId                   uint64
+	PrivateKey                string
+	Mnemonic                  string
+	SequencerHDPath           string
+	EigenContractAddress      string
+	GraphProvider             string
+	RetrieverSocket           string
+	KzgConfig                 challenger.KzgConfig
+	FromStoreNumber           uint64
+	PollInterval              time.Duration
+	DbPath                    string
+	CheckerBatchIndex         uint64
+	DisableHTTP2              bool
+	NeedReRollupBatch         string
+	ReRollupToolEnable        bool
+	ResubmissionTimeout       time.Duration
+	NumConfirmations          uint64
+	SafeAbortNonceTooLowCount uint64
+	LoggingConfig             logging.Config
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -42,9 +50,17 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 			Order:     ctx.GlobalUint64(flags.OrderFlag.Name),
 			NumWorker: ctx.GlobalInt(flags.KzgWorkersFlag.Name),
 		},
-		LoggingConfig:   logging.ReadCLIConfig(ctx),
-		FromStoreNumber: ctx.GlobalUint64(flags.StartStoreNumFlag.Name),
-		DisableHTTP2:    ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
+		ResubmissionTimeout:       ctx.GlobalDuration(flags.ResubmissionTimeoutFlag.Name),
+		NumConfirmations:          ctx.GlobalUint64(flags.NumConfirmationsFlag.Name),
+		SafeAbortNonceTooLowCount: ctx.GlobalUint64(flags.SafeAbortNonceTooLowCountFlag.Name),
+		LoggingConfig:             logging.ReadCLIConfig(ctx),
+		FromStoreNumber:           ctx.GlobalUint64(flags.StartStoreNumFlag.Name),
+		PollInterval:              ctx.GlobalDuration(flags.PollIntervalFlag.Name),
+		DbPath:                    ctx.GlobalString(flags.DbPathFlag.Name),
+		CheckerBatchIndex:         ctx.GlobalUint64(flags.CheckerBatchIndexFlag.Name),
+		NeedReRollupBatch:         ctx.GlobalString(flags.NeedReRollupBatchFlag.Name),
+		ReRollupToolEnable:        ctx.GlobalBool(flags.ReRollupToolEnableFlag.Name),
+		DisableHTTP2:              ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
 	}
 	return cfg, nil
 }

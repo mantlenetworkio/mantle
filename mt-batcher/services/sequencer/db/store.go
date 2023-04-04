@@ -19,8 +19,8 @@ func NewStore(path string) (*Store, error) {
 	}, nil
 }
 
-func (s *Store) GetLatestBatchIndex() (uint64, bool) {
-	key := []byte("BatchIndex")
+func (s *Store) GetReRollupBatchIndex() (uint64, bool) {
+	key := []byte("ReRollupBatchIndex")
 	data, err := s.db.Get(key)
 	if err != nil {
 		return 0, false
@@ -29,8 +29,8 @@ func (s *Store) GetLatestBatchIndex() (uint64, bool) {
 	return bn, true
 }
 
-func (s *Store) SetLatestBatchIndex(bn uint64) bool {
-	key := []byte("BatchIndex")
+func (s *Store) SetReRollupBatchIndex(bn uint64) bool {
+	key := []byte("ReRollupBatchIndex")
 	data := toByteArray(bn)
 	err := s.db.Put(key, data)
 	return err == nil
