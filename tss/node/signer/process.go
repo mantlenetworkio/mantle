@@ -47,7 +47,7 @@ type Processor struct {
 	keygenRequestChan         chan tdtypes.RPCRequest
 	askRollBackChan           chan tdtypes.RPCRequest
 	signRollBackChan          chan tdtypes.RPCRequest
-	waitSignLock              *sync.Mutex
+	waitSignLock              *sync.RWMutex
 	waitSignMsgs              map[string]common.SignStateRequest
 	waitSignSlashLock         *sync.RWMutex
 	waitSignSlashMsgs         map[string]map[uint64]common.SlashRequest
@@ -122,7 +122,7 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 		keygenRequestChan:         make(chan tdtypes.RPCRequest, 1),
 		askRollBackChan:           make(chan tdtypes.RPCRequest, 1),
 		signRollBackChan:          make(chan tdtypes.RPCRequest, 1),
-		waitSignLock:              &sync.Mutex{},
+		waitSignLock:              &sync.RWMutex{},
 		waitSignMsgs:              make(map[string]common.SignStateRequest),
 		waitSignSlashLock:         &sync.RWMutex{},
 		waitSignSlashMsgs:         make(map[string]map[uint64]common.SlashRequest),
