@@ -3,7 +3,6 @@ package sequencer
 import (
 	"errors"
 	"fmt"
-
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 )
 
@@ -79,7 +78,6 @@ func GenSequencerBatchParams(
 	blockOffset uint64,
 	batch []BatchElement,
 ) (*AppendSequencerBatchParams, error) {
-
 	var (
 		contexts               []BatchContext
 		groupedBlocks          []groupedBlock
@@ -88,7 +86,6 @@ func GenSequencerBatchParams(
 		lastTimestamp          uint64
 		lastBlockNumber        uint64
 	)
-
 	// Iterate over the batch elements, grouping the elements according to
 	// the following criteria:
 	//  - All txs in the same group must have the same timestamp.
@@ -182,7 +179,6 @@ func GenSequencerBatchParams(
 			BlockNumber:           blockNumber,
 		})
 	}
-
 	return &AppendSequencerBatchParams{
 		ShouldStartAtElement:  shouldStartAtElement - blockOffset,
 		TotalElementsToAppend: uint64(len(batch)),

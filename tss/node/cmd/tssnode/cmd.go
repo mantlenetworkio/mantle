@@ -41,7 +41,6 @@ func Command() *cobra.Command {
 }
 
 func runNode(cmd *cobra.Command) error {
-	serverPort, _ := cmd.Flags().GetString("port")
 	nonProd, _ := cmd.Flags().GetBool("non-prod")
 	waitPeersFullConnected, _ := cmd.Flags().GetBool("full")
 	cfg := tss.GetConfigFromCmd(cmd)
@@ -119,7 +118,7 @@ func runNode(cmd *cobra.Command) error {
 	}
 	signer.Start()
 
-	hs := server.NewHttpServer(":"+serverPort, tssInstance, signer, nonProd)
+	hs := server.NewHttpServer(cfg.Node.HttpAddr, tssInstance, signer, nonProd)
 
 	if err := hs.Start(); err != nil {
 		log.Error().Err(err).Msg("fail to start http server")

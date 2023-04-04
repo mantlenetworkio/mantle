@@ -70,6 +70,7 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.Eth1CanonicalTransactionChainDeployHeightFlag,
 			utils.RollupClientHttpFlag,
 			utils.RollupEnableVerifierFlag,
+			utils.RollupMpcVerifierFlag,
 			utils.RollupTimstampRefreshFlag,
 			utils.RollupPollIntervalFlag,
 			utils.RollupMaxCalldataSizeFlag,
@@ -79,6 +80,8 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.RollupFeeThresholdUpFlag,
 			utils.RollupGenesisTimeoutSecondsFlag,
 			utils.SequencerClientHttpFlag,
+			utils.RollupEigenClientHttpFlag,
+			utils.L1MsgSenderFlage,
 		},
 	},
 	{

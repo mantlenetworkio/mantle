@@ -22,6 +22,43 @@ export interface EnqueueEntry {
   timestamp: number
 }
 
+export interface DataStoreEntry {
+  index: number
+  dataStoreId: string
+  storeNumber: string
+  durationDataStoreId: string
+  dataCommitment: string
+  msgHash: string
+  stakesFromBlockNumber: string
+  initTime: string
+  expireTime: number
+  duration: number
+  numSys: string
+  numPar: string
+  degree: string
+  storePeriodLength: string
+  fee: string
+  confirmer: string
+  header: string
+  initTxHash: string
+  initGasUsed: string
+  initBlockNumber: string
+  confirmed: string
+  ethSigned: string
+  eigenSigned: string
+  nonSignerPubKeyHashes: string
+  signatoryRecord: string
+  confirmTxHash: string
+  confirmGasUsed: string
+}
+
+export interface TransactionListEntry {
+  index: number
+  txIndex: number
+  blockNumber: string
+  txHash: string
+}
+
 export interface TransactionEntry {
   index: number
   batchIndex: number
@@ -36,6 +73,13 @@ export interface TransactionEntry {
   queueIndex: number | null
   decoded: DecodedSequencerBatchTransaction | null
   confirmed: boolean
+}
+
+export interface RollupStoreEntry {
+  index: number
+  data_store_id: number
+  status: string
+  confirm_at: number
 }
 
 interface BatchEntry {

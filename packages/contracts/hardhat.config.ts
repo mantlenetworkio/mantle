@@ -271,6 +271,15 @@ const config: HardhatUserConfig = {
     sccSequencerPublishWindowSeconds: {
       type: 'number',
     },
+    blockStaleMeasure: {
+      type: 'number',
+    },
+    daFraudProofPeriod: {
+      type: 'number',
+    },
+    l2SubmittedBlockNumber: {
+      type: 'number',
+    },
     bvmSequencerAddress: {
       type: 'address',
     },
@@ -301,6 +310,10 @@ const config: HardhatUserConfig = {
     },
     bvmEigenSequencerAddress: {
       type: 'address',
+    },
+    sccAddress: {
+      type: 'address',
+      default: 0,
     },
     gasPriceOracleOverhead: {
       type: 'number',
@@ -347,6 +360,8 @@ if (
     url: process.env.CONTRACTS_RPC_URL,
     live: true,
     saveDeployments: true,
+    gas: 'auto',
+    gasPrice: 'auto',
     tags: [process.env.CONTRACTS_TARGET_NETWORK],
   }
 }

@@ -8,10 +8,11 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/rs/zerolog"
+
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
 	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
-	"github.com/rs/zerolog"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
@@ -127,7 +128,8 @@ func (p *Processor) SignSlash() {
 }
 
 func (p *Processor) checkSlashMessages(sign tsscommon.SlashRequest) error {
-
+	p.waitSignSlashLock.RLock()
+	defer p.waitSignSlashLock.RUnlock()
 	v, ok := p.waitSignSlashMsgs[sign.Address.String()]
 	if !ok {
 		return errors.New("slash sign request has not been verified")

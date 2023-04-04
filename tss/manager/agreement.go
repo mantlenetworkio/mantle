@@ -26,13 +26,13 @@ func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Me
 	if err != nil {
 		return types.Context{}, err
 	}
-	log.Info("agreement begin", "request", string(requestBz))
+	log.Info("agreement begin")
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
 	errSendChan := make(chan struct{})
 	expectedResponseCount := len(ctx.AvailableNodes())
-	maxAllowedLostCount := len(ctx.AvailableNodes()) - ctx.TssInfos().Threshold - 1
+	maxAllowedLostCount := len(ctx.AvailableNodes())
 	results := make(map[string]bool) // node -> true/false
 	go func() {
 		cctx, cancel := context.WithTimeout(context.Background(), m.askTimeout)

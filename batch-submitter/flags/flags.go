@@ -46,6 +46,18 @@ var (
 		Required: true,
 		EnvVar:   "TSS_CLIENT_RPC",
 	}
+	DaAddressFlag = cli.StringFlag{
+		Name:     "da-address",
+		Usage:    "Address of the da contract",
+		Required: true,
+		EnvVar:   "DA_ADDRESS",
+	}
+	DaUpgradeBlockFlag = cli.Uint64Flag{
+		Name:     "da-upgrade-block",
+		Usage:    "eigen layer upgrade block",
+		Required: true,
+		EnvVar:   prefixEnvVar("DA_UPGRADE_BLOCK"),
+	}
 	CTCAddressFlag = cli.StringFlag{
 		Name:     "ctc-address",
 		Usage:    "Address of the CTC contract",
@@ -275,6 +287,8 @@ var requiredFlags = []cli.Flag{
 	L1EthRpcFlag,
 	L2EthRpcFlag,
 	TssClientUrl,
+	DaAddressFlag,
+	DaUpgradeBlockFlag,
 	CTCAddressFlag,
 	SCCAddressFlag,
 	FPRollupAddressFlag,
