@@ -339,8 +339,9 @@ github.com/deckarep/golang-set/v2 v2.1.0 h1:g47V4Or+DUdzbs8FxCCmgb6VYd+ptPAngjM6
 github.com/deckarep/golang-set/v2 v2.1.0/go.mod h1:VAky9rY/yGXJOLEDv3OMci+7wtDpOF4IN+y82NBOac4=
 github.com/decred/dcrd/crypto/blake256 v1.0.0 h1:/8DMNYp9SGi5f0w7uCm6d6M4OU2rGFK09Y2A4Xv7EE0=
 github.com/decred/dcrd/crypto/blake256 v1.0.0/go.mod h1:sQl2p6Y26YV+ZOcSTP6thNdn47hh8kt6rqSlvmrXFAc=
-github.com/decred/dcrd/dcrec/edwards/v2 v2.0.0 h1:E5KszxGgpjpmW8vN811G6rBAZg0/S/DftdGqN4FW5x4=
 github.com/decred/dcrd/dcrec/edwards/v2 v2.0.0/go.mod h1:d0H8xGMWbiIQP7gN3v2rByWUcuZPm9YsgmnfoxgbINc=
+github.com/decred/dcrd/dcrec/edwards/v2 v2.0.1 h1:V6eqU1crZzuoFT4KG2LhaU5xDSdkHuvLQsj25wd7Wb4=
+github.com/decred/dcrd/dcrec/edwards/v2 v2.0.1/go.mod h1:d0H8xGMWbiIQP7gN3v2rByWUcuZPm9YsgmnfoxgbINc=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1/go.mod h1:hyedUtir6IdtD/7lIxGeCxkaw7y45JueMRL4DIyJDKs=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 h1:HbphB4TFFXpv7MNrT52FGrrgVXF1owhMVTHFZIlnvd4=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0/go.mod h1:DZGJHZMqrU4JJqFAWUS2UO1+lbSKsdiOoYi9Zzey7Fc=
@@ -1017,6 +1018,8 @@ github.com/mailru/easyjson v0.0.0-20190614124828-94de47d64c63/go.mod h1:C1wdFJiN
 github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
 github.com/mantlenetworkio/go-ethereum-hdwallet v0.1.4 h1:i/KYaaO4JmPgJ5gJ0k5etcKhtZnhtqyBt7QYx4F1Ry4=
 github.com/mantlenetworkio/go-ethereum-hdwallet v0.1.4/go.mod h1:0BdK23/GCg4CeZC4Ez866TV+t0BKlJlTOue/LJJpCGM=
+github.com/mantlenetworkio/mantle/tss v0.0.0-20230313034302-2b6d5400976e h1:VwBYvkwjZd/v/SrzT2dsAuO0BD4rgDSEb8/w1qmuduw=
+github.com/mantlenetworkio/mantle/tss v0.0.0-20230313034302-2b6d5400976e/go.mod h1:qvXfxYRKoK8TzqDTpS5F0Qhf+zq4fc+LzJsaZ5kTRvo=
 github.com/mantlenetworkio/mt-geth v0.0.0-20230312080159-f956b531c3d2 h1:0zLw7d3anMvtRBDMsYH0zlGcBbeQesnbyLxl/1q15zw=
 github.com/mantlenetworkio/mt-geth v0.0.0-20230312080159-f956b531c3d2/go.mod h1:/tjlXxOaovIyuF0l6+wCzr6AtDb3lYWTymmpQAQcqu8=
 github.com/maratori/testpackage v1.1.0/go.mod h1:PeAhzU8qkCwdGEMTEupsHJNlQu2gZopMC6RjbhmHeDc=

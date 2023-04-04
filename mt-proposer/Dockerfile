@@ -10,6 +10,7 @@ COPY ./mt-bindings /app/mt-bindings
 COPY ./mt-node /app/mt-node
 COPY ./mt-service /app/mt-service
 COPY ./mt-signer /app/mt-signer
+COPY ./mt-tss /app/mt-tss
 COPY ./go.mod /app/go.mod
 COPY ./go.sum /app/go.sum
 COPY ./.git /app/.git

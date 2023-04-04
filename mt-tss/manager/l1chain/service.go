@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/influxdata/influxdb/pkg/slices"
-	"github.com/mantlenetworkio/mantle/mt-tss/bindings/tgm"
+	"github.com/mantlenetworkio/mantle/mt-bindings/bindings"
 	tss "github.com/mantlenetworkio/mantle/mt-tss/common"
 	"github.com/mantlenetworkio/mantle/mt-tss/manager/types"
 	"github.com/mantlenetworkio/mantle/mt-tss/slash"
@@ -20,7 +20,7 @@ import (
 
 type QueryService struct {
 	ethClient             *ethclient.Client
-	tssGroupManagerCaller *tgm.TssGroupManagerCaller
+	tssGroupManagerCaller *bindings.TssGroupManagerCaller
 	confirmBlocks         uint64
 	slashingStore         slash.SlashingStore
 }
@@ -30,7 +30,7 @@ func NewQueryService(url, tssGroupContractAddress string, confirmBlocks int, sto
 	if err != nil {
 		panic(err)
 	}
-	tssGroupManagerCaller, err := tgm.NewTssGroupManagerCaller(common.HexToAddress(tssGroupContractAddress), cli)
+	tssGroupManagerCaller, err := bindings.NewTssGroupManagerCaller(common.HexToAddress(tssGroupContractAddress), cli)
 	if err != nil {
 		panic(err)
 	}

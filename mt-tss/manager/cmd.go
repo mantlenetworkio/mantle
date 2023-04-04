@@ -44,7 +44,7 @@ func run(cmd *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-	observer, err := index.NewIndexer(managerStore, config.L1Url, config.L1ConfirmBlocks, config.SccContractAddress, config.TimedTaskInterval)
+	observer, err := index.NewIndexer(managerStore, config.L1Url, config.L1ConfirmBlocks, config.L2ooContractAddress, config.TimedTaskInterval)
 	if err != nil {
 		return err
 	}

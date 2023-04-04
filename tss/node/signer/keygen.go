@@ -11,7 +11,7 @@ import (
 	etht "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
+	"github.com/mantlenetworkio/mantle/mt-bindings/bindings"
 	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keygen"
@@ -103,14 +103,14 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 	address := ethc.HexToAddress(p.tssGroupManagerAddress)
 	//new tss group manager contract parsed
 	parsed, err := abi.JSON(strings.NewReader(
-		tgm.TssGroupManagerABI,
+		bindings.TssGroupManagerABI,
 	))
 	if err != nil {
 		p.logger.Err(err).Msg("Unable to new parsed from tss group manager contract abi")
 		return err
 	}
 	//get tss group manager abi
-	tgmABI, err := tgm.TssGroupManagerMetaData.GetAbi()
+	tgmABI, err := bindings.TssGroupManagerMetaData.GetAbi()
 	if err != nil {
 		p.logger.Err(err).Msg("Unable to get tss group manager contract abi")
 		return err

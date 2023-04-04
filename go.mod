@@ -34,6 +34,7 @@ require (
 	github.com/libp2p/go-libp2p-pubsub v0.9.0
 	github.com/libp2p/go-libp2p-testing v0.12.0
 	github.com/mantlenetworkio/go-ethereum-hdwallet v0.1.4
+	github.com/mantlenetworkio/mantle/tss v0.0.0-20230313034302-2b6d5400976e
 	github.com/mattn/go-isatty v0.0.17
 	github.com/multiformats/go-multiaddr v0.8.0
 	github.com/multiformats/go-multiaddr-dns v0.3.1
@@ -67,7 +68,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.1.1 // indirect
 	github.com/aws/smithy-go v1.13.5 // indirect
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce // indirect
-	github.com/decred/dcrd/dcrec/edwards/v2 v2.0.0 // indirect
+	github.com/decred/dcrd/dcrec/edwards/v2 v2.0.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect

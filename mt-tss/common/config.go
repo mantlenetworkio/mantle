@@ -15,7 +15,7 @@ type Configuration struct {
 	Manager                        ManagerConfig `json:"manager"`
 	Node                           NodeConfig    `json:"node"`
 	L1Url                          string        `json:"l1_url" mapstructure:"l1_url"`
-	SccContractAddress             string        `json:"scc_contract_address" mapstructure:"scc_contract_address"`
+	L2ooContractAddress            string        `json:"l2oo_contract_address" mapstructure:"l2oo_contract_address"`
 	TssGroupContractAddress        string        `json:"tss_group_contract_address" mapstructure:"tss_group_contract_address"`
 	TssStakingSlashContractAddress string        `json:"tss_staking_slash_contract_address" mapstructure:"tss_staking_slash_contract_address"`
 	TimedTaskInterval              string        `json:"timed_task_interval" mapstructure:"timed_task_interval"`
