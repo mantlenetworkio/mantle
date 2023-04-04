@@ -40,31 +40,6 @@ describe('RollUp', () => {
     txHash: ctx.txnHash,
   }
 
-
-  const tx = [
-    ctx.txNonce,
-    ctx.gasPrice,
-    ctx.gas,
-    ctx.recipient,
-    ctx.value,
-    ctx.input,
-    ctx.txV,
-    ctx.txR,
-    ctx.txS,
-  ]
-
-  const ctxCall = {
-    coinbase: ctx.coinbase,
-    timestamp: ctx.timestamp,
-    number: ctx.blockNumber,
-    origin: ctx.origin,
-    transaction: tx,
-    inputRoot:
-      '0x0000000000000000000000000000000000000000000000000000000000000000',
-    txHash: ctx.txnHash,
-  }
-
-
   before('setup', async () => {
     accounts = await ethers.getSigners()
     await deployAddressManager()
@@ -117,16 +92,10 @@ describe('RollUp', () => {
     )
     expect(await rollUp.lastCreatedAssertionID()).to.eq(1)
 
-    await rollUp.createAssertion(
-      '0x0000000000000000000000000000000000000000000000000000000000000001',
-      2
-    )
+    await rollUp.createAssertion(proof.currHash, 2)
     expect(await rollUp.lastCreatedAssertionID()).to.eq(2)
 
-    await rollUp.createAssertion(
-      '0x0000000000000000000000000000000000000000000000000000000000000001',
-      3
-    )
+    await rollUp.createAssertion(proof.nextHash, 3)
 
     expect(await rollUp.lastCreatedAssertionID()).to.eq(3)
 
@@ -135,13 +104,13 @@ describe('RollUp', () => {
       4
     )
     expect(await rollUp.lastCreatedAssertionID()).to.eq(4)
-    await rollUp.connect(await accounts[3]).stake({ value: 1000 })
+    await rollUp.connect(await accounts[3]).stake({ value: 100000 })
     await rollUp.connect(await accounts[3]).advanceStake(1)
     await rollUp.connect(await accounts[3]).advanceStake(2)
     await rollUp
       .connect(await accounts[3])
       .createAssertion(
-        '0x0000000000000000000000000000000000000000000000000000000000000002',
+        '0x0000000000000000000000000000000000000000000000000000000000000001',
         3
       )
     expect(await rollUp.lastCreatedAssertionID()).to.eq(5)
@@ -175,9 +144,8 @@ describe('RollUp', () => {
   })
 
   it('verifyOneStepProof', async () => {
-    const winnerAddr = await accounts[3].getAddress()
-    const loserAddr = await accounts[0].getAddress()
-    const ownerAddr = await accounts[1].getAddress()
+    const winnerAddr = await accounts[0].getAddress()
+    const loserAddr = await accounts[3].getAddress()
 
     const challengeImp = await deploy('Challenge')
     const challengeAddr = (await rollUp.stakers(winnerAddr)).currentChallenge
@@ -186,33 +154,28 @@ describe('RollUp', () => {
       challengeImp.interface,
       accounts[0]
     )
-    await challenge.initializeChallengeLength(1)
-    const winnerAmount = (
-      await rollUp.stakers(winnerAddr)
-    ).amountStaked.toNumber()
+    await challenge.initializeChallengeLength(
+      '0x0000000000000000000000000000000000000000000000000000000000000011',
+      2
+    )
     const loserAmount = (
       await rollUp.stakers(loserAddr)
     ).amountStaked.toNumber()
-    const withdrawLoser = loserAmount - winnerAmount
 
     await challenge.connect(accounts[3]).verifyOneStepProof(
+      ctxCall,
+      proof.verifier,
       proof.proof, // proof
       1, // challengedStepIndex
-      [await assertionMap.getStateHash(2), await assertionMap.getStateHash(3)], // prevBisection
       0, // prevChallengedSegmentStart
-      1 // prevChallengedSegmentLength
+      2 // prevChallengedSegmentLength
     )
+    await challenge.completeChallenge(true)
     // check amount
-    expect(await rollUp.withdrawableFunds(loserAddr)).to.eq(withdrawLoser)
-    expect(await rollUp.withdrawableFunds(ownerAddr)).to.eq(
-      loserAmount - withdrawLoser - (loserAmount - withdrawLoser) / 2
-    )
-    expect((await rollUp.stakers(winnerAddr)).amountStaked.toNumber()).to.eq(
-      (loserAmount - withdrawLoser) / 2 + winnerAmount
-    )
+    expect(await rollUp.withdrawableFunds(loserAddr)).to.eq(loserAmount - 100)
     expect(await rollUp.isStaked(loserAddr)).to.eq(false)
     expect((await rollUp.zombies(0)).stakerAddress).to.eq(loserAddr)
-    expect((await rollUp.zombies(0)).lastAssertionID.toNumber()).to.eq(4)
+    expect((await rollUp.zombies(0)).lastAssertionID.toNumber()).to.eq(5)
   })
 
   const deployToken = async () => {
@@ -223,6 +186,12 @@ describe('RollUp', () => {
     const rollUpImp = await deploy('Rollup')
     assertionMap = await deploy('AssertionMap')
 
+    const whitelists = [
+      await accounts[0].getAddress(),
+      await accounts[1].getAddress(),
+      await accounts[2].getAddress(),
+      await accounts[3].getAddress(),
+    ]
     const rollupArgs = [
       await accounts[1].getAddress(), // roll up owner
       verifier.address, // verifier
@@ -234,6 +203,7 @@ describe('RollUp', () => {
       0, // minimum assertion period
       100, // baseStakeAmount
       '0x0000000000000000000000000000000000000000000000000000000000000000', // initialVMhash
+      whitelists,
     ]
 
     const callData = rollUpImp.interface.encodeFunctionData(
