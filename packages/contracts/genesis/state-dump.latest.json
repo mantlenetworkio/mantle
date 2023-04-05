@@ -17,6 +17,7 @@
     "muirGlacierBlock": 0,
     "berlinBlock": 0,
     "updateGaslimitBlock": 10,
+    "eigenDaBlock": 100,
     "clique": {
       "period": 0,
       "epoch": 30000
