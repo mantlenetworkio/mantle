@@ -33,7 +33,7 @@ if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
 
   # todo: remove
   # fraud proof verifier deploy
-  DEPLOY_VERIFIER="npx hardhat deployVerifier --address 0x86E10B59cFDFeFBCf3ED5b40D018949CbFCE8B59 --network $CONTRACTS_TARGET_NETWORK"
+  DEPLOY_VERIFIER="npx hardhat deployVerifier --address 0x86E10B59cFDFeFBCf3ED5b40D018949CbFCE8B59"
 
   echo "Deploying contracts. Deployment command:"
   echo "$DEPLOY_CMD"
