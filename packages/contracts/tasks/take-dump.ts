@@ -52,6 +52,12 @@ task('take-dump').setAction(async (args, hre) => {
       decimals: hre.deployConfig.gasPriceOracleDecimals,
       isBurning: hre.deployConfig.gasPriceOracleIsBurning,
       charge: hre.deployConfig.gasPriceOracleCharge,
+      sccAddress: (
+        await getContractFromArtifact(
+          hre,
+          names.managed.contracts.StateCommitmentChain
+        )
+      ).address,
     },
     L2StandardBridge: {
       l1TokenBridge: (
@@ -156,33 +162,68 @@ task('take-dump').setAction(async (args, hre) => {
     commit = '0000000000000000000000000000000000000000'
   }
 
-  const genesis = {
-    commit,
-    config: {
-      chainId: hre.deployConfig.l2ChainId,
-      homesteadBlock: 0,
-      eip150Block: 0,
-      eip155Block: 0,
-      eip158Block: 0,
-      byzantiumBlock: 0,
-      constantinopleBlock: 0,
-      petersburgBlock: 0,
-      istanbulBlock: 0,
-      muirGlacierBlock: 0,
-      berlinBlock: hre.deployConfig.hfBerlinBlock,
-      clique: {
-        period: 0,
-        epoch: 30000,
+  let genesis;
+  //if hre.deployConfig.l2ChainId === 5000, it is mainnet
+  //we needn't import it
+  if (hre.deployConfig.l2ChainId === 5000) {
+    genesis = {
+      commit,
+      config: {
+        chainId: hre.deployConfig.l2ChainId,
+        homesteadBlock: 0,
+        eip150Block: 0,
+        eip155Block: 0,
+        eip158Block: 0,
+        byzantiumBlock: 0,
+        constantinopleBlock: 0,
+        petersburgBlock: 0,
+        istanbulBlock: 0,
+        muirGlacierBlock: 0,
+        berlinBlock: hre.deployConfig.hfBerlinBlock,
+        clique: {
+          period: 0,
+          epoch: 30000,
+        },
       },
-    },
-    difficulty: '1',
-    gasLimit: hre.deployConfig.l2BlockGasLimit.toString(10),
-    extradata:
-      '0x' +
-      '00'.repeat(32) +
-      remove0x(hre.deployConfig.bvmBlockSignerAddress) +
-      '00'.repeat(65),
-    alloc: dump,
+      difficulty: '1',
+      gasLimit: hre.deployConfig.l2BlockGasLimit.toString(10),
+      extradata:
+        '0x' +
+        '00'.repeat(32) +
+        remove0x(hre.deployConfig.bvmBlockSignerAddress) +
+        '00'.repeat(65),
+      alloc: dump,
+    }
+  }else{
+    genesis = {
+      commit,
+      config: {
+        chainId: hre.deployConfig.l2ChainId,
+        homesteadBlock: 0,
+        eip150Block: 0,
+        eip155Block: 0,
+        eip158Block: 0,
+        byzantiumBlock: 0,
+        constantinopleBlock: 0,
+        petersburgBlock: 0,
+        istanbulBlock: 0,
+        muirGlacierBlock: 0,
+        berlinBlock: hre.deployConfig.hfBerlinBlock,
+        updateGaslimitBlock: hre.deployConfig.updateGaslimitBlock,
+        clique: {
+          period: 0,
+          epoch: 30000,
+        },
+      },
+      difficulty: '1',
+      gasLimit: hre.deployConfig.l2BlockGasLimit.toString(10),
+      extradata:
+        '0x' +
+        '00'.repeat(32) +
+        remove0x(hre.deployConfig.bvmBlockSignerAddress) +
+        '00'.repeat(65),
+      alloc: dump,
+    }
   }
 
   // Make sure the output location exists

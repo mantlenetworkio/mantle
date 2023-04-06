@@ -811,10 +811,17 @@ var (
 		Usage:  "Deployment of the canonical transaction chain",
 		EnvVar: "ETH1_CTC_DEPLOYMENT_HEIGHT",
 	}
-	RollupRoleFlag = cli.StringFlag{
-		Name:   "rollup.role",
-		Usage:  "Set rollup node role",
-		EnvVar: "ROLLUP_ROLE",
+	RollupEigenClientHttpFlag = cli.StringFlag{
+		Name:   "rollup.eigenclienthttp",
+		Usage:  "HTTP endpoint for the eigen  client",
+		Value:  "http://localhost:7979",
+		EnvVar: "EIGEN_CLIENT_HTTP",
+	}
+	L1MsgSenderFlage = cli.StringFlag{
+		Name:   "rollup.l1messagesender",
+		Usage:  "l1 message sender for eigen layer handle data",
+		Value:  "0x8A6acf3B8Ffc87FAcA8ad8A1b5d95C0f58c0D009",
+		EnvVar: "L1_MSG_SENDER",
 	}
 	RollupClientHttpFlag = cli.StringFlag{
 		Name:   "rollup.clienthttp",
@@ -834,11 +841,14 @@ var (
 		Value:  time.Minute * 3,
 		EnvVar: "ROLLUP_TIMESTAMP_REFRESH",
 	}
-	// sequencer / verify /schedual
-
+	RollupRoleFlag = cli.StringFlag{
+		Name:   "rollup.role",
+		Usage:  "Set rollup node role",
+		EnvVar: "ROLLUP_ROLE",
+	} // sequencer / verify /schedual
 	RollupBackendFlag = cli.StringFlag{
 		Name:   "rollup.backend",
-		Usage:  "Sync backend for verifiers (\"l1\" or \"l2\"), defaults to l1",
+		Usage:  "Sync backend for verifiers (\"l1\", \"l2\" or \"da\"), defaults to l1",
 		Value:  "l1",
 		EnvVar: "ROLLUP_BACKEND",
 	}
@@ -846,6 +856,11 @@ var (
 		Name:   "rollup.verifier",
 		Usage:  "Enable the verifier",
 		EnvVar: "ROLLUP_VERIFIER_ENABLE",
+	}
+	RollupMpcVerifierFlag = cli.BoolFlag{
+		Name:   "rollup.mpcverifier",
+		Usage:  "Enable the verifier for mpc node",
+		EnvVar: "ROLLUP_VERIFIER_MPC_ENABLE",
 	}
 	RollupMaxCalldataSizeFlag = cli.IntFlag{
 		Name:   "rollup.maxcalldatasize",
@@ -1197,6 +1212,9 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	if ctx.GlobalIsSet(RollupEnforceFeesFlag.Name) {
 		cfg.EnforceFees = ctx.GlobalBool(RollupEnforceFeesFlag.Name)
 	}
+	if ctx.GlobalIsSet(RollupMpcVerifierFlag.Name) {
+		cfg.MpcVerifier = true
+	}
 	if ctx.GlobalIsSet(RollupFeeThresholdDownFlag.Name) {
 		val := ctx.GlobalFloat64(RollupFeeThresholdDownFlag.Name)
 		cfg.FeeThresholdDown = new(big.Float).SetFloat64(val)
@@ -1204,6 +1222,12 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	if ctx.GlobalIsSet(RollupFeeThresholdUpFlag.Name) {
 		val := ctx.GlobalFloat64(RollupFeeThresholdUpFlag.Name)
 		cfg.FeeThresholdUp = new(big.Float).SetFloat64(val)
+	}
+	if ctx.GlobalIsSet(RollupEigenClientHttpFlag.Name) {
+		cfg.EigenClientHttp = ctx.GlobalString(RollupEigenClientHttpFlag.Name)
+	}
+	if ctx.GlobalIsSet(L1MsgSenderFlage.Name) {
+		cfg.L1MsgSender = ctx.GlobalString(L1MsgSenderFlage.Name)
 	}
 	if ctx.GlobalIsSet(SequencerClientHttpFlag.Name) {
 		cfg.SequencerClientHttp = ctx.GlobalString(SequencerClientHttpFlag.Name)

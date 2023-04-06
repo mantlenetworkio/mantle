@@ -158,6 +158,7 @@ var (
 		utils.Eth1CanonicalTransactionChainDeployHeightFlag,
 		utils.RollupClientHttpFlag,
 		utils.RollupEnableVerifierFlag,
+		utils.RollupMpcVerifierFlag,
 		utils.RollupTimstampRefreshFlag,
 		utils.RollupPollIntervalFlag,
 		utils.RollupMaxCalldataSizeFlag,
@@ -168,6 +169,8 @@ var (
 		utils.RollupRoleFlag,
 		utils.RollupGenesisTimeoutSecondsFlag,
 		utils.SequencerClientHttpFlag,
+		utils.RollupEigenClientHttpFlag,
+		utils.L1MsgSenderFlage,
 
 		// fraud proof flags
 		utils.FraudProofL1EndpointFlag,

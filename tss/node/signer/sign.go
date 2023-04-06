@@ -186,10 +186,13 @@ func (p *Processor) checkMessages(sign tsscommon.SignStateRequest) (err error, h
 	}
 	hashStr := hexutil.Encode(hashByte)
 
-	signByte, ok := p.cacheSign.Get(hashStr)
+	signByte, ok := p.GetSign(hashStr)
 	if ok {
 		return nil, hashByte, signByte
 	}
+
+	p.waitSignLock.RLock()
+	defer p.waitSignLock.RUnlock()
 	_, ok = p.waitSignMsgs[hashStr]
 	if !ok {
 		return errors.New("sign request has the unverified state batch"), nil, nil
@@ -261,4 +264,10 @@ func (p *Processor) CacheSign(key string, value []byte) bool {
 	p.cacheSignLock.Lock()
 	defer p.cacheSignLock.Unlock()
 	return p.cacheSign.Set(key, value)
+}
+
+func (p *Processor) GetSign(key string) ([]byte, bool) {
+	p.cacheSignLock.RLock()
+	defer p.cacheSignLock.RUnlock()
+	return p.cacheSign.Get(key)
 }

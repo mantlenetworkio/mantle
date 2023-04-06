@@ -10,6 +10,7 @@ import { L1TransportServer } from '../server/service'
 import { validators } from '../../utils'
 import { L2IngestionService } from '../l2-ingestion/service'
 import { BSS_HF1_INDEX } from '../../config'
+import { DaIngestionService } from "../da-ingestion/service";
 
 export interface L1DataTransportServiceOptions {
   nodeEnv: string
@@ -30,9 +31,17 @@ export interface L1DataTransportServiceOptions {
   dbPath: string
   logsPerPollingInterval: number
   pollingInterval: number
+  daPollingInterval: number
   port: number
   syncFromL1?: boolean
   syncFromL2?: boolean
+  syncToDa?: boolean
+  mtBatcherHost?: string
+  mtBatcherFetchPort?: number
+  eigenUpgradeEnable?: boolean
+  daSyncStep?: number
+  daInitBatch?: number
+
   transactionsPerPollingInterval: number
   legacySequencerCompatibility: boolean
   useSentry?: boolean
@@ -64,6 +73,7 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
     db: LevelUp
     l1IngestionService?: L1IngestionService
     l2IngestionService?: L2IngestionService
+    daIngestionService?:DaIngestionService
     l1TransportServer: L1TransportServer
     metrics: Metrics
     failureCounter: Counter<string>
@@ -124,6 +134,17 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
       })
     }
 
+    if (this.options.syncToDa) {
+      this.state.daIngestionService = new DaIngestionService({
+        ...(this.options as any), // TODO: Correct thing to do here is to assert this type.
+        metrics: this.state.metrics,
+        db: this.state.db,
+      })
+    }
+
+
+
+
     await this.state.l1TransportServer.init()
 
     if (this.options.syncFromL1) {
@@ -133,6 +154,12 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
     if (this.options.syncFromL2) {
       await this.state.l2IngestionService.init()
     }
+
+    if (this.options.syncToDa) {
+      await this.state.daIngestionService.init()
+    }
+
+
   }
 
   protected async _start(): Promise<void> {
@@ -141,6 +168,7 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
         this.state.l1TransportServer.start(),
         this.options.syncFromL1 ? this.state.l1IngestionService.start() : null,
         this.options.syncFromL2 ? this.state.l2IngestionService.start() : null,
+        this.options.syncToDa ? this.state.daIngestionService.start() : null
       ])
     } catch (e) {
       this.state.failureCounter.inc()
@@ -154,6 +182,8 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
         this.state.l1TransportServer.stop(),
         this.options.syncFromL1 ? this.state.l1IngestionService.stop() : null,
         this.options.syncFromL2 ? this.state.l2IngestionService.stop() : null,
+        this.options.syncToDa ? this.state.daIngestionService.stop() : null,
+
       ])
 
       await this.state.db.close()

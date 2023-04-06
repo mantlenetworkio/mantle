@@ -72,21 +72,24 @@ else [ $CONTRACTS_TARGET_NETWORK == "goerli-testnet" ]
   cp -r filenames-testnet.txt filenames.txt
 fi
 
-# Start building addresses.json.
-echo "{" > addresses.json
-# Zip the two files describe above together, then, switch their order and format as JSON.
-paste addresses.txt filenames.txt | awk '{printf "  \"%s\": \"%s\",\n", $2, $1}' >> addresses.json
-# Add the address manager alias.
-echo "\"AddressManager\": \"$ADDRESS_MANAGER_ADDRESS\"" >> addresses.json
-# End addresses.json
-echo "}" >> addresses.json
+# only gen addresses.json in local. Use exist configmap in k8s environment
+if [ $CONTRACTS_TARGET_NETWORK = "local" ] || [ $SKIP_CONTRACT_DEPLOY = "NO"];then
+  # Start building addresses.json.
+  echo "{" > addresses.json
+  # Zip the two files describe above together, then, switch their order and format as JSON.
+  paste addresses.txt filenames.txt | awk '{printf "  \"%s\": \"%s\",\n", $2, $1}' >> addresses.json
+  # Add the address manager alias.
+  echo "\"AddressManager\": \"$ADDRESS_MANAGER_ADDRESS\"" >> addresses.json
+  # End addresses.json
+  echo "}" >> addresses.json
+fi
 
 echo "Built addresses.json. Content:"
 jq . addresses.json
 
 echo "Building dump file."
 npx hardhat take-dump --network $CONTRACTS_TARGET_NETWORK
-mv addresses.json ./genesis
+cp addresses.json ./genesis
 cp ./genesis/$CONTRACTS_TARGET_NETWORK.json ./genesis/state-dump.latest.json
 
 # init balance

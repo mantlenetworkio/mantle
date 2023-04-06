@@ -18,6 +18,12 @@ type Config struct {
 	GasLimit uint64
 	// HTTP endpoint of the data transport layer
 	RollupClientHttp string
+
+	// // HTTP endpoint of the eigen client
+	EigenClientHttp string
+
+	L1MsgSender string
+
 	// Owner of the GasPriceOracle contract
 	GasPriceOracleOwnerAddress common.Address
 	// Turns on checking of state for L2 gas price
@@ -43,4 +49,6 @@ type Config struct {
 	StakeAmount *big.Int
 	// node character
 	RollupRole Role
+
+	MpcVerifier bool
 }

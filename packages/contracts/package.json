@@ -20,7 +20,6 @@
     "build": "yarn build:contracts && yarn autogen:artifacts && yarn build:typescript",
     "build:typescript": "tsc -p ./tsconfig.json",
     "build:contracts": "hardhat compile --show-stack-traces",
-    "gen:bindings": "cd contracts/da/ && ./gen_bindings.sh",
     "autogen:markdown": "ts-node scripts/generate-markdown.ts",
     "autogen:artifacts": "ts-node scripts/generate-artifacts.ts && ts-node scripts/generate-deployed-artifacts.ts",
     "test": "yarn test:contracts",

@@ -215,17 +215,15 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(108), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, new(EthashConfig), nil}
-
+	AllEthashProtocolChanges = &ChainConfig{big.NewInt(108), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), new(EthashConfig), nil}
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(420), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}}
-
-	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, new(EthashConfig), nil}
-	TestRules       = TestChainConfig.Rules(new(big.Int))
+	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(420), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), nil, &CliqueConfig{Period: 0, Epoch: 30000}}
+	TestChainConfig          = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), new(EthashConfig), nil}
+	TestRules                = TestChainConfig.Rules(new(big.Int))
 
 	// OpMainnetChainID is the ID of Mantle's mainnet chain.
 	OpMainnetChainID = big.NewInt(10)
@@ -311,6 +309,8 @@ type ChainConfig struct {
 
 	EWASMBlock *big.Int `json:"ewasmBlock,omitempty"` // EWASM switch block (nil = no fork, 0 = already activated)
 
+	UpdateGaslimitBlock *big.Int `json:"updateGaslimitBlock,omitempty"` //  UpdateGaslimitBlock witch block (nil = no fork, 0 = already activated)
+
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
@@ -360,6 +360,7 @@ func (c *ChainConfig) String() string {
 		c.IstanbulBlock,
 		c.MuirGlacierBlock,
 		c.BerlinBlock,
+		c.UpdateGaslimitBlock,
 		engine,
 	)
 }
@@ -426,6 +427,11 @@ func (c *ChainConfig) IsEWASM(num *big.Int) bool {
 	return isForked(c.EWASMBlock, num)
 }
 
+// ISUpdateGaslimitBlock returns whether num represents a block number after the UpdateGaslimitBlock fork
+func (c *ChainConfig) ISUpdateGaslimitBlock(num *big.Int) bool {
+	return isForked(c.UpdateGaslimitBlock, num)
+}
+
 // IsSDUpdate returns whether num represents a block number after the SD update fork
 func (c *ChainConfig) IsSDUpdate(num *big.Int) bool {
 	if c.ChainID.Cmp(OpMainnetChainID) == 0 {
@@ -474,6 +480,8 @@ func (c *ChainConfig) CheckConfigForkOrder() error {
 		{"istanbulBlock", c.IstanbulBlock},
 		{"muirGlacierBlock", c.MuirGlacierBlock},
 		{name: "berlinBlock", block: c.BerlinBlock},
+		//we needn't to check config fork order for UpdateGaslimitBlock
+		//{name: "UpdateGaslimitBlock", block: c.UpdateGaslimitBlock},
 	} {
 		if lastFork.name != "" {
 			// Next one must be higher number
@@ -535,6 +543,9 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	}
 	if isForkIncompatible(c.EWASMBlock, newcfg.EWASMBlock, head) {
 		return newCompatError("ewasm fork block", c.EWASMBlock, newcfg.EWASMBlock)
+	}
+	if isForkIncompatible(c.UpdateGaslimitBlock, newcfg.UpdateGaslimitBlock, head) {
+		return newCompatError("UpdateGaslimitBlock fork block", c.UpdateGaslimitBlock, newcfg.UpdateGaslimitBlock)
 	}
 	return nil
 }
@@ -603,7 +614,12 @@ type Rules struct {
 	ChainID                                                 *big.Int
 	IsHomestead, IsEIP150, IsEIP155, IsEIP158               bool
 	IsByzantium, IsConstantinople, IsPetersburg, IsIstanbul bool
+<<<<<<< HEAD
 	IsBerlin, IsLondon                                      bool
+=======
+	IsBerlin                                                bool
+	ISUpdateGaslimitBlock                                   bool
+>>>>>>> origin/release/v0.3.1
 }
 
 // Rules ensures c's ChainID is not nil.
@@ -613,15 +629,16 @@ func (c *ChainConfig) Rules(num *big.Int) Rules {
 		chainID = new(big.Int)
 	}
 	return Rules{
-		ChainID:          new(big.Int).Set(chainID),
-		IsHomestead:      c.IsHomestead(num),
-		IsEIP150:         c.IsEIP150(num),
-		IsEIP155:         c.IsEIP155(num),
-		IsEIP158:         c.IsEIP158(num),
-		IsByzantium:      c.IsByzantium(num),
-		IsConstantinople: c.IsConstantinople(num),
-		IsPetersburg:     c.IsPetersburg(num),
-		IsIstanbul:       c.IsIstanbul(num),
-		IsBerlin:         c.IsBerlin(num),
+		ChainID:               new(big.Int).Set(chainID),
+		IsHomestead:           c.IsHomestead(num),
+		IsEIP150:              c.IsEIP150(num),
+		IsEIP155:              c.IsEIP155(num),
+		IsEIP158:              c.IsEIP158(num),
+		IsByzantium:           c.IsByzantium(num),
+		IsConstantinople:      c.IsConstantinople(num),
+		IsPetersburg:          c.IsPetersburg(num),
+		IsIstanbul:            c.IsIstanbul(num),
+		IsBerlin:              c.IsBerlin(num),
+		ISUpdateGaslimitBlock: c.ISUpdateGaslimitBlock(num),
 	}
 }
