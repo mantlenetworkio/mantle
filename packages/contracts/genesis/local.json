@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
-    "commit": "c61a1efdc8517d02ad7a7d5ac64b4eb39a4e4e61",
-=======
-    "commit": "7accccb28a63b7701eaa79033c1aeb914b3395b3",
->>>>>>> feature/ctc-rollup-switch-to-eigenlayer
+    "commit": "5b513b5df2e16d5915c379ebdc96898de34db7bb",
     "config": {
         "chainId": 17,
         "homesteadBlock": 0,

@@ -28,6 +28,7 @@ require (
 )
 
 require (
+	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
 )
 
