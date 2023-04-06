@@ -20,8 +20,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/log"
-
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/ctc"
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/scc"
 	tssClient "github.com/mantlenetworkio/mantle/batch-submitter/tss-client"
@@ -57,18 +55,18 @@ type Config struct {
 }
 
 type Driver struct {
-	cfg            Config
-	sccContract    *scc.StateCommitmentChain
-	rawSccContract *bind.BoundContract
-	ctcContract    *ctc.CanonicalTransactionChain
-	fpRollup       *fpbindings.Rollup
-	rawFPContract  *bind.BoundContract
-	fpAssertion    *fpbindings.AssertionMap
-	walletAddr     common.Address
+	cfg                  Config
+	sccContract          *scc.StateCommitmentChain
+	rawSccContract       *bind.BoundContract
+	ctcContract          *ctc.CanonicalTransactionChain
+	fpRollup             *fpbindings.Rollup
+	rawFPContract        *bind.BoundContract
+	fpAssertion          *fpbindings.AssertionMap
+	walletAddr           common.Address
 	rollbackEndBlock     *big.Int
 	rollbackEndStateRoot [stateRootSize]byte
-	once           sync.Once
-	metrics        *metrics.Base
+	once                 sync.Once
+	metrics              *metrics.Base
 }
 
 func NewDriver(cfg Config) (*Driver, error) {
@@ -129,19 +127,18 @@ func NewDriver(cfg Config) (*Driver, error) {
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
 
 	return &Driver{
-<<<<<<< HEAD
-		cfg:            cfg,
-		sccContract:    sccContract,
-		rawSccContract: rawSccContract,
-		ctcContract:    ctcContract,
-		fpRollup:       fpRollup,
-		rawFPContract:  rawFPContract,
-		fpAssertion:    assertionMap,
-		walletAddr:     walletAddr,
+		cfg:                  cfg,
+		sccContract:          sccContract,
+		rawSccContract:       rawSccContract,
+		ctcContract:          ctcContract,
+		fpRollup:             fpRollup,
+		rawFPContract:        rawFPContract,
+		fpAssertion:          assertionMap,
+		walletAddr:           walletAddr,
 		rollbackEndBlock:     big.NewInt(0),
 		rollbackEndStateRoot: [stateRootSize]byte{},
-		once:           sync.Once{},
-		metrics:        metrics.NewBase("batch_submitter", cfg.Name),
+		once:                 sync.Once{},
+		metrics:              metrics.NewBase("batch_submitter", cfg.Name),
 	}, nil
 }
 

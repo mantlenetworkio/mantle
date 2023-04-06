@@ -614,12 +614,8 @@ type Rules struct {
 	ChainID                                                 *big.Int
 	IsHomestead, IsEIP150, IsEIP155, IsEIP158               bool
 	IsByzantium, IsConstantinople, IsPetersburg, IsIstanbul bool
-<<<<<<< HEAD
 	IsBerlin, IsLondon                                      bool
-=======
-	IsBerlin                                                bool
 	ISUpdateGaslimitBlock                                   bool
->>>>>>> origin/release/v0.3.1
 }
 
 // Rules ensures c's ChainID is not nil.

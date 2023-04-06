@@ -57,9 +57,5 @@ mantle.iml
 
 ops/data/**
 dist/
-<<<<<<< HEAD
 packages/contracts/test/data/
-=======
-
 packages/contracts/abi/
->>>>>>> origin/release/v0.3.1
