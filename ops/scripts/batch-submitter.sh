@@ -22,7 +22,9 @@ fi
 
 
 # waits for l2geth to be up
-curl --fail \
+curl -XPOST \
+    -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+    --fail \
     --show-error \
     --silent \
     --retry-connrefused \

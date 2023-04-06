@@ -46,14 +46,14 @@ type Processor struct {
 	signSlashChan             chan tdtypes.RPCRequest
 	keygenRequestChan         chan tdtypes.RPCRequest
 	askRollBackChan           chan tdtypes.RPCRequest
-	signRollBackChan          chan tdtypes.RPCRequest
-	waitSignLock              *sync.Mutex
+	signRollBachChan          chan tdtypes.RPCRequest
+	waitSignLock              *sync.RWMutex
 	waitSignMsgs              map[string]common.SignStateRequest
-	waitSignSlashLock         *sync.Mutex
+	waitSignSlashLock         *sync.RWMutex
 	waitSignSlashMsgs         map[string]map[uint64]common.SlashRequest
-	cacheVerifyLock           *sync.Mutex
+	cacheVerifyLock           *sync.RWMutex
 	cacheVerify               *types.Cache[string, bool]
-	cacheSignLock             *sync.Mutex
+	cacheSignLock             *sync.RWMutex
 	cacheSign                 *types.Cache[string, []byte]
 	nodeStore                 types.NodeStore
 	logger                    zerolog.Logger
@@ -122,13 +122,13 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 		keygenRequestChan:         make(chan tdtypes.RPCRequest, 1),
 		askRollBackChan:           make(chan tdtypes.RPCRequest, 1),
 		signRollBackChan:          make(chan tdtypes.RPCRequest, 1),
-		waitSignLock:              &sync.Mutex{},
+		waitSignLock:              &sync.RWMutex{},
 		waitSignMsgs:              make(map[string]common.SignStateRequest),
-		waitSignSlashLock:         &sync.Mutex{},
+		waitSignSlashLock:         &sync.RWMutex{},
 		waitSignSlashMsgs:         make(map[string]map[uint64]common.SlashRequest),
-		cacheVerifyLock:           &sync.Mutex{},
-		cacheVerify:               types.NewCache[string, bool](50),
-		cacheSignLock:             &sync.Mutex{},
+		cacheVerifyLock:           &sync.RWMutex{},
+		cacheVerify:               types.NewCache[string, bool](1000),
+		cacheSignLock:             &sync.RWMutex{},
 		cacheSign:                 types.NewCache[string, []byte](10),
 		nodeStore:                 nodeStore,
 		tssGroupManagerAddress:    cfg.TssGroupContractAddress,

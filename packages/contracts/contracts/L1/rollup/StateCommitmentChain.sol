@@ -49,6 +49,16 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         SEQUENCER_PUBLISH_WINDOW = _sequencerPublishWindow;
     }
 
+    function setFraudProofWindow(uint256 _fraudProofWindow) public {
+        // Proposers must have previously staked at the BondManager
+        require(
+            IBondManager(resolve("BondManager")).isCollateralized(msg.sender),
+            "Proposer does not have enough collateral posted"
+        );
+
+        FRAUD_PROOF_WINDOW = _fraudProofWindow;
+    }
+
     /********************
      * Public Functions *
      ********************/
@@ -202,14 +212,6 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         _checkRollBackSignature(_shouldRollBack,_signature);
 
     }
-
-
-    /**
-    * @inheritdoc IStateCommitmentChain
-     */
-    // slither-disable-next-line external-function
-    function rollBackMessage(uint256 _shouldRollBack) public {}
-
 
     /**********************
      * Internal Functions *
@@ -415,10 +417,9 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         );
 
 
-        // construct calldata for claimReward call
-        bytes memory message = abi.encodeWithSelector(
-            IStateCommitmentChain.rollBackMessage.selector,
-                _shouldRollBack
+        bytes memory message = abi.encodeWithSignature(
+            "rollBackMessage(uint256)",
+            _shouldRollBack
         );
 
         // send call data into L2, hardcode address

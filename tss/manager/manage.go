@@ -131,7 +131,7 @@ func (m Manager) recoverGenerateKey() {
 }
 
 func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
-	log.Info("received sign state request", "request", request.String())
+	log.Info("received sign state request", "start block", request.StartBlock, "len", len(request.StateRoots), "index", request.OffsetStartsAtIndex)
 	offsetStartsAtIndex, _ := new(big.Int).SetString(request.OffsetStartsAtIndex, 10)
 	digestBz, err := tss.StateBatchHash(request.StateRoots, offsetStartsAtIndex)
 	if err != nil {
@@ -184,6 +184,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	var resp tss.SignResponse
 	var culprits []string
 	var rollback bool
+	var signErr error
 
 	if len(ctx.Approvers()) < ctx.TssInfos().Threshold+1 {
 		if len(ctx.UnApprovers()) < ctx.TssInfos().Threshold+1 {
@@ -199,13 +200,13 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		resp, culprits, err = m.sign(ctx, rollBackRequest, rollBackBz, tss.SignRollBack)
+		resp, culprits, signErr = m.sign(ctx, rollBackRequest, rollBackBz, tss.SignRollBack)
 	} else {
 		request.ElectionId = tssInfo.ElectionId
-		resp, culprits, err = m.sign(ctx, request, digestBz, tss.SignStateBatch)
+		resp, culprits, signErr = m.sign(ctx, request, digestBz, tss.SignStateBatch)
 	}
 
-	if err != nil {
+	if signErr != nil {
 		for _, culprit := range culprits {
 			addr, err := tss.NodeToAddress(culprit)
 			if err != nil {
@@ -220,7 +221,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 			})
 		}
 		m.store.AddCulprits(culprits)
-		return nil, err
+		return nil, signErr
 	}
 
 	if !rollback {
@@ -238,6 +239,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		}
 		m.setStateSignature(digestBz, resp.Signature)
 	}
+
 	response := tss.BatchSubmitterResponse{
 		Signature: resp.Signature,
 		RollBack:  rollback,

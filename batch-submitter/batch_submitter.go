@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/getsentry/sentry-go"
 	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/proposer"
 	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/sequencer"
 	tss "github.com/mantlenetworkio/mantle/batch-submitter/tss-client"
@@ -133,6 +132,8 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				MinTxSize:             cfg.MinL1TxSize,
 				MaxTxSize:             cfg.MaxL1TxSize,
 				MaxPlaintextBatchSize: cfg.MaxPlaintextBatchSize,
+				DaUpgradeBlock:        cfg.DaUpgradeBlock,
+				DAAddr:                ethc.Address(common.HexToAddress(cfg.DAAddress)),
 				CTCAddr:               ctcAddress,
 				ChainID:               chainID,
 				PrivKey:               sequencerPrivKey,

@@ -55,6 +55,21 @@ export interface DeployConfig {
   sccSequencerPublishWindowSeconds: number
 
   /**
+   * blockStaleMeasure block stale measure.
+   */
+  blockStaleMeasure: number
+
+  /**
+   * daFraudProofPeriod da fraud proof period.
+   */
+  daFraudProofPeriod: number
+
+  /**
+   * l2SubmittedBlockNumber l2 submitted block number.
+   */
+  l2SubmittedBlockNumber: number
+
+  /**
    * Address of the Sequencer (publishes to CTC).
    */
   bvmSequencerAddress: string
@@ -108,6 +123,11 @@ export interface DeployConfig {
    * Address of data eigenda sequencer.
    */
   bvmEigenSequencerAddress: string
+
+  /**
+   * Address of scc contract.
+   */
+  sccAddress: string
 
   /**
    * Optional initial overhead value for GPO (default: 2750).
@@ -192,6 +212,15 @@ const configSpec: {
   sccSequencerPublishWindowSeconds: {
     type: 'number',
   },
+  blockStaleMeasure: {
+    type: 'number',
+  },
+  daFraudProofPeriod:  {
+    type: 'number',
+  },
+  l2SubmittedBlockNumber:  {
+    type: 'number',
+  },
   bvmSequencerAddress: {
     type: 'address',
   },
@@ -224,6 +253,9 @@ const configSpec: {
     type: 'address',
   },
   bvmEigenSequencerAddress: {
+    type: 'address',
+  },
+  sccAddress: {
     type: 'address',
   },
   gasPriceOracleOverhead: {

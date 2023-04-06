@@ -9,10 +9,11 @@ use (
 	./l2geth-exporter
 	./proxyd
 	./state-surgery
-	integration-tests/go-tests
+	./integration-tests/go-tests
 	./tss
 	./mt-batcher
-	fraud-proof
+	./fraud-proof
+	./mt-challenger
 )
 
 replace github.com/ethereum/go-ethereum v1.10.21 => github.com/ethereum-mantle/reference-optimistic-geth v0.0.0-20220803173305-1c9d4cc76a6e
