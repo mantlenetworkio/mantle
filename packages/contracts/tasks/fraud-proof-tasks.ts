@@ -10,6 +10,37 @@ import { names } from '../src/address-names'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs')
 
+task('setAddress')
+  .addParam('addressmanager', 'Lib_AddressManager contract address')
+  .addParam('name', 'contract name')
+  .addParam('address', 'contract address')
+  .setAction(async (taskArgs) => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://localhost:9545'
+    )
+    const addressManagerKey = process.env.BVM_ADDRESS_MANAGER_KEY
+    const managerWallet = new ethers.Wallet(addressManagerKey, provider)
+    const lib_AddressManager = await getContractFactory(
+      'Lib_AddressManager'
+    ).attach(taskArgs.addressmanager)
+
+    console.log(
+      'Lib_AddressManager owner:',
+      await lib_AddressManager.connect(managerWallet).owner()
+    )
+    console.log(
+      'The name has address before set',
+      await lib_AddressManager.connect(managerWallet).getAddress(taskArgs.name)
+    )
+    await lib_AddressManager
+      .connect(managerWallet)
+      .setAddress(taskArgs.name, taskArgs.address)
+    console.log(
+      'The name has address after set',
+      await lib_AddressManager.connect(managerWallet).getAddress(taskArgs.name)
+    )
+  })
+
 task('whiteListInit')
   .addParam('rollup', 'Rollup contract address')
   .setAction(async (taskArgs) => {

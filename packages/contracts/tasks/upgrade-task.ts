@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config'
 import { ethers } from 'ethers'
 
-import { getContractDefinition, getContractFactory } from "../src/contract-defs";
+import { getContractDefinition, getContractFactory } from '../src'
 
 task('getOwner')
   .addParam('contract', 'proxy address')
@@ -37,7 +37,7 @@ task('getImp')
 
 task('setCode')
   .addParam('contract', 'proxy address')
-  .setAction(async (taskArgs, hre) => {
+  .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:9545'
     )
