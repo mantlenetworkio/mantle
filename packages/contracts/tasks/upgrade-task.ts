@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config'
 import { ethers } from 'ethers'
 
-import { getContractFactory } from '../src/contract-defs'
+import {getContractDefinition, getContractFactory} from '../src/contract-defs'
 
 task('getOwner')
   .addParam('contract', 'proxy address')
@@ -39,9 +39,12 @@ task('setCode')
   .addParam('contract', 'proxy address')
   .setAction(async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners()
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://localhost:9545'
+    )
     const ownerWallet = new ethers.Wallet(
-      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
-      accounts[0].provider
+      '0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e',
+      provider
     )
     const l1ChugSplashProxy = getContractFactory('L1ChugSplashProxy').attach(
       taskArgs.contract
@@ -56,12 +59,12 @@ task('setCode')
         })
     )
 
-    const upgrade = getContractFactory('L1StandardBridgeUpgrade')
+    const upgrade = getContractDefinition('L1StandardBridgeUpgrade')
     const upgradeContract = getContractFactory(
       'L1StandardBridgeUpgrade'
     ).attach(taskArgs.contract)
-
     console.log('set Code')
+
     await l1ChugSplashProxy
       .connect(ownerWallet)
       .setCode(upgrade.deployedBytecode)
@@ -94,7 +97,7 @@ task('upgradeTest').setAction(async (taskArgs, hre) => {
     .connect(ownerWallet)
     .deploy(ownerWallet.address)
 
-  const testContract = getContractFactory('Test')
+  const testContract = getContractDefinition('Test')
   await proxy.connect(ownerWallet).setCode(testContract.deployedBytecode)
 
   console.log(proxy.address)
@@ -109,7 +112,7 @@ task('upgradeTest').setAction(async (taskArgs, hre) => {
   await test.connect(accounts[0]).setVersion()
   console.log(await test.connect(accounts[0]).version())
 
-  const testUpgradeContract = getContractFactory('TestUpgrade')
+  const testUpgradeContract = getContractDefinition('TestUpgrade')
   await proxy.connect(ownerWallet).setCode(testUpgradeContract.deployedBytecode)
   const testUpgrade = getContractFactory('Test').attach(proxy.address)
   await testUpgrade.connect(accounts[0]).setVersion()
