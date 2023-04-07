@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"math/big"
 	"os"
 	"testing"
@@ -56,16 +57,16 @@ func TestBuildL2DeveloperGenesis(t *testing.T) {
 		require.Equal(t, ok, true)
 		require.Greater(t, len(account.Code), 0)
 
-		if name == "GovernanceToken" || name == "LegacyERC20ETH" || name == "ProxyAdmin" || name == "WETH9" {
+		if name == "GovernanceToken" || name == "LegacyERC20ETH" || name == "ProxyAdmin" || name == "WETH9" || name == "BVM_ETH" || name == "BVM_BIT" {
 			continue
 		}
-
+		fmt.Printf("name  = %v \n", name)
 		adminSlot, ok := account.Storage[genesis.AdminSlot]
 		require.Equal(t, ok, true)
 		require.Equal(t, adminSlot, predeploys.ProxyAdminAddr.Hash())
 		require.Equal(t, account.Code, depB)
 	}
-	require.Equal(t, 2343, len(gen.Alloc))
+	require.Equal(t, 2344, len(gen.Alloc))
 
 	if writeFile {
 		file, _ := json.MarshalIndent(gen, "", " ")
@@ -92,5 +93,5 @@ func TestBuildL2DeveloperGenesisDevAccountsFunding(t *testing.T) {
 
 	gen, err := genesis.BuildL2DeveloperGenesis(config, block)
 	require.NoError(t, err)
-	require.Equal(t, 2321, len(gen.Alloc))
+	require.Equal(t, 2322, len(gen.Alloc))
 }

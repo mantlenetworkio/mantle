@@ -34,6 +34,12 @@ func TestBuildMantle(t *testing.T) {
 		"BaseFeeVault": {
 			"recipient": common.HexToAddress("0x1234567890123456789012345678901234567890"),
 		},
+		"BVMETH": {
+			"recipient": common.HexToAddress("0x1234567890123456789012345678901234567890"),
+		},
+		"BVMBIT": {
+			"recipient": common.HexToAddress("0x1234567890123456789012345678901234567890"),
+		},
 	})
 	require.Nil(t, err)
 	require.NotNil(t, results)
@@ -54,6 +60,8 @@ func TestBuildMantle(t *testing.T) {
 		"L2ERC721Bridge":              true,
 		"MantleMintableERC721Factory": true,
 		"LegacyERC20ETH":              true,
+		"BVM_ETH":                     false,
+		"BVM_BIT":                     false,
 	}
 
 	// Only the exact contracts that we care about are being
@@ -63,6 +71,9 @@ func TestBuildMantle(t *testing.T) {
 	for name, bytecode := range results {
 		// There is bytecode there
 		require.Greater(t, len(bytecode), 0)
+		if name == "BVM_ETH" || name == "BVM_BIT" {
+			continue
+		}
 		// It is in the set of contracts that we care about
 		require.True(t, contracts[name])
 	}
