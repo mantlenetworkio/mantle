@@ -8,17 +8,65 @@ import { getContractFactory } from '../src'
 import { names } from '../src/address-names'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require('fs');
+const fs = require('fs')
 
-task(`deployVerifier`)
-  .addParam('address', 'verifier entry address')
+task('whiteListInit')
+  .addParam('rollup', 'Rollup contract address')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:9545'
     )
-    const ownerWallet = new ethers.Wallet(
-      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
-      provider
+    const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
+    const proposerAddr = process.env.BVM_PROPOSER_ADDRESS
+    const entryOwner = new ethers.Wallet(deployerKey, provider)
+
+    console.log(
+      'balance: ',
+      entryOwner.address,
+      (await entryOwner.getBalance()).toString()
+    )
+    const SequencerENV = process.env.BVM_ROLLUPER_ADDRESS
+    const Validator1ENV = process.env.BVM_VERIFIER1_ADDRESS
+    const Validator2ENV = process.env.BVM_VERIFIER2_ADDRESS
+    const whiteListToAdd = [SequencerENV, Validator1ENV, Validator2ENV]
+    console.log('whiteList:', whiteListToAdd)
+    const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
+    await rollup.connect(entryOwner).addToWhitelist(whiteListToAdd)
+    console.log('transferOwnerShip')
+    await rollup.connect(entryOwner).transferOwnership(proposerAddr)
+  })
+
+task('rollupStake')
+  .addParam('rollup', 'Rollup contract address')
+  .addParam('amount', 'amount to stake', '0.1')
+  .setAction(async (taskArgs) => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://localhost:9545'
+    )
+    const verifier1Key = process.env.BVM_VERIFIER1_KEY
+    const verifier2Key = process.env.BVM_VERIFIER2_KEY
+    const proposerKey = process.env.BVM_PROPOSER_KEY
+
+    const proposerWallet = new ethers.Wallet(proposerKey, provider)
+    const verifier1Wallet = new ethers.Wallet(verifier1Key, provider)
+    const verifier2Wallet = new ethers.Wallet(verifier2Key, provider)
+
+    const wallets = [proposerWallet, verifier1Wallet, verifier2Wallet]
+    const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
+
+    for (const w of wallets) {
+      console.log('balance: ', w.address, (await w.getBalance()).toString())
+      await rollup
+        .connect(w)
+        .stake({ value: ethers.utils.parseEther(taskArgs.amount) })
+    }
+  })
+
+task(`deployVerifier`)
+  .addParam('verifier', 'verifier entry address')
+  .setAction(async (taskArgs) => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://localhost:9545'
     )
     const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
     const entryOwner = new ethers.Wallet(deployerKey, provider)
@@ -26,7 +74,7 @@ task(`deployVerifier`)
       names.managed.fraud_proof.SubVerifiers.BlockInitiationVerifier
     )
     const blockInitiationVerifier = await BlockInitiationVerifier.connect(
-      ownerWallet
+      entryOwner
     ).deploy()
     await blockInitiationVerifier.deployed()
     console.log('blockInitiationVerifier : ', blockInitiationVerifier.address)
@@ -35,7 +83,7 @@ task(`deployVerifier`)
       names.managed.fraud_proof.SubVerifiers.BlockFinalizationVerifier
     )
     const blockFinalizationVerifier = await BlockFinalizationVerifier.connect(
-      ownerWallet
+      entryOwner
     ).deploy()
     await blockFinalizationVerifier.deployed()
     console.log(
@@ -46,14 +94,14 @@ task(`deployVerifier`)
     const InterTxVerifier = getContractFactory(
       names.managed.fraud_proof.SubVerifiers.BlockInitiationVerifier
     )
-    const interTxVerifier = await InterTxVerifier.connect(ownerWallet).deploy()
+    const interTxVerifier = await InterTxVerifier.connect(entryOwner).deploy()
     await interTxVerifier.deployed()
     console.log('interTxVerifier : ', interTxVerifier.address)
 
     const StackOpVerifier = getContractFactory(
       names.managed.fraud_proof.SubVerifiers.StackOpVerifier
     )
-    const stackOpVerifier = await StackOpVerifier.connect(ownerWallet).deploy()
+    const stackOpVerifier = await StackOpVerifier.connect(entryOwner).deploy()
     await stackOpVerifier.deployed()
     console.log('stackOpVerifier : ', stackOpVerifier.address)
 
@@ -61,7 +109,7 @@ task(`deployVerifier`)
       names.managed.fraud_proof.SubVerifiers.EnvironmentalOpVerifier
     )
     const environmentalOpVerifier = await EnvironmentalOpVerifier.connect(
-      ownerWallet
+      entryOwner
     ).deploy()
     await environmentalOpVerifier.deployed()
     console.log('environmentalOpVerifier : ', environmentalOpVerifier.address)
@@ -70,7 +118,7 @@ task(`deployVerifier`)
       names.managed.fraud_proof.SubVerifiers.MemoryOpVerifier
     )
     const memoryOpVerifier = await MemoryOpVerifier.connect(
-      ownerWallet
+      entryOwner
     ).deploy()
     await memoryOpVerifier.deployed()
     console.log('memoryOpVerifier : ', memoryOpVerifier.address)
@@ -79,7 +127,7 @@ task(`deployVerifier`)
       names.managed.fraud_proof.SubVerifiers.StorageOpVerifier
     )
     const storageOpVerifier = await StorageOpVerifier.connect(
-      ownerWallet
+      entryOwner
     ).deploy()
     await storageOpVerifier.deployed()
     console.log('storageOpVerifier : ', storageOpVerifier.address)
@@ -87,7 +135,7 @@ task(`deployVerifier`)
     const CallOpVerifier = getContractFactory(
       names.managed.fraud_proof.SubVerifiers.CallOpVerifier
     )
-    const callOpVerifier = await CallOpVerifier.connect(ownerWallet).deploy()
+    const callOpVerifier = await CallOpVerifier.connect(entryOwner).deploy()
     await callOpVerifier.deployed()
     console.log('callOpVerifier : ', callOpVerifier.address)
 
@@ -95,14 +143,14 @@ task(`deployVerifier`)
       names.managed.fraud_proof.SubVerifiers.InvalidOpVerifier
     )
     const invalidOpVerifier = await InvalidOpVerifier.connect(
-      ownerWallet
+      entryOwner
     ).deploy()
     await invalidOpVerifier.deployed()
     console.log('invalidOpVerifier : ', invalidOpVerifier.address)
 
     const Proxy__Verifier = getContractFactory(
       names.managed.fraud_proof.VerifierEntry
-    ).attach(taskArgs.address)
+    ).attach(taskArgs.verifier)
     await Proxy__Verifier.connect(entryOwner).setVerifier(
       0,
       await stackOpVerifier.address
@@ -142,7 +190,7 @@ task(`deployVerifier`)
 
     if (
       !hexStringEquals(
-        await Proxy__Verifier.connect(ownerWallet).blockInitiationVerifier(),
+        await Proxy__Verifier.connect(entryOwner).blockInitiationVerifier(),
         blockInitiationVerifier.address
       )
     ) {
@@ -151,7 +199,7 @@ task(`deployVerifier`)
 
     if (
       !hexStringEquals(
-        await Proxy__Verifier.connect(ownerWallet).blockFinalizationVerifier(),
+        await Proxy__Verifier.connect(entryOwner).blockFinalizationVerifier(),
         blockFinalizationVerifier.address
       )
     ) {
@@ -160,7 +208,7 @@ task(`deployVerifier`)
 
     if (
       !hexStringEquals(
-        await Proxy__Verifier.connect(ownerWallet).interTxVerifier(),
+        await Proxy__Verifier.connect(entryOwner).interTxVerifier(),
         interTxVerifier.address
       )
     ) {
@@ -169,7 +217,7 @@ task(`deployVerifier`)
 
     if (
       !hexStringEquals(
-        await Proxy__Verifier.connect(ownerWallet).stackOpVerifier(),
+        await Proxy__Verifier.connect(entryOwner).stackOpVerifier(),
         stackOpVerifier.address
       )
     ) {
@@ -178,7 +226,7 @@ task(`deployVerifier`)
 
     if (
       !hexStringEquals(
-        await Proxy__Verifier.connect(ownerWallet).environmentalOpVerifier(),
+        await Proxy__Verifier.connect(entryOwner).environmentalOpVerifier(),
         environmentalOpVerifier.address
       )
     ) {
@@ -187,7 +235,7 @@ task(`deployVerifier`)
 
     if (
       !hexStringEquals(
-        await Proxy__Verifier.connect(ownerWallet).memoryOpVerifier(),
+        await Proxy__Verifier.connect(entryOwner).memoryOpVerifier(),
         memoryOpVerifier.address
       )
     ) {
@@ -196,7 +244,7 @@ task(`deployVerifier`)
 
     if (
       !hexStringEquals(
-        await Proxy__Verifier.connect(ownerWallet).storageOpVerifier(),
+        await Proxy__Verifier.connect(entryOwner).storageOpVerifier(),
         storageOpVerifier.address
       )
     ) {
@@ -205,7 +253,7 @@ task(`deployVerifier`)
 
     if (
       !hexStringEquals(
-        await Proxy__Verifier.connect(ownerWallet).callOpVerifier(),
+        await Proxy__Verifier.connect(entryOwner).callOpVerifier(),
         callOpVerifier.address
       )
     ) {
@@ -214,7 +262,7 @@ task(`deployVerifier`)
 
     if (
       !hexStringEquals(
-        await Proxy__Verifier.connect(ownerWallet).invalidOpVerifier(),
+        await Proxy__Verifier.connect(entryOwner).invalidOpVerifier(),
         invalidOpVerifier.address
       )
     ) {
@@ -223,7 +271,7 @@ task(`deployVerifier`)
 
     const VerifierTestDriver = await getContractFactory('VerifierTestDriver')
     const verifierTestDriver = await VerifierTestDriver.connect(
-      ownerWallet
+      entryOwner
     ).deploy(
       blockInitiationVerifier.address,
       blockFinalizationVerifier.address,
@@ -262,7 +310,7 @@ task(`genOsp`)
 
 task(`verifyOsp`)
   // .addParam('addr', 'VerifierTestDriver contract address')
-  .setAction(async (taskArgs) => {
+  .setAction(async () => {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:9545'
     )
