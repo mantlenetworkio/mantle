@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
@@ -74,12 +73,12 @@ func (g *GasPriceOracle) Start() error {
 	gasPriceGauge.Update(int64(price.Uint64()))
 
 	log.Info("Starting Gas Price Oracle enableL1BaseFee", "enableL1BaseFee",
-		g.config.enableL1BaseFee, "enableL2GasPrice", g.config.enableL2GasPrice)
+		g.config.enableL1BaseFee, "enableL2GasPrice", g.config.enableL2GasPrice, "enableDaFee", g.config.enableDaFee)
 
 	if g.config.enableL1BaseFee {
 		go g.BaseFeeLoop()
 	}
-	if g.config.enableL1BaseFee {
+	if g.config.enableDaFee {
 		go g.DaFeeLoop()
 	}
 	if g.config.enableL2GasPrice {
@@ -169,7 +168,7 @@ func (g *GasPriceOracle) DaFeeLoop() {
 		select {
 		case <-timer.C:
 			if err := updateDaFee(); err != nil {
-				log.Error("cannot update l1 base fee", "messgae", err)
+				log.Error("cannot update da fee", "messgae", err)
 			}
 
 		case <-g.ctx.Done():
@@ -219,7 +218,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 	if err != nil {
 		return nil, err
 	}
-	daFeeClient, err := bindings.NewBVMEigenDataLayrFee(common.HexToAddress(""), l1Client.Client)
+	daFeeClient, err := bindings.NewBVMEigenDataLayrFee(cfg.daFeeContractAddress, l1Client.Client)
 	// Ensure that we can actually connect to both backends
 	log.Info("Connecting to layer two")
 	if err := ensureConnection(l2Client); err != nil {

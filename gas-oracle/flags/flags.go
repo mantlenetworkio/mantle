@@ -33,6 +33,12 @@ var (
 		Value:  "0x420000000000000000000000000000000000000F",
 		EnvVar: "GAS_PRICE_ORACLE_GAS_PRICE_ORACLE_ADDRESS",
 	}
+	DaFeeContractAddressFlag = cli.StringFlag{
+		Name:   "da-fee-contract-address",
+		Usage:  "Address of DA-Fee-Contract",
+		Value:  "0x9109811E8eEe02520219612bB5D47C60c382F4aa",
+		EnvVar: "GAS_PRICE_ORACLE_DA_FEE_CONTRACT_ADDRESS",
+	}
 	PrivateKeyFlag = cli.StringFlag{
 		Name:   "private-key",
 		Usage:  "Private Key corresponding to BVM_GasPriceOracle Owner",
@@ -53,10 +59,10 @@ var (
 		Usage:  "Enable updating the L2 gas price",
 		EnvVar: "GAS_PRICE_ORACLE_ENABLE_L2_GAS_PRICE",
 	}
-	EnableDaGasPriceFlag = cli.BoolFlag{
+	EnableDaFeeFlag = cli.BoolFlag{
 		Name:   "enable-da-gas-price",
 		Usage:  "Enable updating the da gas price",
-		EnvVar: "GAS_PRICE_ORACLE_ENABLE_DA_GAS_PRICE",
+		EnvVar: "GAS_PRICE_ORACLE_ENABLE_DA_FEE",
 	}
 	LogLevelFlag = cli.IntFlag{
 		Name:   "loglevel",
@@ -195,7 +201,9 @@ var Flags = []cli.Flag{
 	L1ChainIDFlag,
 	L2ChainIDFlag,
 	L1BaseFeeSignificanceFactorFlag,
+	DaFeeSignificanceFactorFlag,
 	GasPriceOracleAddressFlag,
+	DaFeeContractAddressFlag,
 	PrivateKeyFlag,
 	TransactionGasPriceFlag,
 	LogLevelFlag,
@@ -205,12 +213,14 @@ var Flags = []cli.Flag{
 	AverageBlockGasLimitPerEpochFlag,
 	EpochLengthSecondsFlag,
 	L1BaseFeeEpochLengthSecondsFlag,
+	DaFeeEpochLengthSecondsFlag,
 	L2GasPriceSignificanceFactorFlag,
 	BybitBackendURL,
 	TokenPricerUpdateFrequencySecond,
 	WaitForReceiptFlag,
 	EnableL1BaseFeeFlag,
 	EnableL2GasPriceFlag,
+	EnableDaFeeFlag,
 	MetricsEnabledFlag,
 	MetricsHTTPFlag,
 	MetricsPortFlag,

@@ -123,7 +123,7 @@ func (gpo *RollupOracle) SuggestScalar(ctx context.Context) (*big.Float, error) 
 // DASwitch returns the cached DASwitch value
 func (gpo *RollupOracle) DASwitch() *big.Int {
 	gpo.daSwitchLock.Lock()
-	defer gpo.chargeLock.Unlock()
+	defer gpo.daSwitchLock.Unlock()
 	return gpo.daSwitch
 }
 

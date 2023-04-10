@@ -50,6 +50,11 @@ func wrapUpdateDaFee(daBackend *bindings.BVMEigenDataLayrFee, l2Backend DeployCo
 		if err != nil {
 			return err
 		}
+		// TODO delete
+		fmt.Println("daFee from l1", daFee)
+		if daFee.Uint64() == 0 {
+			daFee.SetUint64(1)
+		}
 		if !isDifferenceSignificant(currentDaFee.Uint64(), daFee.Uint64(), cfg.daFeeSignificanceFactor) {
 			log.Debug("non significant da fee update", "da", daFee, "current", currentDaFee)
 			return nil

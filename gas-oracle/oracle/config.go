@@ -20,6 +20,7 @@ type Config struct {
 	ethereumHttpUrl                  string
 	layerTwoHttpUrl                  string
 	gasPriceOracleAddress            common.Address
+	daFeeContractAddress             common.Address
 	privateKey                       *ecdsa.PrivateKey
 	gasPrice                         *big.Int
 	waitForReceipt                   bool
@@ -37,7 +38,7 @@ type Config struct {
 	daFeeSignificanceFactor          float64
 	enableL1BaseFee                  bool
 	enableL2GasPrice                 bool
-	enableDaGasPrice                 bool
+	enableDaFee                      bool
 	// Metrics config
 	MetricsEnabled          bool
 	MetricsHTTP             string
@@ -56,6 +57,8 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.layerTwoHttpUrl = ctx.GlobalString(flags.LayerTwoHttpUrlFlag.Name)
 	addr := ctx.GlobalString(flags.GasPriceOracleAddressFlag.Name)
 	cfg.gasPriceOracleAddress = common.HexToAddress(addr)
+	daFeeContractAddress := ctx.GlobalString(flags.DaFeeContractAddressFlag.Name)
+	cfg.daFeeContractAddress = common.HexToAddress(daFeeContractAddress)
 	cfg.targetGasPerSecond = ctx.GlobalUint64(flags.TargetGasPerSecondFlag.Name)
 	cfg.maxPercentChangePerEpoch = ctx.GlobalFloat64(flags.MaxPercentChangePerEpochFlag.Name)
 	cfg.averageBlockGasLimitPerEpoch = ctx.GlobalUint64(flags.AverageBlockGasLimitPerEpochFlag.Name)
@@ -70,7 +73,7 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.daFeeSignificanceFactor = ctx.GlobalFloat64(flags.DaFeeSignificanceFactorFlag.Name)
 	cfg.enableL1BaseFee = ctx.GlobalBool(flags.EnableL1BaseFeeFlag.Name)
 	cfg.enableL2GasPrice = ctx.GlobalBool(flags.EnableL2GasPriceFlag.Name)
-	cfg.enableDaGasPrice = ctx.GlobalBool(flags.EnableDaGasPriceFlag.Name)
+	cfg.enableDaFee = ctx.GlobalBool(flags.EnableDaFeeFlag.Name)
 
 	if ctx.GlobalIsSet(flags.PrivateKeyFlag.Name) {
 		hex := ctx.GlobalString(flags.PrivateKeyFlag.Name)

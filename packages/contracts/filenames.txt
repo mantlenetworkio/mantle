@@ -1,4 +1,5 @@
 ChainStorageContainer-SCC-batches
+BVM_EigenDataLayrFee
 StateCommitmentChain
 TestBitToken
 ChainStorageContainer-CTC-batches
@@ -6,6 +7,7 @@ Proxy__BVM_L1StandardBridge
 TssStakingSlashing
 BVM_L1CrossDomainMessenger
 Proxy__TSS_GroupManager
+Proxy__BVM_EigenDataLayrFee
 Lib_AddressManager
 AddressDictator
 BVM_EigenDataLayrChain
