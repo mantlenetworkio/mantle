@@ -195,6 +195,7 @@ func BuildL1DeveloperGenesis(config *DeployConfig) (*core.Genesis, error) {
 	SetPrecompileBalances(memDB)
 
 	for name, proxyAddr := range predeploys.DevPredeploys {
+
 		memDB.SetState(*proxyAddr, ImplementationSlot, depsByName[name].Address.Hash())
 		// Special case for WETH since it was not designed to be behind a proxy
 		if name == "WETH9" {
@@ -205,6 +206,15 @@ func BuildL1DeveloperGenesis(config *DeployConfig) (*core.Genesis, error) {
 			memDB.SetState(*proxyAddr, common.Hash{31: 0x01}, symbol)
 			memDB.SetState(*proxyAddr, common.Hash{31: 0x02}, decimals)
 		}
+		if name == "TestBitToken" {
+			name, _ := state.EncodeStringValue("Bit Token", 0)
+			symbol, _ := state.EncodeStringValue("BIT", 0)
+			decimals, _ := state.EncodeUintValue(18, 0)
+			memDB.SetState(*proxyAddr, common.Hash{}, name)
+			memDB.SetState(*proxyAddr, common.Hash{31: 0x01}, symbol)
+			memDB.SetState(*proxyAddr, common.Hash{31: 0x02}, decimals)
+		}
+
 	}
 
 	stateDB, err := backend.Blockchain().State()
@@ -213,6 +223,7 @@ func BuildL1DeveloperGenesis(config *DeployConfig) (*core.Genesis, error) {
 	}
 
 	for _, dep := range deployments {
+
 		st, err := stateDB.StorageTrie(dep.Address)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open storage trie of %s: %w", dep.Address, err)
@@ -227,7 +238,15 @@ func BuildL1DeveloperGenesis(config *DeployConfig) (*core.Genesis, error) {
 			depAddr = *predeploys.DevPredeploys[strings.TrimSuffix(dep.Name, "Proxy")]
 		}
 
+		if dep.Name == "TestBitToken" {
+			depAddr = *predeploys.DevPredeploys["TestBitToken"]
+		}
+
 		memDB.CreateAccount(depAddr)
+		fmt.Printf("set code  name = %v  \n", dep.Name)
+		fmt.Printf("set code  depAddr = %v  \n", depAddr)
+		fmt.Printf("set code  init address = %v  \n", dep.Address)
+
 		memDB.SetCode(depAddr, dep.Bytecode)
 
 		for iter.Next() {
@@ -322,6 +341,9 @@ func deployL1Contracts(config *DeployConfig, backend *backends.SimulatedBackend)
 		{
 			Name: "WETH9",
 		},
+		{
+			Name: "TestBitToken",
+		},
 	}...)
 	return deployer.Deploy(backend, constructors, l1Deployer)
 }
@@ -382,7 +404,7 @@ func l1Deployer(backend *backends.SimulatedBackend, opts *bind.TransactOpts, dep
 			opts,
 			backend,
 			predeploys.DevL1CrossDomainMessengerAddr,
-			predeploys.DevL1BitAddress,
+			predeploys.DevTestBitToken,
 		)
 	case "MantleMintableERC20Factory":
 		_, tx, _, err = bindings.DeployMantleMintableERC20Factory(

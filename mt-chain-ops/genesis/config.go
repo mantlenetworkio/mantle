@@ -452,6 +452,10 @@ func NewL2StorageConfig(config *DeployConfig, block *types.Block) (state.Storage
 		"symbol":   "WETH",
 		"decimals": 18,
 	}
+	storage["TestBitToken"] = state.StorageValues{
+		"name":   "Bit Token",
+		"symbol": "BIT",
+	}
 	storage["GovernanceToken"] = state.StorageValues{
 		"_name":   config.GovernanceTokenName,
 		"_symbol": config.GovernanceTokenSymbol,

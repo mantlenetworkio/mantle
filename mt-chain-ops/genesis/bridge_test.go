@@ -22,8 +22,8 @@ const (
 	l2EthAddress    = "0x4200000000000000000000000000000000000022"
 	l1BridgeAddress = "0x6900000000000000000000000000000000000003"
 	l2BridgeAddress = "0x4200000000000000000000000000000000000010"
-
-	l1BitAddress = "0x6900000000000000000000000000000000000020"
+	l1weth          = "0x6900000000000000000000000000000000000007"
+	l1BitAddress    = "0x6900000000000000000000000000000000000020"
 
 	userPrivateKey = "ddf04c9058d6fac4fea241820f2fbc3b36868d33b80894ba5ff9a9baf8793e10"
 	userAddress    = "0xeE3e7d56188ae7af8d5bab980908E3e91c0d7384"
@@ -80,7 +80,7 @@ func TestDepositAndWithdraw(t *testing.T) {
 	t.Log("l1 eth balance: ", getETHBalanceFromL1(t, userAddress))
 	t.Log("l2 eth balance: ", getETHBalanceFromL2(t, userAddress))
 	// do deposit
-	auth := buildAuth(t, l1Client, userPrivateKey, big.NewInt(DECIMAL0_1))
+	auth := buildL1Auth(t, l1Client, userPrivateKey, big.NewInt(DECIMAL0_1))
 	tx, err := l1Bridge.DepositETH(auth, 2_000_000, []byte("0x"))
 	require.NoError(t, err)
 	t.Log("deposit eth tx hash is: ", tx.Hash())
@@ -101,7 +101,7 @@ func TestDepositAndWithdraw(t *testing.T) {
 	setL1BitApprove(t)
 	t.Log("l1 bit balance: ", getBITBalanceFromL1(t, userAddress))
 	t.Log("l2 bit balance: ", getBITBalanceFromL2(t, userAddress))
-	auth = buildAuth(t, l1Client, userPrivateKey, big.NewInt(0))
+	auth = buildL1Auth(t, l1Client, userPrivateKey, big.NewInt(0))
 	tx, err = l1Bridge.DepositERC20(auth, common.HexToAddress(l1BitAddress), common.HexToAddress(l2BitAddress), big.NewInt(DECIMAL0_1), 2_000_000, []byte("0x"))
 	require.NoError(t, err)
 	t.Log("deposit bit tx hash is: ", tx.Hash())
@@ -119,7 +119,7 @@ func TestDepositAndWithdraw(t *testing.T) {
 	setL2EthApprove(t)
 	t.Log("l1 eth balance: ", getETHBalanceFromL1(t, userAddress))
 	t.Log("l2 eth balance: ", getETHBalanceFromL2(t, userAddress))
-	auth = buildAuth(t, l2Client, userPrivateKey, big.NewInt(0))
+	auth = buildL2Auth(t, l2Client, userPrivateKey, big.NewInt(0))
 	tx, err = l2Bridge.Withdraw(auth, common.HexToAddress(l2EthAddress), big.NewInt(DECIMAL0_1), 300_000, []byte("0x"))
 	require.NoError(t, err)
 	t.Log("withdraw eth tx hash is: ", tx.Hash())
@@ -136,7 +136,7 @@ func TestDepositAndWithdraw(t *testing.T) {
 	t.Log("BIT before withdraw.....\\")
 	t.Log("l1 bit balance: ", getBITBalanceFromL1(t, userAddress))
 	t.Log("l2 bit balance: ", getBITBalanceFromL2(t, userAddress))
-	auth = buildAuth(t, l2Client, userPrivateKey, big.NewInt(0))
+	auth = buildL2Auth(t, l2Client, userPrivateKey, big.NewInt(0))
 	tx, err = l2Bridge.Withdraw(auth, common.HexToAddress(l2BitAddress), big.NewInt(DECIMAL0_1), 300_000, []byte("0x"))
 	require.NoError(t, err)
 	t.Log("withdraw bit tx hash is: ", tx.Hash())
@@ -209,6 +209,13 @@ func checkTokenBridge(t *testing.T) {
 	require.NotEmpty(t, code)
 	t.Log("TOKEN BRIDGE INFO")
 	t.Log("find l1 token bridge at: ", l1BridgeAddress)
+
+	code, err = l1Client.CodeAt(context.Background(), common.HexToAddress(l1weth), nil)
+	require.NoError(t, err)
+	require.NotEmpty(t, code)
+	t.Log("L1WETH INFO")
+	t.Log("find l1 weth at: ", l1BridgeAddress)
+
 	// check l2 token bridge
 	code, err = l2Client.CodeAt(context.Background(), common.HexToAddress(l2BridgeAddress), nil)
 	require.NoError(t, err)
@@ -227,6 +234,8 @@ func checkBalance(t *testing.T) {
 	// init balance
 	l1Eth := getETHBalanceFromL1(t, userAddress)
 	l1Bit := getBITBalanceFromL1(t, userAddress)
+
+	t.Log("find l1 bit balance : ", l1Bit)
 	decimal1 := big.NewInt(DECIMAL1)
 	if l1Eth.Cmp(decimal1) < 0 {
 		delta := big.NewInt(0)
@@ -260,7 +269,7 @@ func setL1BitApprove(t *testing.T) {
 
 	l1BitInstance, err := bindings.NewBitTokenERC20(common.HexToAddress(l1BitAddress), client)
 	require.NoError(t, err)
-	auth := buildAuth(t, client, userPrivateKey, big.NewInt(0))
+	auth := buildL1Auth(t, client, userPrivateKey, big.NewInt(0))
 	tx, err := l1BitInstance.Approve(auth, common.HexToAddress(l1BridgeAddress), big.NewInt(DECIMAL5))
 	require.NoError(t, err)
 	require.NotNil(t, tx)
@@ -276,7 +285,7 @@ func setL2EthApprove(t *testing.T) {
 
 	l2EthInstance, err := bindings.NewBVMETH(common.HexToAddress(l2EthAddress), client)
 	require.NoError(t, err)
-	auth := buildAuth(t, client, userPrivateKey, big.NewInt(0))
+	auth := buildL2Auth(t, client, userPrivateKey, big.NewInt(0))
 	tx, err := l2EthInstance.Approve(auth, common.HexToAddress(l2BridgeAddress), big.NewInt(DECIMAL5))
 	require.NoError(t, err)
 	require.NotNil(t, tx)
@@ -333,7 +342,15 @@ func getBITBalanceFromL2(t *testing.T, address string) *big.Int {
 	return balance
 }
 
-func buildAuth(t *testing.T, client *ethclient.Client, privateKey string, amount *big.Int) *bind.TransactOpts {
+func buildL1Auth(t *testing.T, client *ethclient.Client, privateKey string, amount *big.Int) *bind.TransactOpts {
+	return buildAuth(t, client, privateKey, amount, big.NewInt(900))
+}
+
+func buildL2Auth(t *testing.T, client *ethclient.Client, privateKey string, amount *big.Int) *bind.TransactOpts {
+	return buildAuth(t, client, privateKey, amount, big.NewInt(901))
+}
+
+func buildAuth(t *testing.T, client *ethclient.Client, privateKey string, amount *big.Int, chainId *big.Int) *bind.TransactOpts {
 	privKey, err := crypto.HexToECDSA(privateKey)
 	require.NoError(t, err)
 
@@ -344,10 +361,14 @@ func buildAuth(t *testing.T, client *ethclient.Client, privateKey string, amount
 	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
 	require.NoError(t, err)
 
-	//gasPrice, err := client.SuggestGasPrice(context.Background())
-	//require.NoError(t, err)
+	//gasPrice :=big.NewInt(21000)
+	require.NoError(t, err)
 
-	auth := bind.NewKeyedTransactor(privKey)
+	auth, err := bind.NewKeyedTransactorWithChainID(privKey, chainId)
+	if err != nil {
+		require.Nil(t, err)
+
+	}
 	auth.Nonce = big.NewInt(int64(nonce))
 	auth.Value = amount             // in wei
 	auth.GasLimit = uint64(3000000) // in units
@@ -389,7 +410,7 @@ func transferETH(t *testing.T, client *ethclient.Client, address common.Address,
 func mintBIT(t *testing.T, client *ethclient.Client, privateKey string, amount int64) {
 	l1bitToken, err := bindings.NewBitTokenERC20(common.HexToAddress(l1BitAddress), client)
 	require.NoError(t, err)
-	auth := buildAuth(t, client, privateKey, big.NewInt(0))
+	auth := buildL1Auth(t, client, privateKey, big.NewInt(0))
 	tx, err := l1bitToken.Mint(auth, big.NewInt(amount))
 	require.NoError(t, err)
 	require.NotNil(t, tx)

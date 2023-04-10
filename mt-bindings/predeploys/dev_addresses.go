@@ -28,14 +28,14 @@ var (
 	DevWETH9Addr                      = common.HexToAddress(DevWETH9)
 	DevL1ERC721BridgeAddr             = common.HexToAddress(DevL1ERC721Bridge)
 	DevSystemConfigAddr               = common.HexToAddress(DevSystemConfig)
-	DevL1BitAddress                   = common.HexToAddress(DevL1Bit)
+	DevTestBitToken                   = common.HexToAddress(DevL1Bit)
 
 	DevPredeploys = make(map[string]*common.Address)
 )
 
 func init() {
-	DevPredeploys["L1BitAddress"] = &DevL1BitAddress
-
+	DevPredeploys["L1BitAddress"] = &DevTestBitToken
+	DevPredeploys["TestBitToken"] = &DevTestBitToken
 	DevPredeploys["L2OutputOracle"] = &DevL2OutputOracleAddr
 	DevPredeploys["MantlePortal"] = &DevMantlePortalAddr
 	DevPredeploys["L1CrossDomainMessenger"] = &DevL1CrossDomainMessengerAddr

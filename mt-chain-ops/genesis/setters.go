@@ -113,13 +113,17 @@ func setProxies(db vm.StateDB, proxyAdminAddr common.Address, namespace *big.Int
 	}
 
 	for i := uint64(0); i <= count; i++ {
-		if i == uint64(33) || i == uint64(34) {
-			// skip l2bit and l2eth
+		if i >= uint64(33) && i <= uint64(34) && namespace == bigL2PredeployNamespace {
+			continue
+		} else if i == uint64(32) && namespace == bigL1PredeployNamespace {
 			bigAddr := new(big.Int).Or(namespace, new(big.Int).SetUint64(i))
 			addr := common.BigToAddress(bigAddr)
-			fmt.Printf("skip set proxy address = %v \n", addr)
+			if !db.Exist(addr) {
+				db.CreateAccount(addr)
+			}
 			continue
 		}
+
 		bigAddr := new(big.Int).Or(namespace, new(big.Int).SetUint64(i))
 		addr := common.BigToAddress(bigAddr)
 
