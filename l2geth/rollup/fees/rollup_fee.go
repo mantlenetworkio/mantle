@@ -212,10 +212,7 @@ func CalculateDAFee(data []byte, daGasPrice *big.Int, scalar *big.Float) *big.In
 // batch submission goes down via contract optimizations. This will not overflow
 // under standard network conditions.
 func CalculateDAGasUsed(data []byte) *big.Int {
-	zeroes, ones := zeroesAndOnes(data)
-	zeroesGas := zeroes * params.TxDataZeroGas
-	onesGas := (ones + 68) * params.TxDataNonZeroGasEIP2028
-	return new(big.Int).SetUint64(zeroesGas + onesGas)
+	return big.NewInt(int64(len(data)))
 }
 
 // DeriveL1GasInfo reads L1 gas related information to be included

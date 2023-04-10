@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
@@ -43,6 +44,7 @@ type GasPriceOracle struct {
 	contract        *bindings.BVMGasPriceOracle
 	l2Backend       DeployContractBackend
 	l1Backend       bind.ContractTransactor
+	daBackend       *bindings.BVMEigenDataLayrFee
 	gasPriceUpdater *gasprices.GasPriceUpdater
 	config          *Config
 }
@@ -76,6 +78,9 @@ func (g *GasPriceOracle) Start() error {
 
 	if g.config.enableL1BaseFee {
 		go g.BaseFeeLoop()
+	}
+	if g.config.enableL1BaseFee {
+		go g.DaFeeLoop()
 	}
 	if g.config.enableL2GasPrice {
 		go g.Loop()
@@ -151,6 +156,28 @@ func (g *GasPriceOracle) BaseFeeLoop() {
 	}
 }
 
+func (g *GasPriceOracle) DaFeeLoop() {
+	timer := time.NewTicker(time.Duration(g.config.daFeeEpochLengthSeconds) * time.Second)
+	defer timer.Stop()
+
+	updateDaFee, err := wrapUpdateDaFee(g.daBackend, g.l2Backend, g.config)
+	if err != nil {
+		panic(err)
+	}
+
+	for {
+		select {
+		case <-timer.C:
+			if err := updateDaFee(); err != nil {
+				log.Error("cannot update l1 base fee", "messgae", err)
+			}
+
+		case <-g.ctx.Done():
+			g.Stop()
+		}
+	}
+}
+
 // Update will update the gas price
 func (g *GasPriceOracle) Update() error {
 	l2GasPrice, err := g.contract.GasPrice(&bind.CallOpts{
@@ -192,6 +219,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 	if err != nil {
 		return nil, err
 	}
+	daFeeClient, err := bindings.NewBVMEigenDataLayrFee(common.HexToAddress(""), l1Client.Client)
 	// Ensure that we can actually connect to both backends
 	log.Info("Connecting to layer two")
 	if err := ensureConnection(l2Client); err != nil {
@@ -315,6 +343,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 		config:          cfg,
 		l2Backend:       l2Client,
 		l1Backend:       l1Client,
+		daBackend:       daFeeClient,
 	}
 
 	if err := gpo.ensure(); err != nil {

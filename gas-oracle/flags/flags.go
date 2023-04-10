@@ -53,6 +53,11 @@ var (
 		Usage:  "Enable updating the L2 gas price",
 		EnvVar: "GAS_PRICE_ORACLE_ENABLE_L2_GAS_PRICE",
 	}
+	EnableDaGasPriceFlag = cli.BoolFlag{
+		Name:   "enable-da-gas-price",
+		Usage:  "Enable updating the da gas price",
+		EnvVar: "GAS_PRICE_ORACLE_ENABLE_DA_GAS_PRICE",
+	}
 	LogLevelFlag = cli.IntFlag{
 		Name:   "loglevel",
 		Value:  3,
@@ -95,11 +100,23 @@ var (
 		Usage:  "polling time for updating the L1 base fee",
 		EnvVar: "GAS_PRICE_ORACLE_L1_BASE_FEE_EPOCH_LENGTH_SECONDS",
 	}
+	DaFeeEpochLengthSecondsFlag = cli.Uint64Flag{
+		Name:   "da-fee-epoch-length-seconds",
+		Value:  15,
+		Usage:  "polling time for updating the Da fee",
+		EnvVar: "GAS_PRICE_ORACLE_DA_FEE_EPOCH_LENGTH_SECONDS",
+	}
 	L1BaseFeeSignificanceFactorFlag = cli.Float64Flag{
 		Name:   "l1-base-fee-significant-factor",
 		Value:  0.10,
 		Usage:  "only update when the L1 base fee changes by more than this factor",
 		EnvVar: "GAS_PRICE_ORACLE_L1_BASE_FEE_SIGNIFICANT_FACTOR",
+	}
+	DaFeeSignificanceFactorFlag = cli.Float64Flag{
+		Name:   "da-fee-significant-factor",
+		Value:  0.10,
+		Usage:  "only update when the L1 base fee changes by more than this factor",
+		EnvVar: "GAS_PRICE_ORACLE_DA_FEE_SIGNIFICANT_FACTOR",
 	}
 	L2GasPriceSignificanceFactorFlag = cli.Float64Flag{
 		Name:   "significant-factor",
