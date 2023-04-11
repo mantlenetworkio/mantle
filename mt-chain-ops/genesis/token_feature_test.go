@@ -13,6 +13,15 @@ import (
 	"testing"
 )
 
+func initTestAccountForEthBit(t *testing.T) {
+	l1Client, err := ethclient.Dial(l1url)
+	require.NoError(t, err)
+	require.NotNil(t, l1Client)
+	l2Client, err := ethclient.Dial(l2url)
+	require.NoError(t, err)
+	require.NotNil(t, l2Client)
+}
+
 func TestCheckBalance(t *testing.T) {
 	l1Client, err := ethclient.Dial(l1url)
 	require.NoError(t, err)
@@ -35,6 +44,7 @@ func TestCheckBalance(t *testing.T) {
 		l1Eth = getETHBalanceFromL1(t, userAddress)
 	}
 	if l1Bit.Cmp(decimal1) < 0 {
+		t.Log("start mint bit")
 		delta := big.NewInt(0)
 		mintBIT(t, l1Client, userPrivateKey, delta.Sub(decimal1, l1Bit).Int64())
 	}
@@ -48,10 +58,10 @@ func TestCheckBalance(t *testing.T) {
 	t.Log("L1 BALANCE INFO")
 	l1Eth = getETHBalanceFromL1(t, userAddress)
 	l1Bit = getBITBalanceFromL1(t, userAddress)
-	require.Equal(t, l1Eth.Int64(), int64(DECIMAL1))
-	require.Equal(t, l1Bit.Int64(), int64(DECIMAL1))
-	t.Log("balance eth: ", l1Eth)
-	t.Log("balance bit: ", l1Bit)
+	require.Equal(t, int64(DECIMAL1), l1Eth.Int64())
+	require.Equal(t, int64(DECIMAL1), l1Bit.Int64())
+	t.Log("balance eth: ", l1Eth.Int64())
+	t.Log("balance bit: ", l1Bit.Int64())
 }
 
 func TransferETH(t *testing.T, client *ethclient.Client, address common.Address, amount int64) {

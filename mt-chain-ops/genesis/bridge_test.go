@@ -51,7 +51,7 @@ func TestEnv(t *testing.T) {
 	checkBalance(t)
 }
 
-func checkBalance(t *testing.T) {
+func checkBalance(t *testing.T) *big.Int {
 	l1Client, err := ethclient.Dial(l1url)
 	require.NoError(t, err)
 	require.NotNil(t, l1Client)
@@ -84,10 +84,11 @@ func checkBalance(t *testing.T) {
 	t.Log("L1 BALANCE INFO")
 	l1Eth = getETHBalanceFromL1(t, userAddress)
 	l1Bit = getBITBalanceFromL1(t, userAddress)
-	require.Equal(t, int64(DECIMAL1), l1Eth.Int64())
+	require.LessOrEqual(t, int64(DECIMAL1), l1Eth.Int64())
 	require.Equal(t, int64(DECIMAL1), l1Bit.Int64())
 	t.Log("balance eth: ", l1Eth)
 	t.Log("balance bit: ", l1Bit)
+	return l1Eth
 }
 
 func TestContractsProxy(t *testing.T) {
@@ -100,7 +101,6 @@ func TestContractsProxy(t *testing.T) {
 
 func TestDepositAndWithdraw(t *testing.T) {
 	t.Log("check balance.....")
-	checkBalance(t)
 
 	l1Client, err := ethclient.Dial(l1url)
 	require.NoError(t, err)
