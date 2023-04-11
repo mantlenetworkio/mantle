@@ -28,6 +28,9 @@ const (
 	userPrivateKey = "ddf04c9058d6fac4fea241820f2fbc3b36868d33b80894ba5ff9a9baf8793e10"
 	userAddress    = "0xeE3e7d56188ae7af8d5bab980908E3e91c0d7384"
 
+	deployerPrivateKey = "b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291"
+	deployerAddress    = "0x71562b71999873DB5b286dF957af199Ec94617F7"
+
 	DECIMAL5    = 5000000000000000000
 	DECIMAL1    = 1000000000000000000
 	DECIMAL0_5  = 500000000000000000
@@ -37,6 +40,7 @@ const (
 
 func TestEnv(t *testing.T) {
 	// check l1 bit token
+
 	t.Log("check l1 bit token address.....")
 	checkTokenAddress(t)
 
@@ -45,6 +49,45 @@ func TestEnv(t *testing.T) {
 
 	t.Log("check balance.....")
 	checkBalance(t)
+}
+
+func checkBalance(t *testing.T) {
+	l1Client, err := ethclient.Dial(l1url)
+	require.NoError(t, err)
+	require.NotNil(t, l1Client)
+	l2Client, err := ethclient.Dial(l2url)
+	require.NoError(t, err)
+	require.NotNil(t, l2Client)
+
+	// init balance
+	l1Eth := getETHBalanceFromL1(t, userAddress)
+	l1Bit := getBITBalanceFromL1(t, userAddress)
+
+	t.Log("find l1 bit balance : ", l1Bit)
+	decimal1 := big.NewInt(DECIMAL1)
+	if l1Eth.Cmp(decimal1) < 0 {
+		delta := big.NewInt(0)
+		transferETH(t, l1Client, common.HexToAddress(userAddress), delta.Sub(decimal1, l1Eth).Int64())
+		l1Eth = getETHBalanceFromL1(t, userAddress)
+	}
+	if l1Bit.Cmp(decimal1) < 0 {
+		delta := big.NewInt(0)
+		mintBIT(t, l1Client, userPrivateKey, delta.Sub(decimal1, l1Bit).Int64())
+	}
+	l1Eth = getETHBalanceFromL1(t, userAddress)
+	if l1Eth.Cmp(decimal1) < 0 {
+		delta := big.NewInt(0)
+		transferETH(t, l1Client, common.HexToAddress(userAddress), delta.Sub(decimal1, l1Eth).Int64())
+		l1Eth = getETHBalanceFromL1(t, userAddress)
+	}
+
+	t.Log("L1 BALANCE INFO")
+	l1Eth = getETHBalanceFromL1(t, userAddress)
+	l1Bit = getBITBalanceFromL1(t, userAddress)
+	require.Equal(t, int64(DECIMAL1), l1Eth.Int64())
+	require.Equal(t, int64(DECIMAL1), l1Bit.Int64())
+	t.Log("balance eth: ", l1Eth)
+	t.Log("balance bit: ", l1Bit)
 }
 
 func TestContractsProxy(t *testing.T) {
@@ -223,45 +266,6 @@ func checkTokenBridge(t *testing.T) {
 	t.Log("find l2 token bridge at: ", l2BridgeAddress)
 }
 
-func checkBalance(t *testing.T) {
-	l1Client, err := ethclient.Dial(l1url)
-	require.NoError(t, err)
-	require.NotNil(t, l1Client)
-	l2Client, err := ethclient.Dial(l2url)
-	require.NoError(t, err)
-	require.NotNil(t, l2Client)
-
-	// init balance
-	l1Eth := getETHBalanceFromL1(t, userAddress)
-	l1Bit := getBITBalanceFromL1(t, userAddress)
-
-	t.Log("find l1 bit balance : ", l1Bit)
-	decimal1 := big.NewInt(DECIMAL1)
-	if l1Eth.Cmp(decimal1) < 0 {
-		delta := big.NewInt(0)
-		transferETH(t, l1Client, common.HexToAddress(userAddress), delta.Sub(decimal1, l1Eth).Int64())
-		l1Eth = getETHBalanceFromL1(t, userAddress)
-	}
-	if l1Bit.Cmp(decimal1) < 0 {
-		delta := big.NewInt(0)
-		mintBIT(t, l1Client, userPrivateKey, delta.Sub(decimal1, l1Bit).Int64())
-	}
-	l1Eth = getETHBalanceFromL1(t, userAddress)
-	if l1Eth.Cmp(decimal1) < 0 {
-		delta := big.NewInt(0)
-		transferETH(t, l1Client, common.HexToAddress(userAddress), delta.Sub(decimal1, l1Eth).Int64())
-		l1Eth = getETHBalanceFromL1(t, userAddress)
-	}
-
-	t.Log("L1 BALANCE INFO")
-	l1Eth = getETHBalanceFromL1(t, userAddress)
-	l1Bit = getBITBalanceFromL1(t, userAddress)
-	require.Equal(t, l1Eth.Int64(), int64(DECIMAL1))
-	require.Equal(t, l1Bit.Int64(), int64(DECIMAL1))
-	t.Log("balance eth: ", l1Eth)
-	t.Log("balance bit: ", l1Bit)
-}
-
 func setL1BitApprove(t *testing.T) {
 	client, err := ethclient.Dial(l1url)
 	require.NoError(t, err)
@@ -373,12 +377,14 @@ func buildAuth(t *testing.T, client *ethclient.Client, privateKey string, amount
 	auth.Value = amount             // in wei
 	auth.GasLimit = uint64(3000000) // in units
 	//auth.GasPrice = gasPrice
-	auth.GasPrice = big.NewInt(1)
+	gasPrice, err := client.SuggestGasPrice(context.Background())
+	require.NoError(t, err)
+	auth.GasPrice = gasPrice
 	return auth
 }
 
 func transferETH(t *testing.T, client *ethclient.Client, address common.Address, amount int64) {
-	privateKey, err := crypto.HexToECDSA("ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+	privateKey, err := crypto.HexToECDSA(deployerPrivateKey)
 	require.NoError(t, err)
 
 	publicKey := privateKey.Public()
@@ -414,6 +420,7 @@ func mintBIT(t *testing.T, client *ethclient.Client, privateKey string, amount i
 	tx, err := l1bitToken.Mint(auth, big.NewInt(amount))
 	require.NoError(t, err)
 	require.NotNil(t, tx)
+	t.Log("bit mint tx : ", tx.Hash().String())
 }
 
 func TestDecimal(t *testing.T) {
