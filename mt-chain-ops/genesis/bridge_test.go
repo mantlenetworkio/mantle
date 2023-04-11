@@ -68,7 +68,9 @@ func checkBalance(t *testing.T) *big.Int {
 	if l1Eth.Cmp(decimal1) < 0 {
 		delta := big.NewInt(0)
 		transferETH(t, l1Client, common.HexToAddress(userAddress), delta.Sub(decimal1, l1Eth).Int64())
+		time.Sleep(time.Second)
 		l1Eth = getETHBalanceFromL1(t, userAddress)
+
 	}
 	if l1Bit.Cmp(decimal1) < 0 {
 		delta := big.NewInt(0)
