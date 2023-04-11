@@ -4,7 +4,7 @@ import { ethers } from 'ethers'
 // @ts-ignore
 import { getContractDefinition, getContractFactory } from '../src'
 
-task('setL1BridgeChugCode')
+task('updateL1BridgeChugCode')
   .addParam('contract', 'proxy address')
   .setAction(async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners()
@@ -54,6 +54,36 @@ task('setL1BridgeChugCode')
       'version: ',
       await upgradeContract.connect(accounts[0]).getVersion()
     )
+  })
+
+
+task('updateL1CrossDomainMessenger')
+  .addParam('contract', 'proxy address')
+  .setAction(async (taskArgs, hre) => {
+    const accounts = await hre.ethers.getSigners()
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://localhost:9545'
+    )
+
+    //0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e is the key of addressmananger
+    //address: 0xd5add52d36399570e56c183d949da83ac29aa7d6
+    const ownerWallet = new ethers.Wallet(
+      '0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e',
+      provider
+    )
+
+
+    const l1CrossDomainMessenger = getContractFactory('L1CrossDomainMessenger')
+    const L1CrossDomainMessenger = await l1CrossDomainMessenger
+      .connect(ownerWallet)
+      .deploy()
+    await L1CrossDomainMessenger.deployed()
+    console.log('L1CrossDomainMessenger : ', L1CrossDomainMessenger.address)
+
+    const libAddressManager = getContractFactory('Lib_AddressManager').attach(taskArgs.contract);
+
+    await libAddressManager.connect(ownerWallet)
+      .setAddress('BVM_L1CrossDomainMessenger',L1CrossDomainMessenger.address)
   })
 
 task('updateTssGroupManagerCode')
@@ -167,4 +197,6 @@ task('updateEigenDataLayrChainCode')
       .connect(ownerWallet)
       .callStatic.implementation())
   })
+
+
 
