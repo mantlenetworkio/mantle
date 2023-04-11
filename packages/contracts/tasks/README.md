@@ -67,3 +67,13 @@ upgradecode
 yarn hardhat updateEigenDataLayrChainCode --contract 0x5a0069E211A28cBD1a7dbD585877596FeD07805b --network local
 
 ```
+
+
+##### local: updateda contract
+query implementation
+```shell
+cast call --rpc-url  http://localhost:9545 \
+--private-key 74e58c0127a59c8745568e7b4b6f41a4ad27875d2678358e0a0431f8385e5e9d \
+--from 0xd5da011954f654e8192ffc3bd8469fd997c360fc 0x216C8c9815fe6e43222D94De5598e17C014A1b99 "getProxyImplementation(address)" 0x535211625Ec42aAB8BF018A33afa9729e6AaB634
+```
+

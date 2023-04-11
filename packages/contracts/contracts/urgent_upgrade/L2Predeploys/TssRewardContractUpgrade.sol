@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import {ITssRewardContract} from  "../L2/predeploys/iTssRewardContract.sol";
-import {IBVM_GasPriceOracle} from "../L2/predeploys/iBVM_GasPriceOracle.sol";
+import {ITssRewardContract} from  "../../L2/predeploys/iTssRewardContract.sol";
+import {IBVM_GasPriceOracle} from "../../L2/predeploys/iBVM_GasPriceOracle.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {Lib_PredeployAddresses} from "../libraries/constants/Lib_PredeployAddresses.sol";
-import { CrossDomainEnabled } from "../libraries/bridge/CrossDomainEnabled.sol";
+import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAddresses.sol";
+import { CrossDomainEnabled } from "../../libraries/bridge/CrossDomainEnabled.sol";
 
 /* Library Imports */
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
