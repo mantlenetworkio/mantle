@@ -24,6 +24,8 @@ type Config struct {
 
 	L1MsgSender string
 
+	DtlEigenEnable bool
+
 	// Owner of the GasPriceOracle contract
 	GasPriceOracleOwnerAddress common.Address
 	// Turns on checking of state for L2 gas price
