@@ -406,19 +406,19 @@ abstract contract StandardBridge {
      *                     to identify the transaction.
      */
     function _initiateBridgeERC20(
-        address _localToken,  // l2bit
-        address _remoteToken, // l1bit
+        address _localToken,
+        address _remoteToken,
         address _from,
         address _to,
         uint256 _amount,
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
-    //TODO 改变erc20绑定关系
-    //TODO 绑定bit到 mintable list
+
         if (_localToken == address(0)  ){
-            require(_remoteToken == Predeploys.L2_BIT_ADDRESS,"the target mint token has to be bit");
-            require(msg.value == _amount,"bit amount can't equal the params");
+            // start l1 eth transfer to l2 eth
+            require(_remoteToken == Predeploys.L2_ETH_ADDRESS,"the target mint token has to be l2's ETH");
+            require(msg.value == _amount,"eth amount can't equal the params");
             MESSENGER.sendMessage(
                     address(OTHER_BRIDGE),
                     abi.encodeWithSelector(
@@ -442,7 +442,7 @@ abstract contract StandardBridge {
 
         }
         else if (_remoteToken== address(0) ){
-            require(_localToken == Predeploys.L2_BIT_ADDRESS,"the target mint token has to be bit");
+            require(_localToken == Predeploys.L2_ETH_ADDRESS,"the target mint token has to be ETH");
                 require(
                     _isCorrectTokenPair(_localToken, _remoteToken),
                     "StandardBridge: wrong remote token for Mantle Mintable ERC20 local token"
