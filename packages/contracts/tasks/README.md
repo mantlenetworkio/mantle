@@ -200,4 +200,13 @@ forge script script/Upgrade.s.sol:EigenLayrUpgrade \
 
 ### urgent-upgrade-task-l2
 for l2 upgrade, we use **hard-code model.**
-- setcode
+
+#### sequence 1
+change the code by state_transition.go
+https://github.com/mantlenetworkio/mantle/blob/ac8ed3fa93ea26029a4c086ff07459314de70650/l2geth/core/state_transition.go#L39
+
+#### sequence 2
+change the height by state_transition.go
+
+#### create a new release, upgrade the binary for sequencer and verifier
+https://github.com/mantlenetworkio/mantle/releases
