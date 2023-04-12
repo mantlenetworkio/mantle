@@ -51,6 +51,10 @@ func TestEnv(t *testing.T) {
 	checkBalance(t)
 }
 
+func waitForTx() {
+	time.Sleep(time.Second * time.Duration(2))
+}
+
 func checkBalance(t *testing.T) *big.Int {
 	l1Client, err := ethclient.Dial(l1url)
 	require.NoError(t, err)
@@ -68,7 +72,7 @@ func checkBalance(t *testing.T) *big.Int {
 	if l1Eth.Cmp(decimal1) < 0 {
 		delta := big.NewInt(0)
 		transferETH(t, l1Client, common.HexToAddress(userAddress), delta.Sub(decimal1, l1Eth).Int64())
-		time.Sleep(time.Second)
+		waitForTx()
 		l1Eth = getETHBalanceFromL1(t, userAddress)
 
 	}
@@ -79,9 +83,17 @@ func checkBalance(t *testing.T) *big.Int {
 	l1Eth = getETHBalanceFromL1(t, userAddress)
 	if l1Eth.Cmp(decimal1) < 0 {
 		delta := big.NewInt(0)
-		transferETH(t, l1Client, common.HexToAddress(userAddress), delta.Sub(decimal1, l1Eth).Int64())
+		transferETH(t, l1Client, common.HexToAddress(userAddress), delta.Sub(big.NewInt(DECIMAL1+DECIMAL00_1), l1Eth).Int64())
 		l1Eth = getETHBalanceFromL1(t, userAddress)
 	}
+	l2Bit := getBITBalanceFromL2(t, userAddress)
+	if l2Bit.Cmp(decimal1) < 0 {
+		delta := big.NewInt(0)
+		transferL2Bit(t, l2Client, common.HexToAddress(userAddress), delta.Sub(decimal1, l2Bit).Int64())
+		waitForTx()
+		l2Bit = getBITBalanceFromL2(t, userAddress)
+	}
+	waitForTx()
 
 	t.Log("L1 BALANCE INFO")
 	l1Eth = getETHBalanceFromL1(t, userAddress)
@@ -194,7 +206,10 @@ func TestDepositAndWithdraw(t *testing.T) {
 }
 
 func TestCheckAccountBalance(t *testing.T) {
-
+	l2Client, err := ethclient.Dial(l2url)
+	require.NoError(t, err)
+	require.NotNil(t, l2Client)
+	transferL2Bit(t, l2Client, common.HexToAddress(userAddress), DECIMAL1)
 }
 
 func TestShowL1L2Balance(t *testing.T) {
@@ -278,9 +293,12 @@ func setL1BitApprove(t *testing.T) {
 	auth := buildL1Auth(t, client, userPrivateKey, big.NewInt(0))
 	tx, err := l1BitInstance.Approve(auth, common.HexToAddress(l1BridgeAddress), big.NewInt(DECIMAL5))
 	require.NoError(t, err)
+	t.Log("l1 bit approve tx = ", tx.Hash().String())
+	waitForTx()
 	require.NotNil(t, tx)
 	l1BitAllowance, err := l1BitInstance.Allowance(&bind.CallOpts{}, common.HexToAddress(userAddress), common.HexToAddress(l1BridgeAddress))
 	require.NoError(t, err)
+	t.Log("l1bit allowance ", l1BitAllowance)
 	require.Equal(t, int64(DECIMAL5), l1BitAllowance.Int64())
 }
 
@@ -295,6 +313,8 @@ func setL2EthApprove(t *testing.T) {
 	tx, err := l2EthInstance.Approve(auth, common.HexToAddress(l2BridgeAddress), big.NewInt(DECIMAL5))
 	require.NoError(t, err)
 	require.NotNil(t, tx)
+	t.Log("approve tx = ", tx.Hash().String())
+	waitForTx()
 	l1BitAllowance, err := l2EthInstance.Allowance(&bind.CallOpts{}, common.HexToAddress(userAddress), common.HexToAddress(l2BridgeAddress))
 	require.NoError(t, err)
 	require.Equal(t, int64(DECIMAL5), l1BitAllowance.Int64())
@@ -386,6 +406,36 @@ func buildAuth(t *testing.T, client *ethclient.Client, privateKey string, amount
 }
 
 func transferETH(t *testing.T, client *ethclient.Client, address common.Address, amount int64) {
+	privateKey, err := crypto.HexToECDSA(deployerPrivateKey)
+	require.NoError(t, err)
+
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	require.True(t, ok)
+
+	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+	require.NoError(t, err)
+
+	value := big.NewInt(amount) // in wei (1 eth)
+	gasLimit := uint64(21000)   // in units
+	gasPrice, err := client.SuggestGasPrice(context.Background())
+	require.NoError(t, err)
+
+	var data []byte
+	tx := types.NewTransaction(nonce, address, value, gasLimit, gasPrice, data)
+
+	chainID, err := client.NetworkID(context.Background())
+	require.NoError(t, err)
+
+	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
+	require.NoError(t, err)
+
+	err = client.SendTransaction(context.Background(), signedTx)
+	require.NoError(t, err)
+}
+
+func transferL2Bit(t *testing.T, client *ethclient.Client, address common.Address, amount int64) {
 	privateKey, err := crypto.HexToECDSA(deployerPrivateKey)
 	require.NoError(t, err)
 
