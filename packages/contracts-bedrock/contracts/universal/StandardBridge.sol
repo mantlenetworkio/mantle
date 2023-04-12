@@ -352,7 +352,6 @@ abstract contract StandardBridge {
         // contracts may override this function in order to emit legacy events as well.
         _emitERC20BridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
     }
-    //TODO 改变eth绑定关系
     /**
      * @notice Initiates a bridge of ETH through the CrossDomainMessenger.
      *
@@ -466,7 +465,6 @@ abstract contract StandardBridge {
 
 
         else if (_isMantleMintableERC20(_localToken)) {
-            //TODO burn 流程
             require(
                 _isCorrectTokenPair(_localToken, _remoteToken),
                 "StandardBridge: wrong remote token for Mantle Mintable ERC20 local token"
