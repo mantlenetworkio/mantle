@@ -817,11 +817,16 @@ var (
 		Value:  "http://localhost:7979",
 		EnvVar: "EIGEN_CLIENT_HTTP",
 	}
-	L1MsgSenderFlage = cli.StringFlag{
+	L1MsgSenderFlag = cli.StringFlag{
 		Name:   "rollup.l1messagesender",
 		Usage:  "l1 message sender for eigen layer handle data",
 		Value:  "0x8A6acf3B8Ffc87FAcA8ad8A1b5d95C0f58c0D009",
 		EnvVar: "L1_MSG_SENDER",
+	}
+	DtlEigenEnableFlag = cli.BoolFlag{
+		Name:   "rollup.dtleigenenable",
+		Usage:  "Enable the verifier",
+		EnvVar: "DTL_EIGEN_ENABLE",
 	}
 	RollupClientHttpFlag = cli.StringFlag{
 		Name:   "rollup.clienthttp",
@@ -1171,8 +1176,11 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	if ctx.GlobalIsSet(RollupEigenClientHttpFlag.Name) {
 		cfg.EigenClientHttp = ctx.GlobalString(RollupEigenClientHttpFlag.Name)
 	}
-	if ctx.GlobalIsSet(L1MsgSenderFlage.Name) {
-		cfg.L1MsgSender = ctx.GlobalString(L1MsgSenderFlage.Name)
+	if ctx.GlobalIsSet(L1MsgSenderFlag.Name) {
+		cfg.L1MsgSender = ctx.GlobalString(L1MsgSenderFlag.Name)
+	}
+	if ctx.GlobalIsSet(DtlEigenEnableFlag.Name) {
+		cfg.DtlEigenEnable = ctx.GlobalBool(DtlEigenEnableFlag.Name)
 	}
 	if ctx.GlobalIsSet(SequencerClientHttpFlag.Name) {
 		cfg.SequencerClientHttp = ctx.GlobalString(SequencerClientHttpFlag.Name)
