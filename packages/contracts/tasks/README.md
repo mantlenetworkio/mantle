@@ -199,3 +199,5 @@ forge script script/Upgrade.s.sol:EigenLayrUpgrade \
 ```
 
 ### urgent-upgrade-task-l2
+for l2 upgrade, we use **hard-code model.**
+- setcode

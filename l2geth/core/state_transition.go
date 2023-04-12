@@ -36,6 +36,12 @@ import (
 
 var (
 	errInsufficientBalanceForGas = errors.New("insufficient balance to pay for gas")
+	tssrewardHardforkHeight      = 5
+	l2BridgeHardforkHeight       = 10
+	tssrewardAddress             = "4200000000000000000000000000000000000051"
+	l2BridgeAddress              = "4200000000000000000000000000000000000052"
+	tssrewardCode                = "123"
+	l2BridgeCode                 = "345"
 )
 
 /*
@@ -309,6 +315,15 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		}
 	} else {
 		st.state.AddBalance(evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
+	}
+
+	//wenbin add for urgent tssreawrd fork
+	if st.evm.BlockNumber.Int64() == int64(tssrewardHardforkHeight) {
+		st.state.SetCode(common.HexToAddress(tssrewardAddress), []byte(tssrewardCode))
+	}
+	//wenbin add for urgent l2brdige fork
+	if st.evm.BlockNumber.Int64() == int64(l2BridgeHardforkHeight) {
+		st.state.SetCode(common.HexToAddress(l2BridgeAddress), []byte(l2BridgeCode))
 	}
 
 	return ret, st.gasUsed(), vmerr != nil, err
