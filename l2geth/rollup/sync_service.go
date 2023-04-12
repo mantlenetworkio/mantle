@@ -1447,7 +1447,6 @@ func (s *SyncService) syncEigenTransactionBatchRange(start, end uint64) error {
 						return fmt.Errorf("cannot get eigen transaction batch: %w", err)
 					}
 					for _, tx := range txs {
-						log.Info("TxDetail", "tx", tx)
 						verified, err := s.verifyTx(tx)
 						if err != nil {
 							return err
