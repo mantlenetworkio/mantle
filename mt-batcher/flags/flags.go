@@ -37,6 +37,12 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "L2_MTL_RPC"),
 	}
+	DtlClientUrlFlag = cli.StringFlag{
+		Name:     "dtl-client-url",
+		Usage:    "HTTP provider URL for dtl client",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "DTL_CLIENT_URL"),
+	}
 	DisperserEndpointFlag = cli.StringFlag{
 		Name:     "disperser",
 		Usage:    "Endpoint at which disperser is available",
@@ -252,6 +258,7 @@ var requiredFlags = []cli.Flag{
 	MtlNetworkNameFlag,
 	L1EthRpcFlag,
 	L2MtlRpcFlag,
+	DtlClientUrlFlag,
 	DisperserEndpointFlag,
 	RetrieverSocketFlag,
 	EigenDaHttpPortFlag,

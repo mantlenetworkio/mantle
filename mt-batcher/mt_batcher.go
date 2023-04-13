@@ -128,6 +128,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 	driverConfig := &sequencer.DriverConfig{
 		L1Client:                  l1Client,
 		L2Client:                  l2Client,
+		DtlClientUrl:              cfg.DtlClientUrl,
 		EigenDaContract:           eigenContract,
 		RawEigenContract:          rawEigenContract,
 		EigenABI:                  eignenABI,

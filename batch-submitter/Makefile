@@ -9,6 +9,7 @@ LDFLAGS := -ldflags "$(LDFLAGSSTRING)"
 
 CTC_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/L1/rollup/CanonicalTransactionChain.sol/CanonicalTransactionChain.json
 SCC_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/L1/rollup/StateCommitmentChain.sol/StateCommitmentChain.json
+DA_ABI_ARTIFACT := ../packages/contracts/artifacts/contracts/da/BVM_EigenDataLayrChain.sol/BVM_EigenDataLayrChain.json
 
 batch-submitter:
 	env GO111MODULE=on go build -v $(LDFLAGS) ./cmd/batch-submitter
@@ -22,7 +23,7 @@ test:
 lint:
 	golangci-lint run ./...
 
-bindings: bindings-ctc bindings-scc
+bindings: bindings-ctc bindings-scc bindings-da
 
 bindings-ctc:
 	$(eval temp := $(shell mktemp))
@@ -56,11 +57,28 @@ bindings-scc:
 
 	rm $(temp)
 
+bindings-da:
+	$(eval temp := $(shell mktemp))
+
+	cat $(DA_ABI_ARTIFACT) \
+		| jq -r .bytecode > $(temp)
+
+	cat $(DA_ABI_ARTIFACT) \
+		| jq .abi \
+		| abigen --pkg da \
+		--abi - \
+		--out bindings/da/bvm_eigen_datalayr_chain.go \
+		--type BVM_EigenDataLayrChain \
+		--bin $(temp)
+
+	rm $(temp)
+
 .PHONY: \
 	batch-submitter \
 	bindings \
 	bindings-ctc \
 	bindings-scc \
+	bindings-da \
 	clean \
 	test \
 	lint

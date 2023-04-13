@@ -63,6 +63,12 @@ type Config struct {
 	// Tss manager client Url
 	TssClientUrl string
 
+	// eigen layer upgrade block.
+	DaUpgradeBlock uint64
+
+	// DAAddress is the CTC contract address.
+	DAAddress string
+
 	// CTCAddress is the CTC contract address.
 	CTCAddress string
 
@@ -207,6 +213,8 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		L1EthRpc:                  ctx.GlobalString(flags.L1EthRpcFlag.Name),
 		L2EthRpc:                  ctx.GlobalString(flags.L2EthRpcFlag.Name),
 		TssClientUrl:              ctx.GlobalString(flags.TssClientUrl.Name),
+		DaUpgradeBlock:            ctx.GlobalUint64(flags.DaUpgradeBlockFlag.Name),
+		DAAddress:                 ctx.GlobalString(flags.DaAddressFlag.Name),
 		CTCAddress:                ctx.GlobalString(flags.CTCAddressFlag.Name),
 		SCCAddress:                ctx.GlobalString(flags.SCCAddressFlag.Name),
 		MinL1TxSize:               ctx.GlobalUint64(flags.MinL1TxSizeFlag.Name),
