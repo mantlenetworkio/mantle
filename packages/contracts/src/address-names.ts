@@ -28,7 +28,7 @@ export const names = {
       Proxy__AssertionMap: 'Proxy__AssertionMap',
       Proxy__Verifier: 'Proxy__Verifier',
       Proxy__Rollup: 'Proxy__Rollup',
-      SubVerifiers:{
+      SubVerifiers: {
         BlockInitiationVerifier: 'BlockInitiationVerifier',
         BlockFinalizationVerifier: 'BlockFinalizationVerifier',
         InterTxVerifier: 'InterTxVerifier',

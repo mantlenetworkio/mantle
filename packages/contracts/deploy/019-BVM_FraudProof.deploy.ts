@@ -249,12 +249,9 @@ const deployFn: DeployFunction = async (hre) => {
   )
   console.log('deploy fraud proof verifier proxy success')
 
-  const proposer = hre.deployConfig.bvmRolluperAddress
-  console.log('proposer address :',proposer)
-
   // deploy rollup proxy
   const rollupArgs = [
-    proposer, // address _owner
+    deployer, // address _owner
     Proxy__VerifierEntry.address, // address _verifier,
     l1BitAddress, // address _stakeToken,
     Lib_AddressManager.address, // address _libAddressManager,
@@ -313,7 +310,7 @@ const deployFn: DeployFunction = async (hre) => {
         async () => {
           return hexStringEquals(
             await contract.owner(),
-            proposer
+            deployer
           )
         },
         5000,
