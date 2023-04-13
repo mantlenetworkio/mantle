@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var errTssHTTPError = errors.New("eigen da http error")
+var errEigenHTTPError = errors.New("eigen da http error")
 
 type EigenClient interface {
 	GetLatestTransactionBatchIndex() (*uint64, error)
@@ -32,7 +32,7 @@ func NewEigenClient(url string) *Client {
 		if statusCode >= 400 {
 			method := r.Request.Method
 			url := r.Request.URL
-			return fmt.Errorf("%d cannot %s %s: %w", statusCode, method, url, errTssHTTPError)
+			return fmt.Errorf("%d cannot %s %s: %w", statusCode, method, url, errEigenHTTPError)
 		}
 		return nil
 	})
