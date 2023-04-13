@@ -171,6 +171,7 @@ var (
 		utils.SequencerClientHttpFlag,
 		utils.RollupEigenClientHttpFlag,
 		utils.L1MsgSenderFlage,
+		utils.DtlEigenEnableFlag,
 
 		// fraud proof flags
 		utils.FraudProofL1EndpointFlag,

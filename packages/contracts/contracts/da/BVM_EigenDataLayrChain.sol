@@ -33,13 +33,11 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
 
     address public sequencer;
     address public dataManageAddress;
-    address public reSubmitterAddress;
     uint256 public BLOCK_STALE_MEASURE;
     uint256 public l2StoredBlockNumber;
     uint256 public l2ConfirmedBlockNumber;
     uint256 public fraudProofPeriod;
     uint256 public rollupBatchIndex;
-    uint256 public reRollupIndex;
 
     bytes public constant FRAUD_STRING = '-_(` O `)_- -_(` o `)_- -_(` Q `)_- BITDAO JUST REKT YOU |_(` O `)_| - |_(` o `)_| - |_(` Q `)_|';
     uint256 internal constant DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED = type(uint256).max;
@@ -61,6 +59,9 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
     mapping(uint32 => BatchRollupBlock) public dataStoreIdToL2RollUpBlock;
     mapping(uint32 => uint256) public dataStoreIdToRollupStoreNumber;
     mapping(address => bool) private fraudProofWhitelist;
+
+    address public reSubmitterAddress;
+    uint256 public reRollupIndex;
     mapping(uint256 => uint256) public reRollupBatchIndex;
 
     event RollupStoreInitialized(uint32 dataStoreId, uint256 stratL2BlockNumber, uint256 endL2BlockNumber);
