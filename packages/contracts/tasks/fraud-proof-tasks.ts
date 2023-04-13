@@ -74,6 +74,7 @@ task('rollupStake')
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:9545'
     )
+    const bitToken = process.env.L1_BIT_ADDRESS
     const verifier1Key = process.env.BVM_VERIFIER1_KEY
     const verifier2Key = process.env.BVM_VERIFIER2_KEY
     const proposerKey = process.env.BVM_PROPOSER_KEY
@@ -84,12 +85,18 @@ task('rollupStake')
 
     const wallets = [proposerWallet, verifier1Wallet, verifier2Wallet]
     const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
+    const bit = await getContractFactory('BitTokenERC20').attach(bitToken)
 
     for (const w of wallets) {
-      console.log('balance: ', w.address, (await w.getBalance()).toString())
-      await rollup
+      await bit
         .connect(w)
-        .stake({ value: ethers.utils.parseEther(taskArgs.amount) })
+        .approve(taskArgs.rollup, ethers.utils.parseEther(taskArgs.amount))
+      console.log(
+        'balance: ',
+        w.address,
+        (await bit.balanceOf(w.address)).toString()
+      )
+      await rollup.connect(w).stake(ethers.utils.parseEther(taskArgs.amount))
     }
   })
 
