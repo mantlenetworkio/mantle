@@ -238,6 +238,10 @@ const config: HardhatUserConfig = {
     exclude: ['contracts/test-helpers', 'contracts/test-libraries'],
   },
   deployConfigSpec: {
+    allowUnlimitedContractSize: {
+      type: 'boolean',
+      default: true,
+    },
     isForkedNetwork: {
       type: 'boolean',
       default: false,

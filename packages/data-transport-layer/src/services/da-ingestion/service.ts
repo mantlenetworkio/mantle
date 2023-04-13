@@ -1,9 +1,9 @@
 /* Imports: External */
+import { BigNumber, ethers, constants } from 'ethers'
 import { sleep } from '@mantleio/core-utils'
 import { BaseService, Metrics } from '@mantleio/common-ts'
 import { BaseProvider } from '@ethersproject/providers'
 import { LevelUp } from 'levelup'
-import { constants } from 'ethers'
 // eslint-disable-next-line import/order
 import { Gauge, Counter } from 'prom-client'
 
@@ -19,6 +19,9 @@ import {
   DataStoreEntry,
   TransactionListEntry, RollupStoreEntry,
 } from '../../types'
+import {
+  toHexString,
+} from '@mantleio/core-utils'
 
 interface DaIngestionMetrics {
   highestSyncedL1Block: Gauge<string>
@@ -255,39 +258,52 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       for (const batchTx of batchTxs) {
         const queueOrigin =
           batchTx['TxMeta']['queueOrigin'] === 1 ? 'l1' : 'sequencer'
-        const txData =
-          batchTx['TxMeta']['queueOrigin'] === 1
-            ? null
-            : batchTx['TxMeta']['rawTransaction']
-        const sigData =
+        const binaryData = Buffer.from(batchTx['TxMeta']['rawTransaction'], 'base64');
+        const txData =  '0x'.concat(binaryData.toString('hex'))
+        const sigR = Buffer.from(batchTx['TxDetail']['r'].replace("0x", '').padStart(64, '0')).toString()
+        const sigS = Buffer.from(batchTx['TxDetail']['s'].replace("0x", '').padStart(64, '0')).toString()
+        const decoded =
           batchTx['TxMeta']['queueOrigin'] === 1
             ? null
             : {
-              v: batchTx['TxDetail']['v'],
-              r: batchTx['TxDetail']['r'],
-              s: batchTx['TxDetail']['s'],
+              nonce: BigNumber.from(batchTx['TxDetail']['nonce']).toString(),
+              gasPrice: BigNumber.from(batchTx['TxDetail']['gasPrice']).toString(),
+              gasLimit: BigNumber.from(batchTx['TxDetail']['gas']).toString(),
+              value: batchTx['TxDetail']['value'],
+              target: batchTx['TxDetail']['to'] ? toHexString(batchTx['TxDetail']['to']) : null,
+              data: batchTx['TxDetail']['input'],
+              sig:  {
+                v: BigNumber.from(batchTx['TxDetail']['v']).toNumber() - 69,
+                r: '0x'.concat(sigR),
+                s: '0x'.concat(sigS),
+              },
             }
+        let gasLimit = BigNumber.from(0).toString()
+        let target = constants.AddressZero
+        let origin = null
+        if (batchTx['TxMeta']['queueIndex'] != null) {
+          const enqueue = await this.state.db.getEnqueueByIndex(
+            BigNumber.from(batchTx['TxMeta']['queueIndex']).toNumber()
+          )
+          if (enqueue != null) {
+            gasLimit = enqueue.gasLimit
+            target = enqueue.target
+            origin = enqueue.origin
+          }
+        }
         transactionEntries.push({
           index: batchTx['TxMeta']['index'],
           batchIndex: 0,
           blockNumber: batchTx['TxMeta']['l1BlockNumber'],
           timestamp: batchTx['TxMeta']['l1Timestamp'],
-          gasLimit: '0',
-          target: constants.AddressZero,
-          origin: batchTx['TxMeta']['l1MessageSender'],
+          gasLimit: gasLimit,
+          target: target,
+          origin: origin,
           data: txData,
           queueOrigin,
           value: batchTx['TxDetail']['value'],
           queueIndex: batchTx['TxMeta']['queueIndex'],
-          decoded: {
-            sig: sigData,
-            value: batchTx['TxDetail']['value'],
-            gasLimit: '0x0',
-            gasPrice: batchTx['TxDetail']['gasPrice'],
-            nonce: batchTx['TxDetail']['nonce'],
-            target: constants.AddressZero,
-            data: batchTx['TxDetail']['input'],
-          },
+          decoded: decoded,
           confirmed: true,
         })
       }
