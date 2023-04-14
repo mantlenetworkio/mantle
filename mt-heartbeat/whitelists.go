@@ -1,4 +1,4 @@
-package op_heartbeat
+package mt-heartbeat
 
 var AllowedChainIDs = map[uint64]bool{
 	420: true,

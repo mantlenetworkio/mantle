@@ -29,5 +29,5 @@ Unlike previous iterations of our state surgery scripts, this one does not write
 
 ## Compilation
 
-Run `make op-migrate`.
+Run `make mt-migrate`.
 

@@ -15,6 +15,6 @@ RUN make mt-migrate
 
 FROM alpine:3.15
 
-COPY --from=builder /app/mt-chain-ops/bin/op-migrate /usr/local/bin
+COPY --from=builder /app/mt-chain-ops/bin/mt-migrate /usr/local/bin
 
-ENTRYPOINT ["op-migrate"]
+ENTRYPOINT ["mt-migrate"]

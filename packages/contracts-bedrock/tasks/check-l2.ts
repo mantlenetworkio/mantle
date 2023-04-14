@@ -500,7 +500,7 @@ const check = {
     console.log(`  - name: ${name}`)
 
     const symbol = await GovernanceToken.symbol()
-    assert(symbol === 'OP')
+    assert(symbol === 'MT')
     console.log(`  - symbol: ${symbol}`)
 
     const owner = await GovernanceToken.owner()

@@ -1,4 +1,4 @@
-package op_e2e
+package mt_e2e
 
 import (
 	"context"
@@ -243,7 +243,7 @@ func TestPreregolith(t *testing.T) {
 			require.NoError(t, err)
 			defer opGeth.Close()
 
-			systemTx, err := derive.L1InfoDeposit(1, opGeth.L1Head, opGeth.SystemConfig, false)
+			systemTx, err := derive.L1InfoDeposit(1, opGeth.L1Head, opGeth.SystemConfig, 1, nil, eth.Bytes32{}, false)
 			systemTx.IsSystemTransaction = true
 			require.NoError(t, err)
 
@@ -428,7 +428,7 @@ func TestRegolith(t *testing.T) {
 
 			test.activateRegolith(ctx, opGeth)
 
-			systemTx, err := derive.L1InfoDeposit(1, opGeth.L1Head, opGeth.SystemConfig, false)
+			systemTx, err := derive.L1InfoDeposit(1, opGeth.L1Head, opGeth.SystemConfig, 1, nil, eth.Bytes32{}, false)
 			systemTx.IsSystemTransaction = true
 			require.NoError(t, err)
 

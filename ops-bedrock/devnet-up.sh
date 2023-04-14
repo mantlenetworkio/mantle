@@ -32,7 +32,7 @@ set -eu
 L1_URL="http://localhost:8545"
 L2_URL="http://localhost:9545"
 
-OP_NODE="$PWD/mt-node"
+MT_NODE="$PWD/mt-node"
 CONTRACTS_BEDROCK="$PWD/packages/contracts-bedrock"
 NETWORK=devnetL1
 DEVNET="$PWD/.devnet"
@@ -68,7 +68,7 @@ if [ ! -f "$DEVNET/done" ]; then
   cat "$CONTRACTS_BEDROCK/deploy-config/devnetL1.json" | jq -r ".l1GenesisBlockTimestamp = \"$TIMESTAMP\"" > /tmp/bedrock-devnet-deploy-config.json
 
   (
-    cd "$OP_NODE"
+    cd "$MT_NODE"
     go run cmd/main.go genesis devnet \
         --deploy-config /tmp/bedrock-devnet-deploy-config.json \
         --outfile.l1 $DEVNET/genesis-l1.json \

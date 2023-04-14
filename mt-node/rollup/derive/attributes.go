@@ -3,11 +3,11 @@ package derive
 import (
 	"context"
 	"fmt"
+	"github.com/ethereum/go-ethereum/log"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
-
 	"github.com/mantlenetworkio/mantle/mt-bindings/predeploys"
 	"github.com/mantlenetworkio/mantle/mt-node/eth"
 	"github.com/mantlenetworkio/mantle/mt-node/rollup"
@@ -28,13 +28,15 @@ type FetchingAttributesBuilder struct {
 	cfg *rollup.Config
 	l1  L1ReceiptsFetcher
 	l2  SystemConfigL2Fetcher
+	tp  *TPClient
 }
 
-func NewFetchingAttributesBuilder(cfg *rollup.Config, l1 L1ReceiptsFetcher, l2 SystemConfigL2Fetcher) *FetchingAttributesBuilder {
+func NewFetchingAttributesBuilder(cfg *rollup.Config, l1 L1ReceiptsFetcher, l2 SystemConfigL2Fetcher, tp *TPClient) *FetchingAttributesBuilder {
 	return &FetchingAttributesBuilder{
 		cfg: cfg,
 		l1:  l1,
 		l2:  l2,
+		tp:  tp,
 	}
 }
 
@@ -99,8 +101,14 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 		return nil, NewResetError(fmt.Errorf("cannot build L2 block on top %s for time %d before L1 origin %s at time %d",
 			l2Parent, nextL2Time, eth.ToBlockID(l1Info), l1Info.Time()))
 	}
-
-	l1InfoTx, err := L1InfoDepositBytes(seqNumber, l1Info, sysConfig, ba.cfg.IsRegolith(nextL2Time))
+	var ratio int64
+	if ba.tp != nil {
+		ratio, err = ba.tp.PriceRatio()
+	} else {
+		ratio = 1
+		log.Warn("ba miss token price client,set default 1")
+	}
+	l1InfoTx, err := L1InfoDepositBytes(seqNumber, l1Info, sysConfig, ratio, ba.cfg.IsRegolith(nextL2Time))
 	if err != nil {
 		return nil, NewCriticalError(fmt.Errorf("failed to create l1InfoTx: %w", err))
 	}

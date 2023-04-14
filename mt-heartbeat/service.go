@@ -1,28 +1,28 @@
-package op_heartbeat
+package mt-heartbeat
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net"
-	"net/http"
-	"os"
-	"os/signal"
-	"strconv"
-	"strings"
-	"syscall"
-	"time"
+"context"
+"encoding/json"
+"fmt"
+"io"
+"net"
+"net/http"
+"os"
+"os/signal"
+"strconv"
+"strings"
+"syscall"
+"time"
 
-	"github.com/urfave/cli"
+"github.com/urfave/cli"
 
-	"github.com/ethereum/go-ethereum/log"
+"github.com/ethereum/go-ethereum/log"
 
-	"github.com/mantlenetworkio/mantle/mt-node/heartbeat"
-	"github.com/mantlenetworkio/mantle/mt-service/httputil"
-	oplog "github.com/mantlenetworkio/mantle/mt-service/log"
-	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
-	oppprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
+"github.com/mantlenetworkio/mantle/mt-node/heartbeat"
+"github.com/mantlenetworkio/mantle/mt-service/httputil"
+oplog "github.com/mantlenetworkio/mantle/mt-service/log"
+mtmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
+mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
 )
 
 const (
@@ -61,13 +61,13 @@ func Main(version string) func(ctx *cli.Context) error {
 }
 
 func Start(ctx context.Context, l log.Logger, cfg Config, version string) error {
-	registry := opmetrics.NewRegistry()
+	registry := mtmetrics.NewRegistry()
 
 	metricsCfg := cfg.Metrics
 	if metricsCfg.Enabled {
 		l.Info("starting metrics server", "addr", metricsCfg.ListenAddr, "port", metricsCfg.ListenPort)
 		go func() {
-			if err := opmetrics.ListenAndServe(ctx, registry, metricsCfg.ListenAddr, metricsCfg.ListenPort); err != nil {
+			if err := mtmetrics.ListenAndServe(ctx, registry, metricsCfg.ListenAddr, metricsCfg.ListenPort); err != nil {
 				l.Error("error starting metrics server", err)
 			}
 		}()
@@ -77,7 +77,7 @@ func Start(ctx context.Context, l log.Logger, cfg Config, version string) error 
 	if pprofCfg.Enabled {
 		l.Info("starting pprof server", "addr", pprofCfg.ListenAddr, "port", pprofCfg.ListenPort)
 		go func() {
-			if err := oppprof.ListenAndServe(ctx, pprofCfg.ListenAddr, pprofCfg.ListenPort); err != nil {
+			if err := mtpprof.ListenAndServe(ctx, pprofCfg.ListenAddr, pprofCfg.ListenPort); err != nil {
 				l.Error("error starting pprof server", err)
 			}
 		}()
@@ -88,8 +88,8 @@ func Start(ctx context.Context, l log.Logger, cfg Config, version string) error 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", HealthzHandler)
 	mux.Handle("/", Handler(l, metrics))
-	recorder := opmetrics.NewPromHTTPRecorder(registry, MetricsNamespace)
-	mw := opmetrics.NewHTTPRecordingMiddleware(recorder, mux)
+	recorder := mtmetrics.NewPromHTTPRecorder(registry, MetricsNamespace)
+	mw := mtmetrics.NewHTTPRecordingMiddleware(recorder, mux)
 
 	server := &http.Server{
 		Addr:           net.JoinHostPort(cfg.HTTPAddr, strconv.Itoa(cfg.HTTPPort)),

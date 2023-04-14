@@ -1,24 +1,23 @@
-package op_heartbeat
+package mt-heartbeat
 
 import (
-	"errors"
+"errors"
 
-	"github.com/mantlenetworkio/mantle/mt-heartbeat/flags"
-	oplog "github.com/mantlenetworkio/mantle/mt-service/log"
-	opmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
-	oppprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
-	"github.com/urfave/cli"
+"github.com/mantlenetworkio/mantle/mt-heartbeat/flags"
+oplog "github.com/mantlenetworkio/mantle/mt-service/log"
+mtmetrics "github.com/mantlenetworkio/mantle/mt-service/metrics"
+mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
+"github.com/urfave/cli"
 )
-
 type Config struct {
 	HTTPAddr string
 	HTTPPort int
 
 	Log oplog.CLIConfig
 
-	Metrics opmetrics.CLIConfig
+	Metrics mtmetrics.CLIConfig
 
-	Pprof oppprof.CLIConfig
+	Pprof mtpprof.CLIConfig
 }
 
 func (c Config) Check() error {
@@ -45,7 +44,7 @@ func NewConfig(ctx *cli.Context) Config {
 		HTTPAddr: ctx.GlobalString(flags.HTTPAddrFlag.Name),
 		HTTPPort: ctx.GlobalInt(flags.HTTPPortFlag.Name),
 		Log:      oplog.ReadCLIConfig(ctx),
-		Metrics:  opmetrics.ReadCLIConfig(ctx),
-		Pprof:    oppprof.ReadCLIConfig(ctx),
+		Metrics:  mtmetrics.ReadCLIConfig(ctx),
+		Pprof:    mtpprof.ReadCLIConfig(ctx),
 	}
 }

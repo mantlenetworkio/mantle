@@ -1,4 +1,4 @@
-package op_e2e
+package mt_e2e
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/cmd/utils"
 	"github.com/ethereum/go-ethereum/common"

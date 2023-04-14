@@ -1,4 +1,4 @@
-package op_e2e
+package mt_e2e
 
 import (
 	"context"
@@ -180,7 +180,7 @@ func (d *MtGeth) StartBlockBuilding(ctx context.Context, attrs *eth.PayloadAttri
 func (d *MtGeth) CreatePayloadAttributes(txs ...*types.Transaction) (*eth.PayloadAttributes, error) {
 	timestamp := d.L2Head.Timestamp + 2
 	regolith := d.L2ChainConfig.IsRegolith(uint64(timestamp))
-	l1Info, err := derive.L1InfoDepositBytes(d.sequenceNum, d.L1Head, d.SystemConfig, regolith)
+	l1Info, err := derive.L1InfoDepositBytes(d.sequenceNum, d.L1Head, d.SystemConfig, 1, regolith)
 	if err != nil {
 		return nil, err
 	}

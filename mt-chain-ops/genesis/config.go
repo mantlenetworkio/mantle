@@ -442,6 +442,8 @@ func NewL2StorageConfig(config *DeployConfig, block *types.Block) (state.Storage
 		"batcherHash":    config.BatchSenderAddress.Hash(),
 		"l1FeeOverhead":  config.GasPriceOracleOverhead,
 		"l1FeeScalar":    config.GasPriceOracleScalar,
+		"daFee":          block.BaseFee(),
+		"daFeeScalar":    config.GasPriceOracleScalar,
 	}
 	storage["LegacyERC20ETH"] = state.StorageValues{
 		"_name":   "Ether",

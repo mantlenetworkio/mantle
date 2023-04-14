@@ -198,7 +198,7 @@ root
 ├── <a href="./integration-tests">integration-tests</a>: Various integration tests for the Mantle network
 ├── <a href="./l2geth">l2geth</a>: Mantle client software, a fork of <a href="https://github.com/ethereum/go-ethereum/tree/v1.9.10">geth v1.9.10</a>  (deprecated for BEDROCK upgrade)
 ├── <a href="./l2geth-exporter">l2geth-exporter</a>: A prometheus exporter to collect/serve metrics from an L2 geth node
-├── <a href="./op-exporter">op-exporter</a>: A prometheus exporter to collect/serve metrics from an Mantle node
+├── <a href="./mt-exporter">mt-exporter</a>: A prometheus exporter to collect/serve metrics from an Mantle node
 ├── <a href="./proxyd">proxyd</a>: Configurable RPC request router and proxy
 ├── <a href="./technical-documents">technical-documents</a>: audits and post-mortem documents
 </pre>

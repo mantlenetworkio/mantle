@@ -23,7 +23,7 @@ func main() {
 	app := cli.NewApp()
 	app.Flags = flags.Flags
 	app.Version = fmt.Sprintf("%s-%s-%s", Version, GitCommit, GitDate)
-	app.Name = "op-heartbeat"
+	app.Name = "mt-heartbeat"
 	app.Usage = "Heartbeat recorder"
 	app.Description = "Service that records opt-in heartbeats from op nodes"
 	app.Action = heartbeat.Main(app.Version)

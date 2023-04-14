@@ -252,7 +252,7 @@ func TestSequencerChaosMonkey(t *testing.T) {
 			InfoBaseFee:     big.NewInt(1234),
 			InfoReceiptRoot: common.Hash{},
 		}
-		infoDep, err := derive.L1InfoDepositBytes(seqNr, l1Info, cfg.Genesis.SystemConfig, false)
+		infoDep, err := derive.L1InfoDepositBytes(seqNr, l1Info, cfg.Genesis.SystemConfig, 1, false)
 		require.NoError(t, err)
 
 		testGasLimit := eth.Uint64Quantity(10_000_000)

@@ -7,11 +7,11 @@ LDFLAGSSTRING +=-X main.GitDate=$(GITDATE)
 LDFLAGSSTRING +=-X main.Version=$(VERSION)
 LDFLAGS := -ldflags "$(LDFLAGSSTRING)"
 
-op-heartbeat:
-	env GO111MODULE=on go build -v $(LDFLAGS) -o ./bin/op-heartbeat ./cmd
+mt-heartbeat:
+	env GO111MODULE=on go build -v $(LDFLAGS) -o ./bin/mt-heartbeat ./cmd
 
 clean:
-	rm bin/op-heartbeat
+	rm bin/mt-heartbeat
 
 test:
 	go test -v ./...
@@ -21,6 +21,6 @@ lint:
 
 .PHONY: \
 	clean \
-	op-heartbeat \
+	mt-heartbeat \
 	test \
 	lint

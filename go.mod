@@ -10,6 +10,7 @@ require (
 	github.com/docker/go-connections v0.4.0
 	github.com/ethereum/go-ethereum v1.11.2
 	github.com/fsnotify/fsnotify v1.6.0
+	github.com/go-resty/resty/v2 v2.7.0
 	github.com/golang/snappy v0.0.4
 	github.com/google/go-cmp v0.5.9
 	github.com/google/gofuzz v1.2.1-0.20220503160820-4a35382e8fc8
@@ -190,6 +191,6 @@ require (
 	nhooyr.io/websocket v1.8.7 // indirect
 )
 
-replace github.com/ethereum/go-ethereum v1.11.2 => github.com/mantlenetworkio/mt-geth v0.0.0-20230312080159-f956b531c3d2
+replace github.com/ethereum/go-ethereum v1.11.2 => github.com/mantlenetworkio/mt-geth v0.0.0-20230313110010-df3b6e5caa29
 
 //replace github.com/ethereum/go-ethereum v1.11.2 => ../go-ethereum

@@ -1,10 +1,9 @@
-package op_e2e
+package mt_e2e
 
 import (
 	"context"
 
 	"github.com/libp2p/go-libp2p/core/peer"
-
 	"github.com/mantlenetworkio/mantle/mt-node/eth"
 	"github.com/mantlenetworkio/mantle/mt-node/node"
 )

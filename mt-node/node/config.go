@@ -9,7 +9,7 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-node/p2p"
 	"github.com/mantlenetworkio/mantle/mt-node/rollup"
 	"github.com/mantlenetworkio/mantle/mt-node/rollup/driver"
-	oppprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
+	mtpprof "github.com/mantlenetworkio/mantle/mt-service/pprof"
 )
 
 type Config struct {
@@ -19,6 +19,9 @@ type Config struct {
 	Driver driver.Config
 
 	Rollup rollup.Config
+
+	// TPCfg token price config
+	TPCfg TPConfig
 
 	// P2PSigner will be used for signing off on published content
 	// if the node is sequencing and if the p2p stack is enabled
@@ -30,7 +33,7 @@ type Config struct {
 
 	Metrics MetricsConfig
 
-	Pprof oppprof.CLIConfig
+	Pprof mtpprof.CLIConfig
 
 	// Used to poll the L1 for new finalized or safe blocks
 	L1EpochPollInterval time.Duration
@@ -38,6 +41,12 @@ type Config struct {
 	// Optional
 	Tracer    Tracer
 	Heartbeat HeartbeatConfig
+}
+
+type TPConfig struct {
+	Url             string
+	SourceName      string
+	SecondFrequency uint64
 }
 
 type RPCConfig struct {

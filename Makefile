@@ -85,7 +85,7 @@ test-unit:
 	make -C ./mt-node test
 	make -C ./mt-proposer test
 	make -C ./mt-l1batcher test
-	make -C ./op-e2e test
+	make -C ./mt-e2e test
 	yarn test
 .PHONY: test-unit
 

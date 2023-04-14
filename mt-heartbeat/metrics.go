@@ -1,20 +1,20 @@
-package op_heartbeat
+package mt-heartbeat
 
 import (
-	"fmt"
-	"strconv"
-	"sync/atomic"
-	"time"
+"fmt"
+"strconv"
+"sync/atomic"
+"time"
 
-	lru "github.com/hashicorp/golang-lru"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+lru "github.com/hashicorp/golang-lru"
+"github.com/prometheus/client_golang/prometheus"
+"github.com/prometheus/client_golang/prometheus/promauto"
 
-	"github.com/mantlenetworkio/mantle/mt-node/heartbeat"
+"github.com/mantlenetworkio/mantle/mt-node/heartbeat"
 )
 
 const (
-	MetricsNamespace     = "op_heartbeat"
+	MetricsNamespace     = "mt-heartbeat"
 	MinHeartbeatInterval = 10*time.Minute - 10*time.Second
 	UsersCacheSize       = 10_000
 )
