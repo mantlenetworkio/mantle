@@ -287,6 +287,7 @@ var requiredFlags = []cli.Flag{
 	MtlNetworkNameFlag,
 	L1EthRpcFlag,
 	L2MtlRpcFlag,
+	DtlClientUrlFlag,
 	DisperserEndpointFlag,
 	RetrieverSocketFlag,
 	EigenDaHttpPortFlag,

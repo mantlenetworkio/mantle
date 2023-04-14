@@ -258,6 +258,7 @@ func (s *DaService) GetTransactionListByStoreNumber(c gecho.Context) error {
 	}
 	reply, err := client.RetrieveFramesAndData(s.Ctx, request, opt)
 	if err != nil {
+		log.Error("RetrieveFramesAndData retrieve frames and data error", "err", err)
 		return c.JSON(http.StatusBadRequest, errors.New("RetrieveFramesAndData error"))
 	}
 	data := reply.GetData()
