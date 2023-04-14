@@ -81,7 +81,8 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.RollupGenesisTimeoutSecondsFlag,
 			utils.SequencerClientHttpFlag,
 			utils.RollupEigenClientHttpFlag,
-			utils.L1MsgSenderFlage,
+			utils.L1MsgSenderFlag,
+			utils.DtlEigenEnableFlag,
 		},
 	},
 	{

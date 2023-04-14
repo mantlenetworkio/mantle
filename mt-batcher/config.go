@@ -12,6 +12,7 @@ type Config struct {
 	MtlNetworkName            string
 	L1EthRpc                  string
 	L2MtlRpc                  string
+	DtlClientUrl              string
 	DisperserEndpoint         string
 	RetrieverSocket           string
 	EigenDaHttpPort           int
@@ -57,6 +58,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		MtlNetworkName:            ctx.GlobalString(flags.MtlNetworkNameFlag.Name),
 		L1EthRpc:                  ctx.GlobalString(flags.L1EthRpcFlag.Name),
 		L2MtlRpc:                  ctx.GlobalString(flags.L2MtlRpcFlag.Name),
+		DtlClientUrl:              ctx.GlobalString(flags.DtlClientUrlFlag.Name),
 		DisperserEndpoint:         ctx.GlobalString(flags.DisperserEndpointFlag.Name),
 		RetrieverSocket:           ctx.GlobalString(flags.RetrieverSocketFlag.Name),
 		EigenDaHttpPort:           ctx.GlobalInt(flags.EigenDaHttpPortFlag.Name),

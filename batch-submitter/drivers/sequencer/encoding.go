@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/big"
 
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
@@ -68,10 +69,10 @@ func (c BatchContext) MarkerBatchType() BatchType {
 
 // Write encodes the BatchContext into a 16-byte stream using the following
 // encoding:
-//  - num_sequenced_txs:        3 bytes
-//  - num_subsequent_queue_txs: 3 bytes
-//  - timestamp:                5 bytes
-//  - block_number:             5 bytes
+//   - num_sequenced_txs:        3 bytes
+//   - num_subsequent_queue_txs: 3 bytes
+//   - timestamp:                5 bytes
+//   - block_number:             5 bytes
 //
 // Note that writing to a bytes.Buffer cannot
 // error, so errors are ignored here
@@ -85,10 +86,10 @@ func (c *BatchContext) Write(w *bytes.Buffer) {
 // Read decodes the BatchContext from the passed reader. If fewer than 16-bytes
 // remain, an error is returned. Otherwise the first 16-bytes will be read using
 // the expected encoding:
-//  - num_sequenced_txs:        3 bytes
-//  - num_subsequent_queue_txs: 3 bytes
-//  - timestamp:                5 bytes
-//  - block_number:             5 bytes
+//   - num_sequenced_txs:        3 bytes
+//   - num_subsequent_queue_txs: 3 bytes
+//   - timestamp:                5 bytes
+//   - block_number:             5 bytes
 func (c *BatchContext) Read(r io.Reader) error {
 	if err := readUint64(r, &c.NumSequencedTxs, 3); err != nil {
 		return err
@@ -188,13 +189,13 @@ type AppendSequencerBatchParams struct {
 }
 
 // Write encodes the AppendSequencerBatchParams using the following format:
-//  - should_start_at_element:        5 bytes
-//  - total_elements_to_append:       3 bytes
-//  - num_contexts:                   3 bytes
-//    - num_contexts * batch_context: num_contexts * 16 bytes
-//  - [num txs omitted]
-//    - tx_len:                       3 bytes
-//    - tx_bytes:                     tx_len bytes
+//   - should_start_at_element:        5 bytes
+//   - total_elements_to_append:       3 bytes
+//   - num_contexts:                   3 bytes
+//   - num_contexts * batch_context: num_contexts * 16 bytes
+//   - [num txs omitted]
+//   - tx_len:                       3 bytes
+//   - tx_bytes:                     tx_len bytes
 //
 // Typed batches include a dummy context as the first context
 // where the timestamp is 0. The blocknumber is interpreted
@@ -271,15 +272,57 @@ func (p *AppendSequencerBatchParams) Write(
 	return nil
 }
 
+func (p *AppendSequencerBatchParams) WriteNoTxn(
+	w *bytes.Buffer,
+	batchType BatchType,
+) error {
+	_ = writeUint64(w, p.ShouldStartAtElement, 5)
+	_ = writeUint64(w, p.TotalElementsToAppend, 3)
+
+	// There must be contexts if there are transactions
+	if len(p.Contexts) == 0 && len(p.Txs) != 0 {
+		return ErrMalformedBatch
+	}
+
+	// There must be transactions if there are contexts
+	if len(p.Txs) == 0 && len(p.Contexts) != 0 {
+		return ErrMalformedBatch
+	}
+
+	// copy the contexts as to not malleate the struct
+	// when it is a typed batch
+	contexts := make([]BatchContext, 0, len(p.Contexts)+1)
+	// Add the marker context, if any, for non-legacy encodings.
+	markerContext := batchType.MarkerContext()
+	if markerContext != nil {
+		contexts = append(contexts, *markerContext)
+	}
+	contexts = append(contexts, p.Contexts...)
+
+	// Write number of contexts followed by each fixed-size BatchContext.
+	_ = writeUint64(w, uint64(len(contexts)), 3)
+	for _, context := range contexts {
+		context.Write(w)
+	}
+	return nil
+}
+
 // Serialize performs the same encoding as Write, but returns the resulting
 // bytes slice.
 func (p *AppendSequencerBatchParams) Serialize(
 	batchType BatchType,
+	l2BlockNumber *big.Int,
+	upgradeBlock *big.Int,
 ) ([]byte, error) {
-
 	var buf bytes.Buffer
-	if err := p.Write(&buf, batchType); err != nil {
-		return nil, err
+	if l2BlockNumber.Cmp(upgradeBlock) > 0 {
+		if err := p.WriteNoTxn(&buf, batchType); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := p.Write(&buf, batchType); err != nil {
+			return nil, err
+		}
 	}
 	return buf.Bytes(), nil
 }
@@ -288,13 +331,13 @@ func (p *AppendSequencerBatchParams) Serialize(
 // stream does not terminate cleanly with an EOF while reading a tx_len, this
 // method will return an error. Otherwise, the stream will be parsed according
 // to the following format:
-//  - should_start_at_element:        5 bytes
-//  - total_elements_to_append:       3 bytes
-//  - num_contexts:                   3 bytes
-//    - num_contexts * batch_context: num_contexts * 16 bytes
-//  - [num txs omitted]
-//    - tx_len:                       3 bytes
-//    - tx_bytes:                     tx_len bytes
+//   - should_start_at_element:        5 bytes
+//   - total_elements_to_append:       3 bytes
+//   - num_contexts:                   3 bytes
+//   - num_contexts * batch_context: num_contexts * 16 bytes
+//   - [num txs omitted]
+//   - tx_len:                       3 bytes
+//   - tx_bytes:                     tx_len bytes
 func (p *AppendSequencerBatchParams) Read(r io.Reader) error {
 	if err := readUint64(r, &p.ShouldStartAtElement, 5); err != nil {
 		return err

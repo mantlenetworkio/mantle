@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum"
+	ethereum "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -16,6 +16,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/ctc"
+	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/da"
 	"github.com/mantlenetworkio/mantle/bss-core/drivers"
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
@@ -37,18 +38,23 @@ type Config struct {
 	MaxTxSize             uint64
 	MaxPlaintextBatchSize uint64
 	CTCAddr               common.Address
+	DaUpgradeBlock        uint64
+	DAAddr                common.Address
 	ChainID               *big.Int
 	PrivKey               *ecdsa.PrivateKey
 	BatchType             BatchType
 }
 
 type Driver struct {
-	cfg            Config
-	ctcContract    *ctc.CanonicalTransactionChain
-	rawCtcContract *bind.BoundContract
-	walletAddr     common.Address
-	ctcABI         *abi.ABI
-	metrics        *Metrics
+	cfg              Config
+	ctcContract      *ctc.CanonicalTransactionChain
+	daContract       *da.BVMEigenDataLayrChain
+	rawCtcContract   *bind.BoundContract
+	rawDaCtcContract *bind.BoundContract
+	walletAddr       common.Address
+	ctcABI           *abi.ABI
+	DaABI            *abi.ABI
+	metrics          *Metrics
 }
 
 func NewDriver(cfg Config) (*Driver, error) {
@@ -76,15 +82,41 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.L1Client,
 	)
 
+	daContract, err := da.NewBVMEigenDataLayrChain(
+		cfg.DAAddr, cfg.L1Client,
+	)
+	if err != nil {
+		return nil, err
+	}
+	daParsed, err := abi.JSON(strings.NewReader(
+		da.BVMEigenDataLayrChainABI,
+	))
+	if err != nil {
+		return nil, err
+	}
+
+	daABI, err := da.BVMEigenDataLayrChainMetaData.GetAbi()
+	if err != nil {
+		return nil, err
+	}
+
+	rawDaCtcContract := bind.NewBoundContract(
+		cfg.DAAddr, daParsed, cfg.L1Client, cfg.L1Client,
+		cfg.L1Client,
+	)
+
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
 
 	return &Driver{
-		cfg:            cfg,
-		ctcContract:    ctcContract,
-		rawCtcContract: rawCtcContract,
-		walletAddr:     walletAddr,
-		ctcABI:         ctcABI,
-		metrics:        NewMetrics(cfg.Name),
+		cfg:              cfg,
+		ctcContract:      ctcContract,
+		daContract:       daContract,
+		rawCtcContract:   rawCtcContract,
+		rawDaCtcContract: rawDaCtcContract,
+		walletAddr:       walletAddr,
+		ctcABI:           ctcABI,
+		DaABI:            daABI,
+		metrics:          NewMetrics(cfg.Name),
 	}, nil
 }
 
@@ -139,15 +171,23 @@ func (d *Driver) GetBatchBlockRange(
 	if err != nil {
 		return nil, nil, err
 	}
-
-	// Add one because end is *exclusive*.
-	end := new(big.Int).Add(latestHeader.Number, bigOne)
-
+	var end *big.Int
+	// for upgrade
+	if latestHeader.Number.Cmp(big.NewInt(int64(d.cfg.DaUpgradeBlock))) < 0 {
+		// Add one because end is *exclusive*.
+		end = new(big.Int).Add(latestHeader.Number, bigOne)
+	} else {
+		end, err = d.daContract.GetL2ConfirmedBlockNumber(&bind.CallOpts{
+			Context: context.Background(),
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+	}
 	if start.Cmp(end) > 0 {
 		return nil, nil, fmt.Errorf("invalid range, "+
 			"end(%v) < start(%v)", end, start)
 	}
-
 	return start, end, nil
 }
 
@@ -214,7 +254,7 @@ func (d *Driver) CraftBatchTx(
 		}
 
 		// Encode the batch arguments using the configured encoding type.
-		batchArguments, err := batchParams.Serialize(d.cfg.BatchType)
+		batchArguments, err := batchParams.Serialize(d.cfg.BatchType, start, big.NewInt(int64(d.cfg.DaUpgradeBlock)))
 		if err != nil {
 			return nil, err
 		}

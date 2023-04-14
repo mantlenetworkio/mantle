@@ -5,8 +5,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
-	"encoding/json"
-	"fmt"
 	datalayr "github.com/Layr-Labs/datalayr/common/contracts"
 	gkzg "github.com/Layr-Labs/datalayr/common/crypto/go-kzg-bn254"
 	"github.com/Layr-Labs/datalayr/common/graphView"
@@ -18,20 +16,23 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
+	common4 "github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/txmgr"
 	"github.com/mantlenetworkio/mantle/mt-challenger/bindings"
 	rc "github.com/mantlenetworkio/mantle/mt-challenger/bindings"
+	"github.com/mantlenetworkio/mantle/mt-challenger/challenger/db"
 	"github.com/pkg/errors"
 	"github.com/shurcooL/graphql"
 	"google.golang.org/grpc"
 	"math/big"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -74,17 +75,25 @@ type FraudProof struct {
 }
 
 type ChallengerConfig struct {
-	L1Client          *ethclient.Client
-	L2Client          *l2ethclient.Client
-	EigenContractAddr ethc.Address
-	Logger            *logging.Logger
-	PrivKey           *ecdsa.PrivateKey
-	GraphProvider     string
-	RetrieverSocket   string
-	KzgConfig         KzgConfig
-	LastStoreNumber   uint64
-	Timeout           time.Duration
-	SignerFn          SignerFn
+	L1Client                  *ethclient.Client
+	L2Client                  *l2ethclient.Client
+	EigenContractAddr         ethc.Address
+	Logger                    *logging.Logger
+	PrivKey                   *ecdsa.PrivateKey
+	GraphProvider             string
+	RetrieverSocket           string
+	KzgConfig                 KzgConfig
+	LastStoreNumber           uint64
+	Timeout                   time.Duration
+	PollInterval              time.Duration
+	DbPath                    string
+	CheckerBatchIndex         uint64
+	NeedReRollupBatch         string
+	ReRollupToolEnable        bool
+	SignerFn                  SignerFn
+	ResubmissionTimeout       time.Duration
+	NumConfirmations          uint64
+	SafeAbortNonceTooLowCount uint64
 }
 
 type Challenger struct {
@@ -96,12 +105,16 @@ type Challenger struct {
 	EigenABI         *abi.ABI
 	GraphClient      *graphView.GraphClient
 	GraphqlClient    *graphql.Client
+	LevelDBStore     *db.Store
 	txMgr            txmgr.TxManager
 	cancel           func()
 	wg               sync.WaitGroup
+	once             sync.Once
 }
 
 func NewChallenger(ctx context.Context, cfg *ChallengerConfig) (*Challenger, error) {
+	_, cancel := context.WithTimeout(ctx, common4.DefaultTimeout)
+	defer cancel()
 	eigenContract, err := bindings.NewBVMEigenDataLayrChain(
 		ethc.Address(cfg.EigenContractAddr), cfg.L1Client,
 	)
@@ -112,52 +125,68 @@ func NewChallenger(ctx context.Context, cfg *ChallengerConfig) (*Challenger, err
 		bindings.BVMEigenDataLayrChainABI,
 	))
 	if err != nil {
-		cfg.Logger.Err(err).Msg("parse eigenda contract abi fail")
+		log.Error("Challenger parse eigen layer contract abi fail", "err", err)
 		return nil, err
 	}
 	eignenABI, err := bindings.BVMEigenDataLayrChainMetaData.GetAbi()
 	if err != nil {
-		cfg.Logger.Err(err).Msg("get eigenda contract abi fail")
+		log.Error("Challenger get eigen layer contract abi fail", "err", err)
 		return nil, err
 	}
 	rawEigenContract := bind.NewBoundContract(
-		ethc.Address(cfg.EigenContractAddr), parsed, cfg.L1Client, cfg.L1Client,
+		cfg.EigenContractAddr, parsed, cfg.L1Client, cfg.L1Client,
 		cfg.L1Client,
 	)
+
+	txManagerConfig := txmgr.Config{
+		ResubmissionTimeout:       cfg.ResubmissionTimeout,
+		ReceiptQueryInterval:      time.Second,
+		NumConfirmations:          cfg.NumConfirmations,
+		SafeAbortNonceTooLowCount: cfg.SafeAbortNonceTooLowCount,
+	}
+
+	txMgr := txmgr.NewSimpleTxManager(txManagerConfig, cfg.L1Client)
+
 	graphClient := graphView.NewGraphClient(cfg.GraphProvider, cfg.Logger)
 	graphqlClient := graphql.NewClient(graphClient.GetEndpoint(), nil)
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+
+	levelDBStore, err := db.NewStore(cfg.DbPath)
+	if err != nil {
+		log.Error("Challenger init leveldb fail", "err", err)
+		return nil, err
+	}
 	return &Challenger{
 		Cfg:              cfg,
 		Ctx:              ctx,
 		EigenDaContract:  eigenContract,
 		RawEigenContract: rawEigenContract,
-		WalletAddr:       ethc.Address(walletAddr),
+		WalletAddr:       walletAddr,
 		EigenABI:         eignenABI,
 		GraphClient:      graphClient,
 		GraphqlClient:    graphqlClient,
+		LevelDBStore:     levelDBStore,
+		txMgr:            txMgr,
+		cancel:           cancel,
 	}, nil
 }
 
-func (c *Challenger) getNextDataStore() (*graphView.DataStore, error) {
+func (c *Challenger) getDataStoreById(dataStoreId string) (*graphView.DataStore, error) {
 	var query struct {
-		DataStores []graphView.DataStoreGql `graphql:"dataStores(first:1,where:{storeNumber_gt: $lastStoreNumber,confirmer: $confirmer,confirmed:true})"`
+		DataStore graphView.DataStoreGql `graphql:"dataStore(id: $storeId)"`
 	}
 	variables := map[string]interface{}{
-		"lastStoreNumber": graphql.String(fmt.Sprint(c.Cfg.LastStoreNumber)),
-		"confirmer":       graphql.String(strings.ToLower(c.Cfg.EigenContractAddr.Hex())),
+		"storeId": graphql.String(dataStoreId),
 	}
 	err := c.GraphqlClient.Query(context.Background(), &query, variables)
 	if err != nil {
-		c.Cfg.Logger.Error().Err(err).Msg("GetExpiringDataStores error")
+		log.Error("Challenger query data from graphql fail", "err", err)
 		return nil, err
 	}
-	if len(query.DataStores) == 0 {
-		return nil, errors.New("no new stores")
-	}
-	store, err := query.DataStores[0].Convert()
+	store, err := query.DataStore.Convert()
 	if err != nil {
-		return nil, errors.New("conversion error")
+		log.Error("Challenger convert data store fail", "err", err)
+		return nil, err
 	}
 	c.Cfg.LastStoreNumber = uint64(store.StoreNumber)
 	return store, nil
@@ -166,7 +195,7 @@ func (c *Challenger) getNextDataStore() (*graphView.DataStore, error) {
 func (c *Challenger) callRetrieve(store *graphView.DataStore) ([]byte, []datalayr.Frame, error) {
 	conn, err := grpc.Dial(c.Cfg.RetrieverSocket, grpc.WithInsecure())
 	if err != nil {
-		c.Cfg.Logger.Printf("Disperser Cannot connect to %v. %v\n", c.Cfg.RetrieverSocket, err)
+		log.Error("Disperser Cannot connect to", "retriever-socket", c.Cfg.RetrieverSocket, "err", err)
 		return nil, nil, err
 	}
 	defer conn.Close()
@@ -185,7 +214,7 @@ func (c *Challenger) callRetrieve(store *graphView.DataStore) ([]byte, []datalay
 	framesBytes := reply.GetFrames()
 	header, err := datalayr.DecodeDataStoreHeader(store.Header)
 	if err != nil {
-		c.Cfg.Logger.Printf("Could not decode header %v. %v\n", header, err)
+		log.Error("Could not decode header", "err", err)
 		return nil, nil, err
 	}
 	frames := make([]datalayr.Frame, header.NumSys+header.NumPar)
@@ -211,7 +240,7 @@ func (c *Challenger) checkForFraud(store *graphView.DataStore, data []byte) (*Fr
 }
 
 func (c *Challenger) constructFraudProof(store *graphView.DataStore, data []byte, fraud *Fraud, frames []datalayr.Frame) (*FraudProof, error) {
-	//encode data to frames here
+	// encode data to frames here
 	header, err := datalayr.DecodeDataStoreHeader(store.Header)
 	if err != nil {
 		c.Cfg.Logger.Printf("Could not decode header %v. %v\n", header, err)
@@ -286,7 +315,7 @@ func (fp *DataLayrDisclosureProof) ToDisclosureProofs() rc.BVMEigenDataLayrChain
 
 func (c *Challenger) UpdateGasPrice(ctx context.Context, tx *types.Transaction) (*types.Transaction, error) {
 	opts := &bind.TransactOpts{
-		From: ethc.Address(c.WalletAddr),
+		From: c.WalletAddr,
 		Signer: func(addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
 			return c.Cfg.SignerFn(ctx, addr, tx)
 		},
@@ -300,7 +329,7 @@ func (c *Challenger) UpdateGasPrice(ctx context.Context, tx *types.Transaction) 
 		return finalTx, nil
 
 	case c.IsMaxPriorityFeePerGasNotFoundError(err):
-		log.Warn("MtChallenger eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
+		log.Info("MtChallenger eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap", "txData", tx.Data())
 		opts.GasTipCap = FallbackGasTipCap
 		return c.RawEigenContract.RawTransact(opts, tx.Data())
 
@@ -399,79 +428,190 @@ func (c *Challenger) postFraudProof(store *graphView.DataStore, fraudProof *Frau
 	return tx, nil
 }
 
+func (c *Challenger) makReRollupBatchTx(ctx context.Context, batchIndex *big.Int) (*types.Transaction, error) {
+	balance, err := c.Cfg.L1Client.BalanceAt(
+		c.Ctx, ethc.Address(c.WalletAddr), nil,
+	)
+	if err != nil {
+		log.Error("MtChallenger unable to get current balance", "err", err)
+		return nil, err
+	}
+	log.Info("MtChallenger wallet address balance", "balance", balance)
+	nonce64, err := c.Cfg.L1Client.NonceAt(
+		c.Ctx, ethc.Address(c.WalletAddr), nil,
+	)
+	if err != nil {
+		log.Error("MtChallenger unable to get current nonce", "err", err)
+		return nil, err
+	}
+	nonce := new(big.Int).SetUint64(nonce64)
+	opts := &bind.TransactOpts{
+		From: ethc.Address(c.WalletAddr),
+		Signer: func(addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
+			return c.Cfg.SignerFn(ctx, addr, tx)
+		},
+		Context: ctx,
+		Nonce:   nonce,
+		NoSend:  true,
+	}
+	tx, err := c.EigenDaContract.SubmitReRollUpInfo(opts, batchIndex)
+	switch {
+	case err == nil:
+		return tx, nil
+
+	case c.IsMaxPriorityFeePerGasNotFoundError(err):
+		log.Warn("MtChallenger eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
+		opts.GasTipCap = FallbackGasTipCap
+		return c.EigenDaContract.SubmitReRollUpInfo(opts, batchIndex)
+	default:
+		return nil, err
+	}
+}
+
+func (c *Challenger) submitReRollupBatchIndex(batchIndex *big.Int) (*types.Transaction, error) {
+	tx, err := c.makReRollupBatchTx(c.Ctx, batchIndex)
+	if err != nil {
+		return nil, err
+	}
+	updateGasPrice := func(ctx context.Context) (*types.Transaction, error) {
+		log.Info("MtChallenger makReRollupBatchTx update gas price")
+		return c.UpdateGasPrice(ctx, tx)
+	}
+	receipt, err := c.txMgr.Send(
+		c.Ctx, updateGasPrice, c.SendTransaction,
+	)
+	if err != nil {
+		return nil, err
+	}
+	log.Info("MtChallenge submit re-rollup batch index success", "TxHash", receipt.TxHash)
+	return tx, nil
+}
+
 func (c *Challenger) Start() error {
 	c.wg.Add(1)
 	go c.eventLoop()
+	c.once.Do(func() {
+		log.Info("MtChallenge start exec once update da tool")
+		if c.Cfg.ReRollupToolEnable {
+			reRollupBatchIndex := strings.Split(c.Cfg.NeedReRollupBatch, "|")
+			for index := 0; index < len(reRollupBatchIndex); index++ {
+				bigParam := new(big.Int)
+				bigBatchIndex, ok := bigParam.SetString(reRollupBatchIndex[index], 10)
+				if !ok {
+					log.Error("MtChallenge string to big.int fail", "ok", ok)
+					continue
+				}
+				tx, err := c.submitReRollupBatchIndex(bigBatchIndex)
+				if err != nil {
+					log.Error("MtChallenge tool submit re-rollup info fail", "batchIndex", reRollupBatchIndex[index], "err", err)
+					continue
+				}
+				log.Info("MtChallenge tool submit re-rollup info success", "batchIndex", reRollupBatchIndex[index], "txHash", tx.Hash().String())
+			}
+		}
+	})
 	return nil
 }
 
 func (c *Challenger) Stop() {
-	// c.cancel()
+	c.cancel()
 	c.wg.Wait()
 }
 
 func (c *Challenger) eventLoop() {
-	ticker := time.NewTicker(500 * time.Millisecond)
+	defer c.wg.Done()
+	ticker := time.NewTicker(c.Cfg.PollInterval)
+	defer ticker.Stop()
 	for {
-		<-ticker.C
-		//fetch the next datastore
-		store, err := c.getNextDataStore()
-		if err != nil {
-			continue
-		}
-		obj, _ := json.Marshal(store)
-		c.Cfg.Logger.Info().Msg("Got store:" + string(obj))
-		data, frames, err := c.callRetrieve(store)
-		// retrieve the data associated with the store
-		if err != nil {
-			c.Cfg.Logger.Error().Err(err).Msg("Error getting data")
-			continue
-		}
-		batchTxn := new([]eigenda.BatchTx)
-		batchRlpStream := rlp.NewStream(bytes.NewBuffer(data), uint64(len(data)))
-		err = batchRlpStream.Decode(batchTxn)
-		if err != nil {
-			c.Cfg.Logger.Error().Err(err).Msg("Decode batch txn fail")
-			continue
-		}
-		newBatchTxn := *batchTxn
-		for i := 0; i < len(newBatchTxn); i++ {
-			l2Tx := new(l2types.Transaction)
-			rlpStream := l2rlp.NewStream(bytes.NewBuffer(newBatchTxn[i].RawTx), 0)
-			if err := l2Tx.DecodeRLP(rlpStream); err != nil {
-				c.Cfg.Logger.Error().Err(err).Msg("Decode RLP fail")
-			}
-			c.Cfg.Logger.Info().Msg("tx hash:" + l2Tx.Hash().Hex())
-			// tx check for tmp, will remove in future
-			l2Transaction, _, err := c.Cfg.L2Client.TransactionByHash(c.Ctx, l2Tx.Hash())
+		select {
+		case <-ticker.C:
+			latestBatchIndex, err := c.EigenDaContract.RollupBatchIndex(&bind.CallOpts{})
 			if err != nil {
-				c.Cfg.Logger.Error().Err(err).Msg("No this transaction")
+				log.Error("MtChallenge get batch index fail", "err", err)
 				continue
 			}
-			c.Cfg.Logger.Info().Msg("fond transaction, hash is " + l2Transaction.Hash().Hex())
+			batchIndex, ok := c.LevelDBStore.GetLatestBatchIndex()
+			if !ok {
+				log.Error("MtChallenge get batch index from db fail", "err", err)
+			}
+			if c.Cfg.CheckerBatchIndex > latestBatchIndex.Uint64() {
+				log.Info("MtChallenge Batch Index", "DbBatchIndex", batchIndex, "ContractBatchIndex", latestBatchIndex.Uint64()-c.Cfg.CheckerBatchIndex)
+				continue
+			}
+			if batchIndex >= (latestBatchIndex.Uint64() - c.Cfg.CheckerBatchIndex) {
+				log.Info("MtChallenge db batch index and contract batch idnex is equal", "DbBatchIndex", batchIndex, "ContractBatchIndex", latestBatchIndex.Uint64()-c.Cfg.CheckerBatchIndex)
+				continue
+			}
+			log.Info("MtChallenge db batch index and contract batch idnex",
+				"DbBatchIndex", batchIndex, "ContractBatchIndex", latestBatchIndex.Uint64(),
+				"latestBatchIndex.Uint64() - c.Cfg.CheckerBatchIndex", latestBatchIndex.Uint64()-c.Cfg.CheckerBatchIndex,
+			)
+			for i := batchIndex; i <= (latestBatchIndex.Uint64() - c.Cfg.CheckerBatchIndex); i++ {
+				dataStoreId, err := c.EigenDaContract.GetRollupStoreByRollupBatchIndex(&bind.CallOpts{}, big.NewInt(int64(i)))
+				if err != nil {
+					continue
+				}
+				store, err := c.getDataStoreById(strconv.Itoa(int(dataStoreId.DataStoreId)))
+				if err != nil {
+					log.Error("MtChallenge get data store fail", "err", err)
+					continue
+				}
+				log.Info("MtChallenge get data store by id success", "Confirmed", store.Confirmed)
+				if store.Confirmed {
+					data, frames, err := c.callRetrieve(store)
+					if err != nil {
+						log.Error("MtChallenge error getting data", "err", err)
+						continue
+					}
+					batchTxn := new([]eigenda.BatchTx)
+					batchRlpStream := rlp.NewStream(bytes.NewBuffer(data), uint64(len(data)))
+					err = batchRlpStream.Decode(batchTxn)
+					if err != nil {
+						log.Error("MtChallenge decode batch txn fail", "err", err)
+						continue
+					}
+					newBatchTxn := *batchTxn
+					for i := 0; i < len(newBatchTxn); i++ {
+						l2Tx := new(l2types.Transaction)
+						rlpStream := l2rlp.NewStream(bytes.NewBuffer(newBatchTxn[i].RawTx), 0)
+						if err := l2Tx.DecodeRLP(rlpStream); err != nil {
+							c.Cfg.Logger.Error().Err(err).Msg("Decode RLP fail")
+						}
+						log.Info("MtChallenge decode transaction", "hash", l2Tx.Hash().Hex())
+
+						// tx check for tmp, will remove in future
+						l2Transaction, _, err := c.Cfg.L2Client.TransactionByHash(c.Ctx, l2Tx.Hash())
+						if err != nil {
+							log.Error("MtChallenge no this transaction", "err", err)
+							continue
+						}
+						log.Info("MtChallenge fond transaction", "hash", l2Transaction.Hash().Hex())
+					}
+
+					// check if the fraud string exists within the data
+					fraud, exists := c.checkForFraud(store, data)
+					if !exists {
+						log.Info("MtChallenge no fraud")
+						c.LevelDBStore.SetLatestBatchIndex(i)
+						continue
+					}
+					proof, err := c.constructFraudProof(store, data, fraud, frames)
+					if err != nil {
+						log.Error("MtChallenge error constructing fraud", "err", err)
+						continue
+					}
+					tx, err := c.postFraudProof(store, proof)
+					if err != nil {
+						log.Error("MtChallenge error posting fraud proof", "err", err)
+						continue
+					}
+					log.Info("MtChallenge fraud proof tx", "hash", tx.Hash().Hex())
+				}
+				c.LevelDBStore.SetLatestBatchIndex(i)
+			}
+		case err := <-c.Ctx.Done():
+			log.Error("MtChallenge eigenDa sequencer service shutting down", "err", err)
+			return
 		}
-		// check if the fraud string exists within the data
-		fraud, exists := c.checkForFraud(store, data)
-		if !exists {
-			c.Cfg.Logger.Info().Msg("No fraud")
-			continue
-		}
-		obj, _ = json.Marshal(fraud)
-		proof, err := c.constructFraudProof(store, data, fraud, frames)
-		if err != nil {
-			c.Cfg.Logger.Error().Err(err).Msg("Error constructing fraud")
-			continue
-		}
-		obj, _ = json.Marshal(proof)
-		c.Cfg.Logger.Info().Msg("Fraud proof:" + string(obj))
-		obj, _ = json.Marshal(store)
-		c.Cfg.Logger.Info().Msg("Store:" + string(obj))
-		// post the fraud proof to the chain
-		tx, err := c.postFraudProof(store, proof)
-		if err != nil {
-			c.Cfg.Logger.Error().Err(err).Msg("Error posting fraud proof")
-			continue
-		}
-		c.Cfg.Logger.Info().Msg("Fraud proof tx:" + tx.Hash().Hex())
 	}
 }

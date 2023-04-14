@@ -235,13 +235,15 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
           handleEventsTransactionEnqueued
         )
 
-        await this._syncEvents(
-          'CanonicalTransactionChain',
-          'SequencerBatchAppended',
-          highestSyncedL1Block,
-          targetL1Block,
-          handleEventsSequencerBatchAppended
-        )
+        if (!this.options.eigenUpgradeEnable) {
+           await this._syncEvents(
+             'CanonicalTransactionChain',
+             'SequencerBatchAppended',
+             highestSyncedL1Block,
+             targetL1Block,
+             handleEventsSequencerBatchAppended
+           )
+         }
 
         await this._syncEvents(
           'StateCommitmentChain',
