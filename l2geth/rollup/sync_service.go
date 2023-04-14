@@ -1420,17 +1420,14 @@ func (s *SyncService) syncEigenTransactionBatchRange(start, end uint64) error {
 						return fmt.Errorf("cannot get eigen transaction batch from dtl: %w", err)
 					}
 					for _, tx := range txs {
-						//verified, err := s.verifyTx(tx)
-						//if err != nil {
-						//	return err
-						//}
-						//if verified {
-						//	if err := s.applyBatchedTransaction(tx); err != nil {
-						//		return fmt.Errorf("cannot apply batched transaction: %w", err)
-						//	}
-						//}
-						if err := s.applyBatchedTransaction(tx); err != nil {
-							return fmt.Errorf("cannot apply batched transaction: %w", err)
+						verified, err := s.verifyTx(tx)
+						if err != nil {
+							return err
+						}
+						if verified {
+							if err := s.applyBatchedTransaction(tx); err != nil {
+								return fmt.Errorf("cannot apply batched transaction: %w", err)
+							}
 						}
 					}
 					log.Info("set latest eigen batch index", "index", i)
@@ -1447,7 +1444,6 @@ func (s *SyncService) syncEigenTransactionBatchRange(start, end uint64) error {
 						return fmt.Errorf("cannot get eigen transaction batch: %w", err)
 					}
 					for _, tx := range txs {
-						log.Info("TxDetail", "tx", tx)
 						verified, err := s.verifyTx(tx)
 						if err != nil {
 							return err

@@ -126,13 +126,13 @@ func parseTransactionBatchResponseV2(txBatch *TransactionBatchResponseV2, chainI
 	if txBatch == nil {
 		return nil, errors.New("txBatch is nil")
 	}
-	txs := make([]*types.Transaction, len(txBatch.Transactions))
-	for i, tx := range txBatch.Transactions {
-		transaction, err := batchedTransactionToTransaction(&tx, chainID)
+	var txs []*types.Transaction
+	for i := 0; i < len(txBatch.Transactions); i++ {
+		transaction, err := batchedTransactionToTransaction(&txBatch.Transactions[i], chainID)
 		if err != nil {
 			return nil, err
 		}
-		txs[i] = transaction
+		txs = append(txs, transaction)
 	}
 	return txs, nil
 }
