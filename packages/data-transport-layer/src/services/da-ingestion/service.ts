@@ -12,7 +12,7 @@ import { Gauge, Counter } from 'prom-client'
 import fetch from 'node-fetch'
 import { MissingElementError } from './handlers/errors'
 import { TransportDB } from '../../db/transport-db'
-import { validators } from '../../utils'
+import {parseSignatureVParam, validators} from '../../utils'
 import { L1DataTransportServiceOptions } from '../main/service'
 import {
   TransactionEntry,
@@ -273,7 +273,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
               target: batchTx['TxDetail']['to'] ? toHexString(batchTx['TxDetail']['to']) : null,
               data: batchTx['TxDetail']['input'],
               sig:  {
-                v: BigNumber.from(batchTx['TxDetail']['v']).toNumber() - 69,
+                v: parseSignatureVParam(BigNumber.from(batchTx['TxDetail']['v']).toNumber(), this.options.l2ChainId),
                 r: '0x'.concat(sigR),
                 s: '0x'.concat(sigS),
               },
