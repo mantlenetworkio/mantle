@@ -20,6 +20,7 @@ type Config struct {
 	ethereumHttpUrl                  string
 	layerTwoHttpUrl                  string
 	gasPriceOracleAddress            common.Address
+	daFeeContractAddress             common.Address
 	privateKey                       *ecdsa.PrivateKey
 	gasPrice                         *big.Int
 	waitForReceipt                   bool
@@ -29,12 +30,15 @@ type Config struct {
 	averageBlockGasLimitPerEpoch     uint64
 	epochLengthSeconds               uint64
 	l1BaseFeeEpochLengthSeconds      uint64
+	daFeeEpochLengthSeconds          uint64
 	l2GasPriceSignificanceFactor     float64
 	bybitBackendURL                  string
 	tokenPricerUpdateFrequencySecond uint64
 	l1BaseFeeSignificanceFactor      float64
+	daFeeSignificanceFactor          float64
 	enableL1BaseFee                  bool
 	enableL2GasPrice                 bool
+	enableDaFee                      bool
 	// Metrics config
 	MetricsEnabled          bool
 	MetricsHTTP             string
@@ -53,18 +57,23 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.layerTwoHttpUrl = ctx.GlobalString(flags.LayerTwoHttpUrlFlag.Name)
 	addr := ctx.GlobalString(flags.GasPriceOracleAddressFlag.Name)
 	cfg.gasPriceOracleAddress = common.HexToAddress(addr)
+	daFeeContractAddress := ctx.GlobalString(flags.DaFeeContractAddressFlag.Name)
+	cfg.daFeeContractAddress = common.HexToAddress(daFeeContractAddress)
 	cfg.targetGasPerSecond = ctx.GlobalUint64(flags.TargetGasPerSecondFlag.Name)
 	cfg.maxPercentChangePerEpoch = ctx.GlobalFloat64(flags.MaxPercentChangePerEpochFlag.Name)
 	cfg.averageBlockGasLimitPerEpoch = ctx.GlobalUint64(flags.AverageBlockGasLimitPerEpochFlag.Name)
 	cfg.epochLengthSeconds = ctx.GlobalUint64(flags.EpochLengthSecondsFlag.Name)
 	cfg.l1BaseFeeEpochLengthSeconds = ctx.GlobalUint64(flags.L1BaseFeeEpochLengthSecondsFlag.Name)
+	cfg.daFeeEpochLengthSeconds = ctx.GlobalUint64(flags.DaFeeEpochLengthSecondsFlag.Name)
 	cfg.l2GasPriceSignificanceFactor = ctx.GlobalFloat64(flags.L2GasPriceSignificanceFactorFlag.Name)
 	cfg.bybitBackendURL = ctx.GlobalString(flags.BybitBackendURL.Name)
 	cfg.tokenPricerUpdateFrequencySecond = ctx.GlobalUint64(flags.TokenPricerUpdateFrequencySecond.Name)
 	cfg.floorPrice = ctx.GlobalUint64(flags.FloorPriceFlag.Name)
 	cfg.l1BaseFeeSignificanceFactor = ctx.GlobalFloat64(flags.L1BaseFeeSignificanceFactorFlag.Name)
+	cfg.daFeeSignificanceFactor = ctx.GlobalFloat64(flags.DaFeeSignificanceFactorFlag.Name)
 	cfg.enableL1BaseFee = ctx.GlobalBool(flags.EnableL1BaseFeeFlag.Name)
 	cfg.enableL2GasPrice = ctx.GlobalBool(flags.EnableL2GasPriceFlag.Name)
+	cfg.enableDaFee = ctx.GlobalBool(flags.EnableDaFeeFlag.Name)
 
 	if ctx.GlobalIsSet(flags.PrivateKeyFlag.Name) {
 		hex := ctx.GlobalString(flags.PrivateKeyFlag.Name)
