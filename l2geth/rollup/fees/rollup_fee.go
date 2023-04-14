@@ -195,7 +195,7 @@ func CalculateDAMsgFee(msg Message, state StateDB, gpo *common.Address) (*big.In
 	}
 
 	_, _, scalar := readGPOStorageSlots(*gpo, state)
-	daGasPrice := new(big.Int)
+	daGasPrice := state.GetState(*gpo, rcfg.DaGasPriceSlot).Big()
 	daFee := CalculateDAFee(raw, daGasPrice, scalar)
 	return daFee, nil
 }
@@ -245,8 +245,7 @@ func DeriveDAGasInfo(msg Message, state StateDB) (*big.Int, *big.Int, *big.Int, 
 		return nil, nil, nil, nil, err
 	}
 	_, _, scalar := readGPOStorageSlots(rcfg.L2GasPriceOracleAddress, state)
-	// TODO delete
-	daGasPrice := new(big.Int)
+	daGasPrice := state.GetState(rcfg.L2GasPriceOracleAddress, rcfg.DaGasPriceSlot).Big()
 	daGasUsed := CalculateDAGasUsed(raw)
 	daFee := CalculateDAFee(raw, daGasPrice, scalar)
 	return daFee, daGasPrice, daGasUsed, scalar, nil

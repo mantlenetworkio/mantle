@@ -199,9 +199,11 @@ func (st *StateTransition) buyGas() error {
 		// Only charge the L1 fee for QueueOrigin sequencer transactions
 		if st.msg.QueueOrigin() == types.QueueOriginSequencer {
 			mgval = mgval.Add(mgval, st.l1Fee)
+			mgval = mgval.Add(mgval, st.daFee)
 			if st.msg.CheckNonce() {
 				log.Debug("Adding L1 fee", "l1-fee", st.l1Fee)
 			}
+
 		}
 	}
 	if st.state.GetBalance(st.msg.From()).Cmp(mgval) < 0 {
