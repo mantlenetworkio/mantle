@@ -22,6 +22,9 @@ type Config struct {
 	PrivateKey                string
 	Mnemonic                  string
 	SequencerHDPath           string
+	FeePrivateKey             string
+	FeeMnemonic               string
+	FeeHDPath                 string
 	EigenContractAddress      string
 	EigenFeeContractAddress   string
 	DataStoreDuration         uint64
@@ -72,6 +75,9 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		PrivateKey:                ctx.GlobalString(flags.PrivateKeyFlag.Name),
 		Mnemonic:                  ctx.GlobalString(flags.MnemonicFlag.Name),
 		SequencerHDPath:           ctx.GlobalString(flags.SequencerHDPathFlag.Name),
+		FeePrivateKey:             ctx.GlobalString(flags.FeePrivateKeyFlag.Name),
+		FeeMnemonic:               ctx.GlobalString(flags.FeeMnemonicFlag.Name),
+		FeeHDPath:                 ctx.GlobalString(flags.FeeHDPathFlag.Name),
 		EigenContractAddress:      ctx.GlobalString(flags.EigenContractAddressFlag.Name),
 		EigenFeeContractAddress:   ctx.GlobalString(flags.EigenFeeContractAddressFlag.Name),
 		DataStoreDuration:         ctx.GlobalUint64(flags.DataStoreDurationFlag.Name),

@@ -66,6 +66,14 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		return nil, err
 	}
 
+	mtFeePrivateKey, _, err := common2.ParseWalletPrivKeyAndContractAddr(
+		"MtBatcher", cfg.FeeMnemonic, cfg.FeeHDPath,
+		cfg.FeePrivateKey, cfg.EigenFeeContractAddress,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	l1Client, err := l1l2client.L1EthClientWithTimeout(ctx, cfg.L1EthRpc, cfg.DisableHTTP2)
 	if err != nil {
 		return nil, err
@@ -90,6 +98,18 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 
 	signer := func(chainID *big.Int) sequencer.SignerFn {
 		s := common2.PrivateKeySignerFn(mtBatherPrivateKey, chainID)
+		return func(_ context.Context, addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
+			return s(addr, tx)
+		}
+	}
+
+	feePrivateKey, err := crypto.HexToECDSA(strings.TrimPrefix(cfg.FeePrivateKey, "0x"))
+	if err != nil {
+		return nil, err
+	}
+
+	feeSigner := func(chainID *big.Int) sequencer.SignerFn {
+		s := common2.PrivateKeySignerFn(feePrivateKey, chainID)
 		return func(_ context.Context, addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
 			return s(addr, tx)
 		}
@@ -166,6 +186,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		FeePerBytePerTime:         cfg.FeePerBytePerTime,
 		Logger:                    logger,
 		PrivKey:                   sequencerPrivKey,
+		FeePrivKey:                mtFeePrivateKey,
 		BlockOffset:               cfg.BlockOffset,
 		RollUpMinSize:             cfg.RollUpMinSize,
 		RollUpMaxSize:             cfg.RollUpMaxSize,
@@ -185,6 +206,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		NumConfirmations:          cfg.NumConfirmations,
 		SafeAbortNonceTooLowCount: cfg.SafeAbortNonceTooLowCount,
 		SignerFn:                  signer(chainID),
+		FeeSignerFn:               feeSigner(chainID),
 	}
 	driver, err := sequencer.NewDriver(ctx, driverConfig)
 	if err != nil {

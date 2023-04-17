@@ -85,6 +85,22 @@ var (
 			"mnemonic. The mnemonic flag must also be set.",
 		EnvVar: prefixEnvVar(envVarPrefix, "SEQUENCER_HD_PATH"),
 	}
+	FeePrivateKeyFlag = cli.StringFlag{
+		Name:     "fee-private",
+		Usage:    "Ethereum private key for mt fee",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "FEE_PRIVATE_KEY"),
+	}
+	FeeMnemonicFlag = cli.StringFlag{
+		Name:   "fee-mnemonic",
+		Usage:  "The mnemonic used to derive the wallets for the mt fee",
+		EnvVar: prefixEnvVar(envVarPrefix, "MNEMONIC"),
+	}
+	FeeHDPathFlag = cli.StringFlag{
+		Name:   "fee-hd-path",
+		Usage:  "The HD path used to derive the wallets for the mt fee",
+		EnvVar: prefixEnvVar(envVarPrefix, "SEQUENCER_HD_PATH"),
+	}
 	EigenContractAddressFlag = cli.StringFlag{
 		Name:     "rollup-address",
 		Usage:    "Address of the datalayr repository contract",
@@ -295,6 +311,9 @@ var requiredFlags = []cli.Flag{
 	GraphProviderFlag,
 	PrivateKeyFlag,
 	MnemonicFlag,
+	FeePrivateKeyFlag,
+	FeeMnemonicFlag,
+	FeeHDPathFlag,
 	SequencerHDPathFlag,
 	EigenContractAddressFlag,
 	EigenFeeContractAddressFlag,

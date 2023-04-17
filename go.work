@@ -6,8 +6,8 @@ use (
 	./gas-oracle
 	./l2geth
 	./l2geth-exporter
-	//./mt-batcher
-	//./mt-challenger
+	./mt-batcher
+	./mt-challenger
 	./proxyd
 	./state-surgery
 	./subsidy

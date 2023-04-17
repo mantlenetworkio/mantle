@@ -50,6 +50,7 @@ type DriverConfig struct {
 	EigenFeeABI               *abi.ABI
 	Logger                    *logging.Logger
 	PrivKey                   *ecdsa.PrivateKey
+	FeePrivKey                *ecdsa.PrivateKey
 	BlockOffset               uint64
 	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
@@ -67,6 +68,7 @@ type DriverConfig struct {
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
 	SignerFn                  SignerFn
+	FeeSignerFn               SignerFn
 	DbPath                    string
 	CheckerBatchIndex         uint64
 	CheckerEnable             bool
@@ -84,6 +86,7 @@ type Driver struct {
 	Ctx           context.Context
 	Cfg           *DriverConfig
 	WalletAddr    common.Address
+	FeeWalletAddr common.Address
 	GraphClient   *graphView.GraphClient
 	GraphqlClient *graphql.Client
 	DtlClient     client.DtlClient
@@ -118,10 +121,12 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 	}
 	dtlClient := client.NewDtlClient(cfg.DtlClientUrl)
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+	feeWalletAddr := crypto.PubkeyToAddress(cfg.FeePrivKey.PublicKey)
 	return &Driver{
 		Cfg:           cfg,
 		Ctx:           ctx,
 		WalletAddr:    walletAddr,
+		FeeWalletAddr: feeWalletAddr,
 		GraphClient:   graphClient,
 		GraphqlClient: graphqlClient,
 		DtlClient:     dtlClient,
@@ -135,14 +140,27 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction, feeModelEnable bool) (*types.Transaction, error) {
 	var finalTx *types.Transaction
 	var err error
-	opts := &bind.TransactOpts{
-		From: d.WalletAddr,
-		Signer: func(addr common.Address, tx *types.Transaction) (*types.Transaction, error) {
-			return d.Cfg.SignerFn(ctx, addr, tx)
-		},
-		Context: ctx,
-		Nonce:   new(big.Int).SetUint64(tx.Nonce()),
-		NoSend:  true,
+	var opts *bind.TransactOpts
+	if feeModelEnable {
+		opts = &bind.TransactOpts{
+			From: d.WalletAddr,
+			Signer: func(addr common.Address, tx *types.Transaction) (*types.Transaction, error) {
+				return d.Cfg.FeeSignerFn(ctx, addr, tx)
+			},
+			Context: ctx,
+			Nonce:   new(big.Int).SetUint64(tx.Nonce()),
+			NoSend:  true,
+		}
+	} else {
+		opts = &bind.TransactOpts{
+			From: d.WalletAddr,
+			Signer: func(addr common.Address, tx *types.Transaction) (*types.Transaction, error) {
+				return d.Cfg.SignerFn(ctx, addr, tx)
+			},
+			Context: ctx,
+			Nonce:   new(big.Int).SetUint64(tx.Nonce()),
+			NoSend:  true,
+		}
 	}
 	if feeModelEnable {
 		log.Info("MtBatcher update eigen da use fee", "FeeModelEnable", d.Cfg.FeeModelEnable)
@@ -559,7 +577,7 @@ func (d *Driver) CalcUserFeeByRules(rollupDateSize *big.Int) (*big.Int, error) {
 
 func (d *Driver) UpdateFee(ctx context.Context, l2Block, daFee *big.Int) (*types.Transaction, error) {
 	balance, err := d.Cfg.L1Client.BalanceAt(
-		d.Ctx, d.WalletAddr, nil,
+		d.Ctx, d.FeeWalletAddr, nil,
 	)
 	if err != nil {
 		log.Error("MtBatcher unable to get fee wallet address current balance", "err", err)
@@ -567,7 +585,7 @@ func (d *Driver) UpdateFee(ctx context.Context, l2Block, daFee *big.Int) (*types
 	}
 	log.Info("MtBatcher fee wallet address balance", "balance", balance)
 	nonce64, err := d.Cfg.L1Client.NonceAt(
-		d.Ctx, d.WalletAddr, nil,
+		d.Ctx, d.FeeWalletAddr, nil,
 	)
 	if err != nil {
 		log.Error("MtBatcher unable to get fee wallet nonce", "err", err)
@@ -577,7 +595,7 @@ func (d *Driver) UpdateFee(ctx context.Context, l2Block, daFee *big.Int) (*types
 	opts := &bind.TransactOpts{
 		From: d.WalletAddr,
 		Signer: func(addr common.Address, tx *types.Transaction) (*types.Transaction, error) {
-			return d.Cfg.SignerFn(ctx, addr, tx)
+			return d.Cfg.FeeSignerFn(ctx, addr, tx)
 		},
 		Context: ctx,
 		Nonce:   nonce,
