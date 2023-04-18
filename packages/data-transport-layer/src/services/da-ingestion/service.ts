@@ -24,28 +24,28 @@ import {
 } from '../../types'
 
 interface DaIngestionMetrics {
-  highestSyncedL1Block: Gauge<string>
-  missingElementCount: Counter<string>
-  unhandledErrorCount: Counter<string>
+  currentL2TransactionIndex: Gauge<string>
+  syncBatchIndex: Gauge<string>
+  syncDataStoreId: Gauge<string>
 }
 
 const registerMetrics = ({
   client,
   registry,
 }: Metrics): DaIngestionMetrics => ({
-  highestSyncedL1Block: new client.Gauge({
-    name: 'data_transport_layer_synced_da_data',
-    help: 'Synced DA  Data',
+  currentL2TransactionIndex: new client.Gauge({
+    name: 'data_transport_layer_current_l2_transaction_index',
+    help: 'l2 transaction index',
     registers: [registry],
   }),
-  missingElementCount: new client.Counter({
-    name: 'data_transport_layer_da_missing_element_count',
-    help: 'Number of times recovery from missing elements happens',
+  syncBatchIndex: new client.Gauge({
+    name: 'data_transport_layer_sync_batch_index',
+    help: 'sync data from eigen layer batch_index',
     registers: [registry],
   }),
-  unhandledErrorCount: new client.Counter({
-    name: 'data_transport_layer_da_unhandled_error_count',
-    help: 'Number of times recovered from unhandled errors',
+  syncDataStoreId:  new client.Gauge({
+    name: 'data_transport_layer_sync_data_store_id',
+    help: 'sync data from eigen layer data store id',
     registers: [registry],
   }),
 })
@@ -135,7 +135,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
             message: err.toString(),
           })
         } else if (!this.running || this.options.dangerouslyCatchAllErrors) {
-          this.daIngestionMetrics.unhandledErrorCount.inc()
           this.logger.error('Caught an unhandled error', {
             message: err.toString(),
             stack: err.stack,
@@ -236,6 +235,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   private async getBatchIndexRange(): Promise<Range> {
     const latestBatchIndex = await this.state.db.getLastBatchIndex()
     const newTxBatchIndex: number = await this.GetLatestTransactionBatchIndex()
+    this.daIngestionMetrics.syncBatchIndex.set(newTxBatchIndex)
     if (newTxBatchIndex > latestBatchIndex) {
       let step = latestBatchIndex + this.options.daSyncStep
       if (this.options.daSyncStep > newTxBatchIndex - latestBatchIndex) {
@@ -335,9 +335,11 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
           decoded,
           confirmed: true,
         })
+        this.daIngestionMetrics.currentL2TransactionIndex.set(batchTx['TxMeta']['index'])
       }
       await this.state.db.putTransactions(transactionEntries)
       await this.state.db.putBatchTransactionByDsId(transactionEntries, storeId)
+      this.daIngestionMetrics.syncDataStoreId.set(storeId)
     } catch (error) {
       throw new Error(`eigen layer sync finish, error is: ${error}`)
     }
