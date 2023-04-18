@@ -9,7 +9,7 @@ replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr-mantle/lib/merkz
 replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
 
 require (
-	// github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
+	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/mantlenetworkio/mantle/l2geth v0.0.0
@@ -27,10 +27,7 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0
 )
 
-require (
-	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
-	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
-)
+require github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
 
 require (
 	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0-00010101000000-000000000000 // indirect
@@ -63,6 +60,7 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/hashicorp/go-bexpr v0.1.11 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.2.0 // indirect

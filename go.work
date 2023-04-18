@@ -9,9 +9,10 @@ use (
 	./l2geth-exporter
 	./proxyd
 	./state-surgery
-	integration-tests/go-tests
+	./integration-tests/go-tests
 	./tss
 	./mt-batcher
+	./fraud-proof
 	./mt-challenger
 )
 
