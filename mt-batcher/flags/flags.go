@@ -39,7 +39,7 @@ var (
 	}
 	DtlClientUrlFlag = cli.StringFlag{
 		Name:     "dtl-client-url",
-		Usage:    "HTTP provider URL for dtl client",
+		Usage:    "dtl client url for mt batcher",
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "DTL_CLIENT_URL"),
 	}
@@ -85,11 +85,33 @@ var (
 			"mnemonic. The mnemonic flag must also be set.",
 		EnvVar: prefixEnvVar(envVarPrefix, "SEQUENCER_HD_PATH"),
 	}
+	FeePrivateKeyFlag = cli.StringFlag{
+		Name:     "fee-private",
+		Usage:    "Ethereum private key for mt fee",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "FEE_PRIVATE_KEY"),
+	}
+	FeeMnemonicFlag = cli.StringFlag{
+		Name:   "fee-mnemonic",
+		Usage:  "The mnemonic used to derive the wallets for the mt fee",
+		EnvVar: prefixEnvVar(envVarPrefix, "MNEMONIC"),
+	}
+	FeeHDPathFlag = cli.StringFlag{
+		Name:   "fee-hd-path",
+		Usage:  "The HD path used to derive the wallets for the mt fee",
+		EnvVar: prefixEnvVar(envVarPrefix, "SEQUENCER_HD_PATH"),
+	}
 	EigenContractAddressFlag = cli.StringFlag{
 		Name:     "rollup-address",
 		Usage:    "Address of the datalayr repository contract",
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "ROLLUP_ADDRESS"),
+	}
+	EigenFeeContractAddressFlag = cli.StringFlag{
+		Name:     "eigen-fee-address",
+		Usage:    "Address of the datalayr fee contract",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "ROLLUP_FEE_ADDRESS"),
 	}
 	BlockOffsetFlag = cli.Uint64Flag{
 		Name:   "block-offset",
@@ -102,6 +124,18 @@ var (
 		Usage:  "Rollup transaction min size data for eigen da",
 		Value:  1000,
 		EnvVar: prefixEnvVar(envVarPrefix, "ROLLUP_MIN_SIZE"),
+	}
+	FeeSizeSecFlag = cli.StringFlag{
+		Name:   "fee-size-sec",
+		Usage:  "Rollup transaction fee size",
+		Value:  "102400", //
+		EnvVar: prefixEnvVar(envVarPrefix, "FEE_SIZE_SEC"),
+	}
+	FeePerBytePerTimeFlag = cli.Uint64Flag{
+		Name:   "fee-per-byte-time",
+		Usage:  "Fee per byte time",
+		Value:  1,
+		EnvVar: prefixEnvVar(envVarPrefix, "FEE_PER_BYTE_TIME"),
 	}
 	RollUpMaxSizeFlag = cli.Uint64Flag{
 		Name:   "rollup-max-size",
@@ -148,6 +182,12 @@ var (
 		Usage:    "checker worker poll interval",
 		Required: true,
 		EnvVar:   prefixEnvVar(envVarPrefix, "CHECKER_WORKER_POLL_INTERVAL"),
+	}
+	FeeWorkerPollIntervalFlag = cli.DurationFlag{
+		Name:     "fee-worker-poll-interval",
+		Usage:    "fee worker poll interval",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "FEE_WORKER_POLL_INTERVAL"),
 	}
 	DataStoreDurationFlag = cli.IntFlag{
 		Name:     "duration",
@@ -208,6 +248,11 @@ var (
 			"ignored and logs are printed using JSON",
 		EnvVar: prefixEnvVar(envVarPrefix, "LOG_TERMINAL"),
 	}
+	FeeModelEnableFlags = cli.BoolFlag{
+		Name:   "fee-model-enable",
+		Usage:  "fee model enable",
+		EnvVar: prefixEnvVar(envVarPrefix, "FEE_MODEL_ENABLE"),
+	}
 	SentryEnableFlag = cli.BoolFlag{
 		Name:   "sentry-enable",
 		Usage:  "Whether or not to enable Sentry. If true, sentry-dsn must also be set",
@@ -266,13 +311,20 @@ var requiredFlags = []cli.Flag{
 	GraphProviderFlag,
 	PrivateKeyFlag,
 	MnemonicFlag,
+	FeePrivateKeyFlag,
+	FeeMnemonicFlag,
+	FeeHDPathFlag,
 	SequencerHDPathFlag,
 	EigenContractAddressFlag,
+	EigenFeeContractAddressFlag,
 	BlockOffsetFlag,
 	RollUpMinSizeFlag,
 	RollUpMaxSizeFlag,
+	FeeSizeSecFlag,
+	FeePerBytePerTimeFlag,
 	MainWorkerPollIntervalFlag,
 	CheckerWorkerPollIntervalFlag,
+	FeeWorkerPollIntervalFlag,
 	DataStoreDurationFlag,
 	DataStoreTimeoutFlag,
 	EigenLayerNodeFlag,
@@ -281,6 +333,7 @@ var requiredFlags = []cli.Flag{
 	CheckerEnableFlag,
 	ResubmissionTimeoutFlag,
 	NumConfirmationsFlag,
+	FeeModelEnableFlags,
 	SafeAbortNonceTooLowCountFlag,
 	MtlBatcherEnableFlag,
 }

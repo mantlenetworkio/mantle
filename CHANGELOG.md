@@ -1,6 +1,15 @@
 # Changelog
+## [0.3.1] - 2023-04-13
 
-## [0.3.0] - 2023-02-20
+### Features
+- Changed the rollup method from Layer1 CTC contract to EigenDA([#779](https://github.com/mantlenetworkio/mantle/pull/779))
+- Added support for data verification and recovery based on DA‘s api service in the Verifier node([#803](https://github.com/mantlenetworkio/mantle/pull/803))
+
+### Improvements
+- Optimized re-rollup process([#789](https://github.com/mantlenetworkio/mantle/pull/789))
+- Optimized code for contract upgrades([#798](https://github.com/mantlenetworkio/mantle/pull/798))
+
+## [0.3.0](https://github.com/mantlenetworkio/mantle/commits/v0.3.0) - 2023-03-16
 
 ### Features
 - Verifier syncs data from the DA network, verifies and generates new blocks([#638](https://github.com/mantlenetworkio/mantle/pull/638))
