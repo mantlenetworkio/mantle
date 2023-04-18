@@ -23,6 +23,7 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	rc "github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	common2 "github.com/mantlenetworkio/mantle/mt-batcher/common"
+	"github.com/mantlenetworkio/mantle/mt-batcher/metrics"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/client"
 	common4 "github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/sequencer/db"
@@ -75,6 +76,7 @@ type DriverConfig struct {
 	FeeSizeSec                string
 	FeePerBytePerTime         uint64
 	FeeModelEnable            bool
+	Metrics                   metrics.MtBatchMetrics
 }
 
 type FeePipline struct {
@@ -303,6 +305,7 @@ func (d *Driver) StoreData(ctx context.Context, uploadHeader []byte, duration ui
 		return nil, err
 	}
 	log.Info("MtBatcher WalletAddr Balance", "balance", balance)
+	d.Cfg.Metrics.MtBatchBalanceETH().Set(common4.WeiToEth64(balance))
 	nonce64, err := d.Cfg.L1Client.NonceAt(
 		d.Ctx, d.WalletAddr, nil,
 	)
@@ -343,6 +346,7 @@ func (d *Driver) ConfirmData(ctx context.Context, callData []byte, searchData rc
 		return nil, err
 	}
 	log.Info("MtBatcher wallet address balance", "balance", balance)
+	d.Cfg.Metrics.MtBatchBalanceETH().Set(common4.WeiToEth64(balance))
 	nonce64, err := d.Cfg.L1Client.NonceAt(
 		d.Ctx, d.WalletAddr, nil,
 	)
@@ -584,6 +588,7 @@ func (d *Driver) UpdateFee(ctx context.Context, l2Block, daFee *big.Int) (*types
 		return nil, err
 	}
 	log.Info("MtBatcher fee wallet address balance", "balance", balance)
+	d.Cfg.Metrics.MtFeeBalanceETH().Set(common4.WeiToEth64(balance))
 	nonce64, err := d.Cfg.L1Client.NonceAt(
 		d.Ctx, d.FeeWalletAddr, nil,
 	)
@@ -591,6 +596,7 @@ func (d *Driver) UpdateFee(ctx context.Context, l2Block, daFee *big.Int) (*types
 		log.Error("MtBatcher unable to get fee wallet nonce", "err", err)
 		return nil, err
 	}
+	d.Cfg.Metrics.MtFeeNonce().Set(float64(nonce64))
 	nonce := new(big.Int).SetUint64(nonce64)
 	opts := &bind.TransactOpts{
 		From: d.WalletAddr,
@@ -690,18 +696,21 @@ func (d *Driver) RollupMainWorker() {
 				log.Error("MtBatcher eigenDa sequencer unable to craft batch tx", "err", err)
 				continue
 			}
+			d.Cfg.Metrics.BatchSizeBytes().Observe(float64(len(aggregateTxData)))
 			params, receipt, err := d.DisperseStoreData(aggregateTxData, startL2BlockNumber, endL2BlockNumber, false)
 			if err != nil {
 				log.Error("MtBatcher disperse store data fail", "err", err)
 				continue
 			}
 			log.Info("MtBatcher disperse store data success", "txHash", receipt.TxHash.String())
+			d.Cfg.Metrics.L2StoredBlockNumber().Set(float64(start.Uint64()))
 			csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, 0, big.NewInt(0), false)
 			if err != nil {
 				log.Error("MtBatcher confirm store data fail", "err", err)
 				continue
 			}
 			log.Info("MtBatcher confirm store data success", "txHash", csdReceipt.TxHash.String())
+			d.Cfg.Metrics.L2ConfirmedBlockNumber().Set(float64(start.Uint64()))
 			if d.Cfg.FeeModelEnable {
 				daFee, _ := d.CalcUserFeeByRules(big.NewInt(int64(len(aggregateTxData))))
 				feePip := &FeePipline{
