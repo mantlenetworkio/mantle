@@ -52,7 +52,7 @@ type MantleBatch struct {
 	cfg             Config
 	sequencerDriver *sequencer.Driver
 	daService       *restorer.DaService
-	metrics         *metrics.Metrics
+	metrics         *metrics.MtBatchMetrics
 }
 
 func NewMantleBatch(cfg Config) (*MantleBatch, error) {
@@ -207,6 +207,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		SafeAbortNonceTooLowCount: cfg.SafeAbortNonceTooLowCount,
 		SignerFn:                  signer(chainID),
 		FeeSignerFn:               feeSigner(chainID),
+		Metrics:                   metrics.NewMtBatchBase(),
 	}
 	driver, err := sequencer.NewDriver(ctx, driverConfig)
 	if err != nil {
@@ -245,9 +246,12 @@ func (mb *MantleBatch) Start() error {
 	go func() {
 		err := mb.daService.Start()
 		if err != nil {
-			log.Error("metrics server failed to start", "err", err)
+			log.Error("da server failed to start", "err", err)
 		}
 	}()
+	if mb.cfg.MetricsServerEnable {
+		go metrics.StartServer(mb.cfg.MetricsHostname, mb.cfg.MetricsPort)
+	}
 	return nil
 }
 
