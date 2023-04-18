@@ -43,7 +43,7 @@ const registerMetrics = ({
     help: 'sync data from eigen layer batch_index',
     registers: [registry],
   }),
-  syncDataStoreId:  new client.Gauge({
+  syncDataStoreId: new client.Gauge({
     name: 'data_transport_layer_sync_data_store_id',
     help: 'sync data from eigen layer data store id',
     registers: [registry],
@@ -335,7 +335,9 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
           decoded,
           confirmed: true,
         })
-        this.daIngestionMetrics.currentL2TransactionIndex.set(batchTx['TxMeta']['index'])
+        this.daIngestionMetrics.currentL2TransactionIndex.set(
+          batchTx['TxMeta']['index']
+        )
       }
       await this.state.db.putTransactions(transactionEntries)
       await this.state.db.putBatchTransactionByDsId(transactionEntries, storeId)
