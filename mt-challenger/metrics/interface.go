@@ -5,9 +5,9 @@ import "github.com/prometheus/client_golang/prometheus"
 type ChallengerMetrics interface {
 	BalanceETH() prometheus.Gauge
 
-	NonceETH() prometheus.Counter
+	NonceETH() prometheus.Gauge
 
-	ReRollupBatchIndex() prometheus.Counter
+	ReRollupBatchIndex() prometheus.Gauge
 
-	CheckBatchIndex() prometheus.Counter
+	CheckBatchIndex() prometheus.Gauge
 }

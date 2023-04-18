@@ -17,7 +17,6 @@ type MtBatchBase struct {
 	eigenUserFee           prometheus.Gauge
 	mtFeeNonce             prometheus.Gauge
 	mtBatchNonce           prometheus.Gauge
-	dtlBatchIndex          prometheus.Gauge
 }
 
 func NewMtBatchBase() *MtBatchBase {
@@ -25,72 +24,66 @@ func NewMtBatchBase() *MtBatchBase {
 		mtBatchBalanceETH: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "mt_batch_balance_eth",
 			Help:      "ETH balance of the mt batch",
-			Subsystem: "mt-batcher",
+			Subsystem: "mtbatcher",
 		}),
 		mtFeeBalanceETH: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "mt_fee_balance_eth",
 			Help:      "ETH balance of the mt fee",
-			Subsystem: "mt-batcher",
+			Subsystem: "mtbatcher",
 		}),
 		batchSizeBytes: promauto.NewSummary(prometheus.SummaryOpts{
 			Name:       "batch_size_bytes",
 			Help:       "Size of batches in bytes",
-			Subsystem:  "mt-batcher",
+			Subsystem:  "mtbatcher",
 			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		}),
 		numTxnPerBatch: promauto.NewSummary(prometheus.SummaryOpts{
 			Name:       "num_txn_per_batch",
 			Help:       "Number of transaction in each batch",
 			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
-			Subsystem:  "mt-batcher",
+			Subsystem:  "mtbatcher",
 		}),
 
 		l2StoredBlockNumber: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "l2_store_block_number",
 			Help:      "eigen da store block number",
-			Subsystem: "mt-batcher",
+			Subsystem: "mtbatcher",
 		}),
 
 		l2ConfirmedBlockNumber: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "l2_confirmed_block_number",
 			Help:      "eigen da confirmed block number",
-			Subsystem: "mt-batcher",
+			Subsystem: "mtbatcher",
 		}),
 
 		rollUpBatchIndex: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "rollup_batch_index",
 			Help:      "Count of batches submitted",
-			Subsystem: "mt-batcher",
+			Subsystem: "mtbatcher",
 		}),
 
 		reRollUpBatchIndex: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "re_rollup_batch_index",
 			Help:      "Count of batches re-submitted",
-			Subsystem: "mt-batcher",
+			Subsystem: "mtbatcher",
 		}),
 
 		eigenUserFee: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "eigen_user_fee",
 			Help:      "user fee for eigen",
-			Subsystem: "mt-batcher",
+			Subsystem: "mtbatcher",
 		}),
 
 		mtFeeNonce: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "mt_fee_nonce",
 			Help:      "nonce for mt address",
-			Subsystem: "mt-batcher",
+			Subsystem: "mtbatcher",
 		}),
 
 		mtBatchNonce: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "mt_batch_nonce",
 			Help:      "nonce for mt batch address",
-			Subsystem: "mt-batcher",
-		}),
-
-		dtlBatchIndex: promauto.NewGauge(prometheus.GaugeOpts{
-			Name:      "dtl_batch_index",
-			Help:      "batch index for dtl sync",
-			Subsystem: "mt-batcher",
+			Subsystem: "mtbatcher",
 		}),
 	}
 }
@@ -137,8 +130,4 @@ func (mbb *MtBatchBase) MtFeeNonce() prometheus.Gauge {
 
 func (mbb *MtBatchBase) MtBatchNonce() prometheus.Gauge {
 	return mbb.mtBatchNonce
-}
-
-func (mbb *MtBatchBase) DtlBatchIndex() prometheus.Gauge {
-	return mbb.dtlBatchIndex
 }

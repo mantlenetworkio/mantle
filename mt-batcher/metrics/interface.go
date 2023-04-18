@@ -24,6 +24,4 @@ type MtBatchMetrics interface {
 	MtFeeNonce() prometheus.Gauge
 
 	MtBatchNonce() prometheus.Gauge
-
-	DtlBatchIndex() prometheus.Gauge
 }

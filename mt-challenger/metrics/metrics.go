@@ -7,9 +7,9 @@ import (
 
 type ChallengerBase struct {
 	balanceETH         prometheus.Gauge
-	nonceETH           prometheus.Counter
-	reRollupBatchIndex prometheus.Counter
-	checkBatchIndex    prometheus.Counter
+	nonceETH           prometheus.Gauge
+	reRollupBatchIndex prometheus.Gauge
+	checkBatchIndex    prometheus.Gauge
 }
 
 func NewChallengerBase() *ChallengerBase {
@@ -17,25 +17,25 @@ func NewChallengerBase() *ChallengerBase {
 		balanceETH: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "balance_eth",
 			Help:      "ETH balance of the mt batch",
-			Subsystem: "mt-challenger",
+			Subsystem: "challenger",
 		}),
 
 		nonceETH: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "nonce_eth",
 			Help:      "nonce for mt batch address",
-			Subsystem: "mt-challenger",
+			Subsystem: "challenger",
 		}),
 
-		reRollupBatchIndex: promauto.NewCounter(prometheus.CounterOpts{
+		reRollupBatchIndex: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "re_rollup_batch_index",
 			Help:      "re-rollup batch index for eigen layer",
-			Subsystem: "mt-challenger",
+			Subsystem: "challenger",
 		}),
 
 		checkBatchIndex: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "checker_batch_index",
 			Help:      "checker batch index for eigen layer",
-			Subsystem: "mt-challenger",
+			Subsystem: "challenger",
 		}),
 	}
 }
@@ -44,14 +44,14 @@ func (cb *ChallengerBase) BalanceETH() prometheus.Gauge {
 	return cb.balanceETH
 }
 
-func (cb *ChallengerBase) NonceETH() prometheus.Counter {
+func (cb *ChallengerBase) NonceETH() prometheus.Gauge {
 	return cb.nonceETH
 }
 
-func (cb *ChallengerBase) ReRollUpBatchIndex() prometheus.Counter {
+func (cb *ChallengerBase) ReRollupBatchIndex() prometheus.Gauge {
 	return cb.reRollupBatchIndex
 }
 
-func (cb *ChallengerBase) CheckRollUpBatchIndex() prometheus.Counter {
+func (cb *ChallengerBase) CheckBatchIndex() prometheus.Gauge {
 	return cb.checkBatchIndex
 }

@@ -354,6 +354,7 @@ func (d *Driver) ConfirmData(ctx context.Context, callData []byte, searchData rc
 		log.Error("MtBatcher unable to get current nonce", "err", err)
 		return nil, err
 	}
+	d.Cfg.Metrics.MtBatchNonce().Set(float64(nonce64))
 	nonce := new(big.Int).SetUint64(nonce64)
 	opts := &bind.TransactOpts{
 		From: d.WalletAddr,
@@ -696,6 +697,7 @@ func (d *Driver) RollupMainWorker() {
 				log.Error("MtBatcher eigenDa sequencer unable to craft batch tx", "err", err)
 				continue
 			}
+			d.Cfg.Metrics.NumTxnPerBatch().Observe(float64((new(big.Int).Sub(endL2BlockNumber, startL2BlockNumber)).Uint64()))
 			d.Cfg.Metrics.BatchSizeBytes().Observe(float64(len(aggregateTxData)))
 			params, receipt, err := d.DisperseStoreData(aggregateTxData, startL2BlockNumber, endL2BlockNumber, false)
 			if err != nil {
@@ -719,6 +721,8 @@ func (d *Driver) RollupMainWorker() {
 				}
 				d.FeeCh <- feePip
 			}
+			batchIndex, _ := d.Cfg.EigenDaContract.RollupBatchIndex(&bind.CallOpts{})
+			d.Cfg.Metrics.RollUpBatchIndex().Set(float64(batchIndex.Uint64()))
 		case err := <-d.Ctx.Done():
 			log.Error("MtBatcher eigenDa sequencer service shutting down", "err", err)
 			return
@@ -747,6 +751,7 @@ func (d *Driver) RollUpFeeWorker() {
 						log.Error("MtBatcher RollUpFeeWorker update user da fee fail", "err", err)
 						continue
 					}
+					d.Cfg.Metrics.EigenUserFee().Set(float64(daFee.RollUpFee.Uint64()))
 					log.Info("MtBatcher RollUpFeeWorker update user fee success", "Hash", txfRpt.TxHash.String())
 				}
 			}
@@ -769,6 +774,7 @@ func (d *Driver) CheckConfirmedWorker() {
 				log.Error("Checker get batch index fail", "err", err)
 				continue
 			}
+			d.Cfg.Metrics.ReRollUpBatchIndex().Set(float64(latestReRollupBatchIndex.Uint64()))
 			batchIndex, ok := d.LevelDBStore.GetReRollupBatchIndex()
 			if !ok {
 				log.Error("Checker get batch index from db fail", "err", err)
