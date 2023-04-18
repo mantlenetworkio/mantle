@@ -282,7 +282,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         let highestL2BlockNumber
         switch (backend) {
           case 'l1':
-            currentL2Block = await this.state.db.getLatestTransaction()
+            currentL2Block = await this.state.db.getDaLatestTransaction()
             highestL2BlockNumber = await this.state.db.getHighestL2BlockNumber()
             break
           case 'l2':
