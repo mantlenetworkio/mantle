@@ -17,6 +17,7 @@
 package vm
 
 import (
+	"github.com/mantlenetworkio/mantle/l2geth/core/state"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -74,6 +75,18 @@ type StateDB interface {
 	AddPreimage(common.Hash, []byte)
 
 	ForEachStorage(common.Address, func(common.Hash, common.Hash) bool) error
+
+	// <FRAUD-PROOF modification>
+	Copy() *state.StateDB
+	GetCurrentLogs() []*types.Log
+	GetCurrentAccessListForProof() (map[common.Address]int, []map[common.Hash]struct{})
+	GetStateRootForProof(common.Address) common.Hash
+	GetProof(common.Address) ([][]byte, error)
+	GetStorageProof(common.Address, common.Hash) ([][]byte, error)
+	GetRootForProof() common.Hash
+	CommitForProof()
+	DeleteSuicidedAccountForProof(addr common.Address)
+	// <FRAUD-PROOF modification/>
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM

@@ -129,6 +129,20 @@ func (db *Database) NewBatch() ethdb.Batch {
 	}
 }
 
+// NewBatchWithSize creates a write-only database batch with pre-allocated buffer.
+func (db *Database) NewBatchWithSize(size int) ethdb.Batch {
+	return &batch{
+		db: db,
+	}
+}
+
+// NewSnapshot creates a database snapshot based on the current state.
+// The created snapshot will not be affected by all following mutations
+// happened on the database.
+func (db *Database) NewSnapshot() (ethdb.Snapshot, error) {
+	return newSnapshot(db), nil
+}
+
 // NewIterator creates a binary-alphabetical iterator over the entire keyspace
 // contained within the memory database.
 func (db *Database) NewIterator() ethdb.Iterator {
@@ -341,4 +355,60 @@ func (it *iterator) Value() []byte {
 // be called multiple times without causing error.
 func (it *iterator) Release() {
 	it.keys, it.values = nil, nil
+}
+
+// snapshot wraps a batch of key-value entries deep copied from the in-memory
+// database for implementing the Snapshot interface.
+type snapshot struct {
+	db   map[string][]byte
+	lock sync.RWMutex
+}
+
+// newSnapshot initializes the snapshot with the given database instance.
+func newSnapshot(db *Database) *snapshot {
+	db.lock.RLock()
+	defer db.lock.RUnlock()
+
+	copied := make(map[string][]byte)
+	for key, val := range db.db {
+		copied[key] = common.CopyBytes(val)
+	}
+	return &snapshot{db: copied}
+}
+
+// Has retrieves if a key is present in the snapshot backing by a key-value
+// data store.
+func (snap *snapshot) Has(key []byte) (bool, error) {
+	snap.lock.RLock()
+	defer snap.lock.RUnlock()
+
+	if snap.db == nil {
+		return false, errors.New("snapshot released")
+	}
+	_, ok := snap.db[string(key)]
+	return ok, nil
+}
+
+// Get retrieves the given key if it's present in the snapshot backing by
+// key-value data store.
+func (snap *snapshot) Get(key []byte) ([]byte, error) {
+	snap.lock.RLock()
+	defer snap.lock.RUnlock()
+
+	if snap.db == nil {
+		return nil, errors.New("snapshot released")
+	}
+	if entry, ok := snap.db[string(key)]; ok {
+		return common.CopyBytes(entry), nil
+	}
+	return nil, errMemorydbNotFound
+}
+
+// Release releases associated resources. Release should always succeed and can
+// be called multiple times without causing error.
+func (snap *snapshot) Release() {
+	snap.lock.Lock()
+	defer snap.lock.Unlock()
+
+	snap.db = nil
 }
