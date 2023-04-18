@@ -710,6 +710,9 @@ func (s *SyncService) updateGasPriceOracleCache(hash *common.Hash) error {
 	if err := s.updateDASwitch(statedb); err != nil {
 		return err
 	}
+	if err := s.updateDAGasPrice(statedb); err != nil {
+		return err
+	}
 	return nil
 }
 
