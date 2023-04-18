@@ -287,6 +287,7 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 		log.Info("MtBatcher current da node", "totalNode", daNodes)
 		totalNode = daNodes
 	}
+	d.Cfg.Metrics.NumEigenNode().Set(float64(daNodes))
 	if len(txnBufBytes) > 31*totalNode {
 		transactionByte = txnBufBytes
 	} else {

@@ -24,4 +24,6 @@ type MtBatchMetrics interface {
 	MtFeeNonce() prometheus.Gauge
 
 	MtBatchNonce() prometheus.Gauge
+
+	NumEigenNode() prometheus.Gauge
 }

@@ -17,6 +17,7 @@ type MtBatchBase struct {
 	eigenUserFee           prometheus.Gauge
 	mtFeeNonce             prometheus.Gauge
 	mtBatchNonce           prometheus.Gauge
+	numEigenNode           prometheus.Gauge
 }
 
 func NewMtBatchBase() *MtBatchBase {
@@ -85,6 +86,12 @@ func NewMtBatchBase() *MtBatchBase {
 			Help:      "nonce for mt batch address",
 			Subsystem: "mtbatcher",
 		}),
+
+		numEigenNode: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "num_eigen_node",
+			Help:      "total eigen layer nodes",
+			Subsystem: "mtbatcher",
+		}),
 	}
 }
 
@@ -130,4 +137,8 @@ func (mbb *MtBatchBase) MtFeeNonce() prometheus.Gauge {
 
 func (mbb *MtBatchBase) MtBatchNonce() prometheus.Gauge {
 	return mbb.mtBatchNonce
+}
+
+func (mbb *MtBatchBase) NumEigenNode() prometheus.Gauge {
+	return mbb.numEigenNode
 }
