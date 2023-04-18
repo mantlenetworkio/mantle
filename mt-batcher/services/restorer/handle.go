@@ -171,7 +171,6 @@ func (s *DaService) GetDtlBatchTransactionByDataStoreId(c gecho.Context) error {
 				addrLs := common2.HexToAddress("")
 				l1MessageSender = &addrLs
 			}
-			log.Info("txDecodeMetaData", "txDecodeMetaData", txDecodeMetaData)
 			realTxMeta := &types.TransactionMeta{
 				L1BlockNumber:   txDecodeMetaData.L1BlockNumber,
 				L1Timestamp:     txDecodeMetaData.L1Timestamp,

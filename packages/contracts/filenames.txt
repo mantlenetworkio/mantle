@@ -1,6 +1,7 @@
 Proxy__Verifier
 ChainStorageContainer-SCC-batches
 Proxy__AssertionMap
+BVM_EigenDataLayrFee
 StateCommitmentChain
 TestBitToken
 ChainStorageContainer-CTC-batches
@@ -9,6 +10,7 @@ Rollup
 TssStakingSlashing
 BVM_L1CrossDomainMessenger
 Proxy__TSS_GroupManager
+Proxy__BVM_EigenDataLayrFee
 Lib_AddressManager
 VerifierEntry
 AddressDictator

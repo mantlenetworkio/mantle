@@ -210,6 +210,7 @@ task('take-dump').setAction(async (args, hre) => {
         muirGlacierBlock: 0,
         berlinBlock: hre.deployConfig.hfBerlinBlock,
         updateGaslimitBlock: hre.deployConfig.updateGaslimitBlock,
+        eigenDaBlock: hre.deployConfig.eigenDaBlock,
         clique: {
           period: 0,
           epoch: 30000,
