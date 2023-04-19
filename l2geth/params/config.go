@@ -625,7 +625,7 @@ type Rules struct {
 	IsHomestead, IsEIP150, IsEIP155, IsEIP158               bool
 	IsByzantium, IsConstantinople, IsPetersburg, IsIstanbul bool
 	IsBerlin, IsLondon                                      bool
-	ISUpdateGaslimitBlock                                   bool
+	IsUpdateGasLimitBlock                                   bool
 	IsEigenDa                                               bool
 }
 
