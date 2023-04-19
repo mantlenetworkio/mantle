@@ -170,7 +170,6 @@ var (
 		utils.RollupGenesisTimeoutSecondsFlag,
 		utils.SequencerClientHttpFlag,
 		utils.RollupEigenClientHttpFlag,
-		utils.L1MsgSenderFlage,
 		utils.DtlEigenEnableFlag,
 
 		// fraud proof flags

@@ -48,7 +48,7 @@ task('whiteListInit')
       'http://localhost:9545'
     )
     const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
-    const proposerAddr = process.env.BVM_PROPOSER_ADDRESS
+    const proposerAddr = process.env.BVM_ROLLUPER_ADDRESS
     const entryOwner = new ethers.Wallet(deployerKey, provider)
 
     console.log(
@@ -58,8 +58,8 @@ task('whiteListInit')
     )
     const SequencerENV = process.env.BVM_ROLLUPER_ADDRESS
     const Validator1ENV = process.env.BVM_VERIFIER1_ADDRESS
-    const Validator2ENV = process.env.BVM_VERIFIER2_ADDRESS
-    const whiteListToAdd = [SequencerENV, Validator1ENV, Validator2ENV]
+    // const Validator2ENV = process.env.BVM_VERIFIER2_ADDRESS
+    const whiteListToAdd = [SequencerENV, Validator1ENV]
     console.log('whiteList:', whiteListToAdd)
     const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
     await rollup.connect(entryOwner).addToWhitelist(whiteListToAdd)
