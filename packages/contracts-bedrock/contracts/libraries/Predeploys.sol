@@ -6,6 +6,12 @@ pragma solidity ^0.8.0;
  * @notice Contains constant addresses for contracts that are pre-deployed to the L2 system.
  */
 library Predeploys {
+
+
+    address internal constant BVM_BIT = 0x4200000000000000000000000000000000000021;
+    address internal constant L1_BIT = 0x6400000000000000000000000000000000000022;
+
+
     /**
      * @notice Address of the L2ToL1MessagePasser predeploy.
      */

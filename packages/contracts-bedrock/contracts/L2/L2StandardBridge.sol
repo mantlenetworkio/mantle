@@ -73,7 +73,7 @@ contract L2StandardBridge is StandardBridge, Semver {
      */
     receive() external payable override onlyEOA {
         _initiateWithdrawal(
-            Predeploys.LEGACY_ERC20_ETH,
+            Predeploys.BVM_BIT,
             msg.sender,
             msg.sender,
             msg.value,
@@ -186,6 +186,9 @@ contract L2StandardBridge is StandardBridge, Semver {
     ) internal {
         if (_l2Token == Predeploys.LEGACY_ERC20_ETH) {
             _initiateBridgeETH(_from, _to, _amount, _minGasLimit, _extraData);
+        }else if (_l2Token == Predeploys.BVM_BIT){
+            _initiateBridgeBITWithdraw(_l2Token,Predeploys.L1_BIT,_from, _to, _amount, _minGasLimit, _extraData);
+
         } else {
             address l1Token = MantleMintableERC20(_l2Token).l1Token();
             _initiateBridgeERC20(_l2Token, l1Token, _from, _to, _amount, _minGasLimit, _extraData);

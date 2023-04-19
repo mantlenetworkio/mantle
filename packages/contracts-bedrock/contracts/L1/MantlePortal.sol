@@ -412,6 +412,7 @@ contract MantlePortal is Initializable, ResourceMetering, Semver {
      * @param _data       Data to trigger the recipient with.
      */
     function depositTransaction(
+        uint32 _type,
         address _to,
         uint256 _value,
         uint64 _gasLimit,
@@ -439,8 +440,16 @@ contract MantlePortal is Initializable, ResourceMetering, Semver {
         // Compute the opaque data that will be emitted as part of the TransactionDeposited event.
         // We use opaque data so that we can update the TransactionDeposited event in the future
         // without breaking the current interface.
+        uint256 mintValue = 0;
+        if (_type==1){
+            //BIT
+            mintValue =_value;
+        }else if (_type==0 || _type ==2){
+            //0:ETH or 2:ERC20 deposit
+            mintValue =0;
+        }
         bytes memory opaqueData = abi.encodePacked(
-            msg.value,
+            mintValue,
             _value,
             _gasLimit,
             _isCreation,

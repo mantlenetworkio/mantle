@@ -255,6 +255,7 @@ abstract contract CrossDomainMessenger is
      * @param _minGasLimit Minimum gas limit that the message can be executed with.
      */
     function sendMessage(
+        uint32 _type,
         address _target,
         bytes calldata _message,
         uint32 _minGasLimit
@@ -263,7 +264,21 @@ abstract contract CrossDomainMessenger is
         // message is the amount of gas requested by the user PLUS the base gas value. We want to
         // guarantee the property that the call to the target contract will always have at least
         // the minimum gas limit specified by the user.
+        uint256 mintValue = 0;
+        if (_type==1){
+            //BIT
+            mintValue =_value;
+        }else if (_type==0 || _type ==2){
+            //0:ETH or 2:ERC20 deposit
+            mintValue =0;
+
+        }
+
+
+
+
         _sendMessage(
+            _type,
             OTHER_MESSENGER,
             baseGas(_message, _minGasLimit),
             msg.value,
@@ -371,7 +386,7 @@ abstract contract CrossDomainMessenger is
             gasleft() >= _minGasLimit + RELAY_GAS_REQUIRED,
             "CrossDomainMessenger: insufficient gas to relay message"
         );
-
+        //TODO add bit transfer and eth transfer
         xDomainMsgSender = _sender;
         bool success = SafeCall.call(_target, gasleft() - RELAY_GAS_BUFFER, _value, _message);
         xDomainMsgSender = Constants.DEFAULT_L2_SENDER;
