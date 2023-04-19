@@ -18,7 +18,7 @@ contract BVM_BIT is MantleMintableERC20 {
      ***************/
     // hardcode to bit token mainnet address
     constructor()
-        MantleMintableERC20(Predeploys.L2_STANDARD_BRIDGE,address(0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5),"Bit Token","BIT")
+        MantleMintableERC20(Predeploys.L2_STANDARD_BRIDGE,Predeploys.L1_BIT_ADDRESS,"Bit Token","BIT")
     {
     }
 

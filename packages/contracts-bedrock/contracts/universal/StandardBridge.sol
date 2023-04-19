@@ -285,7 +285,6 @@ abstract contract StandardBridge {
             _extraData
         );
     }
-
     /**
      * @notice Finalizes an ETH bridge on this chain. Can only be triggered by the other
      *         StandardBridge contract on the remote chain.
@@ -415,7 +414,6 @@ abstract contract StandardBridge {
     ) internal {
 
         if (_localToken == address(0)  ){
-            // start l1 eth transfer to l2 eth
             require(_remoteToken == Predeploys.L2_ETH_ADDRESS,"the target mint token has to be l2's ETH");
             require(msg.value == _amount,"eth amount can't equal the params");
             MESSENGER.sendMessage(

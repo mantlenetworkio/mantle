@@ -185,8 +185,6 @@ github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7
 github.com/etcd-io/bbolt v1.3.3/go.mod h1:ZF2nL25h33cCyBtcyWeZ2/I3HQOfTP+0PIEvHjkjCrw=
 github.com/ethandavionlabs/mt-geth v0.0.0-20230331060308-d419cef7c3f9 h1:vM/dMh2LAA34OnY5FnvkOkRFbptJMsxh4WfFjKU9WVo=
 github.com/ethandavionlabs/mt-geth v0.0.0-20230331060308-d419cef7c3f9/go.mod h1:/tjlXxOaovIyuF0l6+wCzr6AtDb3lYWTymmpQAQcqu8=
-github.com/ethereum/go-ethereum v1.11.2 h1:z/luyejbevDCAMUUiu0rc80dxJxOnpoG58k5o0tSawc=
-github.com/ethereum/go-ethereum v1.11.2/go.mod h1:DuefStAgaxoaYGLR0FueVcVbehmn5n9QUcVrMCuOvuc=
 github.com/fasthttp-contrib/websocket v0.0.0-20160511215533-1f3b11f56072/go.mod h1:duJ4Jxv5lDcvg4QuQr0oowTf7dz4/CR8NtyCooz9HL8=
 github.com/fatih/structs v1.1.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga6PJ7M=
 github.com/fjl/memsize v0.0.1 h1:+zhkb+dhUgx0/e+M8sF0QqiouvMQUiKR+QYvdxIOKcQ=
