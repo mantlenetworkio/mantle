@@ -521,6 +521,7 @@ abstract contract StandardBridge {
 
         MESSENGER.sendMessage(
             BIT_TX,
+            _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
                 this.finalizeBridgeBITDeposit.selector,

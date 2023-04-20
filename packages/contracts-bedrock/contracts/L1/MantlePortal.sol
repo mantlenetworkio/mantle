@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
 
-import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import { SafeCall } from "../libraries/SafeCall.sol";
-import { L2OutputOracle } from "./L2OutputOracle.sol";
-import { Constants } from "../libraries/Constants.sol";
-import { Types } from "../libraries/Types.sol";
-import { Hashing } from "../libraries/Hashing.sol";
-import { SecureMerkleTrie } from "../libraries/trie/SecureMerkleTrie.sol";
-import { AddressAliasHelper } from "../vendor/AddressAliasHelper.sol";
-import { ResourceMetering } from "./ResourceMetering.sol";
-import { Semver } from "../universal/Semver.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {SafeCall} from "../libraries/SafeCall.sol";
+import {L2OutputOracle} from "./L2OutputOracle.sol";
+import {Constants} from "../libraries/Constants.sol";
+import {Types} from "../libraries/Types.sol";
+import {Hashing} from "../libraries/Hashing.sol";
+import {SecureMerkleTrie} from "../libraries/trie/SecureMerkleTrie.sol";
+import {AddressAliasHelper} from "../vendor/AddressAliasHelper.sol";
+import {ResourceMetering} from "./ResourceMetering.sol";
+import {Semver} from "../universal/Semver.sol";
 
 /**
  * @custom:proxied
@@ -246,8 +246,8 @@ contract MantlePortal is Initializable, ResourceMetering, Semver {
         // output index has been updated.
         require(
             provenWithdrawal.timestamp == 0 ||
-                L2_ORACLE.getL2Output(provenWithdrawal.l2OutputIndex).outputRoot !=
-                provenWithdrawal.outputRoot,
+            L2_ORACLE.getL2Output(provenWithdrawal.l2OutputIndex).outputRoot !=
+            provenWithdrawal.outputRoot,
             "MantlePortal: withdrawal hash has already been proven"
         );
 
@@ -294,8 +294,8 @@ contract MantlePortal is Initializable, ResourceMetering, Semver {
      * @param _tx Withdrawal transaction to finalize.
      */
     function finalizeWithdrawalTransaction(Types.WithdrawalTransaction memory _tx)
-        external
-        whenNotPaused
+    external
+    whenNotPaused
     {
         // Make sure that the l2Sender has not yet been set. The l2Sender is set to a value other
         // than the default value when a withdrawal transaction is being finalized. This check is
@@ -441,16 +441,16 @@ contract MantlePortal is Initializable, ResourceMetering, Semver {
         // We use opaque data so that we can update the TransactionDeposited event in the future
         // without breaking the current interface.
         uint256 mintValue = 0;
-        if (_type==1){
+        if (_type == 1) {
             //BIT
-            mintValue =_value;
-        }else if (_type==0 || _type ==2){
+            mintValue = _value;
+        } else if (_type == 0 || _type == 2) {
             //0:ETH or 2:ERC20 deposit
-            mintValue =0;
+            mintValue = 0;
         }
         bytes memory opaqueData = abi.encodePacked(
             mintValue,
-            _value,
+            mintValue,
             _gasLimit,
             _isCreation,
             _data
