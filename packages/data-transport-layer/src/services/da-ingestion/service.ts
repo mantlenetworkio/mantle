@@ -26,6 +26,7 @@ import {
 interface DaIngestionMetrics {
   currentL2TransactionIndex: Gauge<string>
   syncBatchIndex: Gauge<string>
+  syncLatestBatchIndex: Gauge<string>
   syncDataStoreId: Gauge<string>
 }
 
@@ -41,6 +42,11 @@ const registerMetrics = ({
   syncBatchIndex: new client.Gauge({
     name: 'data_transport_layer_sync_batch_index',
     help: 'sync data from eigen layer batch_index',
+    registers: [registry],
+  }),
+  syncLatestBatchIndex: new client.Gauge({
+    name: 'data_transport_layer_sync_latest_batch_index',
+    help: 'sync data from eigen layer latest batch_index',
     registers: [registry],
   }),
   syncDataStoreId: new client.Gauge({
@@ -229,13 +235,14 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         )
       }
       await this.state.db.putLastBatchIndex(index)
+      this.daIngestionMetrics.syncBatchIndex.set(index)
     }
   }
 
   private async getBatchIndexRange(): Promise<Range> {
     const latestBatchIndex = await this.state.db.getLastBatchIndex()
     const newTxBatchIndex: number = await this.GetLatestTransactionBatchIndex()
-    this.daIngestionMetrics.syncBatchIndex.set(newTxBatchIndex)
+    this.daIngestionMetrics.syncLatestBatchIndex.set(newTxBatchIndex)
     if (newTxBatchIndex > latestBatchIndex) {
       let step = latestBatchIndex + this.options.daSyncStep
       if (this.options.daSyncStep > newTxBatchIndex - latestBatchIndex) {
