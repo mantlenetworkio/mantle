@@ -341,7 +341,7 @@ contract L1StandardBridge is StandardBridge, Semver {
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
-        _initiateBridgeETH(_from, _to, msg.value, _minGasLimit, _extraData);
+        _initiateBridgeETH(Predeploys.LEGACY_ERC20_ETH,_from, _to, msg.value, _minGasLimit, _extraData);
     }
 
     /**

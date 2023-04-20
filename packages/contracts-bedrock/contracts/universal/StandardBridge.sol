@@ -9,7 +9,6 @@ import { SafeCall } from "../libraries/SafeCall.sol";
 import { IMantleMintableERC20, ILegacyMintableERC20 } from "./IMantleMintableERC20.sol";
 import { CrossDomainMessenger } from "./CrossDomainMessenger.sol";
 import { MantleMintableERC20 } from "./MantleMintableERC20.sol";
-
 /**
  * @custom:upgradeable
  * @title StandardBridge
@@ -297,21 +296,36 @@ abstract contract StandardBridge {
      *                   to identify the transaction.
      */
     function finalizeBridgeETH(
+        address _localToken,
+        address _remoteToken,
         address _from,
         address _to,
         uint256 _amount,
         bytes calldata _extraData
     ) public payable onlyOtherBridge {
-        require(msg.value == _amount, "StandardBridge: amount sent does not match amount required");
         require(_to != address(this), "StandardBridge: cannot send to self");
         require(_to != address(MESSENGER), "StandardBridge: cannot send to messenger");
 
-        // Emit the correct events. By default this will be _amount, but child
+
+
+
+        if (_isMantleMintableERC20(_localToken)) {
+            require(
+                _isCorrectTokenPair(_localToken, _remoteToken),
+                "StandardBridge: wrong remote token for Mantle Mintable ERC20 local token"
+            );
+
+            MantleMintableERC20(_localToken).mint(_to, _amount);
+        } else {
+            deposits[_localToken][_remoteToken] = deposits[_localToken][_remoteToken] - _amount;
+            IERC20(_localToken).safeTransfer(_to, _amount);
+        }
+
+        // Emit the correct events. By default this will be ERC20BridgeFinalized, but child
         // contracts may override this function in order to emit legacy events as well.
         _emitETHBridgeFinalized(_from, _to, _amount, _extraData);
 
-        bool success = SafeCall.call(_to, gasleft(), _amount, hex"");
-        require(success, "StandardBridge: ETH transfer failed");
+
     }
     /**
  * @notice Finalizes an BIT bridge on this chain. Can only be triggered by the other
@@ -319,7 +333,7 @@ abstract contract StandardBridge {
      *
      * @param _from      Address of the sender.
      * @param _to        Address of the receiver.
-     * @param _amount    Amount of ETH being bridged.
+     * @param _amount    Amount of BIT being bridged.
      * @param _extraData Extra data to be sent with the transaction. Note that the recipient will
      *                   not be triggered with this data, but it will be emitted and can be used
      *                   to identify the transaction.
@@ -414,6 +428,7 @@ abstract contract StandardBridge {
      *                     to identify the transaction.
      */
     function _initiateBridgeETH(
+        address _remoteToken,
         address _from,
         address _to,
         uint256 _amount,
@@ -431,9 +446,12 @@ abstract contract StandardBridge {
 
         MESSENGER.sendMessage{ value: _amount }(
             ETH_TX,
+            _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
                 this.finalizeBridgeETH.selector,
+                _remoteToken,
+                address (0),
                 _from,
                 _to,
                 _amount,

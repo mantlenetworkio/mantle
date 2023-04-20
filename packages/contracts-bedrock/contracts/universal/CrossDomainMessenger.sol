@@ -299,7 +299,7 @@ CrossDomainMessengerLegacySpacer1
                     messageNonce(),
                     msg.sender,
                     _target,
-                    msg.value,
+                    0,
                     _minGasLimit,
                     _message
                 )
