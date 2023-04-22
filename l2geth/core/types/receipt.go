@@ -258,7 +258,7 @@ func (r *ReceiptForStorage) DecodeRLP(s *rlp.Stream) error {
 
 func decodeStoredReceiptRLP(r *ReceiptForStorage, blob []byte) error {
 	var stored storedReceiptRLP
-	if err := rlp.DecodeBytes(blob, &stored); err != nil {
+	if err := rlp.DecodeReceiptsBytes(blob, &stored); err != nil {
 		return err
 	}
 	if err := (*Receipt)(r).setStatus(stored.PostStateOrStatus); err != nil {
@@ -293,7 +293,7 @@ func decodeStoredReceiptRLP(r *ReceiptForStorage, blob []byte) error {
 
 func decodeV4StoredReceiptRLP(r *ReceiptForStorage, blob []byte) error {
 	var stored v4StoredReceiptRLP
-	if err := rlp.DecodeReceiptsBytes(blob, &stored); err != nil {
+	if err := rlp.DecodeBytes(blob, &stored); err != nil {
 		return err
 	}
 	if err := (*Receipt)(r).setStatus(stored.PostStateOrStatus); err != nil {
