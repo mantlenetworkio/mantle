@@ -2,11 +2,12 @@ module github.com/mantlenetworkio/mantle/mt-batcher
 
 go 1.19
 
-replace github.com/Layr-Labs/datalayr/common => ../datalayr-mantle/common
-
-replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr-mantle/lib/merkzg
-
-replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
+replace (
+	github.com/Layr-Labs/datalayr/common => ../datalayr-mantle/common
+	github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr-mantle/lib/merkzg
+	github.com/mantlenetworkio/mantle/bss-core v0.0.0 => ../bss-core
+	github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
+)
 
 require (
 	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
@@ -27,7 +28,12 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0
 )
 
-require github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
+require (
+	cloud.google.com/go v0.65.0
+	github.com/mantlenetworkio/mantle/bss-core v0.0.0-20230414061956-0b1f375d5656
+	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
+	google.golang.org/api v0.30.0
+)
 
 require (
 	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0-00010101000000-000000000000 // indirect
@@ -50,14 +56,17 @@ require (
 	github.com/edsrzf/mmap-go v1.1.0 // indirect
 	github.com/elastic/gosigar v0.14.2 // indirect
 	github.com/gballet/go-libpcsclite v0.0.0-20191108122812-4678299bea08 // indirect
+	github.com/getsentry/sentry-go v0.12.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/googleapis/gax-go/v2 v2.0.5 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
-	github.com/hashicorp/go-bexpr v0.1.11 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.2.0 // indirect
@@ -69,6 +78,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/mitchellh/pointerstructure v1.2.1 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/onsi/ginkgo/v2 v2.5.1 // indirect
@@ -93,12 +103,15 @@ require (
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/wsddn/go-ecdh v0.0.0-20161211032359-48726bab9208 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
+	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/net v0.3.0 // indirect
+	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/text v0.5.0 // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
+	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect

@@ -9,6 +9,9 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tyler-smith/go-bip39 v1.1.0
+	cloud.google.com/go/kms v1.10.1
+	github.com/btcsuite/btcd/btcec/v2 v2.2.0
+	google.golang.org/genproto v0.0.0-20230330154414-c0448cd141ea
 )
 
 require (

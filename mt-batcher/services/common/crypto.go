@@ -1,20 +1,24 @@
 package common
 
 import (
+	kms "cloud.google.com/go/kms/apiv1"
+	"context"
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"github.com/decred/dcrd/hdkeychain/v3"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
+	"github.com/tyler-smith/go-bip39"
+	"google.golang.org/api/option"
 	"math/big"
 	"strings"
 
-	"github.com/decred/dcrd/hdkeychain/v3"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/tyler-smith/go-bip39"
 )
 
 var (
@@ -124,4 +128,22 @@ func PrivateKeySignerFn(key *ecdsa.PrivateKey, chainID *big.Int) bind.SignerFn {
 		}
 		return tx.WithSignature(signer, signature)
 	}
+}
+
+func NewHsmSignerFn(apiName string, addr string, chainID *big.Int, credentials string) (bind.SignerFn, error) {
+	ctx := context.Background()
+	apikey := option.WithCredentialsFile("mantle-666-keystore.json")
+	client, err := kms.NewKeyManagementClient(ctx, apikey)
+	if err != nil {
+		return nil, err
+	}
+
+	mk := &bsscore.ManagedKey{
+		KeyName:      apiName,
+		EthereumAddr: common.HexToAddress(addr),
+		Gclient:      client,
+	}
+	fmt.Printf(mk.KeyName)
+
+	return nil, nil
 }
