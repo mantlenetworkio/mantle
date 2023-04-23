@@ -145,7 +145,7 @@ func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction, feeM
 	var opts *bind.TransactOpts
 	if feeModelEnable {
 		opts = &bind.TransactOpts{
-			From: d.WalletAddr,
+			From: d.FeeWalletAddr,
 			Signer: func(addr common.Address, tx *types.Transaction) (*types.Transaction, error) {
 				return d.Cfg.FeeSignerFn(ctx, addr, tx)
 			},
