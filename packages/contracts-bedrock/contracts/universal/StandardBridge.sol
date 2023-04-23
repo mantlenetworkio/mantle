@@ -191,9 +191,9 @@ abstract contract StandardBridge {
      *                     not be triggered with this data, but it will be emitted and can be used
      *                     to identify the transaction.
      */
-    function bridgeETH(uint32 _minGasLimit, bytes calldata _extraData) public payable onlyEOA {
-        _initiateBridgeETH(msg.sender, msg.sender, msg.value, _minGasLimit, _extraData);
-    }
+//    function bridgeETH(uint32 _minGasLimit, bytes calldata _extraData) public payable onlyEOA {
+//        _initiateBridgeETH(msg.sender, msg.sender, msg.value, _minGasLimit, _extraData);
+//    }
 
     /**
      * @notice Sends ETH to a receiver's address on the other chain. Note that if ETH is sent to a
@@ -210,13 +210,25 @@ abstract contract StandardBridge {
      *                     not be triggered with this data, but it will be emitted and can be used
      *                     to identify the transaction.
      */
-    function bridgeETHTo(
+    function bridgeL1ETHTo(
         address _to,
         uint32 _minGasLimit,
         bytes calldata _extraData
     ) public payable {
-        _initiateBridgeETH(msg.sender, _to, msg.value, _minGasLimit, _extraData);
+        _initiateBridgeETHDeposit(msg.sender, _to, msg.value, _minGasLimit, _extraData);
     }
+
+    function bridgeL2ETHTo(
+        address _localToken,
+        address _to,
+        uint256 _amount,
+        uint32 _minGasLimit,
+        bytes calldata _extraData
+    ) public payable {
+        _initiateBridgeETHWithdraw(_localToken,address(0),msg.sender,_to,_amount,_minGasLimit,_extraData );
+
+    }
+
 
     /**
      * @notice Sends ERC20 tokens to the sender's address on the other chain. Note that if the
@@ -444,7 +456,7 @@ abstract contract StandardBridge {
      *                     not be triggered with this data, but it will be emitted and can be used
      *                     to identify the transaction.
      */
-    function _initiateBridgeETH(
+    function _initiateBridgeETHDeposit(
         address _remoteToken,
         address _from,
         address _to,
@@ -466,7 +478,7 @@ abstract contract StandardBridge {
             _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
-                this.finalizeBridgeETH.selector,
+                this.finalizeBridgeETHDeposit.selector,
                 _remoteToken,
                 address (0),
                 _from,
@@ -578,6 +590,7 @@ abstract contract StandardBridge {
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
+        //TODO check _localToken and _remoteToken.
         if (_isMantleMintableERC20(_localToken)) {
             require(
                 _isCorrectTokenPair(_localToken, _remoteToken),
