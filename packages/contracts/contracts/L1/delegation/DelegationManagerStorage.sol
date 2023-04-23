@@ -2,17 +2,17 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "./interfaces/IInvestmentManager.sol";
-import "./interfaces/IInvestmentStrategy.sol";
+import "./interfaces/IDelegationManager.sol";
+import "./interfaces/IDelegationShare.sol";
 import "./interfaces/IDelegation.sol";
-import "./interfaces/ISlasher.sol";
+import "./interfaces/IDelegationSlasher.sol";
 
 /**
  * @title Storage variables for the `InvestmentManager` contract.
  * @author Layr Labs, Inc.
  * @notice This storage contract is separate from the logic to simplify the upgrade process.
  */
-abstract contract InvestmentManagerStorage is IInvestmentManager {
+abstract contract DelegationManagerStorage is IDelegationManager {
     /// @notice The EIP-712 typehash for the contract's domain
     bytes32 public constant DOMAIN_TYPEHASH =
         keccak256("EIP712Domain(string name,uint256 chainId,address verifyingContract)");
@@ -35,23 +35,23 @@ abstract contract InvestmentManagerStorage is IInvestmentManager {
     uint32 public constant WITHDRAWAL_WAITING_PERIOD = 10 seconds;
 
     // maximum length of dynamic arrays in `investorStrats` mapping, for sanity's sake
-    uint8 internal constant MAX_INVESTOR_STRATS_LENGTH = 32;
+    uint8 internal constant MAX_INVESTOR_DELEGATION_LENGTH = 32;
 
-    // system contracts
+    // delegation system contracts
     IDelegation public immutable delegation;
-    ISlasher public immutable slasher;
+    IDelegationSlasher public immutable delegationSlasher;
 
-    // staker => InvestmentStrategy => number of shares which they currently hold
-    mapping(address => mapping(IInvestmentStrategy => uint256)) public investorStratShares;
-    // staker => array of strategies in which they have nonzero shares
-    mapping(address => IInvestmentStrategy[]) public investorStrats;
+    // staker => IDelegationShare => number of shares which they currently hold
+    mapping(address => mapping(IDelegationShare => uint256)) public investorDelegationShares;
+    // staker => array of DelegationShare in which they have nonzero shares
+    mapping(address => IDelegationShare[]) public investorDelegations;
     // hash of withdrawal inputs, aka 'withdrawalRoot' => timestamps & address related to the withdrawal
     mapping(bytes32 => WithdrawalStorage) public queuedWithdrawals;
     // staker => cumulative number of queued withdrawals they have ever initiated. only increments (doesn't decrement)
     mapping(address => uint256) public numWithdrawalsQueued;
 
-    constructor(IDelegation _delegation, ISlasher _slasher) {
+    constructor(IDelegation _delegation, IDelegationSlasher _delegationSlasher) {
         delegation = _delegation;
-        slasher = _slasher;
+        delegationSlasher = _delegationSlasher;
     }
 }

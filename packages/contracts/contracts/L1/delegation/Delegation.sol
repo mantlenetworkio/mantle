@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -6,15 +6,14 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-
-import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 import "./DelegationStorage.sol";
-import "./Slasher.sol";
+import "./DelegationSlasher.sol";
+import "./WhiteListBase.sol";
 
 /**
  * @title The primary delegation contract.
- * @author Layr Labs, Inc.
  * @notice  This is the contract for delegation. The main functionalities of this contract are
  * - for enabling any staker to register as a delegate and specify the delegation terms it has agreed to
  * - for enabling anyone to register as an operator
@@ -22,25 +21,25 @@ import "./Slasher.sol";
  * - for a staker to undelegate its assets
  * - for anyone to challenge a staker's claim to have fulfilled all its obligation before undelegation
  */
-contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, DelegationStorage {
+contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, Whitelist, DelegationStorage {
     /// @notice Simple permission for functions that are only callable by the InvestmentManager contract.
-    modifier onlyInvestmentManager() {
-        require(msg.sender == address(investmentManager), "onlyInvestmentManager");
+    modifier onlyDelegationManager() {
+        require(msg.sender == address(delegationManager), "onlyDelegationManager");
         _;
     }
 
     // INITIALIZING FUNCTIONS
-    constructor(IInvestmentManager _investmentManager)
-        DelegationStorage(_investmentManager)
+    constructor(IDelegationManager _delegationManager)
+        DelegationStorage(_delegationManager)
     {
         _disableInitializers();
     }
 
     /// @dev Emitted when a low-level call to `delegationTerms.onDelegationReceived` fails, returning `returnData`
-    event OnDelegationReceivedCallFailure(IDelegationTerms indexed delegationTerms, bytes32 returnData);
+    event OnDelegationReceivedCallFailure(IDelegationCallback indexed delegationTerms, bytes32 returnData);
 
     /// @dev Emitted when a low-level call to `delegationTerms.onDelegationWithdrawn` fails, returning `returnData`
-    event OnDelegationWithdrawnCallFailure(IDelegationTerms indexed delegationTerms, bytes32 returnData);
+    event OnDelegationWithdrawnCallFailure(IDelegationCallback indexed delegationTerms, bytes32 returnData);
 
     function initialize(address initialOwner)
         external
@@ -51,11 +50,11 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
     }
 
     // PERMISSION FUNCTIONS
-    function pause() external onlyInvestmentManager {
+    function pause() external onlyOwner {
         _pause();
     }
 
-    function unpause() external onlyInvestmentManager {
+    function unpause() external onlyOwner {
         _unpause();
     }
 
@@ -67,13 +66,13 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
      * in a more 'trustful' manner.
      * @dev In the present design, once set, there is no way for an operator to ever modify the address of their DelegationTerms contract.
      */
-    function registerAsOperator(IDelegationTerms dt) external {
+    function registerAsOperator(IDelegationCallback dt) external whitelistOnly(msg.sender) {
         require(
-            address(delegationTerms[msg.sender]) == address(0),
+            address(delegationCallback[msg.sender]) == address(0),
             "Delegation.registerAsOperator: Delegate has already registered"
         );
         // store the address of the delegation contract that the operator is providing.
-        delegationTerms[msg.sender] = dt;
+        delegationCallback[msg.sender] = dt;
         _delegate(msg.sender, msg.sender);
     }
 
@@ -89,7 +88,7 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
      * @notice Delegates from `staker` to `operator`.
      * @dev requires that r, vs are a valid ECSDA signature from `staker` indicating their intention for this action
      */
-    function delegateToBySignature(address staker, address operator, uint256 expiry, bytes32 r, bytes32 vs)
+    function delegateToSignature(address staker, address operator, uint256 expiry, bytes32 r, bytes32 vs)
         external
         whenNotPaused
     {
@@ -111,7 +110,7 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
      * @notice Callable only by the InvestmentManager
      * @dev Should only ever be called in the event that the `staker` has no active deposits.
      */
-    function undelegate(address staker) external onlyInvestmentManager {
+    function undelegate(address staker) external onlyDelegationManager {
         delegationStatus[staker] = DelegationStatus.UNDELEGATED;
         delegatedTo[staker] = address(0);
     }
@@ -120,26 +119,26 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
      * @notice Increases the `staker`'s delegated shares in `strategy` by `shares, typically called when the staker has further deposits
      * @dev Callable only by the InvestmentManager
      */
-    function increaseDelegatedShares(address staker, IInvestmentStrategy strategy, uint256 shares)
+    function increaseDelegatedShares(address staker, IDelegationShare delegationShare, uint256 shares)
         external
-        onlyInvestmentManager
+        onlyDelegationManager
     {
         //if the staker is delegated to an operator
         if (isDelegated(staker)) {
             address operator = delegatedTo[staker];
 
             // add strategy shares to delegate's shares
-            operatorShares[operator][strategy] += shares;
+            operatorShares[operator][delegationShare] += shares;
 
             //Calls into operator's delegationTerms contract to update weights of individual staker
-            IInvestmentStrategy[] memory investorStrats = new IInvestmentStrategy[](1);
+            IDelegationShare[] memory investorDelegations = new IDelegationShare[](1);
             uint256[] memory investorShares = new uint[](1);
-            investorStrats[0] = strategy;
+            investorDelegations[0] = delegationShare;
             investorShares[0] = shares;
 
-            // call into hook in delegationTerms contract
-            IDelegationTerms dt = delegationTerms[operator];
-            _delegationReceivedHook(dt, staker, investorStrats, investorShares);
+            // call into hook in delegationCallback contract
+            IDelegationCallback dt = delegationCallback[operator];
+            _delegationReceivedHook(dt, staker, operator, investorDelegations, investorShares);
         }
     }
 
@@ -147,37 +146,37 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
      * @notice Decreases the `staker`'s delegated shares in `strategy` by `shares, typically called when the staker withdraws
      * @dev Callable only by the InvestmentManager
      */
-    function decreaseDelegatedShares(address staker, IInvestmentStrategy strategy, uint256 shares)
+    function decreaseDelegatedShares(address staker, IDelegationShare delegationShare, uint256 shares)
         external
-        onlyInvestmentManager
+        onlyDelegationManager
     {
         //if the staker is delegated to an operator
         if (isDelegated(staker)) {
             address operator = delegatedTo[staker];
 
             // subtract strategy shares from delegate's shares
-            operatorShares[operator][strategy] -= shares;
+            operatorShares[operator][delegationShare] -= shares;
 
-            //Calls into operator's delegationTerms contract to update weights of individual staker
-            IInvestmentStrategy[] memory investorStrats = new IInvestmentStrategy[](1);
+            //Calls into operator's delegationCallback contract to update weights of individual staker
+            IDelegationShare[] memory investorDelegationShares = new IDelegationShare[](1);
             uint256[] memory investorShares = new uint[](1);
-            investorStrats[0] = strategy;
+            investorDelegationShares[0] = delegationShare;
             investorShares[0] = shares;
 
-            // call into hook in delegationTerms contract
-            IDelegationTerms dt = delegationTerms[operator];
-            _delegationWithdrawnHook(dt, staker, investorStrats, investorShares);
+            // call into hook in delegationCallback contract
+            IDelegationCallback dt = delegationCallback[operator];
+            _delegationWithdrawnHook(dt, staker, operator, investorDelegationShares, investorShares);
         }
     }
 
     /// @notice Version of `decreaseDelegatedShares` that accepts an array of inputs.
     function decreaseDelegatedShares(
         address staker,
-        IInvestmentStrategy[] calldata strategies,
+        IDelegationShare[] calldata strategies,
         uint256[] calldata shares
     )
         external
-        onlyInvestmentManager
+        onlyDelegationManager
     {
         if (isDelegated(staker)) {
             address operator = delegatedTo[staker];
@@ -191,9 +190,9 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
                 }
             }
 
-            // call into hook in delegationTerms contract
-            IDelegationTerms dt = delegationTerms[operator];
-            _delegationWithdrawnHook(dt, staker, strategies, shares);
+            // call into hook in delegationCallback contract
+            IDelegationCallback dt = delegationCallback[operator];
+            _delegationWithdrawnHook(dt, staker, operator, strategies, shares);
         }
     }
 
@@ -206,9 +205,10 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
      * `returnData` is *only the first 32 bytes* returned by the call to `dt`.
      */
     function _delegationReceivedHook(
-        IDelegationTerms dt,
+        IDelegationCallback dt,
         address staker,
-        IInvestmentStrategy[] memory strategies,
+        address operator,
+        IDelegationShare[] memory delegationShares,
         uint256[] memory shares
     )
         internal
@@ -218,7 +218,7 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
          * In particular, in-line assembly is also used to prevent the copying of uncapped return data which is also a potential DoS vector.
          */
         // format calldata
-        bytes memory lowLevelCalldata = abi.encodeWithSelector(IDelegationTerms.onDelegationReceived.selector, staker, strategies, shares);
+        bytes memory lowLevelCalldata = abi.encodeWithSelector(IDelegationCallback.onDelegationReceived.selector, staker, operator, delegationShares, shares);
         // Prepare memory for low-level call return data. We accept a max return data length of 32 bytes
         bool success;
         bytes32[1] memory returnData;
@@ -254,9 +254,10 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
      * `returnData` is *only the first 32 bytes* returned by the call to `dt`.
      */
     function _delegationWithdrawnHook(
-        IDelegationTerms dt,
+        IDelegationCallback dt,
         address staker,
-        IInvestmentStrategy[] memory strategies,
+        address operator,
+        IDelegationShare[] memory delegationShares,
         uint256[] memory shares
     )
         internal
@@ -266,7 +267,7 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
          * In particular, in-line assembly is also used to prevent the copying of uncapped return data which is also a potential DoS vector.
          */
         // format calldata
-        bytes memory lowLevelCalldata = abi.encodeWithSelector(IDelegationTerms.onDelegationWithdrawn.selector, staker, strategies, shares);
+        bytes memory lowLevelCalldata = abi.encodeWithSelector(IDelegationCallback.onDelegationWithdrawn.selector, staker, operator, delegationShares, shares);
         // Prepare memory for low-level call return data. We accept a max return data length of 32 bytes
         bool success;
         bytes32[1] memory returnData;
@@ -303,14 +304,14 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
      * delegated, and records the new delegation.
      */
     function _delegate(address staker, address operator) internal {
-        IDelegationTerms dt = delegationTerms[operator];
+        IDelegationCallback dt = delegationCallback[operator];
         require(
             address(dt) != address(0), "Delegation._delegate: operator has not yet registered as a delegate"
         );
 
         require(isNotDelegated(staker), "Delegation._delegate: staker has existing delegation");
         // checks that operator has not been frozen
-        ISlasher slasher = investmentManager.slasher();
+        IDelegationSlasher slasher = delegationManager.delegationSlasher();
         require(!slasher.isFrozen(operator), "Delegation._delegate: cannot delegate to a frozen operator");
 
         // record delegation relation between the staker and operator
@@ -320,20 +321,20 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
         delegationStatus[staker] = DelegationStatus.DELEGATED;
 
         // retrieve list of strategies and their shares from investment manager
-        (IInvestmentStrategy[] memory strategies, uint256[] memory shares) = investmentManager.getDeposits(staker);
+        (IDelegationShare[] memory delegationShares, uint256[] memory shares) = delegationManager.getDeposits(staker);
 
         // add strategy shares to delegate's shares
-        uint256 stratsLength = strategies.length;
-        for (uint256 i = 0; i < stratsLength;) {
+        uint256 delegationLength = delegationShares.length;
+        for (uint256 i = 0; i < delegationLength;) {
             // update the share amounts for each of the operator's strategies
-            operatorShares[operator][strategies[i]] += shares[i];
+            operatorShares[operator][delegationShares[i]] += shares[i];
             unchecked {
                 ++i;
             }
         }
 
-        // call into hook in delegationTerms contract
-        _delegationReceivedHook(dt, staker, strategies, shares);
+        // call into hook in delegationCallback contract
+        _delegationReceivedHook(dt, staker, operator, delegationShares, shares);
     }
 
     // VIEW FUNCTIONS
@@ -350,6 +351,6 @@ contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, D
 
     /// @notice Returns if an operator can be delegated to, i.e. it has called `registerAsOperator`.
     function isOperator(address operator) external view returns (bool) {
-        return (address(delegationTerms[operator]) != address(0));
+        return (address(delegationCallback[operator]) != address(0));
     }
 }

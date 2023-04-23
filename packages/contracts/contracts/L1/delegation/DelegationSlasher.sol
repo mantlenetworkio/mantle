@@ -6,9 +6,9 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
-import "./interfaces/ISlasher.sol";
+import "./interfaces/IDelegationSlasher.sol";
 import "./interfaces/IDelegation.sol";
-import "./interfaces/IInvestmentManager.sol";
+import "./interfaces/IDelegationManager.sol";
 
 /**
  * @title The primary 'slashing' contract.
@@ -18,10 +18,10 @@ import "./interfaces/IInvestmentManager.sol";
  * - revoking permission for slashing from specified contracts,
  * - calling investManager to do actual slashing.
  */
-contract Slasher is Initializable, OwnableUpgradeable, PausableUpgradeable, ISlasher {
+contract DelegationSlasher is Initializable, OwnableUpgradeable, PausableUpgradeable, IDelegationSlasher {
     // ,DSTest
     /// @notice The central InvestmentManager contract
-    IInvestmentManager public immutable investmentManager;
+    IDelegationManager public immutable investmentManager;
     /// @notice The Delegation contract
     IDelegation public immutable delegation;
     // contract address => whether or not the contract is allowed to slash any staker (or operator)
@@ -40,7 +40,7 @@ contract Slasher is Initializable, OwnableUpgradeable, PausableUpgradeable, ISla
     event OperatorSlashed(address indexed slashedOperator, address indexed slashingContract);
     event FrozenStatusReset(address indexed previouslySlashedAddress);
 
-    constructor(IInvestmentManager _investmentManager, IDelegation _delegation) {
+    constructor(IDelegationManager _investmentManager, IDelegation _delegation) {
         investmentManager = _investmentManager;
         delegation = _delegation;
         _disableInitializers();

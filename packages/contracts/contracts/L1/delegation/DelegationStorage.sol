@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "./interfaces/IInvestmentManager.sol";
-import "./interfaces/IDelegationTerms.sol";
+import "./interfaces/IDelegationManager.sol";
+import "./interfaces/IDelegationCallback.sol";
 import "./interfaces/IDelegation.sol";
 
 /**
@@ -26,13 +26,13 @@ abstract contract DelegationStorage is IDelegation {
     bytes32 public DOMAIN_SEPARATOR;
 
     /// @notice The InvestmentManager contract
-    IInvestmentManager public immutable investmentManager;
+    IDelegationManager public immutable delegationManager;
 
     // operator => investment strategy => total number of shares delegated to them
-    mapping(address => mapping(IInvestmentStrategy => uint256)) public operatorShares;
+    mapping(address => mapping(IDelegationShare => uint256)) public operatorShares;
 
     // operator => delegation terms contract
-    mapping(address => IDelegationTerms) public delegationTerms;
+    mapping(address => IDelegationCallback) public delegationCallback;
 
     // staker => operator
     mapping(address => address) public delegatedTo;
@@ -43,7 +43,7 @@ abstract contract DelegationStorage is IDelegation {
     // delegator => number of signed delegation nonce (used in delegateToBySignature)
     mapping(address => uint256) public nonces;
 
-    constructor(IInvestmentManager _investmentManager) {
-        investmentManager = _investmentManager;
+    constructor(IDelegationManager _investmentManager) {
+        delegationManager = _investmentManager;
     }
 }

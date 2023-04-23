@@ -136,36 +136,11 @@ interface IRollup {
     function confirmedInboxSize() external view returns (uint256);
 
     /**
-     * @notice Deposits stake on staker's current assertion (or the last confirmed assertion if not currently staked).
-     * @notice currently use Ether to stake; stakeAmount Token amount to deposit. Must be > than defined threshold if this is a new stake.
-     */
-    // function stake(uint256 stakeAmount) external payable;
-    function stake() external payable;
-
-    /**
-     * @notice Withdraws stakeAmount from staker's stake by if assertion it is staked on is confirmed.
-     * @param stakeAmount Token amount to withdraw. Must be <= sender's current stake minus the current required stake.
-     */
-    function unstake(uint256 stakeAmount) external;
-
-    /**
-     * @notice Removes stakerAddress from the set of stakers and withdraws the full stake amount to stakerAddress.
-     * This can be called by anyone since it is currently necessary to keep the chain progressing.
-     * @param stakerAddress Address of staker for which to unstake.
-     */
-    function removeStake(address stakerAddress) external;
-
-    /**
      * @notice Advances msg.sender's existing sake to assertionID.
      * @param assertionID ID of assertion to advance stake to. Currently this must be a child of the current assertion.
      * TODO: generalize to arbitrary descendants.
      */
     function advanceStake(uint256 assertionID) external;
-
-    /**
-     * @notice Withdraws all of msg.sender's withdrawable funds.
-     */
-    function withdraw() external;
 
     /**
      * @notice Creates a new DA representing the rollup state after executing a block of transactions (sequenced in SequencerInbox).

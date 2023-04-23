@@ -25,7 +25,13 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "hardhat/console.sol";
+import {Lib_AddressResolver} from "../../libraries/resolver/Lib_AddressResolver.sol";
+import {Lib_AddressManager} from "../../libraries/resolver/Lib_AddressManager.sol";
+import {DelegationShareBase} from "../delegation/DelegationShareBase.sol";
+import {DelegationCallbackBase} from "../delegation/DelegationCallbackBase.sol";
+import {IDelegationManager} from "../delegation/interfaces/IDelegationManager.sol";
+import {IDelegationShare} from "../delegation/interfaces/IDelegation.sol";
+import {IDelegation} from "../delegation/interfaces/IDelegation.sol";
 
 import "./challenge/Challenge.sol";
 import "./challenge/ChallengeLib.sol";
@@ -34,17 +40,13 @@ import "./IRollup.sol";
 import "./RollupLib.sol";
 import "./WhiteList.sol";
 import "./verifier/IVerifier.sol";
-import {Lib_AddressResolver} from "../../libraries/resolver/Lib_AddressResolver.sol";
-import {Lib_AddressManager} from "../../libraries/resolver/Lib_AddressManager.sol";
 
 abstract contract RollupBase is IRollup, Initializable {
     // Config parameters
-    uint256 public confirmationPeriod; // number of L1 blocks
     uint256 public challengePeriod; // number of L1 blocks
     uint256 public minimumAssertionPeriod; // number of L1 blocks
     uint256 public baseStakeAmount; // number of stake tokens
 
-    IERC20 public stakeToken;
     AssertionMap public override assertions;
     IVerifierEntry public verifier;
 
@@ -70,7 +72,7 @@ abstract contract RollupBase is IRollup, Initializable {
     }
 }
 
-contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
+contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, DelegationCallbackBase {
     modifier stakedOnly() {
         if (!isStaked(msg.sender)) {
             revert("NotStaked");
@@ -95,23 +97,21 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
     function initialize(
-        address _owner,
         address _verifier,
         address _stakeToken,
+        address _delegationManager,
+        address _delegation,
         address _libAddressManager,
         address _assertionMap,
         uint256 _confirmationPeriod,
         uint256 _challengePeriod,
         uint256 _minimumAssertionPeriod,
         uint256 _baseStakeAmount,
-        bytes32 _initialVMhash,
-        address[] calldata whitelists
+        bytes32 _initialVMhash
     ) public initializer {
-        if (_owner == address(0) || _verifier == address(0)) {
+        if (_verifier == address(0)) {
             revert("ZeroAddress");
         }
-        owner = _owner;
-        stakeToken = IERC20(_stakeToken);
         verifier = IVerifierEntry(_verifier);
 
         if (address(libAddressManager) != address(0)) {
@@ -124,10 +124,14 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         }
         assertions = AssertionMap(_assertionMap);
 
-        confirmationPeriod = _confirmationPeriod;
         challengePeriod = _challengePeriod; // TODO: currently unused.
         minimumAssertionPeriod = _minimumAssertionPeriod;
         baseStakeAmount = _baseStakeAmount;
+
+        // initialize delegation
+        delegationManager = IDelegationManager(_delegationManager);
+        underlyingToken = IERC20(_stakeToken);
+        delegation = IDelegation(_delegation);
 
         assertions.setRollupAddress(address(this));
         lastResolvedAssertionID = 0;
@@ -141,10 +145,6 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             0, // parentID
             block.number // deadline (unchallengeable)
         );
-
-        for (uint i = 0; i < whitelists.length; i++) {
-            whitelist[whitelists[i]] = true;
-        }
     }
 
     /// @inheritdoc IRollup
@@ -162,49 +162,22 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         return assertions.getInboxSize(lastConfirmedAssertionID);
     }
 
-    /// @inheritdoc IRollup
-    function stake() external payable override whitelistOnly {
-        if (isStaked(msg.sender)) {
-            stakers[msg.sender].amountStaked += msg.value;
-        } else {
-            if (msg.value < baseStakeAmount) {
-                revert("InsufficientStake");
-            }
-            stakers[msg.sender] = Staker(true, msg.value, 0, address(0));
-            numStakers++;
-            stakeOnAssertion(msg.sender, lastConfirmedAssertionID);
-        }
+    function onDelegationReceived(
+        address delegator,
+        address operator,
+        IDelegationShare[] memory investorDelegationShares,
+        uint256[] memory investorShares
+    ) external override onlyDelegation {
+        stake(delegator, operator, investorDelegationShares, investorShares);
     }
 
-    /// @inheritdoc IRollup
-    function unstake(uint256 stakeAmount) external override {
-        requireStaked(msg.sender);
-        // Require that staker is staked on a confirmed assertion.
-        Staker storage staker = stakers[msg.sender];
-        if (staker.assertionID > lastConfirmedAssertionID) {
-            revert("StakedOnUnconfirmedAssertion");
-        }
-        if (stakeAmount > staker.amountStaked - currentRequiredStake()) {
-            revert("InsufficientStake");
-        }
-        staker.amountStaked -= stakeAmount;
-        // Note: we don't need to modify assertion state because you can only unstake from a confirmed assertion.
-        (bool success,) = msg.sender.call{value: stakeAmount}("");
-        if (!success) revert("TransferFailed");
-    }
-
-    /// @inheritdoc IRollup
-    function removeStake(address stakerAddress) external override {
-        requireStaked(stakerAddress);
-        // Require that staker is staked on a confirmed assertion.
-        Staker storage staker = stakers[stakerAddress];
-        if (staker.assertionID > lastConfirmedAssertionID) {
-            revert("StakedOnUnconfirmedAssertion");
-        }
-        deleteStaker(stakerAddress);
-        // Note: we don't need to modify assertion state because you can only unstake from a confirmed assertion.
-        (bool success,) = stakerAddress.call{value: staker.amountStaked}("");
-        if (!success) revert("TransferFailed");
+    function onDelegationWithdrawn(
+        address delegator,
+        address operator,
+        IDelegationShare[] memory investorDelegationShares,
+        uint256[] memory investorShares
+    ) external override onlyDelegation {
+        unstake(delegator, operator, investorDelegationShares, investorShares);
     }
 
     /// @inheritdoc IRollup
@@ -218,14 +191,6 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             revert("ParentAssertionUnstaked");
         }
         stakeOnAssertion(msg.sender, assertionID);
-    }
-
-    /// @inheritdoc IRollup
-    function withdraw() external override {
-        uint256 withdrawableFund = withdrawableFunds[msg.sender];
-        withdrawableFunds[msg.sender] = 0;
-        (bool success,) = msg.sender.call{value: withdrawableFund}("");
-        if (!success) revert("TransferFailed");
     }
 
     /// @inheritdoc IRollup
@@ -530,6 +495,50 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         return numStakedZombies;
     }
 
+    function stake(
+        address delegator,
+        address operator,
+        IDelegationShare[] memory investorDelegationShares,
+        uint256[] memory investorShares
+    ) internal {
+        uint256 delegationLength = investorDelegationShares.length;
+        for (uint256 i = 0; i < delegationLength; i++) {
+            if (address(investorDelegationShares[i]) == address(this)) {
+                if (isStaked(operator)) {
+                    stakers[operator].amountStaked += investorShares[i];
+                } else {
+                    if (investorShares[i] < baseStakeAmount) {
+                        revert("InsufficientStake");
+                    }
+                    stakers[operator] = Staker(true, investorShares[i], 0, address(0));
+                    numStakers++;
+                    stakeOnAssertion(operator, lastConfirmedAssertionID);
+                }
+            }
+            break;
+        }
+    }
+
+    function unstake(
+        address delegator,
+        address operator,
+        IDelegationShare[] memory investorDelegationShares,
+        uint256[] memory investorShares
+    ) internal {
+        requireStaked(operator);
+        Staker storage staker = stakers[operator];
+        uint256 delegationLength = investorDelegationShares.length;
+        for (uint256 i = 0; i < delegationLength; i++) {
+            if (address(investorDelegationShares[i]) == address(this)) {
+                if (investorShares[i] > staker.amountStaked - currentRequiredStake()) {
+                    revert("InsufficientStake");
+                }
+                staker.amountStaked -= investorShares[i];
+            }
+            break;
+        }
+    }
+
     // ************
     // requirements
     // ************
@@ -547,3 +556,4 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         }
     }
 }
+

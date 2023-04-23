@@ -6,7 +6,7 @@ pragma solidity ^0.8.9;
  * @author Layr Labs, Inc.
  * @notice See the `Slasher` contract itself for implementation details.
  */
-interface ISlasher {
+interface IDelegationSlasher {
     /**
      * @notice Gives the `contractAddress` permission to slash the funds of the caller.
      * @dev Typically, this function must be called prior to registering for a middleware.

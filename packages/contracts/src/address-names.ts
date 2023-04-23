@@ -17,6 +17,14 @@ export const names = {
       Proxy__TSS_GroupManager: 'Proxy__TSS_GroupManager',
       Proxy__TSS_StakingSlashing: 'Proxy__TSS_StakingSlashing',
     },
+    delegation: {
+      Delegation: 'Delegation',
+      DelegationManager: 'DelegationManager',
+      DelegationSlasher: 'DelegationSlasher',
+      Proxy__Delegation: 'Proxy__Delegation',
+      Proxy__DelegationManager: 'Proxy__DelegationManager',
+      Proxy__DelegationSlasher: 'Proxy__DelegationSlasher',
+    },
     da: {
       BVM_EigenDataLayrChain: 'BVM_EigenDataLayrChain',
       Proxy__BVM_EigenDataLayrChain: 'Proxy__BVM_EigenDataLayrChain',

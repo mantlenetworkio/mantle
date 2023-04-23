@@ -1,30 +1,29 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
- * @title Minimal interface for an `InvestmentStrategy` contract.
- * @author Layr Labs, Inc.
- * @notice Custom `InvestmentStrategy` implementations may expand extensively on this interface.
+ * @title Minimal interface for an `IDelegationShares` contract.
+ * @notice Custom `DelegationShares` implementations may expand extensively on this interface.
  */
-interface IInvestmentStrategy {
+interface IDelegationShare {
     /**
-     * @notice Used to deposit tokens into this InvestmentStrategy
+     * @notice Used to deposit tokens into this DelegationShares
      * @param token is the ERC20 token being deposited
      * @param amount is the amount of token being deposited
-     * @dev This function is only callable by the investmentManager contract. It is invoked inside of the investmentManager's
-     * `depositIntoStrategy` function, and individual share balances are recorded in the investmentManager as well.
+     * @dev This function is only callable by the delegationManager contract. It is invoked inside of the delegationManager's
+     * `depositInto` function, and individual share balances are recorded in the delegationManager as well.
      * @return newShares is the number of new shares issued at the current exchange ratio.
      */
-    function deposit(IERC20 token, uint256 amount) external returns (uint256);
+    function deposit(address depositor, IERC20 token, uint256 amount) external returns (uint256);
 
     /**
-     * @notice Used to withdraw tokens from this InvestmentStrategy, to the `depositor`'s address
+     * @notice Used to withdraw tokens from this DelegationLedger, to the `depositor`'s address
      * @param token is the ERC20 token being transferred out
      * @param amountShares is the amount of shares being withdrawn
-     * @dev This function is only callable by the investmentManager contract. It is invoked inside of the investmentManager's
-     * other functions, and individual share balances are recorded in the investmentManager as well.
+     * @dev This function is only callable by the delegationManager contract. It is invoked inside of the delegationManager's
+     * other functions, and individual share balances are recorded in the delegationManager as well.
      */
     function withdraw(address depositor, IERC20 token, uint256 amountShares) external;
 
@@ -37,42 +36,42 @@ interface IInvestmentStrategy {
     function sharesToUnderlying(uint256 amountShares) external returns (uint256);
 
     /**
-     * @notice Used to convert an amount of underlying tokens to the equivalent amount of shares in this strategy.
+     * @notice Used to convert an amount of underlying tokens to the equivalent amount of shares in this ledger.
      * @notice In contrast to `underlyingToSharesView`, this function **may** make state modifications
-     * @param amountUnderlying is the amount of `underlyingToken` to calculate its conversion into strategy shares
-     * @dev Implementation for these functions in particular may vary signifcantly for different strategies
+     * @param amountUnderlying is the amount of `underlyingToken` to calculate its conversion into ledger shares
+     * @dev Implementation for these functions in particular may vary signifcantly for different ledgers
      */
     function underlyingToShares(uint256 amountUnderlying) external view returns (uint256);
 
     /**
      * @notice convenience function for fetching the current underlying value of all of the `user`'s shares in
-     * this strategy. In contrast to `userUnderlyingView`, this function **may** make state modifications
+     * this ledger. In contrast to `userUnderlyingView`, this function **may** make state modifications
      */
     function userUnderlying(address user) external returns (uint256);
 
      /**
-     * @notice Used to convert a number of shares to the equivalent amount of underlying tokens for this strategy.
+     * @notice Used to convert a number of shares to the equivalent amount of underlying tokens for this ledger.
      * @notice In contrast to `sharesToUnderlying`, this function guarantees no state modifications
      * @param amountShares is the amount of shares to calculate its conversion into the underlying token
-     * @dev Implementation for these functions in particular may vary signifcantly for different strategies
+     * @dev Implementation for these functions in particular may vary signifcantly for different ledgers
      */
     function sharesToUnderlyingView(uint256 amountShares) external view returns (uint256);
 
     /**
-     * @notice Used to convert an amount of underlying tokens to the equivalent amount of shares in this strategy.
+     * @notice Used to convert an amount of underlying tokens to the equivalent amount of shares in this ledger.
      * @notice In contrast to `underlyingToShares`, this function guarantees no state modifications
-     * @param amountUnderlying is the amount of `underlyingToken` to calculate its conversion into strategy shares
-     * @dev Implementation for these functions in particular may vary signifcantly for different strategies
+     * @param amountUnderlying is the amount of `underlyingToken` to calculate its conversion into ledger shares
+     * @dev Implementation for these functions in particular may vary signifcantly for different ledgers
      */
     function underlyingToSharesView(uint256 amountUnderlying) external view returns (uint256);
 
     /**
      * @notice convenience function for fetching the current underlying value of all of the `user`'s shares in
-     * this strategy. In contrast to `userUnderlying`, this function guarantees no state modifications
+     * this ledger. In contrast to `userUnderlying`, this function guarantees no state modifications
      */
     function userUnderlyingView(address user) external view returns (uint256);
 
-    /// @notice The underyling token for shares in this InvestmentStrategy
+    /// @notice The underyling token for shares in this DelegationShares
     function underlyingToken() external view returns (IERC20);
 
     /// @notice The total number of extant shares in thie InvestmentStrategy
