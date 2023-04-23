@@ -59,3 +59,6 @@ ops/data/**
 dist/
 packages/contracts/test/data/
 packages/contracts/abi/
+
+mt-batcher/go.sum
+mt-challenger/go.sum
