@@ -615,8 +615,6 @@ abstract contract StandardBridge {
                 // Because this call will be executed on the remote chain, we reverse the order of
                 // the remote and local token addresses relative to their order in the
                 // finalizeBridgeERC20 function.
-                _remoteToken,
-                _localToken,
                 _from,
                 _to,
                 _amount,
