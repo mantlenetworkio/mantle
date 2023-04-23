@@ -185,7 +185,7 @@ contract L2StandardBridge is StandardBridge, Semver {
         bytes memory _extraData
     ) internal {
         if (_l2Token == Predeploys.LEGACY_ERC20_ETH) {
-            _initiateBridgeETH(_from, _to, _amount, _minGasLimit, _extraData);
+            _initiateBridgeETHWithdraw(_l2Token,address(0),_from, _to, _amount, _minGasLimit, _extraData);
         }else if (_l2Token == Predeploys.BVM_BIT){
             _initiateBridgeBITWithdraw(_l2Token,Predeploys.L1_BIT,_from, _to, _amount, _minGasLimit, _extraData);
 
