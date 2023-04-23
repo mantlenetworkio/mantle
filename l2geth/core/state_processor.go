@@ -133,7 +133,7 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 		return nil, err
 	}
 	if daSwitch.Cmp(common.Big1) == 0 {
-		daFee, daGasPrice, daGasUsed, _, err := fees.DeriveDAGasInfo(msg, statedb)
+		daFee, daGasPrice, daGasUsed, err := fees.DeriveDAGasInfo(msg, statedb)
 		if err != nil {
 			return nil, err
 		}
