@@ -13,6 +13,7 @@ use (
 	./state-surgery
 	./subsidy
 	./tss
+	./cloudhsm
 	./integration-tests/go-tests
 )
 

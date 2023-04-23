@@ -3,3 +3,5 @@
 /mt-challenger.exe
 .env
 mt-challenger
+
+go.sum
