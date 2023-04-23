@@ -3,60 +3,142 @@ package metrics
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"math/big"
-	"net"
-	"net/http"
-	"strconv"
 )
 
-const metricsNamespace = "mt-batcher"
-
-type MetricsConfig struct {
-	Hostname string
-	Port     uint64
+type MtBatchBase struct {
+	mtBatchBalanceETH      prometheus.Gauge
+	mtFeeBalanceETH        prometheus.Gauge
+	batchSizeBytes         prometheus.Summary
+	numTxnPerBatch         prometheus.Summary
+	l2StoredBlockNumber    prometheus.Gauge
+	l2ConfirmedBlockNumber prometheus.Gauge
+	rollUpBatchIndex       prometheus.Gauge
+	reRollUpBatchIndex     prometheus.Gauge
+	eigenUserFee           prometheus.Gauge
+	mtFeeNonce             prometheus.Gauge
+	mtBatchNonce           prometheus.Gauge
+	numEigenNode           prometheus.Gauge
 }
 
-type Metrics struct {
-	Cfg                    *MetricsConfig
-	L2StoredBlockNumber    *prometheus.GaugeVec
-	L2ConfirmedBlockNumber *prometheus.GaugeVec
-}
-
-func NewMetrics(cfg *MetricsConfig) *Metrics {
-	return &Metrics{
-		Cfg: cfg,
-		L2StoredBlockNumber: promauto.NewGaugeVec(prometheus.GaugeOpts{
-			Name:      "l1_store_block_number",
-			Help:      "The height of eigen da store data l2 block",
-			Namespace: metricsNamespace,
-		}, []string{
-			"eigen",
+func NewMtBatchBase() *MtBatchBase {
+	return &MtBatchBase{
+		mtBatchBalanceETH: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "mt_batch_balance_eth",
+			Help:      "ETH balance of the mt batch",
+			Subsystem: "mtbatcher",
 		}),
-		L2ConfirmedBlockNumber: promauto.NewGaugeVec(prometheus.GaugeOpts{
-			Name:      "l2_confirm_block_number",
-			Help:      "The height of eigen da confirmed data l2 block",
-			Namespace: metricsNamespace,
-		}, []string{
-			"eigen",
+		mtFeeBalanceETH: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "mt_fee_balance_eth",
+			Help:      "ETH balance of the mt fee",
+			Subsystem: "mtbatcher",
+		}),
+		batchSizeBytes: promauto.NewSummary(prometheus.SummaryOpts{
+			Name:       "batch_size_bytes",
+			Help:       "Size of batches in bytes",
+			Subsystem:  "mtbatcher",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+		}),
+		numTxnPerBatch: promauto.NewSummary(prometheus.SummaryOpts{
+			Name:       "num_txn_per_batch",
+			Help:       "Number of transaction in each batch",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+			Subsystem:  "mtbatcher",
+		}),
+
+		l2StoredBlockNumber: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "l2_store_block_number",
+			Help:      "eigen da store block number",
+			Subsystem: "mtbatcher",
+		}),
+
+		l2ConfirmedBlockNumber: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "l2_confirmed_block_number",
+			Help:      "eigen da confirmed block number",
+			Subsystem: "mtbatcher",
+		}),
+
+		rollUpBatchIndex: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "rollup_batch_index",
+			Help:      "Count of batches submitted",
+			Subsystem: "mtbatcher",
+		}),
+
+		reRollUpBatchIndex: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "re_rollup_batch_index",
+			Help:      "Count of batches re-submitted",
+			Subsystem: "mtbatcher",
+		}),
+
+		eigenUserFee: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "eigen_user_fee",
+			Help:      "user fee for eigen",
+			Subsystem: "mtbatcher",
+		}),
+
+		mtFeeNonce: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "mt_fee_nonce",
+			Help:      "nonce for mt address",
+			Subsystem: "mtbatcher",
+		}),
+
+		mtBatchNonce: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "mt_batch_nonce",
+			Help:      "nonce for mt batch address",
+			Subsystem: "mtbatcher",
+		}),
+
+		numEigenNode: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "num_eigen_node",
+			Help:      "total eigen layer nodes",
+			Subsystem: "mtbatcher",
 		}),
 	}
 }
 
-func (m *Metrics) SetL2StoredBlockNumber(height *big.Int) {
-	m.L2StoredBlockNumber.WithLabelValues("l2").Set(float64(height.Int64()))
+func (mbb *MtBatchBase) MtBatchBalanceETH() prometheus.Gauge {
+	return mbb.mtBatchBalanceETH
 }
 
-func (m *Metrics) SetL2ConfirmedBlockNumber(height *big.Int) {
-	m.L2ConfirmedBlockNumber.WithLabelValues("l2").Set(float64(height.Int64()))
+func (mbb *MtBatchBase) MtFeeBalanceETH() prometheus.Gauge {
+	return mbb.mtFeeBalanceETH
 }
 
-func (m *Metrics) Start() (*http.Server, error) {
-	mux := http.NewServeMux()
-	mux.Handle("/metrics", promhttp.Handler())
-	srv := new(http.Server)
-	srv.Addr = net.JoinHostPort(m.Cfg.Hostname, strconv.FormatUint(m.Cfg.Port, 10))
-	srv.Handler = mux
-	err := srv.ListenAndServe()
-	return srv, err
+func (mbb *MtBatchBase) BatchSizeBytes() prometheus.Summary {
+	return mbb.batchSizeBytes
+}
+
+func (mbb *MtBatchBase) NumTxnPerBatch() prometheus.Summary {
+	return mbb.numTxnPerBatch
+}
+
+func (mbb *MtBatchBase) L2StoredBlockNumber() prometheus.Gauge {
+	return mbb.l2StoredBlockNumber
+}
+
+func (mbb *MtBatchBase) L2ConfirmedBlockNumber() prometheus.Gauge {
+	return mbb.l2ConfirmedBlockNumber
+}
+
+func (mbb *MtBatchBase) RollUpBatchIndex() prometheus.Gauge {
+	return mbb.rollUpBatchIndex
+}
+
+func (mbb *MtBatchBase) ReRollUpBatchIndex() prometheus.Gauge {
+	return mbb.reRollUpBatchIndex
+}
+
+func (mbb *MtBatchBase) EigenUserFee() prometheus.Gauge {
+	return mbb.eigenUserFee
+}
+
+func (mbb *MtBatchBase) MtFeeNonce() prometheus.Gauge {
+	return mbb.mtFeeNonce
+}
+
+func (mbb *MtBatchBase) MtBatchNonce() prometheus.Gauge {
+	return mbb.mtBatchNonce
+}
+
+func (mbb *MtBatchBase) NumEigenNode() prometheus.Gauge {
+	return mbb.numEigenNode
 }
