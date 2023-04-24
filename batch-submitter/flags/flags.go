@@ -274,20 +274,20 @@ var (
 		Usage:  "Whether or not to disable HTTP/2 support.",
 		EnvVar: prefixEnvVar("HTTP2_DISABLE"),
 	}
+	EnableSequencerHsmFlag = cli.BoolFlag{
+		Name:   "enable-sequencer-hsm",
+		Usage:  "Whether or not to use cloudhsm for sequencer",
+		EnvVar: prefixEnvVar("ENABLE_SEQUENCER_HSM"),
+	}
+	EnableProposerHsmFlag = cli.BoolFlag{
+		Name:   "enable-proposer-hsm",
+		Usage:  "Whether or not to use cloudhsm for proposer",
+		EnvVar: prefixEnvVar("ENABLE_PROPOSER_HSM"),
+	}
 	SccRollbackFlag = cli.BoolFlag{
 		Name:   "EnableSccRollbackFlag",
 		Usage:  "Whether or not to enable scc rollback.",
 		EnvVar: prefixEnvVar("SCC_ROLLBACK"),
-	}
-	EnableSequencerHsmFlag = cli.BoolFlag{
-		Name:   "EnableSequencerHsmFlag",
-		Usage:  "Whether or not to use cloudhsm for sequencer",
-		EnvVar: prefixEnvVar("SEQUENCER_HSM_ENABLE"),
-	}
-	EnableProposerHsmFlag = cli.BoolFlag{
-		Name:   "EnableProposerHsmFlag",
-		Usage:  "Whether or not to use cloudhsm for proposer",
-		EnvVar: prefixEnvVar("PROPOSER_HSM_ENABLE"),
 	}
 )
 
@@ -336,6 +336,8 @@ var optionalFlags = []cli.Flag{
 	MetricsHostnameFlag,
 	MetricsPortFlag,
 	HTTP2DisableFlag,
+	EnableProposerHsmFlag,
+	EnableSequencerHsmFlag,
 }
 
 // Flags contains the list of configuration options available to the binary.
