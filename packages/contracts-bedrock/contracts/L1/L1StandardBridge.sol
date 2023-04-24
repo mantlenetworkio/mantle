@@ -434,4 +434,29 @@ contract L1StandardBridge is StandardBridge, Semver {
         emit ERC20WithdrawalFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
         super._emitERC20BridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
     }
+
+
+    function _emitBITBridgeFinalized(
+        address _localToken,
+        address _remoteToken,
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes memory _extraData
+    ) internal override {
+        emit BITWithdrawalFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+        super._emitBITBridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+    }
+
+    function _emitBITBridgeInitiated(
+        address _localToken,
+        address _remoteToken,
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes memory _extraData
+    ) internal override {
+        emit BITDepositInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+        super._emitBITBridgeInitiated()(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+    }
 }

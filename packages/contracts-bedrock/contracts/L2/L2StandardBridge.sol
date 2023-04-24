@@ -276,4 +276,45 @@ contract L2StandardBridge is StandardBridge, Semver {
         emit DepositFinalized(_remoteToken, _localToken, _from, _to, _amount, _extraData);
         super._emitERC20BridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
     }
+
+    function _emitBITBridgeInitiated(
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes memory _extraData
+    ) internal override {
+        emit WithdrawalInitiated(
+            address(0),
+            Predeploys.BVM_BIT,
+            _from,
+            _to,
+            _amount,
+            _extraData
+        );
+        super._emitBITBridgeInitiated(address(0), Predeploys.BVM_BIT,_from, _to, _amount, _extraData);
+    }
+
+    /**
+     * @notice Emits the legacy DepositFinalized event followed by the ETHBridgeFinalized event.
+     *         This is necessary for backwards compatibility with the legacy bridge.
+     *
+     * @inheritdoc StandardBridge
+     */
+    function _emitBITBridgeFinalized(
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes memory _extraData
+    ) internal override {
+        emit DepositFinalized(
+            address(0),
+            Predeploys.BVM_BIT,
+            _from,
+            _to,
+            _amount,
+            _extraData
+        );
+        super._emitBITBridgeFinalized(address(0), Predeploys.BVM_BIT,_from, _to, _amount, _extraData);
+    }
+
 }

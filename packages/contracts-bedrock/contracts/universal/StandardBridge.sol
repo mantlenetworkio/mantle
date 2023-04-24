@@ -133,6 +133,23 @@ abstract contract StandardBridge {
         bytes extraData
     );
 
+    event BITBridgeInitiated(
+        address indexed localToken,
+        address indexed remoteToken,
+        address indexed from,
+        address to,
+        uint256 amount,
+        bytes extraData
+    );
+
+    event BITBridgeFinalized(
+        address indexed localToken,
+        address indexed remoteToken,
+        address indexed from,
+        address to,
+        uint256 amount,
+        bytes extraData
+    );
     /**
      * @notice Only allow EOAs to call the functions. Note that this is not safe against contracts
      *         calling code within their constructors, but also doesn't really matter since we're
@@ -745,6 +762,32 @@ abstract contract StandardBridge {
         emit ETHBridgeFinalized(_from, _to, _amount, _extraData);
     }
 
+    function _emitBITBridgeInitiated(
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes memory _extraData
+    ) internal virtual {
+        emit BITBridgeInitiated(_from, _to, _amount, _extraData);
+    }
+
+    /**
+     * @notice Emits the ETHBridgeFinalized and if necessary the appropriate legacy event when an
+     *         ETH bridge is finalized on this chain.
+     *
+     * @param _from      Address of the sender.
+     * @param _to        Address of the receiver.
+     * @param _amount    Amount of ETH sent.
+     * @param _extraData Extra data sent with the transaction.
+     */
+    function _emitBITBridgeFinalized(
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes memory _extraData
+    ) internal virtual {
+        emit BITBridgeFinalized(_from, _to, _amount, _extraData);
+    }
     /**
      * @notice Emits the ERC20BridgeInitiated event and if necessary the appropriate legacy
      *         event when an ERC20 bridge is initiated to the other chain.
@@ -766,6 +809,28 @@ abstract contract StandardBridge {
     ) internal virtual {
         emit ERC20BridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
     }
+    function _emitBITBridgeInitiated(
+        address _localToken,
+        address _remoteToken,
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes memory _extraData
+    ) internal virtual {
+        emit BITBridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+    }
+
+    function _emitBITBridgeFinalized(
+        address _localToken,
+        address _remoteToken,
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes memory _extraData
+    ) internal virtual {
+        emit BITBridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+    }
+
 
     /**
      * @notice Emits the ERC20BridgeFinalized event and if necessary the appropriate legacy
