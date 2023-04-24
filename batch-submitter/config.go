@@ -206,6 +206,12 @@ type Config struct {
 	DisableHTTP2 bool
 
 	EnableSccRollback bool
+
+	// use cloud-hsm to sign for proposer
+	EnableProposerHsm bool
+
+	// use cloud-hsm to sign for sequencer
+	EnableSequencerHsm bool
 }
 
 // NewConfig parses the Config from the provided flags or environment variables.
@@ -256,6 +262,8 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		MetricsPort:         ctx.GlobalUint64(flags.MetricsPortFlag.Name),
 		DisableHTTP2:        ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
 		EnableSccRollback:   ctx.GlobalBool(flags.SccRollbackFlag.Name),
+		EnableSequencerHsm:  ctx.GlobalBool(flags.EnableSequencerHsmFlag.Name),
+		EnableProposerHsm:   ctx.GlobalBool(flags.EnableProposerHsmFlag.Name),
 	}
 
 	err := ValidateConfig(&cfg)

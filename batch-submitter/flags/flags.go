@@ -279,6 +279,16 @@ var (
 		Usage:  "Whether or not to enable scc rollback.",
 		EnvVar: prefixEnvVar("SCC_ROLLBACK"),
 	}
+	EnableSequencerHsmFlag = cli.BoolFlag{
+		Name:   "EnableSequencerHsmFlag",
+		Usage:  "Whether or not to use cloudhsm for sequencer",
+		EnvVar: prefixEnvVar("SEQUENCER_HSM_ENABLE"),
+	}
+	EnableProposerHsmFlag = cli.BoolFlag{
+		Name:   "EnableProposerHsmFlag",
+		Usage:  "Whether or not to use cloudhsm for proposer",
+		EnvVar: prefixEnvVar("PROPOSER_HSM_ENABLE"),
+	}
 )
 
 var requiredFlags = []cli.Flag{

@@ -43,6 +43,7 @@ type Config struct {
 	DAAddr                common.Address
 	ChainID               *big.Int
 	PrivKey               *ecdsa.PrivateKey
+	EnableSequencerHsm    bool
 	BatchType             BatchType
 }
 

@@ -51,6 +51,7 @@ type Config struct {
 	FPRollupAddr         common.Address
 	ChainID              *big.Int
 	PrivKey              *ecdsa.PrivateKey
+	EnableProposerHsm    bool
 	SccRollback          bool
 }
 
