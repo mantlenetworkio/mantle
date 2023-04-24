@@ -601,7 +601,7 @@ func (d *Driver) UpdateFee(ctx context.Context, l2Block, daFee *big.Int) (*types
 	d.Cfg.Metrics.MtFeeNonce().Set(float64(nonce64))
 	nonce := new(big.Int).SetUint64(nonce64)
 	opts := &bind.TransactOpts{
-		From: d.WalletAddr,
+		From: d.FeeWalletAddr,
 		Signer: func(addr common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			return d.Cfg.FeeSignerFn(ctx, addr, tx)
 		},
