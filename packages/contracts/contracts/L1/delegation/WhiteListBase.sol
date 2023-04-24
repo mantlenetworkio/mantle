@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-abstract contract Whitelist is OwnableUpgradeable {
+abstract contract WhiteList is OwnableUpgradeable {
     modifier whitelistOnly(address checkAddr) {
         if (!whitelist[checkAddr]) {
             revert("NOT_IN_WHITELIST");

@@ -38,7 +38,6 @@ import "./challenge/ChallengeLib.sol";
 import "./AssertionMap.sol";
 import "./IRollup.sol";
 import "./RollupLib.sol";
-import "./WhiteList.sol";
 import "./verifier/IVerifier.sol";
 
 abstract contract RollupBase is IRollup, Initializable {

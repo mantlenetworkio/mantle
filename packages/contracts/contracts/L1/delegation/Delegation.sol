@@ -21,7 +21,7 @@ import "./WhiteListBase.sol";
  * - for a staker to undelegate its assets
  * - for anyone to challenge a staker's claim to have fulfilled all its obligation before undelegation
  */
-contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, Whitelist, DelegationStorage {
+contract Delegation is Initializable, OwnableUpgradeable, PausableUpgradeable, WhiteList, DelegationStorage {
     /// @notice Simple permission for functions that are only callable by the InvestmentManager contract.
     modifier onlyDelegationManager() {
         require(msg.sender == address(delegationManager), "onlyDelegationManager");

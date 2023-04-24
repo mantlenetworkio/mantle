@@ -30,7 +30,7 @@ contract DelegationManager is
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,
     DelegationManagerStorage,
-    Whitelist
+    WhiteList
 {
     using SafeERC20 for IERC20;
 
