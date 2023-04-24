@@ -30,9 +30,9 @@ task('updateL1BridgeChugCode')
         })
     )
 
-    const upgrade = getContractDefinition('L1StandardBridgeUpgrade')
+    const upgrade = getContractDefinition('L1StandardBridgeUpdate')
     const upgradeContract = getContractFactory(
-      'L1StandardBridgeUpgrade'
+      'L1StandardBridgeUpdate'
     ).attach(taskArgs.contract)
     console.log('set Code')
 
@@ -50,10 +50,12 @@ task('updateL1BridgeChugCode')
         })
     )
 
-    console.log(
-      'version: ',
-      await upgradeContract.connect(accounts[0]).getVersion()
-    )
+    // console.log(
+    //   'version: ',
+    //   await upgradeContract.connect(accounts[0]).getVersion()
+    // )
+    await upgradeContract.connect(ownerWallet).updateL1TokenBridge(taskArgs.contract)
+    console.log(await upgradeContract.connect(accounts[0]).l1TokenBridge())
   })
 
 
