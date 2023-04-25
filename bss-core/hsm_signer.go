@@ -101,7 +101,6 @@ func (mk *ManagedKey) SignHash(ctx context.Context, hash common.Hash) ([]byte, e
 	if err != nil {
 		return nil, err
 	}
-
 	if err != nil {
 		return nil, fmt.Errorf("Google KMS asymmetric sign operation: %w", err)
 	}

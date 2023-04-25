@@ -2,12 +2,15 @@ package proposer
 
 import (
 	"bytes"
+	kms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
+	"google.golang.org/api/option"
 	"math/big"
 	"strings"
 	"sync"
@@ -52,6 +55,9 @@ type Config struct {
 	ChainID              *big.Int
 	PrivKey              *ecdsa.PrivateKey
 	EnableProposerHsm    bool
+	ProposerHsmAddress   string
+	ProposerHsmAPIName   string
+	ProposerHsmCreden    string
 	SccRollback          bool
 }
 
@@ -125,7 +131,13 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.FPRollupAddr, parsedFP, cfg.L1Client, cfg.L1Client, cfg.L1Client,
 	)
 
-	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+	var walletAddr common.Address
+	if cfg.EnableProposerHsm {
+		walletAddr = common.HexToAddress(cfg.ProposerHsmAddress)
+		log.Info("use proposer hsm as walletAddr")
+	} else {
+		walletAddr = crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+	}
 
 	return &Driver{
 		cfg:                  cfg,
@@ -220,7 +232,6 @@ func (d *Driver) CraftBatchTx(
 	name := d.cfg.Name
 
 	log.Info(name+" crafting batch tx", "start", start, "end", end, "nonce", nonce)
-
 	var blocks []*l2types.Block
 	var stateRoots [][stateRootSize]byte
 	for i := new(big.Int).Set(start); i.Cmp(end) < 0; i.Add(i, bigOne) {
@@ -239,7 +250,6 @@ func (d *Driver) CraftBatchTx(
 		blocks = append(blocks, block)
 		stateRoots = append(stateRoots, block.Root())
 	}
-
 	// Abort if we don't have enough state roots to meet our minimum
 	// requirement.
 	if uint64(len(stateRoots)) < d.cfg.MinStateRootElements {
@@ -253,9 +263,27 @@ func (d *Driver) CraftBatchTx(
 
 	log.Info(name+" batch constructed", "num_state_roots", len(stateRoots))
 
-	opts, err := bind.NewKeyedTransactorWithChainID(
-		d.cfg.PrivKey, d.cfg.ChainID,
-	)
+	var opts *bind.TransactOpts
+	var err error
+	if d.cfg.EnableProposerHsm {
+		proBytes, err := hex.DecodeString(d.cfg.ProposerHsmCreden)
+		apikey := option.WithCredentialsJSON(proBytes)
+		client, err := kms.NewKeyManagementClient(ctx, apikey)
+		if err != nil {
+			return nil, err
+		}
+		mk := &bsscore.ManagedKey{
+			KeyName:      d.cfg.ProposerHsmAPIName,
+			EthereumAddr: common.HexToAddress(d.cfg.ProposerHsmAddress),
+			Gclient:      client,
+		}
+		opts, err = mk.NewEthereumTransactorrWithChainID(ctx, d.cfg.ChainID)
+		log.Info("proposer", "enable-hsm", true)
+	} else {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			d.cfg.PrivKey, d.cfg.ChainID,
+		)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -442,9 +470,26 @@ func (d *Driver) UpdateGasPrice(
 	var finalTx *types.Transaction
 	var err error
 
-	opts, err := bind.NewKeyedTransactorWithChainID(
-		d.cfg.PrivKey, d.cfg.ChainID,
-	)
+	var opts *bind.TransactOpts
+	if d.cfg.EnableProposerHsm {
+		proBytes, err := hex.DecodeString(d.cfg.ProposerHsmCreden)
+		apikey := option.WithCredentialsJSON(proBytes)
+		client, err := kms.NewKeyManagementClient(ctx, apikey)
+		if err != nil {
+			return nil, err
+		}
+		mk := &bsscore.ManagedKey{
+			KeyName:      d.cfg.ProposerHsmAPIName,
+			EthereumAddr: common.HexToAddress(d.cfg.ProposerHsmAddress),
+			Gclient:      client,
+		}
+		opts, err = mk.NewEthereumTransactorrWithChainID(ctx, d.cfg.ChainID)
+		log.Info("proposer", "enable-hsm", true)
+	} else {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			d.cfg.PrivKey, d.cfg.ChainID,
+		)
+	}
 	if err != nil {
 		return nil, err
 	}
