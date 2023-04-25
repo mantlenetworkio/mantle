@@ -6,6 +6,7 @@ RUN apk add --no-cache make gcc musl-dev linux-headers git
 COPY ./l2geth /app/l2geth
 
 WORKDIR /app/l2geth
+
 RUN go mod tidy
 RUN make geth
 
