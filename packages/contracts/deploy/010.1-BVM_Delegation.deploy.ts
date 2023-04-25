@@ -30,9 +30,9 @@ const deployFn: DeployFunction = async (hre) => {
   const l1BitAddress = hre.deployConfig.l1BitAddress
 
   // @ts-ignore
-  let DelegationProxyAddress = address(0)
-  let DelegationManagerProxyAddress = address(0)
-  let DelegationSlasherProxyAddress = address(0)
+  let DelegationProxyAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  let DelegationManagerProxyAddress = "0xD6f15EAC1Cb3B4131Ab4899a52E711e19DEeA73f"
+  let DelegationSlasherProxyAddress = "0x82d2984a3A2137634300c0D6DDEf7D3C851EcEa8"
 
   // deploy Delegation impl
   await deployAndVerifyAndThen({
@@ -117,16 +117,16 @@ const deployFn: DeployFunction = async (hre) => {
   console.log('Proxy__Delegation Address', Proxy__Delegation.address)
   console.log('deploy delegation Proxy__Delegation success')
 
-  callData = Impl__DelegationManager.interface.encodeFunctionData(
+  callData = Impl__DelegationSlasher.interface.encodeFunctionData(
     'initialize',
     [owner]
   )
   await deployAndVerifyAndThen({
     hre,
-    name: names.managed.delegation.Proxy__DelegationManager,
+    name: names.managed.delegation.Proxy__DelegationSlasher,
     contract: 'TransparentUpgradeableProxy',
-    iface: 'DelegationManager',
-    args: [Impl__DelegationManager.address, owner, callData],
+    iface: 'DelegationSlasher',
+    args: [Impl__DelegationSlasher.address, owner, callData],
   })
 
   const Proxy__DelegationSlasher = await getContractFromArtifact(
@@ -142,7 +142,34 @@ const deployFn: DeployFunction = async (hre) => {
     Proxy__DelegationSlasher.address
   )
   console.log('deploy DelegationSlasher Proxy success')
+
+  callData = Impl__DelegationManager.interface.encodeFunctionData(
+    'initialize',
+    [owner]
+  )
+  await deployAndVerifyAndThen({
+    hre,
+    name: names.managed.delegation.Proxy__DelegationManager,
+    contract: 'TransparentUpgradeableProxy',
+    iface: 'DelegationManager',
+    args: [Impl__DelegationManager.address, owner, callData],
+  })
+
+  const Proxy__DelegationManager = await getContractFromArtifact(
+    hre,
+    names.managed.delegation.Proxy__DelegationManager,
+    {
+      iface: 'DelegationManager',
+      signerOrProvider: deployer,
+    }
+  )
+  console.log(
+    'Proxy__DelegationManager Address',
+    Proxy__DelegationManager.address
+  )
+  console.log('deploy DelegationManager Proxy success')
 }
+
 
 // This is kept during an upgrade. So no upgrade tag.
 deployFn.tags = ['FraudProof', 'upgrade']
