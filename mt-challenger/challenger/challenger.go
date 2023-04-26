@@ -94,6 +94,10 @@ type ChallengerConfig struct {
 	ResubmissionTimeout       time.Duration
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
+	EnableHsm                 bool
+	HsmAPIName                string
+	HsmCreden                 string
+	HsmAddress                string
 }
 
 type Challenger struct {

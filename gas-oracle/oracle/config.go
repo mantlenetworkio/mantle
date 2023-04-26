@@ -39,6 +39,10 @@ type Config struct {
 	enableL1BaseFee                  bool
 	enableL2GasPrice                 bool
 	enableDaFee                      bool
+	EnableHsm                        bool
+	HsmAPIName                       string
+	HsmCreden                        string
+	HsmAddress                       string
 	// Metrics config
 	MetricsEnabled          bool
 	MetricsHTTP             string
@@ -74,6 +78,10 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.enableL1BaseFee = ctx.GlobalBool(flags.EnableL1BaseFeeFlag.Name)
 	cfg.enableL2GasPrice = ctx.GlobalBool(flags.EnableL2GasPriceFlag.Name)
 	cfg.enableDaFee = ctx.GlobalBool(flags.EnableDaFeeFlag.Name)
+	cfg.EnableHsm = ctx.GlobalBool(flags.EnableHsmFlag.Name)
+	cfg.HsmAddress = ctx.GlobalString(flags.HsmAddressFlag.Name)
+	cfg.HsmAPIName = ctx.GlobalString(flags.HsmAPINameFlag.Name)
+	cfg.HsmCreden = ctx.GlobalString(flags.HsmCredenFlag.Name)
 
 	if ctx.GlobalIsSet(flags.PrivateKeyFlag.Name) {
 		hex := ctx.GlobalString(flags.PrivateKeyFlag.Name)

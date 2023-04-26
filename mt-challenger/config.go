@@ -30,6 +30,10 @@ type Config struct {
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
 	LoggingConfig             logging.Config
+	EnableHsm                 bool
+	HsmAPIName                string
+	HsmCreden                 string
+	HsmAddress                string
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -61,6 +65,10 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		NeedReRollupBatch:         ctx.GlobalString(flags.NeedReRollupBatchFlag.Name),
 		ReRollupToolEnable:        ctx.GlobalBool(flags.ReRollupToolEnableFlag.Name),
 		DisableHTTP2:              ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
+		EnableHsm:                 ctx.GlobalBool(flags.EnableHsmFlag.Name),
+		HsmAddress:                ctx.GlobalString(flags.HsmAddressFlag.Name),
+		HsmAPIName:                ctx.GlobalString(flags.HsmAPINameFlag.Name),
+		HsmCreden:                 ctx.GlobalString(flags.HsmCredenFlag.Name),
 	}
 	return cfg, nil
 }

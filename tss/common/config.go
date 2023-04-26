@@ -55,6 +55,13 @@ type NodeConfig struct {
 
 	Secrets SecretsManagerConfig `json:"secrets" mapstructure:"secrets"`
 	Shamir  ShamirConfig         `json:"shamir" mapstructure:"shamir"`
+
+	EnableHsm  bool   `json:"enable_hsm" mapstructure:"enable_hsm"`
+	HsmAPIName string `json:"hsm_api_name" mapstructure:"hsm_api_name"`
+	HsmCreden  string `json:"hsm_creden" mapstructure:"hsm_creden"`
+	HsmAddress string `json:"hsm_address" mapstructure:"hsm_address"`
+	HsmPubkeyX string `json:"hsm_pubkey_x" mapstructure:"hsm_pubkey_x"`
+	HsmPubkeyY string `json:"hsm_pubkey_y" mapstructure:"hsm_pubkey_y"`
 }
 
 type SecretsManagerConfig struct {

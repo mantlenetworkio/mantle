@@ -4,8 +4,6 @@ import (
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
 	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
-
-	"gopkg.in/urfave/cli.v1"
 )
 
 var (
@@ -59,6 +57,26 @@ var (
 		Usage:  "Challenge verify",
 		EnvVar: "CHALLENGE_VERIFY",
 	}
+	EnableHsmFlag = cli.BoolFlag{
+		Name:   "enable-hsm",
+		Usage:  "Enalbe the hsm",
+		EnvVar: "ENABLE_HSM",
+	}
+	HsmAPINameFlag = cli.StringFlag{
+		Name:   "hsm-api-name",
+		Usage:  "the api name of hsm",
+		EnvVar: "HSM_API_NAME",
+	}
+	HsmAddressFlag = cli.StringFlag{
+		Name:   "hsm-address",
+		Usage:  "the address of hsm key",
+		EnvVar: "HSM_API_NAME",
+	}
+	HsmCredenFlag = cli.StringFlag{
+		Name:   "hsm-creden",
+		Usage:  "the creden of hsm key",
+		EnvVar: "HSM_CREDEN",
+	}
 )
 
 //// RegisterEthService adds an Ethereum client to the stack.
@@ -105,6 +123,10 @@ func MakeFraudProofConfig(ctx *cli.Context) *services.Config {
 		StakeAddr:       common.HexToAddress(ctx.String(FraudProofStakeAddrFlag.Name)),
 		StakeAmount:     ctx.Uint64(FraudProofStakeAmount.Name),
 		ChallengeVerify: ctx.Bool(FraudProofChallengeVerify.Name),
+		EnableHsm:       ctx.GlobalBool(EnableHsmFlag.Name),
+		HsmAddress:      ctx.GlobalString(HsmAddressFlag.Name),
+		HsmAPIName:      ctx.GlobalString(HsmAPINameFlag.Name),
+		HsmCreden:       ctx.GlobalString(HsmCredenFlag.Name),
 	}
 	return cfg
 }

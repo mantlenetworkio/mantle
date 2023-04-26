@@ -80,6 +80,10 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			ResubmissionTimeout:       cfg.ResubmissionTimeout,
 			NumConfirmations:          cfg.NumConfirmations,
 			SafeAbortNonceTooLowCount: cfg.SafeAbortNonceTooLowCount,
+			EnableHsm:                 cfg.EnableHsm,
+			HsmCreden:                 cfg.HsmCreden,
+			HsmAPIName:                cfg.HsmAPIName,
+			HsmAddress:                cfg.HsmAddress,
 		}
 		cLager, err := challenger.NewChallenger(ctx, challengerConfig)
 		if err != nil {
