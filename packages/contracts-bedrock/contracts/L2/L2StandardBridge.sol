@@ -149,7 +149,7 @@ contract L2StandardBridge is StandardBridge, Semver {
         bytes calldata _extraData
     ) external payable virtual {
         if (_l1Token == address(0) && _l2Token == Predeploys.LEGACY_ERC20_ETH) {
-            finalizeBridgeETH(_from, _to, _amount, _extraData);
+            finalizeBridgeETHDeposit(_l2Token,_l1Token,_from, _to, _amount, _extraData);
         } else {
             finalizeBridgeERC20(_l2Token, _l1Token, _from, _to, _amount, _extraData);
         }
@@ -185,9 +185,9 @@ contract L2StandardBridge is StandardBridge, Semver {
         bytes memory _extraData
     ) internal {
         if (_l2Token == Predeploys.LEGACY_ERC20_ETH) {
-            _initiateBridgeETHWithdraw(_l2Token,address(0),_from, _to, _amount, _minGasLimit, _extraData);
+            _initiateBridgeETHWithdrawal(_l2Token,address(0),_from, _to, _amount, _minGasLimit, _extraData);
         }else if (_l2Token == Predeploys.BVM_BIT){
-            _initiateBridgeBITWithdraw(_l2Token,Predeploys.L1_BIT,_from, _to, _amount, _minGasLimit, _extraData);
+            _initiateBridgeBITWithdrawal(_l2Token,Predeploys.L1_BIT,_from, _to, _amount, _minGasLimit, _extraData);
 
         } else {
             address l1Token = MantleMintableERC20(_l2Token).l1Token();
@@ -278,6 +278,8 @@ contract L2StandardBridge is StandardBridge, Semver {
     }
 
     function _emitBITBridgeInitiated(
+        address _localToken,
+        address _remoteToken,
         address _from,
         address _to,
         uint256 _amount,
@@ -301,6 +303,8 @@ contract L2StandardBridge is StandardBridge, Semver {
      * @inheritdoc StandardBridge
      */
     function _emitBITBridgeFinalized(
+        address _localToken,
+        address _remoteToken,
         address _from,
         address _to,
         uint256 _amount,

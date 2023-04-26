@@ -44,8 +44,10 @@ contract L1StandardBridge is StandardBridge, Semver {
      * @param extraData Extra data attached to the deposit.
      */
     event BITDepositInitiated(
+        address indexed localToken,
+        address indexed remoteToken,
         address indexed from,
-        address indexed to,
+        address to,
         uint256 amount,
         bytes extraData
     );
@@ -78,8 +80,10 @@ contract L1StandardBridge is StandardBridge, Semver {
      * @param extraData Extra data attached to the withdrawal.
      */
     event BITWithdrawalFinalized(
+        address indexed l1Token,
+        address indexed l2Token,
         address indexed from,
-        address indexed to,
+        address to,
         uint256 amount,
         bytes extraData
     );
@@ -283,7 +287,7 @@ contract L1StandardBridge is StandardBridge, Semver {
         uint256 _amount,
         bytes calldata _extraData
     ) external payable {
-        finalizeBridgeETH(_from, _to, _amount, _extraData);
+        finalizeBridgeETHWithdrawal(_from, _to, _amount, _extraData);
     }
 
     /**
@@ -341,7 +345,7 @@ contract L1StandardBridge is StandardBridge, Semver {
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
-        _initiateBridgeETH(Predeploys.LEGACY_ERC20_ETH,_from, _to, msg.value, _minGasLimit, _extraData);
+        _initiateBridgeETHDeposit(Predeploys.LEGACY_ERC20_ETH,_from, _to, msg.value, _minGasLimit, _extraData);
     }
 
     /**
@@ -457,6 +461,6 @@ contract L1StandardBridge is StandardBridge, Semver {
         bytes memory _extraData
     ) internal override {
         emit BITDepositInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
-        super._emitBITBridgeInitiated()(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+        super._emitBITBridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
     }
 }

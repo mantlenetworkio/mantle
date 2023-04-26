@@ -504,6 +504,7 @@ CrossDomainMessengerLegacySpacer1
      * @param _data     Message data.
      */
     function _sendMessage(
+        uint32 _type,
         address _to,
         uint64 _gasLimit,
         uint256 _value,

@@ -9,6 +9,8 @@ import { SafeCall } from "../libraries/SafeCall.sol";
 import { IMantleMintableERC20, ILegacyMintableERC20 } from "./IMantleMintableERC20.sol";
 import { CrossDomainMessenger } from "./CrossDomainMessenger.sol";
 import { MantleMintableERC20 } from "./MantleMintableERC20.sol";
+import { Predeploys } from "../libraries/Predeploys.sol";
+
 /**
  * @custom:upgradeable
  * @title StandardBridge
@@ -232,7 +234,7 @@ abstract contract StandardBridge {
         uint32 _minGasLimit,
         bytes calldata _extraData
     ) public payable {
-        _initiateBridgeETHDeposit(msg.sender, _to, msg.value, _minGasLimit, _extraData);
+        _initiateBridgeETHDeposit(Predeploys.LEGACY_ERC20_ETH,msg.sender, _to, msg.value, _minGasLimit, _extraData);
     }
 
     function bridgeL2ETHTo(
@@ -242,7 +244,7 @@ abstract contract StandardBridge {
         uint32 _minGasLimit,
         bytes calldata _extraData
     ) public payable {
-        _initiateBridgeETHWithdraw(_localToken,address(0),msg.sender,_to,_amount,_minGasLimit,_extraData );
+        _initiateBridgeETHWithdrawal(_localToken,address(0),msg.sender,_to,_amount,_minGasLimit,_extraData );
 
     }
 
@@ -356,7 +358,7 @@ abstract contract StandardBridge {
 
 
     }
-    function finalizeBridgeETHWithdraw(
+    function finalizeBridgeETHWithdrawal(
         address _from,
         address _to,
         uint256 _amount,
@@ -396,7 +398,7 @@ abstract contract StandardBridge {
 
         // Emit the correct events. By default this will be _amount, but child
         // contracts may override this function in order to emit legacy events as well.
-        _emitBITBridgeFinalized(_from, _to, _amount, _extraData);
+        _emitBITBridgeFinalized(address(0),Predeploys.BVM_BIT, _from, _to, _amount, _extraData);
 
         bool success = SafeCall.call(_to, gasleft(), _amount, hex"");
         require(success, "StandardBridge: BIT transfer failed");
@@ -518,7 +520,7 @@ abstract contract StandardBridge {
      *                     not be triggered with this data, but it will be emitted and can be used
      *                     to identify the transaction.
      */
-    function _initiateBridgeBITWithdraw(
+    function _initiateBridgeBITWithdrawal(
         address _localToken,
         address _remoteToken,
         address _from,
@@ -534,7 +536,7 @@ abstract contract StandardBridge {
 
         // Emit the correct events. By default this will be _amount, but child
         // contracts may override this function in order to emit legacy events as well.
-        _emitBITBridgeInitiated(_from, _to, _amount, _extraData);
+        _emitBITBridgeInitiated(_localToken,_remoteToken,_from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage{ value: _amount }(
             BIT_TX,
@@ -598,7 +600,7 @@ abstract contract StandardBridge {
         );
     }
 
-    function _initiateBridgeETHWithdraw(
+    function _initiateBridgeETHWithdrawal(
         address _localToken,
         address _remoteToken,
         address _from,
@@ -622,13 +624,14 @@ abstract contract StandardBridge {
 
         // Emit the correct events. By default this will be ERC20BridgeInitiated, but child
         // contracts may override this function in order to emit legacy events as well.
-        _emitETHBridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+        _emitETHBridgeInitiated( _from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage(
             ETH_TX,
+            _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
-                this.finalizeBridgeETHWithdraw.selector,
+                this.finalizeBridgeETHWithdrawal.selector,
                 // Because this call will be executed on the remote chain, we reverse the order of
                 // the remote and local token addresses relative to their order in the
                 // finalizeBridgeERC20 function.
@@ -763,12 +766,14 @@ abstract contract StandardBridge {
     }
 
     function _emitBITBridgeInitiated(
+        address _local,
+        address _remote,
         address _from,
         address _to,
         uint256 _amount,
         bytes memory _extraData
     ) internal virtual {
-        emit BITBridgeInitiated(_from, _to, _amount, _extraData);
+        emit BITBridgeInitiated(_local,_remote,_from, _to, _amount, _extraData);
     }
 
     /**
@@ -781,12 +786,14 @@ abstract contract StandardBridge {
      * @param _extraData Extra data sent with the transaction.
      */
     function _emitBITBridgeFinalized(
+        address _localToken,
+        address _remoteToken,
         address _from,
         address _to,
         uint256 _amount,
         bytes memory _extraData
     ) internal virtual {
-        emit BITBridgeFinalized(_from, _to, _amount, _extraData);
+        emit BITBridgeFinalized(_localToken,_remoteToken,_from, _to, _amount, _extraData);
     }
     /**
      * @notice Emits the ERC20BridgeInitiated event and if necessary the appropriate legacy
@@ -808,27 +815,6 @@ abstract contract StandardBridge {
         bytes memory _extraData
     ) internal virtual {
         emit ERC20BridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
-    }
-    function _emitBITBridgeInitiated(
-        address _localToken,
-        address _remoteToken,
-        address _from,
-        address _to,
-        uint256 _amount,
-        bytes memory _extraData
-    ) internal virtual {
-        emit BITBridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
-    }
-
-    function _emitBITBridgeFinalized(
-        address _localToken,
-        address _remoteToken,
-        address _from,
-        address _to,
-        uint256 _amount,
-        bytes memory _extraData
-    ) internal virtual {
-        emit BITBridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
     }
 
 
