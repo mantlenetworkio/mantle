@@ -263,6 +263,12 @@ var (
 		Usage:  "Sentry data source name",
 		EnvVar: prefixEnvVar(envVarPrefix, "SENTRY_DSN"),
 	}
+	PollingDurationFlag = cli.DurationFlag{
+		Name:   "polling-duration",
+		Usage:  "polling duration for fetch data from da graph node",
+		Value:  50 * time.Millisecond,
+		EnvVar: prefixEnvVar(envVarPrefix, "POLLING_DURATION"),
+	}
 	SentryTraceRateFlag = cli.DurationFlag{
 		Name:   "sentry-trace-rate",
 		Usage:  "Sentry trace rate",

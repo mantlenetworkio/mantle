@@ -63,6 +63,7 @@ type DriverConfig struct {
 	FeeWorkerPollInterval     time.Duration
 	MainWorkerPollInterval    time.Duration
 	CheckerWorkerPollInterval time.Duration
+	GraphPollingDuration      time.Duration
 	GraphProvider             string
 	EigenLogConfig            logging.Config
 	ResubmissionTimeout       time.Duration
@@ -428,7 +429,7 @@ func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, st
 	event, ok := d.GraphClient.PollingInitDataStore(
 		d.Ctx,
 		txHash[:],
-		1000000000,
+		d.Cfg.GraphPollingDuration,
 	)
 	if !ok {
 		log.Error("MtBatcher could not get initDataStore", "ok", ok)
