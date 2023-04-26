@@ -266,7 +266,7 @@ var (
 	PollingDurationFlag = cli.DurationFlag{
 		Name:   "polling-duration",
 		Usage:  "polling duration for fetch data from da graph node",
-		Value:  50 * time.Millisecond,
+		Value:  1200 * time.Millisecond,
 		EnvVar: prefixEnvVar(envVarPrefix, "POLLING_DURATION"),
 	}
 	SentryTraceRateFlag = cli.DurationFlag{

@@ -454,6 +454,7 @@ func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, st
 			DurationDataStoreId:  event.DurationDataStoreId,
 			GlobalDataStoreId:    event.StoreNumber,
 			ReferenceBlockNumber: event.ReferenceBlockNumber,
+			BlockNumber:          uint32(event.InitBlockNumber.Uint64()),
 			Fee:                  event.Fee,
 			Confirmer:            common.HexToAddress(event.Confirmer),
 			SignatoryRecordHash:  [32]byte{},
@@ -705,6 +706,7 @@ func (d *Driver) RollupMainWorker() {
 			}
 			log.Info("MtBatcher disperse store data success", "txHash", receipt.TxHash.String())
 			d.Cfg.Metrics.L2StoredBlockNumber().Set(float64(start.Uint64()))
+			time.Sleep(10 * time.Second) // sleep for data into graph node
 			csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, 0, big.NewInt(0), false)
 			if err != nil {
 				log.Error("MtBatcher confirm store data fail", "err", err)
