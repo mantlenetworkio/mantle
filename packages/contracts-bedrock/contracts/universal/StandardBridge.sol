@@ -540,6 +540,7 @@ abstract contract StandardBridge {
 
         MESSENGER.sendMessage{ value: _amount }(
             BIT_TX,
+            _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
                 this.finalizeBridgeBITWithdraw.selector,
@@ -683,6 +684,7 @@ abstract contract StandardBridge {
 
         MESSENGER.sendMessage(
             ERC20_TX,
+            _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
                 this.finalizeBridgeERC20.selector,
