@@ -30,6 +30,18 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     uint256 public lastBatchTime;
     uint256 public sendAmountPerYear;
     address public sccAddress;
+    // staker => operator
+    mapping(address => address) public delegatedTo;
+    // operator => investment strategy => total number of shares delegated to them
+    mapping(address => mapping(address => uint256)) public operatorStakerShares;
+    //operator => stakers
+    mapping(address => address[]) public operatorStakers;
+    // operator => total number of shares
+    mapping(address => uint256) public operatorShares;
+    // operator or staker => tssreward
+    mapping(address => uint256) public rewardDetails;
+    //claimer => staker
+    mapping(address => address) public claimers;
 
 
 
@@ -97,9 +109,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
             claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
             return;
         }
-        uint256 sendAmount = 0;
         uint256 batchAmount = 0;
-        uint256 accu = 0;
         // sendAmount
         if (lastBatchTime == 0) {
             lastBatchTime = _batchTime;
@@ -108,20 +118,11 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
         require(_batchTime > lastBatchTime,"args _batchTime must gther than last lastBatchTime");
         batchAmount = (_batchTime - lastBatchTime) * querySendAmountPerSecond() + dust;
         dust = 0;
-        sendAmount = batchAmount.div(_tssMembers.length);
-        for (uint256 j = 0; j < _tssMembers.length; j++) {
-            address payable addr = payable(_tssMembers[j]);
-            accu = accu.add(sendAmount);
-            addr.transfer(sendAmount);
-        }
-        uint256 reserved = batchAmount.sub(accu);
-        if (reserved > 0) {
-            dust = dust.add(reserved);
-        }
+        _distributeReward(batchAmount, _tssMembers, false);
         emit DistributeTssReward(
             lastBatchTime,
             _batchTime,
-            sendAmount,
+            batchAmount,
             _tssMembers
         );
         lastBatchTime = _batchTime;
@@ -140,7 +141,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
         uint256 batchAmount = 0;
         uint256 accu = 0;
         // release reward from _blockStartHeight to _blockStartHeight + _length - 1
-        for (uint256 i = 0; i < _length; i++) {
+        for (uint i = 0; i < _length; i++) {
             batchAmount = batchAmount.add(ledger[_blockStartHeight + i]);
             // delete distributed height
             delete ledger[_blockStartHeight + i];
@@ -149,7 +150,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
             batchAmount = batchAmount + dust;
             dust = 0;
             sendAmount = batchAmount.div(_tssMembers.length);
-            for (uint256 j = 0; j < _tssMembers.length; j++) {
+            for (uint j = 0; j < _tssMembers.length; j++) {
                 address payable addr = payable(_tssMembers[j]);
                 accu = accu.add(sendAmount);
                 totalAmount = totalAmount.sub(sendAmount);
@@ -209,4 +210,148 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
             payable(owner()).transfer(address(this).balance);
         }
     }
+
+    /**
+     * @dev Increases the `staker`'s delegated shares
+     * @param _operator the address of operator which staker chosed
+     * @param _staker the address of staker
+     * @param _shares the number of staker delegated for operator
+     */
+    function increaseDelegatedShares(address _operator, address _staker, uint256 _shares)
+    external
+    virtual
+    onlyFromCrossDomainAccount(sccAddress) {
+        _increaseDelegation(_operator, _staker, _shares);
+    }
+
+    /**
+     * @dev Decreases the `staker`'s delegated shares
+     * @param _operator the address of operator which staker chosed
+     * @param _staker the address of staker
+     * @param _shares the number of staker delegated for operator
+     */
+    function decreaseDelegatedShares(address _operator, address _staker, uint256 _shares)
+    external
+    virtual
+    onlyFromCrossDomainAccount(sccAddress) {
+        _decreasDelegation(_operator, _staker, _shares);
+    }
+
+    /**
+     * @dev first stake and delegated shares
+     * @param _operator the address of operator which staker chosed
+     * @param _staker the address of staker
+     * @param _shares the number of staker delegated for operator
+     */
+    function delegate(address _operator, address _staker, uint256 _shares)
+    external
+    virtual
+    onlyFromCrossDomainAccount(sccAddress) {
+        //store staker => operator
+        delegatedTo[_staker] = _operator;
+        operatorStakers[_operator].push(_staker);
+        claimers[_staker] = _staker;
+        _increaseDelegation(_operator, _staker, _shares);
+    }
+
+    /**
+     * @dev Claim reward
+     * @param _addr the address of reward owner
+     */
+    function claim(address _addr) external {
+        _claim(_addr);
+    }
+
+    /**
+     * @dev Claim reward and withdraw
+     * @param _addr the address of reward owner
+     */
+    function claimWithdraw(address _addr) external {
+        _claim(_addr);
+        address staker = claimers[_addr];
+        delete rewardDetails[staker];
+        address operator = delegatedTo[staker];
+        uint256 shares = operatorStakerShares[operator][staker];
+        operatorShares[operator] -= shares;
+        delete operatorStakerShares[operator][staker];
+        delete delegatedTo[staker];
+        delete claimers[_addr];
+        _deleteStakers(operator, staker);
+    }
+
+    function setClaimer(address _staker, address _claimer)
+    external
+    virtual
+    onlyFromCrossDomainAccount(sccAddress)
+    {
+        claimers[_claimer] = _staker;
+    }
+
+
+
+    function _claim(address _addr) internal {
+        address staker = claimers[_addr];
+        uint256 amount = rewardDetails[staker];
+        if (amount > 0) {
+            address payable addr = payable(_addr);
+            addr.transfer(amount);
+            rewardDetails[staker] = 0;
+        }
+        emit Claim(_addr, amount);
+    }
+
+    function _increaseDelegation(address _operator, address _staker, uint256 _shares) internal {
+        //store operator => staker =>shares
+        operatorStakerShares[_operator][_staker] += _shares;
+        operatorShares[_operator] += _shares;
+    }
+
+    function _decreasDelegation(address _operator, address _staker, uint256 _shares) internal {
+        operatorStakerShares[_operator][_staker] -= _shares;
+        operatorShares[_operator] -= _shares;
+    }
+
+    function _deleteStakers(address _operator, address _staker) internal {
+        uint arrayLength = operatorStakers[_operator].length;
+        uint indexToBeDeleted;
+        for (uint i=0; i<arrayLength; i++){
+            if (operatorStakers[_operator][i] == _staker) {
+                indexToBeDeleted = i;
+                break;
+            }
+        }
+        if (indexToBeDeleted < arrayLength-1) {
+            operatorStakers[_operator][indexToBeDeleted] = operatorStakers[_operator][arrayLength-1];
+        }
+        operatorStakers[_operator].pop();
+    }
+
+    function _distributeReward(uint256 amount, address[] calldata _tssMembers,bool isByBlock) internal {
+        if (amount > 0) {
+            uint256 sendAmount = 0;
+            uint256 totalShares = 0;
+            uint256 accu = 0;
+            for (uint i=0; i<_tssMembers.length; i++){
+                totalShares = totalShares.add(operatorShares[_tssMembers[i]]);
+            }
+            for (uint j = 0; j < _tssMembers.length; j++) {
+                address operator = _tssMembers[j];
+                for (uint i = 0; i < operatorStakers[operator].length; i++) {
+                    address staker = operatorStakers[operator][i];
+                    sendAmount = (amount * operatorStakerShares[operator][staker]).div(totalShares);
+                    rewardDetails[staker] += sendAmount;
+                    accu = accu.add(sendAmount);
+                    if (isByBlock) {
+                        totalAmount = totalAmount.sub(sendAmount);
+                    }
+                }
+            }
+            uint256 reserved = amount.sub(accu);
+            if (reserved > 0) {
+                dust = dust.add(reserved);
+            }
+        }
+    }
+
+
 }

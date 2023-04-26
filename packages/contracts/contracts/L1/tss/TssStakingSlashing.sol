@@ -4,6 +4,15 @@ pragma solidity ^0.8.9;
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+
+import {DelegationShareBase} from "../delegation/DelegationShareBase.sol";
+import {DelegationCallbackBase} from "../delegation/DelegationCallbackBase.sol";
+import {IDelegationManager} from "../delegation/interfaces/IDelegationManager.sol";
+import {IDelegationShare} from "../delegation/interfaces/IDelegation.sol";
+import {IDelegation} from "../delegation/interfaces/IDelegation.sol";
+import {CrossDomainEnabled} from "../../libraries/bridge/CrossDomainEnabled.sol";
+import {ITssRewardContract} from "../../L2/predeploys/iTssRewardContract.sol";
+
 import "./ITssGroupManager.sol";
 import "./ITssStakingSlashing.sol";
 
@@ -11,7 +20,10 @@ contract TssStakingSlashing is
     Initializable,
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
-    IStakingSlashing
+    IStakingSlashing,
+    DelegationShareBase,
+    DelegationCallbackBase,
+    CrossDomainEnabled
 {
     enum SlashType {
         nothing,
@@ -25,13 +37,13 @@ contract TssStakingSlashing is
         address[] tssNodes;
         SlashType slashType;
     }
-    // staking parameter settings
-    // bit token contract address
-    address public BitToken;
+
     // tss group contract address
     address public tssGroupContract;
-    // storage staker infos (key:staker address)
-    mapping(address => DepositInfo) public deposits;
+    //tss delegation manager address
+    address public tssDelegationManagerContract;
+    // storage operator infos (key:staker address)
+    mapping(address => bytes) public operators;
 
     // slashing parameter settings
     // record the quit request
@@ -43,19 +55,8 @@ contract TssStakingSlashing is
     // record the slash operate (map[batchIndex] -> (map[staker] -> slashed))
     mapping(uint256 => mapping(address => bool)) slashRecord;
 
-    /**
-     * @notice staking for himself
-     * @param 0 staker address
-     * @param 1 staker public key and deposit amount
-     */
-    event AddDeposit(address, DepositInfo);
 
-    /**
-     * @notice withdraw for himself
-     * @param 0 staker address
-     * @param 1 total amount withdraw
-     */
-    event Withdraw(address, uint256);
+
 
     /**
      * @notice slash tssnode
@@ -64,17 +65,32 @@ contract TssStakingSlashing is
      */
     event Slashing(address, SlashType);
 
+
+
+    constructor()  CrossDomainEnabled(address(0)) {
+        _disableInitializers();
+    }
+
     /**
      * @notice initializes the contract setting and the deployer as the initial owner
      * @param _bitToken bit token contract address
      * @param _tssGroupContract address tss group manager contract address
      */
-    function initialize(address _bitToken, address _tssGroupContract) public initializer {
+    function initialize(address _bitToken,
+        address _tssGroupContract,
+        address _delegationManager,
+        address _delegation,
+        address _l1messenger
+        ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
-
-        BitToken = _bitToken;
+        underlyingToken = IERC20(_bitToken);
         tssGroupContract = _tssGroupContract;
+        tssDelegationManagerContract = _delegationManager;
+        //initialize delegation
+        delegationManager = IDelegationManager(_delegationManager);
+        delegation = IDelegation(_delegation);
+        messenger = _l1messenger;
     }
 
     /**
@@ -83,7 +99,7 @@ contract TssStakingSlashing is
      * @param _tssGroup tssGroup contract address
      */
     function setAddress(address _token, address _tssGroup) public onlyOwner {
-        BitToken = _token;
+        underlyingToken = IERC20(_token);
         tssGroupContract = _tssGroup;
     }
 
@@ -115,80 +131,99 @@ contract TssStakingSlashing is
         return (slashAmount, exIncome);
     }
 
-    /**
-     * @notice staking entrance for user to deposit bit tokens
-     * @param _amount deposit amount of bit token
-     * @param _pubKey public key of sender
-     */
-    function staking(uint256 _amount, bytes calldata _pubKey) public nonReentrant {
-        // slashing params check
-        for (uint256 i = 0; i < 2; i++) {
-            require(slashAmount[i] > 0, "have not set the slash amount");
-            require(exIncome[i] > 0, "have not set the extra income amount");
+
+
+    function setPublicKey(bytes calldata _pubKey) public nonReentrant {
+        if (delegation.isOperator(msg.sender)) {
+            operators[msg.sender] = _pubKey;
         }
-        // verify amount
-        require(_amount > 0, "invalid amount");
-        require(
-            deposits[msg.sender].amount + _amount >= slashAmount[1],
-            "need deposit >= slashAmount"
-        );
+    }
 
-        if (deposits[msg.sender].pubKey.length > 0) {
-            // increase pledge amount
-            require(isEqual(deposits[msg.sender].pubKey, _pubKey), "pubKey not equal");
-        } else {
-            // new to staking
-            require(
-                msg.sender == ITssGroupManager(tssGroupContract).publicKeyToAddress(_pubKey),
-                "invalid pubKey"
-            );
-            deposits[msg.sender].pubKey = _pubKey;
-            deposits[msg.sender].pledgor = msg.sender;
+    function onDelegationReceived(
+        address delegator,
+        address operator,
+        IDelegationShare[] memory investorDelegationShares,
+        uint256[] memory investorShares
+    )external override onlyDelegation {
+        uint256 delegationLength = investorDelegationShares.length;
+        for (uint256 i = 0; i < delegationLength; i++) {
+            if (address(investorDelegationShares[i]) == address(this)) {
+                // construct calldata for increaseDelegatedShares call
+                bytes memory message = abi.encodeWithSelector(
+                    ITssRewardContract.increaseDelegatedShares.selector,
+                    operator,
+                    delegator,
+                    investorShares[i]
+                );
+
+                // send call data into L2, hardcode address
+                sendCrossDomainMessage(
+                    address(0x4200000000000000000000000000000000000020),
+                    2000000,
+                    message
+                );
+            }
+            break;
         }
+    }
 
-        // send bit token to staking contract, need user approve first
-        require(
-            IERC20(BitToken).transferFrom(msg.sender, address(this), _amount),
-            "transfer erc20 token failed"
+    function onDelegationWithdrawn(
+        address delegator,
+        address operator,
+        IDelegationShare[] memory investorDelegationShares,
+        uint256[] memory investorShares
+    ) external override onlyDelegation {
+        uint256 delegationLength = investorDelegationShares.length;
+        for (uint256 i = 0; i < delegationLength; i++) {
+            if (address(investorDelegationShares[i]) == address(this)) {
+                // construct calldata for decreaseDelegatedShares call
+                bytes memory message = abi.encodeWithSelector(
+                    ITssRewardContract.decreaseDelegatedShares.selector,
+                    operator,
+                    delegator,
+                    investorShares[i]
+                );
+
+                // send call data into L2, hardcode address
+                sendCrossDomainMessage(
+                    address(0x4200000000000000000000000000000000000020),
+                    2000000,
+                    message
+                );
+            }
+            break;
+        }
+    }
+
+    function setClaimer(
+        address staker,
+        address claimer
+    ) external {
+        require(msg.sender == staker, "msg sender is not the staker");
+        bytes memory message = abi.encodeWithSelector(
+            ITssRewardContract.setClaimer.selector,
+            staker,
+            claimer
         );
-        deposits[msg.sender].amount += _amount;
-
-        emit AddDeposit(
-            msg.sender,
-            DepositInfo({ pledgor: msg.sender, pubKey: _pubKey, amount: _amount })
+        // send call data into L2, hardcode address
+        sendCrossDomainMessage(
+            address(0x4200000000000000000000000000000000000020),
+            2000000,
+            message
         );
     }
 
-    /**
-     * @notice user who not elected to be validator to withdraw their bit token
-     */
-    function withdrawToken() public nonReentrant {
-        uint256 amount = deposits[msg.sender].amount;
-        require(amount > 0, "do not have deposit");
-        bytes memory pubKey = deposits[msg.sender].pubKey;
-
-        // when not in consensus period or be selected
-        require(
-            !ITssGroupManager(tssGroupContract).memberExistInActive(pubKey) &&
-                !ITssGroupManager(tssGroupContract).memberExistActive(pubKey),
-            "not at the right time"
-        );
-
-        delete deposits[msg.sender];
-
-        require(IERC20(BitToken).transfer(msg.sender, amount), "erc20 transfer failed");
-        emit Withdraw(msg.sender, amount);
-    }
 
     /**
      * @notice send quit request for the next election
      */
     function quitRequest() public nonReentrant {
-        require(deposits[msg.sender].amount > 0, "do not have deposit");
+
+        require(delegation.operatorShares(msg.sender, this) > 0, "do not have deposit");
         // when not in consensus period
         require(
-            ITssGroupManager(tssGroupContract).memberExistInActive(deposits[msg.sender].pubKey) ||
-                ITssGroupManager(tssGroupContract).memberExistActive(deposits[msg.sender].pubKey),
+            ITssGroupManager(tssGroupContract).memberExistInActive(operators[msg.sender]) ||
+                ITssGroupManager(tssGroupContract).memberExistActive(operators[msg.sender]),
             "not at the inactive group or active group"
         );
         // is active member
@@ -246,7 +281,7 @@ contract TssStakingSlashing is
             require(slashAmount[i] > 0, "have not set the slash amount");
             require(exIncome[i] > 0, "have not set the extra income amount");
         }
-        bytes memory jailNodePubKey = deposits[message.jailNode].pubKey;
+        bytes memory jailNodePubKey = operators[message.jailNode];
         if (message.slashType == SlashType.uptime) {
             // jail and transfer deposits
             ITssGroupManager(tssGroupContract).memberJail(jailNodePubKey);
@@ -258,6 +293,7 @@ contract TssStakingSlashing is
         } else {
             require(false, "err type for slashing");
         }
+
     }
 
     /**
@@ -271,12 +307,12 @@ contract TssStakingSlashing is
         uint256 slashType,
         address[] memory tssNodes
     ) internal {
-        uint256 deductedAmount;
-        uint256 totalTransfer;
-        uint256 extraAmount;
-        uint256 remainder;
-        uint256 gain;
-        uint256 _exIncome = 0;
+        uint256 deductedAmountShare;
+        uint256 totalTransferShare;
+        uint256 extraAmountShare;
+        uint256 remainderShare;
+        uint256 gainShare;
+        uint256 _exIncomeShare = 0;
         // total slash slashAmount[slashType]
         // tssnodes get: gain = (slashAmount[slashType] - exIncome[slashType]) / tssnodes.length
         // sender get: remainder + _exIncome = (slashAmount[slashType] - exIncome[slashType]) % tssnodes.length + exIncome[slashType]
@@ -284,34 +320,50 @@ contract TssStakingSlashing is
 
         // check deposit > slashAmount, deduct slashAmount then
         // distribute additional tokens for the sender
+
+        uint256 totalBalance = _tokenBalance();
+
         require(
-            deposits[deduction].amount >= slashAmount[slashType],
-            "do not have enought deposit"
+            (delegation.operatorShares(deduction, this) * totalBalance) / totalShares >= slashAmount[slashType],
+            "do not have enought shares"
         );
         // record total penalty
-        deductedAmount = slashAmount[slashType];
+        deductedAmountShare = (slashAmount[slashType] * totalShares) / totalBalance;
         // record the sender's fixed additional income
-        _exIncome = exIncome[slashType];
+        _exIncomeShare = (exIncome[slashType] * totalShares) / totalBalance;
 
-        // deal with the punished
-        deposits[deduction].amount -= deductedAmount;
+
+
         // record the deserving income for tss nodes
-        extraAmount = deductedAmount - _exIncome;
+        extraAmountShare = deductedAmountShare - _exIncomeShare;
         // deserving income should subtract the remainder
-        remainder = extraAmount % tssNodes.length;
+        remainderShare = extraAmountShare % tssNodes.length;
         // record the gain for tss nodes
-        gain = (extraAmount - remainder) / tssNodes.length;
+        gainShare = (extraAmountShare - remainderShare) / tssNodes.length;
 
+
+        IERC20[] memory tokens = new IERC20[](1);
+        tokens[0] = underlyingToken;
+        IDelegationShare[] memory delegationShares = new IDelegationShare[](1);
+        delegationShares[0] = this;
+
+        uint256[] memory delegationShareIndexes = new uint256[](1);
+        delegationShareIndexes[0] = 0;
+
+        uint256[] memory shareAmounts = new uint256[](1);
+        shareAmounts[0] = _exIncomeShare + remainderShare;
         // sender get the fixed additional income and remainder
-        deposits[msg.sender].amount += _exIncome + remainder;
-        totalTransfer = exIncome[slashType] + remainder;
+        delegationManager.slashShares(deduction, msg.sender, delegationShares, tokens, delegationShareIndexes, shareAmounts);
+        totalTransferShare = _exIncomeShare + remainderShare;
+
         // send gain to tss nodes
         for (uint256 i = 0; i < tssNodes.length; i++) {
-            totalTransfer += gain;
-            deposits[tssNodes[i]].amount += gain;
+            totalTransferShare += gainShare;
+            shareAmounts[0] = gainShare;
+            delegationManager.slashShares(deduction, tssNodes[i], delegationShares, tokens, delegationShareIndexes, shareAmounts);
         }
         // The total transfer amount is the same as the deducted amount
-        require(totalTransfer == deductedAmount, "panic, calculation error");
+        require(totalTransferShare == deductedAmountShare, "panic, calculation error");
     }
 
     /**
@@ -323,29 +375,13 @@ contract TssStakingSlashing is
             require(slashAmount[i] > 0, "have not set the slash amount");
             require(exIncome[i] > 0, "have not set the extra income amount");
         }
-        require(deposits[msg.sender].amount >= slashAmount[1], "Insufficient balance");
-        ITssGroupManager(tssGroupContract).memberUnJail(deposits[msg.sender].pubKey);
+
+        uint256 totalBalance = _tokenBalance();
+
+        require((delegation.operatorShares(msg.sender, this) * totalBalance) / totalShares >= slashAmount[1], "Insufficient balance");
+        ITssGroupManager(tssGroupContract).memberUnJail(operators[msg.sender]);
     }
 
-    /**
-     * @notice get the deposit info
-     * @param user address of the staker
-     */
-    function getDeposits(address user) public view returns (DepositInfo memory) {
-        return deposits[user];
-    }
-
-    /**
-     * @notice get the deposit infos
-     * @param users address list of the stakers
-     */
-    function batchGetDeposits(address[] calldata users) public view returns (DepositInfo[] memory) {
-        DepositInfo[] memory depositsList = new DepositInfo[](users.length);
-        for (uint256 i = 0; i < users.length; i++) {
-            depositsList[i] = deposits[users[i]];
-        }
-        return depositsList;
-    }
 
     /**
      * @notice get the slash record
@@ -362,7 +398,7 @@ contract TssStakingSlashing is
      */
     function isJailed(address user) public returns (bool) {
         ITssGroupManager.TssMember memory tssMember = ITssGroupManager(tssGroupContract)
-            .getTssMember(deposits[user].pubKey);
+            .getTssMember(operators[user]);
         require(tssMember.publicKey.length == 64, "tss member not exist");
         return tssMember.status == ITssGroupManager.MemberStatus.jail;
     }

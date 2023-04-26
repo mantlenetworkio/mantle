@@ -137,7 +137,7 @@ abstract contract DelegationManager is
         uint256[] calldata delegationIndexes,
         IDelegationShare[] calldata delegationShares,
         IERC20[] calldata tokens,
-        uint256[] calldata shares,
+        uint256[] calldata  ,
         WithdrawerAndNonce calldata withdrawerAndNonce,
         bool undelegateIfPossible
     )

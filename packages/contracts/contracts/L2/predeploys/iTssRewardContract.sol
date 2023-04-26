@@ -24,6 +24,11 @@ interface ITssRewardContract {
         address[] tssMembers
     );
 
+    event Claim(
+        address owner,
+        uint256 amount
+    );
+
     /********************
      * Public Functions *
      ********************/
@@ -57,4 +62,48 @@ interface ITssRewardContract {
      * @dev clear contract(canonical).
      */
     function withdraw() external;
+
+    /**
+     * @dev Increases the `staker`'s delegated shares
+     * @param _operator the address of operator which staker chosed
+     * @param _staker the address of staker
+     * @param _shares the number of staker delegated for operator
+     */
+    function increaseDelegatedShares(address _operator, address _staker, uint256 _shares) external;
+
+    /**
+     * @dev Decreases the `staker`'s delegated shares
+     * @param _operator the address of operator which staker chosed
+     * @param _staker the address of staker
+     * @param _shares the number of staker delegated for operator
+     */
+    function decreaseDelegatedShares(address _operator, address _staker, uint256 _shares) external;
+
+    /**
+     * @dev first stake and delegated shares
+     * @param _operator the address of operator which staker chosed
+     * @param _staker the address of staker
+     * @param _shares the number of staker delegated for operator
+     */
+    function delegate(address _operator, address _staker, uint256 _shares) external;
+
+    /**
+     * @dev Claim reward
+     * @param _addr the address of reward owner
+     */
+    function claim(address _addr) external;
+
+    /**
+     * @dev Claim reward and withdraw
+     * @param _addr the address of reward owner
+     */
+    function claimWithdraw(address _addr) external;
+
+    /**
+     * @dev default claimer == staker, if staker is multi-signature address,must set claimer
+     * @param _staker the address of staker
+     * @param _claimer the address for staker to claim reward
+     */
+    function setClaimer(address _staker, address _claimer) external;
+
 }
