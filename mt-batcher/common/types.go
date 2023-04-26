@@ -3,9 +3,10 @@ package common
 import "math/big"
 
 type AggregateSignature struct {
-	AggSig           []byte
-	AggPubKey        []byte
-	NonSignerPubKeys [][]byte
+	AggSig            []byte
+	StoredAggPubkeyG1 []byte
+	UsedAggPubkeyG2   []byte
+	NonSignerPubkeys  [][]byte
 }
 
 type DisperseMeta struct {
@@ -16,14 +17,14 @@ type DisperseMeta struct {
 }
 
 type StoreParams struct {
-	BlockNumber         uint32
-	TotalOperatorsIndex uint32
-	OrigDataSize        uint32 // unique nonce for each data store
-	NumTotal            uint32 // total number data node active on chain
-	Quorum              uint32 // minimal amount of signatures from data node
-	NumSys              uint32 // number of data node which contains the systematic chunk
-	NumPar              uint32 // number of data node which contains the parity chunk
-	Duration            uint32 // duration which data is stored
+	ReferenceBlockNumber uint32
+	TotalOperatorsIndex  uint32
+	OrigDataSize         uint32 // unique nonce for each data store
+	NumTotal             uint32 // total number data node active on chain
+	Quorum               uint32 // minimal amount of signatures from data node
+	NumSys               uint32 // number of data node which contains the systematic chunk
+	NumPar               uint32 // number of data node which contains the parity chunk
+	Duration             uint32 // duration which data is stored
 
 	// Data and Encoding
 	KzgCommit      []byte // elliptic curve kzg commitmetn

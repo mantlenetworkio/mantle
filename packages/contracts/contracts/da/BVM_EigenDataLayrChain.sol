@@ -7,10 +7,11 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import { DataLayrDisclosureLogic } from "../libraries/eigenda/DataLayrDisclosureLogic.sol";
-import { IDataLayrServiceManager } from "../libraries/eigenda/lib/contracts/interfaces/IDataLayrServiceManager.sol";
+import { IDataLayrServiceManager } from "../libraries/eigenda/interfaces/IDataLayrServiceManager.sol";
 import { BN254 } from "../libraries/eigenda/BN254.sol";
-import { DataStoreUtils } from "../libraries/eigenda/lib/contracts/libraries/DataStoreUtils.sol";
+import { DataStoreUtils } from "../libraries/eigenda/DataStoreUtils.sol";
 import { Parser } from "../libraries/eigenda/Parse.sol";
+import 'hardhat/console.sol';
 
 
 contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeable, Parser {
@@ -283,15 +284,18 @@ contract BVM_EigenDataLayrChain is OwnableUpgradeable, ReentrancyGuardUpgradeabl
         bool isReRollup
     ) external {
         require(msg.sender == sequencer, "Only the sequencer can store data");
+        console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         require(dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].startL2BlockNumber == startL2Block &&
             dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].endBL2BlockNumber == endL2Block &&
             dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].isReRollup == isReRollup,
             "Data store either was not initialized by the rollup contract, or is already confirmed"
         );
+        console.log("000000000000000000000000000000000000000000000000");
         require(
             dataStoreIdToRollupStoreNumber[searchData.metadata.globalDataStoreId] == DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED,
             "Data store either was not initialized by the rollup contract, or is already confirmed"
         );
+        console.log("00000000000001111111111111111111000000000000000");
         IDataLayrServiceManager(dataManageAddress).confirmDataStore(data, searchData);
         if (!isReRollup) {
             rollupBatchIndexRollupStores[rollupBatchIndex] = RollupStore({

@@ -38,7 +38,7 @@ subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
   async (_, __, runSuper) => {
     console.log('running task')
     // copySync(
-    //   '../../datalayr-mantle/contracts/eignlayr-contracts/src',
+    //   '../../datalayr/contracts/eignlayr-contracts/src',
     //   './contracts/libraries/eigenda/lib'
     // )
     const paths = await runSuper()

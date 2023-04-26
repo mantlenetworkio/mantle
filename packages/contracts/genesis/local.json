@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
     "commit": "5721560308276eafef92e688cc03207ed2c00f53",
+=======
+    "commit": "0b1f375d5656ee83dd73959f3757faca37601d8a",
+>>>>>>> 05d570c (migrate to eigenda latest code)
     "config": {
         "chainId": 17,
         "homesteadBlock": 0,

@@ -29,8 +29,8 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/sequencer/db"
 	"github.com/mantlenetworkio/mantle/mt-batcher/txmgr"
 	"github.com/pkg/errors"
-	"github.com/shurcooL/graphql"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"math/big"
 	"strings"
 	"sync"
@@ -85,6 +85,7 @@ type FeePipline struct {
 }
 
 type Driver struct {
+<<<<<<< HEAD
 	Ctx           context.Context
 	Cfg           *DriverConfig
 	WalletAddr    common.Address
@@ -97,6 +98,17 @@ type Driver struct {
 	FeeCh         chan *FeePipline
 	cancel        func()
 	wg            sync.WaitGroup
+=======
+	Ctx          context.Context
+	Cfg          *DriverConfig
+	WalletAddr   common.Address
+	GraphClient  *graphView.GraphClient
+	DtlClient    client.DtlClient
+	txMgr        txmgr.TxManager
+	LevelDBStore *db.Store
+	cancel       func()
+	wg           sync.WaitGroup
+>>>>>>> 05d570c (migrate to eigenda latest code)
 }
 
 var bigOne = new(big.Int).SetUint64(1)
@@ -114,7 +126,6 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 	txMgr := txmgr.NewSimpleTxManager(txManagerConfig, cfg.L1Client)
 
 	graphClient := graphView.NewGraphClient(cfg.GraphProvider, cfg.Logger)
-	graphqlClient := graphql.NewClient(graphClient.GetEndpoint(), nil)
 
 	levelDBStore, err := db.NewStore(cfg.DbPath)
 	if err != nil {
@@ -125,6 +136,7 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
 	feeWalletAddr := crypto.PubkeyToAddress(cfg.FeePrivKey.PublicKey)
 	return &Driver{
+<<<<<<< HEAD
 		Cfg:           cfg,
 		Ctx:           ctx,
 		WalletAddr:    walletAddr,
@@ -136,6 +148,16 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 		LevelDBStore:  levelDBStore,
 		FeeCh:         make(chan *FeePipline),
 		cancel:        cancel,
+=======
+		Cfg:          cfg,
+		Ctx:          ctx,
+		WalletAddr:   walletAddr,
+		GraphClient:  graphClient,
+		DtlClient:    dtlClient,
+		txMgr:        txMgr,
+		LevelDBStore: levelDBStore,
+		cancel:       cancel,
+>>>>>>> 05d570c (migrate to eigenda latest code)
 	}, nil
 }
 
@@ -395,7 +417,7 @@ func (d *Driver) DisperseStoreData(data []byte, startl2BlockNumber *big.Int, end
 		return params, nil, err
 	}
 	tx, err := d.StoreData(
-		d.Ctx, uploadHeader, uint8(params.Duration), params.BlockNumber, startl2BlockNumber, endl2BlockNumber, params.TotalOperatorsIndex, isReRollup,
+		d.Ctx, uploadHeader, uint8(params.Duration), params.ReferenceBlockNumber, startl2BlockNumber, endl2BlockNumber, params.TotalOperatorsIndex, isReRollup,
 	)
 	if err != nil {
 		log.Error("MtBatcher StoreData tx", "err", err)
@@ -428,14 +450,13 @@ func (d *Driver) GetEigenLayerNode() (int, error) {
 }
 
 func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, startl2BlockNumber, endl2BlockNumber *big.Int, originDataStoreId uint32, reConfirmedBatchIndex *big.Int, isReRollup bool) (*types.Receipt, error) {
-	event, ok := graphView.PollingInitDataStore(
-		d.GraphClient,
+	event, ok := d.GraphClient.PollingInitDataStore(
+		d.Ctx,
 		txHash[:],
-		d.Cfg.Logger,
-		12,
+		1000000000,
 	)
 	if !ok {
-		log.Error("MtBatcher could not get initDataStore")
+		log.Error("MtBatcher could not get initDataStore", "ok", ok)
 		return nil, errors.New("MtBatcher could not get initDataStore")
 	}
 	log.Info("PollingInitDataStore", "MsgHash", event.MsgHash, "StoreNumber", event.StoreNumber)
@@ -453,13 +474,13 @@ func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, st
 		Timestamp: new(big.Int).SetUint64(uint64(event.InitTime)),
 		Index:     event.Index,
 		Metadata: rc.IDataLayrServiceManagerDataStoreMetadata{
-			HeaderHash:          event.DataCommitment,
-			DurationDataStoreId: event.DurationDataStoreId,
-			GlobalDataStoreId:   event.StoreNumber,
-			BlockNumber:         event.StakesFromBlockNumber,
-			Fee:                 event.Fee,
-			Confirmer:           common.HexToAddress(event.Confirmer),
-			SignatoryRecordHash: [32]byte{},
+			HeaderHash:           event.DataCommitment,
+			DurationDataStoreId:  event.DurationDataStoreId,
+			GlobalDataStoreId:    event.StoreNumber,
+			ReferenceBlockNumber: event.ReferenceBlockNumber,
+			Fee:                  event.Fee,
+			Confirmer:            common.HexToAddress(event.Confirmer),
+			SignatoryRecordHash:  [32]byte{},
 		},
 	}
 	var tx *types.Transaction
@@ -491,7 +512,7 @@ func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, st
 }
 
 func (d *Driver) callEncode(data []byte) (common2.StoreParams, error) {
-	conn, err := grpc.Dial(d.Cfg.DisperserSocket, grpc.WithInsecure())
+	conn, err := grpc.Dial(d.Cfg.DisperserSocket, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Error("MtBatcher Disperser Cannot connect to", "DisperserSocket", d.Cfg.DisperserSocket)
 		return common2.StoreParams{}, err
@@ -515,22 +536,22 @@ func (d *Driver) callEncode(data []byte) (common2.StoreParams, error) {
 	g := reply.GetStore()
 	feeBigInt := new(big.Int).SetBytes(g.Fee)
 	params := common2.StoreParams{
-		BlockNumber:         g.BlockNumber,
-		TotalOperatorsIndex: g.TotalOperatorsIndex,
-		OrigDataSize:        g.OrigDataSize,
-		NumTotal:            g.NumTotal,
-		Quorum:              g.Quorum,
-		NumSys:              g.NumSys,
-		NumPar:              g.NumPar,
-		Duration:            g.Duration,
-		KzgCommit:           g.KzgCommit,
-		LowDegreeProof:      g.LowDegreeProof,
-		Degree:              g.Degree,
-		TotalSize:           g.TotalSize,
-		Order:               g.Order,
-		Fee:                 feeBigInt,
-		HeaderHash:          g.HeaderHash,
-		Disperser:           g.Disperser,
+		ReferenceBlockNumber: g.ReferenceBlockNumber,
+		TotalOperatorsIndex:  g.TotalOperatorsIndex,
+		OrigDataSize:         g.OrigDataSize,
+		NumTotal:             g.NumTotal,
+		Quorum:               g.Quorum,
+		NumSys:               g.NumSys,
+		NumPar:               g.NumPar,
+		Duration:             g.Duration,
+		KzgCommit:            g.KzgCommit,
+		LowDegreeProof:       g.LowDegreeProof,
+		Degree:               g.Degree,
+		TotalSize:            g.TotalSize,
+		Order:                g.Order,
+		Fee:                  feeBigInt,
+		HeaderHash:           g.HeaderHash,
+		Disperser:            g.Disperser,
 	}
 	return params, nil
 }
@@ -555,9 +576,10 @@ func (d *Driver) callDisperse(headerHash []byte, messageHash []byte) (common2.Di
 	}
 	sigs := reply.GetSigs()
 	aggSig := common2.AggregateSignature{
-		AggSig:           sigs.AggSig,
-		AggPubKey:        sigs.AggPubKey,
-		NonSignerPubKeys: sigs.NonSignerPubKeys,
+		AggSig:            sigs.AggSig,
+		StoredAggPubkeyG1: sigs.StoredAggPubkeyG1,
+		UsedAggPubkeyG2:   sigs.UsedAggPubkeyG2,
+		NonSignerPubkeys:  sigs.NonSignerPubkeys,
 	}
 	meta := common2.DisperseMeta{
 		Sigs:            aggSig,
