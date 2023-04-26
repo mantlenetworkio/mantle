@@ -85,30 +85,17 @@ type FeePipline struct {
 }
 
 type Driver struct {
-<<<<<<< HEAD
 	Ctx           context.Context
 	Cfg           *DriverConfig
 	WalletAddr    common.Address
 	FeeWalletAddr common.Address
 	GraphClient   *graphView.GraphClient
-	GraphqlClient *graphql.Client
 	DtlClient     client.DtlClient
 	txMgr         txmgr.TxManager
 	LevelDBStore  *db.Store
 	FeeCh         chan *FeePipline
 	cancel        func()
 	wg            sync.WaitGroup
-=======
-	Ctx          context.Context
-	Cfg          *DriverConfig
-	WalletAddr   common.Address
-	GraphClient  *graphView.GraphClient
-	DtlClient    client.DtlClient
-	txMgr        txmgr.TxManager
-	LevelDBStore *db.Store
-	cancel       func()
-	wg           sync.WaitGroup
->>>>>>> 05d570c (migrate to eigenda latest code)
 }
 
 var bigOne = new(big.Int).SetUint64(1)
@@ -136,28 +123,16 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
 	feeWalletAddr := crypto.PubkeyToAddress(cfg.FeePrivKey.PublicKey)
 	return &Driver{
-<<<<<<< HEAD
 		Cfg:           cfg,
 		Ctx:           ctx,
 		WalletAddr:    walletAddr,
 		FeeWalletAddr: feeWalletAddr,
 		GraphClient:   graphClient,
-		GraphqlClient: graphqlClient,
 		DtlClient:     dtlClient,
 		txMgr:         txMgr,
 		LevelDBStore:  levelDBStore,
 		FeeCh:         make(chan *FeePipline),
 		cancel:        cancel,
-=======
-		Cfg:          cfg,
-		Ctx:          ctx,
-		WalletAddr:   walletAddr,
-		GraphClient:  graphClient,
-		DtlClient:    dtlClient,
-		txMgr:        txMgr,
-		LevelDBStore: levelDBStore,
-		cancel:       cancel,
->>>>>>> 05d570c (migrate to eigenda latest code)
 	}, nil
 }
 
