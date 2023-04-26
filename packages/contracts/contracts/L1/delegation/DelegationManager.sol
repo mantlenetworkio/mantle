@@ -24,7 +24,7 @@ import "./WhiteListBase.sol";
  * - recording deposit for securing
  * - slashing of assets for permissioned strategies
  */
-contract DelegationManager is
+abstract contract DelegationManager is
     Initializable,
     OwnableUpgradeable,
     PausableUpgradeable,
@@ -437,14 +437,14 @@ contract DelegationManager is
         returns (uint256 shares)
     {
 
+        // transfer tokens from the sender to the delegation contract
+        token.safeTransferFrom(depositor, address(delegationShare), amount);
+
         // deposit the assets into the specified delegation contract and get the equivalent amount of shares in that delegation contract
         shares = delegationShare.deposit(depositor, token, amount);
 
         // add the returned shares to the depositor's existing shares for this delegation contract
         _addShares(depositor, delegationShare, shares);
-
-        // transfer tokens from the sender to the delegation contract
-        token.safeTransferFrom(depositor, address(delegationShare), amount);
 
         return shares;
     }
