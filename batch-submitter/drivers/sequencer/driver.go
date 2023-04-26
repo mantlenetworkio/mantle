@@ -117,9 +117,10 @@ func NewDriver(cfg Config) (*Driver, error) {
 	var walletAddr common.Address
 	if cfg.EnableSequencerHsm {
 		walletAddr = common.HexToAddress(cfg.SequencerHsmAddress)
-		log.Info("use sequencer hsm as walletAddr")
+		log.Info("use sequencer hsm", "walletaddr", walletAddr)
 	} else {
 		walletAddr = crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+		log.Info("not use sequencer hsm", "walletaddr", walletAddr)
 	}
 
 	return &Driver{
@@ -365,8 +366,8 @@ func (d *Driver) CraftBatchTx(
 		tx, err := d.rawCtcContract.RawTransact(opts, calldata)
 		switch {
 		case err == nil:
+			log.Info("ctc contract", "rawtransact isSuccess", true)
 			return tx, nil
-
 		// If the transaction failed because the backend does not support
 		// eth_maxPriorityFeePerGas, fallback to using the default constant.
 		// Currently Alchemy is the only backend provider that exposes this
@@ -380,6 +381,7 @@ func (d *Driver) CraftBatchTx(
 			return d.rawCtcContract.RawTransact(opts, calldata)
 
 		default:
+			log.Info("CTC CONTRACT", "call raw transact", err.Error())
 			return nil, err
 		}
 	}

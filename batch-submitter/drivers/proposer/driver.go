@@ -134,9 +134,10 @@ func NewDriver(cfg Config) (*Driver, error) {
 	var walletAddr common.Address
 	if cfg.EnableProposerHsm {
 		walletAddr = common.HexToAddress(cfg.ProposerHsmAddress)
-		log.Info("use proposer hsm as walletAddr")
+		log.Info("use proposer hsm", "walletaddr", walletAddr)
 	} else {
 		walletAddr = crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+		log.Info("not use proposer hsm", "walletaddr", walletAddr)
 	}
 
 	return &Driver{

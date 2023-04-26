@@ -4,14 +4,14 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"github.com/decred/dcrd/hdkeychain/v3"
+	"github.com/tyler-smith/go-bip39"
 	"strings"
 
-	"github.com/decred/dcrd/hdkeychain/v3"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/tyler-smith/go-bip39"
 )
 
 var (
@@ -32,8 +32,8 @@ func ParseAddress(address string) (common.Address, error) {
 
 // GetConfiguredPrivateKey computes the private key for our configured services.
 // The two supported methods are:
-//  - Derived from BIP39 mnemonic and BIP32 HD derivation path.
-//  - Directly from a serialized private key.
+//   - Derived from BIP39 mnemonic and BIP32 HD derivation path.
+//   - Directly from a serialized private key.
 func GetConfiguredPrivateKey(mnemonic, hdPath, privKeyStr string) (
 	*ecdsa.PrivateKey, error) {
 
@@ -133,10 +133,9 @@ func ParseWalletPrivKeyAndContractAddr(
 	}
 
 	// Log wallet address rather than private key...
-	walletAddress := crypto.PubkeyToAddress(privKey.PublicKey)
+	//walletAddress := crypto.PubkeyToAddress(privKey.PublicKey)
 
-	log.Info(name+" wallet params parsed successfully", "wallet_address",
-		walletAddress, "contract_address", contractAddress)
+	log.Info(name+" wallet params parsed successfully", "contract_address", contractAddress)
 
 	return privKey, contractAddress, nil
 }
