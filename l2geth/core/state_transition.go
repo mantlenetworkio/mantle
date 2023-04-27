@@ -298,9 +298,11 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		if isBurning.Cmp(big.NewInt(1)) == 0 {
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 			fee := new(big.Int).Add(st.l1Fee, l2Fee)
+			fee = new(big.Int).Add(fee, st.daFee)
 			st.state.AddBalance(evm.Coinbase, fee)
 		} else if isBurning.Cmp(big.NewInt(0)) == 0 {
-			st.state.AddBalance(dump.BvmFeeWallet, st.l1Fee)
+			fee := new(big.Int).Add(st.l1Fee, st.daFee)
+			st.state.AddBalance(dump.BvmFeeWallet, fee)
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 			st.state.AddBalance(dump.TssRewardAddress, l2Fee)
 			data, err := tssreward.PacketData(evm.BlockNumber, l2Fee)
