@@ -31,9 +31,8 @@ echo "test point1"
 if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
   DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
 
-  # todo: remove
   # whiteListInit
-  WHITELIST_INIT="npx hardhat whiteListInit --rollup $ROLLUP_CONTRACT_ADDRESS"
+  WHITELIST_INIT="npx hardhat whiteListInit --delegation $ROLLUP_CONTRACT_ADDRESS"
   # fraud proof verifier deploy
   DEPLOY_VERIFIER="npx hardhat deployVerifier --verifier $VERIFIER_ENTRY_ADDRESS"
 
@@ -42,8 +41,8 @@ if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
   eval "$DEPLOY_CMD"
   echo "$DEPLOY_VERIFIER"
   eval "$DEPLOY_VERIFIER"
-  echo "$WHITELIST_INIT"
-  eval "$WHITELIST_INIT"
+#  echo "$WHITELIST_INIT"
+#  eval "$WHITELIST_INIT"
 
 elif [ $SKIP_CONTRACT_DEPLOY == "NO" ] ; then
   DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"

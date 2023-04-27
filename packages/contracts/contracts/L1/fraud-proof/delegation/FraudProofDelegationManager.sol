@@ -5,7 +5,6 @@ import "../../delegation/DelegationManager.sol";
 
 /**
  * @title The primary entry- and exit-point for funds into and out.
- * @author Layr Labs, Inc.
  * @notice This contract is for managing investments in different strategies. The main
  * functionalities are:
  * - adding and removing investment strategies that any delegator can invest into
@@ -16,6 +15,7 @@ import "../../delegation/DelegationManager.sol";
  * - slashing of assets for permissioned strategies
  */
 contract FraudProofDelegationManager is DelegationManager {
+    // INITIALIZING FUNCTIONS
     /**
      * @param _delegation The delegation contract.
      * @param _delegationSlasher The primary slashing contract.

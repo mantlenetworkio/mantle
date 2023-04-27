@@ -12,13 +12,12 @@ import "./interfaces/IDelegationManager.sol";
 
 /**
  * @title The primary 'slashing' contract.
- * @author Layr Labs, Inc.
  * @notice This contract specifies details on slashing. The functionalities are:
  * - adding contracts who have permission to perform slashing,
  * - revoking permission for slashing from specified contracts,
  * - calling investManager to do actual slashing.
  */
-contract DelegationSlasher is Initializable, OwnableUpgradeable, PausableUpgradeable, IDelegationSlasher {
+abstract contract DelegationSlasher is Initializable, OwnableUpgradeable, PausableUpgradeable, IDelegationSlasher {
     // ,DSTest
     /// @notice The central InvestmentManager contract
     IDelegationManager public immutable investmentManager;
