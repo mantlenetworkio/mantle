@@ -77,6 +77,7 @@ type FraudProof struct {
 type ChallengerConfig struct {
 	L1Client                  *ethclient.Client
 	L2Client                  *l2ethclient.Client
+	L1ChainID                 *big.Int
 	EigenContractAddr         ethc.Address
 	Logger                    *logging.Logger
 	PrivKey                   *ecdsa.PrivateKey
@@ -90,14 +91,14 @@ type ChallengerConfig struct {
 	CheckerBatchIndex         uint64
 	NeedReRollupBatch         string
 	ReRollupToolEnable        bool
-	SignerFn                  SignerFn
 	ResubmissionTimeout       time.Duration
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
-	EnableHsm                 bool
-	HsmAPIName                string
-	HsmCreden                 string
-	HsmAddress                string
+
+	EnableHsm  bool
+	HsmAPIName string
+	HsmCreden  string
+	HsmAddress string
 }
 
 type Challenger struct {
@@ -318,15 +319,23 @@ func (fp *DataLayrDisclosureProof) ToDisclosureProofs() rc.BVMEigenDataLayrChain
 }
 
 func (c *Challenger) UpdateGasPrice(ctx context.Context, tx *types.Transaction) (*types.Transaction, error) {
-	opts := &bind.TransactOpts{
-		From: c.WalletAddr,
-		Signer: func(addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
-			return c.Cfg.SignerFn(ctx, addr, tx)
-		},
-		Context: ctx,
-		Nonce:   new(big.Int).SetUint64(tx.Nonce()),
-		NoSend:  true,
+	var opts *bind.TransactOpts
+	var err error
+	if !c.Cfg.EnableHsm {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			c.Cfg.PrivKey, c.Cfg.L1ChainID,
+		)
+	} else {
+		opts, err = common4.NewHSMTransactOpts(ctx, c.Cfg.HsmAPIName,
+			c.Cfg.HsmAddress, c.Cfg.L1ChainID, c.Cfg.HsmCreden)
 	}
+	if err != nil {
+		return nil, err
+	}
+	opts.Context = ctx
+	opts.Nonce = new(big.Int).SetUint64(tx.Nonce())
+	opts.NoSend = true
+
 	finalTx, err := c.RawEigenContract.RawTransact(opts, tx.Data())
 	switch {
 	case err == nil:
@@ -368,16 +377,23 @@ func (c *Challenger) ChallengeProveFraud(ctx context.Context, fraudStoreNumber *
 		log.Error("MtChallenger unable to get current nonce", "err", err)
 		return nil, err
 	}
+	var opts *bind.TransactOpts
 	nonce := new(big.Int).SetUint64(nonce64)
-	opts := &bind.TransactOpts{
-		From: ethc.Address(c.WalletAddr),
-		Signer: func(addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
-			return c.Cfg.SignerFn(ctx, addr, tx)
-		},
-		Context: ctx,
-		Nonce:   nonce,
-		NoSend:  true,
+	if !c.Cfg.EnableHsm {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			c.Cfg.PrivKey, c.Cfg.L1ChainID,
+		)
+	} else {
+		opts, err = common4.NewHSMTransactOpts(ctx, c.Cfg.HsmAPIName,
+			c.Cfg.HsmAddress, c.Cfg.L1ChainID, c.Cfg.HsmCreden)
 	}
+	if err != nil {
+		return nil, err
+	}
+	opts.Context = ctx
+	opts.Nonce = nonce
+	opts.NoSend = true
+
 	tx, err := c.EigenDaContract.ProveFraud(opts, fraudStoreNumber, new(big.Int).SetUint64(uint64(fraudProof.StartingSymbolIndex)), searchData, disclosureProofs)
 	switch {
 	case err == nil:
@@ -449,15 +465,22 @@ func (c *Challenger) makReRollupBatchTx(ctx context.Context, batchIndex *big.Int
 		return nil, err
 	}
 	nonce := new(big.Int).SetUint64(nonce64)
-	opts := &bind.TransactOpts{
-		From: ethc.Address(c.WalletAddr),
-		Signer: func(addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
-			return c.Cfg.SignerFn(ctx, addr, tx)
-		},
-		Context: ctx,
-		Nonce:   nonce,
-		NoSend:  true,
+	var opts *bind.TransactOpts
+	if !c.Cfg.EnableHsm {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			c.Cfg.PrivKey, c.Cfg.L1ChainID,
+		)
+	} else {
+		opts, err = common4.NewHSMTransactOpts(ctx, c.Cfg.HsmAPIName,
+			c.Cfg.HsmAddress, c.Cfg.L1ChainID, c.Cfg.HsmCreden)
 	}
+	if err != nil {
+		return nil, err
+	}
+	opts.Context = ctx
+	opts.Nonce = nonce
+	opts.NoSend = true
+
 	tx, err := c.EigenDaContract.SubmitReRollUpInfo(opts, batchIndex)
 	switch {
 	case err == nil:

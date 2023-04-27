@@ -4,6 +4,7 @@ import (
 	kms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/decred/dcrd/hdkeychain/v3"
@@ -130,20 +131,18 @@ func PrivateKeySignerFn(key *ecdsa.PrivateKey, chainID *big.Int) bind.SignerFn {
 	}
 }
 
-func NewHsmSignerFn(apiName string, addr string, chainID *big.Int, credentials string) (bind.SignerFn, error) {
-	ctx := context.Background()
-	apikey := option.WithCredentialsFile("mantle-666-keystore.json")
+func NewHSMTransactOpts(ctx context.Context, hsmAPIName string, hsmAddress string, chainID *big.Int, hsmCreden string) (*bind.TransactOpts, error) {
+	proBytes, err := hex.DecodeString(hsmCreden)
+	apikey := option.WithCredentialsJSON(proBytes)
 	client, err := kms.NewKeyManagementClient(ctx, apikey)
 	if err != nil {
 		return nil, err
 	}
-
 	mk := &bsscore.ManagedKey{
-		KeyName:      apiName,
-		EthereumAddr: common.HexToAddress(addr),
+		KeyName:      hsmAPIName,
+		EthereumAddr: common.HexToAddress(hsmAddress),
 		Gclient:      client,
 	}
-	fmt.Printf(mk.KeyName)
-
-	return nil, nil
+	opts, err := mk.NewEthereumTransactorrWithChainID(ctx, chainID)
+	return opts, nil
 }
