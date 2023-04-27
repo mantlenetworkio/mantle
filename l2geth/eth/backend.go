@@ -143,6 +143,9 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if _, ok := genesisErr.(*params.ConfigCompatError); genesisErr != nil && !ok {
 		return nil, genesisErr
 	}
+	if chainConfig.EigenDaBlock == nil {
+		chainConfig.EigenDaBlock = big.NewInt(config.Rollup.EigenDaBlock)
+	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
 	eth := &Ethereum{
@@ -211,7 +214,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		return nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
 	eth.syncService.SetExtra(makeExtraData(config.Miner.ExtraData))
-
 
 	// Permit the downloader to use the trie cache allowance during fast sync
 	cacheLimit := cacheConfig.TrieCleanLimit + cacheConfig.TrieDirtyLimit
