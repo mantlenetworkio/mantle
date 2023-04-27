@@ -19,16 +19,8 @@ const { getImplementationAddress, getProxyAddress } = require('@openzeppelin/upg
 const deployFn: DeployFunction = async (hre) => {
   // @ts-ignore
   const { deployer } = await hre.getNamedAccounts()
-
-  const Lib_AddressManager = await getContractFromArtifact(
-    hre,
-    names.unmanaged.Lib_AddressManager
-  )
   // @ts-ignore
   const owner = hre.deployConfig.bvmAddressManagerOwner
-  // @ts-ignore
-  const l1BitAddress = hre.deployConfig.l1BitAddress
-
   // @ts-ignore
   let DelegationProxyAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
   let DelegationManagerProxyAddress = "0xD6f15EAC1Cb3B4131Ab4899a52E711e19DEeA73f"
@@ -37,141 +29,128 @@ const deployFn: DeployFunction = async (hre) => {
   // deploy Delegation impl
   await deployAndVerifyAndThen({
     hre,
-    name: names.managed.delegation.Delegation,
-    contract: 'Delegation',
+    name: names.managed.delegation.fraud_proof.FraudProofDelegation,
+    contract: 'FraudProofDelegation',
     args: [DelegationManagerProxyAddress],
   })
-  const Impl__Delegation = await getContractFromArtifact(
+  const Impl__FraudProofDelegation = await getContractFromArtifact(
     hre,
-    names.managed.delegation.Delegation,
+    names.managed.delegation.fraud_proof.FraudProofDelegation,
     {
-      iface: 'Delegation',
+      iface: 'FraudProofDelegation',
       signerOrProvider: deployer,
     }
   )
-  console.log('Delegation Implementation Address', Impl__Delegation.address)
-  console.log('deploy Delegation success')
+  console.log('FraudProofDelegation Implementation Address', Impl__FraudProofDelegation.address)
+  console.log('deploy FraudProof Delegation success')
 
   // deploy DelegationManager impl
   await deployAndVerifyAndThen({
     hre,
-    name: names.managed.delegation.DelegationManager,
-    contract: 'DelegationManager',
+    name: names.managed.delegation.fraud_proof.FraudProofDelegationManager,
+    contract: 'FraudProofDelegationManager',
     args: [DelegationProxyAddress, DelegationSlasherProxyAddress],
   })
-  const Impl__DelegationManager = await getContractFromArtifact(
+  const Impl__FraudProofDelegationManager = await getContractFromArtifact(
     hre,
-    names.managed.delegation.DelegationManager,
+    names.managed.delegation.fraud_proof.FraudProofDelegationManager,
     {
-      iface: 'DelegationManager',
+      iface: 'FraudProofDelegationManager',
       signerOrProvider: deployer,
     }
   )
-  console.log(
-    'DelegationManager Implementation Address',
-    Impl__DelegationManager.address
-  )
-  console.log('deploy DelegationManager success')
+  console.log('FraudProofDelegationManager Implementation Address', Impl__FraudProofDelegationManager.address)
+  console.log('deploy FraudProof DelegationManager success')
 
   // deploy DelegationSlasher impl
   await deployAndVerifyAndThen({
     hre,
-    name: names.managed.delegation.DelegationSlasher,
-    contract: 'DelegationSlasher',
+    name: names.managed.delegation.fraud_proof.FraudProofDelegationSlasher,
+    contract: 'FraudProofDelegationSlasher',
     args: [DelegationManagerProxyAddress, DelegationProxyAddress],
   })
-  const Impl__DelegationSlasher = await getContractFromArtifact(
+  const Impl__FraudProofDelegationSlasher = await getContractFromArtifact(
     hre,
-    names.managed.delegation.DelegationSlasher,
+    names.managed.delegation.fraud_proof.FraudProofDelegationSlasher,
     {
-      iface: 'DelegationSlasher',
+      iface: 'FraudProofDelegationSlasher',
       signerOrProvider: deployer,
     }
   )
-  console.log(
-    'DelegationSlasher Implementation Address',
-    Impl__DelegationSlasher.address
-  )
-  console.log('deploy DelegationSlasher rollup success')
+  console.log('FraudProof DelegationSlasher Implementation Address', Impl__FraudProofDelegationSlasher.address)
+  console.log('deploy FraudProof DelegationSlasher rollup success')
 
   // deploy Delegation proxy
-  let callData = Impl__Delegation.interface.encodeFunctionData('initialize', [
+  let callData = Impl__FraudProofDelegation.interface.encodeFunctionData('initialize', [
     owner,
   ])
   await deployAndVerifyAndThen({
     hre,
-    name: names.managed.delegation.Proxy__Delegation,
+    name: names.managed.delegation.fraud_proof.Proxy__FraudProofDelegation,
     contract: 'TransparentUpgradeableProxy',
-    iface: 'Delegation',
-    args: [Impl__Delegation.address, owner, callData],
+    iface: 'FraudProofDelegation',
+    args: [Impl__FraudProofDelegation.address, owner, callData],
   })
-  console.log('deploy Delegation Proxy success')
-  const Proxy__Delegation = await getContractFromArtifact(
+  console.log('deploy FraudProof Delegation Proxy success')
+  const Proxy__FraudProofDelegation = await getContractFromArtifact(
     hre,
-    names.managed.delegation.Proxy__Delegation,
+    names.managed.delegation.fraud_proof.Proxy__FraudProofDelegation,
     {
-      iface: 'Delegation',
+      iface: 'FraudProofDelegation',
       signerOrProvider: deployer,
     }
   )
-  console.log('Proxy__Delegation Address', Proxy__Delegation.address)
-  console.log('deploy delegation Proxy__Delegation success')
+  console.log('Proxy__FraudProofDelegation Address', Proxy__FraudProofDelegation.address)
+  console.log('deploy FraudProof Delegation Proxy__FraudProofDelegation success')
 
-  callData = Impl__DelegationSlasher.interface.encodeFunctionData(
+  callData = Impl__FraudProofDelegationSlasher.interface.encodeFunctionData(
     'initialize',
     [owner]
   )
   await deployAndVerifyAndThen({
     hre,
-    name: names.managed.delegation.Proxy__DelegationSlasher,
+    name: names.managed.delegation.fraud_proof.Proxy__FraudProofDelegationSlasher,
     contract: 'TransparentUpgradeableProxy',
-    iface: 'DelegationSlasher',
-    args: [Impl__DelegationSlasher.address, owner, callData],
+    iface: 'FraudProofDelegationSlasher',
+    args: [Impl__FraudProofDelegationSlasher.address, owner, callData],
   })
 
-  const Proxy__DelegationSlasher = await getContractFromArtifact(
+  const Proxy__FraudProofDelegationSlasher = await getContractFromArtifact(
     hre,
-    names.managed.delegation.Proxy__DelegationSlasher,
+    names.managed.delegation.fraud_proof.Proxy__FraudProofDelegationSlasher,
     {
-      iface: 'DelegationSlasher',
+      iface: 'FraudProofDelegationSlasher',
       signerOrProvider: deployer,
     }
   )
-  console.log(
-    'Proxy__DelegationSlasher Address',
-    Proxy__DelegationSlasher.address
-  )
-  console.log('deploy DelegationSlasher Proxy success')
+  console.log('Proxy__FraudProofDelegationSlasher Address', Proxy__FraudProofDelegationSlasher.address)
+  console.log('deploy FraudProof DelegationSlasher Proxy success')
 
-  callData = Impl__DelegationManager.interface.encodeFunctionData(
+  callData = Impl__FraudProofDelegationManager.interface.encodeFunctionData(
     'initialize',
     [owner]
   )
   await deployAndVerifyAndThen({
     hre,
-    name: names.managed.delegation.Proxy__DelegationManager,
+    name: names.managed.delegation.fraud_proof.Proxy__FraudProofDelegationManager,
     contract: 'TransparentUpgradeableProxy',
-    iface: 'DelegationManager',
-    args: [Impl__DelegationManager.address, owner, callData],
+    iface: 'FraudProofDelegationManager',
+    args: [Impl__FraudProofDelegationManager.address, owner, callData],
   })
 
-  const Proxy__DelegationManager = await getContractFromArtifact(
+  const Proxy__FraudProofDelegationManager = await getContractFromArtifact(
     hre,
-    names.managed.delegation.Proxy__DelegationManager,
+    names.managed.delegation.fraud_proof.Proxy__FraudProofDelegationManager,
     {
-      iface: 'DelegationManager',
+      iface: 'FraudProofDelegationManager',
       signerOrProvider: deployer,
     }
   )
-  console.log(
-    'Proxy__DelegationManager Address',
-    Proxy__DelegationManager.address
-  )
+  console.log('Proxy__FraudProofDelegationManager Address', Proxy__FraudProofDelegationManager.address)
   console.log('deploy DelegationManager Proxy success')
 }
 
-
 // This is kept during an upgrade. So no upgrade tag.
-deployFn.tags = ['FraudProof', 'upgrade']
+deployFn.tags = ['FraudProofDelegation', 'upgrade']
 
 export default deployFn

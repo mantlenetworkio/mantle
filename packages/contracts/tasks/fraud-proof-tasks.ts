@@ -42,13 +42,13 @@ task('setAddress')
   })
 
 task('whiteListInit')
-  .addParam('rollup', 'Rollup contract address')
+  .addParam('delegation', 'Delegation contract address')
+  .addParam('manager', 'Manager contract address')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:9545'
     )
     const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
-    const proposerAddr = process.env.BVM_ROLLUPER_ADDRESS
     const entryOwner = new ethers.Wallet(deployerKey, provider)
 
     console.log(
@@ -56,15 +56,54 @@ task('whiteListInit')
       entryOwner.address,
       (await entryOwner.getBalance()).toString()
     )
+
     const SequencerENV = process.env.BVM_ROLLUPER_ADDRESS
     const Validator1ENV = process.env.BVM_VERIFIER1_ADDRESS
-    // const Validator2ENV = process.env.BVM_VERIFIER2_ADDRESS
-    const whiteListToAdd = [SequencerENV, Validator1ENV]
-    console.log('whiteList:', whiteListToAdd)
-    const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
-    await rollup.connect(entryOwner).addToWhitelist(whiteListToAdd)
-    console.log('transferOwnerShip')
-    await rollup.connect(entryOwner).transferOwnership(proposerAddr)
+    const whiteListAddToDelegation = [SequencerENV, Validator1ENV]
+    console.log('whiteList to delegation:', whiteListAddToDelegation)
+    const delegation = await getContractFactory('FraudProofDelegation').attach(
+      taskArgs.delegation
+    )
+    await delegation.connect(entryOwner).addToWhitelist(whiteListAddToDelegation)
+    // console.log('transferOwnerShip')
+    // await delegation.connect(entryOwner).transferOwnership(proposerAddr)
+
+    const ProxyRollupENV = process.env.ROLLUP_CONTRACT_ADDRESS
+    const whiteListAddToManager = [ProxyRollupENV]
+    console.log('whiteList to manager:', whiteListAddToManager)
+    const manager = await getContractFactory('FraudProofDelegationManager').attach(
+      taskArgs.manager
+    )
+    await manager.connect(entryOwner).addToWhitelist(whiteListAddToManager)
+  })
+
+task('registerAsOperator')
+  .addParam('delegation', 'Delegation contract address')
+  .setAction(async (taskArgs) => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://localhost:9545'
+    )
+    const SequencerKey = process.env.BVM_PROPOSER_KEY
+    const Validator1Key = process.env.BVM_VERIFIER1_KEY
+    const proposer = new ethers.Wallet(SequencerKey, provider)
+    const validator = new ethers.Wallet(Validator1Key, provider)
+
+    console.log(
+      'proposer balance: ',
+      proposer.address,
+      (await proposer.getBalance()).toString()
+    )
+    console.log(
+      'validator balance: ',
+      validator.address,
+      (await validator.getBalance()).toString()
+    )
+
+    const delegation = await getContractFactory('FraudProofDelegation').attach(
+      taskArgs.delegation
+    )
+    await delegation.connect(proposer).registerAsOperator(process.env.ROLLUP_CONTRACT_ADDRESS)
+    await delegation.connect(validator).registerAsOperator(process.env.ROLLUP_CONTRACT_ADDRESS)
   })
 
 task('rollupStake')
