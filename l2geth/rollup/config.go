@@ -51,5 +51,5 @@ type Config struct {
 	MpcVerifier bool
 
 	// EigenDaFee blockNumber Config
-	EigenDaBlock int64
+	EigenDaBlock int
 }

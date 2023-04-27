@@ -144,7 +144,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		return nil, genesisErr
 	}
 	if chainConfig.EigenDaBlock == nil {
-		chainConfig.EigenDaBlock = big.NewInt(config.Rollup.EigenDaBlock)
+		chainConfig.EigenDaBlock = big.NewInt(int64(config.Rollup.EigenDaBlock))
 	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
