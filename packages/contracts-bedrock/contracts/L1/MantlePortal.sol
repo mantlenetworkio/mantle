@@ -11,6 +11,7 @@ import {SecureMerkleTrie} from "../libraries/trie/SecureMerkleTrie.sol";
 import {AddressAliasHelper} from "../vendor/AddressAliasHelper.sol";
 import {ResourceMetering} from "./ResourceMetering.sol";
 import {Semver} from "../universal/Semver.sol";
+import { BridgeConstants } from "../libraries/BridgeConstants.sol";
 
 /**
  * @custom:proxied
@@ -441,11 +442,9 @@ contract MantlePortal is Initializable, ResourceMetering, Semver {
         // We use opaque data so that we can update the TransactionDeposited event in the future
         // without breaking the current interface.
         uint256 mintValue = 0;
-        if (_type == 1) {
-            //BIT
+        if (_type == BridgeConstants.BIT_TX) {
             mintValue = _value;
-        } else if (_type == 0 || _type == 2) {
-            //0:ETH or 2:ERC20 deposit
+        } else if (_type == BridgeConstants.ERC20_TX || _type == BridgeConstants.ETH_TX) {
             mintValue = 0;
         }
         bytes memory opaqueData = abi.encodePacked(

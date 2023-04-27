@@ -73,7 +73,7 @@ contract L2StandardBridge is StandardBridge, Semver {
      */
     receive() external payable override onlyEOA {
         _initiateWithdrawal(
-            Predeploys.BVM_BIT,
+            address(0),
             msg.sender,
             msg.sender,
             msg.value,
@@ -186,7 +186,7 @@ contract L2StandardBridge is StandardBridge, Semver {
     ) internal {
         if (_l2Token == Predeploys.LEGACY_ERC20_ETH) {
             _initiateBridgeETHWithdrawal(_l2Token,address(0),_from, _to, _amount, _minGasLimit, _extraData);
-        }else if (_l2Token == Predeploys.BVM_BIT){
+        }else if (_l2Token == address(0)){
             _initiateBridgeBITWithdrawal(_l2Token,Predeploys.L1_BIT,_from, _to, _amount, _minGasLimit, _extraData);
 
         } else {
@@ -287,13 +287,13 @@ contract L2StandardBridge is StandardBridge, Semver {
     ) internal override {
         emit WithdrawalInitiated(
             address(0),
-            Predeploys.BVM_BIT,
+            Predeploys.L1_BIT,
             _from,
             _to,
             _amount,
             _extraData
         );
-        super._emitBITBridgeInitiated(address(0), Predeploys.BVM_BIT,_from, _to, _amount, _extraData);
+        super._emitBITBridgeInitiated(address(0), Predeploys.L1_BIT,_from, _to, _amount, _extraData);
     }
 
     /**
@@ -312,13 +312,13 @@ contract L2StandardBridge is StandardBridge, Semver {
     ) internal override {
         emit DepositFinalized(
             address(0),
-            Predeploys.BVM_BIT,
+            Predeploys.L1_BIT,
             _from,
             _to,
             _amount,
             _extraData
         );
-        super._emitBITBridgeFinalized(address(0), Predeploys.BVM_BIT,_from, _to, _amount, _extraData);
+        super._emitBITBridgeFinalized(address(0), Predeploys.L1_BIT,_from, _to, _amount, _extraData);
     }
 
 }

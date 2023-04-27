@@ -10,6 +10,7 @@ import { IMantleMintableERC20, ILegacyMintableERC20 } from "./IMantleMintableERC
 import { CrossDomainMessenger } from "./CrossDomainMessenger.sol";
 import { MantleMintableERC20 } from "./MantleMintableERC20.sol";
 import { Predeploys } from "../libraries/Predeploys.sol";
+import { BridgeConstants } from "../libraries/BridgeConstants.sol";
 
 /**
  * @custom:upgradeable
@@ -22,9 +23,7 @@ abstract contract StandardBridge {
     using SafeERC20 for IERC20;
 
 
-    uint32 constant BIT_TX = 1;
-    uint32 constant ERC20_TX = 2;
-    uint32 constant ETH_TX = 0;
+
 
     /**
      * @notice The L2 gas limit set when eth is depoisited using the receive() function.
@@ -398,7 +397,7 @@ abstract contract StandardBridge {
 
         // Emit the correct events. By default this will be _amount, but child
         // contracts may override this function in order to emit legacy events as well.
-        _emitBITBridgeFinalized(address(0),Predeploys.BVM_BIT, _from, _to, _amount, _extraData);
+        _emitBITBridgeFinalized(address(0),Predeploys.L1_BIT, _from, _to, _amount, _extraData);
 
         bool success = SafeCall.call(_to, gasleft(), _amount, hex"");
         require(success, "StandardBridge: BIT transfer failed");
@@ -493,7 +492,7 @@ abstract contract StandardBridge {
         _emitETHBridgeInitiated(_from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage{ value: _amount }(
-            ETH_TX,
+            BridgeConstants.ETH_TX,
             _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
@@ -539,7 +538,7 @@ abstract contract StandardBridge {
         _emitBITBridgeInitiated(_localToken,_remoteToken,_from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage{ value: _amount }(
-            BIT_TX,
+            BridgeConstants.BIT_TX,
             _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
@@ -571,7 +570,6 @@ abstract contract StandardBridge {
      */
     function _initiateBridgeBITDeposit(
         address _localToken,
-        address _remoteToken,
         address _from,
         address _to,
         uint256 _amount,
@@ -580,14 +578,14 @@ abstract contract StandardBridge {
     ) internal {
 
         IERC20(_localToken).safeTransferFrom(_from, address(this), _amount);
-        deposits[_localToken][_remoteToken] = deposits[_localToken][_remoteToken] + _amount;
+        deposits[_localToken][address(0) ] = deposits[_localToken][address(0)] + _amount;
 
         // Emit the correct events. By default this will be ERC20BridgeInitiated, but child
         // contracts may override this function in order to emit legacy events as well.
-        _emitBITBridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+        _emitBITBridgeInitiated(_localToken, address(0) , _from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage(
-            BIT_TX,
+            BridgeConstants.BIT_TX,
             _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
@@ -628,7 +626,7 @@ abstract contract StandardBridge {
         _emitETHBridgeInitiated( _from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage(
-            ETH_TX,
+            BridgeConstants.ETH_TX,
             _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
@@ -683,7 +681,7 @@ abstract contract StandardBridge {
         _emitERC20BridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage(
-            ERC20_TX,
+            BridgeConstants.ERC20_TX,
             _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
