@@ -11,7 +11,7 @@ replace github.com/mantlenetworkio/mantle/mt-batcher => ../mt-batcher
 replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
 
 require (
-	// github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
+	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/mantlenetworkio/mantle/l2geth v0.0.0
 	github.com/mantlenetworkio/mantle/mt-batcher v0.0.0
@@ -22,7 +22,7 @@ require (
 )
 
 require (
-	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
+	github.com/prometheus/client_golang v1.14.0
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 )
 
@@ -30,6 +30,7 @@ require (
 	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0-00010101000000-000000000000 // indirect
 	github.com/VictoriaMetrics/fastcache v1.9.0 // indirect
 	github.com/aristanetworks/goarista v0.0.0-20170210015632-ea17b1a17847 // indirect
+	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd v0.22.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -44,8 +45,6 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/decred/dcrd/hdkeychain/v3 v3.0.0 // indirect
 	github.com/elastic/gosigar v0.14.2 // indirect
-	github.com/go-kit/log v0.2.0 // indirect
-	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
@@ -60,8 +59,12 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
+	github.com/prometheus/client_model v0.3.0 // indirect
+	github.com/prometheus/common v0.37.0 // indirect
+	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/prometheus/tsdb v0.10.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rjeczalik/notify v0.9.2 // indirect
