@@ -28,6 +28,7 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-challenger/bindings"
 	rc "github.com/mantlenetworkio/mantle/mt-challenger/bindings"
 	"github.com/mantlenetworkio/mantle/mt-challenger/challenger/db"
+	"github.com/mantlenetworkio/mantle/mt-challenger/metrics"
 	"github.com/pkg/errors"
 	"github.com/shurcooL/graphql"
 	"google.golang.org/grpc"
@@ -94,6 +95,7 @@ type ChallengerConfig struct {
 	ResubmissionTimeout       time.Duration
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
+	Metrics                   metrics.ChallengerMetrics
 }
 
 type Challenger struct {
@@ -437,6 +439,7 @@ func (c *Challenger) makReRollupBatchTx(ctx context.Context, batchIndex *big.Int
 		return nil, err
 	}
 	log.Info("MtChallenger wallet address balance", "balance", balance)
+	c.Cfg.Metrics.BalanceETH().Set(common4.WeiToEth64(balance))
 	nonce64, err := c.Cfg.L1Client.NonceAt(
 		c.Ctx, ethc.Address(c.WalletAddr), nil,
 	)
@@ -444,6 +447,7 @@ func (c *Challenger) makReRollupBatchTx(ctx context.Context, batchIndex *big.Int
 		log.Error("MtChallenger unable to get current nonce", "err", err)
 		return nil, err
 	}
+	c.Cfg.Metrics.NonceETH().Inc()
 	nonce := new(big.Int).SetUint64(nonce64)
 	opts := &bind.TransactOpts{
 		From: ethc.Address(c.WalletAddr),
@@ -506,6 +510,7 @@ func (c *Challenger) Start() error {
 					log.Error("MtChallenge tool submit re-rollup info fail", "batchIndex", reRollupBatchIndex[index], "err", err)
 					continue
 				}
+				c.Cfg.Metrics.ReRollupBatchIndex().Set(float64(bigBatchIndex.Uint64()))
 				log.Info("MtChallenge tool submit re-rollup info success", "batchIndex", reRollupBatchIndex[index], "txHash", tx.Hash().String())
 			}
 		}
@@ -546,6 +551,7 @@ func (c *Challenger) eventLoop() {
 				"DbBatchIndex", batchIndex, "ContractBatchIndex", latestBatchIndex.Uint64(),
 				"latestBatchIndex.Uint64() - c.Cfg.CheckerBatchIndex", latestBatchIndex.Uint64()-c.Cfg.CheckerBatchIndex,
 			)
+			c.Cfg.Metrics.CheckBatchIndex().Set(float64(latestBatchIndex.Uint64() - c.Cfg.CheckerBatchIndex))
 			for i := batchIndex; i <= (latestBatchIndex.Uint64() - c.Cfg.CheckerBatchIndex); i++ {
 				dataStoreId, err := c.EigenDaContract.GetRollupStoreByRollupBatchIndex(&bind.CallOpts{}, big.NewInt(int64(i)))
 				if err != nil {

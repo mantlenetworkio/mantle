@@ -285,6 +285,11 @@ func (b *LesApiBackend) SuggestL1GasPrice(ctx context.Context) (*big.Int, error)
 	panic("SuggestL1GasPrice not implemented")
 }
 
+// NB: Non sequencer nodes cannot suggest DA gas prices.
+func (b *LesApiBackend) SuggestDAGasPrice(ctx context.Context) (*big.Int, error) {
+	panic("SuggestL1GasPrice not implemented")
+}
+
 // NB: Non sequencer nodes cannot suggest L2 execution gas prices.
 func (b *LesApiBackend) SuggestL2GasPrice(ctx context.Context) (*big.Int, error) {
 	panic("SuggestL2GasPrice not implemented")

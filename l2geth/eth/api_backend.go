@@ -369,6 +369,10 @@ func (b *EthAPIBackend) SuggestL1GasPrice(ctx context.Context) (*big.Int, error)
 	return b.rollupGpo.SuggestL1GasPrice(ctx)
 }
 
+func (b *EthAPIBackend) SuggestDAGasPrice(ctx context.Context) (*big.Int, error) {
+	return b.rollupGpo.SuggestDAGasPrice(ctx)
+}
+
 func (b *EthAPIBackend) SuggestL2GasPrice(ctx context.Context) (*big.Int, error) {
 	return b.rollupGpo.SuggestL2GasPrice(ctx)
 }

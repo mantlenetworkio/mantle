@@ -10,6 +10,7 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-batcher/l1l2client"
 	common2 "github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"github.com/mantlenetworkio/mantle/mt-challenger/challenger"
+	"github.com/mantlenetworkio/mantle/mt-challenger/metrics"
 	"github.com/urfave/cli"
 	"math/big"
 	"time"
@@ -54,6 +55,10 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			return err
 		}
 
+		if cfg.MetricsServerEnable {
+			go metrics.StartServer(cfg.MetricsHostname, cfg.MetricsPort)
+		}
+
 		signer := func(chainID *big.Int) challenger.SignerFn {
 			s := common2.PrivateKeySignerFn(challengerPrivKey, chainID)
 			return func(_ context.Context, addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
@@ -80,6 +85,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			ResubmissionTimeout:       cfg.ResubmissionTimeout,
 			NumConfirmations:          cfg.NumConfirmations,
 			SafeAbortNonceTooLowCount: cfg.SafeAbortNonceTooLowCount,
+			Metrics:                   metrics.NewChallengerBase(),
 		}
 		cLager, err := challenger.NewChallenger(ctx, challengerConfig)
 		if err != nil {

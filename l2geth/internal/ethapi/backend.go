@@ -92,6 +92,7 @@ type Backend interface {
 	GetRollupContext() (uint64, uint64, uint64)
 	GasLimit() uint64
 	SuggestL1GasPrice(ctx context.Context) (*big.Int, error)
+	SuggestDAGasPrice(ctx context.Context) (*big.Int, error)
 	SetL1GasPrice(context.Context, *big.Int) error
 	SuggestL2GasPrice(context.Context) (*big.Int, error)
 	SetL2GasPrice(context.Context, *big.Int) error
