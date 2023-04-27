@@ -76,7 +76,8 @@ contract TssDelegationManager is DelegationManager {
             // the internal function will return 'true' in the event the delegation contract was
             // removed from the slashedAddress's array of strategies -- i.e. investorStrats[slashedAddress]
             if (_removeShares(slashedAddress, delegationIndexes[delegationIndex], delegationShares[i], shareAmounts[i])) {
-                _addShares(recipient, delegationShare, shareAmounts[i]);
+                _addShares(recipient, delegationShares[i], shareAmounts[i]);
+                delegation.increaseDelegatedShares(recipient, delegationShares[i], shareAmounts[i]);
                 unchecked {
                     ++delegationIndex;
                 }
@@ -90,8 +91,8 @@ contract TssDelegationManager is DelegationManager {
 
         // modify delegated shares accordingly, if applicable
         delegation.decreaseDelegatedShares(slashedAddress, delegationShares, shareAmounts);
-        
-        delegation.increaseDelegatedShares(recipient, delegationShare, shareAmounts);
+
+
     }
 
 
