@@ -39,10 +39,11 @@ type Config struct {
 	enableL1BaseFee                  bool
 	enableL2GasPrice                 bool
 	enableDaFee                      bool
-	EnableHsm                        bool
-	HsmAPIName                       string
-	HsmCreden                        string
-	HsmAddress                       string
+	// hsm config
+	EnableHsm  bool
+	HsmAPIName string
+	HsmCreden  string
+	HsmAddress string
 	// Metrics config
 	MetricsEnabled          bool
 	MetricsHTTP             string
@@ -83,16 +84,21 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.HsmAPIName = ctx.GlobalString(flags.HsmAPINameFlag.Name)
 	cfg.HsmCreden = ctx.GlobalString(flags.HsmCredenFlag.Name)
 
-	if ctx.GlobalIsSet(flags.PrivateKeyFlag.Name) {
-		hex := ctx.GlobalString(flags.PrivateKeyFlag.Name)
-		hex = strings.TrimPrefix(hex, "0x")
-		key, err := crypto.HexToECDSA(hex)
-		if err != nil {
-			log.Error(fmt.Sprintf("Option %q: %v", flags.PrivateKeyFlag.Name, err))
-		}
-		cfg.privateKey = key
+	if cfg.EnableHsm {
+		log.Info("gasoracle", "enable hsm", cfg.EnableHsm,
+			"hsm address", cfg.HsmAddress)
 	} else {
-		log.Crit("No private key configured")
+		if ctx.GlobalIsSet(flags.PrivateKeyFlag.Name) {
+			hex := ctx.GlobalString(flags.PrivateKeyFlag.Name)
+			hex = strings.TrimPrefix(hex, "0x")
+			key, err := crypto.HexToECDSA(hex)
+			if err != nil {
+				log.Error(fmt.Sprintf("Option %q: %v", flags.PrivateKeyFlag.Name, err))
+			}
+			cfg.privateKey = key
+		} else {
+			log.Crit("No private key configured")
+		}
 	}
 
 	if ctx.GlobalIsSet(flags.L1ChainIDFlag.Name) {

@@ -206,7 +206,7 @@ var (
 	HsmAddressFlag = cli.StringFlag{
 		Name:   "hsm-address",
 		Usage:  "the address of hsm key",
-		EnvVar: "GAS_PRICE_ORACLE_HSM_API_NAME",
+		EnvVar: "GAS_PRICE_ORACLE_HSM_ADDRESS",
 	}
 	HsmCredenFlag = cli.StringFlag{
 		Name:   "hsm-creden",
