@@ -56,16 +56,14 @@ contract TssDelegationManager is DelegationManager {
      * is to order the strategies *for which `msg.sender` is withdrawing 100% of their shares* from highest index in
      * `investorStrats` to lowest index
      */
-    function slashShares(
+    function slashOperatorShares(
         address slashedAddress,
         address recipient,
         IDelegationShare[] calldata delegationShares,
-        IERC20[] calldata tokens,
         uint256[] calldata delegationIndexes,
         uint256[] calldata shareAmounts
     )
         external
-        override
         whenNotPaused
         nonReentrant
         onlyStakingSlash

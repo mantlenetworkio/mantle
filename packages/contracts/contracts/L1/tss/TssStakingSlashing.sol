@@ -12,6 +12,7 @@ import {IDelegationShare} from "../delegation/interfaces/IDelegation.sol";
 import {IDelegation} from "../delegation/interfaces/IDelegation.sol";
 import {CrossDomainEnabled} from "../../libraries/bridge/CrossDomainEnabled.sol";
 import {ITssRewardContract} from "../../L2/predeploys/iTssRewardContract.sol";
+import {TssDelegationManager} from "./delegation/TssDelegationManager.sol";
 
 import "./ITssGroupManager.sol";
 import "./ITssStakingSlashing.sol";
@@ -342,8 +343,7 @@ contract TssStakingSlashing is
         gainShare = (extraAmountShare - remainderShare) / tssNodes.length;
 
 
-        IERC20[] memory tokens = new IERC20[](1);
-        tokens[0] = underlyingToken;
+
         IDelegationShare[] memory delegationShares = new IDelegationShare[](1);
         delegationShares[0] = this;
 
@@ -353,14 +353,14 @@ contract TssStakingSlashing is
         uint256[] memory shareAmounts = new uint256[](1);
         shareAmounts[0] = _exIncomeShare + remainderShare;
         // sender get the fixed additional income and remainder
-        delegationManager.slashShares(deduction, msg.sender, delegationShares, tokens, delegationShareIndexes, shareAmounts);
+        TssDelegationManager(tssDelegationManagerContract).slashOperatorShares(deduction, msg.sender, delegationShares, delegationShareIndexes, shareAmounts);
         totalTransferShare = _exIncomeShare + remainderShare;
 
         // send gain to tss nodes
         for (uint256 i = 0; i < tssNodes.length; i++) {
             totalTransferShare += gainShare;
             shareAmounts[0] = gainShare;
-            delegationManager.slashShares(deduction, tssNodes[i], delegationShares, tokens, delegationShareIndexes, shareAmounts);
+            TssDelegationManager(tssDelegationManagerContract).slashOperatorShares(deduction, tssNodes[i], delegationShares, delegationShareIndexes, shareAmounts);
         }
         // The total transfer amount is the same as the deducted amount
         require(totalTransferShare == deductedAmountShare, "panic, calculation error");
