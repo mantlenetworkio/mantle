@@ -8,7 +8,6 @@ pragma solidity ^0.8.0;
 library Predeploys {
 
 
-    address internal constant BVM_BIT = 0x4200000000000000000000000000000000000021;
     address internal constant L1_BIT = 0x6400000000000000000000000000000000000022;
 
 
