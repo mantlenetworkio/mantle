@@ -329,7 +329,7 @@ contract L1StandardBridge is StandardBridge, Semver {
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
-        _initiateBridgeBITDeposit(Predeploys.L1_BIT, address(0), _from, _to, _amount, _minGasLimit, _extraData);
+        _initiateBridgeBITDeposit(Predeploys.L1_BIT, _from, _to, _amount, _minGasLimit, _extraData);
     }
     /**
      * @notice Internal function for initiating an ETH deposit.

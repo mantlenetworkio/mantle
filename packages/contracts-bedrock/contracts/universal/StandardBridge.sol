@@ -560,7 +560,6 @@ abstract contract StandardBridge {
  * @notice Sends ERC20 tokens to a receiver's address on the other chain.
      *
      * @param _localToken  Address of the ERC20 on this chain.
-     * @param _remoteToken Address of the corresponding token on the remote chain.
      * @param _to          Address of the receiver.
      * @param _amount      Amount of local tokens to deposit.
      * @param _minGasLimit Minimum amount of gas that the bridge can be relayed with.
