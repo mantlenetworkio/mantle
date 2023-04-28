@@ -18,12 +18,22 @@ export const names = {
       Proxy__TSS_StakingSlashing: 'Proxy__TSS_StakingSlashing',
     },
     delegation: {
-      Delegation: 'Delegation',
-      DelegationManager: 'DelegationManager',
-      DelegationSlasher: 'DelegationSlasher',
-      Proxy__Delegation: 'Proxy__Delegation',
-      Proxy__DelegationManager: 'Proxy__DelegationManager',
-      Proxy__DelegationSlasher: 'Proxy__DelegationSlasher',
+      fraud_proof: {
+        FraudProofDelegation: 'FraudProofDelegation',
+        FraudProofDelegationManager: 'FraudProofDelegationManager',
+        FraudProofDelegationSlasher: 'FraudProofDelegationSlasher',
+        Proxy__FraudProofDelegation: 'Proxy__FraudProofDelegation',
+        Proxy__FraudProofDelegationManager: 'Proxy__FraudProofDelegationManager',
+        Proxy__FraudProofDelegationSlasher: 'Proxy__FraudProofDelegationSlasher',
+      },
+      tss: {
+        TssDelegation: 'TssDelegation',
+        TssDelegationManager: 'TssDelegationManager',
+        TssDelegationSlasher: 'TssDelegationSlasher',
+        Proxy__TssDelegation: 'Proxy__TssDelegation',
+        Proxy__TssDelegationManager: 'Proxy__TssDelegationManager',
+        Proxy__TssDelegationSlasher: 'Proxy__TssDelegationSlasher',
+      },
     },
     da: {
       BVM_EigenDataLayrChain: 'BVM_EigenDataLayrChain',

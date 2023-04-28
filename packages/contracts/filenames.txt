@@ -1,12 +1,15 @@
 Proxy__Verifier
+FraudProofDelegationSlasher
 ChainStorageContainer-SCC-batches
 Proxy__AssertionMap
 BVM_EigenDataLayrFee
 StateCommitmentChain
+Proxy__FraudProofDelegationSlasher
 TestBitToken
 ChainStorageContainer-CTC-batches
 Proxy__BVM_L1StandardBridge
 Rollup
+Proxy__FraudProofDelegation
 TssStakingSlashing
 BVM_L1CrossDomainMessenger
 Proxy__TSS_GroupManager
@@ -17,7 +20,10 @@ AddressDictator
 BVM_EigenDataLayrChain
 CanonicalTransactionChain
 TssGroupManager
+FraudProofDelegation
 L1StandardBridge_for_verification_only
+Proxy__FraudProofDelegationManager
+FraudProofDelegationManager
 ChugSplashDictator
 Proxy__BVM_EigenDataLayrChain
 Proxy__BVM_L1CrossDomainMessenger
