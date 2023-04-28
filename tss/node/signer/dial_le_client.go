@@ -3,12 +3,13 @@ package signer
 import (
 	"context"
 	"crypto/tls"
+	"net/http"
+	"strings"
+
 	"github.com/mantlenetworkio/mantle/bss-core/dial"
 	"github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
-	"net/http"
-	"strings"
 )
 
 // DialL2EthClientWithTimeout attempts to dial the L2 provider using the

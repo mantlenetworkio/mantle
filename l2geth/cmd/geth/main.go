@@ -29,6 +29,8 @@ import (
 	"time"
 
 	"github.com/elastic/gosigar"
+	fp "github.com/mantlenetworkio/mantle/fraud-proof"
+	fpcmd "github.com/mantlenetworkio/mantle/fraud-proof/cmd"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
 	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
@@ -164,11 +166,21 @@ var (
 		utils.RollupEnforceFeesFlag,
 		utils.RollupFeeThresholdDownFlag,
 		utils.RollupFeeThresholdUpFlag,
+		utils.RollupRoleFlag,
 		utils.RollupGenesisTimeoutSecondsFlag,
 		utils.SequencerClientHttpFlag,
 		utils.RollupEigenClientHttpFlag,
-		utils.L1MsgSenderFlag,
 		utils.DtlEigenEnableFlag,
+
+		// fraud proof flags
+		utils.FraudProofL1EndpointFlag,
+		utils.FraudProofL1ChainIDFlag,
+		utils.FraudProofL1ConfirmationsFlag,
+		utils.FraudProofSequencerAddrFlag,
+		utils.FraudProofRollupAddrFlag,
+		utils.FraudProofStakeAddrFlag,
+		utils.FraudProofStakeAmount,
+		utils.FraudProofChallengeVerify,
 	}
 
 	rpcFlags = []cli.Flag{
@@ -468,6 +480,13 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 			}
 		}
 	}
+
+	// <FRAUD-PROOF modification>
+	if ctx.IsSet(utils.RollupRoleFlag.Name) {
+		cfg := fpcmd.MakeFraudProofConfig(ctx)
+		fp.RegisterFraudProofService(stack, cfg)
+	}
+	// <FRAUD-PROOF modification/>
 }
 
 // unlockAccounts unlocks any account specifically requested.
