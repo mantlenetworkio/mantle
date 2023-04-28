@@ -6,8 +6,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
@@ -17,7 +15,6 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/restorer"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/sequencer"
 	"github.com/urfave/cli"
-	"math/big"
 	"strings"
 )
 
@@ -91,30 +88,6 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 	}
 	log.Info("l2Client init success")
 
-	mtBatherPrivateKey, err := crypto.HexToECDSA(strings.TrimPrefix(cfg.PrivateKey, "0x"))
-	if err != nil {
-		return nil, err
-	}
-
-	signer := func(chainID *big.Int) sequencer.SignerFn {
-		s := common2.PrivateKeySignerFn(mtBatherPrivateKey, chainID)
-		return func(_ context.Context, addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
-			return s(addr, tx)
-		}
-	}
-
-	feePrivateKey, err := crypto.HexToECDSA(strings.TrimPrefix(cfg.FeePrivateKey, "0x"))
-	if err != nil {
-		return nil, err
-	}
-
-	feeSigner := func(chainID *big.Int) sequencer.SignerFn {
-		s := common2.PrivateKeySignerFn(feePrivateKey, chainID)
-		return func(_ context.Context, addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
-			return s(addr, tx)
-		}
-	}
-
 	eigenContract, err := bindings.NewBVMEigenDataLayrChain(
 		ethc.Address(common.HexToAddress(cfg.EigenContractAddress)), l1Client,
 	)
@@ -174,6 +147,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 	driverConfig := &sequencer.DriverConfig{
 		L1Client:                  l1Client,
 		L2Client:                  l2Client,
+		L1ChainID:                 chainID,
 		DtlClientUrl:              cfg.DtlClientUrl,
 		EigenDaContract:           eigenContract,
 		RawEigenContract:          rawEigenContract,
@@ -191,7 +165,6 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		RollUpMinSize:             cfg.RollUpMinSize,
 		RollUpMaxSize:             cfg.RollUpMaxSize,
 		EigenLayerNode:            cfg.EigenLayerNode,
-		ChainID:                   chainID,
 		DataStoreDuration:         uint64(cfg.DataStoreDuration),
 		DataStoreTimeout:          cfg.DataStoreTimeout,
 		DisperserSocket:           cfg.DisperserEndpoint,
@@ -205,8 +178,6 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		ResubmissionTimeout:       cfg.ResubmissionTimeout,
 		NumConfirmations:          cfg.NumConfirmations,
 		SafeAbortNonceTooLowCount: cfg.SafeAbortNonceTooLowCount,
-		SignerFn:                  signer(chainID),
-		FeeSignerFn:               feeSigner(chainID),
 		Metrics:                   metrics.NewMtBatchBase(),
 	}
 	driver, err := sequencer.NewDriver(ctx, driverConfig)

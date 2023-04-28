@@ -193,6 +193,26 @@ var (
 		Value:  "test",
 		EnvVar: "GAS_PRICE_ORACLE_METRICS_INFLUX_DB_PASSWORD",
 	}
+	EnableHsmFlag = cli.BoolFlag{
+		Name:   "enable-hsm",
+		Usage:  "Enalbe the hsm",
+		EnvVar: "GAS_PRICE_ORACLE_ENABLE_HSM",
+	}
+	HsmAPINameFlag = cli.StringFlag{
+		Name:   "hsm-api-name",
+		Usage:  "the api name of hsm",
+		EnvVar: "GAS_PRICE_ORACLE_HSM_API_NAME",
+	}
+	HsmAddressFlag = cli.StringFlag{
+		Name:   "hsm-address",
+		Usage:  "the address of hsm key",
+		EnvVar: "GAS_PRICE_ORACLE_HSM_ADDRESS",
+	}
+	HsmCredenFlag = cli.StringFlag{
+		Name:   "hsm-creden",
+		Usage:  "the creden of hsm key",
+		EnvVar: "GAS_PRICE_ORACLE_HSM_CREDEN",
+	}
 )
 
 var Flags = []cli.Flag{
@@ -221,6 +241,10 @@ var Flags = []cli.Flag{
 	EnableL1BaseFeeFlag,
 	EnableL2GasPriceFlag,
 	EnableDaFeeFlag,
+	EnableHsmFlag,
+	HsmAddressFlag,
+	HsmAPINameFlag,
+	HsmCredenFlag,
 	MetricsEnabledFlag,
 	MetricsHTTPFlag,
 	MetricsPortFlag,

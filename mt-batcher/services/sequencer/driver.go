@@ -42,6 +42,7 @@ type SignerFn func(context.Context, common.Address, *types.Transaction) (*types.
 type DriverConfig struct {
 	L1Client                  *ethclient.Client
 	L2Client                  *l2ethclient.Client
+	L1ChainID                 *big.Int
 	DtlClientUrl              string
 	EigenDaContract           *bindings.BVMEigenDataLayrChain
 	RawEigenContract          *bind.BoundContract
@@ -56,7 +57,6 @@ type DriverConfig struct {
 	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
 	EigenLayerNode            int
-	ChainID                   *big.Int
 	DataStoreDuration         uint64
 	DataStoreTimeout          uint64
 	DisperserSocket           string
@@ -68,8 +68,6 @@ type DriverConfig struct {
 	ResubmissionTimeout       time.Duration
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
-	SignerFn                  SignerFn
-	FeeSignerFn               SignerFn
 	DbPath                    string
 	CheckerBatchIndex         uint64
 	CheckerEnable             bool
@@ -77,6 +75,13 @@ type DriverConfig struct {
 	FeePerBytePerTime         uint64
 	FeeModelEnable            bool
 	Metrics                   metrics.MtBatchMetrics
+
+	EnableHsm     bool
+	HsmAddress    string
+	HsmFeeAddress string
+	HsmAPIName    string
+	HsmFeeAPIName string
+	HsmCreden     string
 }
 
 type FeePipline struct {
@@ -144,25 +149,36 @@ func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction, feeM
 	var err error
 	var opts *bind.TransactOpts
 	if feeModelEnable {
-		opts = &bind.TransactOpts{
-			From: d.FeeWalletAddr,
-			Signer: func(addr common.Address, tx *types.Transaction) (*types.Transaction, error) {
-				return d.Cfg.FeeSignerFn(ctx, addr, tx)
-			},
-			Context: ctx,
-			Nonce:   new(big.Int).SetUint64(tx.Nonce()),
-			NoSend:  true,
+		var opts *bind.TransactOpts
+		if !d.Cfg.EnableHsm {
+			opts, err = bind.NewKeyedTransactorWithChainID(
+				d.Cfg.FeePrivKey, d.Cfg.L1ChainID,
+			)
+		} else {
+			opts, err = common4.NewHSMTransactOpts(ctx, d.Cfg.HsmFeeAPIName,
+				d.Cfg.HsmFeeAddress, d.Cfg.L1ChainID, d.Cfg.HsmCreden)
 		}
+		if err != nil {
+			return nil, err
+		}
+		opts.Context = ctx
+		opts.Nonce = new(big.Int).SetUint64(tx.Nonce())
+		opts.NoSend = true
 	} else {
-		opts = &bind.TransactOpts{
-			From: d.WalletAddr,
-			Signer: func(addr common.Address, tx *types.Transaction) (*types.Transaction, error) {
-				return d.Cfg.SignerFn(ctx, addr, tx)
-			},
-			Context: ctx,
-			Nonce:   new(big.Int).SetUint64(tx.Nonce()),
-			NoSend:  true,
+		if !d.Cfg.EnableHsm {
+			opts, err = bind.NewKeyedTransactorWithChainID(
+				d.Cfg.PrivKey, d.Cfg.L1ChainID,
+			)
+		} else {
+			opts, err = common4.NewHSMTransactOpts(ctx, d.Cfg.HsmAPIName,
+				d.Cfg.HsmAddress, d.Cfg.L1ChainID, d.Cfg.HsmCreden)
 		}
+		if err != nil {
+			return nil, err
+		}
+		opts.Context = ctx
+		opts.Nonce = new(big.Int).SetUint64(tx.Nonce())
+		opts.NoSend = true
 	}
 	if feeModelEnable {
 		log.Info("MtBatcher update eigen da use fee", "FeeModelEnable", d.Cfg.FeeModelEnable)
@@ -314,15 +330,22 @@ func (d *Driver) StoreData(ctx context.Context, uploadHeader []byte, duration ui
 		return nil, err
 	}
 	nonce := new(big.Int).SetUint64(nonce64)
-	opts := &bind.TransactOpts{
-		From: d.WalletAddr,
-		Signer: func(addr common.Address, tx *types.Transaction) (*types.Transaction, error) {
-			return d.Cfg.SignerFn(ctx, addr, tx)
-		},
-		Context: ctx,
-		Nonce:   nonce,
-		NoSend:  true,
+	var opts *bind.TransactOpts
+	if !d.Cfg.EnableHsm {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			d.Cfg.PrivKey, d.Cfg.L1ChainID,
+		)
+	} else {
+		opts, err = common4.NewHSMTransactOpts(ctx, d.Cfg.HsmAPIName,
+			d.Cfg.HsmAddress, d.Cfg.L1ChainID, d.Cfg.HsmCreden)
 	}
+	if err != nil {
+		return nil, err
+	}
+	opts.Context = ctx
+	opts.Nonce = nonce
+	opts.NoSend = true
+
 	tx, err := d.Cfg.EigenDaContract.StoreData(opts, uploadHeader, duration, blockNumber, startL2BlockNumber, endL2BlockNumber, totalOperatorsIndex, isReRollup)
 	switch {
 	case err == nil:
@@ -357,15 +380,22 @@ func (d *Driver) ConfirmData(ctx context.Context, callData []byte, searchData rc
 	}
 	d.Cfg.Metrics.MtBatchNonce().Set(float64(nonce64))
 	nonce := new(big.Int).SetUint64(nonce64)
-	opts := &bind.TransactOpts{
-		From: d.WalletAddr,
-		Signer: func(addr common.Address, tx *types.Transaction) (*types.Transaction, error) {
-			return d.Cfg.SignerFn(ctx, addr, tx)
-		},
-		Context: ctx,
-		Nonce:   nonce,
-		NoSend:  true,
+	var opts *bind.TransactOpts
+	if !d.Cfg.EnableHsm {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			d.Cfg.PrivKey, d.Cfg.L1ChainID,
+		)
+	} else {
+		opts, err = common4.NewHSMTransactOpts(ctx, d.Cfg.HsmAPIName,
+			d.Cfg.HsmAddress, d.Cfg.L1ChainID, d.Cfg.HsmCreden)
 	}
+	if err != nil {
+		return nil, err
+	}
+	opts.Context = ctx
+	opts.Nonce = nonce
+	opts.NoSend = true
+
 	tx, err := d.Cfg.EigenDaContract.ConfirmData(opts, callData, searchData, startL2BlockNumber, endL2BlockNumber, originDataStoreId, reConfirmedBatchIndex, isReRollup)
 	switch {
 	case err == nil:
@@ -600,15 +630,22 @@ func (d *Driver) UpdateFee(ctx context.Context, l2Block, daFee *big.Int) (*types
 	}
 	d.Cfg.Metrics.MtFeeNonce().Set(float64(nonce64))
 	nonce := new(big.Int).SetUint64(nonce64)
-	opts := &bind.TransactOpts{
-		From: d.FeeWalletAddr,
-		Signer: func(addr common.Address, tx *types.Transaction) (*types.Transaction, error) {
-			return d.Cfg.FeeSignerFn(ctx, addr, tx)
-		},
-		Context: ctx,
-		Nonce:   nonce,
-		NoSend:  true,
+	var opts *bind.TransactOpts
+	if !d.Cfg.EnableHsm {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			d.Cfg.FeePrivKey, d.Cfg.L1ChainID,
+		)
+	} else {
+		opts, err = common4.NewHSMTransactOpts(ctx, d.Cfg.HsmFeeAPIName,
+			d.Cfg.HsmFeeAddress, d.Cfg.L1ChainID, d.Cfg.HsmCreden)
 	}
+	if err != nil {
+		return nil, err
+	}
+	opts.Context = ctx
+	opts.Nonce = nonce
+	opts.NoSend = true
+
 	tx, err := d.Cfg.EigenFeeContract.SetRollupFee(opts, l2Block, daFee)
 	switch {
 	case err == nil:
