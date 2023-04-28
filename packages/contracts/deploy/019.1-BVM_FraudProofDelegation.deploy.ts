@@ -22,9 +22,9 @@ const deployFn: DeployFunction = async (hre) => {
   // @ts-ignore
   const owner = hre.deployConfig.bvmAddressManagerOwner
   // @ts-ignore
-  let DelegationProxyAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-  let DelegationManagerProxyAddress = "0xD6f15EAC1Cb3B4131Ab4899a52E711e19DEeA73f"
-  let DelegationSlasherProxyAddress = "0x82d2984a3A2137634300c0D6DDEf7D3C851EcEa8"
+  let DelegationProxyAddress = "0x88e7b36Ae38D502e4Df97e7240560B77F6B4a58E"
+  let DelegationManagerProxyAddress = "0x90c9E4f7F11C93BCec2e1F272b2063640d3bb264"
+  let DelegationSlasherProxyAddress = "0x8eC353337d109C0f8eef2200021D28C542CAe8E6"
 
   // deploy Delegation impl
   await deployAndVerifyAndThen({
@@ -82,7 +82,7 @@ const deployFn: DeployFunction = async (hre) => {
 
   // deploy Delegation proxy
   let callData = Impl__FraudProofDelegation.interface.encodeFunctionData('initialize', [
-    owner,
+    deployer,
   ])
   await deployAndVerifyAndThen({
     hre,
@@ -105,7 +105,7 @@ const deployFn: DeployFunction = async (hre) => {
 
   callData = Impl__FraudProofDelegationSlasher.interface.encodeFunctionData(
     'initialize',
-    [owner]
+    [deployer]
   )
   await deployAndVerifyAndThen({
     hre,
@@ -128,7 +128,7 @@ const deployFn: DeployFunction = async (hre) => {
 
   callData = Impl__FraudProofDelegationManager.interface.encodeFunctionData(
     'initialize',
-    [owner]
+    [deployer]
   )
   await deployAndVerifyAndThen({
     hre,

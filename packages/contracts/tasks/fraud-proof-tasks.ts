@@ -65,8 +65,6 @@ task('whiteListInit')
       taskArgs.delegation
     )
     await delegation.connect(entryOwner).addToWhitelist(whiteListAddToDelegation)
-    // console.log('transferOwnerShip')
-    // await delegation.connect(entryOwner).transferOwnership(proposerAddr)
 
     const ProxyRollupENV = process.env.ROLLUP_CONTRACT_ADDRESS
     const whiteListAddToManager = [ProxyRollupENV]
@@ -107,28 +105,33 @@ task('registerAsOperator')
   })
 
 task('rollupStake')
-  .addParam('rollup', 'Rollup contract address')
-  .addParam('amount', 'amount to stake', '0.1')
+  .addParam('manager', 'Manager contract address')
+  .addParam('amount', 'amount to stake', '100')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:9545'
     )
     const verifier1Key = process.env.BVM_VERIFIER1_KEY
-    const verifier2Key = process.env.BVM_VERIFIER2_KEY
     const proposerKey = process.env.BVM_PROPOSER_KEY
 
     const proposerWallet = new ethers.Wallet(proposerKey, provider)
     const verifier1Wallet = new ethers.Wallet(verifier1Key, provider)
-    const verifier2Wallet = new ethers.Wallet(verifier2Key, provider)
 
-    const wallets = [proposerWallet, verifier1Wallet, verifier2Wallet]
-    const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
-
+    const wallets = [proposerWallet, verifier1Wallet]
+    const manager = await getContractFactory('FraudProofDelegationManager').attach(taskArgs.manager)
+    const l1bit = await getContractFactory('ERC20').attach(process.env.L1_BIT_ADDRESS)
     for (const w of wallets) {
-      console.log('balance: ', w.address, (await w.getBalance()).toString())
-      await rollup
+      console.log('eth balance: ', w.address, (await w.getBalance()).toString())
+      // TODO query balance
+      console.log('bit balance: ', w.address, (await l1bit.balanceOf(w.address)).toString())
+      // TODO set approve
+      await manager
         .connect(w)
-        .stake({ value: ethers.utils.parseEther(taskArgs.amount) })
+        .depositInto(
+          process.env.ROLLUP_CONTRACT_ADDRESS,
+          process.env.L1_BIT_ADDRESS,
+          ethers.utils.parseEther(taskArgs.amount)
+        )
     }
   })
 
