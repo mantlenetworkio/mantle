@@ -163,14 +163,20 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
     /// @inheritdoc IRollup
-    function stake() external payable override whitelistOnly {
+    function stake(uint256 stakeAmount) external override whitelistOnly {
+        // send erc20 token to staking contract, need user approve first
+        require(
+            IERC20(stakeToken).transferFrom(msg.sender, address(this), stakeAmount),
+            "transfer erc20 token failed"
+        );
+
         if (isStaked(msg.sender)) {
-            stakers[msg.sender].amountStaked += msg.value;
+            stakers[msg.sender].amountStaked += stakeAmount;
         } else {
-            if (msg.value < baseStakeAmount) {
+            if (stakeAmount < baseStakeAmount) {
                 revert("InsufficientStake");
             }
-            stakers[msg.sender] = Staker(true, msg.value, 0, address(0));
+            stakers[msg.sender] = Staker(true, stakeAmount, 0, address(0));
             numStakers++;
             stakeOnAssertion(msg.sender, lastConfirmedAssertionID);
         }
@@ -188,9 +194,11 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             revert("InsufficientStake");
         }
         staker.amountStaked -= stakeAmount;
-        // Note: we don't need to modify assertion state because you can only unstake from a confirmed assertion.
-        (bool success,) = msg.sender.call{value: stakeAmount}("");
-        if (!success) revert("TransferFailed");
+        // send erc20 token to user
+        require(
+            IERC20(stakeToken).transfer(msg.sender, stakeAmount),
+            "transfer erc20 token failed"
+        );
     }
 
     /// @inheritdoc IRollup
@@ -202,9 +210,11 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             revert("StakedOnUnconfirmedAssertion");
         }
         deleteStaker(stakerAddress);
-        // Note: we don't need to modify assertion state because you can only unstake from a confirmed assertion.
-        (bool success,) = stakerAddress.call{value: staker.amountStaked}("");
-        if (!success) revert("TransferFailed");
+        // send erc20 token to user
+        require(
+            IERC20(stakeToken).transfer(stakerAddress, staker.amountStaked),
+            "transfer erc20 token failed"
+        );
     }
 
     /// @inheritdoc IRollup
