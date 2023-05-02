@@ -12,6 +12,7 @@ import { CrossDomainEnabled } from "../../libraries/bridge/CrossDomainEnabled.so
 import { Lib_PredeployAddresses } from "../../libraries/constants/Lib_PredeployAddresses.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 
 /**
  * @title L1StandardBridge
@@ -20,7 +21,7 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
  * and listening to it for newly finalized withdrawals.
  *
  */
-contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
+contract L1StandardBridge is Initializable, IL1StandardBridge, CrossDomainEnabled {
     using SafeERC20 for IERC20;
 
     /********************************
@@ -38,7 +39,9 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
      ***************/
 
     // This contract lives behind a proxy, so the constructor parameters will go unused.
-    constructor() CrossDomainEnabled(address(0)) {}
+    constructor() CrossDomainEnabled(address(0)) {
+        _disableInitializers();
+    }
 
     /******************
      * Initialization *
@@ -67,6 +70,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
     modifier onlyEOA() {
         // Used to stop deposits from contracts (avoid accidentally lost tokens)
         require(!Address.isContract(msg.sender), "Account not EOA");
+        require(tx.origin==msg.sender, "msg.sender is not ts origin");
         _;
     }
 
@@ -193,7 +197,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
         bytes memory message;
         if (_l1Token == l1BitAddress) {
             // Construct calldata for finalizeDeposit call
-            _l2Token = Lib_PredeployAddresses.BVM_BIT;
+            require(_l2Token == Lib_PredeployAddresses.BVM_BIT, "Unmatched token pair");
             message = abi.encodeWithSelector(
                 IL2ERC20Bridge.finalizeDeposit.selector,
                 address(0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5),
