@@ -30,7 +30,7 @@ var (
 
 // RollupMetaData contains all meta data concerning the Rollup contract.
 var RollupMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AssertionAlreadyResolved\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AssertionOutOfRange\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ChallengePeriodPending\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ChallengedStaker\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"DifferentParent\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyAssertion\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"staker1Challenge\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"staker2Challenge\",\"type\":\"address\"}],\"name\":\"InDifferentChallenge\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InboxReadLimitExceeded\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InsufficientStake\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidParent\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MinimumAssertionPeriodNotPassed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoStaker\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoUnresolvedAssertion\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotAllStaked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInChallenge\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotStaked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ParentAssertionUnstaked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PreviousStateHash\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RedundantInitialized\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StakedOnUnconfirmedAssertion\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StakerStakedOnTarget\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StakersPresent\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TransferFailed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UnproposedAssertion\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"WrongOrder\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAddress\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"challengeAddr\",\"type\":\"address\"}],\"name\":\"AssertionChallenged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"AssertionConfirmed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"asserterAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"vmHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"}],\"name\":\"AssertionCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"AssertionRejected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"stakerAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"StakerStaked\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"toAddAddresses\",\"type\":\"address[]\"}],\"name\":\"addToWhitelist\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"advanceStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"assertions\",\"outputs\":[{\"internalType\":\"contractAssertionMap\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"baseStakeAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[2]\",\"name\":\"players\",\"type\":\"address[2]\"},{\"internalType\":\"uint256[2]\",\"name\":\"assertionIDs\",\"type\":\"uint256[2]\"}],\"name\":\"challengeAssertion\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"challengeCtx\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"completed\",\"type\":\"bool\"},{\"internalType\":\"address\",\"name\":\"challengeAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"defenderAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"challengerAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"defenderAssertionID\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengerAssertionID\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"challengePeriod\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"winner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"loser\",\"type\":\"address\"}],\"name\":\"completeChallenge\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"confirmFirstUnresolvedAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"confirmationPeriod\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"confirmedInboxSize\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"vmHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"}],\"name\":\"createAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"vmHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"},{\"internalType\":\"bytes32[]\",\"name\":\"_batch\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint256\",\"name\":\"_shouldStartAtElement\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_signature\",\"type\":\"bytes\"}],\"name\":\"createAssertionWithStateBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentRequiredStake\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_verifier\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_stakeToken\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_libAddressManager\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_assertionMap\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_confirmationPeriod\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_challengePeriod\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_minimumAssertionPeriod\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_baseStakeAmount\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"_initialVMhash\",\"type\":\"bytes32\"},{\"internalType\":\"address[]\",\"name\":\"whitelists\",\"type\":\"address[]\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"isStaked\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastConfirmedAssertionID\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastCreatedAssertionID\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastResolvedAssertionID\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"libAddressManager\",\"outputs\":[{\"internalType\":\"contractLib_AddressManager\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"minimumAssertionPeriod\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"numStakers\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rejectFirstUnresolvedAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"toRemoveAddresses\",\"type\":\"address[]\"}],\"name\":\"removeFromWhitelist\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"removeOldZombies\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"stakerAddress\",\"type\":\"address\"}],\"name\":\"removeStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"}],\"name\":\"resolve\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"stakeAmount\",\"type\":\"uint256\"}],\"name\":\"stake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakeToken\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"stakers\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"isStaked\",\"type\":\"bool\"},{\"internalType\":\"uint256\",\"name\":\"amountStaked\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"currentChallenge\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"stakeAmount\",\"type\":\"uint256\"}],\"name\":\"unstake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"verifier\",\"outputs\":[{\"internalType\":\"contractIVerifierEntry\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"whitelist\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"withdrawableFunds\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"zombies\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"stakerAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"lastAssertionID\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AssertionAlreadyResolved\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AssertionOutOfRange\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ChallengePeriodPending\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ChallengedStaker\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"DifferentParent\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyAssertion\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"staker1Challenge\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"staker2Challenge\",\"type\":\"address\"}],\"name\":\"InDifferentChallenge\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InboxReadLimitExceeded\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InsufficientStake\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidParent\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MinimumAssertionPeriodNotPassed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoStaker\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoUnresolvedAssertion\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotAllStaked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInChallenge\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotStaked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ParentAssertionUnstaked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PreviousStateHash\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RedundantInitialized\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StakedOnUnconfirmedAssertion\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StakerStakedOnTarget\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StakersPresent\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TransferFailed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UnproposedAssertion\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"WrongOrder\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAddress\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"challengeAddr\",\"type\":\"address\"}],\"name\":\"AssertionChallenged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"AssertionConfirmed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"asserterAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"vmHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"}],\"name\":\"AssertionCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"AssertionRejected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"stakerAddr\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"StakerStaked\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"toAddAddresses\",\"type\":\"address[]\"}],\"name\":\"addToOperatorWhitelist\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"toAddAddresses\",\"type\":\"address[]\"}],\"name\":\"addToStakerWhitelist\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"}],\"name\":\"advanceStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"assertions\",\"outputs\":[{\"internalType\":\"contractAssertionMap\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"baseStakeAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[2]\",\"name\":\"players\",\"type\":\"address[2]\"},{\"internalType\":\"uint256[2]\",\"name\":\"assertionIDs\",\"type\":\"uint256[2]\"}],\"name\":\"challengeAssertion\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"challengeCtx\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"completed\",\"type\":\"bool\"},{\"internalType\":\"address\",\"name\":\"challengeAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"defenderAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"challengerAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"defenderAssertionID\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengerAssertionID\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"winner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"loser\",\"type\":\"address\"}],\"name\":\"completeChallenge\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"confirmFirstUnresolvedAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"confirmedInboxSize\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"vmHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"}],\"name\":\"createAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"vmHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"inboxSize\",\"type\":\"uint256\"},{\"internalType\":\"bytes32[]\",\"name\":\"_batch\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint256\",\"name\":\"_shouldStartAtElement\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_signature\",\"type\":\"bytes\"}],\"name\":\"createAssertionWithStateBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentRequiredStake\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_verifier\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_stakeToken\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_libAddressManager\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_assertionMap\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_minimumAssertionPeriod\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_baseStakeAmount\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"_initialVMhash\",\"type\":\"bytes32\"},{\"internalType\":\"address[]\",\"name\":\"stakerWhitelists\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"operatorWhitelists\",\"type\":\"address[]\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"isStaked\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastConfirmedAssertionID\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastCreatedAssertionID\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastResolvedAssertionID\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"libAddressManager\",\"outputs\":[{\"internalType\":\"contractLib_AddressManager\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"minimumAssertionPeriod\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"numStakers\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"operatorWhitelist\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"registers\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rejectFirstUnresolvedAssertion\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"toRemoveAddresses\",\"type\":\"address[]\"}],\"name\":\"removeFromOperatorWhitelist\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"toRemoveAddresses\",\"type\":\"address[]\"}],\"name\":\"removeFromStakerWhitelist\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"removeOldZombies\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"stakerAddress\",\"type\":\"address\"}],\"name\":\"removeStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"}],\"name\":\"resolve\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"stakeAmount\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"stake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakeToken\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"stakerWhitelist\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"stakers\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"isStaked\",\"type\":\"bool\"},{\"internalType\":\"uint256\",\"name\":\"amountStaked\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"assertionID\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"currentChallenge\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"stakeAmount\",\"type\":\"uint256\"}],\"name\":\"unstake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"verifier\",\"outputs\":[{\"internalType\":\"contractIVerifierEntry\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"withdrawableFunds\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"zombies\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"stakerAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"lastAssertionID\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // RollupABI is the input ABI used to generate the binding from.
@@ -304,68 +304,6 @@ func (_Rollup *RollupCallerSession) ChallengeCtx() (struct {
 	ChallengerAssertionID *big.Int
 }, error) {
 	return _Rollup.Contract.ChallengeCtx(&_Rollup.CallOpts)
-}
-
-// ChallengePeriod is a free data retrieval call binding the contract method 0xf3f480d9.
-//
-// Solidity: function challengePeriod() view returns(uint256)
-func (_Rollup *RollupCaller) ChallengePeriod(opts *bind.CallOpts) (*big.Int, error) {
-	var out []interface{}
-	err := _Rollup.contract.Call(opts, &out, "challengePeriod")
-
-	if err != nil {
-		return *new(*big.Int), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
-
-	return out0, err
-
-}
-
-// ChallengePeriod is a free data retrieval call binding the contract method 0xf3f480d9.
-//
-// Solidity: function challengePeriod() view returns(uint256)
-func (_Rollup *RollupSession) ChallengePeriod() (*big.Int, error) {
-	return _Rollup.Contract.ChallengePeriod(&_Rollup.CallOpts)
-}
-
-// ChallengePeriod is a free data retrieval call binding the contract method 0xf3f480d9.
-//
-// Solidity: function challengePeriod() view returns(uint256)
-func (_Rollup *RollupCallerSession) ChallengePeriod() (*big.Int, error) {
-	return _Rollup.Contract.ChallengePeriod(&_Rollup.CallOpts)
-}
-
-// ConfirmationPeriod is a free data retrieval call binding the contract method 0x0429b880.
-//
-// Solidity: function confirmationPeriod() view returns(uint256)
-func (_Rollup *RollupCaller) ConfirmationPeriod(opts *bind.CallOpts) (*big.Int, error) {
-	var out []interface{}
-	err := _Rollup.contract.Call(opts, &out, "confirmationPeriod")
-
-	if err != nil {
-		return *new(*big.Int), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
-
-	return out0, err
-
-}
-
-// ConfirmationPeriod is a free data retrieval call binding the contract method 0x0429b880.
-//
-// Solidity: function confirmationPeriod() view returns(uint256)
-func (_Rollup *RollupSession) ConfirmationPeriod() (*big.Int, error) {
-	return _Rollup.Contract.ConfirmationPeriod(&_Rollup.CallOpts)
-}
-
-// ConfirmationPeriod is a free data retrieval call binding the contract method 0x0429b880.
-//
-// Solidity: function confirmationPeriod() view returns(uint256)
-func (_Rollup *RollupCallerSession) ConfirmationPeriod() (*big.Int, error) {
-	return _Rollup.Contract.ConfirmationPeriod(&_Rollup.CallOpts)
 }
 
 // ConfirmedInboxSize is a free data retrieval call binding the contract method 0xc94b5847.
@@ -647,6 +585,37 @@ func (_Rollup *RollupCallerSession) NumStakers() (*big.Int, error) {
 	return _Rollup.Contract.NumStakers(&_Rollup.CallOpts)
 }
 
+// OperatorWhitelist is a free data retrieval call binding the contract method 0xe03c8632.
+//
+// Solidity: function operatorWhitelist(address ) view returns(bool)
+func (_Rollup *RollupCaller) OperatorWhitelist(opts *bind.CallOpts, arg0 common.Address) (bool, error) {
+	var out []interface{}
+	err := _Rollup.contract.Call(opts, &out, "operatorWhitelist", arg0)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// OperatorWhitelist is a free data retrieval call binding the contract method 0xe03c8632.
+//
+// Solidity: function operatorWhitelist(address ) view returns(bool)
+func (_Rollup *RollupSession) OperatorWhitelist(arg0 common.Address) (bool, error) {
+	return _Rollup.Contract.OperatorWhitelist(&_Rollup.CallOpts, arg0)
+}
+
+// OperatorWhitelist is a free data retrieval call binding the contract method 0xe03c8632.
+//
+// Solidity: function operatorWhitelist(address ) view returns(bool)
+func (_Rollup *RollupCallerSession) OperatorWhitelist(arg0 common.Address) (bool, error) {
+	return _Rollup.Contract.OperatorWhitelist(&_Rollup.CallOpts, arg0)
+}
+
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
 //
 // Solidity: function owner() view returns(address)
@@ -676,6 +645,37 @@ func (_Rollup *RollupSession) Owner() (common.Address, error) {
 // Solidity: function owner() view returns(address)
 func (_Rollup *RollupCallerSession) Owner() (common.Address, error) {
 	return _Rollup.Contract.Owner(&_Rollup.CallOpts)
+}
+
+// Registers is a free data retrieval call binding the contract method 0x6aabc350.
+//
+// Solidity: function registers(address ) view returns(address)
+func (_Rollup *RollupCaller) Registers(opts *bind.CallOpts, arg0 common.Address) (common.Address, error) {
+	var out []interface{}
+	err := _Rollup.contract.Call(opts, &out, "registers", arg0)
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// Registers is a free data retrieval call binding the contract method 0x6aabc350.
+//
+// Solidity: function registers(address ) view returns(address)
+func (_Rollup *RollupSession) Registers(arg0 common.Address) (common.Address, error) {
+	return _Rollup.Contract.Registers(&_Rollup.CallOpts, arg0)
+}
+
+// Registers is a free data retrieval call binding the contract method 0x6aabc350.
+//
+// Solidity: function registers(address ) view returns(address)
+func (_Rollup *RollupCallerSession) Registers(arg0 common.Address) (common.Address, error) {
+	return _Rollup.Contract.Registers(&_Rollup.CallOpts, arg0)
 }
 
 // Resolve is a free data retrieval call binding the contract method 0x461a4478.
@@ -740,13 +740,45 @@ func (_Rollup *RollupCallerSession) StakeToken() (common.Address, error) {
 	return _Rollup.Contract.StakeToken(&_Rollup.CallOpts)
 }
 
+// StakerWhitelist is a free data retrieval call binding the contract method 0x300a7161.
+//
+// Solidity: function stakerWhitelist(address ) view returns(bool)
+func (_Rollup *RollupCaller) StakerWhitelist(opts *bind.CallOpts, arg0 common.Address) (bool, error) {
+	var out []interface{}
+	err := _Rollup.contract.Call(opts, &out, "stakerWhitelist", arg0)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// StakerWhitelist is a free data retrieval call binding the contract method 0x300a7161.
+//
+// Solidity: function stakerWhitelist(address ) view returns(bool)
+func (_Rollup *RollupSession) StakerWhitelist(arg0 common.Address) (bool, error) {
+	return _Rollup.Contract.StakerWhitelist(&_Rollup.CallOpts, arg0)
+}
+
+// StakerWhitelist is a free data retrieval call binding the contract method 0x300a7161.
+//
+// Solidity: function stakerWhitelist(address ) view returns(bool)
+func (_Rollup *RollupCallerSession) StakerWhitelist(arg0 common.Address) (bool, error) {
+	return _Rollup.Contract.StakerWhitelist(&_Rollup.CallOpts, arg0)
+}
+
 // Stakers is a free data retrieval call binding the contract method 0x9168ae72.
 //
-// Solidity: function stakers(address ) view returns(bool isStaked, uint256 amountStaked, uint256 assertionID, address currentChallenge)
+// Solidity: function stakers(address ) view returns(bool isStaked, uint256 amountStaked, uint256 assertionID, address operator, address currentChallenge)
 func (_Rollup *RollupCaller) Stakers(opts *bind.CallOpts, arg0 common.Address) (struct {
 	IsStaked         bool
 	AmountStaked     *big.Int
 	AssertionID      *big.Int
+	Operator         common.Address
 	CurrentChallenge common.Address
 }, error) {
 	var out []interface{}
@@ -756,6 +788,7 @@ func (_Rollup *RollupCaller) Stakers(opts *bind.CallOpts, arg0 common.Address) (
 		IsStaked         bool
 		AmountStaked     *big.Int
 		AssertionID      *big.Int
+		Operator         common.Address
 		CurrentChallenge common.Address
 	})
 	if err != nil {
@@ -765,7 +798,8 @@ func (_Rollup *RollupCaller) Stakers(opts *bind.CallOpts, arg0 common.Address) (
 	outstruct.IsStaked = *abi.ConvertType(out[0], new(bool)).(*bool)
 	outstruct.AmountStaked = *abi.ConvertType(out[1], new(*big.Int)).(**big.Int)
 	outstruct.AssertionID = *abi.ConvertType(out[2], new(*big.Int)).(**big.Int)
-	outstruct.CurrentChallenge = *abi.ConvertType(out[3], new(common.Address)).(*common.Address)
+	outstruct.Operator = *abi.ConvertType(out[3], new(common.Address)).(*common.Address)
+	outstruct.CurrentChallenge = *abi.ConvertType(out[4], new(common.Address)).(*common.Address)
 
 	return *outstruct, err
 
@@ -773,11 +807,12 @@ func (_Rollup *RollupCaller) Stakers(opts *bind.CallOpts, arg0 common.Address) (
 
 // Stakers is a free data retrieval call binding the contract method 0x9168ae72.
 //
-// Solidity: function stakers(address ) view returns(bool isStaked, uint256 amountStaked, uint256 assertionID, address currentChallenge)
+// Solidity: function stakers(address ) view returns(bool isStaked, uint256 amountStaked, uint256 assertionID, address operator, address currentChallenge)
 func (_Rollup *RollupSession) Stakers(arg0 common.Address) (struct {
 	IsStaked         bool
 	AmountStaked     *big.Int
 	AssertionID      *big.Int
+	Operator         common.Address
 	CurrentChallenge common.Address
 }, error) {
 	return _Rollup.Contract.Stakers(&_Rollup.CallOpts, arg0)
@@ -785,11 +820,12 @@ func (_Rollup *RollupSession) Stakers(arg0 common.Address) (struct {
 
 // Stakers is a free data retrieval call binding the contract method 0x9168ae72.
 //
-// Solidity: function stakers(address ) view returns(bool isStaked, uint256 amountStaked, uint256 assertionID, address currentChallenge)
+// Solidity: function stakers(address ) view returns(bool isStaked, uint256 amountStaked, uint256 assertionID, address operator, address currentChallenge)
 func (_Rollup *RollupCallerSession) Stakers(arg0 common.Address) (struct {
 	IsStaked         bool
 	AmountStaked     *big.Int
 	AssertionID      *big.Int
+	Operator         common.Address
 	CurrentChallenge common.Address
 }, error) {
 	return _Rollup.Contract.Stakers(&_Rollup.CallOpts, arg0)
@@ -824,37 +860,6 @@ func (_Rollup *RollupSession) Verifier() (common.Address, error) {
 // Solidity: function verifier() view returns(address)
 func (_Rollup *RollupCallerSession) Verifier() (common.Address, error) {
 	return _Rollup.Contract.Verifier(&_Rollup.CallOpts)
-}
-
-// Whitelist is a free data retrieval call binding the contract method 0x9b19251a.
-//
-// Solidity: function whitelist(address ) view returns(bool)
-func (_Rollup *RollupCaller) Whitelist(opts *bind.CallOpts, arg0 common.Address) (bool, error) {
-	var out []interface{}
-	err := _Rollup.contract.Call(opts, &out, "whitelist", arg0)
-
-	if err != nil {
-		return *new(bool), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
-
-	return out0, err
-
-}
-
-// Whitelist is a free data retrieval call binding the contract method 0x9b19251a.
-//
-// Solidity: function whitelist(address ) view returns(bool)
-func (_Rollup *RollupSession) Whitelist(arg0 common.Address) (bool, error) {
-	return _Rollup.Contract.Whitelist(&_Rollup.CallOpts, arg0)
-}
-
-// Whitelist is a free data retrieval call binding the contract method 0x9b19251a.
-//
-// Solidity: function whitelist(address ) view returns(bool)
-func (_Rollup *RollupCallerSession) Whitelist(arg0 common.Address) (bool, error) {
-	return _Rollup.Contract.Whitelist(&_Rollup.CallOpts, arg0)
 }
 
 // WithdrawableFunds is a free data retrieval call binding the contract method 0x2f30cabd.
@@ -933,25 +938,46 @@ func (_Rollup *RollupCallerSession) Zombies(arg0 *big.Int) (struct {
 	return _Rollup.Contract.Zombies(&_Rollup.CallOpts, arg0)
 }
 
-// AddToWhitelist is a paid mutator transaction binding the contract method 0x7f649783.
+// AddToOperatorWhitelist is a paid mutator transaction binding the contract method 0xc8525c3e.
 //
-// Solidity: function addToWhitelist(address[] toAddAddresses) returns()
-func (_Rollup *RollupTransactor) AddToWhitelist(opts *bind.TransactOpts, toAddAddresses []common.Address) (*types.Transaction, error) {
-	return _Rollup.contract.Transact(opts, "addToWhitelist", toAddAddresses)
+// Solidity: function addToOperatorWhitelist(address[] toAddAddresses) returns()
+func (_Rollup *RollupTransactor) AddToOperatorWhitelist(opts *bind.TransactOpts, toAddAddresses []common.Address) (*types.Transaction, error) {
+	return _Rollup.contract.Transact(opts, "addToOperatorWhitelist", toAddAddresses)
 }
 
-// AddToWhitelist is a paid mutator transaction binding the contract method 0x7f649783.
+// AddToOperatorWhitelist is a paid mutator transaction binding the contract method 0xc8525c3e.
 //
-// Solidity: function addToWhitelist(address[] toAddAddresses) returns()
-func (_Rollup *RollupSession) AddToWhitelist(toAddAddresses []common.Address) (*types.Transaction, error) {
-	return _Rollup.Contract.AddToWhitelist(&_Rollup.TransactOpts, toAddAddresses)
+// Solidity: function addToOperatorWhitelist(address[] toAddAddresses) returns()
+func (_Rollup *RollupSession) AddToOperatorWhitelist(toAddAddresses []common.Address) (*types.Transaction, error) {
+	return _Rollup.Contract.AddToOperatorWhitelist(&_Rollup.TransactOpts, toAddAddresses)
 }
 
-// AddToWhitelist is a paid mutator transaction binding the contract method 0x7f649783.
+// AddToOperatorWhitelist is a paid mutator transaction binding the contract method 0xc8525c3e.
 //
-// Solidity: function addToWhitelist(address[] toAddAddresses) returns()
-func (_Rollup *RollupTransactorSession) AddToWhitelist(toAddAddresses []common.Address) (*types.Transaction, error) {
-	return _Rollup.Contract.AddToWhitelist(&_Rollup.TransactOpts, toAddAddresses)
+// Solidity: function addToOperatorWhitelist(address[] toAddAddresses) returns()
+func (_Rollup *RollupTransactorSession) AddToOperatorWhitelist(toAddAddresses []common.Address) (*types.Transaction, error) {
+	return _Rollup.Contract.AddToOperatorWhitelist(&_Rollup.TransactOpts, toAddAddresses)
+}
+
+// AddToStakerWhitelist is a paid mutator transaction binding the contract method 0x6a368561.
+//
+// Solidity: function addToStakerWhitelist(address[] toAddAddresses) returns()
+func (_Rollup *RollupTransactor) AddToStakerWhitelist(opts *bind.TransactOpts, toAddAddresses []common.Address) (*types.Transaction, error) {
+	return _Rollup.contract.Transact(opts, "addToStakerWhitelist", toAddAddresses)
+}
+
+// AddToStakerWhitelist is a paid mutator transaction binding the contract method 0x6a368561.
+//
+// Solidity: function addToStakerWhitelist(address[] toAddAddresses) returns()
+func (_Rollup *RollupSession) AddToStakerWhitelist(toAddAddresses []common.Address) (*types.Transaction, error) {
+	return _Rollup.Contract.AddToStakerWhitelist(&_Rollup.TransactOpts, toAddAddresses)
+}
+
+// AddToStakerWhitelist is a paid mutator transaction binding the contract method 0x6a368561.
+//
+// Solidity: function addToStakerWhitelist(address[] toAddAddresses) returns()
+func (_Rollup *RollupTransactorSession) AddToStakerWhitelist(toAddAddresses []common.Address) (*types.Transaction, error) {
+	return _Rollup.Contract.AddToStakerWhitelist(&_Rollup.TransactOpts, toAddAddresses)
 }
 
 // AdvanceStake is a paid mutator transaction binding the contract method 0x8821b2ae.
@@ -1080,25 +1106,25 @@ func (_Rollup *RollupTransactorSession) CreateAssertionWithStateBatch(vmHash [32
 	return _Rollup.Contract.CreateAssertionWithStateBatch(&_Rollup.TransactOpts, vmHash, inboxSize, _batch, _shouldStartAtElement, _signature)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x7d6c971f.
+// Initialize is a paid mutator transaction binding the contract method 0xc97a5919.
 //
-// Solidity: function initialize(address _owner, address _verifier, address _stakeToken, address _libAddressManager, address _assertionMap, uint256 _confirmationPeriod, uint256 _challengePeriod, uint256 _minimumAssertionPeriod, uint256 _baseStakeAmount, bytes32 _initialVMhash, address[] whitelists) returns()
-func (_Rollup *RollupTransactor) Initialize(opts *bind.TransactOpts, _owner common.Address, _verifier common.Address, _stakeToken common.Address, _libAddressManager common.Address, _assertionMap common.Address, _confirmationPeriod *big.Int, _challengePeriod *big.Int, _minimumAssertionPeriod *big.Int, _baseStakeAmount *big.Int, _initialVMhash [32]byte, whitelists []common.Address) (*types.Transaction, error) {
-	return _Rollup.contract.Transact(opts, "initialize", _owner, _verifier, _stakeToken, _libAddressManager, _assertionMap, _confirmationPeriod, _challengePeriod, _minimumAssertionPeriod, _baseStakeAmount, _initialVMhash, whitelists)
+// Solidity: function initialize(address _owner, address _verifier, address _stakeToken, address _libAddressManager, address _assertionMap, uint256 _minimumAssertionPeriod, uint256 _baseStakeAmount, bytes32 _initialVMhash, address[] stakerWhitelists, address[] operatorWhitelists) returns()
+func (_Rollup *RollupTransactor) Initialize(opts *bind.TransactOpts, _owner common.Address, _verifier common.Address, _stakeToken common.Address, _libAddressManager common.Address, _assertionMap common.Address, _minimumAssertionPeriod *big.Int, _baseStakeAmount *big.Int, _initialVMhash [32]byte, stakerWhitelists []common.Address, operatorWhitelists []common.Address) (*types.Transaction, error) {
+	return _Rollup.contract.Transact(opts, "initialize", _owner, _verifier, _stakeToken, _libAddressManager, _assertionMap, _minimumAssertionPeriod, _baseStakeAmount, _initialVMhash, stakerWhitelists, operatorWhitelists)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x7d6c971f.
+// Initialize is a paid mutator transaction binding the contract method 0xc97a5919.
 //
-// Solidity: function initialize(address _owner, address _verifier, address _stakeToken, address _libAddressManager, address _assertionMap, uint256 _confirmationPeriod, uint256 _challengePeriod, uint256 _minimumAssertionPeriod, uint256 _baseStakeAmount, bytes32 _initialVMhash, address[] whitelists) returns()
-func (_Rollup *RollupSession) Initialize(_owner common.Address, _verifier common.Address, _stakeToken common.Address, _libAddressManager common.Address, _assertionMap common.Address, _confirmationPeriod *big.Int, _challengePeriod *big.Int, _minimumAssertionPeriod *big.Int, _baseStakeAmount *big.Int, _initialVMhash [32]byte, whitelists []common.Address) (*types.Transaction, error) {
-	return _Rollup.Contract.Initialize(&_Rollup.TransactOpts, _owner, _verifier, _stakeToken, _libAddressManager, _assertionMap, _confirmationPeriod, _challengePeriod, _minimumAssertionPeriod, _baseStakeAmount, _initialVMhash, whitelists)
+// Solidity: function initialize(address _owner, address _verifier, address _stakeToken, address _libAddressManager, address _assertionMap, uint256 _minimumAssertionPeriod, uint256 _baseStakeAmount, bytes32 _initialVMhash, address[] stakerWhitelists, address[] operatorWhitelists) returns()
+func (_Rollup *RollupSession) Initialize(_owner common.Address, _verifier common.Address, _stakeToken common.Address, _libAddressManager common.Address, _assertionMap common.Address, _minimumAssertionPeriod *big.Int, _baseStakeAmount *big.Int, _initialVMhash [32]byte, stakerWhitelists []common.Address, operatorWhitelists []common.Address) (*types.Transaction, error) {
+	return _Rollup.Contract.Initialize(&_Rollup.TransactOpts, _owner, _verifier, _stakeToken, _libAddressManager, _assertionMap, _minimumAssertionPeriod, _baseStakeAmount, _initialVMhash, stakerWhitelists, operatorWhitelists)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x7d6c971f.
+// Initialize is a paid mutator transaction binding the contract method 0xc97a5919.
 //
-// Solidity: function initialize(address _owner, address _verifier, address _stakeToken, address _libAddressManager, address _assertionMap, uint256 _confirmationPeriod, uint256 _challengePeriod, uint256 _minimumAssertionPeriod, uint256 _baseStakeAmount, bytes32 _initialVMhash, address[] whitelists) returns()
-func (_Rollup *RollupTransactorSession) Initialize(_owner common.Address, _verifier common.Address, _stakeToken common.Address, _libAddressManager common.Address, _assertionMap common.Address, _confirmationPeriod *big.Int, _challengePeriod *big.Int, _minimumAssertionPeriod *big.Int, _baseStakeAmount *big.Int, _initialVMhash [32]byte, whitelists []common.Address) (*types.Transaction, error) {
-	return _Rollup.Contract.Initialize(&_Rollup.TransactOpts, _owner, _verifier, _stakeToken, _libAddressManager, _assertionMap, _confirmationPeriod, _challengePeriod, _minimumAssertionPeriod, _baseStakeAmount, _initialVMhash, whitelists)
+// Solidity: function initialize(address _owner, address _verifier, address _stakeToken, address _libAddressManager, address _assertionMap, uint256 _minimumAssertionPeriod, uint256 _baseStakeAmount, bytes32 _initialVMhash, address[] stakerWhitelists, address[] operatorWhitelists) returns()
+func (_Rollup *RollupTransactorSession) Initialize(_owner common.Address, _verifier common.Address, _stakeToken common.Address, _libAddressManager common.Address, _assertionMap common.Address, _minimumAssertionPeriod *big.Int, _baseStakeAmount *big.Int, _initialVMhash [32]byte, stakerWhitelists []common.Address, operatorWhitelists []common.Address) (*types.Transaction, error) {
+	return _Rollup.Contract.Initialize(&_Rollup.TransactOpts, _owner, _verifier, _stakeToken, _libAddressManager, _assertionMap, _minimumAssertionPeriod, _baseStakeAmount, _initialVMhash, stakerWhitelists, operatorWhitelists)
 }
 
 // RejectFirstUnresolvedAssertion is a paid mutator transaction binding the contract method 0x30b26075.
@@ -1122,25 +1148,46 @@ func (_Rollup *RollupTransactorSession) RejectFirstUnresolvedAssertion() (*types
 	return _Rollup.Contract.RejectFirstUnresolvedAssertion(&_Rollup.TransactOpts)
 }
 
-// RemoveFromWhitelist is a paid mutator transaction binding the contract method 0x548db174.
+// RemoveFromOperatorWhitelist is a paid mutator transaction binding the contract method 0x9efbea23.
 //
-// Solidity: function removeFromWhitelist(address[] toRemoveAddresses) returns()
-func (_Rollup *RollupTransactor) RemoveFromWhitelist(opts *bind.TransactOpts, toRemoveAddresses []common.Address) (*types.Transaction, error) {
-	return _Rollup.contract.Transact(opts, "removeFromWhitelist", toRemoveAddresses)
+// Solidity: function removeFromOperatorWhitelist(address[] toRemoveAddresses) returns()
+func (_Rollup *RollupTransactor) RemoveFromOperatorWhitelist(opts *bind.TransactOpts, toRemoveAddresses []common.Address) (*types.Transaction, error) {
+	return _Rollup.contract.Transact(opts, "removeFromOperatorWhitelist", toRemoveAddresses)
 }
 
-// RemoveFromWhitelist is a paid mutator transaction binding the contract method 0x548db174.
+// RemoveFromOperatorWhitelist is a paid mutator transaction binding the contract method 0x9efbea23.
 //
-// Solidity: function removeFromWhitelist(address[] toRemoveAddresses) returns()
-func (_Rollup *RollupSession) RemoveFromWhitelist(toRemoveAddresses []common.Address) (*types.Transaction, error) {
-	return _Rollup.Contract.RemoveFromWhitelist(&_Rollup.TransactOpts, toRemoveAddresses)
+// Solidity: function removeFromOperatorWhitelist(address[] toRemoveAddresses) returns()
+func (_Rollup *RollupSession) RemoveFromOperatorWhitelist(toRemoveAddresses []common.Address) (*types.Transaction, error) {
+	return _Rollup.Contract.RemoveFromOperatorWhitelist(&_Rollup.TransactOpts, toRemoveAddresses)
 }
 
-// RemoveFromWhitelist is a paid mutator transaction binding the contract method 0x548db174.
+// RemoveFromOperatorWhitelist is a paid mutator transaction binding the contract method 0x9efbea23.
 //
-// Solidity: function removeFromWhitelist(address[] toRemoveAddresses) returns()
-func (_Rollup *RollupTransactorSession) RemoveFromWhitelist(toRemoveAddresses []common.Address) (*types.Transaction, error) {
-	return _Rollup.Contract.RemoveFromWhitelist(&_Rollup.TransactOpts, toRemoveAddresses)
+// Solidity: function removeFromOperatorWhitelist(address[] toRemoveAddresses) returns()
+func (_Rollup *RollupTransactorSession) RemoveFromOperatorWhitelist(toRemoveAddresses []common.Address) (*types.Transaction, error) {
+	return _Rollup.Contract.RemoveFromOperatorWhitelist(&_Rollup.TransactOpts, toRemoveAddresses)
+}
+
+// RemoveFromStakerWhitelist is a paid mutator transaction binding the contract method 0xaca9a518.
+//
+// Solidity: function removeFromStakerWhitelist(address[] toRemoveAddresses) returns()
+func (_Rollup *RollupTransactor) RemoveFromStakerWhitelist(opts *bind.TransactOpts, toRemoveAddresses []common.Address) (*types.Transaction, error) {
+	return _Rollup.contract.Transact(opts, "removeFromStakerWhitelist", toRemoveAddresses)
+}
+
+// RemoveFromStakerWhitelist is a paid mutator transaction binding the contract method 0xaca9a518.
+//
+// Solidity: function removeFromStakerWhitelist(address[] toRemoveAddresses) returns()
+func (_Rollup *RollupSession) RemoveFromStakerWhitelist(toRemoveAddresses []common.Address) (*types.Transaction, error) {
+	return _Rollup.Contract.RemoveFromStakerWhitelist(&_Rollup.TransactOpts, toRemoveAddresses)
+}
+
+// RemoveFromStakerWhitelist is a paid mutator transaction binding the contract method 0xaca9a518.
+//
+// Solidity: function removeFromStakerWhitelist(address[] toRemoveAddresses) returns()
+func (_Rollup *RollupTransactorSession) RemoveFromStakerWhitelist(toRemoveAddresses []common.Address) (*types.Transaction, error) {
+	return _Rollup.Contract.RemoveFromStakerWhitelist(&_Rollup.TransactOpts, toRemoveAddresses)
 }
 
 // RemoveOldZombies is a paid mutator transaction binding the contract method 0x8c669739.
@@ -1185,25 +1232,25 @@ func (_Rollup *RollupTransactorSession) RemoveStake(stakerAddress common.Address
 	return _Rollup.Contract.RemoveStake(&_Rollup.TransactOpts, stakerAddress)
 }
 
-// Stake is a paid mutator transaction binding the contract method 0xa694fc3a.
+// Stake is a paid mutator transaction binding the contract method 0x7acb7757.
 //
-// Solidity: function stake(uint256 stakeAmount) returns()
-func (_Rollup *RollupTransactor) Stake(opts *bind.TransactOpts, stakeAmount *big.Int) (*types.Transaction, error) {
-	return _Rollup.contract.Transact(opts, "stake", stakeAmount)
+// Solidity: function stake(uint256 stakeAmount, address operator) returns()
+func (_Rollup *RollupTransactor) Stake(opts *bind.TransactOpts, stakeAmount *big.Int, operator common.Address) (*types.Transaction, error) {
+	return _Rollup.contract.Transact(opts, "stake", stakeAmount, operator)
 }
 
-// Stake is a paid mutator transaction binding the contract method 0xa694fc3a.
+// Stake is a paid mutator transaction binding the contract method 0x7acb7757.
 //
-// Solidity: function stake(uint256 stakeAmount) returns()
-func (_Rollup *RollupSession) Stake(stakeAmount *big.Int) (*types.Transaction, error) {
-	return _Rollup.Contract.Stake(&_Rollup.TransactOpts, stakeAmount)
+// Solidity: function stake(uint256 stakeAmount, address operator) returns()
+func (_Rollup *RollupSession) Stake(stakeAmount *big.Int, operator common.Address) (*types.Transaction, error) {
+	return _Rollup.Contract.Stake(&_Rollup.TransactOpts, stakeAmount, operator)
 }
 
-// Stake is a paid mutator transaction binding the contract method 0xa694fc3a.
+// Stake is a paid mutator transaction binding the contract method 0x7acb7757.
 //
-// Solidity: function stake(uint256 stakeAmount) returns()
-func (_Rollup *RollupTransactorSession) Stake(stakeAmount *big.Int) (*types.Transaction, error) {
-	return _Rollup.Contract.Stake(&_Rollup.TransactOpts, stakeAmount)
+// Solidity: function stake(uint256 stakeAmount, address operator) returns()
+func (_Rollup *RollupTransactorSession) Stake(stakeAmount *big.Int, operator common.Address) (*types.Transaction, error) {
+	return _Rollup.Contract.Stake(&_Rollup.TransactOpts, stakeAmount, operator)
 }
 
 // TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
