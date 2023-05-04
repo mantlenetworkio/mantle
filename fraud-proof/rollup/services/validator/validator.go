@@ -104,7 +104,7 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 				// re-stake check
 				if !stakerStatus.IsStaked {
 					stakeOpts := v.Rollup.TransactOpts
-					_, err = v.Rollup.Contract.Stake(&stakeOpts, new(big.Int).SetUint64(v.Config.StakeAmount))
+					_, err = v.Rollup.Contract.Stake(&stakeOpts, new(big.Int).SetUint64(v.Config.StakeAmount), stakeOpts.From)
 					if err != nil {
 						log.Error("Failed to stake", "from", stakeOpts.From.String(), "amount", v.Config.StakeAmount, "err", err)
 						continue

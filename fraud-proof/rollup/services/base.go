@@ -104,7 +104,7 @@ func (b *BaseService) Start(cleanL1, stake bool) *types.Block {
 			log.Crit("Failed to query stake", "err", err)
 		}
 		if !isStaked {
-			_, err = b.Rollup.Contract.Stake(&stakeOpts, new(big.Int).SetUint64(b.Config.StakeAmount))
+			_, err = b.Rollup.Contract.Stake(&stakeOpts, new(big.Int).SetUint64(b.Config.StakeAmount), stakeOpts.From)
 			if err != nil {
 				log.Crit("Failed to stake", "from", stakeOpts.From.String(), "amount", b.Config.StakeAmount, "err", err)
 			}
