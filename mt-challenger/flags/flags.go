@@ -173,7 +173,7 @@ var (
 	HsmAddressFlag = cli.StringFlag{
 		Name:   "hsm-address",
 		Usage:  "the address of hsm key",
-		EnvVar: prefixEnvVar("HSM_API_NAME"),
+		EnvVar: prefixEnvVar("HSM_ADDRESS"),
 	}
 	HsmCredenFlag = cli.StringFlag{
 		Name:   "hsm-creden",

@@ -58,10 +58,13 @@ type Config struct {
 	DbPath                    string
 	CheckerBatchIndex         uint64
 	CheckerEnable             bool
-	EnableHsm                 bool
-	HsmAPIName                string
-	HsmCreden                 string
-	HsmAddress                string
+
+	EnableHsm     bool
+	HsmAPIName    string
+	HsmFeeAPIName string
+	HsmCreden     string
+	HsmAddress    string
+	HsmFeeAddress string
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -117,7 +120,9 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		CheckerEnable:             ctx.GlobalBool(flags.CheckerEnableFlag.Name),
 		EnableHsm:                 ctx.GlobalBool(flags.EnableHsmFlag.Name),
 		HsmAddress:                ctx.GlobalString(flags.HsmAddressFlag.Name),
+		HsmFeeAddress:             ctx.GlobalString(flags.HsmFeeAddressFlag.Name),
 		HsmAPIName:                ctx.GlobalString(flags.HsmAPINameFlag.Name),
+		HsmFeeAPIName:             ctx.GlobalString(flags.HsmFeeAPINameFlag.Name),
 		HsmCreden:                 ctx.GlobalString(flags.HsmCredenFlag.Name),
 	}
 	return cfg, nil

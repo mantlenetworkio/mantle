@@ -179,6 +179,12 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		ResubmissionTimeout:       cfg.ResubmissionTimeout,
 		NumConfirmations:          cfg.NumConfirmations,
 		SafeAbortNonceTooLowCount: cfg.SafeAbortNonceTooLowCount,
+		EnableHsm:                 cfg.EnableHsm,
+		HsmAddress:                cfg.HsmAddress,
+		HsmFeeAddress:             cfg.HsmFeeAddress,
+		HsmAPIName:                cfg.HsmAPIName,
+		HsmFeeAPIName:             cfg.HsmFeeAPIName,
+		HsmCreden:                 cfg.HsmCreden,
 	}
 	driver, err := sequencer.NewDriver(ctx, driverConfig)
 	if err != nil {
