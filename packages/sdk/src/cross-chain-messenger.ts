@@ -809,11 +809,11 @@ export class CrossChainMessenger implements ICrossChainMessenger {
     }
 
     const stateBatchTransaction = await stateBatchAppendedEvent.getTransaction()
-    const [stateRoots] =
-      this.contracts.l1.StateCommitmentChain.interface.decodeFunctionData(
-        'appendStateBatch',
+    const stateRoots =
+      this.contracts.l1.Rollup.interface.decodeFunctionData(
+        'createAssertionWithStateBatch',
         stateBatchTransaction.data
-      )
+      )[2]
 
     return {
       blockNumber: stateBatchAppendedEvent.blockNumber,
