@@ -57,7 +57,7 @@ describe('RollUp', () => {
     await token.mint(await accounts[0].getAddress(), amountStake)
     await token.connect(accounts[0]).approve(rollUp.address, amountStake)
 
-    await rollUp.stake(amountStake)
+    await rollUp.stake(amountStake, )
     expect(await rollUp.isStaked(await accounts[0].getAddress())).to.eq(true)
     expect(await rollUp.numStakers()).to.eq(1)
     const staker = await rollUp.stakers(await accounts[0].getAddress())

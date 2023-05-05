@@ -48,7 +48,7 @@ task('whiteListInit')
       'http://localhost:9545'
     )
     const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
-    const proposerAddr = process.env.BVM_ROLLUPER_ADDRESS
+    // const proposerAddr = process.env.BVM_ROLLUPER_ADDRESS
     const entryOwner = new ethers.Wallet(deployerKey, provider)
 
     console.log(
@@ -62,9 +62,10 @@ task('whiteListInit')
     const whiteListToAdd = [SequencerENV, Validator1ENV]
     console.log('whiteList:', whiteListToAdd)
     const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
-    await rollup.connect(entryOwner).addToWhitelist(whiteListToAdd)
-    console.log('transferOwnerShip')
-    await rollup.connect(entryOwner).transferOwnership(proposerAddr)
+    await rollup.connect(entryOwner).addToOperatorWhitelist(whiteListToAdd)
+    await rollup.connect(entryOwner).addToStakerWhitelist(whiteListToAdd)
+    // console.log('transferOwnerShip')
+    // await rollup.connect(entryOwner).transferOwnership(proposerAddr)
   })
 
 task('rollupStake')
@@ -76,12 +77,10 @@ task('rollupStake')
     )
     const bitToken = process.env.L1_BIT_ADDRESS
     const verifier1Key = process.env.BVM_VERIFIER1_KEY
-    // const verifier2Key = process.env.BVM_VERIFIER2_KEY
     const proposerKey = process.env.BVM_PROPOSER_KEY
-    
+
     const proposerWallet = new ethers.Wallet(proposerKey, provider)
     const verifier1Wallet = new ethers.Wallet(verifier1Key, provider)
-    // const verifier2Wallet = new ethers.Wallet(verifier2Key, provider)
 
     const wallets = [proposerWallet, verifier1Wallet]
     const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
@@ -97,7 +96,7 @@ task('rollupStake')
         w.address,
         (await bit.connect(w).balanceOf(w.address)).toString()
       )
-      await rollup.connect(w).stake(ethers.utils.parseEther(taskArgs.amount))
+      await rollup.connect(w).stake(ethers.utils.parseEther(taskArgs.amount), w.address)
     }
   })
 
