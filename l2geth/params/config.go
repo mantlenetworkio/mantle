@@ -436,7 +436,7 @@ func (c *ChainConfig) IsUpdateGasLimitBlock(num *big.Int) bool {
 
 // IsEigenDa returns whether num represents a block number after the IsEigenDa fork
 func (c *ChainConfig) IsEigenDa(num *big.Int) bool {
-	return c.EigenDaBlock.Cmp(num) == 0
+	return isForked(c.EigenDaBlock, num)
 }
 
 // IsSDUpdate returns whether num represents a block number after the SD update fork
