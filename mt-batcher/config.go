@@ -12,6 +12,7 @@ type Config struct {
 	MtlNetworkName            string
 	L1EthRpc                  string
 	L2MtlRpc                  string
+	DtlClientUrl              string
 	DisperserEndpoint         string
 	RetrieverSocket           string
 	EigenDaHttpPort           int
@@ -21,12 +22,17 @@ type Config struct {
 	PrivateKey                string
 	Mnemonic                  string
 	SequencerHDPath           string
+	FeePrivateKey             string
+	FeeMnemonic               string
+	FeeHDPath                 string
 	EigenContractAddress      string
+	EigenFeeContractAddress   string
 	DataStoreDuration         uint64
 	DataStoreTimeout          uint64
 	SentryEnable              bool
 	MainWorkerPollInterval    time.Duration
 	CheckerWorkerPollInterval time.Duration
+	FeeWorkerPollInterval     time.Duration
 	BlockOffset               uint64
 	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
@@ -45,6 +51,9 @@ type Config struct {
 	SafeAbortNonceTooLowCount uint64
 	EchoDebug                 bool
 	MtlBatcherEnable          bool
+	FeeSizeSec                string
+	FeePerBytePerTime         uint64
+	FeeModelEnable            bool
 	DisableHTTP2              bool
 	DbPath                    string
 	CheckerBatchIndex         uint64
@@ -57,6 +66,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		MtlNetworkName:            ctx.GlobalString(flags.MtlNetworkNameFlag.Name),
 		L1EthRpc:                  ctx.GlobalString(flags.L1EthRpcFlag.Name),
 		L2MtlRpc:                  ctx.GlobalString(flags.L2MtlRpcFlag.Name),
+		DtlClientUrl:              ctx.GlobalString(flags.DtlClientUrlFlag.Name),
 		DisperserEndpoint:         ctx.GlobalString(flags.DisperserEndpointFlag.Name),
 		RetrieverSocket:           ctx.GlobalString(flags.RetrieverSocketFlag.Name),
 		EigenDaHttpPort:           ctx.GlobalInt(flags.EigenDaHttpPortFlag.Name),
@@ -65,11 +75,16 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		PrivateKey:                ctx.GlobalString(flags.PrivateKeyFlag.Name),
 		Mnemonic:                  ctx.GlobalString(flags.MnemonicFlag.Name),
 		SequencerHDPath:           ctx.GlobalString(flags.SequencerHDPathFlag.Name),
+		FeePrivateKey:             ctx.GlobalString(flags.FeePrivateKeyFlag.Name),
+		FeeMnemonic:               ctx.GlobalString(flags.FeeMnemonicFlag.Name),
+		FeeHDPath:                 ctx.GlobalString(flags.FeeHDPathFlag.Name),
 		EigenContractAddress:      ctx.GlobalString(flags.EigenContractAddressFlag.Name),
+		EigenFeeContractAddress:   ctx.GlobalString(flags.EigenFeeContractAddressFlag.Name),
 		DataStoreDuration:         ctx.GlobalUint64(flags.DataStoreDurationFlag.Name),
 		DataStoreTimeout:          ctx.GlobalUint64(flags.DataStoreTimeoutFlag.Name),
 		MainWorkerPollInterval:    ctx.GlobalDuration(flags.MainWorkerPollIntervalFlag.Name),
 		CheckerWorkerPollInterval: ctx.GlobalDuration(flags.CheckerWorkerPollIntervalFlag.Name),
+		FeeWorkerPollInterval:     ctx.GlobalDuration(flags.FeeWorkerPollIntervalFlag.Name),
 		BlockOffset:               ctx.GlobalUint64(flags.BlockOffsetFlag.Name),
 		RollUpMinSize:             ctx.GlobalUint64(flags.RollUpMinSizeFlag.Name),
 		RollUpMaxSize:             ctx.GlobalUint64(flags.RollUpMaxSizeFlag.Name),
@@ -87,6 +102,9 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		SentryEnable:              ctx.GlobalBool(flags.SentryEnableFlag.Name),
 		SentryDsn:                 ctx.GlobalString(flags.SentryDsnFlag.Name),
 		SentryTraceRate:           ctx.GlobalDuration(flags.SentryTraceRateFlag.Name),
+		FeeSizeSec:                ctx.GlobalString(flags.FeeSizeSecFlag.Name),
+		FeePerBytePerTime:         ctx.GlobalUint64(flags.FeePerBytePerTimeFlag.Name),
+		FeeModelEnable:            ctx.GlobalBool(flags.FeeModelEnableFlags.Name),
 		DisableHTTP2:              ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
 		EchoDebug:                 ctx.GlobalBool(flags.EchoDebugFlag.Name),
 		MtlBatcherEnable:          ctx.GlobalBool(flags.MtlBatcherEnableFlag.Name),

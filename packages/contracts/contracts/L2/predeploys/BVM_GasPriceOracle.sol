@@ -37,6 +37,10 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
     uint256    public charge;
     // sccAddress l1 sccAddress
     address public sccAddress;
+    // daGasPrice da gas price
+    uint256  public daGasPrice;
+    // daSwitch Switch controls whether enable DA
+    uint256  public daSwitch;
 
     /***************
      * Constructor *
@@ -63,11 +67,13 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
 
     event GasPriceUpdated(uint256);
     event L1BaseFeeUpdated(uint256);
+    event DAGasPriceUpdated(uint256);
     event OverheadUpdated(uint256);
     event ScalarUpdated(uint256);
     event DecimalsUpdated(uint256);
     event IsBurningUpdated(uint256);
     event ChargeUpdated(uint256);
+    event DASwitchUpdated(uint256);
     /********************
      * Public Functions *
      ********************/
@@ -90,6 +96,16 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
     function setL1BaseFee(uint256 _baseFee) public onlyOwner {
         l1BaseFee = _baseFee;
         emit L1BaseFeeUpdated(_baseFee);
+    }
+
+    /**
+     * Allows the owner to modify the da gas price.
+     * @param _daGasPrice New da gas price
+     */
+    // slither-disable-next-line external-function
+    function setDAGasPrice(uint256 _daGasPrice) public onlyOwner {
+        daGasPrice = _daGasPrice;
+        emit DAGasPriceUpdated(_daGasPrice);
     }
 
     /**
@@ -141,6 +157,10 @@ contract BVM_GasPriceOracle is Ownable,IBVM_GasPriceOracle {
         emit ChargeUpdated(_charge);
     }
 
+    function setDaSwitch(uint256 _daSwitch) public onlyOwner checkValue(_daSwitch){
+        daSwitch = _daSwitch;
+        emit DASwitchUpdated(_daSwitch);
+    }
 
     /**
      * Computes the L1 portion of the fee

@@ -17,11 +17,14 @@ if [[ ! -z "$URL" ]]; then
     # set the env
     export CTC_ADDRESS=$(echo $ADDRESSES | jq -r '.CanonicalTransactionChain')
     export SCC_ADDRESS=$(echo $ADDRESSES | jq -r '.StateCommitmentChain')
+    export FP_ROLLUP_ADDRESS=$(echo $ADDRESSES | jq -r '.Proxy__Rollup')
 fi
 
 
 # waits for l2geth to be up
-curl --fail \
+curl -XPOST \
+    -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+    --fail \
     --show-error \
     --silent \
     --retry-connrefused \

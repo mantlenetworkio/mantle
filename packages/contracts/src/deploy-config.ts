@@ -80,6 +80,11 @@ export interface DeployConfig {
   bvmProposerAddress: string
 
   /**
+   * Address of the Rolluper (publishes to Rollup).
+   */
+  bvmRolluperAddress: string
+
+  /**
    * Address of the account that will sign blocks.
    */
   bvmBlockSignerAddress: string
@@ -220,6 +225,9 @@ const configSpec: {
     type: 'address',
   },
   bvmProposerAddress: {
+    type: 'address',
+  },
+  bvmRolluperAddress: {
     type: 'address',
   },
   bvmBlockSignerAddress: {

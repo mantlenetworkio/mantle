@@ -2,9 +2,7 @@ package batchsubmitter
 
 import (
 	"context"
-	"os"
-	"time"
-
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/getsentry/sentry-go"
 	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/proposer"
@@ -15,6 +13,8 @@ import (
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
 	"github.com/urfave/cli"
+	"os"
+	"time"
 )
 
 // Main is the entrypoint into the batch submitter service. This method returns
@@ -132,6 +132,8 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				MinTxSize:             cfg.MinL1TxSize,
 				MaxTxSize:             cfg.MaxL1TxSize,
 				MaxPlaintextBatchSize: cfg.MaxPlaintextBatchSize,
+				DaUpgradeBlock:        cfg.DaUpgradeBlock,
+				DAAddr:                common.Address(common.HexToAddress(cfg.DAAddress)),
 				CTCAddr:               ctcAddress,
 				ChainID:               chainID,
 				PrivKey:               sequencerPrivKey,
@@ -162,8 +164,10 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				MaxStateRootElements: cfg.MaxStateRootElements,
 				SCCAddr:              sccAddress,
 				CTCAddr:              ctcAddress,
+				FPRollupAddr:         common.HexToAddress(cfg.FPRollupAddress),
 				ChainID:              chainID,
 				PrivKey:              proposerPrivKey,
+				SccRollback:          cfg.EnableSccRollback,
 			})
 			if err != nil {
 				return err

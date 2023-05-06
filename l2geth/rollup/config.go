@@ -24,6 +24,8 @@ type Config struct {
 
 	L1MsgSender string
 
+	DtlEigenEnable bool
+
 	// Owner of the GasPriceOracle contract
 	GasPriceOracleOwnerAddress common.Address
 	// Turns on checking of state for L2 gas price
@@ -45,6 +47,13 @@ type Config struct {
 	FeeThresholdUp   *big.Float
 	// HTTP endpoint of the sequencer
 	SequencerClientHttp string
+	// stake amount
+	StakeAmount *big.Int
+	// node character
+	RollupRole Role
 
 	MpcVerifier bool
+
+	// EigenDaFee blockNumber Config
+	EigenDaBlock int64
 }

@@ -46,6 +46,18 @@ var (
 		Required: true,
 		EnvVar:   "TSS_CLIENT_RPC",
 	}
+	DaAddressFlag = cli.StringFlag{
+		Name:     "da-address",
+		Usage:    "Address of the da contract",
+		Required: true,
+		EnvVar:   "DA_ADDRESS",
+	}
+	DaUpgradeBlockFlag = cli.Uint64Flag{
+		Name:     "da-upgrade-block",
+		Usage:    "eigen layer upgrade block",
+		Required: true,
+		EnvVar:   prefixEnvVar("DA_UPGRADE_BLOCK"),
+	}
 	CTCAddressFlag = cli.StringFlag{
 		Name:     "ctc-address",
 		Usage:    "Address of the CTC contract",
@@ -57,6 +69,12 @@ var (
 		Usage:    "Address of the SCC contract",
 		Required: true,
 		EnvVar:   "SCC_ADDRESS",
+	}
+	FPRollupAddressFlag = cli.StringFlag{
+		Name:     "fraud-proof-rollup-address",
+		Usage:    "Address of the FraudProof Rollup contract",
+		Required: true,
+		EnvVar:   "FP_ROLLUP_ADDRESS",
 	}
 	MinL1TxSizeFlag = cli.Uint64Flag{
 		Name: "min-l1-tx-size",
@@ -256,6 +274,11 @@ var (
 		Usage:  "Whether or not to disable HTTP/2 support.",
 		EnvVar: prefixEnvVar("HTTP2_DISABLE"),
 	}
+	SccRollbackFlag = cli.BoolFlag{
+		Name:   "EnableSccRollbackFlag",
+		Usage:  "Whether or not to enable scc rollback.",
+		EnvVar: prefixEnvVar("SCC_ROLLBACK"),
+	}
 )
 
 var requiredFlags = []cli.Flag{
@@ -264,8 +287,11 @@ var requiredFlags = []cli.Flag{
 	L1EthRpcFlag,
 	L2EthRpcFlag,
 	TssClientUrl,
+	DaAddressFlag,
+	DaUpgradeBlockFlag,
 	CTCAddressFlag,
 	SCCAddressFlag,
+	FPRollupAddressFlag,
 	MinL1TxSizeFlag,
 	MaxL1TxSizeFlag,
 	MaxPlaintextBatchSizeFlag,

@@ -52,7 +52,7 @@ type MantleBatch struct {
 	cfg             Config
 	sequencerDriver *sequencer.Driver
 	daService       *restorer.DaService
-	metrics         *metrics.Metrics
+	metrics         *metrics.MtBatchMetrics
 }
 
 func NewMantleBatch(cfg Config) (*MantleBatch, error) {
@@ -61,6 +61,14 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 	sequencerPrivKey, _, err := common2.ParseWalletPrivKeyAndContractAddr(
 		"MtBatcher", cfg.Mnemonic, cfg.SequencerHDPath,
 		cfg.PrivateKey, cfg.EigenContractAddress,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	mtFeePrivateKey, _, err := common2.ParseWalletPrivKeyAndContractAddr(
+		"MtBatcher", cfg.FeeMnemonic, cfg.FeeHDPath,
+		cfg.FeePrivateKey, cfg.EigenFeeContractAddress,
 	)
 	if err != nil {
 		return nil, err
@@ -90,6 +98,18 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 
 	signer := func(chainID *big.Int) sequencer.SignerFn {
 		s := common2.PrivateKeySignerFn(mtBatherPrivateKey, chainID)
+		return func(_ context.Context, addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
+			return s(addr, tx)
+		}
+	}
+
+	feePrivateKey, err := crypto.HexToECDSA(strings.TrimPrefix(cfg.FeePrivateKey, "0x"))
+	if err != nil {
+		return nil, err
+	}
+
+	feeSigner := func(chainID *big.Int) sequencer.SignerFn {
+		s := common2.PrivateKeySignerFn(feePrivateKey, chainID)
 		return func(_ context.Context, addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
 			return s(addr, tx)
 		}
@@ -125,14 +145,48 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 	)
 	log.Info("contract init success", "EigenContractAddress", cfg.EigenContractAddress)
 
+	eigenFeeContract, err := bindings.NewBVMEigenDataLayrFee(
+		ethc.Address(common.HexToAddress(cfg.EigenFeeContractAddress)),
+		l1Client,
+	)
+	if err != nil {
+		log.Error("MtBatcher binding eigen fee contract fail", "err", err)
+		return nil, err
+	}
+
+	feeParsed, err := abi.JSON(strings.NewReader(
+		bindings.BVMEigenDataLayrFeeABI,
+	))
+	if err != nil {
+		log.Error("MtBatcher parse eigen fee contract abi fail", "err", err)
+		return nil, err
+	}
+	eigenFeeABI, err := bindings.BVMEigenDataLayrFeeMetaData.GetAbi()
+	if err != nil {
+		log.Error("MtBatcher get eigen fee contract abi fail", "err", err)
+		return nil, err
+	}
+	rawEigenFeeContract := bind.NewBoundContract(
+		ethc.Address(common.HexToAddress(cfg.EigenFeeContractAddress)), feeParsed, l1Client, l1Client,
+		l1Client,
+	)
+
 	driverConfig := &sequencer.DriverConfig{
 		L1Client:                  l1Client,
 		L2Client:                  l2Client,
+		DtlClientUrl:              cfg.DtlClientUrl,
 		EigenDaContract:           eigenContract,
 		RawEigenContract:          rawEigenContract,
 		EigenABI:                  eignenABI,
+		EigenFeeContract:          eigenFeeContract,
+		RawEigenFeeContract:       rawEigenFeeContract,
+		EigenFeeABI:               eigenFeeABI,
+		FeeModelEnable:            cfg.FeeModelEnable,
+		FeeSizeSec:                cfg.FeeSizeSec,
+		FeePerBytePerTime:         cfg.FeePerBytePerTime,
 		Logger:                    logger,
 		PrivKey:                   sequencerPrivKey,
+		FeePrivKey:                mtFeePrivateKey,
 		BlockOffset:               cfg.BlockOffset,
 		RollUpMinSize:             cfg.RollUpMinSize,
 		RollUpMaxSize:             cfg.RollUpMaxSize,
@@ -143,6 +197,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		DisperserSocket:           cfg.DisperserEndpoint,
 		MainWorkerPollInterval:    cfg.MainWorkerPollInterval,
 		CheckerWorkerPollInterval: cfg.CheckerWorkerPollInterval,
+		FeeWorkerPollInterval:     cfg.FeeWorkerPollInterval,
 		DbPath:                    cfg.DbPath,
 		CheckerBatchIndex:         cfg.CheckerBatchIndex,
 		CheckerEnable:             cfg.CheckerEnable,
@@ -151,6 +206,8 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		NumConfirmations:          cfg.NumConfirmations,
 		SafeAbortNonceTooLowCount: cfg.SafeAbortNonceTooLowCount,
 		SignerFn:                  signer(chainID),
+		FeeSignerFn:               feeSigner(chainID),
+		Metrics:                   metrics.NewMtBatchBase(),
 	}
 	driver, err := sequencer.NewDriver(ctx, driverConfig)
 	if err != nil {
@@ -189,9 +246,12 @@ func (mb *MantleBatch) Start() error {
 	go func() {
 		err := mb.daService.Start()
 		if err != nil {
-			log.Error("metrics server failed to start", "err", err)
+			log.Error("da server failed to start", "err", err)
 		}
 	}()
+	if mb.cfg.MetricsServerEnable {
+		go metrics.StartServer(mb.cfg.MetricsHostname, mb.cfg.MetricsPort)
+	}
 	return nil
 }
 

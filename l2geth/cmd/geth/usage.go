@@ -71,6 +71,7 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.RollupClientHttpFlag,
 			utils.RollupEnableVerifierFlag,
 			utils.RollupMpcVerifierFlag,
+			utils.RollupEigenDaBlockFlag,
 			utils.RollupTimstampRefreshFlag,
 			utils.RollupPollIntervalFlag,
 			utils.RollupMaxCalldataSizeFlag,
@@ -81,7 +82,8 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.RollupGenesisTimeoutSecondsFlag,
 			utils.SequencerClientHttpFlag,
 			utils.RollupEigenClientHttpFlag,
-			utils.L1MsgSenderFlage,
+			utils.L1MsgSenderFlag,
+			utils.DtlEigenEnableFlag,
 		},
 	},
 	{

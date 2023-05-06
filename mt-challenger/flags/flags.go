@@ -97,6 +97,47 @@ var (
 		Value:    4,
 		EnvVar:   prefixEnvVar("KZG_NUM_WORKERS"),
 	}
+	PollIntervalFlag = cli.DurationFlag{
+		Name:     "poll-interval",
+		Usage:    "main worker poll interval",
+		Required: true,
+		EnvVar:   prefixEnvVar("POLL_INTERVAL"),
+	}
+	DbPathFlag = cli.StringFlag{
+		Name:     "db-path",
+		Usage:    "db path of leveldb",
+		Required: true,
+		EnvVar:   prefixEnvVar("DB_PATH"),
+	}
+	CheckerBatchIndexFlag = cli.Uint64Flag{
+		Name:     "checker-batch-index",
+		Usage:    "checker batch index",
+		Required: true,
+		Value:    1,
+		EnvVar:   prefixEnvVar("CHECKER_BATCH_INDEX"),
+	}
+	ResubmissionTimeoutFlag = cli.DurationFlag{
+		Name: "resubmission-timeout",
+		Usage: "Duration we will wait before resubmitting a " +
+			"transaction to L1",
+		Required: true,
+		EnvVar:   prefixEnvVar("RESUBMISSION_TIMEOUT"),
+	}
+	NumConfirmationsFlag = cli.Uint64Flag{
+		Name: "num-confirmations",
+		Usage: "Number of confirmations which we will wait after " +
+			"appending a new batch",
+		Required: true,
+		EnvVar:   prefixEnvVar("NUM_CONFIRMATIONS"),
+	}
+	SafeAbortNonceTooLowCountFlag = cli.Uint64Flag{
+		Name: "safe-abort-nonce-too-low-count",
+		Usage: "Number of ErrNonceTooLow observations required to " +
+			"give up on a tx at a particular nonce without receiving " +
+			"confirmation",
+		Required: true,
+		EnvVar:   prefixEnvVar("SAFE_ABORT_NONCE_TOO_LOW_COUNT"),
+	}
 	StartStoreNumFlag = cli.Uint64Flag{
 		Name:     "starting-store-numer",
 		Usage:    "Store number from which challenger should pull",
@@ -108,6 +149,33 @@ var (
 		Name:   "http2-disable",
 		Usage:  "Whether or not to disable HTTP/2 support.",
 		EnvVar: prefixEnvVar("HTTP2_DISABLE"),
+	}
+	NeedReRollupBatchFlag = cli.StringFlag{
+		Name:   "need-re-rollup-batch",
+		Usage:  "tool need re rollup batch",
+		EnvVar: prefixEnvVar("NEED_RE_ROLLUP_BATCH"),
+	}
+	ReRollupToolEnableFlag = cli.BoolFlag{
+		Name:   "re-rollup-tool-enable",
+		Usage:  "re rollup tool support.",
+		EnvVar: prefixEnvVar("RE_ROLLUP_TOOL_ENABLE"),
+	}
+	MetricsServerEnableFlag = cli.BoolFlag{
+		Name:   "metrics-server-enable",
+		Usage:  "Whether or not to run the embedded metrics server",
+		EnvVar: prefixEnvVar("METRICS_SERVER_ENABLE"),
+	}
+	MetricsHostnameFlag = cli.StringFlag{
+		Name:   "metrics-hostname",
+		Usage:  "The hostname of the metrics server",
+		Value:  "127.0.0.1",
+		EnvVar: prefixEnvVar("METRICS_HOSTNAME"),
+	}
+	MetricsPortFlag = cli.Uint64Flag{
+		Name:   "metrics-port",
+		Usage:  "The port of the metrics server",
+		Value:  7301,
+		EnvVar: prefixEnvVar("METRICS_PORT"),
 	}
 )
 
@@ -123,11 +191,22 @@ var requiredFlags = []cli.Flag{
 	SrsTablePathFlag,
 	OrderFlag,
 	RetrieverSocketFlag,
+	DbPathFlag,
+	CheckerBatchIndexFlag,
+	PollIntervalFlag,
+	ResubmissionTimeoutFlag,
+	NumConfirmationsFlag,
+	SafeAbortNonceTooLowCountFlag,
 }
 
 var optionalFlags = []cli.Flag{
 	KzgWorkersFlag,
 	HTTP2DisableFlag,
+	NeedReRollupBatchFlag,
+	ReRollupToolEnableFlag,
+	MetricsServerEnableFlag,
+	MetricsHostnameFlag,
+	MetricsPortFlag,
 }
 
 func init() {

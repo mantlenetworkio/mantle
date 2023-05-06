@@ -26,6 +26,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi/bind"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -143,6 +144,9 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if _, ok := genesisErr.(*params.ConfigCompatError); genesisErr != nil && !ok {
 		return nil, genesisErr
 	}
+	if chainConfig.EigenDaBlock == nil {
+		chainConfig.EigenDaBlock = big.NewInt(config.Rollup.EigenDaBlock)
+	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
 	eth := &Ethereum{
@@ -211,7 +215,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		return nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
 	eth.syncService.SetExtra(makeExtraData(config.Miner.ExtraData))
-
 
 	// Permit the downloader to use the trie cache allowance during fast sync
 	cacheLimit := cacheConfig.TrieCleanLimit + cacheConfig.TrieDirtyLimit
@@ -302,17 +305,16 @@ func CreateConsensusEngine(ctx *node.ServiceContext, chainConfig *params.ChainCo
 func (s *Ethereum) APIs() []rpc.API {
 	apis := ethapi.GetAPIs(s.APIBackend)
 
+	// <FRAUD-PROOF modification>
+	apis = append(apis, proof.APIs(s.APIBackend)...)
+	// <FRAUD-PROOF modification>
+
 	// Append any APIs exposed explicitly by the les server
 	if s.lesServer != nil {
 		apis = append(apis, s.lesServer.APIs()...)
 	}
 	// Append any APIs exposed explicitly by the consensus engine
 	apis = append(apis, s.engine.APIs(s.BlockChain())...)
-
-	// Append any APIs exposed explicitly by the les server
-	if s.lesServer != nil {
-		apis = append(apis, s.lesServer.APIs()...)
-	}
 
 	// Append all the local APIs and return
 	return append(apis, []rpc.API{
