@@ -5,19 +5,28 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	sign "github.com/mantlenetworkio/mantle/tss/node/signer"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keysign"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
+	sign "github.com/mantlenetworkio/mantle/tss/node/signer"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keygen"
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keysign"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+)
+
+const (
+	jwtExpiryTimeout = 60 * time.Second
+	jwtKeyLength     = 32
 )
 
 type Server struct {
@@ -36,19 +45,23 @@ type GenRequest struct {
 type MockEventRequest struct {
 }
 
-func NewHttpServer(addr string, t tsslib.Server, signer *sign.Processor, nonProd bool) *Server {
+func NewHttpServer(addr string, t tsslib.Server, signer *sign.Processor, nonProd bool, jwtSecretStr string) (*Server, error) {
 	hs := &Server{
 		logger:    log.With().Str("module", "http").Logger(),
 		tssServer: t,
 		nonProd:   nonProd,
 		signer:    signer,
 	}
+	handler, err := newJWTHandler(jwtSecretStr, hs.newHandler())
+	if err != nil {
+		return nil, err
+	}
 	s := &http.Server{
 		Addr:    addr,
-		Handler: hs.newHandler(),
+		Handler: handler,
 	}
 	hs.s = s
-	return hs
+	return hs, nil
 }
 
 func (hs *Server) Start() error {
@@ -68,6 +81,66 @@ func (hs *Server) Stop() {
 	err := hs.s.Shutdown(c)
 	if err != nil {
 		hs.logger.Error().Err(err).Msg("Failed to shutdown the server gracefully")
+	}
+}
+
+type jwtHandler struct {
+	keyFunc func(token *jwt.Token) (interface{}, error)
+	handler http.Handler
+}
+
+// newJWTHandler creates a http.Handler with jwt authentication support.
+func newJWTHandler(jwtSecretStr string, handler http.Handler) (http.Handler, error) {
+	jwtSecret, err := hexutil.Decode(jwtSecretStr)
+	if err != nil {
+		return nil, err
+	}
+	if len(jwtSecret) != jwtKeyLength {
+		return nil, fmt.Errorf("invalid jwt secret length, expected length %d, actual length %d", jwtKeyLength, len(jwtSecret))
+	}
+	return &jwtHandler{
+		keyFunc: func(token *jwt.Token) (interface{}, error) {
+			return jwtSecret, nil
+		},
+		handler: handler,
+	}, nil
+}
+
+// ServeHTTP implements http.Handler
+func (handler *jwtHandler) ServeHTTP(out http.ResponseWriter, r *http.Request) {
+	var (
+		strToken string
+		claims   jwt.RegisteredClaims
+	)
+	if auth := r.Header.Get("Authorization"); strings.HasPrefix(auth, "Bearer ") {
+		strToken = strings.TrimPrefix(auth, "Bearer ")
+	}
+	if len(strToken) == 0 {
+		http.Error(out, "missing token", http.StatusUnauthorized)
+		return
+	}
+	// We explicitly set only HS256 allowed, and also disables the
+	// claim-check: the RegisteredClaims internally requires 'iat' to
+	// be no later than 'now', but we allow for a bit of drift.
+	token, err := jwt.ParseWithClaims(strToken, &claims, handler.keyFunc,
+		jwt.WithValidMethods([]string{"HS256"}),
+		jwt.WithoutClaimsValidation())
+
+	switch {
+	case err != nil:
+		http.Error(out, err.Error(), http.StatusUnauthorized)
+	case !token.Valid:
+		http.Error(out, "invalid token", http.StatusUnauthorized)
+	case !claims.VerifyExpiresAt(time.Now(), false): // optional
+		http.Error(out, "token is expired", http.StatusUnauthorized)
+	case claims.IssuedAt == nil:
+		http.Error(out, "missing issued-at", http.StatusUnauthorized)
+	case time.Since(claims.IssuedAt.Time) > jwtExpiryTimeout:
+		http.Error(out, "stale token", http.StatusUnauthorized)
+	case time.Until(claims.IssuedAt.Time) > jwtExpiryTimeout:
+		http.Error(out, "future token", http.StatusUnauthorized)
+	default:
+		handler.handler.ServeHTTP(out, r)
 	}
 }
 

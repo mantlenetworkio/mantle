@@ -11,18 +11,16 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
-
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	"github.com/mantlenetworkio/mantle/tss/node/store"
-
 	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/index"
 	"github.com/mantlenetworkio/mantle/tss/node/server"
 	sign "github.com/mantlenetworkio/mantle/tss/node/signer"
+	"github.com/mantlenetworkio/mantle/tss/node/store"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	"github.com/mantlenetworkio/mantle/tss/slash"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -119,7 +117,10 @@ func runNode(cmd *cobra.Command) error {
 	}
 	signer.Start()
 
-	hs := server.NewHttpServer(cfg.Node.HttpAddr, tssInstance, signer, nonProd)
+	hs, err := server.NewHttpServer(cfg.Node.HttpAddr, tssInstance, signer, nonProd, cfg.Node.JwtSecret)
+	if err != nil {
+		log.Fatal().Err(err).Msg("fail to create http server")
+	}
 
 	if err := hs.Start(); err != nil {
 		log.Error().Err(err).Msg("fail to start http server")
