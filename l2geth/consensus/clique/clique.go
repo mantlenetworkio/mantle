@@ -52,6 +52,7 @@ const (
 	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
 
 	preUpgradedGaslimit = 15000000 //this params is only used for testnet
+	testnetChainID      = 5001
 )
 
 // Clique proof-of-authority protocol constants.
@@ -583,8 +584,15 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainReader, header *types.
 
 	//this is only for testnet, if height< fixblockhash branch block height, set gaslimit = 15000000
 	//if height >= fixblockhash branch block height, use the config value
-	if !chain.Config().IsUpdateGasLimitBlock(header.Number) && chain.Config().UpdateGasLimitBlock != nil {
-		header.GasLimit = preUpgradedGaslimit
+	//if UpdateGasLimitBlock not set , will not changed, for mainnet.
+	//if UpdateGasLimitBlock = 0, from the genesis block
+	//if UpdateGasLimitBlock = x, from the x
+	if chain.Config().UpdateGasLimitBlock != nil && chain.Config().ChainID.Int64() == testnetChainID {
+		//for testnet, when the UpdateGasLimitBlock  is actived, we must update the gaslimit for all of block
+		//which is after the "updategaslimit" block
+		if !chain.Config().IsUpdateGasLimitBlock(header.Number) {
+			header.GasLimit = preUpgradedGaslimit
+		}
 	}
 
 	// Assemble and return the final block for sealing

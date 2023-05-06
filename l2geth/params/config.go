@@ -436,8 +436,10 @@ func (c *ChainConfig) IsUpdateGasLimitBlock(num *big.Int) bool {
 
 // IsEigenDa returns whether num represents a block number after the IsEigenDa fork
 func (c *ChainConfig) IsEigenDa(num *big.Int) bool {
+	// c.eigenda block maybe nil for mainnet
+	// in this case, we need to upgrade the code of gasoralce too!
 	if c.EigenDaBlock == nil {
-		return false
+		return true
 	}
 	return c.EigenDaBlock.Cmp(num) == 0
 }
