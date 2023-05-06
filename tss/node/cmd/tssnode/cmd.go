@@ -118,7 +118,11 @@ func runNode(cmd *cobra.Command) error {
 	}
 	signer.Start()
 
-	hs := server.NewHttpServer(cfg.Node.HttpAddr, tssInstance, signer, nonProd)
+	hs, err := server.NewHttpServer(cfg.Node.HttpAddr, tssInstance, signer, nonProd, cfg.Node.JwtSecret)
+	if err != nil {
+		log.Error().Err(err).Msg("fail to create http server")
+		return err
+	}
 
 	if err := hs.Start(); err != nil {
 		log.Error().Err(err).Msg("fail to start http server")
