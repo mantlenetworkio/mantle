@@ -5,14 +5,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
+	cmm "github.com/mantlenetworkio/mantle/tss/common"
 	sign "github.com/mantlenetworkio/mantle/tss/node/signer"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
@@ -128,14 +127,6 @@ func (hs *Server) Stop() {
 }
 
 func (hs *Server) newHandler(jwtSecretStr string) (http.Handler, error) {
-	jwtSecret, err := hexutil.Decode(jwtSecretStr)
-	if err != nil {
-		return nil, err
-	}
-	if len(jwtSecret) != jwtKeyLength {
-		return nil, fmt.Errorf("invalid jwt secret length, expected length %d, actual length %d", jwtKeyLength, len(jwtSecret))
-	}
-
 	router := mux.NewRouter()
 	router.Handle("/ping", http.HandlerFunc(hs.pingHandler)).Methods(http.MethodGet)
 	router.Handle("/gen-key", http.HandlerFunc(hs.keyGenHandler)).Methods(http.MethodPost)
@@ -149,12 +140,7 @@ func (hs *Server) newHandler(jwtSecretStr string) (http.Handler, error) {
 
 	router.Use(logMiddleware())
 
-	return &jwtHandler{
-		keyFunc: func(token *jwt.Token) (interface{}, error) {
-			return jwtSecret, nil
-		},
-		handler: router,
-	}, nil
+	return cmm.NewJwtHandler(router, jwtSecretStr)
 }
 
 func logMiddleware() mux.MiddlewareFunc {

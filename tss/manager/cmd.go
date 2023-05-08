@@ -3,10 +3,6 @@ package manager
 import (
 	"context"
 	"errors"
-	"github.com/mantlenetworkio/mantle/tss/index"
-	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
-	"github.com/mantlenetworkio/mantle/tss/manager/store"
-	"github.com/mantlenetworkio/mantle/tss/slash"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,9 +12,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/tss/common"
+	"github.com/mantlenetworkio/mantle/tss/index"
+	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
 	"github.com/mantlenetworkio/mantle/tss/manager/router"
+	"github.com/mantlenetworkio/mantle/tss/manager/store"
+	"github.com/mantlenetworkio/mantle/tss/slash"
 	"github.com/mantlenetworkio/mantle/tss/ws/server"
 	"github.com/spf13/cobra"
+)
+
+const (
+	jwtExpiryTimeout = 60 * time.Second
+	jwtKeyLength     = 32
 )
 
 func Command() *cobra.Command {
@@ -61,10 +66,15 @@ func run(cmd *cobra.Command) error {
 	r := gin.Default()
 	registry.Register(r)
 
+	jwtHandler, err := common.NewJwtHandler(r, config.Manager.JwtSecret)
+	if err != nil {
+		return err
+	}
+
 	// custom http configuration
 	s := &http.Server{
 		Addr:    config.Manager.HttpAddr,
-		Handler: r,
+		Handler: jwtHandler,
 	}
 	go func() {
 		if err := s.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
