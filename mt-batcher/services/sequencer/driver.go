@@ -392,6 +392,7 @@ func (d *Driver) DisperseStoreData(data []byte, startl2BlockNumber *big.Int, end
 	if err != nil {
 		return params, nil, err
 	}
+	log.Info("Operator Info", "NumSys", params.NumSys, "NumPar", params.NumPar, "TotalOperatorsIndex", params.TotalOperatorsIndex, "NumTotal", params.NumTotal)
 	tx, err := d.StoreData(
 		d.Ctx, uploadHeader, uint8(params.Duration), params.ReferenceBlockNumber, startl2BlockNumber, endl2BlockNumber, params.TotalOperatorsIndex, isReRollup,
 	)
