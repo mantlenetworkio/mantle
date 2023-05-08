@@ -23,7 +23,7 @@ type JwtHandler struct {
 func NewJwtHandler(handle http.Handler, jetSecretKey string) (http.Handler, error) {
 	jwtSecret, err := hexutil.Decode(jetSecretKey)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("decoding jwt secret key error: %s", err.Error())
 	}
 	if len(jwtSecret) != jwtKeyLength {
 		return nil, fmt.Errorf("invalid jwt secret length, expected length %d, actual length %d", jwtKeyLength, len(jwtSecret))
