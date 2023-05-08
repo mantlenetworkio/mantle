@@ -74,7 +74,18 @@ const deployFn: DeployFunction = async (hre) => {
     }
   )
 
-  args = [l1BitAddress, Proxy__TSS_GroupManager.address]
+  const Proxy__BVM_L1CrossDomainMessenger = await getContractFromArtifact(
+    hre,
+    names.managed.contracts.Proxy__BVM_L1CrossDomainMessenger
+  )
+
+  args = [
+    l1BitAddress,
+    Proxy__TSS_GroupManager.address,
+    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+    Proxy__BVM_L1CrossDomainMessenger.address,
+  ]
   callData = Impl__TssStakingSlashing.interface.encodeFunctionData(
     'initialize',
     args

@@ -6,7 +6,6 @@ import "../../delegation/DelegationManager.sol";
 
 /**
  * @title The primary entry- and exit-point for funds into and out.
- * @author Layr Labs, Inc.
  * @notice This contract is for managing investments in different strategies. The main
  * functionalities are:
  * - adding and removing investment strategies that any delegator can invest into
@@ -92,6 +91,7 @@ contract TssDelegationManager is DelegationManager {
 
 
     }
+    
 
 
 

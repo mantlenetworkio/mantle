@@ -17,4 +17,11 @@ interface IStakingSlashing {
     function getQuitRequestList() external view returns (address[] memory);
     function getSlashRecord(uint256, address) external view returns (bool);
     function isJailed(address) external returns (bool);
+
+    //fund
+    function deposit(uint256 amount) external;
+    function withdraw() external;
+    function setCutOff()
+
+
 }

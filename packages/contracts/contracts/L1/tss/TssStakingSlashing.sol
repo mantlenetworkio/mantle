@@ -16,6 +16,7 @@ import {TssDelegationManager} from "./delegation/TssDelegationManager.sol";
 
 import "./ITssGroupManager.sol";
 import "./ITssStakingSlashing.sol";
+import "./WhiteList.sol";
 
 contract TssStakingSlashing is
     Initializable,
@@ -24,7 +25,8 @@ contract TssStakingSlashing is
     IStakingSlashing,
     DelegationShareBase,
     DelegationCallbackBase,
-    CrossDomainEnabled
+    CrossDomainEnabled,
+    WhiteList
 {
     enum SlashType {
         nothing,
@@ -81,7 +83,9 @@ contract TssStakingSlashing is
         address _tssGroupContract,
         address _delegationManager,
         address _delegation,
-        address _l1messenger
+        address _l1messenger,
+        address[] calldata stakerWhitelists,
+        address[] calldata operatorWhitelists
         ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -92,6 +96,13 @@ contract TssStakingSlashing is
         delegationManager = IDelegationManager(_delegationManager);
         delegation = IDelegation(_delegation);
         messenger = _l1messenger;
+
+        for (uint i = 0; i < stakerWhitelists.length; i++) {
+            stakerWhitelist[stakerWhitelists[i]] = true;
+        }
+        for (uint i = 0; i < operatorWhitelists.length; i++) {
+            operatorWhitelist[operatorWhitelists[i]] = true;
+        }
     }
 
     /**
