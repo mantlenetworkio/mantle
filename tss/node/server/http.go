@@ -50,23 +50,6 @@ type jwtHandler struct {
 	handler http.Handler
 }
 
-// newJWTHandler creates a http.Handler with jwt authentication support.
-func newJWTHandler(jwtSecretStr string, handler http.Handler) (http.Handler, error) {
-	jwtSecret, err := hexutil.Decode(jwtSecretStr)
-	if err != nil {
-		return nil, err
-	}
-	if len(jwtSecret) != jwtKeyLength {
-		return nil, fmt.Errorf("invalid jwt secret length, expected length %d, actual length %d", jwtKeyLength, len(jwtSecret))
-	}
-	return &jwtHandler{
-		keyFunc: func(token *jwt.Token) (interface{}, error) {
-			return jwtSecret, nil
-		},
-		handler: handler,
-	}, nil
-}
-
 // ServeHTTP implements http.Handler
 func (handler *jwtHandler) ServeHTTP(out http.ResponseWriter, r *http.Request) {
 	var (
@@ -112,7 +95,7 @@ func NewHttpServer(addr string, t tsslib.Server, signer *sign.Processor, nonProd
 		nonProd:   nonProd,
 		signer:    signer,
 	}
-	handler, err := newJWTHandler(jwtSecretStr, hs.newHandler())
+	handler, err := hs.newHandler(jwtSecretStr)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +127,15 @@ func (hs *Server) Stop() {
 	}
 }
 
-func (hs *Server) newHandler() http.Handler {
+func (hs *Server) newHandler(jwtSecretStr string) (http.Handler, error) {
+	jwtSecret, err := hexutil.Decode(jwtSecretStr)
+	if err != nil {
+		return nil, err
+	}
+	if len(jwtSecret) != jwtKeyLength {
+		return nil, fmt.Errorf("invalid jwt secret length, expected length %d, actual length %d", jwtKeyLength, len(jwtSecret))
+	}
+
 	router := mux.NewRouter()
 	router.Handle("/ping", http.HandlerFunc(hs.pingHandler)).Methods(http.MethodGet)
 	router.Handle("/gen-key", http.HandlerFunc(hs.keyGenHandler)).Methods(http.MethodPost)
@@ -157,7 +148,13 @@ func (hs *Server) newHandler() http.Handler {
 	))
 
 	router.Use(logMiddleware())
-	return router
+
+	return &jwtHandler{
+		keyFunc: func(token *jwt.Token) (interface{}, error) {
+			return jwtSecret, nil
+		},
+		handler: router,
+	}, nil
 }
 
 func logMiddleware() mux.MiddlewareFunc {
