@@ -1,12 +1,10 @@
 package common
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -21,17 +19,9 @@ type JwtHandler struct {
 }
 
 func NewJwtHandler(handle http.Handler, jetSecretKey string) (http.Handler, error) {
-	jwtSecret, err := hexutil.Decode(jetSecretKey)
-	if err != nil {
-		return nil, fmt.Errorf("decoding jwt secret key error: %s", err.Error())
-	}
-	if len(jwtSecret) != jwtKeyLength {
-		return nil, fmt.Errorf("invalid jwt secret length, expected length %d, actual length %d", jwtKeyLength, len(jwtSecret))
-	}
-
 	jwtHandler := &JwtHandler{
 		keyFunc: func(token *jwt.Token) (interface{}, error) {
-			return jwtSecret, nil
+			return []byte(jetSecretKey), nil
 		},
 		handler: handle,
 	}
