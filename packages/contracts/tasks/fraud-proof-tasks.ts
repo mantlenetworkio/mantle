@@ -48,7 +48,7 @@ task('whiteListInit')
       'http://localhost:9545'
     )
     const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
-    // const proposerAddr = process.env.BVM_ROLLUPER_ADDRESS
+    const proposerAddr = process.env.BVM_ROLLUPER_ADDRESS
     const entryOwner = new ethers.Wallet(deployerKey, provider)
 
     console.log(
@@ -64,8 +64,8 @@ task('whiteListInit')
     const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
     await rollup.connect(entryOwner).addToOperatorWhitelist(whiteListToAdd)
     await rollup.connect(entryOwner).addToStakerWhitelist(whiteListToAdd)
-    // console.log('transferOwnerShip')
-    // await rollup.connect(entryOwner).transferOwnership(proposerAddr)
+    console.log('transferOwnerShip')
+    await rollup.connect(entryOwner).transferOwnership(proposerAddr)
   })
 
 task('rollupStake')
