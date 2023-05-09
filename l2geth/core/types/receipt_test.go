@@ -281,3 +281,102 @@ func clearComputedFieldsOnLog(t *testing.T, log *Log) {
 	log.TxIndex = math.MaxUint32
 	log.Index = math.MaxUint32
 }
+
+func TestDecodeReceiptsBytes(t *testing.T) {
+
+	tx := NewTransaction(1, common.HexToAddress("0x1"), big.NewInt(1), 1, big.NewInt(1), nil)
+	receipt := &Receipt{
+		PostState:         common.Hash{2}.Bytes(),
+		Status:            ReceiptStatusSuccessful,
+		CumulativeGasUsed: 1,
+		Logs: []*Log{
+			{Address: common.BytesToAddress([]byte{0x11})},
+			{Address: common.BytesToAddress([]byte{0x01, 0x11})},
+		},
+		TxHash:           tx.Hash(),
+		ContractAddress:  common.BytesToAddress([]byte{0x02, 0x22, 0x22}),
+		GasUsed:          10000,
+		BlockHash:        common.BytesToHash([]byte{0x03, 0x33, 0x33}),
+		BlockNumber:      big.NewInt(math.MaxUint32),
+		TransactionIndex: math.MaxUint32,
+		L1GasPrice:       big.NewInt(int64(100)),
+		L1GasUsed:        big.NewInt(int64(100)),
+		L1Fee:            big.NewInt(int64(200)),
+		FeeScalar:        big.NewFloat(10.12),
+		DAGasPrice:       big.NewInt(int64(10)),
+		DAGasUsed:        big.NewInt(int64(10)),
+		DAFee:            big.NewInt(int64(10)),
+	}
+	receipt.Bloom = CreateBloom(Receipts{receipt})
+	var s Receipt
+	receiptByte, err := rlp.EncodeToBytes(&receipt)
+	t.Logf("receipt = %v", receipt)
+	if err != nil {
+		t.Fatalf(err.Error())
+		return
+	}
+	err = rlp.DecodeReceiptsBytes(receiptByte, &s)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	t.Logf("result = %v", s)
+
+	if !bytes.Equal(receipt.PostState, s.PostState) {
+		t.Errorf("receipt.PostState = %v, want %v", receipt.PostState, s.PostState)
+	}
+
+	for i := 0; i < len(s.Logs); i++ {
+		if s.Logs[i].Address != receipt.Logs[i].Address {
+			t.Fatalf("receipt log %d address mismatch, want %v, have %v", i, receipt.Logs[i].Address, s.Logs[i].Address)
+		}
+	}
+	if receipt.Status != s.Status {
+		t.Errorf("receipt.Status = %v, want %v", receipt.Status, s.Status)
+	}
+	if receipt.CumulativeGasUsed != s.CumulativeGasUsed {
+		t.Errorf("receipt.CumulativeGasUsed = %v, want %v", receipt.CumulativeGasUsed, s.CumulativeGasUsed)
+	}
+	if receipt.Bloom != s.Bloom {
+		t.Errorf("receipt.Bloom = %v, want %v", receipt.Bloom, s.Bloom)
+	}
+	if receipt.TxHash != s.TxHash {
+		t.Errorf("receipt.TxHash = %v, want %v", receipt.TxHash, s.TxHash)
+	}
+	if receipt.ContractAddress != s.ContractAddress {
+		t.Errorf("receipt.ContractAddress = %v, want %v", receipt.ContractAddress, s.ContractAddress)
+	}
+	if receipt.GasUsed != s.GasUsed {
+		t.Errorf("receipt.GasUsed = %v, want %v", receipt.GasUsed, s.GasUsed)
+	}
+	if receipt.BlockHash != s.BlockHash {
+		t.Errorf("receipt.BlockHash = %v, want %v", receipt.BlockHash, s.BlockHash)
+	}
+	if receipt.BlockNumber != s.BlockNumber {
+		t.Errorf("receipt.BlockNumber = %v, want %v", receipt.BlockNumber, s.BlockNumber)
+	}
+	if receipt.TransactionIndex != s.TransactionIndex {
+		t.Errorf("receipt.TransactionIndex = %v, want %v", receipt.TransactionIndex, s.TransactionIndex)
+	}
+	if receipt.L1GasPrice != s.L1GasPrice {
+		t.Errorf("receipt.L1GasPrice = %v, want %v", receipt.L1GasPrice, s.L1GasPrice)
+	}
+	if receipt.L1Fee != s.L1Fee {
+		t.Errorf("receipt.L1Fee = %v, want %v", receipt.L1Fee, s.L1Fee)
+	}
+	if receipt.L1GasUsed != s.L1GasUsed {
+		t.Errorf("receipt.L1GasUsed = %v, want %v", receipt.L1GasUsed, s.L1GasUsed)
+	}
+	if receipt.FeeScalar != s.FeeScalar {
+		t.Errorf("receipt.FeeScalar = %v, want %v", receipt.FeeScalar, s.FeeScalar)
+	}
+	if receipt.DAFee != s.DAFee {
+		t.Errorf("receipt.DAFee = %v, want %v", receipt.DAFee, s.DAFee)
+	}
+	if receipt.DAGasUsed != s.DAGasUsed {
+		t.Errorf("receipt.DAGasUsed = %v, want %v", receipt.DAGasUsed, s.DAGasUsed)
+	}
+	if receipt.DAGasPrice != s.L1GasPrice {
+		t.Errorf("receipt.L1GasPrice = %v, want %v", receipt.DAGasPrice, s.DAGasPrice)
+	}
+
+}
