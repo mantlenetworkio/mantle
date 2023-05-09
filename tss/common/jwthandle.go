@@ -10,7 +10,6 @@ import (
 
 const (
 	jwtExpiryTimeout = 60 * time.Second
-	jwtKeyLength     = 32
 )
 
 type JwtHandler struct {
