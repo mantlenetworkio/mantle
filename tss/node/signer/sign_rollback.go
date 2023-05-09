@@ -35,14 +35,21 @@ func (p *Processor) SignRollBack() {
 				if err := json.Unmarshal(req.Params, &nodeSignRequest); err != nil {
 					logger.Error().Msg("failed to unmarshal roll back request")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					sendErr := p.wsClient.SendMsg(RpcResponse)
+					if sendErr != nil {
+						logger.Error().Msg("failed to send unmarshal error on ws client rpc response | err = " + sendErr.Error())
+
+					}
 					continue
 				}
 				var requestBody tsscommon.RollBackRequest
 				if err := json.Unmarshal(rawMsg, &requestBody); err != nil {
 					logger.Error().Msg("failed to umarshal roll back params request body")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					sendErr := p.wsClient.SendMsg(RpcResponse)
+					if sendErr != nil {
+						logger.Error().Msg("failed to send unmarshal error on ws client rpc response | err = " + sendErr.Error())
+					}
 					continue
 				}
 				nodeSignRequest.RequestBody = requestBody
@@ -51,7 +58,10 @@ func (p *Processor) SignRollBack() {
 				if err != nil {
 					logger.Err(err).Msg("failed to encode roll back msg")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					sendErr := p.wsClient.SendMsg(RpcResponse)
+					if sendErr != nil {
+						logger.Error().Msg("failed to send encode roll back msg on ws client rpc response | err = " + sendErr.Error())
+					}
 					continue
 				}
 

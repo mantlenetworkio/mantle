@@ -28,7 +28,10 @@ func (p *Processor) VerifySlash() {
 				if err := json.Unmarshal(req.Params, &askRequest); err != nil {
 					logger.Error().Msg("failed to unmarshal ask request")
 					RpcResponse = tdtypes.NewRPCErrorResponse(resId, 201, "failed to unmarshal", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					sendErr := p.wsClient.SendMsg(RpcResponse)
+					if sendErr != nil {
+						logger.Error().Msg("failed to send unmarshal error on ws client rpc response | err = " + sendErr.Error())
+					}
 					continue
 				}
 
@@ -62,7 +65,11 @@ func (p *Processor) VerifySlash() {
 					Result: ret,
 				}
 				RpcResponse = tdtypes.NewRPCSuccessResponse(resId, askResponse)
-				p.wsClient.SendMsg(RpcResponse)
+				sendErr := p.wsClient.SendMsg(RpcResponse)
+				if sendErr != nil {
+					logger.Error().Msg("failed to send unmarshal error on ws client rpc response | err = " + sendErr.Error())
+
+				}
 			}
 		}
 	}()

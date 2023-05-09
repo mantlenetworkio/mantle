@@ -33,7 +33,10 @@ func (p *Processor) Verify() {
 				if err := json.Unmarshal(req.Params, &askRequest); err != nil {
 					logger.Error().Msg("failed to unmarshal ask request")
 					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to unmarshal ", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					sendMsgErr := p.wsClient.SendMsg(RpcResponse)
+					if sendMsgErr != nil {
+						logger.Error().Msg("failed send json unmarshal error on rpc response for ws client | err =" + sendMsgErr.Error())
+					}
 					continue
 				}
 				var resId = req.ID
@@ -76,7 +79,10 @@ func (p *Processor) Verify() {
 					if err != nil {
 						logger.Err(err).Msg("failed to conv msg to hash")
 						RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to conv msg to hash", err.Error())
-						p.wsClient.SendMsg(RpcResponse)
+						sendMsgErr := p.wsClient.SendMsg(RpcResponse)
+						if sendMsgErr != nil {
+							logger.Error().Msg("failed send conv msg to hash error on rpc response for ws client | err =  " + sendMsgErr.Error())
+						}
 						continue
 					} else {
 						hashStr := hexutil.Encode(hash)
@@ -86,13 +92,19 @@ func (p *Processor) Verify() {
 
 				if getBlockErr {
 					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "get error when verify ", resultErr.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					err := p.wsClient.SendMsg(RpcResponse)
+					if err != nil {
+						logger.Error().Msg("failed send verify error on ws client rpc response | err = " + resultErr.Error())
+					}
 				} else {
 					askResponse := common.AskResponse{
 						Result: result,
 					}
 					RpcResponse = tdtypes.NewRPCSuccessResponse(resId, askResponse)
-					p.wsClient.SendMsg(RpcResponse)
+					err := p.wsClient.SendMsg(RpcResponse)
+					if err != nil {
+						logger.Error().Msg("failed to send rpc response | err = " + err.Error())
+					}
 				}
 
 			}

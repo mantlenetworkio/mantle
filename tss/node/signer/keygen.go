@@ -53,7 +53,10 @@ func (p *Processor) Keygen() {
 				if err := json.Unmarshal(req.Params, &keyR); err != nil {
 					logger.Error().Msg("failed to unmarshal ask request")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					sendErr := p.wsClient.SendMsg(RpcResponse)
+					if sendErr != nil {
+						logger.Error().Msg("failed to send unmarshal error on ws client rpc response | err = " + sendErr.Error())
+					}
 					continue
 				}
 
@@ -73,7 +76,12 @@ func (p *Processor) Keygen() {
 							ClusterPublicKey: resp.PubKey,
 						}
 						RpcResponse := tdtypes.NewRPCSuccessResponse(tdtypes.JSONRPCStringID(resId), keygenResponse)
-						p.wsClient.SendMsg(RpcResponse)
+						sendErr := p.wsClient.SendMsg(RpcResponse)
+						if sendErr != nil {
+							// when it can't send success response,it can still finish setting group public key process
+							logger.Error().Msg("failed to send rpc response  | err = " + sendErr.Error())
+
+						}
 						logger.Info().Msgf("keygen start to set group publickey for l1 contract")
 						err := p.setGroupPublicKey(p.localPubKeyByte, resp.PubKeyByte)
 						if err != nil {
@@ -81,7 +89,10 @@ func (p *Processor) Keygen() {
 						}
 					} else {
 						RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 202, "failed", resp.FailReason)
-						p.wsClient.SendMsg(RpcResponse)
+						sendErr := p.wsClient.SendMsg(RpcResponse)
+						if sendErr != nil {
+							logger.Error().Msg("failed to send unmarshal error on ws client rpc response | err = " + sendErr.Error())
+						}
 					}
 				}
 

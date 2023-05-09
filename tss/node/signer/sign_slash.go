@@ -42,16 +42,22 @@ func (p *Processor) SignSlash() {
 				nodeSignRequest.RequestBody = &rawMsg
 
 				if err := json.Unmarshal(req.Params, &nodeSignRequest); err != nil {
-					logger.Error().Msg("failed to unmarshal node sign request")
+					logger.Error().Msg("failed to unmarshal node sign request ")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					sendErr := p.wsClient.SendMsg(RpcResponse)
+					if sendErr != nil {
+						logger.Error().Msg("failed to send unmarshal error on ws client rpc response | err = " + sendErr.Error())
+					}
 					continue
 				}
 				var requestBody tsscommon.SlashRequest
 				if err := json.Unmarshal(rawMsg, &requestBody); err != nil {
-					logger.Error().Msg("failed to umarshal slash params request body")
+					logger.Error().Msg("failed to unmarshal slash params request body ")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					sendErr := p.wsClient.SendMsg(RpcResponse)
+					if sendErr != nil {
+						logger.Error().Msg("failed to send unmarshal error on ws client rpc response | err = " + sendErr.Error())
+					}
 					continue
 				}
 				nodeSignRequest.RequestBody = requestBody
@@ -60,7 +66,10 @@ func (p *Processor) SignSlash() {
 				if err != nil {
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 
-					p.wsClient.SendMsg(RpcResponse)
+					sendErr := p.wsClient.SendMsg(RpcResponse)
+					if sendErr != nil {
+						logger.Error().Msg("failed to send check event failed error on ws client rpc response | err = " + sendErr.Error())
+					}
 					logger.Err(err).Msg("check event failed")
 					continue
 				}
@@ -75,7 +84,10 @@ func (p *Processor) SignSlash() {
 				if err != nil {
 					logger.Err(err).Msg("failed to encode SlashMsg")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					sendErr := p.wsClient.SendMsg(RpcResponse)
+					if sendErr != nil {
+						logger.Error().Msg("failed to send encode SlashMsg error on ws client rpc response | err = " + sendErr.Error())
+					}
 					continue
 				}
 
@@ -103,7 +115,10 @@ func (p *Processor) SignSlash() {
 				if err != nil {
 					logger.Err(err).Msg("failed to txbuilder slash tranction")
 					errorRes := tdtypes.NewRPCErrorResponse(req.ID, 201, "sign failed", err.Error())
-					p.wsClient.SendMsg(errorRes)
+					sendErr := p.wsClient.SendMsg(errorRes)
+					if sendErr != nil {
+						logger.Error().Msg("failed to send txbuilder slash tranction error on ws client rpc response | err = " + sendErr.Error())
+					}
 					continue
 				}
 
