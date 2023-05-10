@@ -284,6 +284,7 @@ func clearComputedFieldsOnLog(t *testing.T, log *Log) {
 
 func TestDecodeReceiptsBytes(t *testing.T) {
 
+	FeeScalar := &big.Float{}
 	tx := NewTransaction(1, common.HexToAddress("0x4932"), big.NewInt(math.MaxUint32), math.MaxUint64, big.NewInt(math.MaxUint32), []byte{0x11})
 	receipt := &Receipt{
 		PostState:         common.Hash{1}.Bytes(),
@@ -299,13 +300,13 @@ func TestDecodeReceiptsBytes(t *testing.T) {
 		BlockHash:        common.BytesToHash([]byte{0x03, 0x33, 0x33}),
 		BlockNumber:      big.NewInt(math.MaxUint32),
 		TransactionIndex: math.MaxUint32,
-		L1GasPrice:       big.NewInt(int64(100)),
+		L1GasPrice:       big.NewInt(0),
 		L1GasUsed:        big.NewInt(int64(100)),
 		L1Fee:            big.NewInt(int64(100)),
-		FeeScalar:        big.NewFloat(10.12),
-		DAGasPrice:       big.NewInt(int64(10)),
+		FeeScalar:        FeeScalar,
 		DAGasUsed:        big.NewInt(int64(10)),
-		DAFee:            big.NewInt(int64(10)),
+		DAFee:            &big.Int{},
+		DAGasPrice:       big.NewInt(int64(10)),
 	}
 	receipt.Bloom = CreateBloom(Receipts{receipt})
 
@@ -394,4 +395,31 @@ var receiptTests = []Receipt{
 
 	//info Missing longitude,Ten in total
 	{FeeScalar: big.NewFloat(10.123456789)},
+
+	//info Default to 0
+	{DAFee: nil},
+
+	//info Decode to 0
+	{DAFee: &big.Int{}},
+
+	//info Decode to 0
+	{FeeScalar: &big.Float{}},
+
+	//info If the field is nil, decode to the default value
+	{
+		PostState:         common.Hash{1}.Bytes(),
+		CumulativeGasUsed: 1800,
+		Logs: []*Log{
+			{Address: common.BytesToAddress([]byte("0x112"))},
+			{Address: common.BytesToAddress([]byte{0x01, 0x11})},
+		},
+		GasUsed:    10000,
+		L1GasPrice: big.NewInt(0),
+		L1GasUsed:  big.NewInt(int64(100)),
+		L1Fee:      big.NewInt(int64(100)),
+		FeeScalar:  big.NewFloat(10.12),
+		DAGasUsed:  big.NewInt(int64(10)),
+		DAFee:      &big.Int{},
+		DAGasPrice: big.NewInt(int64(10)),
+	},
 }
