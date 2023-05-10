@@ -142,6 +142,7 @@ abstract contract DelegationManager is
         bool undelegateIfPossible
     )
         external
+        virtual
         whenNotPaused
         onlyNotFrozen(msg.sender)
         nonReentrant
@@ -228,7 +229,7 @@ abstract contract DelegationManager is
     * - The withdrawer completes the queued withdrawal after the stake is inactive or a withdrawal fraud proof period has passed,
     *   whichever is longer. They specify whether they would like the withdrawal in shares or in tokens.
     */
-    function startQueuedWithdrawalWaitingPeriod(bytes32 withdrawalRoot, uint32 stakeInactiveAfter) external {
+    function startQueuedWithdrawalWaitingPeriod(bytes32 withdrawalRoot, uint32 stakeInactiveAfter) external virtual {
         require(
             queuedWithdrawals[withdrawalRoot].unlockTimestamp == QUEUED_WITHDRAWAL_INITIALIZED_VALUE,
             "InvestmentManager.startQueuedWithdrawalWaitingPeriod: Withdrawal stake inactive claim has already been made"
@@ -332,6 +333,7 @@ abstract contract DelegationManager is
         uint256[] calldata shareAmounts
     )
         external
+        virtual
         whenNotPaused
         onlyOwner
         onlyFrozen(slashedAddress)

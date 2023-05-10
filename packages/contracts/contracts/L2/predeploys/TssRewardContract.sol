@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import {ITssRewardContract} from  "./iTssRewardContract.sol";
 import {IBVM_GasPriceOracle} from "./iBVM_GasPriceOracle.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAddresses.sol";
 import { CrossDomainEnabled } from "../../libraries/bridge/CrossDomainEnabled.sol";
 
@@ -30,23 +31,25 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     uint256 public lastBatchTime;
     uint256 public sendAmountPerYear;
     address public sccAddress;
-    // staker => operator
-    mapping(address => address) public delegatedTo;
-    // operator => investment strategy => total number of shares delegated to them
-    mapping(address => mapping(address => uint256)) public operatorStakerShares;
-    //operator => stakers
-    mapping(address => address[]) public operatorStakers;
-    // operator => total number of shares
-    mapping(address => uint256) public operatorShares;
-    // operator or staker => tssreward
-    mapping(address => uint256) public rewardDetails;
-    //claimer => staker
-    mapping(address => address) public claimers;
 
+    uint256 public dustBlock;
+    uint256 public waitingTime;
+    // operator => tssreward
+    mapping(address => uint256) public rewardDetails;
+    //operator => claimer
+    mapping(address => address) public operators;
+    //claimer => operator
+    mapping(address => address) public claimers;
+    //operator => timestamp
+    mapping(address => uint256) public claimTimes;
+    //operator => claim number
+    mapping(address => uint256) public claimAmout;
+    using SafeERC20 for IERC20;
+    IERC20 public rewardToken;
 
 
     // set call address
-    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress,address _l2CrossDomainMessenger, address _sccAddress)
+    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress,address _l2CrossDomainMessenger, address _sccAddress, uint256 _waitingTime, address _token)
     Ownable() CrossDomainEnabled(_l2CrossDomainMessenger)
     {
         transferOwnership(_owner);
@@ -54,6 +57,8 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
         sendAmountPerYear = _sendAmountPerYear;
         bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
         sccAddress = _sccAddress;
+        waitingTime = _waitingTime;
+        rewardToken = IERC20(_token);
     }
 
     // slither-disable-next-line locked-ether
@@ -79,8 +84,20 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
         _;
     }
 
+    modifier onlyAuthorized() {
+        address operator = claimers[msg.sender];
+        require(operator != address(0),
+        "The msg sender is not authorized by the validator"
+        );
+        _;
+    }
+
     function setSendAmountPerYear(uint256 _sendAmountPerYear) public onlyOwner {
         sendAmountPerYear = _sendAmountPerYear;
+    }
+
+    function setWaitingTime(uint256 _waitingTime) public onlyOwner {
+        waitingTime = _waitingTime;
     }
 
     function querySendAmountPerSecond() public view returns (uint256){
@@ -147,19 +164,9 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
             delete ledger[_blockStartHeight + i];
         }
         if (batchAmount > 0) {
-            batchAmount = batchAmount + dust;
-            dust = 0;
-            sendAmount = batchAmount.div(_tssMembers.length);
-            for (uint j = 0; j < _tssMembers.length; j++) {
-                address payable addr = payable(_tssMembers[j]);
-                accu = accu.add(sendAmount);
-                totalAmount = totalAmount.sub(sendAmount);
-                addr.transfer(sendAmount);
-            }
-            uint256 reserved = batchAmount.sub(accu);
-            if (reserved > 0) {
-                dust = dust.add(reserved);
-            }
+            batchAmount = batchAmount + dustBlock;
+            dustBlock = 0;
+            _distributeReward(batchAmount, _tssMembers, true);
         }
         emit DistributeTssRewardByBlock(
             _blockStartHeight,
@@ -190,14 +197,14 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     }
 
     /**
-     * @dev withdraw div dust
+     * @dev withdraw div dustBlock
      */
     function withdrawDust() external onlyOwner checkBalance {
-        uint256 amount = dust;
-        totalAmount = totalAmount.sub(dust);
-        dust = 0;
+        uint256 amount = dustBlock;
+        totalAmount = totalAmount.sub(amount);
+        dustBlock = 0;
         if (amount > 0) {
-        payable(owner()).transfer(dust);
+            rewardToken.safeTransfer(owner(),amount);
         }
     }
 
@@ -206,149 +213,100 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
      */
     function withdraw() external onlyOwner checkBalance {
         totalAmount = 0;
-        if (address(this).balance > 0) {
-            payable(owner()).transfer(address(this).balance);
+        uint256 balance = rewardToken.balanceOf(address(this));
+        if (balance > 0) {
+            rewardToken.safeTransfer(owner(),balance);
         }
     }
 
-    /**
-     * @dev Increases the `staker`'s delegated shares
-     * @param _operator the address of operator which staker chosed
-     * @param _staker the address of staker
-     * @param _shares the number of staker delegated for operator
-     */
-    function increaseDelegatedShares(address _operator, address _staker, uint256 _shares)
-    external
-    virtual
-    onlyFromCrossDomainAccount(sccAddress) {
-        _increaseDelegation(_operator, _staker, _shares);
+    function requestClaim() external onlyAuthorized returns (bool) {
+        address operator = claimers[msg.sender];
+        uint256 time = claimTimes[operator];
+        require(time == 0,
+        "You have already initiated a request to claim, please wait for the waiting period to pass"
+        );
+        claimTimes[operator] = block.timestamp;
+        claimAmout[operator] = rewardDetails[operator];
+        return true;
     }
 
-    /**
-     * @dev Decreases the `staker`'s delegated shares
-     * @param _operator the address of operator which staker chosed
-     * @param _staker the address of staker
-     * @param _shares the number of staker delegated for operator
-     */
-    function decreaseDelegatedShares(address _operator, address _staker, uint256 _shares)
-    external
-    virtual
-    onlyFromCrossDomainAccount(sccAddress) {
-        _decreasDelegation(_operator, _staker, _shares);
-    }
-
-    /**
-     * @dev first stake and delegated shares
-     * @param _operator the address of operator which staker chosed
-     * @param _staker the address of staker
-     * @param _shares the number of staker delegated for operator
-     */
-    function delegate(address _operator, address _staker, uint256 _shares)
-    external
-    virtual
-    onlyFromCrossDomainAccount(sccAddress) {
-        //store staker => operator
-        delegatedTo[_staker] = _operator;
-        operatorStakers[_operator].push(_staker);
-        claimers[_staker] = _staker;
-        _increaseDelegation(_operator, _staker, _shares);
+    function queryClaimTime() external view onlyAuthorized returns (uint256) {
+        address operator = claimers[msg.sender];
+        uint256 remainTime = _remainTime(operator);
+        return remainTime;
     }
 
     /**
      * @dev Claim reward
-     * @param _addr the address of reward owner
      */
-    function claim(address _addr) external {
-        _claim(_addr);
+    function claim() external onlyAuthorized {
+        address operator = claimers[msg.sender];
+        uint256 remainTime = _remainTime(operator);
+        require(remainTime == 0,
+        "please wait for the waiting period to pass"
+        );
+        _claim(operator);
+        delete claimTimes[operator];
     }
 
-    /**
-     * @dev Claim reward and withdraw
-     * @param _addr the address of reward owner
-     */
-    function claimWithdraw(address _addr) external {
-        _claim(_addr);
-        address staker = claimers[_addr];
-        delete rewardDetails[staker];
-        address operator = delegatedTo[staker];
-        uint256 shares = operatorStakerShares[operator][staker];
-        operatorShares[operator] -= shares;
-        delete operatorStakerShares[operator][staker];
-        delete delegatedTo[staker];
-        delete claimers[_addr];
-        _deleteStakers(operator, staker);
-    }
-
-    function setClaimer(address _staker, address _claimer)
+    function setClaimer(address _operator, address _claimer)
     external
     virtual
     onlyFromCrossDomainAccount(sccAddress)
     {
-        claimers[_claimer] = _staker;
+        claimers[_claimer] = _operator;
+        operators[_operator] = _claimer;
     }
 
-
-
-    function _claim(address _addr) internal {
-        address staker = claimers[_addr];
-        uint256 amount = rewardDetails[staker];
-        if (amount > 0) {
-            address payable addr = payable(_addr);
-            addr.transfer(amount);
-            rewardDetails[staker] = 0;
+    function _remainTime(address operator) internal view returns (uint256) {
+        uint256 time = claimTimes[operator];
+        require(time != 0,
+        "please initiate a request to claim first"
+        );
+        uint256 last = time + waitingTime;
+        uint256 remaining;
+        if ( last > block.timestamp ) {
+            remaining = last - block.timestamp;
+        }else {
+            remaining = 0;
         }
-        emit Claim(_addr, amount);
+        return remaining;
     }
 
-    function _increaseDelegation(address _operator, address _staker, uint256 _shares) internal {
-        //store operator => staker =>shares
-        operatorStakerShares[_operator][_staker] += _shares;
-        operatorShares[_operator] += _shares;
-    }
 
-    function _decreasDelegation(address _operator, address _staker, uint256 _shares) internal {
-        operatorStakerShares[_operator][_staker] -= _shares;
-        operatorShares[_operator] -= _shares;
-    }
-
-    function _deleteStakers(address _operator, address _staker) internal {
-        uint arrayLength = operatorStakers[_operator].length;
-        uint indexToBeDeleted;
-        for (uint i=0; i<arrayLength; i++){
-            if (operatorStakers[_operator][i] == _staker) {
-                indexToBeDeleted = i;
-                break;
-            }
+    function _claim(address _operator) internal {
+        uint256 claimNumber = claimAmout[_operator];
+        uint256 amount = rewardDetails[_operator];
+        if (claimNumber > 0) {
+            address claimer = operators[_operator];
+            rewardToken.safeTransfer(claimer,claimNumber);
+            delete claimAmout[_operator];
+            rewardDetails[_operator] = rewardDetails[_operator] - claimNumber;
         }
-        if (indexToBeDeleted < arrayLength-1) {
-            operatorStakers[_operator][indexToBeDeleted] = operatorStakers[_operator][arrayLength-1];
-        }
-        operatorStakers[_operator].pop();
+        emit Claim(_operator, amount);
     }
 
-    function _distributeReward(uint256 amount, address[] calldata _tssMembers,bool isByBlock) internal {
+    function _distributeReward(uint256 amount, address[] calldata _tssMembers, bool isByBlock) internal {
         if (amount > 0) {
             uint256 sendAmount = 0;
-            uint256 totalShares = 0;
             uint256 accu = 0;
-            for (uint i=0; i<_tssMembers.length; i++){
-                totalShares = totalShares.add(operatorShares[_tssMembers[i]]);
-            }
-            for (uint j = 0; j < _tssMembers.length; j++) {
-                address operator = _tssMembers[j];
-                for (uint i = 0; i < operatorStakers[operator].length; i++) {
-                    address staker = operatorStakers[operator][i];
-                    sendAmount = (amount * operatorStakerShares[operator][staker]).div(totalShares);
-                    rewardDetails[staker] += sendAmount;
-                    accu = accu.add(sendAmount);
-                    if (isByBlock) {
-                        totalAmount = totalAmount.sub(sendAmount);
-                    }
+            sendAmount = amount.div(_tssMembers.length);
+            for (uint i = 0; i < _tssMembers.length; i++) {
+                address operator = _tssMembers[i];
+                rewardDetails[operator] += sendAmount;
+                accu = accu.add(sendAmount);
+                if (isByBlock) {
+                    totalAmount = totalAmount.sub(sendAmount);
                 }
             }
             uint256 reserved = amount.sub(accu);
             if (reserved > 0) {
-                dust = dust.add(reserved);
+                if (isByBlock) {
+                    dustBlock = dustBlock.add(reserved);
+                }else {
+                    dust = dust.add(reserved);
+                }
+
             }
         }
     }

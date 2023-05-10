@@ -14,10 +14,45 @@ import "../../delegation/Delegation.sol";
  * - for anyone to challenge a staker's claim to have fulfilled all its obligation before undelegation
  */
 contract TssDelegation is Delegation {
+
+
+    address public stakingSlash;
+
     // INITIALIZING FUNCTIONS
     constructor(IDelegationManager _delegationManager)
     Delegation(_delegationManager)
     {
         _disableInitializers();
     }
+
+
+    function initialize(
+        address _stakingSlashing,
+        address initialOwner
+    ) external initializer {
+        DOMAIN_SEPARATOR = keccak256(abi.encode(DOMAIN_TYPEHASH, bytes("Mantle"), block.chainid, address(this)));
+        _transferOwnership(initialOwner);
+        stakingSlash = _stakingSlashing;
+    }
+
+    modifier onlyStakingSlash() {
+        require(msg.sender == stakingSlash, "contract call is not staking slashing");
+        _;
+    }
+
+    function registerAsOperator(IDelegationCallback dt, address sender) external onlyStakingSlash {
+        require(
+            address(delegationCallback[sender]) == address(0),
+            "Delegation.registerAsOperator: Delegate has already registered"
+        );
+        // store the address of the delegation contract that the operator is providing.
+        delegationCallback[sender] = dt;
+        _delegate(sender, sender);
+    }
+
+    function delegateTo(address operator, address staker) external onlyStakingSlash whenNotPaused {
+        _delegate(staker, operator);
+    }
+
+
 }

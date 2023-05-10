@@ -191,4 +191,6 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
     function _tokenBalance() internal view virtual returns (uint256) {
         return underlyingToken.balanceOf(address(this));
     }
+
+    
 }
