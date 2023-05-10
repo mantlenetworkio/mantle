@@ -25,6 +25,7 @@ import {
   CrossChainMessage,
   CrossChainMessageProof,
   CrossChainMessageRequest,
+  StorageProof,
   IBridgeAdapter,
   ICrossChainMessenger,
   MessageDirection,
@@ -670,57 +671,6 @@ export class CrossChainMessenger implements ICrossChainMessenger {
     return challengePeriod.toNumber()
   }
 
-  public async getMessageStateRoot(
-    message: MessageLike
-  ): Promise<StateRoot | null> {
-    const resolved = await this.toCrossChainMessage(message)
-
-    // State roots are only a thing for L2 to L1 messages.
-    if (resolved.direction === MessageDirection.L1_TO_L2) {
-      throw new Error(`cannot get a state root for an L1 to L2 message`)
-    }
-
-    // We need the block number of the transaction that triggered the message so we can look up the
-    // state root batch that corresponds to that block number.
-    const messageTxReceipt = await this.l2Provider.getTransactionReceipt(
-      resolved.transactionHash
-    )
-
-    // Every block has exactly one transaction in it. Since there's a genesis block, the
-    // transaction index will always be one less than the block number.
-    const messageTxIndex = messageTxReceipt.blockNumber - 1
-
-    // Pull down the state root batch, we'll try to pick out the specific state root that
-    // corresponds to our message.
-    const stateRootBatch = await this.getStateRootBatchByTransactionIndex(
-      messageTxIndex
-    )
-
-    // No state root batch, no state root.
-    if (stateRootBatch === null) {
-      return null
-    }
-
-    // We have a state root batch, now we need to find the specific state root for our transaction.
-    // First we need to figure out the index of the state root within the batch we found. This is
-    // going to be the original transaction index offset by the total number of previous state
-    // roots.
-    const indexInBatch =
-      messageTxIndex - stateRootBatch.header.prevTotalElements.toNumber()
-
-    // Just a sanity check.
-    if (stateRootBatch.stateRoots.length <= indexInBatch) {
-      // Should never happen!
-      throw new Error(`state root does not exist in batch`)
-    }
-
-    return {
-      stateRoot: stateRootBatch.stateRoots[indexInBatch],
-      stateRootIndexInBatch: indexInBatch,
-      batch: stateRootBatch,
-    }
-  }
-
   public async getStateBatchAppendedEventByBatchIndex(
     batchIndex: number
   ): Promise<ethers.Event | null> {
@@ -740,9 +690,15 @@ export class CrossChainMessenger implements ICrossChainMessenger {
     }
   }
 
-  public async getStateBatchAppendedEventByTransactionIndex(
+  /**
+   * Returns the state batch index for a given transaction index.
+   *
+   * @param transactionIndex Index of the L2 transaction to find an batch for.
+   * @returns Index for the batch that includes the given transaction by index.
+   */
+  public async getStateBatchIndexByTransactionIndex(
     transactionIndex: number
-  ): Promise<ethers.Event | null> {
+  ): Promise<number | null> {
     const isEventHi = (event: ethers.Event, index: number) => {
       const prevTotalElements = event.args._prevTotalElements.toNumber()
       return index < prevTotalElements
@@ -776,7 +732,7 @@ export class CrossChainMessenger implements ICrossChainMessenger {
     } else if (!isEventHi(batchEvent, transactionIndex)) {
       // Upper bound is not too low and also not too high. This means the upper bound event is the
       // one we're looking for! Return it.
-      return batchEvent
+      return toNumber(batchEvent.args._batchIndex)
     }
 
     // Binary search to find the right event. The above checks will guarantee that the event does
@@ -796,17 +752,14 @@ export class CrossChainMessenger implements ICrossChainMessenger {
       }
     }
 
-    return batchEvent
+    return toNumber(batchEvent.args._batchIndex)
   }
 
-  public async getStateRootBatchByTransactionIndex(
-    transactionIndex: number
+  public async getStateRootBatchByBatchIndex(
+    batchIndex: number
   ): Promise<StateRootBatch | null> {
     const stateBatchAppendedEvent =
-      await this.getStateBatchAppendedEventByTransactionIndex(transactionIndex)
-    if (stateBatchAppendedEvent === null) {
-      return null
-    }
+      await this.getStateBatchAppendedEventByBatchIndex(batchIndex)
 
     const stateBatchTransaction = await stateBatchAppendedEvent.getTransaction()
     const [stateRoots] =
@@ -823,47 +776,261 @@ export class CrossChainMessenger implements ICrossChainMessenger {
         batchRoot: stateBatchAppendedEvent.args._batchRoot,
         batchSize: stateBatchAppendedEvent.args._batchSize,
         prevTotalElements: stateBatchAppendedEvent.args._prevTotalElements,
-        signature: stateBatchAppendedEvent.args._signature,
         extraData: stateBatchAppendedEvent.args._extraData,
       },
     }
   }
 
-  public async getMessageProof(
-    message: MessageLike
-  ): Promise<CrossChainMessageProof> {
-    const resolved = await this.toCrossChainMessage(message)
-    if (resolved.direction === MessageDirection.L1_TO_L2) {
-      throw new Error(`can only generate proofs for L2 to L1 messages`)
-    }
 
-    const stateRoot = await this.getMessageStateRoot(resolved)
-    if (stateRoot === null) {
-      throw new Error(`state root for message not yet published`)
-    }
-
-    // We need to calculate the specific storage slot that demonstrates that this message was
-    // actually included in the L2 chain. The following calculation is based on the fact that
-    // messages are stored in the following mapping on L2:
-    // https://github.com/mantlenetworkio/mantle/blob/c84d3450225306abbb39b4e7d6d82424341df2be/packages/contracts/contracts/L2/predeploys/BVM_L2ToL1MessagePasser.sol#L23
-    // You can read more about how Solidity storage slots are computed for mappings here:
-    // https://docs.soliditylang.org/en/v0.8.4/internals/layout_in_storage.html#mappings-and-dynamic-arrays
-    const messageSlot = ethers.utils.keccak256(
-      ethers.utils.keccak256(
-        encodeCrossDomainMessageV0(
-          resolved.target,
-          resolved.sender,
-          resolved.message,
-          resolved.messageNonce
-        ) + remove0x(this.contracts.l2.L2CrossDomainMessenger.address)
-      ) + '00'.repeat(32)
+  /**
+   * Returns information about the state root batch that included the state root for the given
+   * transaction by index. Returns null if no such state root has been published yet.
+   *
+   * @param transactionIndex Index of the L2 transaction to find a state root batch for.
+   * @returns State root batch for the given transaction index, or null if none exists yet.
+   */
+  public async getStateRootBatchByTransactionIndex(
+    transactionIndex: number
+  ): Promise<StateRootBatch | null> {
+    return this.getStateRootBatchByBatchIndex(
+      await this.getStateBatchIndexByTransactionIndex(transactionIndex)
     )
+  }
+
+  public async getFirstStateRootInBatch(
+    batchIndex: number
+  ): Promise<StateRoot | null> {
+    // Pull down the state root batch, we'll try to pick out the specific state root that
+    // corresponds to our transaction index.
+    const stateRootBatch = await this.getStateRootBatchByBatchIndex(batchIndex)
+
+    // No state root batch, no state root.
+    if (stateRootBatch === null) {
+      return null
+    }
+
+    // We have a state root batch, now we need to find the specific state root for our transaction.
+    // First we need to figure out the index of the state root within the batch we found. This is
+    // going to be the original transaction index offset by the total number of previous state
+    // roots.
+    const indexInBatch = 0
+
+    // Just a sanity check.
+    if (stateRootBatch.stateRoots.length <= indexInBatch) {
+      // Should never happen!
+      throw new Error(`state root does not exist in batch`)
+    }
+
+    return {
+      stateRoot: stateRootBatch.stateRoots[indexInBatch],
+      stateRootIndexInBatch: indexInBatch,
+      batch: stateRootBatch,
+    }
+  }
+
+  /**
+   * Returns the state root that corresponds to a given transaction index. This is the state root
+   * for the block in which the transaction was included, as published to the StateCommitmentChain.
+   * If the state root for the given transaction has not been published yet, this function returns
+   * null.
+   *
+   * @param transactionIndex Transaction index to find a state root for.
+   * @returns State root for the block in which the transaction was included.
+   */
+  public async getStateRootByTransactionIndex(
+    transactionIndex: number
+  ): Promise<StateRoot | null> {
+    // Pull down the state root batch, we'll try to pick out the specific state root that
+    // corresponds to our transaction index.
+    const stateRootBatch = await this.getStateRootBatchByTransactionIndex(
+      transactionIndex
+    )
+
+    // No state root batch, no state root.
+    if (stateRootBatch === null) {
+      return null
+    }
+
+    // We have a state root batch, now we need to find the specific state root for our transaction.
+    // First we need to figure out the index of the state root within the batch we found. This is
+    // going to be the original transaction index offset by the total number of previous state
+    // roots.
+    const indexInBatch =
+      transactionIndex - stateRootBatch.header.prevTotalElements.toNumber()
+
+    // Just a sanity check.
+    if (stateRootBatch.stateRoots.length <= indexInBatch) {
+      // Should never happen!
+      throw new Error(`state root does not exist in batch`)
+    }
+
+    return {
+      stateRoot: stateRootBatch.stateRoots[indexInBatch],
+      stateRootIndexInBatch: indexInBatch,
+      batch: stateRootBatch,
+    }
+  }
+
+  /**
+   * Returns the state root that corresponds to a given message. This is the state root for the
+   * block in which the transaction was included, as published to the StateCommitmentChain. If the
+   * state root for the given message has not been published yet, this function returns null.
+   *
+   * @param message Message to find a state root for.
+   * @returns State root for the block in which the message was created.
+   */
+  public async getMessageStateRoot(
+    message: MessageLike
+  ): Promise<StateRoot | null> {
+    const resolved = await this.toCrossChainMessage(message)
+
+    // State roots are only a thing for L2 to L1 messages.
+    if (resolved.direction === MessageDirection.L1_TO_L2) {
+      throw new Error(`cannot get a state root for an L1 to L2 message`)
+    }
+
+    // We need the block number of the transaction that triggered the message so we can look up the
+    // state root batch that corresponds to that block number.
+    const messageTxReceipt = await this.l2Provider.getTransactionReceipt(
+      resolved.transactionHash
+    )
+
+    return this.getStateRootByTransactionIndex(messageTxReceipt.blockNumber - 1)
+  }
+
+  /**
+   * Gets a storage proof (including state root proof) for a given address and storage slot at a
+   * given block tag. A block tag can either be a specific block number or the string "latest" or
+   * "finalized". If the string "finalized" is used, then the proof will be provided with respect
+   * to the latest finalized **state root**.
+   *
+   * @param address Address to get a storage proof for.
+   * @param slot Storage slot to get a storage proof for.
+   * @param opts Additional options.
+   * @param opts.blockTag Gets storage proof for specific L2 block tag.
+   * @param opts.l1BlocksAgo Gets storage proof for batch at least this many L1 blocks old.
+   * @returns Storage proof for the given address and storage slot at the given block tag.
+   */
+  public async getStorageProof(
+    address: string,
+    slot: string,
+    opts?: {
+      blockTag?: NumberLike | 'latest' | 'finalized'
+      l1BlocksAgo?: NumberLike
+    }
+  ): Promise<StorageProof> {
+    // Conflicting options, so only accept one.
+    if (opts?.blockTag !== undefined && opts?.l1BlocksAgo !== undefined) {
+      throw new Error(
+        `cannot specify both blockTag and l1BlocksAgo in getStorageProof`
+      )
+    }
+
+    if (opts?.blockTag === undefined && opts?.l1BlocksAgo === undefined) {
+      opts = {
+        ...opts,
+        blockTag: 'finalized',
+      }
+    }
+
+    let stateRoot: StateRoot
+
+    if (opts?.blockTag !== undefined) {
+      if (opts.blockTag === 'finalized') {
+        const fpw =
+          await this.contracts.l1.StateCommitmentChain.FRAUD_PROOF_WINDOW()
+        const latestBlock = await this.l1Provider.getBlock('latest')
+        const totalBatches =
+          await this.contracts.l1.StateCommitmentChain.getTotalBatches()
+
+        // Nothing can be finalized if there are no batches.
+        if (totalBatches.eq(0)) {
+          throw new Error(`no state root batches have been submitted yet`)
+        }
+
+        const isBatchFinalized = async (
+          batchIndex: number
+        ): Promise<boolean> => {
+          const event = await this.getStateBatchAppendedEventByBatchIndex(
+            batchIndex
+          )
+
+          // Happens when the StateCommitmentChain is redeployed. We'll just assume these are
+          // finalized, shouldn't be a problem in practice.
+          if (event === null && batchIndex < totalBatches.toNumber()) {
+            return true
+          }
+
+          const block = await event.getBlock()
+          return block.timestamp + fpw.toNumber() < latestBlock.timestamp
+        }
+
+        // Perform a binary search to find the latest finalized batch.
+        let hasSomeFinalized = false
+        let lo = 0
+        let hi = totalBatches.toNumber()
+        while (lo + 1 !== hi) {
+          const mid = Math.floor((lo + hi) / 2)
+          if (await isBatchFinalized(mid)) {
+            hasSomeFinalized = true
+            lo = mid
+          } else {
+            hi = mid - 1
+          }
+        }
+
+        // Might happen early on in the chain when there are no finalized batches yet.
+        if (!hasSomeFinalized) {
+          throw new Error(`no state root batches have been finalized yet`)
+        }
+
+        stateRoot = await this.getFirstStateRootInBatch(lo)
+      } else if (opts.blockTag === 'latest') {
+        const totalBatches =
+          await this.contracts.l1.StateCommitmentChain.getTotalBatches()
+        stateRoot = await this.getFirstStateRootInBatch(
+          totalBatches.toNumber() - 1
+        )
+      } else {
+        stateRoot = await this.getStateRootByTransactionIndex(
+          toNumber(opts.blockTag)
+        )
+      }
+    }
+
+    if (opts?.l1BlocksAgo !== undefined) {
+      const latest = await this.l1Provider.getBlockNumber()
+      const lo = Math.max(0, latest - toNumber(opts.l1BlocksAgo) - 2000)
+      const hi = Math.min(lo + 2000, latest - toNumber(opts.l1BlocksAgo))
+
+      const stateRootBatchEvents =
+        await this.contracts.l1.StateCommitmentChain.queryFilter(
+          this.contracts.l1.StateCommitmentChain.filters.StateBatchAppended(),
+          lo,
+          hi
+        )
+
+      // Shouldn't happen in practice. We publish state roots every ~5 minutes which is approx
+      // every 25 blocks on mainnet. No state roots within 2000 blocks would be a big problem.
+      if (stateRootBatchEvents.length === 0) {
+        throw new Error(
+          `no state root batch found within ${lo} and ${hi} blocks ago`
+        )
+      }
+
+      const stateRootBatchEvent = stateRootBatchEvents[0]
+      stateRoot = await this.getFirstStateRootInBatch(
+        stateRootBatchEvent.args._batchIndex
+      )
+    }
 
     const stateTrieProof = await makeStateTrieProof(
       this.l2Provider as ethers.providers.JsonRpcProvider,
-      resolved.blockNumber,
-      this.contracts.l2.BVM_L2ToL1MessagePasser.address,
-      messageSlot
+      toNumber(stateRoot.batch.header.prevTotalElements) +
+      stateRoot.stateRootIndexInBatch +
+      1,
+      address,
+      slot
     )
 
     return {
@@ -879,6 +1046,47 @@ export class CrossChainMessenger implements ICrossChainMessenger {
       stateTrieWitness: toHexString(rlp.encode(stateTrieProof.accountProof)),
       storageTrieWitness: toHexString(rlp.encode(stateTrieProof.storageProof)),
     }
+  }
+
+
+  /**
+   * Generates the proof required to finalize an L2 to L1 message.
+   *
+   * @param message Message to generate a proof for.
+   * @returns Proof that can be used to finalize the message.
+   */
+  public async getMessageProof(
+    message: MessageLike
+  ): Promise<CrossChainMessageProof> {
+    const resolved = await this.toCrossChainMessage(message)
+    if (resolved.direction === MessageDirection.L1_TO_L2) {
+      throw new Error(`can only generate proofs for L2 to L1 messages`)
+    }
+
+    // We need to calculate the specific storage slot that demonstrates that this message was
+    // actually included in the L2 chain. The following calculation is based on the fact that
+    // messages are stored in the following mapping on L2:
+    // https://github.com/ethereum-optimism/optimism/blob/c84d3450225306abbb39b4e7d6d82424341df2be/packages/contracts/contracts/L2/predeploys/OVM_L2ToL1MessagePasser.sol#L23
+    // You can read more about how Solidity storage slots are computed for mappings here:
+    // https://docs.soliditylang.org/en/v0.8.4/internals/layout_in_storage.html#mappings-and-dynamic-arrays
+    const messageSlot = ethers.utils.keccak256(
+      ethers.utils.keccak256(
+        encodeCrossDomainMessageV0(
+          resolved.target,
+          resolved.sender,
+          resolved.message,
+          resolved.messageNonce
+        ) + remove0x(this.contracts.l2.L2CrossDomainMessenger.address)
+      ) + '00'.repeat(32)
+    )
+
+    return this.getStorageProof(
+      this.contracts.l2.BVM_L2ToL1MessagePasser.address,
+      messageSlot,
+      {
+        blockTag: resolved.blockNumber,
+      }
+    )
   }
 
   public async sendMessage(

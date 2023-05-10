@@ -313,17 +313,6 @@ export interface ICrossChainMessenger {
   ): Promise<Event | null>
 
   /**
-   * Returns the StateBatchAppended event for the batch that includes the transaction with the
-   * given index. Returns null if no such event exists.
-   *
-   * @param transactionIndex Index of the L2 transaction to find an event for.
-   * @returns StateBatchAppended event for the batch that includes the given transaction by index.
-   */
-  getStateBatchAppendedEventByTransactionIndex(
-    transactionIndex: number
-  ): Promise<Event | null>
-
-  /**
    * Returns information about the state root batch that included the state root for the given
    * transaction by index. Returns null if no such state root has been published yet.
    *
