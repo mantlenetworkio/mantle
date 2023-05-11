@@ -49,4 +49,7 @@ type Config struct {
 	SequencerClientHttp string
 
 	MpcVerifier bool
+
+	// EigenDaFee blockNumber Config
+	EigenDaBlock int64
 }

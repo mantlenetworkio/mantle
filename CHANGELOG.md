@@ -1,5 +1,10 @@
 # Changelog
-## [0.3.1] - 2023-04-13
+## [0.3.2] - 2023-05-10
+
+### Features
+- Reduce the amount of data sent to Layer1 rollup using EigenLayer, significantly lowering gas fees for Layer2([#811](https://github.com/mantlenetworkio/mantle/pull/811)、[#825](https://github.com/mantlenetworkio/mantle/pull/825))
+
+## [0.3.1](https://github.com/mantlenetworkio/mantle/commits/v0.3.1) - 2023-04-13
 
 ### Features
 - Changed the rollup method from Layer1 CTC contract to EigenDA([#779](https://github.com/mantlenetworkio/mantle/pull/779))

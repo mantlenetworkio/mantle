@@ -72,6 +72,9 @@ type Receipt struct {
 	L1GasUsed  *big.Int   `json:"l1GasUsed" gencodec:"required"`
 	L1Fee      *big.Int   `json:"l1Fee" gencodec:"required"`
 	FeeScalar  *big.Float `json:"l1FeeScalar" gencodec:"required"`
+	DAGasPrice *big.Int   `json:"daGasPrice" `
+	DAGasUsed  *big.Int   `json:"daGasUsed" `
+	DAFee      *big.Int   `json:"daFee"`
 }
 
 type receiptMarshaling struct {
@@ -84,6 +87,10 @@ type receiptMarshaling struct {
 	L1GasPrice        *hexutil.Big
 	L1GasUsed         *hexutil.Big
 	L1Fee             *hexutil.Big
+	// use eigen DA
+	DAGasUsed  *big.Int
+	DAGasPrice *big.Int
+	DAFee      *big.Int
 }
 
 // receiptRLP is the consensus encoding of a receipt.
@@ -104,6 +111,10 @@ type storedReceiptRLP struct {
 	L1GasPrice *big.Int
 	L1Fee      *big.Int
 	FeeScalar  string
+	// use eigenDA
+	DAGasUsed  *big.Int
+	DAGasPrice *big.Int
+	DAFee      *big.Int
 }
 
 // v4StoredReceiptRLP is the storage encoding of a receipt used in database version 4.
@@ -214,6 +225,9 @@ func (r *ReceiptForStorage) EncodeRLP(w io.Writer) error {
 		L1GasPrice:        r.L1GasPrice,
 		L1Fee:             r.L1Fee,
 		FeeScalar:         feeScalar,
+		DAGasUsed:         r.DAGasUsed,
+		DAGasPrice:        r.DAGasPrice,
+		DAFee:             r.DAFee,
 	}
 	for i, log := range r.Logs {
 		enc.Logs[i] = (*LogForStorage)(log)
@@ -244,7 +258,7 @@ func (r *ReceiptForStorage) DecodeRLP(s *rlp.Stream) error {
 
 func decodeStoredReceiptRLP(r *ReceiptForStorage, blob []byte) error {
 	var stored storedReceiptRLP
-	if err := rlp.DecodeBytes(blob, &stored); err != nil {
+	if err := rlp.DecodeReceiptsBytes(blob, &stored); err != nil {
 		return err
 	}
 	if err := (*Receipt)(r).setStatus(stored.PostStateOrStatus); err != nil {
@@ -270,6 +284,9 @@ func decodeStoredReceiptRLP(r *ReceiptForStorage, blob []byte) error {
 	r.L1GasPrice = stored.L1GasPrice
 	r.L1Fee = stored.L1Fee
 	r.FeeScalar = scalar
+	r.DAGasUsed = stored.DAGasUsed
+	r.DAGasPrice = stored.DAGasPrice
+	r.DAFee = stored.DAFee
 
 	return nil
 }

@@ -69,6 +69,7 @@ type StateTransition struct {
 	evm        *vm.EVM
 	// UsingBVM
 	l1Fee *big.Int
+	daFee *big.Int
 }
 
 // Message represents a message sent to a contract.
@@ -131,6 +132,7 @@ func IntrinsicGas(data []byte, contractCreation, isHomestead bool, isEIP2028 boo
 // NewStateTransition initialises and returns a new state transition object.
 func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition {
 	l1Fee := new(big.Int)
+	daFee := new(big.Int)
 	gasPrice := msg.GasPrice()
 	if rcfg.UsingBVM {
 		if msg.GasPrice().Cmp(common.Big0) != 0 {
@@ -142,6 +144,10 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 				gasPrice = common.Big0
 			} else if charge.Cmp(common.Big1) == 1 {
 				panic(fmt.Sprintf("charge:%v is invaild", charge))
+			}
+			daCharge := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.DaSwitchSlot).Big()
+			if daCharge.Cmp(common.Big1) == 0 {
+				daFee, _ = fees.CalculateDAMsgFee(msg, evm.StateDB, nil)
 			}
 		}
 	}
@@ -155,6 +161,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 		data:     msg.Data(),
 		state:    evm.StateDB,
 		l1Fee:    l1Fee,
+		daFee:    daFee,
 	}
 }
 
@@ -192,9 +199,11 @@ func (st *StateTransition) buyGas() error {
 		// Only charge the L1 fee for QueueOrigin sequencer transactions
 		if st.msg.QueueOrigin() == types.QueueOriginSequencer {
 			mgval = mgval.Add(mgval, st.l1Fee)
+			mgval = mgval.Add(mgval, st.daFee)
 			if st.msg.CheckNonce() {
 				log.Debug("Adding L1 fee", "l1-fee", st.l1Fee)
 			}
+
 		}
 	}
 	if st.state.GetBalance(st.msg.From()).Cmp(mgval) < 0 {
@@ -289,9 +298,11 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		if isBurning.Cmp(big.NewInt(1)) == 0 {
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 			fee := new(big.Int).Add(st.l1Fee, l2Fee)
+			fee = new(big.Int).Add(fee, st.daFee)
 			st.state.AddBalance(evm.Coinbase, fee)
 		} else if isBurning.Cmp(big.NewInt(0)) == 0 {
-			st.state.AddBalance(dump.BvmFeeWallet, st.l1Fee)
+			fee := new(big.Int).Add(st.l1Fee, st.daFee)
+			st.state.AddBalance(dump.BvmFeeWallet, fee)
 			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 			st.state.AddBalance(dump.TssRewardAddress, l2Fee)
 			data, err := tssreward.PacketData(evm.BlockNumber, l2Fee)

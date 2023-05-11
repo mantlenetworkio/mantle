@@ -30,6 +30,9 @@ type Config struct {
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
 	LoggingConfig             logging.Config
+	MetricsServerEnable       bool
+	MetricsHostname           string
+	MetricsPort               uint64
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -61,6 +64,9 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		NeedReRollupBatch:         ctx.GlobalString(flags.NeedReRollupBatchFlag.Name),
 		ReRollupToolEnable:        ctx.GlobalBool(flags.ReRollupToolEnableFlag.Name),
 		DisableHTTP2:              ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
+		MetricsServerEnable:       ctx.GlobalBool(flags.MetricsServerEnableFlag.Name),
+		MetricsHostname:           ctx.GlobalString(flags.MetricsHostnameFlag.Name),
+		MetricsPort:               ctx.GlobalUint64(flags.MetricsPortFlag.Name),
 	}
 	return cfg, nil
 }
