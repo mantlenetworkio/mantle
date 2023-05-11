@@ -50,6 +50,12 @@ const deployFn: DeployFunction = async (hre) => {
       name: names.managed.accounts.BVM_Proposer,
       address: hre.deployConfig.bvmProposerAddress,
     },
+    // BVM_Rolluper is the address allowed to submit state roots & assertion (transaction results) to the
+    // Rollup.
+    {
+      name: names.managed.accounts.BVM_Rolluper,
+      address: hre.deployConfig.bvmRolluperAddress,
+    },
     // L1_BIT_ADDRESS indicate l1 bit token erc20 contract address
     {
       name: names.managed.configs.L1_BIT_ADDRESS,

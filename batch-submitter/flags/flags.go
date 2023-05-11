@@ -70,6 +70,12 @@ var (
 		Required: true,
 		EnvVar:   "SCC_ADDRESS",
 	}
+	FPRollupAddressFlag = cli.StringFlag{
+		Name:     "fraud-proof-rollup-address",
+		Usage:    "Address of the FraudProof Rollup contract",
+		Required: true,
+		EnvVar:   "FP_ROLLUP_ADDRESS",
+	}
 	MinL1TxSizeFlag = cli.Uint64Flag{
 		Name: "min-l1-tx-size",
 		Usage: "Minimum size in bytes of any L1 transaction that gets " +
@@ -268,6 +274,11 @@ var (
 		Usage:  "Whether or not to disable HTTP/2 support.",
 		EnvVar: prefixEnvVar("HTTP2_DISABLE"),
 	}
+	SccRollbackFlag = cli.BoolFlag{
+		Name:   "EnableSccRollbackFlag",
+		Usage:  "Whether or not to enable scc rollback.",
+		EnvVar: prefixEnvVar("SCC_ROLLBACK"),
+	}
 )
 
 var requiredFlags = []cli.Flag{
@@ -280,6 +291,7 @@ var requiredFlags = []cli.Flag{
 	DaUpgradeBlockFlag,
 	CTCAddressFlag,
 	SCCAddressFlag,
+	FPRollupAddressFlag,
 	MinL1TxSizeFlag,
 	MaxL1TxSizeFlag,
 	MaxPlaintextBatchSizeFlag,
