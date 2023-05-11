@@ -32,7 +32,7 @@ task('mpcUpdateL1BridgeChugCode')
 
     const upgrade = getContractDefinition('L1StandardBridgeUpdate')
 
-    console.log('set Code')
+    console.log('set Code:')
     console.log(upgrade.deployedBytecode)
 
 
