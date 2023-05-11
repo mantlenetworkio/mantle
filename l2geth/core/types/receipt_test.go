@@ -18,6 +18,7 @@ package types
 
 import (
 	"bytes"
+	"fmt"
 	"math"
 	"math/big"
 	"reflect"
@@ -421,5 +422,158 @@ var receiptTests = []Receipt{
 		DAGasUsed:  big.NewInt(int64(10)),
 		DAFee:      &big.Int{},
 		DAGasPrice: big.NewInt(int64(10)),
+	},
+}
+
+func TestDecodeReceiptsBytesV2(t *testing.T) {
+	receiptTest := receiptErrorTests
+
+	for i := range receiptTest {
+		receiptByte, err := encodeAsStoredReceiptRLPV2(&receiptTest[i])
+		if err != nil {
+			fmt.Printf("Error encoding receipt: %v\n", err)
+			continue
+		}
+		var s ReceiptForStorage
+		err = rlp.DecodeReceiptsBytes(receiptByte, &s)
+		if err != nil {
+			fmt.Printf("Error decoding RLP receipt: %v", err)
+		}
+
+		t.Logf("receipt is %v", receiptTest[i])
+		t.Logf("want %v", s)
+
+		if !bytes.Equal(receiptTest[i].PostState, s.PostState) {
+			t.Errorf("receipt.PostState = %v, want %v", receiptTest[i].PostState, s.PostState)
+		}
+
+		for j := 0; j < len(s.Logs); j++ {
+			if s.Logs[j].Address != receiptTest[i].Logs[j].Address {
+				t.Fatalf("receipt log %d address mismatch, want %v, have %v", i, receiptTest[i].Logs[j].Address, s.Logs[j].Address)
+			}
+		}
+		if receiptTest[i].CumulativeGasUsed != s.CumulativeGasUsed {
+			t.Errorf("receipt.CumulativeGasUsed = %v, want %v", receiptTest[i].CumulativeGasUsed, s.CumulativeGasUsed)
+		}
+		if receiptTest[i].L1GasPrice.String() != s.L1GasPrice.String() {
+			t.Errorf("receipt.L1GasPrice = %v, want %v", receiptTest[i].L1GasPrice, s.L1GasPrice)
+		}
+		if receiptTest[i].L1Fee.String() != s.L1Fee.String() {
+			t.Errorf("receipt.L1Fee = %v, want %v", receiptTest[i].L1Fee, s.L1Fee)
+		}
+		if receiptTest[i].L1GasUsed.String() != s.L1GasUsed.String() {
+			t.Errorf("receipt.L1GasUsed = %v, want %v", receiptTest[i].L1GasUsed, s.L1GasUsed)
+		}
+		if receiptTest[i].FeeScalar.String() != s.FeeScalar.String() {
+			t.Errorf("receipt.FeeScalar = %v, want %v", receiptTest[i].FeeScalar, s.FeeScalar)
+		}
+		if receiptTest[i].DAFee.String() != s.DAFee.String() {
+			t.Errorf("receipt.DAFee = %v, want %v", receiptTest[i].DAFee, s.DAFee)
+		}
+		if receiptTest[i].DAGasUsed.String() != s.DAGasUsed.String() {
+			t.Errorf("receipt.DAGasUsed = %v, want %v", receiptTest[i].DAGasUsed, s.DAGasUsed)
+		}
+		if receiptTest[i].DAGasPrice.String() != s.DAGasPrice.String() {
+			t.Errorf("receipt.L1GasPrice = %v, want %v", receiptTest[i].DAGasPrice, s.DAGasPrice)
+		}
+		if err == nil {
+			fmt.Println("--------------------------------------")
+		}
+	}
+
+}
+
+// The rest are right
+var receiptErrorTests = []Receipt{
+	//big.int,big.float transfer negative number
+	//error rlp: cannot encode negative *big.Int
+	{
+		TxHash:            NewTransaction(1, common.HexToAddress("0x1"), big.NewInt(1), 1, big.NewInt(1), nil).Hash(),
+		PostState:         common.Hash{1}.Bytes(),
+		CumulativeGasUsed: 1800,
+		Logs: []*Log{
+			{Address: common.BytesToAddress([]byte("0x112"))},
+			{Address: common.BytesToAddress([]byte{0x01, 0x11})},
+		},
+		GasUsed:    10000,
+		L1GasPrice: big.NewInt(-1),
+		L1GasUsed:  big.NewInt(int64(-1)),
+		L1Fee:      big.NewInt(int64(-1)),
+		FeeScalar:  big.NewFloat(-10.12),
+		DAGasUsed:  big.NewInt(int64(-1)),
+		DAFee:      big.NewInt(int64(-1)),
+		DAGasPrice: big.NewInt(int64(-10)),
+	},
+	//big.float transfer long longitude
+	//info Missing longitude,Ten in total
+	{
+		TxHash:            NewTransaction(1, common.HexToAddress("0x1"), big.NewInt(1), 1, big.NewInt(1), nil).Hash(),
+		PostState:         common.Hash{1}.Bytes(),
+		CumulativeGasUsed: 1800,
+		Logs: []*Log{
+			{Address: common.BytesToAddress([]byte("0x112"))},
+			{Address: common.BytesToAddress([]byte{0x01, 0x11})},
+		},
+		GasUsed:    10000,
+		L1GasPrice: big.NewInt(0),
+		L1GasUsed:  big.NewInt(int64(100)),
+		L1Fee:      big.NewInt(int64(100)),
+		FeeScalar:  big.NewFloat(10.123456789),
+		DAGasUsed:  big.NewInt(int64(10)),
+		DAFee:      big.NewInt(int64(10)),
+		DAGasPrice: big.NewInt(int64(10)),
+	},
+	//transfer fields nil
+	{
+		TxHash:            NewTransaction(1, common.HexToAddress("0x1"), big.NewInt(1), 1, big.NewInt(1), nil).Hash(),
+		PostState:         common.Hash{1}.Bytes(),
+		CumulativeGasUsed: 1800,
+		Logs: []*Log{
+			{Address: common.BytesToAddress([]byte("0x112"))},
+			{Address: common.BytesToAddress([]byte{0x01, 0x11})},
+		},
+		GasUsed:    10000,
+		L1GasPrice: big.NewInt(0),
+		L1GasUsed:  big.NewInt(int64(100)),
+		L1Fee:      nil,
+		FeeScalar:  big.NewFloat(10.12),
+		DAGasUsed:  nil,
+		DAFee:      nil,
+		DAGasPrice: big.NewInt(int64(10)),
+	},
+	//Do not transfer fields
+	{
+		TxHash:            NewTransaction(1, common.HexToAddress("0x1"), big.NewInt(1), 1, big.NewInt(1), nil).Hash(),
+		PostState:         common.Hash{1}.Bytes(),
+		CumulativeGasUsed: 1800,
+		Logs: []*Log{
+			{Address: common.BytesToAddress([]byte("0x112"))},
+			{Address: common.BytesToAddress([]byte{0x01, 0x11})},
+		},
+		GasUsed:    10000,
+		L1GasUsed:  big.NewInt(int64(100)),
+		L1Fee:      big.NewInt(int64(100)),
+		FeeScalar:  big.NewFloat(10.12),
+		DAGasUsed:  big.NewInt(int64(10)),
+		DAFee:      big.NewInt(int64(10)),
+		DAGasPrice: big.NewInt(int64(10)),
+	},
+	//*big.int is empty,
+	{
+		TxHash:            NewTransaction(1, common.HexToAddress("0x1"), big.NewInt(1), 1, big.NewInt(1), nil).Hash(),
+		PostState:         common.Hash{1}.Bytes(),
+		CumulativeGasUsed: 1800,
+		Logs: []*Log{
+			{Address: common.BytesToAddress([]byte("0x112"))},
+			{Address: common.BytesToAddress([]byte{0x01, 0x11})},
+		},
+		GasUsed:    10000,
+		L1GasPrice: big.NewInt(int64(100)),
+		L1GasUsed:  big.NewInt(int64(100)),
+		L1Fee:      big.NewInt(int64(100)),
+		FeeScalar:  big.NewFloat(10.12),
+		DAGasUsed:  big.NewInt(int64(10)),
+		DAGasPrice: big.NewInt(int64(10)),
+		DAFee:      &big.Int{},
 	},
 }
