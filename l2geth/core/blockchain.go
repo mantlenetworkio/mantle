@@ -1451,6 +1451,66 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 	return status, nil
 }
 
+// WriteBlockAndSetHead writes the given block and all associated state to the database,
+// and applies the block as the new chain head.
+func (bc *BlockChain) WriteBlockAndSetHead(block *types.Block, receipts []*types.Receipt, logs []*types.Log, state *state.StateDB, emitHeadEvent bool) (status WriteStatus, err error) {
+	if !bc.chainmu.TryLock() {
+		return NonStatTy, errors.New("blockchain is stopped")
+	}
+	defer bc.chainmu.Unlock()
+
+	return bc.writeBlockAndSetHead(block, receipts, logs, state, emitHeadEvent)
+}
+
+// writeBlockAndSetHead is the internal implementation of WriteBlockAndSetHead.
+// This function expects the chain mutex to be held.
+func (bc *BlockChain) writeBlockAndSetHead(block *types.Block, receipts []*types.Receipt, logs []*types.Log, state *state.StateDB, emitHeadEvent bool) (status WriteStatus, err error) {
+	if _, err := bc.writeBlockWithState(block, receipts, logs, state, emitHeadEvent); err != nil {
+		return NonStatTy, err
+	}
+	// TODO-FIXME test this
+	//currentBlock := bc.CurrentBlock()
+	// ignore reorg logics
+	//reorg, err := bc.forker.ReorgNeeded(currentBlock.Header(), block.Header())
+	//if err != nil {
+	//	return NonStatTy, err
+	//}
+	//if reorg {
+	//	// Reorganise the chain if the parent is not the head block
+	//	if block.ParentHash() != currentBlock.Hash() {
+	//		if err := bc.reorg(currentBlock, block); err != nil {
+	//			return NonStatTy, err
+	//		}
+	//	}
+	//	status = CanonStatTy
+	//} else {
+	status = SideStatTy
+	//}
+	// Set new head.
+	if status == CanonStatTy {
+		bc.writeHeadBlock(block)
+	}
+	bc.futureBlocks.Remove(block.Hash())
+
+	if status == CanonStatTy {
+		bc.chainFeed.Send(ChainEvent{Block: block, Hash: block.Hash(), Logs: logs})
+		if len(logs) > 0 {
+			bc.logsFeed.Send(logs)
+		}
+		// In theory we should fire a ChainHeadEvent when we inject
+		// a canonical block, but sometimes we can insert a batch of
+		// canonical blocks. Avoid firing too many ChainHeadEvents,
+		// we will fire an accumulated ChainHeadEvent and disable fire
+		// event here.
+		if emitHeadEvent {
+			bc.chainHeadFeed.Send(ChainHeadEvent{Block: block})
+		}
+	} else {
+		bc.chainSideFeed.Send(ChainSideEvent{Block: block})
+	}
+	return status, nil
+}
+
 // addFutureBlock checks if the block is within the max allowed window to get
 // accepted for future processing, and returns an error if the block is too far
 // ahead and was not added.

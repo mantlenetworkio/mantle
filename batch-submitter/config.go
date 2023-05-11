@@ -75,6 +75,9 @@ type Config struct {
 	// SCCAddress is the SCC contract address.
 	SCCAddress string
 
+	// FPRollupAddress is the fraud proof rollup contract address.
+	FPRollupAddress string
+
 	// MinL1TxSize is the minimum size in bytes of any L1 transactions generated
 	// by the batch submitter.
 	MinL1TxSize uint64
@@ -201,6 +204,8 @@ type Config struct {
 
 	// DisableHTTP2 disables HTTP2 support.
 	DisableHTTP2 bool
+
+	EnableSccRollback bool
 }
 
 // NewConfig parses the Config from the provided flags or environment variables.
@@ -217,6 +222,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		DAAddress:                 ctx.GlobalString(flags.DaAddressFlag.Name),
 		CTCAddress:                ctx.GlobalString(flags.CTCAddressFlag.Name),
 		SCCAddress:                ctx.GlobalString(flags.SCCAddressFlag.Name),
+		FPRollupAddress:           ctx.GlobalString(flags.FPRollupAddressFlag.Name),
 		MinL1TxSize:               ctx.GlobalUint64(flags.MinL1TxSizeFlag.Name),
 		MaxL1TxSize:               ctx.GlobalUint64(flags.MaxL1TxSizeFlag.Name),
 		MaxPlaintextBatchSize:     ctx.GlobalUint64(flags.MaxPlaintextBatchSizeFlag.Name),
@@ -249,6 +255,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		MetricsHostname:     ctx.GlobalString(flags.MetricsHostnameFlag.Name),
 		MetricsPort:         ctx.GlobalUint64(flags.MetricsPortFlag.Name),
 		DisableHTTP2:        ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
+		EnableSccRollback:   ctx.GlobalBool(flags.SccRollbackFlag.Name),
 	}
 
 	err := ValidateConfig(&cfg)
