@@ -74,6 +74,7 @@ subtask(TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE).setAction(
 
 // @ts-ignore
 // @ts-ignore
+// @ts-ignore
 const config: HardhatUserConfig = {
   networks: {
     hardhat: {
