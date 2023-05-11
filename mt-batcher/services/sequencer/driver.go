@@ -418,7 +418,7 @@ func (d *Driver) DisperseStoreData(data []byte, startl2BlockNumber *big.Int, end
 }
 
 func (d *Driver) GetEigenLayerNode() (int, error) {
-	operators, err := d.GraphClient.QueryOperators()
+	operators, err := d.GraphClient.QueryOperatorsByStatus()
 	if err != nil {
 		log.Error("MtBatcher query operators fail", "err", err)
 		return 0, err
