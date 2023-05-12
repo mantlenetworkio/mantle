@@ -997,6 +997,13 @@ func (s *SyncService) applyIndexedTransaction(tx *types.Transaction) error {
 	if *index < next {
 		return s.applyHistoricalTransaction(tx)
 	}
+	if s.dtlEigenEnable {
+		if *index > next {
+			latestEigenBatchIndex := s.GetLatestEigenBatchIndex()
+			eigenBatchIndex := *latestEigenBatchIndex - 1
+			s.SetLatestEigenBatchIndex(&eigenBatchIndex)
+		}
+	}
 	return fmt.Errorf("Received tx at index %d when looking for %d", *index, next)
 }
 
