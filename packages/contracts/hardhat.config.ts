@@ -112,9 +112,9 @@ const config: HardhatUserConfig = {
       url: 'http://127.0.0.1:8545',
       accounts: [privateKey],
     },
-    goerlibn: {
+    goerli: {
       chainId: 5,
-      url: 'https://eth-goerli.g.alchemy.com/v2/821_LFssCCQnEG3mHnP7tSrc87IQKsUp',
+      url: 'https://rpc.ankr.com/eth_goerli',
       deploy,
       accounts: [privateKey],
     },

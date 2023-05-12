@@ -9,12 +9,13 @@ task('mpcUpdateL1BridgeChugCode')
   .setAction(async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners()
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28'
     )
     //0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e is the key of addressmananger
     //address: 0xd5add52d36399570e56c183d949da83ac29aa7d6
+    //this is a account of goerli-network, we will use the gnosis-safe on mainnet
     const ownerWallet = new ethers.Wallet(
-      '0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e',
+      '0x574108d5a6bfa179e9727887e315c1cd08ec2f8ca09dd4f00b1abd591011375f',
       provider
     )
     const l1ChugSplashProxy = getContractFactory('L1ChugSplashProxy').attach(
@@ -67,13 +68,14 @@ task('mpcUpdateL1CrossDomainMessenger')
   .setAction(async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners()
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28'
     )
 
     //0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e is the key of addressmananger
     //address: 0xd5add52d36399570e56c183d949da83ac29aa7d6
+    //this is a account of goerli-network, we will use the gnosis-safe on mainnet
     const ownerWallet = new ethers.Wallet(
-      '0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e',
+      '0x574108d5a6bfa179e9727887e315c1cd08ec2f8ca09dd4f00b1abd591011375f',
       provider
     )
 
@@ -96,23 +98,24 @@ task('mpcUpdateTssGroupManagerCode')
   .setAction(async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners()
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28'
     )
 
     //0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e is the key of addressmananger
     //address: 0xd5add52d36399570e56c183d949da83ac29aa7d6
+    //this is a account of goerli-network, we will use the gnosis-safe on mainnet
     const ownerWallet = new ethers.Wallet(
-      '0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e',
+      '0x574108d5a6bfa179e9727887e315c1cd08ec2f8ca09dd4f00b1abd591011375f',
       provider
     )
 
-    const l1TransparentProxy = getContractFactory('TransparentUpgradeableProxy').attach(taskArgs.contract)
-
-    console.log('Query before setImplementation')
-    console.log(
-      'Implementation :',
-      await l1TransparentProxy.connect(ownerWallet).callStatic.implementation()
-    )
+    // const l1TransparentProxy = getContractFactory('TransparentUpgradeableProxy').attach(taskArgs.contract)
+    //
+    // console.log('Query before setImplementation')
+    // console.log(
+    //   'Implementation :',
+    //   await l1TransparentProxy.connect(ownerWallet).callStatic.implementation()
+    // )
 
     const tssGroupManagerUpgrade = getContractFactory('TssGroupManagerUpgrade')
     const TssGroupManagerUpgrade = await tssGroupManagerUpgrade
@@ -134,11 +137,12 @@ task('mpcUpdateTssStakingSlashCode')
   .setAction(async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners()
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28'
     )
 
     //0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e is the key of addressmananger
     //address: 0xd5add52d36399570e56c183d949da83ac29aa7d6
+    //this is a account of goerli-network, we will use the gnosis-safe on mainnet
     const ownerWallet = new ethers.Wallet(
       '0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e',
       provider
@@ -172,11 +176,12 @@ task('mpcUpdateEigenDataLayrChainCode')
   .setAction(async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners()
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      'https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28'
     )
 
     //0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e is the key of addressmananger
     //address: 0xd5add52d36399570e56c183d949da83ac29aa7d6
+    //this is a account of goerli-network, we will use the gnosis-safe on mainnet
     const ownerWallet = new ethers.Wallet(
       '0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e',
       provider

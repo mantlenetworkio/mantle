@@ -36,14 +36,13 @@ cast --to-unit 1000000000000000000wei ether
 
 mpcUpdateL1BridgeChugCode
 ```shell
-yarn hardhat mpcUpdateL1BridgeChugCode --contract 0x52753615226F8aC8a464bfecb11Ef798CFF3793f --network local
-
+yarn hardhat mpcUpdateL1BridgeChugCode --contract 0x802e4857306AF17f654452112a50E58f4a58e28D --network goerli
 ```
 
 #### local: mpcUpdateL1CrossDomainMessenger
 
 ```shell
-yarn hardhat mpcUpdateL1CrossDomainMessenger --contract 0x19C22f181280dF6Ad1d97285cdD430173Df91C12 --network local
+yarn hardhat mpcUpdateL1CrossDomainMessenger --contract 0xfDe0ef603c3DCbcbB94F451238caC39Adad41918 --network goerli
 ```
 
 query owner:
@@ -54,11 +53,11 @@ cast call --rpc-url  http://localhost:9545 \
 ```
 
 #### local:mpcUpdateTssGroupManagerCode
+if we want to query the implementation, we must use the admin address and privatekey.
 
 upgradecode
 ```shell
-yarn hardhat mpcUpdateTssGroupManagerCode --contract 0xa83239cf2b900682001f9144144B5E5e5788A631 --network local
-
+yarn hardhat mpcUpdateTssGroupManagerCode --contract 0xa83239cf2b900682001f9144144B5E5e5788A631 --network goerli
 ```
 
 query implementation
@@ -74,7 +73,7 @@ cast call --rpc-url  http://localhost:9545 \
 
 updatecode
 ```shell
-yarn hardhat mpcUpdateTssStakingSlashCode --contract 0xe6cd9e7b620964bECd42c7Ad41e56724f515E284 --network local
+yarn hardhat mpcUpdateTssStakingSlashCode --contract 0xe6cd9e7b620964bECd42c7Ad41e56724f515E284 --network goerli
 ```
 
 query implementation:
