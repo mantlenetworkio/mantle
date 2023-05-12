@@ -1,8 +1,8 @@
 # Changelog
-## [0.3.2] - 2023-04-18
+## [0.3.2] - 2023-05-10
 
 ### Features
-- Reduce the amount of data sent to Layer1 rollup using EigenLayer, significantly lowering gas fees for Layer2([#811](https://github.com/mantlenetworkio/mantle/pull/811))
+- Reduce the amount of data sent to Layer1 rollup using EigenLayer, significantly lowering gas fees for Layer2([#811](https://github.com/mantlenetworkio/mantle/pull/811)、[#825](https://github.com/mantlenetworkio/mantle/pull/825))
 
 ## [0.3.1](https://github.com/mantlenetworkio/mantle/commits/v0.3.1) - 2023-04-13
 
