@@ -31,6 +31,7 @@ var (
 	TestnetGenesisHash = common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d")
 	RinkebyGenesisHash = common.HexToHash("0x6341fd3daf94b748c72ced5a5b26028f2474f5f00d824504e4fa37a75767e177")
 	GoerliGenesisHash  = common.HexToHash("0xbf7e331f7f7c1dd2e05159666b3bf8bc7a8a3a9eb1d518969eab529dd9b88c1a")
+	MainnetChainID     = int64(5000)
 )
 
 // TrustedCheckpoints associates each known checkpoint with the genesis hash of
@@ -437,9 +438,9 @@ func (c *ChainConfig) IsUpdateGasLimitBlock(num *big.Int) bool {
 // IsEigenDa returns whether num represents a block number after the IsEigenDa fork
 func (c *ChainConfig) IsEigenDa(num *big.Int) bool {
 	// c.eigenda block maybe nil for mainnet
-	// in this case, we need to upgrade the code of gasoralce too!
-	if c.EigenDaBlock == nil {
-		return true
+	// in this case, we have write the code into genesis.json
+	if c.EigenDaBlock == nil && c.ChainID.Int64() == MainnetChainID {
+		return false
 	}
 	return c.EigenDaBlock.Cmp(num) == 0
 }

@@ -1,7 +1,7 @@
 const config = {
   l1BlockTimeSeconds: 15,
   l2BlockGasLimit: 15_000_000,
-  l2ChainId: 5000,
+  l2ChainId: 17,
   updateGaslimitBlock: 10,
   eigenDaBlock: 100,
   ctcL2GasDiscountDivisor: 32,
