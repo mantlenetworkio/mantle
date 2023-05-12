@@ -483,7 +483,6 @@ func TestDecodeReceiptsBytesV2(t *testing.T) {
 
 }
 
-// The rest are right
 var receiptErrorTests = []Receipt{
 	//big.int,big.float transfer negative number
 	//error rlp: cannot encode negative *big.Int
@@ -575,5 +574,23 @@ var receiptErrorTests = []Receipt{
 		DAGasUsed:  big.NewInt(int64(10)),
 		DAGasPrice: big.NewInt(int64(10)),
 		DAFee:      &big.Int{},
+	},
+	//right
+	{
+		TxHash:            NewTransaction(1, common.HexToAddress("0x1"), big.NewInt(1), 1, big.NewInt(1), nil).Hash(),
+		PostState:         common.Hash{1}.Bytes(),
+		CumulativeGasUsed: 1800,
+		Logs: []*Log{
+			{Address: common.BytesToAddress([]byte("0x112"))},
+			{Address: common.BytesToAddress([]byte{0x01, 0x11})},
+		},
+		GasUsed:    10000,
+		L1GasPrice: big.NewInt(120),
+		L1GasUsed:  big.NewInt(int64(100)),
+		L1Fee:      big.NewInt(int64(100)),
+		FeeScalar:  big.NewFloat(10.12),
+		DAGasUsed:  big.NewInt(int64(10)),
+		DAFee:      big.NewInt(int64(10)),
+		DAGasPrice: big.NewInt(int64(10)),
 	},
 }
