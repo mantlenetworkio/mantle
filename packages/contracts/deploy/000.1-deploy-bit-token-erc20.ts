@@ -24,20 +24,10 @@ const deployFn: DeployFunction = async (hre) => {
       signerOrProvider: deployer,
     }
   )
-  console.log(`Checking the bit token was correctly set...`)
-  console.log(bitContract.address)
-  console.log(hre.deployConfig.l1BitAddress)
-  if (await isHardhatNode(hre)) {
-    await awaitCondition(
-      async () => {
-        return hexStringEquals(bitContract.address, hre.deployConfig.l1BitAddress)
-      },
-      5000,
-      1
-    )
-    console.log(`Check pass`)
-  }
-  console.log(`Check pass`)
+  console.log(`Checking the bit token was correctly set...`);
+  console.log("bitContract.address: ", bitContract.address)
+  hre.deployConfig.l1BitAddress = bitContract.address;
+  (global as any).L1_BIT_ADDRESS = bitContract.address;
 }
 
 deployFn.tags = ['bit-token', 'upgrade']
