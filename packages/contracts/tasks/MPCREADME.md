@@ -13,7 +13,7 @@
 for every time we upgrade the contract on mainnet，we need to change the
 deploy address.
 
-#### local:updateL1BridgeChug
+#### local:updateL1BridgeChug        mpc verified
 
 tranfer eth balance to addressmanager owner
 ```shell
@@ -40,11 +40,14 @@ yarn hardhat mpcUpdateL1BridgeChug --contract 0x802e4857306AF17f654452112a50E58f
 ```
 
 ```shell
-cast call --rpc-url  https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28 0x1eFfED12A9408c830fD19535F89131f1829debc4 "getTestUpdate()"
+cast call --rpc-url  https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28 0x802e4857306AF17f654452112a50E58f4a58e28D "getTestUpdate()"
+cast send --rpc-url  https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28  \
+--private-key 574108d5a6bfa179e9727887e315c1cd08ec2f8ca09dd4f00b1abd591011375f \
+--from 0xFca9E706e5b0AE97B8F98F747F57Fa64f75EC48D 0x802e4857306AF17f654452112a50E58f4a58e28D "setTestUpdate(uint256)"  121
 cast call --rpc-url  https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28 0x1eFfED12A9408c830fD19535F89131f1829debc4 "testUpdate()"
 ```
 
-#### local: mpcUpdateL1CrossDomainMessenger
+#### local: mpcUpdateL1CrossDomainMessenger   mpc verified
 
 ```shell
 yarn hardhat mpcUpdateL1CrossDomainMessenger --contract 0xfDe0ef603c3DCbcbB94F451238caC39Adad41918 --network goerli
@@ -57,6 +60,14 @@ cast call --rpc-url  http://localhost:9545 \
 --from 0xd5add52d36399570e56c183d949da83ac29aa7d6 0x19C22f181280dF6Ad1d97285cdD430173Df91C12 "owner()"
 ```
 
+```shell
+cast call --rpc-url  https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28 0x1eFfED12A9408c830fD19535F89131f1829debc4 "getTestUpdate()"
+cast send --rpc-url  https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28 --private-key 574108d5a6bfa179e9727887e315c1cd08ec2f8ca09dd4f00b1abd591011375f \
+--from 0xFca9E706e5b0AE97B8F98F747F57Fa64f75EC48D 0xfDe0ef603c3DCbcbB94F451238caC39Adad41918 "setTestUpdate(uint256)"  12
+cast call --rpc-url  https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28 0x1eFfED12A9408c830fD19535F89131f1829debc4 "testUpdate()"
+```
+
+
 #### local:mpcUpdateTssGroupManager
 if we want to query the implementation, we must use the admin address and privatekey.
 
@@ -67,11 +78,20 @@ yarn hardhat mpcUpdateTssGroupManager --contract 0xa83239cf2b900682001f9144144B5
 
 query implementation
 ```shell
+
+cast call --rpc-url  https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28  0x4A1fC57Be953Fa5C24868457C025F116863Be7ba "owner()"
+
 cast call --rpc-url  http://localhost:9545 \
 --private-key 26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e \
 --from 0xd5add52d36399570e56c183d949da83ac29aa7d6 0xa83239cf2b900682001f9144144B5E5e5788A631 "implementation()"
-
 ```
+
+```shell
+cast call --rpc-url  https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28 0x1eFfED12A9408c830fD19535F89131f1829debc4 "getTestUpdate()"
+cast call --rpc-url  https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28 0x1eFfED12A9408c830fD19535F89131f1829debc4 "setTestUpdate(uint256)"  12
+cast call --rpc-url  https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28 0x1eFfED12A9408c830fD19535F89131f1829debc4 "testUpdate()"
+```
+
 
 
 #### local:mpcUpdateTssStakingSlash

@@ -309,4 +309,9 @@ contract L1StandardBridgeUpdate is IL1StandardBridge, CrossDomainEnabled {
     function getTestUpdate() public view returns (uint256) {
         return testUpdate;
     }
+
+
+    function setTestUpdate(uint256 _testUpdate) public {
+        testUpdate = _testUpdate;
+    }
 }

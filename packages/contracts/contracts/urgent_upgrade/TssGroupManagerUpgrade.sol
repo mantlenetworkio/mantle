@@ -330,4 +330,8 @@ contract TssGroupManagerUpgrade is
     function getTestUpdate() public view returns (uint256) {
         return testUpdate;
     }
+
+    function setTestUpdate(uint256 _testUpdate) public {
+        testUpdate = _testUpdate;
+    }
 }

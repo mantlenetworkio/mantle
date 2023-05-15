@@ -382,4 +382,7 @@ contract L1CrossDomainMessengerUpgrade is
         return testUpdate;
     }
 
+    function setTestUpdate(uint256 _testUpdate) public {
+        testUpdate = _testUpdate;
+    }
 }
