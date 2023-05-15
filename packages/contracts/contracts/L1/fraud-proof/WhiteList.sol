@@ -4,33 +4,59 @@ abstract contract Whitelist {
         _;
     }
 
-    modifier whitelistOnly() {
-        if (!whitelist[msg.sender]) {
-            revert("NOT_IN_WHITELIST");
+    modifier stakerWhitelistOnly(address _checkAddress) {
+        if (!stakerWhitelist[_checkAddress]) {
+            revert("NOT_IN_STAKER_WHITELIST");
+        }
+        _;
+    }
+
+    modifier operatorWhitelistOnly(address _checkAddress) {
+        if (!operatorWhitelist[_checkAddress]) {
+            revert("NOT_IN_OPERATOR_WHITELIST");
         }
         _;
     }
 
     address public owner;
-    mapping(address => bool) public whitelist;
+    mapping(address => bool) public stakerWhitelist;
+    mapping(address => bool) public operatorWhitelist;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
-     * @notice Add to whitelist
+     * @notice Add to staker whitelist
      */
-    function addToWhitelist(address[] calldata toAddAddresses) external onlyOwner {
+    function addToStakerWhitelist(address[] calldata toAddAddresses) external onlyOwner {
         for (uint i = 0; i < toAddAddresses.length; i++) {
-            whitelist[toAddAddresses[i]] = true;
+            stakerWhitelist[toAddAddresses[i]] = true;
         }
     }
 
     /**
      * @notice Remove from whitelist
      */
-    function removeFromWhitelist(address[] calldata toRemoveAddresses) external onlyOwner {
+    function removeFromStakerWhitelist(address[] calldata toRemoveAddresses) external onlyOwner {
         for (uint i = 0; i < toRemoveAddresses.length; i++) {
-            delete whitelist[toRemoveAddresses[i]];
+            delete stakerWhitelist[toRemoveAddresses[i]];
+        }
+    }
+
+    /**
+ * @notice Add to whitelist
+     */
+    function addToOperatorWhitelist(address[] calldata toAddAddresses) external onlyOwner {
+        for (uint i = 0; i < toAddAddresses.length; i++) {
+            operatorWhitelist[toAddAddresses[i]] = true;
+        }
+    }
+
+    /**
+     * @notice Remove from whitelist
+     */
+    function removeFromOperatorWhitelist(address[] calldata toRemoveAddresses) external onlyOwner {
+        for (uint i = 0; i < toRemoveAddresses.length; i++) {
+            delete operatorWhitelist[toRemoveAddresses[i]];
         }
     }
 
