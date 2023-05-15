@@ -21,6 +21,12 @@ cast send -f 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 \
 --private-key ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
  --legacy --rpc-url http://localhost:9545 \
  --value 10ether 0xd5add52d36399570e56c183d949da83ac29aa7d6
+
+
+ cast send -f 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 \
+--private-key ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
+ --legacy --rpc-url http://localhost:9545 \
+ --value 10ether 0xFca9E706e5b0AE97B8F98F747F57Fa64f75EC48D
 ```
 
 query balances
@@ -57,8 +63,16 @@ cast call --rpc-url  http://localhost:9545 \
 
 upgradecode
 ```shell
-yarn hardhat updateTssGroupManagerCode --contract 0xa83239cf2b900682001f9144144B5E5e5788A631 --network local
 
+cast call --rpc-url  http://localhost:9545  0xa83239cf2b900682001f9144144B5E5e5788A631 "owner()"
+
+yarn hardhat updateTssGroupManagerCode --contract 0xa83239cf2b900682001f9144144B5E5e5788A631 --network local
+```
+
+getadmin
+```shell
+cast send --rpc-url  http://localhost:9545  0xa83239cf2b900682001f9144144B5E5e5788A631 \
+--private-key 26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e --from 0xd5add52d36399570e56c183d949da83ac29aa7d6 "admin()"
 ```
 
 query implementation
@@ -67,6 +81,10 @@ cast call --rpc-url  http://localhost:9545 \
 --private-key 26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e \
 --from 0xd5add52d36399570e56c183d949da83ac29aa7d6 0xa83239cf2b900682001f9144144B5E5e5788A631 "implementation()"
 
+```
+```shell
+cast send --rpc-url  http://localhost:9545 --private-key 574108d5a6bfa179e9727887e315c1cd08ec2f8ca09dd4f00b1abd591011375f \
+--from 0xFca9E706e5b0AE97B8F98F747F57Fa64f75EC48D 0xa83239cf2b900682001f9144144B5E5e5788A631 "setTestUpdate(uint256)"  12
 ```
 
 

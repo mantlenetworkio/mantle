@@ -99,17 +99,17 @@ task('updateTssGroupManagerCode')
     //0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e is the key of addressmananger
     //address: 0xd5add52d36399570e56c183d949da83ac29aa7d6
     const ownerWallet = new ethers.Wallet(
-      '0x26f45686079c1e633e14e235c58b465192f9e33819177bd19e7bb225afae031e',
+      '041deb3563e965bce6e803b88b9d25005cb1414c4cdade04181363e87ca9e259',
       provider
     )
 
     const l1TransparentProxy = getContractFactory('TransparentUpgradeableProxy').attach(taskArgs.contract)
 
-    console.log('Query before setImplementation')
-    console.log(
-      'Implementation :',
-      await l1TransparentProxy.connect(ownerWallet).callStatic.implementation()
-    )
+    // console.log('Query before setImplementation')
+    // console.log(
+    //   'Implementation :',
+    //   await l1TransparentProxy.connect(ownerWallet).callStatic.implementation()
+    // )
 
     const tssGroupManagerUpgrade = getContractFactory('TssGroupManagerUpgrade')
     const TssGroupManagerUpgrade = await tssGroupManagerUpgrade
