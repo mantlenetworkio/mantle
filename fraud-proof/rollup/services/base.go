@@ -43,10 +43,9 @@ func NewBaseService(eth Backend, proofBackend proof.Backend, cfg *Config, auth *
 		Context: ctx,
 	}
 	transactOpts := bind.TransactOpts{
-		From:     auth.From,
-		Signer:   auth.Signer,
-		GasPrice: big.NewInt(800000000),
-		Context:  ctx,
+		From:    auth.From,
+		Signer:  auth.Signer,
+		Context: ctx,
 	}
 	rollup, err := bindings.NewRollup(common.Address(cfg.RollupAddr), l1)
 	if err != nil {
