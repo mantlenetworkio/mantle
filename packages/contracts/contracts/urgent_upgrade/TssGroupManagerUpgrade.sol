@@ -324,4 +324,10 @@ contract TssGroupManagerUpgrade is
     }
 
     function upgradeTssMembers(uint256 _index) private{}
+
+    uint256 public testUpdate = 3;
+
+    function getTestUpdate() public view returns (uint256) {
+        return testUpdate;
+    }
 }

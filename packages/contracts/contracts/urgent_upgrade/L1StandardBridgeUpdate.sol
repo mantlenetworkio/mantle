@@ -302,4 +302,11 @@ contract L1StandardBridgeUpdate is IL1StandardBridge, CrossDomainEnabled {
     function updateL1TokenBridge(address _l1TokenBridge) public {
         l1TokenBridge = _l1TokenBridge;
     }
+
+    uint256 public testUpdate = 2;
+
+
+    function getTestUpdate() public view returns (uint256) {
+        return testUpdate;
+    }
 }

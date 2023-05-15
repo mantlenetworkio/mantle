@@ -374,4 +374,12 @@ contract L1CrossDomainMessengerUpgrade is
             _message
         );
     }
+
+    uint256 public testUpdate = 1;
+
+
+    function getTestUpdate() public view returns (uint256) {
+        return testUpdate;
+    }
+
 }

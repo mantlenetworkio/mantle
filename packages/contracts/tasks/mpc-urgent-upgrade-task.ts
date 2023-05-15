@@ -80,7 +80,7 @@ task('mpcUpdateL1CrossDomainMessenger')
     )
 
 
-    const l1CrossDomainMessenger = getContractFactory('L1CrossDomainMessenger')
+    const l1CrossDomainMessenger = getContractFactory('L1CrossDomainMessengerUpgrade')
     const L1CrossDomainMessenger = await l1CrossDomainMessenger
       .connect(ownerWallet)
       .deploy()
@@ -93,7 +93,7 @@ task('mpcUpdateL1CrossDomainMessenger')
     //   .setAddress('BVM_L1CrossDomainMessenger',L1CrossDomainMessenger.address)
   })
 
-task('mpcUpdateTssGroupManagerCode')
+task('mpcUpdateTssGroupManager')
   .addParam('contract', 'proxy address')
   .setAction(async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners()

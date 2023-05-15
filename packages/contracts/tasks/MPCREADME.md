@@ -39,6 +39,11 @@ mpcUpdateL1BridgeChugCode
 yarn hardhat mpcUpdateL1BridgeChugCode --contract 0x802e4857306AF17f654452112a50E58f4a58e28D --network goerli
 ```
 
+```shell
+cast call --rpc-url  https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28 0x1eFfED12A9408c830fD19535F89131f1829debc4 "getTestUpdate()"
+cast call --rpc-url  https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28 0x1eFfED12A9408c830fD19535F89131f1829debc4 "testUpdate()"
+```
+
 #### local: mpcUpdateL1CrossDomainMessenger
 
 ```shell
