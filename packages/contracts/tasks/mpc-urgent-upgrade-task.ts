@@ -4,7 +4,7 @@ import { ethers } from 'ethers'
 // @ts-ignore
 import { getContractDefinition, getContractFactory } from '../src'
 
-task('mpcUpdateL1BridgeChugCode')
+task('mpcUpdateL1BridgeChug')
   .addParam('contract', 'proxy address')
   .setAction(async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners()
@@ -132,7 +132,7 @@ task('mpcUpdateTssGroupManager')
 
 
 
-task('mpcUpdateTssStakingSlashCode')
+task('mpcUpdateTssStakingSlash')
   .addParam('contract', 'proxy address')
   .setAction(async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners()
@@ -171,7 +171,7 @@ task('mpcUpdateTssStakingSlashCode')
 
 
 
-task('mpcUpdateEigenDataLayrChainCode')
+task('mpcUpdateEigenDataLayrChain')
   .addParam('contract', 'proxy address')
   .setAction(async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners()

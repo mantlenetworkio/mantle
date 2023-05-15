@@ -13,7 +13,7 @@
 for every time we upgrade the contract on mainnet，we need to change the
 deploy address.
 
-#### local:updateL1BridgeChugCode
+#### local:updateL1BridgeChug
 
 tranfer eth balance to addressmanager owner
 ```shell
@@ -34,9 +34,9 @@ convert unit
 cast --to-unit 1000000000000000000wei ether
 ```
 
-mpcUpdateL1BridgeChugCode
+mpcUpdateL1BridgeChug
 ```shell
-yarn hardhat mpcUpdateL1BridgeChugCode --contract 0x802e4857306AF17f654452112a50E58f4a58e28D --network goerli
+yarn hardhat mpcUpdateL1BridgeChug --contract 0x802e4857306AF17f654452112a50E58f4a58e28D --network goerli
 ```
 
 ```shell
@@ -57,12 +57,12 @@ cast call --rpc-url  http://localhost:9545 \
 --from 0xd5add52d36399570e56c183d949da83ac29aa7d6 0x19C22f181280dF6Ad1d97285cdD430173Df91C12 "owner()"
 ```
 
-#### local:mpcUpdateTssGroupManagerCode
+#### local:mpcUpdateTssGroupManager
 if we want to query the implementation, we must use the admin address and privatekey.
 
-upgradecode
+upgrade
 ```shell
-yarn hardhat mpcUpdateTssGroupManagerCode --contract 0xa83239cf2b900682001f9144144B5E5e5788A631 --network goerli
+yarn hardhat mpcUpdateTssGroupManager --contract 0xa83239cf2b900682001f9144144B5E5e5788A631 --network goerli
 ```
 
 query implementation
@@ -74,11 +74,11 @@ cast call --rpc-url  http://localhost:9545 \
 ```
 
 
-#### local:mpcUpdateTssStakingSlashCode
+#### local:mpcUpdateTssStakingSlash
 
-updatecode
+update
 ```shell
-yarn hardhat mpcUpdateTssStakingSlashCode --contract 0xe6cd9e7b620964bECd42c7Ad41e56724f515E284 --network goerli
+yarn hardhat mpcUpdateTssStakingSlash --contract 0xe6cd9e7b620964bECd42c7Ad41e56724f515E284 --network goerli
 ```
 
 query implementation:
@@ -115,7 +115,7 @@ contract ProxyAdmin is Ownable {
 
 ```
 
-#### local:mpcUpdateEigenDataLayrChainCode
+#### local:mpcUpdateEigenDataLayrChain
 
 query implementation demo:
 ```shell
