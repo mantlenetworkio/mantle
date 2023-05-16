@@ -238,22 +238,24 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
 
   private async updateTransactionBatches(updBatchIndex: number) {
     if (updBatchIndex > 0) {
+      this.logger.info('Update batch index from(MtBatcher)', { updBatchIndex })
       const dataStoreRollupId = await this.GetRollupStoreByRollupBatchIndex(
         updBatchIndex
       )
-      if (dataStoreRollupId['data_store_id'] > 0) {
-        const dataStore = await this.GetDataStoreById(
-          dataStoreRollupId['data_store_id'].toString()
-        )
-        if (dataStore === null && dataStore['Confirmed']) {
-          await this._storeTransactionListByDSId(
-            dataStoreRollupId['data_store_id']
-          )
-          await this._storeBatchTransactionsByDSId(
-            dataStoreRollupId['data_store_id']
-          )
-        }
-      }
+      this.logger.info(
+        'dataStoreRollupId dataStoreRollupId dataStoreRollupId',
+        dataStoreRollupId
+      )
+      const dataStore = await this.GetDataStoreById(
+        dataStoreRollupId['data_store_id'].toString()
+      )
+      this.logger.info('Update batch index from(Confirmed)', dataStore)
+      await this._storeTransactionListByDSId(
+        dataStoreRollupId['data_store_id']
+      )
+      await this._storeBatchTransactionsByDSId(
+        dataStoreRollupId['data_store_id']
+      )
     }
   }
 
