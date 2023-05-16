@@ -20,7 +20,6 @@ import {
   TransactionEntry,
   DataStoreEntry,
   TransactionListEntry,
-  RollupStoreEntry,
 } from '../../types'
 
 interface DaIngestionMetrics {
@@ -123,6 +122,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   }
 
   protected async _start(): Promise<void> {
+    this.updateTransactionBatches(this.options.updBatchIndex)
     while (this.running) {
       try {
         const batchIndexRange = await this.getBatchIndexRange()
@@ -155,9 +155,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   }
 
   private async pareTransaction(batchIndexRange: Range) {
-    const dataStore: DataStoreEntry[] = []
-    const transactionEntries: TransactionEntry[] = []
-    const exploreTransactionEntries: TransactionEntry[] = []
     for (
       let index = batchIndexRange.start;
       index < batchIndexRange.end;
@@ -236,6 +233,27 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       }
       await this.state.db.putLastBatchIndex(index)
       this.daIngestionMetrics.syncBatchIndex.set(index)
+    }
+  }
+
+  private async updateTransactionBatches(updBatchIndex: number) {
+    if (updBatchIndex > 0) {
+      const dataStoreRollupId = await this.GetRollupStoreByRollupBatchIndex(
+        updBatchIndex
+      )
+      if (dataStoreRollupId['data_store_id'] > 0) {
+        const dataStore = await this.GetDataStoreById(
+          dataStoreRollupId['data_store_id'].toString()
+        )
+        if (dataStore === null && dataStore['Confirmed']) {
+          await this._storeTransactionListByDSId(
+            dataStoreRollupId['data_store_id']
+          )
+          await this._storeBatchTransactionsByDSId(
+            dataStoreRollupId['data_store_id']
+          )
+        }
+      }
     }
   }
 
