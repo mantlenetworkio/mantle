@@ -16,6 +16,7 @@ import {ITssRewardContract} from "../../L2/predeploys/iTssRewardContract.sol";
 import {TssDelegationManager} from "./delegation/TssDelegationManager.sol";
 import {TssDelegation} from "./delegation/TssDelegation.sol";
 import {WhiteList} from "../delegation/WhiteListBase.sol";
+import "hardhat/console.sol";
 
 import "./ITssGroupManager.sol";
 import "./ITssStakingSlashing.sol";
@@ -65,9 +66,9 @@ contract TssStakingSlashing is
     //msg sender => withdrawal
     mapping(address => IDelegationManager.QueuedWithdrawal) public withdrawals;
     //operator => stakers
-    mapping(address => address[]) stakers;
+    mapping(address => address[]) public stakers;
     //staker => operator
-    mapping(address => address) delegators;
+    mapping(address => address) public delegators;
 
 
     /**
@@ -93,8 +94,7 @@ contract TssStakingSlashing is
         address _delegationManager,
         address _delegation,
         address _l1messenger,
-        address _regulatoryAccount,
-        address[] calldata operatorWhitelists
+        address _regulatoryAccount
         ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -107,12 +107,6 @@ contract TssStakingSlashing is
         delegation = IDelegation(_delegation);
         messenger = _l1messenger;
         regulatoryAccount = _regulatoryAccount;
-        address[] memory thisAddr = new address[](1);
-        thisAddr[0] = address(this);
-
-        WhiteList(_delegation).addToWhitelist(operatorWhitelists);
-        WhiteList(_delegationManager).addToWhitelist(thisAddr);
-
     }
 
     /**
@@ -422,8 +416,10 @@ contract TssStakingSlashing is
         delegationManager.completeQueuedWithdrawal(queuedWithdrawal, true);
     }
 
-    function registerAsOperator() external {
+    function registerAsOperator(bytes calldata _pubKey) external {
+        console.log("start to register operator %s",msg.sender);
         TssDelegation(tssDelegationContract).registerAsOperator(this, msg.sender);
+        setPublicKey(_pubKey);
     }
 
     function delegateTo(address _operator) external {
@@ -437,16 +433,17 @@ contract TssStakingSlashing is
         IDelegationShare[] memory delegationShares,
         uint256[] memory investorShares
     )external override onlyDelegation {
+        console.log("on delegation recieved");
         uint256 delegationLength = delegationShares.length;
-        for (uint256 i = 0; i < delegationLength; i++) {
-            if (address(delegationShares[i]) == address(this)) {
-                if( delegators[delegator] == address(0)) {
-                    delegators[delegator] == operator;
-                    stakers[operator].push(delegator);
-                }
-            }
-            break;
+        require(delegationLength == 1,"delegation only for tss");
+        require(investorShares.length == 1,"delegation share only for tss");
+        require(address(delegationShares[0]) == address(this),"must use current contract");
+        if (delegators[delegator] == address(0)) {
+            delegators[delegator] = operator;
+            stakers[operator].push(delegator);
         }
+        console.log("delegators %s %s",delegator,delegators[delegator]);
+
     }
 
     function onDelegationWithdrawn(
@@ -456,20 +453,18 @@ contract TssStakingSlashing is
         uint256[] memory investorShares
     ) external override onlyDelegation {
         uint256 delegationLength = delegationShares.length;
-        for (uint256 i = 0; i < delegationLength; i++) {
-            if (address(delegationShares[i]) == address(this)) {
-                if (TssDelegationManager(tssDelegationManagerContract).getDelegationShares(delegator, delegationShares[i]) == investorShares[i]){
-                    address[] memory staker = stakers[operator];
-                    for (uint256 j = 0; j < staker.length; j++) {
-                        if (staker[j] == delegator) {
-                            stakers[operator][j] == stakers[operator][staker.length -1];
-                            stakers[operator].pop();
-                            delete delegators[delegator];
-                        }
-                    }
+        require(delegationLength == 1,"delegation only for tss");
+        require(investorShares.length == 1,"delegation share only for tss");
+        require(address(delegationShares[0]) == address(this),"must use current contract");
+        if (TssDelegationManager(tssDelegationManagerContract).getDelegationShares(delegator, delegationShares[0]) == investorShares[0]){
+            address[] memory staker = stakers[operator];
+            for (uint256 j = 0; j < staker.length; j++) {
+                if (staker[j] == delegator) {
+                    stakers[operator][j] = stakers[operator][staker.length -1];
+                    stakers[operator].pop();
+                    delete delegators[delegator];
                 }
             }
-            break;
         }
     }
 

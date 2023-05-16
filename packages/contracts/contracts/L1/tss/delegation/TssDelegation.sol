@@ -2,6 +2,8 @@
 pragma solidity ^0.8.9;
 
 import "../../delegation/Delegation.sol";
+import "../../delegation/WhiteListBase.sol";
+import "hardhat/console.sol";
 
 
 /**
@@ -26,13 +28,13 @@ contract TssDelegation is Delegation {
     }
 
 
-    function initialize(
+    function initializeT(
         address _stakingSlashing,
         address initialOwner
     ) external initializer {
         DOMAIN_SEPARATOR = keccak256(abi.encode(DOMAIN_TYPEHASH, bytes("Mantle"), block.chainid, address(this)));
-        _transferOwnership(initialOwner);
         stakingSlash = _stakingSlashing;
+         _transferOwnership(initialOwner);
     }
 
     modifier onlyStakingSlash() {
@@ -40,7 +42,13 @@ contract TssDelegation is Delegation {
         _;
     }
 
-    function registerAsOperator(IDelegationCallback dt, address sender) external onlyStakingSlash {
+    function setStakingSlash(address _address) public onlyOwner {
+        stakingSlash = _address;
+    }
+
+    function registerAsOperator(IDelegationCallback dt, address sender) external whitelistOnly(sender) onlyStakingSlash {
+        console.log("de register operator %s",sender);
+
         require(
             address(delegationCallback[sender]) == address(0),
             "Delegation.registerAsOperator: Delegate has already registered"

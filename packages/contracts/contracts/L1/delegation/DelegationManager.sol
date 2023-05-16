@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./interfaces/IDelegation.sol";
 import "./DelegationManagerStorage.sol";
 import "./WhiteListBase.sol";
-
+import "hardhat/console.sol";
 /**
  * @title The primary entry- and exit-point for funds into and out.
  * @author Layr Labs, Inc.
@@ -439,6 +439,9 @@ abstract contract DelegationManager is
         returns (uint256 shares)
     {
 
+        console.log("address %s balance %s share %s ",depositor,token.balanceOf(depositor),address(delegationShare));
+
+        console.log("amount %s",amount);
         // transfer tokens from the sender to the delegation contract
         token.safeTransferFrom(depositor, address(delegationShare), amount);
 

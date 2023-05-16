@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import "../../delegation/DelegationManager.sol";
 import "../ITssGroupManager.sol";
 import "../TssStakingSlashing.sol";
+import "hardhat/console.sol";
 
 
 /**
@@ -38,10 +39,14 @@ contract TssDelegationManager is DelegationManager {
         _disableInitializers();
     }
 
-    function initialize(address _stakingSlashing,
+    function initializeT(
+        address _stakingSlashing,
         address _tssGroupManager,
-        uint256 _minStakeAmount
+        uint256 _minStakeAmount,
+        address initialOwner
     ) public initializer {
+        DOMAIN_SEPARATOR = keccak256(abi.encode(DOMAIN_TYPEHASH, bytes("Mantle"), block.chainid, address(this)));
+        _transferOwnership(initialOwner);
         stakingSlash = _stakingSlashing;
         tssGroupManager = _tssGroupManager;
         minStakeAmount = _minStakeAmount;

@@ -3,12 +3,13 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"path"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type Configuration struct {
@@ -26,10 +27,10 @@ type Configuration struct {
 }
 
 type ManagerConfig struct {
-	WsAddr   string `json:"ws_addr" mapstructure:"ws_addr"`
-	HttpAddr string `json:"http_addr" mapstructure:"http_addr"`
-	DBDir    string `json:"db_dir" mapstructure:"db_dir"`
-	PrivateKey   string `json:"private_key" mapstructure:"private_key"`
+	WsAddr     string `json:"ws_addr" mapstructure:"ws_addr"`
+	HttpAddr   string `json:"http_addr" mapstructure:"http_addr"`
+	DBDir      string `json:"db_dir" mapstructure:"db_dir"`
+	PrivateKey string `json:"private_key" mapstructure:"private_key"`
 
 	KeygenTimeout     string `json:"keygen_timeout" mapstructure:"keygen_timeout"`
 	CPKConfirmTimeout string `json:"cpk_confirm_timeout" mapstructure:"cpk_confirm_timeout"`

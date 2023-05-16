@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./DelegationStorage.sol";
 import "./DelegationSlasher.sol";
 import "./WhiteListBase.sol";
-
+import "hardhat/console.sol";
 /**
  * @title The primary delegation contract.
  * @notice  This is the contract for delegation. The main functionalities of this contract are
@@ -218,29 +218,12 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
          * In particular, in-line assembly is also used to prevent the copying of uncapped return data which is also a potential DoS vector.
          */
         // format calldata
-        bytes memory lowLevelCalldata = abi.encodeWithSelector(IDelegationCallback.onDelegationReceived.selector, staker, operator, delegationShares, shares);
-        // Prepare memory for low-level call return data. We accept a max return data length of 32 bytes
-        bool success;
-        bytes32[1] memory returnData;
-        // actually make the call
-        assembly {
-            success := call(
-                // gas provided to this context
-                LOW_LEVEL_GAS_BUDGET,
-                // address to call
-                dt,
-                // value in wei for call
-                0,
-                // memory location to copy for calldata
-                lowLevelCalldata,
-                // length of memory to copy for calldata
-                mload(lowLevelCalldata),
-                // memory location to copy return data
-                returnData,
-                // byte size of return data to copy to memory
-                32
-            )
-        }
+        console.log("in hook 1 %s ", address(dt));
+        (bool success, bytes memory returnData) = address(dt).call{gas: LOW_LEVEL_GAS_BUDGET}(
+            abi.encodeWithSelector(IDelegationCallback.onDelegationReceived.selector, staker, operator, delegationShares, shares)
+        );
+
+        console.log("in hook 2 %s ", success);
         // if the call fails, we emit a special event rather than reverting
         if (!success) {
             emit OnDelegationReceivedCallFailure(dt, returnData[0]);
@@ -266,30 +249,11 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
          * We use low-level call functionality here to ensure that an operator cannot maliciously make this function fail in order to prevent undelegation.
          * In particular, in-line assembly is also used to prevent the copying of uncapped return data which is also a potential DoS vector.
          */
-        // format calldata
-        bytes memory lowLevelCalldata = abi.encodeWithSelector(IDelegationCallback.onDelegationWithdrawn.selector, staker, operator, delegationShares, shares);
-        // Prepare memory for low-level call return data. We accept a max return data length of 32 bytes
-        bool success;
-        bytes32[1] memory returnData;
-        // actually make the call
-        assembly {
-            success := call(
-                // gas provided to this context
-                LOW_LEVEL_GAS_BUDGET,
-                // address to call
-                dt,
-                // value in wei for call
-                0,
-                // memory location to copy for calldata
-                lowLevelCalldata,
-                // length of memory to copy for calldata
-                mload(lowLevelCalldata),
-                // memory location to copy return data
-                returnData,
-                // byte size of return data to copy to memory
-                32
-            )
-        }
+
+        (bool success, bytes memory returnData) = address(dt).call{gas: LOW_LEVEL_GAS_BUDGET}(
+            abi.encodeWithSelector(IDelegationCallback.onDelegationWithdrawn.selector, staker, operator, delegationShares, shares)
+        );
+
         // if the call fails, we emit a special event rather than reverting
         if (!success) {
             emit OnDelegationWithdrawnCallFailure(dt, returnData[0]);
@@ -304,22 +268,28 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
      * delegated, and records the new delegation.
      */
     function _delegate(address staker, address operator) internal {
+        console.log("dede delegate staker %s operator %s",staker,operator);
+
         IDelegationCallback dt = delegationCallback[operator];
         require(
             address(dt) != address(0), "Delegation._delegate: operator has not yet registered as a delegate"
         );
-
+        console.log("requiir 1 delegate staker %s operator %s",staker,operator);
         require(isNotDelegated(staker), "Delegation._delegate: staker has existing delegation");
+        console.log("requiir 2 delegate staker %s operator %s",staker,operator);
+
         // checks that operator has not been frozen
         IDelegationSlasher slasher = delegationManager.delegationSlasher();
         require(!slasher.isFrozen(operator), "Delegation._delegate: cannot delegate to a frozen operator");
-
+        console.log("requiir 3 delegate staker %s operator %s",staker,operator);
         // record delegation relation between the staker and operator
         delegatedTo[staker] = operator;
+        console.log("1dede delegate staker %s operator %s",staker,operator);
 
         // record that the staker is delegated
         delegationStatus[staker] = DelegationStatus.DELEGATED;
-
+        console.log("2dede delegate staker %s operator %s",staker,operator);
+        console.log("isDelegated %s address %s",isDelegated(staker),address(this));
         // retrieve list of strategies and their shares from investment manager
         (IDelegationShare[] memory delegationShares, uint256[] memory shares) = delegationManager.getDeposits(staker);
 
@@ -327,11 +297,13 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
         uint256 delegationLength = delegationShares.length;
         for (uint256 i = 0; i < delegationLength;) {
             // update the share amounts for each of the operator's strategies
+            console.log("delegationShare %s shares %s",address(delegationShares[i]),shares[i]);
             operatorShares[operator][delegationShares[i]] += shares[i];
             unchecked {
                 ++i;
             }
         }
+        console.log("start to hook dt address %s operator %s",address(dt),staker,operator);
 
         // call into hook in delegationCallback contract
         _delegationReceivedHook(dt, staker, operator, delegationShares, shares);

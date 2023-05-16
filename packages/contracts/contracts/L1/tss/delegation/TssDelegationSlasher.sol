@@ -10,7 +10,7 @@ import "../../delegation/DelegationSlasher.sol";
  * - revoking permission for slashing from specified contracts,
  * - calling investManager to do actual slashing.
  */
-contract TssProofDelegationSlasher is DelegationSlasher {
+contract TssDelegationSlasher is DelegationSlasher {
     constructor(IDelegationManager _delegationManager, IDelegation _delegation)
     DelegationSlasher(_delegationManager, _delegation)
     {

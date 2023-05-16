@@ -29,7 +29,7 @@ interface IStakingSlashing {
     function canCompleteQueuedWithdrawal() external returns (bool);
 
     //delegation
-    function registerAsOperator() external;
+    function registerAsOperator(bytes calldata) external;
     function delegateTo(address) external;
 
 
