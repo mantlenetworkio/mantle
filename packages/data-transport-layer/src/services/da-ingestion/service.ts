@@ -249,6 +249,15 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       const dataStore = await this.GetDataStoreById(
         dataStoreRollupId['data_store_id'].toString()
       )
+      await this.state.db.putRollupStoreByBatchIndex(
+        {
+          index: 0,
+          data_store_id: dataStoreRollupId['data_store_id'],
+          status: dataStoreRollupId['status'],
+          confirm_at: dataStoreRollupId['confirm_at'],
+        },
+        updBatchIndex
+      )
       this.logger.info('Update batch index from(Confirmed)', dataStore)
       await this._storeTransactionListByDSId(
         dataStoreRollupId['data_store_id']
