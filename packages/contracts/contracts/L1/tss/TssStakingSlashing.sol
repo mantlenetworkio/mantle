@@ -64,6 +64,10 @@ contract TssStakingSlashing is
      */
     event Slashing(address, SlashType);
 
+    constructor() {
+        _disableInitializers();
+    }
+
     /**
      * @notice initializes the contract setting and the deployer as the initial owner
      * @param _bitToken bit token contract address

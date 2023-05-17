@@ -8,11 +8,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/rs/zerolog"
-
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
 	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
+	"github.com/rs/zerolog"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 

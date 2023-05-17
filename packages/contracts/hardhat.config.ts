@@ -14,6 +14,7 @@ import '@typechain/hardhat'
 import 'hardhat-deploy'
 import 'hardhat-gas-reporter'
 import 'hardhat-output-validator'
+import 'hardhat-abi-exporter'
 
 // Hardhat tasks
 import './tasks'
@@ -71,6 +72,8 @@ subtask(TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE).setAction(
   }
 )
 
+// @ts-ignore
+// @ts-ignore
 const config: HardhatUserConfig = {
   networks: {
     hardhat: {
@@ -154,13 +157,13 @@ const config: HardhatUserConfig = {
       {
         version: '0.8.9',
         settings: {
-          optimizer: { enabled: true, runs: 10_000 },
+          optimizer: { enabled: true, runs: 200 },
         },
       },
       {
         version: '0.5.17', // Required for WETH9
         settings: {
-          optimizer: { enabled: true, runs: 10_000 },
+          optimizer: { enabled: true, runs: 200 },
         },
       },
     ],
@@ -183,6 +186,11 @@ const config: HardhatUserConfig = {
     deploy: './deploy',
     deployments: './deployments',
     deployConfig: './deploy-config',
+  },
+  abiExporter: {
+    path: './abi',
+    runOnCompile: true,
+    clear: true,
   },
   namedAccounts: {
     deployer: {
@@ -230,6 +238,10 @@ const config: HardhatUserConfig = {
     exclude: ['contracts/test-helpers', 'contracts/test-libraries'],
   },
   deployConfigSpec: {
+    allowUnlimitedContractSize: {
+      type: 'boolean',
+      default: true,
+    },
     isForkedNetwork: {
       type: 'boolean',
       default: false,

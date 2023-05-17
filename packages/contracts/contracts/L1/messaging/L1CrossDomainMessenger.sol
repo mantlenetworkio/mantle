@@ -58,6 +58,7 @@ contract L1CrossDomainMessenger is
     mapping(bytes32 => bool) public successfulMessages;
 
     address internal xDomainMsgSender = Lib_DefaultValues.DEFAULT_XDOMAIN_SENDER;
+    address internal pauseOwner ;
 
     /***************
      * Constructor *
@@ -97,6 +98,25 @@ contract L1CrossDomainMessenger is
      * Pause relaying.
      */
     function pause() external onlyOwner {
+        _pause();
+    }
+
+    /**
+     * UnPause relaying.
+     */
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    function setPauseOwner(address _pauseOwner) external onlyOwner {
+        pauseOwner = _pauseOwner;
+    }
+
+    function pauseByPOwner() external {
+        require(
+            pauseOwner == msg.sender,
+            "msg.sender shoule be pauseowner."
+        );
         _pause();
     }
 
