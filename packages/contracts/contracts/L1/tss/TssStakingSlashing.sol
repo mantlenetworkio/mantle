@@ -245,11 +245,11 @@ contract TssStakingSlashing is
         if (message.slashType == SlashType.uptime) {
             // jail and transfer deposits
             ITssGroupManager(tssGroupContract).memberJail(jailNodePubKey);
-            transformDeposit(message.jailNode, 0, message.tssNodes);
+            transformDeposit(message.jailNode, 0);
         } else if (message.slashType == SlashType.animus) {
             // remove the member and transfer deposits
             ITssGroupManager(tssGroupContract).memberJail(jailNodePubKey);
-            transformDeposit(message.jailNode, 1, message.tssNodes);
+            transformDeposit(message.jailNode, 1);
         } else {
             require(false, "err type for slashing");
         }
@@ -260,12 +260,10 @@ contract TssStakingSlashing is
      * @notice distribute rewards to voters
      * @param deduction address of the punished
      * @param slashType the type to punished
-     * @param tssNodes participants other than the initiator
      */
     function transformDeposit(
         address deduction,
-        uint256 slashType,
-        address[] memory tssNodes
+        uint256 slashType
     ) internal {
         uint256 deductedAmountShare;
 
@@ -389,12 +387,19 @@ contract TssStakingSlashing is
         });
         withdrawals[msg.sender] = queuedWithdrawal;
         bytes32 withdrawRoot = TssDelegationManager(tssDelegationManagerContract).queueWithdrawal(msg.sender,delegationIndexes,delegationShares,tokens,sharesA,withdrawerAndNonce);
-        TssDelegationManager(tssDelegationManagerContract).startQueuedWithdrawalWaitingPeriod(withdrawRoot,msg.sender,0);
         withdrawalRoots[msg.sender] = withdrawRoot;
     }
 
+    function startWithdraw() external {
+        require(
+            withdrawalRoots[msg.sender] != bytes32(0),
+            "msg sender must request withdraw first"
+        );
+        bytes32 withdrawRoot = withdrawalRoots[msg.sender];
+        TssDelegationManager(tssDelegationManagerContract).startQueuedWithdrawalWaitingPeriod(withdrawRoot,msg.sender,0);
+    }
+
     function canCompleteQueuedWithdrawal() external returns (bool) {
-        require(delegation.isDelegated(msg.sender),"not delegator");
 
         require(
             withdrawalRoots[msg.sender] != bytes32(0),
@@ -405,7 +410,6 @@ contract TssStakingSlashing is
     }
 
     function completeWithdraw() external {
-        require(delegation.isDelegated(msg.sender),"not delegator");
 
         require(
             withdrawalRoots[msg.sender] != bytes32(0),
@@ -413,7 +417,9 @@ contract TssStakingSlashing is
         );
         IDelegationManager.QueuedWithdrawal memory queuedWithdrawal = withdrawals[msg.sender];
         require(delegationManager.canCompleteQueuedWithdrawal(queuedWithdrawal),"The waiting period has not yet passed");
-        delegationManager.completeQueuedWithdrawal(queuedWithdrawal, true);
+        TssDelegationManager(tssDelegationManagerContract).completeQueuedWithdrawal(msg.sender, queuedWithdrawal, true);
+        delete withdrawalRoots[msg.sender];
+        delete withdrawals[msg.sender];
     }
 
     function registerAsOperator(bytes calldata _pubKey) external {

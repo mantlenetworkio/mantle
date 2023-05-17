@@ -207,6 +207,15 @@ contract TssGroupManager is
         return false;
     }
 
+    function memberExistActive(address _addr) public view override returns (bool) {
+        for (uint256 i = 0; i < activeTssMembers.length; i++) {
+            if ( _addr == tssActiveMemberInfo[activeTssMembers[i]].nodeAddress) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @inheritdoc ITssGroupManager
      */

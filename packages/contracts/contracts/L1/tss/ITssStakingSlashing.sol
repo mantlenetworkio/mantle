@@ -26,6 +26,7 @@ interface IStakingSlashing {
     function deposit(uint256 amount) external returns (uint256);
     function withdraw() external;
     function completeWithdraw() external;
+    function startWithdraw() external;
     function canCompleteQueuedWithdrawal() external returns (bool);
 
     //delegation

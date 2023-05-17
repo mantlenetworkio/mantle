@@ -326,6 +326,67 @@ contract TssDelegationManager is DelegationManager {
         queuedWithdrawals[withdrawalRoot].unlockTimestamp = max((uint32(block.timestamp) + WITHDRAWAL_WAITING_PERIOD), stakeInactiveAfter);
     }
 
+    function completeQueuedWithdrawal(address sender, QueuedWithdrawal calldata queuedWithdrawal, bool receiveAsTokens)
+        external
+        whenNotPaused
+        // check that the address that the staker *was delegated to* – at the time that they queued the withdrawal – is not frozen
+        onlyNotFrozen(queuedWithdrawal.delegatedAddress)
+        nonReentrant
+        onlyStakingSlash
+    {
+        // find the withdrawalRoot
+        bytes32 withdrawalRoot = calculateWithdrawalRoot(queuedWithdrawal);
+        // copy storage to memory
+        WithdrawalStorage memory withdrawalStorageCopy = queuedWithdrawals[withdrawalRoot];
+
+        // verify that the queued withdrawal actually exists
+        require(
+            withdrawalStorageCopy.unlockTimestamp != 0,
+            "InvestmentManager.completeQueuedWithdrawal: withdrawal does not exist"
+        );
+
+        require(
+            uint32(block.timestamp) >= withdrawalStorageCopy.unlockTimestamp
+                || (queuedWithdrawal.delegatedAddress == address(0)),
+            "InvestmentManager.completeQueuedWithdrawal: withdrawal waiting period has not yet passed and depositor was delegated when withdrawal initiated"
+        );
+
+        // TODO: add testing coverage for this
+        require(
+            sender == queuedWithdrawal.withdrawerAndNonce.withdrawer,
+            "InvestmentManager.completeQueuedWithdrawal: only specified withdrawer can complete a queued withdrawal"
+        );
+
+        // reset the storage slot in mapping of queued withdrawals
+        delete queuedWithdrawals[withdrawalRoot];
+
+        // store length for gas savings
+        uint256 strategiesLength = queuedWithdrawal.delegations.length;
+        // if the withdrawer has flagged to receive the funds as tokens, withdraw from strategies
+        if (receiveAsTokens) {
+            // actually withdraw the funds
+            for (uint256 i = 0; i < strategiesLength;) {
+                // tell the delegation to send the appropriate amount of funds to the depositor
+                queuedWithdrawal.delegations[i].withdraw(
+                    withdrawalStorageCopy.withdrawer, queuedWithdrawal.tokens[i], queuedWithdrawal.shares[i]
+                );
+                unchecked {
+                    ++i;
+                }
+            }
+        } else {
+            // else increase their shares
+            for (uint256 i = 0; i < strategiesLength;) {
+                _addShares(withdrawalStorageCopy.withdrawer, queuedWithdrawal.delegations[i], queuedWithdrawal.shares[i]);
+                unchecked {
+                    ++i;
+                }
+            }
+        }
+
+        emit WithdrawalCompleted(queuedWithdrawal.depositor, withdrawalStorageCopy.withdrawer, withdrawalRoot);
+    }
+
     function getWithdrawNonce(address staker) external view onlyStakingSlash returns (uint256) {
         return numWithdrawalsQueued[staker];
     }
@@ -338,12 +399,13 @@ contract TssDelegationManager is DelegationManager {
         address operator = delegation.delegatedTo(sender);
         // check if the operator is still mpc node, if the remaining shares meet the mini requirement
         if (delegation.isDelegated(sender)){
-            require(!TssStakingSlashing(stakingSlash).isJailed(operator),"the operator is in jail status");
-
-            uint256 rest= delegation.operatorShares(operator, delegationShare) - shares;
-            uint256 balance = delegationShare.sharesToUnderlying(rest);
-            if (ITssGroupManager(tssGroupManager).isTssGroupUnJailMembers(operator)) {
-                require(balance > minStakeAmount,"unable withdraw due to operator's rest shares smaller than mini requirement");
+            if (ITssGroupManager(tssGroupManager).memberExistActive(sender)){
+                require(!TssStakingSlashing(stakingSlash).isJailed(operator),"the operator is not in jail status");
+                uint256 rest= delegation.operatorShares(operator, delegationShare) - shares;
+                uint256 balance = delegationShare.sharesToUnderlying(rest);
+                if (ITssGroupManager(tssGroupManager).isTssGroupUnJailMembers(operator)) {
+                    require(balance > minStakeAmount,"unable withdraw due to operator's rest shares smaller than mini requirement");
+                }
             }
         }
     }

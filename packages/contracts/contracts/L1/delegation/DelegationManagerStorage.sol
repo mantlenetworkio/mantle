@@ -28,7 +28,7 @@ abstract contract DelegationManagerStorage is IDelegationManager {
      * within `REASONABLE_STAKES_UPDATE_PERIOD` of the present moment. In other words, this is the lag between undelegation/deregistration
      * and the staker's/operator's funds no longer being slashable due to misbehavior *on a new task*.
      */
-    uint256 public constant REASONABLE_STAKES_UPDATE_PERIOD = 7 days;
+    uint256 public constant REASONABLE_STAKES_UPDATE_PERIOD = 30 seconds;
 
     // fixed waiting period for withdrawals
     // TODO: set this to a proper interval for production
