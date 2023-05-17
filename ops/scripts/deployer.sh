@@ -43,6 +43,13 @@ if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
   # eval "$DEPLOY_VERIFIER"
 #  echo "$WHITELIST_INIT"
 #  eval "$WHITELIST_INIT"
+#  echo "done WHITELIST_INIT"
+#  echo "$REGISTER_AS_OPERATOR"
+#  eval "$REGISTER_AS_OPERATOR"
+#  echo "done REGISTER_AS_OPERATOR"
+#  echo "$ROLLUP_STAKE"
+#  eval "$ROLLUP_STAKE"
+#  echo "done ROLLUP_STAKE"
 
 elif [ $SKIP_CONTRACT_DEPLOY == "NO" ] ; then
   DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
