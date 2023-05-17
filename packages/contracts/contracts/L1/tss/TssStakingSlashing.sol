@@ -16,7 +16,6 @@ import {ITssRewardContract} from "../../L2/predeploys/iTssRewardContract.sol";
 import {TssDelegationManager} from "./delegation/TssDelegationManager.sol";
 import {TssDelegation} from "./delegation/TssDelegation.sol";
 import {WhiteList} from "../delegation/WhiteListBase.sol";
-import "hardhat/console.sol";
 
 import "./ITssGroupManager.sol";
 import "./ITssStakingSlashing.sol";
@@ -423,7 +422,6 @@ contract TssStakingSlashing is
     }
 
     function registerAsOperator(bytes calldata _pubKey) external {
-        console.log("start to register operator %s",msg.sender);
         TssDelegation(tssDelegationContract).registerAsOperator(this, msg.sender);
         setPublicKey(_pubKey);
     }
@@ -439,7 +437,6 @@ contract TssStakingSlashing is
         IDelegationShare[] memory delegationShares,
         uint256[] memory investorShares
     )external override onlyDelegation {
-        console.log("on delegation recieved");
         uint256 delegationLength = delegationShares.length;
         require(delegationLength == 1,"delegation only for tss");
         require(investorShares.length == 1,"delegation share only for tss");
@@ -448,8 +445,6 @@ contract TssStakingSlashing is
             delegators[delegator] = operator;
             stakers[operator].push(delegator);
         }
-        console.log("delegators %s %s",delegator,delegators[delegator]);
-
     }
 
     function onDelegationWithdrawn(

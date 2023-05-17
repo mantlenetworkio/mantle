@@ -4,7 +4,6 @@ pragma solidity ^0.8.9;
 import "../../delegation/DelegationManager.sol";
 import "../ITssGroupManager.sol";
 import "../TssStakingSlashing.sol";
-import "hardhat/console.sol";
 
 
 /**

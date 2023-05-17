@@ -3,7 +3,6 @@ pragma solidity ^0.8.9;
 
 import "../../delegation/Delegation.sol";
 import "../../delegation/WhiteListBase.sol";
-import "hardhat/console.sol";
 
 
 /**
@@ -47,7 +46,6 @@ contract TssDelegation is Delegation {
     }
 
     function registerAsOperator(IDelegationCallback dt, address sender) external whitelistOnly(sender) onlyStakingSlash {
-        console.log("de register operator %s",sender);
 
         require(
             address(delegationCallback[sender]) == address(0),
