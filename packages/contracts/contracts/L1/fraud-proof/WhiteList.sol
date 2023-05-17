@@ -30,7 +30,7 @@ abstract contract Whitelist {
      */
     function removeFromWhitelist(address[] calldata toRemoveAddresses) external onlyOwner {
         for (uint i = 0; i < toRemoveAddresses.length; i++) {
-           delete whitelist[toRemoveAddresses[i]];
+            delete whitelist[toRemoveAddresses[i]];
         }
     }
 

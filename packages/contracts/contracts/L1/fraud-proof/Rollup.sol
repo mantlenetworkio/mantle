@@ -142,7 +142,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             block.number // deadline (unchallengeable)
         );
 
-       for (uint i = 0; i < whitelists.length; i++) {
+        for (uint i = 0; i < whitelists.length; i++) {
             whitelist[whitelists[i]] = true;
         }
     }

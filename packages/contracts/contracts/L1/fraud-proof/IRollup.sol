@@ -139,7 +139,7 @@ interface IRollup {
      * @notice Deposits stake on staker's current assertion (or the last confirmed assertion if not currently staked).
      * @notice currently use Ether to stake; stakeAmount Token amount to deposit. Must be > than defined threshold if this is a new stake.
      */
-     function stake() external payable;
+    function stake() external payable;
 
     /**
      * @notice Withdraws stakeAmount from staker's stake by if assertion it is staked on is confirmed.
