@@ -11,7 +11,7 @@ import { IDataLayrServiceManager } from "../libraries/eigenda/lib/contracts/inte
 import { BN254 } from "../libraries/eigenda/BN254.sol";
 import { DataStoreUtils } from "../libraries/eigenda/lib/contracts/libraries/DataStoreUtils.sol";
 import { Parser } from "../libraries/eigenda/Parse.sol";
-import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 
 contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable, Parser {
