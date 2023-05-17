@@ -40,6 +40,14 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
     /// @dev Emitted when a low-level call to `delegationTerms.onDelegationWithdrawn` fails, returning `returnData`
     event OnDelegationWithdrawnCallFailure(IDelegationCallback indexed delegationTerms, bytes32 returnData);
 
+    event RegisterOperator(address delegationCallback, address register);
+
+    event DelegateTo(address delegatior, address operator);
+
+    event DecreaseDelegatedShares(address delegatedShare, address operator, uint256 share);
+
+    event IncreaseDelegatedShares(address delegatedShare, address operator, uint256 share);
+
     function initialize(address initialOwner)
         external
         initializer
@@ -73,6 +81,7 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
         // store the address of the delegation contract that the operator is providing.
         delegationCallback[msg.sender] = dt;
         _delegate(msg.sender, msg.sender);
+        emit RegisterOperator(address(dt),msg.sender);
     }
 
     /**
@@ -138,6 +147,7 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
             // call into hook in delegationCallback contract
             IDelegationCallback dt = delegationCallback[operator];
             _delegationReceivedHook(dt, staker, operator, investorDelegations, investorShares);
+            emit IncreaseDelegatedShares(address(delegationShare), operator, shares);
         }
     }
 
@@ -165,6 +175,7 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
             // call into hook in delegationCallback contract
             IDelegationCallback dt = delegationCallback[operator];
             _delegationWithdrawnHook(dt, staker, operator, investorDelegationShares, investorShares);
+            emit DecreaseDelegatedShares(address(delegationShare), operator, shares);
         }
     }
 
@@ -184,6 +195,7 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
             uint256 stratsLength = strategies.length;
             for (uint256 i = 0; i < stratsLength;) {
                 operatorShares[operator][strategies[i]] -= shares[i];
+                emit DecreaseDelegatedShares(address(strategies[i]), operator, shares[i]);
                 unchecked {
                     ++i;
                 }
@@ -294,6 +306,7 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
         }
         // call into hook in delegationCallback contract
         _delegationReceivedHook(dt, staker, operator, delegationShares, shares);
+        emit DelegateTo(staker, operator);
     }
 
     // VIEW FUNCTIONS

@@ -77,6 +77,9 @@ contract TssStakingSlashing is
      */
     event Slashing(address, SlashType);
 
+    event WithdrawQueue(address,uint256);
+
+
 
 
     constructor()  CrossDomainEnabled(address(0)) {
@@ -387,6 +390,7 @@ contract TssStakingSlashing is
         withdrawals[msg.sender] = queuedWithdrawal;
         bytes32 withdrawRoot = TssDelegationManager(tssDelegationManagerContract).queueWithdrawal(msg.sender,delegationIndexes,delegationShares,tokens,sharesA,withdrawerAndNonce);
         withdrawalRoots[msg.sender] = withdrawRoot;
+        emit WithdrawQueue(msg.sender, sharesA[0]);
     }
 
     function startWithdraw() external {

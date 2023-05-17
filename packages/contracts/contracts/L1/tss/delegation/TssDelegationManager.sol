@@ -26,8 +26,6 @@ contract TssDelegationManager is DelegationManager {
     uint256 public minStakeAmount;
 
 
-
-
     /**
      * @param _delegation The delegation contract.
      * @param _delegationSlasher The primary slashing contract.

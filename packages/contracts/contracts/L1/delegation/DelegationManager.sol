@@ -56,13 +56,13 @@ abstract contract DelegationManager is
     modifier onlyNotFrozen(address staker) {
         require(
             !delegationSlasher.isFrozen(staker),
-            "InvestmentManager.onlyNotFrozen: staker has been frozen and may be subject to slashing"
+            "DelegationManager.onlyNotFrozen: staker has been frozen and may be subject to slashing"
         );
         _;
     }
 
     modifier onlyFrozen(address staker) {
-        require(delegationSlasher.isFrozen(staker), "InvestmentManager.onlyFrozen: staker has not been frozen");
+        require(delegationSlasher.isFrozen(staker), "DelegationManager.onlyFrozen: staker has not been frozen");
         _;
     }
 
@@ -149,7 +149,7 @@ abstract contract DelegationManager is
     {
         require(
             withdrawerAndNonce.nonce == numWithdrawalsQueued[msg.sender],
-            "InvestmentManager.queueWithdrawal: provided nonce incorrect"
+            "DelegationManager.queueWithdrawal: provided nonce incorrect"
         );
         // increment the numWithdrawalsQueued of the sender
         unchecked {
@@ -231,15 +231,15 @@ abstract contract DelegationManager is
     function startQueuedWithdrawalWaitingPeriod(bytes32 withdrawalRoot, uint32 stakeInactiveAfter) external virtual {
         require(
             queuedWithdrawals[withdrawalRoot].unlockTimestamp == QUEUED_WITHDRAWAL_INITIALIZED_VALUE,
-            "InvestmentManager.startQueuedWithdrawalWaitingPeriod: Withdrawal stake inactive claim has already been made"
+            "DelegationManager.startQueuedWithdrawalWaitingPeriod: Withdrawal stake inactive claim has already been made"
         );
         require(
             queuedWithdrawals[withdrawalRoot].withdrawer == msg.sender,
-            "InvestmentManager.startQueuedWithdrawalWaitingPeriod: Sender is not the withdrawer"
+            "DelegationManager.startQueuedWithdrawalWaitingPeriod: Sender is not the withdrawer"
         );
         require(
             block.timestamp > queuedWithdrawals[withdrawalRoot].initTimestamp,
-            "InvestmentManager.startQueuedWithdrawalWaitingPeriod: Stake may still be subject to slashing based on new tasks. Wait to set stakeInactiveAfter."
+            "DelegationManager.startQueuedWithdrawalWaitingPeriod: Stake may still be subject to slashing based on new tasks. Wait to set stakeInactiveAfter."
         );
         //they can only unlock after a withdrawal waiting period or after they are claiming their stake is inactive
         queuedWithdrawals[withdrawalRoot].unlockTimestamp = max((uint32(block.timestamp) + WITHDRAWAL_WAITING_PERIOD), stakeInactiveAfter);
@@ -267,19 +267,19 @@ abstract contract DelegationManager is
         // verify that the queued withdrawal actually exists
         require(
             withdrawalStorageCopy.unlockTimestamp != 0,
-            "InvestmentManager.completeQueuedWithdrawal: withdrawal does not exist"
+            "DelegationManager.completeQueuedWithdrawal: withdrawal does not exist"
         );
 
         require(
             uint32(block.timestamp) >= withdrawalStorageCopy.unlockTimestamp
                 || (queuedWithdrawal.delegatedAddress == address(0)),
-            "InvestmentManager.completeQueuedWithdrawal: withdrawal waiting period has not yet passed and depositor was delegated when withdrawal initiated"
+            "DelegationManager.completeQueuedWithdrawal: withdrawal waiting period has not yet passed and depositor was delegated when withdrawal initiated"
         );
 
         // TODO: add testing coverage for this
         require(
             msg.sender == queuedWithdrawal.withdrawerAndNonce.withdrawer,
-            "InvestmentManager.completeQueuedWithdrawal: only specified withdrawer can complete a queued withdrawal"
+            "DelegationManager.completeQueuedWithdrawal: only specified withdrawer can complete a queued withdrawal"
         );
 
         // reset the storage slot in mapping of queued withdrawals
@@ -378,13 +378,13 @@ abstract contract DelegationManager is
         // verify that the queued withdrawal actually exists
         require(
             queuedWithdrawals[withdrawalRoot].unlockTimestamp != 0,
-            "InvestmentManager.slashQueuedWithdrawal: withdrawal does not exist"
+            "DelegationManager.slashQueuedWithdrawal: withdrawal does not exist"
         );
 
         // verify that *either* the queued withdrawal has been successfully challenged, *or* the `depositor` has been frozen
         require(
             queuedWithdrawals[withdrawalRoot].withdrawer == address(0) || delegationSlasher.isFrozen(queuedWithdrawal.depositor),
-            "InvestmentManager.slashQueuedWithdrawal: withdrawal has not been successfully challenged or depositor is not frozen"
+            "DelegationManager.slashQueuedWithdrawal: withdrawal has not been successfully challenged or depositor is not frozen"
         );
 
         // reset the storage slot in mapping of queued withdrawals
@@ -410,13 +410,13 @@ abstract contract DelegationManager is
      */
     function _addShares(address depositor, IDelegationShare delegationShare, uint256 shares) internal {
         // sanity check on `shares` input
-        require(shares != 0, "InvestmentManager._addShares: shares should not be zero!");
+        require(shares != 0, "DelegationManager._addShares: shares should not be zero!");
 
         // if they dont have existing shares of this delegation contract, add it to their strats
         if (investorDelegationShares[depositor][delegationShare] == 0) {
             require(
                 investorDelegations[depositor].length <= MAX_INVESTOR_DELEGATION_LENGTH,
-                "InvestmentManager._addShares: deposit would exceed MAX_INVESTOR_DELEGATION_LENGTH"
+                "DelegationManager._addShares: deposit would exceed MAX_INVESTOR_DELEGATION_LENGTH"
             );
             investorDelegations[depositor].push(delegationShare);
         }
@@ -460,13 +460,13 @@ abstract contract DelegationManager is
         returns (bool)
     {
         // sanity check on `shareAmount` input
-        require(shareAmount != 0, "InvestmentManager._removeShares: shareAmount should not be zero!");
+        require(shareAmount != 0, "DelegationManager._removeShares: shareAmount should not be zero!");
 
         //check that the user has sufficient shares
         uint256 userShares = investorDelegationShares[depositor][delegationShare];
 
 
-        require(shareAmount <= userShares, "InvestmentManager._removeShares: shareAmount too high");
+        require(shareAmount <= userShares, "DelegationManager._removeShares: shareAmount too high");
         //unchecked arithmetic since we just checked this above
         unchecked {
             userShares = userShares - shareAmount;
@@ -545,7 +545,7 @@ abstract contract DelegationManager is
         // verify that the queued withdrawal actually exists
         require(
             queuedWithdrawals[withdrawalRoot].unlockTimestamp != 0,
-            "InvestmentManager.canCompleteQueuedWithdrawal: withdrawal does not exist"
+            "DelegationManager.canCompleteQueuedWithdrawal: withdrawal does not exist"
         );
 
         if (delegationSlasher.isFrozen(queuedWithdrawal.delegatedAddress)) {

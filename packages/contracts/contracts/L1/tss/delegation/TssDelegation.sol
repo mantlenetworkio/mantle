@@ -19,6 +19,9 @@ contract TssDelegation is Delegation {
 
     address public stakingSlash;
 
+
+
+
     // INITIALIZING FUNCTIONS
     constructor(IDelegationManager _delegationManager)
     Delegation(_delegationManager)
@@ -54,6 +57,7 @@ contract TssDelegation is Delegation {
         // store the address of the delegation contract that the operator is providing.
         delegationCallback[sender] = dt;
         _delegate(sender, sender);
+        emit RegisterOperator(address(dt), sender);
     }
 
     function delegateTo(address operator, address staker) external onlyStakingSlash whenNotPaused {
