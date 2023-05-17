@@ -25,27 +25,24 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import {Lib_AddressResolver} from "../../libraries/resolver/Lib_AddressResolver.sol";
-import {Lib_AddressManager} from "../../libraries/resolver/Lib_AddressManager.sol";
-import {DelegationShareBase} from "../delegation/DelegationShareBase.sol";
-import {DelegationCallbackBase} from "../delegation/DelegationCallbackBase.sol";
-import {IDelegationManager} from "../delegation/interfaces/IDelegationManager.sol";
-import {IDelegationShare} from "../delegation/interfaces/IDelegation.sol";
-import {IDelegation} from "../delegation/interfaces/IDelegation.sol";
+import "hardhat/console.sol";
 
 import "./challenge/Challenge.sol";
 import "./challenge/ChallengeLib.sol";
 import "./AssertionMap.sol";
 import "./IRollup.sol";
 import "./RollupLib.sol";
+import "./WhiteList.sol";
 import "./verifier/IVerifier.sol";
+import {Lib_AddressResolver} from "../../libraries/resolver/Lib_AddressResolver.sol";
+import {Lib_AddressManager} from "../../libraries/resolver/Lib_AddressManager.sol";
 
 abstract contract RollupBase is IRollup, Initializable {
     // Config parameters
-    uint256 public challengePeriod; // number of L1 blocks
     uint256 public minimumAssertionPeriod; // number of L1 blocks
     uint256 public baseStakeAmount; // number of stake tokens
 
+    IERC20 public stakeToken;
     AssertionMap public override assertions;
     IVerifierEntry public verifier;
 
@@ -53,6 +50,7 @@ abstract contract RollupBase is IRollup, Initializable {
         bool isStaked;
         uint256 amountStaked;
         uint256 assertionID; // latest staked assertion ID
+        address operator; // operator
         address currentChallenge; // address(0) if none
     }
 
@@ -71,10 +69,17 @@ abstract contract RollupBase is IRollup, Initializable {
     }
 }
 
-contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, DelegationCallbackBase {
+contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     modifier stakedOnly() {
         if (!isStaked(msg.sender)) {
             revert("NotStaked");
+        }
+        _;
+    }
+
+    modifier operatorOnly() {
+        if (registers[msg.sender] == address(0)) {
+            revert("NotOperator");
         }
         _;
     }
@@ -87,6 +92,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
     // Staking state
     uint256 public numStakers; // current total number of stakers
     mapping(address => Staker) public stakers; // mapping from staker addresses to corresponding stakers
+    mapping(address => address) public registers; // register info for operator => staker
     mapping(address => uint256) public withdrawableFunds; // mapping from addresses to withdrawable funds (won in challenge)
     Zombie[] public zombies; // stores stakers that lost a challenge
     ChallengeCtx public challengeCtx;  // stores challenge context
@@ -96,21 +102,22 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
     }
 
     function initialize(
+        address _owner,
         address _verifier,
         address _stakeToken,
-        address _delegationManager,
-        address _delegation,
         address _libAddressManager,
         address _assertionMap,
-        uint256 _confirmationPeriod,
-        uint256 _challengePeriod,
         uint256 _minimumAssertionPeriod,
         uint256 _baseStakeAmount,
-        bytes32 _initialVMhash
+        bytes32 _initialVMhash,
+        address[] calldata stakerWhitelists,
+        address[] calldata operatorWhitelists
     ) public initializer {
-        if (_verifier == address(0)) {
+        if (_owner == address(0) || _verifier == address(0)) {
             revert("ZeroAddress");
         }
+        owner = _owner;
+        stakeToken = IERC20(_stakeToken);
         verifier = IVerifierEntry(_verifier);
 
         if (address(libAddressManager) != address(0)) {
@@ -123,14 +130,8 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
         }
         assertions = AssertionMap(_assertionMap);
 
-        challengePeriod = _challengePeriod; // TODO: currently unused.
         minimumAssertionPeriod = _minimumAssertionPeriod;
         baseStakeAmount = _baseStakeAmount;
-
-        // initialize delegation
-        delegationManager = IDelegationManager(_delegationManager);
-        underlyingToken = IERC20(_stakeToken);
-        delegation = IDelegation(_delegation);
 
         assertions.setRollupAddress(address(this));
         lastResolvedAssertionID = 0;
@@ -144,6 +145,13 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
             0, // parentID
             block.number // deadline (unchallengeable)
         );
+
+        for (uint i = 0; i < stakerWhitelists.length; i++) {
+            stakerWhitelist[stakerWhitelists[i]] = true;
+        }
+        for (uint i = 0; i < operatorWhitelists.length; i++) {
+            operatorWhitelist[operatorWhitelists[i]] = true;
+        }
     }
 
     /// @inheritdoc IRollup
@@ -161,27 +169,73 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
         return assertions.getInboxSize(lastConfirmedAssertionID);
     }
 
-    function onDelegationReceived(
-        address delegator,
-        address operator,
-        IDelegationShare[] memory investorDelegationShares,
-        uint256[] memory investorShares
-    ) external override onlyDelegation {
-        stake(delegator, operator, investorDelegationShares, investorShares);
-    }
+    /// @inheritdoc IRollup
+    function stake(uint256 stakeAmount, address operator) external override
+        stakerWhitelistOnly(msg.sender)
+        operatorWhitelistOnly(operator)
+    {
+        // send erc20 token to staking contract, need user approve first
+        require(
+            IERC20(stakeToken).transferFrom(msg.sender, address(this), stakeAmount),
+            "transfer erc20 token failed"
+        );
 
-    function onDelegationWithdrawn(
-        address delegator,
-        address operator,
-        IDelegationShare[] memory investorDelegationShares,
-        uint256[] memory investorShares
-    ) external override onlyDelegation {
-        unstake(delegator, operator, investorDelegationShares, investorShares);
+        if (isStaked(msg.sender)) {
+            require(
+            stakers[msg.sender].operator == operator,
+                "staker => operator mapping not unique"
+            );
+            stakers[msg.sender].amountStaked += stakeAmount;
+        } else {
+            if (stakeAmount < baseStakeAmount) {
+                revert("InsufficientStake");
+            }
+            stakers[msg.sender] = Staker(true, stakeAmount, 0, operator, address(0));
+            registers[operator] = msg.sender;
+            numStakers++;
+            stakeOnAssertion(msg.sender, lastConfirmedAssertionID);
+        }
     }
 
     /// @inheritdoc IRollup
-    function advanceStake(uint256 assertionID) external override stakedOnly {
+    function unstake(uint256 stakeAmount) external override {
+        requireStaked(msg.sender);
+        // Require that staker is staked on a confirmed assertion.
         Staker storage staker = stakers[msg.sender];
+        if (staker.assertionID > lastConfirmedAssertionID) {
+            revert("StakedOnUnconfirmedAssertion");
+        }
+        if (stakeAmount > staker.amountStaked - currentRequiredStake()) {
+            revert("InsufficientStake");
+        }
+        staker.amountStaked -= stakeAmount;
+        // send erc20 token to user
+        require(
+            IERC20(stakeToken).transfer(msg.sender, stakeAmount),
+            "transfer erc20 token failed"
+        );
+    }
+
+    /// @inheritdoc IRollup
+    function removeStake(address stakerAddress) onlyOwner external override {
+        requireStaked(stakerAddress);
+        // Require that staker is staked on a confirmed assertion.
+        Staker storage staker = stakers[stakerAddress];
+        if (staker.assertionID > lastConfirmedAssertionID) {
+            revert("StakedOnUnconfirmedAssertion");
+        }
+        deleteStaker(stakerAddress);
+        // send erc20 token to user
+        require(
+            IERC20(stakeToken).transfer(stakerAddress, staker.amountStaked),
+            "transfer erc20 token failed"
+        );
+    }
+
+    /// @inheritdoc IRollup
+    function advanceStake(uint256 assertionID) external override operatorOnly {
+        address stakerAddr = registers[msg.sender];
+        Staker storage staker = stakers[stakerAddr];
         if (assertionID <= staker.assertionID && assertionID > lastCreatedAssertionID) {
             revert("AssertionOutOfRange");
         }
@@ -189,16 +243,25 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
         if (staker.assertionID != assertions.getParentID(assertionID)) {
             revert("ParentAssertionUnstaked");
         }
-        stakeOnAssertion(msg.sender, assertionID);
+        stakeOnAssertion(stakerAddr, assertionID);
+    }
+
+    /// @inheritdoc IRollup
+    function withdraw() external override {
+        uint256 withdrawableFund = withdrawableFunds[msg.sender];
+        withdrawableFunds[msg.sender] = 0;
+        (bool success,) = msg.sender.call{value: withdrawableFund}("");
+        if (!success) revert("TransferFailed");
     }
 
     /// @inheritdoc IRollup
     function createAssertion(
         bytes32 vmHash,
         uint256 inboxSize
-    ) public override stakedOnly {
-        require(stakers[msg.sender].currentChallenge == address(0),"can not create assertion when staker in challenge");
-        uint256 parentID = stakers[msg.sender].assertionID;
+    ) public override operatorOnly {
+        address stakerAddr = registers[msg.sender];
+        require(stakers[stakerAddr].currentChallenge == address(0),"can not create assertion when staker in challenge");
+        uint256 parentID = stakers[stakerAddr].assertionID;
         // Require that enough time has passed since the last assertion.
         if (block.number - assertions.getProposalTime(parentID) < minimumAssertionPeriod) {
             revert("MinimumAssertionPeriodNotPassed");
@@ -216,7 +279,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
         );
 
         // Update stake.
-        stakeOnAssertion(msg.sender, lastCreatedAssertionID);
+        stakeOnAssertion(stakerAddr, lastCreatedAssertionID);
     }
 
     /// @inheritdoc IRollup
@@ -226,7 +289,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
         bytes32[] calldata _batch,
         uint256 _shouldStartAtElement,
         bytes calldata _signature
-        ) external override stakedOnly { // todo batch submitter only
+        ) external override operatorOnly {
         // permissions only allow rollup proposer to submit assertion, only allow RollupContract to append new batch
         require(msg.sender == resolve("BVM_Rolluper"), "msg.sender is not rollup proposer, can't append batch");
         // create assertion
@@ -265,8 +328,10 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
         // Require that neither player is currently engaged in a challenge.
         address defender = players[0];
         address challenger = players[1];
-        requireUnchallengedStaker(defender);
-        requireUnchallengedStaker(challenger);
+        address defenderStaker = registers[defender];
+        address challengerStaker = registers[challenger];
+        requireUnchallengedStaker(defenderStaker);
+        requireUnchallengedStaker(challengerStaker);
 
         // TODO: Calculate upper limit for allowed node proposal time.
 
@@ -382,32 +447,34 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
 
     /// @inheritdoc IRollup
     function completeChallenge(address winner, address loser) external override {
-        requireStaked(loser);
+        address winnerStaker = registers[winner];
+        address loserStaker = registers[loser];
+        requireStaked(loserStaker);
 
-        address challenge = getChallenge(winner, loser);
+        address challenge = getChallenge(winnerStaker, loserStaker);
         if (msg.sender != challenge) {
             revert("NotChallenge");
         }
         uint256 amountWon;
-        uint256 loserStake = stakers[loser].amountStaked;
-        uint256 winnerStake = stakers[winner].amountStaked;
+        uint256 loserStake = stakers[loserStaker].amountStaked;
+        uint256 winnerStake = stakers[winnerStaker].amountStaked;
         if (loserStake > baseStakeAmount) {
             // If loser has a higher stake than the winner, refund the difference.
             // Loser gets deleted anyways, so maybe unnecessary to set amountStaked.
             // stakers[loser].amountStaked = winnerStake;
-            withdrawableFunds[loser] += (loserStake - baseStakeAmount);
+            withdrawableFunds[loserStaker] += (loserStake - baseStakeAmount);
             amountWon = baseStakeAmount;
         } else {
             amountWon = loserStake;
         }
         // Reward the winner with half the remaining stake
-        stakers[winner].amountStaked += amountWon; // why +stake instead of +withdrawable?
-        stakers[winner].currentChallenge = address(0);
+        stakers[winnerStaker].amountStaked += amountWon; // why +stake instead of +withdrawable?
+        stakers[winnerStaker].currentChallenge = address(0);
         // Turning loser into zombie renders the loser's remaining stake inaccessible.
-        uint256 assertionID = stakers[loser].assertionID;
-        deleteStaker(loser);
+        uint256 assertionID = stakers[loserStaker].assertionID;
+        deleteStaker(loserStaker);
         // Track as zombie so we can account for it during assertion resolution.
-        zombies.push(Zombie(loser, assertionID));
+        zombies.push(Zombie(loserStaker, assertionID));
         challengeCtx.completed = true;
     }
 
@@ -428,7 +495,9 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
      */
     function deleteStaker(address stakerAddress) private {
         numStakers--;
+        address operator = stakers[stakerAddress].operator;
         delete stakers[stakerAddress];
+        delete registers[operator];
     }
 
     /**
@@ -465,7 +534,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
     // zombie processing
     // *****************
 
-    function removeOldZombies() external stakedOnly {
+    function removeOldZombies() external operatorOnly {
         delete zombies;
     }
     /**
@@ -494,50 +563,6 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
         return numStakedZombies;
     }
 
-    function stake(
-        address delegator,
-        address operator,
-        IDelegationShare[] memory investorDelegationShares,
-        uint256[] memory investorShares
-    ) internal {
-        uint256 delegationLength = investorDelegationShares.length;
-        for (uint256 i = 0; i < delegationLength; i++) {
-            if (address(investorDelegationShares[i]) == address(this)) {
-                if (isStaked(operator)) {
-                    stakers[operator].amountStaked += investorShares[i];
-                } else {
-                    if (investorShares[i] < baseStakeAmount) {
-                        revert("InsufficientStake");
-                    }
-                    stakers[operator] = Staker(true, investorShares[i], 0, address(0));
-                    numStakers++;
-                    stakeOnAssertion(operator, lastConfirmedAssertionID);
-                }
-            }
-            break;
-        }
-    }
-
-    function unstake(
-        address delegator,
-        address operator,
-        IDelegationShare[] memory investorDelegationShares,
-        uint256[] memory investorShares
-    ) internal {
-        requireStaked(operator);
-        Staker storage staker = stakers[operator];
-        uint256 delegationLength = investorDelegationShares.length;
-        for (uint256 i = 0; i < delegationLength; i++) {
-            if (address(investorDelegationShares[i]) == address(this)) {
-                if (investorShares[i] > staker.amountStaked - currentRequiredStake()) {
-                    revert("InsufficientStake");
-                }
-                staker.amountStaked -= investorShares[i];
-            }
-            break;
-        }
-    }
-
     // ************
     // requirements
     // ************
@@ -555,4 +580,3 @@ contract Rollup is Lib_AddressResolver, RollupBase, DelegationShareBase, Delegat
         }
     }
 }
-

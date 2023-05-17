@@ -42,13 +42,13 @@ task('setAddress')
   })
 
 task('whiteListInit')
-  .addParam('delegation', 'Delegation contract address')
-  .addParam('manager', 'Manager contract address')
+  .addParam('rollup', 'Rollup contract address')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:9545'
     )
     const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
+    const proposerAddr = process.env.BVM_ROLLUPER_ADDRESS
     const entryOwner = new ethers.Wallet(deployerKey, provider)
 
     console.log(
@@ -56,61 +56,26 @@ task('whiteListInit')
       entryOwner.address,
       (await entryOwner.getBalance()).toString()
     )
-
     const SequencerENV = process.env.BVM_ROLLUPER_ADDRESS
     const Validator1ENV = process.env.BVM_VERIFIER1_ADDRESS
-    const whiteListAddToDelegation = [SequencerENV, Validator1ENV]
-    console.log('whiteList to delegation:', whiteListAddToDelegation)
-    const delegation = await getContractFactory('FraudProofDelegation').attach(
-      taskArgs.delegation
-    )
-    await delegation.connect(entryOwner).addToWhitelist(whiteListAddToDelegation)
-
-    const ProxyRollupENV = process.env.ROLLUP_CONTRACT_ADDRESS
-    const whiteListAddToManager = [ProxyRollupENV]
-    console.log('whiteList to manager:', whiteListAddToManager)
-    const manager = await getContractFactory('FraudProofDelegationManager').attach(
-      taskArgs.manager
-    )
-    await manager.connect(entryOwner).addToWhitelist(whiteListAddToManager)
-  })
-
-task('registerAsOperator')
-  .addParam('delegation', 'Delegation contract address')
-  .setAction(async (taskArgs) => {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
-    )
-    const SequencerKey = process.env.BVM_PROPOSER_KEY
-    const Validator1Key = process.env.BVM_VERIFIER1_KEY
-    const proposer = new ethers.Wallet(SequencerKey, provider)
-    const validator = new ethers.Wallet(Validator1Key, provider)
-
-    console.log(
-      'proposer balance: ',
-      proposer.address,
-      (await proposer.getBalance()).toString()
-    )
-    console.log(
-      'validator balance: ',
-      validator.address,
-      (await validator.getBalance()).toString()
-    )
-
-    const delegation = await getContractFactory('FraudProofDelegation').attach(
-      taskArgs.delegation
-    )
-    await delegation.connect(proposer).registerAsOperator(process.env.ROLLUP_CONTRACT_ADDRESS)
-    await delegation.connect(validator).registerAsOperator(process.env.ROLLUP_CONTRACT_ADDRESS)
+    // const Validator2ENV = process.env.BVM_VERIFIER2_ADDRESS
+    const whiteListToAdd = [SequencerENV, Validator1ENV]
+    console.log('whiteList:', whiteListToAdd)
+    const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
+    await rollup.connect(entryOwner).addToOperatorWhitelist(whiteListToAdd)
+    await rollup.connect(entryOwner).addToStakerWhitelist(whiteListToAdd)
+    console.log('transferOwnerShip')
+    await rollup.connect(entryOwner).transferOwnership(proposerAddr)
   })
 
 task('rollupStake')
-  .addParam('manager', 'Manager contract address')
-  .addParam('amount', 'amount to stake', '100')
+  .addParam('rollup', 'Rollup contract address')
+  .addParam('amount', 'amount to stake', '0.1')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:9545'
     )
+    const bitToken = process.env.L1_BIT_ADDRESS
     const verifier1Key = process.env.BVM_VERIFIER1_KEY
     const proposerKey = process.env.BVM_PROPOSER_KEY
 
@@ -118,20 +83,20 @@ task('rollupStake')
     const verifier1Wallet = new ethers.Wallet(verifier1Key, provider)
 
     const wallets = [proposerWallet, verifier1Wallet]
-    const manager = await getContractFactory('FraudProofDelegationManager').attach(taskArgs.manager)
-    const l1bit = await getContractFactory('ERC20').attach(process.env.L1_BIT_ADDRESS)
+    const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
+    const bit = await getContractFactory('BitTokenERC20').attach(bitToken)
     for (const w of wallets) {
-      console.log('eth balance: ', w.address, (await w.getBalance()).toString())
-      // TODO query balance
-      console.log('bit balance: ', w.address, (await l1bit.balanceOf(w.address)).toString())
-      // TODO set approve
-      await manager
+      console.log("ETH Balance:",w.address," ",await w.getBalance())
+      await bit.connect(w).mint(ethers.utils.parseEther(taskArgs.amount))
+      await bit
         .connect(w)
-        .depositInto(
-          process.env.ROLLUP_CONTRACT_ADDRESS,
-          process.env.L1_BIT_ADDRESS,
-          ethers.utils.parseEther(taskArgs.amount)
-        )
+        .approve(taskArgs.rollup, ethers.utils.parseEther(taskArgs.amount))
+      console.log(
+        'balance: ',
+        w.address,
+        (await bit.connect(w).balanceOf(w.address)).toString()
+      )
+      await rollup.connect(w).stake(ethers.utils.parseEther(taskArgs.amount), w.address)
     }
   })
 

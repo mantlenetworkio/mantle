@@ -122,17 +122,22 @@ const deployFn: DeployFunction = async (hre) => {
 
   // deploy rollup proxy
   const rollupArgs = [
+    deployer, // address _owner
     Proxy__VerifierEntry.address, // address _verifier,
     l1BitAddress, // address _stakeToken,
-    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', //_delegationManager
-    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', //_delegation
     Lib_AddressManager.address, // address _libAddressManager,
     Proxy__AssertionMap.address, // address _assertionMap,
-    5, // uint256 _confirmationPeriod,
-    0, // uint256 _challengePeriod,
     0, // uint256 _minimumAssertionPeriod,
     0, // uint256 _baseStakeAmount
     '0x89e2ce7fd44675606b4ced40dd2ccc67f7ae2851dd1b86409bdaeac791a60d3e', // bytes32 _initialVMhash //TODO-FIXME
+    [
+      '0xd5b002298b2e81b4ced1b6c8cf1964023cdc3758',
+      '0xd55fe10a1acb32b6183bdfbeb42e9961c3cb8792',
+    ],
+    [
+      '0xd5b002298b2e81b4ced1b6c8cf1964023cdc3758',
+      '0xd55fe10a1acb32b6183bdfbeb42e9961c3cb8792',
+    ],
   ]
   callData = Impl__Rollup.interface.encodeFunctionData('initialize', rollupArgs)
   await deployAndVerifyAndThen({
@@ -171,11 +176,23 @@ const deployFn: DeployFunction = async (hre) => {
         5000,
         100
       )
+      console.log('>>>> owner ',await contract.owner())
+      await awaitCondition(
+        async () => {
+          return hexStringEquals(
+            await contract.owner(),
+            deployer
+          )
+        },
+        5000,
+        100
+      )
+      // console.log('>>>> whitelists', contract.whitelist())
       // await awaitCondition(
       //   async () => {
       //     return hexStringEquals(
-      //       await contract.owner(),
-      //       deployer
+      //       await contract.whitelist().length,
+      //       "3"
       //     )
       //   },
       //   5000,
