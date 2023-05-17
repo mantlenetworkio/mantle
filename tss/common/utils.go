@@ -2,13 +2,21 @@ package common
 
 import (
 	"bytes"
+	"context"
+	"crypto/ecdsa"
 	"math/big"
+	"time"
 
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
 var (
@@ -137,4 +145,83 @@ func IsAddrExist(set []common.Address, find common.Address) bool {
 		}
 	}
 	return false
+}
+
+// Ensure we can actually connect l1
+func EnsureConnection(client *ethclient.Client) error {
+	t := time.NewTicker(1 * time.Second)
+	retries := 0
+	defer t.Stop()
+	for ; true; <-t.C {
+		_, err := client.ChainID(context.Background())
+		if err == nil {
+			break
+		} else {
+			retries += 1
+			if retries > 90 {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func EstimateGas(client *ethclient.Client, prikey *ecdsa.PrivateKey,chainId *big.Int, ctx context.Context, tx *types.Transaction, rawContract *bind.BoundContract, to common.Address) (*types.Transaction, error) {
+	from := crypto.PubkeyToAddress(prikey.PublicKey)
+
+	header, err := client.HeaderByNumber(ctx, nil)
+	if err != nil {
+		log.Error("failed to get header by l1client","err",err.Error())
+		return nil, err
+	}
+	var gasPrice *big.Int
+	var gasTipCap *big.Int
+	var gasFeeCap *big.Int
+	if header.BaseFee == nil {
+		gasPrice, err = client.SuggestGasPrice(ctx)
+		if err != nil {
+			log.Error("cannot fetch gas price ", "err",err.Error())
+			return nil, err
+		}
+	} else {
+		gasTipCap, err = client.SuggestGasTipCap(ctx)
+		if err != nil {
+			log.Warn("failed to SuggestGasTipCap, FallbackGasTipCap = big.NewInt(1500000000) ")
+			gasTipCap = big.NewInt(1500000000)
+		}
+		gasFeeCap = new(big.Int).Add(
+			gasTipCap,
+			new(big.Int).Mul(header.BaseFee, big.NewInt(2)),
+		)
+	}
+
+	msg := ethereum.CallMsg{
+		From:      from,
+		To:        &to,
+		GasPrice:  gasPrice,
+		GasTipCap: gasTipCap,
+		GasFeeCap: gasFeeCap,
+		Value:     nil,
+		Data:      tx.Data(),
+	}
+
+	gasLimit, err := client.EstimateGas(ctx, msg)
+	if err != nil {
+		log.Error("failed to EstimateGas","err",err.Error())
+		return nil, err
+	}
+	opts, err := bind.NewKeyedTransactorWithChainID(prikey, chainId)
+	if err != nil {
+		log.Error("failed to new ops in estimate gas function","err",err.Error())
+		return nil, err
+	}
+	opts.Context = ctx
+	opts.NoSend = true
+	opts.Nonce = new(big.Int).SetUint64(tx.Nonce())
+
+	opts.GasTipCap = gasTipCap
+	opts.GasFeeCap = gasFeeCap
+	opts.GasLimit = 25 * gasLimit //add 20% buffer to gas limit
+
+	return rawContract.RawTransact(opts, tx.Data())
 }

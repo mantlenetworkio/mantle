@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./ITssGroupManager.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./ITssStakingSlashing.sol";
 
 contract TssGroupManager is
     Initializable,
@@ -68,7 +69,11 @@ contract TssGroupManager is
     {
         require((_batchPublicKey.length > 0), "batch public key is empty");
         require(_threshold < _batchPublicKey.length, "threshold must less than tss member");
-        // require((inActiveTssMembers.length == 0), "inactive tss member array is not empty");
+        for (uint256 i = 0; i < _batchPublicKey.length; i++) {
+            address operator = publicKeyToAddress(_batchPublicKey[i]);
+            require(IStakingSlashing(stakingSlash).isCanOperator(operator),"batch public keys has a node ,can not be operator");
+        }
+
         if(inActiveTssMembers.length > 0) {
             for (uint256 i = 0; i < inActiveTssMembers.length; i++) {
                 // re-election clear data
@@ -166,7 +171,7 @@ contract TssGroupManager is
      * @inheritdoc ITssGroupManager
      */
     // slither-disable-next-line external-function
-    function removeMember(bytes memory _publicKey) public override onlyStakingSlash {
+    function removeMember(bytes memory _publicKey) public override onlyOwner {
         for (uint256 i = 0; i < activeTssMembers.length; i++) {
             if (isEqual(activeTssMembers[i], _publicKey)) {
                 removeActiveTssMembers(i);
@@ -195,6 +200,26 @@ contract TssGroupManager is
             }
         }
         return _addresses;
+    }
+
+    function isTssGroupUnJailMembers(address _addr) public view override returns (bool) {
+        for (uint256 i = 0; i < activeTssMembers.length; i++) {
+            if (tssActiveMemberInfo[activeTssMembers[i]].status == MemberStatus.unJail) {
+                if ( _addr == tssActiveMemberInfo[activeTssMembers[i]].nodeAddress) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function memberExistActive(address _addr) public view override returns (bool) {
+        for (uint256 i = 0; i < activeTssMembers.length; i++) {
+            if ( _addr == tssActiveMemberInfo[activeTssMembers[i]].nodeAddress) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

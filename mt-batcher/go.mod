@@ -32,6 +32,7 @@ require (
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
 )
 
+
 require (
 	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0-00010101000000-000000000000 // indirect
 	github.com/VictoriaMetrics/fastcache v1.9.0 // indirect
