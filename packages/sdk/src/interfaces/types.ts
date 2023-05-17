@@ -41,6 +41,7 @@ export interface OEL1Contracts {
   StateCommitmentChain: Contract
   CanonicalTransactionChain: Contract
   BondManager: Contract
+  Rollup: Contract
 }
 
 /**
