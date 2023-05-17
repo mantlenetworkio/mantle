@@ -31,25 +31,16 @@ echo "test point1"
 if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
   DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"
 
-#  # fraud proof verifier deploy
-#  DEPLOY_VERIFIER="npx hardhat deployVerifier --verifier $VERIFIER_ENTRY_ADDRESS"
-#
-#  # whiteListInit
-#  WHITELIST_INIT="npx hardhat whiteListInit --delegation $Proxy__FraudProofDelegation --manager $Proxy__FraudProofDelegationManager"
-#
-#  # registerAsOperator
-#  REGISTER_AS_OPERATOR="npx hardhat registerAsOperator --delegation $Proxy__FraudProofDelegation"
-#
-#  # fraud proof rollup stake
-#  ROLLUP_STAKE="npx hardhat rollupStake --manager $Proxy__FraudProofDelegationManager"
+  # # whiteListInit
+  # WHITELIST_INIT="npx hardhat whiteListInit --delegation $ROLLUP_CONTRACT_ADDRESS"
+  # # fraud proof verifier deploy
+  # DEPLOY_VERIFIER="npx hardhat deployVerifier --verifier $VERIFIER_ENTRY_ADDRESS"
 
   echo "Deploying contracts. Deployment command:"
   echo "$DEPLOY_CMD"
   eval "$DEPLOY_CMD"
-  echo "done DEPLOY_CMD"
-#  echo "$DEPLOY_VERIFIER"
-#  eval "$DEPLOY_VERIFIER"
-#  echo "done DEPLOY_VERIFIER"
+  # echo "$DEPLOY_VERIFIER"
+  # eval "$DEPLOY_VERIFIER"
 #  echo "$WHITELIST_INIT"
 #  eval "$WHITELIST_INIT"
 #  echo "done WHITELIST_INIT"

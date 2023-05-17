@@ -11,7 +11,6 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./DelegationStorage.sol";
 import "./DelegationSlasher.sol";
 import "./WhiteListBase.sol";
-
 /**
  * @title The primary delegation contract.
  * @notice  This is the contract for delegation. The main functionalities of this contract are
@@ -40,6 +39,14 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
 
     /// @dev Emitted when a low-level call to `delegationTerms.onDelegationWithdrawn` fails, returning `returnData`
     event OnDelegationWithdrawnCallFailure(IDelegationCallback indexed delegationTerms, bytes32 returnData);
+
+    event RegisterOperator(address delegationCallback, address register);
+
+    event DelegateTo(address delegatior, address operator);
+
+    event DecreaseDelegatedShares(address delegatedShare, address operator, uint256 share);
+
+    event IncreaseDelegatedShares(address delegatedShare, address operator, uint256 share);
 
     function initialize(address initialOwner)
         external
@@ -74,6 +81,7 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
         // store the address of the delegation contract that the operator is providing.
         delegationCallback[msg.sender] = dt;
         _delegate(msg.sender, msg.sender);
+        emit RegisterOperator(address(dt),msg.sender);
     }
 
     /**
@@ -139,6 +147,7 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
             // call into hook in delegationCallback contract
             IDelegationCallback dt = delegationCallback[operator];
             _delegationReceivedHook(dt, staker, operator, investorDelegations, investorShares);
+            emit IncreaseDelegatedShares(address(delegationShare), operator, shares);
         }
     }
 
@@ -166,6 +175,7 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
             // call into hook in delegationCallback contract
             IDelegationCallback dt = delegationCallback[operator];
             _delegationWithdrawnHook(dt, staker, operator, investorDelegationShares, investorShares);
+            emit DecreaseDelegatedShares(address(delegationShare), operator, shares);
         }
     }
 
@@ -185,6 +195,7 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
             uint256 stratsLength = strategies.length;
             for (uint256 i = 0; i < stratsLength;) {
                 operatorShares[operator][strategies[i]] -= shares[i];
+                emit DecreaseDelegatedShares(address(strategies[i]), operator, shares[i]);
                 unchecked {
                     ++i;
                 }
@@ -218,29 +229,10 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
          * In particular, in-line assembly is also used to prevent the copying of uncapped return data which is also a potential DoS vector.
          */
         // format calldata
-        bytes memory lowLevelCalldata = abi.encodeWithSelector(IDelegationCallback.onDelegationReceived.selector, staker, operator, delegationShares, shares);
-        // Prepare memory for low-level call return data. We accept a max return data length of 32 bytes
-        bool success;
-        bytes32[1] memory returnData;
-        // actually make the call
-        assembly {
-            success := call(
-                // gas provided to this context
-                LOW_LEVEL_GAS_BUDGET,
-                // address to call
-                dt,
-                // value in wei for call
-                0,
-                // memory location to copy for calldata
-                lowLevelCalldata,
-                // length of memory to copy for calldata
-                mload(lowLevelCalldata),
-                // memory location to copy return data
-                returnData,
-                // byte size of return data to copy to memory
-                32
-            )
-        }
+        (bool success, bytes memory returnData) = address(dt).call{gas: LOW_LEVEL_GAS_BUDGET}(
+            abi.encodeWithSelector(IDelegationCallback.onDelegationReceived.selector, staker, operator, delegationShares, shares)
+        );
+
         // if the call fails, we emit a special event rather than reverting
         if (!success) {
             emit OnDelegationReceivedCallFailure(dt, returnData[0]);
@@ -266,30 +258,11 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
          * We use low-level call functionality here to ensure that an operator cannot maliciously make this function fail in order to prevent undelegation.
          * In particular, in-line assembly is also used to prevent the copying of uncapped return data which is also a potential DoS vector.
          */
-        // format calldata
-        bytes memory lowLevelCalldata = abi.encodeWithSelector(IDelegationCallback.onDelegationWithdrawn.selector, staker, operator, delegationShares, shares);
-        // Prepare memory for low-level call return data. We accept a max return data length of 32 bytes
-        bool success;
-        bytes32[1] memory returnData;
-        // actually make the call
-        assembly {
-            success := call(
-                // gas provided to this context
-                LOW_LEVEL_GAS_BUDGET,
-                // address to call
-                dt,
-                // value in wei for call
-                0,
-                // memory location to copy for calldata
-                lowLevelCalldata,
-                // length of memory to copy for calldata
-                mload(lowLevelCalldata),
-                // memory location to copy return data
-                returnData,
-                // byte size of return data to copy to memory
-                32
-            )
-        }
+
+        (bool success, bytes memory returnData) = address(dt).call{gas: LOW_LEVEL_GAS_BUDGET}(
+            abi.encodeWithSelector(IDelegationCallback.onDelegationWithdrawn.selector, staker, operator, delegationShares, shares)
+        );
+
         // if the call fails, we emit a special event rather than reverting
         if (!success) {
             emit OnDelegationWithdrawnCallFailure(dt, returnData[0]);
@@ -304,22 +277,21 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
      * delegated, and records the new delegation.
      */
     function _delegate(address staker, address operator) internal {
+
         IDelegationCallback dt = delegationCallback[operator];
         require(
             address(dt) != address(0), "Delegation._delegate: operator has not yet registered as a delegate"
         );
-
         require(isNotDelegated(staker), "Delegation._delegate: staker has existing delegation");
+
         // checks that operator has not been frozen
         IDelegationSlasher slasher = delegationManager.delegationSlasher();
         require(!slasher.isFrozen(operator), "Delegation._delegate: cannot delegate to a frozen operator");
-
         // record delegation relation between the staker and operator
         delegatedTo[staker] = operator;
 
         // record that the staker is delegated
         delegationStatus[staker] = DelegationStatus.DELEGATED;
-
         // retrieve list of strategies and their shares from investment manager
         (IDelegationShare[] memory delegationShares, uint256[] memory shares) = delegationManager.getDeposits(staker);
 
@@ -332,9 +304,9 @@ abstract contract Delegation is Initializable, OwnableUpgradeable, PausableUpgra
                 ++i;
             }
         }
-
         // call into hook in delegationCallback contract
         _delegationReceivedHook(dt, staker, operator, delegationShares, shares);
+        emit DelegateTo(staker, operator);
     }
 
     // VIEW FUNCTIONS

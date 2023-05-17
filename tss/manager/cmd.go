@@ -35,6 +35,9 @@ func Command() *cobra.Command {
 func run(cmd *cobra.Command) error {
 	config := common.GetConfigFromCmd(cmd)
 	log.Info("config info print", "SignedBatchesWindow", config.SignedBatchesWindow, "MinSignedInWindow", config.MinSignedInWindow)
+	if len(config.Manager.PrivateKey) == 0 {
+		return errors.New("need to config private key")
+	}
 	wsServer, err := server.NewWSServer(config.Manager.WsAddr)
 	if err != nil {
 		return err

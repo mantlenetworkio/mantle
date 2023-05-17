@@ -24,6 +24,11 @@ interface ITssRewardContract {
         address[] tssMembers
     );
 
+    event Claim(
+        address owner,
+        uint256 amount
+    );
+
     /********************
      * Public Functions *
      ********************/
@@ -57,4 +62,27 @@ interface ITssRewardContract {
      * @dev clear contract(canonical).
      */
     function withdraw() external;
+
+    /**
+     * @dev Claim reward and withdraw
+     */
+    function claim() external;
+
+    /**
+     * @dev default claimer == staker, if staker is multi-signature address,must set claimer
+     * @param _staker the address of staker
+     * @param _claimer the address for staker to claim reward
+     */
+    function setClaimer(address _staker, address _claimer) external;
+
+    /**
+     * @dev Initiate a request to claim
+     */
+    function requestClaim() external returns (bool);
+
+    /**
+     * @dev Query the remaining time required to claim
+     */
+    function queryClaimTime() external returns (uint256);
+
 }

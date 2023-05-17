@@ -27,6 +27,10 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
     /// @notice The total number of extant shares in the DelegationShare
     uint256 public totalShares;
 
+    event Deposit(address depositor, address token, uint256 amount);
+
+    event Withdraw(address depositor, address token, uint256 amount);
+
     /// @notice Simply checks that the `msg.sender` is the `DelegationManager`, which is an address stored immutably at construction.
     modifier onlyDelegationManager() {
         require(msg.sender == address(delegationManager), "DelegationShareBase.onlyDelegationManager");
@@ -63,6 +67,7 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
         }
 
         totalShares += newShares;
+        emit Deposit(depositor, address(token), amount);
         return newShares;
     }
 
@@ -102,6 +107,7 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
             amountToSend = (_tokenBalance() * amountShares) / priorTotalShares;
         }
         underlyingToken.safeTransfer(depositor, amountToSend);
+        emit Withdraw(depositor, address(token), amountToSend);
     }
 
     /**
@@ -191,4 +197,6 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
     function _tokenBalance() internal view virtual returns (uint256) {
         return underlyingToken.balanceOf(address(this));
     }
+
+
 }
