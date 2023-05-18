@@ -99,7 +99,7 @@ func CalculateTotalFee(tx *types.Transaction, gpo RollupOracle) (*big.Int, error
 		if err != nil {
 			return nil, err
 		}
-		daFee := CalculateDAFee(raw, daGasPrice, scalar)
+		daFee := CalculateDAFee(raw, daGasPrice)
 		fee = new(big.Int).Add(fee, daFee)
 	}
 	return fee, nil
@@ -193,18 +193,16 @@ func CalculateDAMsgFee(msg Message, state StateDB, gpo *common.Address) (*big.In
 	if gpo == nil {
 		gpo = &rcfg.L2GasPriceOracleAddress
 	}
-
-	_, _, scalar := readGPOStorageSlots(*gpo, state)
 	daGasPrice := state.GetState(*gpo, rcfg.DaGasPriceSlot).Big()
-	daFee := CalculateDAFee(raw, daGasPrice, scalar)
+	daFee := CalculateDAFee(raw, daGasPrice)
 	return daFee, nil
 }
 
 // CalculateDAFee computes the DA fee
-func CalculateDAFee(data []byte, daGasPrice *big.Int, scalar *big.Float) *big.Int {
+func CalculateDAFee(data []byte, daGasPrice *big.Int) *big.Int {
 	daGasUsed := CalculateDAGasUsed(data)
 	daFee := new(big.Int).Mul(daGasUsed, daGasPrice)
-	return mulByFloat(daFee, scalar)
+	return daFee
 }
 
 // CalculateDAGasUsed computes the DA gas used based on the calldata and
@@ -217,7 +215,6 @@ func CalculateDAGasUsed(data []byte) *big.Int {
 
 // DeriveL1GasInfo reads L1 gas related information to be included
 // on the receipt
-// TODO DONE
 func DeriveL1GasInfo(msg Message, state StateDB) (*big.Int, *big.Int, *big.Int, *big.Float, error) {
 	tx := asTransaction(msg)
 	raw, err := rlpEncode(tx)
@@ -237,18 +234,16 @@ func DeriveL1GasInfo(msg Message, state StateDB) (*big.Int, *big.Int, *big.Int, 
 
 // DeriveDAGasInfo reads DA gas related information to be included
 // on the receipt
-// TODO DONE
-func DeriveDAGasInfo(msg Message, state StateDB) (*big.Int, *big.Int, *big.Int, *big.Float, error) {
+func DeriveDAGasInfo(msg Message, state StateDB) (*big.Int, *big.Int, *big.Int, error) {
 	tx := asTransaction(msg)
 	raw, err := rlpEncode(tx)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, err
 	}
-	_, _, scalar := readGPOStorageSlots(rcfg.L2GasPriceOracleAddress, state)
 	daGasPrice := state.GetState(rcfg.L2GasPriceOracleAddress, rcfg.DaGasPriceSlot).Big()
 	daGasUsed := CalculateDAGasUsed(raw)
-	daFee := CalculateDAFee(raw, daGasPrice, scalar)
-	return daFee, daGasPrice, daGasUsed, scalar, nil
+	daFee := CalculateDAFee(raw, daGasPrice)
+	return daFee, daGasPrice, daGasUsed, nil
 }
 
 func readGPOStorageSlots(addr common.Address, state StateDB) (*big.Int, *big.Int, *big.Float) {

@@ -160,6 +160,23 @@ var (
 		Usage:  "re rollup tool support.",
 		EnvVar: prefixEnvVar("RE_ROLLUP_TOOL_ENABLE"),
 	}
+	MetricsServerEnableFlag = cli.BoolFlag{
+		Name:   "metrics-server-enable",
+		Usage:  "Whether or not to run the embedded metrics server",
+		EnvVar: prefixEnvVar("METRICS_SERVER_ENABLE"),
+	}
+	MetricsHostnameFlag = cli.StringFlag{
+		Name:   "metrics-hostname",
+		Usage:  "The hostname of the metrics server",
+		Value:  "127.0.0.1",
+		EnvVar: prefixEnvVar("METRICS_HOSTNAME"),
+	}
+	MetricsPortFlag = cli.Uint64Flag{
+		Name:   "metrics-port",
+		Usage:  "The port of the metrics server",
+		Value:  7301,
+		EnvVar: prefixEnvVar("METRICS_PORT"),
+	}
 )
 
 var requiredFlags = []cli.Flag{
@@ -187,6 +204,9 @@ var optionalFlags = []cli.Flag{
 	HTTP2DisableFlag,
 	NeedReRollupBatchFlag,
 	ReRollupToolEnableFlag,
+	MetricsServerEnableFlag,
+	MetricsHostnameFlag,
+	MetricsPortFlag,
 }
 
 func init() {

@@ -54,7 +54,10 @@ describe('RollUp', () => {
     expect(await rollUp.isStaked(await accounts[0].getAddress())).to.eq(false)
     expect(await rollUp.numStakers()).to.eq(0)
 
-    await rollUp.stake({ value: amountStake })
+    await token.mint(await accounts[0].getAddress(), amountStake)
+    await token.connect(accounts[0]).approve(rollUp.address, amountStake)
+
+    await rollUp.stake(amountStake, )
     expect(await rollUp.isStaked(await accounts[0].getAddress())).to.eq(true)
     expect(await rollUp.numStakers()).to.eq(1)
     const staker = await rollUp.stakers(await accounts[0].getAddress())
@@ -84,7 +87,9 @@ describe('RollUp', () => {
 
   it('createAssertion', async () => {
     const amountStake = 10000
-    await rollUp.stake({ value: amountStake })
+    await token.mint(await accounts[0].getAddress(), amountStake)
+    await token.connect(accounts[0]).approve(rollUp.address, amountStake)
+    await rollUp.stake(amountStake)
 
     await rollUp.createAssertion(
       '0x0000000000000000000000000000000000000000000000000000000000000001',
@@ -104,7 +109,9 @@ describe('RollUp', () => {
       4
     )
     expect(await rollUp.lastCreatedAssertionID()).to.eq(4)
-    await rollUp.connect(await accounts[3]).stake({ value: 100000 })
+    await token.mint(await accounts[3].getAddress(), 100000)
+    await token.connect(accounts[3]).approve(rollUp.address, 100000)
+    await rollUp.connect(await accounts[3]).stake(100000)
     await rollUp.connect(await accounts[3]).advanceStake(1)
     await rollUp.connect(await accounts[3]).advanceStake(2)
     await rollUp

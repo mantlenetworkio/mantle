@@ -79,9 +79,6 @@ contract TssStakingSlashing is
 
     event WithdrawQueue(address,uint256);
 
-
-
-
     constructor()  CrossDomainEnabled(address(0)) {
         _disableInitializers();
     }
