@@ -7,8 +7,10 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./ITssGroupManager.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract TssGroupManager is
+    Initializable,
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
     ITssGroupManager
@@ -34,6 +36,10 @@ contract TssGroupManager is
     event tssGroupMemberAppend(uint256 _roundId, uint256 _threshold, bytes[] _inActiveTssMembers);
 
     event tssActiveMemberAppended(uint256 _roundId, bytes _groupKey, bytes[] activeTssMembers);
+
+    constructor() {
+        _disableInitializers();
+    }
 
     function initialize() public initializer {
         __Ownable_init();

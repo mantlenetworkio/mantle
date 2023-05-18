@@ -11,7 +11,7 @@ replace github.com/mantlenetworkio/mantle/mt-batcher => ../mt-batcher
 replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
 
 require (
-	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
+	//github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/mantlenetworkio/mantle/l2geth v0.0.0
 	github.com/mantlenetworkio/mantle/mt-batcher v0.0.0
@@ -22,6 +22,7 @@ require (
 )
 
 require (
+	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 	github.com/prometheus/client_golang v1.14.0
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 )
