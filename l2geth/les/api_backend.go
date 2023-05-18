@@ -195,6 +195,14 @@ func (b *LesApiBackend) GetLogs(ctx context.Context, hash common.Hash) ([][]*typ
 	return nil, nil
 }
 
+func (b *LesApiBackend) GetTxStatusByHash(ctx context.Context, txHash common.Hash) (*types.TxStatus, error) {
+	return nil, errors.New("currently we are not supported txstatus detail for light client")
+}
+
+func (b *LesApiBackend) GetTxStatusDetailByHash(ctx context.Context, txHash common.Hash) (*types.TxStatusDetail, error) {
+	return nil, errors.New("currently we are not supported txstatus detail for light client")
+}
+
 func (b *LesApiBackend) GetTd(hash common.Hash) *big.Int {
 	return b.eth.blockchain.GetTdByHash(hash)
 }

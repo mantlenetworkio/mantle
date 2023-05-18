@@ -47,7 +47,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
-	"github.com/tyler-smith/go-bip39"
 )
 
 var (
@@ -1502,6 +1501,39 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context, ha
 	// If the ContractAddress is 20 0x0 bytes, assume it is not a contract creation
 	if receipt.ContractAddress != (common.Address{}) {
 		fields["contractAddress"] = receipt.ContractAddress
+	}
+	return fields, nil
+}
+
+// GetTxStatus returns the transaction status for the given transaction hash.
+func (s *PublicTransactionPoolAPI) GetTxStatus(ctx context.Context, txHash common.Hash) (map[string]interface{}, error) {
+	txStatus, err := s.b.GetTxStatusByHash(ctx, txHash)
+	if err != nil {
+		return nil, err
+	}
+	fields := map[string]interface{}{
+		"blockHash":        txStatus.BlockHash,
+		"blockNumber":      hexutil.Uint64(txStatus.BlockNumber.Uint64()),
+		"transactionHash":  txHash,
+		"transactionIndex": hexutil.Uint64(txStatus.TransactionIndex),
+		"status":           hexutil.Uint(txStatus.Status),
+	}
+
+	return fields, nil
+}
+
+// GetTxStatusDetailByHash returns the transaction status for the given transaction hash.
+func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, txHash common.Hash) (map[string]interface{}, error) {
+	txStatusDetail, err := s.b.GetTxStatusDetailByHash(ctx, txHash)
+	if err != nil {
+		return nil, err
+	}
+	fields := map[string]interface{}{
+		"blockHash":        txStatusDetail.BlockHash,
+		"blockNumber":      hexutil.Uint64(txStatusDetail.BlockNumber.Uint64()),
+		"transactionHash":  txHash,
+		"transactionIndex": hexutil.Uint64(txStatusDetail.TransactionIndex),
+		"status":           hexutil.Uint(txStatusDetail.Status),
 	}
 	return fields, nil
 }
