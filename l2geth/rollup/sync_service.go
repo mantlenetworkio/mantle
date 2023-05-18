@@ -1609,3 +1609,11 @@ func (s *SyncService) verifyTx(tx *types.Transaction) (bool, error) {
 		return true, nil
 	}
 }
+
+func (s *SyncService) GetTxStatusByNumber(number uint64) (*types.TxStatus, error) {
+	return nil, nil
+}
+
+func (s *SyncService) GetTxStatusDetailByNumber(number uint64) (*types.TxStatusDetail, error) {
+	return nil, nil
+}
