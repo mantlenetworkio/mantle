@@ -198,6 +198,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		MainWorkerPollInterval:    cfg.MainWorkerPollInterval,
 		CheckerWorkerPollInterval: cfg.CheckerWorkerPollInterval,
 		FeeWorkerPollInterval:     cfg.FeeWorkerPollInterval,
+		GraphPollingDuration:      cfg.PollingDuration,
 		DbPath:                    cfg.DbPath,
 		CheckerBatchIndex:         cfg.CheckerBatchIndex,
 		CheckerEnable:             cfg.CheckerEnable,

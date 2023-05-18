@@ -62,7 +62,8 @@ task('whiteListInit')
     const whiteListToAdd = [SequencerENV, Validator1ENV]
     console.log('whiteList:', whiteListToAdd)
     const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
-    await rollup.connect(entryOwner).addToWhitelist(whiteListToAdd)
+    await rollup.connect(entryOwner).addToOperatorWhitelist(whiteListToAdd)
+    await rollup.connect(entryOwner).addToStakerWhitelist(whiteListToAdd)
     console.log('transferOwnerShip')
     await rollup.connect(entryOwner).transferOwnership(proposerAddr)
   })
@@ -74,22 +75,28 @@ task('rollupStake')
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:9545'
     )
+    const bitToken = process.env.L1_BIT_ADDRESS
     const verifier1Key = process.env.BVM_VERIFIER1_KEY
-    const verifier2Key = process.env.BVM_VERIFIER2_KEY
     const proposerKey = process.env.BVM_PROPOSER_KEY
 
     const proposerWallet = new ethers.Wallet(proposerKey, provider)
     const verifier1Wallet = new ethers.Wallet(verifier1Key, provider)
-    const verifier2Wallet = new ethers.Wallet(verifier2Key, provider)
 
-    const wallets = [proposerWallet, verifier1Wallet, verifier2Wallet]
+    const wallets = [proposerWallet, verifier1Wallet]
     const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
-
+    const bit = await getContractFactory('BitTokenERC20').attach(bitToken)
     for (const w of wallets) {
-      console.log('balance: ', w.address, (await w.getBalance()).toString())
-      await rollup
+      console.log("ETH Balance:",w.address," ",await w.getBalance())
+      // await bit.connect(w).mint(ethers.utils.parseEther(taskArgs.amount))
+      await bit
         .connect(w)
-        .stake({ value: ethers.utils.parseEther(taskArgs.amount) })
+        .approve(taskArgs.rollup, ethers.utils.parseEther(taskArgs.amount))
+      console.log(
+        'balance: ',
+        w.address,
+        (await bit.connect(w).balanceOf(w.address)).toString()
+      )
+      await rollup.connect(w).stake(ethers.utils.parseEther(taskArgs.amount), w.address)
     }
   })
 

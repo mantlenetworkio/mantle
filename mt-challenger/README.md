@@ -20,14 +20,14 @@ go mod tidy
 
 ### 2.build binary
 ```bash
-make datalayr-mantle
+make datalayr
 make binding
 make mt-challenger
 ```
 
 ### 3.build docker
 ```bash
-make datalayr-mantle
+make datalayr
 docker build -t challenger:latest -f ./Dockerfile .
 ```
 
