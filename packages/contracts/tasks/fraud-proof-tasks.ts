@@ -87,7 +87,7 @@ task('rollupStake')
     const bit = await getContractFactory('BitTokenERC20').attach(bitToken)
     for (const w of wallets) {
       console.log("ETH Balance:",w.address," ",await w.getBalance())
-      await bit.connect(w).mint(ethers.utils.parseEther(taskArgs.amount))
+      // await bit.connect(w).mint(ethers.utils.parseEther(taskArgs.amount))
       await bit
         .connect(w)
         .approve(taskArgs.rollup, ethers.utils.parseEther(taskArgs.amount))
