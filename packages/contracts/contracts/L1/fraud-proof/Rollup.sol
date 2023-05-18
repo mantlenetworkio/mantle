@@ -24,9 +24,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
-import "hardhat/console.sol";
-
 import "./challenge/Challenge.sol";
 import "./challenge/ChallengeLib.sol";
 import "./AssertionMap.sol";
