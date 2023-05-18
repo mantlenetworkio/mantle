@@ -7,9 +7,9 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import { DataLayrDisclosureLogic } from "../libraries/eigenda/DataLayrDisclosureLogic.sol";
-import { IDataLayrServiceManager } from "../libraries/eigenda/lib/contracts/interfaces/IDataLayrServiceManager.sol";
+import { IDataLayrServiceManager } from "../libraries/eigenda/interfaces/IDataLayrServiceManager.sol";
 import { BN254 } from "../libraries/eigenda/BN254.sol";
-import { DataStoreUtils } from "../libraries/eigenda/lib/contracts/libraries/DataStoreUtils.sol";
+import { DataStoreUtils } from "../libraries/eigenda/DataStoreUtils.sol";
 import { Parser } from "../libraries/eigenda/Parse.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
