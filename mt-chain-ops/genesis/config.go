@@ -445,6 +445,14 @@ func NewL2StorageConfig(config *DeployConfig, block *types.Block) (state.Storage
 		"daFee":          block.BaseFee(),
 		"daFeeScalar":    config.GasPriceOracleScalar,
 	}
+	storage["TestBitToken"] = state.StorageValues{
+		"name":   "Bit Token",
+		"symbol": "BIT",
+	}
+	storage["BVM_ETH"] = state.StorageValues{
+		"_name":   "Ether",
+		"_symbol": "ETH",
+	}
 	storage["LegacyERC20ETH"] = state.StorageValues{
 		"_name":   "Ether",
 		"_symbol": "ETH",

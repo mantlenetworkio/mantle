@@ -56,7 +56,7 @@ func TestBuildL2DeveloperGenesis(t *testing.T) {
 		require.Equal(t, ok, true)
 		require.Greater(t, len(account.Code), 0)
 
-		if name == "GovernanceToken" || name == "LegacyERC20ETH" || name == "ProxyAdmin" || name == "WETH9" {
+		if name == "GovernanceToken" || name == "LegacyERC20ETH" || name == "ProxyAdmin" || name == "WETH9" || name == "BVM_ETH" {
 			continue
 		}
 

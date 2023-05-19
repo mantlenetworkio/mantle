@@ -51,6 +51,7 @@ var (
 		predeploys.LegacyMessagePasserAddr: true,
 		predeploys.LegacyERC20ETHAddr:      true,
 		predeploys.DeployerWhitelistAddr:   true,
+		predeploys.BVMETHAddress:           true,
 	}
 )
 
@@ -111,6 +112,17 @@ func setProxies(db vm.StateDB, proxyAdminAddr common.Address, namespace *big.Int
 	}
 
 	for i := uint64(0); i <= count; i++ {
+
+		if i >= uint64(33) && i <= uint64(34) && namespace == bigL2PredeployNamespace {
+			continue
+		} else if i == uint64(32) && namespace == bigL1PredeployNamespace {
+			bigAddr := new(big.Int).Or(namespace, new(big.Int).SetUint64(i))
+			addr := common.BigToAddress(bigAddr)
+			if !db.Exist(addr) {
+				db.CreateAccount(addr)
+			}
+			continue
+		}
 		bigAddr := new(big.Int).Or(namespace, new(big.Int).SetUint64(i))
 		addr := common.BigToAddress(bigAddr)
 
@@ -154,7 +166,7 @@ func SetImplementations(db vm.StateDB, storage state.StorageConfig, immutable im
 			continue
 		}
 
-		if *address == predeploys.LegacyERC20ETHAddr {
+		if *address == predeploys.LegacyERC20ETHAddr || *address == predeploys.BVMETHAddress {
 			continue
 		}
 
@@ -205,8 +217,13 @@ func SetDevOnlyL2Implementations(db vm.StateDB, storage state.StorageConfig, imm
 	}
 
 	db.CreateAccount(predeploys.LegacyERC20ETHAddr)
+	db.CreateAccount(predeploys.BVMETHAddress)
+
 	if err := setupPredeploy(db, deployResults, storage, "LegacyERC20ETH", predeploys.LegacyERC20ETHAddr, predeploys.LegacyERC20ETHAddr); err != nil {
 		return fmt.Errorf("error setting up legacy eth: %w", err)
+	}
+	if err := setupPredeploy(db, deployResults, storage, "BVM_ETH", predeploys.BVMETHAddress, predeploys.BVMETHAddress); err != nil {
+		return fmt.Errorf("error setting up bvm eth: %w", err)
 	}
 
 	return nil
