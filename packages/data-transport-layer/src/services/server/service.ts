@@ -18,6 +18,7 @@ import {
   EnqueueResponse,
   StateRootBatchResponse,
   StateRootResponse,
+  TxStatusResponse,
   SyncingResponse,
   TransactionBatchResponse,
   TransactionResponse,
@@ -690,6 +691,38 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         return {
           batch,
           stateRoots,
+        }
+      }
+    )
+
+    this._registerRoute(
+      'get',
+      '/tx/status/index/:index',
+      async (req): Promise<TxStatusResponse> => {
+        const batch = await this.state.db.getStateRootBatchByIndex(
+          BigNumber.from(req.params.index).toNumber()
+        )
+        const currentL1BlockNumber = await this.state.db.getHighestL1BlockNumber();
+
+        if (batch === null) {
+          return {
+            batch: null,
+            stateRoots: [],
+            currentL1BlockNumber,
+          }
+        }
+
+        const stateRoots = await this.state.db.getStateRootsByIndexRange(
+          BigNumber.from(batch.prevTotalElements).toNumber(),
+          BigNumber.from(batch.prevTotalElements).toNumber() +
+          BigNumber.from(batch.size).toNumber()
+        )
+
+
+        return {
+          batch,
+          stateRoots,
+          currentL1BlockNumber,
         }
       }
     )

@@ -33,6 +33,13 @@ export interface StateRootBatchResponse {
   stateRoots: StateRootEntry[]
 }
 
+export interface TxStatusResponse {
+  batch: StateRootBatchEntry
+  stateRoots: StateRootEntry[]
+  currentL1BlockNumber: number
+}
+
+
 export interface ContextResponse {
   blockNumber: number
   timestamp: number

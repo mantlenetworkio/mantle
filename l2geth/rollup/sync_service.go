@@ -1610,10 +1610,11 @@ func (s *SyncService) verifyTx(tx *types.Transaction) (bool, error) {
 	}
 }
 
-func (s *SyncService) GetTxStatusByNumber(number uint64) (*types.TxStatus, error) {
-	return nil, nil
-}
+func (s *SyncService) GetTxStatusByNumber(number uint64) (*TxStatusResponse, error) {
+	stateRsp, err := s.client.GetStateRootResponse(number, s.backend)
+	if err != nil {
+		return nil, err
+	}
 
-func (s *SyncService) GetTxStatusDetailByNumber(number uint64) (*types.TxStatusDetail, error) {
-	return nil, nil
+	return stateRsp, nil
 }

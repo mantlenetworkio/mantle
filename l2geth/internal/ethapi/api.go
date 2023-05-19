@@ -47,7 +47,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
-	"github.com/tyler-smith/go-bip39"
 )
 
 var (
@@ -1507,17 +1506,29 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context, ha
 }
 
 // GetTxStatus returns the transaction status for the given transaction hash.
-func (s *PublicTransactionPoolAPI) GetTxStatus(ctx context.Context, txHash common.Hash) (map[string]interface{}, error) {
-	txStatus, err := s.b.GetTxStatusByHash(ctx, txHash)
+func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash common.Hash) (map[string]interface{}, error) {
+	// Try to return an already finalized transaction
+	tx, blockHash, blockNumber, index, err := s.b.GetTransaction(ctx, txHash)
+
+	if err != nil || tx != nil {
+		return nil, err
+	}
+	rpcTx, err := newRPCTransaction(tx, blockHash, blockNumber, index), nil
+
+	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
 	if err != nil {
 		return nil, err
 	}
+	status := 0
 	fields := map[string]interface{}{
-		"blockHash":        txStatus.BlockHash,
-		"blockNumber":      hexutil.Uint64(txStatus.BlockNumber.Uint64()),
-		"transactionHash":  txHash,
-		"transactionIndex": hexutil.Uint64(txStatus.TransactionIndex),
-		"status":           hexutil.Uint(txStatus.Status),
+		"blockHash":        blockHash,
+		"origin":           rpcTx.QueueOrigin,
+		"to":               rpcTx.To,
+		"from":             rpcTx.From,
+		"transactionHash":  rpcTx.Hash,
+		"blockNumber":      hexutil.Uint64(blockNumber),
+		"status":           hexutil.Uint(status),
+		"sccBatchL1Number": hexutil.Uint64(txStatus.Batch.BlockNumber),
 	}
 
 	return fields, nil
@@ -1525,17 +1536,30 @@ func (s *PublicTransactionPoolAPI) GetTxStatus(ctx context.Context, txHash commo
 
 // GetTxStatusDetailByHash returns the transaction status for the given transaction hash.
 func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, txHash common.Hash) (map[string]interface{}, error) {
-	txStatusDetail, err := s.b.GetTxStatusDetailByHash(ctx, txHash)
+	// Try to return an already finalized transaction
+	tx, blockHash, blockNumber, index, err := s.b.GetTransaction(ctx, txHash)
+
+	if err != nil || tx != nil {
+		return nil, err
+	}
+	rpcTx, err := newRPCTransaction(tx, blockHash, blockNumber, index), nil
+
+	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
 	if err != nil {
 		return nil, err
 	}
+	status := 0
 	fields := map[string]interface{}{
-		"blockHash":        txStatusDetail.BlockHash,
-		"blockNumber":      hexutil.Uint64(txStatusDetail.BlockNumber.Uint64()),
-		"transactionHash":  txHash,
-		"transactionIndex": hexutil.Uint64(txStatusDetail.TransactionIndex),
-		"status":           hexutil.Uint(txStatusDetail.Status),
+		"blockHash":        blockHash,
+		"origin":           rpcTx.QueueOrigin,
+		"to":               rpcTx.To,
+		"from":             rpcTx.From,
+		"transactionHash":  rpcTx.Hash,
+		"blockNumber":      hexutil.Uint64(blockNumber),
+		"status":           hexutil.Uint(status),
+		"sccBatchL1Number": hexutil.Uint64(txStatus.Batch.BlockNumber),
 	}
+
 	return fields, nil
 }
 

@@ -133,6 +133,7 @@ type RollupClient interface {
 	GetLatestTransaction(Backend) (*types.Transaction, error)
 	GetLatestTransactionIndex(Backend) (*uint64, error)
 	GetStateRoot(uint64, Backend) (*StateRoot, error)
+	GetStateRootResponse(uint64, Backend) (*TxStatusResponse, error)
 	GetEthContext(uint64) (*EthContext, error)
 	GetLatestEthContext() (*EthContext, error)
 	GetLastConfirmedEnqueue() (*types.Transaction, error)
@@ -166,6 +167,13 @@ type TransactionBatchResponse struct {
 type StateRootResponse struct {
 	StateRoot *StateRoot `json:"stateRoot"`
 	Batch     *Batch     `json:"batch"`
+}
+
+// StateRootResponse represents the response from the remote server when querying stateroot
+type TxStatusResponse struct {
+	StateRoot       *StateRoot `json:"stateRoot"`
+	Batch           *Batch     `json:"batch"`
+	CurrentL1Height int64      `json:"currentL1Height"`
 }
 
 // NewClient create a new Client given a remote HTTP url and a chain id
@@ -516,6 +524,37 @@ func (c *Client) GetStateRoot(index uint64, backend Backend) (*StateRoot, error)
 		return nil, errElementNotFound
 	}
 	return res.StateRoot, nil
+}
+
+func (c *Client) GetStateRootResponse(index uint64, backend Backend) (*TxStatusResponse, error) {
+	str := strconv.FormatUint(index, 10)
+	var QueryParam string
+	if backend.String() == "da" {
+		QueryParam = "l1"
+	} else {
+		QueryParam = backend.String()
+	}
+	response, err := c.client.R().
+		SetPathParams(map[string]string{
+			"index": str,
+		}).
+		SetQueryParams(map[string]string{
+			"backend": QueryParam,
+		}).
+		SetResult(&StateRootResponse{}).
+		Get("/tx/status/index/{index}")
+
+	if err != nil {
+		return nil, fmt.Errorf("cannot fetch transaction: %w", err)
+	}
+	res, ok := response.Result().(*TxStatusResponse)
+	if !ok {
+		return nil, fmt.Errorf("could not get tx with index %d", index)
+	}
+	if res.StateRoot == nil {
+		return nil, errElementNotFound
+	}
+	return res, nil
 }
 
 // GetEthContext will return the EthContext by block number
