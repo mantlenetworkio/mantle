@@ -52,7 +52,9 @@ contract L1StandardBridge_Receive_Test is Bridge_Initializer {
                 CrossDomainMessenger.sendMessage.selector,
                 address(L2Bridge),
                 abi.encodeWithSelector(
-                    StandardBridge.finalizeBridgeETH.selector,
+                    StandardBridge.finalizeBridgeETHDeposit.selector,
+                    address(0),
+                    Predeploys.LEGACY_ERC20_ETH,
                     alice,
                     alice,
                     100,
@@ -79,7 +81,9 @@ contract PreBridgeETH is Bridge_Initializer {
         address l1MessengerAliased = AddressAliasHelper.applyL1ToL2Alias(address(L1Messenger));
 
         bytes memory message = abi.encodeWithSelector(
-            StandardBridge.finalizeBridgeETH.selector,
+            StandardBridge.finalizeBridgeETHDeposit.selector,
+            address(0),
+            Predeploys.LEGACY_ERC20_ETH,
             alice,
             alice,
             500,
@@ -225,7 +229,9 @@ contract PreBridgeETHTo is Bridge_Initializer {
         }
 
         bytes memory message = abi.encodeWithSelector(
-            StandardBridge.finalizeBridgeETH.selector,
+            StandardBridge.finalizeBridgeETHDeposit.selector,
+            address(0),
+            Predeploys.LEGACY_ERC20_ETH,
             alice,
             bob,
             600,
@@ -238,6 +244,8 @@ contract PreBridgeETHTo is Bridge_Initializer {
             address(L1Messenger),
             abi.encodeWithSelector(
                 CrossDomainMessenger.sendMessage.selector,
+                0,
+                600,
                 address(L2Bridge),
                 message,
                 60000
@@ -258,6 +266,7 @@ contract PreBridgeETHTo is Bridge_Initializer {
         vm.expectCall(
             address(op),
             abi.encodeWithSelector(
+                0,
                 MantlePortal.depositTransaction.selector,
                 address(L2Messenger),
                 600,
@@ -676,7 +685,8 @@ contract L1StandardBridge_FinalizeBridgeETH_Test is Bridge_Initializer {
         vm.expectEmit(true, true, true, true, address(L1Bridge));
         emit ETHBridgeFinalized(alice, alice, 100, hex"");
 
-        L1Bridge.finalizeBridgeETH{ value: 100 }(alice, alice, 100, hex"");
+        L1Bridge.finalizeBridgeETHDeposit{ value: 100 }(address(0),address(0),alice, alice, 100, hex"");
+
     }
 }
 
@@ -691,7 +701,7 @@ contract L1StandardBridge_FinalizeBridgeETH_TestFail is Bridge_Initializer {
         vm.deal(messenger, 100);
         vm.prank(messenger);
         vm.expectRevert("StandardBridge: amount sent does not match amount required");
-        L1Bridge.finalizeBridgeETH{ value: 50 }(alice, alice, 100, hex"");
+        L1Bridge.finalizeBridgeETHDeposit{ value: 50 }(address(0),address(0),alice, alice, 100, hex"");
     }
 
     function test_finalizeBridgeETH_sendToSelf_reverts() external {
@@ -704,7 +714,7 @@ contract L1StandardBridge_FinalizeBridgeETH_TestFail is Bridge_Initializer {
         vm.deal(messenger, 100);
         vm.prank(messenger);
         vm.expectRevert("StandardBridge: cannot send to self");
-        L1Bridge.finalizeBridgeETH{ value: 100 }(alice, address(L1Bridge), 100, hex"");
+        L1Bridge.finalizeBridgeETHDeposit{ value: 100 }(address(0),address(0),alice, address(L1Bridge), 100, hex"");
     }
 
     function test_finalizeBridgeETH_sendToMessenger_reverts() external {
@@ -717,6 +727,6 @@ contract L1StandardBridge_FinalizeBridgeETH_TestFail is Bridge_Initializer {
         vm.deal(messenger, 100);
         vm.prank(messenger);
         vm.expectRevert("StandardBridge: cannot send to messenger");
-        L1Bridge.finalizeBridgeETH{ value: 100 }(alice, messenger, 100, hex"");
+        L1Bridge.finalizeBridgeETHDeposit{ value: 100 }(address(0),address(0),alice, messenger, 100, hex"");
     }
 }

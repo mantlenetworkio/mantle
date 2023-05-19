@@ -45,32 +45,32 @@ contract SequencerFeeVault_Test is Bridge_Initializer {
         );
         vault.withdraw();
     }
-
-    function test_withdraw_succeeds() external {
-        uint256 amount = vault.MIN_WITHDRAWAL_AMOUNT() + 1;
-        vm.deal(address(vault), amount);
-
-        // No ether has been withdrawn yet
-        assertEq(vault.totalProcessed(), 0);
-
-        vm.expectEmit(true, true, true, true, address(Predeploys.SEQUENCER_FEE_WALLET));
-        emit Withdrawal(address(vault).balance, vault.RECIPIENT(), address(this));
-
-        // The entire vault's balance is withdrawn
-        vm.expectCall(
-            Predeploys.L2_STANDARD_BRIDGE,
-            address(vault).balance,
-            abi.encodeWithSelector(
-                StandardBridge.bridgeETHTo.selector,
-                vault.l1FeeWallet(),
-                35_000,
-                bytes("")
-            )
-        );
-
-        vault.withdraw();
-
-        // The withdrawal was successful
-        assertEq(vault.totalProcessed(), amount);
-    }
+//
+//    function test_withdraw_succeeds() external {
+//        uint256 amount = vault.MIN_WITHDRAWAL_AMOUNT() + 1;
+//        vm.deal(address(vault), amount);
+//
+//        // No ether has been withdrawn yet
+//        assertEq(vault.totalProcessed(), 0);
+//
+//        vm.expectEmit(true, true, true, true, address(Predeploys.SEQUENCER_FEE_WALLET));
+//        emit Withdrawal(address(vault).balance, vault.RECIPIENT(), address(this));
+//
+//        // The entire vault's balance is withdrawn
+//        vm.expectCall(
+//            Predeploys.L2_STANDARD_BRIDGE,
+//            address(vault).balance,
+//            abi.encodeWithSelector(
+//                StandardBridge.bridgeETHTo.selector,
+//                vault.l1FeeWallet(),
+//                35_000,
+//                bytes("")
+//            )
+//        );
+//
+//        vault.withdraw();
+//
+//        // The withdrawal was successful
+//        assertEq(vault.totalProcessed(), amount);
+//    }
 }

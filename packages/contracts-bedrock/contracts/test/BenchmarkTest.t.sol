@@ -7,7 +7,6 @@ import { Vm } from "forge-std/Vm.sol";
 import "./CommonTest.t.sol";
 import { CrossDomainMessenger } from "../universal/CrossDomainMessenger.sol";
 import { ResourceMetering } from "../L1/ResourceMetering.sol";
-
 uint128 constant INITIAL_BASE_FEE = 1_000_000_000;
 
 // Free function for setting the prevBaseFee param in the MantlePortal.
@@ -128,7 +127,7 @@ contract GasBenchMark_L1CrossDomainMessenger is Messenger_Initializer {
         // The amount of data typically sent during a bridge deposit.
         bytes
             memory data = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-        L1Messenger.sendMessage(bob, data, uint32(100));
+        L1Messenger.sendMessage(0,100,bob, data, uint32(100));
     }
 
     function test_sendMessage_benchmark_1() external {
@@ -136,7 +135,7 @@ contract GasBenchMark_L1CrossDomainMessenger is Messenger_Initializer {
         // The amount of data typically sent during a bridge deposit.
         bytes
             memory data = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-        L1Messenger.sendMessage(bob, data, uint32(100));
+        L1Messenger.sendMessage(0,100,bob, data, uint32(100));
     }
 }
 

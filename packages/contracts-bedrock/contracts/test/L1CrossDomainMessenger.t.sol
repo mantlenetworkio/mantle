@@ -83,14 +83,14 @@ contract L1CrossDomainMessenger_Test is Messenger_Initializer {
         emit SentMessageExtension1(alice, 0);
 
         vm.prank(alice);
-        L1Messenger.sendMessage(recipient, hex"ff", uint32(100));
+        L1Messenger.sendMessage(0,0,recipient, hex"ff", uint32(100));
     }
 
     // sendMessage: should be able to send the same message twice
     function test_sendMessage_twice_succeeds() external {
         uint256 nonce = L1Messenger.messageNonce();
-        L1Messenger.sendMessage(recipient, hex"aa", uint32(500_000));
-        L1Messenger.sendMessage(recipient, hex"aa", uint32(500_000));
+        L1Messenger.sendMessage(0,0,recipient, hex"aa", uint32(500_000));
+        L1Messenger.sendMessage(0,0,recipient, hex"aa", uint32(500_000));
         // the nonce increments for each message sent
         assertEq(nonce + 2, L1Messenger.messageNonce());
     }
