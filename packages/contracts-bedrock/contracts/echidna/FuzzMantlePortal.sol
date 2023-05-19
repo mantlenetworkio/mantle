@@ -18,6 +18,7 @@ contract EchidnaFuzzMantlePortal {
 
     // A test intended to identify any unexpected halting conditions
     function testDepositTransactionCompletes(
+        uint32 _type,
         address _to,
         uint256 _mint,
         uint256 _value,

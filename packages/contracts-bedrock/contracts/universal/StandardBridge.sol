@@ -233,7 +233,7 @@ abstract contract StandardBridge {
         uint32 _minGasLimit,
         bytes calldata _extraData
     ) public payable {
-        _initiateBridgeETHDeposit(Predeploys.LEGACY_ERC20_ETH,msg.sender, _to, msg.value, _minGasLimit, _extraData);
+        _initiateBridgeETHDeposit(Predeploys.BVM_ETH,msg.sender, _to, msg.value, _minGasLimit, _extraData);
     }
 
     function bridgeL2ETHTo(
@@ -317,7 +317,8 @@ abstract contract StandardBridge {
     /**
      * @notice Finalizes an ETH bridge on this chain. Can only be triggered by the other
      *         StandardBridge contract on the remote chain.
-     *
+     * @param _localToken      Address of the sender token.
+     * @param _remoteToken     Address of the receiver token.
      * @param _from      Address of the sender.
      * @param _to        Address of the receiver.
      * @param _amount    Amount of ETH being bridged.
@@ -404,7 +405,19 @@ abstract contract StandardBridge {
     }
 
 
-
+    /**
+     * @notice Finalizes an BIT bridge on this chain. Can only be triggered by the other
+     *         StandardBridge contract on the remote chain.
+     *
+     * @param _localToken  Address of the L1BIT on this chain.
+     * @param _remoteToken Address of the corresponding token on the remote chain.
+     * @param _from        Address of the sender.
+     * @param _to          Address of the receiver.
+     * @param _amount      Amount of the ERC20 being bridged.
+     * @param _extraData   Extra data to be sent with the transaction. Note that the recipient will
+     *                     not be triggered with this data, but it will be emitted and can be used
+     *                     to identify the transaction.
+     */
     function finalizeBridgeBITWithdraw(
         address _localToken,
         address _remoteToken,
@@ -466,6 +479,7 @@ abstract contract StandardBridge {
     /**
      * @notice Initiates a bridge of ETH through the CrossDomainMessenger.
      *
+     * @param _remoteToken        Address of the L2ETH.
      * @param _from        Address of the sender.
      * @param _to          Address of the receiver.
      * @param _amount      Amount of ETH being bridged.
@@ -489,7 +503,7 @@ abstract contract StandardBridge {
 
         // Emit the correct events. By default this will be _amount, but child
         // contracts may override this function in order to emit legacy events as well.
-        _emitETHBridgeInitiated(_from, _to, _amount, _extraData);
+        _emitETHBridgeInitiated( _from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage{ value: _amount }(
             BridgeConstants.ETH_TX,
@@ -498,7 +512,7 @@ abstract contract StandardBridge {
             abi.encodeWithSelector(
                 this.finalizeBridgeETHDeposit.selector,
                 _remoteToken,
-                address (0),
+                address(0),
                 _from,
                 _to,
                 _amount,
@@ -511,6 +525,8 @@ abstract contract StandardBridge {
     /**
  * @notice Initiates a bridge of ETH through the CrossDomainMessenger.
      *
+     * @param _localToken     Address of the sender's token address.
+     * @param _remoteToken    Address of the receiver's token address.
      * @param _from        Address of the sender.
      * @param _to          Address of the receiver.
      * @param _amount      Amount of ETH being bridged.
@@ -598,6 +614,19 @@ abstract contract StandardBridge {
         );
     }
 
+    /**
+ * @notice Sends ETH tokens to a receiver's address on the other chain.
+     *
+     * @param _localToken  Address of the ETH on this chain.
+     * @param _remoteToken Address of the ETH on other chain.
+     * @param _from          Address of the sender.
+     * @param _to          Address of the receiver.
+     * @param _amount      Amount of local tokens to deposit.
+     * @param _minGasLimit Minimum amount of gas that the bridge can be relayed with.
+     * @param _extraData   Extra data to be sent with the transaction. Note that the recipient will
+     *                     not be triggered with this data, but it will be emitted and can be used
+     *                     to identify the transaction.
+     */
     function _initiateBridgeETHWithdrawal(
         address _localToken,
         address _remoteToken,
@@ -625,7 +654,7 @@ abstract contract StandardBridge {
         _emitETHBridgeInitiated( _from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage(
-            BridgeConstants.ETH_TX,
+            BridgeConstants.ETH_WITHDRAWAL_TX,
             _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
@@ -647,6 +676,7 @@ abstract contract StandardBridge {
      *
      * @param _localToken  Address of the ERC20 on this chain.
      * @param _remoteToken Address of the corresponding token on the remote chain.
+     * @param _from          Address of the sender.
      * @param _to          Address of the receiver.
      * @param _amount      Amount of local tokens to deposit.
      * @param _minGasLimit Minimum amount of gas that the bridge can be relayed with.
@@ -663,6 +693,12 @@ abstract contract StandardBridge {
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
+
+
+        require(_localToken != address(0) && _localToken != Predeploys.L1_BIT ,
+            "StandardBridge: BIT and ETH deposit should not call this function."
+        );
+
         if (_isMantleMintableERC20(_localToken)) {
             require(
                 _isCorrectTokenPair(_localToken, _remoteToken),
@@ -778,7 +814,9 @@ abstract contract StandardBridge {
     /**
      * @notice Emits the ETHBridgeFinalized and if necessary the appropriate legacy event when an
      *         ETH bridge is finalized on this chain.
-     *
+
+     * @param _localToken  Address of the ERC20 on this chain.
+     * @param _remoteToken Address of the corresponding token on the remote chain.
      * @param _from      Address of the sender.
      * @param _to        Address of the receiver.
      * @param _amount    Amount of ETH sent.

@@ -66,10 +66,11 @@ abstract contract FeeVault {
         totalProcessed += value;
 
         emit Withdrawal(value, RECIPIENT, msg.sender);
-
+        //TODO UNCHECK change the ETH withdraw function
         L2StandardBridge(payable(Predeploys.L2_STANDARD_BRIDGE)).bridgeETHTo{ value: value }(
             RECIPIENT,
             WITHDRAWAL_MIN_GAS,
+            value,
             bytes("")
         );
     }

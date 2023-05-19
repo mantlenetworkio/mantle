@@ -192,7 +192,7 @@ contract MantlePortal is Initializable, ResourceMetering, Semver {
      */
     // solhint-disable-next-line ordering
     receive() external payable {
-        depositTransaction(0,msg.sender, msg.value, RECEIVE_DEFAULT_GAS_LIMIT, false, bytes(""));
+        depositTransaction(msg.sender, 0, RECEIVE_DEFAULT_GAS_LIMIT, false, bytes(""));
     }
 
     /**
@@ -413,7 +413,6 @@ contract MantlePortal is Initializable, ResourceMetering, Semver {
      * @param _data       Data to trigger the recipient with.
      */
     function depositTransaction(
-        uint32 _type,
         address _to,
         uint256 _value,
         uint64 _gasLimit,
@@ -441,15 +440,10 @@ contract MantlePortal is Initializable, ResourceMetering, Semver {
         // Compute the opaque data that will be emitted as part of the TransactionDeposited event.
         // We use opaque data so that we can update the TransactionDeposited event in the future
         // without breaking the current interface.
-        uint256 mintValue = 0;
-        if (_type == BridgeConstants.BIT_TX) {
-            mintValue = _value;
-        } else if (_type == BridgeConstants.ERC20_TX || _type == BridgeConstants.ETH_TX) {
-            mintValue = 0;
-        }
+
         bytes memory opaqueData = abi.encodePacked(
-            mintValue,
-            mintValue,
+            _value,
+            _value,
             _gasLimit,
             _isCreation,
             _data

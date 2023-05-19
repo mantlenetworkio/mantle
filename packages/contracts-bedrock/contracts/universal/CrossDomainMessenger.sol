@@ -6,7 +6,7 @@ import {SafeCall} from "../libraries/SafeCall.sol";
 import {Hashing} from "../libraries/Hashing.sol";
 import {Encoding} from "../libraries/Encoding.sol";
 import {Constants} from "../libraries/Constants.sol";
-
+import { BridgeConstants } from "../libraries/BridgeConstants.sol";
 /**
  * @custom:legacy
  * @title CrossDomainMessengerLegacySpacer0
@@ -267,8 +267,7 @@ CrossDomainMessengerLegacySpacer1
         // the minimum gas limit specified by the user.
 
 
-        if (_type == 1) {
-            //BIT, change the formal msg.value to L1 ERC20 BIT amount
+        if (_type == BridgeConstants.BIT_TX || _type == BridgeConstants.ETH_WITHDRAWAL_TX) {
             _sendMessage(
                 _type,
                 OTHER_MESSENGER,
@@ -285,9 +284,7 @@ CrossDomainMessengerLegacySpacer1
                 )
             );
 
-
-
-        } else if (_type == 0 || _type == 2) {
+        } else if (_type == BridgeConstants.ETH_TX || _type == BridgeConstants.ERC20_TX) {
             //0:ETH or 2:ERC20 deposit
             _sendMessage(
                 _type,
@@ -310,11 +307,10 @@ CrossDomainMessengerLegacySpacer1
 
 
         emit SentMessage(_target, msg.sender, _message, messageNonce(), _minGasLimit);
-        if (msg.value!=0){
-            emit SentMessageExtension1(msg.sender, msg.value);
-        }else{
+        if (_type == BridgeConstants.BIT_TX){
             emit SentMessageExtension1(msg.sender, _amount);
-
+        }else{
+            emit SentMessageExtension1(msg.sender, 0);
         }
 
     unchecked {
@@ -407,7 +403,7 @@ CrossDomainMessengerLegacySpacer1
             gasleft() >= _minGasLimit + RELAY_GAS_REQUIRED,
             "CrossDomainMessenger: insufficient gas to relay message"
         );
-        //TODO add bit transfer and eth transfer
+
         xDomainMsgSender = _sender;
         bool success = SafeCall.call(_target, gasleft() - RELAY_GAS_BUFFER, _value, _message);
         xDomainMsgSender = Constants.DEFAULT_L2_SENDER;

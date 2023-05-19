@@ -8,8 +8,8 @@ pragma solidity ^0.8.0;
 library Predeploys {
 
 
-    address internal constant L1_BIT = 0x6400000000000000000000000000000000000022;
-
+    address internal constant L1_BIT = 0x6900000000000000000000000000000000000020;
+    address internal constant BVM_ETH = 0x4200000000000000000000000000000000000022;
 
     /**
      * @notice Address of the L2ToL1MessagePasser predeploy.

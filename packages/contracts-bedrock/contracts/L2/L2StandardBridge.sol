@@ -81,6 +81,24 @@ contract L2StandardBridge is StandardBridge, Semver {
             bytes("")
         );
     }
+    function bridgeETHTo(
+        address _to,
+        uint32 _minGasLimit,
+        uint256 _amount,
+        bytes calldata _extraData
+    ) public payable {
+        _initiateBridgeETHWithdrawal(Predeploys.BVM_ETH,address(0),msg.sender, _to, _amount, _minGasLimit, _extraData);
+    }
+
+
+
+    function bridgeETH(
+        uint32 _minGasLimit,
+        uint256 _amount,
+        bytes calldata _extraData
+    ) public payable {
+        _initiateBridgeETHWithdrawal(Predeploys.BVM_ETH,address(0),msg.sender, msg.sender, _amount, _minGasLimit, _extraData);
+    }
 
     /**
      * @custom:legacy
@@ -148,7 +166,7 @@ contract L2StandardBridge is StandardBridge, Semver {
         uint256 _amount,
         bytes calldata _extraData
     ) external payable virtual {
-        if (_l1Token == address(0) && _l2Token == Predeploys.LEGACY_ERC20_ETH) {
+        if (_l1Token == address(0) && _l2Token == Predeploys.BVM_ETH) {
             finalizeBridgeETHDeposit(_l2Token,_l1Token,_from, _to, _amount, _extraData);
         } else {
             finalizeBridgeERC20(_l2Token, _l1Token, _from, _to, _amount, _extraData);
@@ -184,9 +202,10 @@ contract L2StandardBridge is StandardBridge, Semver {
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
-        if (_l2Token == Predeploys.LEGACY_ERC20_ETH) {
+        if (_l2Token == Predeploys.BVM_ETH) {
             _initiateBridgeETHWithdrawal(_l2Token,address(0),_from, _to, _amount, _minGasLimit, _extraData);
         }else if (_l2Token == address(0)){
+            require(msg.value!=0,"cant withdraw zero amount bit");
             _initiateBridgeBITWithdrawal(_l2Token,Predeploys.L1_BIT,_from, _to, _amount, _minGasLimit, _extraData);
 
         } else {
@@ -209,7 +228,7 @@ contract L2StandardBridge is StandardBridge, Semver {
     ) internal override {
         emit WithdrawalInitiated(
             address(0),
-            Predeploys.LEGACY_ERC20_ETH,
+            Predeploys.BVM_ETH,
             _from,
             _to,
             _amount,
@@ -232,7 +251,7 @@ contract L2StandardBridge is StandardBridge, Semver {
     ) internal override {
         emit DepositFinalized(
             address(0),
-            Predeploys.LEGACY_ERC20_ETH,
+            Predeploys.BVM_ETH,
             _from,
             _to,
             _amount,

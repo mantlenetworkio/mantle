@@ -51,9 +51,9 @@ contract L1CrossDomainMessenger is CrossDomainMessenger, Semver {
         bytes memory _data
     ) internal override {
         if (_type == BridgeConstants.BIT_TX){
-            PORTAL.depositTransaction{ value: 0 }(_type,_to, _value, _gasLimit, false, _data);
+            PORTAL.depositTransaction{ value: 0 }(_to, _value, _gasLimit, false, _data);
         }else{
-            PORTAL.depositTransaction{ value: _value }(_type,_to, _value, _gasLimit, false, _data);
+            PORTAL.depositTransaction{ value: _value }(_to, 0, _gasLimit, false, _data);
         }
     }
 
