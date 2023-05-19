@@ -238,20 +238,9 @@ func (b *EthAPIBackend) GetReceipts(ctx context.Context, hash common.Hash) (type
 	return b.eth.blockchain.GetReceiptsByHash(hash), nil
 }
 
-func (b *EthAPIBackend) GetTxStatusByHash(ctx context.Context, txHash common.Hash) (*types.TxStatus, error) {
-	tx, _, blockNumber, _ := rawdb.ReadTransaction(b.eth.ChainDb(), txHash)
-	if tx == nil {
-		return nil, errors.New("Transaction not found")
-	}
-	return b.eth.syncService.GetTxStatusByNumber(blockNumber)
-}
-
-func (b *EthAPIBackend) GetTxStatusDetailByHash(ctx context.Context, txHash common.Hash) (*types.TxStatusDetail, error) {
-	tx, _, blockNumber, _ := rawdb.ReadTransaction(b.eth.ChainDb(), txHash)
-	if tx == nil {
-		return nil, errors.New("Transaction not found")
-	}
-	return b.eth.syncService.GetTxStatusDetailByNumber(blockNumber)
+func (b *EthAPIBackend) GetTxStatusByHash(ctx context.Context, blockNumber uint64) (*rollup.TxStatusResponse, error) {
+	txStatus, err := b.eth.syncService.GetTxStatusByNumber(blockNumber)
+	return txStatus, err
 }
 
 func (b *EthAPIBackend) GetLogs(ctx context.Context, hash common.Hash) ([][]*types.Log, error) {

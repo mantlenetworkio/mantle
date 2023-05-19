@@ -39,6 +39,7 @@ const TRANSPORT_DB_KEYS = {
   UNCONFIRMED_STATE_ROOT: `unconfirmed:stateroot`,
   STATE_ROOT_BATCH: `batch:stateroot`,
   STARTING_L1_BLOCK: `l1:starting`,
+  HIGHEST_L1_BLOCK: `l1:highest`,
   HIGHEST_L2_BLOCK: `l2:highest`,
   HIGHEST_SYNCED_BLOCK: `synced:highest`,
   CONSISTENCY_CHECK: `consistency:checked`,
@@ -332,6 +333,10 @@ export class TransportDB {
     return this._getLatestEntry(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH)
   }
 
+  public async getHighestL1BlockNumber(): Promise<number> {
+    return this.db.get<number>(TRANSPORT_DB_KEYS.HIGHEST_L1_BLOCK, 0)
+  }
+
   public async getHighestL2BlockNumber(): Promise<number> {
     return this.db.get<number>(TRANSPORT_DB_KEYS.HIGHEST_L2_BLOCK, 0)
   }
@@ -346,6 +351,22 @@ export class TransportDB {
         key: TRANSPORT_DB_KEYS.CONSISTENCY_CHECK,
         index: 0,
         value: flag,
+      },
+    ])
+  }
+
+  public async putHighestL1BlockNumber(
+    block: number | BigNumber
+  ): Promise<void> {
+    if (block <= (await this.getHighestL2BlockNumber())) {
+      return
+    }
+
+    return this.db.put<number>([
+      {
+        key: TRANSPORT_DB_KEYS.HIGHEST_L1_BLOCK,
+        index: 0,
+        value: BigNumber.from(block).toNumber(),
       },
     ])
   }

@@ -212,6 +212,7 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
           highestSyncedL1Block + this.options.logsPerPollingInterval,
           currentL1Block - this.options.confirmations
         )
+        await this.state.db.putHighestL1BlockNumber(currentL1Block);
 
         // We're already at the head, so no point in attempting to sync.
         if (highestSyncedL1Block === targetL1Block) {

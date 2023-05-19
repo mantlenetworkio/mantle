@@ -1055,6 +1055,10 @@ func (m *mockClient) GetStateRoot(index uint64, backend Backend) (*StateRoot, er
 	return nil, nil
 }
 
+func (m *mockClient) GetStateRootResponse(index uint64, backend Backend) (*TxStatusResponse, error) {
+	return nil, nil
+}
+
 func (m *mockClient) GetLatestTransaction(backend Backend) (*types.Transaction, error) {
 	if len(m.getTransaction) == 0 {
 		return nil, errors.New("No transactions")
