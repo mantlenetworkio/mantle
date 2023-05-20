@@ -699,24 +699,36 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       'get',
       '/tx/status/index/:index',
       async (req): Promise<TxStatusResponse> => {
-        const batch = await this.state.db.getStateRootBatchByIndex(
-          BigNumber.from(req.params.index).toNumber()
-        )
         const currentL1BlockNumber = await this.state.db.getHighestL1BlockNumber();
+        const backend = req.query.backend || this.options.defaultBackend
+        let stateRoots = null
 
-        if (batch === null) {
+        switch (backend) {
+          case 'l1':
+            stateRoots = await this.state.db.getStateRootByIndex(
+              BigNumber.from(req.params.index).toNumber()
+            )
+            break
+          case 'l2':
+            stateRoots = await this.state.db.getUnconfirmedStateRootByIndex(
+              BigNumber.from(req.params.index).toNumber()
+            )
+            break
+          default:
+            throw new Error(`Unknown transaction backend ${backend}`)
+        }
+
+        const batch = await this.state.db.getStateRootBatchByIndex(
+          stateRoots.batchIndex
+        )
+
+        if (stateRoots === null) {
           return {
             batch: null,
-            stateRoots: [],
+            stateRoots: null,
             currentL1BlockNumber,
           }
         }
-
-        const stateRoots = await this.state.db.getStateRootsByIndexRange(
-          BigNumber.from(batch.prevTotalElements).toNumber(),
-          BigNumber.from(batch.prevTotalElements).toNumber() +
-          BigNumber.from(batch.size).toNumber()
-        )
 
 
         return {

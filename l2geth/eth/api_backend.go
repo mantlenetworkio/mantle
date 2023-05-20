@@ -20,7 +20,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
@@ -238,8 +237,11 @@ func (b *EthAPIBackend) GetReceipts(ctx context.Context, hash common.Hash) (type
 	return b.eth.blockchain.GetReceiptsByHash(hash), nil
 }
 
-func (b *EthAPIBackend) GetTxStatusByHash(ctx context.Context, blockNumber uint64) (*rollup.TxStatusResponse, error) {
+func (b *EthAPIBackend) GetTxStatusByHash(ctx context.Context, blockNumber uint64) (*types.TxStatusResponse, error) {
 	txStatus, err := b.eth.syncService.GetTxStatusByNumber(blockNumber)
+	if err != nil {
+		log.Error(err.Error())
+	}
 	return txStatus, err
 }
 

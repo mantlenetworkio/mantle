@@ -1055,7 +1055,7 @@ func (m *mockClient) GetStateRoot(index uint64, backend Backend) (*StateRoot, er
 	return nil, nil
 }
 
-func (m *mockClient) GetStateRootResponse(index uint64, backend Backend) (*TxStatusResponse, error) {
+func (m *mockClient) GetStateRootResponse(index uint64, backend Backend) (*types.TxStatusResponse, error) {
 	return nil, nil
 }
 

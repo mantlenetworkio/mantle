@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/tyler-smith/go-bip39"
 	"math/big"
 	"strings"
 	"time"
@@ -1510,10 +1511,10 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 	// Try to return an already finalized transaction
 	tx, blockHash, blockNumber, index, err := s.b.GetTransaction(ctx, txHash)
 
-	if err != nil || tx != nil {
-		return nil, err
+	if err != nil || tx == nil {
+		return nil, errors.New("transaction not found")
 	}
-	rpcTx, err := newRPCTransaction(tx, blockHash, blockNumber, index), nil
+	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
 	if err != nil {
@@ -1539,16 +1540,19 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 	// Try to return an already finalized transaction
 	tx, blockHash, blockNumber, index, err := s.b.GetTransaction(ctx, txHash)
 
-	if err != nil || tx != nil {
-		return nil, err
+	if err != nil || tx == nil {
+		return nil, errors.New("transaction not found")
 	}
-	rpcTx, err := newRPCTransaction(tx, blockHash, blockNumber, index), nil
+	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
 	if err != nil {
 		return nil, err
 	}
 	status := 0
+	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= 64 {
+		status = 1
+	}
 	fields := map[string]interface{}{
 		"blockHash":        blockHash,
 		"origin":           rpcTx.QueueOrigin,
