@@ -742,7 +742,6 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         const currentL1BlockNumber = await this.state.db.getHighestL1BlockNumber();
         const backend = req.query.backend || this.options.defaultBackend
         let stateRoots = null
-        let batch = null
 
         switch (backend) {
           case 'l1':
@@ -754,6 +753,10 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
             throw new Error(`Unknown transaction backend ${backend}`)
         }
 
+        let batch = await this.state.db.getStateRootBatchByIndex(
+          stateRoots.batchIndex
+        )
+
         if (stateRoots === null) {
           switch (backend) {
             case 'l1':
@@ -763,6 +766,17 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
               break
             default:
               throw new Error(`Unknown transaction backend ${backend}`)
+
+          }
+          batch = await this.state.db.getStateRootBatchCachedByIndex(
+            stateRoots.batchIndex
+          )
+          if (stateRoots === null) {
+            return {
+              batch: null,
+              stateRoots: null,
+              currentL1BlockNumber,
+            }
           }
           if (stateRoots === null) {
             return {
