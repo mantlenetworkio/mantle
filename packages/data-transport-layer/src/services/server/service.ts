@@ -698,6 +698,9 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     this._registerRoute(
       'get',
       '/tx/status/index/:index',
+      // we needn't to query the unconfirmed:stateroot, because
+      // it is sent by layer2, if dtl only connect to layer2, it
+      //can not listen the event from layer1.
       async (req): Promise<TxStatusResponse> => {
         const currentL1BlockNumber = await this.state.db.getHighestL1BlockNumber();
         const backend = req.query.backend || this.options.defaultBackend
@@ -709,27 +712,35 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
               BigNumber.from(req.params.index).toNumber()
             )
             break
-          case 'l2':
-            stateRoots = await this.state.db.getUnconfirmedStateRootByIndex(
-              BigNumber.from(req.params.index).toNumber()
-            )
-            break
           default:
             throw new Error(`Unknown transaction backend ${backend}`)
         }
 
-        const batch = await this.state.db.getStateRootBatchByIndex(
+        let batch = await this.state.db.getStateRootBatchByIndex(
           stateRoots.batchIndex
         )
 
         if (stateRoots === null) {
-          return {
-            batch: null,
-            stateRoots: null,
-            currentL1BlockNumber,
+          switch (backend) {
+            case 'l1':
+              stateRoots = await this.state.db.getStateRootCachedByIndex(
+                BigNumber.from(req.params.index).toNumber()
+              )
+              break
+            default:
+              throw new Error(`Unknown transaction backend ${backend}`)
+          }
+          batch = await this.state.db.getStateRootBatchCachedByIndex(
+            stateRoots.batchIndex
+          )
+          if (stateRoots === null) {
+            return {
+              batch: null,
+              stateRoots: null,
+              currentL1BlockNumber,
+            }
           }
         }
-
 
         return {
           batch,
