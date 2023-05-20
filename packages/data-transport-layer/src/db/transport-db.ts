@@ -38,6 +38,8 @@ const TRANSPORT_DB_KEYS = {
   STATE_ROOT: `stateroot`,
   UNCONFIRMED_STATE_ROOT: `unconfirmed:stateroot`,
   STATE_ROOT_BATCH: `batch:stateroot`,
+  STATE_ROOT_CACHED: `staterootcached`,
+  STATE_ROOT_BATCH_CACHED: `batch:staterootcached`,
   STARTING_L1_BLOCK: `l1:starting`,
   HIGHEST_L1_BLOCK: `l1:highest`,
   HIGHEST_L2_BLOCK: `l2:highest`,
@@ -219,6 +221,26 @@ export class TransportDB {
     await this._putEntries(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH, entries)
   }
 
+  public async putStateRootCachedEntries(entries: StateRootEntry[]): Promise<void> {
+    await this._putEntries(TRANSPORT_DB_KEYS.STATE_ROOT_CACHED, entries)
+  }
+
+  public async putStateRootCachedBatchEntries(
+    entries: StateRootBatchEntry[]
+  ): Promise<void> {
+    await this._putEntries(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH_CACHED, entries)
+  }
+
+  public async deleteStateRootCachedEntries(entries: StateRootEntry[]): Promise<void> {
+    //TODO: need to replace to deleteEntries
+    await this._putEntries(TRANSPORT_DB_KEYS.STATE_ROOT_CACHED, entries)
+  }
+
+  public async deleteStateRootCachedBatchEntries(entries: StateRootEntry[]): Promise<void> {
+    //TODO: need to replace to deleteEntries
+    await this._putEntries(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH_CACHED, entries)
+  }
+
   public async putTransactionIndexByQueueIndex(
     queueIndex: number,
     index: number
@@ -277,6 +299,10 @@ export class TransportDB {
     return this._getEntryByIndex(TRANSPORT_DB_KEYS.STATE_ROOT, index)
   }
 
+  public async getStateRootCachedByIndex(index: number): Promise<StateRootEntry> {
+    return this._getEntryByIndex(TRANSPORT_DB_KEYS.STATE_ROOT_CACHED, index)
+  }
+
   public async getUnconfirmedStateRootByIndex(
     index: number
   ): Promise<StateRootEntry> {
@@ -298,6 +324,13 @@ export class TransportDB {
   ): Promise<StateRootBatchEntry> {
     return this._getEntryByIndex(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH, index)
   }
+
+  public async getStateRootBatchCachedByIndex(
+    index: number
+  ): Promise<StateRootBatchEntry> {
+    return this._getEntryByIndex(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH_CACHED, index)
+  }
+
 
   public async getLatestEnqueue(): Promise<EnqueueEntry> {
     return this._getLatestEntry(TRANSPORT_DB_KEYS.ENQUEUE)

@@ -21,6 +21,7 @@ import {
 } from '../../utils'
 import { EventHandlerSet } from '../../types'
 import { L1DataTransportServiceOptions } from '../main/service'
+import {handleEventsStateCachedBatchAppended} from "./handlers/state-cached-batch-appended";
 
 interface L1IngestionMetrics {
   highestSyncedL1Block: Gauge<string>
@@ -212,10 +213,25 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
           highestSyncedL1Block + this.options.logsPerPollingInterval,
           currentL1Block - this.options.confirmations
         )
+        const noConfirmTargetL1Block = Math.min(
+          highestSyncedL1Block + this.options.logsPerPollingInterval,
+          currentL1Block
+        )
         await this.state.db.putHighestL1BlockNumber(currentL1Block);
 
         // We're already at the head, so no point in attempting to sync.
         if (highestSyncedL1Block === targetL1Block) {
+          //at the begining we are catching the block, and we will not enter
+          //into this code block.
+          if (highestSyncedL1Block < noConfirmTargetL1Block) {
+            await this._syncEvents(
+              'StateCommitmentChain',
+              'StateBatchAppended',
+              highestSyncedL1Block,
+              noConfirmTargetL1Block,
+              handleEventsStateCachedBatchAppended
+            )
+          }
           await sleep(this.options.pollingInterval)
           continue
         }
