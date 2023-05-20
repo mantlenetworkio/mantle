@@ -19,7 +19,6 @@ package les
 import (
 	"context"
 	"errors"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
@@ -189,15 +188,15 @@ func (b *LesApiBackend) GetReceipts(ctx context.Context, hash common.Hash) (type
 	return nil, nil
 }
 
+func (b *LesApiBackend) GetTxStatusByHash(ctx context.Context, blockNumber uint64) (*types.TxStatusResponse, error) {
+	return nil, errors.New("currently we are not supported txstatus detail for light client")
+}
+
 func (b *LesApiBackend) GetLogs(ctx context.Context, hash common.Hash) ([][]*types.Log, error) {
 	if number := rawdb.ReadHeaderNumber(b.eth.chainDb, hash); number != nil {
 		return light.GetBlockLogs(ctx, b.eth.odr, hash, *number)
 	}
 	return nil, nil
-}
-
-func (b *LesApiBackend) GetTxStatusByHash(ctx context.Context, blockNumber uint64) (*rollup.TxStatusResponse, error) {
-	return nil, errors.New("currently we are not supported txstatus detail for light client")
 }
 
 func (b *LesApiBackend) GetTd(hash common.Hash) *big.Int {
