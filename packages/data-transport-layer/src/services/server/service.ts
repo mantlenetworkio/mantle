@@ -769,7 +769,9 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
             return {
               batch: null,
               stateRoots: null,
+              daBatchIndex:null,
               currentL1BlockNumber,
+              datastore:null,
             }
           }else{
             // we query the data from cached
@@ -784,10 +786,20 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           )
         }
 
+        // get datastore information by batchindex and datastore_id
+        let datastore = null;
+        const transaction = await this.state.db.getDaTransactionByIndex(
+          BigNumber.from(req.params.index).toNumber()
+        )
+        const daBatch = await this.state.db.getRollupStoreByBatchIndex(transaction.batchIndex)
+        datastore = await this.state.db.getDsById(daBatch.data_store_id)
+
         return {
           batch,
           stateRoots,
           currentL1BlockNumber,
+          daBatchIndex:transaction.batchIndex,
+          datastore,
         }
       }
     )

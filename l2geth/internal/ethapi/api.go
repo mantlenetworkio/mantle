@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/tyler-smith/go-bip39"
 	"math/big"
 	"strings"
 	"time"
@@ -48,12 +47,17 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
+	"github.com/tyler-smith/go-bip39"
 )
 
 var (
-	errNoSequencerURL  = errors.New("sequencer transaction forwarding not configured")
-	errStillSyncing    = errors.New("sequencer still syncing, cannot accept transactions")
-	errBlockNotIndexed = errors.New("block in range not indexed, this should never happen")
+	errNoSequencerURL   = errors.New("sequencer transaction forwarding not configured")
+	errStillSyncing     = errors.New("sequencer still syncing, cannot accept transactions")
+	errBlockNotIndexed  = errors.New("block in range not indexed, this should never happen")
+	txStatusPeriodZero  = "Accepted on layer2"
+	txStatusPeriodOne   = "Rollup to layer1"
+	txStatusPeriodTwo   = "Finalized on layer1"
+	txStatusPeriodThree = "Challenge Period Passed"
 )
 
 const (
@@ -1510,17 +1514,46 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context, ha
 func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash common.Hash) (map[string]interface{}, error) {
 	// Try to return an already finalized transaction
 	tx, blockHash, blockNumber, index, err := s.b.GetTransaction(ctx, txHash)
-
 	if err != nil || tx == nil {
 		return nil, errors.New("transaction not found")
 	}
+	status := 0
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
-
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
 	if err != nil {
-		return nil, err
+		fields := map[string]interface{}{
+			"blockHash":       blockHash,
+			"origin":          rpcTx.QueueOrigin,
+			"to":              rpcTx.To,
+			"from":            rpcTx.From,
+			"transactionHash": rpcTx.Hash,
+			"status":          hexutil.Uint(status),
+			"statusInfo":      txStatusPeriodZero,
+		}
+		return fields, nil
 	}
-	status := 0
+	if txStatus.StateRoot != nil {
+		status := 1
+		fields := map[string]interface{}{
+			"blockHash":       blockHash,
+			"origin":          rpcTx.QueueOrigin,
+			"to":              rpcTx.To,
+			"from":            rpcTx.From,
+			"transactionHash": rpcTx.Hash,
+			"status":          hexutil.Uint(status),
+			"statusInfo":      txStatusPeriodOne,
+		}
+		return fields, nil
+	}
+	var statusInfo string
+	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= 64 {
+		status = 2
+		statusInfo = txStatusPeriodTwo
+	}
+	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= (60*60*24*7)/12 {
+		status = 3
+		statusInfo = txStatusPeriodThree
+	}
 	fields := map[string]interface{}{
 		"blockHash":        blockHash,
 		"origin":           rpcTx.QueueOrigin,
@@ -1529,7 +1562,10 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 		"transactionHash":  rpcTx.Hash,
 		"blockNumber":      hexutil.Uint64(blockNumber),
 		"status":           hexutil.Uint(status),
+		"statusInfo":       statusInfo,
 		"sccBatchL1Number": hexutil.Uint64(txStatus.Batch.BlockNumber),
+		"datastoreId":      txStatus.Datastore.DataStoreId,
+		"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
 	}
 
 	return fields, nil
@@ -1543,27 +1579,63 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 	if err != nil || tx == nil {
 		return nil, errors.New("transaction not found")
 	}
+	status := 0
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
-
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
 	if err != nil {
-		return nil, err
+		fields := map[string]interface{}{
+			"blockHash":       blockHash,
+			"origin":          rpcTx.QueueOrigin,
+			"to":              rpcTx.To,
+			"from":            rpcTx.From,
+			"transactionHash": rpcTx.Hash,
+			"status":          hexutil.Uint(status),
+			"statusInfo":      txStatusPeriodZero,
+		}
+		return fields, nil
 	}
-	status := 0
+	if txStatus.StateRoot != nil {
+		status := 1
+		fields := map[string]interface{}{
+			"blockHash":       blockHash,
+			"origin":          rpcTx.QueueOrigin,
+			"to":              rpcTx.To,
+			"from":            rpcTx.From,
+			"transactionHash": rpcTx.Hash,
+			"status":          hexutil.Uint(status),
+			"statusInfo":      txStatusPeriodOne,
+		}
+		return fields, nil
+	}
+	var statusInfo string
 	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= 64 {
-		status = 1
+		status = 2
+		statusInfo = txStatusPeriodTwo
+	}
+	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= (60*60*24*7)/12 {
+		status = 3
+		statusInfo = txStatusPeriodThree
 	}
 	fields := map[string]interface{}{
-		"blockHash":        blockHash,
-		"origin":           rpcTx.QueueOrigin,
-		"to":               rpcTx.To,
-		"from":             rpcTx.From,
-		"transactionHash":  rpcTx.Hash,
-		"blockNumber":      hexutil.Uint64(blockNumber),
-		"status":           hexutil.Uint(status),
-		"sccBatchL1Number": hexutil.Uint64(txStatus.Batch.BlockNumber),
+		"blockHash":         blockHash,
+		"origin":            rpcTx.QueueOrigin,
+		"to":                rpcTx.To,
+		"from":              rpcTx.From,
+		"transactionHash":   rpcTx.Hash,
+		"blockNumber":       hexutil.Uint64(blockNumber),
+		"status":            hexutil.Uint(status),
+		"statusInfo":        statusInfo,
+		"sccBatchL1Number":  hexutil.Uint64(txStatus.Batch.BlockNumber),
+		"datastoreId":       txStatus.Datastore.DataStoreId,
+		"daBatchIndex":      hexutil.Uint64(txStatus.DaBatchIndex),
+		"dataCommitment":    txStatus.Datastore.DataCommitment,
+		"daMsgHash":         txStatus.Datastore.MsgHash,
+		"daStoreNumber":     txStatus.Datastore.StoreNumber,
+		"daInitBlockNumber": txStatus.Datastore.InitBlockNumber,
+		"daInitTxHash":      txStatus.Datastore.InitTxHash,
+		"daConfirmTxHash":   txStatus.Datastore.ConfirmTxHash,
+		"daSignatoryRecord": txStatus.Datastore.SignatoryRecord,
 	}
-
 	return fields, nil
 }
 
