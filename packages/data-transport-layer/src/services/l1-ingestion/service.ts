@@ -215,7 +215,8 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
         )
         const noConfirmTargetL1Block = Math.min(
           highestSyncedL1Block + this.options.logsPerPollingInterval,
-          currentL1Block
+          // we will minus 1 to cover the reorg on layer1 mainet
+          currentL1Block - 1
         )
         await this.state.db.putHighestL1BlockNumber(currentL1Block);
 
