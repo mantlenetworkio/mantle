@@ -232,13 +232,11 @@ export class TransportDB {
   }
 
   public async deleteStateRootCachedEntries(entries: StateRootEntry[]): Promise<void> {
-    //TODO: need to replace to deleteEntries
-    await this._putEntries(TRANSPORT_DB_KEYS.STATE_ROOT_CACHED, entries)
+    await this._delEntries(TRANSPORT_DB_KEYS.STATE_ROOT_CACHED, entries)
   }
 
-  public async deleteStateRootCachedBatchEntries(entries: StateRootEntry[]): Promise<void> {
-    //TODO: need to replace to deleteEntries
-    await this._putEntries(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH_CACHED, entries)
+  public async deleteStateRootCachedBatchEntries(entries: StateRootBatchEntry[]): Promise<void> {
+    await this._delEntries(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH_CACHED, entries)
   }
 
   public async putTransactionIndexByQueueIndex(
@@ -644,5 +642,24 @@ export class TransportDB {
   ): Promise<void> {
     await this._putLatestEntryIndex(key, entries.length - 1)
     await this._putEntries(key, entries)
+  }
+
+  private async _delEntries<TEntry extends Indexed>(
+    key: string,
+    entries: TEntry[]
+  ): Promise<void> {
+    if (entries.length === 0) {
+      return
+    }
+
+    await this.db.del<TEntry>(
+      entries.map((entry) => {
+        return {
+          key: `${key}:index`,
+          index: entry.index,
+          value: entry,
+        }
+      })
+    )
   }
 }
