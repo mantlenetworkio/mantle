@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/tyler-smith/go-bip39"
 	"math/big"
 	"strings"
 	"time"
