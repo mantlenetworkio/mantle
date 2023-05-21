@@ -47,7 +47,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
-	"github.com/tyler-smith/go-bip39"
 )
 
 var (
@@ -1535,13 +1534,16 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 	if txStatus.StateRoot != nil {
 		status := 1
 		fields := map[string]interface{}{
-			"blockHash":       blockHash,
-			"origin":          rpcTx.QueueOrigin,
-			"to":              rpcTx.To,
-			"from":            rpcTx.From,
-			"transactionHash": rpcTx.Hash,
-			"status":          hexutil.Uint(status),
-			"statusInfo":      txStatusPeriodOne,
+			"blockHash":        blockHash,
+			"origin":           rpcTx.QueueOrigin,
+			"to":               rpcTx.To,
+			"from":             rpcTx.From,
+			"transactionHash":  rpcTx.Hash,
+			"status":           hexutil.Uint(status),
+			"statusInfo":       txStatusPeriodOne,
+			"sccBatchL1Number": hexutil.Uint64(txStatus.Batch.BlockNumber),
+			"datastoreId":      txStatus.Datastore.DataStoreId,
+			"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
 		}
 		return fields, nil
 	}
@@ -1597,13 +1599,16 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 	if txStatus.StateRoot != nil {
 		status := 1
 		fields := map[string]interface{}{
-			"blockHash":       blockHash,
-			"origin":          rpcTx.QueueOrigin,
-			"to":              rpcTx.To,
-			"from":            rpcTx.From,
-			"transactionHash": rpcTx.Hash,
-			"status":          hexutil.Uint(status),
-			"statusInfo":      txStatusPeriodOne,
+			"blockHash":        blockHash,
+			"origin":           rpcTx.QueueOrigin,
+			"to":               rpcTx.To,
+			"from":             rpcTx.From,
+			"transactionHash":  rpcTx.Hash,
+			"status":           hexutil.Uint(status),
+			"statusInfo":       txStatusPeriodOne,
+			"sccBatchL1Number": hexutil.Uint64(txStatus.Batch.BlockNumber),
+			"datastoreId":      txStatus.Datastore.DataStoreId,
+			"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
 		}
 		return fields, nil
 	}
