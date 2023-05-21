@@ -64,6 +64,18 @@ export class SimpleDB {
     )
   }
 
+  public async del<TEntry>(
+    entries: {
+      key: string
+      index: number
+      value: TEntry
+    }[]
+  ): Promise<void> {
+    entries.map((entry) => {
+      this.db.del(this._makeKey(entry.key, entry.index))
+    })
+  }
+
   private _makeKey(key: string, index: number): string {
     // prettier-ignore
     return `${key}:${BigNumber.from(index).toString().padStart(32, '0')}`

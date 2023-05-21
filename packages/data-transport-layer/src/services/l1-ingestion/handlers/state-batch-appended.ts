@@ -84,5 +84,8 @@ export const handleEventsStateBatchAppended: EventHandlerSet<
 
     await db.putStateRootBatchEntries([entry.stateRootBatchEntry])
     await db.putStateRootEntries(entry.stateRootEntries)
+
+    await db.deleteStateRootCachedBatchEntries([entry.stateRootBatchEntry])
+    await db.deleteStateRootCachedEntries(entry.stateRootEntries)
   },
 }

@@ -223,6 +223,7 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
         if (highestSyncedL1Block === targetL1Block) {
           //at the begining we are catching the block, and we will not enter
           //into this code block.
+          //if confirmation == 0, we will not enter into this if-else.
           if (highestSyncedL1Block < noConfirmTargetL1Block) {
             await this._syncEvents(
               'StateCommitmentChain',

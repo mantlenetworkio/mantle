@@ -72,7 +72,7 @@ export const handleEventsStateCachedBatchAppended: EventHandlerSet<
     // Defend against situations where we missed an event because the RPC provider
     // (infura/alchemy/whatever) is missing an event.
     if (entry.stateRootBatchEntry.index > 0) {
-      const prevStateRootBatchEntry = await db.getStateRootBatchByIndex(
+      const prevStateRootBatchEntry = await db.getStateRootBatchCachedByIndex(
         entry.stateRootBatchEntry.index - 1
       )
 
