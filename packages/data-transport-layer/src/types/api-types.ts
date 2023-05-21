@@ -37,6 +37,8 @@ export interface TxStatusResponse {
   batch: StateRootBatchEntry
   stateRoots: StateRootEntry[]
   currentL1BlockNumber: number
+  daBatchIndex: number
+  datastore: DataStoreEntry
 }
 
 

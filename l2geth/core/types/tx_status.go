@@ -40,6 +40,8 @@ type TxStatusResponse struct {
 	StateRoot       *StateRoot `json:"stateRoots"`
 	Batch           *Batch     `json:"batch"`
 	CurrentL1Height int64      `json:"currentL1BlockNumber"`
+	DaBatchIndex    int64      `json:"daBatchIndex"`
+	Datastore       *Datastore `json:"datastore"`
 }
 
 // stateroot represents the return result of the remote server.
@@ -61,4 +63,34 @@ type Batch struct {
 	BlockNumber       uint64         `json:"blockNumber"`
 	Timestamp         uint64         `json:"timestamp"`
 	Submitter         common.Address `json:"submitter"`
+}
+
+type Datastore struct {
+	DataStoreId           string        `json:"dataStoreId"`
+	StoreNumber           string        `json:"storeNumber"`
+	DurationDataStoreId   string        `json:"durationDataStoreId"`
+	Index                 string        `json:"index"`
+	DataCommitment        string        `json:"dataCommitment"`
+	MsgHash               string        `json:"msgHash"`
+	StakesFromBlockNumber string        `json:"stakesFromBlockNumber"`
+	InitTime              string        `json:"initTime"`
+	ExpireTime            string        `json:"expireTime"`
+	Duration              int           `json:"duration"`
+	NumSys                string        `json:"numSys"`
+	NumPar                string        `json:"numPar"`
+	Degree                string        `json:"degree"`
+	StorePeriodLength     string        `json:"storePeriodLength"`
+	Fee                   string        `json:"fee"`
+	Confirmer             string        `json:"confirmer"`
+	Header                string        `json:"header"`
+	InitTxHash            string        `json:"initTxHash"`
+	InitGasUsed           string        `json:"initGasUsed"`
+	InitBlockNumber       string        `json:"initBlockNumber"`
+	Confirmed             bool          `json:"confirmed"`
+	EthSigned             string        `json:"ethSigned"`
+	EigenSigned           string        `json:"eigenSigned"`
+	NonSignerPubKeyHashes []interface{} `json:"nonSignerPubKeyHashes"`
+	SignatoryRecord       string        `json:"signatoryRecord"`
+	ConfirmTxHash         string        `json:"confirmTxHash"`
+	ConfirmGasUsed        string        `json:"confirmGasUsed"`
 }
