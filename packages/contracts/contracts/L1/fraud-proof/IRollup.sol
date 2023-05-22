@@ -137,7 +137,7 @@ interface IRollup {
 
     /**
      * @notice Deposits stake on staker's current assertion (or the last confirmed assertion if not currently staked).
-     * @notice currently use Bit to stake; stakeAmount Token amount to deposit. Must be > than defined threshold if this is a new stake.
+     * @notice currently use MNT to stake; stakeAmount Token amount to deposit. Must be > than defined threshold if this is a new stake.
      */
      function stake(uint256 stakeAmount, address operator) external;
 

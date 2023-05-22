@@ -20,9 +20,9 @@ func TestMix(t *testing.T) {
 	l1Bridge, err := l1bridge.NewL1StandardBridge(common.HexToAddress("0xfc9dc9e4f9a5e6a03b268485395517236c2a0f0a"), l1Client)
 	require.NoError(t, err)
 
-	l1bit, err := l1Bridge.L1BitAddress(&bind.CallOpts{})
+	l1mantle, err := l1Bridge.L1MantleAddress(&bind.CallOpts{})
 	require.NoError(t, err)
-	t.Log(l1bit.Hex())
+	t.Log(l1mantle.Hex())
 
 	l2bridge, err := l1Bridge.L2TokenBridge(&bind.CallOpts{})
 	require.NoError(t, err)

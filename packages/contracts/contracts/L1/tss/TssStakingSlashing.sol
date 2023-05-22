@@ -26,8 +26,8 @@ contract TssStakingSlashing is
         SlashType slashType;
     }
     // staking parameter settings
-    // bit token contract address
-    address public BitToken;
+    // mantle token contract address
+    address public MantleToken;
     // tss group contract address
     address public tssGroupContract;
     // storage staker infos (key:staker address)
@@ -70,24 +70,24 @@ contract TssStakingSlashing is
 
     /**
      * @notice initializes the contract setting and the deployer as the initial owner
-     * @param _bitToken bit token contract address
+     * @param _mantleToken mantle token contract address
      * @param _tssGroupContract address tss group manager contract address
      */
-    function initialize(address _bitToken, address _tssGroupContract) public initializer {
+    function initialize(address _mantleToken, address _tssGroupContract) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
 
-        BitToken = _bitToken;
+        MantleToken = _mantleToken;
         tssGroupContract = _tssGroupContract;
     }
 
     /**
-     * @notice change the bit token and tssGroup contract address
-     * @param _token the erc20 bit token contract address
+     * @notice change the mantle token and tssGroup contract address
+     * @param _token the erc20 mantle token contract address
      * @param _tssGroup tssGroup contract address
      */
     function setAddress(address _token, address _tssGroup) public onlyOwner {
-        BitToken = _token;
+        MantleToken = _token;
         tssGroupContract = _tssGroup;
     }
 
@@ -120,8 +120,8 @@ contract TssStakingSlashing is
     }
 
     /**
-     * @notice staking entrance for user to deposit bit tokens
-     * @param _amount deposit amount of bit token
+     * @notice staking entrance for user to deposit mantle tokens
+     * @param _amount deposit amount of mantle token
      * @param _pubKey public key of sender
      */
     function staking(uint256 _amount, bytes calldata _pubKey) public nonReentrant {
@@ -150,9 +150,9 @@ contract TssStakingSlashing is
             deposits[msg.sender].pledgor = msg.sender;
         }
 
-        // send bit token to staking contract, need user approve first
+        // send mantle token to staking contract, need user approve first
         require(
-            IERC20(BitToken).transferFrom(msg.sender, address(this), _amount),
+            IERC20(MantleToken).transferFrom(msg.sender, address(this), _amount),
             "transfer erc20 token failed"
         );
         deposits[msg.sender].amount += _amount;
@@ -164,7 +164,7 @@ contract TssStakingSlashing is
     }
 
     /**
-     * @notice user who not elected to be validator to withdraw their bit token
+     * @notice user who not elected to be validator to withdraw their mantle token
      */
     function withdrawToken() public nonReentrant {
         uint256 amount = deposits[msg.sender].amount;
@@ -180,7 +180,7 @@ contract TssStakingSlashing is
 
         delete deposits[msg.sender];
 
-        require(IERC20(BitToken).transfer(msg.sender, amount), "erc20 transfer failed");
+        require(IERC20(MantleToken).transfer(msg.sender, amount), "erc20 transfer failed");
         emit Withdraw(msg.sender, amount);
     }
 

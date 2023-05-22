@@ -13,7 +13,7 @@ const deployFn: DeployFunction = async (hre) => {
   const { deployer } = await hre.getNamedAccounts()
 
   const owner = hre.deployConfig.bvmAddressManagerOwner
-  const l1BitAddress = hre.deployConfig.l1BitAddress
+  const l1MantleAddress = hre.deployConfig.l1MantleAddress
   // deploy impl
   await deployAndVerifyAndThen({
     hre,
@@ -74,7 +74,7 @@ const deployFn: DeployFunction = async (hre) => {
     }
   )
 
-  args = [l1BitAddress, Proxy__TSS_GroupManager.address]
+  args = [l1MantleAddress, Proxy__TSS_GroupManager.address]
   callData = Impl__TssStakingSlashing.interface.encodeFunctionData(
     'initialize',
     args
@@ -92,8 +92,8 @@ const deployFn: DeployFunction = async (hre) => {
           return hexStringEquals(
             await contract
               .connect(Impl_TSS_GroupManager.signer.provider)
-              .BitToken({ from: ethers.constants.AddressZero }),
-            l1BitAddress
+              .MantleToken({ from: ethers.constants.AddressZero }),
+            l1MantleAddress
           )
         },
         5000,
