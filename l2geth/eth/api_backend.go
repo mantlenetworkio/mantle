@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
