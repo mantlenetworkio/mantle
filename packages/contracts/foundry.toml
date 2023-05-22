@@ -1,0 +1,45 @@
+[profile.default]
+src = 'contracts'
+out = 'forge-artifacts'
+libs = ['node_modules', '../../node_modules']
+cache_path  = 'forge-cache'
+
+remappings = [
+  '@openzeppelin-upgrades/contracts/=node_modules/@openzeppelin/contracts-upgradeable/',
+  '@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/',
+#   '@rari-capital/solmate/=node_modules/@rari-capital/solmate',
+#   "@cwia/=node_modules/clones-with-immutable-args/src",
+  'forge-std/=../../node_modules/forge-std/src',
+  'ds-test/=../../node_modules/ds-test/src'
+]
+
+extra_output = ['devdoc', 'userdoc', 'metadata', 'storageLayout']
+bytecode_hash = 'none'
+build_info = true
+build_info_path = 'artifacts/build-info'
+ffi = true
+fuzz_runs = 16
+no_match_contract = 'EchidnaFuzz'
+
+fs_permissions = [
+  { 'access'='read-write', 'path'='./.resource-metering.csv' }
+]
+
+[profile.ci]
+fuzz_runs = 512
+
+[profile.echidna]
+bytecode_hash = 'ipfs'
+
+
+# // "devDependencies": {
+
+# //   "ethereumjs-wallet": "^1.0.2",
+
+# //   "@rari-capital/solmate": "https://github.com/rari-capital/solmate.git#8f9b23f8838670afda0fd8983f2c41e8037ae6bc",
+# //   "clones-with-immutable-args": "https://github.com/Saw-mon-and-Natalie/clones-with-immutable-args.git#105efee1b9127ed7f6fedf139e1fc796ce8791f2",
+# //   "bip39": "^3.0.4",
+# //   "command-exists": "1.2.9",
+# //   
+
+# // }

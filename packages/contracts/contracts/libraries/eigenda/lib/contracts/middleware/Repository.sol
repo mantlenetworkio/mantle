@@ -53,7 +53,7 @@ contract Repository is Ownable, Initializable, IRepository {
         _setVoteWeigher(_voteWeigher);
         _setServiceManager(_serviceManager);
         _setRegistry(_registry);
-        _transferOwnership(initialOwner);
+        transferOwnership(initialOwner);
     }
 
     /// @notice sets the vote weigher for the middleware

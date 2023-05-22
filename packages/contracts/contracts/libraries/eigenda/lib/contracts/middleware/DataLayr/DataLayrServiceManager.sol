@@ -17,7 +17,6 @@ import "../../permissions/Pausable.sol";
 
 import "../Repository.sol";
 import "./DataLayrChallengeUtils.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Primary entrypoint for procuring services from DataLayr.
@@ -198,11 +197,9 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
         whenNotPaused
         returns (uint32 index)
     {
-        console.log("dlsm:01010101010101010100101010");
         bytes32 headerHash = keccak256(header);
         uint32 storePeriodLength;
         IDataLayrServiceManager.DataStoreMetadata memory metadata;
-        console.log("dlsm:0000000000000000000000000");
         {
             uint256 totalBytes;
             {
@@ -261,8 +258,6 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
                 signatoryRecordHash: bytes32(0)
             });
          }
-         console.log("dlsm:111111111111111");
-
 
         /**
          * Stores the hash of the datastore's metadata into the `dataStoreHashesForDurationAtTimestamp` mapping.
@@ -287,7 +282,7 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
                 "DataLayrServiceManager.initDataStore: number of initDatastores for this duration and block has reached its limit"
             );
         }
-        console.log("dlsm:2222222222222222222");
+
         // sanity check on blockNumber
         {
             require(
@@ -299,14 +294,14 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
                 "DataLayrServiceManager.initDataStore: specified blockNumber is too far in past"
             );
         }
-        console.log("dlsm:333333333333333333333333333333");
+
         IDataLayrServiceManager.DataStoreSearchData memory searchData = IDataLayrServiceManager.DataStoreSearchData({
             duration: duration,
             timestamp: block.timestamp,
             index: index,
             metadata: metadata
         });
-        console.log("dlsm:444444444444444444444444444444");
+
         // emit event to represent initialization of data store
         emit InitDataStore(feePayer, searchData, header);
 
@@ -321,14 +316,13 @@ contract DataLayrServiceManager is DataLayrServiceManagerStorage, BLSSignatureCh
         if (_latestTime > dataStoresForDuration.latestTime) {
             dataStoresForDuration.latestTime = _latestTime;
         }
-        console.log("dlsm:5555555555555555555");
+
         // increments the number of datastores for the specific duration of the asserted DataStore
         _incrementDataStoresForDuration(duration);
 
         // increment the counter
         ++dataStoresForDuration.dataStoreId;
 
-        console.log("dlsm:66666666666666666666");
         return index;
     }
 

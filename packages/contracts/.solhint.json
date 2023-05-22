@@ -5,7 +5,7 @@
       "prettier/prettier": "error",
       "compiler-version": "off",
       "code-complexity": ["warn", 5],
-      "max-line-length": ["error", 100],
+      "max-line-length": ["error", 1000],
       "func-param-name-mixedcase": "error",
       "modifier-name-mixedcase": "error",
       "ordering": "warn",

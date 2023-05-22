@@ -59,3 +59,7 @@ ops/data/**
 dist/
 packages/contracts/test/data/
 packages/contracts/abi/
+
+# forge files
+packages/contracts/forge-artifacts/
+packages/contracts/forge-cache/

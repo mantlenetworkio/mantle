@@ -35,7 +35,7 @@
     "lint:contracts:fix": "yarn prettier --write 'contracts/**/*.sol'",
     "lint:fix": "yarn lint:contracts:fix && yarn lint:ts:fix",
     "lint": "yarn lint:fix && yarn lint:check",
-    "clean": "rm -rf ./dist ./artifacts ./cache ./coverage ./tsconfig.tsbuildinfo",
+    "clean": "rm -rf ./dist ./artifacts ./cache ./coverage ./tsconfig.tsbuildinfo ./forge-artifacts ./ forge-cache",
     "prepublishOnly": "yarn copyfiles -u 1 -e \"**/test-*/**/*\" \"contracts/**/*\" ./",
     "postpublish": "rimraf chugsplash L1 L2 libraries standards",
     "prepack": "yarn prepublishOnly",
@@ -115,7 +115,11 @@
     "ts-generator": "0.0.8",
     "ts-node": "^10.0.0",
     "typechain": "^8.1.0",
-    "typescript": "^4.6.2"
+    "typescript": "^4.6.2",
+    "@foundry-rs/hardhat-forge": "^0.1.17",
+    "@foundry-rs/easy-foundryup": "^0.1.3",
+    "forge-std": "https://github.com/foundry-rs/forge-std.git",
+    "ds-test": "https://github.com/dapphub/ds-test.git"
   },
   "peerDependencies": {
     "ethers": "^5"
