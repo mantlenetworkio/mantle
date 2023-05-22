@@ -124,8 +124,8 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
 
   protected async _start(): Promise<void> {
     this.updateTransactionBatches(
-      this.options.updBatchIndex,
-      this.options.endUpdBatchIndex
+      this.options.startUpdateBatchIndex,
+      this.options.endUpdateBatchIndex
     )
     while (this.running) {
       try {

@@ -34,8 +34,8 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       logsPerPollingInterval: config.uint('logs-per-polling-interval', 2000),
       daSyncStep: config.uint('da-sync-step', 100),
       daInitBatch: config.uint('da-init-batch', 0),
-      updBatchIndex: config.uint('upd-batch-index', 0),
-      endUpdBatchIndex: config.uint('end-upd-batch-index', 0),
+      startUpdateBatchIndex: config.uint('start-update-batch-index', 0),
+      endUpdateBatchIndex: config.uint('end-update-batch-index', 0),
 
       dangerouslyCatchAllErrors: config.bool(
         'dangerously-catch-all-errors',

@@ -41,8 +41,8 @@ export interface L1DataTransportServiceOptions {
   eigenUpgradeEnable?: boolean
   daSyncStep?: number
   daInitBatch?: number
-  updBatchIndex?: number
-  endUpdBatchIndex?: number
+  startUpdateBatchIndex?: number
+  endUpdateBatchIndex?: number
 
   transactionsPerPollingInterval: number
   legacySequencerCompatibility: boolean
