@@ -846,6 +846,11 @@ var (
 		Value:  time.Minute * 3,
 		EnvVar: "ROLLUP_TIMESTAMP_REFRESH",
 	}
+	RollupRoleFlag = cli.StringFlag{
+		Name:   "rollup.role",
+		Usage:  "Set rollup node role",
+		EnvVar: "ROLLUP_ROLE",
+	} // sequencer / verify /schedual
 	RollupBackendFlag = cli.StringFlag{
 		Name:   "rollup.backend",
 		Usage:  "Sync backend for verifiers (\"l1\", \"l2\" or \"da\"), defaults to l1",
@@ -898,6 +903,56 @@ var (
 		Name:   "sequencer.clienthttp",
 		Usage:  "HTTP endpoint for the sequencer client",
 		EnvVar: "SEQUENCER_CLIENT_HTTP",
+	}
+
+	// fraud proof flags
+	FraudProofL1EndpointFlag = &cli.StringFlag{
+		Name:   "fp.l1endpoint",
+		Usage:  "The api endpoint of L1 client",
+		EnvVar: "L1_ENDPOINT",
+		Value:  "",
+	}
+	FraudProofL1ChainIDFlag = &cli.Uint64Flag{
+		Name:   "fp.l1chainid",
+		Usage:  "The chain ID of L1 client",
+		EnvVar: "L1_CHAIN_ID",
+		Value:  31337,
+	}
+	FraudProofL1ConfirmationsFlag = &cli.Uint64Flag{
+		Name:   "fp.l1confirmations",
+		Usage:  "The confirmation block number of L1",
+		EnvVar: "L1_CONFIRMATIONS",
+		Value:  31337,
+	}
+	FraudProofSequencerAddrFlag = &cli.StringFlag{
+		Name:   "fp.sequencer-addr",
+		Usage:  "The account address of sequencer",
+		EnvVar: "SEQUENCER_ADDR",
+		Value:  "",
+	}
+	// FraudProofRollupAddrFlag rollup contract address
+	FraudProofRollupAddrFlag = &cli.StringFlag{
+		Name:   "fp.rollup-addr",
+		Usage:  "The contract address of L1 rollup",
+		EnvVar: "ROLLUP_ADDR",
+		Value:  "",
+	}
+	FraudProofStakeAddrFlag = &cli.StringFlag{
+		Name:   "fp.stake-addr",
+		Usage:  "The sequencer/validator address to be unlocked (pass passphrash via --password)",
+		EnvVar: "STAKE_ADDR",
+		Value:  "",
+	}
+	FraudProofStakeAmount = &cli.Uint64Flag{
+		Name:   "fp.stake-amount",
+		Usage:  "Required staking amount",
+		EnvVar: "STAKE_AMOUNT",
+		Value:  1000000000000000000,
+	}
+	FraudProofChallengeVerify = &cli.BoolTFlag{
+		Name:   "fp.challenge-verify",
+		Usage:  "Challenge verify",
+		EnvVar: "CHALLENGE_VERIFY",
 	}
 )
 
@@ -1192,6 +1247,19 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	}
 	if ctx.GlobalIsSet(SequencerClientHttpFlag.Name) {
 		cfg.SequencerClientHttp = ctx.GlobalString(SequencerClientHttpFlag.Name)
+	}
+	if ctx.GlobalIsSet(RollupRoleFlag.Name) {
+		str := ctx.GlobalString(RollupRoleFlag.Name)
+		switch str {
+		case "scheduler", "SCHEDULER":
+			cfg.RollupRole = rollup.SCHEDULER_NODE
+		case "sequencer", "SEQUENCER":
+			cfg.RollupRole = rollup.SEQUENCER_NODE
+		case "replica", "REPLICA", "verifier", "VERIFIER":
+			cfg.RollupRole = rollup.VERIFIER_NODE
+		default:
+			log.Crit("invalid rollup role", "role", str)
+		}
 	}
 }
 

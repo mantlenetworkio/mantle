@@ -18,7 +18,6 @@ package state
 
 import (
 	"fmt"
-
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
@@ -102,6 +101,17 @@ type Trie interface {
 func NewDatabase(db ethdb.Database) Database {
 	return NewDatabaseWithCache(db, 0)
 }
+
+//// NewDatabaseWithConfig creates a backing store for state. The returned database
+//// is safe for concurrent use and retains a lot of collapsed RLP trie nodes in a
+//// large memory cache.
+//func NewDatabaseWithConfig(db ethdb.Database, config *trie.Config) Database {
+//	csc, _ := lru.New(codeSizeCacheSize)
+//	return &cachingDB{
+//		db:            trie.NewDatabaseWithConfig(db, config),
+//		codeSizeCache: csc,
+//	}
+//}
 
 // NewDatabaseWithCache creates a backing store for state. The returned database
 // is safe for concurrent use and retains a lot of collapsed RLP trie nodes in a

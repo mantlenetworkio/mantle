@@ -24,7 +24,7 @@ func (p *Processor) SignRollBack() {
 			select {
 			case <-p.stopChan:
 				return
-			case req := <-p.signRollBachChan:
+			case req := <-p.signRollBackChan:
 				var resId = req.ID.(tdtypes.JSONRPCStringID).String()
 				logger.Info().Msgf("dealing resId (%s) ", resId)
 

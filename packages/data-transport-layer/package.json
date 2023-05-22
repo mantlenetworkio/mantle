@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@mantleio/data-transport-layer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "[Mantle] Service for shuttling data from L1 into L2",
   "main": "dist/index",
   "types": "dist/index",
@@ -39,7 +39,7 @@
     "@ethersproject/providers": "^5.6.8",
     "@ethersproject/transactions": "^5.6.2",
     "@mantleio/common-ts": "0.1.0",
-    "@mantleio/contracts": "0.1.0",
+    "@mantleio/contracts": "0.1.2",
     "@mantleio/core-utils": "0.1.0",
     "@sentry/node": "^6.3.1",
     "@sentry/tracing": "^6.3.1",

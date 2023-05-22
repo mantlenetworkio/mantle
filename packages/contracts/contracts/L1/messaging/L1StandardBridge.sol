@@ -67,6 +67,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
     modifier onlyEOA() {
         // Used to stop deposits from contracts (avoid accidentally lost tokens)
         require(!Address.isContract(msg.sender), "Account not EOA");
+        require(tx.origin==msg.sender, "msg.sender is not ts origin");
         _;
     }
 
@@ -193,7 +194,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
         bytes memory message;
         if (_l1Token == l1BitAddress) {
             // Construct calldata for finalizeDeposit call
-            _l2Token = Lib_PredeployAddresses.BVM_BIT;
+            require(_l2Token == Lib_PredeployAddresses.BVM_BIT, "Unmatched token pair");
             message = abi.encodeWithSelector(
                 IL2ERC20Bridge.finalizeDeposit.selector,
                 address(0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5),
