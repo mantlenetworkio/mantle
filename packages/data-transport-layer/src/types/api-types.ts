@@ -39,6 +39,7 @@ export interface TxStatusResponse {
   currentL1BlockNumber: number
   daBatchIndex: number
   datastore: DataStoreEntry
+  fraudProofWindow:number
 }
 
 

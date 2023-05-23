@@ -38,13 +38,15 @@ const TRANSPORT_DB_KEYS = {
   STATE_ROOT: `stateroot`,
   UNCONFIRMED_STATE_ROOT: `unconfirmed:stateroot`,
   STATE_ROOT_BATCH: `batch:stateroot`,
-  STATE_ROOT_CACHED: `staterootcached`,
-  STATE_ROOT_BATCH_CACHED: `batch:staterootcached`,
   STARTING_L1_BLOCK: `l1:starting`,
   HIGHEST_L1_BLOCK: `l1:highest`,
   HIGHEST_L2_BLOCK: `l2:highest`,
   HIGHEST_SYNCED_BLOCK: `synced:highest`,
   CONSISTENCY_CHECK: `consistency:checked`,
+  STATE_ROOT_CACHED: `staterootcached`,
+  STATE_ROOT_BATCH_CACHED: `batch:staterootcached`,
+  STATE_ROOT_CACHE_HEIGHT: `cached:highest`,
+  FRAUD_PROOF_WINDOW: `fraudproofwindow`,
 }
 
 interface Indexed {
@@ -372,6 +374,14 @@ export class TransportDB {
     return this.db.get<number>(TRANSPORT_DB_KEYS.HIGHEST_L2_BLOCK, 0)
   }
 
+  public async getFraudProofWindow(): Promise<number> {
+    return this.db.get<number>(TRANSPORT_DB_KEYS.FRAUD_PROOF_WINDOW, 0)
+  }
+
+  public async getStateRootCacheHeight(): Promise<number> {
+    return this.db.get<number>(TRANSPORT_DB_KEYS.STATE_ROOT_CACHE_HEIGHT, 0)
+  }
+
   public async getConsistencyCheckFlag(): Promise<boolean> {
     return this.db.get<boolean>(TRANSPORT_DB_KEYS.CONSISTENCY_CHECK, 0)
   }
@@ -401,6 +411,32 @@ export class TransportDB {
       },
     ])
   }
+
+  public async putStateRootCacheHeight(
+    block: number | BigNumber
+  ): Promise<void> {
+    return this.db.put<number>([
+      {
+        key: TRANSPORT_DB_KEYS.STATE_ROOT_CACHE_HEIGHT,
+        index: 0,
+        value: BigNumber.from(block).toNumber(),
+      },
+    ])
+  }
+
+  public async putFraudProofWindow(
+    window: number | BigNumber
+  ): Promise<void> {
+
+    return this.db.put<number>([
+      {
+        key: TRANSPORT_DB_KEYS.FRAUD_PROOF_WINDOW,
+        index: 0,
+        value: BigNumber.from(window).toNumber(),
+      },
+    ])
+  }
+
 
   public async putHighestL2BlockNumber(
     block: number | BigNumber

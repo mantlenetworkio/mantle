@@ -209,31 +209,17 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
           (await this.state.db.getHighestSyncedL1Block()) ||
           this.state.startingL1BlockNumber
         const currentL1Block = await this.state.l1RpcProvider.getBlockNumber()
+        const fraudProofWindow = await this.state.contracts.StateCommitmentChain.FRAUD_PROOF_WINDOW()
+        await this.state.db.putHighestL1BlockNumber(currentL1Block);
+        await this.state.db.putFraudProofWindow(fraudProofWindow);
+
         const targetL1Block = Math.min(
           highestSyncedL1Block + this.options.logsPerPollingInterval,
           currentL1Block - this.options.confirmations
         )
-        const noConfirmTargetL1Block = Math.min(
-          highestSyncedL1Block + this.options.logsPerPollingInterval,
-          // we will minus 1 to cover the reorg on layer1 mainet
-          currentL1Block - 1
-        )
-        await this.state.db.putHighestL1BlockNumber(currentL1Block);
 
         // We're already at the head, so no point in attempting to sync.
         if (highestSyncedL1Block === targetL1Block) {
-          //at the begining we are catching the block, and we will not enter
-          //into this code block.
-          //if confirmation == 0, we will not enter into this if-else.
-          if (highestSyncedL1Block < noConfirmTargetL1Block) {
-            await this._syncEvents(
-              'StateCommitmentChain',
-              'StateBatchAppended',
-              highestSyncedL1Block,
-              noConfirmTargetL1Block,
-              handleEventsStateCachedBatchAppended
-            )
-          }
           await sleep(this.options.pollingInterval)
           continue
         }
@@ -275,6 +261,27 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
         await this.state.db.setHighestSyncedL1Block(targetL1Block)
 
         this.l1IngestionMetrics.highestSyncedL1Block.set(targetL1Block)
+
+        // only when we are at head, we needn't sync the block and find the time to scan the cached event
+        // if confirmation equal 0, we needn't and willn't enter into this if-else
+        // because if targetl1block = currentblock,
+        // than staterootcacheheight = targetl1block = currentblock,
+        // noConfirmTargetL1Block = currentL1Block - 1
+        // stateRootCachedHeight can't < noConfirmTargetL1Block
+        if (targetL1Block === currentL1Block - this.options.confirmations) {
+          const stateRootCachedHeight = Math.max(await this.state.db.getStateRootCacheHeight(),targetL1Block);
+          const noConfirmTargetL1Block = currentL1Block - 1
+          if (stateRootCachedHeight < noConfirmTargetL1Block) {
+            await this._syncEvents(
+              'StateCommitmentChain',
+              'StateBatchAppended',
+              stateRootCachedHeight,
+              noConfirmTargetL1Block,
+              handleEventsStateCachedBatchAppended
+            )
+            await this.state.db.putStateRootCacheHeight(noConfirmTargetL1Block);
+          }
+        }
 
         if (
           currentL1Block - highestSyncedL1Block <

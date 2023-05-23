@@ -133,7 +133,7 @@ type RollupClient interface {
 	GetLatestTransaction(Backend) (*types.Transaction, error)
 	GetLatestTransactionIndex(Backend) (*uint64, error)
 	GetStateRoot(uint64, Backend) (*StateRoot, error)
-	GetStateRootResponse(uint64, Backend) (*types.TxStatusResponse, error)
+	GetTxStatusResponse(uint64, Backend) (*types.TxStatusResponse, error)
 	GetEthContext(uint64) (*EthContext, error)
 	GetLatestEthContext() (*EthContext, error)
 	GetLastConfirmedEnqueue() (*types.Transaction, error)
@@ -519,7 +519,7 @@ func (c *Client) GetStateRoot(index uint64, backend Backend) (*StateRoot, error)
 	return res.StateRoot, nil
 }
 
-func (c *Client) GetStateRootResponse(index uint64, backend Backend) (*types.TxStatusResponse, error) {
+func (c *Client) GetTxStatusResponse(index uint64, backend Backend) (*types.TxStatusResponse, error) {
 	str := strconv.FormatUint(index, 10)
 	var QueryParam string
 	if backend.String() == "da" {

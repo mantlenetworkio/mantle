@@ -1615,7 +1615,7 @@ func (s *SyncService) GetTxStatusByNumber(number uint64) (*types.TxStatusRespons
 	if index < 0 {
 		return nil, errors.New("index should bigger or equal than 0")
 	}
-	stateRsp, err := s.client.GetStateRootResponse(index, s.backend)
+	stateRsp, err := s.client.GetTxStatusResponse(index, s.backend)
 	if err != nil {
 		return nil, err
 	}

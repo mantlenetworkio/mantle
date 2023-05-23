@@ -740,6 +740,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       //can not listen the event from layer1.
       async (req): Promise<TxStatusResponse> => {
         const currentL1BlockNumber = await this.state.db.getHighestL1BlockNumber();
+        const fraudProofWindow = await this.state.db.getFraudProofWindow();
         const backend = req.query.backend || this.options.defaultBackend
         let stateRoots = null
         let batch = null
@@ -771,6 +772,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
               daBatchIndex:null,
               currentL1BlockNumber,
               datastore:null,
+              fraudProofWindow,
             }
           }else{
             // we query the data from cached
@@ -799,6 +801,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           currentL1BlockNumber,
           daBatchIndex:transaction.batchIndex,
           datastore,
+          fraudProofWindow,
         }
       }
     )

@@ -58,6 +58,15 @@ var (
 	txStatusPeriodOne   = "Rollup to layer1"
 	txStatusPeriodTwo   = "Finalized on layer1"
 	txStatusPeriodThree = "Challenge Period Passed"
+	l1FinalizeBlock     = int64(64)
+	// scc event db mean the status of dtl, reflect the connection of layer1 mainnet
+	// there may be many error that make dtl not get the event from the layer1,
+	//i.e: network connections, rpc error, layer1 bug, ...
+	// in the case, we simply use the time interval to judge it. If the recent block and
+	// the query block's interval is bigger than 1000second, we simply think it have met some error.
+	dtlStatusIntervalFlag = uint64(1000)
+	dtlEventDBRight       = "dtlEventDBRight"
+	dtlEventDBFalse       = "dtlEventDBFalse"
 )
 
 const (
@@ -1521,14 +1530,21 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
 	if err != nil {
+		cb := s.b.CurrentBlock().Time()
+		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
+		dtlEventDBStatus := dtlEventDBFalse
+		if b != nil && cb-b.Time() < dtlStatusIntervalFlag {
+			dtlEventDBStatus = dtlEventDBRight
+		}
 		fields := map[string]interface{}{
-			"blockHash":       blockHash,
-			"origin":          rpcTx.QueueOrigin,
-			"to":              rpcTx.To,
-			"from":            rpcTx.From,
-			"transactionHash": rpcTx.Hash,
-			"status":          hexutil.Uint(status),
-			"statusInfo":      txStatusPeriodZero,
+			"blockHash":        blockHash,
+			"origin":           rpcTx.QueueOrigin,
+			"to":               rpcTx.To,
+			"from":             rpcTx.From,
+			"transactionHash":  rpcTx.Hash,
+			"status":           hexutil.Uint(status),
+			"statusInfo":       txStatusPeriodZero,
+			"dtlEventDBStatus": dtlEventDBStatus,
 		}
 		return fields, nil
 	}
@@ -1545,15 +1561,16 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 			"sccBatchL1Number": hexutil.Uint64(txStatus.Batch.BlockNumber),
 			"datastoreId":      txStatus.Datastore.DataStoreId,
 			"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
+			"dtlEventDBStatus": dtlEventDBRight,
 		}
 		return fields, nil
 	}
 	var statusInfo string
-	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= 64 {
+	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= l1FinalizeBlock {
 		status = 2
 		statusInfo = txStatusPeriodTwo
 	}
-	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= (60*60*24*7)/12 {
+	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= txStatus.Fraudproofwindow {
 		status = 3
 		statusInfo = txStatusPeriodThree
 	}
@@ -1569,6 +1586,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 		"sccBatchL1Number": hexutil.Uint64(txStatus.Batch.BlockNumber),
 		"datastoreId":      txStatus.Datastore.DataStoreId,
 		"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
+		"dtlEventDBStatus": dtlEventDBRight,
 	}
 
 	return fields, nil
@@ -1586,14 +1604,21 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
 	if err != nil {
+		cb := s.b.CurrentBlock().Time()
+		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
+		dtlEventDBStatus := dtlEventDBFalse
+		if b != nil && cb-b.Time() < dtlStatusIntervalFlag {
+			dtlEventDBStatus = dtlEventDBRight
+		}
 		fields := map[string]interface{}{
-			"blockHash":       blockHash,
-			"origin":          rpcTx.QueueOrigin,
-			"to":              rpcTx.To,
-			"from":            rpcTx.From,
-			"transactionHash": rpcTx.Hash,
-			"status":          hexutil.Uint(status),
-			"statusInfo":      txStatusPeriodZero,
+			"blockHash":        blockHash,
+			"origin":           rpcTx.QueueOrigin,
+			"to":               rpcTx.To,
+			"from":             rpcTx.From,
+			"transactionHash":  rpcTx.Hash,
+			"status":           hexutil.Uint(status),
+			"statusInfo":       txStatusPeriodZero,
+			"dtlEventDBStatus": dtlEventDBStatus,
 		}
 		return fields, nil
 	}
@@ -1610,15 +1635,16 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 			"sccBatchL1Number": hexutil.Uint64(txStatus.Batch.BlockNumber),
 			"datastoreId":      txStatus.Datastore.DataStoreId,
 			"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
+			"dtlEventDBStatus": dtlEventDBRight,
 		}
 		return fields, nil
 	}
 	var statusInfo string
-	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= 64 {
+	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= l1FinalizeBlock {
 		status = 2
 		statusInfo = txStatusPeriodTwo
 	}
-	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= (60*60*24*7)/12 {
+	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= txStatus.Fraudproofwindow {
 		status = 3
 		statusInfo = txStatusPeriodThree
 	}
@@ -1641,6 +1667,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 		"daInitTxHash":      txStatus.Datastore.InitTxHash,
 		"daConfirmTxHash":   txStatus.Datastore.ConfirmTxHash,
 		"daSignatoryRecord": txStatus.Datastore.SignatoryRecord,
+		"dtlEventDBStatus":  dtlEventDBRight,
 	}
 	return fields, nil
 }
