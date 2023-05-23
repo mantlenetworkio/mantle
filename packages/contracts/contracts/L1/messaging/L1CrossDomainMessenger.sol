@@ -112,6 +112,10 @@ contract L1CrossDomainMessenger is
         pauseOwner = _pauseOwner;
     }
 
+    function getPauseOwner() public view returns (address) {
+        return pauseOwner;
+    }
+
     function pauseByPOwner() external {
         require(
             pauseOwner == msg.sender,

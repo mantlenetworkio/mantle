@@ -37,11 +37,12 @@ type TxStatusDetail struct {
 
 // StateRootResponse represents the response from the remote server when querying stateroot
 type TxStatusResponse struct {
-	StateRoot       *StateRoot `json:"stateRoots"`
-	Batch           *Batch     `json:"batch"`
-	CurrentL1Height int64      `json:"currentL1BlockNumber"`
-	DaBatchIndex    int64      `json:"daBatchIndex"`
-	Datastore       *Datastore `json:"datastore"`
+	StateRoot        *StateRoot `json:"stateRoots"`
+	Batch            *Batch     `json:"batch"`
+	CurrentL1Height  int64      `json:"currentL1BlockNumber"`
+	DaBatchIndex     int64      `json:"daBatchIndex"`
+	Datastore        *Datastore `json:"datastore"`
+	Fraudproofwindow int64      `json:"fraudproofwindow"`
 }
 
 // stateroot represents the return result of the remote server.
