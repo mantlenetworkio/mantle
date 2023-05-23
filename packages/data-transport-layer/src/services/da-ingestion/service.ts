@@ -187,8 +187,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
 
         // batch transaction list
         await this._storeBatchTransactionsByDSId(
-          dataStoreRollupId['data_store_id'],
-          index
+          dataStoreRollupId['data_store_id']
         )
 
         // put rollup store info to db
