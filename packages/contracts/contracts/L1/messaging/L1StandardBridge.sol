@@ -21,7 +21,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
  * and listening to it for newly finalized withdrawals.
  *
  */
-contract L1StandardBridge is Initializable, IL1StandardBridge, CrossDomainEnabled {
+contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
     using SafeERC20 for IERC20;
 
     /********************************
@@ -40,7 +40,6 @@ contract L1StandardBridge is Initializable, IL1StandardBridge, CrossDomainEnable
 
     // This contract lives behind a proxy, so the constructor parameters will go unused.
     constructor() CrossDomainEnabled(address(0)) {
-        _disableInitializers();
     }
 
     /******************
