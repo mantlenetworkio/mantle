@@ -32,11 +32,11 @@ export const handleEventsStateCachedBatchAppended: EventHandlerSet<
   },
   parseEvent: (event, extraData) => {
     const stateRoots = getContractFactory(
-      'StateCommitmentChain'
+      'Rollup'
     ).interface.decodeFunctionData(
-      'appendStateBatch',
+      'createAssertionWithStateBatch',
       extraData.l1TransactionData
-    )[0]
+    )[2]
 
     const stateRootEntries: StateRootEntry[] = []
     for (let i = 0; i < stateRoots.length; i++) {
