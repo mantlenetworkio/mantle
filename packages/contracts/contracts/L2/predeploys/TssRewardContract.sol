@@ -111,7 +111,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     }
 
     function setTokenAddr(address _token) public onlyOwner {
-        rewardToken = _token;
+        rewardToken = IERC20(_token);
     }
 
     function querySendAmountPerSecond() public view returns (uint256){
