@@ -36,6 +36,7 @@ describe('TssGroupManager', () => {
     const provider = waffle.provider;
     let myWallet = new Wallet("a1724a3be3134c9e64d9243428926088c1f4a236e777c19e3c7a974e0da6dba3", provider)
     let pubKey = "0x" + myWallet.publicKey.substring(4)
+    console.log("pubKey: ", pubKey)
     let toAddress = await tssGroup.publicKeyToAddress(pubKey)
 
     expect(toAddress).to.eq(myWallet.address)
