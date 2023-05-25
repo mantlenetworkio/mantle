@@ -3,6 +3,7 @@ package validator
 import (
 	"bytes"
 	"math/big"
+	"os"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -12,6 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
+	"github.com/mantlenetworkio/mantle/fraud-proof/metrics"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
@@ -60,7 +62,7 @@ func New(eth services.Backend, proofBackend proof.Backend, cfg *services.Config,
 
 // This goroutine validates the assertion posted to L1 Rollup, advances
 // stake if validated, or challenges if not
-func (v *Validator) validationLoop(genesisRoot common.Hash) {
+func (v *Validator) validationLoop() {
 	defer v.Wg.Done()
 
 	db := v.ProofBackend.ChainDb()
@@ -100,16 +102,11 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 		} else {
 			select {
 			case ev := <-assertionEventCh:
+				metrics.Metrics.MustGetGaugeVec(metrics.NameIndex.Name()).
+					WithLabelValues(metrics.NameIndex.LabelAssertionIndex()).Set(float64(ev.AssertionID.Uint64()))
+				metrics.Metrics.MustGetGaugeVec(metrics.NameSize.Name()).
+					WithLabelValues(metrics.NameSize.LabelAssertionSize()).Set(float64(ev.InboxSize.Uint64()))
 				// only one verifier and check it
-				// re-stake check
-				if !stakerStatus.IsStaked {
-					stakeOpts := v.Rollup.TransactOpts
-					_, err = v.Rollup.Contract.Stake(&stakeOpts, new(big.Int).SetUint64(v.Config.StakeAmount), stakeOpts.From)
-					if err != nil {
-						log.Error("Failed to stake", "from", stakeOpts.From.String(), "amount", v.Config.StakeAmount, "err", err)
-						continue
-					}
-				}
 				// check challenge status
 				if !bytes.Equal(stakerStatus.CurrentChallenge.Bytes(), common.BigToAddress(common.Big0).Bytes()) {
 					continue
@@ -170,12 +167,19 @@ func (v *Validator) validationLoop(genesisRoot common.Hash) {
 						// Validation succeeded, confirm assertion and advance stake
 						log.Info("Validator advance stake into assertion", "ID", ev.AssertionID, "now", startID)
 						// todo ：During frequent interactions, it is necessary to check the results of the previous interaction
-						_, err = v.Rollup.AdvanceStake(new(big.Int).SetUint64(startID + 1))
+						tx, err := v.Rollup.AdvanceStake(new(big.Int).SetUint64(startID + 1))
 						if err != nil {
 							log.Error("UNHANDELED: Can't advance stake, validator state corrupted", "err", err)
 							break
 						}
+						metrics.Metrics.MustGetGaugeVec(metrics.NameFee.Name()).
+							WithLabelValues(metrics.NameFee.LabelValidatorVerifyFee()).Set(float64(tx.Cost().Uint64()))
+						balance, _ := v.BaseService.L1.BalanceAt(v.Ctx, v.Rollup.TransactOpts.From, nil)
+						metrics.Metrics.MustGetGaugeVec(metrics.NameBalance.Name()).
+							WithLabelValues(metrics.NameBalance.LabelValidatorBalance()).Set(float64(balance.Uint64()))
 					}
+					metrics.Metrics.MustGetGaugeVec(metrics.NameIndex.Name()).
+						WithLabelValues(metrics.NameIndex.LabelVerifiedIndex()).Set(float64(checkID))
 				}
 			case <-v.Ctx.Done():
 				return
@@ -350,6 +354,8 @@ func (v *Validator) challengeLoop() {
 			select {
 			case ctx = <-v.challengeCh:
 				log.Info("Validator get challenge context, create challenge assertion")
+				metrics.Metrics.MustGetCounterVec(metrics.NameAlert.Name()).
+					WithLabelValues(metrics.NameAlert.LabelAlertChallengeStart()).Inc()
 
 				_, err = v.Rollup.CreateAssertion(
 					ctx.OurAssertion.VmHash,
@@ -463,11 +469,24 @@ func (v *Validator) challengeLoop() {
 }
 
 func (v *Validator) Start() error {
-	genesis := v.BaseService.Start(true, true)
+	//genesis := v.BaseService.Start(true, true)
 
 	v.Wg.Add(2)
-	go v.validationLoop(genesis.Root())
+	go v.validationLoop()
 	go v.challengeLoop()
+
+	if len(os.Getenv("FP_METRICS_SERVER_ENABLE")) > 0 {
+		port, ok := os.LookupEnv("FP_METRICS_PORT")
+		if !ok {
+			port = "9190"
+		}
+		host, ok := os.LookupEnv("FP_METRICS_HOSTNAME")
+		if !ok {
+			port = "0.0.0.0"
+		}
+		go metrics.Metrics.Start("fp-validator", host, port)
+	}
+
 	log.Info("Validator started")
 	return nil
 }
