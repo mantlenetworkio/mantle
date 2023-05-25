@@ -266,7 +266,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     function setClaimer(address _operator, address _claimer)
     external
     virtual
-    onlyFromCrossDomainAccount(sccAddress)
+    onlyFromCrossDomainAccount(stakeSlashAddress)
     {
         claimers[_claimer] = _operator;
         operators[_operator] = _claimer;
