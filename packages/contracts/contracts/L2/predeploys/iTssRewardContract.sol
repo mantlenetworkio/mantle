@@ -85,4 +85,14 @@ interface ITssRewardContract {
      */
     function queryClaimTime() external returns (uint256);
 
+    function setSccAddr(address sccAddr) external;
+
+    function setStakeSlashAddr(address ssAddr) external;
+
+    function setSendAmountPerYear(uint256) external;
+
+    function setWaitingTime(uint256) external;
+
+    function setTokenAddr(address _token) external;
+
 }

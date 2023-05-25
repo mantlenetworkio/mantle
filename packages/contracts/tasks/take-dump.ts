@@ -120,6 +120,14 @@ task('take-dump').setAction(async (args, hre) => {
           names.managed.contracts.StateCommitmentChain
         )
       ).address,
+      waitingTime: 86400,
+      token: '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000',
+      ssAddr: (
+        await getContractFromArtifact(
+          hre,
+          names.managed.contracts.Proxy__TSS_StakingSlashing
+        )
+      ).address,
     },
   }
 

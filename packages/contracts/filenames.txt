@@ -24,6 +24,7 @@ CanonicalTransactionChain
 TssGroupManager
 L1StandardBridge_for_verification_only
 TssDelegationManager
+EmptyContract
 ChugSplashDictator
 Proxy__BVM_EigenDataLayrChain
 Proxy__BVM_L1CrossDomainMessenger
