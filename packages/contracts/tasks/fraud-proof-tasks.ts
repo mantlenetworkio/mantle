@@ -16,7 +16,7 @@ task('setAddress')
   .addParam('address', 'contract address')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      process.env.CONTRACTS_RPC_URL
     )
     const addressManagerKey = process.env.BVM_ADDRESS_MANAGER_KEY
     const managerWallet = new ethers.Wallet(addressManagerKey, provider)
@@ -45,7 +45,7 @@ task('whiteListInit')
   .addParam('rollup', 'Rollup contract address')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      process.env.CONTRACTS_RPC_URL
     )
     const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
     const proposerAddr = process.env.BVM_ROLLUPER_ADDRESS
@@ -73,7 +73,7 @@ task('rollupStake')
   .addParam('amount', 'amount to stake', '0.1')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      process.env.CONTRACTS_RPC_URL
     )
     const bitToken = process.env.L1_BIT_ADDRESS
     const verifier1Key = process.env.BVM_VERIFIER1_KEY
@@ -104,7 +104,7 @@ task(`deployVerifier`)
   .addParam('verifier', 'verifier entry address')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      process.env.CONTRACTS_RPC_URL
     )
     const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
     const entryOwner = new ethers.Wallet(deployerKey, provider)
@@ -330,6 +330,7 @@ task(`genOsp`)
   .addParam('hash', 'the transaction hash to prove')
   .addParam('step', 'the step to prove')
   .setAction(async (taskArgs) => {
+    // TODO change hardcode url to env variable
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:8545'
     )
@@ -350,7 +351,7 @@ task(`verifyOsp`)
   // .addParam('addr', 'VerifierTestDriver contract address')
   .setAction(async () => {
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      process.env.CONTRACTS_RPC_URL
     )
     const ownerWallet = new ethers.Wallet(
       '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
