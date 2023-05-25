@@ -3,10 +3,10 @@ ChainStorageContainer-SCC-batches
 Proxy__AssertionMap
 BVM_EigenDataLayrFee
 StateCommitmentChain
-TestBitToken
 ChainStorageContainer-CTC-batches
 Proxy__BVM_L1StandardBridge
 Rollup
+TestMantleToken
 TssStakingSlashing
 BVM_L1CrossDomainMessenger
 Proxy__TSS_GroupManager
