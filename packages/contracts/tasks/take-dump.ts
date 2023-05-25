@@ -121,8 +121,8 @@ task('take-dump').setAction(async (args, hre) => {
         )
       ).address,
       waitingTime: 86400,
-      token: '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000',
-      ssAddr: (
+      rewardToken: '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000',
+      stakeSlashAddress: (
         await getContractFromArtifact(
           hre,
           names.managed.contracts.Proxy__TSS_StakingSlashing
