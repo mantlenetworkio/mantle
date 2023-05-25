@@ -334,7 +334,9 @@ const deployFn: DeployFunction = async (hre) => {
       gasLimit: 2_000_000,
     })
   console.log('update Tss Delegation Proxy__TssDelegation success')
-  await delegationProxy.connect(deployerWallet).changeAdmin(owner)
+  await delegationProxy.connect(deployerWallet).changeAdmin(owner, {
+    gasLimit: 2_000_000,
+  })
   console.log('update Tss Delegation Proxy__TssDelegation admin success')
 
   //update Delegation Slasher proxy
@@ -353,7 +355,9 @@ const deployFn: DeployFunction = async (hre) => {
   console.log(
     'update Tss Delegation Slasher Proxy_TssDelegationSlasher success'
   )
-  await delegationSlasherProxy.connect(deployerWallet).changeAdmin(owner)
+  await delegationSlasherProxy.connect(deployerWallet).changeAdmin(owner, {
+    gasLimit: 2_000_000,
+  })
   console.log(
     'update Tss Delegation Slasher Proxy_TssDelegationSlasher admin success'
   )
@@ -379,7 +383,9 @@ const deployFn: DeployFunction = async (hre) => {
   console.log(
     'update Tss Delegation manager Proxy_TssDelegationManager success'
   )
-  await delegationManagerProxy.connect(deployerWallet).changeAdmin(owner)
+  await delegationManagerProxy.connect(deployerWallet).changeAdmin(owner, {
+    gasLimit: 2_000_000,
+  })
   console.log(
     'update Tss Delegation manager Proxy_TssDelegationManager admin success'
   )
