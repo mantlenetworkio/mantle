@@ -22,7 +22,9 @@ const config = {
   l1BitAddress: process.env.L1_BIT_ADDRESS || '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
   bvmTssRewardContractOwner: process.env.TssRewardContractOwner || '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
   dataManagerAddress: process.env.DATA_MANAGER_ADDRESS || '0xE5C3D068e2160c67e09afaCEff3E765e30163Eb8',
-  bvmEigenSequencerAddress: process.env.BVM_EIGENDA_SEQUENCER_ADDRESS || '0x70997970c51812dc3a010c7d01b50e0d17dc79c8'
+  bvmEigenSequencerAddress: process.env.BVM_EIGENDA_SEQUENCER_ADDRESS || '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
+  contractsDeployerKey: process.env.CONTRACTS_DEPLOYER_KEY,
+  contractsRpcUrl: process.env.CONTRACTS_RPC_URL,
 }
 
 export default config

@@ -27,6 +27,7 @@ export const names = {
         Proxy__FraudProofDelegationSlasher: 'Proxy__FraudProofDelegationSlasher',
       },
       tss: {
+        EmptyContract: 'EmptyContract',
         TssDelegation: 'TssDelegation',
         TssDelegationManager: 'TssDelegationManager',
         TssDelegationSlasher: 'TssDelegationSlasher',

@@ -8,87 +8,41 @@ import {
   deployAndVerifyAndThen,
   getContractFromArtifact,
 } from '../src/deploy-utils'
+import { getContractFactory } from '../src'
 
 const deployFn: DeployFunction = async (hre) => {
   const { deployer } = await hre.getNamedAccounts()
 
   const owner = hre.deployConfig.bvmAddressManagerOwner
   const l1BitAddress = hre.deployConfig.l1BitAddress
-  let DelegationProxyAddress = "0xe6cd9e7b620964bECd42c7Ad41e56724f515E284"
-  let DelegationManagerProxyAddress = "0xE6A251EefaEE70E8645FBAdf21E9B1246e07C374"
-  let DelegationSlasherProxyAddress = "0xD007896d9E3e4514a1f1216A91d33a72e15bf5C0"
-  let StakingSlashingProxyAddress = "0x9c28c8D298ae7Ebf8daA6FA54e1F2909313dB158"
-  let TssGroupManagerProxyAddress = "0xF48398a3D94D57AE1406B343D2a7C541336Ea2c2"
 
-  // deploy Delegation impl
+  //deploy EmptyContract
   await deployAndVerifyAndThen({
     hre,
-    name: names.managed.delegation.tss.TssDelegation,
-    contract: 'TssDelegation',
-    args: [DelegationManagerProxyAddress],
+    name: names.managed.delegation.tss.EmptyContract,
+    contract: 'EmptyContract',
+    args: [],
   })
-  const Impl__TssDelegation = await getContractFromArtifact(
+  const emptyContract = await getContractFromArtifact(
     hre,
-    names.managed.delegation.tss.TssDelegation,
+    names.managed.delegation.tss.EmptyContract,
     {
-      iface: 'TssDelegation',
+      iface: 'EmptyContract',
       signerOrProvider: deployer,
     }
   )
-  console.log('TssDelegation Implementation Address', Impl__TssDelegation.address)
-  console.log('deploy Tss Delegation success')
+  console.log('EmptyContract Address', emptyContract.address)
+  console.log('deploy EmptyContract success')
 
-  // deploy DelegationManager impl
-  await deployAndVerifyAndThen({
-    hre,
-    name: names.managed.delegation.tss.TssDelegationManager,
-    contract: 'TssDelegationManager',
-    args: [DelegationProxyAddress, DelegationSlasherProxyAddress],
-  })
-  const Impl__TssDelegationManager = await getContractFromArtifact(
-    hre,
-    names.managed.delegation.tss.TssDelegationManager,
-    {
-      iface: 'TssDelegationManager',
-      signerOrProvider: deployer,
-    }
-  )
-  console.log('TssDelegationManager Implementation Address', Impl__TssDelegationManager.address)
-  console.log('deploy Tss DelegationManager success')
-
-  // deploy DelegationSlasher impl
-  await deployAndVerifyAndThen({
-    hre,
-    name: names.managed.delegation.tss.TssDelegationSlasher,
-    contract: 'TssDelegationSlasher',
-    args: [DelegationManagerProxyAddress, DelegationProxyAddress],
-  })
-  const Impl__TssDelegationSlasher = await getContractFromArtifact(
-    hre,
-    names.managed.delegation.tss.TssDelegationSlasher,
-    {
-      iface: 'TssDelegationSlasher',
-      signerOrProvider: deployer,
-    }
-  )
-  console.log('Tss DelegationSlasher Implementation Address', Impl__TssDelegationSlasher.address)
-  console.log('deploy Tss DelegationSlasher success')
-
-  // deploy Delegation proxy
-  let callData = Impl__TssDelegation.interface.encodeFunctionData(
-    'initializeT',
-    [StakingSlashingProxyAddress,
-      deployer,]
-    )
-
+  //deploy Delegation proxy with empty contract
   await deployAndVerifyAndThen({
     hre,
     name: names.managed.delegation.tss.Proxy__TssDelegation,
     contract: 'TransparentUpgradeableProxy',
     iface: 'TssDelegation',
-    args: [Impl__TssDelegation.address, owner, callData],
+    args: [emptyContract.address, deployer, []],
   })
-  const Proxy__TssDelegation = await getContractFromArtifact(
+  const Proxy_TssDelegation = await getContractFromArtifact(
     hre,
     names.managed.delegation.tss.Proxy__TssDelegation,
     {
@@ -96,49 +50,18 @@ const deployFn: DeployFunction = async (hre) => {
       signerOrProvider: deployer,
     }
   )
-  console.log('Proxy__TssDelegation Address', Proxy__TssDelegation.address)
+  console.log('Proxy__TssDelegation Address', Proxy_TssDelegation.address)
   console.log('deploy Tss Delegation Proxy__TssDelegation success')
 
-  callData = Impl__TssDelegationSlasher.interface.encodeFunctionData(
-    'initialize',
-    [deployer]
-  )
-  await deployAndVerifyAndThen({
-    hre,
-    name: names.managed.delegation.tss.Proxy__TssDelegationSlasher,
-    contract: 'TransparentUpgradeableProxy',
-    iface: 'TssDelegationSlasher',
-    args: [Impl__TssDelegationSlasher.address, owner, callData],
-  })
-
-  const Proxy__TssDelegationSlasher = await getContractFromArtifact(
-    hre,
-    names.managed.delegation.tss.Proxy__TssDelegationSlasher,
-    {
-      iface: 'TssDelegationSlasher',
-      signerOrProvider: deployer,
-    }
-  )
-  console.log('Proxy__TssDelegationSlasher Address', Proxy__TssDelegationSlasher.address)
-  console.log('deploy Tss DelegationSlasher Proxy success')
-
-  callData = Impl__TssDelegationManager.interface.encodeFunctionData(
-    'initializeT',
-    [StakingSlashingProxyAddress,
-      TssGroupManagerProxyAddress,
-      '10000',
-      deployer,
-    ]
-  )
+  //deploy DelegationManager proxy with empty contract
   await deployAndVerifyAndThen({
     hre,
     name: names.managed.delegation.tss.Proxy__TssDelegationManager,
     contract: 'TransparentUpgradeableProxy',
     iface: 'TssDelegationManager',
-    args: [Impl__TssDelegationManager.address, owner, callData],
+    args: [emptyContract.address, deployer, []],
   })
-
-  const Proxy__TssDelegationManager = await getContractFromArtifact(
+  const Proxy_TssDelegationManager = await getContractFromArtifact(
     hre,
     names.managed.delegation.tss.Proxy__TssDelegationManager,
     {
@@ -146,8 +69,37 @@ const deployFn: DeployFunction = async (hre) => {
       signerOrProvider: deployer,
     }
   )
-  console.log('Proxy__TssDelegationManager Address', Proxy__TssDelegationManager.address)
-  console.log('deploy Tss DelegationManager Proxy success')
+  console.log(
+    'Proxy__TssDelegationManager Address',
+    Proxy_TssDelegationManager.address
+  )
+  console.log(
+    'deploy Tss Delegation Manager Proxy__TssDelegationManager success'
+  )
+
+  //depoly DelegationSlasher proxy with empty contract
+  await deployAndVerifyAndThen({
+    hre,
+    name: names.managed.delegation.tss.Proxy__TssDelegationSlasher,
+    contract: 'TransparentUpgradeableProxy',
+    iface: 'TssDelegationSlasher',
+    args: [emptyContract.address, deployer, []],
+  })
+  const Proxy_TssDelegationSlasher = await getContractFromArtifact(
+    hre,
+    names.managed.delegation.tss.Proxy__TssDelegationSlasher,
+    {
+      iface: 'TssDelegationSlasher',
+      signerOrProvider: deployer,
+    }
+  )
+  console.log(
+    'Proxy_TssDelegationSlasher Address',
+    Proxy_TssDelegationSlasher.address
+  )
+  console.log(
+    'deploy Tss Delegation Manager Proxy_TssDelegationSlasher success'
+  )
 
   // deploy impl
   await deployAndVerifyAndThen({
@@ -187,7 +139,7 @@ const deployFn: DeployFunction = async (hre) => {
 
   let args: unknown[]
   args = []
-  callData = Impl_TSS_GroupManager.interface.encodeFunctionData(
+  let callData = Impl_TSS_GroupManager.interface.encodeFunctionData(
     'initialize',
     args
   )
@@ -198,7 +150,6 @@ const deployFn: DeployFunction = async (hre) => {
     iface: 'TssGroupManager',
     args: [Impl_TSS_GroupManager.address, owner, callData],
   })
-  console.log('deploy tss group manager proxy success')
 
   const Proxy__TSS_GroupManager = await getContractFromArtifact(
     hre,
@@ -208,6 +159,11 @@ const deployFn: DeployFunction = async (hre) => {
       signerOrProvider: deployer,
     }
   )
+  console.log(
+    'Proxy__TSS_GroupManager Address',
+    Proxy__TSS_GroupManager.address
+  )
+  console.log('deploy tss group manager proxy success')
 
   const Proxy__BVM_L1CrossDomainMessenger = await getContractFromArtifact(
     hre,
@@ -217,8 +173,8 @@ const deployFn: DeployFunction = async (hre) => {
   args = [
     l1BitAddress,
     Proxy__TSS_GroupManager.address,
-    Proxy__TssDelegationManager.address,
-    Proxy__TssDelegation.address,
+    Proxy_TssDelegationManager.address,
+    Proxy_TssDelegation.address,
     Proxy__BVM_L1CrossDomainMessenger.address,
     owner,
   ]
@@ -273,30 +229,160 @@ const deployFn: DeployFunction = async (hre) => {
         5000,
         100
       )
-
-      // await contract.transferOwnership(owner)
-
-      // console.log(`Checking tss staking slashing contract owner was correctly set...`)
-      // await awaitCondition(
-      //     async () => {
-      //         return hexStringEquals(await contract.connect(Impl_TSS_GroupManager.signer.provider).owner({ from: ethers.constants.AddressZero }), owner)
-      //     },
-      //     5000,
-      //     100
-      // )
-
-      // await Proxy__TSS_GroupManager.transferOwnership(owner)
-      // console.log(`Checking tss group contract manager owner was correctly set...`)
-      // await awaitCondition(
-      //     async () => {
-      //         return hexStringEquals(await contract.connect(Impl_TSS_GroupManager.signer.provider).owner({ from: ethers.constants.AddressZero }), owner)
-      //     },
-      //     5000,
-      //     100
-      // )
     },
   })
+
+  const Proxy__TSS_StakingSlashing = await getContractFromArtifact(
+    hre,
+    names.managed.contracts.Proxy__TSS_StakingSlashing,
+    {
+      iface: 'TssStakingSlashing',
+      signerOrProvider: deployer,
+    }
+  )
+  console.log(
+    'Proxy__TSS_StakingSlashing Address',
+    Proxy__TSS_StakingSlashing.address
+  )
   console.log('deploy tss staking slashing proxy success')
+
+  // deploy Delegation impl
+  await deployAndVerifyAndThen({
+    hre,
+    name: names.managed.delegation.tss.TssDelegation,
+    contract: 'TssDelegation',
+    args: [Proxy_TssDelegationManager.address],
+  })
+  const Impl__TssDelegation = await getContractFromArtifact(
+    hre,
+    names.managed.delegation.tss.TssDelegation,
+    {
+      iface: 'TssDelegation',
+      signerOrProvider: deployer,
+    }
+  )
+  console.log(
+    'TssDelegation Implementation Address',
+    Impl__TssDelegation.address
+  )
+  console.log('deploy Tss Delegation success')
+
+  // deploy DelegationManager impl
+  await deployAndVerifyAndThen({
+    hre,
+    name: names.managed.delegation.tss.TssDelegationManager,
+    contract: 'TssDelegationManager',
+    args: [Proxy_TssDelegation.address, Proxy_TssDelegationSlasher.address],
+  })
+  const Impl__TssDelegationManager = await getContractFromArtifact(
+    hre,
+    names.managed.delegation.tss.TssDelegationManager,
+    {
+      iface: 'TssDelegationManager',
+      signerOrProvider: deployer,
+    }
+  )
+  console.log(
+    'TssDelegationManager Implementation Address',
+    Impl__TssDelegationManager.address
+  )
+  console.log('deploy Tss DelegationManager success')
+
+  // deploy DelegationSlasher impl
+  await deployAndVerifyAndThen({
+    hre,
+    name: names.managed.delegation.tss.TssDelegationSlasher,
+    contract: 'TssDelegationSlasher',
+    args: [Proxy_TssDelegationManager.address, Proxy_TssDelegation.address],
+  })
+  const Impl__TssDelegationSlasher = await getContractFromArtifact(
+    hre,
+    names.managed.delegation.tss.TssDelegationSlasher,
+    {
+      iface: 'TssDelegationSlasher',
+      signerOrProvider: deployer,
+    }
+  )
+  console.log(
+    'Tss DelegationSlasher Implementation Address',
+    Impl__TssDelegationSlasher.address
+  )
+  console.log('deploy Tss DelegationSlasher success')
+
+  // const from = deployer
+  const provider = new ethers.providers.JsonRpcBatchProvider(
+    hre.deployConfig.contractsRpcUrl
+  )
+  const deployerWallet = new ethers.Wallet(
+    hre.deployConfig.contractsDeployerKey,
+    provider
+  )
+  console.log('deploy privete key', hre.deployConfig.contractsDeployerKey)
+  console.log('privder', provider)
+
+  // update Delegation proxy
+  const delegationProxy = getContractFactory(
+    'TransparentUpgradeableProxy'
+  ).attach(Proxy_TssDelegation.address)
+  callData = Impl__TssDelegation.interface.encodeFunctionData('initializeT', [
+    Proxy__TSS_StakingSlashing.address,
+    deployer,
+  ])
+  await delegationProxy
+    .connect(deployerWallet)
+    .upgradeToAndCall(Impl__TssDelegation.address, callData, {
+      gasLimit: 2_000_000,
+    })
+  console.log('update Tss Delegation Proxy__TssDelegation success')
+  await delegationProxy.connect(deployerWallet).changeAdmin(owner)
+  console.log('update Tss Delegation Proxy__TssDelegation admin success')
+
+  //update Delegation Slasher proxy
+  const delegationSlasherProxy = getContractFactory(
+    'TransparentUpgradeableProxy'
+  ).attach(Proxy_TssDelegationSlasher.address)
+  callData = Impl__TssDelegationSlasher.interface.encodeFunctionData(
+    'initialize',
+    [deployer]
+  )
+  await delegationSlasherProxy
+    .connect(deployerWallet)
+    .upgradeToAndCall(Impl__TssDelegationSlasher.address, callData, {
+      gasLimit: 2_000_000,
+    })
+  console.log(
+    'update Tss Delegation Slasher Proxy_TssDelegationSlasher success'
+  )
+  await delegationSlasherProxy.connect(deployerWallet).changeAdmin(owner)
+  console.log(
+    'update Tss Delegation Slasher Proxy_TssDelegationSlasher admin success'
+  )
+
+  //update delegation manager proxy
+  const delegationManagerProxy = getContractFactory(
+    'TransparentUpgradeableProxy'
+  ).attach(Proxy_TssDelegationManager.address)
+  callData = Impl__TssDelegationManager.interface.encodeFunctionData(
+    'initializeT',
+    [
+      Proxy__TSS_StakingSlashing.address,
+      Proxy__TSS_GroupManager.address,
+      '10000',
+      deployer,
+    ]
+  )
+  await delegationManagerProxy
+    .connect(deployerWallet)
+    .upgradeToAndCall(Impl__TssDelegationManager.address, callData, {
+      gasLimit: 2_000_000,
+    })
+  console.log(
+    'update Tss Delegation manager Proxy_TssDelegationManager success'
+  )
+  await delegationManagerProxy.connect(deployerWallet).changeAdmin(owner)
+  console.log(
+    'update Tss Delegation manager Proxy_TssDelegationManager admin success'
+  )
 }
 
 // This is kept during an upgrade. So no upgrade tag.

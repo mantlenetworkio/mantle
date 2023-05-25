@@ -46,10 +46,11 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     mapping(address => uint256) public claimAmout;
     using SafeERC20 for IERC20;
     IERC20 public rewardToken;
+    address public stakeSlashAddress;
 
 
     // set call address
-    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress,address _l2CrossDomainMessenger, address _sccAddress, uint256 _waitingTime, address _token)
+    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress,address _l2CrossDomainMessenger, address _sccAddress, uint256 _waitingTime, address _token, address _ssAddr)
     Ownable() CrossDomainEnabled(_l2CrossDomainMessenger)
     {
         transferOwnership(_owner);
@@ -59,6 +60,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
         sccAddress = _sccAddress;
         waitingTime = _waitingTime;
         rewardToken = IERC20(_token);
+        stakeSlashAddress = _sccAddress;
     }
 
     // slither-disable-next-line locked-ether
@@ -98,6 +100,18 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
 
     function setWaitingTime(uint256 _waitingTime) public onlyOwner {
         waitingTime = _waitingTime;
+    }
+
+    function setSccAddr(address _sccAddress) public onlyOwner {
+        sccAddress = _sccAddress;
+    }
+
+    function setStakeSlashAddr(address _ssAddre) public onlyOwner {
+        stakeSlashAddress = _ssAddre;
+    }
+
+    function setTokenAddr(address _token) public onlyOwner {
+        rewardToken = _token;
     }
 
     function querySendAmountPerSecond() public view returns (uint256){
