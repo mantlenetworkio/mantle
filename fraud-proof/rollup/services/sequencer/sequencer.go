@@ -153,9 +153,10 @@ func (s *Sequencer) confirmationLoop() {
 					challengeAssertions[ev.AssertionID.Uint64()] = true
 				}
 			case header := <-headCh:
-				balance, _ := s.BaseService.L1.BalanceAt(s.Ctx, s.TransactOpts.From, nil)
-				metrics.Metrics.MustGetGaugeVec(metrics.NameBalance.Name()).
-					WithLabelValues(metrics.NameBalance.LabelProposerBalance()).Set(float64(balance.Uint64()))
+				balance, err := s.BaseService.L1.BalanceAt(s.Ctx, s.TransactOpts.From, nil)
+				if err == nil {
+					metrics.Metrics.MustGetGaugeVec(metrics.NameBalance.Name()).WithLabelValues(metrics.NameBalance.LabelProposerBalance()).Set(float64(balance.Uint64()))
+				}
 				// todo : optimization the check with block height
 				// Get confirm block header
 				if s.confirmations != 0 {
@@ -461,9 +462,10 @@ func (s *Sequencer) challengeLoop() {
 					continue
 				}
 			case <-headCh:
-				balance, _ := s.BaseService.L1.BalanceAt(s.Ctx, s.TransactOpts.From, nil)
-				metrics.Metrics.MustGetGaugeVec(metrics.NameBalance.Name()).
-					WithLabelValues(metrics.NameBalance.LabelProposerBalance()).Set(float64(balance.Uint64()))
+				balance, err := s.BaseService.L1.BalanceAt(s.Ctx, s.TransactOpts.From, nil)
+				if err == nil {
+					metrics.Metrics.MustGetGaugeVec(metrics.NameBalance.Name()).WithLabelValues(metrics.NameBalance.LabelProposerBalance()).Set(float64(balance.Uint64()))
+				}
 				continue // consume channel values
 			case <-s.Ctx.Done():
 				return
@@ -496,7 +498,7 @@ func (s *Sequencer) Start() error {
 		}
 		host, ok := os.LookupEnv("FP_METRICS_HOSTNAME")
 		if !ok {
-			port = "0.0.0.0"
+			host = "0.0.0.0"
 		}
 		go metrics.Metrics.Start("fp-validator", host, port)
 	}

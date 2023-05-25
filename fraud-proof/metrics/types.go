@@ -21,9 +21,8 @@ type (
 )
 
 const (
-	//
 	AssertionSize       = "assertion_size"
-	RollupSize          = "rollup_size" //
+	RollupSize          = "rollup_size"
 	ProposerBalance     = "proposer_balance"
 	ValidatorBalance    = "validator_balance"
 	ProposerRollupFee   = "proposer_rollup_fee"

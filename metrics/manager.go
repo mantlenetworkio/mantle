@@ -13,10 +13,10 @@ import (
 
 type Manager struct {
 	promauto.Factory
-	ctx    context.Context
-	cancel context.CancelFunc
-	mutex  sync.Mutex
-
+	ctx           context.Context
+	cancel        context.CancelFunc
+	mutex         sync.Mutex
+	handler       http.Handler
 	gaugeVecs     map[string]*prometheus.GaugeVec
 	counterVecs   map[string]*prometheus.CounterVec
 	summaryVecs   map[string]*prometheus.SummaryVec
@@ -25,11 +25,14 @@ type Manager struct {
 }
 
 func NewMetricsManager(ctx context.Context) *Manager {
-	factory := promauto.With(prometheus.NewRegistry())
+	reg := prometheus.NewRegistry()
+	handler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
+	factory := promauto.With(reg)
 	ctx, cancel := context.WithCancel(ctx)
 	return &Manager{
 		ctx:           ctx,
 		cancel:        cancel,
+		handler:       handler,
 		Factory:       factory,
 		gaugeVecs:     make(map[string]*prometheus.GaugeVec, 0),
 		counterVecs:   make(map[string]*prometheus.CounterVec, 0),
@@ -49,7 +52,7 @@ func (m *Manager) setDefaultGaugeVec(name string) *prometheus.GaugeVec {
 	defer m.mutex.Unlock()
 	m.gaugeVecs[name] = m.Factory.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name:      "Default",
+			Name:      name,
 			Help:      "default gauge vec",
 			Subsystem: "default",
 		},
@@ -154,8 +157,8 @@ func (m *Manager) Start(module string, hostname string, port string) error {
 	log.Info(fmt.Sprintf("%s metrics started", module))
 	metricsAddr := fmt.Sprintf("%s:%s", hostname, port)
 	go func() {
-		http.Handle("/metrics", promhttp.Handler())
-		_ = http.ListenAndServe(metricsAddr, nil)
+		http.Handle("/metrics", m.handler)
+		_ = http.ListenAndServe(metricsAddr, m.handler)
 	}()
 	return nil
 }

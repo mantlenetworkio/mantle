@@ -174,9 +174,11 @@ func (v *Validator) validationLoop() {
 						}
 						metrics.Metrics.MustGetGaugeVec(metrics.NameFee.Name()).
 							WithLabelValues(metrics.NameFee.LabelValidatorVerifyFee()).Set(float64(tx.Cost().Uint64()))
-						balance, _ := v.BaseService.L1.BalanceAt(v.Ctx, v.Rollup.TransactOpts.From, nil)
-						metrics.Metrics.MustGetGaugeVec(metrics.NameBalance.Name()).
-							WithLabelValues(metrics.NameBalance.LabelValidatorBalance()).Set(float64(balance.Uint64()))
+						balance, err := v.BaseService.L1.BalanceAt(v.Ctx, v.Rollup.TransactOpts.From, nil)
+						if err == nil {
+							metrics.Metrics.MustGetGaugeVec(metrics.NameBalance.Name()).
+								WithLabelValues(metrics.NameBalance.LabelValidatorBalance()).Set(float64(balance.Uint64()))
+						}
 					}
 					metrics.Metrics.MustGetGaugeVec(metrics.NameIndex.Name()).
 						WithLabelValues(metrics.NameIndex.LabelVerifiedIndex()).Set(float64(checkID))
@@ -482,7 +484,7 @@ func (v *Validator) Start() error {
 		}
 		host, ok := os.LookupEnv("FP_METRICS_HOSTNAME")
 		if !ok {
-			port = "0.0.0.0"
+			host = "0.0.0.0"
 		}
 		go metrics.Metrics.Start("fp-validator", host, port)
 	}

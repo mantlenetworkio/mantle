@@ -7,7 +7,6 @@ import (
 
 func TestMetrics(t *testing.T) {
 	go Metrics.Start("test", "0.0.0.0", "9190")
-	initMetrics()
 	require.NotEmpty(t, NameBalance.Name())
 	require.NotEmpty(t, NameAlert.Name())
 	require.NotEmpty(t, NameIndex.Name())
@@ -30,4 +29,8 @@ func TestMetrics(t *testing.T) {
 	// test counter
 	Metrics.MustGetSummaryVec(NameBalance.Name()).WithLabelValues(NameBalance.LabelValidatorBalance()).Observe(1)
 	Metrics.MustGetSummaryVec(NameBalance.Name()).WithLabelValues(NameBalance.LabelProposerBalance()).Observe(1)
+
+	t.Logf("wait")
+	c := make(chan struct{}, 0)
+	<-c
 }
