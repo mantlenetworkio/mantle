@@ -5,7 +5,7 @@ RUN apk add --no-cache make gcc musl-dev linux-headers git jq bash
 
 COPY ./mt-batcher /go/mt-batcher
 COPY ./bss-core /go/bss-core
-COPY ./datalayr-mantle /go/datalayr-mantle
+COPY ./datalayr /go/datalayr
 COPY ./l2geth /go/l2geth
 COPY ./mt-batcher/docker.go.work /go/go.work
 

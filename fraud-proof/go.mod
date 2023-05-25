@@ -10,6 +10,8 @@ require (
 	github.com/holiman/uint256 v1.2.0
 	github.com/mantlenetworkio/mantle/l2geth v0.0.0-20221214100001-fb1439a71d5f
 	github.com/specularl2/specular/clients/geth/specular v0.0.0-20221120100224-5e02437e9455
+	github.com/stretchr/testify v1.7.2
+	gopkg.in/urfave/cli.v1 v1.20.0
 )
 
 require (
@@ -29,6 +31,7 @@ require (
 	github.com/fjl/memsize v0.0.1 // indirect
 	github.com/gballet/go-libpcsclite v0.0.0-20191108122812-4678299bea08 // indirect
 	github.com/go-ole/go-ole v1.2.1 // indirect
+	github.com/go-resty/resty/v2 v2.4.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang-jwt/jwt/v4 v4.3.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
@@ -55,6 +58,7 @@ require (
 	github.com/pborman/uuid v1.2.0 // indirect
 	github.com/peterh/liner v1.1.1-0.20190123174540-a2c9a5303de7 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/tsdb v0.10.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rjeczalik/notify v0.9.2 // indirect
@@ -80,6 +84,7 @@ require (
 	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
-	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
+	gopkg.in/olebedev/go-duktape.v3 v3.0.0-20200619000410-60c24ae608a6 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

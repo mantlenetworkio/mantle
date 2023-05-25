@@ -47,6 +47,7 @@ type Config struct {
 	SentryTraceRate           time.Duration
 	ResubmissionTimeout       time.Duration
 	RetrieverTimeout          time.Duration
+	PollingDuration           time.Duration
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
 	EchoDebug                 bool
@@ -85,6 +86,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		MainWorkerPollInterval:    ctx.GlobalDuration(flags.MainWorkerPollIntervalFlag.Name),
 		CheckerWorkerPollInterval: ctx.GlobalDuration(flags.CheckerWorkerPollIntervalFlag.Name),
 		FeeWorkerPollInterval:     ctx.GlobalDuration(flags.FeeWorkerPollIntervalFlag.Name),
+		PollingDuration:           ctx.GlobalDuration(flags.PollingDurationFlag.Name),
 		BlockOffset:               ctx.GlobalUint64(flags.BlockOffsetFlag.Name),
 		RollUpMinSize:             ctx.GlobalUint64(flags.RollUpMinSizeFlag.Name),
 		RollUpMaxSize:             ctx.GlobalUint64(flags.RollUpMaxSizeFlag.Name),

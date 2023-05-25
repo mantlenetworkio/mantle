@@ -32,7 +32,7 @@ type Config struct {
 	l1BaseFeeEpochLengthSeconds      uint64
 	daFeeEpochLengthSeconds          uint64
 	l2GasPriceSignificanceFactor     float64
-	bybitBackendURL                  string
+	PriceBackendURL                  string
 	tokenPricerUpdateFrequencySecond uint64
 	l1BaseFeeSignificanceFactor      float64
 	daFeeSignificanceFactor          float64
@@ -66,7 +66,7 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.l1BaseFeeEpochLengthSeconds = ctx.GlobalUint64(flags.L1BaseFeeEpochLengthSecondsFlag.Name)
 	cfg.daFeeEpochLengthSeconds = ctx.GlobalUint64(flags.DaFeeEpochLengthSecondsFlag.Name)
 	cfg.l2GasPriceSignificanceFactor = ctx.GlobalFloat64(flags.L2GasPriceSignificanceFactorFlag.Name)
-	cfg.bybitBackendURL = ctx.GlobalString(flags.BybitBackendURL.Name)
+	cfg.PriceBackendURL = ctx.GlobalString(flags.PriceBackendURL.Name)
 	cfg.tokenPricerUpdateFrequencySecond = ctx.GlobalUint64(flags.TokenPricerUpdateFrequencySecond.Name)
 	cfg.floorPrice = ctx.GlobalUint64(flags.FloorPriceFlag.Name)
 	cfg.l1BaseFeeSignificanceFactor = ctx.GlobalFloat64(flags.L1BaseFeeSignificanceFactorFlag.Name)
