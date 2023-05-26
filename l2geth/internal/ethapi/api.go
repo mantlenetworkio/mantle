@@ -59,6 +59,7 @@ var (
 	txStatusPeriodTwo   = "Finalized on layer1"
 	txStatusPeriodThree = "Challenge Period Passed"
 	l1FinalizeBlock     = int64(64)
+	l1BlockInterval     = int64(12)
 	// scc event db mean the status of dtl, reflect the connection of layer1 mainnet
 	// there may be many error that make dtl not get the event from the layer1,
 	//i.e: network connections, rpc error, layer1 bug, ...
@@ -1529,6 +1530,9 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 	status := 0
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
+	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
+		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
+		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
 	if err != nil {
 		cb := s.b.CurrentBlock().Time()
 		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
@@ -1570,7 +1574,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 		status = 2
 		statusInfo = txStatusPeriodTwo
 	}
-	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= txStatus.Fraudproofwindow {
+	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= txStatus.Fraudproofwindow/l1BlockInterval {
 		status = 3
 		statusInfo = txStatusPeriodThree
 	}
@@ -1596,13 +1600,15 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, txHash common.Hash) (map[string]interface{}, error) {
 	// Try to return an already finalized transaction
 	tx, blockHash, blockNumber, index, err := s.b.GetTransaction(ctx, txHash)
-
 	if err != nil || tx == nil {
 		return nil, errors.New("transaction not found")
 	}
 	status := 0
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
+	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
+		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
+		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
 	if err != nil {
 		cb := s.b.CurrentBlock().Time()
 		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
@@ -1644,7 +1650,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 		status = 2
 		statusInfo = txStatusPeriodTwo
 	}
-	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= txStatus.Fraudproofwindow {
+	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= txStatus.Fraudproofwindow/l1BlockInterval {
 		status = 3
 		statusInfo = txStatusPeriodThree
 	}
