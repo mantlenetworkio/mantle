@@ -145,8 +145,10 @@ func (v *Validator) validationLoop() {
 						Parent:    assertion.Parent,
 					}
 					block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
-					if err != nil {
+					if err != nil || block == nil {
 						log.Error("Validator get block failed", "err", err)
+						time.Sleep(5 * time.Second)
+						break
 					}
 					if bytes.Compare(checkAssertion.VmHash.Bytes(), block.Root().Bytes()) != 0 {
 						//  Validation failed
