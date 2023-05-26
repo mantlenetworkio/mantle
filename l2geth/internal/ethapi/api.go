@@ -1533,7 +1533,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
 		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
 		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
-	if err != nil {
+	if err != nil || txStatus.StateRoot == nil {
 		cb := s.b.CurrentBlock().Time()
 		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
 		dtlEventDBStatus := dtlEventDBFalse
@@ -1553,21 +1553,23 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 		return fields, nil
 	}
 	if txStatus.StateRoot != nil {
-		status := 1
-		fields := map[string]interface{}{
-			"blockHash":        blockHash,
-			"origin":           rpcTx.QueueOrigin,
-			"to":               rpcTx.To,
-			"from":             rpcTx.From,
-			"transactionHash":  rpcTx.Hash,
-			"status":           hexutil.Uint(status),
-			"statusInfo":       txStatusPeriodOne,
-			"sccBatchL1Number": hexutil.Uint64(txStatus.Batch.BlockNumber),
-			"datastoreId":      txStatus.Datastore.DataStoreId,
-			"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
-			"dtlEventDBStatus": dtlEventDBRight,
+		if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) < l1FinalizeBlock {
+			status := 1
+			fields := map[string]interface{}{
+				"blockHash":        blockHash,
+				"origin":           rpcTx.QueueOrigin,
+				"to":               rpcTx.To,
+				"from":             rpcTx.From,
+				"transactionHash":  rpcTx.Hash,
+				"status":           hexutil.Uint(status),
+				"statusInfo":       txStatusPeriodOne,
+				"sccBatchL1Number": hexutil.Uint64(txStatus.Batch.BlockNumber),
+				"datastoreId":      txStatus.Datastore.DataStoreId,
+				"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
+				"dtlEventDBStatus": dtlEventDBRight,
+			}
+			return fields, nil
 		}
-		return fields, nil
 	}
 	var statusInfo string
 	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= l1FinalizeBlock {
@@ -1609,7 +1611,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
 		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
 		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
-	if err != nil {
+	if err != nil || txStatus.StateRoot == nil {
 		cb := s.b.CurrentBlock().Time()
 		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
 		dtlEventDBStatus := dtlEventDBFalse
@@ -1629,21 +1631,23 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 		return fields, nil
 	}
 	if txStatus.StateRoot != nil {
-		status := 1
-		fields := map[string]interface{}{
-			"blockHash":        blockHash,
-			"origin":           rpcTx.QueueOrigin,
-			"to":               rpcTx.To,
-			"from":             rpcTx.From,
-			"transactionHash":  rpcTx.Hash,
-			"status":           hexutil.Uint(status),
-			"statusInfo":       txStatusPeriodOne,
-			"sccBatchL1Number": hexutil.Uint64(txStatus.Batch.BlockNumber),
-			"datastoreId":      txStatus.Datastore.DataStoreId,
-			"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
-			"dtlEventDBStatus": dtlEventDBRight,
+		if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) < l1FinalizeBlock {
+			status := 1
+			fields := map[string]interface{}{
+				"blockHash":        blockHash,
+				"origin":           rpcTx.QueueOrigin,
+				"to":               rpcTx.To,
+				"from":             rpcTx.From,
+				"transactionHash":  rpcTx.Hash,
+				"status":           hexutil.Uint(status),
+				"statusInfo":       txStatusPeriodOne,
+				"sccBatchL1Number": hexutil.Uint64(txStatus.Batch.BlockNumber),
+				"datastoreId":      txStatus.Datastore.DataStoreId,
+				"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
+				"dtlEventDBStatus": dtlEventDBRight,
+			}
+			return fields, nil
 		}
-		return fields, nil
 	}
 	var statusInfo string
 	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= l1FinalizeBlock {
