@@ -93,6 +93,4 @@ interface ITssRewardContract {
 
     function setWaitingTime(uint256) external;
 
-    function setTokenAddr(address _token) external;
-
 }

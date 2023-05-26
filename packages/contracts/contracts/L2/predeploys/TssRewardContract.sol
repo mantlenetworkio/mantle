@@ -4,7 +4,6 @@ pragma solidity ^0.8.9;
 import {ITssRewardContract} from  "./iTssRewardContract.sol";
 import {IBVM_GasPriceOracle} from "./iBVM_GasPriceOracle.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Lib_PredeployAddresses} from "../../libraries/constants/Lib_PredeployAddresses.sol";
 import { CrossDomainEnabled } from "../../libraries/bridge/CrossDomainEnabled.sol";
 
@@ -44,13 +43,11 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     mapping(address => uint256) public claimTimes;
     //operator => claim number
     mapping(address => uint256) public claimAmout;
-    using SafeERC20 for IERC20;
-    IERC20 public rewardToken;
     address public stakeSlashAddress;
 
 
     // set call address
-    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress,address _l2CrossDomainMessenger, address _sccAddress, uint256 _waitingTime, address _token, address _ssAddr)
+    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress,address _l2CrossDomainMessenger, address _sccAddress, uint256 _waitingTime, address _ssAddr)
     Ownable() CrossDomainEnabled(_l2CrossDomainMessenger)
     {
         transferOwnership(_owner);
@@ -59,7 +56,6 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
         bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
         sccAddress = _sccAddress;
         waitingTime = _waitingTime;
-        rewardToken = IERC20(_token);
         stakeSlashAddress = _sccAddress;
     }
 
@@ -108,10 +104,6 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
 
     function setStakeSlashAddr(address _ssAddre) public onlyOwner {
         stakeSlashAddress = _ssAddre;
-    }
-
-    function setTokenAddr(address _token) public onlyOwner {
-        rewardToken = IERC20(_token);
     }
 
     function querySendAmountPerSecond() public view returns (uint256){
@@ -218,7 +210,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
         totalAmount = totalAmount.sub(amount);
         dustBlock = 0;
         if (amount > 0) {
-            rewardToken.safeTransfer(owner(),amount);
+            payable(owner()).transfer(amount);
         }
     }
 
@@ -227,9 +219,8 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
      */
     function withdraw() external onlyOwner checkBalance {
         totalAmount = 0;
-        uint256 balance = rewardToken.balanceOf(address(this));
-        if (balance > 0) {
-            rewardToken.safeTransfer(owner(),balance);
+        if (address(this).balance > 0) {
+            payable(owner()).transfer(address(this).balance);
         }
     }
 
@@ -293,7 +284,8 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
         uint256 amount = rewardDetails[_operator];
         if (claimNumber > 0) {
             address claimer = operators[_operator];
-            rewardToken.safeTransfer(claimer,claimNumber);
+            address payable addr = payable(claimer);
+            addr.transfer(claimNumber);
             delete claimAmout[_operator];
             rewardDetails[_operator] = rewardDetails[_operator] - claimNumber;
         }

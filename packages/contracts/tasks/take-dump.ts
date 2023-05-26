@@ -121,7 +121,6 @@ task('take-dump').setAction(async (args, hre) => {
         )
       ).address,
       waitingTime: 86400,
-      rewardToken: '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000',
       stakeSlashAddress: (
         await getContractFromArtifact(
           hre,
