@@ -209,7 +209,7 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
           (await this.state.db.getHighestSyncedL1Block()) ||
           this.state.startingL1BlockNumber
         const currentL1Block = await this.state.l1RpcProvider.getBlockNumber()
-        const fraudProofWindow = 60*24*24*7  // 7 days
+        const fraudProofWindow = this.options.fraudProofWindow
         await this.state.db.putHighestL1BlockNumber(currentL1Block);
         await this.state.db.putFraudProofWindow(fraudProofWindow);
 

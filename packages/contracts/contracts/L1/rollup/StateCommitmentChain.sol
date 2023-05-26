@@ -59,6 +59,10 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         FRAUD_PROOF_WINDOW = _fraudProofWindow;
     }
 
+    function getFraudProofWindow() public view returns (uint256 _fraudProofWindow) {
+        return uint256(FRAUD_PROOF_WINDOW);
+    }
+
     /********************
      * Public Functions *
      ********************/

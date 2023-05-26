@@ -30,6 +30,7 @@ export interface L1DataTransportServiceOptions {
   metrics?: Metrics
   dbPath: string
   logsPerPollingInterval: number
+  fraudProofWindow: number
   pollingInterval: number
   daPollingInterval: number
   port: number
