@@ -530,6 +530,7 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 	}
 	if lastCreatedAssertionID.Uint64() != 0 && latestAssertion.InboxSize.Uint64()+uint64(len(txBatch.Txs)) != txBatch.LastBlockNumber() {
 		log.Error("Online total InboxSize not match with local batch's LatestBlockNumber")
+		log.Info(fmt.Sprintf("show proposer error, currenyInboxSize: %d, batchLength: %d, lastBlockNumber: %d", latestAssertion.InboxSize.Uint64(), len(txBatch.Txs), txBatch.LastBlockNumber()))
 		return nil, errors.New("Online total InboxSize not match with local batch's LatestBlockNumber")
 	}
 
