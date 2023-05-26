@@ -501,19 +501,25 @@ func (d *Driver) SendTransaction(
 
 func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32]byte, shouldStartAtElement *big.Int, signature []byte, blocks []*l2types.Block) (*types.Transaction, error) {
 	var latestAssertion rollupTypes.Assertion
-	var staker rollupTypes.Staker
-	if ret, err := d.fpRollup.Stakers(&bind.CallOpts{}, opts.From); err != nil {
+	var stakerInfo rollupTypes.Staker
+	var stakerAddr common.Address
+	if ret, err := d.fpRollup.Registers(&bind.CallOpts{}, opts.From); err != nil {
 		return nil, err
 	} else {
-		staker.IsStaked = ret.IsStaked
-		staker.AmountStaked = ret.AmountStaked
-		staker.AssertionID = ret.AssertionID
-		staker.CurrentChallenge = ret.CurrentChallenge
+		stakerAddr = ret
 	}
-	if ret, err := d.fpAssertion.Assertions(&bind.CallOpts{}, staker.AssertionID); err != nil {
+	if ret, err := d.fpRollup.Stakers(&bind.CallOpts{}, stakerAddr); err != nil {
 		return nil, err
 	} else {
-		latestAssertion.ID = staker.AssertionID
+		stakerInfo.IsStaked = ret.IsStaked
+		stakerInfo.AmountStaked = ret.AmountStaked
+		stakerInfo.AssertionID = ret.AssertionID
+		stakerInfo.CurrentChallenge = ret.CurrentChallenge
+	}
+	if ret, err := d.fpAssertion.Assertions(&bind.CallOpts{}, stakerInfo.AssertionID); err != nil {
+		return nil, err
+	} else {
+		latestAssertion.ID = stakerInfo.AssertionID
 		latestAssertion.VmHash = ret.StateHash
 		latestAssertion.InboxSize = ret.InboxSize
 		latestAssertion.Parent = ret.Parent
