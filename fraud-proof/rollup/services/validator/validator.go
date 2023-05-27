@@ -82,7 +82,12 @@ func (v *Validator) validationLoop() {
 	}
 
 	for {
-		stakerStatus, err := v.Rollup.Stakers(v.Rollup.TransactOpts.From)
+		stakerAddr, err := v.Rollup.Registers(v.TransactOpts.From)
+		if err != nil {
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		stakerStatus, err := v.Rollup.Stakers(stakerAddr)
 		if err != nil {
 			log.Error("UNHANDELED: Can't find stake, validator state corrupted", "err", err)
 			time.Sleep(5 * time.Second)
@@ -255,10 +260,24 @@ func (v *Validator) challengeLoop() {
 			// entered the challenge state and did not execute it to challenge complete.
 			// we need to re-enter in the challenge process.
 			// Find the entry point through the state of the L1.
-			stakeStatus, _ := v.Rollup.Stakers(v.Rollup.TransactOpts.From)
-			currentAssertion, _ := v.AssertionMap.Assertions(stakeStatus.AssertionID)
+			stakerAddr, err := v.Rollup.Registers(v.TransactOpts.From)
+			if err != nil {
+				log.Error("get operator register error", "operator", v.TransactOpts.From, "err", err)
+				return
+			}
+			stakeStatus, err := v.Rollup.Stakers(stakerAddr)
+			if err != nil {
+				log.Error("get staker error", "addr", stakerAddr, "err", err)
+				return
+			}
+			currentAssertion, err := v.AssertionMap.Assertions(stakeStatus.AssertionID)
+			if err != nil {
+				log.Error("get assertion error", "assertionID", stakeStatus.AssertionID, "err", err)
+				return
+			}
 			var challengeCtx ChallengeCtx
 			if err = rlp.DecodeBytes(challengeCtxEnc, &challengeCtx); err != nil {
+				log.Error("decode challengeCtx error", "err", err)
 				return
 			}
 			ctx = &challengeCtx
