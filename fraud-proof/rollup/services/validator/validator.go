@@ -137,7 +137,9 @@ func (v *Validator) validationLoop() {
 					checkID := startID + 1
 					assertion, err := v.AssertionMap.Assertions(new(big.Int).SetUint64(checkID))
 					if err != nil {
-						log.Error("Validator get block failed", "err", err)
+						log.Error("Validator get assertion failed", "assertionID", checkID, "err", err)
+						time.Sleep(5 * time.Second)
+						break
 					}
 					if assertion.InboxSize.Uint64() == 0 {
 						// Skip assertions that have been deleted
@@ -150,8 +152,12 @@ func (v *Validator) validationLoop() {
 						Parent:    assertion.Parent,
 					}
 					block, err := v.BaseService.ProofBackend.BlockByNumber(v.Ctx, rpc2.BlockNumber(checkAssertion.InboxSize.Int64()))
-					if err != nil || block == nil {
+					if err != nil {
 						log.Error("Validator get block failed", "err", err)
+						break
+					}
+					if block == nil {
+						log.Error("Validator get block is nil, sleep for a while")
 						time.Sleep(5 * time.Second)
 						break
 					}
