@@ -12,7 +12,6 @@ import { CrossDomainEnabled } from "../../libraries/bridge/CrossDomainEnabled.so
 import { Lib_PredeployAddresses } from "../../libraries/constants/Lib_PredeployAddresses.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @title L1StandardBridge
@@ -21,7 +20,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
  * and listening to it for newly finalized withdrawals.
  *
  */
-contract L1StandardBridge is Initializable, IL1StandardBridge, CrossDomainEnabled {
+contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
     using SafeERC20 for IERC20;
 
     /********************************
@@ -39,9 +38,7 @@ contract L1StandardBridge is Initializable, IL1StandardBridge, CrossDomainEnable
      ***************/
 
     // This contract lives behind a proxy, so the constructor parameters will go unused.
-    constructor() CrossDomainEnabled(address(0)) {
-        _disableInitializers();
-    }
+    constructor() CrossDomainEnabled(address(0)) {}
 
     /******************
      * Initialization *
