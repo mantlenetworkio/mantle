@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 abstract contract Whitelist {
     modifier onlyOwner() {
         require(msg.sender == owner, "Ownable: caller is not the owner");
