@@ -13,7 +13,7 @@ const deployFn: DeployFunction = async (hre) => {
   const { deployer } = await hre.getNamedAccounts()
 
   const owner = hre.deployConfig.bvmAddressManagerOwner
-  const l1MantleAddress = hre.deployConfig.l1MantleAddress
+  const l1MantleAddress = hre.deployConfig.proxyL1MantleAddress
   // deploy impl
   await deployAndVerifyAndThen({
     hre,

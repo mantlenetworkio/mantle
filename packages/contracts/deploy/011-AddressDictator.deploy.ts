@@ -59,7 +59,7 @@ const deployFn: DeployFunction = async (hre) => {
     // L1_MANTLE_ADDRESS indicate l1 mantle token erc20 contract address
     {
       name: names.managed.configs.L1_MANTLE_ADDRESS,
-      address: hre.deployConfig.l1MantleAddress,
+      address: hre.deployConfig.proxyL1MantleAddress,
     },
   ]
 

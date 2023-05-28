@@ -20,6 +20,7 @@ const config = {
   bvmGasPriceOracleOwner: process.env.BVM_GAS_PRICE_ORACLE_OWNER || '0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc',
   bvmFeeWalletOwner: process.env.BVM_FEE_WALLETOWNER_OWNER ||'0xDfCDD683728F83A5da850a210db828e6f35DCfA6',
   l1MantleAddress: process.env.L1_MANTLE_ADDRESS || '0x92aBAD50368175785e4270ca9eFd169c949C4ce1',
+  proxyL1MantleAddress: process.env.PROXY_L1_MANTLE_ADDRESS || '0x19C22f181280dF6Ad1d97285cdD430173Df91C12',
   bvmTssRewardContractOwner: process.env.TssRewardContractOwner || '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
   dataManagerAddress: process.env.DATA_MANAGER_ADDRESS || '0xE5C3D068e2160c67e09afaCEff3E765e30163Eb8',
   bvmEigenSequencerAddress: process.env.BVM_EIGENDA_SEQUENCER_ADDRESS || '0x70997970c51812dc3a010c7d01b50e0d17dc79c8'

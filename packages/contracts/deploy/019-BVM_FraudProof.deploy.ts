@@ -24,7 +24,7 @@ const deployFn: DeployFunction = async (hre) => {
   // @ts-ignore
   const owner = hre.deployConfig.bvmAddressManagerOwner
   // @ts-ignore
-  const l1MantleAddress = hre.deployConfig.l1MantleAddress
+  const l1MantleAddress = hre.deployConfig.proxyL1MantleAddress
 
   // deploy assertionMap impl
   await deployAndVerifyAndThen({
