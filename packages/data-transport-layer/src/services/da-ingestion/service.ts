@@ -123,7 +123,10 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   }
 
   protected async _start(): Promise<void> {
-    this.updateTransactionBatches(this.options.updBatchIndex)
+    this.updateTransactionBatches(
+      this.options.startUpdateBatchIndex,
+      this.options.endUpdateBatchIndex
+    )
     while (this.running) {
       try {
         const batchIndexRange = await this.getBatchIndexRange()
@@ -168,13 +171,13 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         index
       )
       if (dataStoreRollupId['data_store_id'] === 0) {
-        break
+        continue
       }
       const dataStore = await this.GetDataStoreById(
         dataStoreRollupId['data_store_id'].toString()
       )
       if (dataStore === null) {
-        break
+        continue
       }
       if (dataStore['Confirmed']) {
         // explore transaction list
@@ -238,34 +241,48 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     }
   }
 
-  private async updateTransactionBatches(updBatchIndex: number) {
-    if (updBatchIndex > 0) {
-      this.logger.info('Update batch index from(MtBatcher)', { updBatchIndex })
-      const dataStoreRollupId = await this.GetRollupStoreByRollupBatchIndex(
-        updBatchIndex
-      )
-      this.logger.info(
-        'dataStoreRollupId dataStoreRollupId dataStoreRollupId',
-        dataStoreRollupId
-      )
-      const dataStore = await this.GetDataStoreById(
-        dataStoreRollupId['data_store_id'].toString()
-      )
-      await this.state.db.putRollupStoreByBatchIndex(
-        {
-          index: 0,
-          data_store_id: dataStoreRollupId['data_store_id'],
-          status: dataStoreRollupId['status'],
-          confirm_at: dataStoreRollupId['confirm_at'],
-        },
-        updBatchIndex
-      )
-      this.logger.info('Update batch index from(Confirmed)', dataStore)
-      await this._storeTransactionListByDSId(dataStoreRollupId['data_store_id'])
-      await this._storeBatchTransactionsByDSId(
-        dataStoreRollupId['data_store_id'],
-        updBatchIndex
-      )
+  private async updateTransactionBatches(
+    startBatchIndex: number,
+    endBatchIndex: number
+  ) {
+    if (startBatchIndex > 0 && endBatchIndex > startBatchIndex) {
+      this.logger.info('Update batch index from(MtBatcher)', {
+        start: startBatchIndex,
+        end: endBatchIndex,
+      })
+      for (
+        let batchIndex = startBatchIndex;
+        batchIndex <= endBatchIndex;
+        batchIndex++
+      ) {
+        const dataStoreRollupId = await this.GetRollupStoreByRollupBatchIndex(
+          batchIndex
+        )
+        this.logger.info(
+          'dataStoreRollupId dataStoreRollupId dataStoreRollupId',
+          dataStoreRollupId
+        )
+        const dataStore = await this.GetDataStoreById(
+          dataStoreRollupId['data_store_id'].toString()
+        )
+        await this.state.db.putRollupStoreByBatchIndex(
+          {
+            index: 0,
+            data_store_id: dataStoreRollupId['data_store_id'],
+            status: dataStoreRollupId['status'],
+            confirm_at: dataStoreRollupId['confirm_at'],
+          },
+          batchIndex
+        )
+        this.logger.info('Update batch index from(Confirmed)', dataStore)
+        await this._storeTransactionListByDSId(
+          dataStoreRollupId['data_store_id']
+        )
+        await this._storeBatchTransactionsByDSId(
+          dataStoreRollupId['data_store_id'],
+          batchIndex
+        )
+      }
     }
   }
 
