@@ -74,7 +74,7 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 			return err
 		}
 		// get history 20 block best gasprice
-		bestBaseFee := getHistoryBestPrice(l1Backend, tip.Number, 20)
+		bestBaseFee := getHistoryBestPrice(l1Backend, tip.Number, tip.BaseFee, 20)
 		// set L1BaseFee to base fee + tip cap, to cover rollup tip cap
 		tx, err := contract.SetL1BaseFee(opts, new(big.Int).Add(bestBaseFee, gasTipCap))
 		if err != nil {
@@ -101,10 +101,10 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 	}, nil
 }
 
-func getHistoryBestPrice(l1Backend bind.ContractTransactor, endHeight *big.Int, countWindow int) *big.Int {
+func getHistoryBestPrice(l1Backend bind.ContractTransactor, endHeight *big.Int, lastBaseFee *big.Int, countWindow int) *big.Int {
 	var baseFees = make([]*big.Int, 0)
+	var bestPrice = new(big.Int)
 	var wg = sync.WaitGroup{}
-	var bestPrice *big.Int
 	// get base fee
 	for i := 0; i < countWindow; i++ {
 		wg.Add(1)
@@ -117,7 +117,8 @@ func getHistoryBestPrice(l1Backend bind.ContractTransactor, endHeight *big.Int, 
 		}()
 	}
 	wg.Wait()
-	// get best base fee
+	// get best base fee, append last base fee again, incase get base fees all in error
+	baseFees = append(baseFees, lastBaseFee)
 	for j := 0; j < len(baseFees); j++ {
 		if bestPrice.Cmp(baseFees[j]) < 0 {
 			bestPrice = baseFees[j]
