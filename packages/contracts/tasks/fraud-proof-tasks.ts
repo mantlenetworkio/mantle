@@ -43,6 +43,7 @@ task('setAddress')
 
 task('whiteListInit')
   .addParam('rollup', 'Rollup contract address')
+  .addParam('stakers', 'Rollup contract stakers address')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
       process.env.CONTRACTS_RPC_URL
@@ -58,13 +59,10 @@ task('whiteListInit')
     )
     const SequencerENV = process.env.BVM_ROLLUPER_ADDRESS
     const Validator1ENV = process.env.BVM_VERIFIER1_ADDRESS
-    // const Validator2ENV = process.env.BVM_VERIFIER2_ADDRESS
     const operatorWhitelist = [SequencerENV, Validator1ENV]
     console.log('operatorWhitelist:', operatorWhitelist)
 
-    const stake1 = "0x6C880BE01b60a6Cc53AA636257fa3CAB0b6127Bc"
-    const stake2 = "0x81d8D877AC485D6cDeFCBc1Ad08b86C47596A76b"
-    const StakerWhitelist = [stake1, stake2]
+    const StakerWhitelist = taskArgs.stakers.split(',')
     console.log('StakerWhitelist:', StakerWhitelist)
 
     const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
@@ -77,6 +75,7 @@ task('whiteListInit')
 
 task('rollupStake')
   .addParam('rollup', 'Rollup contract address')
+  .addParam('stakerkeys', 'Rollup contract stakers address key')
   .addParam('amount', 'amount to stake', '0.1')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
@@ -89,53 +88,57 @@ task('rollupStake')
 
     const SequencerAddress = process.env.BVM_ROLLUPER_ADDRESS
     const Validator1Address = process.env.BVM_VERIFIER1_ADDRESS
-    const stakeKey1 = "b4b76c760275b8c987b114aa2bdc213a30c3a7be4c6aa6216e05e2fbc2e90312"
-    const stakeKey2 = "a76b480cba50a7cba9487a789e6eb65ab6b9cb837eb216d7a49b04d96c9bb29f"
+    const stakerKeys = taskArgs.stakerkeys.split(',')
+    const operators = [SequencerAddress, Validator1Address]
 
     const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
     const deployer = new ethers.Wallet(deployerKey, provider)
-
-    const amount = ethers.utils.parseEther("1.0"); // 替换为转账金额
-    const bitAmount = ethers.utils.parseEther("100.0"); // 替换为转账金额
-
-    const stakeWallet1 = new ethers.Wallet(stakeKey1, provider)
-    const stakeWallet2 = new ethers.Wallet(stakeKey2, provider)
-
-    const wallets = [stakeWallet1, stakeWallet2]
-    const operators = [SequencerAddress, Validator1Address]
+    const amount = ethers.utils.parseEther('1.0') // 替换为转账金额
+    const bitAmount = ethers.utils.parseEther('100.0') // 替换为转账金额
 
     // 使用索引的 for 循环迭代数组
-    for (let i = 0; i < wallets.length; i++) {
+    for (let i = 0; i < stakerKeys.length; i++) {
+      const stakerWallet = new ethers.Wallet(stakerKeys[i], provider)
       // 构造交易对象
       const transaction = {
-        to: wallets[i].address,
+        to: stakerWallet.address,
         value: amount,
-      };
-
-      try {
-        const response = await deployer.sendTransaction(transaction);
-        console.log("Transaction hash:", response.hash);
-      } catch (error) {
-        console.error("Failed to send transaction:", error);
       }
 
-      await bit
-        .connect(deployer)
-        .transfer(wallets[i].address, bitAmount)
+      try {
+        const response = await deployer.sendTransaction(transaction)
+        console.log('Transaction hash:', response.hash)
+      } catch (error) {
+        console.error('Failed to send transaction:', error)
+      }
+
+      await bit.connect(deployer).transfer(stakerWallet.address, bitAmount)
       console.log(
         'balance: ',
-        wallets[i].address,
-        (await bit.connect(deployer).balanceOf(wallets[i].address)).toString()
+        stakerWallet.address,
+        (await bit.connect(deployer).balanceOf(stakerWallet.address)).toString()
       )
 
-      console.log("ETH Balance:", wallets[i].address," ",await wallets[i].getBalance())
+      console.log(
+        'ETH Balance:',
+        stakerWallet.address,
+        ' ',
+        await stakerWallet.getBalance()
+      )
       await bit
-        .connect(wallets[i])
+        .connect(stakerWallet)
         .approve(taskArgs.rollup, ethers.utils.parseEther(taskArgs.amount))
-      console.log("ETH Balance:", wallets[i].address," ",await wallets[i].getBalance())
+      console.log(
+        'ETH Balance:',
+        stakerWallet.address,
+        ' ',
+        await stakerWallet.getBalance()
+      )
 
-      console.log("stake", wallets[i].address, operators[i])
-      await rollup.connect(wallets[i]).stake(ethers.utils.parseEther(taskArgs.amount), operators[i])
+      console.log('stake', stakerWallet.address, operators[i])
+      await rollup
+        .connect(stakerWallet)
+        .stake(ethers.utils.parseEther(taskArgs.amount), operators[i])
     }
   })
 
@@ -194,9 +197,7 @@ task(`deployVerifier`)
     const MemoryOpVerifier = getContractFactory(
       names.managed.fraud_proof.SubVerifiers.MemoryOpVerifier
     )
-    const memoryOpVerifier = await MemoryOpVerifier.connect(
-      entryOwner
-    ).deploy()
+    const memoryOpVerifier = await MemoryOpVerifier.connect(entryOwner).deploy()
     await memoryOpVerifier.deployed()
     console.log('memoryOpVerifier : ', memoryOpVerifier.address)
 
