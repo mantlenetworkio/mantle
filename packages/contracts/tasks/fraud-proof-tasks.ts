@@ -16,7 +16,7 @@ task('setAddress')
   .addParam('address', 'contract address')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      process.env.CONTRACTS_RPC_URL
     )
     const addressManagerKey = process.env.BVM_ADDRESS_MANAGER_KEY
     const managerWallet = new ethers.Wallet(addressManagerKey, provider)
@@ -43,9 +43,10 @@ task('setAddress')
 
 task('whiteListInit')
   .addParam('rollup', 'Rollup contract address')
+  .addParam('stakers', 'Rollup contract stakers address')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      process.env.CONTRACTS_RPC_URL
     )
     const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
     const proposerAddr = process.env.BVM_ROLLUPER_ADDRESS
@@ -58,45 +59,86 @@ task('whiteListInit')
     )
     const SequencerENV = process.env.BVM_ROLLUPER_ADDRESS
     const Validator1ENV = process.env.BVM_VERIFIER1_ADDRESS
-    // const Validator2ENV = process.env.BVM_VERIFIER2_ADDRESS
-    const whiteListToAdd = [SequencerENV, Validator1ENV]
-    console.log('whiteList:', whiteListToAdd)
+    const operatorWhitelist = [SequencerENV, Validator1ENV]
+    console.log('operatorWhitelist:', operatorWhitelist)
+
+    const StakerWhitelist = taskArgs.stakers.split(',')
+    console.log('StakerWhitelist:', StakerWhitelist)
+
     const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
-    await rollup.connect(entryOwner).addToOperatorWhitelist(whiteListToAdd)
-    await rollup.connect(entryOwner).addToStakerWhitelist(whiteListToAdd)
+    await rollup.connect(entryOwner).addToOperatorWhitelist(operatorWhitelist)
+    await rollup.connect(entryOwner).addToStakerWhitelist(StakerWhitelist)
+
     console.log('transferOwnerShip')
     await rollup.connect(entryOwner).transferOwnership(proposerAddr)
   })
 
 task('rollupStake')
   .addParam('rollup', 'Rollup contract address')
+  .addParam('stakerkeys', 'Rollup contract stakers address key')
   .addParam('amount', 'amount to stake', '0.1')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      process.env.CONTRACTS_RPC_URL
     )
+
     const bitToken = process.env.L1_BIT_ADDRESS
-    const verifier1Key = process.env.BVM_VERIFIER1_KEY
-    const proposerKey = process.env.BVM_PROPOSER_KEY
-
-    const proposerWallet = new ethers.Wallet(proposerKey, provider)
-    const verifier1Wallet = new ethers.Wallet(verifier1Key, provider)
-
-    const wallets = [proposerWallet, verifier1Wallet]
-    const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
     const bit = await getContractFactory('BitTokenERC20').attach(bitToken)
-    for (const w of wallets) {
-      console.log("ETH Balance:",w.address," ",await w.getBalance())
-      // await bit.connect(w).mint(ethers.utils.parseEther(taskArgs.amount))
-      await bit
-        .connect(w)
-        .approve(taskArgs.rollup, ethers.utils.parseEther(taskArgs.amount))
+    const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
+
+    const SequencerAddress = process.env.BVM_ROLLUPER_ADDRESS
+    const Validator1Address = process.env.BVM_VERIFIER1_ADDRESS
+    const stakerKeys = taskArgs.stakerkeys.split(',')
+    const operators = [SequencerAddress, Validator1Address]
+
+    const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
+    const deployer = new ethers.Wallet(deployerKey, provider)
+    const amount = ethers.utils.parseEther('1.0') // 替换为转账金额
+    const bitAmount = ethers.utils.parseEther('100.0') // 替换为转账金额
+
+    // 使用索引的 for 循环迭代数组
+    for (let i = 0; i < stakerKeys.length; i++) {
+      const stakerWallet = new ethers.Wallet(stakerKeys[i], provider)
+      // 构造交易对象
+      const transaction = {
+        to: stakerWallet.address,
+        value: amount,
+      }
+
+      try {
+        const response = await deployer.sendTransaction(transaction)
+        console.log('Transaction hash:', response.hash)
+      } catch (error) {
+        console.error('Failed to send transaction:', error)
+      }
+
+      await bit.connect(deployer).transfer(stakerWallet.address, bitAmount)
       console.log(
         'balance: ',
-        w.address,
-        (await bit.connect(w).balanceOf(w.address)).toString()
+        stakerWallet.address,
+        (await bit.connect(deployer).balanceOf(stakerWallet.address)).toString()
       )
-      await rollup.connect(w).stake(ethers.utils.parseEther(taskArgs.amount), w.address)
+
+      console.log(
+        'ETH Balance:',
+        stakerWallet.address,
+        ' ',
+        await stakerWallet.getBalance()
+      )
+      await bit
+        .connect(stakerWallet)
+        .approve(taskArgs.rollup, ethers.utils.parseEther(taskArgs.amount))
+      console.log(
+        'ETH Balance:',
+        stakerWallet.address,
+        ' ',
+        await stakerWallet.getBalance()
+      )
+
+      console.log('stake', stakerWallet.address, operators[i])
+      await rollup
+        .connect(stakerWallet)
+        .stake(ethers.utils.parseEther(taskArgs.amount), operators[i])
     }
   })
 
@@ -104,7 +146,7 @@ task(`deployVerifier`)
   .addParam('verifier', 'verifier entry address')
   .setAction(async (taskArgs) => {
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      process.env.CONTRACTS_RPC_URL
     )
     const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
     const entryOwner = new ethers.Wallet(deployerKey, provider)
@@ -155,9 +197,7 @@ task(`deployVerifier`)
     const MemoryOpVerifier = getContractFactory(
       names.managed.fraud_proof.SubVerifiers.MemoryOpVerifier
     )
-    const memoryOpVerifier = await MemoryOpVerifier.connect(
-      entryOwner
-    ).deploy()
+    const memoryOpVerifier = await MemoryOpVerifier.connect(entryOwner).deploy()
     await memoryOpVerifier.deployed()
     console.log('memoryOpVerifier : ', memoryOpVerifier.address)
 
@@ -330,6 +370,7 @@ task(`genOsp`)
   .addParam('hash', 'the transaction hash to prove')
   .addParam('step', 'the step to prove')
   .setAction(async (taskArgs) => {
+    // TODO change hardcode url to env variable
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:8545'
     )
@@ -350,7 +391,7 @@ task(`verifyOsp`)
   // .addParam('addr', 'VerifierTestDriver contract address')
   .setAction(async () => {
     const provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:9545'
+      process.env.CONTRACTS_RPC_URL
     )
     const ownerWallet = new ethers.Wallet(
       '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',

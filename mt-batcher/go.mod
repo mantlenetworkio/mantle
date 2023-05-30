@@ -9,7 +9,7 @@ replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr/lib/merkzg
 replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
 
 require (
-	//github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
+	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/mantlenetworkio/mantle/l2geth v0.0.0
@@ -24,12 +24,8 @@ require (
 	github.com/decred/dcrd/hdkeychain/v3 v3.0.0
 	github.com/labstack/echo/v4 v4.9.0
 	github.com/prometheus/client_golang v1.14.0
-	github.com/tyler-smith/go-bip39 v1.1.0
-)
-
-require (
-	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
+	github.com/tyler-smith/go-bip39 v1.1.0
 )
 
 require (

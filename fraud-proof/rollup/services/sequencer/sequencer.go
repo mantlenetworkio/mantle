@@ -3,6 +3,7 @@ package sequencer
 import (
 	"bytes"
 	"math/big"
+	"os"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
@@ -11,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
+	"github.com/mantlenetworkio/mantle/fraud-proof/metrics"
 	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
 	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
@@ -127,6 +129,8 @@ func (s *Sequencer) confirmationLoop() {
 		s.challengeCh <- &challengeCtx
 	}
 
+	var newConfirmSend = false
+
 	for {
 		if isInChallenge {
 			// Waif for the challenge resolved
@@ -149,6 +153,10 @@ func (s *Sequencer) confirmationLoop() {
 					challengeAssertions[ev.AssertionID.Uint64()] = true
 				}
 			case header := <-headCh:
+				balance, err := s.BaseService.L1.BalanceAt(s.Ctx, s.TransactOpts.From, nil)
+				if err == nil {
+					metrics.Metrics.MustGetGaugeVec(metrics.NameBalance.Name()).WithLabelValues(metrics.NameBalance.LabelProposerBalance()).Set(float64(balance.Uint64()))
+				}
 				// todo : optimization the check with block height
 				// Get confirm block header
 				if s.confirmations != 0 {
@@ -183,7 +191,7 @@ func (s *Sequencer) confirmationLoop() {
 					log.Error("Failed to get first unresolved Assertion", "err", err, "ID", firstUnresolvedID)
 					continue
 				}
-				if header.Time >= firstUnresolvedAssertion.Deadline.Uint64() {
+				if header.Time >= firstUnresolvedAssertion.Deadline.Uint64() && !newConfirmSend {
 					log.Info("Current assertion", "id", firstUnresolvedID)
 					if !challengeAssertions[firstUnresolvedID] {
 						// Confirmation period has past, confirm it
@@ -195,6 +203,7 @@ func (s *Sequencer) confirmationLoop() {
 							}
 							log.Error("Failed to confirm DA", "err", err)
 						}
+						newConfirmSend = true
 						continue
 					}
 					log.Info("Sequencer call RejectFirstUnresolvedAssertion...")
@@ -214,6 +223,8 @@ func (s *Sequencer) confirmationLoop() {
 
 			case ev := <-confirmedCh:
 				log.Info("New confirmed assertion", "id", ev.AssertionID)
+				// send confirm tx once for a while
+				newConfirmSend = false
 			case ev := <-challengedCh:
 				log.Warn("New challenge rise!!!!!!", "ev", ev)
 				// todo when interrupt at this moment, check staker`s status
@@ -334,7 +345,7 @@ func (s *Sequencer) challengeLoop() {
 				}
 			case ev := <-challengeCompletedCh:
 				log.Info("[challenge] Try to challenge completed", "winner", ev.Winner)
-				_, err = challengeSession.CompleteChallenge(s.Config.ChallengeVerify)
+				tx, err := challengeSession.CompleteChallenge(s.Config.ChallengeVerify)
 				if err != nil {
 					log.Error("Can not complete challenge", "error", err)
 					continue
@@ -346,6 +357,10 @@ func (s *Sequencer) challengeLoop() {
 				challengeSession = nil
 				s.challengeResolutionCh <- struct{}{}
 				log.Info("[challenge] Challenge completed", "winner", ev.Winner)
+				metrics.Metrics.MustGetGaugeVec(metrics.NameFee.Name()).
+					WithLabelValues(metrics.NameFee.LabelProposerConfirmFee()).Set(float64(tx.Cost().Uint64()))
+				metrics.Metrics.MustGetCounterVec(metrics.NameAlert.Name()).
+					WithLabelValues(metrics.NameAlert.LabelAlertChallengeEnd()).Inc()
 			case <-s.Ctx.Done():
 				bisectedSub.Unsubscribe()
 				challengeCompletedSub.Unsubscribe()
@@ -447,6 +462,10 @@ func (s *Sequencer) challengeLoop() {
 					continue
 				}
 			case <-headCh:
+				balance, err := s.BaseService.L1.BalanceAt(s.Ctx, s.TransactOpts.From, nil)
+				if err == nil {
+					metrics.Metrics.MustGetGaugeVec(metrics.NameBalance.Name()).WithLabelValues(metrics.NameBalance.LabelProposerBalance()).Set(float64(balance.Uint64()))
+				}
 				continue // consume channel values
 			case <-s.Ctx.Done():
 				return
@@ -466,11 +485,24 @@ func (s *Sequencer) APIs() []rpc.API {
 }
 
 func (s *Sequencer) Start() error {
-	_ = s.BaseService.Start(true, true)
+	//_ = s.BaseService.Start(true, true)
 
 	s.Wg.Add(2)
 	go s.confirmationLoop()
 	go s.challengeLoop()
+
+	if len(os.Getenv("FP_METRICS_SERVER_ENABLE")) > 0 {
+		port, ok := os.LookupEnv("FP_METRICS_PORT")
+		if !ok {
+			port = "9190"
+		}
+		host, ok := os.LookupEnv("FP_METRICS_HOSTNAME")
+		if !ok {
+			host = "0.0.0.0"
+		}
+		go metrics.Metrics.Start("fp-validator", host, port)
+	}
+
 	log.Info("fraud-proof defender started")
 	return nil
 }

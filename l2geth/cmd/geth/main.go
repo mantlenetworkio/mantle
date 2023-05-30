@@ -179,7 +179,7 @@ var (
 		utils.FraudProofL1ConfirmationsFlag,
 		utils.FraudProofSequencerAddrFlag,
 		utils.FraudProofRollupAddrFlag,
-		utils.FraudProofStakeAddrFlag,
+		utils.FraudProofOperatorAddrFlag,
 		utils.FraudProofStakeAmount,
 		utils.FraudProofChallengeVerify,
 	}

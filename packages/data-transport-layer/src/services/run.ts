@@ -35,7 +35,9 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       fraudProofWindow: config.uint('fraud-proof-window',60*60*24*7),
       daSyncStep: config.uint('da-sync-step', 100),
       daInitBatch: config.uint('da-init-batch', 0),
-      updBatchIndex: config.uint('upd-batch-index', 0),
+      startUpdateBatchIndex: config.uint('start-update-batch-index', 0),
+      endUpdateBatchIndex: config.uint('end-update-batch-index', 0),
+
       dangerouslyCatchAllErrors: config.bool(
         'dangerously-catch-all-errors',
         false

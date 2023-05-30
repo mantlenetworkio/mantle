@@ -27,6 +27,7 @@ curl -XPOST \
     --fail \
     --show-error \
     --silent \
+    -H "Content-Type: application/json" \
     --retry-connrefused \
     --retry $RETRIES \
     --retry-delay 1 \
