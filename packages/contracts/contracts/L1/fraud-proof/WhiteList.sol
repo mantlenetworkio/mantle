@@ -5,39 +5,45 @@ abstract contract Whitelist {
     }
 
     modifier stakerWhitelistOnly(address _checkAddress) {
-        if (!stakerWhitelist[_checkAddress]) {
+        if (stakerslist[stakerWhitelist[_checkAddress]] == _checkAddress) {
             revert("NOT_IN_STAKER_WHITELIST");
         }
         _;
     }
 
     modifier operatorWhitelistOnly(address _checkAddress) {
-        if (!operatorWhitelist[_checkAddress]) {
+        if (operatorslist[operatorWhitelist[_checkAddress]] == _checkAddress) {
             revert("NOT_IN_OPERATOR_WHITELIST");
         }
         _;
     }
 
     address public owner;
-    mapping(address => bool) public stakerWhitelist;
-    mapping(address => bool) public operatorWhitelist;
+    mapping(address => uint256) public stakerWhitelist;
+    address[] public stakerslist;
+    mapping(address => uint256) public operatorWhitelist;
+    address[] public operatorslist;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
      * @notice Add to staker whitelist
      */
-    function addToStakerWhitelist(address[] calldata toAddAddresses) external onlyOwner {
+    function addToStakerWhitelist(address[] calldata toAddAddresses) public onlyOwner {
         for (uint i = 0; i < toAddAddresses.length; i++) {
-            stakerWhitelist[toAddAddresses[i]] = true;
+            stakerWhitelist[toAddAddresses[i]] = stakerslist.length + i;
+            stakerslist.push(toAddAddresses[i]);
         }
     }
 
     /**
      * @notice Remove from whitelist
      */
-    function removeFromStakerWhitelist(address[] calldata toRemoveAddresses) external onlyOwner {
+    function removeFromStakerWhitelist(address[] calldata toRemoveAddresses) public onlyOwner {
         for (uint i = 0; i < toRemoveAddresses.length; i++) {
+            uint256 index = stakerWhitelist[toRemoveAddresses[i]];
+            stakerslist[index] = stakerslist[stakerslist.length-1];
+            stakerslist.pop();
             delete stakerWhitelist[toRemoveAddresses[i]];
         }
     }
@@ -45,17 +51,21 @@ abstract contract Whitelist {
     /**
  * @notice Add to whitelist
      */
-    function addToOperatorWhitelist(address[] calldata toAddAddresses) external onlyOwner {
+    function addToOperatorWhitelist(address[] calldata toAddAddresses) public onlyOwner {
         for (uint i = 0; i < toAddAddresses.length; i++) {
-            operatorWhitelist[toAddAddresses[i]] = true;
+            operatorWhitelist[toAddAddresses[i]] = operatorslist.length + i;
+            operatorslist.push(toAddAddresses[i]);
         }
     }
 
     /**
      * @notice Remove from whitelist
      */
-    function removeFromOperatorWhitelist(address[] calldata toRemoveAddresses) external onlyOwner {
+    function removeFromOperatorWhitelist(address[] calldata toRemoveAddresses) public onlyOwner {
         for (uint i = 0; i < toRemoveAddresses.length; i++) {
+            uint256 index = operatorWhitelist[toRemoveAddresses[i]];
+            operatorslist[index] = operatorslist[operatorslist.length-1];
+            operatorslist.pop();
             delete operatorWhitelist[toRemoveAddresses[i]];
         }
     }
