@@ -122,7 +122,8 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _address for fraud proof
     */
     function setFraudProofAddress(address _address) external {
-        require(msg.sender == sequencer, "Only the sequencer can set fraud proof address unavailable");
+        require(_address == address(0), "setFraudProofAddress: address is the zero address");
+        require(msg.sender == sequencer, "setFraudProofAddress: Only the sequencer can set fraud proof address unavailable");
         fraudProofWhitelist[_address] = true;
     }
 
@@ -131,7 +132,8 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _address for fraud proof
     */
     function unavailableFraudProofAddress(address _address) external {
-        require(msg.sender == sequencer, "Only the sequencer can remove fraud proof address");
+        require(_address == address(0), "unavailableFraudProofAddress: unavailableFraudProofAddress: address is the zero address");
+        require(msg.sender == sequencer, "unavailableFraudProofAddress: Only the sequencer can remove fraud proof address");
         fraudProofWhitelist[_address] = false;
     }
 
@@ -140,7 +142,8 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _address for fraud proof
     */
     function removeFraudProofAddress(address _address) external {
-        require(msg.sender == sequencer, "Only the sequencer can remove fraud proof address");
+        require(_address == address(0), "removeFraudProofAddress: removeFraudProofAddress: address is the zero address");
+        require(msg.sender == sequencer, "removeFraudProofAddress: Only the sequencer can remove fraud proof address");
         delete fraudProofWhitelist[_address];
     }
 
@@ -149,7 +152,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _fraudProofPeriod fraud proof period
     */
     function updateFraudProofPeriod(uint256 _fraudProofPeriod) external {
-        require(msg.sender == sequencer, "Only the sequencer can update fraud proof period");
+        require(msg.sender == sequencer, "updateFraudProofPeriod: Only the sequencer can update fraud proof period");
         fraudProofPeriod = _fraudProofPeriod;
     }
 
@@ -158,7 +161,8 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _dataManageAddress dlsm address
     */
     function updateDataLayrManagerAddress(address _dataManageAddress) external {
-        require(msg.sender == sequencer, "Only the sequencer can update dlsm address");
+        require(_dataManageAddress == address(0), "updateDataLayrManagerAddress: _dataManageAddress is the zero address");
+        require(msg.sender == sequencer, "updateDataLayrManagerAddress: Only the sequencer can update dlsm address");
         dataManageAddress = _dataManageAddress;
     }
 
@@ -167,7 +171,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _l2StoredBlockNumber l2 latest block number
     */
     function updateL2StoredBlockNumber(uint256 _l2StoredBlockNumber) external {
-        require(msg.sender == sequencer, "Only the sequencer can set latest l2 block number");
+        require(msg.sender == sequencer, "updateL2StoredBlockNumber: Only the sequencer can set latest l2 block number");
         l2StoredBlockNumber = _l2StoredBlockNumber;
     }
 
@@ -176,7 +180,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _l2ConfirmedBlockNumber l2 latest block number
     */
     function updateL2ConfirmedBlockNumber(uint256 _l2ConfirmedBlockNumber) external {
-        require(msg.sender == sequencer, "Only the sequencer can set latest l2 block number");
+        require(msg.sender == sequencer, "updateL2ConfirmedBlockNumber: Only the sequencer can set latest l2 block number");
         l2ConfirmedBlockNumber = _l2ConfirmedBlockNumber;
     }
 
@@ -185,12 +189,14 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _sequencer update sequencer address
     */
     function updateSequencerAddress(address _sequencer) external {
-        require(msg.sender == sequencer, "Only the sequencer can update sequencer address");
+        require(_sequencer == address(0), "updateSequencerAddress: _sequencer is the zero address");
+        require(msg.sender == sequencer, "updateSequencerAddress: Only the sequencer can update sequencer address");
         sequencer = _sequencer;
     }
 
     function updateReSubmitterAddress(address _reSubmitterAddress) external {
-        require(msg.sender == sequencer, "Only the sequencer can update re submitter address");
+        require(_reSubmitterAddress == address(0), "updateReSubmitterAddress: _reSubmitterAddress is the zero address");
+        require(msg.sender == sequencer, "updateReSubmitterAddress: Only the sequencer can update re submitter address");
         reSubmitterAddress = _reSubmitterAddress;
     }
 
@@ -199,7 +205,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _rollupBatchIndex update rollup index
     */
     function resetRollupBatchData(uint256 _rollupBatchIndex) external {
-        require(msg.sender == sequencer, "Only the sequencer can update sequencer address");
+        require(msg.sender == sequencer, "resetRollupBatchData: Only the sequencer can update sequencer address");
         for (uint256 i = 0; i < rollupBatchIndex; i++) {
             delete rollupBatchIndexRollupStores[i];
         }
@@ -215,7 +221,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     function submitReRollUpInfo(
         uint256 batchIndex
     ) external {
-        require(msg.sender == reSubmitterAddress, "Only the re submitter can submit re rollup data");
+        require(msg.sender == reSubmitterAddress, "submitReRollUpInfo: Only the re submitter can submit re rollup data");
         RollupStore memory rStore = rollupBatchIndexRollupStores[batchIndex];
         if (rStore.dataStoreId > 0) {
             reRollupBatchIndex[reRollupIndex] = batchIndex;
@@ -247,8 +253,9 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
         uint32 totalOperatorsIndex,
         bool   isReRollup
     ) external {
-        require(msg.sender == sequencer, "Only the sequencer can store data");
-        require(block.number - blockNumber < BLOCK_STALE_MEASURE, "stakes taken from too long ago");
+        require(msg.sender == sequencer, "storeData: Only the sequencer can store data");
+        require(endL2Block > startL2Block, "storeData: endL2Block must more than startL2Block");
+        require(block.number - blockNumber < BLOCK_STALE_MEASURE, "storeData: stakes taken from too long ago");
         uint32 dataStoreId = IDataLayrServiceManager(dataManageAddress).taskNumber();
         IDataLayrServiceManager(dataManageAddress).initDataStore(
             msg.sender,
@@ -287,15 +294,17 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
         uint256 reConfirmedBatchIndex,
         bool isReRollup
     ) external {
-        require(msg.sender == sequencer, "Only the sequencer can store data");
-        require(dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].startL2BlockNumber == startL2Block &&
-            dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].endBL2BlockNumber == endL2Block &&
-            dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].isReRollup == isReRollup,
-            "Data store either was not initialized by the rollup contract, or is already confirmed"
+        require(msg.sender == sequencer, "confirmData: Only the sequencer can store data");
+        require(endL2Block > startL2Block, "confirmData: endL2Block must more than startL2Block");
+        BatchRollupBlock memory batchRollupBlock = dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId];
+        require(batchRollupBlock.startL2BlockNumber == startL2Block &&
+            batchRollupBlock.endBL2BlockNumber == endL2Block &&
+            batchRollupBlock.isReRollup == isReRollup,
+            "confirmData: Data store either was not initialized by the rollup contract, or is already confirmed"
         );
         require(
             dataStoreIdToRollupStoreNumber[searchData.metadata.globalDataStoreId] == DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED,
-            "Data store either was not initialized by the rollup contract, or is already confirmed"
+            "confirmData: Data store either was not initialized by the rollup contract, or is already confirmed"
         );
         IDataLayrServiceManager(dataManageAddress).confirmDataStore(data, searchData);
         if (!isReRollup) {
@@ -340,7 +349,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
         IDataLayrServiceManager.DataStoreSearchData memory searchData,
         DisclosureProofs calldata disclosureProofs
     ) external {
-        require(fraudProofWhitelist[msg.sender] == true, "Only fraud proof white list can challenge data");
+        require(fraudProofWhitelist[msg.sender] == true, "proveFraud: Only fraud proof white list can challenge data");
         RollupStore memory rollupStore = rollupBatchIndexRollupStores[fraudulentStoreNumber];
         require(rollupStore.status == RollupStoreStatus.COMMITTED && rollupStore.confirmAt > block.timestamp, "RollupStore must be committed and unconfirmed");
         require(
@@ -349,7 +358,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
                 searchData.timestamp,
                 searchData.index
             ) == DataStoreUtils.computeDataStoreHash(searchData.metadata),
-            "metadata preimage is incorrect"
+            "proveFraud: metadata preimage is incorrect"
         );
         require(searchData.metadata.globalDataStoreId == rollupStore.dataStoreId, "seachData's datastore id is not consistent with given rollup store");
         require(searchData.metadata.headerHash == keccak256(disclosureProofs.header), "disclosure proofs headerhash preimage is incorrect");
