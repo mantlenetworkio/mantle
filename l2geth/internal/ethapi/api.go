@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/tyler-smith/go-bip39"
 	"math/big"
 	"strings"
 	"time"
@@ -1421,6 +1420,7 @@ func (s *PublicTransactionPoolAPI) GetTransactionCount(ctx context.Context, addr
 		return nil, err
 	}
 	nonce := state.GetNonce(address)
+	log.Info("transaction count", "address", address.String(), "nonce", nonce)
 	return (*hexutil.Uint64)(&nonce), state.Error()
 }
 
