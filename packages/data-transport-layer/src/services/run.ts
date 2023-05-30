@@ -32,6 +32,7 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       pollingInterval: config.uint('polling-interval', 5000),
       daPollingInterval: config.uint('da-polling-interval', 5000),
       logsPerPollingInterval: config.uint('logs-per-polling-interval', 2000),
+      fraudProofWindow: config.uint('fraud-proof-window',60*60*24*7),
       daSyncStep: config.uint('da-sync-step', 100),
       daInitBatch: config.uint('da-init-batch', 0),
       startUpdateBatchIndex: config.uint('start-update-batch-index', 0),
