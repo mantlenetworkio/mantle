@@ -28,6 +28,7 @@ require (
 	github.com/decred/dcrd/hdkeychain/v3 v3.0.0
 	github.com/labstack/echo/v4 v4.9.0
 	github.com/prometheus/client_golang v1.15.1
+	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
 	github.com/tyler-smith/go-bip39 v1.1.0
 )
 
@@ -101,7 +102,7 @@ require (
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
-	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
+	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
