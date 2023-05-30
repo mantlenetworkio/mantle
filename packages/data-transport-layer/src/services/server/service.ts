@@ -764,7 +764,6 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
               break
             default:
               throw new Error(`Unknown transaction backend ${backend}`)
-
           }
           if (stateRoots === null) {
             return {

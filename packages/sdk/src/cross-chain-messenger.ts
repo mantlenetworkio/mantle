@@ -6,8 +6,8 @@ import {
   TransactionRequest,
   TransactionResponse,
 } from '@ethersproject/abstract-provider'
-import {Signer} from '@ethersproject/abstract-signer'
-import {BigNumber, CallOverrides, ethers, Overrides} from 'ethers'
+import { Signer } from '@ethersproject/abstract-signer'
+import { BigNumber, CallOverrides, ethers, Overrides } from 'ethers'
 import {
   encodeCrossDomainMessageV0,
   hashCrossDomainMessage,
@@ -15,7 +15,7 @@ import {
   sleep,
   toHexString,
 } from '@mantleio/core-utils'
-import {getContractInterface, predeploys} from '@mantleio/contracts'
+import { getContractInterface, predeploys } from '@mantleio/contracts'
 import * as rlp from 'rlp'
 
 import {
@@ -462,8 +462,8 @@ export class CrossChainMessenger implements ICrossChainMessenger {
       return {
         receiptStatus: MessageReceiptStatus.RELAYED_FAILED,
         transactionReceipt: await failedRelayedMessageEvents[
-        failedRelayedMessageEvents.length - 1
-          ].getTransactionReceipt(),
+          failedRelayedMessageEvents.length - 1
+        ].getTransactionReceipt(),
       }
     }
 
@@ -809,11 +809,19 @@ export class CrossChainMessenger implements ICrossChainMessenger {
     }
 
     const stateBatchTransaction = await stateBatchAppendedEvent.getTransaction()
-    const stateRoots =
-      this.contracts.l1.Rollup.interface.decodeFunctionData(
+    let stateRoots: any
+    try {
+      stateRoots =
+        this.contracts.l1.StateCommitmentChain.interface.decodeFunctionData(
+          'appendStateBatch',
+          stateBatchTransaction.data
+        )
+    } catch (e) {
+      stateRoots = this.contracts.l1.Rollup.interface.decodeFunctionData(
         'createAssertionWithStateBatch',
         stateBatchTransaction.data
       )[2]
+    }
 
     return {
       blockNumber: stateBatchAppendedEvent.blockNumber,
