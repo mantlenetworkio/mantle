@@ -43,6 +43,25 @@ const deployFn: DeployFunction = async (hre) => {
       // Same thing as above, we want to transfer ownership of this contract to the owner of the
       // AddressManager. Not technically necessary but seems like the right thing to do.
       console.log(
+        `set pauseowner of L1CrossDomainMessenger (implementation)...`
+      )
+      // set the pauseowner
+      const pauseowner = hre.deployConfig.bvmCrossDomainPauseOwner
+      await contract.setPauseOwner(pauseowner)
+      console.log(`Checking that contract pause owner was correctly set...`)
+      await awaitCondition(
+        async () => {
+          console.log(contract.getPauseOwner())
+          console.log(pauseowner)
+          return hexStringEquals(await contract.getPauseOwner(), pauseowner)
+        },
+        5000,
+        100
+      )
+
+      // Same thing as above, we want to transfer ownership of this contract to the owner of the
+      // AddressManager. Not technically necessary but seems like the right thing to do.
+      console.log(
         `Transferring ownership of L1CrossDomainMessenger (implementation)...`
       )
       const owner = hre.deployConfig.bvmAddressManagerOwner
