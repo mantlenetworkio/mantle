@@ -70,10 +70,12 @@ type Driver struct {
 }
 
 func NewDriver(cfg Config) (*Driver, error) {
+	log.Info("Show configration", "cfg.SCCAddr", cfg.SCCAddr, "cfg.CTCAddr", cfg.CTCAddr, "cfg.FPRollupAddr", cfg.FPRollupAddr)
 	sccContract, err := scc.NewStateCommitmentChain(
 		cfg.SCCAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewStateCommitmentChain in error", "error", err)
 		return nil, err
 	}
 
@@ -81,6 +83,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.CTCAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewCanonicalTransactionChain in error", "error", err)
 		return nil, err
 	}
 
@@ -88,11 +91,13 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.FPRollupAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewRollup in error", "error", err)
 		return nil, err
 	}
 
 	assertionAddr, err := fpRollup.Assertions(&bind.CallOpts{})
 	if err != nil {
+		log.Error("fpRollup get Assertions in error", "error", err)
 		return nil, err
 	}
 
@@ -100,6 +105,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		assertionAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewAssertionMap in error", "error", err)
 		return nil, err
 	}
 
@@ -107,12 +113,14 @@ func NewDriver(cfg Config) (*Driver, error) {
 		scc.StateCommitmentChainABI,
 	))
 	if err != nil {
+		log.Error("Parse StateCommitmentChain ABI in error", "error", err)
 		return nil, err
 	}
 	parsedFP, err := abi.JSON(strings.NewReader(
 		fpbindings.RollupABI,
 	))
 	if err != nil {
+		log.Error("Parse Rollup ABI in error", "error", err)
 		return nil, err
 	}
 
