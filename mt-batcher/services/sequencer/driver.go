@@ -791,13 +791,13 @@ func (d *Driver) CheckConfirmedWorker() {
 			log.Info("Checker db batch index and contract batch idnex", "DbBatchIndex", batchIndex, "ContractBatchIndex", latestReRollupBatchIndex.Uint64())
 			for i := batchIndex; i <= latestReRollupBatchIndex.Uint64(); i++ {
 				log.Info("Checker batch confirm data index", "batchIndex", i)
-				batchIndex, err := d.Cfg.EigenDaContract.ReRollupBatchIndex(&bind.CallOpts{}, big.NewInt(int64(i)))
+				reConfirmedBatchIndex, err := d.Cfg.EigenDaContract.ReRollupBatchIndex(&bind.CallOpts{}, big.NewInt(int64(i)))
 				if err != nil {
 					log.Info("Checker get batch index by re rollup index fail", "err", err)
 					continue
 				}
 
-				rollupStore, err := d.Cfg.EigenDaContract.RollupBatchIndexRollupStores(&bind.CallOpts{}, batchIndex)
+				rollupStore, err := d.Cfg.EigenDaContract.RollupBatchIndexRollupStores(&bind.CallOpts{}, reConfirmedBatchIndex)
 				if err != nil {
 					log.Info("Checker get rollup store fail", "err", err)
 					continue
@@ -825,7 +825,7 @@ func (d *Driver) CheckConfirmedWorker() {
 					}
 
 					log.Info("MtBatcher disperse re-rollup store data success", "txHash", receipt.TxHash.String())
-					csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, rollupStore.DataStoreId, big.NewInt(int64(i)), true)
+					csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, rollupStore.DataStoreId, reConfirmedBatchIndex, true)
 					if err != nil {
 						log.Error("Checker confirm store data fail", "err", err)
 						continue
