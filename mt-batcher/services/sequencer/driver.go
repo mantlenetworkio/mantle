@@ -789,7 +789,7 @@ func (d *Driver) CheckConfirmedWorker() {
 			}
 
 			log.Info("Checker db batch index and contract batch idnex", "DbBatchIndex", batchIndex, "ContractBatchIndex", latestReRollupBatchIndex.Uint64())
-			for i := batchIndex; i <= latestReRollupBatchIndex.Uint64(); i++ {
+			for i := batchIndex; i < latestReRollupBatchIndex.Uint64(); i++ {
 				log.Info("Checker batch confirm data index", "batchIndex", i)
 				reConfirmedBatchIndex, err := d.Cfg.EigenDaContract.ReRollupBatchIndex(&bind.CallOpts{}, big.NewInt(int64(i)))
 				if err != nil {
