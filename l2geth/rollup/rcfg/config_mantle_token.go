@@ -1,13 +1,18 @@
 package rcfg
 
 import (
-	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"math/big"
+
+	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 )
 
 var (
 	// predeploy
-	L2MantleTokenAddress        = common.HexToAddress("0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000")
+	L2MantleTokenAddress = dump.BvmMantleAddress
+
+	// L2WrappedMantleTokenAddress deployed by WMANTLEDeployer, the Wrapped Mantle Token Address is deterministic
+	// 0x9523886f149E12D04A9dd1E97214B00A039df199
 	L2WrappedMantleTokenAddress = common.HexToAddress("0x9523886f149E12D04A9dd1E97214B00A039df199")
 
 	MantleTokenNameSlot          = common.BigToHash(big.NewInt(3))
@@ -15,22 +20,20 @@ var (
 	WrappedMantleTokenNameSlot   = common.BigToHash(big.NewInt(3))
 	WrappedMantleTokenSymbolSlot = common.BigToHash(big.NewInt(4))
 
-	MantleTokenName               = "Mantle Tokens"
-	MantleTokenSymbol             = "MNTs"
-	WrappedMantleTokenName        = "Wrapped MANTLEs"
-	WrappenMantleTokenSymbol      = "WMANTLEs"
-	MantleTokenNameValue          = common.BytesToHash(packBytesSliceWithLen([]byte(MantleTokenName), len(MantleTokenName)))
-	MantleTokenSymbolValue        = common.BytesToHash(packBytesSliceWithLen([]byte(MantleTokenSymbol), len(MantleTokenSymbol)))
-	WrappedMantleTokenNameValue   = common.BytesToHash(packBytesSliceWithLen([]byte(WrappedMantleTokenName), len(WrappedMantleTokenName)))
-	WrappedMantleTokenSymbolValue = common.BytesToHash(packBytesSliceWithLen([]byte(WrappenMantleTokenSymbol), len(WrappenMantleTokenSymbol)))
+	MantleTokenName               = "Mantle Token"
+	MantleTokenSymbol             = "MNT"
+	WrappedMantleTokenName        = "Wrapped MANTLE"
+	WrappedMantleTokenSymbol      = "WMANTLE"
+	MantleTokenNameValue          = common.BytesToHash(packStringForSlot(MantleTokenName))
+	MantleTokenSymbolValue        = common.BytesToHash(packStringForSlot(MantleTokenSymbol))
+	WrappedMantleTokenNameValue   = common.BytesToHash(packStringForSlot(WrappedMantleTokenName))
+	WrappedMantleTokenSymbolValue = common.BytesToHash(packStringForSlot(WrappedMantleTokenSymbol))
 )
 
-// packBytesSlice packs the given bytes as [L, V] as the canonical representation
-// bytes slice
-// string	->	slot
-// MNT 		-> 	[77 78 84 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 6]
-func packBytesSliceWithLen(bytes []byte, len int) []byte {
-	val := common.RightPadBytes(bytes, 32)
-	val[31] = byte(len * 2)
-	return val
+// packStringForSlot pack a string value to store in contract directly
+// just test when len(string) < 32
+func packStringForSlot(value string) []byte {
+	valueBytes := common.RightPadBytes([]byte(value), 32)
+	valueBytes[31] = byte(len(value) * 2)
+	return valueBytes
 }
