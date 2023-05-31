@@ -824,7 +824,7 @@ func (d *Driver) CheckConfirmedWorker() {
 						log.Error("Checker disperse store data fail", "err", err)
 						continue
 					}
-
+					time.Sleep(10 * time.Second) // sleep for data into graph node
 					log.Info("MtBatcher disperse re-rollup store data success", "txHash", receipt.TxHash.String())
 					csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, rollupStore.DataStoreId, reConfirmedBatchIndex, true)
 					if err != nil {
