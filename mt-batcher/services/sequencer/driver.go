@@ -808,15 +808,16 @@ func (d *Driver) CheckConfirmedWorker() {
 						log.Info("Checker get l2 rollup block fail", "err", err)
 						continue
 					}
+					log.Info("Checker DataStoreIdToL2RollUpBlock", "rollupBlock.StartL2BlockNumber", rollupBlock.StartL2BlockNumber, "rollupBlock.EndBL2BlockNumber", rollupBlock.EndBL2BlockNumber)
 
 					aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
 						d.Ctx, rollupBlock.StartL2BlockNumber, rollupBlock.EndBL2BlockNumber,
 					)
-
 					if err != nil {
 						log.Error("Checker eigenDa sequencer unable to craft batch tx", "err", err)
 						continue
 					}
+					log.Info("Checker tx aggregator", "startL2BlockNumber", startL2BlockNumber, "endL2BlockNumber", endL2BlockNumber)
 
 					params, receipt, err := d.DisperseStoreData(aggregateTxData, startL2BlockNumber, endL2BlockNumber, true)
 					if err != nil {
