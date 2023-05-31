@@ -215,14 +215,14 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(108), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), big.NewInt(0), new(EthashConfig), nil}
+	AllEthashProtocolChanges = &ChainConfig{big.NewInt(108), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), new(EthashConfig), nil}
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(420), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), big.NewInt(0), nil, &CliqueConfig{Period: 0, Epoch: 30000}}
-	TestChainConfig          = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), big.NewInt(0), new(EthashConfig), nil}
+	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(420), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, &CliqueConfig{Period: 0, Epoch: 30000}}
+	TestChainConfig          = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), new(EthashConfig), nil}
 	TestRules                = TestChainConfig.Rules(new(big.Int))
 
 	// OpMainnetChainID is the ID of Mantle's mainnet chain.
@@ -309,8 +309,9 @@ type ChainConfig struct {
 
 	EWASMBlock *big.Int `json:"ewasmBlock,omitempty"` // EWASM switch block (nil = no fork, 0 = already activated)
 
-	UpdateGasLimitBlock *big.Int `json:"updateGaslimitBlock,omitempty"` //  UpdateGasLimitBlock witch block (nil = no fork, 0 = already activated)
-	EigenDaBlock        *big.Int `json:"eigenDaBlock,omitempty"`        //  EigenDaBlock witch block (nil = no fork, 0 = already activated)
+	UpdateGasLimitBlock     *big.Int `json:"updateGaslimitBlock,omitempty"`          //  UpdateGasLimitBlock witch block (nil = no fork, 0 = already activated)
+	EigenDaBlock            *big.Int `json:"eigenDaBlock,omitempty"`                 //  EigenDaBlock witch block (nil = no fork, 0 = already activated)
+	MantleTokenUpgradeBlock *big.Int `json:"mantleTokenUpgradeBlockBlock,omitempty"` //  MantleTokenUpgradeBlock witch block (nil = no fork, 0 = already activated)
 
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
@@ -347,7 +348,7 @@ func (c *ChainConfig) String() string {
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v Petersburg: %v Istanbul: %v, Muir Glacier: %v, Berlin: %v,UpdateGasLimitBlock:%v,EigenDaBlock:%v, Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v Petersburg: %v Istanbul: %v, Muir Glacier: %v, Berlin: %v,UpdateGasLimitBlock:%v,EigenDaBlock:%v, MantleTokenUpgradeBlock:%v, Engine: %v}",
 		c.ChainID,
 		c.HomesteadBlock,
 		c.DAOForkBlock,
@@ -363,6 +364,7 @@ func (c *ChainConfig) String() string {
 		c.BerlinBlock,
 		c.UpdateGasLimitBlock,
 		c.EigenDaBlock,
+		c.MantleTokenUpgradeBlock,
 		engine,
 	)
 }
@@ -437,6 +439,11 @@ func (c *ChainConfig) IsUpdateGasLimitBlock(num *big.Int) bool {
 // IsEigenDa returns whether num represents a block number after the IsEigenDa fork
 func (c *ChainConfig) IsEigenDa(num *big.Int) bool {
 	return c.EigenDaBlock.Cmp(num) == 0
+}
+
+// IsMantleTokenUpgrade returns whether num represents a block number after the IsMantleTokenUpgrade fork
+func (c *ChainConfig) IsMantleTokenUpgrade(num *big.Int) bool {
+	return c.MantleTokenUpgradeBlock.Cmp(num) == 0
 }
 
 // IsSDUpdate returns whether num represents a block number after the SD update fork
@@ -556,6 +563,9 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	}
 	if isForkIncompatible(c.EigenDaBlock, newcfg.EigenDaBlock, head) {
 		return newCompatError("EigenDa fork block", c.EigenDaBlock, newcfg.EigenDaBlock)
+	}
+	if isForkIncompatible(c.MantleTokenUpgradeBlock, newcfg.MantleTokenUpgradeBlock, head) {
+		return newCompatError("Mantle Token fork block", c.MantleTokenUpgradeBlock, newcfg.MantleTokenUpgradeBlock)
 	}
 	return nil
 }
