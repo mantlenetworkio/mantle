@@ -221,7 +221,7 @@ func EstimateGas(client *ethclient.Client, prikey *ecdsa.PrivateKey,chainId *big
 
 	opts.GasTipCap = gasTipCap
 	opts.GasFeeCap = gasFeeCap
-	opts.GasLimit = 25 * gasLimit //add 20% buffer to gas limit
+	opts.GasLimit = 120 * gasLimit / 100//add 20% buffer to gas limit
 
 	return rawContract.RawTransact(opts, tx.Data())
 }

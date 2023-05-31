@@ -22,8 +22,8 @@ type Configuration struct {
 	TimedTaskInterval              string        `json:"timed_task_interval" mapstructure:"timed_task_interval"`
 	L1ReceiptConfirmTimeout        string        `json:"l1_receipt_confirm_timeout" mapstructure:"l1_receipt_confirm_timeout"`
 	L1ConfirmBlocks                int           `json:"l1_confirm_blocks" mapstructure:"l1_confirm_blocks"`
-	SignedBatchesWindow            int           `json:"signed_batches_window" mapstructure:"signed_batches_window"`
-	MinSignedInWindow              int           `json:"min_signed_in_window" mapstructure:"min_signed_in_window"`
+	L1StartBlockNumber             string      `json:"l1_start_block_number" mapstructure:"l1_start_block_number"`
+	MissSignedNumber               int           `json:"miss_signed_number" mapstructure:"miss_signed_number"`
 }
 
 type ManagerConfig struct {
@@ -54,6 +54,7 @@ type NodeConfig struct {
 	KeyGenTimeout   time.Duration `json:"key_gen_timeout" mapstructure:"key_gen_timeout"`
 	KeySignTimeout  time.Duration `json:"key_sign_timeout" mapstructure:"key_sign_timeout"`
 	PreParamTimeout time.Duration `json:"pre_param_timeout" mapstructure:"pre_param_timeout"`
+	GasLimitScaler  int           `json:"gas_limit_scaler" mapstructure:"gas_limit_scaler"`
 
 	Secrets SecretsManagerConfig `json:"secrets" mapstructure:"secrets"`
 	Shamir  ShamirConfig         `json:"shamir" mapstructure:"shamir"`
@@ -101,8 +102,8 @@ func DefaultConfiguration() Configuration {
 		TimedTaskInterval:       "10s",
 		L1ReceiptConfirmTimeout: "20m",
 		L1ConfirmBlocks:         10,
-		SignedBatchesWindow:     100,
-		MinSignedInWindow:       50,
+		L1StartBlockNumber:      "1",
+		MissSignedNumber:        50,
 		Manager: ManagerConfig{
 			KeygenTimeout:     "120s",
 			CPKConfirmTimeout: "2h",
@@ -114,6 +115,7 @@ func DefaultConfiguration() Configuration {
 			KeyGenTimeout:   10 * time.Second,
 			KeySignTimeout:  10 * time.Second,
 			PreParamTimeout: 5 * time.Minute,
+			GasLimitScaler:  2,
 		},
 	}
 }

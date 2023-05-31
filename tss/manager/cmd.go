@@ -3,15 +3,17 @@ package manager
 import (
 	"context"
 	"errors"
+	"net/http"
+	"os"
+	"os/signal"
+	"strconv"
+	"syscall"
+	"time"
+
 	"github.com/mantlenetworkio/mantle/tss/index"
 	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
 	"github.com/mantlenetworkio/mantle/tss/manager/store"
 	"github.com/mantlenetworkio/mantle/tss/slash"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
@@ -34,7 +36,8 @@ func Command() *cobra.Command {
 
 func run(cmd *cobra.Command) error {
 	config := common.GetConfigFromCmd(cmd)
-	log.Info("config info print", "SignedBatchesWindow", config.SignedBatchesWindow, "MinSignedInWindow", config.MinSignedInWindow)
+	log.Info("config info print", "MissSignedNumber", config.MissSignedNumber)
+	log.Info("l1 start block number", "block number", config.L1StartBlockNumber)
 	if len(config.Manager.PrivateKey) == 0 {
 		return errors.New("need to config private key")
 	}
@@ -46,11 +49,18 @@ func run(cmd *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-	observer, err := index.NewIndexer(managerStore, config.L1Url, config.L1ConfirmBlocks, config.SccContractAddress, config.TimedTaskInterval)
+	l1StartBlockNumber, err := strconv.ParseUint(
+		config.L1StartBlockNumber, 10, 32,
+	)
 	if err != nil {
 		return err
 	}
-	observer = observer.SetHook(slash.NewSlashing(managerStore, managerStore, config.SignedBatchesWindow, config.MinSignedInWindow))
+
+	observer, err := index.NewIndexer(managerStore, config.L1Url, config.L1ConfirmBlocks, config.SccContractAddress, config.TimedTaskInterval, l1StartBlockNumber)
+	if err != nil {
+		return err
+	}
+	observer = observer.SetHook(slash.NewSlashing(managerStore, managerStore, config.MissSignedNumber))
 	observer.Start()
 
 	queryService := l1chain.NewQueryService(config.L1Url, config.TssGroupContractAddress, config.L1ConfirmBlocks, managerStore)

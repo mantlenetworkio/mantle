@@ -13,16 +13,14 @@ type Slashing struct {
 	stateBatchStore index.StateBatchStore
 	slashingStore   SlashingStore
 
-	signedBatchesWindow int
-	minSignedInWindow   int
+	missSignedNumber int
 }
 
-func NewSlashing(sbs index.StateBatchStore, ss SlashingStore, signedBatchesWindow, minSignedInWindow int) Slashing {
+func NewSlashing(sbs index.StateBatchStore, ss SlashingStore, missSignedNumber int) Slashing {
 	return Slashing{
 		stateBatchStore:     sbs,
 		slashingStore:       ss,
-		signedBatchesWindow: signedBatchesWindow,
-		minSignedInWindow:   minSignedInWindow,
+		missSignedNumber: missSignedNumber,
 	}
 }
 
@@ -42,7 +40,6 @@ func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
 		}
 	}
 
-	maxMissed := s.signedBatchesWindow - s.minSignedInWindow
 	// update signingInfo for working nodes
 	for _, workingNode := range stateBatch.WorkingNodes {
 		address, err := tss.NodeToAddress(workingNode)
@@ -65,13 +62,15 @@ func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
 		if err != nil {
 			return err
 		}
-		if updatedSigningInfo.MissedBlocksCounter > uint64(maxMissed) {
+		if updatedSigningInfo.MissedBlocksCounter > uint64(s.missSignedNumber) {
 			s.slashingStore.SetSlashingInfo(SlashingInfo{
 				Address:    address,
 				ElectionId: stateBatch.ElectionId,
 				BatchIndex: stateBatch.BatchIndex,
 				SlashType:  tss.SlashTypeLiveness,
 			})
+			updatedSigningInfo.MissedBlocksCounter = 0
+			s.slashingStore.SetSigningInfo(updatedSigningInfo)
 		}
 	}
 
@@ -87,20 +86,8 @@ func (s Slashing) UpdateSigningInfo(batchIndex uint64, address common.Address, e
 	if !found {
 		signingInfo = s.InitializeSigningInfo(batchIndex, address, missed)
 	} else {
-		signingInfo.IndexOffset++
-
-		idx := signingInfo.IndexOffset % uint64(s.signedBatchesWindow)
-
-		previous := s.slashingStore.GetNodeMissedBatchBitArray(address, idx)
-		switch {
-		case !previous && missed:
-			s.slashingStore.SetNodeMissedBatchBitArray(address, idx, true)
-			signingInfo.MissedBlocksCounter++
-		case previous && !missed:
-			s.slashingStore.SetNodeMissedBatchBitArray(address, idx, false)
-			signingInfo.MissedBlocksCounter--
-		default:
-			// array value at this index has not changed, no need to update counter
+		if missed {
+			signingInfo.MissedBlocksCounter++;
 		}
 	}
 	s.slashingStore.SetSigningInfo(signingInfo)
@@ -110,8 +97,6 @@ func (s Slashing) UpdateSigningInfo(batchIndex uint64, address common.Address, e
 func (s Slashing) InitializeSigningInfo(batchIndex uint64, address common.Address, missed bool) SigningInfo {
 	signingInfo := SigningInfo{
 		Address:             address,
-		StartBatchIndex:     batchIndex,
-		IndexOffset:         0,
 		MissedBlocksCounter: 0,
 	}
 	if missed {
