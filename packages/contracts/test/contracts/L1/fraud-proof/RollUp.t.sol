@@ -2,8 +2,9 @@
 pragma solidity ^0.8.13;
 
 import '../../../../contracts/libraries/resolver/Lib_AddressManager.sol';
-import '../../../../contracts/L1/rollup/StateCommitmentChain.sol';
 import '../../../../contracts/L1/messaging/L1CrossDomainMessenger.sol';
+import '../../../../contracts/L1/rollup/StateCommitmentChain.sol';
+
 import '../../../../contracts/L1/fraud-proof/verifier/subverifiers/StackOpVerifier.sol';
 import '../../../../contracts/L1/fraud-proof/verifier/test-driver/VerifierTestDriver.sol';
 import '../../../../contracts/L1/fraud-proof/verifier/VerifierEntry.sol';
@@ -19,10 +20,15 @@ import "forge-std/Test.sol";
 import "../../mocks/EmptyContract.sol";
 import {console} from "forge-std/console.sol";
 
-contract RollUpTest is Test {
+contract RollUPTest is Test {
 
     ProxyAdmin public proxyAdmin;
-    TransparentUpgradeableProxy public tu;
+    TransparentUpgradeableProxy public proxy;
+    EmptyContract public empt;
+
+    Lib_AddressManager public addressManager;
+    L1CrossDomainMessenger public l1cdm;
+    StateCommitmentChain public scc;
 
     StackOpVerifier public blockInitiationVerifier;
     StackOpVerifier public blockFinalizationVerifier;
@@ -37,19 +43,32 @@ contract RollUpTest is Test {
     VerifierEntry public verifierEntry;
     VerificationContext.Context public ctx;
     
-    Lib_AddressManager public addressManager;
-    StateCommitmentChain public scc;
-
     BitTokenERC20 public l1Bit;
 
     function setUp() public {
-
-        addressManager = new Lib_AddressManager();
-        scc = new StateCommitmentChain(address(addressManager), address(0), 0 ,0);
-        addressManager.setAddress('BVM_Rolluper', address(this));
-        addressManager.setAddress('StateCommitmentChain', address(scc));
+        
         // vm.startPrank(deployer);
         proxyAdmin = new ProxyAdmin();
+
+        addressManager = new Lib_AddressManager();
+
+        L1CrossDomainMessenger l1cdmImpl = new L1CrossDomainMessenger();
+        proxy = new TransparentUpgradeableProxy(
+            address(l1cdmImpl), 
+            address(proxyAdmin), 
+            abi.encodeWithSelector(L1CrossDomainMessenger.initialize.selector, address(addressManager)));
+        l1cdm = L1CrossDomainMessenger(address(proxy));
+
+        scc = new StateCommitmentChain(address(addressManager), address(l1cdm), 0, 0);
+
+        l1Bit = new BitTokenERC20("BitToken", "BIT");
+
+        VerifierEntry verifierEntryImpl = new VerifierEntry();
+        proxy = new TransparentUpgradeableProxy(
+            address(verifierEntryImpl), 
+            address(proxyAdmin), 
+            abi.encodeWithSelector(verifierEntry.initialize.selector));
+        verifierEntry = VerifierEntry(address(proxy));
 
         blockInitiationVerifier = new StackOpVerifier();
         blockFinalizationVerifier = new StackOpVerifier();
@@ -71,23 +90,15 @@ contract RollUpTest is Test {
             address(callOpVerifier),
             address(invalidOpVerifier)
         );
-        l1Bit = new BitTokenERC20("BitToken", "BIT");
 
-        VerifierEntry verifierEntryImpl = new VerifierEntry();
-        tu = new TransparentUpgradeableProxy(address(verifierEntryImpl), address(this), abi.encodeWithSelector(verifierEntry.initialize.selector));
-        
-        vm.prank(address(0));
-        verifierEntryImpl.setVerifier(0, stackOpVerifier);
-        tu.admin();
-        tu.changeAdmin(address(this));
-
-        vm.prank(address(0));
-        verifierEntryImpl.setVerifier(0, stackOpVerifier);
-
+        // verifierEntry.setVerifier(0, address(blockInitiationVerifier));
     }
 
     function testInfo() public {
 
-        // assertEq(verifierEntryImpl.owner(), address(proxyAdmin));
+        assertEq(verifierEntry.owner(), address(this));
+
+        console.log(l1cdm.paused());
     }
+
 }

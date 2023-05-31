@@ -396,7 +396,7 @@ contract TssDelegationManager is DelegationManager {
         address operator = delegation.delegatedTo(sender);
         // check if the operator is still mpc node, if the remaining shares meet the mini requirement
         if (delegation.isDelegated(sender)){
-            if (ITssGroupManager(tssGroupManager).memberExistActive(sender)){
+            if (ITssGroupManager(tssGroupManager).memberExistActive(operator)){
                 require(!TssStakingSlashing(stakingSlash).isJailed(operator),"the operator is not in jail status");
                 uint256 rest= delegation.operatorShares(operator, delegationShare) - shares;
                 uint256 balance = delegationShare.sharesToUnderlying(rest);

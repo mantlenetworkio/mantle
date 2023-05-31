@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import '../../../../contracts/libraries/resolver/Lib_AddressManager.sol';
-import '../../../../contracts/L1/messaging/L1CrossDomainMessenger.sol';
 import '../../../../contracts/L1/fraud-proof/verifier/subverifiers/StackOpVerifier.sol';
 import '../../../../contracts/L1/fraud-proof/verifier/test-driver/VerifierTestDriver.sol';
 import '../../../../contracts/L1/fraud-proof/verifier/VerifierEntry.sol';
@@ -21,6 +19,8 @@ import {console} from "forge-std/console.sol";
 contract VerifierTest is Test {
 
     ProxyAdmin public proxyAdmin;
+    TransparentUpgradeableProxy public proxy;
+    EmptyContract public empt;
 
     StackOpVerifier public blockInitiationVerifier;
     StackOpVerifier public blockFinalizationVerifier;
@@ -41,7 +41,7 @@ contract VerifierTest is Test {
         
         // vm.startPrank(deployer);
         proxyAdmin = new ProxyAdmin();
-
+        
         blockInitiationVerifier = new StackOpVerifier();
         blockFinalizationVerifier = new StackOpVerifier();
         interTxVerifier = new StackOpVerifier();
@@ -64,19 +64,12 @@ contract VerifierTest is Test {
         );
         l1Bit = new BitTokenERC20("BitToken", "BIT");
 
-        EmptyContract emptyContract = new EmptyContract();
-
-        verifierEntry = VerifierEntry(
-            address(new TransparentUpgradeableProxy(address(emptyContract), address(proxyAdmin), ""))
-        );
-
         VerifierEntry verifierEntryImpl = new VerifierEntry();
-        proxyAdmin.upgradeAndCall(
-            TransparentUpgradeableProxy(payable(address(verifierEntry))),
-            address(verifierEntryImpl),
-            abi.encodeWithSelector(verifierEntry.initialize.selector, address(this))
-        );
-
+        proxy = new TransparentUpgradeableProxy(
+            address(verifierEntryImpl), 
+            address(proxyAdmin), 
+            abi.encodeWithSelector(verifierEntry.initialize.selector));
+        verifierEntry = VerifierEntry(address(proxy));
     }
 
     function testInfo() public {
