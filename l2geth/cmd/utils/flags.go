@@ -940,7 +940,7 @@ var (
 	FraudProofOperatorAddrFlag = &cli.StringFlag{
 		Name:   "fp.stake-addr",
 		Usage:  "The sequencer/validator address to be unlocked (pass passphrash via --password)",
-		EnvVar: "OPERATOR_ADDR",
+		EnvVar: "FP_OPERATOR_ADDR",
 		Value:  "",
 	}
 	FraudProofStakeAmount = &cli.Uint64Flag{

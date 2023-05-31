@@ -129,15 +129,9 @@ const deployFn: DeployFunction = async (hre) => {
     Proxy__AssertionMap.address, // address _assertionMap,
     0, // uint256 _minimumAssertionPeriod,
     0, // uint256 _baseStakeAmount
-    '0x89e2ce7fd44675606b4ced40dd2ccc67f7ae2851dd1b86409bdaeac791a60d3e', // bytes32 _initialVMhash //TODO-FIXME
-    [
-      '0xd5b002298b2e81b4ced1b6c8cf1964023cdc3758',
-      '0xd55fe10a1acb32b6183bdfbeb42e9961c3cb8792',
-    ],
-    [
-      '0xd5b002298b2e81b4ced1b6c8cf1964023cdc3758',
-      '0xd55fe10a1acb32b6183bdfbeb42e9961c3cb8792',
-    ],
+    '0x0000000000000000000000000000000000000000000000000000000000000000', // bytes32 _initialVMhash //TODO-FIXME
+    [],
+    [],
   ]
   callData = Impl__Rollup.interface.encodeFunctionData('initialize', rollupArgs)
   await deployAndVerifyAndThen({

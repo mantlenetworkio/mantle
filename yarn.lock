@@ -2355,17 +2355,6 @@
     "@ethersproject/abstract-signer" "^5.6.2"
     "@mantleio/core-utils" "0.1.0"
 
-"@mantleio/sdk@0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@mantleio/sdk/-/sdk-0.1.4.tgz#cc2817fbbb9befe68ae7a52c0c40a29a87d47527"
-  integrity sha512-5j6ElA7+WZ7SAL54e2UzggaqtewGzB2Rs53BZY628eyiFWQVJikO58X9GCoi4c+osfhcF5+ok2TLy43jgoPRHQ==
-  dependencies:
-    "@mantleio/contracts" "0.1.0"
-    "@mantleio/core-utils" "0.1.0"
-    lodash "^4.17.21"
-    merkletreejs "^0.2.27"
-    rlp "^2.2.7"
-
 "@manypkg/find-root@^1.1.0":
   version "1.1.0"
   resolved "https://registry.npmjs.org/@manypkg/find-root/-/find-root-1.1.0.tgz"

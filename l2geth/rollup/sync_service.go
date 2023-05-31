@@ -1609,3 +1609,19 @@ func (s *SyncService) verifyTx(tx *types.Transaction) (bool, error) {
 		return true, nil
 	}
 }
+
+func (s *SyncService) GetTxStatusByNumber(number uint64) (*types.TxStatusResponse, error) {
+	index := number - 1
+	if index < 0 {
+		return nil, errors.New("index should bigger or equal than 0")
+	}
+	stateRsp, err := s.client.GetTxStatusResponse(index, s.backend)
+	if err != nil {
+		return nil, err
+	}
+	if stateRsp == nil {
+		return nil, errors.New("tx status not ready")
+	}
+
+	return stateRsp, nil
+}

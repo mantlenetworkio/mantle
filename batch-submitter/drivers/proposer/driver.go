@@ -70,10 +70,12 @@ type Driver struct {
 }
 
 func NewDriver(cfg Config) (*Driver, error) {
+	log.Info("Show configration", "cfg.SCCAddr", cfg.SCCAddr, "cfg.CTCAddr", cfg.CTCAddr, "cfg.FPRollupAddr", cfg.FPRollupAddr)
 	sccContract, err := scc.NewStateCommitmentChain(
 		cfg.SCCAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewStateCommitmentChain in error", "error", err)
 		return nil, err
 	}
 
@@ -81,6 +83,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.CTCAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewCanonicalTransactionChain in error", "error", err)
 		return nil, err
 	}
 
@@ -88,11 +91,13 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.FPRollupAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewRollup in error", "error", err)
 		return nil, err
 	}
 
 	assertionAddr, err := fpRollup.Assertions(&bind.CallOpts{})
 	if err != nil {
+		log.Error("fpRollup get Assertions in error", "error", err)
 		return nil, err
 	}
 
@@ -100,6 +105,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		assertionAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewAssertionMap in error", "error", err)
 		return nil, err
 	}
 
@@ -107,12 +113,14 @@ func NewDriver(cfg Config) (*Driver, error) {
 		scc.StateCommitmentChainABI,
 	))
 	if err != nil {
+		log.Error("Parse StateCommitmentChain ABI in error", "error", err)
 		return nil, err
 	}
 	parsedFP, err := abi.JSON(strings.NewReader(
 		fpbindings.RollupABI,
 	))
 	if err != nil {
+		log.Error("Parse Rollup ABI in error", "error", err)
 		return nil, err
 	}
 
@@ -501,19 +509,25 @@ func (d *Driver) SendTransaction(
 
 func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32]byte, shouldStartAtElement *big.Int, signature []byte, blocks []*l2types.Block) (*types.Transaction, error) {
 	var latestAssertion rollupTypes.Assertion
-	var staker rollupTypes.Staker
-	if ret, err := d.fpRollup.Stakers(&bind.CallOpts{}, opts.From); err != nil {
+	var stakerInfo rollupTypes.Staker
+	var stakerAddr common.Address
+	if ret, err := d.fpRollup.Registers(&bind.CallOpts{}, opts.From); err != nil {
 		return nil, err
 	} else {
-		staker.IsStaked = ret.IsStaked
-		staker.AmountStaked = ret.AmountStaked
-		staker.AssertionID = ret.AssertionID
-		staker.CurrentChallenge = ret.CurrentChallenge
+		stakerAddr = ret
 	}
-	if ret, err := d.fpAssertion.Assertions(&bind.CallOpts{}, staker.AssertionID); err != nil {
+	if ret, err := d.fpRollup.Stakers(&bind.CallOpts{}, stakerAddr); err != nil {
 		return nil, err
 	} else {
-		latestAssertion.ID = staker.AssertionID
+		stakerInfo.IsStaked = ret.IsStaked
+		stakerInfo.AmountStaked = ret.AmountStaked
+		stakerInfo.AssertionID = ret.AssertionID
+		stakerInfo.CurrentChallenge = ret.CurrentChallenge
+	}
+	if ret, err := d.fpAssertion.Assertions(&bind.CallOpts{}, stakerInfo.AssertionID); err != nil {
+		return nil, err
+	} else {
+		latestAssertion.ID = stakerInfo.AssertionID
 		latestAssertion.VmHash = ret.StateHash
 		latestAssertion.InboxSize = ret.InboxSize
 		latestAssertion.Parent = ret.Parent
@@ -530,6 +544,7 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 	}
 	if lastCreatedAssertionID.Uint64() != 0 && latestAssertion.InboxSize.Uint64()+uint64(len(txBatch.Txs)) != txBatch.LastBlockNumber() {
 		log.Error("Online total InboxSize not match with local batch's LatestBlockNumber")
+		log.Info(fmt.Sprintf("show proposer error, currenyInboxSize: %d, batchLength: %d, lastBlockNumber: %d", latestAssertion.InboxSize.Uint64(), len(txBatch.Txs), txBatch.LastBlockNumber()))
 		return nil, errors.New("Online total InboxSize not match with local batch's LatestBlockNumber")
 	}
 

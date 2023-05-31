@@ -23,6 +23,7 @@
 pragma solidity ^0.8.0;
 
 import "./AssertionMap.sol";
+import {Lib_BVMCodec} from "../../libraries/codec/Lib_BVMCodec.sol";
 
 interface IRollup {
     event AssertionCreated(
@@ -230,11 +231,11 @@ interface IRollup {
      */
     function rejectFirstUnresolvedAssertion() external;
 
-//* @param stakerAddress Address of a staker staked on a different branch to the first unresolved assertion.
-//* If the first unresolved assertion's parent is confirmed, this parameter is used to establish that a staker exists
-//* on a different branch of the assertion chain. This parameter is ignored when the parent of the first unresolved
-//* assertion is not the last confirmed assertion.
-//    function rejectFirstUnresolvedAssertion(address stakerAddress) external;
+    //* @param stakerAddress Address of a staker staked on a different branch to the first unresolved assertion.
+    //* If the first unresolved assertion's parent is confirmed, this parameter is used to establish that a staker exists
+    //* on a different branch of the assertion chain. This parameter is ignored when the parent of the first unresolved
+    //* assertion is not the last confirmed assertion.
+    function rejectLatestCreatedAssertionWithBatch(Lib_BVMCodec.ChainBatchHeader memory _batchHeader) external;
 
     /**
      * @notice Completes ongoing challenge. Callback, called by a challenge contract.

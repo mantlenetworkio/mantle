@@ -63,6 +63,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.CTCAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewCanonicalTransactionChain in error", "error", err)
 		return nil, err
 	}
 
@@ -70,11 +71,13 @@ func NewDriver(cfg Config) (*Driver, error) {
 		ctc.CanonicalTransactionChainABI,
 	))
 	if err != nil {
+		log.Error("Parse CanonicalTransactionChain in error", "error", err)
 		return nil, err
 	}
 
 	ctcABI, err := ctc.CanonicalTransactionChainMetaData.GetAbi()
 	if err != nil {
+		log.Error("Get CanonicalTransactionChain ABI in error", "error", err)
 		return nil, err
 	}
 
@@ -87,17 +90,20 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.DAAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewBVMEigenDataLayrChain in error", "error", err)
 		return nil, err
 	}
 	daParsed, err := abi.JSON(strings.NewReader(
 		da.BVMEigenDataLayrChainABI,
 	))
 	if err != nil {
+		log.Error("Parse BVMEigenDataLayrChain in error", "error", err)
 		return nil, err
 	}
 
 	daABI, err := da.BVMEigenDataLayrChainMetaData.GetAbi()
 	if err != nil {
+		log.Error("Get BVMEigenDataLayrChain ABI in error", "error", err)
 		return nil, err
 	}
 

@@ -24,9 +24,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
-import "hardhat/console.sol";
-
 import "./challenge/Challenge.sol";
 import "./challenge/ChallengeLib.sol";
 import "./AssertionMap.sol";
@@ -36,6 +33,8 @@ import "./WhiteList.sol";
 import "./verifier/IVerifier.sol";
 import {Lib_AddressResolver} from "../../libraries/resolver/Lib_AddressResolver.sol";
 import {Lib_AddressManager} from "../../libraries/resolver/Lib_AddressManager.sol";
+import {Lib_BVMCodec} from "../../libraries/codec/Lib_BVMCodec.sol";
+
 
 abstract contract RollupBase is IRollup, Initializable {
     // Config parameters
@@ -146,12 +145,8 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             block.number // deadline (unchallengeable)
         );
 
-        for (uint i = 0; i < stakerWhitelists.length; i++) {
-            stakerWhitelist[stakerWhitelists[i]] = true;
-        }
-        for (uint i = 0; i < operatorWhitelists.length; i++) {
-            operatorWhitelist[operatorWhitelists[i]] = true;
-        }
+        addToStakerWhitelist(stakerWhitelists);
+        addToOperatorWhitelist(operatorWhitelists);
     }
 
     /// @inheritdoc IRollup
@@ -395,7 +390,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
     /// @inheritdoc IRollup
-    function rejectFirstUnresolvedAssertion() external override {
+    function rejectFirstUnresolvedAssertion() external override operatorOnly {
         if (lastResolvedAssertionID >= lastCreatedAssertionID) {
             revert("NoUnresolvedAssertion");
         }
@@ -443,6 +438,41 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         lastResolvedAssertionID++;
         emit AssertionRejected(lastResolvedAssertionID);
         assertions.deleteAssertion(lastResolvedAssertionID);
+    }
+
+/// @inheritdoc IRollup
+    function rejectLatestCreatedAssertionWithBatch(Lib_BVMCodec.ChainBatchHeader memory _batchHeader) external override operatorOnly {
+        if (lastResolvedAssertionID >= lastCreatedAssertionID) {
+            revert("NoUnresolvedAssertion");
+        }
+
+        address scc = resolve("StateCommitmentChain");
+
+        // batch shift
+        (, bytes memory data) = scc.call(
+            abi.encodeWithSignature("getTotalBatches()")
+        );
+        uint256 totalBatches = uint256(bytes32(data));
+        require(totalBatches-_batchHeader.batchIndex == 1, "delete batch with gap is not allowed");
+
+        // Delete state batch
+        (bool success, ) = scc.call(
+            abi.encodeWithSignature("deleteStateBatch(Lib_BVMCodec.ChainBatchHeader)", _batchHeader)
+        );
+        require(success, "scc delete state batch failed, revert all");
+
+        // Reject assertion.
+        require(lastCreatedAssertionID >= lastResolvedAssertionID, "delete assertion before last resolved in error");
+        emit AssertionRejected(lastCreatedAssertionID);
+        assertions.deleteAssertion(lastCreatedAssertionID);
+        lastCreatedAssertionID--;
+
+        // Revert status
+        for (uint i = 0; i < stakerslist.length; i++) {
+            if (stakers[stakerslist[i]].assertionID > lastCreatedAssertionID) {
+                stakers[stakerslist[i]].assertionID = lastCreatedAssertionID;
+            }
+        }
     }
 
     /// @inheritdoc IRollup
