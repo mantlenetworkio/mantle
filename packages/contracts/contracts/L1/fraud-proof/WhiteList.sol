@@ -5,16 +5,12 @@ abstract contract Whitelist {
     }
 
     modifier stakerWhitelistOnly(address _checkAddress) {
-        if (stakerslist[stakerWhitelist[_checkAddress]] == _checkAddress) {
-            revert("NOT_IN_STAKER_WHITELIST");
-        }
+        require(stakerslist[stakerWhitelist[_checkAddress]] == _checkAddress, "NOT_IN_STAKER_WHITELIST");
         _;
     }
 
     modifier operatorWhitelistOnly(address _checkAddress) {
-        if (operatorslist[operatorWhitelist[_checkAddress]] == _checkAddress) {
-            revert("NOT_IN_OPERATOR_WHITELIST");
-        }
+        require(operatorslist[operatorWhitelist[_checkAddress]] == _checkAddress, "NOT_IN_OPERATOR_WHITELIST");
         _;
     }
 
@@ -30,8 +26,9 @@ abstract contract Whitelist {
      * @notice Add to staker whitelist
      */
     function addToStakerWhitelist(address[] calldata toAddAddresses) public onlyOwner {
+        uint256 lens = stakerslist.length;
         for (uint i = 0; i < toAddAddresses.length; i++) {
-            stakerWhitelist[toAddAddresses[i]] = stakerslist.length + i;
+            stakerWhitelist[toAddAddresses[i]] = lens+i;
             stakerslist.push(toAddAddresses[i]);
         }
     }
@@ -52,8 +49,9 @@ abstract contract Whitelist {
  * @notice Add to whitelist
      */
     function addToOperatorWhitelist(address[] calldata toAddAddresses) public onlyOwner {
+        uint256 lens = operatorslist.length;
         for (uint i = 0; i < toAddAddresses.length; i++) {
-            operatorWhitelist[toAddAddresses[i]] = operatorslist.length + i;
+            operatorWhitelist[toAddAddresses[i]] = lens+i;
             operatorslist.push(toAddAddresses[i]);
         }
     }
