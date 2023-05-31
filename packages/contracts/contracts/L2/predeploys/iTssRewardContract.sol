@@ -48,17 +48,6 @@ interface ITssRewardContract {
     function claimReward(uint256 _blockStartHeight, uint32 _length, uint256 _batchTime, address[] calldata _tssMembers) external;
 
     /**
-     * @dev Update deposit block gas into contract.
-     * @param _blockID Update gas reward L2 block ID.
-     * @return Update success.
-     */
-    function updateReward(uint256 _blockID, uint256 _amount) external returns (bool);
-    /**
-     * @dev withdraw dust.
-     */
-    function withdrawDust() external;
-
-    /**
      * @dev clear contract(canonical).
      */
     function withdraw() external;

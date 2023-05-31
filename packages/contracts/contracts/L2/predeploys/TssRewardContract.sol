@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 import {ITssRewardContract} from  "./iTssRewardContract.sol";
 import {IBVM_GasPriceOracle} from "./iBVM_GasPriceOracle.sol";
@@ -18,7 +19,7 @@ import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
  * @title TssRewardContract
  * @dev Release to batch roll up tss members.
  */
-contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
+contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
 
     mapping(uint256 => uint256) public ledger;
@@ -74,14 +75,6 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
         _;
     }
 
-    modifier checkBalance() {
-        require(
-            address(this).balance >= totalAmount,
-            "balance record and contract balance are not equal"
-        );
-        _;
-    }
-
     modifier onlyAuthorized() {
         address operator = claimers[msg.sender];
         require(operator != address(0),
@@ -113,7 +106,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     /**
      * @dev return the total undistributed amount
      */
-    function queryReward() external view checkBalance returns (uint256) {
+    function queryReward() external view returns (uint256) {
         return address(this).balance;
     }
 
@@ -128,10 +121,6 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     virtual
     onlyFromCrossDomainAccount(sccAddress)
     {
-        if (IBVM_GasPriceOracle(bvmGasPriceOracleAddress).IsBurning() != 1) {
-            claimRewardByBlock(_blockStartHeight, _length, _tssMembers);
-            return;
-        }
         uint256 batchAmount = 0;
         // sendAmount
         if (lastBatchTime == 0) {
@@ -141,7 +130,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
         require(_batchTime > lastBatchTime,"args _batchTime must gther than last lastBatchTime");
         batchAmount = (_batchTime - lastBatchTime) * querySendAmountPerSecond() + dust;
         dust = 0;
-        _distributeReward(batchAmount, _tssMembers, false);
+        _distributeReward(batchAmount, _tssMembers);
         emit DistributeTssReward(
             lastBatchTime,
             _batchTime,
@@ -152,73 +141,9 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     }
 
     /**
-     * @dev claimReward distribute reward to tss member.
-     * @param _blockStartHeight The block height at L2 which needs to distribute profits
-     * @param _length The distribute batch block number
-     * @param _tssMembers The address array of tss group members
-     */
-    function claimRewardByBlock(uint256 _blockStartHeight, uint32 _length, address[] calldata _tssMembers)
-    internal
-    {
-        uint256 sendAmount = 0;
-        uint256 batchAmount = 0;
-        uint256 accu = 0;
-        // release reward from _blockStartHeight to _blockStartHeight + _length - 1
-        for (uint i = 0; i < _length; i++) {
-            batchAmount = batchAmount.add(ledger[_blockStartHeight + i]);
-            // delete distributed height
-            delete ledger[_blockStartHeight + i];
-        }
-        if (batchAmount > 0) {
-            batchAmount = batchAmount + dustBlock;
-            dustBlock = 0;
-            _distributeReward(batchAmount, _tssMembers, true);
-        }
-        emit DistributeTssRewardByBlock(
-            _blockStartHeight,
-            _length,
-            sendAmount,
-            _tssMembers
-        );
-    }
-
-    /**
-     * @dev update tss member gas reward by every block.
-     * @param _blockID The block height at L2 which needs to distribute profits
-     * @return _tssMembers Address array of tss group members
-     */
-    function updateReward(uint256 _blockID, uint256 _amount)
-    external
-    onlyFromDeadAddress
-    checkBalance
-    returns (bool)
-    {
-        // check update block ID
-        require(_blockID == bestBlockID + 1, "block id update illegal");
-        // iter address to update balance
-        bestBlockID = _blockID;
-        totalAmount = totalAmount.add(_amount);
-        ledger[_blockID] = _amount;
-        return true;
-    }
-
-    /**
-     * @dev withdraw div dustBlock
-     */
-    function withdrawDust() external onlyOwner checkBalance {
-        uint256 amount = dustBlock;
-        totalAmount = totalAmount.sub(amount);
-        dustBlock = 0;
-        if (amount > 0) {
-            payable(owner()).transfer(amount);
-        }
-    }
-
-    /**
      * @dev clear balance
      */
-    function withdraw() external onlyOwner checkBalance {
-        totalAmount = 0;
+    function withdraw() external onlyOwner {
         if (address(this).balance > 0) {
             payable(owner()).transfer(address(this).balance);
         }
@@ -244,7 +169,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     /**
      * @dev Claim reward
      */
-    function claim() external onlyAuthorized {
+    function claim() external onlyAuthorized nonReentrant {
         address operator = claimers[msg.sender];
         uint256 remainTime = _remainTime(operator);
         require(remainTime == 0,
@@ -282,17 +207,19 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
     function _claim(address _operator) internal {
         uint256 claimNumber = claimAmout[_operator];
         uint256 amount = rewardDetails[_operator];
+        require(amount >= claimNumber,"The numerical value is incorrect");
+        require(address(this).balance >= claimNumber,"The contract balance is insufficient to pay the reward value");
         if (claimNumber > 0) {
             address claimer = operators[_operator];
             address payable addr = payable(claimer);
-            addr.transfer(claimNumber);
             delete claimAmout[_operator];
             rewardDetails[_operator] = rewardDetails[_operator] - claimNumber;
+            addr.transfer(claimNumber);
         }
-        emit Claim(_operator, amount);
+        emit Claim(_operator, claimNumber);
     }
 
-    function _distributeReward(uint256 amount, address[] calldata _tssMembers, bool isByBlock) internal {
+    function _distributeReward(uint256 amount, address[] calldata _tssMembers) internal {
         if (amount > 0) {
             uint256 sendAmount = 0;
             uint256 accu = 0;
@@ -300,22 +227,13 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled {
             for (uint i = 0; i < _tssMembers.length; i++) {
                 address operator = _tssMembers[i];
                 rewardDetails[operator] += sendAmount;
-                accu = accu.add(sendAmount);
-                if (isByBlock) {
-                    totalAmount = totalAmount.sub(sendAmount);
-                }
             }
+            accu = sendAmount * _tssMembers.length;
             uint256 reserved = amount.sub(accu);
             if (reserved > 0) {
-                if (isByBlock) {
-                    dustBlock = dustBlock.add(reserved);
-                }else {
-                    dust = dust.add(reserved);
-                }
-
+                dust = dust.add(reserved);
             }
         }
     }
-
 
 }

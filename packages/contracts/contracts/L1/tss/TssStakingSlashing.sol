@@ -30,7 +30,6 @@ contract TssStakingSlashing is
     CrossDomainEnabled
 {
     enum SlashType {
-        nothing,
         uptime,
         animus
     }
@@ -68,6 +67,7 @@ contract TssStakingSlashing is
     mapping(address => address[]) public stakers;
     //staker => operator
     mapping(address => address) public delegators;
+    bool public isSetParam;
 
 
     /**
@@ -113,14 +113,17 @@ contract TssStakingSlashing is
      * @param _token the erc20 bit token contract address
      */
     function setTokenAddress(address _token) public onlyOwner {
+        require(_token != address(0),"Invalid address");
         underlyingToken = IERC20(_token);
     }
 
     function setTssGroupAddress(address _tssGroup) public onlyOwner{
+        require(_tssGroup != address(0),"Invalid address");
         tssGroupContract = _tssGroup;
     }
 
     function setRegulatoryAccount(address _account) public onlyOwner {
+        require(_account != address(0),"Invalid address");
         regulatoryAccount = _account;
     }
 
@@ -164,6 +167,7 @@ contract TssStakingSlashing is
             require(_slashAmount[i] > 0, "invalid amount");
             slashAmount[i] = _slashAmount[i];
         }
+        isSetParam = true;
     }
 
     /**
@@ -237,9 +241,7 @@ contract TssStakingSlashing is
      */
     function slash(SlashMsg memory message) internal {
         // slashing params check
-        for (uint256 i = 0; i < 2; i++) {
-            require(slashAmount[i] > 0, "have not set the slash amount");
-        }
+        require(isSetParam,"have not set the slash amount");
         bytes memory jailNodePubKey = operators[message.jailNode];
         if (message.slashType == SlashType.uptime) {
             // jail and transfer deposits
@@ -250,7 +252,7 @@ contract TssStakingSlashing is
             ITssGroupManager(tssGroupContract).memberJail(jailNodePubKey);
             transformDeposit(message.jailNode, 1);
         } else {
-            require(false, "err type for slashing");
+            revert("err type for slashing");
         }
 
     }
@@ -302,9 +304,7 @@ contract TssStakingSlashing is
      */
     function unJail() public {
         // slashing params check
-        for (uint256 i = 0; i < 2; i++) {
-            require(slashAmount[i] > 0, "have not set the slash amount");
-        }
+        require(isSetParam, "have not set the slash amount");
 
         uint256 totalBalance = _tokenBalance();
 
@@ -331,17 +331,6 @@ contract TssStakingSlashing is
             .getTssMember(operators[user]);
         require(tssMember.publicKey.length == 64, "tss member not exist");
         return tssMember.status == ITssGroupManager.MemberStatus.jail;
-    }
-
-    /**
-     * @notice check two bytes for equality
-     */
-    function isEqual(bytes memory byteListA, bytes memory byteListB) public pure returns (bool) {
-        if (byteListA.length != byteListB.length) return false;
-        for (uint256 i = 0; i < byteListA.length; i++) {
-            if (byteListA[i] != byteListB[i]) return false;
-        }
-        return true;
     }
 
     function isCanOperator(address _addr) public returns (bool) {

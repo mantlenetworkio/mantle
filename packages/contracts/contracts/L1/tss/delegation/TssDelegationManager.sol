@@ -126,84 +126,14 @@ contract TssDelegationManager is DelegationManager {
         bool undelegateIfPossible
     )
     external
+    virtual
     override
     whenNotPaused
     onlyNotFrozen(msg.sender)
     nonReentrant
     returns (bytes32)
     {
-        require(
-            withdrawerAndNonce.nonce == numWithdrawalsQueued[msg.sender],
-            "InvestmentManager.queueWithdrawal: provided nonce incorrect"
-        );
-        require(delegationShares.length == 1, "only tss delegation share");
-        require(shares.length == 1,"only tss delegation share");
-        // increment the numWithdrawalsQueued of the sender
-        unchecked {
-            ++numWithdrawalsQueued[msg.sender];
-        }
-        _checkMinStakeAmount(msg.sender,delegationShares[0],shares[0]);
-
-        uint256 delegationIndex;
-
-        // modify delegated shares accordingly, if applicable
-        delegation.decreaseDelegatedShares(msg.sender, delegationShares, shares);
-
-        for (uint256 i = 0; i < delegationShares.length;) {
-            // the internal function will return 'true' in the event the delegation contrat was
-            // removed from the depositor's array of strategies -- i.e. investorStrats[depositor]
-            if (_removeShares(msg.sender, delegationIndexes[delegationIndex], delegationShares[i], shares[i])) {
-                unchecked {
-                    ++delegationIndex;
-                }
-            }
-
-            //increment the loop
-            unchecked {
-                ++i;
-            }
-        }
-
-        // fetch the address that the `msg.sender` is delegated to
-        address delegatedAddress = delegation.delegatedTo(msg.sender);
-
-        // copy arguments into struct and pull delegation info
-        QueuedWithdrawal memory queuedWithdrawal = QueuedWithdrawal({
-            delegations: delegationShares,
-            tokens: tokens,
-            shares: shares,
-            depositor: msg.sender,
-            withdrawerAndNonce: withdrawerAndNonce,
-            delegatedAddress: delegatedAddress
-        });
-
-        // calculate the withdrawal root
-        bytes32 withdrawalRoot = calculateWithdrawalRoot(queuedWithdrawal);
-
-        //update storage in mapping of queued withdrawals
-        queuedWithdrawals[withdrawalRoot] = WithdrawalStorage({
-            /**
-             * @dev We add `REASONABLE_STAKES_UPDATE_PERIOD` to the current time here to account for the fact that it may take some time for
-             * the operator's stake to be updated on all the middlewares. New tasks created between now at this 'initTimestamp' may still
-             * subject the `msg.sender` to slashing!
-             */
-            initTimestamp: uint32(block.timestamp + REASONABLE_STAKES_UPDATE_PERIOD),
-            withdrawer: withdrawerAndNonce.withdrawer,
-            unlockTimestamp: QUEUED_WITHDRAWAL_INITIALIZED_VALUE
-        });
-
-        // If the `msg.sender` has withdrawn all of their funds in this transaction, then they can choose to also undelegate
-        /**
-         * Checking that `investorStrats[msg.sender].length == 0` is not strictly necessary here, but prevents reverting very late in logic,
-         * in the case that 'undelegate' is set to true but the `msg.sender` still has active deposits.
-         */
-        if (undelegateIfPossible && investorDelegations[msg.sender].length == 0) {
-            _undelegate(msg.sender);
-        }
-
-        emit WithdrawalQueued(msg.sender, withdrawerAndNonce.withdrawer, delegatedAddress, withdrawalRoot);
-
-        return withdrawalRoot;
+        revert("TssDelegationManager: queueWithdrawal is disabled ");
     }
 
 
@@ -396,7 +326,7 @@ contract TssDelegationManager is DelegationManager {
         address operator = delegation.delegatedTo(sender);
         // check if the operator is still mpc node, if the remaining shares meet the mini requirement
         if (delegation.isDelegated(sender)){
-            if (ITssGroupManager(tssGroupManager).memberExistActive(sender)){
+            if (ITssGroupManager(tssGroupManager).memberExistActive(operator)){
                 require(!TssStakingSlashing(stakingSlash).isJailed(operator),"the operator is not in jail status");
                 uint256 rest= delegation.operatorShares(operator, delegationShare) - shares;
                 uint256 balance = delegationShare.sharesToUnderlying(rest);
