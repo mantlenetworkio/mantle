@@ -127,7 +127,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _address for fraud proof
     */
     function setFraudProofAddress(address _address) external onlySequencer {
-        require(_address == address(0), "setFraudProofAddress: address is the zero address");
+        require(_address != address(0), "setFraudProofAddress: address is the zero address");
         fraudProofWhitelist[_address] = true;
     }
 
@@ -136,7 +136,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _address for fraud proof
     */
     function unavailableFraudProofAddress(address _address) external onlySequencer {
-        require(_address == address(0), "unavailableFraudProofAddress: unavailableFraudProofAddress: address is the zero address");
+        require(_address != address(0), "unavailableFraudProofAddress: unavailableFraudProofAddress: address is the zero address");
         fraudProofWhitelist[_address] = false;
     }
 
@@ -145,7 +145,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _address for fraud proof
     */
     function removeFraudProofAddress(address _address) external onlySequencer {
-        require(_address == address(0), "removeFraudProofAddress: removeFraudProofAddress: address is the zero address");
+        require(_address != address(0), "removeFraudProofAddress: removeFraudProofAddress: address is the zero address");
         delete fraudProofWhitelist[_address];
     }
 
@@ -162,7 +162,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _dataManageAddress dlsm address
     */
     function updateDataLayrManagerAddress(address _dataManageAddress) external onlySequencer {
-        require(_dataManageAddress == address(0), "updateDataLayrManagerAddress: _dataManageAddress is the zero address");
+        require(_dataManageAddress != address(0), "updateDataLayrManagerAddress: _dataManageAddress is the zero address");
         dataManageAddress = _dataManageAddress;
     }
 
@@ -187,12 +187,12 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _sequencer update sequencer address
     */
     function updateSequencerAddress(address _sequencer) external onlySequencer {
-        require(_sequencer == address(0), "updateSequencerAddress: _sequencer is the zero address");
+        require(_sequencer != address(0), "updateSequencerAddress: _sequencer is the zero address");
         sequencer = _sequencer;
     }
 
     function updateReSubmitterAddress(address _reSubmitterAddress) external onlySequencer {
-        require(_reSubmitterAddress == address(0), "updateReSubmitterAddress: _reSubmitterAddress is the zero address");
+        require(_reSubmitterAddress != address(0), "updateReSubmitterAddress: _reSubmitterAddress is the zero address");
         reSubmitterAddress = _reSubmitterAddress;
     }
 
