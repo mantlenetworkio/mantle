@@ -40,7 +40,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     uint256 public fraudProofPeriod;
     uint256 public rollupBatchIndex;
 
-    bytes public constant FRAUD_STRING = '-_(` O `)_- -_(` o `)_- -_(` Q `)_- BITDAO JUST REKT YOU |_(` O `)_| - |_(` o `)_| - |_(` Q `)_|';
+    bytes public constant FRAUD_STRING = '--This is a bad string. Nobody says this string.--';
     uint256 internal constant DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED = type(uint256).max;
 
     struct RollupStore {
@@ -86,7 +86,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     }
 
     modifier onlySequencer() {
-        require(msg.sender == sequencer, "Only the sequencer can this action");
+        require(msg.sender == sequencer, "Only the sequencer can do this action");
         _;
     }
 
