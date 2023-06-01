@@ -47,9 +47,6 @@ func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
 			return err
 		}
 		s.UpdateSigningInfo(stateBatch.BatchIndex, address, electionAdvanced, false)
-		if err != nil {
-			return err
-		}
 	}
 
 	// update signingInfo for absent nodes
@@ -59,9 +56,6 @@ func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
 			return err
 		}
 		updatedSigningInfo := s.UpdateSigningInfo(stateBatch.BatchIndex, address, electionAdvanced, true)
-		if err != nil {
-			return err
-		}
 		if updatedSigningInfo.MissedBlocksCounter > uint64(s.missSignedNumber) {
 			s.slashingStore.SetSlashingInfo(SlashingInfo{
 				Address:    address,
