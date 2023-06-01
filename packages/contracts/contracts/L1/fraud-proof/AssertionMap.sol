@@ -132,9 +132,10 @@ contract AssertionMap is Initializable {
     }
 
     function deleteAssertion(uint256 assertionID) external rollupOnly {
-        Assertion storage parentAssertion = assertions[parentID];
+        Assertion storage deleteAssertion = assertions[assertionID];
+        Assertion storage parentAssertion = assertions[deleteAssertion.parent];
         delete assertions[assertionID];
         parentAssertion.childInboxSize = 0;
-        parentAssertion.childStateHashes[stateHash] = false;
+        parentAssertion.childStateHashes[deleteAssertion.stateHash] = false;
     }
 }
