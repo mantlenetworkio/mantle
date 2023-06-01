@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/tyler-smith/go-bip39"
 	"math/big"
 	"strings"
 	"time"
@@ -1530,9 +1529,6 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 	status := 0
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
-	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
-		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
-		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
 	if err != nil || txStatus.StateRoot == nil {
 		cb := s.b.CurrentBlock().Time()
 		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
@@ -1549,6 +1545,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 			"status":           hexutil.Uint(status),
 			"statusInfo":       txStatusPeriodZero,
 			"dtlEventDBStatus": dtlEventDBStatus,
+			"challengeBlock":   txStatus.Fraudproofwindow / l1BlockInterval,
 		}
 		return fields, nil
 	}
@@ -1568,10 +1565,14 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 				"datastoreId":      txStatus.Datastore.DataStoreId,
 				"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
 				"dtlEventDBStatus": dtlEventDBRight,
+				"challengeBlock":   txStatus.Fraudproofwindow / l1BlockInterval,
 			}
 			return fields, nil
 		}
 	}
+	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
+		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
+		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
 	var statusInfo string
 	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= l1FinalizeBlock {
 		status = 2
@@ -1595,6 +1596,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 		"datastoreId":      txStatus.Datastore.DataStoreId,
 		"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
 		"dtlEventDBStatus": dtlEventDBRight,
+		"challengeBlock":   txStatus.Fraudproofwindow / l1BlockInterval,
 	}
 
 	return fields, nil
@@ -1610,9 +1612,6 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 	status := 0
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
-	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
-		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
-		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
 	if err != nil || txStatus.StateRoot == nil {
 		cb := s.b.CurrentBlock().Time()
 		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
@@ -1629,6 +1628,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 			"status":           hexutil.Uint(status),
 			"statusInfo":       txStatusPeriodZero,
 			"dtlEventDBStatus": dtlEventDBStatus,
+			"challengeBlock":   txStatus.Fraudproofwindow / l1BlockInterval,
 		}
 		return fields, nil
 	}
@@ -1648,10 +1648,14 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 				"datastoreId":      txStatus.Datastore.DataStoreId,
 				"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
 				"dtlEventDBStatus": dtlEventDBRight,
+				"challengeBlock":   txStatus.Fraudproofwindow / l1BlockInterval,
 			}
 			return fields, nil
 		}
 	}
+	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
+		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
+		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
 	var statusInfo string
 	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= l1FinalizeBlock {
 		status = 2
@@ -1682,6 +1686,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 		"daConfirmTxHash":   txStatus.Datastore.ConfirmTxHash,
 		"daSignatoryRecord": txStatus.Datastore.SignatoryRecord,
 		"dtlEventDBStatus":  dtlEventDBRight,
+		"challengeBlock":    txStatus.Fraudproofwindow / l1BlockInterval,
 	}
 	return fields, nil
 }
