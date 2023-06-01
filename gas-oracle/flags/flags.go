@@ -39,6 +39,18 @@ var (
 		Value:  "0x9700cA34e333BCfa83ee7eA9de998a876474Dc2c",
 		EnvVar: "GAS_PRICE_ORACLE_DA_FEE_CONTRACT_ADDRESS",
 	}
+	SCCContractAddressFlag = cli.StringFlag{
+		Name:   "scc-contract-address",
+		Usage:  "Address of StateCommitChain",
+		Value:  "0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9",
+		EnvVar: "GAS_PRICE_ORACLE_SCC_CONTRACT_ADDRESS",
+	}
+	CTCContractAddressFlag = cli.StringFlag{
+		Name:   "ctc-contract-address",
+		Usage:  "Address of CanonicalTransactionChain",
+		Value:  "0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9",
+		EnvVar: "GAS_PRICE_ORACLE_CTC_CONTRACT_ADDRESS",
+	}
 	PrivateKeyFlag = cli.StringFlag{
 		Name:   "private-key",
 		Usage:  "Private Key corresponding to BVM_GasPriceOracle Owner",
@@ -54,6 +66,11 @@ var (
 		Usage:  "Enable updating the L1 base fee",
 		EnvVar: "GAS_PRICE_ORACLE_ENABLE_L1_BASE_FEE",
 	}
+	EnableL1OverheadFlag = cli.BoolFlag{
+		Name:   "enable-l1-overhead",
+		Usage:  "Enable updating the L1 overhead",
+		EnvVar: "GAS_PRICE_ORACLE_ENABLE_L1_OVERHEAD",
+	}
 	EnableL2GasPriceFlag = cli.BoolFlag{
 		Name:   "enable-l2-gas-price",
 		Usage:  "Enable updating the L2 gas price",
@@ -63,6 +80,24 @@ var (
 		Name:   "enable-da-gas-price",
 		Usage:  "Enable updating the da gas price",
 		EnvVar: "GAS_PRICE_ORACLE_ENABLE_DA_FEE",
+	}
+	BatchSizeCap = cli.IntFlag{
+		Name:   "set-batch-size-cap",
+		Value:  1000,
+		Usage:  "Setup batch size cap",
+		EnvVar: "GAS_PRICE_ORACLE_BATCH_SIZE_CAP",
+	}
+	BatchSizeBottom = cli.IntFlag{
+		Name:   "set-batch-size-bottom",
+		Value:  100,
+		Usage:  "Setup batch size bottom",
+		EnvVar: "GAS_PRICE_ORACLE_BATCH_SIZE_BOTTOM",
+	}
+	SizeGap = cli.IntFlag{
+		Name:   "set-batch-size-gap",
+		Value:  100,
+		Usage:  "Setup batch size gap",
+		EnvVar: "GAS_PRICE_ORACLE_SIZE_GAP",
 	}
 	LogLevelFlag = cli.IntFlag{
 		Name:   "loglevel",

@@ -12,6 +12,7 @@ import (
 	"math/big"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/log"
 
@@ -32,6 +33,7 @@ import (
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 	tss_types "github.com/mantlenetworkio/mantle/tss/common"
 	"google.golang.org/api/option"
 )
@@ -42,23 +44,22 @@ const stateRootSize = 32
 var bigOne = new(big.Int).SetUint64(1) //nolint:unused
 
 type Config struct {
-	Name                 string
-	L1Client             *ethclient.Client
-	L2Client             *l2ethclient.Client
-	TssClient            *tssClient.Client
-	BlockOffset          uint64
-	MaxStateRootElements uint64
-	MinStateRootElements uint64
-	SCCAddr              common.Address
-	CTCAddr              common.Address
-	FPRollupAddr         common.Address
-	ChainID              *big.Int
-	PrivKey              *ecdsa.PrivateKey
-	EnableProposerHsm    bool
-	ProposerHsmAddress   string
-	ProposerHsmAPIName   string
-	ProposerHsmCreden    string
-	SccRollback          bool
+	Name                   string
+	L1Client               *ethclient.Client
+	L2Client               *l2ethclient.Client
+	TssClient              *tssClient.Client
+	BlockOffset            uint64
+	MaxStateRootElements   uint64
+	MinStateRootElements   uint64
+	SCCAddr                common.Address
+	CTCAddr                common.Address
+	FPRollupAddr           common.Address
+	ChainID                *big.Int
+	PrivKey                *ecdsa.PrivateKey
+	SccRollback            bool
+	MaxBatchSubmissionTime time.Duration
+	RollClient             rollup.RollupClient
+	PollInterval           time.Duration
 }
 
 type Driver struct {
@@ -73,6 +74,8 @@ type Driver struct {
 	rollbackEndBlock     *big.Int
 	rollbackEndStateRoot [stateRootSize]byte
 	once                 sync.Once
+	lastCommitTime       time.Time
+	lastStart            *big.Int
 	metrics              *metrics.Base
 }
 
@@ -211,13 +214,12 @@ func (d *Driver) GetBatchBlockRange(
 	}
 	start.Add(start, blockOffset)
 
-	end, err := d.ctcContract.GetTotalElements(&bind.CallOpts{
-		Pending: false,
-		Context: ctx,
-	})
+	backend, _ := rollup.NewBackend("l1")
+	index, err := d.cfg.RollClient.GetLatestTransactionIndex(backend)
 	if err != nil {
 		return nil, nil, err
 	}
+	end := new(big.Int).SetUint64(*index)
 	end.Add(end, blockOffset)
 
 	if start.Cmp(end) > 0 {
@@ -241,6 +243,25 @@ func (d *Driver) CraftBatchTx(
 	name := d.cfg.Name
 
 	log.Info(name+" crafting batch tx", "start", start, "end", end, "nonce", nonce)
+
+	if start.Cmp(d.lastStart) > 0 {
+		d.lastStart = start
+		d.lastCommitTime = time.Now().Add(-d.cfg.PollInterval)
+	}
+
+	//If the waiting time has not been reached, then check whether the minimum stateroot number
+	//is met. if not, return nil
+	if time.Now().Add(-d.cfg.MaxBatchSubmissionTime).Before(d.lastCommitTime) {
+		// Abort if we don't have enough state roots to meet our minimum
+		// requirement.
+		rangeLen := end.Uint64() - start.Uint64()
+		if rangeLen < d.cfg.MinStateRootElements {
+			log.Info(name+" number of state roots  below minimum",
+				"num_state_roots", rangeLen,
+				"min_state_roots", d.cfg.MinStateRootElements)
+			return nil, nil
+		}
+	}
 
 	var blocks []*l2types.Block
 	var stateRoots [][stateRootSize]byte
@@ -553,6 +574,7 @@ func (d *Driver) SendTransaction(
 	ctx context.Context,
 	tx *types.Transaction,
 ) error {
+
 	return d.cfg.L1Client.SendTransaction(ctx, tx)
 }
 
