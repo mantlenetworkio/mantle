@@ -11,6 +11,7 @@ import (
 	"math/big"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/log"
 
@@ -66,6 +67,7 @@ type Driver struct {
 	rollbackEndBlock     *big.Int
 	rollbackEndStateRoot [stateRootSize]byte
 	once                 sync.Once
+	ticker               time.Ticker
 	metrics              *metrics.Base
 }
 
@@ -246,6 +248,16 @@ func (d *Driver) CraftBatchTx(
 		blocks = append(blocks, block)
 		stateRoots = append(stateRoots, block.Root())
 	}
+
+	if len(stateRoots) < 1000 {
+		select {
+		case <-d.ticker.C:
+			// time out for rollup
+		default:
+			return nil, nil
+		}
+	}
+	d.ticker.Reset(5 * time.Minute)
 
 	// Abort if we don't have enough state roots to meet our minimum
 	// requirement.
