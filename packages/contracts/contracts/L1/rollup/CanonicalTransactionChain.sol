@@ -536,8 +536,8 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
     /**
      * Reset the index when the ctc data is dirtyed
      */
-    function resetIndex(uint256 _batchIndex, uint40 _nextqIndex, uint40
-        _totalElement, uint40 _batchSize, uint40 _numQueuedTransactions ,
+    function resetIndex(uint256 _batchIndex, uint40 _totalElement, uint40 _batchSize,
+        uint40 _nextqIndex,uint40 _numQueuedTransactions ,
         uint40 _timestamp, uint40 _blockNumber) external {
         require(_batchIndex < batches().length(), "Invalid batch index.");
 
