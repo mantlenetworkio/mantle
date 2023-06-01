@@ -51,6 +51,12 @@ interface ICanonicalTransactionChain {
         bytes _extraData
     );
 
+
+    event CTCBatchReset(
+        uint256 indexed _batchIndex,
+        uint40 _nextqIndex
+    );
+
     /***********
      * Structs *
      ***********/
@@ -161,4 +167,6 @@ interface ICanonicalTransactionChain {
         // BatchContext[] _contexts,
         // bytes[] _transactionDataFields
     ) external;
+
+    function resetIndex(uint256 _batchIndex, uint40 _nextqIndex) external;
 }

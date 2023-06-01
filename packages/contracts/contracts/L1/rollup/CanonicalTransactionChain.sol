@@ -532,4 +532,22 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
         // slither-disable-next-line reentrancy-no-eth, reentrancy-events
         batchesRef.push(batchHeaderHash, latestBatchContext);
     }
+
+    /**
+     * Reset the index when the ctc data is dirtyed
+     */
+    function resetIndex(uint256 _batchIndex, uint40 _nextqIndex) external {
+        require(_batchIndex < batches().length(), "Invalid batch index.");
+
+        require(msg.sender == libAddressManager.owner(), "Only callable by the address manager owner.");
+
+        // slither-disable-next-line reentrancy-events
+        batches().deleteElementsAfterInclusive(_batchIndex);
+
+        _nextQueueIndex = _nextqIndex;
+
+        // slither-disable-next-line reentrancy-events
+        emit CTCBatchReset(_batchIndex,_nextqIndex);
+    }
+
 }
