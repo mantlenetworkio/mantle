@@ -133,7 +133,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         _appendBatch(_batch, _signature, abi.encode(block.timestamp, msg.sender));
 
         // Update distributed state batch, and emit message
-        _distributeTssReward(_batch, _shouldStartAtElement);
+        _distributeTssReward(_batch.length, _shouldStartAtElement);
     }
 
     /**
@@ -361,7 +361,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
      * @param _batch rollup batch.
      * @param  _shouldStartAtElement.
      */
-    function _distributeTssReward(bytes32[] memory _batch, uint256 _shouldStartAtElement) internal {
+    function _distributeTssReward(uint256 _batch_length, uint256 _shouldStartAtElement) internal {
         // get address of tss group member
         address[] memory tssMembers = ITssGroupManager(resolve("Proxy__TSS_GroupManager")).getTssGroupUnJailMembers();
         require(tssMembers.length > 0, "get tss members in error");
@@ -370,7 +370,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         bytes memory message = abi.encodeWithSelector(
             ITssRewardContract.claimReward.selector,
             _shouldStartAtElement,
-            _batch.length,
+            _batch_length,
             block.timestamp,
             tssMembers
         );
