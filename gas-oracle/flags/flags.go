@@ -39,6 +39,18 @@ var (
 		Value:  "0x9109811E8eEe02520219612bB5D47C60c382F4aa",
 		EnvVar: "GAS_PRICE_ORACLE_DA_FEE_CONTRACT_ADDRESS",
 	}
+	SCCContractAddressFlag = cli.StringFlag{
+		Name:   "scc-contract-address",
+		Usage:  "Address of StateCommitChain",
+		Value:  "0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9",
+		EnvVar: "GAS_PRICE_ORACLE_SCC_CONTRACT_ADDRESS",
+	}
+	CTCContractAddressFlag = cli.StringFlag{
+		Name:   "ctc-contract-address",
+		Usage:  "Address of CanonicalTransactionChain",
+		Value:  "0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9",
+		EnvVar: "GAS_PRICE_ORACLE_CTC_CONTRACT_ADDRESS",
+	}
 	PrivateKeyFlag = cli.StringFlag{
 		Name:   "private-key",
 		Usage:  "Private Key corresponding to BVM_GasPriceOracle Owner",

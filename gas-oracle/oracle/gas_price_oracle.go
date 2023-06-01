@@ -44,6 +44,8 @@ type GasPriceOracle struct {
 	l2Backend       DeployContractBackend
 	l1Backend       bind.ContractTransactor
 	daBackend       *bindings.BVMEigenDataLayrFee
+	sccBackend      *bindings.StateCommitmentChain
+	ctcBackend      *bindings.CanonicalTransactionChain
 	gasPriceUpdater *gasprices.GasPriceUpdater
 	config          *Config
 }
@@ -77,6 +79,9 @@ func (g *GasPriceOracle) Start() error {
 
 	if g.config.enableL1BaseFee {
 		go g.BaseFeeLoop()
+	}
+	if g.config.enableL1OverHead {
+		go g.OverHeadLoop()
 	}
 	if g.config.enableDaFee {
 		go g.DaFeeLoop()
@@ -177,6 +182,39 @@ func (g *GasPriceOracle) DaFeeLoop() {
 	}
 }
 
+func (g *GasPriceOracle) OverHeadLoop() {
+	stateBatchAppendChan := make(chan *bindings.StateCommitmentChainStateBatchAppended, 10)
+	stateAppendSub, err := g.sccBackend.WatchStateBatchAppended(&bind.WatchOpts{}, stateBatchAppendChan, nil)
+	if err != nil {
+		panic(err)
+	}
+	defer stateAppendSub.Unsubscribe()
+	ctcTotalBatches, err := g.ctcBackend.GetTotalBatches(&bind.CallOpts{})
+	if err != nil {
+		panic(err)
+	}
+	updateOverhead, err := wrapUpdateOverhead(g.l2Backend, g.config)
+	if err != nil {
+		panic(err)
+	}
+
+	for {
+		select {
+		case ev := <-stateBatchAppendChan:
+			currentCtcBatches, err := g.ctcBackend.GetTotalBatches(&bind.CallOpts{})
+			if err != nil {
+				continue
+			}
+			if err := updateOverhead(new(big.Int).Sub(currentCtcBatches, ctcTotalBatches), ev.BatchSize); err != nil {
+				log.Error("cannot update da fee", "messgae", err)
+			}
+			ctcTotalBatches = currentCtcBatches
+		case <-g.ctx.Done():
+			g.Stop()
+		}
+	}
+}
+
 // Update will update the gas price
 func (g *GasPriceOracle) Update() error {
 	l2GasPrice, err := g.contract.GasPrice(&bind.CallOpts{
@@ -219,6 +257,17 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 		return nil, err
 	}
 	daFeeClient, err := bindings.NewBVMEigenDataLayrFee(cfg.daFeeContractAddress, l1Client.Client)
+	if err != nil {
+		return nil, err
+	}
+	sccBackend, err := bindings.NewStateCommitmentChain(cfg.sccContractAddress, l1Client.Client)
+	if err != nil {
+		return nil, err
+	}
+	ctcBackend, err := bindings.NewCanonicalTransactionChain(cfg.ctcContractAddress, l1Client.Client)
+	if err != nil {
+		return nil, err
+	}
 	// Ensure that we can actually connect to both backends
 	log.Info("Connecting to layer two")
 	if err := ensureConnection(l2Client); err != nil {
@@ -343,6 +392,8 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 		l2Backend:       l2Client,
 		l1Backend:       l1Client,
 		daBackend:       daFeeClient,
+		sccBackend:      sccBackend,
+		ctcBackend:      ctcBackend,
 	}
 
 	if err := gpo.ensure(); err != nil {
