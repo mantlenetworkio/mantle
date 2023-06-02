@@ -66,6 +66,11 @@ var (
 		Usage:  "Enable updating the L1 base fee",
 		EnvVar: "GAS_PRICE_ORACLE_ENABLE_L1_BASE_FEE",
 	}
+	EnableL1OverheadFlag = cli.BoolFlag{
+		Name:   "enable-l1-overhead",
+		Usage:  "Enable updating the L1 overhead",
+		EnvVar: "GAS_PRICE_ORACLE_ENABLE_L1_OVERHEAD",
+	}
 	EnableL2GasPriceFlag = cli.BoolFlag{
 		Name:   "enable-l2-gas-price",
 		Usage:  "Enable updating the L2 gas price",
@@ -75,6 +80,24 @@ var (
 		Name:   "enable-da-gas-price",
 		Usage:  "Enable updating the da gas price",
 		EnvVar: "GAS_PRICE_ORACLE_ENABLE_DA_FEE",
+	}
+	BatchSizeCap = cli.IntFlag{
+		Name:   "set-batch-size-cap",
+		Value:  1000,
+		Usage:  "Setup batch size cap",
+		EnvVar: "GAS_PRICE_ORACLE_BATCH_SIZE_CAP",
+	}
+	BatchSizeBottom = cli.IntFlag{
+		Name:   "set-batch-size-bottom",
+		Value:  100,
+		Usage:  "Setup batch size bottom",
+		EnvVar: "GAS_PRICE_ORACLE_BATCH_SIZE_BOTTOM",
+	}
+	SizeGap = cli.IntFlag{
+		Name:   "set-batch-size-gap",
+		Value:  100,
+		Usage:  "Setup batch size gap",
+		EnvVar: "GAS_PRICE_ORACLE_SIZE_GAP",
 	}
 	LogLevelFlag = cli.IntFlag{
 		Name:   "loglevel",

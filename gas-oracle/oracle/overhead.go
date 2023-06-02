@@ -55,7 +55,7 @@ func wrapUpdateOverhead(l2Backend DeployContractBackend, cfg *Config) (func(*big
 		return nil, err
 	}
 	return func(diff *big.Int, size *big.Int) error {
-		calculateJumpTable(diff)
+		calculateJumpTable(diff, cfg)
 		newOverheadLevel, err := getOverheadLevelInJumpTable(size)
 		if err != nil {
 			return err
@@ -104,16 +104,18 @@ func wrapUpdateOverhead(l2Backend DeployContractBackend, cfg *Config) (func(*big
 	}, nil
 }
 
-func calculateJumpTable(diff *big.Int) {
-	const BatchSizeCap = 1000
-	const BatchSizeBottom = 100
-	const gap = 100
-	var OverheadGasUsedOnL1 = new(big.Int).Add(new(big.Int).SetUint64(2521687), new(big.Int).Mul(diff, new(big.Int).SetUint64(137893)))
-
-	for levelSize := BatchSizeBottom; levelSize <= BatchSizeCap; {
+func calculateJumpTable(diff *big.Int, cfg *Config) {
+	// fixed state rollup cost
+	var rollupOverhead = new(big.Int).SetUint64(2521687)
+	// data rollup cost
+	var sequencerOverhead = new(big.Int).Mul(diff, new(big.Int).SetUint64(137893))
+	// sum up
+	var OverheadGasUsedOnL1 = new(big.Int).Add(rollupOverhead, sequencerOverhead)
+	// calculate jump table
+	for levelSize := cfg.batchSizeBottom; levelSize <= cfg.batchSizeCap; {
 		orderedSizes = append(orderedSizes, levelSize)
 		jumpTable[levelSize] = new(big.Int).Add(new(big.Int).Div(OverheadGasUsedOnL1, new(big.Int).SetUint64(uint64(levelSize))), new(big.Int).SetUint64(1330))
-		levelSize += gap
+		levelSize += cfg.sizeGap
 	}
 }
 
