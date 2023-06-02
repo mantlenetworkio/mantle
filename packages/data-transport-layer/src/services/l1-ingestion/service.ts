@@ -219,6 +219,9 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
         )
 
         // We're already at the head, so no point in attempting to sync.
+        console.log("fraudproofwindow:",await this.state.db.getFraudProofWindow())
+        console.log("highestSyncedL1Block",highestSyncedL1Block)
+        console.log("targetL1Block",targetL1Block)
         if (highestSyncedL1Block === targetL1Block) {
 
           // only when we are at head, we needn't sync the block and find the time to scan the cached event
@@ -227,6 +230,9 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
           // than staterootcacheheight = targetl1block = currentblock,
           // noConfirmTargetL1Block = currentL1Block - 1
           // stateRootCachedHeight can't < noConfirmTargetL1Block
+          console.log("currentL1Block",currentL1Block)
+          console.log("this.options.confirmations",this.options.confirmations)
+
           if (targetL1Block === currentL1Block - this.options.confirmations) {
             const stateRootCachedHeight = Math.max(await this.state.db.getStateRootCacheHeight(),targetL1Block);
             const noConfirmTargetL1Block = currentL1Block - 1

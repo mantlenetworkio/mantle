@@ -82,6 +82,7 @@ export const handleEventsStateCachedBatchAppended: EventHandlerSet<
   storeEvent: async (entry, db) => {
     // Defend against situations where we missed an event because the RPC provider
     // (infura/alchemy/whatever) is missing an event.
+    console.log("we are storing cached event")
     await db.putStateRootCachedBatchEntries([entry.stateRootBatchEntry])
     await db.putStateRootCachedEntries(entry.stateRootEntries)
   },

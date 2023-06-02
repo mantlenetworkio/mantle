@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/tyler-smith/go-bip39"
 	"math/big"
 	"strings"
 	"time"
@@ -1530,7 +1529,15 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 	status := 0
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
-	if err != nil || txStatus.StateRoot == nil {
+	var notRollup bool
+	if txStatus == nil {
+		notRollup = true
+	} else {
+		if txStatus.StateRoot == nil {
+			notRollup = true
+		}
+	}
+	if err != nil || notRollup {
 		cb := s.b.CurrentBlock().Time()
 		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
 		dtlEventDBStatus := dtlEventDBFalse
@@ -1546,7 +1553,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 			"status":           hexutil.Uint(status),
 			"statusInfo":       txStatusPeriodZero,
 			"dtlEventDBStatus": dtlEventDBStatus,
-			"challengeBlock":   txStatus.Fraudproofwindow / l1BlockInterval,
+			"challengeBlock":   -1,
 		}
 		return fields, nil
 	}
@@ -1613,7 +1620,15 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 	status := 0
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
-	if err != nil || txStatus.StateRoot == nil {
+	var notRollup bool
+	if txStatus == nil {
+		notRollup = true
+	} else {
+		if txStatus.StateRoot == nil {
+			notRollup = true
+		}
+	}
+	if err != nil || notRollup {
 		cb := s.b.CurrentBlock().Time()
 		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
 		dtlEventDBStatus := dtlEventDBFalse
@@ -1629,7 +1644,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 			"status":           hexutil.Uint(status),
 			"statusInfo":       txStatusPeriodZero,
 			"dtlEventDBStatus": dtlEventDBStatus,
-			"challengeBlock":   txStatus.Fraudproofwindow / l1BlockInterval,
+			"challengeBlock":   -1,
 		}
 		return fields, nil
 	}
