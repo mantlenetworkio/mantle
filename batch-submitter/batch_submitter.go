@@ -15,7 +15,6 @@ import (
 	"github.com/mantlenetworkio/mantle/bss-core/dial"
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 	"github.com/urfave/cli"
 )
 
@@ -117,8 +116,6 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			return err
 		}
 
-		rollupClient := rollup.NewClient(cfg.RollupClientHttp, chainID)
-
 		txManagerConfig := txmgr.Config{
 			ResubmissionTimeout:       cfg.ResubmissionTimeout,
 			ReceiptQueryInterval:      time.Second,
@@ -173,8 +170,8 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				PrivKey:                proposerPrivKey,
 				SccRollback:            cfg.EnableSccRollback,
 				MaxBatchSubmissionTime: cfg.MaxBatchSubmissionTime,
-				RollClient:             rollupClient,
 				PollInterval:           cfg.PollInterval,
+				FinalityConfirmations:  cfg.FinalityConfirmations,
 			})
 			if err != nil {
 				return err

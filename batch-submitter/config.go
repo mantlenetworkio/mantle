@@ -206,8 +206,6 @@ type Config struct {
 	DisableHTTP2 bool
 
 	EnableSccRollback bool
-
-	RollupClientHttp string
 }
 
 // NewConfig parses the Config from the provided flags or environment variables.
@@ -258,7 +256,6 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		MetricsPort:         ctx.GlobalUint64(flags.MetricsPortFlag.Name),
 		DisableHTTP2:        ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
 		EnableSccRollback:   ctx.GlobalBool(flags.SccRollbackFlag.Name),
-		RollupClientHttp: ctx.GlobalString(flags.RollupClientHttpFlag.Name),
 	}
 
 	err := ValidateConfig(&cfg)
