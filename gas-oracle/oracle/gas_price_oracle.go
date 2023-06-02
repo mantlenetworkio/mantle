@@ -80,7 +80,7 @@ func (g *GasPriceOracle) Start() error {
 	if g.config.enableL1BaseFee {
 		go g.BaseFeeLoop()
 	}
-	if g.config.enableL1OverHead {
+	if g.config.enableL1Overhead {
 		go g.OverHeadLoop()
 	}
 	if g.config.enableDaFee {

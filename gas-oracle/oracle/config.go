@@ -39,9 +39,13 @@ type Config struct {
 	l1BaseFeeSignificanceFactor      float64
 	daFeeSignificanceFactor          float64
 	enableL1BaseFee                  bool
-	enableL1OverHead                 bool
+	enableL1Overhead                 bool
 	enableL2GasPrice                 bool
 	enableDaFee                      bool
+	// overhead
+	batchSizeBottom int
+	batchSizeCap    int
+	sizeGap         int
 	// Metrics config
 	MetricsEnabled          bool
 	MetricsHTTP             string
@@ -77,8 +81,13 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.l1BaseFeeSignificanceFactor = ctx.GlobalFloat64(flags.L1BaseFeeSignificanceFactorFlag.Name)
 	cfg.daFeeSignificanceFactor = ctx.GlobalFloat64(flags.DaFeeSignificanceFactorFlag.Name)
 	cfg.enableL1BaseFee = ctx.GlobalBool(flags.EnableL1BaseFeeFlag.Name)
+	cfg.enableL1Overhead = ctx.GlobalBool(flags.EnableL1OverheadFlag.Name)
 	cfg.enableL2GasPrice = ctx.GlobalBool(flags.EnableL2GasPriceFlag.Name)
 	cfg.enableDaFee = ctx.GlobalBool(flags.EnableDaFeeFlag.Name)
+
+	cfg.batchSizeCap = ctx.GlobalInt(flags.BatchSizeCap.Name)
+	cfg.batchSizeBottom = ctx.GlobalInt(flags.BatchSizeBottom.Name)
+	cfg.sizeGap = ctx.GlobalInt(flags.SizeGap.Name)
 
 	if ctx.GlobalIsSet(flags.PrivateKeyFlag.Name) {
 		hex := ctx.GlobalString(flags.PrivateKeyFlag.Name)

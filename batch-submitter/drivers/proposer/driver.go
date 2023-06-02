@@ -31,7 +31,6 @@ import (
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 	tss_types "github.com/mantlenetworkio/mantle/tss/common"
 )
 
@@ -55,9 +54,8 @@ type Config struct {
 	PrivKey                *ecdsa.PrivateKey
 	SccRollback            bool
 	MaxBatchSubmissionTime time.Duration
-	RollClient             rollup.RollupClient
-	PollInterval time.Duration
-
+	PollInterval           time.Duration
+	FinalityConfirmations  uint64
 }
 
 type Driver struct {
@@ -205,13 +203,23 @@ func (d *Driver) GetBatchBlockRange(
 	}
 	start.Add(start, blockOffset)
 
-
-	backend, _ := rollup.NewBackend("l1")
-	index, err := d.cfg.RollClient.GetLatestTransactionIndex(backend)
+	curentHeader, err := d.cfg.L1Client.HeaderByNumber(ctx, nil)
 	if err != nil {
 		return nil, nil, err
 	}
-	end := new(big.Int).SetUint64(*index)
+	finality := new(big.Int).SetUint64(d.cfg.FinalityConfirmations)
+	finality.Add(finality, new(big.Int).SetInt64(2)) // add 2 block number buffer to dtl sync data
+	curentNumber := curentHeader.Number
+	curentNumber.Sub(curentNumber, finality)
+
+	end, err := d.ctcContract.GetTotalElements(&bind.CallOpts{
+		Pending:     false,
+		Context:     ctx,
+		BlockNumber: curentNumber,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
 	end.Add(end, blockOffset)
 
 	if start.Cmp(end) > 0 {
