@@ -279,6 +279,12 @@ var (
 		Usage:  "Whether or not to enable scc rollback.",
 		EnvVar: prefixEnvVar("SCC_ROLLBACK"),
 	}
+	RollupClientHttpFlag = cli.StringFlag{
+		Name:   "rollup.clienthttp",
+		Usage:  "HTTP endpoint for the rollup client",
+		Value:  "http://localhost:7878",
+		EnvVar: "ROLLUP_CLIENT_HTTP",
+	}
 )
 
 var requiredFlags = []cli.Flag{
@@ -307,6 +313,7 @@ var requiredFlags = []cli.Flag{
 	RunStateBatchSubmitterFlag,
 	SafeMinimumEtherBalanceFlag,
 	ClearPendingTxsFlag,
+	RollupClientHttpFlag,
 }
 
 var optionalFlags = []cli.Flag{

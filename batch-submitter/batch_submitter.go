@@ -2,6 +2,9 @@ package batchsubmitter
 
 import (
 	"context"
+	"os"
+	"time"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/getsentry/sentry-go"
@@ -12,9 +15,8 @@ import (
 	"github.com/mantlenetworkio/mantle/bss-core/dial"
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 	"github.com/urfave/cli"
-	"os"
-	"time"
 )
 
 // Main is the entrypoint into the batch submitter service. This method returns
@@ -115,6 +117,8 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			return err
 		}
 
+		rollupClient := rollup.NewClient(cfg.RollupClientHttp, chainID)
+
 		txManagerConfig := txmgr.Config{
 			ResubmissionTimeout:       cfg.ResubmissionTimeout,
 			ReceiptQueryInterval:      time.Second,
@@ -155,19 +159,22 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 
 		if cfg.RunStateBatchSubmitter {
 			batchStateDriver, err := proposer.NewDriver(proposer.Config{
-				Name:                 "Proposer",
-				L1Client:             l1Client,
-				L2Client:             l2Client,
-				TssClient:            tssClient,
-				BlockOffset:          cfg.BlockOffset,
-				MinStateRootElements: cfg.MinStateRootElements,
-				MaxStateRootElements: cfg.MaxStateRootElements,
-				SCCAddr:              sccAddress,
-				CTCAddr:              ctcAddress,
-				FPRollupAddr:         common.HexToAddress(cfg.FPRollupAddress),
-				ChainID:              chainID,
-				PrivKey:              proposerPrivKey,
-				SccRollback:          cfg.EnableSccRollback,
+				Name:                   "Proposer",
+				L1Client:               l1Client,
+				L2Client:               l2Client,
+				TssClient:              tssClient,
+				BlockOffset:            cfg.BlockOffset,
+				MinStateRootElements:   cfg.MinStateRootElements,
+				MaxStateRootElements:   cfg.MaxStateRootElements,
+				SCCAddr:                sccAddress,
+				CTCAddr:                ctcAddress,
+				FPRollupAddr:           common.HexToAddress(cfg.FPRollupAddress),
+				ChainID:                chainID,
+				PrivKey:                proposerPrivKey,
+				SccRollback:            cfg.EnableSccRollback,
+				MaxBatchSubmissionTime: cfg.MaxBatchSubmissionTime,
+				RollClient:             rollupClient,
+				PollInterval:           cfg.PollInterval,
 			})
 			if err != nil {
 				return err
