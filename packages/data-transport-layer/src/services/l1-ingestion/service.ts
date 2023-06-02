@@ -230,6 +230,8 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
           if (targetL1Block === currentL1Block - this.options.confirmations) {
             const stateRootCachedHeight = Math.max(await this.state.db.getStateRootCacheHeight(),targetL1Block);
             const noConfirmTargetL1Block = currentL1Block - 1
+            console.log("l1 state root cached stateRootCachedHeight:",stateRootCachedHeight)
+            console.log("l1 state root cached noConfirmTargetL1Block: ",noConfirmTargetL1Block)
             if (stateRootCachedHeight < noConfirmTargetL1Block) {
               await this._syncEvents(
                 'StateCommitmentChain',
