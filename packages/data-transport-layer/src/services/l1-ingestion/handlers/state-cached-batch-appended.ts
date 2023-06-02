@@ -47,7 +47,6 @@ export const handleEventsStateCachedBatchAppended: EventHandlerSet<
         extraData.l1TransactionData
       )[2]
     }
-    console.log("state root cached index: ", stateRoots._batchIndex, stateRoots._batchRoot);
 
     const stateRootEntries: StateRootEntry[] = []
     for (let i = 0; i < stateRoots.length; i++) {
