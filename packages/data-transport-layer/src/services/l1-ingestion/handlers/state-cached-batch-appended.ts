@@ -47,7 +47,6 @@ export const handleEventsStateCachedBatchAppended: EventHandlerSet<
         extraData.l1TransactionData
       )[2]
     }
-    console.log("state root cached index: ", stateRoots._batchIndex, stateRoots._batchRoot);
 
     const stateRootEntries: StateRootEntry[] = []
     for (let i = 0; i < stateRoots.length; i++) {
@@ -82,7 +81,6 @@ export const handleEventsStateCachedBatchAppended: EventHandlerSet<
   storeEvent: async (entry, db) => {
     // Defend against situations where we missed an event because the RPC provider
     // (infura/alchemy/whatever) is missing an event.
-    console.log("we are storing cached event")
     await db.putStateRootCachedBatchEntries([entry.stateRootBatchEntry])
     await db.putStateRootCachedEntries(entry.stateRootEntries)
   },
