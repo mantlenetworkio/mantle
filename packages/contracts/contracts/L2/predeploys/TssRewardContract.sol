@@ -160,7 +160,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
         return true;
     }
 
-    function queryClaimTime() external view onlyAuthorized returns (uint256) {
+    function queryClaimTime() external view returns (uint256) {
         address operator = claimers[msg.sender];
         uint256 remainTime = _remainTime(operator);
         return remainTime;
@@ -184,6 +184,9 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
     virtual
     onlyFromCrossDomainAccount(stakeSlashAddress)
     {
+        if (operators[_operator] != address(0)) {
+            delete claimers[operators[_operator]];
+        }
         claimers[_claimer] = _operator;
         operators[_operator] = _claimer;
     }

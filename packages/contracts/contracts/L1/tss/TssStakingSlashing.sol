@@ -67,6 +67,10 @@ contract TssStakingSlashing is
     mapping(address => address[]) public stakers;
     //staker => operator
     mapping(address => address) public delegators;
+    //operator => claimer
+    mapping(address => address) public operatorClaimers;
+    //claimer => operator
+    mapping(address => address) public claimerOperators;
     bool public isSetParam;
 
 
@@ -134,16 +138,22 @@ contract TssStakingSlashing is
     }
 
     function setClaimer(
-        address staker,
-        address claimer
+        address _operator,
+        address _claimer
     ) external {
-        require(msg.sender == staker, "msg sender is not the staker");
-        require(delegation.isDelegated(staker),"msg sender has not delegated");
+        require(msg.sender == _operator, "msg sender is diff with operator address");
+        require(delegation.isOperator(msg.sender), "msg sender is not registered operator");
+        require(claimerOperators[_claimer] == address(0), "the claimer has been used");
+        if (operatorClaimers[_operator] != address(0)) {
+            delete claimerOperators[operatorClaimers[_operator]];
+        }
+        operatorClaimers[_operator] = _claimer;
+        claimerOperators[_claimer] = _operator;
 
         bytes memory message = abi.encodeWithSelector(
             ITssRewardContract.setClaimer.selector,
-            staker,
-            claimer
+            _operator,
+            _claimer
         );
         // send call data into L2, hardcode address
         sendCrossDomainMessage(
@@ -294,7 +304,7 @@ contract TssStakingSlashing is
             uint256 share = shares(stakerS[i]);
             uint256[] memory shareAmounts = new uint256[](1);
             shareAmounts[0] = deductedAmountShare * share / operatorShare;
-            TssDelegationManager(tssDelegationManagerContract).slashShares(deduction, regulatoryAccount, delegationShares,tokens, delegationShareIndexes, shareAmounts);
+            TssDelegationManager(tssDelegationManagerContract).slashShares(stakerS[i], regulatoryAccount, delegationShares,tokens, delegationShareIndexes, shareAmounts);
         }
 
     }

@@ -23,6 +23,7 @@ contract TssGroupManager is
     address confirmGroupAddress;
     uint256 threshold;
     uint256 gRoundId;
+    uint256 tempThreshold;
     uint256 confirmNumber;
     address public stakingSlash;
 
@@ -47,6 +48,7 @@ contract TssGroupManager is
         gRoundId = 0;
         confirmNumber = 0;
         threshold = 0;
+        tempThreshold = 0;
     }
 
     modifier onlyStakingSlash() {
@@ -89,10 +91,9 @@ contract TssGroupManager is
             isInActiveMember[_batchPublicKey[i]] = true;
             isSubmitGroupKey[_batchPublicKey[i]] = false;
         }
-        threshold = _threshold;
-        gRoundId = gRoundId + 1;
+        tempThreshold = _threshold;
         confirmNumber = 0;
-        emit tssGroupMemberAppend(gRoundId, _threshold, _batchPublicKey);
+        emit tssGroupMemberAppend(gRoundId + 1, _threshold, _batchPublicKey);
     }
 
     /**
@@ -137,9 +138,6 @@ contract TssGroupManager is
             bytes[] memory
         )
     {
-        if (inActiveTssMembers.length > 0) {
-            return (gRoundId - 1, threshold, confirmGroupPublicKey, activeTssMembers);
-        }
         return (gRoundId, threshold, confirmGroupPublicKey, activeTssMembers);
     }
 
@@ -148,7 +146,7 @@ contract TssGroupManager is
      */
     // slither-disable-next-line external-function
     function getTssInactiveGroupInfo() public view override returns (uint256, uint256,  bytes[] memory){
-        return (gRoundId, threshold, inActiveTssMembers);
+        return (gRoundId + 1, tempThreshold, inActiveTssMembers);
     }
 
     /**
@@ -307,6 +305,8 @@ contract TssGroupManager is
         delete inActiveTssMembers;
         confirmGroupPublicKey = _groupPublicKey;
         confirmGroupAddress = publicKeyToAddress(_groupPublicKey);
+        threshold = tempThreshold;
+        gRoundId = gRoundId + 1;
         emit tssActiveMemberAppended(gRoundId, _groupPublicKey, activeTssMembers);
     }
 

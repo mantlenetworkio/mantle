@@ -16,8 +16,8 @@ const (
 	SignRollBack   Method = "signRollBack"
 	AskRollBack    Method = "askRollBack"
 
-	SlashTypeLiveness byte = 1
-	SlashTypeCulprit  byte = 2
+	SlashTypeLiveness byte = 0
+	SlashTypeCulprit  byte = 1
 
 	CulpritErrorCode = 100
 )

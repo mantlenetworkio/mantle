@@ -92,10 +92,8 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 							return
 						}
 
-						if method != tss.SignSlash { // if it is not signSlash, then exit when receiving the first valid response
-							validSignResponse = &signResponse
-							return
-						}
+						validSignResponse = &signResponse
+						return
 					} else if resp.RpcResponse.Error.Code == tss.CulpritErrorCode {
 						_, ok := responseNodes[resp.SourceNode]
 						if ok { // ignore if handled
