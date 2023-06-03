@@ -815,7 +815,7 @@ export class CrossChainMessenger implements ICrossChainMessenger {
         this.contracts.l1.StateCommitmentChain.interface.decodeFunctionData(
           'appendStateBatch',
           stateBatchTransaction.data
-        )
+        )[0]
     } catch (e) {
       stateRoots = this.contracts.l1.Rollup.interface.decodeFunctionData(
         'createAssertionWithStateBatch',

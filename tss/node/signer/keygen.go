@@ -196,23 +196,23 @@ func (p *Processor) setGroupPublicKey(localKey, poolPubkey []byte) error {
 				txHeight := receipt.BlockNumber.Uint64()
 				tipHeight, err := p.l1Client.BlockNumber(context.Background())
 				if err != nil {
-					log.Error("Unable to fetch block number", "err", err)
+					log.Error("keygen Unable to fetch block number", "err", err)
 					break
 				}
-				log.Info("Transaction mined, checking confirmations",
+				log.Info("keygen Transaction mined, checking confirmations",
 					"txHash", txHash, "txHeight", txHeight,
 					"tipHeight", tipHeight,
 					"numConfirmations", p.l1ConfirmBlocks)
 				if txHeight+uint64(p.l1ConfirmBlocks) < tipHeight {
 					reverted := receipt.Status == 0
-					log.Info("Transaction confirmed",
+					log.Info("keygen Transaction confirmed",
 						"txHash", txHash,
 						"reverted", reverted)
 					// remove submitted slashing info
 					return receipt
 				}
 			case err != nil:
-				log.Error("failed to query receipt for transaction", "txHash", txHash.String())
+				log.Error("keygen failed to query receipt for transaction", "txHash", txHash.String())
 			default:
 			}
 			select {
@@ -302,7 +302,7 @@ func (p *Processor) EstimateGas(ctx context.Context, tx *etht.Transaction, rawCo
 
 	opts.GasTipCap = gasTipCap
 	opts.GasFeeCap = gasFeeCap
-	opts.GasLimit = 25 * gasLimit //add 20% buffer to gas limit
+	opts.GasLimit = uint64(p.gasLimitScaler) * gasLimit
 
 	return rawContract.RawTransact(opts, tx.Data())
 

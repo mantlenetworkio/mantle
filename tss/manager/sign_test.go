@@ -221,26 +221,8 @@ func TestSignSlash(t *testing.T) {
 		})
 
 	afterMsgSent := func(request server.RequestMsg, respCh chan server.ResponseMsg) error {
-		var SlashTxGasPrice string
-		var SlashTxBytes []byte
-		switch request.TargetNode {
-		case "a":
-			SlashTxGasPrice = "100000"
-			SlashTxBytes = []byte("a")
-		case "b":
-			SlashTxGasPrice = "200000"
-			SlashTxBytes = []byte("b")
-		case "c":
-			SlashTxGasPrice = "500000"
-			SlashTxBytes = []byte("c")
-		case "d":
-			SlashTxGasPrice = "300000"
-			SlashTxBytes = []byte("d")
-		}
 		signResp := tss.SignResponse{
 			Signature:       signature,
-			SlashTxGasPrice: SlashTxGasPrice,
-			SlashTxBytes:    SlashTxBytes,
 		}
 		rpcResp := tmtypes.NewRPCSuccessResponse(request.RpcRequest.ID, signResp)
 		respCh <- server.ResponseMsg{
@@ -254,30 +236,14 @@ func TestSignSlash(t *testing.T) {
 	require.NoError(t, err)
 	require.Nil(t, culprits)
 	require.EqualValues(t, signature, signResp.Signature)
-	require.EqualValues(t, signResp.SlashTxGasPriceBigInt.Int64(), 500000)
-	require.EqualValues(t, signResp.SlashTxBytes, []byte("c"))
 
 	afterMsgSent = func(request server.RequestMsg, respCh chan server.ResponseMsg) error {
 		if request.TargetNode == "c" {
 			return nil
 		}
-		var SlashTxGasPrice string
-		var SlashTxBytes []byte
-		switch request.TargetNode {
-		case "a":
-			SlashTxGasPrice = "100000"
-			SlashTxBytes = []byte("a")
-		case "b":
-			SlashTxGasPrice = "200000"
-			SlashTxBytes = []byte("b")
-		case "d":
-			SlashTxGasPrice = "300000"
-			SlashTxBytes = []byte("d")
-		}
+
 		signResp := tss.SignResponse{
 			Signature:       signature,
-			SlashTxGasPrice: SlashTxGasPrice,
-			SlashTxBytes:    SlashTxBytes,
 		}
 		rpcResp := tmtypes.NewRPCSuccessResponse(request.RpcRequest.ID, signResp)
 		respCh <- server.ResponseMsg{
@@ -292,8 +258,6 @@ func TestSignSlash(t *testing.T) {
 	require.NoError(t, err)
 	require.Nil(t, culprits)
 	require.EqualValues(t, signature, signResp.Signature)
-	require.EqualValues(t, signResp.SlashTxGasPriceBigInt.Int64(), 300000)
-	require.EqualValues(t, signResp.SlashTxBytes, []byte("d"))
 	cost := time.Now().Sub(before)
 	require.True(t, cost.Seconds()-manager.signTimeout.Seconds() >= 0)
 }

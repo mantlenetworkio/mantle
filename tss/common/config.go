@@ -3,12 +3,13 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"path"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type Configuration struct {
@@ -21,14 +22,15 @@ type Configuration struct {
 	TimedTaskInterval              string        `json:"timed_task_interval" mapstructure:"timed_task_interval"`
 	L1ReceiptConfirmTimeout        string        `json:"l1_receipt_confirm_timeout" mapstructure:"l1_receipt_confirm_timeout"`
 	L1ConfirmBlocks                int           `json:"l1_confirm_blocks" mapstructure:"l1_confirm_blocks"`
-	SignedBatchesWindow            int           `json:"signed_batches_window" mapstructure:"signed_batches_window"`
-	MinSignedInWindow              int           `json:"min_signed_in_window" mapstructure:"min_signed_in_window"`
+	L1StartBlockNumber             string      `json:"l1_start_block_number" mapstructure:"l1_start_block_number"`
+	MissSignedNumber               int           `json:"miss_signed_number" mapstructure:"miss_signed_number"`
 }
 
 type ManagerConfig struct {
-	WsAddr   string `json:"ws_addr" mapstructure:"ws_addr"`
-	HttpAddr string `json:"http_addr" mapstructure:"http_addr"`
-	DBDir    string `json:"db_dir" mapstructure:"db_dir"`
+	WsAddr     string `json:"ws_addr" mapstructure:"ws_addr"`
+	HttpAddr   string `json:"http_addr" mapstructure:"http_addr"`
+	DBDir      string `json:"db_dir" mapstructure:"db_dir"`
+	PrivateKey string `json:"private_key" mapstructure:"private_key"`
 
 	KeygenTimeout     string `json:"keygen_timeout" mapstructure:"keygen_timeout"`
 	CPKConfirmTimeout string `json:"cpk_confirm_timeout" mapstructure:"cpk_confirm_timeout"`
@@ -52,6 +54,7 @@ type NodeConfig struct {
 	KeyGenTimeout   time.Duration `json:"key_gen_timeout" mapstructure:"key_gen_timeout"`
 	KeySignTimeout  time.Duration `json:"key_sign_timeout" mapstructure:"key_sign_timeout"`
 	PreParamTimeout time.Duration `json:"pre_param_timeout" mapstructure:"pre_param_timeout"`
+	GasLimitScaler  int           `json:"gas_limit_scaler" mapstructure:"gas_limit_scaler"`
 
 	Secrets SecretsManagerConfig `json:"secrets" mapstructure:"secrets"`
 	Shamir  ShamirConfig         `json:"shamir" mapstructure:"shamir"`
@@ -99,8 +102,8 @@ func DefaultConfiguration() Configuration {
 		TimedTaskInterval:       "10s",
 		L1ReceiptConfirmTimeout: "20m",
 		L1ConfirmBlocks:         10,
-		SignedBatchesWindow:     100,
-		MinSignedInWindow:       50,
+		L1StartBlockNumber:      "1",
+		MissSignedNumber:        50,
 		Manager: ManagerConfig{
 			KeygenTimeout:     "120s",
 			CPKConfirmTimeout: "2h",
@@ -112,6 +115,7 @@ func DefaultConfiguration() Configuration {
 			KeyGenTimeout:   10 * time.Second,
 			KeySignTimeout:  10 * time.Second,
 			PreParamTimeout: 5 * time.Minute,
+			GasLimitScaler:  2,
 		},
 	}
 }

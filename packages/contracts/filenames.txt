@@ -4,12 +4,17 @@ ChainStorageContainer-SCC-batches
 Proxy__AssertionMap
 BVM_EigenDataLayrFee
 StateCommitmentChain
+TssDelegationSlasher
+TssDelegation
 ChainStorageContainer-CTC-batches
 Proxy__BVM_L1StandardBridge
+Proxy__TssDelegationManager
 Rollup
 TssStakingSlashing
 BVM_L1CrossDomainMessenger
+Proxy__TssDelegation
 Proxy__TSS_GroupManager
+Proxy__TssDelegationSlasher
 Proxy__BVM_EigenDataLayrFee
 Lib_AddressManager
 VerifierEntry
@@ -18,6 +23,8 @@ BVM_EigenDataLayrChain
 CanonicalTransactionChain
 TssGroupManager
 L1StandardBridge_for_verification_only
+TssDelegationManager
+EmptyContract
 ChugSplashDictator
 Proxy__BVM_EigenDataLayrChain
 Proxy__BVM_L1CrossDomainMessenger

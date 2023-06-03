@@ -38,7 +38,7 @@ export const handleEventsStateCachedBatchAppended: EventHandlerSet<
       ).interface.decodeFunctionData(
         'appendStateBatch',
         extraData.l1TransactionData
-      )
+      )[0]
     } catch (e) {
       stateRoots = getContractFactory(
         'Rollup'

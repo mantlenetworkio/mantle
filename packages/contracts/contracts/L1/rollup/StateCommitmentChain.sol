@@ -50,12 +50,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
     }
 
     function setFraudProofWindow(uint256 _fraudProofWindow) public {
-        // Proposers must have previously staked at the BondManager
-        require(
-            IBondManager(resolve("BondManager")).isCollateralized(msg.sender),
-            "Proposer does not have enough collateral posted"
-        );
-
+        require(msg.sender == libAddressManager.owner(), "Only callable by the libAddressManager owner.");
         FRAUD_PROOF_WINDOW = _fraudProofWindow;
     }
 
