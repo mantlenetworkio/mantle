@@ -1530,10 +1530,15 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 	status := 0
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
-	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
-		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
-		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
-	if err != nil || txStatus.StateRoot == nil {
+	var notRollup bool
+	if txStatus == nil {
+		notRollup = true
+	} else {
+		if txStatus.StateRoot == nil {
+			notRollup = true
+		}
+	}
+	if err != nil || notRollup {
 		cb := s.b.CurrentBlock().Time()
 		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
 		dtlEventDBStatus := dtlEventDBFalse
@@ -1549,6 +1554,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 			"status":           hexutil.Uint(status),
 			"statusInfo":       txStatusPeriodZero,
 			"dtlEventDBStatus": dtlEventDBStatus,
+			"challengeBlock":   -1,
 		}
 		return fields, nil
 	}
@@ -1568,10 +1574,14 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 				"datastoreId":      txStatus.Datastore.DataStoreId,
 				"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
 				"dtlEventDBStatus": dtlEventDBRight,
+				"challengeBlock":   txStatus.Fraudproofwindow / l1BlockInterval,
 			}
 			return fields, nil
 		}
 	}
+	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
+		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
+		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
 	var statusInfo string
 	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= l1FinalizeBlock {
 		status = 2
@@ -1595,6 +1605,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 		"datastoreId":      txStatus.Datastore.DataStoreId,
 		"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
 		"dtlEventDBStatus": dtlEventDBRight,
+		"challengeBlock":   txStatus.Fraudproofwindow / l1BlockInterval,
 	}
 
 	return fields, nil
@@ -1610,10 +1621,15 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 	status := 0
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
-	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
-		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
-		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
-	if err != nil || txStatus.StateRoot == nil {
+	var notRollup bool
+	if txStatus == nil {
+		notRollup = true
+	} else {
+		if txStatus.StateRoot == nil {
+			notRollup = true
+		}
+	}
+	if err != nil || notRollup {
 		cb := s.b.CurrentBlock().Time()
 		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
 		dtlEventDBStatus := dtlEventDBFalse
@@ -1629,6 +1645,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 			"status":           hexutil.Uint(status),
 			"statusInfo":       txStatusPeriodZero,
 			"dtlEventDBStatus": dtlEventDBStatus,
+			"challengeBlock":   -1,
 		}
 		return fields, nil
 	}
@@ -1648,10 +1665,14 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 				"datastoreId":      txStatus.Datastore.DataStoreId,
 				"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
 				"dtlEventDBStatus": dtlEventDBRight,
+				"challengeBlock":   txStatus.Fraudproofwindow / l1BlockInterval,
 			}
 			return fields, nil
 		}
 	}
+	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
+		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
+		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
 	var statusInfo string
 	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= l1FinalizeBlock {
 		status = 2
@@ -1682,6 +1703,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 		"daConfirmTxHash":   txStatus.Datastore.ConfirmTxHash,
 		"daSignatoryRecord": txStatus.Datastore.SignatoryRecord,
 		"dtlEventDBStatus":  dtlEventDBRight,
+		"challengeBlock":    txStatus.Fraudproofwindow / l1BlockInterval,
 	}
 	return fields, nil
 }
