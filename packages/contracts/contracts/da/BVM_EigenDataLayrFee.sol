@@ -27,6 +27,7 @@ contract BVM_EigenDataLayrFee is Initializable, OwnableUpgradeable, ReentrancyGu
     }
 
     function setFeeAddress(address _address) public onlyOwner {
+        require(_address != address(0), "setFeeAddress: address is the zero address");
         gasFeeAddress = _address;
     }
 

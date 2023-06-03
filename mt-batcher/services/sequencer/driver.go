@@ -789,15 +789,15 @@ func (d *Driver) CheckConfirmedWorker() {
 			}
 
 			log.Info("Checker db batch index and contract batch idnex", "DbBatchIndex", batchIndex, "ContractBatchIndex", latestReRollupBatchIndex.Uint64())
-			for i := batchIndex; i <= latestReRollupBatchIndex.Uint64(); i++ {
+			for i := batchIndex; i < latestReRollupBatchIndex.Uint64(); i++ {
 				log.Info("Checker batch confirm data index", "batchIndex", i)
-				batchIndex, err := d.Cfg.EigenDaContract.ReRollupBatchIndex(&bind.CallOpts{}, big.NewInt(int64(i)))
+				reConfirmedBatchIndex, err := d.Cfg.EigenDaContract.ReRollupBatchIndex(&bind.CallOpts{}, big.NewInt(int64(i)))
 				if err != nil {
 					log.Info("Checker get batch index by re rollup index fail", "err", err)
 					continue
 				}
 
-				rollupStore, err := d.Cfg.EigenDaContract.RollupBatchIndexRollupStores(&bind.CallOpts{}, batchIndex)
+				rollupStore, err := d.Cfg.EigenDaContract.RollupBatchIndexRollupStores(&bind.CallOpts{}, reConfirmedBatchIndex)
 				if err != nil {
 					log.Info("Checker get rollup store fail", "err", err)
 					continue
@@ -808,24 +808,25 @@ func (d *Driver) CheckConfirmedWorker() {
 						log.Info("Checker get l2 rollup block fail", "err", err)
 						continue
 					}
+					log.Info("Checker DataStoreIdToL2RollUpBlock", "rollupBlock.StartL2BlockNumber", rollupBlock.StartL2BlockNumber, "rollupBlock.EndBL2BlockNumber", rollupBlock.EndBL2BlockNumber)
 
 					aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
 						d.Ctx, rollupBlock.StartL2BlockNumber, rollupBlock.EndBL2BlockNumber,
 					)
-
 					if err != nil {
 						log.Error("Checker eigenDa sequencer unable to craft batch tx", "err", err)
 						continue
 					}
+					log.Info("Checker tx aggregator", "startL2BlockNumber", startL2BlockNumber, "endL2BlockNumber", endL2BlockNumber)
 
 					params, receipt, err := d.DisperseStoreData(aggregateTxData, startL2BlockNumber, endL2BlockNumber, true)
 					if err != nil {
 						log.Error("Checker disperse store data fail", "err", err)
 						continue
 					}
-
+					time.Sleep(10 * time.Second) // sleep for data into graph node
 					log.Info("MtBatcher disperse re-rollup store data success", "txHash", receipt.TxHash.String())
-					csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, rollupStore.DataStoreId, big.NewInt(int64(i)), true)
+					csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, rollupStore.DataStoreId, reConfirmedBatchIndex, true)
 					if err != nil {
 						log.Error("Checker confirm store data fail", "err", err)
 						continue
