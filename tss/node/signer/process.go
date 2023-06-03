@@ -61,6 +61,7 @@ type Processor struct {
 	tssQueryService           managertypes.TssQueryService
 	l1ConfirmBlocks           int
 	confirmReceiptTimeout     time.Duration
+	gasLimitScaler            int
 	metrics                   *Metrics
 }
 
@@ -135,6 +136,7 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 		tssQueryService:           queryService,
 		l1ConfirmBlocks:           cfg.L1ConfirmBlocks,
 		confirmReceiptTimeout:     receiptConfirmTimeoutDur,
+		gasLimitScaler:            cfg.Node.GasLimitScaler,
 		metrics:                   PrometheusMetrics("tssnode"),
 	}
 	return &processor, nil

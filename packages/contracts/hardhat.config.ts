@@ -352,6 +352,12 @@ const config: HardhatUserConfig = {
       type: 'number',
       default: 0,
     },
+    contractsDeployerKey: {
+      type: 'string',
+    },
+    contractsRpcUrl: {
+      type: 'string',
+    },
   },
 }
 

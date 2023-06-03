@@ -40,12 +40,14 @@ if [ $CONTRACTS_TARGET_NETWORK == "local" ] ;then
   echo "Deploying contracts. Deployment command:"
   echo "$DEPLOY_CMD"
   eval "$DEPLOY_CMD"
+
 #  echo "Deploying fraud proof verifiers. Deployment command:"
 #  echo "$DEPLOY_VERIFIER"
 #  eval "$DEPLOY_VERIFIER"
 #  echo "Init fraud proof whitelists. Init command:"
 #  echo "$WHITELIST_INIT"
 #  eval "$WHITELIST_INIT"
+
 
 elif [ $SKIP_CONTRACT_DEPLOY == "NO" ] ; then
   DEPLOY_CMD="npx hardhat deploy --network $CONTRACTS_TARGET_NETWORK"

@@ -6,8 +6,6 @@ import (
 
 type SigningInfo struct {
 	Address             common.Address `json:"address"`
-	StartBatchIndex     uint64         `json:"start_batch_index"`
-	IndexOffset         uint64         `json:"index_offset"`
 	MissedBlocksCounter uint64         `json:"missed_blocks_counter"`
 }
 

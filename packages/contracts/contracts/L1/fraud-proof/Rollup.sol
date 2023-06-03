@@ -453,7 +453,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             abi.encodeWithSignature("getTotalBatches()")
         );
         uint256 totalBatches = uint256(bytes32(data));
-        require(totalBatches-_batchHeader.batchIndex == 0, "delete batch with gap is not allowed");
+        require(totalBatches-_batchHeader.batchIndex == 1, "delete batch with gap is not allowed");
 
         // Delete state batch
         (bool success, ) = scc.call(
