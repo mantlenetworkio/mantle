@@ -82,7 +82,7 @@ task('rollupStake')
       process.env.CONTRACTS_RPC_URL
     )
     const mantleToken = process.env.L1_MANTLE_ADDRESS
-    const mantle = await getContractFactory('BitTokenERC20').attach(mantleToken)
+    const mantle = await getContractFactory('L1MantleToken').attach(mantleToken)
     const rollup = await getContractFactory('Rollup').attach(taskArgs.rollup)
 
     const SequencerAddress = process.env.BVM_ROLLUPER_ADDRESS
@@ -93,7 +93,7 @@ task('rollupStake')
     const deployerKey = process.env.CONTRACTS_DEPLOYER_KEY
     const deployer = new ethers.Wallet(deployerKey, provider)
     const amount = ethers.utils.parseEther('1.0') // 替换为转账金额
-    const bitAmount = ethers.utils.parseEther('100.0') // 替换为转账金额
+    const mantleAmount = ethers.utils.parseEther('100.0') // 替换为转账金额
 
     // 使用索引的 for 循环迭代数组
     for (let i = 0; i < stakerKeys.length; i++) {
@@ -111,7 +111,7 @@ task('rollupStake')
         console.error('Failed to send transaction:', error)
       }
 
-      await mantle.connect(deployer).transfer(stakerWallet.address, bitAmount)
+      await mantle.connect(deployer).transfer(stakerWallet.address, mantleAmount)
       console.log(
         'balance: ',
         stakerWallet.address,
