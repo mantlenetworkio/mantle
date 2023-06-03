@@ -1,6 +1,8 @@
 package manager
 
 import (
+	"context"
+	"crypto/ecdsa"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -18,6 +20,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/influxdata/influxdb/pkg/slices"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/index"
@@ -27,13 +30,16 @@ import (
 )
 
 type Manager struct {
-	wsServer                 server.IWebsocketManager
-	tssQueryService          types.TssQueryService
-	store                    types.ManagerStore
-	l1Cli                    *ethclient.Client
-	tssStakingSlashingCaller *tsh.TssStakingSlashingCaller
-	tssGroupManagerCaller    *tgm.TssGroupManagerCaller
-	l1ConfirmBlocks          int
+	wsServer                  server.IWebsocketManager
+	tssQueryService           types.TssQueryService
+	store                     types.ManagerStore
+	l1Cli                     *ethclient.Client
+	privateKey                *ecdsa.PrivateKey
+	chainId                   *big.Int
+	tssStakingSlashingAddress string
+	tssStakingSlashingCaller  *tsh.TssStakingSlashingCaller
+	tssGroupManagerCaller     *tgm.TssGroupManagerCaller
+	l1ConfirmBlocks           int
 
 	taskInterval          time.Duration
 	confirmReceiptTimeout time.Duration
@@ -89,14 +95,27 @@ func NewManager(wsServer server.IWebsocketManager,
 	if err != nil {
 		return Manager{}, err
 	}
+	privKey, err := crypto.HexToECDSA(config.Manager.PrivateKey)
+	if err != nil {
+		return Manager{}, err
+	}
+
+	chainId, err := l1Cli.ChainID(context.Background())
+	if err != nil {
+		return Manager{}, err
+	}
+
 	return Manager{
-		wsServer:                 wsServer,
-		tssQueryService:          tssQueryService,
-		store:                    store,
-		l1Cli:                    l1Cli,
-		l1ConfirmBlocks:          config.L1ConfirmBlocks,
-		tssStakingSlashingCaller: tssStakingSlashingCaller,
-		tssGroupManagerCaller:    tssGroupManagerCaller,
+		wsServer:                  wsServer,
+		tssQueryService:           tssQueryService,
+		store:                     store,
+		l1Cli:                     l1Cli,
+		l1ConfirmBlocks:           config.L1ConfirmBlocks,
+		tssStakingSlashingAddress: config.TssStakingSlashContractAddress,
+		tssStakingSlashingCaller:  tssStakingSlashingCaller,
+		tssGroupManagerCaller:     tssGroupManagerCaller,
+		privateKey:                privKey,
+		chainId:                   chainId,
 
 		taskInterval:          taskIntervalDur,
 		confirmReceiptTimeout: receiptConfirmTimeoutDur,

@@ -16,7 +16,7 @@ func TestLivenessDetect(t *testing.T) {
 	storage, err := store.NewStorage("")
 	require.NoError(t, err)
 
-	slashing := slash.NewSlashing(storage, storage, 10, 5)
+	slashing := slash.NewSlashing(storage, storage, 10)
 	priK, err := crypto.GenerateKey()
 	nodePublicKey := hexutil.Encode(crypto.CompressPubkey(&priK.PublicKey))
 	address := crypto.PubkeyToAddress(priK.PublicKey)
@@ -52,7 +52,6 @@ func TestLivenessDetect(t *testing.T) {
 	found, signingInfo := storage.GetSigningInfo(address)
 	require.True(t, found)
 	require.EqualValues(t, 6, signingInfo.MissedBlocksCounter)
-	require.EqualValues(t, 5, signingInfo.IndexOffset)
 
 	// index: 6
 	err = storage.SetStateBatch(index.StateBatchInfo{
@@ -68,8 +67,7 @@ func TestLivenessDetect(t *testing.T) {
 	found, signingInfo = storage.GetSigningInfo(address)
 	require.True(t, found)
 	require.EqualValues(t, 1, signingInfo.MissedBlocksCounter)
-	require.EqualValues(t, 0, signingInfo.IndexOffset)
-	require.EqualValues(t, 6, signingInfo.StartBatchIndex)
+
 
 	// index: 7-15, absent from 7-10
 	for i := 7; i <= 15; i++ {
@@ -96,8 +94,6 @@ func TestLivenessDetect(t *testing.T) {
 	}
 	found, signingInfo = storage.GetSigningInfo(address)
 	require.True(t, found)
-	require.EqualValues(t, 6, signingInfo.StartBatchIndex)
-	require.EqualValues(t, 9, signingInfo.IndexOffset)
 	require.EqualValues(t, 5, signingInfo.MissedBlocksCounter)
 	require.False(t, storage.IsInSlashing(address))
 
@@ -117,8 +113,7 @@ func TestLivenessDetect(t *testing.T) {
 	}
 	found, signingInfo = storage.GetSigningInfo(address)
 	require.True(t, found)
-	require.EqualValues(t, 6, signingInfo.StartBatchIndex)
-	require.EqualValues(t, 14, signingInfo.IndexOffset)
+
 	require.EqualValues(t, 5, signingInfo.MissedBlocksCounter)
 	require.False(t, storage.IsInSlashing(address))
 
@@ -137,8 +132,6 @@ func TestLivenessDetect(t *testing.T) {
 
 	found, signingInfo = storage.GetSigningInfo(address)
 	require.True(t, found)
-	require.EqualValues(t, 6, signingInfo.StartBatchIndex)
-	require.EqualValues(t, 15, signingInfo.IndexOffset)
 	require.EqualValues(t, 6, signingInfo.MissedBlocksCounter)
 	require.True(t, storage.IsInSlashing(address))
 	found, slashingInfo := storage.GetSlashingInfo(address, 21)
