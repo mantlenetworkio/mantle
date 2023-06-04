@@ -12,7 +12,6 @@ import { CrossDomainEnabled } from "../../libraries/bridge/CrossDomainEnabled.so
 import { Lib_PredeployAddresses } from "../../libraries/constants/Lib_PredeployAddresses.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @title L1StandardBridge
@@ -21,7 +20,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
  * and listening to it for newly finalized withdrawals.
  *
  */
-contract L1StandardBridge is Initializable, IL1StandardBridge, CrossDomainEnabled {
+contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
     using SafeERC20 for IERC20;
 
     /********************************
@@ -29,7 +28,7 @@ contract L1StandardBridge is Initializable, IL1StandardBridge, CrossDomainEnable
      ********************************/
 
     address public l2TokenBridge;
-    address public l1BitAddress;
+    address public l1MantleAddress;
 
     // Maps L1 token to L2 token to balance of the L1 token deposited
     mapping(address => mapping(address => uint256)) public deposits;
@@ -39,9 +38,7 @@ contract L1StandardBridge is Initializable, IL1StandardBridge, CrossDomainEnable
      ***************/
 
     // This contract lives behind a proxy, so the constructor parameters will go unused.
-    constructor() CrossDomainEnabled(address(0)) {
-        _disableInitializers();
-    }
+    constructor() CrossDomainEnabled(address(0)) {}
 
     /******************
      * Initialization *
@@ -50,14 +47,14 @@ contract L1StandardBridge is Initializable, IL1StandardBridge, CrossDomainEnable
     /**
      * @param _l1messenger L1 Messenger address being used for cross-chain communications.
      * @param _l2TokenBridge L2 standard bridge address.
-     * @param _l1BitAddress initialize L1 bit address
+     * @param _l1MantleAddress initialize L1 mantle address
      */
     // slither-disable-next-line external-function
-    function initialize(address _l1messenger, address _l2TokenBridge, address _l1BitAddress) public {
+    function initialize(address _l1messenger, address _l2TokenBridge, address _l1MantleAddress) public {
         require(messenger == address(0), "Contract has already been initialized.");
         messenger = _l1messenger;
         l2TokenBridge = _l2TokenBridge;
-        l1BitAddress = _l1BitAddress;
+        l1MantleAddress = _l1MantleAddress;
     }
 
     /**************
@@ -195,13 +192,13 @@ contract L1StandardBridge is Initializable, IL1StandardBridge, CrossDomainEnable
 
         // Construct calldata for _l2Token.finalizeDeposit(_to, _amount)
         bytes memory message;
-        if (_l1Token == l1BitAddress) {
+        if (_l1Token == l1MantleAddress) {
             // Construct calldata for finalizeDeposit call
-            require(_l2Token == Lib_PredeployAddresses.BVM_BIT, "Unmatched token pair");
+            require(_l2Token == Lib_PredeployAddresses.BVM_MANTLE, "Unmatched token pair");
             message = abi.encodeWithSelector(
                 IL2ERC20Bridge.finalizeDeposit.selector,
                 address(0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5),
-                Lib_PredeployAddresses.BVM_BIT,
+                Lib_PredeployAddresses.BVM_MANTLE,
                 _from,
                 _to,
                 _amount,
@@ -257,13 +254,13 @@ contract L1StandardBridge is Initializable, IL1StandardBridge, CrossDomainEnable
     /**
      * @inheritdoc IL1ERC20Bridge
      */
-    function finalizeBitWithdrawal(
+    function finalizeMantleWithdrawal(
         address _from,
         address _to,
         uint256 _amount,
         bytes calldata _data
     ) external onlyFromCrossDomainAccount(l2TokenBridge) {
-        finalizeERC20Withdrawal(l1BitAddress, Lib_PredeployAddresses.BVM_BIT, _from, _to, _amount, _data);
+        finalizeERC20Withdrawal(l1MantleAddress, Lib_PredeployAddresses.BVM_MANTLE, _from, _to, _amount, _data);
     }
 
     /**

@@ -513,6 +513,11 @@ func (c *Challenger) Start() error {
 				}
 				c.Cfg.Metrics.ReRollupBatchIndex().Set(float64(bigBatchIndex.Uint64()))
 				log.Info("MtChallenge tool submit re-rollup info success", "batchIndex", reRollupBatchIndex[index], "txHash", tx.Hash().String())
+				updBatchIndex, err := strconv.ParseUint(reRollupBatchIndex[index], 10, 64)
+				if err != nil {
+					log.Error("MtChallenge tool type string to uint64 fail")
+				}
+				c.LevelDBStore.SetLatestBatchIndex(updBatchIndex)
 			}
 		}
 	})

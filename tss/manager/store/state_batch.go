@@ -20,7 +20,7 @@ func (s *Storage) GetStateBatch(root [32]byte) (bool, index.StateBatchInfo) {
 	}
 	var sbi index.StateBatchInfo
 	if err = json.Unmarshal(bz, &sbi); err != nil {
-		return true, index.StateBatchInfo{}
+		return false, index.StateBatchInfo{}
 	}
 	return true, sbi
 }

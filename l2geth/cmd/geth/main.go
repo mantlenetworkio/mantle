@@ -160,6 +160,7 @@ var (
 		utils.RollupEnableVerifierFlag,
 		utils.RollupMpcVerifierFlag,
 		utils.RollupEigenDaBlockFlag,
+		utils.RollupMantleTokenUpgradeBlockFlag,
 		utils.RollupTimstampRefreshFlag,
 		utils.RollupPollIntervalFlag,
 		utils.RollupMaxCalldataSizeFlag,
@@ -179,7 +180,7 @@ var (
 		utils.FraudProofL1ConfirmationsFlag,
 		utils.FraudProofSequencerAddrFlag,
 		utils.FraudProofRollupAddrFlag,
-		utils.FraudProofStakeAddrFlag,
+		utils.FraudProofOperatorAddrFlag,
 		utils.FraudProofStakeAmount,
 		utils.FraudProofChallengeVerify,
 	}

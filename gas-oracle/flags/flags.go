@@ -36,7 +36,7 @@ var (
 	DaFeeContractAddressFlag = cli.StringFlag{
 		Name:   "da-fee-contract-address",
 		Usage:  "Address of DA-Fee-Contract",
-		Value:  "0x9109811E8eEe02520219612bB5D47C60c382F4aa",
+		Value:  "0x9700cA34e333BCfa83ee7eA9de998a876474Dc2c",
 		EnvVar: "GAS_PRICE_ORACLE_DA_FEE_CONTRACT_ADDRESS",
 	}
 	PrivateKeyFlag = cli.StringFlag{

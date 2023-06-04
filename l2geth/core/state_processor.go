@@ -25,6 +25,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/upgrade"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
@@ -101,6 +102,17 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	if config.IsEigenDa(header.Number) {
 		vmenv.StateDB.SetCode(rcfg.L2GasPriceOracleAddress, rcfg.L2GasPriceOracleCode)
 	}
+
+	if config.IsMantleTokenUpgrade(header.Number) {
+		log.Info("update mantle token name & symbol", "address", rcfg.L2MantleTokenAddress)
+		vmenv.StateDB.SetState(rcfg.L2MantleTokenAddress, rcfg.MantleTokenNameSlot, rcfg.MantleTokenNameValue)
+		vmenv.StateDB.SetState(rcfg.L2MantleTokenAddress, rcfg.MantleTokenSymbolSlot, rcfg.MantleTokenSymbolValue)
+
+		log.Info("update wrapped mantle token name & symbol", "address", rcfg.L2WrappedMantleTokenAddress)
+		vmenv.StateDB.SetState(rcfg.L2WrappedMantleTokenAddress, rcfg.WrappedMantleTokenNameSlot, rcfg.WrappedMantleTokenNameValue)
+		vmenv.StateDB.SetState(rcfg.L2WrappedMantleTokenAddress, rcfg.WrappedMantleTokenSymbolSlot, rcfg.WrappedMantleTokenSymbolValue)
+	}
+
 	upgrade.CheckUpgrade(vmenv.StateDB, header.Number)
 
 	// UsingBVM

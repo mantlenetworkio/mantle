@@ -3,16 +3,16 @@
 ###############################################################################
 ###                           Base Configuration                            ###
 ###############################################################################
-l1_url = "http://bitnetwork-l1chain"
+l1_url = "http://mantlenetwork-l1chain"
 time_task_interval = "10s"
 l1_receipt_confirm_timeout = "30s"
 l1_confirm_blocks = "1"
 scc_contract_address = "0x2A88056985814dcBb72aFA50B95893359B6262f5"
 tss_group_contract_address = "0x666f755Ff171702702EAc10339A2a613698Cbd2f"
 tss_staking_slash_contract_address = "0x00f59693Ab3a491356FDB4Facb4B04D811135E22"
+l1_start_block_number = 1
 timed_task_interval = "10s"
-signed_batches_window = 100
-min_signed_in_window = 50
+miss_signed_number = 5
 [node]
 # database directory; default: 'base_dir' will be used
 db_dir = "/root/.tssnode/db"
@@ -23,7 +23,7 @@ ws_addr = "tcp://tss-manager:8081"
 # http server port
 http_addr = ":8080"
 # l2 eth rpc
-l2_eth_rpc = "http://bitnetwork-l2geth"
+l2_eth_rpc = "http://mantlenetwork-l2geth"
 tss_group_manager_address = "0x666f755Ff171702702EAc10339A2a613698Cbd2f"
 tss_staking_slashing_address = "0x00f59693Ab3a491356FDB4Facb4B04D811135E22"
 # the preParamFile for tss job
@@ -47,3 +47,4 @@ pre_param_timeout = "5m0s"
 # set it to environment with the prefix 'TSS', export TSS_KEY_PRIVATE_KEY="981a3e...."
 # or it is recommended to store the private key into keyring, you can checkout with 'tssnode keys -h'.
 private_key = ""
+gas_limit_scaler = 2

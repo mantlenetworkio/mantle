@@ -56,4 +56,6 @@ type Config struct {
 
 	// EigenDaFee blockNumber Config
 	EigenDaBlock int64
+
+	MantleTokenUpgradeBlock int64
 }

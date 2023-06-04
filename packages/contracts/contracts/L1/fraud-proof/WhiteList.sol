@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 abstract contract Whitelist {
     modifier onlyOwner() {
         require(msg.sender == owner, "Ownable: caller is not the owner");
@@ -5,39 +7,42 @@ abstract contract Whitelist {
     }
 
     modifier stakerWhitelistOnly(address _checkAddress) {
-        if (!stakerWhitelist[_checkAddress]) {
-            revert("NOT_IN_STAKER_WHITELIST");
-        }
+        require(stakerslist[stakerWhitelist[_checkAddress]] == _checkAddress, "NOT_IN_STAKER_WHITELIST");
         _;
     }
 
     modifier operatorWhitelistOnly(address _checkAddress) {
-        if (!operatorWhitelist[_checkAddress]) {
-            revert("NOT_IN_OPERATOR_WHITELIST");
-        }
+        require(operatorslist[operatorWhitelist[_checkAddress]] == _checkAddress, "NOT_IN_OPERATOR_WHITELIST");
         _;
     }
 
     address public owner;
-    mapping(address => bool) public stakerWhitelist;
-    mapping(address => bool) public operatorWhitelist;
+    mapping(address => uint256) public stakerWhitelist;
+    address[] public stakerslist;
+    mapping(address => uint256) public operatorWhitelist;
+    address[] public operatorslist;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
      * @notice Add to staker whitelist
      */
-    function addToStakerWhitelist(address[] calldata toAddAddresses) external onlyOwner {
+    function addToStakerWhitelist(address[] calldata toAddAddresses) public onlyOwner {
+        uint256 lens = stakerslist.length;
         for (uint i = 0; i < toAddAddresses.length; i++) {
-            stakerWhitelist[toAddAddresses[i]] = true;
+            stakerWhitelist[toAddAddresses[i]] = lens+i;
+            stakerslist.push(toAddAddresses[i]);
         }
     }
 
     /**
      * @notice Remove from whitelist
      */
-    function removeFromStakerWhitelist(address[] calldata toRemoveAddresses) external onlyOwner {
+    function removeFromStakerWhitelist(address[] calldata toRemoveAddresses) public onlyOwner {
         for (uint i = 0; i < toRemoveAddresses.length; i++) {
+            uint256 index = stakerWhitelist[toRemoveAddresses[i]];
+            stakerslist[index] = stakerslist[stakerslist.length-1];
+            stakerslist.pop();
             delete stakerWhitelist[toRemoveAddresses[i]];
         }
     }
@@ -45,17 +50,22 @@ abstract contract Whitelist {
     /**
  * @notice Add to whitelist
      */
-    function addToOperatorWhitelist(address[] calldata toAddAddresses) external onlyOwner {
+    function addToOperatorWhitelist(address[] calldata toAddAddresses) public onlyOwner {
+        uint256 lens = operatorslist.length;
         for (uint i = 0; i < toAddAddresses.length; i++) {
-            operatorWhitelist[toAddAddresses[i]] = true;
+            operatorWhitelist[toAddAddresses[i]] = lens+i;
+            operatorslist.push(toAddAddresses[i]);
         }
     }
 
     /**
      * @notice Remove from whitelist
      */
-    function removeFromOperatorWhitelist(address[] calldata toRemoveAddresses) external onlyOwner {
+    function removeFromOperatorWhitelist(address[] calldata toRemoveAddresses) public onlyOwner {
         for (uint i = 0; i < toRemoveAddresses.length; i++) {
+            uint256 index = operatorWhitelist[toRemoveAddresses[i]];
+            operatorslist[index] = operatorslist[operatorslist.length-1];
+            operatorslist.pop();
             delete operatorWhitelist[toRemoveAddresses[i]];
         }
     }

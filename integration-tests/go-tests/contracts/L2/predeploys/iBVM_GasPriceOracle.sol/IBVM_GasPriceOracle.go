@@ -26,11 +26,12 @@ var (
 	_ = common.Big1
 	_ = types.BloomLookup
 	_ = event.NewSubscription
+	_ = abi.ConvertType
 )
 
 // IBVMGasPriceOracleMetaData contains all meta data concerning the IBVMGasPriceOracle contract.
 var IBVMGasPriceOracleMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"name\":\"IsBurning\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"name\":\"IsBurning\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // IBVMGasPriceOracleABI is the input ABI used to generate the binding from.
@@ -134,11 +135,11 @@ func NewIBVMGasPriceOracleFilterer(address common.Address, filterer bind.Contrac
 
 // bindIBVMGasPriceOracle binds a generic wrapper to an already deployed contract.
 func bindIBVMGasPriceOracle(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
-	parsed, err := abi.JSON(strings.NewReader(IBVMGasPriceOracleABI))
+	parsed, err := IBVMGasPriceOracleMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
+	return bind.NewBoundContract(address, *parsed, caller, transactor, filterer), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and
@@ -181,16 +182,16 @@ func (_IBVMGasPriceOracle *IBVMGasPriceOracleTransactorRaw) Transact(opts *bind.
 
 // IsBurning is a free data retrieval call binding the contract method 0x0d1e43a0.
 //
-// Solidity: function IsBurning() view returns(bool)
-func (_IBVMGasPriceOracle *IBVMGasPriceOracleCaller) IsBurning(opts *bind.CallOpts) (bool, error) {
+// Solidity: function IsBurning() view returns(uint256)
+func (_IBVMGasPriceOracle *IBVMGasPriceOracleCaller) IsBurning(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
 	err := _IBVMGasPriceOracle.contract.Call(opts, &out, "IsBurning")
 
 	if err != nil {
-		return *new(bool), err
+		return *new(*big.Int), err
 	}
 
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
 
 	return out0, err
 
@@ -198,14 +199,14 @@ func (_IBVMGasPriceOracle *IBVMGasPriceOracleCaller) IsBurning(opts *bind.CallOp
 
 // IsBurning is a free data retrieval call binding the contract method 0x0d1e43a0.
 //
-// Solidity: function IsBurning() view returns(bool)
-func (_IBVMGasPriceOracle *IBVMGasPriceOracleSession) IsBurning() (bool, error) {
+// Solidity: function IsBurning() view returns(uint256)
+func (_IBVMGasPriceOracle *IBVMGasPriceOracleSession) IsBurning() (*big.Int, error) {
 	return _IBVMGasPriceOracle.Contract.IsBurning(&_IBVMGasPriceOracle.CallOpts)
 }
 
 // IsBurning is a free data retrieval call binding the contract method 0x0d1e43a0.
 //
-// Solidity: function IsBurning() view returns(bool)
-func (_IBVMGasPriceOracle *IBVMGasPriceOracleCallerSession) IsBurning() (bool, error) {
+// Solidity: function IsBurning() view returns(uint256)
+func (_IBVMGasPriceOracle *IBVMGasPriceOracleCallerSession) IsBurning() (*big.Int, error) {
 	return _IBVMGasPriceOracle.Contract.IsBurning(&_IBVMGasPriceOracle.CallOpts)
 }
