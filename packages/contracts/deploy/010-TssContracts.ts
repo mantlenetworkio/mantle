@@ -14,7 +14,7 @@ const deployFn: DeployFunction = async (hre) => {
   const { deployer } = await hre.getNamedAccounts()
 
   const owner = hre.deployConfig.bvmAddressManagerOwner
-  const l1BitAddress = hre.deployConfig.l1BitAddress
+  const l1MantleAddress = hre.deployConfig.proxyL1MantleAddress
 
   //deploy EmptyContract
   await deployAndVerifyAndThen({
@@ -171,7 +171,7 @@ const deployFn: DeployFunction = async (hre) => {
   )
 
   args = [
-    l1BitAddress,
+    l1MantleAddress,
     Proxy__TSS_GroupManager.address,
     Proxy_TssDelegationManager.address,
     Proxy_TssDelegation.address,
@@ -197,7 +197,7 @@ const deployFn: DeployFunction = async (hre) => {
             await contract
               .connect(Impl_TSS_GroupManager.signer.provider)
               .underlyingToken({ from: ethers.constants.AddressZero }),
-            l1BitAddress
+            l1MantleAddress
           )
         },
         5000,

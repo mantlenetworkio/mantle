@@ -10,7 +10,7 @@ Proxy__BVM_L1CrossDomainMessenger
 AddressDictator
 L1StandardBridge_for_verification_only
 ChainStorageContainer-CTC-batches
-TestBitToken
+TestMantleToken
 Proxy__TSS_StakingSlashing
 Lib_AddressManager
 TssGroupManager

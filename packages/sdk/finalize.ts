@@ -9,7 +9,7 @@ import {sleep} from "@mantleio/core-utils";
   const l1Wallet = new ethers.Wallet(process.env.PRIVATE_KEY, l1RpcProvider)
   const etherBalance =ethers.utils.formatEther(await l1Wallet.getBalance());
 
-  const tokenAddress = process.env.TestBitToken_ADDRESS;
+  const tokenAddress = process.env.TestMantleToken_ADDRESS;
   const tokenAbi = ["function balanceOf(address account) view returns (uint256)"];
   const tokenContract = new ethers.Contract(tokenAddress!, tokenAbi, l1Wallet);
   const balance = await tokenContract.balanceOf(l1Wallet.address);

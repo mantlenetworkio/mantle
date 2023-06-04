@@ -82,12 +82,12 @@ task('take-dump').setAction(async (args, hre) => {
       _symbol: 'WETH',
       decimal: 18,
     },
-    BVM_BIT: {
+    BVM_MANTLE: {
       l2Bridge: predeploys.L2StandardBridge,
-      // l1Token: hre.deployConfig.l1BitAddress,
+      // l1Token: hre.deployConfig.l1MantleAddress,
       l1Token: '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
-      _name: 'Bit Token',
-      _symbol: 'BIT',
+      _name: 'Mantle',
+      _symbol: 'MNT',
       decimal: 18,
     },
     L2CrossDomainMessenger: {

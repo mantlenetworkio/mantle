@@ -26,11 +26,12 @@ var (
 	_ = common.Big1
 	_ = types.BloomLookup
 	_ = event.NewSubscription
+	_ = abi.ConvertType
 )
 
 // TssRewardContractMetaData contains all meta data concerning the TssRewardContract contract.
 var TssRewardContractMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_deadAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_sendAmountPerYear\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_bvmGasPriceOracleAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_l2Message\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"batchTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tssMembers\",\"type\":\"address[]\"}],\"name\":\"DistributeTssReward\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockStartHeight\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"length\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tssMembers\",\"type\":\"address[]\"}],\"name\":\"DistributeTssRewardByBlock\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"bestBlockID\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"bvmGasPriceOracleAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockStartHeight\",\"type\":\"uint256\"},{\"internalType\":\"uint32\",\"name\":\"_length\",\"type\":\"uint32\"},{\"internalType\":\"uint256\",\"name\":\"_batchTime\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"_tssMembers\",\"type\":\"address[]\"}],\"name\":\"claimReward\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"deadAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"dust\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"l2Message\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"latsBatchTime\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"ledger\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"queryOwner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"queryReward\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"querySendAmountPerSecond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"sendAmountPerYear\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockID\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"updateReward\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdrawDust\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_deadAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_sendAmountPerYear\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_bvmGasPriceOracleAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_l2CrossDomainMessenger\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_sccAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"lastBatchTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"batchTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tssMembers\",\"type\":\"address[]\"}],\"name\":\"DistributeTssReward\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockStartHeight\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"length\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tssMembers\",\"type\":\"address[]\"}],\"name\":\"DistributeTssRewardByBlock\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"bestBlockID\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"bvmGasPriceOracleAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockStartHeight\",\"type\":\"uint256\"},{\"internalType\":\"uint32\",\"name\":\"_length\",\"type\":\"uint32\"},{\"internalType\":\"uint256\",\"name\":\"_batchTime\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"_tssMembers\",\"type\":\"address[]\"}],\"name\":\"claimReward\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"deadAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"dust\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastBatchTime\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"ledger\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"messenger\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"queryReward\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"querySendAmountPerSecond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"sccAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"sendAmountPerYear\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_sendAmountPerYear\",\"type\":\"uint256\"}],\"name\":\"setSendAmountPerYear\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockID\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"updateReward\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdrawDust\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
 }
 
 // TssRewardContractABI is the input ABI used to generate the binding from.
@@ -134,11 +135,11 @@ func NewTssRewardContractFilterer(address common.Address, filterer bind.Contract
 
 // bindTssRewardContract binds a generic wrapper to an already deployed contract.
 func bindTssRewardContract(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
-	parsed, err := abi.JSON(strings.NewReader(TssRewardContractABI))
+	parsed, err := TssRewardContractMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
+	return bind.NewBoundContract(address, *parsed, caller, transactor, filterer), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and
@@ -303,43 +304,12 @@ func (_TssRewardContract *TssRewardContractCallerSession) Dust() (*big.Int, erro
 	return _TssRewardContract.Contract.Dust(&_TssRewardContract.CallOpts)
 }
 
-// L2Message is a free data retrieval call binding the contract method 0xc9dd594b.
+// LastBatchTime is a free data retrieval call binding the contract method 0xe5efd585.
 //
-// Solidity: function l2Message() view returns(address)
-func (_TssRewardContract *TssRewardContractCaller) L2Message(opts *bind.CallOpts) (common.Address, error) {
+// Solidity: function lastBatchTime() view returns(uint256)
+func (_TssRewardContract *TssRewardContractCaller) LastBatchTime(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _TssRewardContract.contract.Call(opts, &out, "l2Message")
-
-	if err != nil {
-		return *new(common.Address), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
-
-	return out0, err
-
-}
-
-// L2Message is a free data retrieval call binding the contract method 0xc9dd594b.
-//
-// Solidity: function l2Message() view returns(address)
-func (_TssRewardContract *TssRewardContractSession) L2Message() (common.Address, error) {
-	return _TssRewardContract.Contract.L2Message(&_TssRewardContract.CallOpts)
-}
-
-// L2Message is a free data retrieval call binding the contract method 0xc9dd594b.
-//
-// Solidity: function l2Message() view returns(address)
-func (_TssRewardContract *TssRewardContractCallerSession) L2Message() (common.Address, error) {
-	return _TssRewardContract.Contract.L2Message(&_TssRewardContract.CallOpts)
-}
-
-// LatsBatchTime is a free data retrieval call binding the contract method 0xe3dad285.
-//
-// Solidity: function latsBatchTime() view returns(uint256)
-func (_TssRewardContract *TssRewardContractCaller) LatsBatchTime(opts *bind.CallOpts) (*big.Int, error) {
-	var out []interface{}
-	err := _TssRewardContract.contract.Call(opts, &out, "latsBatchTime")
+	err := _TssRewardContract.contract.Call(opts, &out, "lastBatchTime")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -351,18 +321,18 @@ func (_TssRewardContract *TssRewardContractCaller) LatsBatchTime(opts *bind.Call
 
 }
 
-// LatsBatchTime is a free data retrieval call binding the contract method 0xe3dad285.
+// LastBatchTime is a free data retrieval call binding the contract method 0xe5efd585.
 //
-// Solidity: function latsBatchTime() view returns(uint256)
-func (_TssRewardContract *TssRewardContractSession) LatsBatchTime() (*big.Int, error) {
-	return _TssRewardContract.Contract.LatsBatchTime(&_TssRewardContract.CallOpts)
+// Solidity: function lastBatchTime() view returns(uint256)
+func (_TssRewardContract *TssRewardContractSession) LastBatchTime() (*big.Int, error) {
+	return _TssRewardContract.Contract.LastBatchTime(&_TssRewardContract.CallOpts)
 }
 
-// LatsBatchTime is a free data retrieval call binding the contract method 0xe3dad285.
+// LastBatchTime is a free data retrieval call binding the contract method 0xe5efd585.
 //
-// Solidity: function latsBatchTime() view returns(uint256)
-func (_TssRewardContract *TssRewardContractCallerSession) LatsBatchTime() (*big.Int, error) {
-	return _TssRewardContract.Contract.LatsBatchTime(&_TssRewardContract.CallOpts)
+// Solidity: function lastBatchTime() view returns(uint256)
+func (_TssRewardContract *TssRewardContractCallerSession) LastBatchTime() (*big.Int, error) {
+	return _TssRewardContract.Contract.LastBatchTime(&_TssRewardContract.CallOpts)
 }
 
 // Ledger is a free data retrieval call binding the contract method 0x10a7fd7b.
@@ -396,6 +366,37 @@ func (_TssRewardContract *TssRewardContractCallerSession) Ledger(arg0 *big.Int) 
 	return _TssRewardContract.Contract.Ledger(&_TssRewardContract.CallOpts, arg0)
 }
 
+// Messenger is a free data retrieval call binding the contract method 0x3cb747bf.
+//
+// Solidity: function messenger() view returns(address)
+func (_TssRewardContract *TssRewardContractCaller) Messenger(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _TssRewardContract.contract.Call(opts, &out, "messenger")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// Messenger is a free data retrieval call binding the contract method 0x3cb747bf.
+//
+// Solidity: function messenger() view returns(address)
+func (_TssRewardContract *TssRewardContractSession) Messenger() (common.Address, error) {
+	return _TssRewardContract.Contract.Messenger(&_TssRewardContract.CallOpts)
+}
+
+// Messenger is a free data retrieval call binding the contract method 0x3cb747bf.
+//
+// Solidity: function messenger() view returns(address)
+func (_TssRewardContract *TssRewardContractCallerSession) Messenger() (common.Address, error) {
+	return _TssRewardContract.Contract.Messenger(&_TssRewardContract.CallOpts)
+}
+
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
 //
 // Solidity: function owner() view returns(address)
@@ -425,37 +426,6 @@ func (_TssRewardContract *TssRewardContractSession) Owner() (common.Address, err
 // Solidity: function owner() view returns(address)
 func (_TssRewardContract *TssRewardContractCallerSession) Owner() (common.Address, error) {
 	return _TssRewardContract.Contract.Owner(&_TssRewardContract.CallOpts)
-}
-
-// QueryOwner is a free data retrieval call binding the contract method 0xfa11fd5a.
-//
-// Solidity: function queryOwner() view returns(address)
-func (_TssRewardContract *TssRewardContractCaller) QueryOwner(opts *bind.CallOpts) (common.Address, error) {
-	var out []interface{}
-	err := _TssRewardContract.contract.Call(opts, &out, "queryOwner")
-
-	if err != nil {
-		return *new(common.Address), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
-
-	return out0, err
-
-}
-
-// QueryOwner is a free data retrieval call binding the contract method 0xfa11fd5a.
-//
-// Solidity: function queryOwner() view returns(address)
-func (_TssRewardContract *TssRewardContractSession) QueryOwner() (common.Address, error) {
-	return _TssRewardContract.Contract.QueryOwner(&_TssRewardContract.CallOpts)
-}
-
-// QueryOwner is a free data retrieval call binding the contract method 0xfa11fd5a.
-//
-// Solidity: function queryOwner() view returns(address)
-func (_TssRewardContract *TssRewardContractCallerSession) QueryOwner() (common.Address, error) {
-	return _TssRewardContract.Contract.QueryOwner(&_TssRewardContract.CallOpts)
 }
 
 // QueryReward is a free data retrieval call binding the contract method 0x2c79db11.
@@ -518,6 +488,37 @@ func (_TssRewardContract *TssRewardContractSession) QuerySendAmountPerSecond() (
 // Solidity: function querySendAmountPerSecond() view returns(uint256)
 func (_TssRewardContract *TssRewardContractCallerSession) QuerySendAmountPerSecond() (*big.Int, error) {
 	return _TssRewardContract.Contract.QuerySendAmountPerSecond(&_TssRewardContract.CallOpts)
+}
+
+// SccAddress is a free data retrieval call binding the contract method 0xea01cd36.
+//
+// Solidity: function sccAddress() view returns(address)
+func (_TssRewardContract *TssRewardContractCaller) SccAddress(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _TssRewardContract.contract.Call(opts, &out, "sccAddress")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// SccAddress is a free data retrieval call binding the contract method 0xea01cd36.
+//
+// Solidity: function sccAddress() view returns(address)
+func (_TssRewardContract *TssRewardContractSession) SccAddress() (common.Address, error) {
+	return _TssRewardContract.Contract.SccAddress(&_TssRewardContract.CallOpts)
+}
+
+// SccAddress is a free data retrieval call binding the contract method 0xea01cd36.
+//
+// Solidity: function sccAddress() view returns(address)
+func (_TssRewardContract *TssRewardContractCallerSession) SccAddress() (common.Address, error) {
+	return _TssRewardContract.Contract.SccAddress(&_TssRewardContract.CallOpts)
 }
 
 // SendAmountPerYear is a free data retrieval call binding the contract method 0xd8111a57.
@@ -601,6 +602,69 @@ func (_TssRewardContract *TssRewardContractSession) ClaimReward(_blockStartHeigh
 // Solidity: function claimReward(uint256 _blockStartHeight, uint32 _length, uint256 _batchTime, address[] _tssMembers) returns()
 func (_TssRewardContract *TssRewardContractTransactorSession) ClaimReward(_blockStartHeight *big.Int, _length uint32, _batchTime *big.Int, _tssMembers []common.Address) (*types.Transaction, error) {
 	return _TssRewardContract.Contract.ClaimReward(&_TssRewardContract.TransactOpts, _blockStartHeight, _length, _batchTime, _tssMembers)
+}
+
+// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
+//
+// Solidity: function renounceOwnership() returns()
+func (_TssRewardContract *TssRewardContractTransactor) RenounceOwnership(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _TssRewardContract.contract.Transact(opts, "renounceOwnership")
+}
+
+// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
+//
+// Solidity: function renounceOwnership() returns()
+func (_TssRewardContract *TssRewardContractSession) RenounceOwnership() (*types.Transaction, error) {
+	return _TssRewardContract.Contract.RenounceOwnership(&_TssRewardContract.TransactOpts)
+}
+
+// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
+//
+// Solidity: function renounceOwnership() returns()
+func (_TssRewardContract *TssRewardContractTransactorSession) RenounceOwnership() (*types.Transaction, error) {
+	return _TssRewardContract.Contract.RenounceOwnership(&_TssRewardContract.TransactOpts)
+}
+
+// SetSendAmountPerYear is a paid mutator transaction binding the contract method 0x3b52c31e.
+//
+// Solidity: function setSendAmountPerYear(uint256 _sendAmountPerYear) returns()
+func (_TssRewardContract *TssRewardContractTransactor) SetSendAmountPerYear(opts *bind.TransactOpts, _sendAmountPerYear *big.Int) (*types.Transaction, error) {
+	return _TssRewardContract.contract.Transact(opts, "setSendAmountPerYear", _sendAmountPerYear)
+}
+
+// SetSendAmountPerYear is a paid mutator transaction binding the contract method 0x3b52c31e.
+//
+// Solidity: function setSendAmountPerYear(uint256 _sendAmountPerYear) returns()
+func (_TssRewardContract *TssRewardContractSession) SetSendAmountPerYear(_sendAmountPerYear *big.Int) (*types.Transaction, error) {
+	return _TssRewardContract.Contract.SetSendAmountPerYear(&_TssRewardContract.TransactOpts, _sendAmountPerYear)
+}
+
+// SetSendAmountPerYear is a paid mutator transaction binding the contract method 0x3b52c31e.
+//
+// Solidity: function setSendAmountPerYear(uint256 _sendAmountPerYear) returns()
+func (_TssRewardContract *TssRewardContractTransactorSession) SetSendAmountPerYear(_sendAmountPerYear *big.Int) (*types.Transaction, error) {
+	return _TssRewardContract.Contract.SetSendAmountPerYear(&_TssRewardContract.TransactOpts, _sendAmountPerYear)
+}
+
+// TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
+//
+// Solidity: function transferOwnership(address newOwner) returns()
+func (_TssRewardContract *TssRewardContractTransactor) TransferOwnership(opts *bind.TransactOpts, newOwner common.Address) (*types.Transaction, error) {
+	return _TssRewardContract.contract.Transact(opts, "transferOwnership", newOwner)
+}
+
+// TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
+//
+// Solidity: function transferOwnership(address newOwner) returns()
+func (_TssRewardContract *TssRewardContractSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
+	return _TssRewardContract.Contract.TransferOwnership(&_TssRewardContract.TransactOpts, newOwner)
+}
+
+// TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
+//
+// Solidity: function transferOwnership(address newOwner) returns()
+func (_TssRewardContract *TssRewardContractTransactorSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
+	return _TssRewardContract.Contract.TransferOwnership(&_TssRewardContract.TransactOpts, newOwner)
 }
 
 // UpdateReward is a paid mutator transaction binding the contract method 0x0b50cd3e.
@@ -756,14 +820,16 @@ func (it *TssRewardContractDistributeTssRewardIterator) Close() error {
 
 // TssRewardContractDistributeTssReward represents a DistributeTssReward event raised by the TssRewardContract contract.
 type TssRewardContractDistributeTssReward struct {
-	BatchTime  *big.Int
-	TssMembers []common.Address
-	Raw        types.Log // Blockchain specific contextual infos
+	LastBatchTime *big.Int
+	BatchTime     *big.Int
+	Amount        *big.Int
+	TssMembers    []common.Address
+	Raw           types.Log // Blockchain specific contextual infos
 }
 
-// FilterDistributeTssReward is a free log retrieval operation binding the contract event 0xf8c88edb629fd6d7636c9252b157475c11ff64f1be0cd034423e9e1046499b00.
+// FilterDistributeTssReward is a free log retrieval operation binding the contract event 0xf533ef50019763ee9d95ad46e28350b533c11edd472ae7be93e8fae83c1b6d99.
 //
-// Solidity: event DistributeTssReward(uint256 batchTime, address[] tssMembers)
+// Solidity: event DistributeTssReward(uint256 lastBatchTime, uint256 batchTime, uint256 amount, address[] tssMembers)
 func (_TssRewardContract *TssRewardContractFilterer) FilterDistributeTssReward(opts *bind.FilterOpts) (*TssRewardContractDistributeTssRewardIterator, error) {
 
 	logs, sub, err := _TssRewardContract.contract.FilterLogs(opts, "DistributeTssReward")
@@ -773,9 +839,9 @@ func (_TssRewardContract *TssRewardContractFilterer) FilterDistributeTssReward(o
 	return &TssRewardContractDistributeTssRewardIterator{contract: _TssRewardContract.contract, event: "DistributeTssReward", logs: logs, sub: sub}, nil
 }
 
-// WatchDistributeTssReward is a free log subscription operation binding the contract event 0xf8c88edb629fd6d7636c9252b157475c11ff64f1be0cd034423e9e1046499b00.
+// WatchDistributeTssReward is a free log subscription operation binding the contract event 0xf533ef50019763ee9d95ad46e28350b533c11edd472ae7be93e8fae83c1b6d99.
 //
-// Solidity: event DistributeTssReward(uint256 batchTime, address[] tssMembers)
+// Solidity: event DistributeTssReward(uint256 lastBatchTime, uint256 batchTime, uint256 amount, address[] tssMembers)
 func (_TssRewardContract *TssRewardContractFilterer) WatchDistributeTssReward(opts *bind.WatchOpts, sink chan<- *TssRewardContractDistributeTssReward) (event.Subscription, error) {
 
 	logs, sub, err := _TssRewardContract.contract.WatchLogs(opts, "DistributeTssReward")
@@ -810,9 +876,9 @@ func (_TssRewardContract *TssRewardContractFilterer) WatchDistributeTssReward(op
 	}), nil
 }
 
-// ParseDistributeTssReward is a log parse operation binding the contract event 0xf8c88edb629fd6d7636c9252b157475c11ff64f1be0cd034423e9e1046499b00.
+// ParseDistributeTssReward is a log parse operation binding the contract event 0xf533ef50019763ee9d95ad46e28350b533c11edd472ae7be93e8fae83c1b6d99.
 //
-// Solidity: event DistributeTssReward(uint256 batchTime, address[] tssMembers)
+// Solidity: event DistributeTssReward(uint256 lastBatchTime, uint256 batchTime, uint256 amount, address[] tssMembers)
 func (_TssRewardContract *TssRewardContractFilterer) ParseDistributeTssReward(log types.Log) (*TssRewardContractDistributeTssReward, error) {
 	event := new(TssRewardContractDistributeTssReward)
 	if err := _TssRewardContract.contract.UnpackLog(event, "DistributeTssReward", log); err != nil {
@@ -893,13 +959,14 @@ func (it *TssRewardContractDistributeTssRewardByBlockIterator) Close() error {
 type TssRewardContractDistributeTssRewardByBlock struct {
 	BlockStartHeight *big.Int
 	Length           uint32
+	Amount           *big.Int
 	TssMembers       []common.Address
 	Raw              types.Log // Blockchain specific contextual infos
 }
 
-// FilterDistributeTssRewardByBlock is a free log retrieval operation binding the contract event 0x417ed5c981c4836fcb057421eaeb9defc15ab95bfadab190ec10e11aecaeeeb9.
+// FilterDistributeTssRewardByBlock is a free log retrieval operation binding the contract event 0x2dae6f3d42a2c50d6baa3ea3f2423a9e1ff0ba26875f8ba6ba25c40df98009fe.
 //
-// Solidity: event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, address[] tssMembers)
+// Solidity: event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, uint256 amount, address[] tssMembers)
 func (_TssRewardContract *TssRewardContractFilterer) FilterDistributeTssRewardByBlock(opts *bind.FilterOpts) (*TssRewardContractDistributeTssRewardByBlockIterator, error) {
 
 	logs, sub, err := _TssRewardContract.contract.FilterLogs(opts, "DistributeTssRewardByBlock")
@@ -909,9 +976,9 @@ func (_TssRewardContract *TssRewardContractFilterer) FilterDistributeTssRewardBy
 	return &TssRewardContractDistributeTssRewardByBlockIterator{contract: _TssRewardContract.contract, event: "DistributeTssRewardByBlock", logs: logs, sub: sub}, nil
 }
 
-// WatchDistributeTssRewardByBlock is a free log subscription operation binding the contract event 0x417ed5c981c4836fcb057421eaeb9defc15ab95bfadab190ec10e11aecaeeeb9.
+// WatchDistributeTssRewardByBlock is a free log subscription operation binding the contract event 0x2dae6f3d42a2c50d6baa3ea3f2423a9e1ff0ba26875f8ba6ba25c40df98009fe.
 //
-// Solidity: event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, address[] tssMembers)
+// Solidity: event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, uint256 amount, address[] tssMembers)
 func (_TssRewardContract *TssRewardContractFilterer) WatchDistributeTssRewardByBlock(opts *bind.WatchOpts, sink chan<- *TssRewardContractDistributeTssRewardByBlock) (event.Subscription, error) {
 
 	logs, sub, err := _TssRewardContract.contract.WatchLogs(opts, "DistributeTssRewardByBlock")
@@ -946,12 +1013,165 @@ func (_TssRewardContract *TssRewardContractFilterer) WatchDistributeTssRewardByB
 	}), nil
 }
 
-// ParseDistributeTssRewardByBlock is a log parse operation binding the contract event 0x417ed5c981c4836fcb057421eaeb9defc15ab95bfadab190ec10e11aecaeeeb9.
+// ParseDistributeTssRewardByBlock is a log parse operation binding the contract event 0x2dae6f3d42a2c50d6baa3ea3f2423a9e1ff0ba26875f8ba6ba25c40df98009fe.
 //
-// Solidity: event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, address[] tssMembers)
+// Solidity: event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, uint256 amount, address[] tssMembers)
 func (_TssRewardContract *TssRewardContractFilterer) ParseDistributeTssRewardByBlock(log types.Log) (*TssRewardContractDistributeTssRewardByBlock, error) {
 	event := new(TssRewardContractDistributeTssRewardByBlock)
 	if err := _TssRewardContract.contract.UnpackLog(event, "DistributeTssRewardByBlock", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// TssRewardContractOwnershipTransferredIterator is returned from FilterOwnershipTransferred and is used to iterate over the raw logs and unpacked data for OwnershipTransferred events raised by the TssRewardContract contract.
+type TssRewardContractOwnershipTransferredIterator struct {
+	Event *TssRewardContractOwnershipTransferred // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *TssRewardContractOwnershipTransferredIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(TssRewardContractOwnershipTransferred)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(TssRewardContractOwnershipTransferred)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *TssRewardContractOwnershipTransferredIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *TssRewardContractOwnershipTransferredIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// TssRewardContractOwnershipTransferred represents a OwnershipTransferred event raised by the TssRewardContract contract.
+type TssRewardContractOwnershipTransferred struct {
+	PreviousOwner common.Address
+	NewOwner      common.Address
+	Raw           types.Log // Blockchain specific contextual infos
+}
+
+// FilterOwnershipTransferred is a free log retrieval operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
+//
+// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+func (_TssRewardContract *TssRewardContractFilterer) FilterOwnershipTransferred(opts *bind.FilterOpts, previousOwner []common.Address, newOwner []common.Address) (*TssRewardContractOwnershipTransferredIterator, error) {
+
+	var previousOwnerRule []interface{}
+	for _, previousOwnerItem := range previousOwner {
+		previousOwnerRule = append(previousOwnerRule, previousOwnerItem)
+	}
+	var newOwnerRule []interface{}
+	for _, newOwnerItem := range newOwner {
+		newOwnerRule = append(newOwnerRule, newOwnerItem)
+	}
+
+	logs, sub, err := _TssRewardContract.contract.FilterLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
+	if err != nil {
+		return nil, err
+	}
+	return &TssRewardContractOwnershipTransferredIterator{contract: _TssRewardContract.contract, event: "OwnershipTransferred", logs: logs, sub: sub}, nil
+}
+
+// WatchOwnershipTransferred is a free log subscription operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
+//
+// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+func (_TssRewardContract *TssRewardContractFilterer) WatchOwnershipTransferred(opts *bind.WatchOpts, sink chan<- *TssRewardContractOwnershipTransferred, previousOwner []common.Address, newOwner []common.Address) (event.Subscription, error) {
+
+	var previousOwnerRule []interface{}
+	for _, previousOwnerItem := range previousOwner {
+		previousOwnerRule = append(previousOwnerRule, previousOwnerItem)
+	}
+	var newOwnerRule []interface{}
+	for _, newOwnerItem := range newOwner {
+		newOwnerRule = append(newOwnerRule, newOwnerItem)
+	}
+
+	logs, sub, err := _TssRewardContract.contract.WatchLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(TssRewardContractOwnershipTransferred)
+				if err := _TssRewardContract.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseOwnershipTransferred is a log parse operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
+//
+// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+func (_TssRewardContract *TssRewardContractFilterer) ParseOwnershipTransferred(log types.Log) (*TssRewardContractOwnershipTransferred, error) {
+	event := new(TssRewardContractOwnershipTransferred)
+	if err := _TssRewardContract.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

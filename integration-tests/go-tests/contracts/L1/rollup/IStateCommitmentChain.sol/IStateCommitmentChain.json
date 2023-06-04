@@ -40,6 +40,19 @@
         {
           "indexed": true,
           "internalType": "uint256",
+          "name": "_startBlockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "RollBackL2Chain",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
           "name": "_batchIndex",
           "type": "uint256"
         },
@@ -252,6 +265,29 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_shouldRollBack",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_shouldStartAtElement",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "rollBackL2Chain",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {

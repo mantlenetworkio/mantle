@@ -3,7 +3,7 @@
 ###############################################################################
 ###                           Base Configuration                            ###
 ###############################################################################
-l1_url = "http://bitnetwork-l1chain"
+l1_url = "http://mantlenetwork-l1chain"
 time_task_interval = "10s"
 l1_receipt_confirm_timeout = "30s"
 l1_confirm_blocks = "1"
@@ -23,7 +23,9 @@ ws_addr = "tcp://tss-manager:8081"
 # http server port
 http_addr = ":8080"
 # l2 eth rpc
-l2_eth_rpc = "http://bitnetwork-l2geth"
+l2_eth_rpc = "http://mantlenetwork-l2geth"
+tss_group_manager_address = "0x666f755Ff171702702EAc10339A2a613698Cbd2f"
+tss_staking_slashing_address = "0x00f59693Ab3a491356FDB4Facb4B04D811135E22"
 # the preParamFile for tss job
 pre_param_file = ""
 # listening port for p2p communication

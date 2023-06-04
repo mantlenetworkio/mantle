@@ -1,9 +1,9 @@
+Proxy__L1MantleToken
 Proxy__Verifier
 ChainStorageContainer-SCC-batches
 Proxy__AssertionMap
 BVM_EigenDataLayrFee
 StateCommitmentChain
-TestBitToken
 TssDelegationSlasher
 TssDelegation
 ChainStorageContainer-CTC-batches
@@ -29,6 +29,7 @@ ChugSplashDictator
 Proxy__BVM_EigenDataLayrChain
 Proxy__BVM_L1CrossDomainMessenger
 Proxy__TSS_StakingSlashing
+L1MantleToken
 BondManager
 AssertionMap
 Proxy__Rollup

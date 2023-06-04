@@ -40,7 +40,6 @@ contract TssStakingSlashing is
         address[] tssNodes;
         SlashType slashType;
     }
-
     // tss group contract address
     address public tssGroupContract;
     //tss delegation manager address
@@ -89,10 +88,10 @@ contract TssStakingSlashing is
 
     /**
      * @notice initializes the contract setting and the deployer as the initial owner
-     * @param _bitToken bit token contract address
+     * @param _mantleToken mantle token contract address
      * @param _tssGroupContract address tss group manager contract address
      */
-    function initialize(address _bitToken,
+    function initialize(address _mantleToken,
         address _tssGroupContract,
         address _delegationManager,
         address _delegation,
@@ -101,7 +100,7 @@ contract TssStakingSlashing is
         ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
-        underlyingToken = IERC20(_bitToken);
+        underlyingToken = IERC20(_mantleToken);
         tssGroupContract = _tssGroupContract;
         tssDelegationManagerContract = _delegationManager;
         tssDelegationContract = _delegation;
@@ -113,8 +112,8 @@ contract TssStakingSlashing is
     }
 
     /**
-     * @notice change the bit token and tssGroup contract address
-     * @param _token the erc20 bit token contract address
+     * @notice change the mantle token and tssGroup contract address
+     * @param _token the erc20 mantle token contract address
      */
     function setTokenAddress(address _token) public onlyOwner {
         require(_token != address(0),"Invalid address");
@@ -186,7 +185,6 @@ contract TssStakingSlashing is
     function getSlashingParams() public view returns (uint256[2] memory) {
         return slashAmount;
     }
-
 
     /**
      * @notice send quit request for the next election

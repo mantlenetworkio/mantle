@@ -116,7 +116,7 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
      */
     function explanation() external pure virtual override returns (string memory) {
         // return "Base DelegationShare implementation to inherit from for more complex implementations";
-        return "BIT token DelegationShare implementation for submodules as an example";
+        return "Mantle token DelegationShare implementation for submodules as an example";
     }
 
     /**
