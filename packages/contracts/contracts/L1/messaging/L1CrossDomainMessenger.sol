@@ -57,7 +57,7 @@ contract L1CrossDomainMessenger is
     mapping(bytes32 => bool) public relayedMessages;
     mapping(bytes32 => bool) public successfulMessages;
 
-    address internal xDomainMsgSender = Lib_DefaultValues.DEFAULT_XDOMAIN_SENDER;
+    address internal xDomainMsgSender;
     address internal pauseOwner ;
 
     /***************
