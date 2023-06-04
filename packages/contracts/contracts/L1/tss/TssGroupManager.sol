@@ -57,6 +57,7 @@ contract TssGroupManager is
     }
 
     function setStakingSlash(address _address) public onlyOwner {
+        require(_address != address(0), "param _address is the zero address");
         stakingSlash = _address;
     }
 
@@ -106,6 +107,7 @@ contract TssGroupManager is
     {
         require(isInActiveMember[_publicKey], "your public key is not in InActiveMember");
         require(msg.sender == publicKeyToAddress(_publicKey), "public key not match");
+        require(_groupPublicKey.length > 0, "groupPublicKey is empty");
 
         if (!isSubmitGroupKey[_publicKey]) {
             isSubmitGroupKey[_publicKey] = true;
@@ -118,7 +120,7 @@ contract TssGroupManager is
             }
             memberGroupKey[_publicKey] = _groupPublicKey;
         }
-        if (groupKeyCounter[_groupPublicKey] == inActiveTssMembers.length) {
+        if (groupKeyCounter[_groupPublicKey] >= inActiveTssMembers.length) {
             updateTssMember(_groupPublicKey);
         }
     }
