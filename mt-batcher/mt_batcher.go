@@ -162,6 +162,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		PrivKey:                   sequencerPrivKey,
 		FeePrivKey:                mtFeePrivateKey,
 		BlockOffset:               cfg.BlockOffset,
+		RollUpMinTxn:              cfg.RollUpMinTxn,
 		RollUpMinSize:             cfg.RollUpMinSize,
 		RollUpMaxSize:             cfg.RollUpMaxSize,
 		EigenLayerNode:            cfg.EigenLayerNode,
