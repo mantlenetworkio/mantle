@@ -997,6 +997,13 @@ func (s *SyncService) applyIndexedTransaction(tx *types.Transaction) error {
 	if *index < next {
 		return s.applyHistoricalTransaction(tx)
 	}
+	if s.dtlEigenEnable {
+		if *index > next {
+			latestEigenBatchIndex := s.GetLatestEigenBatchIndex()
+			eigenBatchIndex := *latestEigenBatchIndex - 1
+			s.SetLatestEigenBatchIndex(&eigenBatchIndex)
+		}
+	}
 	return fmt.Errorf("Received tx at index %d when looking for %d", *index, next)
 }
 
@@ -1601,4 +1608,20 @@ func (s *SyncService) verifyTx(tx *types.Transaction) (bool, error) {
 	} else {
 		return true, nil
 	}
+}
+
+func (s *SyncService) GetTxStatusByNumber(number uint64) (*types.TxStatusResponse, error) {
+	index := number - 1
+	if index < 0 {
+		return nil, errors.New("index should bigger or equal than 0")
+	}
+	stateRsp, err := s.client.GetTxStatusResponse(index, s.backend)
+	if err != nil {
+		return nil, err
+	}
+	if stateRsp == nil {
+		return nil, errors.New("tx status not ready")
+	}
+
+	return stateRsp, nil
 }

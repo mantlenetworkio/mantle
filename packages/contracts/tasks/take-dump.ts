@@ -82,12 +82,12 @@ task('take-dump').setAction(async (args, hre) => {
       _symbol: 'WETH',
       decimal: 18,
     },
-    BVM_BIT: {
+    BVM_MANTLE: {
       l2Bridge: predeploys.L2StandardBridge,
-      // l1Token: hre.deployConfig.l1BitAddress,
+      // l1Token: hre.deployConfig.l1MantleAddress,
       l1Token: '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
-      _name: 'Bit Token',
-      _symbol: 'BIT',
+      _name: 'Mantle',
+      _symbol: 'MNT',
       decimal: 18,
     },
     L2CrossDomainMessenger: {
@@ -118,6 +118,13 @@ task('take-dump').setAction(async (args, hre) => {
         await getContractFromArtifact(
           hre,
           names.managed.contracts.StateCommitmentChain
+        )
+      ).address,
+      waitingTime: 86400,
+      stakeSlashAddress: (
+        await getContractFromArtifact(
+          hre,
+          names.managed.contracts.Proxy__TSS_StakingSlashing
         )
       ).address,
     },

@@ -867,6 +867,16 @@ var (
 		Usage:  "Enable the verifier for mpc node",
 		EnvVar: "ROLLUP_VERIFIER_MPC_ENABLE",
 	}
+	RollupEigenDaBlockFlag = cli.Int64Flag{
+		Name:   "rollup.eigendablock",
+		Usage:  "Eigen DA Fee Block number",
+		EnvVar: "ROLLUP_EIGEN_DA_BLOCK",
+	}
+	RollupMantleTokenUpgradeBlockFlag = cli.Int64Flag{
+		Name:   "rollup.mantletokenupgradeblock",
+		Usage:  "Mantle Token Upgrade Block number",
+		EnvVar: "ROLLUP_MANTLE_TOKEN_UPGRADE_BLOCK",
+	}
 	RollupMaxCalldataSizeFlag = cli.IntFlag{
 		Name:   "rollup.maxcalldatasize",
 		Usage:  "Maximum allowed calldata size for Queue Origin Sequencer Txs",
@@ -932,10 +942,10 @@ var (
 		EnvVar: "ROLLUP_ADDR",
 		Value:  "",
 	}
-	FraudProofStakeAddrFlag = &cli.StringFlag{
+	FraudProofOperatorAddrFlag = &cli.StringFlag{
 		Name:   "fp.stake-addr",
 		Usage:  "The sequencer/validator address to be unlocked (pass passphrash via --password)",
-		EnvVar: "STAKE_ADDR",
+		EnvVar: "FP_OPERATOR_ADDR",
 		Value:  "",
 	}
 	FraudProofStakeAmount = &cli.Uint64Flag{
@@ -1239,6 +1249,12 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	}
 	if ctx.GlobalIsSet(RollupMpcVerifierFlag.Name) {
 		cfg.MpcVerifier = true
+	}
+	if ctx.GlobalIsSet(RollupEigenDaBlockFlag.Name) {
+		cfg.EigenDaBlock = ctx.GlobalInt64(RollupEigenDaBlockFlag.Name)
+	}
+	if ctx.GlobalIsSet(RollupMantleTokenUpgradeBlockFlag.Name) {
+		cfg.MantleTokenUpgradeBlock = ctx.GlobalInt64(RollupMantleTokenUpgradeBlockFlag.Name)
 	}
 	if ctx.GlobalIsSet(RollupFeeThresholdDownFlag.Name) {
 		val := ctx.GlobalFloat64(RollupFeeThresholdDownFlag.Name)

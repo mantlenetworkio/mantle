@@ -42,10 +42,10 @@ var (
 		EnvVar: "ROLLUP_ADDR",
 		Value:  "",
 	}
-	FraudProofStakeAddrFlag = &cli.StringFlag{
+	FraudProofOperatorAddrFlag = &cli.StringFlag{
 		Name:   "fp.stake-addr",
 		Usage:  "The sequencer/validator address to be unlocked (pass passphrash via --password)",
-		EnvVar: "STAKE_ADDR",
+		EnvVar: "FP_OPERATOR_ADDR",
 		Value:  "",
 	}
 	FraudProofStakeAmount = &cli.Uint64Flag{
@@ -122,7 +122,7 @@ func MakeFraudProofConfig(ctx *cli.Context) *services.Config {
 		L1Confirmations: ctx.Uint64(FraudProofL1ConfirmationsFlag.Name),
 		SequencerAddr:   common.HexToAddress(ctx.String(FraudProofSequencerAddrFlag.Name)),
 		RollupAddr:      common.HexToAddress(ctx.String(FraudProofRollupAddrFlag.Name)),
-		StakeAddr:       common.HexToAddress(ctx.String(FraudProofStakeAddrFlag.Name)),
+		StakeAddr:       common.HexToAddress(ctx.String(FraudProofOperatorAddrFlag.Name)),
 		StakeAmount:     ctx.Uint64(FraudProofStakeAmount.Name),
 		ChallengeVerify: ctx.Bool(FraudProofChallengeVerify.Name),
 		EnableHsm:       ctx.GlobalBool(EnableHsmFlag.Name),

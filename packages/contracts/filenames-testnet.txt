@@ -14,4 +14,4 @@ Proxy__TSS_StakingSlashing
 AddressDictator
 ChugSplashDictator
 L1StandardBridge_for_verification_only
-TestBitToken
+TestMantleToken

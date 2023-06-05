@@ -8,7 +8,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"google.golang.org/api/option"
-
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
@@ -77,6 +76,7 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 		if err != nil {
 			return err
 		}
+		// NOTE this will return base multiple with coin ratio
 		tip, err := l1Backend.HeaderByNumber(context.Background(), nil)
 		if err != nil {
 			return err
@@ -100,7 +100,7 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 			}
 			opts.GasPrice = gasPrice
 		}
-
+		// set L1BaseFee to base fee + tip cap, to cover rollup tip cap
 		tx, err := contract.SetL1BaseFee(opts, tip.BaseFee)
 		if err != nil {
 			return err

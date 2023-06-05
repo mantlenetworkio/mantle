@@ -39,7 +39,7 @@ subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
   async (_, __, runSuper) => {
     console.log('running task')
     // copySync(
-    //   '../../datalayr-mantle/contracts/eignlayr-contracts/src',
+    //   '../../datalayr/contracts/eignlayr-contracts/src',
     //   './contracts/libraries/eigenda/lib'
     // )
     const paths = await runSuper()
@@ -72,6 +72,7 @@ subtask(TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE).setAction(
   }
 )
 
+// @ts-ignore
 // @ts-ignore
 // @ts-ignore
 const config: HardhatUserConfig = {
@@ -350,6 +351,12 @@ const config: HardhatUserConfig = {
     hfBerlinBlock: {
       type: 'number',
       default: 0,
+    },
+    contractsDeployerKey: {
+      type: 'string',
+    },
+    contractsRpcUrl: {
+      type: 'string',
     },
   },
 }

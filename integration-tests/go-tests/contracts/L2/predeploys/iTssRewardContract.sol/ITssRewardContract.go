@@ -26,11 +26,12 @@ var (
 	_ = common.Big1
 	_ = types.BloomLookup
 	_ = event.NewSubscription
+	_ = abi.ConvertType
 )
 
 // ITssRewardContractMetaData contains all meta data concerning the ITssRewardContract contract.
 var ITssRewardContractMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"batchTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tssMembers\",\"type\":\"address[]\"}],\"name\":\"DistributeTssReward\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockStartHeight\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"length\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tssMembers\",\"type\":\"address[]\"}],\"name\":\"DistributeTssRewardByBlock\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockStartHeight\",\"type\":\"uint256\"},{\"internalType\":\"uint32\",\"name\":\"_length\",\"type\":\"uint32\"},{\"internalType\":\"uint256\",\"name\":\"_batchTime\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"_tssMembers\",\"type\":\"address[]\"}],\"name\":\"claimReward\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"queryReward\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockID\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"updateReward\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdrawDust\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"lastBatchTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"batchTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tssMembers\",\"type\":\"address[]\"}],\"name\":\"DistributeTssReward\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockStartHeight\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"length\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tssMembers\",\"type\":\"address[]\"}],\"name\":\"DistributeTssRewardByBlock\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockStartHeight\",\"type\":\"uint256\"},{\"internalType\":\"uint32\",\"name\":\"_length\",\"type\":\"uint32\"},{\"internalType\":\"uint256\",\"name\":\"_batchTime\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"_tssMembers\",\"type\":\"address[]\"}],\"name\":\"claimReward\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"queryReward\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockID\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"updateReward\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdrawDust\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // ITssRewardContractABI is the input ABI used to generate the binding from.
@@ -134,11 +135,11 @@ func NewITssRewardContractFilterer(address common.Address, filterer bind.Contrac
 
 // bindITssRewardContract binds a generic wrapper to an already deployed contract.
 func bindITssRewardContract(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
-	parsed, err := abi.JSON(strings.NewReader(ITssRewardContractABI))
+	parsed, err := ITssRewardContractMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
+	return bind.NewBoundContract(address, *parsed, caller, transactor, filterer), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and
@@ -363,14 +364,16 @@ func (it *ITssRewardContractDistributeTssRewardIterator) Close() error {
 
 // ITssRewardContractDistributeTssReward represents a DistributeTssReward event raised by the ITssRewardContract contract.
 type ITssRewardContractDistributeTssReward struct {
-	BatchTime  *big.Int
-	TssMembers []common.Address
-	Raw        types.Log // Blockchain specific contextual infos
+	LastBatchTime *big.Int
+	BatchTime     *big.Int
+	Amount        *big.Int
+	TssMembers    []common.Address
+	Raw           types.Log // Blockchain specific contextual infos
 }
 
-// FilterDistributeTssReward is a free log retrieval operation binding the contract event 0xf8c88edb629fd6d7636c9252b157475c11ff64f1be0cd034423e9e1046499b00.
+// FilterDistributeTssReward is a free log retrieval operation binding the contract event 0xf533ef50019763ee9d95ad46e28350b533c11edd472ae7be93e8fae83c1b6d99.
 //
-// Solidity: event DistributeTssReward(uint256 batchTime, address[] tssMembers)
+// Solidity: event DistributeTssReward(uint256 lastBatchTime, uint256 batchTime, uint256 amount, address[] tssMembers)
 func (_ITssRewardContract *ITssRewardContractFilterer) FilterDistributeTssReward(opts *bind.FilterOpts) (*ITssRewardContractDistributeTssRewardIterator, error) {
 
 	logs, sub, err := _ITssRewardContract.contract.FilterLogs(opts, "DistributeTssReward")
@@ -380,9 +383,9 @@ func (_ITssRewardContract *ITssRewardContractFilterer) FilterDistributeTssReward
 	return &ITssRewardContractDistributeTssRewardIterator{contract: _ITssRewardContract.contract, event: "DistributeTssReward", logs: logs, sub: sub}, nil
 }
 
-// WatchDistributeTssReward is a free log subscription operation binding the contract event 0xf8c88edb629fd6d7636c9252b157475c11ff64f1be0cd034423e9e1046499b00.
+// WatchDistributeTssReward is a free log subscription operation binding the contract event 0xf533ef50019763ee9d95ad46e28350b533c11edd472ae7be93e8fae83c1b6d99.
 //
-// Solidity: event DistributeTssReward(uint256 batchTime, address[] tssMembers)
+// Solidity: event DistributeTssReward(uint256 lastBatchTime, uint256 batchTime, uint256 amount, address[] tssMembers)
 func (_ITssRewardContract *ITssRewardContractFilterer) WatchDistributeTssReward(opts *bind.WatchOpts, sink chan<- *ITssRewardContractDistributeTssReward) (event.Subscription, error) {
 
 	logs, sub, err := _ITssRewardContract.contract.WatchLogs(opts, "DistributeTssReward")
@@ -417,9 +420,9 @@ func (_ITssRewardContract *ITssRewardContractFilterer) WatchDistributeTssReward(
 	}), nil
 }
 
-// ParseDistributeTssReward is a log parse operation binding the contract event 0xf8c88edb629fd6d7636c9252b157475c11ff64f1be0cd034423e9e1046499b00.
+// ParseDistributeTssReward is a log parse operation binding the contract event 0xf533ef50019763ee9d95ad46e28350b533c11edd472ae7be93e8fae83c1b6d99.
 //
-// Solidity: event DistributeTssReward(uint256 batchTime, address[] tssMembers)
+// Solidity: event DistributeTssReward(uint256 lastBatchTime, uint256 batchTime, uint256 amount, address[] tssMembers)
 func (_ITssRewardContract *ITssRewardContractFilterer) ParseDistributeTssReward(log types.Log) (*ITssRewardContractDistributeTssReward, error) {
 	event := new(ITssRewardContractDistributeTssReward)
 	if err := _ITssRewardContract.contract.UnpackLog(event, "DistributeTssReward", log); err != nil {
@@ -500,13 +503,14 @@ func (it *ITssRewardContractDistributeTssRewardByBlockIterator) Close() error {
 type ITssRewardContractDistributeTssRewardByBlock struct {
 	BlockStartHeight *big.Int
 	Length           uint32
+	Amount           *big.Int
 	TssMembers       []common.Address
 	Raw              types.Log // Blockchain specific contextual infos
 }
 
-// FilterDistributeTssRewardByBlock is a free log retrieval operation binding the contract event 0x417ed5c981c4836fcb057421eaeb9defc15ab95bfadab190ec10e11aecaeeeb9.
+// FilterDistributeTssRewardByBlock is a free log retrieval operation binding the contract event 0x2dae6f3d42a2c50d6baa3ea3f2423a9e1ff0ba26875f8ba6ba25c40df98009fe.
 //
-// Solidity: event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, address[] tssMembers)
+// Solidity: event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, uint256 amount, address[] tssMembers)
 func (_ITssRewardContract *ITssRewardContractFilterer) FilterDistributeTssRewardByBlock(opts *bind.FilterOpts) (*ITssRewardContractDistributeTssRewardByBlockIterator, error) {
 
 	logs, sub, err := _ITssRewardContract.contract.FilterLogs(opts, "DistributeTssRewardByBlock")
@@ -516,9 +520,9 @@ func (_ITssRewardContract *ITssRewardContractFilterer) FilterDistributeTssReward
 	return &ITssRewardContractDistributeTssRewardByBlockIterator{contract: _ITssRewardContract.contract, event: "DistributeTssRewardByBlock", logs: logs, sub: sub}, nil
 }
 
-// WatchDistributeTssRewardByBlock is a free log subscription operation binding the contract event 0x417ed5c981c4836fcb057421eaeb9defc15ab95bfadab190ec10e11aecaeeeb9.
+// WatchDistributeTssRewardByBlock is a free log subscription operation binding the contract event 0x2dae6f3d42a2c50d6baa3ea3f2423a9e1ff0ba26875f8ba6ba25c40df98009fe.
 //
-// Solidity: event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, address[] tssMembers)
+// Solidity: event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, uint256 amount, address[] tssMembers)
 func (_ITssRewardContract *ITssRewardContractFilterer) WatchDistributeTssRewardByBlock(opts *bind.WatchOpts, sink chan<- *ITssRewardContractDistributeTssRewardByBlock) (event.Subscription, error) {
 
 	logs, sub, err := _ITssRewardContract.contract.WatchLogs(opts, "DistributeTssRewardByBlock")
@@ -553,9 +557,9 @@ func (_ITssRewardContract *ITssRewardContractFilterer) WatchDistributeTssRewardB
 	}), nil
 }
 
-// ParseDistributeTssRewardByBlock is a log parse operation binding the contract event 0x417ed5c981c4836fcb057421eaeb9defc15ab95bfadab190ec10e11aecaeeeb9.
+// ParseDistributeTssRewardByBlock is a log parse operation binding the contract event 0x2dae6f3d42a2c50d6baa3ea3f2423a9e1ff0ba26875f8ba6ba25c40df98009fe.
 //
-// Solidity: event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, address[] tssMembers)
+// Solidity: event DistributeTssRewardByBlock(uint256 blockStartHeight, uint32 length, uint256 amount, address[] tssMembers)
 func (_ITssRewardContract *ITssRewardContractFilterer) ParseDistributeTssRewardByBlock(log types.Log) (*ITssRewardContractDistributeTssRewardByBlock, error) {
 	event := new(ITssRewardContractDistributeTssRewardByBlock)
 	if err := _ITssRewardContract.contract.UnpackLog(event, "DistributeTssRewardByBlock", log); err != nil {

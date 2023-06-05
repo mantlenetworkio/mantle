@@ -53,4 +53,9 @@ type Config struct {
 	RollupRole Role
 
 	MpcVerifier bool
+
+	// EigenDaFee blockNumber Config
+	EigenDaBlock int64
+
+	MantleTokenUpgradeBlock int64
 }

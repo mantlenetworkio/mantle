@@ -31,12 +31,22 @@ export const handleEventsStateBatchAppended: EventHandlerSet<
     }
   },
   parseEvent: (event, extraData) => {
-    const stateRoots = getContractFactory(
-      'StateCommitmentChain'
-    ).interface.decodeFunctionData(
-      'appendStateBatch',
-      extraData.l1TransactionData
-    )[0]
+    let stateRoots: any
+    try {
+      stateRoots = getContractFactory(
+        'StateCommitmentChain'
+      ).interface.decodeFunctionData(
+        'appendStateBatch',
+        extraData.l1TransactionData
+      )[0]
+    } catch (e) {
+      stateRoots = getContractFactory(
+        'Rollup'
+      ).interface.decodeFunctionData(
+        'createAssertionWithStateBatch',
+        extraData.l1TransactionData
+      )[2]
+    }
 
     const stateRootEntries: StateRootEntry[] = []
     for (let i = 0; i < stateRoots.length; i++) {
@@ -84,5 +94,8 @@ export const handleEventsStateBatchAppended: EventHandlerSet<
 
     await db.putStateRootBatchEntries([entry.stateRootBatchEntry])
     await db.putStateRootEntries(entry.stateRootEntries)
+
+    await db.deleteStateRootCachedBatchEntries([entry.stateRootBatchEntry])
+    await db.deleteStateRootCachedEntries(entry.stateRootEntries)
   },
 }

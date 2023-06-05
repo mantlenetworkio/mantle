@@ -24,7 +24,7 @@ const deployFn: DeployFunction = async (hre) => {
   // @ts-ignore
   const owner = hre.deployConfig.bvmAddressManagerOwner
   // @ts-ignore
-  const l1BitAddress = hre.deployConfig.l1BitAddress
+  const l1MantleAddress = hre.deployConfig.proxyL1MantleAddress
 
   // deploy assertionMap impl
   await deployAndVerifyAndThen({
@@ -124,20 +124,14 @@ const deployFn: DeployFunction = async (hre) => {
   const rollupArgs = [
     deployer, // address _owner
     Proxy__VerifierEntry.address, // address _verifier,
-    l1BitAddress, // address _stakeToken,
+    l1MantleAddress, // address _stakeToken,
     Lib_AddressManager.address, // address _libAddressManager,
     Proxy__AssertionMap.address, // address _assertionMap,
-    5, // uint256 _confirmationPeriod,
-    0, // uint256 _challengePeriod,
     0, // uint256 _minimumAssertionPeriod,
-    // 1000000000000, // uint256 _maxGasPerAssertion,
     0, // uint256 _baseStakeAmount
-    '0x89e2ce7fd44675606b4ced40dd2ccc67f7ae2851dd1b86409bdaeac791a60d3e', // bytes32 _initialVMhash //TODO-FIXME
-    [
-      '0xd5b002298b2e81b4ced1b6c8cf1964023cdc3758',
-      '0xd55fe10a1acb32b6183bdfbeb42e9961c3cb8792',
-      '0xd55fe2797c18d721ee197d09fa0dda584f92b5af',
-    ],
+    '0x0000000000000000000000000000000000000000000000000000000000000000', // bytes32 _initialVMhash //TODO-FIXME
+    [],
+    [],
   ]
   callData = Impl__Rollup.interface.encodeFunctionData('initialize', rollupArgs)
   await deployAndVerifyAndThen({
