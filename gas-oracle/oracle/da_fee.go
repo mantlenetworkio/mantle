@@ -1,8 +1,13 @@
 package oracle
 
 import (
+	kms "cloud.google.com/go/kms/apiv1"
 	"context"
+	"encoding/hex"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
+	"google.golang.org/api/option"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -11,14 +16,35 @@ import (
 )
 
 func wrapUpdateDaFee(daBackend *bindings.BVMEigenDataLayrFee, l2Backend DeployContractBackend, cfg *Config) (func() error, error) {
-	if cfg.privateKey == nil {
-		return nil, errNoPrivateKey
-	}
-	if cfg.l2ChainID == nil {
-		return nil, errNoChainID
-	}
+	var opts *bind.TransactOpts
+	var err error
+	if !cfg.EnableHsm {
+		if cfg.privateKey == nil {
+			return nil, errNoPrivateKey
+		}
+		if cfg.l2ChainID == nil {
+			return nil, errNoChainID
+		}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(cfg.privateKey, cfg.l2ChainID)
+		opts, err = bind.NewKeyedTransactorWithChainID(cfg.privateKey, cfg.l2ChainID)
+	} else {
+		seqBytes, err := hex.DecodeString(cfg.HsmCreden)
+		apikey := option.WithCredentialsJSON(seqBytes)
+		client, err := kms.NewKeyManagementClient(context.Background(), apikey)
+		if err != nil {
+			log.Crit("gasoracle", "create signer error", err.Error())
+		}
+		mk := &bsscore.ManagedKey{
+			KeyName:      cfg.HsmAPIName,
+			EthereumAddr: common.HexToAddress(cfg.HsmAddress),
+			Gclient:      client,
+		}
+		opts, err = mk.NewEthereumTransactorrWithChainID(context.Background(), cfg.l2ChainID)
+		if err != nil {
+			log.Crit("gasoracle", "create signer error", err.Error())
+			return nil, err
+		}
+	}
 	if err != nil {
 		return nil, err
 	}

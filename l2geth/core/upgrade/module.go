@@ -6,6 +6,11 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
+<<<<<<< HEAD
+=======
+	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
+>>>>>>> develop
 )
 
 /*
@@ -21,9 +26,12 @@ import (
  */
 
 var (
+	// mantle token upgrade height for testnet
+	MantleTokenUpgradeHeight = -1
+
 	L2GasPriceOracleHeight = -1
 	//qa height
-	L2TssRewardHeight = 2690000
+	L2TssRewardHeight = -1
 	// L2GasPriceOracleAddress is the address of the BVM_GasPriceOracle
 	// predeploy
 	L2GasPriceOracleAddress = common.HexToAddress("0x420000000000000000000000000000000000000F")
@@ -39,6 +47,7 @@ var (
 func CheckUpgrade(statedb vm.StateDB, blockNumber *big.Int) {
 	l2GasOracleMockUpgrade(statedb, blockNumber)
 	l2TssRewardUpgrade(statedb, blockNumber)
+	mantleTokenAndWMantleUpgrade(statedb, blockNumber)
 }
 
 func l2GasOracleMockUpgrade(statedb vm.StateDB, blockNumber *big.Int) {
@@ -55,4 +64,18 @@ func l2TssRewardUpgrade(statedb vm.StateDB, blockNumber *big.Int) {
 	if blockNumber.Int64() == int64(L2TssRewardHeight) {
 		statedb.SetCode(L2TssRewardAddress, L2GasRewardCode)
 	}
+}
+
+func mantleTokenAndWMantleUpgrade(statedb vm.StateDB, blockNumber *big.Int) {
+	if blockNumber.Int64() != int64(MantleTokenUpgradeHeight) {
+		return
+	}
+
+	log.Info("update mantle token name & symbol", "address", rcfg.L2MantleTokenAddress)
+	statedb.SetState(rcfg.L2MantleTokenAddress, rcfg.MantleTokenNameSlot, rcfg.MantleTokenNameValue)
+	statedb.SetState(rcfg.L2MantleTokenAddress, rcfg.MantleTokenSymbolSlot, rcfg.MantleTokenSymbolValue)
+
+	log.Info("update wrapped mantle token name & symbol", "address", rcfg.L2WrappedMantleTokenAddress)
+	statedb.SetState(rcfg.L2WrappedMantleTokenAddress, rcfg.WrappedMantleTokenNameSlot, rcfg.WrappedMantleTokenNameValue)
+	statedb.SetState(rcfg.L2WrappedMantleTokenAddress, rcfg.WrappedMantleTokenSymbolSlot, rcfg.WrappedMantleTokenSymbolValue)
 }

@@ -59,6 +59,10 @@ type Config struct {
 	DbPath                    string
 	CheckerBatchIndex         uint64
 	CheckerEnable             bool
+	EnableHsm                 bool
+	HsmAPIName                string
+	HsmCreden                 string
+	HsmAddress                string
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -113,6 +117,10 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		DbPath:                    ctx.GlobalString(flags.DbPathFlag.Name),
 		CheckerBatchIndex:         ctx.GlobalUint64(flags.CheckerBatchIndexFlag.Name),
 		CheckerEnable:             ctx.GlobalBool(flags.CheckerEnableFlag.Name),
+		EnableHsm:                 ctx.GlobalBool(flags.EnableHsmFlag.Name),
+		HsmAddress:                ctx.GlobalString(flags.HsmAddressFlag.Name),
+		HsmAPIName:                ctx.GlobalString(flags.HsmAPINameFlag.Name),
+		HsmCreden:                 ctx.GlobalString(flags.HsmCredenFlag.Name),
 	}
 	return cfg, nil
 }
