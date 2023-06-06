@@ -959,6 +959,26 @@ var (
 		Usage:  "Challenge verify",
 		EnvVar: "CHALLENGE_VERIFY",
 	}
+	EnableHsmFlag = &cli.BoolFlag{
+		Name:   "fp.enable-hsm",
+		Usage:  "Enalbe the hsm",
+		EnvVar: "ENABLE_HSM",
+	}
+	HsmAPINameFlag = &cli.StringFlag{
+		Name:   "fp.hsm-api-name",
+		Usage:  "the api name of hsm",
+		EnvVar: "HSM_API_NAME",
+	}
+	HsmAddressFlag = &cli.StringFlag{
+		Name:   "fp.hsm-address",
+		Usage:  "the address of hsm key",
+		EnvVar: "HSM_ADDRESS",
+	}
+	HsmCredenFlag = &cli.StringFlag{
+		Name:   "fp.hsm-creden",
+		Usage:  "the creden of hsm key",
+		EnvVar: "HSM_CREDEN",
+	}
 )
 
 // MakeDataDir retrieves the currently requested data directory, terminating
