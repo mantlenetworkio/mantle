@@ -242,11 +242,13 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
     /// @inheritdoc IRollup
-    function withdraw() external override {
+    function withdraw() external override operatorOnly {
         uint256 withdrawableFund = withdrawableFunds[msg.sender];
         withdrawableFunds[msg.sender] = 0;
-        (bool success,) = msg.sender.call{value: withdrawableFund}("");
-        if (!success) revert("TransferFailed");
+        require(
+            IERC20(stakeToken).transfer(msg.sender, withdrawableFund),
+            "transfer erc20 token failed"
+        );
     }
 
     /// @inheritdoc IRollup
@@ -300,6 +302,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     function challengeAssertion(address[2] calldata players, uint256[2] calldata assertionIDs)
         external
         override
+        operatorOnly
         returns (address)
     {
         uint256 defenderAssertionID = assertionIDs[0];
@@ -354,7 +357,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
     /// @inheritdoc IRollup
-    function confirmFirstUnresolvedAssertion() external override {
+    function confirmFirstUnresolvedAssertion() external override operatorOnly {
         if (lastResolvedAssertionID >= lastCreatedAssertionID) {
             revert("NoUnresolvedAssertion");
         }
@@ -476,7 +479,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
     /// @inheritdoc IRollup
-    function completeChallenge(address winner, address loser) external override {
+    function completeChallenge(address winner, address loser) external override operatorOnly {
         address winnerStaker = registers[winner];
         address loserStaker = registers[loser];
         requireStaked(loserStaker);
