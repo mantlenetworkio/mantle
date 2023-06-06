@@ -27,21 +27,21 @@ func PrometheusMetrics(namespace string, labelsAndValues ...string) *Metrics {
 		stdprometheus.GaugeOpts{
 			Namespace: namespace,
 			Subsystem: "sign",
-			Name:      "sign failed counter",
+			Name:      "sign_failed_counter",
 			Help:      "sign failed ",
 		}, labels).With(labelsAndValues...)
 	var rollback = prometheus.NewGaugeFrom(
 		stdprometheus.GaugeOpts{
 			Namespace: namespace,
 			Subsystem: "sign",
-			Name:      "rollback counter",
+			Name:      "rollback_counter",
 			Help:      "rollback event ",
 		}, labels).With(labelsAndValues...)
 	var approve = prometheus.NewGaugeFrom(
 		stdprometheus.GaugeOpts{
 			Namespace: namespace,
 			Subsystem: "sign",
-			Name:      "approve counter",
+			Name:      "approve_counter",
 			Help:      "approve number ",
 		}, labels).With(labelsAndValues...)
 
@@ -49,21 +49,21 @@ func PrometheusMetrics(namespace string, labelsAndValues ...string) *Metrics {
 		stdprometheus.GaugeOpts{
 			Namespace: namespace,
 			Subsystem: "slash",
-			Name:      "slash counter",
+			Name:      "slash_counter",
 			Help:      "remark slash behavior",
 		}, labels).With(labelsAndValues...)
 	var online = prometheus.NewGaugeFrom(
 		stdprometheus.GaugeOpts{
 			Namespace: namespace,
 			Subsystem: "node",
-			Name:      "online node counter",
+			Name:      "online_node_counter",
 			Help:      "online node number ",
 		}, labels).With(labelsAndValues...)
 	var active = prometheus.NewGaugeFrom(
 		stdprometheus.GaugeOpts{
 			Namespace: namespace,
 			Subsystem: "node",
-			Name:      "active counter",
+			Name:      "active_counter",
 			Help:      "active node behavior",
 		}, labels).With(labelsAndValues...)
 
