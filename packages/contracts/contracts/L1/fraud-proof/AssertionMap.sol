@@ -132,6 +132,10 @@ contract AssertionMap is Initializable {
     }
 
     function deleteAssertion(uint256 assertionID) external rollupOnly {
+        delete assertions[assertionID];
+    }
+
+    function deleteAssertionForBatch(uint256 assertionID) external rollupOnly {
         Assertion storage deleteAssertion = assertions[assertionID];
         Assertion storage parentAssertion = assertions[deleteAssertion.parent];
         delete assertions[assertionID];

@@ -467,7 +467,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         // Reject assertion.
         require(lastCreatedAssertionID >= lastResolvedAssertionID, "delete assertion before last resolved in error");
         emit AssertionRejected(lastCreatedAssertionID);
-        assertions.deleteAssertion(lastCreatedAssertionID);
+        assertions.deleteAssertionForBatch(lastCreatedAssertionID);
         lastCreatedAssertionID--;
 
         // Revert status
