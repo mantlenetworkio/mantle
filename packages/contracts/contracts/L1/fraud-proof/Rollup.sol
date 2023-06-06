@@ -460,7 +460,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
 
         // Delete state batch
         (bool success, ) = scc.call(
-            abi.encodeWithSignature("deleteStateBatch(Lib_BVMCodec.ChainBatchHeader)", _batchHeader)
+            abi.encodeWithSignature("deleteStateBatch((uint256,bytes32,uint256,uint256,bytes,bytes))", _batchHeader)
         );
         require(success, "scc delete state batch failed, revert all");
 
