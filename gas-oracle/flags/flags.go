@@ -36,7 +36,7 @@ var (
 	DaFeeContractAddressFlag = cli.StringFlag{
 		Name:   "da-fee-contract-address",
 		Usage:  "Address of DA-Fee-Contract",
-		Value:  "0x9109811E8eEe02520219612bB5D47C60c382F4aa",
+		Value:  "0x9700cA34e333BCfa83ee7eA9de998a876474Dc2c",
 		EnvVar: "GAS_PRICE_ORACLE_DA_FEE_CONTRACT_ADDRESS",
 	}
 	PrivateKeyFlag = cli.StringFlag{
@@ -130,11 +130,11 @@ var (
 		Usage:  "only update when the gas price changes by more than this factor",
 		EnvVar: "GAS_PRICE_ORACLE_SIGNIFICANT_FACTOR",
 	}
-	BybitBackendURL = cli.StringFlag{
-		Name:   "bybitBackendURL",
-		Value:  "https://api.bybit.com",
-		Usage:  "bybit exchange backend url",
-		EnvVar: "BYBIT_BACKEND_URL",
+	PriceBackendURL = cli.StringFlag{
+		Name:     "PriceBackendURL",
+		Usage:    "price exchange backend url",
+		EnvVar:   "PRICE_BACKEND_URL",
+		Required: true,
 	}
 	TokenPricerUpdateFrequencySecond = cli.Uint64Flag{
 		Name:   "tokenPricerUpdateFrequencySecond",
@@ -215,7 +215,7 @@ var Flags = []cli.Flag{
 	L1BaseFeeEpochLengthSecondsFlag,
 	DaFeeEpochLengthSecondsFlag,
 	L2GasPriceSignificanceFactorFlag,
-	BybitBackendURL,
+	PriceBackendURL,
 	TokenPricerUpdateFrequencySecond,
 	WaitForReceiptFlag,
 	EnableL1BaseFeeFlag,

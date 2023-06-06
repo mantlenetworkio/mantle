@@ -2,9 +2,9 @@ module github.com/mantlenetworkio/mantle/mt-batcher
 
 go 1.19
 
-replace github.com/Layr-Labs/datalayr/common => ../datalayr-mantle/common
+replace github.com/Layr-Labs/datalayr/common => ../datalayr/common
 
-replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr-mantle/lib/merkzg
+replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr/lib/merkzg
 
 replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
 
@@ -13,7 +13,7 @@ replace github.com/mantlenetworkio/mantle/fraud-proof => ../fraud-proof
 replace github.com/mantlenetworkio/mantle/metrics => ../metrics
 
 require (
-	//github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
+	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/mantlenetworkio/mantle/l2geth v0.0.0
@@ -21,26 +21,18 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	github.com/urfave/cli v1.22.12
-	google.golang.org/grpc v1.49.0
+	google.golang.org/grpc v1.53.0
 )
 
 require (
-	//github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 	github.com/decred/dcrd/hdkeychain/v3 v3.0.0
 	github.com/labstack/echo/v4 v4.9.0
 	github.com/prometheus/client_golang v1.15.1
+	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
 	github.com/tyler-smith/go-bip39 v1.1.0
 )
 
-//github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
-require github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
-
-//require github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
-
-require github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
-
 require (
-	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0-00010101000000-000000000000 // indirect
 	github.com/VictoriaMetrics/fastcache v1.9.0 // indirect
 	github.com/aristanetworks/goarista v0.0.0-20170210015632-ea17b1a17847 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -67,6 +59,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0-rc.3 // indirect
 	github.com/hashicorp/go-bexpr v0.1.11 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
@@ -109,7 +102,7 @@ require (
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
-	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
+	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

@@ -47,7 +47,6 @@ export const handleEventsStateCachedBatchAppended: EventHandlerSet<
         extraData.l1TransactionData
       )[2]
     }
-
     const stateRootEntries: StateRootEntry[] = []
     for (let i = 0; i < stateRoots.length; i++) {
       stateRootEntries.push({

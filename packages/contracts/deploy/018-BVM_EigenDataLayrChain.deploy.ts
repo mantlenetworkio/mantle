@@ -19,7 +19,14 @@ const deployFn: DeployFunction = async (hre) => {
   const daFraudProofPeriod = hre.deployConfig.daFraudProofPeriod
   const l2SubmittedBlockNumber = hre.deployConfig.l2SubmittedBlockNumber
 
-  const args = [eigenSequencerAddress, dataManagerAddress, reSubmitterAddress, blockStaleMeasure, daFraudProofPeriod, l2SubmittedBlockNumber]
+  const args = [
+    eigenSequencerAddress,
+    dataManagerAddress,
+    reSubmitterAddress,
+    blockStaleMeasure,
+    daFraudProofPeriod,
+    l2SubmittedBlockNumber,
+  ]
   await deployAndVerifyAndThen({
     hre,
     name: names.managed.da.BVM_EigenDataLayrChain,

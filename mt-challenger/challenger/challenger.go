@@ -8,6 +8,7 @@ import (
 	datalayr "github.com/Layr-Labs/datalayr/common/contracts"
 	gkzg "github.com/Layr-Labs/datalayr/common/crypto/go-kzg-bn254"
 	"github.com/Layr-Labs/datalayr/common/graphView"
+	"github.com/Layr-Labs/datalayr/common/header"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceRetrieverServer"
 	"github.com/Layr-Labs/datalayr/common/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -214,7 +215,7 @@ func (c *Challenger) callRetrieve(store *graphView.DataStore) ([]byte, []datalay
 	}
 	data := reply.GetData()
 	framesBytes := reply.GetFrames()
-	header, err := datalayr.DecodeDataStoreHeader(store.Header)
+	header, err := header.DecodeDataStoreHeader(store.Header)
 	if err != nil {
 		log.Error("Could not decode header", "err", err)
 		return nil, nil, err
@@ -243,7 +244,7 @@ func (c *Challenger) checkForFraud(store *graphView.DataStore, data []byte) (*Fr
 
 func (c *Challenger) constructFraudProof(store *graphView.DataStore, data []byte, fraud *Fraud, frames []datalayr.Frame) (*FraudProof, error) {
 	// encode data to frames here
-	header, err := datalayr.DecodeDataStoreHeader(store.Header)
+	header, err := header.DecodeDataStoreHeader(store.Header)
 	if err != nil {
 		c.Cfg.Logger.Printf("Could not decode header %v. %v\n", header, err)
 		return nil, err
@@ -400,7 +401,7 @@ func (c *Challenger) postFraudProof(store *graphView.DataStore, fraudProof *Frau
 			HeaderHash:          store.DataCommitment,
 			DurationDataStoreId: store.DurationDataStoreId,
 			GlobalDataStoreId:   store.StoreNumber,
-			BlockNumber:         store.StakesFromBlockNumber,
+			BlockNumber:         store.ReferenceBlockNumber,
 			Fee:                 store.Fee,
 			Confirmer:           ethc.Address(common.HexToAddress(store.Confirmer)),
 			SignatoryRecordHash: store.SignatoryRecord,
@@ -512,6 +513,11 @@ func (c *Challenger) Start() error {
 				}
 				c.Cfg.Metrics.ReRollupBatchIndex().Set(float64(bigBatchIndex.Uint64()))
 				log.Info("MtChallenge tool submit re-rollup info success", "batchIndex", reRollupBatchIndex[index], "txHash", tx.Hash().String())
+				updBatchIndex, err := strconv.ParseUint(reRollupBatchIndex[index], 10, 64)
+				if err != nil {
+					log.Error("MtChallenge tool type string to uint64 fail")
+				}
+				c.LevelDBStore.SetLatestBatchIndex(updBatchIndex)
 			}
 		}
 	})

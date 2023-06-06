@@ -31,7 +31,7 @@ export const DEFAULT_L2_CONTRACT_ADDRESSES: OEL2ContractsLike = {
   BVM_L2ToL1MessagePasser: predeploys.BVM_L2ToL1MessagePasser,
   BVM_DeployerWhitelist: predeploys.BVM_DeployerWhitelist,
   BVM_ETH: predeploys.BVM_ETH,
-  BVM_BIT: predeploys.BVM_BIT,
+  BVM_MANTLE: predeploys.BVM_MANTLE,
   BVM_GasPriceOracle: predeploys.BVM_GasPriceOracle,
   BVM_SequencerFeeVault: predeploys.BVM_SequencerFeeVault,
   WETH: predeploys.WETH9,
@@ -67,7 +67,7 @@ export const CONTRACT_ADDRESSES: {
       CanonicalTransactionChain:
         '0x5E4e65926BA27467555EB562121fac00D24E9dD2' as const,
       BondManager: '0xcd626E1328b41fCF24737F137BcD4CE0c32bc8d1' as const,
-      Rollup: 
+      Rollup:
         process.env.Rollup ||
         ('0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const),
     },
@@ -84,7 +84,7 @@ export const CONTRACT_ADDRESSES: {
       CanonicalTransactionChain:
         '0xf7B88A133202d41Fe5E2Ab22e6309a1A4D50AF74' as const,
       BondManager: '0xc5a603d273E28185c18Ba4d26A0024B2d2F42740' as const,
-      Rollup: 
+      Rollup:
         process.env.Rollup ||
         ('0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const),
     },
@@ -110,7 +110,7 @@ export const CONTRACT_ADDRESSES: {
       BondManager:
         process.env.BOND_MANAGER_ADDRESS ||
         ('0xc723Cb5f3337c2F6Eab9b29E78CE42a28B8661d1' as const),
-      Rollup: 
+      Rollup:
         process.env.Rollup ||
         ('0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const),
     },
@@ -127,7 +127,7 @@ export const CONTRACT_ADDRESSES: {
       CanonicalTransactionChain:
         '0x654e6dF111F98374d9e5d908D7a5392C308aA18D' as const,
       BondManager: '0xeBE3f28BbFa7bB8f2C066C1A792073203B985e27' as const,
-      Rollup: 
+      Rollup:
         process.env.Rollup ||
         ('0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const),
     },
@@ -153,7 +153,7 @@ export const CONTRACT_ADDRESSES: {
       BondManager:
         process.env.BOND_MANAGER_ADDRESS ||
         ('0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const),
-      Rollup: 
+      Rollup:
         process.env.Rollup ||
         ('0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const),
     },
@@ -179,7 +179,7 @@ export const CONTRACT_ADDRESSES: {
       BondManager:
         process.env.BOND_MANAGER_ADDRESS ||
         ('0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const),
-      Rollup: 
+      Rollup:
         process.env.Rollup ||
         ('0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const),
     },

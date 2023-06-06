@@ -1004,7 +1004,6 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         // await this.state.db.putUpdatedRollupBatchIndex(0)
         // await this.state.db.putUpdatedDsId(0)
 
-
         return {
           len:lens,
           putdata: JSON.stringify(entries),

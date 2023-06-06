@@ -33,7 +33,6 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/karalabe/usb v0.0.2
 	github.com/mantlenetworkio/mantle/fraud-proof v0.0.0-00010101000000-000000000000
-	github.com/mantlenetworkio/mantle/metrics v0.0.0-00010101000000-000000000000 // indirect
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.16
 	github.com/naoina/toml v0.1.2-0.20170918210437-9fafd6967416
