@@ -46,7 +46,7 @@ abstract contract RollupBase is IRollup, Initializable {
     IVerifierEntry public verifier;
 
     // slot place hold
-    uint256[50] gap;
+    uint256[50] rollupBaseGap;
 
     struct Staker {
         bool isStaked;
@@ -332,9 +332,9 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         }
 
         // Require that neither player is currently engaged in a challenge.
-        require(defender != challenger, "defender and challenge must not equal");
         address defender = players[0];
         address challenger = players[1];
+        require(defender != challenger, "defender and challenge must not equal");
         address defenderStaker = registers[defender];
         address challengerStaker = registers[challenger];
         requireUnchallengedStaker(defenderStaker);
@@ -366,7 +366,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
     /// @inheritdoc IRollup
-    function confirmFirstUnresolvedAssertion() override operatorOnly {
+    function confirmFirstUnresolvedAssertion() public override operatorOnly {
         if (lastResolvedAssertionID >= lastCreatedAssertionID) {
             revert("NoUnresolvedAssertion");
         }
