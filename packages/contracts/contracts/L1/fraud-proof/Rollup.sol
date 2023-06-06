@@ -177,7 +177,6 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             IERC20(stakeToken).transferFrom(msg.sender, address(this), stakeAmount),
             "transfer erc20 token failed"
         );
-        require(registers[operator] != address(0), "operator is occupied");
 
         if (isStaked(msg.sender)) {
             require(
@@ -186,9 +185,12 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             );
             stakers[msg.sender].amountStaked += stakeAmount;
         } else {
+            require(registers[operator] != address(0), "operator is occupied");
+
             if (stakeAmount < baseStakeAmount) {
                 revert("InsufficientStake");
             }
+
             stakers[msg.sender] = Staker(true, stakeAmount, 0, operator, address(0));
             registers[operator] = msg.sender;
             numStakers++;
