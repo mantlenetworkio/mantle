@@ -3,7 +3,7 @@ package oracle
 import (
 	"context"
 	"fmt"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/ethereum/go-ethereum/log"
 	"math/big"
 	"sync"
 
