@@ -223,10 +223,11 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         if (staker.assertionID > lastConfirmedAssertionID) {
             revert("StakedOnUnconfirmedAssertion");
         }
+        uint256 amountToSent = staker.amountStaked;
         deleteStaker(stakerAddress);
         // send erc20 token to user
         require(
-            IERC20(stakeToken).transfer(stakerAddress, staker.amountStaked),
+            IERC20(stakeToken).transfer(stakerAddress, amountToSent),
             "transfer erc20 token failed"
         );
     }
@@ -393,6 +394,13 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         //    revert("NotAllStaked");
         // }
 
+        // there is no slashing mechanism currently,
+        // we can not handle offline staker if we sum up zombies and numStakers,
+        // in which case a offline validator can block confirmation progress.
+        // if (assertions.getNumStakers(lastUnresolvedID) != countStakedZombies(lastUnresolvedID) + numStakers) {
+        //    revert NotAllStaked();
+        // }
+
         // Confirm assertion.
         // assertions.deleteAssertion(lastConfirmedAssertionID);
         lastResolvedAssertionID++;
@@ -498,9 +506,9 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         }
         uint256 amountWon;
         uint256 loserStake = stakers[loserStaker].amountStaked;
-        uint256 winnerStake = stakers[winnerStaker].amountStaked;
+        // uint256 winnerStake = stakers[winnerStaker].amountStaked;
         if (loserStake > baseStakeAmount) {
-            // If loser has a higher stake than the winner, refund the difference.
+            // If loser has a higher stake than the base stake amount, refund the difference.
             // Loser gets deleted anyways, so maybe unnecessary to set amountStaked.
             // stakers[loser].amountStaked = winnerStake;
             withdrawableFunds[loserStaker] += (loserStake - baseStakeAmount);
@@ -508,7 +516,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         } else {
             amountWon = loserStake;
         }
-        // Reward the winner with half the remaining stake
+        // Reward the winner with winner amount
         stakers[winnerStaker].amountStaked += amountWon; // why +stake instead of +withdrawable?
         stakers[winnerStaker].currentChallenge = address(0);
         // Turning loser into zombie renders the loser's remaining stake inaccessible.
@@ -567,6 +575,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         (bool success, bytes memory data) = scc.call(
             abi.encodeWithSignature("FRAUD_PROOF_WINDOW()")
         );
+        require(success,"call FRAUD_PROOF_WINDOW() failed");
         uint256 confirmationWindow = uint256(bytes32(data));
         return block.timestamp + confirmationWindow;
     }
