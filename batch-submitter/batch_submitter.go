@@ -137,6 +137,10 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				CTCAddr:               ctcAddress,
 				ChainID:               chainID,
 				PrivKey:               sequencerPrivKey,
+				EnableSequencerHsm:    cfg.EnableSequencerHsm,
+				SequencerHsmAddress:   cfg.SequencerHsmAddress,
+				SequencerHsmAPIName:   cfg.SequencerHsmAPIName,
+				SequencerHsmCreden:    cfg.SequencerHsmCreden,
 				BatchType:             sequencer.BatchTypeFromString(cfg.SequencerBatchType),
 			})
 			if err != nil {
@@ -167,6 +171,10 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				FPRollupAddr:         common.HexToAddress(cfg.FPRollupAddress),
 				ChainID:              chainID,
 				PrivKey:              proposerPrivKey,
+				EnableProposerHsm:    cfg.EnableProposerHsm,
+				ProposerHsmAddress:   cfg.ProposerHsmAddress,
+				ProposerHsmCreden:    cfg.ProposerHsmCreden,
+				ProposerHsmAPIName:   cfg.ProposerHsmAPIName,
 				SccRollback:          cfg.EnableSccRollback,
 			})
 			if err != nil {
@@ -190,6 +198,9 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 		}
 
 		log.Info("Starting batch submitter")
+		log.Info("CloudHsm", "enable_sequencer", cfg.EnableSequencerHsm, "enable_proposer",
+			cfg.EnableProposerHsm, "sequencer_address", cfg.SequencerHsmAddress, "proposer_address",
+			cfg.ProposerHsmAddress)
 
 		if err := batchSubmitter.Start(); err != nil {
 			return err

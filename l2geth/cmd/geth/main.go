@@ -182,6 +182,10 @@ var (
 		utils.FraudProofOperatorAddrFlag,
 		utils.FraudProofStakeAmount,
 		utils.FraudProofChallengeVerify,
+		utils.EnableHsmFlag,
+		utils.HsmAPINameFlag,
+		utils.HsmCredenFlag,
+		utils.HsmAddressFlag,
 	}
 
 	rpcFlags = []cli.Flag{
