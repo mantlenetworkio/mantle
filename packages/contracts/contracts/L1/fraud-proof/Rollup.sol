@@ -330,7 +330,6 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         if (parentID != assertions.getParentID(challengerAssertionID)) {
             revert("DifferentParent");
         }
-
         // Require that neither player is currently engaged in a challenge.
         address defender = players[0];
         address challenger = players[1];
