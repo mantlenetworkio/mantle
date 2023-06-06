@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -141,14 +142,15 @@ func (g *GasPriceOracle) BaseFeeLoop() {
 	if err != nil {
 		panic(err)
 	}
-
+	mutex := sync.Mutex{}
 	for {
 		select {
 		case <-timer.C:
+			mutex.Lock()
 			if err := updateBaseFee(); err != nil {
 				log.Error("cannot update l1 base fee", "messgae", err)
 			}
-
+			mutex.Unlock()
 		case <-g.ctx.Done():
 			g.Stop()
 		}
