@@ -45,6 +45,9 @@ abstract contract RollupBase is IRollup, Initializable {
     AssertionMap public override assertions;
     IVerifierEntry public verifier;
 
+    // slot place hold
+    uint256[50] gap;
+
     struct Staker {
         bool isStaked;
         uint256 amountStaked;
@@ -174,6 +177,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             IERC20(stakeToken).transferFrom(msg.sender, address(this), stakeAmount),
             "transfer erc20 token failed"
         );
+        require(registers[operator] != address(0), "operator is occupied");
 
         if (isStaked(msg.sender)) {
             require(
@@ -231,7 +235,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     function advanceStake(uint256 assertionID) external override operatorOnly {
         address stakerAddr = registers[msg.sender];
         Staker storage staker = stakers[stakerAddr];
-        if (assertionID <= staker.assertionID && assertionID > lastCreatedAssertionID) {
+        if (assertionID <= staker.assertionID || assertionID > lastCreatedAssertionID) {
             revert("AssertionOutOfRange");
         }
         // TODO: allow arbitrary descendant of current staked assertionID, not just child.
@@ -277,6 +281,10 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
 
         // Update stake.
         stakeOnAssertion(stakerAddr, lastCreatedAssertionID);
+        // confirmed this assertion instantly
+        lastResolvedAssertionID++;
+        lastConfirmedAssertionID = lastResolvedAssertionID;
+        emit AssertionConfirmed(lastResolvedAssertionID);
     }
 
     /// @inheritdoc IRollup
@@ -324,6 +332,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         }
 
         // Require that neither player is currently engaged in a challenge.
+        require(defender != challenger, "defender and challenge must not equal");
         address defender = players[0];
         address challenger = players[1];
         address defenderStaker = registers[defender];
@@ -357,7 +366,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
     /// @inheritdoc IRollup
-    function confirmFirstUnresolvedAssertion() external override operatorOnly {
+    function confirmFirstUnresolvedAssertion() override operatorOnly {
         if (lastResolvedAssertionID >= lastCreatedAssertionID) {
             revert("NoUnresolvedAssertion");
         }

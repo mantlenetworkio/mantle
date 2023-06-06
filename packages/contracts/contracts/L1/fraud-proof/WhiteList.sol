@@ -22,6 +22,9 @@ abstract contract Whitelist {
     mapping(address => uint256) public operatorWhitelist;
     address[] public operatorslist;
 
+    // slot place hold
+    uint256[50] gap;
+
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
