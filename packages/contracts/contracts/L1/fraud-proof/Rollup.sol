@@ -185,7 +185,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             );
             stakers[msg.sender].amountStaked += stakeAmount;
         } else {
-            require(registers[operator] != address(0), "operator is occupied");
+            require(registers[operator] == address(0), "operator is occupied");
 
             if (stakeAmount < baseStakeAmount) {
                 revert("InsufficientStake");
