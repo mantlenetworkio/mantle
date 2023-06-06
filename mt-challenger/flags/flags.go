@@ -177,6 +177,26 @@ var (
 		Value:  7301,
 		EnvVar: prefixEnvVar("METRICS_PORT"),
 	}
+	EnableHsmFlag = cli.BoolFlag{
+		Name:   "enable-hsm",
+		Usage:  "Enalbe the hsm",
+		EnvVar: prefixEnvVar("ENABLE_HSM"),
+	}
+	HsmAPINameFlag = cli.StringFlag{
+		Name:   "hsm-api-name",
+		Usage:  "the api name of hsm",
+		EnvVar: prefixEnvVar("HSM_API_NAME"),
+	}
+	HsmAddressFlag = cli.StringFlag{
+		Name:   "hsm-address",
+		Usage:  "the address of hsm key",
+		EnvVar: prefixEnvVar("HSM_API_NAME"),
+	}
+	HsmCredenFlag = cli.StringFlag{
+		Name:   "hsm-creden",
+		Usage:  "the creden of hsm key",
+		EnvVar: prefixEnvVar("HSM_CREDEN"),
+	}
 )
 
 var requiredFlags = []cli.Flag{
@@ -204,6 +224,10 @@ var optionalFlags = []cli.Flag{
 	HTTP2DisableFlag,
 	NeedReRollupBatchFlag,
 	ReRollupToolEnableFlag,
+	EnableHsmFlag,
+	HsmAddressFlag,
+	HsmAPINameFlag,
+	HsmCredenFlag,
 	MetricsServerEnableFlag,
 	MetricsHostnameFlag,
 	MetricsPortFlag,
