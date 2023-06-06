@@ -6,11 +6,8 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
-<<<<<<< HEAD
-=======
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
->>>>>>> develop
 )
 
 /*
