@@ -108,6 +108,11 @@ contract L1ChugSplashProxy {
         _doProxyCall();
     }
 
+    receive() external payable {
+        // Proxy call by default.
+        _doProxyCall();
+    }
+
     /********************
      * Public Functions *
      ********************/
@@ -161,6 +166,14 @@ contract L1ChugSplashProxy {
         assembly {
             sstore(_key, _value)
         }
+    }
+
+    function getStorage(bytes32 _key) external view returns (bytes32)  {
+        bytes32 value;
+        assembly {
+            value := sload(_key)
+        }
+        return value;
     }
 
     /**
