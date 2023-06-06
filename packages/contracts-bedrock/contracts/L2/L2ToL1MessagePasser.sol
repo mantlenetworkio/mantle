@@ -6,6 +6,7 @@ import { Hashing } from "../libraries/Hashing.sol";
 import { Encoding } from "../libraries/Encoding.sol";
 import { Burn } from "../libraries/Burn.sol";
 import { Semver } from "../universal/Semver.sol";
+import { BridgeConstants } from "../libraries/BridgeConstants.sol";
 
 /**
  * @custom:proxied
@@ -73,7 +74,7 @@ contract L2ToL1MessagePasser is Semver {
      * @notice Allows users to withdraw ETH by sending directly to this contract.
      */
     receive() external payable {
-        initiateWithdrawal(msg.sender, RECEIVE_DEFAULT_GAS_LIMIT, bytes(""));
+        initiateWithdrawal(BridgeConstants.BIT_WITHDRAWAL_TX,msg.value,msg.sender, RECEIVE_DEFAULT_GAS_LIMIT, bytes(""));
     }
 
     /**
@@ -96,16 +97,24 @@ contract L2ToL1MessagePasser is Semver {
      * @param _data     Data to forward to L1 target.
      */
     function initiateWithdrawal(
+        uint32 _type,
+        uint256 _amount,
         address _target,
         uint256 _gasLimit,
         bytes memory _data
     ) public payable {
+        uint256 eth_value = 0;
+        if (_type == BridgeConstants.ETH_WITHDRAWAL_TX){
+            require(_amount!=0,"_amount cant be 0");
+            eth_value = _amount;
+
+        }
         bytes32 withdrawalHash = Hashing.hashWithdrawal(
             Types.WithdrawalTransaction({
                 nonce: messageNonce(),
                 sender: msg.sender,
                 target: _target,
-                value: msg.value,
+                value: eth_value,
                 gasLimit: _gasLimit,
                 data: _data
             })
@@ -117,7 +126,7 @@ contract L2ToL1MessagePasser is Semver {
             messageNonce(),
             msg.sender,
             _target,
-            msg.value,
+            eth_value,
             _gasLimit,
             _data,
             withdrawalHash
