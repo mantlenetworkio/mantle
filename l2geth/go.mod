@@ -53,8 +53,8 @@ require (
 	golang.org/x/crypto v0.3.0
 	golang.org/x/sync v0.1.0
 	golang.org/x/sys v0.6.0
-	golang.org/x/text v0.7.0
-	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af
+	golang.org/x/text v0.8.0
+	golang.org/x/time v0.3.0
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce
 	gopkg.in/olebedev/go-duktape.v3 v3.0.0-20200619000410-60c24ae608a6
 	gopkg.in/urfave/cli.v1 v1.20.0
@@ -62,5 +62,7 @@ require (
 )
 
 replace github.com/mantlenetworkio/mantle/fraud-proof => ../fraud-proof
+
+replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
 
 replace github.com/mantlenetworkio/mantle/metrics => ../metrics
