@@ -697,9 +697,11 @@ func (d *Driver) Start() error {
 		if batchIndex == 0 || !ok {
 			d.LevelDBStore.SetReRollupBatchIndex(1)
 		}
+		d.wg.Add(1)
 		go d.CheckConfirmedWorker()
 	}
 	if d.Cfg.FeeModelEnable {
+		d.wg.Add(1)
 		go d.RollUpFeeWorker()
 	}
 	return nil
