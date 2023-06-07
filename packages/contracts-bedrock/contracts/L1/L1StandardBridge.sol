@@ -393,6 +393,7 @@ contract L1StandardBridge is StandardBridge, Semver {
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
+        require(_l1Token!=L1_MNT && _l1Token!=address(0) ,"cant deposit ETH or MNT.");
         _initiateBridgeERC20(_l1Token, _l2Token, _from, _to, _amount, _minGasLimit, _extraData);
     }
 
