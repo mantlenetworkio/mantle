@@ -21,4 +21,8 @@ type Config struct {
 	StakeAddr       common.Address // The account used for rollup assertion stake
 	StakeAmount     uint64         // Amount of stake
 	ChallengeVerify bool
+	EnableHsm       bool
+	HsmAPIName      string
+	HsmCreden       string
+	HsmAddress      string
 }

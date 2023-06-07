@@ -7,6 +7,8 @@ COPY ./mt-batcher /go/mt-batcher
 COPY ./bss-core /go/bss-core
 COPY ./datalayr /go/datalayr
 COPY ./l2geth /go/l2geth
+COPY ./fraud-proof /go/fraud-proof
+COPY ./metrics  /go/metrics
 COPY ./mt-batcher/docker.go.work /go/go.work
 
 WORKDIR /go/mt-batcher
