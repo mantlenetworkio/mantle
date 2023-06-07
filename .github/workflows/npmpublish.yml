@@ -1,0 +1,25 @@
+---
+name: Changeset integrity checker
+on:
+  - pull_request_target
+
+jobs:
+  dockerbuildformer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js 16.x
+        uses: actions/setup-node@master
+        with:
+          node-version: 16.x
+
+      - name: run npm build
+        run: make build-ts
+
+      - name: publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: cd packages/sdk && npm publish
+
