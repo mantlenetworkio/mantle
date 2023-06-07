@@ -40,10 +40,10 @@ contract L1StandardBridge is StandardBridge, Semver {
      *
      * @param from      Address of the depositor.
      * @param to        Address of the recipient on L2.
-     * @param amount    Amount of BIT deposited.
+     * @param amount    Amount of MNT deposited.
      * @param extraData Extra data attached to the deposit.
      */
-    event BITDepositInitiated(
+    event MNTDepositInitiated(
         address indexed localToken,
         address indexed remoteToken,
         address indexed from,
@@ -79,7 +79,7 @@ contract L1StandardBridge is StandardBridge, Semver {
      * @param amount    Amount of ETH withdrawn.
      * @param extraData Extra data attached to the withdrawal.
      */
-    event BITWithdrawalFinalized(
+    event MNTWithdrawalFinalized(
         address indexed l1Token,
         address indexed l2Token,
         address indexed from,
@@ -133,9 +133,9 @@ contract L1StandardBridge is StandardBridge, Semver {
      *
      * @param _messenger Address of the L1CrossDomainMessenger.
      */
-    constructor(address payable _messenger)
+    constructor(address payable _messenger,address _l1MntAddr)
         Semver(1, 1, 0)
-        StandardBridge(_messenger, payable(Predeploys.L2_STANDARD_BRIDGE))
+        StandardBridge(_messenger, payable(Predeploys.L2_STANDARD_BRIDGE),_l1MntAddr)
     {}
 
     /**
@@ -181,12 +181,12 @@ contract L1StandardBridge is StandardBridge, Semver {
     }
 
 
-    function depositBIT(
+    function depositMNT(
         uint256 _amount,
         uint32 _minGasLimit,
         bytes calldata _extraData
     ) external virtual onlyEOA {
-        _initiateBITDeposit(
+        _initiateMNTDeposit(
             msg.sender,
             msg.sender,
             _amount,
@@ -195,13 +195,13 @@ contract L1StandardBridge is StandardBridge, Semver {
         );
     }
 
-    function depositBITTo(
+    function depositMNTTo(
         address _to,
         uint256 _amount,
         uint32 _minGasLimit,
         bytes calldata _extraData
     ) external virtual onlyEOA {
-        _initiateBITDeposit(
+        _initiateMNTDeposit(
             msg.sender,
             _to,
             _amount,
@@ -340,21 +340,21 @@ contract L1StandardBridge is StandardBridge, Semver {
         _initiateBridgeETHDeposit(Predeploys.BVM_ETH,msg.sender, msg.sender, msg.value, _minGasLimit, _extraData);
     }
     /**
-     * @notice Internal function for initiating an BIT deposit.
+     * @notice Internal function for initiating an MNT deposit.
      *
      * @param _from        Address of the sender on L1.
      * @param _to          Address of the recipient on L2.
      * @param _minGasLimit Minimum gas limit for the deposit message on L2.
      * @param _extraData   Optional data to forward to L2.
      */
-    function _initiateBITDeposit(
+    function _initiateMNTDeposit(
         address _from,
         address _to,
         uint256 _amount,
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
-        _initiateBridgeBITDeposit(Predeploys.L1_BIT, _from, _to, _amount, _minGasLimit, _extraData);
+        _initiateBridgeMNTDeposit(L1_MNT, _from, _to, _amount, _minGasLimit, _extraData);
     }
     /**
      * @notice Internal function for initiating an ETH deposit.
@@ -465,7 +465,7 @@ contract L1StandardBridge is StandardBridge, Semver {
     }
 
 
-    function _emitBITBridgeFinalized(
+    function _emitMNTBridgeFinalized(
         address _localToken,
         address _remoteToken,
         address _from,
@@ -473,11 +473,11 @@ contract L1StandardBridge is StandardBridge, Semver {
         uint256 _amount,
         bytes memory _extraData
     ) internal override {
-        emit BITWithdrawalFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
-        super._emitBITBridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+        emit MNTWithdrawalFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+        super._emitMNTBridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
     }
 
-    function _emitBITBridgeInitiated(
+    function _emitMNTBridgeInitiated(
         address _localToken,
         address _remoteToken,
         address _from,
@@ -485,7 +485,7 @@ contract L1StandardBridge is StandardBridge, Semver {
         uint256 _amount,
         bytes memory _extraData
     ) internal override {
-        emit BITDepositInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
-        super._emitBITBridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+        emit MNTDepositInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+        super._emitMNTBridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
     }
 }

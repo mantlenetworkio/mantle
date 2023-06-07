@@ -74,7 +74,7 @@ contract L2ToL1MessagePasser is Semver {
      * @notice Allows users to withdraw ETH by sending directly to this contract.
      */
     receive() external payable {
-        initiateWithdrawal(BridgeConstants.BIT_WITHDRAWAL_TX,msg.value,msg.sender, RECEIVE_DEFAULT_GAS_LIMIT, bytes(""));
+        initiateWithdrawal(BridgeConstants.MNT_WITHDRAWAL_TX,msg.value,msg.sender, RECEIVE_DEFAULT_GAS_LIMIT, bytes(""));
     }
 
     /**
@@ -107,7 +107,7 @@ contract L2ToL1MessagePasser is Semver {
         if (_type == BridgeConstants.ETH_WITHDRAWAL_TX){
             require(_amount!=0,"ETH amount cant be 0");
             eth_value = _amount;
-        }else if (_type == BridgeConstants.BIT_WITHDRAWAL_TX){
+        }else if (_type == BridgeConstants.MNT_WITHDRAWAL_TX){
             require(msg.value!=0,"value cant be 0");
             eth_value = 0;
         }

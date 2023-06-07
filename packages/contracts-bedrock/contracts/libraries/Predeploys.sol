@@ -7,8 +7,9 @@ pragma solidity ^0.8.0;
  */
 library Predeploys {
 
-
-    address internal constant L1_BIT = 0x6900000000000000000000000000000000000020;
+    /**
+     * @notice Address of the BVM_ETH  predeploy.
+     */
     address internal constant BVM_ETH = 0x4200000000000000000000000000000000000022;
 
     /**

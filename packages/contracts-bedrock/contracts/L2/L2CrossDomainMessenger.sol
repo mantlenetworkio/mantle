@@ -60,7 +60,7 @@ contract L2CrossDomainMessenger is CrossDomainMessenger, Semver {
             L2ToL1MessagePasser(payable(Predeploys.L2_TO_L1_MESSAGE_PASSER)).initiateWithdrawal{
                     value: 0
                 }(_type,_value,_to, _gasLimit, _data);
-        }else if (_type == BridgeConstants.BIT_WITHDRAWAL_TX){
+        }else if (_type == BridgeConstants.MNT_WITHDRAWAL_TX){
             L2ToL1MessagePasser(payable(Predeploys.L2_TO_L1_MESSAGE_PASSER)).initiateWithdrawal{
                     value: _value
                 }(_type,_value,_to, _gasLimit, _data);

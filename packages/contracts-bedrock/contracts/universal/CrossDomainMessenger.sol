@@ -269,19 +269,19 @@ CrossDomainMessengerLegacySpacer1
 
         uint256 _value = 0;
         uint256 _relayMessageValue = 0;
-        if (_type == BridgeConstants.BIT_TX ){
+        if (_type == BridgeConstants.MNT_DEPOSIT_TX ){
             _value = _amount;
             _relayMessageValue = _amount;
         }else if (_type == BridgeConstants.ETH_WITHDRAWAL_TX){
             _value = _amount ;
             _relayMessageValue = _amount;
-        }else if (_type == BridgeConstants.ETH_TX ){
+        }else if (_type == BridgeConstants.ETH_DEPOSIT_TX ){
             _value = msg.value;
             _relayMessageValue = 0;
-        }else if (_type == BridgeConstants.BIT_WITHDRAWAL_TX){
+        }else if (_type == BridgeConstants.MNT_WITHDRAWAL_TX){
             _value = msg.value;
             _relayMessageValue = 0;
-        }else if (_type == BridgeConstants.ERC20_TX || _type == BridgeConstants.ERC20_WITHDRAWAL_TX ){
+        }else if (_type == BridgeConstants.ERC20_DEPOSIT_TX || _type == BridgeConstants.ERC20_WITHDRAWAL_TX ){
             _value = 0;
             _relayMessageValue = 0;
         }
@@ -308,7 +308,7 @@ CrossDomainMessengerLegacySpacer1
 
 
         emit SentMessage(_target, msg.sender, _message, messageNonce(), _minGasLimit);
-        if (_type == BridgeConstants.BIT_TX){
+        if (_type == BridgeConstants.MNT_DEPOSIT_TX){
             emit SentMessageExtension1(msg.sender, _relayMessageValue);
         }else{
             emit SentMessageExtension1(msg.sender, _relayMessageValue);

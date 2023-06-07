@@ -63,9 +63,9 @@ contract L2StandardBridge is StandardBridge, Semver {
      *
      * @param _otherBridge Address of the L1StandardBridge.
      */
-    constructor(address payable _otherBridge)
+    constructor(address payable _otherBridge,address _l1MntAddr)
         Semver(1, 1, 0)
-        StandardBridge(payable(Predeploys.L2_CROSS_DOMAIN_MESSENGER), _otherBridge)
+        StandardBridge(payable(Predeploys.L2_CROSS_DOMAIN_MESSENGER), _otherBridge,_l1MntAddr)
     {}
 
     /**
@@ -206,7 +206,7 @@ contract L2StandardBridge is StandardBridge, Semver {
             _initiateBridgeETHWithdrawal(_l2Token,address(0),_from, _to, _amount, _minGasLimit, _extraData);
         }else if (_l2Token == address(0)){
             require(msg.value!=0 , "cant withdraw 0 amount");
-            _initiateBridgeBITWithdrawal(_l2Token,Predeploys.L1_BIT,_from, _to, _amount, _minGasLimit, _extraData);
+            _initiateBridgeMNTWithdrawal(_l2Token,L1_MNT,_from, _to, _amount, _minGasLimit, _extraData);
 
         } else {
             address l1Token = MantleMintableERC20(_l2Token).l1Token();
@@ -296,7 +296,7 @@ contract L2StandardBridge is StandardBridge, Semver {
         super._emitERC20BridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
     }
 
-    function _emitBITBridgeInitiated(
+    function _emitMNTBridgeInitiated(
         address _localToken,
         address _remoteToken,
         address _from,
@@ -306,13 +306,13 @@ contract L2StandardBridge is StandardBridge, Semver {
     ) internal override {
         emit WithdrawalInitiated(
             address(0),
-            Predeploys.L1_BIT,
+            L1_MNT,
             _from,
             _to,
             _amount,
             _extraData
         );
-        super._emitBITBridgeInitiated(address(0), Predeploys.L1_BIT,_from, _to, _amount, _extraData);
+        super._emitMNTBridgeInitiated(address(0), L1_MNT,_from, _to, _amount, _extraData);
     }
 
     /**
@@ -321,7 +321,7 @@ contract L2StandardBridge is StandardBridge, Semver {
      *
      * @inheritdoc StandardBridge
      */
-    function _emitBITBridgeFinalized(
+    function _emitMNTBridgeFinalized(
         address _localToken,
         address _remoteToken,
         address _from,
@@ -331,13 +331,13 @@ contract L2StandardBridge is StandardBridge, Semver {
     ) internal override {
         emit DepositFinalized(
             address(0),
-            Predeploys.L1_BIT,
+            L1_MNT,
             _from,
             _to,
             _amount,
             _extraData
         );
-        super._emitBITBridgeFinalized(address(0), Predeploys.L1_BIT,_from, _to, _amount, _extraData);
+        super._emitMNTBridgeFinalized(address(0), L1_MNT,_from, _to, _amount, _extraData);
     }
 
 }

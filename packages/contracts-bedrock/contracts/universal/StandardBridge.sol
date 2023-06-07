@@ -41,6 +41,13 @@ abstract contract StandardBridge {
     StandardBridge public immutable OTHER_BRIDGE;
 
     /**
+ * @custom:legacy
+     * @custom:spacer messenger
+     * @notice Spacer for backwards compatibility.
+     */
+    address public immutable L1_MNT;
+
+    /**
      * @custom:legacy
      * @custom:spacer messenger
      * @notice Spacer for backwards compatibility.
@@ -134,7 +141,7 @@ abstract contract StandardBridge {
         bytes extraData
     );
 
-    event BITBridgeInitiated(
+    event MNTBridgeInitiated(
         address indexed localToken,
         address indexed remoteToken,
         address indexed from,
@@ -143,7 +150,7 @@ abstract contract StandardBridge {
         bytes extraData
     );
 
-    event BITBridgeFinalized(
+    event MNTBridgeFinalized(
         address indexed localToken,
         address indexed remoteToken,
         address indexed from,
@@ -180,9 +187,10 @@ abstract contract StandardBridge {
      * @param _messenger   Address of CrossDomainMessenger on this network.
      * @param _otherBridge Address of the other StandardBridge contract.
      */
-    constructor(address payable _messenger, address payable _otherBridge) {
+    constructor(address payable _messenger, address payable _otherBridge,address _l1MntAddress) {
         MESSENGER = CrossDomainMessenger(_messenger);
         OTHER_BRIDGE = StandardBridge(_otherBridge);
+        L1_MNT = _l1MntAddress;
     }
 
     /**
@@ -376,17 +384,17 @@ abstract contract StandardBridge {
         require(success, "StandardBridge: ETH transfer failed");
     }
     /**
- * @notice Finalizes an BIT bridge on this chain. Can only be triggered by the other
+ * @notice Finalizes an MNT bridge on this chain. Can only be triggered by the other
      *         StandardBridge contract on the remote chain.
      *
      * @param _from      Address of the sender.
      * @param _to        Address of the receiver.
-     * @param _amount    Amount of BIT being bridged.
+     * @param _amount    Amount of MNT being bridged.
      * @param _extraData Extra data to be sent with the transaction. Note that the recipient will
      *                   not be triggered with this data, but it will be emitted and can be used
      *                   to identify the transaction.
      */
-    function finalizeBridgeBITDeposit(
+    function finalizeBridgeMNTDeposit(
         address _from,
         address _to,
         uint256 _amount,
@@ -398,18 +406,18 @@ abstract contract StandardBridge {
 
         // Emit the correct events. By default this will be _amount, but child
         // contracts may override this function in order to emit legacy events as well.
-        _emitBITBridgeFinalized(address(0),Predeploys.L1_BIT, _from, _to, _amount, _extraData);
+        _emitMNTBridgeFinalized(address(0),L1_MNT, _from, _to, _amount, _extraData);
 
         bool success = SafeCall.call(_to, gasleft(), _amount, hex"");
-        require(success, "StandardBridge: BIT transfer failed");
+        require(success, "StandardBridge: MNT transfer failed");
     }
 
 
     /**
-     * @notice Finalizes an BIT bridge on this chain. Can only be triggered by the other
+     * @notice Finalizes an MNT bridge on this chain. Can only be triggered by the other
      *         StandardBridge contract on the remote chain.
      *
-     * @param _localToken  Address of the L1BIT on this chain.
+     * @param _localToken  Address of the L1MNT on this chain.
      * @param _remoteToken Address of the corresponding token on the remote chain.
      * @param _from        Address of the sender.
      * @param _to          Address of the receiver.
@@ -418,7 +426,7 @@ abstract contract StandardBridge {
      *                     not be triggered with this data, but it will be emitted and can be used
      *                     to identify the transaction.
      */
-    function finalizeBridgeBITWithdraw(
+    function finalizeBridgeMNTWithdraw(
         address _localToken,
         address _remoteToken,
         address _from,
@@ -506,7 +514,7 @@ abstract contract StandardBridge {
         _emitETHBridgeInitiated( _from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage{ value: _amount }(
-            BridgeConstants.ETH_TX,
+            BridgeConstants.ETH_DEPOSIT_TX,
             _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
@@ -535,7 +543,7 @@ abstract contract StandardBridge {
      *                     not be triggered with this data, but it will be emitted and can be used
      *                     to identify the transaction.
      */
-    function _initiateBridgeBITWithdrawal(
+    function _initiateBridgeMNTWithdrawal(
         address _localToken,
         address _remoteToken,
         address _from,
@@ -546,19 +554,19 @@ abstract contract StandardBridge {
     ) internal {
         require(
             msg.value == _amount,
-            "StandardBridge: bridging BIT must include sufficient BIT value"
+            "StandardBridge: bridging MNT must include sufficient MNT value"
         );
 
         // Emit the correct events. By default this will be _amount, but child
         // contracts may override this function in order to emit legacy events as well.
-        _emitBITBridgeInitiated(_localToken,_remoteToken,_from, _to, _amount, _extraData);
+        _emitMNTBridgeInitiated(_localToken,_remoteToken,_from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage{ value: _amount }(
-            BridgeConstants.BIT_WITHDRAWAL_TX,
+            BridgeConstants.MNT_WITHDRAWAL_TX,
             _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
-                this.finalizeBridgeBITWithdraw.selector,
+                this.finalizeBridgeMNTWithdraw.selector,
                 _remoteToken,
                 _localToken,
                 _from,
@@ -583,7 +591,7 @@ abstract contract StandardBridge {
      *                     not be triggered with this data, but it will be emitted and can be used
      *                     to identify the transaction.
      */
-    function _initiateBridgeBITDeposit(
+    function _initiateBridgeMNTDeposit(
         address _localToken,
         address _from,
         address _to,
@@ -597,14 +605,14 @@ abstract contract StandardBridge {
 
         // Emit the correct events. By default this will be ERC20BridgeInitiated, but child
         // contracts may override this function in order to emit legacy events as well.
-        _emitBITBridgeInitiated(_localToken, address(0) , _from, _to, _amount, _extraData);
+        _emitMNTBridgeInitiated(_localToken, address(0) , _from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage(
-            BridgeConstants.BIT_TX,
+            BridgeConstants.MNT_DEPOSIT_TX,
             _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
-                this.finalizeBridgeBITDeposit.selector,
+                this.finalizeBridgeMNTDeposit.selector,
                 _from,
                 _to,
                 _amount,
@@ -695,8 +703,8 @@ abstract contract StandardBridge {
     ) internal {
 
 
-        require(_localToken != address(0) && _localToken != Predeploys.L1_BIT ,
-            "StandardBridge: BIT and ETH deposit should not call this function."
+        require(_localToken != address(0) && _localToken != L1_MNT ,
+            "StandardBridge: MNT and ETH deposit should not call this function."
         );
 
         if (_isMantleMintableERC20(_localToken)) {
@@ -716,7 +724,7 @@ abstract contract StandardBridge {
         _emitERC20BridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage(
-            BridgeConstants.ERC20_TX,
+            BridgeConstants.ERC20_DEPOSIT_TX,
             _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(
@@ -800,7 +808,7 @@ abstract contract StandardBridge {
         emit ETHBridgeFinalized(_from, _to, _amount, _extraData);
     }
 
-    function _emitBITBridgeInitiated(
+    function _emitMNTBridgeInitiated(
         address _local,
         address _remote,
         address _from,
@@ -808,7 +816,7 @@ abstract contract StandardBridge {
         uint256 _amount,
         bytes memory _extraData
     ) internal virtual {
-        emit BITBridgeInitiated(_local,_remote,_from, _to, _amount, _extraData);
+        emit MNTBridgeInitiated(_local,_remote,_from, _to, _amount, _extraData);
     }
 
     /**
@@ -822,7 +830,7 @@ abstract contract StandardBridge {
      * @param _amount    Amount of ETH sent.
      * @param _extraData Extra data sent with the transaction.
      */
-    function _emitBITBridgeFinalized(
+    function _emitMNTBridgeFinalized(
         address _localToken,
         address _remoteToken,
         address _from,
@@ -830,7 +838,7 @@ abstract contract StandardBridge {
         uint256 _amount,
         bytes memory _extraData
     ) internal virtual {
-        emit BITBridgeFinalized(_localToken,_remoteToken,_from, _to, _amount, _extraData);
+        emit MNTBridgeFinalized(_localToken,_remoteToken,_from, _to, _amount, _extraData);
     }
     /**
      * @notice Emits the ERC20BridgeInitiated event and if necessary the appropriate legacy
