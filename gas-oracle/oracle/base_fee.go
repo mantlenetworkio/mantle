@@ -45,7 +45,7 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 			return err
 		}
 		// NOTE this will return base multiple with coin ratio
-		log.Debug("get header in l1 client", "type is", reflect.ValueOf(l1Backend).Type())
+		log.Info("get header in l1 client", "type is", reflect.ValueOf(l1Backend).Type())
 		tip, err := l1Backend.HeaderByNumber(context.Background(), nil)
 		if err != nil {
 			return err
@@ -54,7 +54,7 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 			return errNoBaseFee
 		}
 		if !isDifferenceSignificant(baseFee.Uint64(), tip.BaseFee.Uint64(), cfg.l1BaseFeeSignificanceFactor) {
-			log.Debug("non significant base fee update", "tip", tip.BaseFee, "current", baseFee)
+			log.Warn("non significant base fee update", "tip", tip.BaseFee, "current", baseFee)
 			return nil
 		}
 

@@ -29,10 +29,11 @@ func NewL1Client(ethereumHttpUrl string, tokenPricer *tokenprice.Client) (*L1Cli
 }
 
 func (c *L1Client) HeaderByNumber(ctx context.Context, number *big.Int) (*types.Header, error) {
-	ratio, err := c.tokenPricer.PriceRatio()
-	if err != nil {
-		return nil, err
-	}
+	//ratio, err := c.tokenPricer.PriceRatio()
+	//if err != nil {
+	//	return nil, err
+	//}
+	ratio := 4000
 	tip, err := c.Client.HeaderByNumber(ctx, number)
 	if err != nil {
 		return nil, err
@@ -47,8 +48,7 @@ func (c *L1Client) HeaderByNumber(ctx context.Context, number *big.Int) (*types.
 		return nil, err
 	}
 	// get history 20 block best base
-	//bestBaseFee := c.getHistoryBestPrice(tip.Number, tip.BaseFee, 20)
-	bestBaseFee := tip.BaseFee
+	bestBaseFee := c.getHistoryBestPrice(tip.Number, tip.BaseFee, 20)
 	tip.BaseFee = new(big.Int).Mul(new(big.Int).Add(bestBaseFee, gasTipCap), big.NewInt(int64(ratio)))
 	log.Info("show base fee context", "bestBaseFee", bestBaseFee, "gasTipCap", gasTipCap, "ratio", ratio)
 	return tip, nil
@@ -61,13 +61,13 @@ func (c *L1Client) getHistoryBestPrice(endHeight *big.Int, lastBaseFee *big.Int,
 	// get base fee
 	for i := 0; i < countWindow; i++ {
 		wg.Add(1)
-		go func() {
-			header, err := c.Client.HeaderByNumber(context.Background(), endHeight.Sub(endHeight, new(big.Int).SetInt64(int64(i))))
+		go func(i int) {
+			header, err := c.Client.HeaderByNumber(context.Background(), new(big.Int).Sub(endHeight, new(big.Int).SetInt64(int64(i))))
 			if err == nil && header.BaseFee != nil {
 				baseFees = append(baseFees, header.BaseFee)
 			}
 			defer wg.Done()
-		}()
+		}(i)
 	}
 	wg.Wait()
 	// get best base fee, append last base fee again, incase get base fees all in error
