@@ -186,7 +186,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @notice update sequencer address
     * @param _sequencer update sequencer address
     */
-    function updateSequencerAddress(address _sequencer) external onlySequencer {
+    function updateSequencerAddress(address _sequencer) external onlyOwner {
         require(_sequencer != address(0), "updateSequencerAddress: _sequencer is the zero address");
         sequencer = _sequencer;
     }
