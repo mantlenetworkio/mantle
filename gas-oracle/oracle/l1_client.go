@@ -40,7 +40,7 @@ func (c *L1Client) HeaderByNumber(ctx context.Context, number *big.Int) (*types.
 	if tip == nil {
 		return nil, fmt.Errorf("get tip is nil")
 	}
-	log.Info("show base fee original", "tip.BaseFee", tip.BaseFee, "number", tip.Number, "ratio", ratio)
+	log.Debug("show base fee original", "tip.BaseFee", tip.BaseFee, "number", tip.Number, "ratio", ratio)
 	// get tip
 	gasTipCap, err := c.SuggestGasTipCap(ctx)
 	if err != nil {
@@ -49,7 +49,7 @@ func (c *L1Client) HeaderByNumber(ctx context.Context, number *big.Int) (*types.
 	// get history 20 block best base
 	bestBaseFee := c.getHistoryBestPrice(tip.Number, tip.BaseFee, 20)
 	tip.BaseFee = new(big.Int).Mul(new(big.Int).Add(bestBaseFee, gasTipCap), big.NewInt(int64(ratio)))
-	log.Info("show base fee context", "bestBaseFee", bestBaseFee, "gasTipCap", gasTipCap, "ratio", ratio)
+	log.Debug("show base fee context", "bestBaseFee", bestBaseFee, "gasTipCap", gasTipCap, "ratio", ratio)
 	return tip, nil
 }
 
