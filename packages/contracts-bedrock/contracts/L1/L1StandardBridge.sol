@@ -464,7 +464,12 @@ contract L1StandardBridge is StandardBridge, Semver {
         super._emitERC20BridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
     }
 
-
+    /**
+     * @notice Emits the legacy MNTBridgeFinalized event followed by the ERC20BridgeFinalized
+     *         event. This is necessary for backwards compatibility with the legacy bridge.
+     *
+     * @inheritdoc StandardBridge
+     */
     function _emitMNTBridgeFinalized(
         address _localToken,
         address _remoteToken,
@@ -476,7 +481,12 @@ contract L1StandardBridge is StandardBridge, Semver {
         emit MNTWithdrawalFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
         super._emitMNTBridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
     }
-
+    /**
+     * @notice Emits the legacy MNTBridgeInitiated event followed by the ERC20BridgeFinalized
+     *         event. This is necessary for backwards compatibility with the legacy bridge.
+     *
+     * @inheritdoc StandardBridge
+     */
     function _emitMNTBridgeInitiated(
         address _localToken,
         address _remoteToken,

@@ -295,8 +295,8 @@ contract MantlePortal is Initializable, ResourceMetering, Semver {
      * @param _tx Withdrawal transaction to finalize.
      */
     function finalizeWithdrawalTransaction(Types.WithdrawalTransaction memory _tx)
-    external
-    whenNotPaused
+        external
+        whenNotPaused
     {
         // Make sure that the l2Sender has not yet been set. The l2Sender is set to a value other
         // than the default value when a withdrawal transaction is being finalized. This check is
@@ -440,7 +440,6 @@ contract MantlePortal is Initializable, ResourceMetering, Semver {
         // Compute the opaque data that will be emitted as part of the TransactionDeposited event.
         // We use opaque data so that we can update the TransactionDeposited event in the future
         // without breaking the current interface.
-
         bytes memory opaqueData = abi.encodePacked(
             _value,
             _value,
