@@ -33,6 +33,10 @@ type Config struct {
 	MetricsServerEnable       bool
 	MetricsHostname           string
 	MetricsPort               uint64
+	EnableHsm                 bool
+	HsmAPIName                string
+	HsmCreden                 string
+	HsmAddress                string
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -67,6 +71,10 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		MetricsServerEnable:       ctx.GlobalBool(flags.MetricsServerEnableFlag.Name),
 		MetricsHostname:           ctx.GlobalString(flags.MetricsHostnameFlag.Name),
 		MetricsPort:               ctx.GlobalUint64(flags.MetricsPortFlag.Name),
+		EnableHsm:                 ctx.GlobalBool(flags.EnableHsmFlag.Name),
+		HsmAddress:                ctx.GlobalString(flags.HsmAddressFlag.Name),
+		HsmAPIName:                ctx.GlobalString(flags.HsmAPINameFlag.Name),
+		HsmCreden:                 ctx.GlobalString(flags.HsmCredenFlag.Name),
 	}
 	return cfg, nil
 }

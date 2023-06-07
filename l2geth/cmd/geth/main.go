@@ -160,7 +160,6 @@ var (
 		utils.RollupEnableVerifierFlag,
 		utils.RollupMpcVerifierFlag,
 		utils.RollupEigenDaBlockFlag,
-		utils.RollupMantleTokenUpgradeBlockFlag,
 		utils.RollupTimstampRefreshFlag,
 		utils.RollupPollIntervalFlag,
 		utils.RollupMaxCalldataSizeFlag,
@@ -183,6 +182,10 @@ var (
 		utils.FraudProofOperatorAddrFlag,
 		utils.FraudProofStakeAmount,
 		utils.FraudProofChallengeVerify,
+		utils.EnableHsmFlag,
+		utils.HsmAPINameFlag,
+		utils.HsmCredenFlag,
+		utils.HsmAddressFlag,
 	}
 
 	rpcFlags = []cli.Flag{
