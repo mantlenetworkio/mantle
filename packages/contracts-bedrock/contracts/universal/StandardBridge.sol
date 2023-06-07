@@ -206,20 +206,9 @@ abstract contract StandardBridge {
         return MESSENGER;
     }
 
-    /**
-     * @notice Sends ETH to the sender's address on the other chain.
-     *
-     * @param _minGasLimit Minimum amount of gas that the bridge can be relayed with.
-     * @param _extraData   Extra data to be sent with the transaction. Note that the recipient will
-     *                     not be triggered with this data, but it will be emitted and can be used
-     *                     to identify the transaction.
-     */
-//    function bridgeETH(uint32 _minGasLimit, bytes calldata _extraData) public payable onlyEOA {
-//        _initiateBridgeETH(msg.sender, msg.sender, msg.value, _minGasLimit, _extraData);
-//    }
 
     /**
-     * @notice Sends ETH to a receiver's address on the other chain. Note that if ETH is sent to a
+ * @notice Sends ETH to a receiver's address on the other chain. Note that if ETH is sent to a
      *         smart contract and the call fails, the ETH will be temporarily locked in the
      *         StandardBridge on the other chain until the call is replayed. If the call cannot be
      *         replayed with any amount of gas (call always reverts), then the ETH will be
@@ -233,15 +222,7 @@ abstract contract StandardBridge {
      *                     not be triggered with this data, but it will be emitted and can be used
      *                     to identify the transaction.
      */
-    function bridgeL1ETHTo(
-        address _to,
-        uint32 _minGasLimit,
-        bytes calldata _extraData
-    ) public payable {
-        _initiateBridgeETHDeposit(Predeploys.BVM_ETH,msg.sender, _to, msg.value, _minGasLimit, _extraData);
-    }
-
-    function bridgeL2ETHTo(
+    function bridgeETHTo(
         address _localToken,
         address _to,
         uint256 _amount,
@@ -249,7 +230,6 @@ abstract contract StandardBridge {
         bytes calldata _extraData
     ) public payable {
         _initiateBridgeETHWithdrawal(_localToken,address(0),msg.sender,_to,_amount,_minGasLimit,_extraData );
-
     }
 
 

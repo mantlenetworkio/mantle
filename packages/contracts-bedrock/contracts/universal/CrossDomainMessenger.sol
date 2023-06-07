@@ -302,21 +302,12 @@ CrossDomainMessengerLegacySpacer1
             )
         );
 
-
-
-
-
-
         emit SentMessage(_target, msg.sender, _message, messageNonce(), _minGasLimit);
-        if (_type == BridgeConstants.MNT_DEPOSIT_TX){
-            emit SentMessageExtension1(msg.sender, _relayMessageValue);
-        }else{
-            emit SentMessageExtension1(msg.sender, _relayMessageValue);
-        }
+        emit SentMessageExtension1(msg.sender, _relayMessageValue);
 
-    unchecked {
-        ++msgNonce;
-    }
+        unchecked {
+            ++msgNonce;
+        }
     }
 
     /**
