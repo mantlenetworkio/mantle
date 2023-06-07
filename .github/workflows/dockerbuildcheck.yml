@@ -1,7 +1,7 @@
 ---
-name: check docker build for L2Geth
+name: dockerfile build check
 on:
-  - workflow_dispatch
+  - pull_request
 
 jobs:
   dockerbuildcheck:
@@ -14,9 +14,57 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Publish L2Geth
+      - name: Dockerfile check for L2Geth
         uses: docker/build-push-action@v2
         with:
           context: .
           file: ./l2geth/Dockerfile
+          push: false
+      - name: Dockerfile check for L2Geth exporter
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./l2geth-exporter/Dockerfile
+          push: false
+
+      - name: Dockerfile check for batch-submitter
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./batch-submitter/Dockerfile
+          push: false
+
+      - name: Dockerfile check for mt-batcher
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./mt-batcher/Dockerfile
+          push: false
+
+      - name: Dockerfile check for mt-challenger
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./mt-challenger/Dockerfile
+          push: false
+
+      - name: Dockerfile check for proxyd
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./proxyd/Dockerfile
+          push: false
+
+      - name: Dockerfile check for proxyd
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./proxyd/Dockerfile
+          push: false
+
+      - name: Dockerfile check for tss
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./tss/Dockerfile
           push: false
