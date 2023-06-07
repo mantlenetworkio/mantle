@@ -1,0 +1,27 @@
+---
+name: Changeset integrity checker
+on:
+  - pull_request_target
+
+jobs:
+  dockerbuildformer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME || 'mantlenetworkio' }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Publish L2Geth
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./l2geth/Dockerfile
+          push: false
