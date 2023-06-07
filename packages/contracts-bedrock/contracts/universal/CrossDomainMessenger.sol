@@ -267,50 +267,51 @@ CrossDomainMessengerLegacySpacer1
         // the minimum gas limit specified by the user.
 
 
-        if (_type == BridgeConstants.BIT_TX || _type == BridgeConstants.ETH_WITHDRAWAL_TX) {
-            _sendMessage(
-                _type,
-                OTHER_MESSENGER,
-                baseGas(_message, _minGasLimit),
-                _amount,
-                abi.encodeWithSelector(
-                    this.relayMessage.selector,
-                    messageNonce(),
-                    msg.sender,
-                    _target,
-                    _amount,
-                    _minGasLimit,
-                    _message
-                )
-            );
-
-        } else if (_type == BridgeConstants.ETH_TX || _type == BridgeConstants.ERC20_TX) {
-            //0:ETH or 2:ERC20 deposit
-            _sendMessage(
-                _type,
-                OTHER_MESSENGER,
-                baseGas(_message, _minGasLimit),
-                msg.value,
-                abi.encodeWithSelector(
-                    this.relayMessage.selector,
-                    messageNonce(),
-                    msg.sender,
-                    _target,
-                    0,
-                    _minGasLimit,
-                    _message
-                )
-            );
+        uint256 _value = 0;
+        uint256 _relayMessageValue = 0;
+        if (_type == BridgeConstants.BIT_TX ){
+            _value = _amount;
+            _relayMessageValue = _amount;
+        }else if (_type == BridgeConstants.ETH_WITHDRAWAL_TX){
+            _value = _amount ;
+            _relayMessageValue = _amount;
+        }else if (_type == BridgeConstants.ETH_TX ){
+            _value = msg.value;
+            _relayMessageValue = 0;
+        }else if (_type == BridgeConstants.BIT_WITHDRAWAL_TX){
+            _value = msg.value;
+            _relayMessageValue = 0;
+        }else if (_type == BridgeConstants.ERC20_TX || _type == BridgeConstants.ERC20_WITHDRAWAL_TX ){
+            _value = 0;
+            _relayMessageValue = 0;
         }
+
+        _sendMessage(
+            _type,
+            OTHER_MESSENGER,
+            baseGas(_message, _minGasLimit),
+            _value,
+            abi.encodeWithSelector(
+                this.relayMessage.selector,
+                messageNonce(),
+                msg.sender,
+                _target,
+                _relayMessageValue,
+                _minGasLimit,
+                _message
+            )
+        );
+
+
 
 
 
 
         emit SentMessage(_target, msg.sender, _message, messageNonce(), _minGasLimit);
         if (_type == BridgeConstants.BIT_TX){
-            emit SentMessageExtension1(msg.sender, _amount);
+            emit SentMessageExtension1(msg.sender, _relayMessageValue);
         }else{
-            emit SentMessageExtension1(msg.sender, 0);
+            emit SentMessageExtension1(msg.sender, _relayMessageValue);
         }
 
     unchecked {

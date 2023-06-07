@@ -103,12 +103,17 @@ contract L2ToL1MessagePasser is Semver {
         uint256 _gasLimit,
         bytes memory _data
     ) public payable {
-        uint256 eth_value = 0;
+        uint256 eth_value = msg.value;
         if (_type == BridgeConstants.ETH_WITHDRAWAL_TX){
-            require(_amount!=0,"_amount cant be 0");
+            require(_amount!=0,"ETH amount cant be 0");
             eth_value = _amount;
-
+        }else if (_type == BridgeConstants.BIT_WITHDRAWAL_TX){
+            require(msg.value!=0,"value cant be 0");
+            eth_value = 0;
         }
+
+
+
         bytes32 withdrawalHash = Hashing.hashWithdrawal(
             Types.WithdrawalTransaction({
                 nonce: messageNonce(),

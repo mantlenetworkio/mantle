@@ -205,7 +205,7 @@ contract L2StandardBridge is StandardBridge, Semver {
         if (_l2Token == Predeploys.BVM_ETH) {
             _initiateBridgeETHWithdrawal(_l2Token,address(0),_from, _to, _amount, _minGasLimit, _extraData);
         }else if (_l2Token == address(0)){
-            require(msg.value!=0,"cant withdraw zero amount bit");
+            require(msg.value!=0 , "cant withdraw 0 amount");
             _initiateBridgeBITWithdrawal(_l2Token,Predeploys.L1_BIT,_from, _to, _amount, _minGasLimit, _extraData);
 
         } else {

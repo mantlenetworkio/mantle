@@ -546,7 +546,7 @@ abstract contract StandardBridge {
     ) internal {
         require(
             msg.value == _amount,
-            "StandardBridge: bridging BIT must include sufficient ETH value"
+            "StandardBridge: bridging BIT must include sufficient BIT value"
         );
 
         // Emit the correct events. By default this will be _amount, but child
@@ -554,7 +554,7 @@ abstract contract StandardBridge {
         _emitBITBridgeInitiated(_localToken,_remoteToken,_from, _to, _amount, _extraData);
 
         MESSENGER.sendMessage{ value: _amount }(
-            BridgeConstants.BIT_TX,
+            BridgeConstants.BIT_WITHDRAWAL_TX,
             _amount,
             address(OTHER_BRIDGE),
             abi.encodeWithSelector(

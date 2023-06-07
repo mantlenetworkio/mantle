@@ -51,7 +51,7 @@ contract L2ToL1MessagePasserTest is CommonTest {
 
         vm.deal(_sender, _value);
         vm.prank(_sender);
-        messagePasser.initiateWithdrawal{ value: _value }(_target, _gasLimit, _data);
+        messagePasser.initiateWithdrawal{ value: _value }(0,0,_target, _gasLimit, _data);
 
         assertEq(messagePasser.sentMessages(withdrawalHash), true);
 
@@ -85,7 +85,7 @@ contract L2ToL1MessagePasserTest is CommonTest {
         );
 
         vm.deal(address(this), 2**64);
-        messagePasser.initiateWithdrawal{ value: 100 }(address(4), 64000, hex"");
+        messagePasser.initiateWithdrawal{ value: 100 }(0,0,address(4), 64000, hex"");
     }
 
     // Test: initiateWithdrawal should emit the correct log when called by an EOA
@@ -106,7 +106,7 @@ contract L2ToL1MessagePasserTest is CommonTest {
         vm.expectEmit(true, true, true, true);
         emit MessagePassed(nonce, alice, target, value, gasLimit, data, withdrawalHash);
 
-        messagePasser.initiateWithdrawal{ value: value }(target, gasLimit, data);
+        messagePasser.initiateWithdrawal{ value: value }(0,0,target, gasLimit, data);
 
         // the sent messages mapping is filled
         assertEq(messagePasser.sentMessages(withdrawalHash), true);
@@ -117,6 +117,7 @@ contract L2ToL1MessagePasserTest is CommonTest {
     // Test: burn should destroy the ETH held in the contract
     function test_burn_succeeds() external {
         messagePasser.initiateWithdrawal{ value: NON_ZERO_VALUE }(
+            0,0,
             NON_ZERO_ADDRESS,
             NON_ZERO_GASLIMIT,
             NON_ZERO_DATA
