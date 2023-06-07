@@ -462,11 +462,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
 /// @inheritdoc IRollup
-    function rejectLatestCreatedAssertionWithBatch(Lib_BVMCodec.ChainBatchHeader memory _batchHeader) external override operatorOnly {
-        if (lastResolvedAssertionID >= lastCreatedAssertionID) {
-            revert("NoUnresolvedAssertion");
-        }
-
+    function rejectLatestCreatedAssertionWithBatch(Lib_BVMCodec.ChainBatchHeader memory _batchHeader) external override onlyOwner {
         address scc = resolve("StateCommitmentChain");
 
         // batch shift
@@ -487,6 +483,8 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         emit AssertionRejected(lastCreatedAssertionID);
         assertions.deleteAssertionForBatch(lastCreatedAssertionID);
         lastCreatedAssertionID--;
+        lastResolvedAssertionID--;
+        lastConfirmedAssertionID--;
 
         // Revert status
         for (uint i = 0; i < stakerslist.length; i++) {
