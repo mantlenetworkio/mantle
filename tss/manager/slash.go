@@ -37,6 +37,7 @@ func (m Manager) slashing() {
 	queryTicker := time.NewTicker(m.taskInterval)
 	for {
 		signingInfos := m.store.ListSlashingInfo()
+		m.metics.SlashCount.Set(float64(len(signingInfos)))
 		for _, si := range signingInfos {
 			m.handleSlashing(si)
 		}
