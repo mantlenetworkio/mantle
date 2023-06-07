@@ -48,7 +48,7 @@ jobs:
       subsidy: ${{ steps.packages.outputs.subsidy }}
 
     steps:
-      - name: Checkout Repo
+      - name: Checkout Repo 
         uses: actions/checkout@master
         with:
           fetch-depth: 0
