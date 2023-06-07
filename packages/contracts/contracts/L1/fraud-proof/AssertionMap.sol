@@ -35,13 +35,17 @@ contract AssertionMap is Initializable {
         uint256 proposalTime; // L1 block number at which assertion was proposed
         // Staking state
         uint256 numStakers; // total number of stakers that have ever staked on this assertion. increasing only.
-        mapping(address => bool) stakers; // all stakers that have ever staked on this assertion.
         // Child state
         uint256 childInboxSize; // child assertion inbox state
+    }
+
+    struct AssertionState {
+        mapping(address => bool) stakers; // all stakers that have ever staked on this assertion.
         mapping(bytes32 => bool) childStateHashes; // child assertion vm hashes
     }
 
     mapping(uint256 => Assertion) public assertions;
+    mapping(uint256 => AssertionState) private assertionStates; // mapping from assertionID to assertion state
     address public rollupAddress;
 
     modifier rollupOnly() {
@@ -91,7 +95,7 @@ contract AssertionMap is Initializable {
     }
 
     function isStaker(uint256 assertionID, address stakerAddress) external view returns (bool) {
-        return assertions[assertionID].stakers[stakerAddress];
+        return assertionStates[assertionID].stakers[stakerAddress];
     }
 
     function createAssertion(
@@ -101,8 +105,8 @@ contract AssertionMap is Initializable {
         uint256 parentID,
         uint256 deadline
     ) external rollupOnly {
-        Assertion storage assertion = assertions[assertionID];
         Assertion storage parentAssertion = assertions[parentID];
+        AssertionState storage parentAssertionState = assertionStates[parentID];
         // Child assertions must have same inbox size
         uint256 parentChildInboxSize = parentAssertion.childInboxSize;
         if (parentChildInboxSize == 0) {
@@ -112,26 +116,39 @@ contract AssertionMap is Initializable {
                 revert("ChildInboxSizeMismatch");
             }
         }
-        if (parentAssertion.childStateHashes[stateHash]) {
+        if (parentAssertionState.childStateHashes[stateHash]) {
             revert("SiblingStateHashExists");
         }
 
-        parentAssertion.childStateHashes[stateHash] = true;
+        parentAssertionState.childStateHashes[stateHash] = true;
 
-        assertion.stateHash = stateHash;
-        assertion.inboxSize = inboxSize;
-        assertion.parent = parentID;
-        assertion.deadline = deadline;
-        assertion.proposalTime = block.number;
+        assertions[assertionID] = Assertion(
+            stateHash,
+            inboxSize,
+            parentID,
+            deadline,
+            block.number, // proposal time
+            0, // numStakers
+            0 // childInboxSize
+        );
     }
 
     function stakeOnAssertion(uint256 assertionID, address stakerAddress) external rollupOnly {
         Assertion storage assertion = assertions[assertionID];
-        assertion.stakers[stakerAddress] = true;
+        assertionStates[assertionID].stakers[stakerAddress] = true;
         assertion.numStakers++;
     }
 
     function deleteAssertion(uint256 assertionID) external rollupOnly {
         delete assertions[assertionID];
+    }
+
+    function deleteAssertionForBatch(uint256 assertionID) external rollupOnly {
+        Assertion storage deleteAssertion = assertions[assertionID];
+        Assertion storage parentAssertion = assertions[deleteAssertion.parent];
+        AssertionState storage parentAssertionState = assertionStates[deleteAssertion.parent];
+        delete assertions[assertionID];
+        parentAssertion.childInboxSize = 0;
+        parentAssertionState.childStateHashes[deleteAssertion.stateHash] = false;
     }
 }
