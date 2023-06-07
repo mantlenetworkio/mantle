@@ -15,7 +15,7 @@ mt-batcher:
 	env GO111MODULE=on go build -v $(LDFLAGS) ./cmd/mt-batcher
 
 datalayr:
-	cd ../datalayr/contracts && ./compile.sh compile-el && ./compile.sh compile-rollup
+	cd ../datalayr/contracts && ./compile.sh compile-el && ./compile.sh compile-dl
 
 clean:
 	rm mt-batcher

@@ -40,7 +40,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     uint256 public fraudProofPeriod;
     uint256 public rollupBatchIndex;
 
-    bytes public constant FRAUD_STRING = '-_(` O `)_- -_(` o `)_- -_(` Q `)_- BITDAO JUST REKT YOU |_(` O `)_| - |_(` o `)_| - |_(` Q `)_|';
+    bytes public constant FRAUD_STRING = '--This is a bad string. Nobody says this string.--';
     uint256 internal constant DATA_STORE_INITIALIZED_BUT_NOT_CONFIRMED = type(uint256).max;
 
     struct RollupStore {
@@ -86,7 +86,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     }
 
     modifier onlySequencer() {
-        require(msg.sender == sequencer, "Only the sequencer can this action");
+        require(msg.sender == sequencer, "Only the sequencer can do this action");
         _;
     }
 
@@ -127,7 +127,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _address for fraud proof
     */
     function setFraudProofAddress(address _address) external onlySequencer {
-        require(_address == address(0), "setFraudProofAddress: address is the zero address");
+        require(_address != address(0), "setFraudProofAddress: address is the zero address");
         fraudProofWhitelist[_address] = true;
     }
 
@@ -136,7 +136,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _address for fraud proof
     */
     function unavailableFraudProofAddress(address _address) external onlySequencer {
-        require(_address == address(0), "unavailableFraudProofAddress: unavailableFraudProofAddress: address is the zero address");
+        require(_address != address(0), "unavailableFraudProofAddress: unavailableFraudProofAddress: address is the zero address");
         fraudProofWhitelist[_address] = false;
     }
 
@@ -145,7 +145,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _address for fraud proof
     */
     function removeFraudProofAddress(address _address) external onlySequencer {
-        require(_address == address(0), "removeFraudProofAddress: removeFraudProofAddress: address is the zero address");
+        require(_address != address(0), "removeFraudProofAddress: removeFraudProofAddress: address is the zero address");
         delete fraudProofWhitelist[_address];
     }
 
@@ -162,7 +162,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _dataManageAddress dlsm address
     */
     function updateDataLayrManagerAddress(address _dataManageAddress) external onlySequencer {
-        require(_dataManageAddress == address(0), "updateDataLayrManagerAddress: _dataManageAddress is the zero address");
+        require(_dataManageAddress != address(0), "updateDataLayrManagerAddress: _dataManageAddress is the zero address");
         dataManageAddress = _dataManageAddress;
     }
 
@@ -186,13 +186,13 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @notice update sequencer address
     * @param _sequencer update sequencer address
     */
-    function updateSequencerAddress(address _sequencer) external onlySequencer {
-        require(_sequencer == address(0), "updateSequencerAddress: _sequencer is the zero address");
+    function updateSequencerAddress(address _sequencer) external onlyOwner {
+        require(_sequencer != address(0), "updateSequencerAddress: _sequencer is the zero address");
         sequencer = _sequencer;
     }
 
     function updateReSubmitterAddress(address _reSubmitterAddress) external onlySequencer {
-        require(_reSubmitterAddress == address(0), "updateReSubmitterAddress: _reSubmitterAddress is the zero address");
+        require(_reSubmitterAddress != address(0), "updateReSubmitterAddress: _reSubmitterAddress is the zero address");
         reSubmitterAddress = _reSubmitterAddress;
     }
 

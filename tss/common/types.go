@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
-	"math/big"
 )
 
 type Method string
@@ -17,8 +16,8 @@ const (
 	SignRollBack   Method = "signRollBack"
 	AskRollBack    Method = "askRollBack"
 
-	SlashTypeLiveness byte = 1
-	SlashTypeCulprit  byte = 2
+	SlashTypeLiveness byte = 0
+	SlashTypeCulprit  byte = 1
 
 	CulpritErrorCode = 100
 )
@@ -67,9 +66,6 @@ type NodeSignRequest struct {
 
 type SignResponse struct {
 	Signature             []byte   `json:"signature"`
-	SlashTxBytes          []byte   `json:"slash_tx_bytes"`
-	SlashTxGasPrice       string   `json:"slash_tx_gas_price"`
-	SlashTxGasPriceBigInt *big.Int `json:"slash_tx_gas_price_big_int"`
 }
 
 type KeygenRequest struct {

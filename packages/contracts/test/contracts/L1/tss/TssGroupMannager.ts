@@ -142,7 +142,7 @@ describe('TssGroupManager', () => {
     cpkPubKey = "0x" + cpk.publicKey.substring(4)
     // tssnodes staking first
     for (let i = 0; i < tssNodes.length; i++) {
-      // approve bit tokens
+      // approve mantle tokens
       let pubKey = "0x" + tssNodes[i].publicKey.substring(4)
       tssNodesPublicKeys[i] = pubKey
     }
