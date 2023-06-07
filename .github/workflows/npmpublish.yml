@@ -1,10 +1,10 @@
 ---
-name: Changeset integrity checker
+name: publish sdk to npm
 on:
-  - pull_request_target
+  - workflow_dispatch
 
 jobs:
-  dockerbuildformer:
+  npmpublish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

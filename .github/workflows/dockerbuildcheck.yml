@@ -1,10 +1,10 @@
 ---
-name: Changeset integrity checker
+name: check docker build for L2Geth
 on:
   - pull_request_target
 
 jobs:
-  dockerbuildformer:
+  dockerbuildcheck:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
