@@ -114,13 +114,13 @@ var (
 	}
 	L1BaseFeeSignificanceFactorFlag = cli.Float64Flag{
 		Name:   "l1-base-fee-significant-factor",
-		Value:  0.10,
+		Value:  0.05,
 		Usage:  "only update when the L1 base fee changes by more than this factor",
 		EnvVar: "GAS_PRICE_ORACLE_L1_BASE_FEE_SIGNIFICANT_FACTOR",
 	}
 	DaFeeSignificanceFactorFlag = cli.Float64Flag{
 		Name:   "da-fee-significant-factor",
-		Value:  0.10,
+		Value:  0.05,
 		Usage:  "only update when the L1 base fee changes by more than this factor",
 		EnvVar: "GAS_PRICE_ORACLE_DA_FEE_SIGNIFICANT_FACTOR",
 	}

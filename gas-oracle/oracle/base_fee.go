@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
+	"reflect"
 )
 
 func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContractBackend, cfg *Config) (func() error, error) {
@@ -77,6 +78,7 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 			return err
 		}
 		// NOTE this will return base multiple with coin ratio
+		log.Info("get header in l1 client", "type is", reflect.ValueOf(l1Backend).Type())
 		tip, err := l1Backend.HeaderByNumber(context.Background(), nil)
 		if err != nil {
 			return err
@@ -85,7 +87,7 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 			return errNoBaseFee
 		}
 		if !isDifferenceSignificant(baseFee.Uint64(), tip.BaseFee.Uint64(), cfg.l1BaseFeeSignificanceFactor) {
-			log.Debug("non significant base fee update", "tip", tip.BaseFee, "current", baseFee)
+			log.Warn("non significant base fee update", "tip", tip.BaseFee, "current", baseFee)
 			return nil
 		}
 
@@ -105,12 +107,12 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 		if err != nil {
 			return err
 		}
-		log.Debug("updating L1 base fee", "tx.gasPrice", tx.GasPrice(), "tx.gasLimit", tx.Gas(),
+		log.Info("updating L1 base fee", "tx.gasPrice", tx.GasPrice(), "tx.gasLimit", tx.Gas(),
 			"tx.data", hexutil.Encode(tx.Data()), "tx.to", tx.To().Hex(), "tx.nonce", tx.Nonce())
 		if err := l2Backend.SendTransaction(context.Background(), tx); err != nil {
 			return fmt.Errorf("cannot update base fee: %w", err)
 		}
-		log.Info("L1 base fee transaction sent", "hash", tx.Hash().Hex(), "baseFee", tip.BaseFee)
+		log.Info("L1 base fee transaction already sent", "hash", tx.Hash().Hex(), "baseFee", tip.BaseFee)
 
 		if cfg.waitForReceipt {
 			// Wait for the receipt

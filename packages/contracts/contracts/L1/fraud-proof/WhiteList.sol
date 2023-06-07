@@ -22,6 +22,9 @@ abstract contract Whitelist {
     mapping(address => uint256) public operatorWhitelist;
     address[] public operatorslist;
 
+    // slot place hold
+    uint256[50] whitelistGap;
+
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
@@ -41,6 +44,7 @@ abstract contract Whitelist {
     function removeFromStakerWhitelist(address[] calldata toRemoveAddresses) public onlyOwner {
         for (uint i = 0; i < toRemoveAddresses.length; i++) {
             uint256 index = stakerWhitelist[toRemoveAddresses[i]];
+            stakerWhitelist[stakerslist[stakerslist.length-1]] = index;
             stakerslist[index] = stakerslist[stakerslist.length-1];
             stakerslist.pop();
             delete stakerWhitelist[toRemoveAddresses[i]];
@@ -64,6 +68,7 @@ abstract contract Whitelist {
     function removeFromOperatorWhitelist(address[] calldata toRemoveAddresses) public onlyOwner {
         for (uint i = 0; i < toRemoveAddresses.length; i++) {
             uint256 index = operatorWhitelist[toRemoveAddresses[i]];
+            operatorWhitelist[operatorslist[operatorslist.length-1]] = index;
             operatorslist[index] = operatorslist[operatorslist.length-1];
             operatorslist.pop();
             delete operatorWhitelist[toRemoveAddresses[i]];

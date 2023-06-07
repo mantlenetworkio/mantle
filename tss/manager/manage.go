@@ -24,6 +24,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/index"
+	"github.com/mantlenetworkio/mantle/tss/manager/metics"
 	"github.com/mantlenetworkio/mantle/tss/manager/types"
 	"github.com/mantlenetworkio/mantle/tss/slash"
 	"github.com/mantlenetworkio/mantle/tss/ws/server"
@@ -52,6 +53,7 @@ type Manager struct {
 	sigCacheLock        *sync.RWMutex
 	stopGenKey          bool
 	stopChan            chan struct{}
+	metics              *metics.Metrics
 }
 
 func NewManager(wsServer server.IWebsocketManager,
@@ -127,6 +129,7 @@ func NewManager(wsServer server.IWebsocketManager,
 		stateSignatureCache: make(map[[32]byte][]byte),
 		sigCacheLock:        &sync.RWMutex{},
 		stopChan:            make(chan struct{}),
+		metics:              metics.PrometheusMetrics("tssmanager"),
 	}, nil
 }
 
@@ -174,6 +177,9 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	//metrics
+	m.metics.ActiveMembersCount.Set(float64(len(tssInfo.TssMembers)))
+
 	availableNodes := m.availableNodes(tssInfo.TssMembers)
 	if len(availableNodes) < tssInfo.Threshold+1 {
 		return nil, errors.New("not enough available nodes to sign state")
@@ -198,12 +204,15 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	// ask tss nodes for the agreement
 	ctx, err = m.agreement(ctx, request, tss.AskStateBatch)
 	if err != nil {
+		m.metics.SignCount.Add(1)
 		return nil, err
 	}
 	var resp tss.SignResponse
 	var culprits []string
 	var rollback bool
 	var signErr error
+
+	m.metics.ApproveNumber.Set(float64(len(ctx.Approvers())))
 
 	if len(ctx.Approvers()) < ctx.TssInfos().Threshold+1 {
 		if len(ctx.UnApprovers()) < ctx.TssInfos().Threshold+1 {
@@ -220,6 +229,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 			return nil, err
 		}
 		resp, culprits, signErr = m.sign(ctx, rollBackRequest, rollBackBz, tss.SignRollBack)
+		m.metics.RollbackCount.Set(1)
 	} else {
 		request.ElectionId = tssInfo.ElectionId
 		resp, culprits, signErr = m.sign(ctx, request, digestBz, tss.SignStateBatch)
@@ -240,8 +250,11 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 			})
 		}
 		m.store.AddCulprits(culprits)
+		m.metics.SignCount.Add(1)
 		return nil, signErr
 	}
+
+	m.metics.SignCount.Set(0)
 
 	if !rollback {
 		absents := make([]string, 0)
@@ -257,6 +270,9 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 			log.Error("failed to execute afterSign", "err", err)
 		}
 		m.setStateSignature(digestBz, resp.Signature)
+		m.metics.RollbackCount.Set(0)
+	} else {
+		m.metics.RollbackCount.Add(1)
 	}
 
 	response := tss.BatchSubmitterResponse{
@@ -331,7 +347,9 @@ func (m Manager) SignTxBatch() error {
 
 func (m Manager) availableNodes(tssMembers []string) []string {
 	aliveNodes := m.wsServer.AliveNodes()
+	m.metics.OnlineNodesCount.Set(float64(len(aliveNodes)))
 	log.Info("check available nodes", "expected", fmt.Sprintf("%v", tssMembers), "alive nodes", fmt.Sprintf("%v", aliveNodes))
+
 	availableNodes := make([]string, 0)
 	for _, n := range aliveNodes {
 		if slices.ExistsIgnoreCase(tssMembers, n) {

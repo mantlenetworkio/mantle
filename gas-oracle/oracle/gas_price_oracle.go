@@ -152,14 +152,12 @@ func (g *GasPriceOracle) BaseFeeLoop() {
 	if err != nil {
 		panic(err)
 	}
-
 	for {
 		select {
 		case <-timer.C:
 			if err := updateBaseFee(); err != nil {
-				log.Error("cannot update l1 base fee", "messgae", err)
+				log.Error("cannot update l1 base fee", "message", err)
 			}
-
 		case <-g.ctx.Done():
 			g.Stop()
 		}
