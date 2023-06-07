@@ -22,9 +22,6 @@ import { BridgeConstants } from "../libraries/BridgeConstants.sol";
 abstract contract StandardBridge {
     using SafeERC20 for IERC20;
 
-
-
-
     /**
      * @notice The L2 gas limit set when eth is depoisited using the receive() function.
      */
@@ -344,21 +341,12 @@ abstract contract StandardBridge {
     ) public payable onlyOtherBridge {
         require(_to != address(this), "StandardBridge: cannot send to self");
         require(_to != address(MESSENGER), "StandardBridge: cannot send to messenger");
-
-
-
-
-        if (_isMantleMintableERC20(_localToken)) {
-            require(
-                _isCorrectTokenPair(_localToken, _remoteToken),
-                "StandardBridge: wrong remote token for Mantle Mintable ERC20 local token"
-            );
-
-            MantleMintableERC20(_localToken).mint(_to, _amount);
-        } else {
-            deposits[_localToken][_remoteToken] = deposits[_localToken][_remoteToken] - _amount;
-            IERC20(_localToken).safeTransfer(_to, _amount);
-        }
+        require(_isMantleMintableERC20(_localToken),"StandardBridge: wrong remote token for Mantle ETH local token");
+        require(
+            _isCorrectTokenPair(_localToken, _remoteToken),
+            "StandardBridge: wrong remote token for Mantle Mintable ERC20 local token"
+        );
+        MantleMintableERC20(_localToken).mint(_to, _amount);
 
         // Emit the correct events. By default this will be ERC20BridgeFinalized, but child
         // contracts may override this function in order to emit legacy events as well.
@@ -644,18 +632,12 @@ abstract contract StandardBridge {
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
-        //TODO check _localToken and _remoteToken.
-        if (_isMantleMintableERC20(_localToken)) {
-            require(
-                _isCorrectTokenPair(_localToken, _remoteToken),
-                "StandardBridge: wrong remote token for Mantle Mintable ERC20 local token"
-            );
-
-            MantleMintableERC20(_localToken).burn(_from, _amount);
-        } else {
-            IERC20(_localToken).safeTransferFrom(_from, address(this), _amount);
-            deposits[_localToken][_remoteToken] = deposits[_localToken][_remoteToken] + _amount;
-        }
+        require(_isMantleMintableERC20(_localToken),"StandardBridge: wrong remote token for Mantle ETH local token");
+        require(
+            _isCorrectTokenPair(_localToken, _remoteToken),
+            "StandardBridge: wrong remote token for Mantle ETH local token"
+        );
+        MantleMintableERC20(_localToken).burn(_from, _amount);
 
         // Emit the correct events. By default this will be ERC20BridgeInitiated, but child
         // contracts may override this function in order to emit legacy events as well.
@@ -701,8 +683,6 @@ abstract contract StandardBridge {
         uint32 _minGasLimit,
         bytes memory _extraData
     ) internal {
-
-
         require(_localToken != address(0) && _localToken != L1_MNT ,
             "StandardBridge: MNT and ETH deposit should not call this function."
         );
@@ -808,6 +788,17 @@ abstract contract StandardBridge {
         emit ETHBridgeFinalized(_from, _to, _amount, _extraData);
     }
 
+    /**
+     * @notice Emits the MNTBridgeInitiated and if necessary the appropriate legacy event when an
+     *         MNT bridge is finalized on this chain.
+
+     * @param _localToken  Address of the L1 MNT on this chain.
+     * @param _remoteToken Address of the L2 MNT on the remote chain.
+     * @param _from      Address of the sender.
+     * @param _to        Address of the receiver.
+     * @param _amount    Amount of MNT sent.
+     * @param _extraData Extra data sent with the transaction.
+     */
     function _emitMNTBridgeInitiated(
         address _local,
         address _remote,
