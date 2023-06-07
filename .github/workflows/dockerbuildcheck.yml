@@ -9,6 +9,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          submodules: recursive
 
 
       - name: Set up Docker Buildx
@@ -20,12 +22,7 @@ jobs:
           context: .
           file: ./l2geth/Dockerfile
           push: false
-      - name: Dockerfile check for L2Geth exporter
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./l2geth-exporter/Dockerfile
-          push: false
+
 
       - name: Dockerfile check for batch-submitter
         uses: docker/build-push-action@v2
@@ -48,19 +45,14 @@ jobs:
           file: ./mt-challenger/Dockerfile
           push: false
 
-      - name: Dockerfile check for proxyd
+      - name: Dockerfile check for gass-oracle
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./proxyd/Dockerfile
+          file: ./gas-oracle/Dockerfile
           push: false
 
-      - name: Dockerfile check for proxyd
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./proxyd/Dockerfile
-          push: false
+
 
       - name: Dockerfile check for tss
         uses: docker/build-push-action@v2
