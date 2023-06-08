@@ -183,21 +183,21 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         // explore transaction list
         await this._storeTransactionListByDSId(
           dataStoreRollupId['data_store_id'],
-          this.options.mantleDaUpgradeBatchIndex
+          this.options.mantleDaUpgradeDataStoreId
         )
 
         // batch transaction list
         await this._storeBatchTransactionsByDSId(
           dataStoreRollupId['data_store_id'],
           index,
-          this.options.mantleDaUpgradeBatchIndex
+          this.options.mantleDaUpgradeDataStoreId
         )
 
         // put rollup store info to db
         await this.state.db.putRollupStoreByBatchIndex(
           {
             index: 0,
-            upgrade_batch_index: this.options.mantleDaUpgradeBatchIndex,
+            upgrade_batch_index: this.options.mantleDaUpgradeDataStoreId,
             data_store_id: dataStoreRollupId['data_store_id'],
             status: dataStoreRollupId['status'],
             confirm_at: dataStoreRollupId['confirm_at'],
@@ -280,12 +280,12 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         this.logger.info('Update batch index from(Confirmed)', dataStore)
         await this._storeTransactionListByDSId(
           dataStoreRollupId['data_store_id'],
-          this.options.mantleDaUpgradeBatchIndex
+          this.options.mantleDaUpgradeDataStoreId
         )
         await this._storeBatchTransactionsByDSId(
           dataStoreRollupId['data_store_id'],
           batchIndex,
-          this.options.mantleDaUpgradeBatchIndex
+          this.options.mantleDaUpgradeDataStoreId
         )
       }
     }
