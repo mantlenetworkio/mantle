@@ -37,6 +37,7 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       daInitBatch: config.uint('da-init-batch', 0),
       startUpdateBatchIndex: config.uint('start-update-batch-index', 0),
       endUpdateBatchIndex: config.uint('end-update-batch-index', 0),
+      mantleDaUpgradeBatchIndex: config.uint('mntda-upgrade-batch-index', 0),
 
       dangerouslyCatchAllErrors: config.bool(
         'dangerously-catch-all-errors',
