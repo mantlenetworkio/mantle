@@ -874,7 +874,9 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       '/da/getBatchTxsByDataStoreId/:dsId',
       async (req): Promise<BatchTxByDataStoreIdResponse> => {
         const batchTxs = await this.state.db.getBatchTxByDataStoreId(
-          BigNumber.from(req.params.dsId).toNumber()
+          BigNumber.from(
+            req.params.dsId + this.options.mantleDaUpgradeDataStoreId
+          ).toNumber()
         )
         if (batchTxs === null || batchTxs.length === 0) {
           return {
