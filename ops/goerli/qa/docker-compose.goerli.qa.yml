@@ -11,7 +11,7 @@ x-base: &base
 services:
   l1_chain:
     <<: *base
-    container_name: bitl1chain
+    container_name: mantlel1chain
     deploy: # run switch
       replicas: 0
 
@@ -37,7 +37,7 @@ services:
       BVM_ADDRESS_MANAGER_OWNER: ${BVM_ADDRESS_MANAGER_OWNER:-}
       BVM_GAS_PRICE_ORACLE_OWNER: ${BVM_GAS_PRICE_ORACLE_OWNER:-}
       AUTOMATICALLY_TRANSFER_OWNERSHIP: ${AUTOMATICALLY_TRANSFER_OWNERSHIP:-true}
-      L1_BIT_ADDRESS: ${L1_BIT_ADDRESS:-0xC40C655a91ef15c8eAd818B840CFC08C755D2C0F}
+      L1_MANTLE_ADDRESS: ${L1_MANTLE_ADDRESS:-0xC40C655a91ef15c8eAd818B840CFC08C755D2C0F}
     ports:
       # expose the service to the host for getting the contract addrs
       - ${DEPLOYER_PORT:-8080}:8081
@@ -45,7 +45,7 @@ services:
 
   dtl:
     <<: *base
-    container_name: bitdtl
+    container_name: mantledtl
     environment:
       DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT: ${DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
       DATA_TRANSPORT_LAYER__L1_START_HEIGHT: ${DATA_TRANSPORT_LAYER__L1_START_HEIGHT:-7759200}
@@ -55,11 +55,11 @@ services:
     <<: *base
     environment:
       ETH1_HTTP: ${ETH1_HTTP:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
-    container_name: bitl2geth
+    container_name: mantlel2geth
 
   gas_oracle:
     <<: *base
-    container_name: bitgasoracle
+    container_name: mantlegasoracle
     env_file:
       - ./envs/gas-oracle.env
     environment:
@@ -71,7 +71,7 @@ services:
 
   batch_submitter:
     <<: *base
-    container_name: bitbatchsubmitter
+    container_name: mantlebatchsubmitter
     environment:
       L1_ETH_RPC: ${L1_ETH_RPC:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
       BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY: ${BATCH_SUBMITTER_SEQUENCER_PRIVATE_KEY:-0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d}
@@ -80,18 +80,18 @@ services:
 
   integration_tests:
     <<: *base
-    container_name: bititests
+    container_name: mantleitests
     deploy:
       replicas: 0
 
   relayer:
-    container_name: bitrelayer
+    container_name: mantlerelayer
     deploy:
       replicas: 0
 
   verifier:
     <<: *base
-    container_name: bitverifier
+    container_name: mantleverifier
     environment:
       ETH1_HTTP: ${ETH1_HTTP:-https://goerli.infura.io/v3/d6167662f2104fbc8d5a947e59dbaa28}
     deploy:
@@ -99,25 +99,25 @@ services:
 
   replica:
     <<: *base
-    container_name: bitreplica
+    container_name: mantlereplica
     deploy:
       replicas: 0
 
   replica_healthcheck:
     <<: *base
-    container_name: bitreplicahealthcheck
+    container_name: mantlereplicahealthcheck
     deploy:
       replicas: 0
 
   fault_detector:
     <<: *base
-    container_name: bitfaultdetector
+    container_name: mantlefaultdetector
     deploy:
       replicas: 0
 
   l2geth2:
     <<: *base
-    container_name: bitl2geth2
+    container_name: mantlel2geth2
     deploy:
       replicas: 0  # disable by default
 

@@ -70,6 +70,12 @@ var (
 		Required: true,
 		EnvVar:   "SCC_ADDRESS",
 	}
+	FPRollupAddressFlag = cli.StringFlag{
+		Name:     "fraud-proof-rollup-address",
+		Usage:    "Address of the FraudProof Rollup contract",
+		Required: true,
+		EnvVar:   "FP_ROLLUP_ADDRESS",
+	}
 	MinL1TxSizeFlag = cli.Uint64Flag{
 		Name: "min-l1-tx-size",
 		Usage: "Minimum size in bytes of any L1 transaction that gets " +
@@ -268,6 +274,57 @@ var (
 		Usage:  "Whether or not to disable HTTP/2 support.",
 		EnvVar: prefixEnvVar("HTTP2_DISABLE"),
 	}
+	SccRollbackFlag = cli.BoolFlag{
+		Name:   "EnableSccRollbackFlag",
+		Usage:  "Whether or not to enable scc rollback.",
+		EnvVar: prefixEnvVar("SCC_ROLLBACK"),
+	}
+	EnableSequencerHsmFlag = cli.BoolFlag{
+		Name:   "enable-sequencer-hsm",
+		Usage:  "Whether or not to use cloudhsm for sequencer",
+		EnvVar: prefixEnvVar("ENABLE_SEQUENCER_HSM"),
+	}
+	SequencerHsmAddressFlag = cli.StringFlag{
+		Name:   "sequencer-hsm-address",
+		Usage:  "The address of private-key in hsm for sequencer",
+		Value:  "",
+		EnvVar: prefixEnvVar("SEQUENCER_HSM_ADDRESS"),
+	}
+	SequencerHsmAPIName = cli.StringFlag{
+		Name:   "sequencer-hsm-api-name",
+		Usage:  "The api-name of private-key in hsm for sequencer",
+		Value:  "",
+		EnvVar: prefixEnvVar("SEQUENCER_HSM_API_NAME"),
+	}
+	SequencerHsmCreden = cli.StringFlag{
+		Name:   "sequencer-hsm-creden",
+		Usage:  "The creden of private-key in hsm for sequencer",
+		Value:  "",
+		EnvVar: prefixEnvVar("SEQUENCER_HSM_CREDEN"),
+	}
+	EnableProposerHsmFlag = cli.BoolFlag{
+		Name:   "enable-proposer-hsm",
+		Usage:  "Whether or not to use cloudhsm for proposer",
+		EnvVar: prefixEnvVar("ENABLE_PROPOSER_HSM"),
+	}
+	ProposerHsmAddressFlag = cli.StringFlag{
+		Name:   "proposer-hsm-address",
+		Usage:  "The address of private-key in hsm for proposer",
+		Value:  "",
+		EnvVar: prefixEnvVar("PROPOSER_HSM_ADDRESS"),
+	}
+	ProposerHsmAPIName = cli.StringFlag{
+		Name:   "proposer-hsm-api-name",
+		Usage:  "The api-name of private-key in hsm for proposer",
+		Value:  "",
+		EnvVar: prefixEnvVar("PROPOSER_HSM_API_NAME"),
+	}
+	ProposerHsmCreden = cli.StringFlag{
+		Name:   "proposer-hsm-creden",
+		Usage:  "The creden of private-key in hsm for proposer",
+		Value:  "",
+		EnvVar: prefixEnvVar("PROPOSER_HSM_CREDEN"),
+	}
 )
 
 var requiredFlags = []cli.Flag{
@@ -280,6 +337,7 @@ var requiredFlags = []cli.Flag{
 	DaUpgradeBlockFlag,
 	CTCAddressFlag,
 	SCCAddressFlag,
+	FPRollupAddressFlag,
 	MinL1TxSizeFlag,
 	MaxL1TxSizeFlag,
 	MaxPlaintextBatchSizeFlag,
@@ -314,6 +372,14 @@ var optionalFlags = []cli.Flag{
 	MetricsHostnameFlag,
 	MetricsPortFlag,
 	HTTP2DisableFlag,
+	EnableProposerHsmFlag,
+	ProposerHsmAddressFlag,
+	ProposerHsmAPIName,
+	ProposerHsmCreden,
+	EnableSequencerHsmFlag,
+	SequencerHsmAddressFlag,
+	SequencerHsmAPIName,
+	SequencerHsmCreden,
 }
 
 // Flags contains the list of configuration options available to the binary.

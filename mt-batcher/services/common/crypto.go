@@ -1,11 +1,16 @@
 package common
 
 import (
+	kms "cloud.google.com/go/kms/apiv1"
+	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
+	"google.golang.org/api/option"
 	"math/big"
 	"strings"
 
@@ -124,4 +129,20 @@ func PrivateKeySignerFn(key *ecdsa.PrivateKey, chainID *big.Int) bind.SignerFn {
 		}
 		return tx.WithSignature(signer, signature)
 	}
+}
+
+func NewHSMTransactOpts(ctx context.Context, hsmAPIName string, hsmAddress string, chainID *big.Int, hsmCreden string) (*bind.TransactOpts, error) {
+	proBytes, err := hex.DecodeString(hsmCreden)
+	apikey := option.WithCredentialsJSON(proBytes)
+	client, err := kms.NewKeyManagementClient(ctx, apikey)
+	if err != nil {
+		return nil, err
+	}
+	mk := &bsscore.ManagedKey{
+		KeyName:      hsmAPIName,
+		EthereumAddr: common.HexToAddress(hsmAddress),
+		Gclient:      client,
+	}
+	opts, err := mk.NewEthereumTransactorrWithChainID(ctx, chainID)
+	return opts, nil
 }

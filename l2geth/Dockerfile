@@ -4,6 +4,9 @@ FROM golang:1.19.0-alpine3.15 as builder
 RUN apk add --no-cache make gcc musl-dev linux-headers git
 
 COPY ./l2geth /app/l2geth
+COPY ./metrics /app/metrics
+COPY ./fraud-proof /app/fraud-proof
+COPY ./bss-core /app/bss-core
 
 WORKDIR /app/l2geth
 RUN make geth

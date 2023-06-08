@@ -187,7 +187,8 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
 
         // batch transaction list
         await this._storeBatchTransactionsByDSId(
-          dataStoreRollupId['data_store_id']
+          dataStoreRollupId['data_store_id'],
+          index
         )
 
         // put rollup store info to db
@@ -278,7 +279,8 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
           dataStoreRollupId['data_store_id']
         )
         await this._storeBatchTransactionsByDSId(
-          dataStoreRollupId['data_store_id']
+          dataStoreRollupId['data_store_id'],
+          batchIndex
         )
       }
     }
@@ -305,7 +307,10 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     }
   }
 
-  private async _storeBatchTransactionsByDSId(storeId: number) {
+  private async _storeBatchTransactionsByDSId(
+    storeId: number,
+    daBatchIndex: number
+  ) {
     const transactionEntries: TransactionEntry[] = []
     if (storeId <= 0) {
       return []
@@ -374,7 +379,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         }
         transactionEntries.push({
           index: batchTx['TxMeta']['index'],
-          batchIndex: 0,
+          batchIndex: daBatchIndex,
           blockNumber: batchTx['TxMeta']['l1BlockNumber'],
           timestamp: batchTx['TxMeta']['l1Timestamp'],
           gasLimit,

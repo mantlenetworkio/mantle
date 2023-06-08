@@ -50,10 +50,16 @@ const deployFn: DeployFunction = async (hre) => {
       name: names.managed.accounts.BVM_Proposer,
       address: hre.deployConfig.bvmProposerAddress,
     },
-    // L1_BIT_ADDRESS indicate l1 bit token erc20 contract address
+    // BVM_Rolluper is the address allowed to submit state roots & assertion (transaction results) to the
+    // Rollup.
     {
-      name: names.managed.configs.L1_BIT_ADDRESS,
-      address: hre.deployConfig.l1BitAddress,
+      name: names.managed.accounts.BVM_Rolluper,
+      address: hre.deployConfig.bvmRolluperAddress,
+    },
+    // L1_MANTLE_ADDRESS indicate l1 mantle token erc20 contract address
+    {
+      name: names.managed.configs.L1_MANTLE_ADDRESS,
+      address: hre.deployConfig.proxyL1MantleAddress,
     },
   ]
 

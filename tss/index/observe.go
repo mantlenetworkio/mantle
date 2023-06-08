@@ -13,20 +13,21 @@ import (
 const scanRange = 10
 
 type Indexer struct {
-	store           IndexerStore
-	l1Cli           *ethclient.Client
-	l1ConfirmBlocks int
-	sccContractAddr common.Address
-	hook            Hook
-	taskInterval    time.Duration
-	stopChan        chan struct{}
+	store              IndexerStore
+	l1Cli              *ethclient.Client
+	l1ConfirmBlocks    int
+	l1StartBlockNumber uint64
+	sccContractAddr    common.Address
+	hook               Hook
+	taskInterval       time.Duration
+	stopChan           chan struct{}
 }
 
 type Hook interface {
 	AfterStateBatchIndexed([32]byte) error
 }
 
-func NewIndexer(store IndexerStore, l1url string, l1ConfirmBlocks int, sccContractAddr string, taskInterval string) (Indexer, error) {
+func NewIndexer(store IndexerStore, l1url string, l1ConfirmBlocks int, sccContractAddr string, taskInterval string, l1StartBlockNumber uint64) (Indexer, error) {
 	taskIntervalDur, err := time.ParseDuration(taskInterval)
 	if err != nil {
 		return Indexer{}, nil
@@ -37,12 +38,13 @@ func NewIndexer(store IndexerStore, l1url string, l1ConfirmBlocks int, sccContra
 	}
 	address := common.HexToAddress(sccContractAddr)
 	return Indexer{
-		store:           store,
-		l1Cli:           l1Cli,
-		l1ConfirmBlocks: l1ConfirmBlocks,
-		sccContractAddr: address,
-		taskInterval:    taskIntervalDur,
-		stopChan:        make(chan struct{}),
+		store:              store,
+		l1Cli:              l1Cli,
+		l1ConfirmBlocks:    l1ConfirmBlocks,
+		l1StartBlockNumber: l1StartBlockNumber,
+		sccContractAddr:    address,
+		taskInterval:       taskIntervalDur,
+		stopChan:           make(chan struct{}),
 	}, nil
 }
 
@@ -55,6 +57,9 @@ func (o Indexer) Start() {
 	scannedHeight, err := o.store.GetScannedHeight()
 	if err != nil {
 		panic(err)
+	}
+	if scannedHeight < o.l1StartBlockNumber {
+		scannedHeight = o.l1StartBlockNumber
 	}
 	log.Info("start to observe StateBatchAppended event", "start_height", scannedHeight)
 	go o.ObserveStateBatchAppended(scannedHeight)

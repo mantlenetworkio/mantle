@@ -103,7 +103,7 @@ interface IL1ERC20Bridge {
     ) external;
 
     /**
-     * @dev Complete a bit withdrawal from L2 to L1, and credit funds to the recipient's balance of the
+     * @dev Complete a mantle withdrawal from L2 to L1, and credit funds to the recipient's balance of the
      * L1 ERC20 token.
      * This call will fail if the initialized withdrawal from L2 has not been finalized.
      *
@@ -114,7 +114,7 @@ interface IL1ERC20Bridge {
      *   solely as a convenience for external contracts. Aside from enforcing a maximum
      *   length, these contracts provide no guarantees about its content.
      */
-    function finalizeBitWithdrawal(
+    function finalizeMantleWithdrawal(
         address _from,
         address _to,
         uint256 _amount,

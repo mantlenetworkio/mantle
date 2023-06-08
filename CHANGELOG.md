@@ -1,5 +1,20 @@
 # Changelog
-## [0.3.2] - 2023-05-10
+## [0.4.0] - 2023-06-08
+
+### Features
+- Integrate fraud proof feature into Mantle network([#814](https://github.com/mantlenetworkio/mantle/pull/814))
+- Adding delegation functionality for fraud proof and MPC modules, supporting external nodes to participate in MPC.([#826](https://github.com/mantlenetworkio/mantle/pull/826))
+- $BIT -> $MNT([#942](https://github.com/mantlenetworkio/mantle/pull/942))
+  - Use Mantle token instead of BitDAO token as the native token of the Mantle network.
+  - Use Mantle token for various purposes such as gas fee payments and other applications.
+- Integrated MantleDA (MantleDA built on EigenDA technology),  add the joining and exiting mechanism function of da node. （[#896](https://github.com/mantlenetworkio/mantle/pull/896)、[#947](https://github.com/mantlenetworkio/mantle/pull/947)）
+- Define fraud proof metrics to serve data visualization and alert monitoring([#892](https://github.com/mantlenetworkio/mantle/pull/892))
+- Define tssmanager metrics to serve data visualization and alert monitoring([#951](https://github.com/mantlenetworkio/mantle/pull/951))
+
+### Bug Fixes
+- Fixed an issue where l1 tip didn’t take effect when calculating l1 price([#869](https://github.com/mantlenetworkio/mantle/pull/869))
+
+## [0.3.2](https://github.com/mantlenetworkio/mantle/commits/v0.3.2) - 2023-05-10
 
 ### Features
 - Reduce the amount of data sent to Layer1 rollup using EigenLayer, significantly lowering gas fees for Layer2([#811](https://github.com/mantlenetworkio/mantle/pull/811)、[#825](https://github.com/mantlenetworkio/mantle/pull/825))

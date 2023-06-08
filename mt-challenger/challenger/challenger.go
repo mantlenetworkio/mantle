@@ -8,6 +8,7 @@ import (
 	datalayr "github.com/Layr-Labs/datalayr/common/contracts"
 	gkzg "github.com/Layr-Labs/datalayr/common/crypto/go-kzg-bn254"
 	"github.com/Layr-Labs/datalayr/common/graphView"
+	"github.com/Layr-Labs/datalayr/common/header"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceRetrieverServer"
 	"github.com/Layr-Labs/datalayr/common/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -78,6 +79,7 @@ type FraudProof struct {
 type ChallengerConfig struct {
 	L1Client                  *ethclient.Client
 	L2Client                  *l2ethclient.Client
+	L1ChainID                 *big.Int
 	EigenContractAddr         ethc.Address
 	Logger                    *logging.Logger
 	PrivKey                   *ecdsa.PrivateKey
@@ -96,6 +98,11 @@ type ChallengerConfig struct {
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
 	Metrics                   metrics.ChallengerMetrics
+
+	EnableHsm  bool
+	HsmAPIName string
+	HsmCreden  string
+	HsmAddress string
 }
 
 type Challenger struct {
@@ -214,7 +221,7 @@ func (c *Challenger) callRetrieve(store *graphView.DataStore) ([]byte, []datalay
 	}
 	data := reply.GetData()
 	framesBytes := reply.GetFrames()
-	header, err := datalayr.DecodeDataStoreHeader(store.Header)
+	header, err := header.DecodeDataStoreHeader(store.Header)
 	if err != nil {
 		log.Error("Could not decode header", "err", err)
 		return nil, nil, err
@@ -243,7 +250,7 @@ func (c *Challenger) checkForFraud(store *graphView.DataStore, data []byte) (*Fr
 
 func (c *Challenger) constructFraudProof(store *graphView.DataStore, data []byte, fraud *Fraud, frames []datalayr.Frame) (*FraudProof, error) {
 	// encode data to frames here
-	header, err := datalayr.DecodeDataStoreHeader(store.Header)
+	header, err := header.DecodeDataStoreHeader(store.Header)
 	if err != nil {
 		c.Cfg.Logger.Printf("Could not decode header %v. %v\n", header, err)
 		return nil, err
@@ -316,15 +323,23 @@ func (fp *DataLayrDisclosureProof) ToDisclosureProofs() rc.BVMEigenDataLayrChain
 }
 
 func (c *Challenger) UpdateGasPrice(ctx context.Context, tx *types.Transaction) (*types.Transaction, error) {
-	opts := &bind.TransactOpts{
-		From: c.WalletAddr,
-		Signer: func(addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
-			return c.Cfg.SignerFn(ctx, addr, tx)
-		},
-		Context: ctx,
-		Nonce:   new(big.Int).SetUint64(tx.Nonce()),
-		NoSend:  true,
+	var opts *bind.TransactOpts
+	var err error
+	if !c.Cfg.EnableHsm {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			c.Cfg.PrivKey, c.Cfg.L1ChainID,
+		)
+	} else {
+		opts, err = common4.NewHSMTransactOpts(ctx, c.Cfg.HsmAPIName,
+			c.Cfg.HsmAddress, c.Cfg.L1ChainID, c.Cfg.HsmCreden)
 	}
+	if err != nil {
+		return nil, err
+	}
+	opts.Context = ctx
+	opts.Nonce = new(big.Int).SetUint64(tx.Nonce())
+	opts.NoSend = true
+
 	finalTx, err := c.RawEigenContract.RawTransact(opts, tx.Data())
 	switch {
 	case err == nil:
@@ -367,15 +382,21 @@ func (c *Challenger) ChallengeProveFraud(ctx context.Context, fraudStoreNumber *
 		return nil, err
 	}
 	nonce := new(big.Int).SetUint64(nonce64)
-	opts := &bind.TransactOpts{
-		From: ethc.Address(c.WalletAddr),
-		Signer: func(addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
-			return c.Cfg.SignerFn(ctx, addr, tx)
-		},
-		Context: ctx,
-		Nonce:   nonce,
-		NoSend:  true,
+	var opts *bind.TransactOpts
+	if !c.Cfg.EnableHsm {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			c.Cfg.PrivKey, c.Cfg.L1ChainID,
+		)
+	} else {
+		opts, err = common4.NewHSMTransactOpts(ctx, c.Cfg.HsmAPIName,
+			c.Cfg.HsmAddress, c.Cfg.L1ChainID, c.Cfg.HsmCreden)
 	}
+	if err != nil {
+		return nil, err
+	}
+	opts.Context = ctx
+	opts.Nonce = nonce
+	opts.NoSend = true
 	tx, err := c.EigenDaContract.ProveFraud(opts, fraudStoreNumber, new(big.Int).SetUint64(uint64(fraudProof.StartingSymbolIndex)), searchData, disclosureProofs)
 	switch {
 	case err == nil:
@@ -400,7 +421,7 @@ func (c *Challenger) postFraudProof(store *graphView.DataStore, fraudProof *Frau
 			HeaderHash:          store.DataCommitment,
 			DurationDataStoreId: store.DurationDataStoreId,
 			GlobalDataStoreId:   store.StoreNumber,
-			BlockNumber:         store.StakesFromBlockNumber,
+			BlockNumber:         store.ReferenceBlockNumber,
 			Fee:                 store.Fee,
 			Confirmer:           ethc.Address(common.HexToAddress(store.Confirmer)),
 			SignatoryRecordHash: store.SignatoryRecord,
@@ -449,15 +470,22 @@ func (c *Challenger) makReRollupBatchTx(ctx context.Context, batchIndex *big.Int
 	}
 	c.Cfg.Metrics.NonceETH().Inc()
 	nonce := new(big.Int).SetUint64(nonce64)
-	opts := &bind.TransactOpts{
-		From: ethc.Address(c.WalletAddr),
-		Signer: func(addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
-			return c.Cfg.SignerFn(ctx, addr, tx)
-		},
-		Context: ctx,
-		Nonce:   nonce,
-		NoSend:  true,
+	var opts *bind.TransactOpts
+	if !c.Cfg.EnableHsm {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			c.Cfg.PrivKey, c.Cfg.L1ChainID,
+		)
+	} else {
+		opts, err = common4.NewHSMTransactOpts(ctx, c.Cfg.HsmAPIName,
+			c.Cfg.HsmAddress, c.Cfg.L1ChainID, c.Cfg.HsmCreden)
 	}
+	if err != nil {
+		return nil, err
+	}
+	opts.Context = ctx
+	opts.Nonce = nonce
+	opts.NoSend = true
+
 	tx, err := c.EigenDaContract.SubmitReRollUpInfo(opts, batchIndex)
 	switch {
 	case err == nil:
@@ -512,6 +540,11 @@ func (c *Challenger) Start() error {
 				}
 				c.Cfg.Metrics.ReRollupBatchIndex().Set(float64(bigBatchIndex.Uint64()))
 				log.Info("MtChallenge tool submit re-rollup info success", "batchIndex", reRollupBatchIndex[index], "txHash", tx.Hash().String())
+				updBatchIndex, err := strconv.ParseUint(reRollupBatchIndex[index], 10, 64)
+				if err != nil {
+					log.Error("MtChallenge tool type string to uint64 fail")
+				}
+				c.LevelDBStore.SetLatestBatchIndex(updBatchIndex)
 			}
 		}
 	})

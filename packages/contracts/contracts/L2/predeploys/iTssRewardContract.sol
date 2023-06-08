@@ -24,6 +24,11 @@ interface ITssRewardContract {
         address[] tssMembers
     );
 
+    event Claim(
+        address owner,
+        uint256 amount
+    );
+
     /********************
      * Public Functions *
      ********************/
@@ -43,18 +48,38 @@ interface ITssRewardContract {
     function claimReward(uint256 _blockStartHeight, uint32 _length, uint256 _batchTime, address[] calldata _tssMembers) external;
 
     /**
-     * @dev Update deposit block gas into contract.
-     * @param _blockID Update gas reward L2 block ID.
-     * @return Update success.
-     */
-    function updateReward(uint256 _blockID, uint256 _amount) external returns (bool);
-    /**
-     * @dev withdraw dust.
-     */
-    function withdrawDust() external;
-
-    /**
      * @dev clear contract(canonical).
      */
     function withdraw() external;
+
+    /**
+     * @dev Claim reward and withdraw
+     */
+    function claim() external;
+
+    /**
+     * @dev default claimer == staker, if staker is multi-signature address,must set claimer
+     * @param _staker the address of staker
+     * @param _claimer the address for staker to claim reward
+     */
+    function setClaimer(address _staker, address _claimer) external;
+
+    /**
+     * @dev Initiate a request to claim
+     */
+    function requestClaim() external returns (bool);
+
+    /**
+     * @dev Query the remaining time required to claim
+     */
+    function queryClaimTime() external returns (uint256);
+
+    function setSccAddr(address sccAddr) external;
+
+    function setStakeSlashAddr(address ssAddr) external;
+
+    function setSendAmountPerYear(uint256) external;
+
+    function setWaitingTime(uint256) external;
+
 }

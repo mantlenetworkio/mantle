@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
@@ -237,6 +238,14 @@ func (b *EthAPIBackend) GetReceipts(ctx context.Context, hash common.Hash) (type
 	return b.eth.blockchain.GetReceiptsByHash(hash), nil
 }
 
+func (b *EthAPIBackend) GetTxStatusByHash(ctx context.Context, blockNumber uint64) (*types.TxStatusResponse, error) {
+	txStatus, err := b.eth.syncService.GetTxStatusByNumber(blockNumber)
+	if err != nil {
+		log.Error(err.Error())
+	}
+	return txStatus, err
+}
+
 func (b *EthAPIBackend) GetLogs(ctx context.Context, hash common.Hash) ([][]*types.Log, error) {
 	receipts := b.eth.blockchain.GetReceiptsByHash(hash)
 	if receipts == nil {
@@ -413,4 +422,15 @@ func (b *EthAPIBackend) ServiceFilter(ctx context.Context, session *bloombits.Ma
 	for i := 0; i < bloomFilterThreads; i++ {
 		go session.Multiplex(bloomRetrievalBatch, bloomRetrievalWait, b.eth.bloomRequests)
 	}
+}
+
+func (b *EthAPIBackend) Engine() consensus.Engine {
+	return b.eth.engine
+}
+func (b *EthAPIBackend) StateAtBlock(ctx context.Context, block *types.Block, reexec uint64, base *state.StateDB, checkLive, preferDisk bool) (*state.StateDB, error) {
+	return b.eth.StateAtBlock(block, reexec, base, checkLive, preferDisk)
+}
+
+func (b *EthAPIBackend) StateAtTransaction(ctx context.Context, block *types.Block, txIndex int, reexec uint64) (core.Message, vm.Context, *state.StateDB, error) {
+	return b.eth.stateAtTransaction(block, txIndex, reexec)
 }

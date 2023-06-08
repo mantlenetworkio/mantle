@@ -26,11 +26,12 @@ var (
 	_ = common.Big1
 	_ = types.BloomLookup
 	_ = event.NewSubscription
+	_ = abi.ConvertType
 )
 
 // ChugSplashDictatorMetaData contains all meta data concerning the ChugSplashDictator contract.
 var ChugSplashDictatorMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"contractL1ChugSplashProxy\",\"name\":\"_target\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_finalOwner\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"_codeHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_messengerSlotKey\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_messengerSlotVal\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_bridgeSlotKey\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_bridgeSlotVal\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_bitAddressSlotKey\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_bitAddressSlotVal\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"bitAddressSlotKey\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"bitAddressSlotVal\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"bridgeSlotKey\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"bridgeSlotVal\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"codeHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_code\",\"type\":\"bytes\"}],\"name\":\"doActions\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"finalOwner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"isUpgrading\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"messengerSlotKey\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"messengerSlotVal\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"returnOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"target\",\"outputs\":[{\"internalType\":\"contractL1ChugSplashProxy\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"contractL1ChugSplashProxy\",\"name\":\"_target\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_finalOwner\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"_codeHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_messengerSlotKey\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_messengerSlotVal\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_bridgeSlotKey\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_bridgeSlotVal\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_mantleAddressSlotKey\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_mantleAddressSlotVal\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"bridgeSlotKey\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"bridgeSlotVal\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"codeHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_code\",\"type\":\"bytes\"}],\"name\":\"doActions\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"finalOwner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"isUpgrading\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"mantleAddressSlotKey\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"mantleAddressSlotVal\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"messengerSlotKey\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"messengerSlotVal\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"returnOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"target\",\"outputs\":[{\"internalType\":\"contractL1ChugSplashProxy\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // ChugSplashDictatorABI is the input ABI used to generate the binding from.
@@ -134,11 +135,11 @@ func NewChugSplashDictatorFilterer(address common.Address, filterer bind.Contrac
 
 // bindChugSplashDictator binds a generic wrapper to an already deployed contract.
 func bindChugSplashDictator(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
-	parsed, err := abi.JSON(strings.NewReader(ChugSplashDictatorABI))
+	parsed, err := ChugSplashDictatorMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
+	return bind.NewBoundContract(address, *parsed, caller, transactor, filterer), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and
@@ -177,68 +178,6 @@ func (_ChugSplashDictator *ChugSplashDictatorTransactorRaw) Transfer(opts *bind.
 // Transact invokes the (paid) contract method with params as input values.
 func (_ChugSplashDictator *ChugSplashDictatorTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 	return _ChugSplashDictator.Contract.contract.Transact(opts, method, params...)
-}
-
-// BitAddressSlotKey is a free data retrieval call binding the contract method 0x830c9df8.
-//
-// Solidity: function bitAddressSlotKey() view returns(bytes32)
-func (_ChugSplashDictator *ChugSplashDictatorCaller) BitAddressSlotKey(opts *bind.CallOpts) ([32]byte, error) {
-	var out []interface{}
-	err := _ChugSplashDictator.contract.Call(opts, &out, "bitAddressSlotKey")
-
-	if err != nil {
-		return *new([32]byte), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
-
-	return out0, err
-
-}
-
-// BitAddressSlotKey is a free data retrieval call binding the contract method 0x830c9df8.
-//
-// Solidity: function bitAddressSlotKey() view returns(bytes32)
-func (_ChugSplashDictator *ChugSplashDictatorSession) BitAddressSlotKey() ([32]byte, error) {
-	return _ChugSplashDictator.Contract.BitAddressSlotKey(&_ChugSplashDictator.CallOpts)
-}
-
-// BitAddressSlotKey is a free data retrieval call binding the contract method 0x830c9df8.
-//
-// Solidity: function bitAddressSlotKey() view returns(bytes32)
-func (_ChugSplashDictator *ChugSplashDictatorCallerSession) BitAddressSlotKey() ([32]byte, error) {
-	return _ChugSplashDictator.Contract.BitAddressSlotKey(&_ChugSplashDictator.CallOpts)
-}
-
-// BitAddressSlotVal is a free data retrieval call binding the contract method 0x61aaa41b.
-//
-// Solidity: function bitAddressSlotVal() view returns(bytes32)
-func (_ChugSplashDictator *ChugSplashDictatorCaller) BitAddressSlotVal(opts *bind.CallOpts) ([32]byte, error) {
-	var out []interface{}
-	err := _ChugSplashDictator.contract.Call(opts, &out, "bitAddressSlotVal")
-
-	if err != nil {
-		return *new([32]byte), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
-
-	return out0, err
-
-}
-
-// BitAddressSlotVal is a free data retrieval call binding the contract method 0x61aaa41b.
-//
-// Solidity: function bitAddressSlotVal() view returns(bytes32)
-func (_ChugSplashDictator *ChugSplashDictatorSession) BitAddressSlotVal() ([32]byte, error) {
-	return _ChugSplashDictator.Contract.BitAddressSlotVal(&_ChugSplashDictator.CallOpts)
-}
-
-// BitAddressSlotVal is a free data retrieval call binding the contract method 0x61aaa41b.
-//
-// Solidity: function bitAddressSlotVal() view returns(bytes32)
-func (_ChugSplashDictator *ChugSplashDictatorCallerSession) BitAddressSlotVal() ([32]byte, error) {
-	return _ChugSplashDictator.Contract.BitAddressSlotVal(&_ChugSplashDictator.CallOpts)
 }
 
 // BridgeSlotKey is a free data retrieval call binding the contract method 0xa3b2d8a5.
@@ -394,6 +333,68 @@ func (_ChugSplashDictator *ChugSplashDictatorSession) IsUpgrading() (bool, error
 // Solidity: function isUpgrading() view returns(bool)
 func (_ChugSplashDictator *ChugSplashDictatorCallerSession) IsUpgrading() (bool, error) {
 	return _ChugSplashDictator.Contract.IsUpgrading(&_ChugSplashDictator.CallOpts)
+}
+
+// MantleAddressSlotKey is a free data retrieval call binding the contract method 0x41cd1c72.
+//
+// Solidity: function mantleAddressSlotKey() view returns(bytes32)
+func (_ChugSplashDictator *ChugSplashDictatorCaller) MantleAddressSlotKey(opts *bind.CallOpts) ([32]byte, error) {
+	var out []interface{}
+	err := _ChugSplashDictator.contract.Call(opts, &out, "mantleAddressSlotKey")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// MantleAddressSlotKey is a free data retrieval call binding the contract method 0x41cd1c72.
+//
+// Solidity: function mantleAddressSlotKey() view returns(bytes32)
+func (_ChugSplashDictator *ChugSplashDictatorSession) MantleAddressSlotKey() ([32]byte, error) {
+	return _ChugSplashDictator.Contract.MantleAddressSlotKey(&_ChugSplashDictator.CallOpts)
+}
+
+// MantleAddressSlotKey is a free data retrieval call binding the contract method 0x41cd1c72.
+//
+// Solidity: function mantleAddressSlotKey() view returns(bytes32)
+func (_ChugSplashDictator *ChugSplashDictatorCallerSession) MantleAddressSlotKey() ([32]byte, error) {
+	return _ChugSplashDictator.Contract.MantleAddressSlotKey(&_ChugSplashDictator.CallOpts)
+}
+
+// MantleAddressSlotVal is a free data retrieval call binding the contract method 0xb0175cb0.
+//
+// Solidity: function mantleAddressSlotVal() view returns(bytes32)
+func (_ChugSplashDictator *ChugSplashDictatorCaller) MantleAddressSlotVal(opts *bind.CallOpts) ([32]byte, error) {
+	var out []interface{}
+	err := _ChugSplashDictator.contract.Call(opts, &out, "mantleAddressSlotVal")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// MantleAddressSlotVal is a free data retrieval call binding the contract method 0xb0175cb0.
+//
+// Solidity: function mantleAddressSlotVal() view returns(bytes32)
+func (_ChugSplashDictator *ChugSplashDictatorSession) MantleAddressSlotVal() ([32]byte, error) {
+	return _ChugSplashDictator.Contract.MantleAddressSlotVal(&_ChugSplashDictator.CallOpts)
+}
+
+// MantleAddressSlotVal is a free data retrieval call binding the contract method 0xb0175cb0.
+//
+// Solidity: function mantleAddressSlotVal() view returns(bytes32)
+func (_ChugSplashDictator *ChugSplashDictatorCallerSession) MantleAddressSlotVal() ([32]byte, error) {
+	return _ChugSplashDictator.Contract.MantleAddressSlotVal(&_ChugSplashDictator.CallOpts)
 }
 
 // MessengerSlotKey is a free data retrieval call binding the contract method 0x708518de.
