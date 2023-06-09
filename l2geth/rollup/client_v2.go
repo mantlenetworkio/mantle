@@ -24,10 +24,11 @@ type StoreResponse struct {
 }
 
 type DataStore struct {
-	Index       uint64 `json:"index"`
-	DataStoreId uint32 `json:"data_store_id"`
-	Status      uint8  `json:"status"`
-	ConfirmAt   uint32 `json:"confirm_at"`
+	Index              uint64 `json:"index"`
+	UpgradeDataStoreId uint32 `json:"upgrade_data_store_id"`
+	DataStoreId        uint32 `json:"data_store_id"`
+	Status             uint8  `json:"status"`
+	ConfirmAt          uint32 `json:"confirm_at"`
 }
 
 type DataStoreId struct {
@@ -96,10 +97,11 @@ func (dc *DtlClient) GetDtlRollupStoreByBatchIndex(batchIndex int64) (*StoreResp
 		return nil, errors.New("fetch roll store data fail")
 	}
 	rollupStore := &StoreResponse{
-		OriginDataStoreId: dataStoreId.BatchIndexDataStore.DataStoreId,
-		DataStoreId:       dataStoreId.BatchIndexDataStore.DataStoreId,
-		ConfirmAt:         dataStoreId.BatchIndexDataStore.ConfirmAt,
-		Status:            dataStoreId.BatchIndexDataStore.Status,
+		UpgradeDataStoreId: dataStoreId.BatchIndexDataStore.UpgradeDataStoreId,
+		OriginDataStoreId:  dataStoreId.BatchIndexDataStore.DataStoreId,
+		DataStoreId:        dataStoreId.BatchIndexDataStore.DataStoreId,
+		ConfirmAt:          dataStoreId.BatchIndexDataStore.ConfirmAt,
+		Status:             dataStoreId.BatchIndexDataStore.Status,
 	}
 	return rollupStore, nil
 }
