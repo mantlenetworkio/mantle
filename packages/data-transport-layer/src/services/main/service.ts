@@ -44,6 +44,7 @@ export interface L1DataTransportServiceOptions {
   daInitBatch?: number
   startUpdateBatchIndex?: number
   endUpdateBatchIndex?: number
+  mantleDaUpgradeDataStoreId?: number
 
   transactionsPerPollingInterval: number
   legacySequencerCompatibility: boolean

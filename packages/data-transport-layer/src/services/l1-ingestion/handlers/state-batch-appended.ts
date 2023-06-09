@@ -40,9 +40,7 @@ export const handleEventsStateBatchAppended: EventHandlerSet<
         extraData.l1TransactionData
       )[0]
     } catch (e) {
-      stateRoots = getContractFactory(
-        'Rollup'
-      ).interface.decodeFunctionData(
+      stateRoots = getContractFactory('Rollup').interface.decodeFunctionData(
         'createAssertionWithStateBatch',
         extraData.l1TransactionData
       )[2]
