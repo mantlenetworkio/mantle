@@ -16,10 +16,11 @@ type RollupBatchIndex struct {
 }
 
 type StoreResponse struct {
-	OriginDataStoreId uint32 `json:"origin_data_store_id"`
-	DataStoreId       uint32 `json:"data_store_id"`
-	ConfirmAt         uint32 `json:"confirm_at"`
-	Status            uint8  `json:"status"`
+	UpgradeDataStoreId uint32 `json:"upgrade_data_store_id"`
+	OriginDataStoreId  uint32 `json:"origin_data_store_id"`
+	DataStoreId        uint32 `json:"data_store_id"`
+	ConfirmAt          uint32 `json:"confirm_at"`
+	Status             uint8  `json:"status"`
 }
 
 type DataStore struct {

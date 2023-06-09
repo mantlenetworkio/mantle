@@ -197,7 +197,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         await this.state.db.putRollupStoreByBatchIndex(
           {
             index: 0,
-            upgrade_batch_index: this.options.mantleDaUpgradeDataStoreId,
+            upgrade_data_store_id: this.options.mantleDaUpgradeDataStoreId,
             data_store_id: dataStoreRollupId['data_store_id'],
             status: dataStoreRollupId['status'],
             confirm_at: dataStoreRollupId['confirm_at'],
@@ -271,6 +271,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         await this.state.db.putRollupStoreByBatchIndex(
           {
             index: 0,
+            upgrade_data_store_id: this.options.mantleDaUpgradeDataStoreId,
             data_store_id: dataStoreRollupId['data_store_id'],
             status: dataStoreRollupId['status'],
             confirm_at: dataStoreRollupId['confirm_at'],

@@ -1449,7 +1449,7 @@ func (s *SyncService) syncEigenTransactionBatchRange(start, end uint64) error {
 					return fmt.Errorf("cannot get rollup store by batch index from dtl: %w", err)
 				}
 				if dtlRollupInfo.DataStoreId != 0 {
-					txs, err := s.dtlEigenClient.GetDtlBatchTransactionByDataStoreId(dtlRollupInfo.DataStoreId)
+					txs, err := s.dtlEigenClient.GetDtlBatchTransactionByDataStoreId(dtlRollupInfo.DataStoreId + dtlRollupInfo.UpgradeDataStoreId)
 					if err != nil {
 						return fmt.Errorf("cannot get eigen transaction batch from dtl: %w", err)
 					}
