@@ -534,7 +534,7 @@ func (api *PrivateDebugAPI) TraceCall(ctx context.Context, args ethapi.CallArgs,
 	statedb, header, err := api.eth.APIBackend.StateAndHeaderByNumberOrHash(ctx, blockNrOrHash)
 
 	if statedb == nil || err != nil {
-		return nil, fmt.Errorf("Error retrieving state")
+		return nil, fmt.Errorf("Error retrieving state: %s", err)
 	}
 
 	// Set sender address or use a default if none specified
@@ -602,9 +602,7 @@ func (api *PrivateDebugAPI) TraceCall(ctx context.Context, args ethapi.CallArgs,
 
 	var data []byte
 	if args.Data != nil {
-		data = []byte(*args.Data)
-	} else {
-		return nil, fmt.Errorf("Data field is empty")
+		data = *args.Data
 	}
 
 	// Currently, the blocknumber and timestamp actually refer to the L1BlockNumber and L1Timestamp
