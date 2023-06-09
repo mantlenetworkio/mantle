@@ -320,13 +320,13 @@ var (
 	HsmAddressFlag = cli.StringFlag{
 		Name:   "hsm-address",
 		Usage:  "the address of hsm key for mt-batcher",
-		EnvVar: prefixEnvVar(envVarPrefix, "HSM_API_ADDRESS"),
+		EnvVar: prefixEnvVar(envVarPrefix, "HSM_ADDRESS"),
 	}
 
 	HsmFeeAddressFlag = cli.StringFlag{
 		Name:   "hsm-fee-address",
 		Usage:  "the address of hsm key for mt-batcher fee",
-		EnvVar: prefixEnvVar(envVarPrefix, "HSM_FEE_API_ADDRESS"),
+		EnvVar: prefixEnvVar(envVarPrefix, "HSM_FEE_ADDRESS"),
 	}
 
 	HsmCredenFlag = cli.StringFlag{
