@@ -63,7 +63,6 @@ func RegisterFraudProofService(stack *node.Node, cfg *services.Config) {
 		if err != nil {
 			log.Crit("sequencer", "create signer error", err.Error())
 		}
-		log.Crit("Failed to register the Rollup service", "err", err)
 	}
 
 	var ethService *eth.Ethereum
