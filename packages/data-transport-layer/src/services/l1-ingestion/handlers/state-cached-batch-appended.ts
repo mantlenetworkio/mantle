@@ -4,7 +4,6 @@ import { getContractFactory } from '@mantleio/contracts'
 import { BigNumber } from 'ethers'
 
 /* Imports: Internal */
-import { MissingElementError } from './errors'
 import {
   StateRootBatchEntry,
   StateBatchAppendedExtraData,
@@ -40,9 +39,7 @@ export const handleEventsStateCachedBatchAppended: EventHandlerSet<
         extraData.l1TransactionData
       )[0]
     } catch (e) {
-      stateRoots = getContractFactory(
-        'Rollup'
-      ).interface.decodeFunctionData(
+      stateRoots = getContractFactory('Rollup').interface.decodeFunctionData(
         'createAssertionWithStateBatch',
         extraData.l1TransactionData
       )[2]

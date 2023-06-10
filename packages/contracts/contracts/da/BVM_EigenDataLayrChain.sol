@@ -197,6 +197,14 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     }
 
     /**
+    * @notice update rollup batch index
+    * @param _rollupBatchIndex update rollup batch index
+    */
+    function updateRollupBatchIndex(uint256 _rollupBatchIndex) external onlySequencer {
+        rollupBatchIndex = _rollupBatchIndex;
+    }
+
+    /**
     * @notice reset batch rollup batch data
     * @param _rollupBatchIndex update rollup index
     */
