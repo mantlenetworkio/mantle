@@ -5,20 +5,17 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
-	bsscore "github.com/mantlenetworkio/mantle/bss-core"
-	"google.golang.org/api/option"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
+	"google.golang.org/api/option"
 	"reflect"
 )
 
 func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContractBackend, cfg *Config) (func() error, error) {
-	if cfg.privateKey == nil {
-		return nil, errNoPrivateKey
-	}
 	if cfg.l2ChainID == nil {
 		return nil, errNoChainID
 	}

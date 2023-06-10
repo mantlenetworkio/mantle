@@ -182,19 +182,22 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       if (dataStore['Confirmed']) {
         // explore transaction list
         await this._storeTransactionListByDSId(
-          dataStoreRollupId['data_store_id']
+          dataStoreRollupId['data_store_id'],
+          this.options.mantleDaUpgradeDataStoreId
         )
 
         // batch transaction list
         await this._storeBatchTransactionsByDSId(
           dataStoreRollupId['data_store_id'],
-          index
+          index,
+          this.options.mantleDaUpgradeDataStoreId
         )
 
         // put rollup store info to db
         await this.state.db.putRollupStoreByBatchIndex(
           {
             index: 0,
+            upgrade_data_store_id: this.options.mantleDaUpgradeDataStoreId,
             data_store_id: dataStoreRollupId['data_store_id'],
             status: dataStoreRollupId['status'],
             confirm_at: dataStoreRollupId['confirm_at'],
@@ -268,6 +271,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         await this.state.db.putRollupStoreByBatchIndex(
           {
             index: 0,
+            upgrade_data_store_id: this.options.mantleDaUpgradeDataStoreId,
             data_store_id: dataStoreRollupId['data_store_id'],
             status: dataStoreRollupId['status'],
             confirm_at: dataStoreRollupId['confirm_at'],
@@ -276,11 +280,13 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         )
         this.logger.info('Update batch index from(Confirmed)', dataStore)
         await this._storeTransactionListByDSId(
-          dataStoreRollupId['data_store_id']
+          dataStoreRollupId['data_store_id'],
+          this.options.mantleDaUpgradeDataStoreId
         )
         await this._storeBatchTransactionsByDSId(
           dataStoreRollupId['data_store_id'],
-          batchIndex
+          batchIndex,
+          this.options.mantleDaUpgradeDataStoreId
         )
       }
     }
@@ -309,7 +315,8 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
 
   private async _storeBatchTransactionsByDSId(
     storeId: number,
-    daBatchIndex: number
+    daBatchIndex: number,
+    upgradeBatchIndex: number
   ) {
     const transactionEntries: TransactionEntry[] = []
     if (storeId <= 0) {
@@ -397,14 +404,20 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         )
       }
       await this.state.db.putTransactions(transactionEntries)
-      await this.state.db.putBatchTransactionByDsId(transactionEntries, storeId)
-      this.daIngestionMetrics.syncDataStoreId.set(storeId)
+      await this.state.db.putBatchTransactionByDsId(
+        transactionEntries,
+        storeId + upgradeBatchIndex
+      )
+      this.daIngestionMetrics.syncDataStoreId.set(upgradeBatchIndex + storeId)
     } catch (error) {
       throw new Error(`eigen layer sync finish, error is: ${error}`)
     }
   }
 
-  private async _storeTransactionListByDSId(storeId: number): Promise<void> {
+  private async _storeTransactionListByDSId(
+    storeId: number,
+    upgradeBatchIndex: number
+  ): Promise<void> {
     const txList = await this.GetTransactionListByStoreNumber(storeId)
     if (
       txList === null ||
@@ -424,7 +437,10 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         txHash: tx['TxHash'],
       })
     }
-    await this.state.db.putTxListByDSId(transactionEntries, storeId)
+    await this.state.db.putTxListByDSId(
+      transactionEntries,
+      upgradeBatchIndex + storeId
+    )
   }
 
   private async GetLatestTransactionBatchIndex(): Promise<number> {
