@@ -324,6 +324,7 @@ func (d *Driver) StoreData(ctx context.Context, uploadHeader []byte, duration ui
 	nonce64, err := d.Cfg.L1Client.NonceAt(
 		d.Ctx, d.WalletAddr, nil,
 	)
+	log.Info("mtbatcher-account", "walletaddr", d.WalletAddr, "nonce64", nonce64)
 	if err != nil {
 		return nil, err
 	}
