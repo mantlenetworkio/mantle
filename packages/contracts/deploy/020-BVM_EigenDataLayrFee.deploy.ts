@@ -10,7 +10,7 @@ import {
 const deployFn: DeployFunction = async (hre) => {
   const { deployer } = await hre.getNamedAccounts()
   const owner = hre.deployConfig.bvmAddressManagerOwner
-  const eigenFeeAddress = hre.deployConfig.BVM_EIGENDA_FEE_ADDRESS
+  const eigenFeeAddress = hre.deployConfig.bvmEigenFeeAddress
 
   await deployAndVerifyAndThen({
     hre,

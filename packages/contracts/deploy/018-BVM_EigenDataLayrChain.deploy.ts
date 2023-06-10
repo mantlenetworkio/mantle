@@ -14,7 +14,7 @@ const deployFn: DeployFunction = async (hre) => {
   // const eigenSequencerAddress = hre.deployConfig.bvmSequencerAddress
   const eigenSequencerAddress = hre.deployConfig.bvmEigenSequencerAddress
   const dataManagerAddress = hre.deployConfig.dataManagerAddress
-  const reSubmitterAddress = hre.deployConfig.BVM_EIGENDA_CHALLENGER_ADDRESS
+  const reSubmitterAddress = hre.deployConfig.bvmEigenChallengerAddress
   const blockStaleMeasure = hre.deployConfig.blockStaleMeasure
   const daFraudProofPeriod = hre.deployConfig.daFraudProofPeriod
   const l2SubmittedBlockNumber = hre.deployConfig.l2SubmittedBlockNumber
