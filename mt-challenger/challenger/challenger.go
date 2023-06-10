@@ -158,7 +158,12 @@ func NewChallenger(ctx context.Context, cfg *ChallengerConfig) (*Challenger, err
 
 	graphClient := graphView.NewGraphClient(cfg.GraphProvider, cfg.Logger)
 	graphqlClient := graphql.NewClient(graphClient.GetEndpoint(), nil)
-	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+	var walletAddr ethc.Address
+	if cfg.EnableHsm {
+		walletAddr = ethc.HexToAddress(cfg.HsmAddress)
+	} else {
+		walletAddr = crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+	}
 
 	levelDBStore, err := db.NewStore(cfg.DbPath)
 	if err != nil {
