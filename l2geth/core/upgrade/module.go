@@ -24,11 +24,11 @@ import (
 
 var (
 	// mantle token upgrade height for testnet
-	MantleTokenUpgradeHeight = -1
+	MantleTokenUpgradeHeight = 11000000
 
 	L2GasPriceOracleHeight = -1
 	//qa height
-	L2TssRewardHeight = -1
+	L2TssRewardHeight = 11000000
 	// L2GasPriceOracleAddress is the address of the BVM_GasPriceOracle
 	// predeploy
 	L2GasPriceOracleAddress = common.HexToAddress("0x420000000000000000000000000000000000000F")
@@ -72,7 +72,7 @@ func mantleTokenAndWMantleUpgrade(statedb vm.StateDB, blockNumber *big.Int) {
 	statedb.SetState(rcfg.L2MantleTokenAddress, rcfg.MantleTokenNameSlot, rcfg.MantleTokenNameValue)
 	statedb.SetState(rcfg.L2MantleTokenAddress, rcfg.MantleTokenSymbolSlot, rcfg.MantleTokenSymbolValue)
 
-	log.Info("update wrapped mantle token name & symbol", "address", rcfg.L2WrappedMantleTokenAddress)
-	statedb.SetState(rcfg.L2WrappedMantleTokenAddress, rcfg.WrappedMantleTokenNameSlot, rcfg.WrappedMantleTokenNameValue)
-	statedb.SetState(rcfg.L2WrappedMantleTokenAddress, rcfg.WrappedMantleTokenSymbolSlot, rcfg.WrappedMantleTokenSymbolValue)
+	// log.Info("update wrapped mantle token name & symbol", "address", rcfg.L2WrappedMantleTokenAddress)
+	// statedb.SetState(rcfg.L2WrappedMantleTokenAddress, rcfg.WrappedMantleTokenNameSlot, rcfg.WrappedMantleTokenNameValue)
+	// statedb.SetState(rcfg.L2WrappedMantleTokenAddress, rcfg.WrappedMantleTokenSymbolSlot, rcfg.WrappedMantleTokenSymbolValue)
 }
