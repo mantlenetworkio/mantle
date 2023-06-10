@@ -126,8 +126,14 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 		return nil, err
 	}
 	dtlClient := client.NewDtlClient(cfg.DtlClientUrl)
-	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
-	feeWalletAddr := crypto.PubkeyToAddress(cfg.FeePrivKey.PublicKey)
+	var walletAddr, feeWalletAddr common.Address
+	if cfg.EnableHsm {
+		walletAddr = common.HexToAddress(cfg.HsmAddress)
+		feeWalletAddr = common.HexToAddress(cfg.HsmFeeAddress)
+	} else {
+		walletAddr = crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+		feeWalletAddr = crypto.PubkeyToAddress(cfg.FeePrivKey.PublicKey)
+	}
 	return &Driver{
 		Cfg:           cfg,
 		Ctx:           ctx,
