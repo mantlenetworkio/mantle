@@ -56,19 +56,9 @@ contract L2CrossDomainMessenger is CrossDomainMessenger, Semver {
         uint256 _value,
         bytes memory _data
     ) internal override {
-        if (_type == BridgeConstants.ETH_WITHDRAWAL_TX){
-            L2ToL1MessagePasser(payable(Predeploys.L2_TO_L1_MESSAGE_PASSER)).initiateWithdrawal{
-                    value: 0
-                }(_type,_value,_to, _gasLimit, _data);
-        }else if (_type == BridgeConstants.MNT_WITHDRAWAL_TX){
-            L2ToL1MessagePasser(payable(Predeploys.L2_TO_L1_MESSAGE_PASSER)).initiateWithdrawal{
-                    value: _value
-                }(_type,_value,_to, _gasLimit, _data);
-        }else{
-            L2ToL1MessagePasser(payable(Predeploys.L2_TO_L1_MESSAGE_PASSER)).initiateWithdrawal{
-                    value: _value
-                }(_type,_value,_to, _gasLimit, _data);
-        }
+        L2ToL1MessagePasser(payable(Predeploys.L2_TO_L1_MESSAGE_PASSER)).initiateWithdrawal{
+                value: msg.value
+            }(_type,_value,_to, _gasLimit, _data);
 
     }
 

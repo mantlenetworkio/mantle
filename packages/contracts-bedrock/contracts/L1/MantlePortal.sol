@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
 
-import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {SafeCall} from "../libraries/SafeCall.sol";
-import {L2OutputOracle} from "./L2OutputOracle.sol";
-import {Constants} from "../libraries/Constants.sol";
-import {Types} from "../libraries/Types.sol";
-import {Hashing} from "../libraries/Hashing.sol";
-import {SecureMerkleTrie} from "../libraries/trie/SecureMerkleTrie.sol";
-import {AddressAliasHelper} from "../vendor/AddressAliasHelper.sol";
-import {ResourceMetering} from "./ResourceMetering.sol";
-import {Semver} from "../universal/Semver.sol";
+import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import { SafeCall } from "../libraries/SafeCall.sol";
+import { L2OutputOracle } from "./L2OutputOracle.sol";
+import { Constants } from "../libraries/Constants.sol";
+import { Types } from "../libraries/Types.sol";
+import { Hashing } from "../libraries/Hashing.sol";
+import { SecureMerkleTrie } from "../libraries/trie/SecureMerkleTrie.sol";
+import { AddressAliasHelper } from "../vendor/AddressAliasHelper.sol";
+import { ResourceMetering } from "./ResourceMetering.sol";
+import { Semver } from "../universal/Semver.sol";
 import { BridgeConstants } from "../libraries/BridgeConstants.sol";
+import { Predeploys } from "../libraries/Predeploys.sol";
 
 /**
  * @custom:proxied
@@ -192,7 +193,7 @@ contract MantlePortal is Initializable, ResourceMetering, Semver {
      */
     // solhint-disable-next-line ordering
     receive() external payable {
-        depositTransaction(msg.sender, 0, RECEIVE_DEFAULT_GAS_LIMIT, false, bytes(""));
+        require(msg.value==0,"cant bridge eth by payable function");
     }
 
     /**

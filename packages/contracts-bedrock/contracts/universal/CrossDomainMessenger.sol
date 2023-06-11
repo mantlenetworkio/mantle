@@ -281,7 +281,7 @@ CrossDomainMessengerLegacySpacer1
         }else if (_type == BridgeConstants.MNT_WITHDRAWAL_TX){
             _value = msg.value;
             _relayMessageValue = 0;
-        }else if (_type == BridgeConstants.ERC20_DEPOSIT_TX || _type == BridgeConstants.ERC20_WITHDRAWAL_TX ){
+        }else if (_type == BridgeConstants.ERC20_DEPOSIT_TX || _type == BridgeConstants.ERC20_WITHDRAWAL_TX || _type == BridgeConstants.ERC721_TX ){
             _value = 0;
             _relayMessageValue = 0;
         }

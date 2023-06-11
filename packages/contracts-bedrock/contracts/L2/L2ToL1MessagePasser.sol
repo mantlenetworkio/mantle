@@ -74,7 +74,7 @@ contract L2ToL1MessagePasser is Semver {
      * @notice Allows users to withdraw ETH by sending directly to this contract.
      */
     receive() external payable {
-        initiateWithdrawal(BridgeConstants.MNT_WITHDRAWAL_TX,msg.value,msg.sender, RECEIVE_DEFAULT_GAS_LIMIT, bytes(""));
+        require(msg.value==0,"cant withdraw MNT by this function");
     }
 
     /**

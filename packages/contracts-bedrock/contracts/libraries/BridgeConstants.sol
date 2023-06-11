@@ -10,5 +10,6 @@ library BridgeConstants {
     uint32 constant MNT_WITHDRAWAL_TX = 4;
     uint32 constant ERC20_WITHDRAWAL_TX = 5;
 
+    uint32 constant ERC721_TX = 6;
 
 }
