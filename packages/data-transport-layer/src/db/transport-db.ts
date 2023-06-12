@@ -399,10 +399,6 @@ export class TransportDB {
   public async putHighestL1BlockNumber(
     block: number | BigNumber
   ): Promise<void> {
-    if (block <= (await this.getHighestL2BlockNumber())) {
-      return
-    }
-
     return this.db.put<number>([
       {
         key: TRANSPORT_DB_KEYS.HIGHEST_L1_BLOCK,
