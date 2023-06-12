@@ -522,7 +522,7 @@ func (c *Client) GetStateRoot(index uint64, backend Backend) (*StateRoot, error)
 func (c *Client) GetTxStatusResponse(index uint64, backend Backend) (*types.TxStatusResponse, error) {
 	str := strconv.FormatUint(index, 10)
 	var QueryParam string
-	if backend.String() == "da" {
+	if backend.String() == "da" || backend.String() == "l2" {
 		QueryParam = "l1"
 	} else {
 		QueryParam = backend.String()
