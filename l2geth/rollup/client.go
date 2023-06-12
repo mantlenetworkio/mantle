@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	gresty "github.com/go-resty/resty/v2"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"math/big"
 	"strconv"
 
@@ -527,6 +528,7 @@ func (c *Client) GetTxStatusResponse(index uint64, backend Backend) (*types.TxSt
 	} else {
 		QueryParam = backend.String()
 	}
+	log.Info("GetTxStatusResponse", "QueryParam", QueryParam, "backend.string", backend.String())
 	response, err := c.client.R().
 		SetPathParams(map[string]string{
 			"index": str,
