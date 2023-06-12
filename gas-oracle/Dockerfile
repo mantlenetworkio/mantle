@@ -3,6 +3,7 @@ FROM golang:1.19-alpine3.15 as builder
 RUN apk add --no-cache make gcc musl-dev linux-headers git jq bash
 
 COPY ./gas-oracle /gas-oracle
+COPY ./bss-core /bss-core
 
 RUN cd /gas-oracle && make gas-oracle
 

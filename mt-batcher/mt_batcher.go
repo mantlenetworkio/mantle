@@ -180,7 +180,17 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		NumConfirmations:          cfg.NumConfirmations,
 		SafeAbortNonceTooLowCount: cfg.SafeAbortNonceTooLowCount,
 		Metrics:                   metrics.NewMtBatchBase(),
+		EnableHsm:                 cfg.EnableHsm,
+		HsmAddress:                cfg.HsmAddress,
+		HsmAPIName:                cfg.HsmAPIName,
+		HsmCreden:                 cfg.HsmCreden,
+		HsmFeeAPIName:             cfg.HsmFeeAPIName,
+		HsmFeeAddress:             cfg.HsmFeeAddress,
 	}
+	log.Info("hsm",
+		"enablehsm", driverConfig.EnableHsm, "hsmaddress", driverConfig.HsmAddress,
+		"hsmapiname", driverConfig.HsmAPIName, "HsmCreden", driverConfig.HsmCreden,
+		"HsmFeeAPIName", driverConfig.HsmFeeAPIName, "HsmFeeAddress", driverConfig.HsmFeeAddress)
 	driver, err := sequencer.NewDriver(ctx, driverConfig)
 	if err != nil {
 		log.Error("new driver fail", "err", err)

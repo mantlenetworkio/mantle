@@ -22,6 +22,8 @@ const config = {
   bvmWhitelistOwner: '0x648E3e8101BFaB7bf5997Bd007Fb473786019159',
   dataManagerAddress: '0xE5C3D068e2160c67e09afaCEff3E765e30163Eb8',
   bvmEigenSequencerAddress: '0x6887246668a3b87F54DeB3b94Ba47a6f63F32985',
+  bvmEigenFeeAddress: '0x6887246668a3b87F54DeB3b94Ba47a6f63F32985',
+  bvmEigenChallengerAddress: '0x6887246668a3b87F54DeB3b94Ba47a6f63F32985',
 }
 
 export default config

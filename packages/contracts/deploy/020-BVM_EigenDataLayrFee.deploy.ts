@@ -10,7 +10,7 @@ import {
 const deployFn: DeployFunction = async (hre) => {
   const { deployer } = await hre.getNamedAccounts()
   const owner = hre.deployConfig.bvmAddressManagerOwner
-  const eigenSequencerAddress = hre.deployConfig.bvmEigenSequencerAddress
+  const eigenFeeAddress = hre.deployConfig.bvmEigenFeeAddress
 
   await deployAndVerifyAndThen({
     hre,
@@ -29,7 +29,7 @@ const deployFn: DeployFunction = async (hre) => {
     }
   )
 
-  const args = [eigenSequencerAddress]
+  const args = [eigenFeeAddress]
   const callData = Impl_EigenDataLayrFee.interface.encodeFunctionData(
     'initialize',
     args
