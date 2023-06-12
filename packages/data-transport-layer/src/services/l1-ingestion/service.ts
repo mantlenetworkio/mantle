@@ -212,6 +212,8 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
         const fraudProofWindow = this.options.fraudProofWindow
         await this.state.db.putHighestL1BlockNumber(currentL1Block);
         await this.state.db.putFraudProofWindow(fraudProofWindow);
+        console.log("currentL1BlockNumber",currentL1Block);
+        console.log("fraudProofWindow",fraudProofWindow);
 
         const targetL1Block = Math.min(
           highestSyncedL1Block + this.options.logsPerPollingInterval,

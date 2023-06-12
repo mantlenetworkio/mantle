@@ -741,6 +741,8 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       async (req): Promise<TxStatusResponse> => {
         const currentL1BlockNumber = await this.state.db.getHighestL1BlockNumber();
         const fraudProofWindow = await this.state.db.getFraudProofWindow();
+        console.log("currentL1BlockNumber",currentL1BlockNumber);
+        console.log("fraudProofWindow",fraudProofWindow);
         const backend = req.query.backend || this.options.defaultBackend
         let stateRoots = null
         let batch = null
