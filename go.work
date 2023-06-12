@@ -3,17 +3,17 @@ go 1.18
 use (
 	./batch-submitter
 	./bss-core
+	./fraud-proof
 	./gas-oracle
+	./integration-tests/go-tests
 	./l2geth
 	./l2geth-exporter
 	./mt-batcher
-	./fraud-proof
 	./mt-challenger
 	./proxyd
 	./state-surgery
 	./subsidy
 	./tss
-	./integration-tests/go-tests
 	metrics
 )
 
