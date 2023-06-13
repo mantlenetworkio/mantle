@@ -6,7 +6,7 @@ replace github.com/mantlenetworkio/mantle/go-test => ./
 
 require (
 	github.com/ethereum/go-ethereum v1.10.26
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 )
 
 require (
