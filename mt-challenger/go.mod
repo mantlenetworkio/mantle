@@ -14,20 +14,19 @@ replace github.com/mantlenetworkio/mantle/fraud-proof => ../fraud-proof
 
 replace github.com/mantlenetworkio/mantle/metrics => ../metrics
 
+replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
+
 require (
-	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
+	github.com/Layr-Labs/datalayr/common v0.0.0
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/mantlenetworkio/mantle/l2geth v0.0.0
 	github.com/mantlenetworkio/mantle/mt-batcher v0.0.0
 	github.com/pkg/errors v0.9.1
-	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
-	github.com/urfave/cli v1.22.12
-	google.golang.org/grpc v1.55.0
-)
-
-require (
 	github.com/prometheus/client_golang v1.15.1
+	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
+	github.com/urfave/cli v1.22.14
+	google.golang.org/grpc v1.55.0
 )
 
 require (
@@ -35,7 +34,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.0.1 // indirect
 	cloud.google.com/go/kms v1.11.0 // indirect
-	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0-00010101000000-000000000000 // indirect
+	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0 // indirect
 	github.com/VictoriaMetrics/fastcache v1.9.0 // indirect
 	github.com/aristanetworks/goarista v0.0.0-20170210015632-ea17b1a17847 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -54,7 +53,7 @@ require (
 	github.com/decred/dcrd/hdkeychain/v3 v3.0.0 // indirect
 	github.com/elastic/gosigar v0.14.2 // indirect
 	github.com/getsentry/sentry-go v0.12.0 // indirect
-	github.com/go-logr/logr v1.2.3 // indirect
+	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
@@ -67,17 +66,16 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.10.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0-rc.3 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0-rc.5 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.2.0 // indirect
-	github.com/mantlenetworkio/mantle/bss-core v0.0.0-20230524081854-aedc5de809b9 // indirect
+	github.com/mantlenetworkio/mantle/bss-core v0.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
-	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
