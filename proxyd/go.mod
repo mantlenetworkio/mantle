@@ -3,7 +3,7 @@ module github.com/mantlenetworkio/mantle/proxyd
 go 1.18
 
 require (
-	github.com/BurntSushi/toml v1.2.1
+	github.com/BurntSushi/toml v1.3.2
 	github.com/alicebob/miniredis v2.5.0+incompatible
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/go-redis/redis/v8 v8.11.4
@@ -14,7 +14,7 @@ require (
 	github.com/prometheus/client_golang v1.15.1
 	github.com/rs/cors v1.8.2
 	github.com/sethvargo/go-limiter v0.7.2
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 	golang.org/x/sync v0.2.0
 )
 

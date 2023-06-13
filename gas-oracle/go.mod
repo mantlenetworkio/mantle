@@ -8,9 +8,9 @@ require (
 	cloud.google.com/go/kms v1.11.0
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/mantlenetworkio/mantle/bss-core v0.0.0-20230612013908-4e6b42537743
-	github.com/stretchr/testify v1.8.1
-	github.com/urfave/cli v1.22.12
+	github.com/mantlenetworkio/mantle/bss-core v0.0.0
+	github.com/stretchr/testify v1.8.4
+	github.com/urfave/cli v1.22.14
 	google.golang.org/api v0.126.0
 )
 

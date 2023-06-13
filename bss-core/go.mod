@@ -9,7 +9,7 @@ require (
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/getsentry/sentry-go v0.12.0
 	github.com/prometheus/client_golang v1.15.1
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 	github.com/tyler-smith/go-bip39 v1.1.0
 	google.golang.org/api v0.126.0
 	google.golang.org/genproto v0.0.0-20230530153820-e85fd2cbaebc
