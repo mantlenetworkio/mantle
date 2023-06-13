@@ -2,15 +2,13 @@ module github.com/mantlenetworkio/mantle/batch-submitter
 
 go 1.18
 
-replace github.com/mantlenetworkio/mantle/bss-core v0.0.0 => ../bss-core
+replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
 
-replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
+replace github.com/mantlenetworkio/mantle/l2geth => ../l2geth
 
-replace github.com/mantlenetworkio/mantle/tss v0.0.0 => ../tss
+replace github.com/mantlenetworkio/mantle/tss => ../tss
 
 replace github.com/mantlenetworkio/mantle/fraud-proof => ../fraud-proof
-
-replace github.com/mantlenetworkio/mantle/metrics => ../metrics
 
 require (
 	cloud.google.com/go/kms v1.11.0

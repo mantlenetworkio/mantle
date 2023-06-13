@@ -373,7 +373,7 @@ func Migrate(dataDir, outDir string, genesis *core.Genesis, addrLists, allowance
 
 	// Write the genesis state to the database. This is taken verbatim from Geth's
 	// core.Genesis struct.
-	rawdb.WriteGenesisState(outDB, block.Hash(), blob)
+	rawdb.WriteGenesisStateSpec(outDB, block.Hash(), blob)
 	rawdb.WriteTd(outDB, block.Hash(), block.NumberU64(), block.Difficulty())
 	rawdb.WriteBlock(outDB, block)
 	rawdb.WriteReceipts(outDB, block.Hash(), block.NumberU64(), nil)
