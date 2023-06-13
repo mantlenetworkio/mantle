@@ -6,17 +6,19 @@ replace github.com/mantlenetworkio/mantle/fraud-proof => ./
 
 replace github.com/mantlenetworkio/mantle/metrics => ../metrics
 
+replace github.com/mantlenetworkio/mantle/l2geth => ../l2geth
+
 require (
 	cloud.google.com/go/kms v1.11.0
 	github.com/cbergoon/merkletree v0.2.0
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/holiman/uint256 v1.2.0
-	github.com/mantlenetworkio/mantle/bss-core v0.0.0-20230524081854-aedc5de809b9
-	github.com/mantlenetworkio/mantle/l2geth v0.0.0-20230524081854-aedc5de809b9
-	github.com/mantlenetworkio/mantle/metrics v0.0.0-00010101000000-000000000000
+	github.com/mantlenetworkio/mantle/bss-core v0.0.0
+	github.com/mantlenetworkio/mantle/l2geth v0.0.0
+	github.com/mantlenetworkio/mantle/metrics v0.0.0
 	github.com/prometheus/client_golang v1.15.1
 	github.com/specularl2/specular/clients/geth/specular v0.0.0-20221120100224-5e02437e9455
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 	google.golang.org/api v0.126.0
 	gopkg.in/urfave/cli.v1 v1.20.0
 )
