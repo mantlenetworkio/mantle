@@ -2,15 +2,13 @@ module github.com/mantlenetworkio/mantle/batch-submitter
 
 go 1.18
 
-replace github.com/mantlenetworkio/mantle/bss-core v0.0.0 => ../bss-core
+replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
 
-replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
+replace github.com/mantlenetworkio/mantle/l2geth => ../l2geth
 
-replace github.com/mantlenetworkio/mantle/tss v0.0.0 => ../tss
+replace github.com/mantlenetworkio/mantle/tss => ../tss
 
 replace github.com/mantlenetworkio/mantle/fraud-proof => ../fraud-proof
-
-replace github.com/mantlenetworkio/mantle/metrics => ../metrics
 
 require (
 	cloud.google.com/go/kms v1.11.0
@@ -22,9 +20,9 @@ require (
 	github.com/mantlenetworkio/mantle/l2geth v0.0.0
 	github.com/mantlenetworkio/mantle/tss v0.0.0
 	github.com/prometheus/client_golang v1.15.1
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
-	github.com/urfave/cli v1.22.12
+	github.com/urfave/cli v1.22.14
 	google.golang.org/api v0.126.0
 )
 
@@ -69,7 +67,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

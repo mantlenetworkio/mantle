@@ -2,6 +2,11 @@ module github.com/mantlenetworkio/mantle/tss
 
 go 1.19
 
+replace (
+	github.com/mantlenetworkio/mantle/bss-core => ../bss-core
+	github.com/mantlenetworkio/mantle/l2geth => ../l2geth
+)
+
 require (
 	github.com/SSSaaS/sssa-golang v0.0.0-20170502204618-d37d7782d752
 	github.com/aws/aws-sdk-go v1.42.6
@@ -29,7 +34,7 @@ require (
 	github.com/rs/zerolog v1.27.0
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.10.1
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	github.com/tendermint/tendermint v0.34.16
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
@@ -66,6 +71,7 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
+	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
@@ -195,9 +201,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	lukechampine.com/blake3 v1.1.7 // indirect
-)
-
-replace (
-	github.com/mantlenetworkio/mantle/bss-core v0.0.0 => ../bss-core
-	github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
 )

@@ -1538,6 +1538,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 			notRollup = true
 		}
 	}
+	log.Info("GetTxStatusByHash", "not rollup state", notRollup)
 	if err != nil || notRollup {
 		cb := s.b.CurrentBlock().Time()
 		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
