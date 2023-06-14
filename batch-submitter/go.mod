@@ -2,11 +2,11 @@ module github.com/mantlenetworkio/mantle/batch-submitter
 
 go 1.18
 
-replace github.com/mantlenetworkio/mantle/bss-core   => ../bss-core
+replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
 
 replace github.com/mantlenetworkio/mantle/l2geth => ../l2geth
 
-replace github.com/mantlenetworkio/mantle/tss  => ../tss
+replace github.com/mantlenetworkio/mantle/tss => ../tss
 
 replace github.com/mantlenetworkio/mantle/fraud-proof => ../fraud-proof
 

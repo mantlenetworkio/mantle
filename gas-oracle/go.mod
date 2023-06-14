@@ -4,6 +4,9 @@ go 1.18
 
 replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
 
+replace github.com/mantlenetworkio/mantle/metrics => ../metrics
+
+
 require (
 	cloud.google.com/go/kms v1.10.1
 	github.com/ethereum/go-ethereum v1.10.26

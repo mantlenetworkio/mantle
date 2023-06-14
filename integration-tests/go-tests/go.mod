@@ -3,6 +3,7 @@ module github.com/mantlenetworkio/mantle/go-test
 go 1.18
 
 replace github.com/mantlenetworkio/mantle/go-test => ./
+replace github.com/mantlenetworkio/mantle/l2geth => ../l2geth
 
 require (
 	github.com/ethereum/go-ethereum v1.10.26

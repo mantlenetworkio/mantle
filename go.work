@@ -13,7 +13,6 @@ use (
 	./mt-challenger
 	./proxyd
 	./state-surgery
-	./subsidy
 	./tss
 )
 
@@ -28,6 +27,5 @@ replace (
 	github.com/mantlenetworkio/mantle/metrics v0.0.0 => ./metrics
 	github.com/mantlenetworkio/mantle/mt-batcher v0.0.0 => ./mt-batcher
 	github.com/mantlenetworkio/mantle/mt-challenger v0.0.0 => ./mt-challenger
-	github.com/mantlenetworkio/mantle/subsidy v0.0.0 => ./subsidy
 	github.com/mantlenetworkio/mantle/tss v0.0.0 => ./tss
 )
