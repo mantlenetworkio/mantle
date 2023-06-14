@@ -533,8 +533,10 @@ func (api *PrivateDebugAPI) traceBlock(ctx context.Context, block *types.Block, 
 func (api *PrivateDebugAPI) TraceCall(ctx context.Context, args ethapi.CallArgs, blockNrOrHash rpc.BlockNumberOrHash, config *TraceCallConfig) (interface{}, error) {
 	statedb, header, err := api.eth.APIBackend.StateAndHeaderByNumberOrHash(ctx, blockNrOrHash)
 
-	if statedb == nil || err != nil {
+	if statedb == nil && err != nil {
 		return nil, fmt.Errorf("Error retrieving state: %s", err)
+	} else if statedb == nil && err == nil {
+		return nil, fmt.Errorf("Error retrieving state, no error code returned")
 	}
 
 	// Set sender address or use a default if none specified
@@ -580,6 +582,9 @@ func (api *PrivateDebugAPI) TraceCall(ctx context.Context, args ethapi.CallArgs,
 				}
 			}
 		}
+
+		// https://github.com/ethereum/go-ethereum/blob/281e8cd5abaac86ed3f37f98250ff147b3c9fe62/internal/ethapi/api.go#L939
+		statedb.Finalise(false)
 	}
 
 	// Set default gas & gas price if none were set
