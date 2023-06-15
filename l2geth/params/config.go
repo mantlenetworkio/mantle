@@ -31,7 +31,14 @@ var (
 	TestnetGenesisHash = common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d")
 	RinkebyGenesisHash = common.HexToHash("0x6341fd3daf94b748c72ced5a5b26028f2474f5f00d824504e4fa37a75767e177")
 	GoerliGenesisHash  = common.HexToHash("0xbf7e331f7f7c1dd2e05159666b3bf8bc7a8a3a9eb1d518969eab529dd9b88c1a")
-	MainnetChainID     = int64(5000)
+)
+
+// ChainID for Mantle network.
+var (
+	MantleMainnetChainID = big.NewInt(5000)
+	MantleTestnetChainID = big.NewInt(5001)
+	MantleQAChainID      = big.NewInt(1705003)
+	MantleLocalChainID   = big.NewInt(17)
 )
 
 // TrustedCheckpoints associates each known checkpoint with the genesis hash of
@@ -216,14 +223,14 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(108), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), big.NewInt(0), new(EthashConfig), nil}
+	AllEthashProtocolChanges = &ChainConfig{big.NewInt(108), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), new(EthashConfig), nil}
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(420), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), big.NewInt(0), nil, &CliqueConfig{Period: 0, Epoch: 30000}}
-	TestChainConfig          = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), big.NewInt(0), new(EthashConfig), nil}
+	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(420), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), nil, &CliqueConfig{Period: 0, Epoch: 30000}}
+	TestChainConfig          = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), new(EthashConfig), nil}
 	TestRules                = TestChainConfig.Rules(new(big.Int))
 
 	// OpMainnetChainID is the ID of Mantle's mainnet chain.
@@ -311,7 +318,6 @@ type ChainConfig struct {
 	EWASMBlock *big.Int `json:"ewasmBlock,omitempty"` // EWASM switch block (nil = no fork, 0 = already activated)
 
 	UpdateGasLimitBlock *big.Int `json:"updateGaslimitBlock,omitempty"` //  UpdateGasLimitBlock witch block (nil = no fork, 0 = already activated)
-	EigenDaBlock        *big.Int `json:"eigenDaBlock,omitempty"`        //  EigenDaBlock witch block (nil = no fork, 0 = already activated)
 
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
@@ -363,7 +369,6 @@ func (c *ChainConfig) String() string {
 		c.MuirGlacierBlock,
 		c.BerlinBlock,
 		c.UpdateGasLimitBlock,
-		c.EigenDaBlock,
 		engine,
 	)
 }
@@ -433,16 +438,6 @@ func (c *ChainConfig) IsEWASM(num *big.Int) bool {
 // IsUpdateGasLimitBlock returns whether num represents a block number after the UpdateGasLimitBlock fork
 func (c *ChainConfig) IsUpdateGasLimitBlock(num *big.Int) bool {
 	return isForked(c.UpdateGasLimitBlock, num)
-}
-
-// IsEigenDa returns whether num represents a block number after the IsEigenDa fork
-func (c *ChainConfig) IsEigenDa(num *big.Int) bool {
-	// c.eigenda block maybe nil for mainnet
-	// in this case, we have write the code into genesis.json
-	if c.EigenDaBlock == nil && c.ChainID.Int64() == MainnetChainID {
-		return false
-	}
-	return c.EigenDaBlock.Cmp(num) == 0
 }
 
 // IsSDUpdate returns whether num represents a block number after the SD update fork
@@ -560,9 +555,6 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	if isForkIncompatible(c.UpdateGasLimitBlock, newcfg.UpdateGasLimitBlock, head) {
 		return newCompatError("UpdateGasLimitBlock fork block", c.UpdateGasLimitBlock, newcfg.UpdateGasLimitBlock)
 	}
-	if isForkIncompatible(c.EigenDaBlock, newcfg.EigenDaBlock, head) {
-		return newCompatError("EigenDa fork block", c.EigenDaBlock, newcfg.EigenDaBlock)
-	}
 	return nil
 }
 
@@ -653,6 +645,5 @@ func (c *ChainConfig) Rules(num *big.Int) Rules {
 		IsIstanbul:            c.IsIstanbul(num),
 		IsBerlin:              c.IsBerlin(num),
 		IsUpdateGasLimitBlock: c.IsUpdateGasLimitBlock(num),
-		IsEigenDa:             c.IsEigenDa(num),
 	}
 }

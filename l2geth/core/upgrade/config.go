@@ -1,11 +1,13 @@
 package upgrade
 
-import "math/big"
+import (
+	"math/big"
+
+	"github.com/mantlenetworkio/mantle/l2geth/params"
+)
 
 type Config struct {
-	// GasPriceOracleL2Block
-	// Once the Layer 2 block height reaches this threshold, the upgrade operation will be executed
-	GasPriceOracleL2Block *big.Int
+	ChainID *big.Int
 
 	// TssRewardL2Block
 	// Once the Layer 2 block height reaches this threshold, the upgrade operation will be executed
@@ -37,7 +39,7 @@ type Config struct {
 
 var (
 	MainnetConfig = &Config{
-		GasPriceOracleL2Block: big.NewInt(-1),
+		ChainID:               params.MantleMainnetChainID,
 		TssRewardL2Block:      big.NewInt(-1),
 		MantleTokenL2Block:    big.NewInt(-1),
 		EigenDaL2Block:        big.NewInt(-1),
@@ -46,16 +48,16 @@ var (
 	}
 
 	TestnetConfig = &Config{
-		GasPriceOracleL2Block: big.NewInt(0),
+		ChainID:               params.MantleTestnetChainID,
 		TssRewardL2Block:      big.NewInt(11_000_000),
 		MantleTokenL2Block:    big.NewInt(11_000_000),
-		EigenDaL2Block:        big.NewInt(0),
+		EigenDaL2Block:        big.NewInt(8_280_000),
 		UpdateGasLimitL2Block: big.NewInt(0),
 		MockUpgradeL1Block:    big.NewInt(-1),
 	}
 
 	QAConfig = &Config{
-		GasPriceOracleL2Block: big.NewInt(-1),
+		ChainID:               params.MantleQAChainID,
 		TssRewardL2Block:      big.NewInt(-1),
 		MantleTokenL2Block:    big.NewInt(-1),
 		EigenDaL2Block:        big.NewInt(-1),
@@ -63,7 +65,7 @@ var (
 		MockUpgradeL1Block:    big.NewInt(-1),
 	}
 	LocalConfig = &Config{
-		GasPriceOracleL2Block: big.NewInt(-1),
+		ChainID:               params.MantleLocalChainID,
 		TssRewardL2Block:      big.NewInt(-1),
 		MantleTokenL2Block:    big.NewInt(-1),
 		EigenDaL2Block:        big.NewInt(-1),
@@ -71,16 +73,6 @@ var (
 		MockUpgradeL1Block:    big.NewInt(-1),
 	}
 )
-
-func init() {
-
-}
-
-// IsGasPriceOracleV1 returns whether num is either equal to the GasPriceOracleV1 fork block or greater.
-// Compare with L2 BlockNumber
-func (c *Config) IsGasPriceOracleV1(num *big.Int) bool {
-	return isExactBlockForked(c.GasPriceOracleL2Block, num)
-}
 
 // IsTssReward returns whether num is either equal to the TssReward fork block or greater.
 // Compare with L2 BlockNumber

@@ -98,9 +98,6 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	// Create a new environment which holds all relevant information
 	// about the transaction and calling mechanisms.
 	vmenv := vm.NewEVM(context, statedb, config, cfg)
-	if config.IsEigenDa(header.Number) {
-		vmenv.StateDB.SetCode(rcfg.L2GasPriceOracleAddress, rcfg.L2GasPriceOracleCode)
-	}
 
 	upgrade.CheckUpgrade(config.ChainID, vmenv.StateDB, bc.ChainDb(), header.Number, tx.L1BlockNumber())
 
