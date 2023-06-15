@@ -32,13 +32,16 @@ func existUpgradeFlag(db ethdb.Reader, key []byte) bool {
 	exist, err := db.Has(key)
 	if err != nil {
 		log.Error("Failed to check upgrade status", "err", err)
+		return false
 	}
 
 	return exist
 }
 
-func writeUpgradeFlag(db ethdb.Writer, key, data []byte) {
+func writeUpgradeFlag(db ethdb.Writer, key, data []byte) error {
 	if err := db.Put(key, data); err != nil {
 		log.Error("Failed to write upgrade status", "err", err)
+		return err
 	}
+	return nil
 }
