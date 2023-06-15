@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
-	"math/big"
 )
 
 type Method string
@@ -15,9 +14,10 @@ const (
 	AskSlash       Method = "askSlash"
 	SignSlash      Method = "signSlash"
 	SignRollBack   Method = "signRollBack"
+	AskRollBack    Method = "askRollBack"
 
-	SlashTypeLiveness byte = 1
-	SlashTypeCulprit  byte = 2
+	SlashTypeLiveness byte = 0
+	SlashTypeCulprit  byte = 1
 
 	CulpritErrorCode = 100
 )
@@ -27,8 +27,10 @@ func (m Method) String() string {
 }
 
 type SignStateRequest struct {
+	Type                uint64     `json:"type"`
 	StartBlock          string     `json:"start_block"`
 	OffsetStartsAtIndex string     `json:"offset_starts_at_index"`
+	Challenge           string     `json:"challenge"`
 	StateRoots          [][32]byte `json:"state_roots"`
 	ElectionId          uint64     `json:"election_id"`
 }
@@ -64,9 +66,6 @@ type NodeSignRequest struct {
 
 type SignResponse struct {
 	Signature             []byte   `json:"signature"`
-	SlashTxBytes          []byte   `json:"slash_tx_bytes"`
-	SlashTxGasPrice       string   `json:"slash_tx_gas_price"`
-	SlashTxGasPriceBigInt *big.Int `json:"slash_tx_gas_price_big_int"`
 }
 
 type KeygenRequest struct {

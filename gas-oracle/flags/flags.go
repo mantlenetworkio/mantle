@@ -36,7 +36,7 @@ var (
 	DaFeeContractAddressFlag = cli.StringFlag{
 		Name:   "da-fee-contract-address",
 		Usage:  "Address of DA-Fee-Contract",
-		Value:  "0x9109811E8eEe02520219612bB5D47C60c382F4aa",
+		Value:  "0x9700cA34e333BCfa83ee7eA9de998a876474Dc2c",
 		EnvVar: "GAS_PRICE_ORACLE_DA_FEE_CONTRACT_ADDRESS",
 	}
 	PrivateKeyFlag = cli.StringFlag{
@@ -114,13 +114,13 @@ var (
 	}
 	L1BaseFeeSignificanceFactorFlag = cli.Float64Flag{
 		Name:   "l1-base-fee-significant-factor",
-		Value:  0.10,
+		Value:  0.05,
 		Usage:  "only update when the L1 base fee changes by more than this factor",
 		EnvVar: "GAS_PRICE_ORACLE_L1_BASE_FEE_SIGNIFICANT_FACTOR",
 	}
 	DaFeeSignificanceFactorFlag = cli.Float64Flag{
 		Name:   "da-fee-significant-factor",
-		Value:  0.10,
+		Value:  0.05,
 		Usage:  "only update when the L1 base fee changes by more than this factor",
 		EnvVar: "GAS_PRICE_ORACLE_DA_FEE_SIGNIFICANT_FACTOR",
 	}
@@ -130,11 +130,11 @@ var (
 		Usage:  "only update when the gas price changes by more than this factor",
 		EnvVar: "GAS_PRICE_ORACLE_SIGNIFICANT_FACTOR",
 	}
-	BybitBackendURL = cli.StringFlag{
-		Name:   "bybitBackendURL",
-		Value:  "https://api.bybit.com",
-		Usage:  "bybit exchange backend url",
-		EnvVar: "BYBIT_BACKEND_URL",
+	PriceBackendURL = cli.StringFlag{
+		Name:     "PriceBackendURL",
+		Usage:    "price exchange backend url",
+		EnvVar:   "PRICE_BACKEND_URL",
+		Required: true,
 	}
 	TokenPricerUpdateFrequencySecond = cli.Uint64Flag{
 		Name:   "tokenPricerUpdateFrequencySecond",
@@ -193,6 +193,26 @@ var (
 		Value:  "test",
 		EnvVar: "GAS_PRICE_ORACLE_METRICS_INFLUX_DB_PASSWORD",
 	}
+	EnableHsmFlag = cli.BoolFlag{
+		Name:   "enable-hsm",
+		Usage:  "Enalbe the hsm",
+		EnvVar: "GAS_PRICE_ORACLE_ENABLE_HSM",
+	}
+	HsmAPINameFlag = cli.StringFlag{
+		Name:   "hsm-api-name",
+		Usage:  "the api name of hsm",
+		EnvVar: "GAS_PRICE_ORACLE_HSM_API_NAME",
+	}
+	HsmAddressFlag = cli.StringFlag{
+		Name:   "hsm-address",
+		Usage:  "the address of hsm key",
+		EnvVar: "GAS_PRICE_ORACLE_HSM_ADDRESS",
+	}
+	HsmCredenFlag = cli.StringFlag{
+		Name:   "hsm-creden",
+		Usage:  "the creden of hsm key",
+		EnvVar: "GAS_PRICE_ORACLE_HSM_CREDEN",
+	}
 )
 
 var Flags = []cli.Flag{
@@ -215,12 +235,16 @@ var Flags = []cli.Flag{
 	L1BaseFeeEpochLengthSecondsFlag,
 	DaFeeEpochLengthSecondsFlag,
 	L2GasPriceSignificanceFactorFlag,
-	BybitBackendURL,
+	PriceBackendURL,
 	TokenPricerUpdateFrequencySecond,
 	WaitForReceiptFlag,
 	EnableL1BaseFeeFlag,
 	EnableL2GasPriceFlag,
 	EnableDaFeeFlag,
+	EnableHsmFlag,
+	HsmAddressFlag,
+	HsmAPINameFlag,
+	HsmCredenFlag,
 	MetricsEnabledFlag,
 	MetricsHTTPFlag,
 	MetricsPortFlag,

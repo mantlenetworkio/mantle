@@ -3,6 +3,8 @@ package router
 import (
 	"errors"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"math/big"
 	"net/http"
 	"strconv"
@@ -43,13 +45,22 @@ func (registry *Registry) SignStateHandler() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, errors.New("wrong OffsetStartsAtIndex, can not be converted to number"))
 			return
 		}
-		signature, err := registry.signService.SignStateBatch(request)
+		var signature []byte
+		var err error
+		if request.Type == 0 {
+			signature, err = registry.signService.SignStateBatch(request)
+		} else if request.Type == 1 {
+			if !common.IsHexAddress(request.Challenge) {
+				c.JSON(http.StatusBadRequest, errors.New("wrong challenge address, can not be converted to hex address"))
+				return
+			}
+			signature, err = registry.signService.SignRollBack(request)
+		}
 		if err != nil {
 			c.String(http.StatusInternalServerError, "failed to sign state")
 			log.Error("failed to sign state", "error", err)
 			return
 		}
-
 		if _, err = c.Writer.Write(signature); err != nil {
 			log.Error("failed to write signature to response writer", "error", err)
 		}
@@ -106,5 +117,18 @@ func (registry *Registry) DeleteSlashHandler() gin.HandlerFunc {
 		}
 		registry.adminService.RemoveSlashingInfo(address, uint64(index))
 		c.String(http.StatusOK, "success")
+	}
+}
+
+func (registry *Registry) PrometheusHandler() gin.HandlerFunc {
+	h := promhttp.InstrumentMetricHandler(
+		prometheus.DefaultRegisterer, promhttp.HandlerFor(
+			prometheus.DefaultGatherer,
+			promhttp.HandlerOpts{MaxRequestsInFlight: 3},
+		),
+	)
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
 	}
 }

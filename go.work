@@ -1,21 +1,19 @@
 go 1.18
 
-use (
-	./batch-submitter
-	./bss-core
-	./gas-oracle
-	./l2geth
-	./l2geth-exporter
-	./mt-batcher
-	./mt-challenger
-	./proxyd
-	./state-surgery
-	./subsidy
-	./tss
-	integration-tests/go-tests
+replace (
+	github.com/Layr-Labs/datalayr/common v0.0.0 => ./datalayr/common
+	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0 => ./datalayr/lib/merkzg
+	github.com/ethereum/go-ethereum v1.10.21 => github.com/ethereum-mantle/reference-optimistic-geth v0.0.0-20220803173305-1c9d4cc76a6e
+	github.com/mantlenetworkio/mantle/bss-core v0.0.0 => ./bss-core
+	github.com/mantlenetworkio/mantle/fraud-proof v0.0.0 => ./fraud-proof
+	github.com/mantlenetworkio/mantle/gas-oracle v0.0.0 => ./gas-oracle
+	github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ./l2geth
+	github.com/mantlenetworkio/mantle/metrics v0.0.0 => ./metrics
+	github.com/mantlenetworkio/mantle/mt-batcher v0.0.0 => ./mt-batcher
+	github.com/mantlenetworkio/mantle/mt-challenger v0.0.0 => ./mt-challenger
+	github.com/mantlenetworkio/mantle/subsidy v0.0.0 => ./subsidy
+	github.com/mantlenetworkio/mantle/tss v0.0.0 => ./tss
 )
-
-replace github.com/ethereum/go-ethereum v1.10.21 => github.com/ethereum-mantle/reference-optimistic-geth v0.0.0-20220803173305-1c9d4cc76a6e
 
 // For local debugging:
 //replace github.com/ethereum/go-ethereum v1.10.21 => ../go-ethereum

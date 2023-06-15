@@ -32,13 +32,18 @@ type Config struct {
 	l1BaseFeeEpochLengthSeconds      uint64
 	daFeeEpochLengthSeconds          uint64
 	l2GasPriceSignificanceFactor     float64
-	bybitBackendURL                  string
+	PriceBackendURL                  string
 	tokenPricerUpdateFrequencySecond uint64
 	l1BaseFeeSignificanceFactor      float64
 	daFeeSignificanceFactor          float64
 	enableL1BaseFee                  bool
 	enableL2GasPrice                 bool
 	enableDaFee                      bool
+	// hsm config
+	EnableHsm  bool
+	HsmAPIName string
+	HsmCreden  string
+	HsmAddress string
 	// Metrics config
 	MetricsEnabled          bool
 	MetricsHTTP             string
@@ -66,7 +71,7 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.l1BaseFeeEpochLengthSeconds = ctx.GlobalUint64(flags.L1BaseFeeEpochLengthSecondsFlag.Name)
 	cfg.daFeeEpochLengthSeconds = ctx.GlobalUint64(flags.DaFeeEpochLengthSecondsFlag.Name)
 	cfg.l2GasPriceSignificanceFactor = ctx.GlobalFloat64(flags.L2GasPriceSignificanceFactorFlag.Name)
-	cfg.bybitBackendURL = ctx.GlobalString(flags.BybitBackendURL.Name)
+	cfg.PriceBackendURL = ctx.GlobalString(flags.PriceBackendURL.Name)
 	cfg.tokenPricerUpdateFrequencySecond = ctx.GlobalUint64(flags.TokenPricerUpdateFrequencySecond.Name)
 	cfg.floorPrice = ctx.GlobalUint64(flags.FloorPriceFlag.Name)
 	cfg.l1BaseFeeSignificanceFactor = ctx.GlobalFloat64(flags.L1BaseFeeSignificanceFactorFlag.Name)
@@ -74,17 +79,26 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.enableL1BaseFee = ctx.GlobalBool(flags.EnableL1BaseFeeFlag.Name)
 	cfg.enableL2GasPrice = ctx.GlobalBool(flags.EnableL2GasPriceFlag.Name)
 	cfg.enableDaFee = ctx.GlobalBool(flags.EnableDaFeeFlag.Name)
+	cfg.EnableHsm = ctx.GlobalBool(flags.EnableHsmFlag.Name)
+	cfg.HsmAddress = ctx.GlobalString(flags.HsmAddressFlag.Name)
+	cfg.HsmAPIName = ctx.GlobalString(flags.HsmAPINameFlag.Name)
+	cfg.HsmCreden = ctx.GlobalString(flags.HsmCredenFlag.Name)
 
-	if ctx.GlobalIsSet(flags.PrivateKeyFlag.Name) {
-		hex := ctx.GlobalString(flags.PrivateKeyFlag.Name)
-		hex = strings.TrimPrefix(hex, "0x")
-		key, err := crypto.HexToECDSA(hex)
-		if err != nil {
-			log.Error(fmt.Sprintf("Option %q: %v", flags.PrivateKeyFlag.Name, err))
-		}
-		cfg.privateKey = key
+	if cfg.EnableHsm {
+		log.Info("gasoracle", "enable hsm", cfg.EnableHsm,
+			"hsm address", cfg.HsmAddress)
 	} else {
-		log.Crit("No private key configured")
+		if ctx.GlobalIsSet(flags.PrivateKeyFlag.Name) {
+			hex := ctx.GlobalString(flags.PrivateKeyFlag.Name)
+			hex = strings.TrimPrefix(hex, "0x")
+			key, err := crypto.HexToECDSA(hex)
+			if err != nil {
+				log.Error(fmt.Sprintf("Option %q: %v", flags.PrivateKeyFlag.Name, err))
+			}
+			cfg.privateKey = key
+		} else {
+			log.Crit("No private key configured")
+		}
 	}
 
 	if ctx.GlobalIsSet(flags.L1ChainIDFlag.Name) {

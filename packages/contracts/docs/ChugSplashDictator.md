@@ -10,10 +10,10 @@
 
 ## Methods
 
-### bitAddressSlotKey
+### mantleAddressSlotKey
 
 ```solidity
-function bitAddressSlotKey() external view returns (bytes32)
+function mantleAddressSlotKey() external view returns (bytes32)
 ```
 
 
@@ -27,10 +27,10 @@ function bitAddressSlotKey() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined
 
-### bitAddressSlotVal
+### mantleAddressSlotVal
 
 ```solidity
-function bitAddressSlotVal() external view returns (bytes32)
+function mantleAddressSlotVal() external view returns (bytes32)
 ```
 
 

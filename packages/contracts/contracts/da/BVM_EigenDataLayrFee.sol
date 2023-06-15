@@ -5,8 +5,9 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract BVM_EigenDataLayrFee is OwnableUpgradeable, ReentrancyGuardUpgradeable {
+contract BVM_EigenDataLayrFee is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
     using AddressUpgradeable for address;
 
@@ -15,6 +16,10 @@ contract BVM_EigenDataLayrFee is OwnableUpgradeable, ReentrancyGuardUpgradeable 
 
     event RollupFeeHistory(uint256 l2Block, uint256 userRollupFee);
 
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(address _address) public initializer {
         __Ownable_init();
         userRollupFee = 0;
@@ -22,6 +27,7 @@ contract BVM_EigenDataLayrFee is OwnableUpgradeable, ReentrancyGuardUpgradeable 
     }
 
     function setFeeAddress(address _address) public onlyOwner {
+        require(_address != address(0), "setFeeAddress: address is the zero address");
         gasFeeAddress = _address;
     }
 

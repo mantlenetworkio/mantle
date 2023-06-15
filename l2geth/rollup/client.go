@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	gresty "github.com/go-resty/resty/v2"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"math/big"
 	"strconv"
 
@@ -133,6 +134,7 @@ type RollupClient interface {
 	GetLatestTransaction(Backend) (*types.Transaction, error)
 	GetLatestTransactionIndex(Backend) (*uint64, error)
 	GetStateRoot(uint64, Backend) (*StateRoot, error)
+	GetTxStatusResponse(uint64, Backend) (*types.TxStatusResponse, error)
 	GetEthContext(uint64) (*EthContext, error)
 	GetLatestEthContext() (*EthContext, error)
 	GetLastConfirmedEnqueue() (*types.Transaction, error)
@@ -516,6 +518,38 @@ func (c *Client) GetStateRoot(index uint64, backend Backend) (*StateRoot, error)
 		return nil, errElementNotFound
 	}
 	return res.StateRoot, nil
+}
+
+func (c *Client) GetTxStatusResponse(index uint64, backend Backend) (*types.TxStatusResponse, error) {
+	str := strconv.FormatUint(index, 10)
+	var QueryParam string
+	if backend.String() == "da" || backend.String() == "l2" {
+		QueryParam = "l1"
+	} else {
+		QueryParam = backend.String()
+	}
+	log.Info("GetTxStatusResponse", "QueryParam", QueryParam, "backend.string", backend.String())
+	response, err := c.client.R().
+		SetPathParams(map[string]string{
+			"index": str,
+		}).
+		SetQueryParams(map[string]string{
+			"backend": QueryParam,
+		}).
+		SetResult(&types.TxStatusResponse{}).
+		Get("/tx/status/index/{index}")
+
+	if err != nil {
+		return nil, fmt.Errorf("cannot fetch transaction: %w", err)
+	}
+	res, ok := response.Result().(*types.TxStatusResponse)
+	if !ok {
+		return nil, fmt.Errorf("could not get tx with index %d", index)
+	}
+	if res.StateRoot == nil {
+		return nil, errElementNotFound
+	}
+	return res, nil
 }
 
 // GetEthContext will return the EthContext by block number

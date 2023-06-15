@@ -1,4 +1,5 @@
 import { ethers } from 'ethers'
+import { type } from 'os'
 
 /**
  * Defines the configuration for a deployment.
@@ -78,6 +79,11 @@ export interface DeployConfig {
    * Address of the Proposer (publishes to SCC).
    */
   bvmProposerAddress: string
+
+  /**
+   * Address of the Rolluper (publishes to Rollup).
+   */
+  bvmRolluperAddress: string
 
   /**
    * Address of the account that will sign blocks.
@@ -163,6 +169,17 @@ export interface DeployConfig {
    * Optional block number to enable the Berlin hardfork (default: 0).
    */
   hfBerlinBlock?: number
+
+  /**
+   * deployer privete key
+   */
+  contractsDeployerKey: string
+
+  /**
+   * deployer rpc url
+   */
+  contractsRpcUrl: string
+
 }
 
 /**
@@ -220,6 +237,9 @@ const configSpec: {
     type: 'address',
   },
   bvmProposerAddress: {
+    type: 'address',
+  },
+  bvmRolluperAddress: {
     type: 'address',
   },
   bvmBlockSignerAddress: {
@@ -281,6 +301,12 @@ const configSpec: {
   hfBerlinBlock: {
     type: 'number',
     default: 0,
+  },
+  contractsDeployerKey: {
+    type: 'string',
+  },
+  contractsRpcUrl: {
+    type: 'string',
   },
 }
 

@@ -1,9 +1,13 @@
 package sequencer
 
 import (
+	kms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"fmt"
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
+	"google.golang.org/api/option"
 	"math/big"
 	"strings"
 
@@ -15,6 +19,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/ctc"
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/da"
 	"github.com/mantlenetworkio/mantle/bss-core/drivers"
@@ -42,6 +47,10 @@ type Config struct {
 	DAAddr                common.Address
 	ChainID               *big.Int
 	PrivKey               *ecdsa.PrivateKey
+	EnableSequencerHsm    bool
+	SequencerHsmAddress   string
+	SequencerHsmAPIName   string
+	SequencerHsmCreden    string
 	BatchType             BatchType
 }
 
@@ -62,6 +71,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.CTCAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewCanonicalTransactionChain in error", "error", err)
 		return nil, err
 	}
 
@@ -69,11 +79,13 @@ func NewDriver(cfg Config) (*Driver, error) {
 		ctc.CanonicalTransactionChainABI,
 	))
 	if err != nil {
+		log.Error("Parse CanonicalTransactionChain in error", "error", err)
 		return nil, err
 	}
 
 	ctcABI, err := ctc.CanonicalTransactionChainMetaData.GetAbi()
 	if err != nil {
+		log.Error("Get CanonicalTransactionChain ABI in error", "error", err)
 		return nil, err
 	}
 
@@ -86,17 +98,20 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.DAAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewBVMEigenDataLayrChain in error", "error", err)
 		return nil, err
 	}
 	daParsed, err := abi.JSON(strings.NewReader(
 		da.BVMEigenDataLayrChainABI,
 	))
 	if err != nil {
+		log.Error("Parse BVMEigenDataLayrChain in error", "error", err)
 		return nil, err
 	}
 
 	daABI, err := da.BVMEigenDataLayrChainMetaData.GetAbi()
 	if err != nil {
+		log.Error("Get BVMEigenDataLayrChain ABI in error", "error", err)
 		return nil, err
 	}
 
@@ -105,7 +120,14 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.L1Client,
 	)
 
-	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+	var walletAddr common.Address
+	if cfg.EnableSequencerHsm {
+		walletAddr = common.HexToAddress(cfg.SequencerHsmAddress)
+		log.Info("use sequencer hsm", "walletaddr", walletAddr)
+	} else {
+		walletAddr = crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+		log.Info("not use sequencer hsm", "walletaddr", walletAddr)
+	}
 
 	return &Driver{
 		cfg:              cfg,
@@ -314,9 +336,34 @@ func (d *Driver) CraftBatchTx(
 			"final_size", len(calldata),
 			"batch_type", d.cfg.BatchType)
 
-		opts, err := bind.NewKeyedTransactorWithChainID(
-			d.cfg.PrivKey, d.cfg.ChainID,
-		)
+		var opts *bind.TransactOpts
+		if d.cfg.EnableSequencerHsm {
+			seqBytes, err := hex.DecodeString(d.cfg.SequencerHsmCreden)
+			apikey := option.WithCredentialsJSON(seqBytes)
+			client, err := kms.NewKeyManagementClient(ctx, apikey)
+			if err != nil {
+				log.Info("sequencer", "create signer error", err.Error())
+				return nil, err
+			}
+			mk := &bsscore.ManagedKey{
+				KeyName:      d.cfg.SequencerHsmAPIName,
+				EthereumAddr: common.HexToAddress(d.cfg.SequencerHsmAddress),
+				Gclient:      client,
+			}
+			opts, err = mk.NewEthereumTransactorrWithChainID(ctx, d.cfg.ChainID)
+			if err != nil {
+				log.Info("sequencer", "create signer error", err.Error())
+				return nil, err
+			}
+		} else {
+			opts, err = bind.NewKeyedTransactorWithChainID(
+				d.cfg.PrivKey, d.cfg.ChainID,
+			)
+			if err != nil {
+				log.Info("sequencer", "create signer error", err.Error())
+				return nil, err
+			}
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -396,9 +443,26 @@ func (d *Driver) UpdateGasPrice(
 		return nil, err
 	}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(
-		d.cfg.PrivKey, d.cfg.ChainID,
-	)
+	var opts *bind.TransactOpts
+	if d.cfg.EnableSequencerHsm {
+		seqBytes, err := hex.DecodeString(d.cfg.SequencerHsmCreden)
+		apikey := option.WithCredentialsJSON(seqBytes)
+		client, err := kms.NewKeyManagementClient(ctx, apikey)
+		if err != nil {
+			return nil, err
+		}
+		mk := &bsscore.ManagedKey{
+			KeyName:      d.cfg.SequencerHsmAPIName,
+			EthereumAddr: common.HexToAddress(d.cfg.SequencerHsmAddress),
+			Gclient:      client,
+		}
+		opts, err = mk.NewEthereumTransactorrWithChainID(ctx, d.cfg.ChainID)
+		log.Info("sequencer", "enable-hsm", true)
+	} else {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			d.cfg.PrivKey, d.cfg.ChainID,
+		)
+	}
 	if err != nil {
 		return nil, err
 	}

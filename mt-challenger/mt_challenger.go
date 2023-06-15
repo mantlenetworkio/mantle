@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/Layr-Labs/datalayr/common/logging"
 	ethc "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/l1l2client"
@@ -12,7 +11,6 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-challenger/challenger"
 	"github.com/mantlenetworkio/mantle/mt-challenger/metrics"
 	"github.com/urfave/cli"
-	"math/big"
 	"time"
 )
 
@@ -59,15 +57,10 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			go metrics.StartServer(cfg.MetricsHostname, cfg.MetricsPort)
 		}
 
-		signer := func(chainID *big.Int) challenger.SignerFn {
-			s := common2.PrivateKeySignerFn(challengerPrivKey, chainID)
-			return func(_ context.Context, addr ethc.Address, tx *types.Transaction) (*types.Transaction, error) {
-				return s(addr, tx)
-			}
-		}
 		challengerConfig := &challenger.ChallengerConfig{
 			L1Client:                  l1Client,
 			L2Client:                  l2Client,
+			L1ChainID:                 chainID,
 			EigenContractAddr:         ethc.Address(common.HexToAddress(cfg.EigenContractAddress)),
 			Logger:                    logger,
 			PrivKey:                   challengerPrivKey,
@@ -81,12 +74,17 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			CheckerBatchIndex:         cfg.CheckerBatchIndex,
 			NeedReRollupBatch:         cfg.NeedReRollupBatch,
 			ReRollupToolEnable:        cfg.ReRollupToolEnable,
-			SignerFn:                  signer(chainID),
 			ResubmissionTimeout:       cfg.ResubmissionTimeout,
 			NumConfirmations:          cfg.NumConfirmations,
 			SafeAbortNonceTooLowCount: cfg.SafeAbortNonceTooLowCount,
 			Metrics:                   metrics.NewChallengerBase(),
+			EnableHsm:                 cfg.EnableHsm,
+			HsmCreden:                 cfg.HsmCreden,
+			HsmAPIName:                cfg.HsmAPIName,
+			HsmAddress:                cfg.HsmAddress,
 		}
+		log.Info("challenger hsm", "EnableHsm", cfg.EnableHsm,
+			"HsmCreden", cfg.HsmCreden, "HsmAPIName", cfg.HsmAPIName, "HsmAddress", cfg.HsmAddress)
 		cLager, err := challenger.NewChallenger(ctx, challengerConfig)
 		if err != nil {
 			return err

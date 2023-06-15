@@ -1,8 +1,13 @@
 package oracle
 
 import (
+	kms "cloud.google.com/go/kms/apiv1"
 	"context"
+	"encoding/hex"
 	"errors"
+	"github.com/ethereum/go-ethereum/common"
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
+	"google.golang.org/api/option"
 	"math/big"
 	"time"
 
@@ -63,16 +68,37 @@ type DeployContractBackend interface {
 // perhaps this should take an options struct along with the backend?
 // how can this continue to be decomposed?
 func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(uint64) error, error) {
-	if cfg.privateKey == nil {
-		return nil, errNoPrivateKey
-	}
-	if cfg.l2ChainID == nil {
-		return nil, errNoChainID
-	}
+	var opts *bind.TransactOpts
+	var err error
+	if !cfg.EnableHsm {
+		if cfg.privateKey == nil {
+			return nil, errNoPrivateKey
+		}
+		if cfg.l2ChainID == nil {
+			return nil, errNoChainID
+		}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(cfg.privateKey, cfg.l2ChainID)
-	if err != nil {
-		return nil, err
+		opts, err = bind.NewKeyedTransactorWithChainID(cfg.privateKey, cfg.l2ChainID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		seqBytes, err := hex.DecodeString(cfg.HsmCreden)
+		apikey := option.WithCredentialsJSON(seqBytes)
+		client, err := kms.NewKeyManagementClient(context.Background(), apikey)
+		if err != nil {
+			log.Crit("gasoracle", "create signer error", err.Error())
+		}
+		mk := &bsscore.ManagedKey{
+			KeyName:      cfg.HsmAPIName,
+			EthereumAddr: common.HexToAddress(cfg.HsmAddress),
+			Gclient:      client,
+		}
+		opts, err = mk.NewEthereumTransactorrWithChainID(context.Background(), cfg.l2ChainID)
+		if err != nil {
+			log.Crit("gasoracle", "create signer error", err.Error())
+			return nil, err
+		}
 	}
 
 	// Don't send the transaction using the `contract` so that we can inspect

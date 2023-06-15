@@ -38,23 +38,21 @@ task('getImp')
 
 task('setCode')
   .addParam('contract', 'proxy address')
-  .setAction(async (taskArgs, hre) => {
-    const accounts = await hre.ethers.getSigners()
-    const ownerWallet = new ethers.Wallet(
-      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
-      accounts[0].provider
+  .setAction(async (taskArgs) => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://localhost:9545'
     )
+    const proposerKey = process.env.BVM_ADDRESS_MANAGER_KEY
+    const ownerWallet = new ethers.Wallet(proposerKey, provider)
     const l1ChugSplashProxy = getContractFactory('L1ChugSplashProxy').attach(
       taskArgs.contract
     )
     console.log('Query before setCode')
     console.log(
       'Implementation :',
-      await l1ChugSplashProxy
-        .connect(accounts[0].provider)
-        .callStatic.getImplementation({
-          from: ethers.constants.AddressZero,
-        })
+      await l1ChugSplashProxy.connect(provider).callStatic.getImplementation({
+        from: ethers.constants.AddressZero,
+      })
     )
 
     const upgrade = getContractDefinition('L1StandardBridgeUpgrade')
@@ -70,16 +68,16 @@ task('setCode')
     console.log('Query after setCode')
     console.log(
       'Implementation :',
-      await l1ChugSplashProxy
-        .connect(accounts[0].provider)
-        .callStatic.getImplementation({
-          from: ethers.constants.AddressZero,
-        })
+      await l1ChugSplashProxy.connect(provider).callStatic.getImplementation({
+        from: ethers.constants.AddressZero,
+      })
     )
 
     console.log(
       'version: ',
-      await upgradeContract.connect(accounts[0]).getVersion()
+      await upgradeContract.connect(ownerWallet.provider).getVersion({
+        from: ethers.constants.AddressZero,
+      })
     )
   })
 

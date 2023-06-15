@@ -1449,7 +1449,8 @@ func (s *SyncService) syncEigenTransactionBatchRange(start, end uint64) error {
 					return fmt.Errorf("cannot get rollup store by batch index from dtl: %w", err)
 				}
 				if dtlRollupInfo.DataStoreId != 0 {
-					txs, err := s.dtlEigenClient.GetDtlBatchTransactionByDataStoreId(dtlRollupInfo.DataStoreId)
+					log.Info("Dtl rollup upgrade datastore id", "upgradeDatastoreId", dtlRollupInfo.UpgradeDataStoreId)
+					txs, err := s.dtlEigenClient.GetDtlBatchTransactionByDataStoreId(dtlRollupInfo.DataStoreId + dtlRollupInfo.UpgradeDataStoreId)
 					if err != nil {
 						return fmt.Errorf("cannot get eigen transaction batch from dtl: %w", err)
 					}
@@ -1608,4 +1609,20 @@ func (s *SyncService) verifyTx(tx *types.Transaction) (bool, error) {
 	} else {
 		return true, nil
 	}
+}
+
+func (s *SyncService) GetTxStatusByNumber(number uint64) (*types.TxStatusResponse, error) {
+	index := number - 1
+	if index < 0 {
+		return nil, errors.New("index should bigger or equal than 0")
+	}
+	stateRsp, err := s.client.GetTxStatusResponse(index, s.backend)
+	if err != nil {
+		return nil, err
+	}
+	if stateRsp == nil {
+		return nil, errors.New("tx status not ready")
+	}
+
+	return stateRsp, nil
 }

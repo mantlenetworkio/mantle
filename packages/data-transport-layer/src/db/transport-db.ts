@@ -39,9 +39,14 @@ const TRANSPORT_DB_KEYS = {
   UNCONFIRMED_STATE_ROOT: `unconfirmed:stateroot`,
   STATE_ROOT_BATCH: `batch:stateroot`,
   STARTING_L1_BLOCK: `l1:starting`,
+  HIGHEST_L1_BLOCK: `l1:highest`,
   HIGHEST_L2_BLOCK: `l2:highest`,
   HIGHEST_SYNCED_BLOCK: `synced:highest`,
   CONSISTENCY_CHECK: `consistency:checked`,
+  STATE_ROOT_CACHED: `staterootcached`,
+  STATE_ROOT_BATCH_CACHED: `batch:staterootcached`,
+  STATE_ROOT_CACHE_HEIGHT: `cached:highest`,
+  FRAUD_PROOF_WINDOW: `fraudproofwindow`,
 }
 
 interface Indexed {
@@ -218,6 +223,24 @@ export class TransportDB {
     await this._putEntries(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH, entries)
   }
 
+  public async putStateRootCachedEntries(entries: StateRootEntry[]): Promise<void> {
+    await this._putEntries(TRANSPORT_DB_KEYS.STATE_ROOT_CACHED, entries)
+  }
+
+  public async putStateRootCachedBatchEntries(
+    entries: StateRootBatchEntry[]
+  ): Promise<void> {
+    await this._putEntries(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH_CACHED, entries)
+  }
+
+  public async deleteStateRootCachedEntries(entries: StateRootEntry[]): Promise<void> {
+    await this._delEntries(TRANSPORT_DB_KEYS.STATE_ROOT_CACHED, entries)
+  }
+
+  public async deleteStateRootCachedBatchEntries(entries: StateRootBatchEntry[]): Promise<void> {
+    await this._delEntries(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH_CACHED, entries)
+  }
+
   public async putTransactionIndexByQueueIndex(
     queueIndex: number,
     index: number
@@ -276,6 +299,10 @@ export class TransportDB {
     return this._getEntryByIndex(TRANSPORT_DB_KEYS.STATE_ROOT, index)
   }
 
+  public async getStateRootCachedByIndex(index: number): Promise<StateRootEntry> {
+    return this._getEntryByIndex(TRANSPORT_DB_KEYS.STATE_ROOT_CACHED, index)
+  }
+
   public async getUnconfirmedStateRootByIndex(
     index: number
   ): Promise<StateRootEntry> {
@@ -297,6 +324,13 @@ export class TransportDB {
   ): Promise<StateRootBatchEntry> {
     return this._getEntryByIndex(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH, index)
   }
+
+  public async getStateRootBatchCachedByIndex(
+    index: number
+  ): Promise<StateRootBatchEntry> {
+    return this._getEntryByIndex(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH_CACHED, index)
+  }
+
 
   public async getLatestEnqueue(): Promise<EnqueueEntry> {
     return this._getLatestEntry(TRANSPORT_DB_KEYS.ENQUEUE)
@@ -332,8 +366,20 @@ export class TransportDB {
     return this._getLatestEntry(TRANSPORT_DB_KEYS.STATE_ROOT_BATCH)
   }
 
+  public async getHighestL1BlockNumber(): Promise<number> {
+    return this.db.get<number>(TRANSPORT_DB_KEYS.HIGHEST_L1_BLOCK, 0)
+  }
+
   public async getHighestL2BlockNumber(): Promise<number> {
     return this.db.get<number>(TRANSPORT_DB_KEYS.HIGHEST_L2_BLOCK, 0)
+  }
+
+  public async getFraudProofWindow(): Promise<number> {
+    return this.db.get<number>(TRANSPORT_DB_KEYS.FRAUD_PROOF_WINDOW, 0)
+  }
+
+  public async getStateRootCacheHeight(): Promise<number> {
+    return this.db.get<number>(TRANSPORT_DB_KEYS.STATE_ROOT_CACHE_HEIGHT, 0)
   }
 
   public async getConsistencyCheckFlag(): Promise<boolean> {
@@ -349,6 +395,44 @@ export class TransportDB {
       },
     ])
   }
+
+  public async putHighestL1BlockNumber(
+    block: number | BigNumber
+  ): Promise<void> {
+    return this.db.put<number>([
+      {
+        key: TRANSPORT_DB_KEYS.HIGHEST_L1_BLOCK,
+        index: 0,
+        value: BigNumber.from(block).toNumber(),
+      },
+    ])
+  }
+
+  public async putStateRootCacheHeight(
+    block: number | BigNumber
+  ): Promise<void> {
+    return this.db.put<number>([
+      {
+        key: TRANSPORT_DB_KEYS.STATE_ROOT_CACHE_HEIGHT,
+        index: 0,
+        value: BigNumber.from(block).toNumber(),
+      },
+    ])
+  }
+
+  public async putFraudProofWindow(
+    window: number | BigNumber
+  ): Promise<void> {
+
+    return this.db.put<number>([
+      {
+        key: TRANSPORT_DB_KEYS.FRAUD_PROOF_WINDOW,
+        index: 0,
+        value: BigNumber.from(window).toNumber(),
+      },
+    ])
+  }
+
 
   public async putHighestL2BlockNumber(
     block: number | BigNumber
@@ -590,5 +674,24 @@ export class TransportDB {
   ): Promise<void> {
     await this._putLatestEntryIndex(key, entries.length - 1)
     await this._putEntries(key, entries)
+  }
+
+  private async _delEntries<TEntry extends Indexed>(
+    key: string,
+    entries: TEntry[]
+  ): Promise<void> {
+    if (entries.length === 0) {
+      return
+    }
+
+    await this.db.del<TEntry>(
+      entries.map((entry) => {
+        return {
+          key: `${key}:index`,
+          index: entry.index,
+          value: entry,
+        }
+      })
+    )
   }
 }
