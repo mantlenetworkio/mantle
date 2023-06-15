@@ -26,8 +26,6 @@ func (s SlashingNode) AfterStateBatchIndexed(root [32]byte) error {
 		return errors.New("can not find the state batch with root: " + hexutil.Encode(root[:]))
 	}
 
-	log.Info("--------", "working", len(stateBatch.WorkingNodes), "no working", len(stateBatch.AbsentNodes))
-
 	// update signingInfo for absent nodes
 	for _, absentNode := range stateBatch.AbsentNodes {
 		address, err := tss.NodeToAddress(absentNode)
