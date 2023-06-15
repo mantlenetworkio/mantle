@@ -7,95 +7,117 @@ import (
 )
 
 type Config struct {
-	ChainID *big.Int
+	chainID *big.Int
 
-	// TssRewardL2Block
+	// tssRewardL2Block
 	// Once the Layer 2 block height reaches this threshold, the upgrade operation will be executed
-	TssRewardL2Block *big.Int
+	tssRewardL2Block *big.Int
 
-	// MantleTokenL2Block
+	// mantleTokenL2Block
 	// Once the Layer 2 block height reaches this threshold, the upgrade operation will be executed
-	MantleTokenL2Block *big.Int
+	mantleTokenL2Block *big.Int
 
-	// UpdateGasLimitL2Block
+	// updateGasLimitL2Block
 	// Once the Layer 2 block height reaches this threshold, the upgrade operation will be executed
-	UpdateGasLimitL2Block *big.Int
+	updateGasLimitL2Block *big.Int
 
-	// EigenDaL2Block
+	// eigenDaL2Block
 	// Once the Layer 2 block height reaches this threshold, the upgrade operation will be executed
-	EigenDaL2Block *big.Int
+	eigenDaL2Block *big.Int
 
-	// MockUpgradeL1Block
+	// mockUpgradeL1Block
 	// Once the Layer 1 block height reaches this threshold, the upgrade operation will be executed
-	MockUpgradeL1Block *big.Int
-	// MantleTokenL2BlockUpgradeStatus record upgrade status for MockUpgradeL1Block
+	mockUpgradeL1Block *big.Int
+	// mockUpgradeL1BlockUpgradeStatus record upgrade status for mockUpgradeL1Block
 	// Record the upgrade status only for upgrades based on L1 block number, as L2 blocks corresponding
 	// to L1 blocks may not have transactions.
 	// By checking if the L1 block number is greater than or equal to a certain value, we can ensure
 	// that the upgrade operation will be triggered.
 	// Also, keep a record of the upgrade to prevent it from being executed repeatedly for subsequent L2 heights.
-	MockUpgradeL1BlockUpgradeStatus bool
+	mockUpgradeL1BlockUpgradeStatus bool
 }
 
 var (
 	MainnetConfig = &Config{
-		ChainID:               params.MantleMainnetChainID,
-		TssRewardL2Block:      big.NewInt(-1),
-		MantleTokenL2Block:    big.NewInt(-1),
-		EigenDaL2Block:        big.NewInt(-1),
-		UpdateGasLimitL2Block: big.NewInt(-1),
-		MockUpgradeL1Block:    big.NewInt(-1),
+		chainID:               params.MantleMainnetChainID,
+		tssRewardL2Block:      big.NewInt(-1),
+		mantleTokenL2Block:    big.NewInt(-1),
+		eigenDaL2Block:        big.NewInt(-1),
+		updateGasLimitL2Block: big.NewInt(-1),
+		mockUpgradeL1Block:    big.NewInt(-1),
 	}
 
 	TestnetConfig = &Config{
-		ChainID:               params.MantleTestnetChainID,
-		TssRewardL2Block:      big.NewInt(11_000_000),
-		MantleTokenL2Block:    big.NewInt(11_000_000),
-		EigenDaL2Block:        big.NewInt(8_280_000),
-		UpdateGasLimitL2Block: big.NewInt(0),
-		MockUpgradeL1Block:    big.NewInt(-1),
+		chainID:               params.MantleTestnetChainID,
+		tssRewardL2Block:      big.NewInt(11_000_000),
+		mantleTokenL2Block:    big.NewInt(11_000_000),
+		eigenDaL2Block:        big.NewInt(8_280_000),
+		updateGasLimitL2Block: big.NewInt(222_073),
+		mockUpgradeL1Block:    big.NewInt(-1),
 	}
 
 	QAConfig = &Config{
-		ChainID:               params.MantleQAChainID,
-		TssRewardL2Block:      big.NewInt(-1),
-		MantleTokenL2Block:    big.NewInt(-1),
-		EigenDaL2Block:        big.NewInt(-1),
-		UpdateGasLimitL2Block: big.NewInt(-1),
-		MockUpgradeL1Block:    big.NewInt(-1),
+		chainID:               params.MantleQAChainID,
+		tssRewardL2Block:      big.NewInt(-1),
+		mantleTokenL2Block:    big.NewInt(-1),
+		eigenDaL2Block:        big.NewInt(-1),
+		updateGasLimitL2Block: big.NewInt(-1),
+		mockUpgradeL1Block:    big.NewInt(-1),
 	}
+
 	LocalConfig = &Config{
-		ChainID:               params.MantleLocalChainID,
-		TssRewardL2Block:      big.NewInt(-1),
-		MantleTokenL2Block:    big.NewInt(-1),
-		EigenDaL2Block:        big.NewInt(-1),
-		UpdateGasLimitL2Block: big.NewInt(-1),
-		MockUpgradeL1Block:    big.NewInt(-1),
+		chainID:               params.MantleLocalChainID,
+		tssRewardL2Block:      big.NewInt(-1),
+		mantleTokenL2Block:    big.NewInt(-1),
+		eigenDaL2Block:        big.NewInt(-1),
+		updateGasLimitL2Block: big.NewInt(-1),
+		mockUpgradeL1Block:    big.NewInt(-1),
 	}
 )
+
+func NewMantleUpgradeConfig(chainID *big.Int) *Config {
+	switch chainID.Int64() {
+	case params.MantleMainnetChainID.Int64():
+		return MainnetConfig
+	case params.MantleTestnetChainID.Int64():
+		return TestnetConfig
+	case params.MantleQAChainID.Int64():
+		return QAConfig
+	case params.MantleLocalChainID.Int64():
+		return LocalConfig
+	default:
+		return LocalConfig
+	}
+}
 
 // IsTssReward returns whether num is either equal to the TssReward fork block or greater.
 // Compare with L2 BlockNumber
 func (c *Config) IsTssReward(num *big.Int) bool {
-	return isExactBlockForked(c.TssRewardL2Block, num)
+	return isExactBlockForked(c.tssRewardL2Block, num)
 }
 
 // IsMantleToken returns whether num is either equal to the IsMantleToken fork block or greater.
 // Compare with L2 BlockNumber
 func (c *Config) IsMantleToken(num *big.Int) bool {
-	return isExactBlockForked(c.MantleTokenL2Block, num)
+	return isExactBlockForked(c.mantleTokenL2Block, num)
 }
 
 // IsEigenDa returns whether num is either equal to the IsEigenDa fork block or greater.
 // Compare with L2 BlockNumber
 func (c *Config) IsEigenDa(num *big.Int) bool {
-	return isExactBlockForked(c.EigenDaL2Block, num)
+	return isExactBlockForked(c.eigenDaL2Block, num)
+}
+
+// IsUpdateGasLimitBlock returns whether num is either equal to the IsUpdateGasLimitBlock fork block or greater.
+// Compare with L2 BlockNumber
+func (c *Config) IsUpdateGasLimitBlock(num *big.Int) bool {
+	return isBlockForked(c.updateGasLimitL2Block, num)
 }
 
 // IsMockUpgradeBasedOnL1BlockNumber returns whether num is either equal to the IsMantleToken fork block or greater.
 // Compare with L1 BlockNumber
 func (c *Config) IsMockUpgradeBasedOnL1BlockNumber(num *big.Int) bool {
-	return isBlockForked(c.MantleTokenL2Block, num)
+	return isBlockForked(c.mockUpgradeL1Block, num)
 }
 
 // isBlockForked returns whether a fork scheduled at block s is active at the

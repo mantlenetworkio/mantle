@@ -34,6 +34,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/consensus/misc"
 	"github.com/mantlenetworkio/mantle/l2geth/core/state"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/core/upgrade"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
@@ -50,9 +51,6 @@ const (
 	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
 
 	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
-
-	preUpgradedGaslimit = 15000000 //this params is only used for testnet
-	testnetChainID      = 5001
 )
 
 // Clique proof-of-authority protocol constants.
@@ -587,12 +585,11 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainReader, header *types.
 	//if UpdateGasLimitBlock not set , will not changed, for mainnet.
 	//if UpdateGasLimitBlock = 0, from the genesis block
 	//if UpdateGasLimitBlock = x, from the x
-	if chain.Config().UpdateGasLimitBlock != nil && chain.Config().ChainID.Int64() == testnetChainID {
+	mantleUpgradeConfig := upgrade.NewMantleUpgradeConfig(chain.Config().ChainID)
+	if !mantleUpgradeConfig.IsUpdateGasLimitBlock(header.Number) {
 		//for testnet, when the UpdateGasLimitBlock  is actived, we must update the gaslimit for all of block
 		//which is after the "updategaslimit" block
-		if !chain.Config().IsUpdateGasLimitBlock(header.Number) {
-			header.GasLimit = preUpgradedGaslimit
-		}
+		header.GasLimit = uint64(upgrade.PreUpgradedGaslimit)
 	}
 
 	// Assemble and return the final block for sealing

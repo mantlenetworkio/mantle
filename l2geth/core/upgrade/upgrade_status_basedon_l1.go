@@ -6,14 +6,14 @@ import (
 )
 
 /*
-	For upgrade based on L1 block number,
+	For upgrade based on L1 block number, record if the upgrade took place.
 */
 
 var (
 	mockUpgradeFlag = []byte("mockUpgradeFlag")
 )
 
-func ReadUpgradeFlag(db ethdb.Reader, key []byte) []byte {
+func readUpgradeFlag(db ethdb.Reader, key []byte) []byte {
 	exist, err := db.Has(key)
 	if err != nil {
 		log.Error("Failed to get upgrade status", "err", err)
@@ -28,7 +28,7 @@ func ReadUpgradeFlag(db ethdb.Reader, key []byte) []byte {
 	return data
 }
 
-func ExistUpgradeFlag(db ethdb.Reader, key []byte) bool {
+func existUpgradeFlag(db ethdb.Reader, key []byte) bool {
 	exist, err := db.Has(key)
 	if err != nil {
 		log.Error("Failed to check upgrade status", "err", err)
@@ -37,7 +37,7 @@ func ExistUpgradeFlag(db ethdb.Reader, key []byte) bool {
 	return exist
 }
 
-func WriteUpgradeFlag(db ethdb.Writer, key, data []byte) {
+func writeUpgradeFlag(db ethdb.Writer, key, data []byte) {
 	if err := db.Put(key, data); err != nil {
 		log.Error("Failed to write upgrade status", "err", err)
 	}

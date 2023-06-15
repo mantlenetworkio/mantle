@@ -223,14 +223,14 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(108), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), new(EthashConfig), nil}
+	AllEthashProtocolChanges = &ChainConfig{big.NewInt(108), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, new(EthashConfig), nil}
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(420), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), nil, &CliqueConfig{Period: 0, Epoch: 30000}}
-	TestChainConfig          = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, big.NewInt(0), new(EthashConfig), nil}
+	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(420), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}}
+	TestChainConfig          = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, new(EthashConfig), nil}
 	TestRules                = TestChainConfig.Rules(new(big.Int))
 
 	// OpMainnetChainID is the ID of Mantle's mainnet chain.
@@ -317,8 +317,6 @@ type ChainConfig struct {
 
 	EWASMBlock *big.Int `json:"ewasmBlock,omitempty"` // EWASM switch block (nil = no fork, 0 = already activated)
 
-	UpdateGasLimitBlock *big.Int `json:"updateGaslimitBlock,omitempty"` //  UpdateGasLimitBlock witch block (nil = no fork, 0 = already activated)
-
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
@@ -368,7 +366,6 @@ func (c *ChainConfig) String() string {
 		c.IstanbulBlock,
 		c.MuirGlacierBlock,
 		c.BerlinBlock,
-		c.UpdateGasLimitBlock,
 		engine,
 	)
 }
@@ -433,11 +430,6 @@ func (c *ChainConfig) IsBerlin(num *big.Int) bool {
 // IsEWASM returns whether num represents a block number after the EWASM fork
 func (c *ChainConfig) IsEWASM(num *big.Int) bool {
 	return isForked(c.EWASMBlock, num)
-}
-
-// IsUpdateGasLimitBlock returns whether num represents a block number after the UpdateGasLimitBlock fork
-func (c *ChainConfig) IsUpdateGasLimitBlock(num *big.Int) bool {
-	return isForked(c.UpdateGasLimitBlock, num)
 }
 
 // IsSDUpdate returns whether num represents a block number after the SD update fork
@@ -552,9 +544,6 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	if isForkIncompatible(c.EWASMBlock, newcfg.EWASMBlock, head) {
 		return newCompatError("ewasm fork block", c.EWASMBlock, newcfg.EWASMBlock)
 	}
-	if isForkIncompatible(c.UpdateGasLimitBlock, newcfg.UpdateGasLimitBlock, head) {
-		return newCompatError("UpdateGasLimitBlock fork block", c.UpdateGasLimitBlock, newcfg.UpdateGasLimitBlock)
-	}
 	return nil
 }
 
@@ -623,8 +612,6 @@ type Rules struct {
 	IsHomestead, IsEIP150, IsEIP155, IsEIP158               bool
 	IsByzantium, IsConstantinople, IsPetersburg, IsIstanbul bool
 	IsBerlin, IsLondon                                      bool
-	IsUpdateGasLimitBlock                                   bool
-	IsEigenDa                                               bool
 }
 
 // Rules ensures c's ChainID is not nil.
@@ -634,16 +621,15 @@ func (c *ChainConfig) Rules(num *big.Int) Rules {
 		chainID = new(big.Int)
 	}
 	return Rules{
-		ChainID:               new(big.Int).Set(chainID),
-		IsHomestead:           c.IsHomestead(num),
-		IsEIP150:              c.IsEIP150(num),
-		IsEIP155:              c.IsEIP155(num),
-		IsEIP158:              c.IsEIP158(num),
-		IsByzantium:           c.IsByzantium(num),
-		IsConstantinople:      c.IsConstantinople(num),
-		IsPetersburg:          c.IsPetersburg(num),
-		IsIstanbul:            c.IsIstanbul(num),
-		IsBerlin:              c.IsBerlin(num),
-		IsUpdateGasLimitBlock: c.IsUpdateGasLimitBlock(num),
+		ChainID:          new(big.Int).Set(chainID),
+		IsHomestead:      c.IsHomestead(num),
+		IsEIP150:         c.IsEIP150(num),
+		IsEIP155:         c.IsEIP155(num),
+		IsEIP158:         c.IsEIP158(num),
+		IsByzantium:      c.IsByzantium(num),
+		IsConstantinople: c.IsConstantinople(num),
+		IsPetersburg:     c.IsPetersburg(num),
+		IsIstanbul:       c.IsIstanbul(num),
+		IsBerlin:         c.IsBerlin(num),
 	}
 }
