@@ -260,10 +260,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		absents := make([]string, 0)
 		for _, node := range tssInfo.TssMembers {
 			if !slices.ExistsIgnoreCase(ctx.Approvers(), node) {
-				addr, _ := tss.NodeToAddress(node)
-				if !m.store.IsInSlashing(addr) {
-					absents = append(absents, node)
-				}
+				absents = append(absents, node)
 			}
 		}
 		if err = m.afterSignStateBatch(ctx, request.StateRoots, absents); err != nil {
