@@ -211,6 +211,10 @@ func (lc *LightChain) ResetWithGenesisBlock(genesis *types.Block) {
 
 // Accessors
 
+func (lc *LightChain) ChainDb() ethdb.Database {
+	panic("not implemented")
+}
+
 // Engine retrieves the light chain's consensus engine.
 func (lc *LightChain) Engine() consensus.Engine { return lc.engine }
 
