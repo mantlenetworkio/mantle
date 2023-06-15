@@ -16,7 +16,7 @@ RUN make mt-challenger
 
 FROM alpine:3.15
 
-RUN apk add --no-cache ca-certificates jq curl
+RUN apk add --no-cache ca-certificates
 COPY --from=builder /go/mt-challenger/mt-challenger /usr/local/bin/
 
 WORKDIR /usr/local/bin

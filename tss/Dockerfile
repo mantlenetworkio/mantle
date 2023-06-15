@@ -15,7 +15,7 @@ FROM alpine:3.15
 
 WORKDIR /app
 
-RUN apk add --no-cache ca-certificates jq curl
+RUN apk add --no-cache ca-certificates
 COPY --from=builder /app/tss/tss /app
 
 # EXPOSE 8545 8546 8547
