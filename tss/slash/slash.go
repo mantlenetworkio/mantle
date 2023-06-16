@@ -2,7 +2,6 @@ package slash
 
 import (
 	"errors"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
@@ -18,8 +17,8 @@ type Slashing struct {
 
 func NewSlashing(sbs index.StateBatchStore, ss SlashingStore, missSignedNumber int) Slashing {
 	return Slashing{
-		stateBatchStore:     sbs,
-		slashingStore:       ss,
+		stateBatchStore:  sbs,
+		slashingStore:    ss,
 		missSignedNumber: missSignedNumber,
 	}
 }
@@ -46,7 +45,7 @@ func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
 		if err != nil {
 			return err
 		}
-		s.UpdateSigningInfo(stateBatch.BatchIndex, address, electionAdvanced, false)
+		s.UpdateSigningInfo(address, electionAdvanced, false)
 	}
 
 	// update signingInfo for absent nodes
@@ -55,7 +54,7 @@ func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
 		if err != nil {
 			return err
 		}
-		updatedSigningInfo := s.UpdateSigningInfo(stateBatch.BatchIndex, address, electionAdvanced, true)
+		updatedSigningInfo := s.UpdateSigningInfo(address, electionAdvanced, true)
 		if updatedSigningInfo.MissedBlocksCounter > uint64(s.missSignedNumber) {
 			s.slashingStore.SetSlashingInfo(SlashingInfo{
 				Address:    address,
@@ -71,24 +70,24 @@ func (s Slashing) AfterStateBatchIndexed(root [32]byte) error {
 	return nil
 }
 
-func (s Slashing) UpdateSigningInfo(batchIndex uint64, address common.Address, electionAdvanced, missed bool) SigningInfo {
+func (s Slashing) UpdateSigningInfo(address common.Address, electionAdvanced, missed bool) SigningInfo {
 	if electionAdvanced {
-		return s.InitializeSigningInfo(batchIndex, address, missed)
+		return s.InitializeSigningInfo(address, missed)
 	}
 
 	found, signingInfo := s.slashingStore.GetSigningInfo(address)
 	if !found {
-		signingInfo = s.InitializeSigningInfo(batchIndex, address, missed)
+		signingInfo = s.InitializeSigningInfo(address, missed)
 	} else {
 		if missed {
-			signingInfo.MissedBlocksCounter++;
+			signingInfo.MissedBlocksCounter++
 		}
 	}
 	s.slashingStore.SetSigningInfo(signingInfo)
 	return signingInfo
 }
 
-func (s Slashing) InitializeSigningInfo(batchIndex uint64, address common.Address, missed bool) SigningInfo {
+func (s Slashing) InitializeSigningInfo(address common.Address, missed bool) SigningInfo {
 	signingInfo := SigningInfo{
 		Address:             address,
 		MissedBlocksCounter: 0,
@@ -98,9 +97,5 @@ func (s Slashing) InitializeSigningInfo(batchIndex uint64, address common.Addres
 	}
 	s.slashingStore.SetSigningInfo(signingInfo)
 
-	// clear historic data
-	s.slashingStore.ClearNodeMissedBatchBitArray(address)
-	// init the first one
-	s.slashingStore.SetNodeMissedBatchBitArray(address, 0, missed)
 	return signingInfo
 }
