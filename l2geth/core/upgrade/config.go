@@ -127,6 +127,11 @@ func isBlockForked(s, head *big.Int) bool {
 	if s == nil || head == nil {
 		return false
 	}
+
+	if s.Cmp(big.NewInt(0)) <= 0 {
+		return false
+	}
+
 	return s.Cmp(head) <= 0
 }
 
@@ -137,5 +142,10 @@ func isExactBlockForked(s, head *big.Int) bool {
 	if s == nil || head == nil {
 		return false
 	}
+
+	if s.Cmp(big.NewInt(0)) <= 0 {
+		return false
+	}
+
 	return s.Cmp(head) == 0
 }
