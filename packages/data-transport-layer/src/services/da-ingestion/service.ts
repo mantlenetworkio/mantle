@@ -187,12 +187,17 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         )
 
         // batch transaction list
-        await this._storeBatchTransactionsByDSId(
+        const execOk = await this._storeBatchTransactionsByDSId(
           dataStoreRollupId['data_store_id'],
           index,
           this.options.mantleDaUpgradeDataStoreId
         )
-
+        this.logger.info('store batch transactions by store id', {
+          execOk,
+        })
+        if (!execOk) {
+          return
+        }
         // put rollup store info to db
         await this.state.db.putRollupStoreByBatchIndex(
           {
@@ -320,7 +325,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   ) {
     const transactionEntries: TransactionEntry[] = []
     if (storeId <= 0) {
-      return []
+      return false
     }
     const batchTxs = await this.GetBatchTransactionByDataStoreId(storeId)
       .then((rst) => {
@@ -332,7 +337,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       })
     try {
       if (batchTxs.length === 0) {
-        return
+        return false
       }
       for (const batchTx of batchTxs) {
         const queueOrigin =
@@ -371,34 +376,43 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
                   s: '0x'.concat(sigS),
                 },
               }
-        let gasLimit = BigNumber.from(0).toString()
-        let target = constants.AddressZero
-        let origin = null
         if (batchTx['TxMeta']['queueIndex'] != null) {
-          const enqueue = await this.state.db.getEnqueueByIndex(
-            BigNumber.from(batchTx['TxMeta']['queueIndex']).toNumber()
-          )
-          if (enqueue != null) {
-            gasLimit = enqueue.gasLimit
-            target = enqueue.target
-            origin = enqueue.origin
+          const lastestEnqueue = await this.state.db.getLatestEnqueue()
+          if (lastestEnqueue.index > batchTx['TxMeta']['queueIndex']) {
+            this.logger.info('get queue index from da and l1(EigenLayer)', {
+              lastestEnqueue: lastestEnqueue.index,
+              queueIndex: batchTx['TxMeta']['queueIndex'],
+            })
+            const enqueue = await this.state.db.getEnqueueByIndex(
+              BigNumber.from(batchTx['TxMeta']['queueIndex']).toNumber()
+            )
+            let gasLimit = BigNumber.from(0).toString()
+            let target = constants.AddressZero
+            let origin = null
+            if (enqueue != null) {
+              gasLimit = enqueue.gasLimit
+              target = enqueue.target
+              origin = enqueue.origin
+            }
+            transactionEntries.push({
+              index: batchTx['TxMeta']['index'],
+              batchIndex: daBatchIndex,
+              blockNumber: batchTx['TxMeta']['l1BlockNumber'],
+              timestamp: batchTx['TxMeta']['l1Timestamp'],
+              gasLimit,
+              target,
+              origin,
+              data: txData,
+              queueOrigin,
+              value: batchTx['TxDetail']['value'],
+              queueIndex: batchTx['TxMeta']['queueIndex'],
+              decoded,
+              confirmed: true,
+            })
+          } else {
+            return false
           }
         }
-        transactionEntries.push({
-          index: batchTx['TxMeta']['index'],
-          batchIndex: daBatchIndex,
-          blockNumber: batchTx['TxMeta']['l1BlockNumber'],
-          timestamp: batchTx['TxMeta']['l1Timestamp'],
-          gasLimit,
-          target,
-          origin,
-          data: txData,
-          queueOrigin,
-          value: batchTx['TxDetail']['value'],
-          queueIndex: batchTx['TxMeta']['queueIndex'],
-          decoded,
-          confirmed: true,
-        })
         this.daIngestionMetrics.currentL2TransactionIndex.set(
           batchTx['TxMeta']['index']
         )
@@ -409,6 +423,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         storeId + upgradeBatchIndex
       )
       this.daIngestionMetrics.syncDataStoreId.set(upgradeBatchIndex + storeId)
+      return true
     } catch (error) {
       throw new Error(`eigen layer sync finish, error is: ${error}`)
     }

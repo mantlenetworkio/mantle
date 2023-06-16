@@ -25,6 +25,8 @@ const config = {
   bvmTssRewardContractOwner: process.env.TssRewardContractOwner || '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
   dataManagerAddress: process.env.DATA_MANAGER_ADDRESS || '0xE5C3D068e2160c67e09afaCEff3E765e30163Eb8',
   bvmEigenSequencerAddress: process.env.BVM_EIGENDA_SEQUENCER_ADDRESS || '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
+  bvmEigenFeeAddress: process.env.BVM_EIGENDA_FEE_ADDRESS || '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
+  bvmEigenChallengerAddress: process.env.BVM_EIGENDA_CHALLENGER_ADDRESS || '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
   contractsDeployerKey: process.env.CONTRACTS_DEPLOYER_KEY,
   contractsRpcUrl: process.env.CONTRACTS_RPC_URL,
 }

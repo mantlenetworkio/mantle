@@ -3,5 +3,8 @@ go 1.18
 use (
 	./mt-batcher
 	./bss-core
+	./datalayr
 	./l2geth
+	./fraud-proof
+  ./metrics
 )

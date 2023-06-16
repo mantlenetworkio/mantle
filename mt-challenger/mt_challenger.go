@@ -83,6 +83,8 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			HsmAPIName:                cfg.HsmAPIName,
 			HsmAddress:                cfg.HsmAddress,
 		}
+		log.Info("challenger hsm", "EnableHsm", cfg.EnableHsm,
+			"HsmCreden", cfg.HsmCreden, "HsmAPIName", cfg.HsmAPIName, "HsmAddress", cfg.HsmAddress)
 		cLager, err := challenger.NewChallenger(ctx, challengerConfig)
 		if err != nil {
 			return err

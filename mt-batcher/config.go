@@ -63,6 +63,8 @@ type Config struct {
 	HsmAPIName                string
 	HsmCreden                 string
 	HsmAddress                string
+	HsmFeeAPIName             string
+	HsmFeeAddress             string
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -121,6 +123,8 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		HsmAddress:                ctx.GlobalString(flags.HsmAddressFlag.Name),
 		HsmAPIName:                ctx.GlobalString(flags.HsmAPINameFlag.Name),
 		HsmCreden:                 ctx.GlobalString(flags.HsmCredenFlag.Name),
+		HsmFeeAPIName:             ctx.GlobalString(flags.HsmFeeAPINameFlag.Name),
+		HsmFeeAddress:             ctx.GlobalString(flags.HsmFeeAddressFlag.Name),
 	}
 	return cfg, nil
 }

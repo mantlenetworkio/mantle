@@ -26,6 +26,8 @@ const config = {
   l1MantleAddress: process.env.L1_MANTLE_ADDRESS || '0x5a94Dc6cc85fdA49d8E9A8b85DDE8629025C42be',
   dataManagerAddress: process.env.DATA_MANAGER_ADDRESS || '0x0000000000000000000000000000000000000000',
   bvmEigenSequencerAddress: process.env.BVM_EIGENDA_SEQUENCER_ADDRESS || '0xc4AaE221f1C62E8CBC657Af5b051eA573914cFc7',
+  bvmEigenFeeAddress: process.env.BVM_EIGENDA_FEE_ADDRESS || '0xc4AaE221f1C62E8CBC657Af5b051eA573914cFc7',
+  bvmEigenChallengerAddress: process.env.BVM_EIGENDA_CHALLENGER_ADDRESS || '0xc4AaE221f1C62E8CBC657Af5b051eA573914cFc7',
   contractsDeployerKey: process.env.CONTRACTS_DEPLOYER_KEY,
   contractsRpcUrl: process.env.CONTRACTS_RPC_URL,
 }

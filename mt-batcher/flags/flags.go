@@ -312,11 +312,23 @@ var (
 		Usage:  "the api name of hsm for mt-batcher",
 		EnvVar: prefixEnvVar(envVarPrefix, "HSM_API_NAME"),
 	}
+	HsmFeeAPINameFlag = cli.StringFlag{
+		Name:   "hsm-fee-api-name",
+		Usage:  "the api name of hsm for mt-batcher fee address",
+		EnvVar: prefixEnvVar(envVarPrefix, "HSM_FEE_API_NAME"),
+	}
 	HsmAddressFlag = cli.StringFlag{
 		Name:   "hsm-address",
 		Usage:  "the address of hsm key for mt-batcher",
-		EnvVar: prefixEnvVar(envVarPrefix, "HSM_API_NAME"),
+		EnvVar: prefixEnvVar(envVarPrefix, "HSM_ADDRESS"),
 	}
+
+	HsmFeeAddressFlag = cli.StringFlag{
+		Name:   "hsm-fee-address",
+		Usage:  "the address of hsm key for mt-batcher fee",
+		EnvVar: prefixEnvVar(envVarPrefix, "HSM_FEE_ADDRESS"),
+	}
+
 	HsmCredenFlag = cli.StringFlag{
 		Name:   "hsm-creden",
 		Usage:  "the creden of hsm key for mt-batcher",
@@ -379,6 +391,8 @@ var optionalFlags = []cli.Flag{
 	HsmAddressFlag,
 	HsmAPINameFlag,
 	HsmCredenFlag,
+	HsmFeeAddressFlag,
+	HsmFeeAPINameFlag,
 }
 
 func init() {
