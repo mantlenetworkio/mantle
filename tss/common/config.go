@@ -22,14 +22,14 @@ type Configuration struct {
 	TimedTaskInterval              string        `json:"timed_task_interval" mapstructure:"timed_task_interval"`
 	L1ReceiptConfirmTimeout        string        `json:"l1_receipt_confirm_timeout" mapstructure:"l1_receipt_confirm_timeout"`
 	L1ConfirmBlocks                int           `json:"l1_confirm_blocks" mapstructure:"l1_confirm_blocks"`
-	L1StartBlockNumber             string      `json:"l1_start_block_number" mapstructure:"l1_start_block_number"`
+	L1StartBlockNumber             string        `json:"l1_start_block_number" mapstructure:"l1_start_block_number"`
 	MissSignedNumber               int           `json:"miss_signed_number" mapstructure:"miss_signed_number"`
 }
 
 type ManagerConfig struct {
 	WsAddr     string `json:"ws_addr" mapstructure:"ws_addr"`
 	HttpAddr   string `json:"http_addr" mapstructure:"http_addr"`
-  JwtSecret string `json:"jwt_secret" mapstructure:"jwt_secret"`
+	JwtSecret  string `json:"jwt_secret" mapstructure:"jwt_secret"`
 	DBDir      string `json:"db_dir" mapstructure:"db_dir"`
 	PrivateKey string `json:"private_key" mapstructure:"private_key"`
 
