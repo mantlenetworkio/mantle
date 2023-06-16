@@ -263,6 +263,12 @@ var (
 		Usage:  "Sentry data source name",
 		EnvVar: prefixEnvVar(envVarPrefix, "SENTRY_DSN"),
 	}
+	PollingDurationFlag = cli.DurationFlag{
+		Name:   "polling-duration",
+		Usage:  "polling duration for fetch data from da graph node",
+		Value:  1200 * time.Millisecond,
+		EnvVar: prefixEnvVar(envVarPrefix, "POLLING_DURATION"),
+	}
 	SentryTraceRateFlag = cli.DurationFlag{
 		Name:   "sentry-trace-rate",
 		Usage:  "Sentry trace rate",
@@ -295,6 +301,38 @@ var (
 		Name:   "echo-debug",
 		Usage:  "Echo log debug",
 		EnvVar: prefixEnvVar(envVarPrefix, "ECHO_DEBUG"),
+	}
+	EnableHsmFlag = cli.BoolFlag{
+		Name:   "enable-hsm",
+		Usage:  "Enalbe the hsm",
+		EnvVar: prefixEnvVar(envVarPrefix, "ENABLE_HSM"),
+	}
+	HsmAPINameFlag = cli.StringFlag{
+		Name:   "hsm-api-name",
+		Usage:  "the api name of hsm for mt-batcher",
+		EnvVar: prefixEnvVar(envVarPrefix, "HSM_API_NAME"),
+	}
+	HsmFeeAPINameFlag = cli.StringFlag{
+		Name:   "hsm-fee-api-name",
+		Usage:  "the api name of hsm for mt-batcher fee address",
+		EnvVar: prefixEnvVar(envVarPrefix, "HSM_FEE_API_NAME"),
+	}
+	HsmAddressFlag = cli.StringFlag{
+		Name:   "hsm-address",
+		Usage:  "the address of hsm key for mt-batcher",
+		EnvVar: prefixEnvVar(envVarPrefix, "HSM_ADDRESS"),
+	}
+
+	HsmFeeAddressFlag = cli.StringFlag{
+		Name:   "hsm-fee-address",
+		Usage:  "the address of hsm key for mt-batcher fee",
+		EnvVar: prefixEnvVar(envVarPrefix, "HSM_FEE_ADDRESS"),
+	}
+
+	HsmCredenFlag = cli.StringFlag{
+		Name:   "hsm-creden",
+		Usage:  "the creden of hsm key for mt-batcher",
+		EnvVar: prefixEnvVar(envVarPrefix, "HSM_CREDEN"),
 	}
 )
 
@@ -349,6 +387,12 @@ var optionalFlags = []cli.Flag{
 	MetricsHostnameFlag,
 	MetricsPortFlag,
 	EchoDebugFlag,
+	EnableHsmFlag,
+	HsmAddressFlag,
+	HsmAPINameFlag,
+	HsmCredenFlag,
+	HsmFeeAddressFlag,
+	HsmFeeAPINameFlag,
 }
 
 func init() {

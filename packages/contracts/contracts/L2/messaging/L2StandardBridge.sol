@@ -111,9 +111,9 @@ contract L2StandardBridge is IL2ERC20Bridge, CrossDomainEnabled {
                 _amount,
                 _data
             );
-        } else if (_l2Token == Lib_PredeployAddresses.BVM_BIT) {
+        } else if (_l2Token == Lib_PredeployAddresses.BVM_MANTLE) {
             message = abi.encodeWithSelector(
-                IL1ERC20Bridge.finalizeBitWithdrawal.selector,
+                IL1ERC20Bridge.finalizeMantleWithdrawal.selector,
                 _from,
                 _to,
                 _amount,

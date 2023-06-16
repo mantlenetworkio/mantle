@@ -120,15 +120,15 @@ function donateETH() external payable
 *Adds ETH balance to the account. This is meant to allow for ETH to be migrated from an old gateway to a new gateway. NOTE: This is left for one upgrade only so we are able to receive the migrated ETH from the old contract*
 
 
-### finalizeBitWithdrawal
+### finalizeMantleWithdrawal
 
 ```solidity
-function finalizeBitWithdrawal(address _from, address _to, uint256 _amount, bytes _data) external nonpayable
+function finalizeMantleWithdrawal(address _from, address _to, uint256 _amount, bytes _data) external nonpayable
 ```
 
 
 
-*Complete a bit withdrawal from L2 to L1, and credit funds to the recipient&#39;s balance of the L1 ERC20 token. This call will fail if the initialized withdrawal from L2 has not been finalized.*
+*Complete a mantle withdrawal from L2 to L1, and credit funds to the recipient&#39;s balance of the L1 ERC20 token. This call will fail if the initialized withdrawal from L2 has not been finalized.*
 
 #### Parameters
 
@@ -182,7 +182,7 @@ function finalizeETHWithdrawal(address _from, address _to, uint256 _amount, byte
 ### initialize
 
 ```solidity
-function initialize(address _l1messenger, address _l2TokenBridge, address _l1BitAddress) external nonpayable
+function initialize(address _l1messenger, address _l2TokenBridge, address _l1MantleAddress) external nonpayable
 ```
 
 
@@ -191,16 +191,16 @@ function initialize(address _l1messenger, address _l2TokenBridge, address _l1Bit
 
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| _l1messenger | address | L1 Messenger address being used for cross-chain communications.
-| _l2TokenBridge | address | L2 standard bridge address.
-| _l1BitAddress | address | initialize L1 bit address
+| Name             | Type | Description |
+|------------------|---|---|
+| _l1messenger     | address | L1 Messenger address being used for cross-chain communications.
+| _l2TokenBridge   | address | L2 standard bridge address.
+| _l1MantleAddress | address | initialize L1 mantle address
 
-### l1BitAddress
+### l1MantleAddress
 
 ```solidity
-function l1BitAddress() external view returns (address)
+function l1MantleAddress() external view returns (address)
 ```
 
 

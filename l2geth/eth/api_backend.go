@@ -238,6 +238,14 @@ func (b *EthAPIBackend) GetReceipts(ctx context.Context, hash common.Hash) (type
 	return b.eth.blockchain.GetReceiptsByHash(hash), nil
 }
 
+func (b *EthAPIBackend) GetTxStatusByHash(ctx context.Context, blockNumber uint64) (*types.TxStatusResponse, error) {
+	txStatus, err := b.eth.syncService.GetTxStatusByNumber(blockNumber)
+	if err != nil {
+		log.Error("GetTxStatusByHash", "status error", err.Error())
+	}
+	return txStatus, err
+}
+
 func (b *EthAPIBackend) GetLogs(ctx context.Context, hash common.Hash) ([][]*types.Log, error) {
 	receipts := b.eth.blockchain.GetReceiptsByHash(hash)
 	if receipts == nil {

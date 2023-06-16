@@ -10,10 +10,10 @@
 
 ## Methods
 
-### BitToken
+### MantleToken
 
 ```solidity
-function BitToken() external view returns (address)
+function MantleToken() external view returns (address)
 ```
 
 
@@ -330,7 +330,7 @@ Resolves the address associated with a given name.
 function setAddress(address _token, address _tssGroup) external nonpayable
 ```
 
-change the bit token and tssGroup contract address
+change the mantle token and tssGroup contract address
 
 
 
@@ -338,7 +338,7 @@ change the bit token and tssGroup contract address
 
 | Name | Type | Description |
 |---|---|---|
-| _token | address | the erc20 bit token contract address
+| _token | address | the erc20 mantle token contract address
 | _tssGroup | address | tssGroup contract address
 
 ### setSlashingParams
@@ -403,7 +403,7 @@ verify the slash message then slash
 function staking(uint256 _amount, bytes _pubKey) external nonpayable
 ```
 
-staking entrance for user to deposit bit tokens
+staking entrance for user to deposit mantle tokens
 
 
 
@@ -411,7 +411,7 @@ staking entrance for user to deposit bit tokens
 
 | Name | Type | Description |
 |---|---|---|
-| _amount | uint256 | deposit amount of bit token
+| _amount | uint256 | deposit amount of mantle token
 | _pubKey | bytes | public key of sender
 
 ### transferOwnership
@@ -464,7 +464,7 @@ set tss node status unjail
 function withdrawToken() external nonpayable
 ```
 
-user who not elected to be validator to withdraw their bit token
+user who not elected to be validator to withdraw their mantle token
 
 
 

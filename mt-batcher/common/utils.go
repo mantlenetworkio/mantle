@@ -2,8 +2,8 @@ package common
 
 import (
 	"fmt"
-	"github.com/Layr-Labs/datalayr/common/contracts"
 	"github.com/Layr-Labs/datalayr/common/graphView"
+	"github.com/Layr-Labs/datalayr/common/header"
 	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 	"os"
@@ -17,7 +17,7 @@ func CreateUploadHeader(params StoreParams) ([]byte, error) {
 	var disperserArray [20]byte
 	copy(disperserArray[:], params.Disperser)
 
-	h := contracts.DataStoreHeader{
+	h := header.DataStoreHeader{
 		KzgCommit:      kzgCommitArray,
 		LowDegreeProof: lowDegreeProof,
 		Degree:         params.Degree,
@@ -26,7 +26,7 @@ func CreateUploadHeader(params StoreParams) ([]byte, error) {
 		OrigDataSize:   params.OrigDataSize,
 		Disperser:      disperserArray,
 	}
-	uploadHeader, _, err := contracts.CreateUploadHeader(h)
+	uploadHeader, _, err := header.CreateUploadHeader(h)
 	if err != nil {
 		return nil, err
 	}
@@ -77,21 +77,21 @@ func MakeCalldata(
 		4,
 	)
 
-	stakesFromBlockNumberBytes := bigIntToBytes(
-		new(big.Int).SetUint64(uint64(params.BlockNumber)),
+	referenceBlockNumberBytes := bigIntToBytes(
+		new(big.Int).SetUint64(uint64(params.ReferenceBlockNumber)),
 		4,
 	)
 
 	numNonPubKeysBytes := bigIntToBytes(
-		new(big.Int).SetUint64(uint64(len(meta.Sigs.NonSignerPubKeys))),
+		new(big.Int).SetUint64(uint64(len(meta.Sigs.NonSignerPubkeys))),
 		4,
 	)
 
 	flattenedNonPubKeysBytes := make([]byte, 0)
-	for i := 0; i < len(meta.Sigs.NonSignerPubKeys); i++ {
+	for i := 0; i < len(meta.Sigs.NonSignerPubkeys); i++ {
 		flattenedNonPubKeysBytes = append(
 			flattenedNonPubKeysBytes,
-			meta.Sigs.NonSignerPubKeys[i]...,
+			meta.Sigs.NonSignerPubkeys[i]...,
 		)
 	}
 
@@ -103,12 +103,13 @@ func MakeCalldata(
 	var calldata []byte
 	calldata = append(calldata, msgHash[:]...)
 	calldata = append(calldata, totalStakeIndexBytes...)
-	calldata = append(calldata, stakesFromBlockNumberBytes...)
+	calldata = append(calldata, referenceBlockNumberBytes...)
 	calldata = append(calldata, storeNumberBytes...)
 	calldata = append(calldata, numNonPubKeysBytes...)
 	calldata = append(calldata, flattenedNonPubKeysBytes...)
 	calldata = append(calldata, apkIndexBytes...)
-	calldata = append(calldata, meta.Sigs.AggPubKey...)
+	calldata = append(calldata, meta.Sigs.StoredAggPubkeyG1...)
+	calldata = append(calldata, meta.Sigs.UsedAggPubkeyG2...)
 	calldata = append(calldata, meta.Sigs.AggSig...)
 	return calldata
 

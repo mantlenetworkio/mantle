@@ -43,10 +43,9 @@ func NewBaseService(eth Backend, proofBackend proof.Backend, cfg *Config, auth *
 		Context: ctx,
 	}
 	transactOpts := bind.TransactOpts{
-		From:     auth.From,
-		Signer:   auth.Signer,
-		GasPrice: big.NewInt(800000000),
-		Context:  ctx,
+		From:    auth.From,
+		Signer:  auth.Signer,
+		Context: ctx,
 	}
 	rollup, err := bindings.NewRollup(common.Address(cfg.RollupAddr), l1)
 	if err != nil {
@@ -104,10 +103,9 @@ func (b *BaseService) Start(cleanL1, stake bool) *types.Block {
 			log.Crit("Failed to query stake", "err", err)
 		}
 		if !isStaked {
-			stakeOpts.Value = big.NewInt(int64(b.Config.StakeAmount))
-			_, err = b.Rollup.Contract.Stake(&stakeOpts)
+			_, err = b.Rollup.Contract.Stake(&stakeOpts, new(big.Int).SetUint64(b.Config.StakeAmount), stakeOpts.From)
 			if err != nil {
-				log.Crit("Failed to stake", "from", stakeOpts.From.String(), "amount", stakeOpts.Value, "err", err)
+				log.Crit("Failed to stake", "from", stakeOpts.From.String(), "amount", b.Config.StakeAmount, "err", err)
 			}
 		}
 	}

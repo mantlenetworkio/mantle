@@ -1,15 +1,16 @@
 /* Imports: External */
-import { BigNumber, ethers, constants } from 'ethers'
+import { BigNumber, constants } from 'ethers'
 import { sleep } from '@mantleio/core-utils'
 import { BaseService, Metrics } from '@mantleio/common-ts'
 import { BaseProvider } from '@ethersproject/providers'
 import { LevelUp } from 'levelup'
 // eslint-disable-next-line import/order
-import { Gauge, Counter } from 'prom-client'
+import { Gauge } from 'prom-client'
 
 /* Imports: Internal */
 // import { serialize } from '@ethersproject/transactions'
 import fetch from 'node-fetch'
+// eslint-disable-next-line no-duplicate-imports
 import { toHexString } from '@mantleio/core-utils'
 
 import { MissingElementError } from './handlers/errors'
@@ -20,7 +21,6 @@ import {
   TransactionEntry,
   DataStoreEntry,
   TransactionListEntry,
-  RollupStoreEntry,
 } from '../../types'
 
 interface DaIngestionMetrics {
@@ -123,6 +123,10 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   }
 
   protected async _start(): Promise<void> {
+    this.updateTransactionBatches(
+      this.options.startUpdateBatchIndex,
+      this.options.endUpdateBatchIndex
+    )
     while (this.running) {
       try {
         const batchIndexRange = await this.getBatchIndexRange()
@@ -155,9 +159,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   }
 
   private async pareTransaction(batchIndexRange: Range) {
-    const dataStore: DataStoreEntry[] = []
-    const transactionEntries: TransactionEntry[] = []
-    const exploreTransactionEntries: TransactionEntry[] = []
     for (
       let index = batchIndexRange.start;
       index < batchIndexRange.end;
@@ -170,29 +171,38 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         index
       )
       if (dataStoreRollupId['data_store_id'] === 0) {
-        break
+        continue
       }
       const dataStore = await this.GetDataStoreById(
         dataStoreRollupId['data_store_id'].toString()
       )
       if (dataStore === null) {
-        break
+        continue
       }
       if (dataStore['Confirmed']) {
         // explore transaction list
         await this._storeTransactionListByDSId(
-          dataStoreRollupId['data_store_id']
+          dataStoreRollupId['data_store_id'],
+          this.options.mantleDaUpgradeDataStoreId
         )
 
         // batch transaction list
-        await this._storeBatchTransactionsByDSId(
-          dataStoreRollupId['data_store_id']
+        const execOk = await this._storeBatchTransactionsByDSId(
+          dataStoreRollupId['data_store_id'],
+          index,
+          this.options.mantleDaUpgradeDataStoreId
         )
-
+        this.logger.info('store batch transactions by store id', {
+          execOk,
+        })
+        if (!execOk) {
+          return
+        }
         // put rollup store info to db
         await this.state.db.putRollupStoreByBatchIndex(
           {
             index: 0,
+            upgrade_data_store_id: this.options.mantleDaUpgradeDataStoreId,
             data_store_id: dataStoreRollupId['data_store_id'],
             status: dataStoreRollupId['status'],
             confirm_at: dataStoreRollupId['confirm_at'],
@@ -239,6 +249,54 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     }
   }
 
+  private async updateTransactionBatches(
+    startBatchIndex: number,
+    endBatchIndex: number
+  ) {
+    if (startBatchIndex > 0 && endBatchIndex > startBatchIndex) {
+      this.logger.info('Update batch index from(MtBatcher)', {
+        start: startBatchIndex,
+        end: endBatchIndex,
+      })
+      for (
+        let batchIndex = startBatchIndex;
+        batchIndex <= endBatchIndex;
+        batchIndex++
+      ) {
+        const dataStoreRollupId = await this.GetRollupStoreByRollupBatchIndex(
+          batchIndex
+        )
+        this.logger.info(
+          'dataStoreRollupId dataStoreRollupId dataStoreRollupId',
+          dataStoreRollupId
+        )
+        const dataStore = await this.GetDataStoreById(
+          dataStoreRollupId['data_store_id'].toString()
+        )
+        await this.state.db.putRollupStoreByBatchIndex(
+          {
+            index: 0,
+            upgrade_data_store_id: this.options.mantleDaUpgradeDataStoreId,
+            data_store_id: dataStoreRollupId['data_store_id'],
+            status: dataStoreRollupId['status'],
+            confirm_at: dataStoreRollupId['confirm_at'],
+          },
+          batchIndex
+        )
+        this.logger.info('Update batch index from(Confirmed)', dataStore)
+        await this._storeTransactionListByDSId(
+          dataStoreRollupId['data_store_id'],
+          this.options.mantleDaUpgradeDataStoreId
+        )
+        await this._storeBatchTransactionsByDSId(
+          dataStoreRollupId['data_store_id'],
+          batchIndex,
+          this.options.mantleDaUpgradeDataStoreId
+        )
+      }
+    }
+  }
+
   private async getBatchIndexRange(): Promise<Range> {
     const latestBatchIndex = await this.state.db.getLastBatchIndex()
     const newTxBatchIndex: number = await this.GetLatestTransactionBatchIndex()
@@ -260,10 +318,14 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     }
   }
 
-  private async _storeBatchTransactionsByDSId(storeId: number) {
+  private async _storeBatchTransactionsByDSId(
+    storeId: number,
+    daBatchIndex: number,
+    upgradeBatchIndex: number
+  ) {
     const transactionEntries: TransactionEntry[] = []
     if (storeId <= 0) {
-      return []
+      return false
     }
     const batchTxs = await this.GetBatchTransactionByDataStoreId(storeId)
       .then((rst) => {
@@ -275,7 +337,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       })
     try {
       if (batchTxs.length === 0) {
-        return
+        return false
       }
       for (const batchTx of batchTxs) {
         const queueOrigin =
@@ -314,47 +376,63 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
                   s: '0x'.concat(sigS),
                 },
               }
-        let gasLimit = BigNumber.from(0).toString()
-        let target = constants.AddressZero
-        let origin = null
         if (batchTx['TxMeta']['queueIndex'] != null) {
-          const enqueue = await this.state.db.getEnqueueByIndex(
-            BigNumber.from(batchTx['TxMeta']['queueIndex']).toNumber()
-          )
-          if (enqueue != null) {
-            gasLimit = enqueue.gasLimit
-            target = enqueue.target
-            origin = enqueue.origin
+          const lastestEnqueue = await this.state.db.getLatestEnqueue()
+          if (lastestEnqueue.index > batchTx['TxMeta']['queueIndex']) {
+            this.logger.info('get queue index from da and l1(EigenLayer)', {
+              lastestEnqueue: lastestEnqueue.index,
+              queueIndex: batchTx['TxMeta']['queueIndex'],
+            })
+            const enqueue = await this.state.db.getEnqueueByIndex(
+              BigNumber.from(batchTx['TxMeta']['queueIndex']).toNumber()
+            )
+            let gasLimit = BigNumber.from(0).toString()
+            let target = constants.AddressZero
+            let origin = null
+            if (enqueue != null) {
+              gasLimit = enqueue.gasLimit
+              target = enqueue.target
+              origin = enqueue.origin
+            }
+            transactionEntries.push({
+              index: batchTx['TxMeta']['index'],
+              batchIndex: daBatchIndex,
+              blockNumber: batchTx['TxMeta']['l1BlockNumber'],
+              timestamp: batchTx['TxMeta']['l1Timestamp'],
+              gasLimit,
+              target,
+              origin,
+              data: txData,
+              queueOrigin,
+              value: batchTx['TxDetail']['value'],
+              queueIndex: batchTx['TxMeta']['queueIndex'],
+              decoded,
+              confirmed: true,
+            })
+          } else {
+            return false
           }
         }
-        transactionEntries.push({
-          index: batchTx['TxMeta']['index'],
-          batchIndex: 0,
-          blockNumber: batchTx['TxMeta']['l1BlockNumber'],
-          timestamp: batchTx['TxMeta']['l1Timestamp'],
-          gasLimit,
-          target,
-          origin,
-          data: txData,
-          queueOrigin,
-          value: batchTx['TxDetail']['value'],
-          queueIndex: batchTx['TxMeta']['queueIndex'],
-          decoded,
-          confirmed: true,
-        })
         this.daIngestionMetrics.currentL2TransactionIndex.set(
           batchTx['TxMeta']['index']
         )
       }
       await this.state.db.putTransactions(transactionEntries)
-      await this.state.db.putBatchTransactionByDsId(transactionEntries, storeId)
-      this.daIngestionMetrics.syncDataStoreId.set(storeId)
+      await this.state.db.putBatchTransactionByDsId(
+        transactionEntries,
+        storeId + upgradeBatchIndex
+      )
+      this.daIngestionMetrics.syncDataStoreId.set(upgradeBatchIndex + storeId)
+      return true
     } catch (error) {
       throw new Error(`eigen layer sync finish, error is: ${error}`)
     }
   }
 
-  private async _storeTransactionListByDSId(storeId: number): Promise<void> {
+  private async _storeTransactionListByDSId(
+    storeId: number,
+    upgradeBatchIndex: number
+  ): Promise<void> {
     const txList = await this.GetTransactionListByStoreNumber(storeId)
     if (
       txList === null ||
@@ -374,7 +452,10 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         txHash: tx['TxHash'],
       })
     }
-    await this.state.db.putTxListByDSId(transactionEntries, storeId)
+    await this.state.db.putTxListByDSId(
+      transactionEntries,
+      upgradeBatchIndex + storeId
+    )
   }
 
   private async GetLatestTransactionBatchIndex(): Promise<number> {

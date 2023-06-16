@@ -42,6 +42,8 @@ import (
 //go:generate gencodec -type GenesisAccount -field-override genesisAccountMarshaling -out gen_genesis_account.go
 
 var errGenesisNoConfig = errors.New("genesis has no chain configuration")
+var testnetGenesisGaslimit = 15000000 //this params is only used for testnet
+var testnetChainID = 5001
 
 // Genesis specifies the header fields, state of a genesis block. It also defines hard
 // fork switch-over blocks through the chain configuration.
@@ -141,10 +143,10 @@ func (e *GenesisMismatchError) Error() string {
 // SetupGenesisBlock writes or updates the genesis block in db.
 // The block that will be used is:
 //
-//                          genesis == nil       genesis != nil
-//                       +------------------------------------------
-//     db has no genesis |  main-net default  |  genesis
-//     db has genesis    |  from DB           |  genesis (if compatible)
+//	                     genesis == nil       genesis != nil
+//	                  +------------------------------------------
+//	db has no genesis |  main-net default  |  genesis
+//	db has genesis    |  from DB           |  genesis (if compatible)
 //
 // The stored chain configuration will be updated if it is compatible (i.e. does not
 // specify a fork block below the local head block). In case of a conflict, the
@@ -167,6 +169,13 @@ func SetupGenesisBlockWithOverride(db ethdb.Database, genesis *Genesis, override
 			genesis = DefaultGenesisBlock()
 		} else {
 			log.Info("Writing custom genesis block")
+		}
+		//for a new node from 0 to recent height, we must reset its genesis gaslimit to 150000000
+		if genesis.Config.ChainID.Int64() == int64(testnetChainID) {
+			// updata gaslimt block is actived！we need to reset the gaslimit for genesis block
+			if genesis.Config.UpdateGasLimitBlock != nil {
+				genesis.GasLimit = uint64(testnetGenesisGaslimit)
+			}
 		}
 		block, err := genesis.Commit(db)
 		if err != nil {

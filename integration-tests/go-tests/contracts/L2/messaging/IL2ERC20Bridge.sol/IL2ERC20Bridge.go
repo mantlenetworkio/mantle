@@ -26,6 +26,7 @@ var (
 	_ = common.Big1
 	_ = types.BloomLookup
 	_ = event.NewSubscription
+	_ = abi.ConvertType
 )
 
 // IL2ERC20BridgeMetaData contains all meta data concerning the IL2ERC20Bridge contract.
@@ -134,11 +135,11 @@ func NewIL2ERC20BridgeFilterer(address common.Address, filterer bind.ContractFil
 
 // bindIL2ERC20Bridge binds a generic wrapper to an already deployed contract.
 func bindIL2ERC20Bridge(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
-	parsed, err := abi.JSON(strings.NewReader(IL2ERC20BridgeABI))
+	parsed, err := IL2ERC20BridgeMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
+	return bind.NewBoundContract(address, *parsed, caller, transactor, filterer), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and

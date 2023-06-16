@@ -50,13 +50,12 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
     }
 
     function setFraudProofWindow(uint256 _fraudProofWindow) public {
-        // Proposers must have previously staked at the BondManager
-        require(
-            IBondManager(resolve("BondManager")).isCollateralized(msg.sender),
-            "Proposer does not have enough collateral posted"
-        );
-
+        require(msg.sender == libAddressManager.owner(), "Only callable by the libAddressManager owner.");
         FRAUD_PROOF_WINDOW = _fraudProofWindow;
+    }
+
+    function getFraudProofWindow() public view returns (uint256 _fraudProofWindow) {
+        return uint256(FRAUD_PROOF_WINDOW);
     }
 
     /********************
@@ -129,7 +128,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         _appendBatch(_batch, _signature, abi.encode(block.timestamp, msg.sender));
 
         // Update distributed state batch, and emit message
-        _distributeTssReward(_batch, _shouldStartAtElement);
+        _distributeTssReward(_batch.length, _shouldStartAtElement);
     }
 
     /**
@@ -354,10 +353,10 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
 
     /**
      * Distribute Reward to tss node.
-     * @param _batch rollup batch.
+     * @param _batch_length rollup batch.
      * @param  _shouldStartAtElement.
      */
-    function _distributeTssReward(bytes32[] memory _batch, uint256 _shouldStartAtElement) internal {
+    function _distributeTssReward(uint256 _batch_length, uint256 _shouldStartAtElement) internal {
         // get address of tss group member
         address[] memory tssMembers = ITssGroupManager(resolve("Proxy__TSS_GroupManager")).getTssGroupUnJailMembers();
         require(tssMembers.length > 0, "get tss members in error");
@@ -366,7 +365,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         bytes memory message = abi.encodeWithSelector(
             ITssRewardContract.claimReward.selector,
             _shouldStartAtElement,
-            _batch.length,
+            _batch_length,
             block.timestamp,
             tssMembers
         );
@@ -381,7 +380,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         // emit message
         emit DistributeTssReward(
             _shouldStartAtElement,
-            _batch.length,
+            _batch_length,
             block.timestamp,
             tssMembers
         );

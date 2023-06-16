@@ -13,8 +13,8 @@ mt-challenger:
 	go mod tidy
 	env GO111MODULE=on go build -v $(LDFLAGS) ./cmd/mt-challenger
 
-datalayr-mantle:
-	cd ../datalayr-mantle/contracts && ./compile.sh compile-el && ./compile.sh compile-rollup
+datalayr:
+	cd ../datalayr/contracts && ./compile.sh compile-el && ./compile.sh compile-dl
 
 clean:
 	rm mt-challenger
@@ -44,7 +44,7 @@ binding:
 
 .PHONY: \
 	mt-challenger \
-	datalayr-mantle \
+	datalayr \
 	binding \
 	clean \
 	test \

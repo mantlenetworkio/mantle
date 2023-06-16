@@ -1,4 +1,5 @@
 import { ethers } from 'ethers'
+import { type } from 'os'
 
 /**
  * Defines the configuration for a deployment.
@@ -168,6 +169,17 @@ export interface DeployConfig {
    * Optional block number to enable the Berlin hardfork (default: 0).
    */
   hfBerlinBlock?: number
+
+  /**
+   * deployer privete key
+   */
+  contractsDeployerKey: string
+
+  /**
+   * deployer rpc url
+   */
+  contractsRpcUrl: string
+
 }
 
 /**
@@ -289,6 +301,12 @@ const configSpec: {
   hfBerlinBlock: {
     type: 'number',
     default: 0,
+  },
+  contractsDeployerKey: {
+    type: 'string',
+  },
+  contractsRpcUrl: {
+    type: 'string',
   },
 }
 

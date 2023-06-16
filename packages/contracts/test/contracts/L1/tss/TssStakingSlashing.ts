@@ -9,7 +9,7 @@ describe('StakingSlashing', () => {
   let accounts: Signer[]
   let tssGroup: Contract
   let stakingSlashing: Contract
-  let bitToken: Contract
+  let mantleToken: Contract
   let myWallet: Wallet
   let tssNodes: Wallet[] = []
   let newTssNodes: Wallet[] = []
@@ -19,7 +19,7 @@ describe('StakingSlashing', () => {
 
   before('deploy stakingSlashing contracts', async () => {
     accounts = await ethers.getSigners()
-    await deployBitToken()
+    await deployMantleToken()
     await deployTssGroup()
     await deployStakingSlashing()
     await initAccount()
@@ -27,10 +27,10 @@ describe('StakingSlashing', () => {
 
   it("setAddress test", async () => {
     await stakingSlashing.setAddress(testTokenAddress, testGroupAddress)
-    expect(await stakingSlashing.BitToken()).to.eq(testTokenAddress)
+    expect(await stakingSlashing.MantleToken()).to.eq(testTokenAddress)
     expect(await stakingSlashing.tssGroupContract()).to.eq(testGroupAddress)
-    await stakingSlashing.setAddress(bitToken.address, tssGroup.address)
-    expect(await stakingSlashing.BitToken()).to.eq(bitToken.address)
+    await stakingSlashing.setAddress(mantleToken.address, tssGroup.address)
+    expect(await stakingSlashing.MantleToken()).to.eq(mantleToken.address)
     expect(await stakingSlashing.tssGroupContract()).to.eq(tssGroup.address)
   })
 
@@ -52,9 +52,9 @@ describe('StakingSlashing', () => {
 
   it("staking", async () => {
     let pubKey = "0x" + myWallet.publicKey.substring(4)
-    await bitToken.mint(myWallet.address, 100000)
-    expect(await bitToken.balanceOf(myWallet.address)).to.eq(100000)
-    await bitToken.connect(myWallet).approve(stakingSlashing.address, 10000)
+    await mantleToken.mint(myWallet.address, 100000)
+    expect(await mantleToken.balanceOf(myWallet.address)).to.eq(100000)
+    await mantleToken.connect(myWallet).approve(stakingSlashing.address, 10000)
 
     // error case amount invalid
     await expect(stakingSlashing.connect(myWallet).staking(0, pubKey)).to.be.revertedWith("invalid amount")
@@ -65,7 +65,7 @@ describe('StakingSlashing', () => {
 
     // staking 1000 for myWallet
     await stakingSlashing.connect(myWallet).staking(10000, pubKey)
-    expect(await bitToken.balanceOf(myWallet.address)).to.eq(90000)
+    expect(await mantleToken.balanceOf(myWallet.address)).to.eq(90000)
     // check
     let deposit = await stakingSlashing.getDeposits((await myWallet.getAddress()).toString())
     expect(deposit.pubKey).to.eq(pubKey)
@@ -77,9 +77,9 @@ describe('StakingSlashing', () => {
     await expect(stakingSlashing.connect(myWallet).staking(10000, pubKey)).to.be.revertedWith("ERC20: transfer amount exceeds allowance")
 
     // add staking for myWallet
-    await bitToken.connect(myWallet).approve(stakingSlashing.address, 10000)
+    await mantleToken.connect(myWallet).approve(stakingSlashing.address, 10000)
     await stakingSlashing.connect(myWallet).staking(10000, pubKey)
-    expect(await bitToken.balanceOf(myWallet.address)).to.eq(80000)
+    expect(await mantleToken.balanceOf(myWallet.address)).to.eq(80000)
     // check
     deposit = await stakingSlashing.getDeposits((await myWallet.getAddress()).toString())
     expect(deposit.pubKey).to.eq(pubKey)
@@ -100,7 +100,7 @@ describe('StakingSlashing', () => {
     expect(deposit.pubKey.toString()).to.eq("0x")
     expect(deposit.amount.toNumber()).to.eq(0)
     // check balance
-    expect(await bitToken.balanceOf(myWallet.address)).to.eq(100000)
+    expect(await mantleToken.balanceOf(myWallet.address)).to.eq(100000)
   })
 
   it("batch GetDeposits test", async () => {
@@ -124,11 +124,11 @@ describe('StakingSlashing', () => {
     let tssNodesPubKey: BytesLike[] = []
     // tssnodes staking first
     for (let i = 0; i < newTssNodes.length; i++) {
-      // approve bit tokens
+      // approve mantle tokens
       let pubKey = "0x" + newTssNodes[i].publicKey.substring(4)
-      await bitToken.mint(newTssNodes[i].address, 20000)
-      expect(await bitToken.balanceOf(newTssNodes[i].address)).to.eq(20000)
-      await bitToken.connect(newTssNodes[i]).approve(stakingSlashing.address, 20000)
+      await mantleToken.mint(newTssNodes[i].address, 20000)
+      expect(await mantleToken.balanceOf(newTssNodes[i].address)).to.eq(20000)
+      await mantleToken.connect(newTssNodes[i]).approve(stakingSlashing.address, 20000)
       // staking
       // console.log(pubKey)
       await stakingSlashing.connect(newTssNodes[i]).staking(20000, pubKey)
@@ -246,13 +246,13 @@ describe('StakingSlashing', () => {
     await expect(stakingSlashing.connect(tssNodes[1]).slashing(message, signature)).to.be.revertedWith("err type for slashing")
   })
 
-  const deployBitToken = async () => {
-    bitToken = await deploy('TestERC20')
+  const deployMantleToken = async () => {
+    mantleToken = await deploy('TestERC20')
   }
 
   const deployStakingSlashing = async () => {
     stakingSlashing = await deploy('TssStakingSlashing')
-    await stakingSlashing.initialize(bitToken.address, tssGroup.address)
+    await stakingSlashing.initialize(mantleToken.address, tssGroup.address)
     await tssGroup.setStakingSlash(stakingSlashing.address)
   }
 
@@ -303,11 +303,11 @@ describe('StakingSlashing', () => {
     let tssNodesPubKey: BytesLike[] = []
     // tssnodes staking first
     for (let i = 0; i < tssNodes.length; i++) {
-      // approve bit tokens
+      // approve mantle tokens
       let pubKey = "0x" + tssNodes[i].publicKey.substring(4)
-      await bitToken.mint(tssNodes[i].address, 20000)
-      expect(await bitToken.balanceOf(tssNodes[i].address)).to.eq(20000)
-      await bitToken.connect(tssNodes[i]).approve(stakingSlashing.address, 20000)
+      await mantleToken.mint(tssNodes[i].address, 20000)
+      expect(await mantleToken.balanceOf(tssNodes[i].address)).to.eq(20000)
+      await mantleToken.connect(tssNodes[i]).approve(stakingSlashing.address, 20000)
       // staking
       await stakingSlashing.connect(tssNodes[i]).staking(20000, pubKey)
       // check

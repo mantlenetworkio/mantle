@@ -5,7 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	l1bit "github.com/mantlenetworkio/mantle/go-test/contracts/L1/local/LocalBitToken.sol"
+	l1mantle "github.com/mantlenetworkio/mantle/go-test/contracts/L1/local/LocalMantleToken.sol"
 	l1bridge "github.com/mantlenetworkio/mantle/go-test/contracts/L1/messaging/L1StandardBridge.sol"
 	l2bridge "github.com/mantlenetworkio/mantle/go-test/contracts/L2/messaging/L2StandardBridge.sol"
 	factory "github.com/mantlenetworkio/mantle/go-test/contracts/L2/messaging/L2StandardTokenFactory.sol"
@@ -66,40 +66,40 @@ func TestNewTokenDepositAndWithdraw(t *testing.T) {
 	l2Bridge, err := l2bridge.NewL2StandardBridge(common.HexToAddress(l2BridgeAddress), l2Client)
 	require.NoError(t, err)
 
-	// TEST deposit BIT
+	// TEST deposit MANTLE
 	t.Log("----------------")
-	t.Log("BIT DEPOSIT TEST")
+	t.Log("MANTLE DEPOSIT TEST")
 	t.Log("----------------")
-	t.Log("BIT before deposit.....\\")
-	setL1BitApprove(t)
-	t.Log("l1 bit balance: ", getBITBalanceFromL1(t, userAddress))
-	t.Log("l2 bit balance: ", getBITBalanceFromL2(t, userAddress))
+	t.Log("MANTLE before deposit.....\\")
+	setL1MantleApprove(t)
+	t.Log("l1 mantle balance: ", getMANTLEBalanceFromL1(t, userAddress))
+	t.Log("l2 mantle balance: ", getMANTLEBalanceFromL2(t, userAddress))
 	auth := buildAuth(t, l1Client, userPrivateKey, big.NewInt(0))
-	tx, err := l1Bridge.DepositERC20(auth, common.HexToAddress(l1BitAddress), common.HexToAddress(l2BitAddress), big.NewInt(DECIMAL1), 2_000_000, []byte("0x"))
+	tx, err := l1Bridge.DepositERC20(auth, common.HexToAddress(l1MantleAddress), common.HexToAddress(l2MantleAddress), big.NewInt(DECIMAL1), 2_000_000, []byte("0x"))
 	require.NoError(t, err)
-	t.Log("deposit bit tx hash is: ", tx.Hash())
-	t.Log("BIT after deposit.....\\")
-	t.Log("l1 bit balance: ", getBITBalanceFromL1(t, userAddress))
+	t.Log("deposit mantle tx hash is: ", tx.Hash())
+	t.Log("MANTLE after deposit.....\\")
+	t.Log("l1 mantle balance: ", getMANTLEBalanceFromL1(t, userAddress))
 	time.Sleep(10 * time.Second)
-	t.Log("l2 bit balance: ", getBITBalanceFromL2(t, userAddress))
-	t.Log("bit deposit amount: ", DECIMAL1)
+	t.Log("l2 mantle balance: ", getMANTLEBalanceFromL2(t, userAddress))
+	t.Log("mantle deposit amount: ", DECIMAL1)
 
 	// TEST deposit TT
 	t.Log("----------------")
 	t.Log("TEST-TOKEN DEPOSIT TEST")
 	t.Log("----------------")
 	t.Log("TT before deposit.....\\")
-	setL1BitApprove(t)
-	t.Log("l1 tt balance: ", getBITBalanceFromL1(t, userAddress))
-	t.Log("l2 tt balance: ", getBITBalanceFromL2(t, userAddress))
+	setL1MantleApprove(t)
+	t.Log("l1 tt balance: ", getMANTLEBalanceFromL1(t, userAddress))
+	t.Log("l2 tt balance: ", getMANTLEBalanceFromL2(t, userAddress))
 	auth = buildAuth(t, l1Client, userPrivateKey, big.NewInt(0))
-	tx, err = l1Bridge.DepositERC20(auth, common.HexToAddress(l1BitAddress), common.HexToAddress(l2BitAddress), big.NewInt(DECIMAL0_1), 2_000_000, []byte("0x"))
+	tx, err = l1Bridge.DepositERC20(auth, common.HexToAddress(l1MantleAddress), common.HexToAddress(l2MantleAddress), big.NewInt(DECIMAL0_1), 2_000_000, []byte("0x"))
 	require.NoError(t, err)
 	t.Log("deposit tt tx hash is: ", tx.Hash())
 	t.Log("TT after deposit.....\\")
-	t.Log("l1 tt balance: ", getBITBalanceFromL1(t, userAddress))
+	t.Log("l1 tt balance: ", getMANTLEBalanceFromL1(t, userAddress))
 	time.Sleep(10 * time.Second)
-	t.Log("l2 tt balance: ", getBITBalanceFromL2(t, userAddress))
+	t.Log("l2 tt balance: ", getMANTLEBalanceFromL2(t, userAddress))
 	t.Log("tt deposit amount: ", DECIMAL0_1)
 
 	// TEST withdraw TT
@@ -127,9 +127,9 @@ func getERC20TokenFromL1(t *testing.T, address string, token string) *big.Int {
 	require.NoError(t, err)
 	require.NotNil(t, client)
 
-	l1BitInstance, err := l1bit.NewBitTokenERC20(common.HexToAddress(token), client)
+	l1MantleInstance, err := l1mantle.NewL1MantleToken(common.HexToAddress(token), client)
 	require.NoError(t, err)
-	bal, err := l1BitInstance.BalanceOf(&bind.CallOpts{}, common.HexToAddress(address))
+	bal, err := l1MantleInstance.BalanceOf(&bind.CallOpts{}, common.HexToAddress(address))
 	require.NoError(t, err)
 	require.NotNil(t, bal)
 	return bal
@@ -173,23 +173,23 @@ func prepareAccount(t *testing.T) {
 	//require.Equal(t, getETHBalanceFromL2(t, userAddress), 0)
 	t.Log("eth deposit amount: ", DECIMAL0_1)
 
-	// TEST deposit BIT
+	// TEST deposit MANTLE
 	t.Log("----------------")
-	t.Log("BIT DEPOSIT TEST")
+	t.Log("MANTLE DEPOSIT TEST")
 	t.Log("----------------")
-	t.Log("BIT before deposit.....\\")
-	setL1BitApprove(t)
-	t.Log("l1 bit balance: ", getBITBalanceFromL1(t, userAddress))
-	t.Log("l2 bit balance: ", getBITBalanceFromL2(t, userAddress))
+	t.Log("MANTLE before deposit.....\\")
+	setL1MantleApprove(t)
+	t.Log("l1 mantle balance: ", getMANTLEBalanceFromL1(t, userAddress))
+	t.Log("l2 mantle balance: ", getMANTLEBalanceFromL2(t, userAddress))
 	auth = buildAuth(t, l1Client, userPrivateKey, big.NewInt(0))
-	tx, err = l1Bridge.DepositERC20(auth, common.HexToAddress(l1BitAddress), common.HexToAddress(l2BitAddress), big.NewInt(DECIMAL0_1), 2_000_000, []byte("0x"))
+	tx, err = l1Bridge.DepositERC20(auth, common.HexToAddress(l1MantleAddress), common.HexToAddress(l2MantleAddress), big.NewInt(DECIMAL0_1), 2_000_000, []byte("0x"))
 	require.NoError(t, err)
-	t.Log("deposit bit tx hash is: ", tx.Hash())
-	t.Log("BIT after deposit.....\\")
-	t.Log("l1 bit balance: ", getBITBalanceFromL1(t, userAddress))
+	t.Log("deposit mantle tx hash is: ", tx.Hash())
+	t.Log("MANTLE after deposit.....\\")
+	t.Log("l1 mantle balance: ", getMANTLEBalanceFromL1(t, userAddress))
 	time.Sleep(10 * time.Second)
-	t.Log("l2 bit balance: ", getBITBalanceFromL2(t, userAddress))
-	t.Log("bit deposit amount: ", DECIMAL0_1)
+	t.Log("l2 mantle balance: ", getMANTLEBalanceFromL2(t, userAddress))
+	t.Log("mantle deposit amount: ", DECIMAL0_1)
 
 	// TEST withdraw ETH
 	t.Log("-----------------")
@@ -209,21 +209,21 @@ func prepareAccount(t *testing.T) {
 	t.Log("l2 eth balance: ", getETHBalanceFromL2(t, userAddress))
 	t.Log("eth withdraw amount: ", DECIMAL0_1)
 
-	// TEST withdraw BIT
+	// TEST withdraw MANTLE
 	t.Log("-----------------")
-	t.Log("BIT WITHDRAW TEST")
+	t.Log("MANTLE WITHDRAW TEST")
 	t.Log("-----------------")
-	t.Log("BIT before withdraw.....\\")
-	t.Log("l1 bit balance: ", getBITBalanceFromL1(t, userAddress))
-	t.Log("l2 bit balance: ", getBITBalanceFromL2(t, userAddress))
+	t.Log("MANTLE before withdraw.....\\")
+	t.Log("l1 mantle balance: ", getMANTLEBalanceFromL1(t, userAddress))
+	t.Log("l2 mantle balance: ", getMANTLEBalanceFromL2(t, userAddress))
 	auth = buildAuth(t, l2Client, userPrivateKey, big.NewInt(0))
-	tx, err = l2Bridge.Withdraw(auth, common.HexToAddress(l2BitAddress), big.NewInt(DECIMAL0_1), 300_000, []byte("0x"))
+	tx, err = l2Bridge.Withdraw(auth, common.HexToAddress(l2MantleAddress), big.NewInt(DECIMAL0_1), 300_000, []byte("0x"))
 	require.NoError(t, err)
-	t.Log("withdraw bit tx hash is: ", tx.Hash())
-	t.Log("BIT after withdraw.....\\")
+	t.Log("withdraw mantle tx hash is: ", tx.Hash())
+	t.Log("MANTLE after withdraw.....\\")
 	time.Sleep(10 * time.Second)
-	t.Log("l1 bit balance: ", getBITBalanceFromL1(t, userAddress))
-	t.Log("l2 bit balance: ", getBITBalanceFromL2(t, userAddress))
+	t.Log("l1 mantle balance: ", getMANTLEBalanceFromL1(t, userAddress))
+	t.Log("l2 mantle balance: ", getMANTLEBalanceFromL2(t, userAddress))
 
-	t.Log("bit withdraw amount: ", DECIMAL0_1)
+	t.Log("mantle withdraw amount: ", DECIMAL0_1)
 }

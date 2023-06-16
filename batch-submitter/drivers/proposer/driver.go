@@ -2,6 +2,7 @@ package proposer
 
 import (
 	"bytes"
+	kms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
@@ -23,6 +24,7 @@ import (
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/ctc"
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/scc"
 	tssClient "github.com/mantlenetworkio/mantle/batch-submitter/tss-client"
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/bss-core/drivers"
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
@@ -31,6 +33,7 @@ import (
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	tss_types "github.com/mantlenetworkio/mantle/tss/common"
+	"google.golang.org/api/option"
 )
 
 // stateRootSize is the size in bytes of a state root.
@@ -51,6 +54,10 @@ type Config struct {
 	FPRollupAddr         common.Address
 	ChainID              *big.Int
 	PrivKey              *ecdsa.PrivateKey
+	EnableProposerHsm    bool
+	ProposerHsmAddress   string
+	ProposerHsmAPIName   string
+	ProposerHsmCreden    string
 	SccRollback          bool
 }
 
@@ -70,10 +77,12 @@ type Driver struct {
 }
 
 func NewDriver(cfg Config) (*Driver, error) {
+	log.Info("Show configration", "cfg.SCCAddr", cfg.SCCAddr, "cfg.CTCAddr", cfg.CTCAddr, "cfg.FPRollupAddr", cfg.FPRollupAddr)
 	sccContract, err := scc.NewStateCommitmentChain(
 		cfg.SCCAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewStateCommitmentChain in error", "error", err)
 		return nil, err
 	}
 
@@ -81,6 +90,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.CTCAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewCanonicalTransactionChain in error", "error", err)
 		return nil, err
 	}
 
@@ -88,11 +98,13 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.FPRollupAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewRollup in error", "error", err)
 		return nil, err
 	}
 
 	assertionAddr, err := fpRollup.Assertions(&bind.CallOpts{})
 	if err != nil {
+		log.Error("fpRollup get Assertions in error", "error", err)
 		return nil, err
 	}
 
@@ -100,6 +112,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		assertionAddr, cfg.L1Client,
 	)
 	if err != nil {
+		log.Error("NewAssertionMap in error", "error", err)
 		return nil, err
 	}
 
@@ -107,12 +120,14 @@ func NewDriver(cfg Config) (*Driver, error) {
 		scc.StateCommitmentChainABI,
 	))
 	if err != nil {
+		log.Error("Parse StateCommitmentChain ABI in error", "error", err)
 		return nil, err
 	}
 	parsedFP, err := abi.JSON(strings.NewReader(
 		fpbindings.RollupABI,
 	))
 	if err != nil {
+		log.Error("Parse Rollup ABI in error", "error", err)
 		return nil, err
 	}
 
@@ -124,7 +139,14 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.FPRollupAddr, parsedFP, cfg.L1Client, cfg.L1Client, cfg.L1Client,
 	)
 
-	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+	var walletAddr common.Address
+	if cfg.EnableProposerHsm {
+		walletAddr = common.HexToAddress(cfg.ProposerHsmAddress)
+		log.Info("use proposer hsm", "walletaddr", walletAddr)
+	} else {
+		walletAddr = crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+		log.Info("not use proposer hsm", "walletaddr", walletAddr)
+	}
 
 	return &Driver{
 		cfg:                  cfg,
@@ -252,9 +274,27 @@ func (d *Driver) CraftBatchTx(
 
 	log.Info(name+" batch constructed", "num_state_roots", len(stateRoots))
 
-	opts, err := bind.NewKeyedTransactorWithChainID(
-		d.cfg.PrivKey, d.cfg.ChainID,
-	)
+	var opts *bind.TransactOpts
+	var err error
+	if d.cfg.EnableProposerHsm {
+		proBytes, err := hex.DecodeString(d.cfg.ProposerHsmCreden)
+		apikey := option.WithCredentialsJSON(proBytes)
+		client, err := kms.NewKeyManagementClient(ctx, apikey)
+		if err != nil {
+			return nil, err
+		}
+		mk := &bsscore.ManagedKey{
+			KeyName:      d.cfg.ProposerHsmAPIName,
+			EthereumAddr: common.HexToAddress(d.cfg.ProposerHsmAddress),
+			Gclient:      client,
+		}
+		opts, err = mk.NewEthereumTransactorrWithChainID(ctx, d.cfg.ChainID)
+		log.Info("proposer", "enable-hsm", true)
+	} else {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			d.cfg.PrivKey, d.cfg.ChainID,
+		)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -441,9 +481,26 @@ func (d *Driver) UpdateGasPrice(
 	var finalTx *types.Transaction
 	var err error
 
-	opts, err := bind.NewKeyedTransactorWithChainID(
-		d.cfg.PrivKey, d.cfg.ChainID,
-	)
+	var opts *bind.TransactOpts
+	if d.cfg.EnableProposerHsm {
+		proBytes, err := hex.DecodeString(d.cfg.ProposerHsmCreden)
+		apikey := option.WithCredentialsJSON(proBytes)
+		client, err := kms.NewKeyManagementClient(ctx, apikey)
+		if err != nil {
+			return nil, err
+		}
+		mk := &bsscore.ManagedKey{
+			KeyName:      d.cfg.ProposerHsmAPIName,
+			EthereumAddr: common.HexToAddress(d.cfg.ProposerHsmAddress),
+			Gclient:      client,
+		}
+		opts, err = mk.NewEthereumTransactorrWithChainID(ctx, d.cfg.ChainID)
+		log.Info("proposer", "enable-hsm", true)
+	} else {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			d.cfg.PrivKey, d.cfg.ChainID,
+		)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -501,19 +558,25 @@ func (d *Driver) SendTransaction(
 
 func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32]byte, shouldStartAtElement *big.Int, signature []byte, blocks []*l2types.Block) (*types.Transaction, error) {
 	var latestAssertion rollupTypes.Assertion
-	var staker rollupTypes.Staker
-	if ret, err := d.fpRollup.Stakers(&bind.CallOpts{}, opts.From); err != nil {
+	var stakerInfo rollupTypes.Staker
+	var stakerAddr common.Address
+	if ret, err := d.fpRollup.Registers(&bind.CallOpts{}, opts.From); err != nil {
 		return nil, err
 	} else {
-		staker.IsStaked = ret.IsStaked
-		staker.AmountStaked = ret.AmountStaked
-		staker.AssertionID = ret.AssertionID
-		staker.CurrentChallenge = ret.CurrentChallenge
+		stakerAddr = ret
 	}
-	if ret, err := d.fpAssertion.Assertions(&bind.CallOpts{}, staker.AssertionID); err != nil {
+	if ret, err := d.fpRollup.Stakers(&bind.CallOpts{}, stakerAddr); err != nil {
 		return nil, err
 	} else {
-		latestAssertion.ID = staker.AssertionID
+		stakerInfo.IsStaked = ret.IsStaked
+		stakerInfo.AmountStaked = ret.AmountStaked
+		stakerInfo.AssertionID = ret.AssertionID
+		stakerInfo.CurrentChallenge = ret.CurrentChallenge
+	}
+	if ret, err := d.fpAssertion.Assertions(&bind.CallOpts{}, stakerInfo.AssertionID); err != nil {
+		return nil, err
+	} else {
+		latestAssertion.ID = stakerInfo.AssertionID
 		latestAssertion.VmHash = ret.StateHash
 		latestAssertion.InboxSize = ret.InboxSize
 		latestAssertion.Parent = ret.Parent
@@ -530,6 +593,7 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 	}
 	if lastCreatedAssertionID.Uint64() != 0 && latestAssertion.InboxSize.Uint64()+uint64(len(txBatch.Txs)) != txBatch.LastBlockNumber() {
 		log.Error("Online total InboxSize not match with local batch's LatestBlockNumber")
+		log.Info(fmt.Sprintf("show proposer error, currenyInboxSize: %d, batchLength: %d, lastBlockNumber: %d", latestAssertion.InboxSize.Uint64(), len(txBatch.Txs), txBatch.LastBlockNumber()))
 		return nil, errors.New("Online total InboxSize not match with local batch's LatestBlockNumber")
 	}
 

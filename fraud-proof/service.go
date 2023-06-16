@@ -2,6 +2,12 @@ package rollup
 
 import (
 	"bytes"
+	kms "cloud.google.com/go/kms/apiv1"
+	"context"
+	"encoding/hex"
+	"github.com/ethereum/go-ethereum/common"
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
+	"google.golang.org/api/option"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -28,13 +34,35 @@ func RegisterFraudProofService(stack *node.Node, cfg *services.Config) {
 		log.Crit("Failed to register the Rollup service: keystore not found")
 	}
 	chainID := big.NewInt(int64(cfg.L1ChainID))
-	json, err := ks.Export(accounts.Account{Address: cfg.StakeAddr}, cfg.Passphrase, cfg.Passphrase)
-	if err != nil {
-		log.Crit("Failed to register the Rollup service", "err", err)
-	}
-	auth, err := bind.NewTransactorWithChainID(bytes.NewReader(json), cfg.Passphrase, chainID)
-	if err != nil {
-		log.Crit("Failed to register the Rollup service", "err", err)
+	log.Info("fault-proof register", "EnableHsm",
+		cfg.EnableHsm, "HsmCreden", cfg.HsmCreden, "HsmAPIName", cfg.HsmAPIName)
+
+	var auth *bind.TransactOpts
+	if !cfg.EnableHsm {
+		json, err := ks.Export(accounts.Account{Address: cfg.StakeAddr}, cfg.Passphrase, cfg.Passphrase)
+		if err != nil {
+			log.Crit("Failed to register the Rollup service", "err", err)
+		}
+		auth, err = bind.NewTransactorWithChainID(bytes.NewReader(json), cfg.Passphrase, chainID)
+		if err != nil {
+			log.Crit("Failed to register the Rollup service", "err", err)
+		}
+	} else {
+		seqBytes, err := hex.DecodeString(cfg.HsmCreden)
+		apikey := option.WithCredentialsJSON(seqBytes)
+		client, err := kms.NewKeyManagementClient(context.Background(), apikey)
+		if err != nil {
+			log.Crit("sequencer", "create signer error", err.Error())
+		}
+		mk := &bsscore.ManagedKey{
+			KeyName:      cfg.HsmAPIName,
+			EthereumAddr: common.HexToAddress(cfg.HsmAddress),
+			Gclient:      client,
+		}
+		auth, err = mk.NewEthereumTransactorrWithChainID(context.Background(), chainID)
+		if err != nil {
+			log.Crit("sequencer", "create signer error", err.Error())
+		}
 	}
 
 	var ethService *eth.Ethereum

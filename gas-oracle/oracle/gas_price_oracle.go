@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"time"
 
@@ -56,11 +57,16 @@ func (g *GasPriceOracle) Start() error {
 	if g.config.l2ChainID == nil {
 		return fmt.Errorf("layer-two: %w", errNoChainID)
 	}
-	if g.config.privateKey == nil {
-		return errNoPrivateKey
+	var address common.Address
+	if !g.config.EnableHsm {
+		if g.config.privateKey == nil {
+			return errNoPrivateKey
+		}
+		address = crypto.PubkeyToAddress(g.config.privateKey.PublicKey)
+	} else {
+		address = common.HexToAddress(g.config.HsmAddress)
 	}
 
-	address := crypto.PubkeyToAddress(g.config.privateKey.PublicKey)
 	log.Info("Starting Gas Price Oracle", "l1-chain-id", g.l1ChainID,
 		"l2-chain-id", g.l2ChainID, "address", address.Hex())
 
@@ -106,7 +112,12 @@ func (g *GasPriceOracle) ensure() error {
 	if err != nil {
 		return err
 	}
-	address := crypto.PubkeyToAddress(g.config.privateKey.PublicKey)
+	var address common.Address
+	if g.config.EnableHsm {
+		address = common.HexToAddress(g.config.HsmAddress)
+	} else {
+		address = crypto.PubkeyToAddress(g.config.privateKey.PublicKey)
+	}
 	if address != owner {
 		log.Error("Signing key does not match contract owner", "signer", address.Hex(), "owner", owner.Hex())
 		return errInvalidSigningKey
@@ -141,14 +152,12 @@ func (g *GasPriceOracle) BaseFeeLoop() {
 	if err != nil {
 		panic(err)
 	}
-
 	for {
 		select {
 		case <-timer.C:
 			if err := updateBaseFee(); err != nil {
-				log.Error("cannot update l1 base fee", "messgae", err)
+				log.Error("cannot update l1 base fee", "message", err)
 			}
-
 		case <-g.ctx.Done():
 			g.Stop()
 		}
@@ -204,7 +213,7 @@ func (g *GasPriceOracle) Update() error {
 
 // NewGasPriceOracle creates a new GasPriceOracle based on a Config
 func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
-	tokenPricer := tokenprice.NewClient(cfg.bybitBackendURL, cfg.tokenPricerUpdateFrequencySecond)
+	tokenPricer := tokenprice.NewClient(cfg.PriceBackendURL, cfg.tokenPricerUpdateFrequencySecond)
 	if tokenPricer == nil {
 		return nil, fmt.Errorf("invalid token price client")
 	}
@@ -290,7 +299,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 		cfg.l1ChainID = l1ChainID
 	}
 
-	if cfg.privateKey == nil {
+	if !cfg.EnableHsm && cfg.privateKey == nil {
 		return nil, errNoPrivateKey
 	}
 

@@ -10,7 +10,7 @@ import { L1TransportServer } from '../server/service'
 import { validators } from '../../utils'
 import { L2IngestionService } from '../l2-ingestion/service'
 import { BSS_HF1_INDEX } from '../../config'
-import { DaIngestionService } from "../da-ingestion/service";
+import { DaIngestionService } from '../da-ingestion/service'
 
 export interface L1DataTransportServiceOptions {
   nodeEnv: string
@@ -30,6 +30,7 @@ export interface L1DataTransportServiceOptions {
   metrics?: Metrics
   dbPath: string
   logsPerPollingInterval: number
+  fraudProofWindow: number
   pollingInterval: number
   daPollingInterval: number
   port: number
@@ -41,6 +42,9 @@ export interface L1DataTransportServiceOptions {
   eigenUpgradeEnable?: boolean
   daSyncStep?: number
   daInitBatch?: number
+  startUpdateBatchIndex?: number
+  endUpdateBatchIndex?: number
+  mantleDaUpgradeDataStoreId?: number
 
   transactionsPerPollingInterval: number
   legacySequencerCompatibility: boolean
