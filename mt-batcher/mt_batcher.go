@@ -2,6 +2,8 @@ package mt_batcher
 
 import (
 	"context"
+	"strings"
+
 	"github.com/Layr-Labs/datalayr/common/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -15,7 +17,6 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/restorer"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/sequencer"
 	"github.com/urfave/cli"
-	"strings"
 )
 
 func Main(gitVersion string) func(ctx *cli.Context) error {
@@ -189,8 +190,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 	}
 	log.Info("hsm",
 		"enablehsm", driverConfig.EnableHsm, "hsmaddress", driverConfig.HsmAddress,
-		"hsmapiname", driverConfig.HsmAPIName, "HsmCreden", driverConfig.HsmCreden,
-		"HsmFeeAPIName", driverConfig.HsmFeeAPIName, "HsmFeeAddress", driverConfig.HsmFeeAddress)
+		"hsmapiname", driverConfig.HsmAPIName, "HsmFeeAPIName", driverConfig.HsmFeeAPIName, "HsmFeeAddress", driverConfig.HsmFeeAddress)
 	driver, err := sequencer.NewDriver(ctx, driverConfig)
 	if err != nil {
 		log.Error("new driver fail", "err", err)
