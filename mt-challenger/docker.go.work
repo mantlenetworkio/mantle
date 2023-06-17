@@ -2,7 +2,8 @@ go 1.18
 
 use (
 	./mt-challenger
-	./datalayr
+	./datalayr/common
+  ./datalayr/lib/merkzg
   ./l2geth
 	./mt-batcher
   ./bss-core
