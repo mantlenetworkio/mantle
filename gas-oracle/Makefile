@@ -43,4 +43,11 @@ binding: abi
 		--type GasPriceOracle \
 		--bin $(temp)
 
+	cat abis/uniswapv3_quoter.json \
+		| jq .abi \
+		| abigen --pkg bindings \
+		--abi - \
+		--out bindings/uniswapv3_quoter.go \
+		--type Uniswapv3Quoter $(temp)
+
 	rm $(temp)

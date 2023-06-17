@@ -136,11 +136,23 @@ var (
 		EnvVar:   "PRICE_BACKEND_URL",
 		Required: true,
 	}
+	PriceBackendUniswapURL = cli.StringFlag{
+		Name:     "price-backend-uniswap-url",
+		Usage:    "price backend uniswap url",
+		EnvVar:   "PRICE_BACKEND_UNISWAP_URL",
+		Required: true,
+	}
 	TokenPricerUpdateFrequencySecond = cli.Uint64Flag{
 		Name:   "tokenPricerUpdateFrequencySecond",
 		Value:  3,
 		Usage:  "token pricer update frequency",
 		EnvVar: "TOKEN_PRICER_UPDATE_FREQUENCY",
+	}
+	TokenRatioMode = cli.Uint64Flag{
+		Name:   "token-ratio-mode",
+		Value:  2,
+		Usage:  "token ratio mode",
+		EnvVar: "TOKEN_RATIO_MODE",
 	}
 	WaitForReceiptFlag = cli.BoolFlag{
 		Name:   "wait-for-receipt",
@@ -236,7 +248,9 @@ var Flags = []cli.Flag{
 	DaFeeEpochLengthSecondsFlag,
 	L2GasPriceSignificanceFactorFlag,
 	PriceBackendURL,
+	PriceBackendUniswapURL,
 	TokenPricerUpdateFrequencySecond,
+	TokenRatioMode,
 	WaitForReceiptFlag,
 	EnableL1BaseFeeFlag,
 	EnableL2GasPriceFlag,
