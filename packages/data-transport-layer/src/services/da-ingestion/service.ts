@@ -193,7 +193,8 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
           this.options.mantleDaUpgradeDataStoreId
         )
         this.logger.info('store batch transactions by store id', {
-          execOk,
+          execValue: execOk,
+          batchIndex: index,
         })
         if (!execOk) {
           return
@@ -376,6 +377,9 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
                   s: '0x'.concat(sigS),
                 },
               }
+        let gasLimit = BigNumber.from(0).toString()
+        let target = constants.AddressZero
+        let origin = null
         if (batchTx['TxMeta']['queueIndex'] != null) {
           const lastestEnqueue = await this.state.db.getLatestEnqueue()
           if (lastestEnqueue.index > batchTx['TxMeta']['queueIndex']) {
@@ -386,33 +390,30 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
             const enqueue = await this.state.db.getEnqueueByIndex(
               BigNumber.from(batchTx['TxMeta']['queueIndex']).toNumber()
             )
-            let gasLimit = BigNumber.from(0).toString()
-            let target = constants.AddressZero
-            let origin = null
             if (enqueue != null) {
               gasLimit = enqueue.gasLimit
               target = enqueue.target
               origin = enqueue.origin
             }
-            transactionEntries.push({
-              index: batchTx['TxMeta']['index'],
-              batchIndex: daBatchIndex,
-              blockNumber: batchTx['TxMeta']['l1BlockNumber'],
-              timestamp: batchTx['TxMeta']['l1Timestamp'],
-              gasLimit,
-              target,
-              origin,
-              data: txData,
-              queueOrigin,
-              value: batchTx['TxDetail']['value'],
-              queueIndex: batchTx['TxMeta']['queueIndex'],
-              decoded,
-              confirmed: true,
-            })
           } else {
             return false
           }
         }
+        transactionEntries.push({
+          index: batchTx['TxMeta']['index'],
+          batchIndex: daBatchIndex,
+          blockNumber: batchTx['TxMeta']['l1BlockNumber'],
+          timestamp: batchTx['TxMeta']['l1Timestamp'],
+          gasLimit,
+          target,
+          origin,
+          data: txData,
+          queueOrigin,
+          value: batchTx['TxDetail']['value'],
+          queueIndex: batchTx['TxMeta']['queueIndex'],
+          decoded,
+          confirmed: true,
+        })
         this.daIngestionMetrics.currentL2TransactionIndex.set(
           batchTx['TxMeta']['index']
         )
