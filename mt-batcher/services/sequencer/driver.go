@@ -153,7 +153,6 @@ func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction, feeM
 	var err error
 	var opts *bind.TransactOpts
 	if feeModelEnable {
-		var opts *bind.TransactOpts
 		if !d.Cfg.EnableHsm {
 			opts, err = bind.NewKeyedTransactorWithChainID(
 				d.Cfg.FeePrivKey, d.Cfg.L1ChainID,

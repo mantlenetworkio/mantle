@@ -38,17 +38,17 @@ func Command() *cobra.Command {
 			return runNode(cmd)
 		},
 	}
-
+	cmd.Flags().BoolP("debug", "d", false, "log level,default info")
 	return cmd
 }
 
 func runNode(cmd *cobra.Command) error {
 	nonProd, _ := cmd.Flags().GetBool("non-prod")
 	waitPeersFullConnected, _ := cmd.Flags().GetBool("full")
-	debug,_ := cmd.Flags().GetBool("debug")
+	debug, _ := cmd.Flags().GetBool("debug")
 	if debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	}else {
+	} else {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
 	cfg := tss.GetConfigFromCmd(cmd)
@@ -78,7 +78,7 @@ func runNode(cmd *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-	observer = observer.SetHook(slash.NewSlashing(store, store, cfg.MissSignedNumber))
+	observer = observer.SetHook(slash.NewSlashingNode(store, store))
 	observer.Start()
 
 	//new tss server instance

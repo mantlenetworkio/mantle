@@ -69,7 +69,7 @@ func (registry *Registry) SignStateHandler() gin.HandlerFunc {
 
 func (registry *Registry) ResetHeightHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		heightStr := c.Param("height")
+		heightStr := c.PostForm("height")
 		height, err := strconv.Atoi(heightStr)
 		if err != nil {
 			c.String(http.StatusInternalServerError, "wrong height format")
