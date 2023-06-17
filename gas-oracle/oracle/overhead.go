@@ -11,19 +11,6 @@ import (
 	"sort"
 )
 
-//type overHead struct {
-//	sync.Mutex
-//
-//	jumpTable      map[int]*big.Int
-//	orderedSizes   []int
-//}
-//
-//var OverHead = overHead{
-//	Mutex: sync.Mutex{},
-//	jumpTable: make(map[int]*big.Int, 0),
-//	orderedSizes: make([]int, 0),
-//}
-
 var jumpTable = make(map[int]*big.Int, 0)
 var orderedSizes = make([]int, 0)
 

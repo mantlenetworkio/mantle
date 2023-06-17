@@ -42,13 +42,13 @@ var (
 	SCCContractAddressFlag = cli.StringFlag{
 		Name:   "scc-contract-address",
 		Usage:  "Address of StateCommitChain",
-		Value:  "0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9",
+		Value:  "0x82e130FF187E787D5DdDFAa4f36CB59e6B1Da6dd",
 		EnvVar: "GAS_PRICE_ORACLE_SCC_CONTRACT_ADDRESS",
 	}
 	CTCContractAddressFlag = cli.StringFlag{
 		Name:   "ctc-contract-address",
 		Usage:  "Address of CanonicalTransactionChain",
-		Value:  "0x8BAccFF561FDe61D6bC8B6f299fFBa561d2189B9",
+		Value:  "0xEd5166f12FCb48a0804B62FDccB37f59F1F1bc3B",
 		EnvVar: "GAS_PRICE_ORACLE_CTC_CONTRACT_ADDRESS",
 	}
 	PrivateKeyFlag = cli.StringFlag{
@@ -274,8 +274,11 @@ var Flags = []cli.Flag{
 	TokenPricerUpdateFrequencySecond,
 	WaitForReceiptFlag,
 	EnableL1BaseFeeFlag,
+	EnableL1OverheadFlag,
 	EnableL2GasPriceFlag,
 	EnableDaFeeFlag,
+	SCCContractAddressFlag,
+	CTCContractAddressFlag,
 	EnableHsmFlag,
 	HsmAddressFlag,
 	HsmAPINameFlag,

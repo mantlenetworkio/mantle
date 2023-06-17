@@ -60,6 +60,11 @@ type Config struct {
 	MaxBatchSubmissionTime time.Duration
 	RollClient             rollup.RollupClient
 	PollInterval           time.Duration
+	FinalityConfirmations  uint64
+	EnableProposerHsm      bool
+	ProposerHsmCreden      string
+	ProposerHsmAddress     string
+	ProposerHsmAPIName     string
 }
 
 type Driver struct {

@@ -72,7 +72,7 @@ func NewConfig(ctx *cli.Context) *Config {
 	daFeeContractAddress := ctx.GlobalString(flags.DaFeeContractAddressFlag.Name)
 	cfg.daFeeContractAddress = common.HexToAddress(daFeeContractAddress)
 	cfg.sccContractAddress = common.HexToAddress(ctx.GlobalString(flags.SCCContractAddressFlag.Name))
-	cfg.sccContractAddress = common.HexToAddress(ctx.GlobalString(flags.SCCContractAddressFlag.Name))
+	cfg.ctcContractAddress = common.HexToAddress(ctx.GlobalString(flags.CTCContractAddressFlag.Name))
 	cfg.targetGasPerSecond = ctx.GlobalUint64(flags.TargetGasPerSecondFlag.Name)
 	cfg.maxPercentChangePerEpoch = ctx.GlobalFloat64(flags.MaxPercentChangePerEpochFlag.Name)
 	cfg.averageBlockGasLimitPerEpoch = ctx.GlobalUint64(flags.AverageBlockGasLimitPerEpochFlag.Name)
