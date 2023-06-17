@@ -3,7 +3,7 @@ go 1.18
 use (
 	./mt-batcher
 	./bss-core
-	./datalayr
+	./datalayr/common
 	./l2geth
 	./fraud-proof
   ./metrics

@@ -8,7 +8,7 @@ replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr/lib/merkzg
 
 replace github.com/mantlenetworkio/mantle/mt-batcher => ../mt-batcher
 
-replace github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ../l2geth
+replace github.com/mantlenetworkio/mantle/l2geth => ../l2geth
 
 replace github.com/mantlenetworkio/mantle/fraud-proof => ../fraud-proof
 
