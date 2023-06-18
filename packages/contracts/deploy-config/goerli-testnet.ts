@@ -24,6 +24,7 @@ const config = {
   bvmFeeWalletOwner: process.env.BVM_FEE_WALLETOWNER_OWNER || '0xAe3e6f7Df1CC6Cf18Fe9F3E69BCFC3351eb4fB45',
   bvmTssRewardContractOwner: process.env.TssRewardContractOwner || '0xAe3e6f7Df1CC6Cf18Fe9F3E69BCFC3351eb4fB45',
   l1MantleAddress: process.env.L1_MANTLE_ADDRESS || '0x5a94Dc6cc85fdA49d8E9A8b85DDE8629025C42be',
+  proxyL1MantleAddress: process.env.PROXY_L1_MANTLE_ADDRESS || '0x5a94Dc6cc85fdA49d8E9A8b85DDE8629025C42be',
   dataManagerAddress: process.env.DATA_MANAGER_ADDRESS || '0x0000000000000000000000000000000000000000',
   bvmEigenSequencerAddress: process.env.BVM_EIGENDA_SEQUENCER_ADDRESS || '0xc4AaE221f1C62E8CBC657Af5b051eA573914cFc7',
   bvmEigenFeeAddress: process.env.BVM_EIGENDA_FEE_ADDRESS || '0xc4AaE221f1C62E8CBC657Af5b051eA573914cFc7',
