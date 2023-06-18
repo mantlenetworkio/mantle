@@ -45,7 +45,7 @@ var (
 	RealTokenRatioMode = TokenRatioMode(0)
 	// DefaultTokenRatioMode use DefaultTokenRatio to set token_ratio
 	DefaultTokenRatioMode = TokenRatioMode(1)
-	// OneDollarTokenRatioMode use DefaultETHPrice to set token_ratio, so mnt price is 1$
+	// OneDollarTokenRatioMode use eth_price to set token_ratio, so mnt price is 1$
 	OneDollarTokenRatioMode = TokenRatioMode(2)
 )
 

@@ -131,7 +131,7 @@ var (
 		EnvVar: "GAS_PRICE_ORACLE_SIGNIFICANT_FACTOR",
 	}
 	PriceBackendURL = cli.StringFlag{
-		Name:     "PriceBackendURL",
+		Name:     "price-backend-url",
 		Usage:    "price exchange backend url",
 		EnvVar:   "PRICE_BACKEND_URL",
 		Required: true,
@@ -143,7 +143,7 @@ var (
 		Required: true,
 	}
 	TokenPricerUpdateFrequencySecond = cli.Uint64Flag{
-		Name:   "tokenPricerUpdateFrequencySecond",
+		Name:   "token-pricer-update-frequency-second",
 		Value:  3,
 		Usage:  "token pricer update frequency",
 		EnvVar: "TOKEN_PRICER_UPDATE_FREQUENCY",
