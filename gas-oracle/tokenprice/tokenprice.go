@@ -43,10 +43,10 @@ var (
 
 	// RealTokenRatioMode use eth_price / mnt_price to set token_ratio
 	RealTokenRatioMode = TokenRatioMode(0)
-	// DefaultTokenRatioMode use DefaultTokenRatio to set token_ratio
-	DefaultTokenRatioMode = TokenRatioMode(1)
 	// OneDollarTokenRatioMode use eth_price to set token_ratio, so mnt price is 1$
-	OneDollarTokenRatioMode = TokenRatioMode(2)
+	OneDollarTokenRatioMode = TokenRatioMode(1)
+	// DefaultTokenRatioMode use DefaultTokenRatio to set token_ratio
+	DefaultTokenRatioMode = TokenRatioMode(2)
 )
 
 // NewClient create a new Client given a remote HTTP url, update frequency and different mode_switch for token ratio
@@ -108,6 +108,8 @@ func (c *Client) PriceRatioWithMode() (float64, error) {
 	case OneDollarTokenRatioMode:
 		// supposing that mnt is 1 USD, so token_ratio is equals to eth_price
 		ratio = ethPrice
+	default:
+		// default mode is RealTokenRatioMode which uses eth_price / mnt_price to set token_ratio
 	}
 
 	c.lastUpdate = time.Now()

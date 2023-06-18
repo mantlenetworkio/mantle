@@ -150,7 +150,7 @@ var (
 	}
 	TokenRatioMode = cli.Uint64Flag{
 		Name:   "token-ratio-mode",
-		Value:  2,
+		Value:  0,
 		Usage:  "token ratio mode",
 		EnvVar: "TOKEN_RATIO_MODE",
 	}

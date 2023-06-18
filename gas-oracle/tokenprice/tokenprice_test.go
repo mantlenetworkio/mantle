@@ -38,17 +38,8 @@ func TestGetTokenPriceWithRealTokenRatioMode(t *testing.T) {
 	t.Logf("ratio:%v", ratio)
 }
 
-func TestGetTokenPriceWithDefaultTokenRatioMode(t *testing.T) {
-	tokenPricer := NewClient("https://api.bybit.com", "https://mainnet.infura.io/v3/4f4692085f1340c2a645ae04d36c2321", 3, 1)
-
-	ratio, err := tokenPricer.PriceRatioWithMode()
-	require.NoError(t, err)
-	require.Equal(t, DefaultTokenRatio, int(ratio))
-	t.Logf("ratio:%v", ratio)
-}
-
 func TestGetTokenPriceWithOneDollarTokenRatioMode(t *testing.T) {
-	tokenPricer := NewClient("https://api.bybit.com", "https://mainnet.infura.io/v3/4f4692085f1340c2a645ae04d36c2321", 3, 2)
+	tokenPricer := NewClient("https://api.bybit.com", "https://mainnet.infura.io/v3/4f4692085f1340c2a645ae04d36c2321", 3, 1)
 
 	ethPrice, err := tokenPricer.query("ETHUSDT")
 	require.NoError(t, err)
@@ -60,7 +51,7 @@ func TestGetTokenPriceWithOneDollarTokenRatioMode(t *testing.T) {
 }
 
 func TestGetTokenPriceWithOneDollarTokenRatioMode2(t *testing.T) {
-	tokenPricer := NewClient("", "https://mainnet.infura.io/v3/4f4692085f1340c2a645ae04d36c2321", 3, 2)
+	tokenPricer := NewClient("", "https://mainnet.infura.io/v3/4f4692085f1340c2a645ae04d36c2321", 3, 1)
 
 	_, ethPrice, err := tokenPricer.getTokenPricesFromUniswap()
 	require.NoError(t, err)
@@ -72,10 +63,19 @@ func TestGetTokenPriceWithOneDollarTokenRatioMode2(t *testing.T) {
 }
 
 func TestGetTokenPriceWithOneDollarTokenRatioMode3(t *testing.T) {
-	tokenPricer := NewClient("", "https://mainnet.infura.io/v3", 3, 2)
+	tokenPricer := NewClient("", "https://mainnet.infura.io/v3", 3, 1)
 
 	ratio, err := tokenPricer.PriceRatioWithMode()
 	require.NoError(t, err)
 	require.Equal(t, DefaultETHPrice, int(ratio))
+	t.Logf("ratio:%v", ratio)
+}
+
+func TestGetTokenPriceWithDefaultTokenRatioMode(t *testing.T) {
+	tokenPricer := NewClient("https://api.bybit.com", "https://mainnet.infura.io/v3/4f4692085f1340c2a645ae04d36c2321", 3, 2)
+
+	ratio, err := tokenPricer.PriceRatioWithMode()
+	require.NoError(t, err)
+	require.Equal(t, DefaultTokenRatio, int(ratio))
 	t.Logf("ratio:%v", ratio)
 }
