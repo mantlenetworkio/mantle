@@ -224,6 +224,8 @@ type Config struct {
 	SequencerHsmAPIName string
 
 	SequencerHsmCreden string
+
+	RollupClientHttp string
 }
 
 // NewConfig parses the Config from the provided flags or environment variables.
@@ -282,6 +284,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		ProposerHsmAddress:  ctx.GlobalString(flags.ProposerHsmAddressFlag.Name),
 		ProposerHsmAPIName:  ctx.GlobalString(flags.ProposerHsmAPIName.Name),
 		ProposerHsmCreden:   ctx.GlobalString(flags.ProposerHsmCreden.Name),
+		RollupClientHttp:    ctx.GlobalString(flags.RollupClientHttpFlag.Name),
 	}
 
 	err := ValidateConfig(&cfg)

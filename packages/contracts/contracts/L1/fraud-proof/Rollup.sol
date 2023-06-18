@@ -347,8 +347,8 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         // Initialize challenge.
         Challenge challenge = new Challenge();
         address challengeAddr = address(challenge);
-        stakers[challenger].currentChallenge = challengeAddr;
-        stakers[defender].currentChallenge = challengeAddr;
+        stakers[challengerStaker].currentChallenge = challengeAddr;
+        stakers[defenderStaker].currentChallenge = challengeAddr;
 
         challengeCtx = ChallengeCtx(false,challengeAddr,defender,challenger,defenderAssertionID,challengerAssertionID);
         emit AssertionChallenged(defenderAssertionID, challengeAddr);
