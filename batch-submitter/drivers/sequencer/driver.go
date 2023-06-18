@@ -1,17 +1,15 @@
 package sequencer
 
 import (
-	kms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
-	bsscore "github.com/mantlenetworkio/mantle/bss-core"
-	"google.golang.org/api/option"
 	"math/big"
 	"strings"
 
-	ethereum "github.com/ethereum/go-ethereum"
+	kms "cloud.google.com/go/kms/apiv1"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -19,9 +17,11 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+	"google.golang.org/api/option"
 
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/ctc"
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/da"
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/bss-core/drivers"
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"

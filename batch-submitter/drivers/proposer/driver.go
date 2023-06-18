@@ -2,7 +2,6 @@ package proposer
 
 import (
 	"bytes"
-	kms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
@@ -14,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	kms "cloud.google.com/go/kms/apiv1"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -21,6 +21,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+	"google.golang.org/api/option"
 
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/ctc"
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/scc"
@@ -34,8 +35,6 @@ import (
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	tss_types "github.com/mantlenetworkio/mantle/tss/common"
-
-	"google.golang.org/api/option"
 )
 
 // stateRootSize is the size in bytes of a state root.
