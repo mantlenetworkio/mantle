@@ -193,7 +193,7 @@ func (g *GasPriceOracle) DaFeeLoop() {
 
 func (g *GasPriceOracle) OverHeadLoop() {
 	stateBatchAppendChan := make(chan *bindings.StateCommitmentChainStateBatchAppended, 10)
-	stateAppendSub, err := g.sccBackend.WatchStateBatchAppended(&bind.WatchOpts{}, stateBatchAppendChan, nil)
+	stateAppendSub, err := g.sccBackend.WatchStateBatchAppended(&bind.WatchOpts{Context: g.ctx}, stateBatchAppendChan, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -261,7 +261,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 		return nil, err
 	}
 
-	l1Client, err := NewL1Client(cfg.ethereumHttpUrl, tokenPricer)
+	l1Client, err := NewL1Client(cfg.ethereumWssUrl, tokenPricer)
 	if err != nil {
 		return nil, err
 	}

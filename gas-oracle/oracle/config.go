@@ -18,6 +18,7 @@ type Config struct {
 	l1ChainID                        *big.Int
 	l2ChainID                        *big.Int
 	ethereumHttpUrl                  string
+	ethereumWssUrl                   string
 	layerTwoHttpUrl                  string
 	gasPriceOracleAddress            common.Address
 	daFeeContractAddress             common.Address
@@ -66,6 +67,7 @@ type Config struct {
 func NewConfig(ctx *cli.Context) *Config {
 	cfg := Config{}
 	cfg.ethereumHttpUrl = ctx.GlobalString(flags.EthereumHttpUrlFlag.Name)
+	cfg.ethereumWssUrl = ctx.GlobalString(flags.EthereumWssUrlFlag.Name)
 	cfg.layerTwoHttpUrl = ctx.GlobalString(flags.LayerTwoHttpUrlFlag.Name)
 	addr := ctx.GlobalString(flags.GasPriceOracleAddressFlag.Name)
 	cfg.gasPriceOracleAddress = common.HexToAddress(addr)
