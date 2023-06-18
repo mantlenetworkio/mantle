@@ -74,7 +74,7 @@ func (c *L1Client) getHistoryBestPrice(endHeight *big.Int, lastBaseFee *big.Int,
 	baseFees = append(baseFees, lastBaseFee)
 	for j := 0; j < len(baseFees); j++ {
 		if bestPrice.Cmp(baseFees[j]) < 0 {
-			bestPrice = baseFees[j]
+			bestPrice.Set(baseFees[j])
 		}
 	}
 	return bestPrice

@@ -738,7 +738,7 @@ func (d *Driver) RollupMainWorker() {
 				continue
 			}
 			rollupMinTransactions := new(big.Int).Sub(end, start)
-			if big.NewInt(int64(d.Cfg.RollUpMinTxn)).Cmp(rollupMinTransactions) < 0 {
+			if big.NewInt(int64(d.Cfg.RollUpMinTxn)).Cmp(rollupMinTransactions) > 0 {
 				log.Info("MtBatcher rollup total transaction less than min transations in config", "rollupMinTransactions", rollupMinTransactions)
 				continue
 			}
