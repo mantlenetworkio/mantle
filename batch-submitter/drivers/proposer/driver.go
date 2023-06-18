@@ -34,12 +34,15 @@ import (
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	tss_types "github.com/mantlenetworkio/mantle/tss/common"
-	
+
 	"google.golang.org/api/option"
 )
 
 // stateRootSize is the size in bytes of a state root.
 const stateRootSize = 32
+
+// block number buffer for dtl to sync data
+const blockBuffer = 2
 
 var bigOne = new(big.Int).SetUint64(1) //nolint:unused
 
@@ -224,7 +227,7 @@ func (d *Driver) GetBatchBlockRange(
 		return nil, nil, err
 	}
 	finality := new(big.Int).SetUint64(d.cfg.FinalityConfirmations)
-	finality.Add(finality, new(big.Int).SetInt64(2)) // add 2 block number buffer to dtl sync data
+	finality.Add(finality, new(big.Int).SetInt64(blockBuffer)) // add 2 block number buffer to dtl sync data
 	currentNumber := currentHeader.Number
 	currentNumber.Sub(currentNumber, finality)
 
