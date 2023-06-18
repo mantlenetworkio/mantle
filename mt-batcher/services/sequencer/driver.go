@@ -54,6 +54,7 @@ type DriverConfig struct {
 	PrivKey                   *ecdsa.PrivateKey
 	FeePrivKey                *ecdsa.PrivateKey
 	BlockOffset               uint64
+	RollUpMinTxn              uint64
 	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
 	EigenLayerNode            int
@@ -734,6 +735,11 @@ func (d *Driver) RollupMainWorker() {
 			log.Info("MtBatcher get batch block range", "start", start, "end", end)
 			if start.Cmp(end) == 0 {
 				log.Info("MtBatcher Sequencer no updates", "start", start, "end", end)
+				continue
+			}
+			rollupMinTransactions := new(big.Int).Sub(end, start)
+			if big.NewInt(int64(d.Cfg.RollUpMinTxn)).Cmp(rollupMinTransactions) < 0 {
+				log.Info("MtBatcher rollup total transaction less than min transations in config", "rollupMinTransactions", rollupMinTransactions)
 				continue
 			}
 			aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(

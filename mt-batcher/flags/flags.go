@@ -119,6 +119,12 @@ var (
 		Value:  1,
 		EnvVar: prefixEnvVar(envVarPrefix, "BLOCK_OFFSET"),
 	}
+	RollUpMinTxnFlag = cli.Uint64Flag{
+		Name:   "rollup-min-txn",
+		Usage:  "Rollup transaction min transactions for eigen da",
+		Value:  500,
+		EnvVar: prefixEnvVar(envVarPrefix, "ROLLUP_MIN_TXN"),
+	}
 	RollUpMinSizeFlag = cli.Uint64Flag{
 		Name:   "rollup-min-size",
 		Usage:  "Rollup transaction min size data for eigen da",
@@ -356,6 +362,7 @@ var requiredFlags = []cli.Flag{
 	EigenContractAddressFlag,
 	EigenFeeContractAddressFlag,
 	BlockOffsetFlag,
+	RollUpMinTxnFlag,
 	RollUpMinSizeFlag,
 	RollUpMaxSizeFlag,
 	FeeSizeSecFlag,
