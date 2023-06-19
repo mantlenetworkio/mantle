@@ -169,7 +169,7 @@ const deployFn: DeployFunction = async (hre) => {
   const Proxy__BVM_L1CrossDomainMessenger = await getContractFromArtifact(
     hre,
     names.managed.contracts.Proxy__BVM_L1CrossDomainMessenger
-  )n
+  )
 
   args = [
     l1MantleAddress,
