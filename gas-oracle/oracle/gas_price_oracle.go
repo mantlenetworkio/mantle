@@ -251,7 +251,7 @@ func (g *GasPriceOracle) Update() error {
 
 // NewGasPriceOracle creates a new GasPriceOracle based on a Config
 func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
-	tokenPricer := tokenprice.NewClient(cfg.PriceBackendURL, cfg.tokenPricerUpdateFrequencySecond)
+	tokenPricer := tokenprice.NewClient(cfg.PriceBackendURL, cfg.PriceBackendUniswapURL, cfg.tokenPricerUpdateFrequencySecond, cfg.tokenRatioMode)
 	if tokenPricer == nil {
 		return nil, fmt.Errorf("invalid token price client")
 	}

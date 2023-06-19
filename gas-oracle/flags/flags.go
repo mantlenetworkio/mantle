@@ -172,16 +172,28 @@ var (
 		EnvVar: "GAS_PRICE_ORACLE_SIGNIFICANT_FACTOR",
 	}
 	PriceBackendURL = cli.StringFlag{
-		Name:     "PriceBackendURL",
+		Name:     "price-backend-url",
 		Usage:    "price exchange backend url",
 		EnvVar:   "PRICE_BACKEND_URL",
 		Required: true,
 	}
+	PriceBackendUniswapURL = cli.StringFlag{
+		Name:     "price-backend-uniswap-url",
+		Usage:    "price backend uniswap url",
+		EnvVar:   "PRICE_BACKEND_UNISWAP_URL",
+		Required: true,
+	}
 	TokenPricerUpdateFrequencySecond = cli.Uint64Flag{
-		Name:   "tokenPricerUpdateFrequencySecond",
+		Name:   "token-pricer-update-frequency-second",
 		Value:  3,
 		Usage:  "token pricer update frequency",
 		EnvVar: "TOKEN_PRICER_UPDATE_FREQUENCY",
+	}
+	TokenRatioMode = cli.Uint64Flag{
+		Name:   "token-ratio-mode",
+		Value:  0,
+		Usage:  "token ratio mode",
+		EnvVar: "TOKEN_RATIO_MODE",
 	}
 	WaitForReceiptFlag = cli.BoolFlag{
 		Name:   "wait-for-receipt",
@@ -278,7 +290,9 @@ var Flags = []cli.Flag{
 	DaFeeEpochLengthSecondsFlag,
 	L2GasPriceSignificanceFactorFlag,
 	PriceBackendURL,
+	PriceBackendUniswapURL,
 	TokenPricerUpdateFrequencySecond,
+	TokenRatioMode,
 	WaitForReceiptFlag,
 	EnableL1BaseFeeFlag,
 	EnableL1OverheadFlag,
