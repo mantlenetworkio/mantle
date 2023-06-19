@@ -2,13 +2,14 @@ package rollup
 
 import (
 	"bytes"
-	kms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"encoding/hex"
+	"math/big"
+
+	kms "cloud.google.com/go/kms/apiv1"
 	"github.com/ethereum/go-ethereum/common"
 	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"google.golang.org/api/option"
-	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
@@ -35,7 +36,7 @@ func RegisterFraudProofService(stack *node.Node, cfg *services.Config) {
 	}
 	chainID := big.NewInt(int64(cfg.L1ChainID))
 	log.Info("fault-proof register", "EnableHsm",
-		cfg.EnableHsm, "HsmCreden", cfg.HsmCreden, "HsmAPIName", cfg.HsmAPIName)
+		cfg.EnableHsm, "HsmAPIName", cfg.HsmAPIName)
 
 	var auth *bind.TransactOpts
 	if !cfg.EnableHsm {
