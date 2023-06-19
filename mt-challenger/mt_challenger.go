@@ -2,6 +2,8 @@ package challenger
 
 import (
 	"context"
+	"time"
+
 	"github.com/Layr-Labs/datalayr/common/logging"
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
@@ -11,7 +13,6 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-challenger/challenger"
 	"github.com/mantlenetworkio/mantle/mt-challenger/metrics"
 	"github.com/urfave/cli"
-	"time"
 )
 
 func Main(gitVersion string) func(ctx *cli.Context) error {
@@ -88,8 +89,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			HsmAPIName:                cfg.HsmAPIName,
 			HsmAddress:                cfg.HsmAddress,
 		}
-		log.Info("challenger hsm", "EnableHsm", cfg.EnableHsm,
-			"HsmCreden", cfg.HsmCreden, "HsmAPIName", cfg.HsmAPIName, "HsmAddress", cfg.HsmAddress)
+		log.Info("challenger hsm", "EnableHsm", cfg.EnableHsm, "HsmAPIName", cfg.HsmAPIName, "HsmAddress", cfg.HsmAddress)
 		cLager, err := challenger.NewChallenger(ctx, challengerConfig)
 		if err != nil {
 			return err

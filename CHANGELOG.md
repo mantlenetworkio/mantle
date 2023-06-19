@@ -1,5 +1,14 @@
 # Changelog
-## [0.4.0] - 2023-06-08
+## [v0.4.1-beta.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.1-beta.0) - 2023-06-19
+
+### Bug Fixes
+- Fixed mt-batcher-fee creating signature null pointer from hsm([#971](https://github.com/mantlenetworkio/mantle/pull/971))
+- Fixed replica returning http error from dt query txstatus([#979](https://github.com/mantlenetworkio/mantle/pull/979))
+- Fixed the issue with improper use of go.work([#980](https://github.com/mantlenetworkio/mantle/pull/980)、[#982](https://github.com/mantlenetworkio/mantle/pull/982)、[#983](https://github.com/mantlenetworkio/mantle/pull/983)、[#996](https://github.com/mantlenetworkio/mantle/pull/996))
+- Fixed an issue where a problem node could not be slashed by placing the logic of whether to penalize tssnode in tssmanager and having tssnode verify whether it can execute([#998](https://github.com/mantlenetworkio/mantle/pull/998))
+- Fixed a data synchronization bug by optimizing the data synchronization logic of DTL([#1001](https://github.com/mantlenetworkio/mantle/pull/1001))
+
+## [v0.4.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.0) - 2023-06-08
 
 ### Features
 - Integrate fraud proof feature into Mantle network([#814](https://github.com/mantlenetworkio/mantle/pull/814))
