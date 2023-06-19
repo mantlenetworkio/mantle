@@ -712,7 +712,7 @@ func (c *Challenger) dataCompensateForDlNodeExitsLoop() {
 			nodeNum, err := c.GetEigenLayerNode()
 			if err != nil {
 				log.Error("MtChallenger data compensate get da node", "err", err)
-				return
+				continue
 			}
 			if nodeNum == totalDaNode {
 				log.Info("MtChallenger current da node and history da node", "current", nodeNum, "history", totalDaNode)
