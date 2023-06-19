@@ -16,6 +16,7 @@ import {ITssRewardContract} from "../../L2/predeploys/iTssRewardContract.sol";
 import {TssDelegationManager} from "./delegation/TssDelegationManager.sol";
 import {TssDelegation} from "./delegation/TssDelegation.sol";
 import {WhiteList} from "../delegation/WhiteListBase.sol";
+import {Lib_Address} from "../../libraries/utils/Lib_Address.sol";
 
 import "./ITssGroupManager.sol";
 import "./ITssStakingSlashing.sol";
@@ -414,7 +415,7 @@ contract TssStakingSlashing is
     }
 
     function registerAsOperator(bytes calldata _pubKey) external {
-        require(msg.sender == ITssGroupManager(tssGroupContract).publicKeyToAddress(_pubKey), "public key not match");
+        require(msg.sender == Lib_Address.publicKeyToAddress(_pubKey), "public key not match");
         TssDelegation(tssDelegationContract).registerAsOperator(this, msg.sender);
         operators[msg.sender] = _pubKey;
     }
