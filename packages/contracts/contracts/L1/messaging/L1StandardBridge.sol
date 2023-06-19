@@ -259,7 +259,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
         address _to,
         uint256 _amount,
         bytes calldata _data
-    ) external onlyFromCrossDomainAccount(l2TokenBridge) {
+    ) external {
         finalizeERC20Withdrawal(l1MantleAddress, Lib_PredeployAddresses.BVM_MANTLE, _from, _to, _amount, _data);
     }
 
