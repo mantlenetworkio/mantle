@@ -173,6 +173,11 @@ var (
 		Usage:  "tool need re rollup batch",
 		EnvVar: prefixEnvVar("NEED_RE_ROLLUP_BATCH"),
 	}
+	ChallengerCheckEnableFlag = cli.BoolFlag{
+		Name:   "challenger-checker-enable",
+		Usage:  "Challenger checker data enable",
+		EnvVar: prefixEnvVar("CHALLENGER_CHECK_ENABLE"),
+	}
 	ReRollupToolEnableFlag = cli.BoolFlag{
 		Name:   "re-rollup-tool-enable",
 		Usage:  "re rollup tool support.",
@@ -243,6 +248,7 @@ var requiredFlags = []cli.Flag{
 	ResubmissionTimeoutFlag,
 	NumConfirmationsFlag,
 	SafeAbortNonceTooLowCountFlag,
+	ChallengerCheckEnableFlag,
 }
 
 var optionalFlags = []cli.Flag{

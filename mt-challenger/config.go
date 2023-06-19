@@ -28,6 +28,7 @@ type Config struct {
 	UpdateBatchIndexStep      uint64
 	DisableHTTP2              bool
 	NeedReRollupBatch         string
+	ChallengerCheckEnable     bool
 	ReRollupToolEnable        bool
 	DataCompensateEnable      bool
 	ResubmissionTimeout       time.Duration
@@ -73,6 +74,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		CheckerBatchIndex:         ctx.GlobalUint64(flags.CheckerBatchIndexFlag.Name),
 		UpdateBatchIndexStep:      ctx.GlobalUint64(flags.UpdateBatchIndexStepFlag.Name),
 		NeedReRollupBatch:         ctx.GlobalString(flags.NeedReRollupBatchFlag.Name),
+		ChallengerCheckEnable:     ctx.GlobalBool(flags.ChallengerCheckEnableFlag.Name),
 		ReRollupToolEnable:        ctx.GlobalBool(flags.ReRollupToolEnableFlag.Name),
 		DataCompensateEnable:      ctx.GlobalBool(flags.DataCompensateEnableFlag.Name),
 		DisableHTTP2:              ctx.GlobalBool(flags.HTTP2DisableFlag.Name),

@@ -75,6 +75,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			DbPath:                    cfg.DbPath,
 			CheckerBatchIndex:         cfg.CheckerBatchIndex,
 			UpdateBatchIndexStep:      cfg.UpdateBatchIndexStep,
+			ChallengerCheckEnable:     cfg.ChallengerCheckEnable,
 			NeedReRollupBatch:         cfg.NeedReRollupBatch,
 			ReRollupToolEnable:        cfg.ReRollupToolEnable,
 			DataCompensateEnable:      cfg.DataCompensateEnable,

@@ -99,6 +99,7 @@ type ChallengerConfig struct {
 	CheckerBatchIndex         uint64
 	UpdateBatchIndexStep      uint64
 	NeedReRollupBatch         string
+	ChallengerCheckEnable     bool
 	ReRollupToolEnable        bool
 	DataCompensateEnable      bool
 	SignerFn                  SignerFn
@@ -557,8 +558,10 @@ func (c *Challenger) ServiceInit() {
 
 func (c *Challenger) Start() error {
 	c.ServiceInit()
-	c.wg.Add(1)
-	go c.eventLoop()
+	if c.Cfg.ChallengerCheckEnable {
+		c.wg.Add(1)
+		go c.eventLoop()
+	}
 	if c.Cfg.DataCompensateEnable {
 		c.wg.Add(1)
 		go c.dataCompensateForDlNodeExitsLoop()
@@ -713,16 +716,27 @@ func (c *Challenger) dataCompensateForDlNodeExitsLoop() {
 			}
 			if nodeNum == totalDaNode {
 				log.Info("MtChallenger current da node and history da node", "current", nodeNum, "history", totalDaNode)
-				return
+				continue
 			} else {
 				// get dtl latest batch index sync from da retriver
-				lastestBatchIndex, batchErr := c.DtlEigenClient.GetLatestTransactionBatchIndex()
+				dtlBatchIndex, batchErr := c.DtlEigenClient.GetLatestTransactionBatchIndex()
 				if err != nil {
-					log.Error("MtChallenger get latest batch index fail", "lastestBatchIndex", lastestBatchIndex, "batchErr", batchErr)
-					return
+					log.Error("MtChallenger get latest batch index fail", "dtlBatchIndex", dtlBatchIndex, "batchErr", batchErr)
+					continue
 				}
-				if lastestBatchIndex != 0 {
-					for batchIndex := lastestBatchIndex; batchIndex <= (lastestBatchIndex + c.Cfg.UpdateBatchIndexStep); batchIndex++ {
+				contractBatchIndex, batchContractErr := c.EigenDaContract.RollupBatchIndex(&bind.CallOpts{})
+				if err != nil {
+					log.Error("MtChallenger get latest batch from contract fail", "contractBatchIndex", contractBatchIndex, "batchErr", batchContractErr)
+					continue
+				}
+				if dtlBatchIndex != 0 {
+					var updateEndBatchIndex uint64
+					if dtlBatchIndex+c.Cfg.UpdateBatchIndexStep > contractBatchIndex.Uint64() {
+						updateEndBatchIndex = dtlBatchIndex + c.Cfg.UpdateBatchIndexStep
+					} else {
+						updateEndBatchIndex = contractBatchIndex.Uint64()
+					}
+					for batchIndex := dtlBatchIndex; batchIndex <= updateEndBatchIndex; batchIndex++ {
 						bigParam := new(big.Int)
 						bigBatchIndex, ok := bigParam.SetString(strconv.FormatUint(batchIndex, 10), 10)
 						if !ok {
