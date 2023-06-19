@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
+	"fmt"
 	datalayr "github.com/Layr-Labs/datalayr/common/contracts"
 	gkzg "github.com/Layr-Labs/datalayr/common/crypto/go-kzg-bn254"
 	"github.com/Layr-Labs/datalayr/common/graphView"
@@ -28,6 +29,7 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-batcher/txmgr"
 	"github.com/mantlenetworkio/mantle/mt-challenger/bindings"
 	rc "github.com/mantlenetworkio/mantle/mt-challenger/bindings"
+	"github.com/mantlenetworkio/mantle/mt-challenger/challenger/client"
 	"github.com/mantlenetworkio/mantle/mt-challenger/challenger/db"
 	"github.com/mantlenetworkio/mantle/mt-challenger/metrics"
 	"github.com/pkg/errors"
@@ -50,6 +52,8 @@ var (
 	)
 	FallbackGasTipCap = big.NewInt(1500000000)
 )
+
+var totalDaNode int
 
 type KzgConfig struct {
 	G1Path    string
@@ -85,14 +89,18 @@ type ChallengerConfig struct {
 	PrivKey                   *ecdsa.PrivateKey
 	GraphProvider             string
 	RetrieverSocket           string
+	DtlClientUrl              string
 	KzgConfig                 KzgConfig
 	LastStoreNumber           uint64
 	Timeout                   time.Duration
 	PollInterval              time.Duration
+	CompensatePollInterval    time.Duration
 	DbPath                    string
 	CheckerBatchIndex         uint64
+	UpdateBatchIndexStep      uint64
 	NeedReRollupBatch         string
 	ReRollupToolEnable        bool
+	DataCompensateEnable      bool
 	SignerFn                  SignerFn
 	ResubmissionTimeout       time.Duration
 	NumConfirmations          uint64
@@ -114,6 +122,7 @@ type Challenger struct {
 	EigenABI         *abi.ABI
 	GraphClient      *graphView.GraphClient
 	GraphqlClient    *graphql.Client
+	DtlEigenClient   client.DtlClient
 	LevelDBStore     *db.Store
 	txMgr            txmgr.TxManager
 	cancel           func()
@@ -134,12 +143,12 @@ func NewChallenger(ctx context.Context, cfg *ChallengerConfig) (*Challenger, err
 		bindings.BVMEigenDataLayrChainABI,
 	))
 	if err != nil {
-		log.Error("Challenger parse eigen layer contract abi fail", "err", err)
+		log.Error("MtChallenger parse eigen layer contract abi fail", "err", err)
 		return nil, err
 	}
 	eignenABI, err := bindings.BVMEigenDataLayrChainMetaData.GetAbi()
 	if err != nil {
-		log.Error("Challenger get eigen layer contract abi fail", "err", err)
+		log.Error("MtChallenger get eigen layer contract abi fail", "err", err)
 		return nil, err
 	}
 	rawEigenContract := bind.NewBoundContract(
@@ -167,8 +176,12 @@ func NewChallenger(ctx context.Context, cfg *ChallengerConfig) (*Challenger, err
 
 	levelDBStore, err := db.NewStore(cfg.DbPath)
 	if err != nil {
-		log.Error("Challenger init leveldb fail", "err", err)
+		log.Error("MtChallenger init leveldb fail", "err", err)
 		return nil, err
+	}
+	dtlEigenClient := client.NewDtlClient(cfg.DtlClientUrl)
+	if dtlEigenClient == nil {
+		return nil, fmt.Errorf("MtChallenger new eigen client fail")
 	}
 	return &Challenger{
 		Cfg:              cfg,
@@ -179,6 +192,7 @@ func NewChallenger(ctx context.Context, cfg *ChallengerConfig) (*Challenger, err
 		EigenABI:         eignenABI,
 		GraphClient:      graphClient,
 		GraphqlClient:    graphqlClient,
+		DtlEigenClient:   dtlEigenClient,
 		LevelDBStore:     levelDBStore,
 		txMgr:            txMgr,
 		cancel:           cancel,
@@ -194,12 +208,12 @@ func (c *Challenger) getDataStoreById(dataStoreId string) (*graphView.DataStore,
 	}
 	err := c.GraphqlClient.Query(context.Background(), &query, variables)
 	if err != nil {
-		log.Error("Challenger query data from graphql fail", "err", err)
+		log.Error("MtChallenger query data from graphql fail", "err", err)
 		return nil, err
 	}
 	store, err := query.DataStore.Convert()
 	if err != nil {
-		log.Error("Challenger convert data store fail", "err", err)
+		log.Error("MtChallenger convert data store fail", "err", err)
 		return nil, err
 	}
 	c.Cfg.LastStoreNumber = uint64(store.StoreNumber)
@@ -209,7 +223,7 @@ func (c *Challenger) getDataStoreById(dataStoreId string) (*graphView.DataStore,
 func (c *Challenger) callRetrieve(store *graphView.DataStore) ([]byte, []datalayr.Frame, error) {
 	conn, err := grpc.Dial(c.Cfg.RetrieverSocket, grpc.WithInsecure())
 	if err != nil {
-		log.Error("Disperser Cannot connect to", "retriever-socket", c.Cfg.RetrieverSocket, "err", err)
+		log.Error("MtChallenger disperser Cannot connect to", "retriever-socket", c.Cfg.RetrieverSocket, "err", err)
 		return nil, nil, err
 	}
 	defer conn.Close()
@@ -228,7 +242,7 @@ func (c *Challenger) callRetrieve(store *graphView.DataStore) ([]byte, []datalay
 	framesBytes := reply.GetFrames()
 	header, err := header.DecodeDataStoreHeader(store.Header)
 	if err != nil {
-		log.Error("Could not decode header", "err", err)
+		log.Error("MtChallenger Could not decode header", "err", err)
 		return nil, nil, err
 	}
 	frames := make([]datalayr.Frame, header.NumSys+header.NumPar)
@@ -237,7 +251,7 @@ func (c *Challenger) callRetrieve(store *graphView.DataStore) ([]byte, []datalay
 		if err == nil {
 			frames[i] = frame
 		} else {
-			return nil, nil, errors.New("Does not Contain all the frames")
+			return nil, nil, errors.New("MtChallenger Does not Contain all the frames")
 		}
 	}
 	return data, frames, nil
@@ -257,7 +271,7 @@ func (c *Challenger) constructFraudProof(store *graphView.DataStore, data []byte
 	// encode data to frames here
 	header, err := header.DecodeDataStoreHeader(store.Header)
 	if err != nil {
-		c.Cfg.Logger.Printf("Could not decode header %v. %v\n", header, err)
+		c.Cfg.Logger.Printf("MtChallenger Could not decode header %v. %v\n", header, err)
 		return nil, err
 	}
 	config := c.Cfg.KzgConfig
@@ -452,7 +466,7 @@ func (c *Challenger) postFraudProof(store *graphView.DataStore, fraudProof *Frau
 	if err != nil {
 		return nil, err
 	}
-	log.Info("MtChallenge challenger prove fraud success", "TxHash", receipt.TxHash)
+	log.Info("MtChallenger challenger prove fraud success", "TxHash", receipt.TxHash)
 	return tx, nil
 }
 
@@ -520,34 +534,56 @@ func (c *Challenger) submitReRollupBatchIndex(batchIndex *big.Int) (*types.Trans
 	if err != nil {
 		return nil, err
 	}
-	log.Info("MtChallenge submit re-rollup batch index success", "TxHash", receipt.TxHash)
+	log.Info("MtChallenger submit re-rollup batch index success", "TxHash", receipt.TxHash)
 	return tx, nil
 }
 
+func (c *Challenger) GetEigenLayerNode() (int, error) {
+	operators, err := c.GraphClient.QueryOperatorsByStatus()
+	if err != nil {
+		log.Error("MtChallenger query operators fail", "err", err)
+		return 0, err
+	}
+	return len(operators), nil
+}
+
+func (c *Challenger) ServiceInit() {
+	nodeNum, err := c.GetEigenLayerNode()
+	if err != nil {
+		log.Error("MtChallenger get batch index fail", "err", err)
+	}
+	totalDaNode = nodeNum
+}
+
 func (c *Challenger) Start() error {
+	c.ServiceInit()
 	c.wg.Add(1)
 	go c.eventLoop()
+	if c.Cfg.DataCompensateEnable {
+		c.wg.Add(1)
+		go c.DataCompensateForDlNodeExitsLoop()
+	}
 	c.once.Do(func() {
-		log.Info("MtChallenge start exec once update da tool")
+		log.Info("MtChallenger start exec once update da tool")
 		if c.Cfg.ReRollupToolEnable {
 			reRollupBatchIndex := strings.Split(c.Cfg.NeedReRollupBatch, "|")
 			for index := 0; index < len(reRollupBatchIndex); index++ {
 				bigParam := new(big.Int)
 				bigBatchIndex, ok := bigParam.SetString(reRollupBatchIndex[index], 10)
 				if !ok {
-					log.Error("MtChallenge string to big.int fail", "ok", ok)
+					log.Error("MtChallenger string to big.int fail", "ok", ok)
 					continue
 				}
 				tx, err := c.submitReRollupBatchIndex(bigBatchIndex)
 				if err != nil {
-					log.Error("MtChallenge tool submit re-rollup info fail", "batchIndex", reRollupBatchIndex[index], "err", err)
+					log.Error("MtChallenger tool submit re-rollup info fail", "batchIndex", reRollupBatchIndex[index], "err", err)
 					continue
 				}
 				c.Cfg.Metrics.ReRollupBatchIndex().Set(float64(bigBatchIndex.Uint64()))
-				log.Info("MtChallenge tool submit re-rollup info success", "batchIndex", reRollupBatchIndex[index], "txHash", tx.Hash().String())
+				log.Info("MtChallenger tool submit re-rollup info success", "batchIndex", reRollupBatchIndex[index], "txHash", tx.Hash().String())
 				updBatchIndex, err := strconv.ParseUint(reRollupBatchIndex[index], 10, 64)
 				if err != nil {
-					log.Error("MtChallenge tool type string to uint64 fail")
+					log.Error("MtChallenger tool type string to uint64 fail")
 				}
 				c.LevelDBStore.SetLatestBatchIndex(updBatchIndex)
 			}
@@ -570,22 +606,22 @@ func (c *Challenger) eventLoop() {
 		case <-ticker.C:
 			latestBatchIndex, err := c.EigenDaContract.RollupBatchIndex(&bind.CallOpts{})
 			if err != nil {
-				log.Error("MtChallenge get batch index fail", "err", err)
+				log.Error("MtChallenger get batch index fail", "err", err)
 				continue
 			}
 			batchIndex, ok := c.LevelDBStore.GetLatestBatchIndex()
 			if !ok {
-				log.Error("MtChallenge get batch index from db fail", "err", err)
+				log.Error("MtChallenger get batch index from db fail", "err", err)
 			}
 			if c.Cfg.CheckerBatchIndex > latestBatchIndex.Uint64() {
-				log.Info("MtChallenge Batch Index", "DbBatchIndex", batchIndex, "ContractBatchIndex", latestBatchIndex.Uint64()-c.Cfg.CheckerBatchIndex)
+				log.Info("MtChallenger Batch Index", "DbBatchIndex", batchIndex, "ContractBatchIndex", latestBatchIndex.Uint64()-c.Cfg.CheckerBatchIndex)
 				continue
 			}
 			if batchIndex >= (latestBatchIndex.Uint64() - c.Cfg.CheckerBatchIndex) {
-				log.Info("MtChallenge db batch index and contract batch idnex is equal", "DbBatchIndex", batchIndex, "ContractBatchIndex", latestBatchIndex.Uint64()-c.Cfg.CheckerBatchIndex)
+				log.Info("MtChallenger db batch index and contract batch idnex is equal", "DbBatchIndex", batchIndex, "ContractBatchIndex", latestBatchIndex.Uint64()-c.Cfg.CheckerBatchIndex)
 				continue
 			}
-			log.Info("MtChallenge db batch index and contract batch idnex",
+			log.Info("MtChallenger db batch index and contract batch idnex",
 				"DbBatchIndex", batchIndex, "ContractBatchIndex", latestBatchIndex.Uint64(),
 				"latestBatchIndex.Uint64() - c.Cfg.CheckerBatchIndex", latestBatchIndex.Uint64()-c.Cfg.CheckerBatchIndex,
 			)
@@ -595,23 +631,27 @@ func (c *Challenger) eventLoop() {
 				if err != nil {
 					continue
 				}
-				store, err := c.getDataStoreById(strconv.Itoa(int(dataStoreId.DataStoreId)))
-				if err != nil {
-					log.Error("MtChallenge get data store fail", "err", err)
+				if dataStoreId.DataStoreId == 0 {
+					log.Info("MtChallenger get rollup store id", "DataStoreId", dataStoreId.DataStoreId)
 					continue
 				}
-				log.Info("MtChallenge get data store by id success", "Confirmed", store.Confirmed)
+				store, err := c.getDataStoreById(strconv.Itoa(int(dataStoreId.DataStoreId)))
+				if err != nil {
+					log.Error("MtChallenger get data store fail", "err", err)
+					continue
+				}
+				log.Info("MtChallenger get data store by id success", "Confirmed", store.Confirmed)
 				if store.Confirmed {
 					data, frames, err := c.callRetrieve(store)
 					if err != nil {
-						log.Error("MtChallenge error getting data", "err", err)
+						log.Error("MtChallenger error getting data", "err", err)
 						continue
 					}
 					batchTxn := new([]eigenda.BatchTx)
 					batchRlpStream := rlp.NewStream(bytes.NewBuffer(data), uint64(len(data)))
 					err = batchRlpStream.Decode(batchTxn)
 					if err != nil {
-						log.Error("MtChallenge decode batch txn fail", "err", err)
+						log.Error("MtChallenger decode batch txn fail", "err", err)
 						continue
 					}
 					newBatchTxn := *batchTxn
@@ -621,37 +661,84 @@ func (c *Challenger) eventLoop() {
 						if err := l2Tx.DecodeRLP(rlpStream); err != nil {
 							c.Cfg.Logger.Error().Err(err).Msg("Decode RLP fail")
 						}
-						log.Info("MtChallenge decode transaction", "hash", l2Tx.Hash().Hex())
 
 						// tx check for tmp, will remove in future
 						l2Transaction, _, err := c.Cfg.L2Client.TransactionByHash(c.Ctx, l2Tx.Hash())
 						if err != nil {
-							log.Error("MtChallenge no this transaction", "err", err)
+							log.Error("MtChallenger no this transaction", "err", err)
 							continue
 						}
-						log.Info("MtChallenge fond transaction", "hash", l2Transaction.Hash().Hex())
+						log.Info("MtChallenger fond transaction", "hash", l2Transaction.Hash().Hex())
 					}
 
 					// check if the fraud string exists within the data
 					fraud, exists := c.checkForFraud(store, data)
 					if !exists {
-						log.Info("MtChallenge no fraud")
+						log.Info("MtChallenger no fraud")
 						c.LevelDBStore.SetLatestBatchIndex(i)
 						continue
 					}
 					proof, err := c.constructFraudProof(store, data, fraud, frames)
 					if err != nil {
-						log.Error("MtChallenge error constructing fraud", "err", err)
+						log.Error("MtChallenger error constructing fraud", "err", err)
 						continue
 					}
 					tx, err := c.postFraudProof(store, proof)
 					if err != nil {
-						log.Error("MtChallenge error posting fraud proof", "err", err)
+						log.Error("MtChallenger error posting fraud proof", "err", err)
 						continue
 					}
-					log.Info("MtChallenge fraud proof tx", "hash", tx.Hash().Hex())
+					log.Info("MtChallenger fraud proof tx", "hash", tx.Hash().Hex())
 				}
 				c.LevelDBStore.SetLatestBatchIndex(i)
+			}
+		case err := <-c.Ctx.Done():
+			log.Error("MtChallenger eigenDa sequencer service shutting down", "err", err)
+			return
+		}
+	}
+}
+
+func (c *Challenger) DataCompensateForDlNodeExitsLoop() {
+	defer c.wg.Done()
+	ticker := time.NewTicker(c.Cfg.CompensatePollInterval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			nodeNum, err := c.GetEigenLayerNode()
+			if err != nil {
+				log.Error("MtChallenger data compensate get da node", "err", err)
+				return
+			}
+			if nodeNum == totalDaNode {
+				log.Info("MtChallenger current da node and history da node", "current", nodeNum, "history", totalDaNode)
+				return
+			} else {
+				// get dtl latest batch index sync from da retriver
+				lastestBatchIndex, batchErr := c.DtlEigenClient.GetLatestTransactionBatchIndex()
+				if err != nil {
+					log.Error("MtChallenger get latest batch index fail", "lastestBatchIndex", lastestBatchIndex, "batchErr", batchErr)
+					return
+				}
+				if lastestBatchIndex != 0 {
+					for batchIndex := lastestBatchIndex; batchIndex <= (lastestBatchIndex + c.Cfg.UpdateBatchIndexStep); batchIndex++ {
+						bigParam := new(big.Int)
+						bigBatchIndex, ok := bigParam.SetString(strconv.FormatUint(batchIndex, 10), 10)
+						if !ok {
+							log.Error("MtChallenger string to big.int fail", "ok", ok)
+							continue
+						}
+						tx, err := c.submitReRollupBatchIndex(bigBatchIndex)
+						if err != nil {
+							log.Error("MtChallenger data compensate submit re-rollup info fail", "batchIndex", bigBatchIndex, "err", err)
+							continue
+						}
+						c.Cfg.Metrics.ReRollupBatchIndex().Set(float64(bigBatchIndex.Uint64()))
+						log.Info("MtChallenger tool submit re-rollup info success", "batchIndex", bigBatchIndex, "txHash", tx.Hash().String())
+					}
+				}
+				totalDaNode = nodeNum
 			}
 		case err := <-c.Ctx.Done():
 			log.Error("MtChallenge eigenDa sequencer service shutting down", "err", err)
