@@ -7,13 +7,19 @@ import (
 var (
 	EthereumHttpUrlFlag = cli.StringFlag{
 		Name:   "ethereum-http-url",
-		Value:  "http://127.0.0.1:8545",
+		Value:  "http://127.0.0.1:9545",
 		Usage:  "L1 HTTP Endpoint",
 		EnvVar: "GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL",
 	}
+	EthereumWssUrlFlag = cli.StringFlag{
+		Name:   "ethereum-wss-url",
+		Value:  "ws://127.0.0.1:9545",
+		Usage:  "L1 WSS Endpoint",
+		EnvVar: "GAS_PRICE_ORACLE_ETHEREUM_WSS_URL",
+	}
 	LayerTwoHttpUrlFlag = cli.StringFlag{
 		Name:   "layer-two-http-url",
-		Value:  "http://127.0.0.1:9545",
+		Value:  "http://127.0.0.1:8545",
 		Usage:  "Sequencer HTTP Endpoint",
 		EnvVar: "GAS_PRICE_ORACLE_LAYER_TWO_HTTP_URL",
 	}
@@ -264,6 +270,7 @@ var (
 
 var Flags = []cli.Flag{
 	EthereumHttpUrlFlag,
+	EthereumWssUrlFlag,
 	LayerTwoHttpUrlFlag,
 	L1ChainIDFlag,
 	L2ChainIDFlag,
@@ -293,6 +300,9 @@ var Flags = []cli.Flag{
 	EnableDaFeeFlag,
 	SCCContractAddressFlag,
 	CTCContractAddressFlag,
+	BatchSizeBottom,
+	BatchSizeCap,
+	SizeGap,
 	EnableHsmFlag,
 	HsmAddressFlag,
 	HsmAPINameFlag,
