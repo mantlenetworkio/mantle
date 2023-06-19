@@ -32,6 +32,9 @@ const config = {
   bvmEigenChallengerAddress: process.env.BVM_EIGENDA_CHALLENGER_ADDRESS || '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
   contractsDeployerKey: process.env.CONTRACTS_DEPLOYER_KEY,
   contractsRpcUrl: process.env.CONTRACTS_RPC_URL,
+  tssRewardSendAmountPerYear: 100000,
+  tssRewardWaitingTime: 86400,
+  tssDelegationManagerMinStakeAmount: '100000000000000000000',
 }
 
 export default config
