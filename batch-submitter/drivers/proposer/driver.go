@@ -2,7 +2,6 @@ package proposer
 
 import (
 	"bytes"
-	kms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
@@ -14,14 +13,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-
+	kms "cloud.google.com/go/kms/apiv1"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/log"
+	"google.golang.org/api/option"
+
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/ctc"
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/scc"
 	tssClient "github.com/mantlenetworkio/mantle/batch-submitter/tss-client"
@@ -33,13 +34,14 @@ import (
 	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup"
 	tss_types "github.com/mantlenetworkio/mantle/tss/common"
-	"google.golang.org/api/option"
 )
 
 // stateRootSize is the size in bytes of a state root.
 const stateRootSize = 32
+
+// block number buffer for dtl to sync data
+const blockBuffer = 2
 
 var bigOne = new(big.Int).SetUint64(1) //nolint:unused
 
@@ -58,7 +60,6 @@ type Config struct {
 	PrivKey                *ecdsa.PrivateKey
 	SccRollback            bool
 	MaxBatchSubmissionTime time.Duration
-	RollClient             rollup.RollupClient
 	PollInterval           time.Duration
 	FinalityConfirmations  uint64
 	EnableProposerHsm      bool
@@ -168,6 +169,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		rollbackEndBlock:     big.NewInt(0),
 		rollbackEndStateRoot: [stateRootSize]byte{},
 		once:                 sync.Once{},
+		lastStart:            big.NewInt(0),
 		metrics:              metrics.NewBase("batch_submitter", cfg.Name),
 	}, nil
 }
@@ -219,12 +221,20 @@ func (d *Driver) GetBatchBlockRange(
 	}
 	start.Add(start, blockOffset)
 
-	backend, _ := rollup.NewBackend("l1")
-	index, err := d.cfg.RollClient.GetLatestTransactionIndex(backend)
+	currentHeader, err := d.cfg.L1Client.HeaderByNumber(ctx, nil)
 	if err != nil {
 		return nil, nil, err
 	}
-	end := new(big.Int).SetUint64(*index)
+	finality := new(big.Int).SetUint64(d.cfg.FinalityConfirmations)
+	finality.Add(finality, new(big.Int).SetInt64(blockBuffer)) // add 2 block number buffer to dtl sync data
+	currentNumber := currentHeader.Number
+	currentNumber.Sub(currentNumber, finality)
+
+	end, err := d.ctcContract.GetTotalElements(&bind.CallOpts{
+		Pending:     false,
+		Context:     ctx,
+		BlockNumber: currentNumber,
+	})
 	end.Add(end, blockOffset)
 
 	if start.Cmp(end) > 0 {
@@ -285,15 +295,6 @@ func (d *Driver) CraftBatchTx(
 
 		blocks = append(blocks, block)
 		stateRoots = append(stateRoots, block.Root())
-	}
-
-	// Abort if we don't have enough state roots to meet our minimum
-	// requirement.
-	if uint64(len(stateRoots)) < d.cfg.MinStateRootElements {
-		log.Info(name+" number of state roots  below minimum",
-			"num_state_roots", len(stateRoots),
-			"min_state_roots", d.cfg.MinStateRootElements)
-		return nil, nil
 	}
 
 	d.metrics.NumElementsPerBatch().Observe(float64(len(stateRoots)))
