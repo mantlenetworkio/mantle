@@ -24,6 +24,8 @@ const config = {
   bvmEigenSequencerAddress: '0x6887246668a3b87F54DeB3b94Ba47a6f63F32985',
   bvmEigenFeeAddress: '0x6887246668a3b87F54DeB3b94Ba47a6f63F32985',
   bvmEigenChallengerAddress: '0x6887246668a3b87F54DeB3b94Ba47a6f63F32985',
+  tssRewardSendAmountPerYear: process.env.TSS_REWARD_SEND_AMOUNT_PERYEAR,
+  tssRewardWaitingTime: process.env.TSS_REWARD_WAITING_TIME,
 }
 
 export default config

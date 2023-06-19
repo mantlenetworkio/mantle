@@ -15,6 +15,7 @@ const deployFn: DeployFunction = async (hre) => {
 
   const owner = hre.deployConfig.bvmAddressManagerOwner
   const l1MantleAddress = hre.deployConfig.proxyL1MantleAddress
+  const minStakeAmount = hre.deployConfig.tssDelegationManagerMinStakeAmount
 
   //deploy EmptyContract
   await deployAndVerifyAndThen({
@@ -168,7 +169,7 @@ const deployFn: DeployFunction = async (hre) => {
   const Proxy__BVM_L1CrossDomainMessenger = await getContractFromArtifact(
     hre,
     names.managed.contracts.Proxy__BVM_L1CrossDomainMessenger
-  )
+  )n
 
   args = [
     l1MantleAddress,
@@ -371,7 +372,7 @@ const deployFn: DeployFunction = async (hre) => {
     [
       Proxy__TSS_StakingSlashing.address,
       Proxy__TSS_GroupManager.address,
-      '10000',
+      minStakeAmount,
       deployer,
     ]
   )

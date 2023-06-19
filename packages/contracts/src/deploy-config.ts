@@ -180,6 +180,21 @@ export interface DeployConfig {
    */
   contractsRpcUrl: string
 
+  /**
+   * Optional initial sendAmountPerYear for TssReward contract
+   */
+  tssRewardSendAmountPerYear?: number
+
+  /**
+   * Optional initial waitingTime for TssReward contract
+   */
+  tssRewardWaitingTime?: number
+
+  /**
+   * Optional initial minStakeAmount for TssDelegationManager contract
+   */
+  tssDelegationManagerMinStakeAmount?: number
+
 }
 
 /**
@@ -227,10 +242,10 @@ const configSpec: {
   blockStaleMeasure: {
     type: 'number',
   },
-  daFraudProofPeriod:  {
+  daFraudProofPeriod: {
     type: 'number',
   },
-  l2SubmittedBlockNumber:  {
+  l2SubmittedBlockNumber: {
     type: 'number',
   },
   bvmSequencerAddress: {
@@ -284,7 +299,7 @@ const configSpec: {
   },
   gasPriceOracleIsBurning: {
     type: 'number',
-    default: 1,
+    default: 0,
   },
   gasPriceOracleCharge: {
     type: 'number',
@@ -307,6 +322,15 @@ const configSpec: {
   },
   contractsRpcUrl: {
     type: 'string',
+  },
+  tssRewardSendAmountPerYear: {
+    type: 'number',
+  },
+  tssRewardWaitingTime: {
+    type: 'number',
+  },
+  tssDelegationManagerMinStakeAmount: {
+    type: 'number',
   },
 }
 
