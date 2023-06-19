@@ -71,7 +71,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     event ReRollupBatchData(uint256 reRollupIndex, uint256 rollupBatchIndex, uint256 stratL2BlockNumber, uint256 endL2BlockNumber);
     event SequencerAddressUpdated(address oldSequencerAddress, address newSequencerAddress);
     event FraudProofPeriodUpdated(uint256 oldFraudProofPeriod, uint256 newFraudProofPeriod);
-    event ReSubmitterAddressUpdated(uint256 oldReSubmitterAddress, uint256 newReSubmitterAddress);
+    event ReSubmitterAddressUpdated(address oldReSubmitterAddress, address newReSubmitterAddress);
     event RollupBatchIndexUpdated(uint256 oldRollupBatchIndex, uint256 newRollupBatchIndex);
     event L2ConfirmedBlockNumberUpdated(uint256 oldL2ConfirmedBlockNumber, uint256 newL2ConfirmedBlockNumber);
     event DataLayrManagerAddressUpdated(address oldDataLayrManagerAddress, address newDataLayrManagerAddress);
