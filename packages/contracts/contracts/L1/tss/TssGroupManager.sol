@@ -24,7 +24,6 @@ contract TssGroupManager is
     uint256 threshold;
     uint256 gRoundId;
     uint256 tempThreshold;
-    uint256 confirmNumber;
     address public stakingSlash;
 
     bytes[] activeTssMembers; // active tss member group
@@ -46,7 +45,6 @@ contract TssGroupManager is
     function initialize() public initializer {
         __Ownable_init();
         gRoundId = 0;
-        confirmNumber = 0;
         threshold = 0;
         tempThreshold = 0;
     }
@@ -93,7 +91,6 @@ contract TssGroupManager is
             isSubmitGroupKey[_batchPublicKey[i]] = false;
         }
         tempThreshold = _threshold;
-        confirmNumber = 0;
         emit tssGroupMemberAppend(gRoundId + 1, _threshold, _batchPublicKey);
     }
 
@@ -111,7 +108,6 @@ contract TssGroupManager is
 
         if (!isSubmitGroupKey[_publicKey]) {
             isSubmitGroupKey[_publicKey] = true;
-            confirmNumber = confirmNumber + 1;
         }
         if (!isEqual(memberGroupKey[_publicKey], _groupPublicKey)) {
             groupKeyCounter[_groupPublicKey] += 1;
