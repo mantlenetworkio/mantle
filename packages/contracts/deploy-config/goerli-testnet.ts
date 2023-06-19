@@ -33,7 +33,7 @@ const config = {
   contractsRpcUrl: process.env.CONTRACTS_RPC_URL,
   tssRewardSendAmountPerYear: 100000,
   tssRewardWaitingTime: 86400,
-  tssDelegationManagerMinStakeAmount: 1000000000000000000000000,
+  tssDelegationManagerMinStakeAmount: '100000000000000000000',
 }
 
 export default config

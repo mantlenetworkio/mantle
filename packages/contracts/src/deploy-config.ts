@@ -193,7 +193,7 @@ export interface DeployConfig {
   /**
    * Optional initial minStakeAmount for TssDelegationManager contract
    */
-  tssDelegationManagerMinStakeAmount?: number
+  tssDelegationManagerMinStakeAmount: string
 
 }
 
@@ -330,7 +330,7 @@ const configSpec: {
     type: 'number',
   },
   tssDelegationManagerMinStakeAmount: {
-    type: 'number',
+    type: 'string',
   },
 }
 
