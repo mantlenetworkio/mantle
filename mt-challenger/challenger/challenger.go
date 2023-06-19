@@ -561,7 +561,7 @@ func (c *Challenger) Start() error {
 	go c.eventLoop()
 	if c.Cfg.DataCompensateEnable {
 		c.wg.Add(1)
-		go c.DataCompensateForDlNodeExitsLoop()
+		go c.dataCompensateForDlNodeExitsLoop()
 	}
 	c.once.Do(func() {
 		log.Info("MtChallenger start exec once update da tool")
@@ -699,7 +699,7 @@ func (c *Challenger) eventLoop() {
 	}
 }
 
-func (c *Challenger) DataCompensateForDlNodeExitsLoop() {
+func (c *Challenger) dataCompensateForDlNodeExitsLoop() {
 	defer c.wg.Done()
 	ticker := time.NewTicker(c.Cfg.CompensatePollInterval)
 	defer ticker.Stop()
