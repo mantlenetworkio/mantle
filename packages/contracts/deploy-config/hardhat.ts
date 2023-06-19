@@ -22,8 +22,9 @@ const config = {
   bvmFeeWalletOwner: '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
   dataManagerAddress: '0xE5C3D068e2160c67e09afaCEff3E765e30163Eb8',
   bvmEigenSequencerAddress: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-  tssRewardSendAmountPerYear: process.env.TSS_REWARD_SEND_AMOUNT_PERYEAR,
-  tssRewardWaitingTime: process.env.TSS_REWARD_WAITING_TIME,
+  tssRewardSendAmountPerYear: 100000,
+  tssRewardWaitingTime: 86400,
+  tssDelegationManagerMinStakeAmount: 1000000000000000000000000,
 }
 
 export default config
