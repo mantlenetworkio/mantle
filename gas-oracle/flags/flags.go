@@ -7,13 +7,19 @@ import (
 var (
 	EthereumHttpUrlFlag = cli.StringFlag{
 		Name:   "ethereum-http-url",
-		Value:  "http://127.0.0.1:8545",
+		Value:  "http://127.0.0.1:9545",
 		Usage:  "L1 HTTP Endpoint",
 		EnvVar: "GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL",
 	}
+	EthereumWssUrlFlag = cli.StringFlag{
+		Name:   "ethereum-wss-url",
+		Value:  "ws://127.0.0.1:9545",
+		Usage:  "L1 WSS Endpoint",
+		EnvVar: "GAS_PRICE_ORACLE_ETHEREUM_WSS_URL",
+	}
 	LayerTwoHttpUrlFlag = cli.StringFlag{
 		Name:   "layer-two-http-url",
-		Value:  "http://127.0.0.1:9545",
+		Value:  "http://127.0.0.1:8545",
 		Usage:  "Sequencer HTTP Endpoint",
 		EnvVar: "GAS_PRICE_ORACLE_LAYER_TWO_HTTP_URL",
 	}
@@ -39,6 +45,18 @@ var (
 		Value:  "0x9700cA34e333BCfa83ee7eA9de998a876474Dc2c",
 		EnvVar: "GAS_PRICE_ORACLE_DA_FEE_CONTRACT_ADDRESS",
 	}
+	SCCContractAddressFlag = cli.StringFlag{
+		Name:   "scc-contract-address",
+		Usage:  "Address of StateCommitChain",
+		Value:  "0x82e130FF187E787D5DdDFAa4f36CB59e6B1Da6dd",
+		EnvVar: "GAS_PRICE_ORACLE_SCC_CONTRACT_ADDRESS",
+	}
+	CTCContractAddressFlag = cli.StringFlag{
+		Name:   "ctc-contract-address",
+		Usage:  "Address of CanonicalTransactionChain",
+		Value:  "0xEd5166f12FCb48a0804B62FDccB37f59F1F1bc3B",
+		EnvVar: "GAS_PRICE_ORACLE_CTC_CONTRACT_ADDRESS",
+	}
 	PrivateKeyFlag = cli.StringFlag{
 		Name:   "private-key",
 		Usage:  "Private Key corresponding to BVM_GasPriceOracle Owner",
@@ -54,6 +72,11 @@ var (
 		Usage:  "Enable updating the L1 base fee",
 		EnvVar: "GAS_PRICE_ORACLE_ENABLE_L1_BASE_FEE",
 	}
+	EnableL1OverheadFlag = cli.BoolFlag{
+		Name:   "enable-l1-overhead",
+		Usage:  "Enable updating the L1 overhead",
+		EnvVar: "GAS_PRICE_ORACLE_ENABLE_L1_OVERHEAD",
+	}
 	EnableL2GasPriceFlag = cli.BoolFlag{
 		Name:   "enable-l2-gas-price",
 		Usage:  "Enable updating the L2 gas price",
@@ -63,6 +86,24 @@ var (
 		Name:   "enable-da-gas-price",
 		Usage:  "Enable updating the da gas price",
 		EnvVar: "GAS_PRICE_ORACLE_ENABLE_DA_FEE",
+	}
+	BatchSizeCap = cli.IntFlag{
+		Name:   "set-batch-size-cap",
+		Value:  1000,
+		Usage:  "Setup batch size cap",
+		EnvVar: "GAS_PRICE_ORACLE_BATCH_SIZE_CAP",
+	}
+	BatchSizeBottom = cli.IntFlag{
+		Name:   "set-batch-size-bottom",
+		Value:  100,
+		Usage:  "Setup batch size bottom",
+		EnvVar: "GAS_PRICE_ORACLE_BATCH_SIZE_BOTTOM",
+	}
+	SizeGap = cli.IntFlag{
+		Name:   "set-batch-size-gap",
+		Value:  100,
+		Usage:  "Setup batch size gap",
+		EnvVar: "GAS_PRICE_ORACLE_SIZE_GAP",
 	}
 	LogLevelFlag = cli.IntFlag{
 		Name:   "loglevel",
@@ -131,16 +172,28 @@ var (
 		EnvVar: "GAS_PRICE_ORACLE_SIGNIFICANT_FACTOR",
 	}
 	PriceBackendURL = cli.StringFlag{
-		Name:     "PriceBackendURL",
+		Name:     "price-backend-url",
 		Usage:    "price exchange backend url",
 		EnvVar:   "PRICE_BACKEND_URL",
 		Required: true,
 	}
+	PriceBackendUniswapURL = cli.StringFlag{
+		Name:     "price-backend-uniswap-url",
+		Usage:    "price backend uniswap url",
+		EnvVar:   "PRICE_BACKEND_UNISWAP_URL",
+		Required: true,
+	}
 	TokenPricerUpdateFrequencySecond = cli.Uint64Flag{
-		Name:   "tokenPricerUpdateFrequencySecond",
+		Name:   "token-pricer-update-frequency-second",
 		Value:  3,
 		Usage:  "token pricer update frequency",
 		EnvVar: "TOKEN_PRICER_UPDATE_FREQUENCY",
+	}
+	TokenRatioMode = cli.Uint64Flag{
+		Name:   "token-ratio-mode",
+		Value:  0,
+		Usage:  "token ratio mode",
+		EnvVar: "TOKEN_RATIO_MODE",
 	}
 	WaitForReceiptFlag = cli.BoolFlag{
 		Name:   "wait-for-receipt",
@@ -217,6 +270,7 @@ var (
 
 var Flags = []cli.Flag{
 	EthereumHttpUrlFlag,
+	EthereumWssUrlFlag,
 	LayerTwoHttpUrlFlag,
 	L1ChainIDFlag,
 	L2ChainIDFlag,
@@ -236,11 +290,19 @@ var Flags = []cli.Flag{
 	DaFeeEpochLengthSecondsFlag,
 	L2GasPriceSignificanceFactorFlag,
 	PriceBackendURL,
+	PriceBackendUniswapURL,
 	TokenPricerUpdateFrequencySecond,
+	TokenRatioMode,
 	WaitForReceiptFlag,
 	EnableL1BaseFeeFlag,
+	EnableL1OverheadFlag,
 	EnableL2GasPriceFlag,
 	EnableDaFeeFlag,
+	SCCContractAddressFlag,
+	CTCContractAddressFlag,
+	BatchSizeBottom,
+	BatchSizeCap,
+	SizeGap,
 	EnableHsmFlag,
 	HsmAddressFlag,
 	HsmAPINameFlag,

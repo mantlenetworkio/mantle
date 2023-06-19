@@ -29,11 +29,10 @@ func NewL1Client(ethereumHttpUrl string, tokenPricer *tokenprice.Client) (*L1Cli
 }
 
 func (c *L1Client) HeaderByNumber(ctx context.Context, number *big.Int) (*types.Header, error) {
-	//ratio, err := c.tokenPricer.PriceRatio()
-	//if err != nil {
-	//	return nil, err
-	//}
-	ratio := 4000
+	ratio, err := c.tokenPricer.PriceRatioWithMode()
+	if err != nil {
+		ratio = float64(tokenprice.DefaultTokenRatio)
+	}
 	tip, err := c.Client.HeaderByNumber(ctx, number)
 	if err != nil {
 		return nil, err
@@ -74,7 +73,7 @@ func (c *L1Client) getHistoryBestPrice(endHeight *big.Int, lastBaseFee *big.Int,
 	baseFees = append(baseFees, lastBaseFee)
 	for j := 0; j < len(baseFees); j++ {
 		if bestPrice.Cmp(baseFees[j]) < 0 {
-			bestPrice = baseFees[j]
+			bestPrice.Set(baseFees[j])
 		}
 	}
 	return bestPrice

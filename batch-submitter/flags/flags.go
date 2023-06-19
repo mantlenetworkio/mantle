@@ -325,6 +325,12 @@ var (
 		Value:  "",
 		EnvVar: prefixEnvVar("PROPOSER_HSM_CREDEN"),
 	}
+	RollupClientHttpFlag = cli.StringFlag{
+		Name:   "rollup.clienthttp",
+		Usage:  "HTTP endpoint for the rollup client",
+		Value:  "http://localhost:7878",
+		EnvVar: "ROLLUP_CLIENT_HTTP",
+	}
 )
 
 var requiredFlags = []cli.Flag{

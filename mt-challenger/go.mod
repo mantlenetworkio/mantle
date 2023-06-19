@@ -19,6 +19,7 @@ replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
 require (
 	github.com/Layr-Labs/datalayr/common v0.0.0
 	github.com/ethereum/go-ethereum v1.10.26
+	github.com/go-resty/resty/v2 v2.7.0
 	github.com/mantlenetworkio/mantle/l2geth v0.0.0
 	github.com/mantlenetworkio/mantle/mt-batcher v0.0.0
 	github.com/pkg/errors v0.9.1
@@ -54,7 +55,6 @@ require (
 	github.com/elastic/gosigar v0.14.2 // indirect
 	github.com/getsentry/sentry-go v0.12.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
-	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect

@@ -18,9 +18,12 @@ type Config struct {
 	l1ChainID                        *big.Int
 	l2ChainID                        *big.Int
 	ethereumHttpUrl                  string
+	ethereumWssUrl                   string
 	layerTwoHttpUrl                  string
 	gasPriceOracleAddress            common.Address
 	daFeeContractAddress             common.Address
+	sccContractAddress               common.Address
+	ctcContractAddress               common.Address
 	privateKey                       *ecdsa.PrivateKey
 	gasPrice                         *big.Int
 	waitForReceipt                   bool
@@ -33,10 +36,13 @@ type Config struct {
 	daFeeEpochLengthSeconds          uint64
 	l2GasPriceSignificanceFactor     float64
 	PriceBackendURL                  string
+	PriceBackendUniswapURL           string
 	tokenPricerUpdateFrequencySecond uint64
+	tokenRatioMode                   uint64
 	l1BaseFeeSignificanceFactor      float64
 	daFeeSignificanceFactor          float64
 	enableL1BaseFee                  bool
+	enableL1Overhead                 bool
 	enableL2GasPrice                 bool
 	enableDaFee                      bool
 	// hsm config
@@ -44,6 +50,10 @@ type Config struct {
 	HsmAPIName string
 	HsmCreden  string
 	HsmAddress string
+	// overhead
+	batchSizeBottom int
+	batchSizeCap    int
+	sizeGap         int
 	// Metrics config
 	MetricsEnabled          bool
 	MetricsHTTP             string
@@ -59,11 +69,14 @@ type Config struct {
 func NewConfig(ctx *cli.Context) *Config {
 	cfg := Config{}
 	cfg.ethereumHttpUrl = ctx.GlobalString(flags.EthereumHttpUrlFlag.Name)
+	cfg.ethereumWssUrl = ctx.GlobalString(flags.EthereumWssUrlFlag.Name)
 	cfg.layerTwoHttpUrl = ctx.GlobalString(flags.LayerTwoHttpUrlFlag.Name)
 	addr := ctx.GlobalString(flags.GasPriceOracleAddressFlag.Name)
 	cfg.gasPriceOracleAddress = common.HexToAddress(addr)
 	daFeeContractAddress := ctx.GlobalString(flags.DaFeeContractAddressFlag.Name)
 	cfg.daFeeContractAddress = common.HexToAddress(daFeeContractAddress)
+	cfg.sccContractAddress = common.HexToAddress(ctx.GlobalString(flags.SCCContractAddressFlag.Name))
+	cfg.ctcContractAddress = common.HexToAddress(ctx.GlobalString(flags.CTCContractAddressFlag.Name))
 	cfg.targetGasPerSecond = ctx.GlobalUint64(flags.TargetGasPerSecondFlag.Name)
 	cfg.maxPercentChangePerEpoch = ctx.GlobalFloat64(flags.MaxPercentChangePerEpochFlag.Name)
 	cfg.averageBlockGasLimitPerEpoch = ctx.GlobalUint64(flags.AverageBlockGasLimitPerEpochFlag.Name)
@@ -72,17 +85,24 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.daFeeEpochLengthSeconds = ctx.GlobalUint64(flags.DaFeeEpochLengthSecondsFlag.Name)
 	cfg.l2GasPriceSignificanceFactor = ctx.GlobalFloat64(flags.L2GasPriceSignificanceFactorFlag.Name)
 	cfg.PriceBackendURL = ctx.GlobalString(flags.PriceBackendURL.Name)
+	cfg.PriceBackendUniswapURL = ctx.GlobalString(flags.PriceBackendUniswapURL.Name)
 	cfg.tokenPricerUpdateFrequencySecond = ctx.GlobalUint64(flags.TokenPricerUpdateFrequencySecond.Name)
+	cfg.tokenRatioMode = ctx.GlobalUint64(flags.TokenRatioMode.Name)
 	cfg.floorPrice = ctx.GlobalUint64(flags.FloorPriceFlag.Name)
 	cfg.l1BaseFeeSignificanceFactor = ctx.GlobalFloat64(flags.L1BaseFeeSignificanceFactorFlag.Name)
 	cfg.daFeeSignificanceFactor = ctx.GlobalFloat64(flags.DaFeeSignificanceFactorFlag.Name)
 	cfg.enableL1BaseFee = ctx.GlobalBool(flags.EnableL1BaseFeeFlag.Name)
+	cfg.enableL1Overhead = ctx.GlobalBool(flags.EnableL1OverheadFlag.Name)
 	cfg.enableL2GasPrice = ctx.GlobalBool(flags.EnableL2GasPriceFlag.Name)
 	cfg.enableDaFee = ctx.GlobalBool(flags.EnableDaFeeFlag.Name)
 	cfg.EnableHsm = ctx.GlobalBool(flags.EnableHsmFlag.Name)
 	cfg.HsmAddress = ctx.GlobalString(flags.HsmAddressFlag.Name)
 	cfg.HsmAPIName = ctx.GlobalString(flags.HsmAPINameFlag.Name)
 	cfg.HsmCreden = ctx.GlobalString(flags.HsmCredenFlag.Name)
+
+	cfg.batchSizeCap = ctx.GlobalInt(flags.BatchSizeCap.Name)
+	cfg.batchSizeBottom = ctx.GlobalInt(flags.BatchSizeBottom.Name)
+	cfg.sizeGap = ctx.GlobalInt(flags.SizeGap.Name)
 
 	if cfg.EnableHsm {
 		log.Info("gasoracle", "enable hsm", cfg.EnableHsm,

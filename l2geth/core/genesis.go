@@ -31,6 +31,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
 	"github.com/mantlenetworkio/mantle/l2geth/core/state"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/mantlenetworkio/mantle/l2geth/core/upgrade"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
@@ -42,8 +43,6 @@ import (
 //go:generate gencodec -type GenesisAccount -field-override genesisAccountMarshaling -out gen_genesis_account.go
 
 var errGenesisNoConfig = errors.New("genesis has no chain configuration")
-var testnetGenesisGaslimit = 15000000 //this params is only used for testnet
-var testnetChainID = 5001
 
 // Genesis specifies the header fields, state of a genesis block. It also defines hard
 // fork switch-over blocks through the chain configuration.
@@ -171,11 +170,9 @@ func SetupGenesisBlockWithOverride(db ethdb.Database, genesis *Genesis, override
 			log.Info("Writing custom genesis block")
 		}
 		//for a new node from 0 to recent height, we must reset its genesis gaslimit to 150000000
-		if genesis.Config.ChainID.Int64() == int64(testnetChainID) {
+		if genesis.Config.ChainID.Int64() == params.MantleTestnetChainID.Int64() {
 			// updata gaslimt block is actived！we need to reset the gaslimit for genesis block
-			if genesis.Config.UpdateGasLimitBlock != nil {
-				genesis.GasLimit = uint64(testnetGenesisGaslimit)
-			}
+			genesis.GasLimit = uint64(upgrade.PreUpgradedGaslimit)
 		}
 		block, err := genesis.Commit(db)
 		if err != nil {

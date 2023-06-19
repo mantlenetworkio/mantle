@@ -18,7 +18,6 @@ package core
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"math/big"
 
@@ -140,8 +139,6 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 			charge := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.ChargeSlot).Big()
 			if charge.Cmp(common.Big0) == 0 {
 				gasPrice = common.Big0
-			} else if charge.Cmp(common.Big1) == 1 {
-				panic(fmt.Sprintf("charge:%v is invaild", charge))
 			}
 			daCharge := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.DaSwitchSlot).Big()
 			if daCharge.Cmp(common.Big1) == 0 {
