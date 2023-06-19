@@ -307,6 +307,8 @@ contract TssStakingSlashing is
     function unJail() public {
         // slashing params check
         require(isSetParam, "have not set the slash amount");
+        require(isJailed(msg.sender), "An unjailed user doesn't need to call this method");
+
         uint256 totalBalance = _tokenBalance();
 
         require((delegation.operatorShares(msg.sender, this) * totalBalance) / totalShares >= slashAmount[1], "Insufficient balance");
