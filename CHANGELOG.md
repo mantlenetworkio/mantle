@@ -1,5 +1,5 @@
 # Changelog
-## [v0.4.1](https://github.com/mantlenetworkio/mantle/commits/v0.4.1) - 2023-06-16
+## [v0.4.1-beta.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.1-beta.0) - 2023-06-19
 
 ### Bug Fixes
 - Fixed mt-batcher-fee creating signature null pointer from hsm([#971](https://github.com/mantlenetworkio/mantle/pull/971))
