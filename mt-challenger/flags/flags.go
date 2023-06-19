@@ -66,6 +66,12 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar("RETRIEVER_SOCKET"),
 	}
+	DtlClientUrlFlag = cli.StringFlag{
+		Name:     "dtl-client-url",
+		Usage:    "dtl client url for mt challenger",
+		Required: true,
+		EnvVar:   prefixEnvVar("DTL_CLIENT_URL"),
+	}
 	G1PathFlag = cli.StringFlag{
 		Name:     "g1-path",
 		Usage:    "Path to G1 SRS",
@@ -103,6 +109,12 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar("POLL_INTERVAL"),
 	}
+	CompensatePollIntervalFlag = cli.DurationFlag{
+		Name:     "compensate-poll-interval",
+		Usage:    "data compensate worker poll interval",
+		Required: true,
+		EnvVar:   prefixEnvVar("COMPENSATE_POLL_INTERVAL"),
+	}
 	DbPathFlag = cli.StringFlag{
 		Name:     "db-path",
 		Usage:    "db path of leveldb",
@@ -115,6 +127,12 @@ var (
 		Required: true,
 		Value:    1,
 		EnvVar:   prefixEnvVar("CHECKER_BATCH_INDEX"),
+	}
+	UpdateBatchIndexStepFlag = cli.Uint64Flag{
+		Name:   "update-batch-index-step",
+		Usage:  "update batch index step",
+		Value:  5,
+		EnvVar: prefixEnvVar("UPDATE_BATCH_INDEX_STEP"),
 	}
 	ResubmissionTimeoutFlag = cli.DurationFlag{
 		Name: "resubmission-timeout",
@@ -155,10 +173,20 @@ var (
 		Usage:  "tool need re rollup batch",
 		EnvVar: prefixEnvVar("NEED_RE_ROLLUP_BATCH"),
 	}
+	ChallengerCheckEnableFlag = cli.BoolFlag{
+		Name:   "challenger-checker-enable",
+		Usage:  "Challenger checker data enable",
+		EnvVar: prefixEnvVar("CHALLENGER_CHECK_ENABLE"),
+	}
 	ReRollupToolEnableFlag = cli.BoolFlag{
 		Name:   "re-rollup-tool-enable",
 		Usage:  "re rollup tool support.",
 		EnvVar: prefixEnvVar("RE_ROLLUP_TOOL_ENABLE"),
+	}
+	DataCompensateEnableFlag = cli.BoolFlag{
+		Name:   "data-compensate-enable",
+		Usage:  "data compensate support",
+		EnvVar: prefixEnvVar("DATA_COMPENSATE_ENABLE"),
 	}
 	MetricsServerEnableFlag = cli.BoolFlag{
 		Name:   "metrics-server-enable",
@@ -211,12 +239,16 @@ var requiredFlags = []cli.Flag{
 	SrsTablePathFlag,
 	OrderFlag,
 	RetrieverSocketFlag,
+	DtlClientUrlFlag,
 	DbPathFlag,
 	CheckerBatchIndexFlag,
+	UpdateBatchIndexStepFlag,
 	PollIntervalFlag,
+	CompensatePollIntervalFlag,
 	ResubmissionTimeoutFlag,
 	NumConfirmationsFlag,
 	SafeAbortNonceTooLowCountFlag,
+	ChallengerCheckEnableFlag,
 }
 
 var optionalFlags = []cli.Flag{
@@ -224,6 +256,7 @@ var optionalFlags = []cli.Flag{
 	HTTP2DisableFlag,
 	NeedReRollupBatchFlag,
 	ReRollupToolEnableFlag,
+	DataCompensateEnableFlag,
 	EnableHsmFlag,
 	HsmAddressFlag,
 	HsmAPINameFlag,
