@@ -305,6 +305,9 @@ func (d *Driver) CraftBatchTx(
 	var err error
 	if d.cfg.EnableProposerHsm {
 		proBytes, err := hex.DecodeString(d.cfg.ProposerHsmCreden)
+		if err != nil {
+			return nil, err
+		}
 		apikey := option.WithCredentialsJSON(proBytes)
 		client, err := kms.NewKeyManagementClient(ctx, apikey)
 		if err != nil {
@@ -316,14 +319,17 @@ func (d *Driver) CraftBatchTx(
 			Gclient:      client,
 		}
 		opts, err = mk.NewEthereumTransactorrWithChainID(ctx, d.cfg.ChainID)
+		if err != nil {
+			return nil, err
+		}
 		log.Info("proposer", "enable-hsm", true)
 	} else {
 		opts, err = bind.NewKeyedTransactorWithChainID(
 			d.cfg.PrivKey, d.cfg.ChainID,
 		)
-	}
-	if err != nil {
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
 	}
 	opts.Context = ctx
 	opts.Nonce = nonce
