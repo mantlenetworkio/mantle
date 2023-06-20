@@ -27,8 +27,6 @@ import {
   BatchTxByDataStoreIdResponse,
   DataStoreByIdResponse,
   TxListByStoreIdResponse,
-  TestResponse,
-  TransactionListEntry,
 } from '../../types'
 import { validators } from '../../utils'
 import { L1DataTransportServiceOptions } from '../main/service'
@@ -669,7 +667,6 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       }
     )
 
-
     this._registerRoute(
       'get',
       '/staterootcached/index/:index',
@@ -705,7 +702,6 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       }
     )
 
-
     this._registerRoute(
       'get',
       '/batch/stateroot/latest',
@@ -739,10 +735,11 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       // it is sent by layer2, if dtl only connect to layer2, it
       //can not listen the event from layer1.
       async (req): Promise<TxStatusResponse> => {
-        const currentL1BlockNumber = await this.state.db.getHighestL1BlockNumber();
-        const fraudProofWindow = await this.state.db.getFraudProofWindow();
-        console.log("currentL1BlockNumber",currentL1BlockNumber);
-        console.log("fraudProofWindow",fraudProofWindow);
+        const currentL1BlockNumber =
+          await this.state.db.getHighestL1BlockNumber()
+        const fraudProofWindow = await this.state.db.getFraudProofWindow()
+        console.log('currentL1BlockNumber', currentL1BlockNumber)
+        console.log('fraudProofWindow', fraudProofWindow)
         const backend = req.query.backend || this.options.defaultBackend
         let stateRoots = null
         let batch = null
@@ -771,18 +768,18 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
             return {
               batch: null,
               stateRoots: null,
-              daBatchIndex:null,
+              daBatchIndex: null,
               currentL1BlockNumber,
-              datastore:null,
+              datastore: null,
               fraudProofWindow,
             }
-          }else{
+          } else {
             // we query the data from cached
             batch = await this.state.db.getStateRootBatchCachedByIndex(
               stateRoots.batchIndex
             )
           }
-        }else{
+        } else {
           // we query the data from persisted
           batch = await this.state.db.getStateRootBatchByIndex(
             stateRoots.batchIndex
@@ -790,18 +787,20 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         }
 
         // get datastore information by batchindex and datastore_id
-        let datastore = null;
+        let datastore = null
         const transaction = await this.state.db.getDaTransactionByIndex(
           BigNumber.from(req.params.index).toNumber()
         )
-        const daBatch = await this.state.db.getRollupStoreByBatchIndex(transaction.batchIndex)
+        const daBatch = await this.state.db.getRollupStoreByBatchIndex(
+          transaction.batchIndex
+        )
         datastore = await this.state.db.getDsById(daBatch.data_store_id)
 
         return {
           batch,
           stateRoots,
           currentL1BlockNumber,
-          daBatchIndex:transaction.batchIndex,
+          daBatchIndex: transaction.batchIndex,
           datastore,
           fraudProofWindow,
         }
@@ -914,18 +913,17 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       'get',
       '/da/transaction/latest',
       async (): Promise<TransactionResponse> => {
-        const transactionEntry = await this.state.db.getDaLatestTransaction(
-        )
+        const transactionEntry = await this.state.db.getDaLatestTransaction()
 
         if (transactionEntry === null) {
           return {
             transaction: null,
-            batch:null
+            batch: null,
           }
         }
         return {
           transaction: transactionEntry,
-          batch:null
+          batch: null,
         }
       }
     )
@@ -940,12 +938,12 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         if (transactionEntry === null) {
           return {
             transaction: null,
-            batch:null
+            batch: null,
           }
         }
         return {
           transaction: transactionEntry,
-          batch:null
+          batch: null,
         }
       }
     )
@@ -966,50 +964,6 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         return {
           storeId: BigNumber.from(req.params.dsId).toNumber(),
           txList: batchTxs,
-        }
-      }
-    )
-
-    this._registerRoute(
-      'get',
-      '/da/test/:batchIndex',
-      async (): Promise<TestResponse> => {
-        const batchTxs = [
-          {
-            BlockNumber: '1',
-            TxHash:
-              '0x5c047ccb63b2f03caa45d6279f0d70f96c44782ce344e0c6e15c57f6316560fc',
-          },
-          {
-            BlockNumber: '4',
-            TxHash:
-              '0xe13cf868cc1702f12a58f1d69083a8cbaf1ec29a5c962cb86f24c02529ce45ee',
-          },
-        ]
-
-        const entries: TransactionListEntry[] = []
-        for (const batchTx of batchTxs) {
-          const index_ = entries.length
-          entries.push({
-            index: index_,
-            txIndex:batchTx['index'],
-            blockNumber: batchTx['BlockNumber'],
-            txHash: batchTx['TxHash'],
-          })
-        }
-        await this.state.db.putTxListByDSId(entries, 5)
-        const lens = await this.state.db._getLatestEntryIndex(
-          'da:txlistdsid' + 5
-        )
-        const response = await this.state.db.getTxListByDSId(5)
-        // await this.state.db.putUpdatedBatchIndex(0)
-        // await this.state.db.putUpdatedRollupBatchIndex(0)
-        // await this.state.db.putUpdatedDsId(0)
-
-        return {
-          len:lens,
-          putdata: JSON.stringify(entries),
-          data: JSON.stringify(response),
         }
       }
     )
