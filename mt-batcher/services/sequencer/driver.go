@@ -240,7 +240,8 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 	for i := new(big.Int).Set(start); i.Cmp(end) < 0; i.Add(i, bigOne) {
 		block, err := d.Cfg.L2Client.BlockByNumber(ctx, i)
 		if err != nil {
-			return nil, big.NewInt(0), big.NewInt(0)
+			log.Error("get blockNumber from l2 fail", "err", err)
+			continue
 		}
 		txs := block.Transactions()
 		if len(txs) != 1 {
@@ -276,6 +277,7 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 		txMetaByte, err := json.Marshal(txMeta)
 		if err != nil {
 			log.Error("tx meta json marshal error", "err", err)
+			continue
 		}
 		batchTx := common3.BatchTx{
 			BlockNumber: i.Bytes(),
