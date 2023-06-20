@@ -2,27 +2,58 @@ package oracle
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
-	"math/big"
-	"sync"
+	"reflect"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
+
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
+
+	kms "cloud.google.com/go/kms/apiv1"
+	"google.golang.org/api/option"
 )
 
 func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContractBackend, cfg *Config) (func() error, error) {
-	if cfg.privateKey == nil {
-		return nil, errNoPrivateKey
-	}
 	if cfg.l2ChainID == nil {
 		return nil, errNoChainID
 	}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(cfg.privateKey, cfg.l2ChainID)
-	if err != nil {
-		return nil, err
+	var opts *bind.TransactOpts
+	var err error
+	if !cfg.EnableHsm {
+		if cfg.privateKey == nil {
+			return nil, errNoPrivateKey
+		}
+		if cfg.l2ChainID == nil {
+			return nil, errNoChainID
+		}
+
+		opts, err = bind.NewKeyedTransactorWithChainID(cfg.privateKey, cfg.l2ChainID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		seqBytes, err := hex.DecodeString(cfg.HsmCreden)
+		apikey := option.WithCredentialsJSON(seqBytes)
+		client, err := kms.NewKeyManagementClient(context.Background(), apikey)
+		if err != nil {
+			log.Crit("gasoracle", "create signer error", err.Error())
+		}
+		mk := &bsscore.ManagedKey{
+			KeyName:      cfg.HsmAPIName,
+			EthereumAddr: common.HexToAddress(cfg.HsmAddress),
+			Gclient:      client,
+		}
+		opts, err = mk.NewEthereumTransactorrWithChainID(context.Background(), cfg.l2ChainID)
+		if err != nil {
+			log.Crit("gasoracle", "create signer error", err.Error())
+			return nil, err
+		}
 	}
 	// Once https://github.com/ethereum/go-ethereum/pull/23062 is released
 	// then we can remove setting the context here
@@ -46,6 +77,8 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 		if err != nil {
 			return err
 		}
+		// NOTE this will return base multiple with coin ratio
+		log.Info("get header in l1 client", "type is", reflect.ValueOf(l1Backend).Type())
 		tip, err := l1Backend.HeaderByNumber(context.Background(), nil)
 		if err != nil {
 			return err
@@ -54,7 +87,7 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 			return errNoBaseFee
 		}
 		if !isDifferenceSignificant(baseFee.Uint64(), tip.BaseFee.Uint64(), cfg.l1BaseFeeSignificanceFactor) {
-			log.Debug("non significant base fee update", "tip", tip.BaseFee, "current", baseFee)
+			log.Warn("non significant base fee update", "tip", tip.BaseFee, "current", baseFee)
 			return nil
 		}
 
@@ -69,23 +102,17 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 			}
 			opts.GasPrice = gasPrice
 		}
-		gasTipCap, err := l1Backend.SuggestGasTipCap(opts.Context)
-		if err != nil {
-			return err
-		}
-		// get history 20 block best gasprice
-		bestBaseFee := getHistoryBestPrice(l1Backend, tip.Number, tip.BaseFee, 20)
 		// set L1BaseFee to base fee + tip cap, to cover rollup tip cap
-		tx, err := contract.SetL1BaseFee(opts, new(big.Int).Add(bestBaseFee, gasTipCap))
+		tx, err := contract.SetL1BaseFee(opts, tip.BaseFee)
 		if err != nil {
 			return err
 		}
-		log.Debug("updating L1 base fee", "tx.gasPrice", tx.GasPrice(), "tx.gasLimit", tx.Gas(),
+		log.Info("updating L1 base fee", "tx.gasPrice", tx.GasPrice(), "tx.gasLimit", tx.Gas(),
 			"tx.data", hexutil.Encode(tx.Data()), "tx.to", tx.To().Hex(), "tx.nonce", tx.Nonce())
 		if err := l2Backend.SendTransaction(context.Background(), tx); err != nil {
 			return fmt.Errorf("cannot update base fee: %w", err)
 		}
-		log.Info("L1 base fee transaction sent", "hash", tx.Hash().Hex(), "baseFee", tip.BaseFee)
+		log.Info("L1 base fee transaction already sent", "hash", tx.Hash().Hex(), "baseFee", tip.BaseFee)
 
 		if cfg.waitForReceipt {
 			// Wait for the receipt
@@ -99,30 +126,4 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 		}
 		return nil
 	}, nil
-}
-
-func getHistoryBestPrice(l1Backend bind.ContractTransactor, endHeight *big.Int, lastBaseFee *big.Int, countWindow int) *big.Int {
-	var baseFees = make([]*big.Int, 0)
-	var bestPrice = new(big.Int)
-	var wg = sync.WaitGroup{}
-	// get base fee
-	for i := 0; i < countWindow; i++ {
-		wg.Add(1)
-		go func() {
-			header, err := l1Backend.HeaderByNumber(context.Background(), endHeight.Sub(endHeight, new(big.Int).SetInt64(int64(i))))
-			if err == nil && header.BaseFee != nil {
-				baseFees = append(baseFees, header.BaseFee)
-			}
-			defer wg.Done()
-		}()
-	}
-	wg.Wait()
-	// get best base fee, append last base fee again, incase get base fees all in error
-	baseFees = append(baseFees, lastBaseFee)
-	for j := 0; j < len(baseFees); j++ {
-		if bestPrice.Cmp(baseFees[j]) < 0 {
-			bestPrice = baseFees[j]
-		}
-	}
-	return bestPrice
 }

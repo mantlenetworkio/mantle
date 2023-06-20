@@ -50,12 +50,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
     }
 
     function setFraudProofWindow(uint256 _fraudProofWindow) public {
-        // Proposers must have previously staked at the BondManager
-        require(
-            IBondManager(resolve("BondManager")).isCollateralized(msg.sender),
-            "Proposer does not have enough collateral posted"
-        );
-
+        require(msg.sender == libAddressManager.owner(), "Only callable by the libAddressManager owner.");
         FRAUD_PROOF_WINDOW = _fraudProofWindow;
     }
 
@@ -358,7 +353,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
 
     /**
      * Distribute Reward to tss node.
-     * @param _batch rollup batch.
+     * @param _batch_length rollup batch.
      * @param  _shouldStartAtElement.
      */
     function _distributeTssReward(uint256 _batch_length, uint256 _shouldStartAtElement) internal {
@@ -385,7 +380,7 @@ contract StateCommitmentChain is IStateCommitmentChain, Lib_AddressResolver, Cro
         // emit message
         emit DistributeTssReward(
             _shouldStartAtElement,
-            _batch.length,
+            _batch_length,
             block.timestamp,
             tssMembers
         );

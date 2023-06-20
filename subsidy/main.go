@@ -29,7 +29,7 @@ func main() {
 	app.Name = "subsidize"
 	app.Usage = "subsidize Submitter"
 	app.Description = "Configure with a private key and an Mantle HTTP endpoint " +
-		"to send transactions that transfer Bit to address."
+		"to send transactions that transfer Mantle to address."
 
 	// Configure the logging
 	app.Before = func(ctx *cli.Context) error {

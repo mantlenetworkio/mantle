@@ -86,15 +86,15 @@ function depositETHTo(address _to, uint32 _l2Gas, bytes _data) external payable
 | _l2Gas | uint32 | Gas limit required to complete the deposit on L2.
 | _data | bytes | Optional data to forward to L2. This data is provided        solely as a convenience for external contracts. Aside from enforcing a maximum        length, these contracts provide no guarantees about its content.
 
-### finalizeBitWithdrawal
+### finalizeMantleWithdrawal
 
 ```solidity
-function finalizeBitWithdrawal(address _from, address _to, uint256 _amount, bytes _data) external nonpayable
+function finalizeMantleWithdrawal(address _from, address _to, uint256 _amount, bytes _data) external nonpayable
 ```
 
 
 
-*Complete a bit withdrawal from L2 to L1, and credit funds to the recipient&#39;s balance of the L1 ERC20 token. This call will fail if the initialized withdrawal from L2 has not been finalized.*
+*Complete a mantle withdrawal from L2 to L1, and credit funds to the recipient&#39;s balance of the L1 ERC20 token. This call will fail if the initialized withdrawal from L2 has not been finalized.*
 
 #### Parameters
 

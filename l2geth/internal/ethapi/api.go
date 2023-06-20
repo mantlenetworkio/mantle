@@ -822,7 +822,7 @@ type CallArgs struct {
 // set, message execution will only use the data in the given state. Otherwise
 // if statDiff is set, all diff will be applied first and then execute the call
 // message.
-type account struct {
+type Account struct {
 	Nonce     *hexutil.Uint64              `json:"nonce"`
 	Code      *hexutil.Bytes               `json:"code"`
 	Balance   **hexutil.Big                `json:"balance"`
@@ -830,7 +830,7 @@ type account struct {
 	StateDiff *map[common.Hash]common.Hash `json:"stateDiff"`
 }
 
-func DoCall(ctx context.Context, b Backend, args CallArgs, blockNrOrHash rpc.BlockNumberOrHash, overrides map[common.Address]account, vmCfg *vm.Config, timeout time.Duration, globalGasCap *big.Int) ([]byte, uint64, bool, error) {
+func DoCall(ctx context.Context, b Backend, args CallArgs, blockNrOrHash rpc.BlockNumberOrHash, overrides map[common.Address]Account, vmCfg *vm.Config, timeout time.Duration, globalGasCap *big.Int) ([]byte, uint64, bool, error) {
 	defer func(start time.Time) { log.Debug("Executing EVM call finished", "runtime", time.Since(start)) }(time.Now())
 
 	state, header, err := b.StateAndHeaderByNumberOrHash(ctx, blockNrOrHash)
@@ -972,8 +972,8 @@ func DoCall(ctx context.Context, b Backend, args CallArgs, blockNrOrHash rpc.Blo
 //
 // Note, this function doesn't make and changes in the state/blockchain and is
 // useful to execute and retrieve values.
-func (s *PublicBlockChainAPI) Call(ctx context.Context, args CallArgs, blockNrOrHash rpc.BlockNumberOrHash, overrides *map[common.Address]account) (hexutil.Bytes, error) {
-	var accounts map[common.Address]account
+func (s *PublicBlockChainAPI) Call(ctx context.Context, args CallArgs, blockNrOrHash rpc.BlockNumberOrHash, overrides *map[common.Address]Account) (hexutil.Bytes, error) {
+	var accounts map[common.Address]Account
 	if overrides != nil {
 		accounts = *overrides
 	}
@@ -1530,10 +1530,16 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 	status := 0
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
-	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
-		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
-		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
-	if err != nil || txStatus.StateRoot == nil {
+	var notRollup bool
+	if txStatus == nil {
+		notRollup = true
+	} else {
+		if txStatus.StateRoot == nil {
+			notRollup = true
+		}
+	}
+	log.Info("GetTxStatusByHash", "not rollup state", notRollup)
+	if err != nil || notRollup {
 		cb := s.b.CurrentBlock().Time()
 		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
 		dtlEventDBStatus := dtlEventDBFalse
@@ -1549,6 +1555,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 			"status":           hexutil.Uint(status),
 			"statusInfo":       txStatusPeriodZero,
 			"dtlEventDBStatus": dtlEventDBStatus,
+			"challengeBlock":   -1,
 		}
 		return fields, nil
 	}
@@ -1568,10 +1575,14 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 				"datastoreId":      txStatus.Datastore.DataStoreId,
 				"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
 				"dtlEventDBStatus": dtlEventDBRight,
+				"challengeBlock":   txStatus.Fraudproofwindow / l1BlockInterval,
 			}
 			return fields, nil
 		}
 	}
+	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
+		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
+		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
 	var statusInfo string
 	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= l1FinalizeBlock {
 		status = 2
@@ -1595,6 +1606,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusByHash(ctx context.Context, txHash
 		"datastoreId":      txStatus.Datastore.DataStoreId,
 		"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
 		"dtlEventDBStatus": dtlEventDBRight,
+		"challengeBlock":   txStatus.Fraudproofwindow / l1BlockInterval,
 	}
 
 	return fields, nil
@@ -1610,10 +1622,15 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 	status := 0
 	rpcTx := newRPCTransaction(tx, blockHash, blockNumber, index)
 	txStatus, err := s.b.GetTxStatusByHash(ctx, blockNumber)
-	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
-		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
-		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
-	if err != nil || txStatus.StateRoot == nil {
+	var notRollup bool
+	if txStatus == nil {
+		notRollup = true
+	} else {
+		if txStatus.StateRoot == nil {
+			notRollup = true
+		}
+	}
+	if err != nil || notRollup {
 		cb := s.b.CurrentBlock().Time()
 		b, _ := s.b.BlockByNumber(ctx, rpc.BlockNumber(blockNumber))
 		dtlEventDBStatus := dtlEventDBFalse
@@ -1629,6 +1646,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 			"status":           hexutil.Uint(status),
 			"statusInfo":       txStatusPeriodZero,
 			"dtlEventDBStatus": dtlEventDBStatus,
+			"challengeBlock":   -1,
 		}
 		return fields, nil
 	}
@@ -1648,10 +1666,14 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 				"datastoreId":      txStatus.Datastore.DataStoreId,
 				"daBatchIndex":     hexutil.Uint64(txStatus.DaBatchIndex),
 				"dtlEventDBStatus": dtlEventDBRight,
+				"challengeBlock":   txStatus.Fraudproofwindow / l1BlockInterval,
 			}
 			return fields, nil
 		}
 	}
+	log.Info("tx rollup status", "txStatus.CurrentL1Height", txStatus.CurrentL1Height,
+		"txStatus.Batch.BlockNumber", txStatus.Batch.BlockNumber,
+		"txStatus.Fraudproofwindow/l1BlockInterval", txStatus.Fraudproofwindow/l1BlockInterval)
 	var statusInfo string
 	if txStatus.CurrentL1Height-int64(txStatus.Batch.BlockNumber) >= l1FinalizeBlock {
 		status = 2
@@ -1682,6 +1704,7 @@ func (s *PublicTransactionPoolAPI) GetTxStatusDetailByHash(ctx context.Context, 
 		"daConfirmTxHash":   txStatus.Datastore.ConfirmTxHash,
 		"daSignatoryRecord": txStatus.Datastore.SignatoryRecord,
 		"dtlEventDBStatus":  dtlEventDBRight,
+		"challengeBlock":    txStatus.Fraudproofwindow / l1BlockInterval,
 	}
 	return fields, nil
 }

@@ -83,7 +83,7 @@ contract BVM_SequencerFeeVault is Ownable {
         }
 
         L2StandardBridge(Lib_PredeployAddresses.L2_STANDARD_BRIDGE).withdrawTo(
-            Lib_PredeployAddresses.BVM_BIT,
+            Lib_PredeployAddresses.BVM_MANTLE,
             to,
             address(this).balance,
             0,

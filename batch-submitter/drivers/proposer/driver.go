@@ -11,18 +11,22 @@ import (
 	"math/big"
 	"strings"
 	"sync"
+	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-
+	kms "cloud.google.com/go/kms/apiv1"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/log"
+	"google.golang.org/api/option"
+
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/ctc"
 	"github.com/mantlenetworkio/mantle/batch-submitter/bindings/scc"
 	tssClient "github.com/mantlenetworkio/mantle/batch-submitter/tss-client"
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/bss-core/drivers"
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
@@ -36,22 +40,32 @@ import (
 // stateRootSize is the size in bytes of a state root.
 const stateRootSize = 32
 
+// block number buffer for dtl to sync data
+const blockBuffer = 2
+
 var bigOne = new(big.Int).SetUint64(1) //nolint:unused
 
 type Config struct {
-	Name                 string
-	L1Client             *ethclient.Client
-	L2Client             *l2ethclient.Client
-	TssClient            *tssClient.Client
-	BlockOffset          uint64
-	MaxStateRootElements uint64
-	MinStateRootElements uint64
-	SCCAddr              common.Address
-	CTCAddr              common.Address
-	FPRollupAddr         common.Address
-	ChainID              *big.Int
-	PrivKey              *ecdsa.PrivateKey
-	SccRollback          bool
+	Name                   string
+	L1Client               *ethclient.Client
+	L2Client               *l2ethclient.Client
+	TssClient              *tssClient.Client
+	BlockOffset            uint64
+	MaxStateRootElements   uint64
+	MinStateRootElements   uint64
+	SCCAddr                common.Address
+	CTCAddr                common.Address
+	FPRollupAddr           common.Address
+	ChainID                *big.Int
+	PrivKey                *ecdsa.PrivateKey
+	SccRollback            bool
+	MaxBatchSubmissionTime time.Duration
+	PollInterval           time.Duration
+	FinalityConfirmations  uint64
+	EnableProposerHsm      bool
+	ProposerHsmCreden      string
+	ProposerHsmAddress     string
+	ProposerHsmAPIName     string
 }
 
 type Driver struct {
@@ -66,6 +80,8 @@ type Driver struct {
 	rollbackEndBlock     *big.Int
 	rollbackEndStateRoot [stateRootSize]byte
 	once                 sync.Once
+	lastCommitTime       time.Time
+	lastStart            *big.Int
 	metrics              *metrics.Base
 }
 
@@ -132,7 +148,14 @@ func NewDriver(cfg Config) (*Driver, error) {
 		cfg.FPRollupAddr, parsedFP, cfg.L1Client, cfg.L1Client, cfg.L1Client,
 	)
 
-	walletAddr := crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+	var walletAddr common.Address
+	if cfg.EnableProposerHsm {
+		walletAddr = common.HexToAddress(cfg.ProposerHsmAddress)
+		log.Info("use proposer hsm", "walletaddr", walletAddr)
+	} else {
+		walletAddr = crypto.PubkeyToAddress(cfg.PrivKey.PublicKey)
+		log.Info("not use proposer hsm", "walletaddr", walletAddr)
+	}
 
 	return &Driver{
 		cfg:                  cfg,
@@ -146,6 +169,7 @@ func NewDriver(cfg Config) (*Driver, error) {
 		rollbackEndBlock:     big.NewInt(0),
 		rollbackEndStateRoot: [stateRootSize]byte{},
 		once:                 sync.Once{},
+		lastStart:            big.NewInt(0),
 		metrics:              metrics.NewBase("batch_submitter", cfg.Name),
 	}, nil
 }
@@ -197,13 +221,20 @@ func (d *Driver) GetBatchBlockRange(
 	}
 	start.Add(start, blockOffset)
 
-	end, err := d.ctcContract.GetTotalElements(&bind.CallOpts{
-		Pending: false,
-		Context: ctx,
-	})
+	currentHeader, err := d.cfg.L1Client.HeaderByNumber(ctx, nil)
 	if err != nil {
 		return nil, nil, err
 	}
+	finality := new(big.Int).SetUint64(d.cfg.FinalityConfirmations)
+	finality.Add(finality, new(big.Int).SetInt64(blockBuffer)) // add 2 block number buffer to dtl sync data
+	currentNumber := currentHeader.Number
+	currentNumber.Sub(currentNumber, finality)
+
+	end, err := d.ctcContract.GetTotalElements(&bind.CallOpts{
+		Pending:     false,
+		Context:     ctx,
+		BlockNumber: currentNumber,
+	})
 	end.Add(end, blockOffset)
 
 	if start.Cmp(end) > 0 {
@@ -228,6 +259,25 @@ func (d *Driver) CraftBatchTx(
 
 	log.Info(name+" crafting batch tx", "start", start, "end", end, "nonce", nonce)
 
+	if start.Cmp(d.lastStart) > 0 {
+		d.lastStart = start
+		d.lastCommitTime = time.Now().Add(-d.cfg.PollInterval)
+	}
+
+	//If the waiting time has not been reached, then check whether the minimum stateroot number
+	//is met. if not, return nil
+	if time.Now().Add(-d.cfg.MaxBatchSubmissionTime).Before(d.lastCommitTime) {
+		// Abort if we don't have enough state roots to meet our minimum
+		// requirement.
+		rangeLen := end.Uint64() - start.Uint64()
+		if rangeLen < d.cfg.MinStateRootElements {
+			log.Info(name+" number of state roots  below minimum",
+				"num_state_roots", rangeLen,
+				"min_state_roots", d.cfg.MinStateRootElements)
+			return nil, nil
+		}
+	}
+
 	var blocks []*l2types.Block
 	var stateRoots [][stateRootSize]byte
 	for i := new(big.Int).Set(start); i.Cmp(end) < 0; i.Add(i, bigOne) {
@@ -247,22 +297,31 @@ func (d *Driver) CraftBatchTx(
 		stateRoots = append(stateRoots, block.Root())
 	}
 
-	// Abort if we don't have enough state roots to meet our minimum
-	// requirement.
-	if uint64(len(stateRoots)) < d.cfg.MinStateRootElements {
-		log.Info(name+" number of state roots  below minimum",
-			"num_state_roots", len(stateRoots),
-			"min_state_roots", d.cfg.MinStateRootElements)
-		return nil, nil
-	}
-
 	d.metrics.NumElementsPerBatch().Observe(float64(len(stateRoots)))
 
 	log.Info(name+" batch constructed", "num_state_roots", len(stateRoots))
 
-	opts, err := bind.NewKeyedTransactorWithChainID(
-		d.cfg.PrivKey, d.cfg.ChainID,
-	)
+	var opts *bind.TransactOpts
+	var err error
+	if d.cfg.EnableProposerHsm {
+		proBytes, err := hex.DecodeString(d.cfg.ProposerHsmCreden)
+		apikey := option.WithCredentialsJSON(proBytes)
+		client, err := kms.NewKeyManagementClient(ctx, apikey)
+		if err != nil {
+			return nil, err
+		}
+		mk := &bsscore.ManagedKey{
+			KeyName:      d.cfg.ProposerHsmAPIName,
+			EthereumAddr: common.HexToAddress(d.cfg.ProposerHsmAddress),
+			Gclient:      client,
+		}
+		opts, err = mk.NewEthereumTransactorrWithChainID(ctx, d.cfg.ChainID)
+		log.Info("proposer", "enable-hsm", true)
+	} else {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			d.cfg.PrivKey, d.cfg.ChainID,
+		)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -449,9 +508,26 @@ func (d *Driver) UpdateGasPrice(
 	var finalTx *types.Transaction
 	var err error
 
-	opts, err := bind.NewKeyedTransactorWithChainID(
-		d.cfg.PrivKey, d.cfg.ChainID,
-	)
+	var opts *bind.TransactOpts
+	if d.cfg.EnableProposerHsm {
+		proBytes, err := hex.DecodeString(d.cfg.ProposerHsmCreden)
+		apikey := option.WithCredentialsJSON(proBytes)
+		client, err := kms.NewKeyManagementClient(ctx, apikey)
+		if err != nil {
+			return nil, err
+		}
+		mk := &bsscore.ManagedKey{
+			KeyName:      d.cfg.ProposerHsmAPIName,
+			EthereumAddr: common.HexToAddress(d.cfg.ProposerHsmAddress),
+			Gclient:      client,
+		}
+		opts, err = mk.NewEthereumTransactorrWithChainID(ctx, d.cfg.ChainID)
+		log.Info("proposer", "enable-hsm", true)
+	} else {
+		opts, err = bind.NewKeyedTransactorWithChainID(
+			d.cfg.PrivKey, d.cfg.ChainID,
+		)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -504,6 +580,7 @@ func (d *Driver) SendTransaction(
 	ctx context.Context,
 	tx *types.Transaction,
 ) error {
+
 	return d.cfg.L1Client.SendTransaction(ctx, tx)
 }
 

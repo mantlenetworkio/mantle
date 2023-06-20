@@ -18,18 +18,15 @@ package core
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
-	"github.com/mantlenetworkio/mantle/l2geth/contracts/tssreward"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/fees"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 )
@@ -142,8 +139,6 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 			charge := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.ChargeSlot).Big()
 			if charge.Cmp(common.Big0) == 0 {
 				gasPrice = common.Big0
-			} else if charge.Cmp(common.Big1) == 1 {
-				panic(fmt.Sprintf("charge:%v is invaild", charge))
 			}
 			daCharge := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.DaSwitchSlot).Big()
 			if daCharge.Cmp(common.Big1) == 0 {
@@ -294,30 +289,10 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		// The L2 Fee is the same as the fee that is charged in the normal geth
 		// codepath. Add the L1 fee to the L2 fee for the total fee that is sent
 		// to the sequencer.
-		isBurning := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.IsBurningSlot).Big()
-		if isBurning.Cmp(big.NewInt(1)) == 0 {
-			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
-			fee := new(big.Int).Add(st.l1Fee, l2Fee)
-			fee = new(big.Int).Add(fee, st.daFee)
-			st.state.AddBalance(evm.Coinbase, fee)
-		} else if isBurning.Cmp(big.NewInt(0)) == 0 {
-			fee := new(big.Int).Add(st.l1Fee, st.daFee)
-			st.state.AddBalance(dump.BvmFeeWallet, fee)
-			l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
-			st.state.AddBalance(dump.TssRewardAddress, l2Fee)
-			data, err := tssreward.PacketData(evm.BlockNumber, l2Fee)
-			if err != nil {
-				return nil, 0, false, err
-			}
-			deadAddress := vm.AccountRef(dump.DeadAddress)
-			_, _, err = evm.Call(deadAddress, dump.TssRewardAddress, data, 210000, common.Big0)
-			if err != nil {
-				log.Error("update reward in error: ", err)
-				return nil, 0, false, err
-			}
-		} else {
-			panic(fmt.Sprintf("IsBurning:%v is invaild", isBurning))
-		}
+		l2Fee := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
+		fee := new(big.Int).Add(st.l1Fee, l2Fee)
+		fee = new(big.Int).Add(fee, st.daFee)
+		st.state.AddBalance(evm.Coinbase, fee)
 	} else {
 		st.state.AddBalance(evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
 	}

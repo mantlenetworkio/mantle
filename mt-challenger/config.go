@@ -18,14 +18,19 @@ type Config struct {
 	EigenContractAddress      string
 	GraphProvider             string
 	RetrieverSocket           string
+	DtlClientUrl              string
 	KzgConfig                 challenger.KzgConfig
 	FromStoreNumber           uint64
 	PollInterval              time.Duration
+	CompensatePollInterval    time.Duration
 	DbPath                    string
 	CheckerBatchIndex         uint64
+	UpdateBatchIndexStep      uint64
 	DisableHTTP2              bool
 	NeedReRollupBatch         string
+	ChallengerCheckEnable     bool
 	ReRollupToolEnable        bool
+	DataCompensateEnable      bool
 	ResubmissionTimeout       time.Duration
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
@@ -33,6 +38,10 @@ type Config struct {
 	MetricsServerEnable       bool
 	MetricsHostname           string
 	MetricsPort               uint64
+	EnableHsm                 bool
+	HsmAPIName                string
+	HsmCreden                 string
+	HsmAddress                string
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -46,6 +55,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		SequencerHDPath:      ctx.GlobalString(flags.SequencerHDPathFlag.Name),
 		EigenContractAddress: ctx.GlobalString(flags.EigenContractAddressFlag.Name),
 		RetrieverSocket:      ctx.GlobalString(flags.RetrieverSocketFlag.Name),
+		DtlClientUrl:         ctx.GlobalString(flags.DtlClientUrlFlag.Name),
 		KzgConfig: challenger.KzgConfig{
 			G1Path:    ctx.GlobalString(flags.G1PathFlag.Name),
 			G2Path:    ctx.GlobalString(flags.G2PathFlag.Name),
@@ -59,14 +69,22 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		LoggingConfig:             logging.ReadCLIConfig(ctx),
 		FromStoreNumber:           ctx.GlobalUint64(flags.StartStoreNumFlag.Name),
 		PollInterval:              ctx.GlobalDuration(flags.PollIntervalFlag.Name),
+		CompensatePollInterval:    ctx.GlobalDuration(flags.CompensatePollIntervalFlag.Name),
 		DbPath:                    ctx.GlobalString(flags.DbPathFlag.Name),
 		CheckerBatchIndex:         ctx.GlobalUint64(flags.CheckerBatchIndexFlag.Name),
+		UpdateBatchIndexStep:      ctx.GlobalUint64(flags.UpdateBatchIndexStepFlag.Name),
 		NeedReRollupBatch:         ctx.GlobalString(flags.NeedReRollupBatchFlag.Name),
+		ChallengerCheckEnable:     ctx.GlobalBool(flags.ChallengerCheckEnableFlag.Name),
 		ReRollupToolEnable:        ctx.GlobalBool(flags.ReRollupToolEnableFlag.Name),
+		DataCompensateEnable:      ctx.GlobalBool(flags.DataCompensateEnableFlag.Name),
 		DisableHTTP2:              ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
 		MetricsServerEnable:       ctx.GlobalBool(flags.MetricsServerEnableFlag.Name),
 		MetricsHostname:           ctx.GlobalString(flags.MetricsHostnameFlag.Name),
 		MetricsPort:               ctx.GlobalUint64(flags.MetricsPortFlag.Name),
+		EnableHsm:                 ctx.GlobalBool(flags.EnableHsmFlag.Name),
+		HsmAddress:                ctx.GlobalString(flags.HsmAddressFlag.Name),
+		HsmAPIName:                ctx.GlobalString(flags.HsmAPINameFlag.Name),
+		HsmCreden:                 ctx.GlobalString(flags.HsmCredenFlag.Name),
 	}
 	return cfg, nil
 }

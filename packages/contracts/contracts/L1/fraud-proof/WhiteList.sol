@@ -7,16 +7,12 @@ abstract contract Whitelist {
     }
 
     modifier stakerWhitelistOnly(address _checkAddress) {
-        if (stakerslist[stakerWhitelist[_checkAddress]] == _checkAddress) {
-            revert("NOT_IN_STAKER_WHITELIST");
-        }
+        require(stakerslist[stakerWhitelist[_checkAddress]] == _checkAddress, "NOT_IN_STAKER_WHITELIST");
         _;
     }
 
     modifier operatorWhitelistOnly(address _checkAddress) {
-        if (operatorslist[operatorWhitelist[_checkAddress]] == _checkAddress) {
-            revert("NOT_IN_OPERATOR_WHITELIST");
-        }
+        require(operatorslist[operatorWhitelist[_checkAddress]] == _checkAddress, "NOT_IN_OPERATOR_WHITELIST");
         _;
     }
 
@@ -26,14 +22,18 @@ abstract contract Whitelist {
     mapping(address => uint256) public operatorWhitelist;
     address[] public operatorslist;
 
+    // slot place hold
+    uint256[50] whitelistGap;
+
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
      * @notice Add to staker whitelist
      */
     function addToStakerWhitelist(address[] calldata toAddAddresses) public onlyOwner {
+        uint256 lens = stakerslist.length;
         for (uint i = 0; i < toAddAddresses.length; i++) {
-            stakerWhitelist[toAddAddresses[i]] = stakerslist.length + i;
+            stakerWhitelist[toAddAddresses[i]] = lens+i;
             stakerslist.push(toAddAddresses[i]);
         }
     }
@@ -44,6 +44,7 @@ abstract contract Whitelist {
     function removeFromStakerWhitelist(address[] calldata toRemoveAddresses) public onlyOwner {
         for (uint i = 0; i < toRemoveAddresses.length; i++) {
             uint256 index = stakerWhitelist[toRemoveAddresses[i]];
+            stakerWhitelist[stakerslist[stakerslist.length-1]] = index;
             stakerslist[index] = stakerslist[stakerslist.length-1];
             stakerslist.pop();
             delete stakerWhitelist[toRemoveAddresses[i]];
@@ -54,8 +55,9 @@ abstract contract Whitelist {
  * @notice Add to whitelist
      */
     function addToOperatorWhitelist(address[] calldata toAddAddresses) public onlyOwner {
+        uint256 lens = operatorslist.length;
         for (uint i = 0; i < toAddAddresses.length; i++) {
-            operatorWhitelist[toAddAddresses[i]] = operatorslist.length + i;
+            operatorWhitelist[toAddAddresses[i]] = lens+i;
             operatorslist.push(toAddAddresses[i]);
         }
     }
@@ -66,6 +68,7 @@ abstract contract Whitelist {
     function removeFromOperatorWhitelist(address[] calldata toRemoveAddresses) public onlyOwner {
         for (uint i = 0; i < toRemoveAddresses.length; i++) {
             uint256 index = operatorWhitelist[toRemoveAddresses[i]];
+            operatorWhitelist[operatorslist[operatorslist.length-1]] = index;
             operatorslist[index] = operatorslist[operatorslist.length-1];
             operatorslist.pop();
             delete operatorWhitelist[toRemoveAddresses[i]];

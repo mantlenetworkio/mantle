@@ -67,7 +67,7 @@ func (p *GasPricer) CalcNextEpochGasPrice(avgGasPerSecondLastEpoch float64) (uin
 	} else {
 		proportionToChangeBy = math.Max(proportionOfTarget, 1-p.maxChangePerEpoch)
 	}
-	ratio, err := p.tokenPricer.PriceRatio()
+	ratio, err := p.tokenPricer.PriceRatioWithMode()
 	if err != nil {
 		return 0.0, err
 	}

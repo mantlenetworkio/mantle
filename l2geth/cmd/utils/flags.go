@@ -867,11 +867,6 @@ var (
 		Usage:  "Enable the verifier for mpc node",
 		EnvVar: "ROLLUP_VERIFIER_MPC_ENABLE",
 	}
-	RollupEigenDaBlockFlag = cli.Int64Flag{
-		Name:   "rollup.eigendablock",
-		Usage:  "Eigen DA Fee Block number",
-		EnvVar: "ROLLUP_EIGEN_DA_BLOCK",
-	}
 	RollupMaxCalldataSizeFlag = cli.IntFlag{
 		Name:   "rollup.maxcalldatasize",
 		Usage:  "Maximum allowed calldata size for Queue Origin Sequencer Txs",
@@ -953,6 +948,26 @@ var (
 		Name:   "fp.challenge-verify",
 		Usage:  "Challenge verify",
 		EnvVar: "CHALLENGE_VERIFY",
+	}
+	EnableHsmFlag = &cli.BoolFlag{
+		Name:   "fp.enable-hsm",
+		Usage:  "Enalbe the hsm",
+		EnvVar: "ENABLE_HSM",
+	}
+	HsmAPINameFlag = &cli.StringFlag{
+		Name:   "fp.hsm-api-name",
+		Usage:  "the api name of hsm",
+		EnvVar: "HSM_API_NAME",
+	}
+	HsmAddressFlag = &cli.StringFlag{
+		Name:   "fp.hsm-address",
+		Usage:  "the address of hsm key",
+		EnvVar: "HSM_ADDRESS",
+	}
+	HsmCredenFlag = &cli.StringFlag{
+		Name:   "fp.hsm-creden",
+		Usage:  "the creden of hsm key",
+		EnvVar: "HSM_CREDEN",
 	}
 )
 
@@ -1224,9 +1239,6 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	}
 	if ctx.GlobalIsSet(RollupMpcVerifierFlag.Name) {
 		cfg.MpcVerifier = true
-	}
-	if ctx.GlobalIsSet(RollupEigenDaBlockFlag.Name) {
-		cfg.EigenDaBlock = ctx.GlobalInt64(RollupEigenDaBlockFlag.Name)
 	}
 	if ctx.GlobalIsSet(RollupFeeThresholdDownFlag.Name) {
 		val := ctx.GlobalFloat64(RollupFeeThresholdDownFlag.Name)

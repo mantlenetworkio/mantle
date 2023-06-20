@@ -23,6 +23,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math"
+	"math/big"
 	"os"
 	"runtime"
 	"sync"
@@ -40,6 +42,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 	"github.com/mantlenetworkio/mantle/l2geth/trie"
 )
@@ -61,6 +64,12 @@ type TraceConfig struct {
 	Tracer  *string
 	Timeout *string
 	Reexec  *uint64
+}
+
+// TraceCallConfig is the config for traceCall API
+type TraceCallConfig struct {
+	TraceConfig
+	StateOverrides *map[common.Address]ethapi.Account
 }
 
 // StdTraceConfig holds extra parameters to standard-json trace functions.
@@ -516,6 +525,140 @@ func (api *PrivateDebugAPI) traceBlock(ctx context.Context, block *types.Block, 
 		return nil, failed
 	}
 	return results, nil
+}
+
+// TraceCall lets you trace a given eth_call. It collects the structured logs
+// created during the execution of EVM if the given transaction was added on
+// top of the provided block and returns them as a JSON object.
+func (api *PrivateDebugAPI) TraceCall(ctx context.Context, args ethapi.CallArgs, blockNrOrHash rpc.BlockNumberOrHash, config *TraceCallConfig) (interface{}, error) {
+	statedb, header, err := api.eth.APIBackend.StateAndHeaderByNumberOrHash(ctx, blockNrOrHash)
+
+	if statedb == nil && err != nil {
+		return nil, fmt.Errorf("Error retrieving state: %s", err)
+	} else if statedb == nil && err == nil {
+		return nil, fmt.Errorf("Error retrieving state, no error code returned")
+	}
+
+	// Set sender address or use a default if none specified
+	var addr common.Address
+	if args.From == nil {
+		if !rcfg.UsingBVM {
+			if wallets := api.eth.AccountManager().Wallets(); len(wallets) > 0 {
+				if accounts := wallets[0].Accounts(); len(accounts) > 0 {
+					addr = accounts[0].Address
+				}
+			}
+		}
+	} else {
+		addr = *args.From
+	}
+
+	// Override the fields of specified contracts before execution.
+	if config != nil {
+		for addr, account := range *config.StateOverrides {
+			// Override account nonce.
+			if account.Nonce != nil {
+				statedb.SetNonce(addr, uint64(*account.Nonce))
+			}
+			// Override account(contract) code.
+			if account.Code != nil {
+				statedb.SetCode(addr, *account.Code)
+			}
+			// Override account balance.
+			if account.Balance != nil {
+				statedb.SetBalance(addr, (*big.Int)(*account.Balance))
+			}
+			if account.State != nil && account.StateDiff != nil {
+				return nil, fmt.Errorf("account %s has both 'state' and 'stateDiff'", addr.Hex())
+			}
+			// Replace entire state if caller requires.
+			if account.State != nil {
+				statedb.SetStorage(addr, *account.State)
+			}
+			// Apply state diff into specified accounts.
+			if account.StateDiff != nil {
+				for key, value := range *account.StateDiff {
+					statedb.SetState(addr, key, value)
+				}
+			}
+		}
+
+		// https://github.com/ethereum/go-ethereum/blob/281e8cd5abaac86ed3f37f98250ff147b3c9fe62/internal/ethapi/api.go#L939
+		statedb.Finalise(false)
+	}
+
+	// Set default gas & gas price if none were set
+	gas := uint64(math.MaxUint64 / 2)
+	if args.Gas != nil {
+		gas = uint64(*args.Gas)
+	}
+
+	// SuggestGasPrice implements ContractTransactor.SuggestGasPrice. Since the simulated
+	// chain doesn't have miners, we just return a gas price of 1 for any call unless specified differently
+	gasPrice := big.NewInt(1)
+	if args.GasPrice != nil {
+		gasPrice = args.GasPrice.ToInt()
+	}
+
+	value := new(big.Int)
+	if args.Value != nil {
+		value = args.Value.ToInt()
+	}
+
+	var data []byte
+	if args.Data != nil {
+		data = *args.Data
+	}
+
+	// Currently, the blocknumber and timestamp actually refer to the L1BlockNumber and L1Timestamp
+	// attached to each transaction. We need to modify the blocknumber and timestamp to reflect this,
+	// or else the result of `eth_call` will not be correct.
+	blockNumber := header.Number
+	timestamp := header.Time
+	if rcfg.UsingBVM {
+		block := api.eth.blockchain.GetBlockByNumber(header.Number.Uint64())
+		if block == nil {
+			return nil, fmt.Errorf("Error retrieving block")
+		}
+
+		txs := block.Transactions()
+		if header.Number.Uint64() != 0 {
+			if len(txs) != 1 {
+				return nil, fmt.Errorf("block %d has more than 1 transaction", header.Number.Uint64())
+			}
+			tx := txs[0]
+			blockNumber = tx.L1BlockNumber()
+			timestamp = tx.L1Timestamp()
+		}
+	}
+
+	// Create new call message
+	msg := types.NewMessage(addr, args.To, 0, value, gas, gasPrice, data, false, blockNumber, timestamp, types.QueueOriginSequencer)
+
+	// Setup context so it may be cancelled the call has completed
+	// or, in case of unmetered gas, setup a context with a timeout.
+	var cancel context.CancelFunc
+	timeout := defaultTraceTimeout
+	if config != nil {
+		if config.Timeout != nil {
+			if timeout, err = time.ParseDuration(*config.Timeout); err != nil {
+				return nil, err
+			}
+		}
+	}
+	ctx, cancel = context.WithTimeout(ctx, timeout)
+
+	// Make sure the context is cancelled when the call has completed
+	// this makes sure resources are cleaned up.
+	defer cancel()
+
+	vmctx := core.NewEVMContext(msg, header, api.eth.blockchain, nil)
+
+	var traceConfig *TraceConfig
+	if config != nil {
+		traceConfig = &config.TraceConfig
+	}
+	return api.traceTx(ctx, msg, vmctx, statedb, traceConfig)
 }
 
 // standardTraceBlockToFile configures a new tracer which uses standard JSON output,

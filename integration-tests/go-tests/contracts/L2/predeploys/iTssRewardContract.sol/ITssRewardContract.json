@@ -9,7 +9,19 @@
         {
           "indexed": false,
           "internalType": "uint256",
+          "name": "lastBatchTime",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
           "name": "batchTime",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
           "type": "uint256"
         },
         {
@@ -36,6 +48,12 @@
           "internalType": "uint32",
           "name": "length",
           "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
         },
         {
           "indexed": false,

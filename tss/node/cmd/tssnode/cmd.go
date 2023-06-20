@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
+
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
@@ -23,6 +24,7 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	"github.com/mantlenetworkio/mantle/tss/slash"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -36,13 +38,19 @@ func Command() *cobra.Command {
 			return runNode(cmd)
 		},
 	}
-
+	cmd.Flags().BoolP("debug", "d", false, "log level,default info")
 	return cmd
 }
 
 func runNode(cmd *cobra.Command) error {
 	nonProd, _ := cmd.Flags().GetBool("non-prod")
 	waitPeersFullConnected, _ := cmd.Flags().GetBool("full")
+	debug, _ := cmd.Flags().GetBool("debug")
+	if debug {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	} else {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
 	cfg := tss.GetConfigFromCmd(cmd)
 
 	if len(cfg.Node.PrivateKey) == 0 {
@@ -59,12 +67,18 @@ func runNode(cmd *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-
-	observer, err := index.NewIndexer(store, cfg.L1Url, cfg.L1ConfirmBlocks, cfg.SccContractAddress, cfg.TimedTaskInterval)
+	l1StartBlockNumber, err := strconv.ParseUint(
+		cfg.L1StartBlockNumber, 10, 32,
+	)
 	if err != nil {
 		return err
 	}
-	observer = observer.SetHook(slash.NewSlashing(store, store, cfg.SignedBatchesWindow, cfg.MinSignedInWindow))
+
+	observer, err := index.NewIndexer(store, cfg.L1Url, cfg.L1ConfirmBlocks, cfg.SccContractAddress, cfg.TimedTaskInterval, l1StartBlockNumber)
+	if err != nil {
+		return err
+	}
+	observer = observer.SetHook(slash.NewSlashingNode(store, store))
 	observer.Start()
 
 	//new tss server instance
@@ -118,7 +132,11 @@ func runNode(cmd *cobra.Command) error {
 	}
 	signer.Start()
 
-	hs := server.NewHttpServer(cfg.Node.HttpAddr, tssInstance, signer, nonProd)
+	hs, err := server.NewHttpServer(cfg.Node.HttpAddr, tssInstance, signer, nonProd, cfg.Node.JwtSecret)
+	if err != nil {
+		log.Error().Err(err).Msg("fail to create http server")
+		return err
+	}
 
 	if err := hs.Start(); err != nil {
 		log.Error().Err(err).Msg("fail to start http server")

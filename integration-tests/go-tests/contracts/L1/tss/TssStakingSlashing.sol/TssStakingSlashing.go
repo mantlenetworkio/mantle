@@ -26,6 +26,7 @@ var (
 	_ = common.Big1
 	_ = types.BloomLookup
 	_ = event.NewSubscription
+	_ = abi.ConvertType
 )
 
 // IStakingSlashingDepositInfo is an auto generated low-level Go binding around an user-defined struct.
@@ -37,7 +38,7 @@ type IStakingSlashingDepositInfo struct {
 
 // TssStakingSlashingMetaData contains all meta data concerning the TssStakingSlashing contract.
 var TssStakingSlashingMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"pledgor\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"pubKey\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"structIStakingSlashing.DepositInfo\",\"name\":\"\",\"type\":\"tuple\"}],\"name\":\"AddDeposit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"enumTssStakingSlashing.SlashType\",\"name\":\"\",\"type\":\"uint8\"}],\"name\":\"Slashing\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"Withdraw\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"BitToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"batchGetDeposits\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"pledgor\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"pubKey\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"internalType\":\"structIStakingSlashing.DepositInfo[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"clearQuitRequestList\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"deposits\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"pledgor\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"pubKey\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"exIncome\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"getDeposits\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"pledgor\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"pubKey\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"internalType\":\"structIStakingSlashing.DepositInfo\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getQuitRequestList\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"batchIndex\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"getSlashRecord\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getSlashingParams\",\"outputs\":[{\"internalType\":\"uint256[2]\",\"name\":\"\",\"type\":\"uint256[2]\"},{\"internalType\":\"uint256[2]\",\"name\":\"\",\"type\":\"uint256[2]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_bitToken\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tssGroupContract\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"byteListA\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"byteListB\",\"type\":\"bytes\"}],\"name\":\"isEqual\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"isJailed\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"quitRequest\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"quitRequestList\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tssGroup\",\"type\":\"address\"}],\"name\":\"setAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[2]\",\"name\":\"_slashAmount\",\"type\":\"uint256[2]\"},{\"internalType\":\"uint256[2]\",\"name\":\"_exIncome\",\"type\":\"uint256[2]\"}],\"name\":\"setSlashingParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"slashAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_messageBytes\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"slashing\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_pubKey\",\"type\":\"bytes\"}],\"name\":\"staking\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tssGroupContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unJail\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdrawToken\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"pledgor\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"pubKey\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"structIStakingSlashing.DepositInfo\",\"name\":\"\",\"type\":\"tuple\"}],\"name\":\"AddDeposit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"enumTssStakingSlashing.SlashType\",\"name\":\"\",\"type\":\"uint8\"}],\"name\":\"Slashing\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"Withdraw\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"MantleToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"batchGetDeposits\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"pledgor\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"pubKey\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"internalType\":\"structIStakingSlashing.DepositInfo[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"clearQuitRequestList\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"deposits\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"pledgor\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"pubKey\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"exIncome\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"getDeposits\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"pledgor\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"pubKey\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"internalType\":\"structIStakingSlashing.DepositInfo\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getQuitRequestList\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"batchIndex\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"getSlashRecord\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getSlashingParams\",\"outputs\":[{\"internalType\":\"uint256[2]\",\"name\":\"\",\"type\":\"uint256[2]\"},{\"internalType\":\"uint256[2]\",\"name\":\"\",\"type\":\"uint256[2]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_mantleToken\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tssGroupContract\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"byteListA\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"byteListB\",\"type\":\"bytes\"}],\"name\":\"isEqual\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"isJailed\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"quitRequest\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"quitRequestList\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tssGroup\",\"type\":\"address\"}],\"name\":\"setAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[2]\",\"name\":\"_slashAmount\",\"type\":\"uint256[2]\"},{\"internalType\":\"uint256[2]\",\"name\":\"_exIncome\",\"type\":\"uint256[2]\"}],\"name\":\"setSlashingParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"slashAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_messageBytes\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"slashing\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_pubKey\",\"type\":\"bytes\"}],\"name\":\"staking\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tssGroupContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unJail\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdrawToken\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // TssStakingSlashingABI is the input ABI used to generate the binding from.
@@ -141,11 +142,11 @@ func NewTssStakingSlashingFilterer(address common.Address, filterer bind.Contrac
 
 // bindTssStakingSlashing binds a generic wrapper to an already deployed contract.
 func bindTssStakingSlashing(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
-	parsed, err := abi.JSON(strings.NewReader(TssStakingSlashingABI))
+	parsed, err := TssStakingSlashingMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
+	return bind.NewBoundContract(address, *parsed, caller, transactor, filterer), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and
@@ -186,12 +187,12 @@ func (_TssStakingSlashing *TssStakingSlashingTransactorRaw) Transact(opts *bind.
 	return _TssStakingSlashing.Contract.contract.Transact(opts, method, params...)
 }
 
-// BitToken is a free data retrieval call binding the contract method 0xeb20b589.
+// MantleToken is a free data retrieval call binding the contract method 0x80f3c106.
 //
-// Solidity: function BitToken() view returns(address)
-func (_TssStakingSlashing *TssStakingSlashingCaller) BitToken(opts *bind.CallOpts) (common.Address, error) {
+// Solidity: function MantleToken() view returns(address)
+func (_TssStakingSlashing *TssStakingSlashingCaller) MantleToken(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
-	err := _TssStakingSlashing.contract.Call(opts, &out, "BitToken")
+	err := _TssStakingSlashing.contract.Call(opts, &out, "MantleToken")
 
 	if err != nil {
 		return *new(common.Address), err
@@ -203,18 +204,18 @@ func (_TssStakingSlashing *TssStakingSlashingCaller) BitToken(opts *bind.CallOpt
 
 }
 
-// BitToken is a free data retrieval call binding the contract method 0xeb20b589.
+// MantleToken is a free data retrieval call binding the contract method 0x80f3c106.
 //
-// Solidity: function BitToken() view returns(address)
-func (_TssStakingSlashing *TssStakingSlashingSession) BitToken() (common.Address, error) {
-	return _TssStakingSlashing.Contract.BitToken(&_TssStakingSlashing.CallOpts)
+// Solidity: function MantleToken() view returns(address)
+func (_TssStakingSlashing *TssStakingSlashingSession) MantleToken() (common.Address, error) {
+	return _TssStakingSlashing.Contract.MantleToken(&_TssStakingSlashing.CallOpts)
 }
 
-// BitToken is a free data retrieval call binding the contract method 0xeb20b589.
+// MantleToken is a free data retrieval call binding the contract method 0x80f3c106.
 //
-// Solidity: function BitToken() view returns(address)
-func (_TssStakingSlashing *TssStakingSlashingCallerSession) BitToken() (common.Address, error) {
-	return _TssStakingSlashing.Contract.BitToken(&_TssStakingSlashing.CallOpts)
+// Solidity: function MantleToken() view returns(address)
+func (_TssStakingSlashing *TssStakingSlashingCallerSession) MantleToken() (common.Address, error) {
+	return _TssStakingSlashing.Contract.MantleToken(&_TssStakingSlashing.CallOpts)
 }
 
 // BatchGetDeposits is a free data retrieval call binding the contract method 0x793505c8.
@@ -632,23 +633,23 @@ func (_TssStakingSlashing *TssStakingSlashingTransactorSession) ClearQuitRequest
 
 // Initialize is a paid mutator transaction binding the contract method 0x485cc955.
 //
-// Solidity: function initialize(address _bitToken, address _tssGroupContract) returns()
-func (_TssStakingSlashing *TssStakingSlashingTransactor) Initialize(opts *bind.TransactOpts, _bitToken common.Address, _tssGroupContract common.Address) (*types.Transaction, error) {
-	return _TssStakingSlashing.contract.Transact(opts, "initialize", _bitToken, _tssGroupContract)
+// Solidity: function initialize(address _mantleToken, address _tssGroupContract) returns()
+func (_TssStakingSlashing *TssStakingSlashingTransactor) Initialize(opts *bind.TransactOpts, _mantleToken common.Address, _tssGroupContract common.Address) (*types.Transaction, error) {
+	return _TssStakingSlashing.contract.Transact(opts, "initialize", _mantleToken, _tssGroupContract)
 }
 
 // Initialize is a paid mutator transaction binding the contract method 0x485cc955.
 //
-// Solidity: function initialize(address _bitToken, address _tssGroupContract) returns()
-func (_TssStakingSlashing *TssStakingSlashingSession) Initialize(_bitToken common.Address, _tssGroupContract common.Address) (*types.Transaction, error) {
-	return _TssStakingSlashing.Contract.Initialize(&_TssStakingSlashing.TransactOpts, _bitToken, _tssGroupContract)
+// Solidity: function initialize(address _mantleToken, address _tssGroupContract) returns()
+func (_TssStakingSlashing *TssStakingSlashingSession) Initialize(_mantleToken common.Address, _tssGroupContract common.Address) (*types.Transaction, error) {
+	return _TssStakingSlashing.Contract.Initialize(&_TssStakingSlashing.TransactOpts, _mantleToken, _tssGroupContract)
 }
 
 // Initialize is a paid mutator transaction binding the contract method 0x485cc955.
 //
-// Solidity: function initialize(address _bitToken, address _tssGroupContract) returns()
-func (_TssStakingSlashing *TssStakingSlashingTransactorSession) Initialize(_bitToken common.Address, _tssGroupContract common.Address) (*types.Transaction, error) {
-	return _TssStakingSlashing.Contract.Initialize(&_TssStakingSlashing.TransactOpts, _bitToken, _tssGroupContract)
+// Solidity: function initialize(address _mantleToken, address _tssGroupContract) returns()
+func (_TssStakingSlashing *TssStakingSlashingTransactorSession) Initialize(_mantleToken common.Address, _tssGroupContract common.Address) (*types.Transaction, error) {
+	return _TssStakingSlashing.Contract.Initialize(&_TssStakingSlashing.TransactOpts, _mantleToken, _tssGroupContract)
 }
 
 // IsJailed is a paid mutator transaction binding the contract method 0x14bfb527.

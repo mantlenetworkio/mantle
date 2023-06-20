@@ -206,6 +206,26 @@ type Config struct {
 	DisableHTTP2 bool
 
 	EnableSccRollback bool
+
+	// use cloud-hsm to sign for proposer
+	EnableProposerHsm bool
+
+	ProposerHsmAddress string
+
+	ProposerHsmAPIName string
+
+	ProposerHsmCreden string
+
+	// use cloud-hsm to sign for sequencer
+	EnableSequencerHsm bool
+
+	SequencerHsmAddress string
+
+	SequencerHsmAPIName string
+
+	SequencerHsmCreden string
+
+	RollupClientHttp string
 }
 
 // NewConfig parses the Config from the provided flags or environment variables.
@@ -256,6 +276,15 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		MetricsPort:         ctx.GlobalUint64(flags.MetricsPortFlag.Name),
 		DisableHTTP2:        ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
 		EnableSccRollback:   ctx.GlobalBool(flags.SccRollbackFlag.Name),
+		EnableSequencerHsm:  ctx.GlobalBool(flags.EnableSequencerHsmFlag.Name),
+		SequencerHsmAddress: ctx.GlobalString(flags.SequencerHsmAddressFlag.Name),
+		SequencerHsmAPIName: ctx.GlobalString(flags.SequencerHsmAPIName.Name),
+		SequencerHsmCreden:  ctx.GlobalString(flags.SequencerHsmCreden.Name),
+		EnableProposerHsm:   ctx.GlobalBool(flags.EnableProposerHsmFlag.Name),
+		ProposerHsmAddress:  ctx.GlobalString(flags.ProposerHsmAddressFlag.Name),
+		ProposerHsmAPIName:  ctx.GlobalString(flags.ProposerHsmAPIName.Name),
+		ProposerHsmCreden:   ctx.GlobalString(flags.ProposerHsmCreden.Name),
+		RollupClientHttp:    ctx.GlobalString(flags.RollupClientHttpFlag.Name),
 	}
 
 	err := ValidateConfig(&cfg)

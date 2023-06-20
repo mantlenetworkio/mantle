@@ -45,6 +45,9 @@ abstract contract RollupBase is IRollup, Initializable {
     AssertionMap public override assertions;
     IVerifierEntry public verifier;
 
+    // slot place hold
+    uint256[50] rollupBaseGap;
+
     struct Staker {
         bool isStaked;
         uint256 amountStaked;
@@ -182,9 +185,12 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             );
             stakers[msg.sender].amountStaked += stakeAmount;
         } else {
+            require(registers[operator] == address(0), "operator is occupied");
+
             if (stakeAmount < baseStakeAmount) {
                 revert("InsufficientStake");
             }
+
             stakers[msg.sender] = Staker(true, stakeAmount, 0, operator, address(0));
             registers[operator] = msg.sender;
             numStakers++;
@@ -219,10 +225,11 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         if (staker.assertionID > lastConfirmedAssertionID) {
             revert("StakedOnUnconfirmedAssertion");
         }
+        uint256 amountToSent = staker.amountStaked;
         deleteStaker(stakerAddress);
         // send erc20 token to user
         require(
-            IERC20(stakeToken).transfer(stakerAddress, staker.amountStaked),
+            IERC20(stakeToken).transfer(stakerAddress, amountToSent),
             "transfer erc20 token failed"
         );
     }
@@ -231,7 +238,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     function advanceStake(uint256 assertionID) external override operatorOnly {
         address stakerAddr = registers[msg.sender];
         Staker storage staker = stakers[stakerAddr];
-        if (assertionID <= staker.assertionID && assertionID > lastCreatedAssertionID) {
+        if (assertionID <= staker.assertionID || assertionID > lastCreatedAssertionID) {
             revert("AssertionOutOfRange");
         }
         // TODO: allow arbitrary descendant of current staked assertionID, not just child.
@@ -242,11 +249,13 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
     /// @inheritdoc IRollup
-    function withdraw() external override {
+    function withdraw() external override operatorOnly {
         uint256 withdrawableFund = withdrawableFunds[msg.sender];
         withdrawableFunds[msg.sender] = 0;
-        (bool success,) = msg.sender.call{value: withdrawableFund}("");
-        if (!success) revert("TransferFailed");
+        require(
+            IERC20(stakeToken).transfer(msg.sender, withdrawableFund),
+            "transfer erc20 token failed"
+        );
     }
 
     /// @inheritdoc IRollup
@@ -275,6 +284,10 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
 
         // Update stake.
         stakeOnAssertion(stakerAddr, lastCreatedAssertionID);
+        // confirmed this assertion instantly
+        lastResolvedAssertionID++;
+        lastConfirmedAssertionID = lastResolvedAssertionID;
+        emit AssertionConfirmed(lastResolvedAssertionID);
     }
 
     /// @inheritdoc IRollup
@@ -300,6 +313,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     function challengeAssertion(address[2] calldata players, uint256[2] calldata assertionIDs)
         external
         override
+        operatorOnly
         returns (address)
     {
         uint256 defenderAssertionID = assertionIDs[0];
@@ -319,10 +333,10 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         if (parentID != assertions.getParentID(challengerAssertionID)) {
             revert("DifferentParent");
         }
-
         // Require that neither player is currently engaged in a challenge.
         address defender = players[0];
         address challenger = players[1];
+        require(defender != challenger, "defender and challenge must not equal");
         address defenderStaker = registers[defender];
         address challengerStaker = registers[challenger];
         requireUnchallengedStaker(defenderStaker);
@@ -333,8 +347,8 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         // Initialize challenge.
         Challenge challenge = new Challenge();
         address challengeAddr = address(challenge);
-        stakers[challenger].currentChallenge = challengeAddr;
-        stakers[defender].currentChallenge = challengeAddr;
+        stakers[challengerStaker].currentChallenge = challengeAddr;
+        stakers[defenderStaker].currentChallenge = challengeAddr;
 
         challengeCtx = ChallengeCtx(false,challengeAddr,defender,challenger,defenderAssertionID,challengerAssertionID);
         emit AssertionChallenged(defenderAssertionID, challengeAddr);
@@ -354,7 +368,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
     /// @inheritdoc IRollup
-    function confirmFirstUnresolvedAssertion() external override {
+    function confirmFirstUnresolvedAssertion() public override operatorOnly {
         if (lastResolvedAssertionID >= lastCreatedAssertionID) {
             revert("NoUnresolvedAssertion");
         }
@@ -380,6 +394,13 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         // (4) all stakers are staked on the block.
         // if (assertions.getNumStakers(lastUnresolvedID) != numStakers) {
         //    revert("NotAllStaked");
+        // }
+
+        // there is no slashing mechanism currently,
+        // we can not handle offline staker if we sum up zombies and numStakers,
+        // in which case a offline validator can block confirmation progress.
+        // if (assertions.getNumStakers(lastUnresolvedID) != countStakedZombies(lastUnresolvedID) + numStakers) {
+        //    revert NotAllStaked();
         // }
 
         // Confirm assertion.
@@ -441,11 +462,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
 /// @inheritdoc IRollup
-    function rejectLatestCreatedAssertionWithBatch(Lib_BVMCodec.ChainBatchHeader memory _batchHeader) external override operatorOnly {
-        if (lastResolvedAssertionID >= lastCreatedAssertionID) {
-            revert("NoUnresolvedAssertion");
-        }
-
+    function rejectLatestCreatedAssertionWithBatch(Lib_BVMCodec.ChainBatchHeader memory _batchHeader) external override onlyOwner {
         address scc = resolve("StateCommitmentChain");
 
         // batch shift
@@ -453,19 +470,21 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
             abi.encodeWithSignature("getTotalBatches()")
         );
         uint256 totalBatches = uint256(bytes32(data));
-        require(totalBatches-_batchHeader.batchIndex == 0, "delete batch with gap is not allowed");
+        require(totalBatches-_batchHeader.batchIndex == 1, "delete batch with gap is not allowed");
 
         // Delete state batch
         (bool success, ) = scc.call(
-            abi.encodeWithSignature("deleteStateBatch(Lib_BVMCodec.ChainBatchHeader)", _batchHeader)
+            abi.encodeWithSignature("deleteStateBatch((uint256,bytes32,uint256,uint256,bytes,bytes))", _batchHeader)
         );
         require(success, "scc delete state batch failed, revert all");
 
         // Reject assertion.
         require(lastCreatedAssertionID >= lastResolvedAssertionID, "delete assertion before last resolved in error");
         emit AssertionRejected(lastCreatedAssertionID);
-        assertions.deleteAssertion(lastCreatedAssertionID);
+        assertions.deleteAssertionForBatch(lastCreatedAssertionID);
         lastCreatedAssertionID--;
+        lastResolvedAssertionID--;
+        lastConfirmedAssertionID--;
 
         // Revert status
         for (uint i = 0; i < stakerslist.length; i++) {
@@ -476,7 +495,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     }
 
     /// @inheritdoc IRollup
-    function completeChallenge(address winner, address loser) external override {
+    function completeChallenge(address winner, address loser) external override operatorOnly {
         address winnerStaker = registers[winner];
         address loserStaker = registers[loser];
         requireStaked(loserStaker);
@@ -487,9 +506,9 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         }
         uint256 amountWon;
         uint256 loserStake = stakers[loserStaker].amountStaked;
-        uint256 winnerStake = stakers[winnerStaker].amountStaked;
+        // uint256 winnerStake = stakers[winnerStaker].amountStaked;
         if (loserStake > baseStakeAmount) {
-            // If loser has a higher stake than the winner, refund the difference.
+            // If loser has a higher stake than the base stake amount, refund the difference.
             // Loser gets deleted anyways, so maybe unnecessary to set amountStaked.
             // stakers[loser].amountStaked = winnerStake;
             withdrawableFunds[loserStaker] += (loserStake - baseStakeAmount);
@@ -497,7 +516,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         } else {
             amountWon = loserStake;
         }
-        // Reward the winner with half the remaining stake
+        // Reward the winner with winner amount
         stakers[winnerStaker].amountStaked += amountWon; // why +stake instead of +withdrawable?
         stakers[winnerStaker].currentChallenge = address(0);
         // Turning loser into zombie renders the loser's remaining stake inaccessible.
@@ -556,6 +575,7 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         (bool success, bytes memory data) = scc.call(
             abi.encodeWithSignature("FRAUD_PROOF_WINDOW()")
         );
+        require(success,"call FRAUD_PROOF_WINDOW() failed");
         uint256 confirmationWindow = uint256(bytes32(data));
         return block.timestamp + confirmationWindow;
     }

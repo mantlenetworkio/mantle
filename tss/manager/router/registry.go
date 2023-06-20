@@ -3,6 +3,8 @@ package router
 import (
 	"errors"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"math/big"
 	"net/http"
 	"strconv"
@@ -67,7 +69,7 @@ func (registry *Registry) SignStateHandler() gin.HandlerFunc {
 
 func (registry *Registry) ResetHeightHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		heightStr := c.Param("height")
+		heightStr := c.PostForm("height")
 		height, err := strconv.Atoi(heightStr)
 		if err != nil {
 			c.String(http.StatusInternalServerError, "wrong height format")
@@ -115,5 +117,18 @@ func (registry *Registry) DeleteSlashHandler() gin.HandlerFunc {
 		}
 		registry.adminService.RemoveSlashingInfo(address, uint64(index))
 		c.String(http.StatusOK, "success")
+	}
+}
+
+func (registry *Registry) PrometheusHandler() gin.HandlerFunc {
+	h := promhttp.InstrumentMetricHandler(
+		prometheus.DefaultRegisterer, promhttp.HandlerFor(
+			prometheus.DefaultGatherer,
+			promhttp.HandlerOpts{MaxRequestsInFlight: 3},
+		),
+	)
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
 	}
 }

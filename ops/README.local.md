@@ -34,7 +34,7 @@ make -f Makefile.local stop
 ```
 
 ### Start/Stop a Single Service
-equal to `docker start/stop bitl1chain` (container name, not service name)
+equal to `docker start/stop mantlel1chain` (container name, not service name)
 ```shell
 make -f Makefile.local start service=l1_chain
 make -f Makefile.local stop service=l1_chain

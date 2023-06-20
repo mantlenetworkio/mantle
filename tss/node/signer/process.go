@@ -3,6 +3,7 @@ package signer
 import (
 	"context"
 	"crypto/ecdsa"
+	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
 	"math/big"
 	"sync"
 	"time"
@@ -58,9 +59,11 @@ type Processor struct {
 	tssStakingSlashingAddress string
 	taskInterval              time.Duration
 	tssStakingSlashingCaller  *tsh.TssStakingSlashingCaller
+	tssGroupManagerCaller     *tgm.TssGroupManagerCaller
 	tssQueryService           managertypes.TssQueryService
 	l1ConfirmBlocks           int
 	confirmReceiptTimeout     time.Duration
+	gasLimitScaler            int
 	metrics                   *Metrics
 }
 
@@ -91,6 +94,10 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 	}
 	l2Client, err := DialL2EthClientWithTimeout(ctx, cfg.Node.L2EthRpc, cfg.Node.DisableHTTP2)
 	tssStakingSlashingCaller, err := tsh.NewTssStakingSlashingCaller(ethc.HexToAddress(cfg.TssStakingSlashContractAddress), l1Cli)
+	if err != nil {
+		return nil, err
+	}
+	tssGroupManagerCaller, err := tgm.NewTssGroupManagerCaller(ethc.HexToAddress(cfg.TssGroupContractAddress), l1Cli)
 	if err != nil {
 		return nil, err
 	}
@@ -132,9 +139,11 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 		tssStakingSlashingAddress: cfg.TssStakingSlashContractAddress,
 		taskInterval:              taskIntervalDur,
 		tssStakingSlashingCaller:  tssStakingSlashingCaller,
+		tssGroupManagerCaller:     tssGroupManagerCaller,
 		tssQueryService:           queryService,
 		l1ConfirmBlocks:           cfg.L1ConfirmBlocks,
 		confirmReceiptTimeout:     receiptConfirmTimeoutDur,
+		gasLimitScaler:            cfg.Node.GasLimitScaler,
 		metrics:                   PrometheusMetrics("tssnode"),
 	}
 	return &processor, nil

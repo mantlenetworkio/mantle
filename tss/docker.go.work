@@ -1,0 +1,11 @@
+go 1.18
+
+use (
+	./mt-challenger
+	./datalayr
+  ./l2geth
+	./mt-batcher
+  ./bss-core
+  ./fraud-proof
+  ./metrics
+)

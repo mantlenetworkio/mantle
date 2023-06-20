@@ -1,7 +1,6 @@
-/**/Dockerfile*   @shidaxi
-/.github          @shidaxi
-/ops              @shidaxi @bradyjoestar
-/tss              @byteflyfunny
-/subsidy          @curryxbo
-/mt-batcher       @guoshijiang
-/*                @wukongcheng @bradyjoestar @silmaj @HaoyangLiu
+/**/Dockerfile*   @wukongcheng @shidaxi
+/.github          @wukongcheng @shidaxi
+/ops              @wukongcheng @shidaxi @bradyjoestar
+/tss              @wukongcheng @byteflyfunny @agnarsong
+/mt-batcher       @wukongcheng @guoshijiang @agnarsong
+/*                @wukongcheng @bradyjoestar @Sha3nS @HaoyangLiu @agnarsong

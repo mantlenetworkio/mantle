@@ -22,13 +22,13 @@ x-base-env: &base-env
 services:
   l1_chain:
     <<: *base
-    container_name: bitl1chain
+    container_name: mantlel1chain
     deploy: # run switch
       replicas: 1
 
   deployer:
     <<: *base
-    container_name: bitdeployer
+    container_name: mantledeployer
     environment:
       CONTRACTS_RPC_URL: ${CONTRACTS_RPC_URL:-http://l1_chain:8545}
       CONTRACTS_DEPLOYER_KEY: ${CONTRACTS_DEPLOYER_KEY:-0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97}
@@ -39,65 +39,65 @@ services:
       BVM_FEE_WALLET_ADDRESS: ${BVM_FEE_WALLET_ADDRESS:-}
       BVM_ADDRESS_MANAGER_OWNER: ${BVM_ADDRESS_MANAGER_OWNER:-}
       BVM_GAS_PRICE_ORACLE_OWNER: ${BVM_GAS_PRICE_ORACLE_OWNER:-}
-      L1_BIT_ADDRESS: ${L1_BIT_ADDRESS:-0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5}
+      L1_MANTLE_ADDRESS: ${L1_MANTLE_ADDRESS:-0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5}
 
   dtl:
     <<: *base
-    container_name: bitdtl
+    container_name: mantledtl
 
   l2geth:
     <<: *base
-    container_name: bitl2geth
+    container_name: mantlel2geth
 
   gas_oracle:
     <<: *base
-    container_name: bitgasoracle
+    container_name: mantlegasoracle
     deploy:
       replicas: 1
 
   batch_submitter:
     <<: *base
-    container_name: bitbatchsubmitter
+    container_name: mantlebatchsubmitter
 
   integration_tests:
     <<: *base
-    container_name: bititests
+    container_name: mantleitests
     deploy:
       replicas: 0
 
   relayer:
     <<: *base
-    container_name: bitrelayer
+    container_name: mantlerelayer
     deploy:
       replicas: 1
 
   verifier:
     <<: *base
-    container_name: bitverifier
+    container_name: mantleverifier
     deploy:
       replicas: 0
 
   replica:
     <<: *base
-    container_name: bitreplica
+    container_name: mantlereplica
     deploy:
       replicas: 0
 
   replica_healthcheck:
     <<: *base
-    container_name: bitreplicahealthcheck
+    container_name: mantlereplicahealthcheck
     deploy:
       replicas: 0
 
   fault_detector:
     <<: *base
-    container_name: bitfaultdetector
+    container_name: mantlefaultdetector
     deploy:
       replicas: 1
 
   l2geth2:
     <<: *base
-    container_name: bitl2geth2
+    container_name: mantlel2geth2
     deploy:
       replicas: 0  # disable by default
 

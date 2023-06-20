@@ -34,6 +34,7 @@ type Config struct {
 	CheckerWorkerPollInterval time.Duration
 	FeeWorkerPollInterval     time.Duration
 	BlockOffset               uint64
+	RollUpMinTxn              uint64
 	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
 	EigenLayerNode            int
@@ -59,6 +60,12 @@ type Config struct {
 	DbPath                    string
 	CheckerBatchIndex         uint64
 	CheckerEnable             bool
+	EnableHsm                 bool
+	HsmAPIName                string
+	HsmCreden                 string
+	HsmAddress                string
+	HsmFeeAPIName             string
+	HsmFeeAddress             string
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -88,6 +95,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		FeeWorkerPollInterval:     ctx.GlobalDuration(flags.FeeWorkerPollIntervalFlag.Name),
 		PollingDuration:           ctx.GlobalDuration(flags.PollingDurationFlag.Name),
 		BlockOffset:               ctx.GlobalUint64(flags.BlockOffsetFlag.Name),
+		RollUpMinTxn:              ctx.GlobalUint64(flags.RollUpMinTxnFlag.Name),
 		RollUpMinSize:             ctx.GlobalUint64(flags.RollUpMinSizeFlag.Name),
 		RollUpMaxSize:             ctx.GlobalUint64(flags.RollUpMaxSizeFlag.Name),
 		EigenLayerNode:            ctx.GlobalInt(flags.EigenLayerNodeFlag.Name),
@@ -113,6 +121,12 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		DbPath:                    ctx.GlobalString(flags.DbPathFlag.Name),
 		CheckerBatchIndex:         ctx.GlobalUint64(flags.CheckerBatchIndexFlag.Name),
 		CheckerEnable:             ctx.GlobalBool(flags.CheckerEnableFlag.Name),
+		EnableHsm:                 ctx.GlobalBool(flags.EnableHsmFlag.Name),
+		HsmAddress:                ctx.GlobalString(flags.HsmAddressFlag.Name),
+		HsmAPIName:                ctx.GlobalString(flags.HsmAPINameFlag.Name),
+		HsmCreden:                 ctx.GlobalString(flags.HsmCredenFlag.Name),
+		HsmFeeAPIName:             ctx.GlobalString(flags.HsmFeeAPINameFlag.Name),
+		HsmFeeAddress:             ctx.GlobalString(flags.HsmFeeAddressFlag.Name),
 	}
 	return cfg, nil
 }

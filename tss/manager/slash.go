@@ -3,18 +3,30 @@ package manager
 import (
 	"context"
 	"encoding/binary"
+	"errors"
 	"math/big"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	eth "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/manager/types"
 	"github.com/mantlenetworkio/mantle/tss/slash"
 )
+
+const (
+	slashingMethodName              = "slashing"
+	errMaxPriorityFeePerGasNotFound = "Method eth_maxPriorityFeePerGas not found"
+)
+
+var FallbackGasTipCap = big.NewInt(1500000000)
 
 var sendState = SendState{
 	states: make(map[[28]byte]string, 0),
@@ -25,6 +37,7 @@ func (m Manager) slashing() {
 	queryTicker := time.NewTicker(m.taskInterval)
 	for {
 		signingInfos := m.store.ListSlashingInfo()
+		m.metics.SlashCount.Set(float64(len(signingInfos)))
 		for _, si := range signingInfos {
 			m.handleSlashing(si)
 		}
@@ -138,6 +151,8 @@ func (m Manager) handleSlashing(si slash.SlashingInfo) {
 		approversAddress[i] = addr
 	}
 	digestBz, err := tss.SlashMsgHash(request.BatchIndex, request.Address, approversAddress, request.SignType)
+	mesTx, err := tss.SlashMsgBytes(si.BatchIndex, si.Address, approversAddress, request.SignType)
+
 	if err != nil {
 		log.Error("failed to encode SlashMsg", "err", err)
 		return
@@ -149,15 +164,19 @@ func (m Manager) handleSlashing(si slash.SlashingInfo) {
 		return
 	}
 
-	if err = m.submitSlashing(signResp, si); err != nil {
+	if err = m.submitSlashing(signResp, si, mesTx); err != nil {
 		log.Error("failed to submit slashing transaction", "error", err)
 	}
 	return
 }
 
-func (m Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo) error {
+func (m Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo, mesTx []byte) error {
+	txData, err := m.txBuilder(mesTx, signResp.Signature)
+	if err != nil {
+		return err
+	}
 	tx := new(eth.Transaction)
-	if err := tx.UnmarshalBinary(signResp.SlashTxBytes); err != nil {
+	if err := tx.UnmarshalBinary(txData); err != nil {
 		return err
 	}
 	if err := m.l1Cli.SendTransaction(context.Background(), tx); err != nil {
@@ -211,6 +230,86 @@ func (m Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo
 	}
 	go confirmTxReceipt(tx.Hash(), si)
 	return nil
+}
+
+func (m *Manager) txBuilder(txData, sig []byte) ([]byte, error) {
+	log.Info("connecting to layer one")
+	if err := tss.EnsureConnection(m.l1Cli); err != nil {
+		log.Error("Unable to connect to layer one", "err", err.Error())
+		return nil, err
+	}
+	if len(m.tssStakingSlashingAddress) == 0 {
+		log.Error("tss staking slashing address is empty ")
+		return nil, errors.New("tss staking slashing address is empty")
+	}
+	address := common.HexToAddress(m.tssStakingSlashingAddress)
+
+	//new raw contract
+	parsed, err := abi.JSON(strings.NewReader(tsh.TssStakingSlashingABI))
+	if err != nil {
+		log.Error("Unable to new parsed from slash contract abi", "err", err.Error())
+		return nil, err
+	}
+	//get staking slash contract abi
+	tshABI, err := tsh.TssStakingSlashingMetaData.GetAbi()
+	if err != nil {
+		log.Error("Unable to get tss staking slashing ABI", "err", err.Error())
+		return nil, err
+	}
+
+	rawSlashContract := bind.NewBoundContract(address, parsed, m.l1Cli, m.l1Cli, m.l1Cli)
+	dataBytes, err := tss.SlashBytes(txData, sig)
+	if err != nil {
+		log.Error("failed to pack slash bytes", "err", err.Error())
+		return nil, err
+	}
+	slashingID := tshABI.Methods[slashingMethodName].ID
+	calldata := append(slashingID, dataBytes...)
+
+	opts, err := bind.NewKeyedTransactorWithChainID(m.privateKey, m.chainId)
+	if err != nil {
+		log.Error("failed to new keyed transactor", "err", err.Error())
+		return nil, err
+	}
+	ctx := context.Background()
+	if opts.Context == nil {
+		opts.Context = ctx
+	}
+	from := crypto.PubkeyToAddress(m.privateKey.PublicKey)
+	nonce64, err := m.l1Cli.NonceAt(ctx, from, nil)
+	if err != nil {
+		log.Error(" unable to get current nonce", "address",
+			from)
+		return nil, err
+	}
+	log.Info("Current nonce is ", "nonce", nonce64)
+	nonce := new(big.Int).SetUint64(nonce64)
+	opts.Nonce = nonce
+	opts.NoSend = true
+
+	tx, err := rawSlashContract.RawTransact(opts, calldata)
+	if err != nil {
+		if strings.Contains(err.Error(), errMaxPriorityFeePerGasNotFound) {
+			opts.GasTipCap = FallbackGasTipCap
+			tx, err = rawSlashContract.RawTransact(opts, calldata)
+			if err != nil {
+				log.Error("failed to build slashing transaction tx!", "err", err.Error())
+				return nil, err
+			}
+		} else {
+			log.Error("failed to build slashing transaction tx!", "err", err.Error())
+			return nil, err
+		}
+	}
+
+	newTx, err := tss.EstimateGas(m.l1Cli, m.privateKey, m.chainId, ctx, tx, rawSlashContract, address)
+
+	txBinary, err := newTx.MarshalBinary()
+	if err != nil {
+		log.Error("failed to get marshal binary from transaction tx", "err", err.Error())
+		return nil, err
+	}
+	return txBinary, nil
 }
 
 type SendState struct {

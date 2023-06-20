@@ -24,7 +24,7 @@ const deployFn: DeployFunction = async (hre) => {
   // @ts-ignore
   const owner = hre.deployConfig.bvmAddressManagerOwner
   // @ts-ignore
-  const l1BitAddress = hre.deployConfig.l1BitAddress
+  const l1MantleAddress = hre.deployConfig.proxyL1MantleAddress
 
   // deploy assertionMap impl
   await deployAndVerifyAndThen({
@@ -124,7 +124,7 @@ const deployFn: DeployFunction = async (hre) => {
   const rollupArgs = [
     deployer, // address _owner
     Proxy__VerifierEntry.address, // address _verifier,
-    l1BitAddress, // address _stakeToken,
+    l1MantleAddress, // address _stakeToken,
     Lib_AddressManager.address, // address _libAddressManager,
     Proxy__AssertionMap.address, // address _assertionMap,
     0, // uint256 _minimumAssertionPeriod,
