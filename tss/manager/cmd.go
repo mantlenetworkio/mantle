@@ -20,7 +20,6 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/slash"
 	"github.com/mantlenetworkio/mantle/tss/ws/server"
 
-	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 )
 
