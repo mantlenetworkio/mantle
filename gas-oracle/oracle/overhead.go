@@ -2,30 +2,63 @@ package oracle
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
 	"math/big"
 	"sort"
+
+	kms "cloud.google.com/go/kms/apiv1"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/log"
+	"google.golang.org/api/option"
+
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
+	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
 )
 
 var jumpTable = make(map[int]*big.Int, 0)
 var orderedSizes = make([]int, 0)
 
 func wrapUpdateOverhead(l2Backend DeployContractBackend, cfg *Config) (func(*big.Int, *big.Int) error, error) {
-	if cfg.privateKey == nil {
-		return nil, errNoPrivateKey
-	}
 	if cfg.l2ChainID == nil {
 		return nil, errNoChainID
 	}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(cfg.privateKey, cfg.l2ChainID)
-	if err != nil {
-		return nil, err
+	var opts *bind.TransactOpts
+	var err error
+	if !cfg.EnableHsm {
+		if cfg.privateKey == nil {
+			return nil, errNoPrivateKey
+		}
+		if cfg.l2ChainID == nil {
+			return nil, errNoChainID
+		}
+
+		opts, err = bind.NewKeyedTransactorWithChainID(cfg.privateKey, cfg.l2ChainID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		seqBytes, err := hex.DecodeString(cfg.HsmCreden)
+		apikey := option.WithCredentialsJSON(seqBytes)
+		client, err := kms.NewKeyManagementClient(context.Background(), apikey)
+		if err != nil {
+			log.Crit("gasoracle", "create signer error", err.Error())
+		}
+		mk := &bsscore.ManagedKey{
+			KeyName:      cfg.HsmAPIName,
+			EthereumAddr: common.HexToAddress(cfg.HsmAddress),
+			Gclient:      client,
+		}
+		opts, err = mk.NewEthereumTransactorrWithChainID(context.Background(), cfg.l2ChainID)
+		if err != nil {
+			log.Crit("gasoracle", "create signer error", err.Error())
+			return nil, err
+		}
 	}
+
 	// Once https://github.com/ethereum/go-ethereum/pull/23062 is released
 	// then we can remove setting the context here
 	if opts.Context == nil {
