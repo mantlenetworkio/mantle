@@ -1,6 +1,6 @@
 {
     "commit": "3bd5a3ac3795fde7800093d8af2cceff09023971",
-    "config": {
+   "config": {
         "chainId": 17,
         "homesteadBlock": 0,
         "eip150Block": 0,
