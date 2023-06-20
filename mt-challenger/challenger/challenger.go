@@ -615,6 +615,7 @@ func (c *Challenger) eventLoop() {
 			batchIndex, ok := c.LevelDBStore.GetLatestBatchIndex()
 			if !ok {
 				log.Error("MtChallenger get batch index from db fail", "err", err)
+				continue
 			}
 			if c.Cfg.CheckerBatchIndex > latestBatchIndex.Uint64() {
 				log.Info("MtChallenger Batch Index", "DbBatchIndex", batchIndex, "ContractBatchIndex", latestBatchIndex.Uint64()-c.Cfg.CheckerBatchIndex)
