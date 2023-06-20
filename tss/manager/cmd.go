@@ -79,16 +79,25 @@ func run(cmd *cobra.Command) error {
 	r := gin.Default()
 	registry.Register(r)
 
-	jwtHandler, err := common.NewJwtHandler(r, config.Manager.JwtSecret)
-	if err != nil {
-		return err
+	var s *http.Server
+	if config.Manager.JwtSecret != "" {
+		jwtHandler, err := common.NewJwtHandler(r, config.Manager.JwtSecret)
+		if err != nil {
+			return err
+		}
+
+		// custom http configuration
+		s = &http.Server{
+			Addr:    config.Manager.HttpAddr,
+			Handler: jwtHandler,
+		}
+	} else {
+		s = &http.Server{
+			Addr:    config.Manager.HttpAddr,
+			Handler: r,
+		}
 	}
 
-	// custom http configuration
-	s := &http.Server{
-		Addr:    config.Manager.HttpAddr,
-		Handler: jwtHandler,
-	}
 	go func() {
 		if err := s.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
 			log.Error("api server starts failed", err)
