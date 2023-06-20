@@ -52,6 +52,8 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
     // slither-disable-next-line external-function
     function initialize(address _l1messenger, address _l2TokenBridge, address _l1MantleAddress) public {
         require(messenger == address(0), "Contract has already been initialized.");
+        require(_l1messenger != address(0),"messenger address cant be zero.");
+        require(_l2TokenBridge != address(0),"l2tokenbridge address cant be zero.");
         messenger = _l1messenger;
         l2TokenBridge = _l2TokenBridge;
         l1MantleAddress = _l1MantleAddress;
@@ -71,15 +73,6 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
         _;
     }
 
-    /** @dev Modifier requiring MESSAGER NOT ZERO ADDRESS.  This check could be bypassed by a malicious
-     *  contract via initcode, but it takes care of the user error we want to avoid.
-     */
-    modifier checkMessenger() {
-        // Used to stop deposits from contracts (avoid accidentally lost tokens)
-        require(messenger != address(0), "messenger address cant be zero");
-        _;
-    }
-
 
     /**
      * @dev This function can be called with no data
@@ -87,14 +80,14 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
      * Since the receive function doesn't take data, a conservative
      * default amount is forwarded to L2.
      */
-    receive() external payable onlyEOA checkMessenger {
+    receive() external payable onlyEOA {
         _initiateETHDeposit(msg.sender, msg.sender, 200_000, bytes(""));
     }
 
     /**
      * @inheritdoc IL1StandardBridge
      */
-    function depositETH(uint32 _l2Gas, bytes calldata _data) external payable onlyEOA checkMessenger{
+    function depositETH(uint32 _l2Gas, bytes calldata _data) external payable onlyEOA {
         _initiateETHDeposit(msg.sender, msg.sender, _l2Gas, _data);
     }
 
@@ -105,7 +98,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
         address _to,
         uint32 _l2Gas,
         bytes calldata _data
-    ) external payable checkMessenger {
+    ) external payable {
         _initiateETHDeposit(msg.sender, _to, _l2Gas, _data);
     }
 
@@ -153,7 +146,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
         uint256 _amount,
         uint32 _l2Gas,
         bytes calldata _data
-    ) external virtual onlyEOA checkMessenger {
+    ) external virtual onlyEOA {
         _initiateERC20Deposit(_l1Token, _l2Token, msg.sender, msg.sender, _amount, _l2Gas, _data);
     }
 
@@ -167,7 +160,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
         uint256 _amount,
         uint32 _l2Gas,
         bytes calldata _data
-    ) external virtual checkMessenger{
+    ) external virtual {
         _initiateERC20Deposit(_l1Token, _l2Token, msg.sender, _to, _amount, _l2Gas, _data);
     }
 
