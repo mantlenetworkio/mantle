@@ -55,7 +55,10 @@ func (c *Client) getTokenPricesFromUniswap() (float64, float64, error) {
 		return 0, 0, err
 	}
 
-	return float64(eth2bitPrice), float64(eth2usdtPrice), nil
+	tokenRatio := determineTokenRatio(float64(eth2bitPrice))
+	ethPrice, _ := determineETHPrice(big.NewFloat(float64(eth2usdtPrice))).Float64()
+
+	return tokenRatio, ethPrice, nil
 }
 
 // getTokenPriceFromUniswap estimate to execute swapping from_token to to_token to get token price
