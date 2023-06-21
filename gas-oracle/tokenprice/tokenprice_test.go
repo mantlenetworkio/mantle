@@ -1,6 +1,7 @@
 package tokenprice
 
 import (
+	"math/big"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -67,7 +68,7 @@ func TestGetTokenPriceWithOneDollarTokenRatioMode3(t *testing.T) {
 
 	ratio, err := tokenPricer.PriceRatioWithMode()
 	require.NoError(t, err)
-	require.Equal(t, DefaultETHPrice, int(ratio))
+	require.Equal(t, DefaultETHPrice, big.NewFloat(ratio))
 	t.Logf("ratio:%v", ratio)
 }
 
@@ -76,6 +77,6 @@ func TestGetTokenPriceWithDefaultTokenRatioMode(t *testing.T) {
 
 	ratio, err := tokenPricer.PriceRatioWithMode()
 	require.NoError(t, err)
-	require.Equal(t, DefaultTokenRatio, int(ratio))
+	require.Equal(t, DefaultTokenRatio, ratio)
 	t.Logf("ratio:%v", ratio)
 }
