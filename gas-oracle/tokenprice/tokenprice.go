@@ -35,11 +35,26 @@ type Result struct {
 var (
 	errHTTPError = errors.New("http error")
 
-	// DefaultTokenRatio is eth_price / mnt_price
-	DefaultTokenRatio = 4000
+	// DefaultTokenRatio is eth_price / mnt_price, 4000 = $1800/$0.45
+	DefaultTokenRatio = float64(4000)
+	// TokenRatioMax token_ratio upper bounds
+	TokenRatioMax = float64(10000)
+	// TokenRatioMin token_ratio lower bounds
+	TokenRatioMin = float64(500)
+
 	// DefaultETHPrice is default eth_price
-	// If SwitchOneDollarTokenRatio valid, use DefaultETHPrice to set token_ratio to mnt price is 1$
-	DefaultETHPrice = 1800
+	// If SwitchOneDollarTokenRatio valid, use DefaultETHPrice to set token_ratio to make mnt_price is 1$
+	DefaultETHPrice = big.NewFloat(1800)
+	// ETHPriceMax eth_price upper bounds
+	ETHPriceMax = big.NewFloat(20000)
+	// ETHPriceMin eth_price lower bounds
+	ETHPriceMin = big.NewFloat(100)
+
+	DefaultMNTPrice = big.NewFloat(0.45)
+	// MNTPriceMax mnt_price upper bounds
+	MNTPriceMax = big.NewFloat(10)
+	// MNTPriceMin mnt_price lower bounds
+	MNTPriceMin = big.NewFloat(0.2)
 
 	// RealTokenRatioMode use eth_price / mnt_price to set token_ratio
 	RealTokenRatioMode = TokenRatioMode(0)
@@ -86,16 +101,17 @@ func (c *Client) PriceRatioWithMode() (float64, error) {
 	var errDex error
 	// get token price from dex
 	if ratio, ethPrice, errDex = c.getTokenPricesFromUniswap(); errDex != nil {
-		ratio = float64(DefaultTokenRatio)
-		ethPrice = float64(DefaultETHPrice)
+		ratio = DefaultTokenRatio
+		ethPrice, _ = DefaultETHPrice.Float64()
 	}
 
 	// get token price from cex
 	// if both dex and cex return token prices correctly, token price from cex will be used
+	// if cex failed, token price from dex will be used
 	// if both failed, default value will be used
 	if ratioCex, ethPriceCex, errCex := c.priceRatio(); errCex != nil && errDex != nil {
-		ratio = float64(DefaultTokenRatio)
-		ethPrice = float64(DefaultETHPrice)
+		ratio = DefaultTokenRatio
+		ethPrice, _ = DefaultETHPrice.Float64()
 	} else if errCex == nil {
 		ratio = ratioCex
 		ethPrice = ethPriceCex
@@ -104,7 +120,7 @@ func (c *Client) PriceRatioWithMode() (float64, error) {
 	switch c.tokenRatioMode {
 	case DefaultTokenRatioMode:
 		// use default eth/mnt price to set token ratio
-		ratio = float64(DefaultTokenRatio)
+		ratio = DefaultTokenRatio
 	case OneDollarTokenRatioMode:
 		// supposing that mnt is 1 USD, so token_ratio is equals to eth_price
 		ratio = ethPrice
@@ -124,20 +140,20 @@ func (c *Client) priceRatio() (float64, float64, error) {
 	if err != nil {
 		return 0, 0, err
 	}
-	bitPrice, err := c.query("BITUSDT")
+	mntPrice, err := c.query("BITUSDT")
 	if err != nil {
 		return 0, 0, err
 	}
-	bigZero := big.NewFloat(0)
-	if ethPrice.Cmp(bigZero) != 1 {
-		return 0, 0, fmt.Errorf("invalid eth Price")
-	}
-	if bitPrice.Cmp(bigZero) != 1 {
-		return 0, 0, fmt.Errorf("invalid mnt Price")
-	}
-	ratio, _ := new(big.Float).Quo(ethPrice, bitPrice).Float64()
-	ethPriceInt64, _ := ethPrice.Float64()
-	return ratio, ethPriceInt64, nil
+
+	ethPrice = determineETHPrice(ethPrice)
+	mntPrice = determineMNTPrice(mntPrice)
+
+	ratio, _ := new(big.Float).Quo(ethPrice, mntPrice).Float64()
+	ratio = determineTokenRatio(ratio)
+
+	ethPriceFloat64, _ := ethPrice.Float64()
+
+	return ratio, ethPriceFloat64, nil
 }
 
 func (c *Client) query(symbol string) (*big.Float, error) {
@@ -159,4 +175,28 @@ func (c *Client) query(symbol string) (*big.Float, error) {
 	}
 	bigPrice, _ := big.NewFloat(0).SetString(result.Result.Price)
 	return bigPrice, nil
+}
+
+func determineMNTPrice(price *big.Float) *big.Float {
+	if price.Cmp(MNTPriceMax) == 1 || price.Cmp(MNTPriceMin) == -1 {
+		return DefaultMNTPrice
+	}
+
+	return price
+}
+
+func determineETHPrice(price *big.Float) *big.Float {
+	if price.Cmp(ETHPriceMax) == 1 || price.Cmp(ETHPriceMin) == -1 {
+		return DefaultETHPrice
+	}
+
+	return price
+}
+
+func determineTokenRatio(ratio float64) float64 {
+	if ratio < TokenRatioMin || ratio > TokenRatioMax {
+		return DefaultTokenRatio
+	}
+
+	return ratio
 }
