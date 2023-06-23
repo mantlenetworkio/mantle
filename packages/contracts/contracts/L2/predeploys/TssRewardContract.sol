@@ -24,7 +24,6 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
 
     uint256 public lastBatchTime;
     uint256 public sendAmountPerYear;
-    uint256 public sendAmountPerSecond;
 
     address public sccAddress;
     uint256 public waitingTime;
@@ -50,7 +49,6 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
         sccAddress = _sccAddress;
         waitingTime = _waitingTime;
         stakeSlashAddress = _sccAddress;
-        sendAmountPerSecond = (sendAmountPerYear * 10 ** 18).div(365 * 24 * 60 * 60);
     }
 
     // slither-disable-next-line locked-ether
@@ -66,7 +64,6 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
 
     function setSendAmountPerYear(uint256 _sendAmountPerYear) public onlyOwner {
         sendAmountPerYear = _sendAmountPerYear;
-        sendAmountPerSecond = (sendAmountPerYear * 10 ** 18).div(365 * 24 * 60 * 60);
     }
 
     function setWaitingTime(uint256 _waitingTime) public onlyOwner {
@@ -82,7 +79,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
     }
 
     function querySendAmountPerSecond() public view returns (uint256){
-        return sendAmountPerSecond;
+        return (sendAmountPerYear * 10 ** 18).div(365 * 24 * 60 * 60);
     }
 
     /**
@@ -127,7 +124,8 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
      */
     function withdraw() external onlyOwner {
         if (address(this).balance > 0) {
-            payable(owner()).transfer(address(this).balance);
+            (bool success, ) = owner().call{ value: address(this).balance }(new bytes(0));
+            require(success, "TssReward withdraw: MNT transfer failed");
         }
     }
 
@@ -196,13 +194,14 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
         require(address(this).balance >= claimNumber,"The contract balance is insufficient to pay the reward value");
         if (claimNumber > 0) {
             address claimer = operators[_operator];
-            address payable addr = payable(claimer);
             delete claimAmout[_operator];
             rewardDetails[_operator] = rewardDetails[_operator] - claimNumber;
-            addr.transfer(claimNumber);
+            (bool success, ) = claimer.call{ value: claimNumber }(new bytes(0));
+            require(success, "TssReward claim: MNT transfer failed");
+            emit Claim(_operator, claimNumber);
         }
-        emit Claim(_operator, claimNumber);
     }
+
 
     function _distributeReward(uint256 amount, address[] calldata _tssMembers) internal {
         if (amount > 0) {

@@ -105,7 +105,7 @@ contract TssGroupManager is
     {
         require(isInActiveMember[_publicKey], "your public key is not in InActiveMember");
         require(msg.sender == Lib_Address.publicKeyToAddress(_publicKey), "public key not match");
-        require(_groupPublicKey.length > 0, "groupPublicKey is empty");
+        require(_groupPublicKey.length == 64, "Invalid groupPublicKey length");
 
         if (!_isSubmitGroupKey[_publicKey]) {
             _isSubmitGroupKey[_publicKey] = true;

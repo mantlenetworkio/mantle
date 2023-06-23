@@ -368,7 +368,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
         IDataLayrServiceManager.DataStoreSearchData memory searchData,
         DisclosureProofs calldata disclosureProofs
     ) external {
-        require(fraudProofWhitelist[msg.sender] == true, "proveFraud: Only fraud proof white list can challenge data");
+        require(fraudProofWhitelist[msg.sender], "proveFraud: Only fraud proof white list can challenge data");
         RollupStore memory rollupStore = rollupBatchIndexRollupStores[fraudulentStoreNumber];
         require(rollupStore.status == RollupStoreStatus.COMMITTED && rollupStore.confirmAt > block.timestamp, "RollupStore must be committed and unconfirmed");
         require(
