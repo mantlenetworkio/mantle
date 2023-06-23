@@ -130,12 +130,6 @@ contract TssStakingSlashing is
         regulatoryAccount = _account;
     }
 
-    function setPublicKey(bytes calldata _pubKey) public nonReentrant {
-        require(delegation.isOperator(msg.sender),"msg sender has not registered operator");
-        operators[msg.sender] = _pubKey;
-
-    }
-
     function setClaimer(
         address _operator,
         address _claimer
@@ -313,7 +307,6 @@ contract TssStakingSlashing is
     function unJail() public {
         // slashing params check
         require(isSetParam, "have not set the slash amount");
-
         uint256 totalBalance = _tokenBalance();
 
         require((delegation.operatorShares(msg.sender, this) * totalBalance) / totalShares >= slashAmount[1], "Insufficient balance");
@@ -413,15 +406,15 @@ contract TssStakingSlashing is
             "msg sender did not request withdraws"
         );
         IDelegationManager.QueuedWithdrawal memory queuedWithdrawal = withdrawals[msg.sender];
-        require(delegationManager.canCompleteQueuedWithdrawal(queuedWithdrawal),"The waiting period has not yet passed");
         TssDelegationManager(tssDelegationManagerContract).completeQueuedWithdrawal(msg.sender, queuedWithdrawal, true);
         delete withdrawalRoots[msg.sender];
         delete withdrawals[msg.sender];
     }
 
     function registerAsOperator(bytes calldata _pubKey) external {
+        require(msg.sender == ITssGroupManager(tssGroupContract).publicKeyToAddress(_pubKey), "public key not match");
         TssDelegation(tssDelegationContract).registerAsOperator(this, msg.sender);
-        setPublicKey(_pubKey);
+        operators[msg.sender] = _pubKey;
     }
 
     function delegateTo(address _operator) external {
