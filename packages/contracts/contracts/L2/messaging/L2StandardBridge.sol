@@ -41,6 +41,8 @@ contract L2StandardBridge is IL2ERC20Bridge, CrossDomainEnabled {
     constructor(address _l2CrossDomainMessenger, address _l1TokenBridge)
         CrossDomainEnabled(_l2CrossDomainMessenger)
     {
+        require(_l1TokenBridge != address(0),"Cant set zero address on _l1TokenBridge" );
+        require(_l2CrossDomainMessenger != address(0),"Cant set zero address on _l2CrossDomainMessenger" );
         l1TokenBridge = _l1TokenBridge;
     }
 
