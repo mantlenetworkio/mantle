@@ -91,10 +91,8 @@ task('take-dump').setAction(async (args, hre) => {
       messageNonce: 100000,
     },
     TssRewardContract: {
-      deadAddress: '0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead',
       _owner: hre.deployConfig.bvmTssRewardContractOwner,
       sendAmountPerYear: hre.deployConfig.tssRewardSendAmountPerYear,
-      bvmGasPriceOracleAddress: '0x420000000000000000000000000000000000000F',
       messenger: predeploys.L2CrossDomainMessenger,
       sccAddress: (
         await getContractFromArtifact(
