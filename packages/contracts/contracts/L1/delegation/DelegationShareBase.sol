@@ -26,6 +26,7 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
 
     /// @notice The total number of extant shares in the DelegationShare
     uint256 public totalShares;
+    uint256 public totalBalance;
 
     event Deposit(address depositor, address token, uint256 amount);
 
@@ -59,7 +60,7 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
          * @notice calculation of newShares *mirrors* `underlyingToShares(amount)`, but is different since the balance of `underlyingToken`
          * has already been increased due to the `delegationManager` transferring tokens to this delegation contract prior to calling this function
          */
-        uint256 priorTokenBalance = _tokenBalance() - amount;
+        uint256 priorTokenBalance = totalBalance;
         if (priorTokenBalance == 0 || totalShares == 0) {
             newShares = amount;
         } else {
@@ -67,6 +68,7 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
         }
 
         totalShares += newShares;
+        totalBalance += amount;
         emit Deposit(depositor, address(token), amount);
         return newShares;
     }
@@ -102,11 +104,12 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
          */
         uint256 amountToSend;
         if (priorTotalShares == amountShares) {
-            amountToSend = _tokenBalance();
+            amountToSend = totalBalance;
         } else {
-            amountToSend = (_tokenBalance() * amountShares) / priorTotalShares;
+            amountToSend = (totalBalance * amountShares) / priorTotalShares;
         }
         underlyingToken.safeTransfer(depositor, amountToSend);
+        totalBalance -= amountToSend;
         emit Withdraw(depositor, address(token), amountToSend);
     }
 
@@ -129,7 +132,7 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
         if (totalShares == 0) {
             return amountShares;
         } else {
-            return (_tokenBalance() * amountShares) / totalShares;
+            return (totalBalance * amountShares) / totalShares;
         }
     }
 
@@ -150,7 +153,7 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
      * @dev Implementation for these functions in particular may vary signifcantly for different strategies
      */
     function underlyingToSharesView(uint256 amountUnderlying) public view virtual returns (uint256) {
-        uint256 tokenBalance = _tokenBalance();
+        uint256 tokenBalance = totalBalance;
         if (tokenBalance == 0 || totalShares == 0) {
             return amountUnderlying;
         } else {
@@ -195,8 +198,7 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
     /// @notice Internal function used to fetch this contract's current balance of `underlyingToken`.
     // slither-disable-next-line dead-code
     function _tokenBalance() internal view virtual returns (uint256) {
-        return underlyingToken.balanceOf(address(this));
+        // return underlyingToken.balanceOf(address(this));
+        return totalBalance;
     }
-
-
 }
