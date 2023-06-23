@@ -56,6 +56,13 @@ func (p *Processor) Keygen() {
 					p.wsClient.SendMsg(RpcResponse)
 					continue
 				}
+				verifyResult := p.verifyThreshold(keyR)
+				if !verifyResult {
+					logger.Error().Msg("verify threshold in keygen request is false")
+					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", "verify threshold in keygen request is false")
+					p.wsClient.SendMsg(RpcResponse)
+					continue
+				}
 
 				var keygenReq = keygen.Request{
 					Keys:      keyR.Nodes,
@@ -331,4 +338,17 @@ func (p *Processor) RetryTransaction(tx *etht.Transaction, rawContract *bind.Bou
 	opts.GasLimit = tx.Gas()
 	return rawContract.RawTransact(opts, tx.Data())
 
+}
+
+func (p *Processor) verifyThreshold(keygen tsscommon.KeygenRequest) bool {
+	tssInfo, err := p.tssQueryService.QueryInactiveInfo()
+	if err != nil {
+		log.Error("failed to query inactive info", "err", err)
+		return false
+	}
+	if tssInfo.ElectionId == keygen.ElectionId {
+		return true
+	} else {
+		return false
+	}
 }
