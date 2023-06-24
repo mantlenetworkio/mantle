@@ -16,6 +16,7 @@ import {ITssRewardContract} from "../../L2/predeploys/iTssRewardContract.sol";
 import {TssDelegationManager} from "./delegation/TssDelegationManager.sol";
 import {TssDelegation} from "./delegation/TssDelegation.sol";
 import {WhiteList} from "../delegation/WhiteListBase.sol";
+import {Lib_Address} from "../../libraries/utils/Lib_Address.sol";
 
 import "./ITssGroupManager.sol";
 import "./ITssStakingSlashing.sol";
@@ -128,12 +129,6 @@ contract TssStakingSlashing is
     function setRegulatoryAccount(address _account) public onlyOwner {
         require(_account != address(0),"Invalid address");
         regulatoryAccount = _account;
-    }
-
-    function setPublicKey(bytes calldata _pubKey) public nonReentrant {
-        require(delegation.isOperator(msg.sender),"msg sender has not registered operator");
-        operators[msg.sender] = _pubKey;
-
     }
 
     function setClaimer(
@@ -313,6 +308,7 @@ contract TssStakingSlashing is
     function unJail() public {
         // slashing params check
         require(isSetParam, "have not set the slash amount");
+        require(isJailed(msg.sender), "An unjailed user doesn't need to call this method");
 
         uint256 totalBalance = _tokenBalance();
 
@@ -413,15 +409,15 @@ contract TssStakingSlashing is
             "msg sender did not request withdraws"
         );
         IDelegationManager.QueuedWithdrawal memory queuedWithdrawal = withdrawals[msg.sender];
-        require(delegationManager.canCompleteQueuedWithdrawal(queuedWithdrawal),"The waiting period has not yet passed");
         TssDelegationManager(tssDelegationManagerContract).completeQueuedWithdrawal(msg.sender, queuedWithdrawal, true);
         delete withdrawalRoots[msg.sender];
         delete withdrawals[msg.sender];
     }
 
     function registerAsOperator(bytes calldata _pubKey) external {
+        require(msg.sender == Lib_Address.publicKeyToAddress(_pubKey), "public key not match");
         TssDelegation(tssDelegationContract).registerAsOperator(this, msg.sender);
-        setPublicKey(_pubKey);
+        operators[msg.sender] = _pubKey;
     }
 
     function delegateTo(address _operator) external {
