@@ -54,12 +54,6 @@ mod-tidy:
 	cd ./mt-batcher && go mod tidy && cd ..
 .PHONY: mod-tidy
 
-getdeps:
-	@printf "${C_BROWN}${C_BOLD}>> Checking golangci-lint: \n${C_RESET}"
-
-	@printf "${C_GREEN}${C_BOLD}>> golangci-lint installed! \n${C_RESET}"
-.PHONY: getdeps
-
 before-ci:
 	@which golangci-lint 1>/dev/null || (echo "Installing golangci-lint" && go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.3)
 	@printf "${C_BROWN}${C_BOLD}>> Checking cache: \n${C_RESET}"
@@ -68,7 +62,7 @@ before-ci:
 	@printf "${C_GREEN}${C_BOLD}>> cache cleaned! \n${C_RESET}"
 .PHONY: before-ci
 
-ci: getdeps ci-batch-submitter ci-fraud-proof ci-gas-oracle ci-l2geth ci-mt-batcher ci-mt-challenger ci-tss
+ci: ci-batch-submitter ci-fraud-proof ci-gas-oracle ci-l2geth ci-mt-batcher ci-mt-challenger ci-tss
 	@echo
 .PHONY: ci
 
