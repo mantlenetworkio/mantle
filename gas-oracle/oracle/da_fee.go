@@ -1,18 +1,21 @@
 package oracle
 
 import (
-	kms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
-	bsscore "github.com/mantlenetworkio/mantle/bss-core"
-	"google.golang.org/api/option"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
+
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
+	ometrics "github.com/mantlenetworkio/mantle/gas-oracle/metrics"
+
+	kms "cloud.google.com/go/kms/apiv1"
+	"google.golang.org/api/option"
 )
 
 func wrapUpdateDaFee(daBackend *bindings.BVMEigenDataLayrFee, l2Backend DeployContractBackend, cfg *Config) (func() error, error) {
@@ -101,9 +104,10 @@ func wrapUpdateDaFee(daBackend *bindings.BVMEigenDataLayrFee, l2Backend DeployCo
 		log.Debug("updating da fee", "tx.gasPrice", tx.GasPrice(), "tx.gasLimit", tx.Gas(),
 			"tx.data", hexutil.Encode(tx.Data()), "tx.to", tx.To().Hex(), "tx.nonce", tx.Nonce())
 		if err := l2Backend.SendTransaction(context.Background(), tx); err != nil {
-			return fmt.Errorf("cannot update base fee: %w", err)
+			return fmt.Errorf("cannot update da fee: %w", err)
 		}
-		log.Info("L1 base fee transaction sent", "hash", tx.Hash().Hex(), "baseFee", daFee)
+		log.Info("L1 da fee transaction sent", "hash", tx.Hash().Hex(), "daFee", daFee)
+		ometrics.GasOracleStats.DaFeeGauge.Update(daFee.Int64())
 
 		if cfg.waitForReceipt {
 			// Wait for the receipt
