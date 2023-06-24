@@ -226,6 +226,9 @@ type Config struct {
 	SequencerHsmCreden string
 
 	RollupClientHttp string
+
+	// batch submitter rollback
+	AllowL2AutoRollback bool
 }
 
 // NewConfig parses the Config from the provided flags or environment variables.
@@ -285,6 +288,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		ProposerHsmAPIName:  ctx.GlobalString(flags.ProposerHsmAPIName.Name),
 		ProposerHsmCreden:   ctx.GlobalString(flags.ProposerHsmCreden.Name),
 		RollupClientHttp:    ctx.GlobalString(flags.RollupClientHttpFlag.Name),
+		AllowL2AutoRollback: ctx.GlobalBool(flags.AllowL2AutoRollback.Name),
 	}
 
 	err := ValidateConfig(&cfg)

@@ -331,6 +331,12 @@ var (
 		Value:  "http://localhost:7878",
 		EnvVar: "ROLLUP_CLIENT_HTTP",
 	}
+	AllowL2AutoRollback = cli.BoolFlag{
+		Name:     "rollup.allow-l2-auto-rollback",
+		Usage:    "Trigger for allowing layer2 auto rollback",
+		Required: false,
+		EnvVar:   "ROLLUP_ALLOW_L2_AUTO_ROLLBACK",
+	}
 )
 
 var requiredFlags = []cli.Flag{
