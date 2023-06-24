@@ -38,8 +38,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
      ***************/
 
     // This contract lives behind a proxy, so the constructor parameters will go unused.
-    constructor() CrossDomainEnabled(address(0)) {}
-
+    constructor() CrossDomainEnabled(0x3900000000000000000000000000000000000000) {}
     /******************
      * Initialization *
      ******************/
@@ -51,7 +50,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
      */
     // slither-disable-next-line external-function
     function initialize(address _l1messenger, address _l2TokenBridge, address _l1MantleAddress) public {
-        require(messenger == address(0), "Contract has already been initialized.");
+        require(messenger == 0x3900000000000000000000000000000000000000, "Contract has already been initialized.");
         messenger = _l1messenger;
         l2TokenBridge = _l2TokenBridge;
         l1MantleAddress = _l1MantleAddress;
