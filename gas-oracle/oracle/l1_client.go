@@ -3,12 +3,14 @@ package oracle
 import (
 	"context"
 	"fmt"
-	"github.com/ethereum/go-ethereum/log"
 	"math/big"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/log"
+
+	ometrics "github.com/mantlenetworkio/mantle/gas-oracle/metrics"
 	"github.com/mantlenetworkio/mantle/gas-oracle/tokenprice"
 )
 
@@ -50,6 +52,8 @@ func (c *L1Client) HeaderByNumber(ctx context.Context, number *big.Int) (*types.
 	bestBaseFee := c.getHistoryBestPrice(tip.Number, tip.BaseFee, 20)
 	tip.BaseFee = new(big.Int).Mul(new(big.Int).Add(bestBaseFee, gasTipCap), big.NewInt(int64(ratio)))
 	log.Info("show base fee context", "bestBaseFee", bestBaseFee, "gasTipCap", gasTipCap, "ratio", ratio)
+	ometrics.GasOracleStats.L1GasPriceGauge.Update(new(big.Int).Add(bestBaseFee, gasTipCap).Int64())
+	ometrics.GasOracleStats.TokenRatioGauge.Update(int64(ratio))
 	return tip, nil
 }
 
