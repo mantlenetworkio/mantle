@@ -105,26 +105,21 @@ func (c *Client) PriceRatioWithMode() (float64, error) {
 
 	// Todo query token prices concurrent
 	var mntPrices, ethPrices []float64
-	var mntPrice1, ethPrice1, mntPrice2, ethPrice2, mntPrice3, ethPrice3 float64
-	var err1, err2, err3 error
 	// get token price from oracle1(dex)
-	if mntPrice1, ethPrice1, err1 = c.getTokenPricesFromUniswap(); err1 == nil {
-		mntPrices = append(mntPrices, mntPrice1)
-		ethPrices = append(ethPrices, ethPrice1)
-	}
+	mntPrice1, ethPrice1 := c.getTokenPricesFromUniswap()
+	mntPrices = append(mntPrices, mntPrice1)
+	ethPrices = append(ethPrices, ethPrice1)
 
 	// get token price from oracle2(cex)
-	if mntPrice2, ethPrice2, err2 = c.getTokenPricesFromCex(); err2 == nil {
-		mntPrices = append(mntPrices, mntPrice2)
-		ethPrices = append(ethPrices, ethPrice2)
-	}
+	mntPrice2, ethPrice2 := c.getTokenPricesFromCex()
+	mntPrices = append(mntPrices, mntPrice2)
+	ethPrices = append(ethPrices, ethPrice2)
 
 	// get token price from oracle3(cex)
 	// Todo add a third oracle to query prices
-	if mntPrice3, ethPrice3, err3 = c.getTokenPricesFromCex(); err3 != nil {
-		mntPrices = append(mntPrices, mntPrice3)
-		ethPrices = append(ethPrices, ethPrice3)
-	}
+	mntPrice3, ethPrice3 := c.getTokenPricesFromCex()
+	mntPrices = append(mntPrices, mntPrice3)
+	ethPrices = append(ethPrices, ethPrice3)
 
 	// median price for eth & mnt
 	medianMNTPrice := getMedian(mntPrices)
@@ -151,21 +146,22 @@ func (c *Client) PriceRatioWithMode() (float64, error) {
 	c.lastUpdate = time.Now()
 	c.lastRatio = ratio
 	c.lastEthPrice = ethPrice
+	c.lastMntPrice = mntPrice
 
 	return ratio, nil
 }
 
-func (c *Client) getTokenPricesFromCex() (float64, float64, error) {
+func (c *Client) getTokenPricesFromCex() (float64, float64) {
 	ethPrice, err := c.queryV5(ETHUSDT)
 	if err != nil {
-		return 0, 0, err
+		return 0, 0
 	}
 	mntPrice, err := c.queryV5(c.tokenPairForMNTPrice)
 	if err != nil {
-		return 0, 0, err
+		return 0, ethPrice
 	}
 
-	return mntPrice, ethPrice, nil
+	return mntPrice, ethPrice
 }
 
 func (c *Client) determineMNTPrice(price float64) float64 {
@@ -177,7 +173,7 @@ func (c *Client) determineMNTPrice(price float64) float64 {
 }
 
 func (c *Client) determineETHPrice(price float64) float64 {
-	if price > ETHPriceMax || price < (ETHPriceMin) {
+	if price > ETHPriceMax || price < ETHPriceMin {
 		return c.lastEthPrice
 	}
 
@@ -209,8 +205,17 @@ func determineTokenPairForMNT(tokenPairMNTMode bool) string {
 }
 
 func getMedian(nums []float64) float64 {
-	sort.Float64s(nums)
-	return nums[len(nums)/2]
+	nonZeros := make([]float64, 0)
+	for _, num := range nums {
+		if num != 0 {
+			nonZeros = append(nonZeros, num)
+		}
+	}
+	sort.Float64s(nonZeros)
+	if len(nonZeros) == 0 {
+		return 0
+	}
+	return nonZeros[len(nonZeros)/2]
 }
 
 func getMax(a, b float64) float64 {

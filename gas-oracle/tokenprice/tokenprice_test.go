@@ -17,8 +17,7 @@ func TestGetTokenPrice(t *testing.T) {
 	t.Logf("BIT price:%v", bitPrice)
 
 	t.Logf("ratio:%v", ethPrice/bitPrice)
-	bitPrice, ethPrice, err = tokenPricer.getTokenPricesFromCex()
-	require.NoError(t, err)
+	bitPrice, ethPrice = tokenPricer.getTokenPricesFromCex()
 	t.Logf("ETH price:%v", ethPrice)
 	t.Logf("BIT price:%v", bitPrice)
 	t.Logf("ratio:%v", ethPrice/bitPrice)
@@ -55,8 +54,7 @@ func TestGetTokenPriceWithOneDollarTokenRatioMode(t *testing.T) {
 func TestGetTokenPriceWithOneDollarTokenRatioMode2(t *testing.T) {
 	tokenPricer := NewClient("", "https://mainnet.infura.io/v3/4f4692085f1340c2a645ae04d36c2321", 3, 1, false)
 
-	_, ethPrice, err := tokenPricer.getTokenPricesFromUniswap()
-	require.NoError(t, err)
+	_, ethPrice := tokenPricer.getTokenPricesFromUniswap()
 	t.Logf("ETH price:%v", ethPrice)
 
 	ratio, err := tokenPricer.PriceRatioWithMode()
@@ -120,10 +118,13 @@ func TestGetTokenPriceWithMNT(t *testing.T) {
 }
 
 func Test_getMedian(t *testing.T) {
-	result := getMedian([]float64{1.1})
+	result := getMedian([]float64{0, 0, 0})
+	require.Equal(t, float64(0), result)
+
+	result = getMedian([]float64{1.1, 0, 0})
 	require.Equal(t, 1.1, result)
 
-	result = getMedian([]float64{1.1, 2.1})
+	result = getMedian([]float64{1.1, 2.1, 0})
 	require.Equal(t, 2.1, result)
 
 	result = getMedian([]float64{2.1, 1.1})

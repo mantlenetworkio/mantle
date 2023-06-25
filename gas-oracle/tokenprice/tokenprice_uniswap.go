@@ -62,20 +62,20 @@ func newUniswapClient(uniswapURL string, tokenPairMNTMode bool) (*uniswapClient,
 	return quoterClient, nil
 }
 
-func (c *Client) getTokenPricesFromUniswap() (float64, float64, error) {
+func (c *Client) getTokenPricesFromUniswap() (float64, float64) {
 
 	eth2mntPrice, err := c.getTokenPriceFromUniswap(c.uniswapQuoterClient.ethAddress,
 		c.uniswapQuoterClient.mntAddress, c.uniswapQuoterClient.mntDecimals)
 	if err != nil {
-		return 0, 0, err
+		return 0, 0
 	}
 	eth2usdtPrice, err := c.getTokenPriceFromUniswap(c.uniswapQuoterClient.ethAddress,
 		c.uniswapQuoterClient.usdttAddress, c.uniswapQuoterClient.usdtDecimals)
 	if err != nil {
-		return 0, 0, err
+		return 0, eth2mntPrice
 	}
 
-	return eth2usdtPrice / eth2mntPrice, eth2usdtPrice, nil
+	return eth2usdtPrice / eth2mntPrice, eth2usdtPrice
 }
 
 // getTokenPriceFromUniswap estimate to execute swapping from_token to to_token to get token price
