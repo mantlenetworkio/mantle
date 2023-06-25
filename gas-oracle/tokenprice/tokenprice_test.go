@@ -120,19 +120,22 @@ func TestGetTokenPriceWithMNT(t *testing.T) {
 }
 
 func Test_getMedian(t *testing.T) {
-	result := getMedian(1.1, 2.1)
+	result := getMedian([]float64{1.1})
+	require.Equal(t, 1.1, result)
+
+	result = getMedian([]float64{1.1, 2.1})
 	require.Equal(t, 2.1, result)
 
-	result = getMedian(2.1, 1.1)
+	result = getMedian([]float64{2.1, 1.1})
 	require.Equal(t, 2.1, result)
 
-	result = getMedian(1.1, 2.1, 3.1)
+	result = getMedian([]float64{1.1, 2.1, 3.1})
 	require.Equal(t, 2.1, result)
 
-	result = getMedian(1.1, 3.1, 2.1)
+	result = getMedian([]float64{1.1, 3.1, 2.1})
 	require.Equal(t, 2.1, result)
 
-	result = getMedian(1.1, 3.1, 2.1, 4.1)
+	result = getMedian([]float64{1.1, 3.1, 2.1, 4.1})
 	require.Equal(t, 3.1, result)
 }
 

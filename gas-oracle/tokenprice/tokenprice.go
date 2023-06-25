@@ -104,30 +104,31 @@ func (c *Client) PriceRatioWithMode() (float64, error) {
 	}
 
 	// Todo query token prices concurrent
+	var mntPrices, ethPrices []float64
 	var mntPrice1, ethPrice1, mntPrice2, ethPrice2, mntPrice3, ethPrice3 float64
 	var err1, err2, err3 error
 	// get token price from oracle1(dex)
-	if mntPrice1, ethPrice1, err1 = c.getTokenPricesFromUniswap(); err1 != nil {
-		mntPrice1 = DefaultMNTPrice
-		ethPrice1 = DefaultETHPrice
+	if mntPrice1, ethPrice1, err1 = c.getTokenPricesFromUniswap(); err1 == nil {
+		mntPrices = append(mntPrices, mntPrice1)
+		ethPrices = append(ethPrices, ethPrice1)
 	}
 
 	// get token price from oracle2(cex)
-	if mntPrice2, ethPrice2, err2 = c.getTokenPricesFromCex(); err2 != nil {
-		mntPrice2 = DefaultMNTPrice
-		ethPrice2 = DefaultETHPrice
+	if mntPrice2, ethPrice2, err2 = c.getTokenPricesFromCex(); err2 == nil {
+		mntPrices = append(mntPrices, mntPrice2)
+		ethPrices = append(ethPrices, ethPrice2)
 	}
 
 	// get token price from oracle3(cex)
 	// Todo add a third oracle to query prices
 	if mntPrice3, ethPrice3, err3 = c.getTokenPricesFromCex(); err3 != nil {
-		mntPrice3 = DefaultMNTPrice
-		ethPrice3 = DefaultETHPrice
+		mntPrices = append(mntPrices, mntPrice3)
+		ethPrices = append(ethPrices, ethPrice3)
 	}
 
 	// median price for eth & mnt
-	medianMNTPrice := getMedian(mntPrice1, mntPrice2, mntPrice3)
-	medianETHPrice := getMedian(ethPrice1, ethPrice2, ethPrice3)
+	medianMNTPrice := getMedian(mntPrices)
+	medianETHPrice := getMedian(ethPrices)
 
 	// determine mnt_price, eth_price
 	mntPrice := c.determineMNTPrice(medianMNTPrice)
@@ -207,7 +208,7 @@ func determineTokenPairForMNT(tokenPairMNTMode bool) string {
 	}
 }
 
-func getMedian(nums ...float64) float64 {
+func getMedian(nums []float64) float64 {
 	sort.Float64s(nums)
 	return nums[len(nums)/2]
 }
