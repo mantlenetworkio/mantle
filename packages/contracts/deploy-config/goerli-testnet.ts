@@ -34,6 +34,7 @@ const config = {
   tssRewardSendAmountPerYear: 100000,
   tssRewardWaitingTime: 86400,
   tssDelegationManagerMinStakeAmount: '100000000000000000000',
+  tssManagerAddress: process.env.BVM_TSS_MANAGER_ADDRESS,
 }
 
 export default config
