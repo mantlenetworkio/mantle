@@ -38,15 +38,15 @@ var (
 	// If SwitchOneDollarTokenRatio valid, use DefaultETHPrice to set token_ratio to make mnt_price is 1$
 	DefaultETHPrice = float64(1800)
 	// ETHPriceMax eth_price upper bounds
-	ETHPriceMax = float64(20000)
+	ETHPriceMax = float64(1000000)
 	// ETHPriceMin eth_price lower bounds
 	ETHPriceMin = float64(100)
 
 	DefaultMNTPrice = 0.45
 	// MNTPriceMax mnt_price upper bounds
-	MNTPriceMax = float64(10)
+	MNTPriceMax = float64(100)
 	// MNTPriceMin mnt_price lower bounds
-	MNTPriceMin = 0.2
+	MNTPriceMin = 0.01
 
 	// RealTokenRatioMode use eth_price / mnt_price to set token_ratio
 	RealTokenRatioMode = TokenRatioMode(0)
