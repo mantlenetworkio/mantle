@@ -19,12 +19,12 @@ contract ChugSplashDictator is iL1ChugSplashDeployer {
     L1ChugSplashProxy public target;
     address public finalOwner;
     bytes32 public codeHash;
-    bytes32 public messengerSlotKey;
-    bytes32 public messengerSlotVal;
-    bytes32 public bridgeSlotKey;
-    bytes32 public bridgeSlotVal;
-    bytes32 public mantleAddressSlotKey;
-    bytes32 public mantleAddressSlotVal;
+    bytes32 immutable public messengerSlotKey;
+    bytes32 immutable public messengerSlotVal;
+    bytes32 immutable public bridgeSlotKey;
+    bytes32 immutable public bridgeSlotVal;
+    bytes32 immutable public mantleAddressSlotKey;
+    bytes32 immutable public mantleAddressSlotVal;
 
     /***************
      * Constructor *
