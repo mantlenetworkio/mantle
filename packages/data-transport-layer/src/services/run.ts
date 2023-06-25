@@ -41,6 +41,7 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
         'mantle-da-upgrade-datastore-id',
         0
       ),
+      mantleDaRequestTimeout: config.uint('mantle-da-request-timeout', 12000),
 
       dangerouslyCatchAllErrors: config.bool(
         'dangerously-catch-all-errors',

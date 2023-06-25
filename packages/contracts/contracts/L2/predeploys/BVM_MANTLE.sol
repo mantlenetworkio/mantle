@@ -18,7 +18,7 @@ contract BVM_MANTLE is L2StandardERC20 {
      ***************/
     // hardcode to mantle token mainnet address
     constructor()
-        L2StandardERC20(Lib_PredeployAddresses.L2_STANDARD_BRIDGE, address(0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5), "Mantle Token", "MNT", 18)
+        L2StandardERC20(Lib_PredeployAddresses.L2_STANDARD_BRIDGE, address(0x3c3a81e81dc49A522A592e7622A7E711c06bf354), "Mantle", "MNT", 18)
     {}
 
 

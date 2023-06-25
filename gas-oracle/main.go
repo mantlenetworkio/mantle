@@ -49,14 +49,11 @@ func main() {
 			return err
 		}
 
-		if err := gpo.Start(); err != nil {
-			return err
-		}
-
 		if config.MetricsEnabled {
 			address := fmt.Sprintf("%s:%d", config.MetricsHTTP, config.MetricsPort)
 			log.Info("Enabling stand-alone metrics HTTP endpoint", "address", address)
 			ometrics.Setup(address)
+			ometrics.InitAndRegisterStats(ometrics.DefaultRegistry)
 		}
 
 		if config.MetricsEnableInfluxDB {
@@ -66,6 +63,10 @@ func main() {
 			password := config.MetricsInfluxDBPassword
 			log.Info("Enabling metrics export to InfluxDB", "endpoint", endpoint, "username", username, "database", database)
 			go influxdb.InfluxDBWithTags(ometrics.DefaultRegistry, 10*time.Second, endpoint, database, username, password, "geth.", make(map[string]string))
+		}
+
+		if err := gpo.Start(); err != nil {
+			return err
 		}
 
 		gpo.Wait()

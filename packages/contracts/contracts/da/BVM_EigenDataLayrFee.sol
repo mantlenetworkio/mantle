@@ -15,6 +15,7 @@ contract BVM_EigenDataLayrFee is Initializable, OwnableUpgradeable, ReentrancyGu
     uint256 userRollupFee;
 
     event RollupFeeHistory(uint256 l2Block, uint256 userRollupFee);
+    event FeeAddressUpdated(address oldFeeAddress, address newFeeAddress);
 
     constructor() {
         _disableInitializers();
@@ -28,7 +29,9 @@ contract BVM_EigenDataLayrFee is Initializable, OwnableUpgradeable, ReentrancyGu
 
     function setFeeAddress(address _address) public onlyOwner {
         require(_address != address(0), "setFeeAddress: address is the zero address");
+        address oldGasFeeAddress = gasFeeAddress;
         gasFeeAddress = _address;
+        emit FeeAddressUpdated(oldGasFeeAddress, gasFeeAddress);
     }
 
     modifier onlyGasFee() {

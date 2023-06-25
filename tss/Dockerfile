@@ -3,9 +3,7 @@ FROM golang:1.19-alpine3.15 as builder
 
 RUN apk add --no-cache make gcc musl-dev linux-headers git
 
-COPY ./bss-core /go/bss-core
-COPY ./l2geth /go/l2geth
-COPY ./tss/docker.go.work /go/go.work
+COPY . /app/
 
 WORKDIR /app/tss
 RUN make build

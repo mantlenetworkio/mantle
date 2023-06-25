@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/index"
@@ -19,7 +20,6 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/slash"
 	"github.com/mantlenetworkio/mantle/tss/ws/server"
 
-	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 )
 
@@ -79,16 +79,25 @@ func run(cmd *cobra.Command) error {
 	r := gin.Default()
 	registry.Register(r)
 
-	jwtHandler, err := common.NewJwtHandler(r, config.Manager.JwtSecret)
-	if err != nil {
-		return err
+	var s *http.Server
+	if config.Manager.JwtSecret != "" {
+		jwtHandler, err := common.NewJwtHandler(r, config.Manager.JwtSecret)
+		if err != nil {
+			return err
+		}
+
+		// custom http configuration
+		s = &http.Server{
+			Addr:    config.Manager.HttpAddr,
+			Handler: jwtHandler,
+		}
+	} else {
+		s = &http.Server{
+			Addr:    config.Manager.HttpAddr,
+			Handler: r,
+		}
 	}
 
-	// custom http configuration
-	s := &http.Server{
-		Addr:    config.Manager.HttpAddr,
-		Handler: jwtHandler,
-	}
 	go func() {
 		if err := s.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
 			log.Error("api server starts failed", err)

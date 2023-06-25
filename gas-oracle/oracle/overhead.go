@@ -7,15 +7,17 @@ import (
 	"math/big"
 	"sort"
 
-	kms "cloud.google.com/go/kms/apiv1"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
-	"google.golang.org/api/option"
 
 	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
+	ometrics "github.com/mantlenetworkio/mantle/gas-oracle/metrics"
+
+	kms "cloud.google.com/go/kms/apiv1"
+	"google.golang.org/api/option"
 )
 
 var jumpTable = make(map[int]*big.Int, 0)
@@ -109,6 +111,7 @@ func wrapUpdateOverhead(l2Backend DeployContractBackend, cfg *Config) (func(*big
 			return fmt.Errorf("cannot update base fee: %w", err)
 		}
 		log.Info("L2 overhead transaction sent", "hash", tx.Hash().Hex(), "old overhead", overhead, "new overhead", newOverheadLevel)
+		ometrics.GasOracleStats.OverHeadGauge.Update(newOverheadLevel.Int64())
 
 		if cfg.waitForReceipt {
 			// Wait for the receipt

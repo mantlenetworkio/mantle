@@ -71,12 +71,6 @@ export interface DataStoreByIdResponse {
   dataStore: DataStoreEntry
 }
 
-export interface TestResponse {
-  len: number
-  putdata: string
-  data: string
-}
-
 export interface TxListByStoreIdResponse {
   txList: TransactionListEntry[]
   storeId: number

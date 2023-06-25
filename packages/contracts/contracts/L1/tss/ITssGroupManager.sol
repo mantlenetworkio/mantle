@@ -27,7 +27,6 @@ interface ITssGroupManager {
     function memberExistInActive(bytes memory _publicKey) external returns (bool);
     function inActiveIsEmpty() external returns (bool);
     function verifySign(bytes32 _message, bytes memory _sig) external returns (bool);
-    function publicKeyToAddress (bytes memory publicKey) external returns (address);
     function isTssGroupUnJailMembers(address _addr) external returns (bool);
     function memberExistActive(address _addr) external returns (bool);
 }

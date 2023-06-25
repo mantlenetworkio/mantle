@@ -54,6 +54,13 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
         returns (uint256 newShares)
     {
         require(token == underlyingToken, "DelegationShareBase.deposit: Can only deposit underlyingToken");
+        // be ware of lines below, if min amount is too small there will be a share calculation exploit problem
+        (bool success, bytes memory data) = address(token).call(
+            abi.encodeWithSignature("decimals()")
+        );
+        require(success, "underlyingToken have no method with decimals");
+        uint256 decimals = uint256(bytes32(data));
+        require(amount >= 1*10**decimals, "amount must gt 1 unit");
 
         /**
          * @notice calculation of newShares *mirrors* `underlyingToShares(amount)`, but is different since the balance of `underlyingToken`
@@ -197,6 +204,4 @@ abstract contract DelegationShareBase is Initializable, PausableUpgradeable, IDe
     function _tokenBalance() internal view virtual returns (uint256) {
         return underlyingToken.balanceOf(address(this));
     }
-
-
 }

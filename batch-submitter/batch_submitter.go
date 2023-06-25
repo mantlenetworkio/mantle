@@ -177,6 +177,10 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				MaxBatchSubmissionTime: cfg.MaxBatchSubmissionTime,
 				PollInterval:           cfg.PollInterval,
 				FinalityConfirmations:  cfg.FinalityConfirmations,
+				EnableProposerHsm:      cfg.EnableProposerHsm,
+				ProposerHsmAddress:     cfg.ProposerHsmAddress,
+				ProposerHsmCreden:      cfg.ProposerHsmCreden,
+				ProposerHsmAPIName:     cfg.ProposerHsmAPIName,
 			})
 			if err != nil {
 				return err

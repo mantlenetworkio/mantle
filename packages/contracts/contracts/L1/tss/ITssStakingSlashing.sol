@@ -9,7 +9,6 @@ interface IStakingSlashing {
     function setRegulatoryAccount(address) external;
     function setClaimer(address, address) external;
     function setSlashingParams(uint256[2] calldata) external;
-    function setPublicKey(bytes calldata) external;
     function quitRequest() external;
     function clearQuitRequestList() external;
     function slashing(bytes calldata, bytes calldata) external;

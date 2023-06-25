@@ -1,32 +1,25 @@
 package oracle
 
 import (
-	kms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"encoding/hex"
 	"errors"
-	"github.com/ethereum/go-ethereum/common"
-	bsscore "github.com/mantlenetworkio/mantle/bss-core"
-	"google.golang.org/api/option"
 	"math/big"
 	"time"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
+
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
 	ometrics "github.com/mantlenetworkio/mantle/gas-oracle/metrics"
-)
 
-var (
-	txSendCounter           = metrics.NewRegisteredCounter("tx/send", ometrics.DefaultRegistry)
-	txNotSignificantCounter = metrics.NewRegisteredCounter("tx/not_significant", ometrics.DefaultRegistry)
-	gasPriceGauge           = metrics.NewRegisteredGauge("gas_price", ometrics.DefaultRegistry)
-	txConfTimer             = metrics.NewRegisteredTimer("tx/confirmed", ometrics.DefaultRegistry)
-	txSendTimer             = metrics.NewRegisteredTimer("tx/send", ometrics.DefaultRegistry)
+	kms "cloud.google.com/go/kms/apiv1"
+	"google.golang.org/api/option"
 )
 
 // getLatestBlockNumberFn is used by the GasPriceUpdater
@@ -140,7 +133,7 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(ui
 		// no need to update when they are the same
 		if currentPrice.Uint64() == updatedGasPrice {
 			log.Info("gas price did not change", "gas-price", updatedGasPrice)
-			txNotSignificantCounter.Inc(1)
+			ometrics.GasOracleStats.TxNotSignificantCounter.Inc(1)
 			return nil
 		}
 
@@ -149,7 +142,7 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(ui
 		if !isDifferenceSignificant(currentPrice.Uint64(), updatedGasPrice, cfg.l2GasPriceSignificanceFactor) {
 			log.Info("gas price did not significantly change", "min-factor", cfg.l2GasPriceSignificanceFactor,
 				"current-price", currentPrice, "next-price", updatedGasPrice)
-			txNotSignificantCounter.Inc(1)
+			ometrics.GasOracleStats.TxNotSignificantCounter.Inc(1)
 			return nil
 		}
 
@@ -165,11 +158,11 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(ui
 		if err := backend.SendTransaction(context.Background(), tx); err != nil {
 			return err
 		}
-		txSendTimer.Update(time.Since(pre))
+		ometrics.GasOracleStats.TxSendTimer.Update(time.Since(pre))
 		log.Info("L2 gas price transaction sent", "hash", tx.Hash().Hex())
 
-		gasPriceGauge.Update(int64(updatedGasPrice))
-		txSendCounter.Inc(1)
+		ometrics.GasOracleStats.L2GasPriceGauge.Update(int64(updatedGasPrice))
+		ometrics.GasOracleStats.TxSendCounter.Inc(1)
 
 		if cfg.waitForReceipt {
 			// Keep track of the time it takes to confirm the transaction
@@ -179,7 +172,7 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(ui
 			if err != nil {
 				return err
 			}
-			txConfTimer.Update(time.Since(pre))
+			ometrics.GasOracleStats.TxConfTimer.Update(time.Since(pre))
 
 			log.Info("L2 gas price transaction confirmed", "hash", tx.Hash().Hex(),
 				"gas-used", receipt.GasUsed, "blocknumber", receipt.BlockNumber)

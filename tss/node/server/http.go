@@ -89,8 +89,11 @@ func (hs *Server) newHandler(jwtSecretStr string) (http.Handler, error) {
 	))
 
 	router.Use(logMiddleware())
-
-	return cmm.NewJwtHandler(router, jwtSecretStr)
+	if jwtSecretStr != "" {
+		return cmm.NewJwtHandler(router, jwtSecretStr)
+	}else {
+		return router,nil
+	}
 }
 
 func logMiddleware() mux.MiddlewareFunc {

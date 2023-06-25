@@ -460,9 +460,15 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   }
 
   private async GetLatestTransactionBatchIndex(): Promise<number> {
+    const controller = new AbortController()
+    const timeOutSignal = controller.signal
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, this.options.mantleDaRequestTimeout)
     const data = await fetch(
       this.state.mtBatcherFetchUrl + '/eigen/getLatestTransactionBatchIndex',
       {
+        signal: timeOutSignal,
         method: 'GET',
         headers: { Accept: 'application/json' },
       }
@@ -479,6 +485,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     if (typeof data === 'number') {
       newTxBatchIndex = data
     }
+    clearTimeout(timeoutId)
     return newTxBatchIndex
   }
 
@@ -488,10 +495,16 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     const requestData = JSON.stringify({
       batch_index: batchIndex,
     })
+    const controller = new AbortController()
+    const timeOutSignal = controller.signal
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, this.options.mantleDaRequestTimeout)
     // 👇️ const response: Response
-    return fetch(
+    const result = fetch(
       this.state.mtBatcherFetchUrl + '/eigen/getRollupStoreByRollupBatchIndex',
       {
+        signal: timeOutSignal,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: requestData,
@@ -501,6 +514,8 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       .catch((error) => {
         return error
       })
+    clearTimeout(timeoutId)
+    return result
   }
 
   private async GetBatchTransactionByDataStoreId(
@@ -509,10 +524,16 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     const requestData = JSON.stringify({
       store_number: storeNumber,
     })
+    const controller = new AbortController()
+    const timeOutSignal = controller.signal
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, this.options.mantleDaRequestTimeout)
     // 👇️ const response: Response
-    return fetch(
+    const result = fetch(
       this.state.mtBatcherFetchUrl + '/dtl/getBatchTransactionByDataStoreId',
       {
+        signal: timeOutSignal,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: requestData,
@@ -526,22 +547,35 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         )
         return error
       })
+    clearTimeout(timeoutId)
+    return result
   }
 
   private async GetDataStoreById(storeNumber: string): Promise<any> {
     // 👇️ const response: Response
-    return fetch(this.state.mtBatcherFetchUrl + '/browser/getDataStoreById', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        store_id: storeNumber,
-      }),
-    })
+    const controller = new AbortController()
+    const timeOutSignal = controller.signal
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, this.options.mantleDaRequestTimeout)
+    const result = fetch(
+      this.state.mtBatcherFetchUrl + '/browser/getDataStoreById',
+      {
+        signal: timeOutSignal,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          store_id: storeNumber,
+        }),
+      }
+    )
       .then((res) => res.json())
       .catch((error) => {
         console.log('GetDataStoreById HTTP error status != 200 ', error)
         return error
       })
+    clearTimeout(timeoutId)
+    return result
   }
 
   private async GetTransactionListByStoreNumber(
@@ -550,10 +584,16 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     const requestData = JSON.stringify({
       store_number: storeNumber,
     })
+    const controller = new AbortController()
+    const timeOutSignal = controller.signal
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, this.options.mantleDaRequestTimeout)
     // 👇️ const response: Response
-    return fetch(
+    const result = fetch(
       this.state.mtBatcherFetchUrl + '/browser/GetTransactionListByStoreNumber',
       {
+        signal: timeOutSignal,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: requestData,
@@ -564,5 +604,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         console.log('GetTransactionListByStoreNumber HTTP error status != 200 ')
         return error
       })
+    clearTimeout(timeoutId)
+    return result
   }
 }
