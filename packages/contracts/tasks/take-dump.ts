@@ -72,7 +72,7 @@ task('take-dump').setAction(async (args, hre) => {
     BVM_MANTLE: {
       l2Bridge: predeploys.L2StandardBridge,
       // l1Token: hre.deployConfig.l1MantleAddress,
-      l1Token: '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
+      l1Token: '0x3c3a81e81dc49A522A592e7622A7E711c06bf354',
       _name: 'Mantle',
       _symbol: 'MNT',
       decimal: 18,
