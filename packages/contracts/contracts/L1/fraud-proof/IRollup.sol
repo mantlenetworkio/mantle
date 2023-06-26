@@ -243,4 +243,12 @@ interface IRollup {
      * @param loser Address of losing staker.
      */
     function completeChallenge(address winner, address loser) external;
+
+    /**
+     * Emit event to notify sequencers to roll back.
+     * @param _shouldRollBack roll back to should start.
+     * @param _shouldStartAtElement Index of the element at which this batch should start
+     * @param _signature signature of rollback message
+     */
+    function rollbackL2Chain(uint256 _shouldRollBack, uint256 _shouldStartAtElement, bytes memory _signature) external;
 }

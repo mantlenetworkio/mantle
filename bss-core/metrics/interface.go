@@ -35,4 +35,7 @@ type Metrics interface {
 	// BatchConfirmationTimeMs tracks the duration it takes to confirm a batch
 	// transaction.
 	BatchConfirmationTimeMs() prometheus.Gauge
+
+	// TssRollbackSignal tracks the signal due to state fork between sequencer and varifier
+	TssRollbackSignal() prometheus.Gauge
 }
