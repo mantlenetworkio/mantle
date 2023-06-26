@@ -1,6 +1,7 @@
 package rollup
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	eigenlayer "github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
