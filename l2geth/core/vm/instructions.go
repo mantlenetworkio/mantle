@@ -18,6 +18,7 @@ package vm
 
 import (
 	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -570,6 +571,7 @@ func opGasprice(pc *uint64, interpreter *EVMInterpreter, contract *Contract, mem
 func opBlockhash(pc *uint64, interpreter *EVMInterpreter, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	num := stack.pop()
 
+	fmt.Println("==============print block hash opcode begin=================")
 	n := interpreter.intPool.get().Sub(interpreter.evm.BlockNumber, common.Big257)
 	if num.Cmp(n) > 0 && num.Cmp(interpreter.evm.BlockNumber) < 0 {
 		stack.push(interpreter.evm.GetHash(num.Uint64()).Big())
@@ -577,6 +579,7 @@ func opBlockhash(pc *uint64, interpreter *EVMInterpreter, contract *Contract, me
 		stack.push(interpreter.intPool.getZero())
 	}
 	interpreter.intPool.put(num, n)
+	fmt.Println("===============print block hash opcode end==================")
 	return nil, nil
 }
 
