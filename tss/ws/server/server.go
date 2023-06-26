@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	"net"
 	"net/http"
@@ -23,7 +24,7 @@ type WSServer struct {
 	WM       *WebsocketManager
 }
 
-func NewWSServer(localAddr string) (*WebsocketManager, error) {
+func NewWSServer(localAddr string, queryService l1chain.QueryService) (*WebsocketManager, error) {
 	wsServer := &WSServer{}
 	var err error
 
@@ -33,7 +34,7 @@ func NewWSServer(localAddr string) (*WebsocketManager, error) {
 
 	mux := http.NewServeMux()
 	wmLogger := logger.With("protocol", "ws")
-	wsServer.WM = NewWebsocketManager()
+	wsServer.WM = NewWebsocketManager(queryService)
 
 	wsServer.WM.SetWsConnOptions(OnConnect(wsServer.WM),
 		OnDisconnect(func(remoteAddr, pubKey string) {

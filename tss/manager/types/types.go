@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"time"
 )
 
@@ -16,6 +17,12 @@ type CpkData struct {
 	Cpk          string    `json:"cpk"`
 	ElectionId   uint64    `json:"election_id"`
 	CreationTime time.Time `json:"creation_time"`
+}
+
+type TgTssMember struct {
+	PublicKey   []byte
+	NodeAddress common.Address
+	Status      uint8
 }
 
 // Context ---------------------------------------------
