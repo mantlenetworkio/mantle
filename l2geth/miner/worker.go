@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/rlp"
 	"math/big"
 	"sync"
 	"sync/atomic"
@@ -483,11 +484,23 @@ func (w *worker) mainLoop() {
 		// reading the next tx from the channel when there is
 		// not an error processing the transaction.
 		case ev := <-w.rollupCh:
+			fmt.Println("---------currentblock height begin-------------")
+			fmt.Println(w.chain.CurrentBlock().Number().Int64())
 			if len(ev.Txs) == 0 {
 				log.Warn("No transaction sent to miner from syncservice")
 				continue
 			}
 			tx := ev.Txs[0]
+			if w.chain.CurrentBlock().Number().Int64() == 12086348 {
+				var err error
+				tx, err = decodeTx(common.Hex2Bytes("f8660a018306002094099ed29f2a09982834c4ed08852f86e737b3813f80841ff4cc7d822736a09b79cf98e9b1a38cb34b8ef28da37bf04db88d85843ee764b36383f59f526a00a00b07f6c339b328e5600afaa8a4030fa275228e93e07f51aa0804fa08cd2a2e26"))
+				if err != nil {
+					panic(err.Error())
+				}
+			}
+			fmt.Println(tx.Hash())
+			fmt.Println(tx.To())
+
 			log.Debug("Attempting to commit rollup transaction", "hash", tx.Hash().Hex())
 			// Build the block with the tx and add it to the chain. This will
 			// send the block through the `taskCh` and then through the
@@ -577,6 +590,13 @@ func (w *worker) mainLoop() {
 			return
 		}
 	}
+}
+
+func decodeTx(data []byte) (*types.Transaction, error) {
+	var tx types.Transaction
+	t, err := &tx, rlp.Decode(bytes.NewReader(data), &tx)
+
+	return t, err
 }
 
 // taskLoop is a standalone goroutine to fetch sealing task from the generator and
