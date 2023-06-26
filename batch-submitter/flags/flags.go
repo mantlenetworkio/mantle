@@ -46,6 +46,12 @@ var (
 		Required: true,
 		EnvVar:   "TSS_CLIENT_RPC",
 	}
+	JwtSecret = cli.StringFlag{
+		Name:     "jwt-secret",
+		Usage:    "jet access secret",
+		Required: true,
+		EnvVar:   "JWT_SECRET",
+	}
 	DaAddressFlag = cli.StringFlag{
 		Name:     "da-address",
 		Usage:    "Address of the da contract",
@@ -339,6 +345,7 @@ var requiredFlags = []cli.Flag{
 	L1EthRpcFlag,
 	L2EthRpcFlag,
 	TssClientUrl,
+	JwtSecret,
 	DaAddressFlag,
 	DaUpgradeBlockFlag,
 	CTCAddressFlag,
