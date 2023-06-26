@@ -72,6 +72,7 @@ contract TssStakingSlashing is
     //claimer => operator
     mapping(address => address) public claimerOperators;
     bool public isSetParam;
+    address public tssManager;
 
 
     /**
@@ -97,7 +98,8 @@ contract TssStakingSlashing is
         address _delegationManager,
         address _delegation,
         address _l1messenger,
-        address _regulatoryAccount
+        address _regulatoryAccount,
+        address _tssManager
         ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -110,6 +112,7 @@ contract TssStakingSlashing is
         delegation = IDelegation(_delegation);
         messenger = _l1messenger;
         regulatoryAccount = _regulatoryAccount;
+        tssManager = _tssManager;
     }
 
     /**
@@ -129,6 +132,11 @@ contract TssStakingSlashing is
     function setRegulatoryAccount(address _account) public onlyOwner {
         require(_account != address(0),"Invalid address");
         regulatoryAccount = _account;
+    }
+
+    function setTssManager(address _tssManager) public onlyOwner {
+        require(_tssManager != address(0),"Invalid address");
+        tssManager = _tssManager;
     }
 
     function setClaimer(
@@ -220,6 +228,7 @@ contract TssStakingSlashing is
      * @param _sig the signature of the hash keccak256(_messageBytes)
      */
     function slashing(bytes calldata _messageBytes, bytes calldata _sig) public nonReentrant {
+        require(tssManager == msg.sender,"TssStakingSlashing: msg.sender is not tssManager");
         SlashMsg memory message = abi.decode(_messageBytes, (SlashMsg));
         // verify tss member state not at jailed status
         require(!isJailed(message.jailNode), "the node already jailed");

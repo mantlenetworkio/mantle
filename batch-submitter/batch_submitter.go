@@ -105,7 +105,10 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			return err
 		}
 
-		tssClient := tss.NewClient(cfg.TssClientUrl)
+		tssClient, err := tss.NewClient(cfg.TssClientUrl, cfg.JwtSecret)
+		if err != nil {
+			return err
+		}
 		log.Info("Configured tss client", "url", cfg.TssClientUrl)
 
 		if cfg.MetricsServerEnable {

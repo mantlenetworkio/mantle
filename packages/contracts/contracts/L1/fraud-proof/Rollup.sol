@@ -98,7 +98,6 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     mapping(address => uint256) public withdrawableFunds; // mapping from addresses to withdrawable funds (won in challenge)
     Zombie[] public zombies; // stores stakers that lost a challenge
     ChallengeCtx public challengeCtx;  // stores challenge context
-
     constructor() Lib_AddressResolver(address(0)) {
         _disableInitializers();
     }

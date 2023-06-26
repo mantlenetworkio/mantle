@@ -63,6 +63,9 @@ type Config struct {
 	// Tss manager client Url
 	TssClientUrl string
 
+	// jwt access token
+	JwtSecret string
+
 	// eigen layer upgrade block.
 	DaUpgradeBlock uint64
 
@@ -241,6 +244,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		L1EthRpc:                  ctx.GlobalString(flags.L1EthRpcFlag.Name),
 		L2EthRpc:                  ctx.GlobalString(flags.L2EthRpcFlag.Name),
 		TssClientUrl:              ctx.GlobalString(flags.TssClientUrl.Name),
+		JwtSecret:                 ctx.GlobalString(flags.JwtSecret.Name),
 		DaUpgradeBlock:            ctx.GlobalUint64(flags.DaUpgradeBlockFlag.Name),
 		DAAddress:                 ctx.GlobalString(flags.DaAddressFlag.Name),
 		CTCAddress:                ctx.GlobalString(flags.CTCAddressFlag.Name),

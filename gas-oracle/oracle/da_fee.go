@@ -81,7 +81,7 @@ func wrapUpdateDaFee(daBackend *bindings.BVMEigenDataLayrFee, l2Backend DeployCo
 			return err
 		}
 		if !isDifferenceSignificant(currentDaFee.Uint64(), daFee.Uint64(), cfg.daFeeSignificanceFactor) {
-			log.Debug("non significant da fee update", "da", daFee, "current", currentDaFee)
+			log.Warn("non significant da fee update", "da", daFee, "current", currentDaFee)
 			return nil
 		}
 
@@ -101,7 +101,7 @@ func wrapUpdateDaFee(daBackend *bindings.BVMEigenDataLayrFee, l2Backend DeployCo
 		if err != nil {
 			return err
 		}
-		log.Debug("updating da fee", "tx.gasPrice", tx.GasPrice(), "tx.gasLimit", tx.Gas(),
+		log.Info("updating da fee", "tx.gasPrice", tx.GasPrice(), "tx.gasLimit", tx.Gas(),
 			"tx.data", hexutil.Encode(tx.Data()), "tx.to", tx.To().Hex(), "tx.nonce", tx.Nonce())
 		if err := l2Backend.SendTransaction(context.Background(), tx); err != nil {
 			return fmt.Errorf("cannot update da fee: %w", err)

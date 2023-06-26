@@ -169,6 +169,10 @@ contract TssGroupManager is
      */
     // slither-disable-next-line external-function
     function removeMember(bytes calldata _publicKey) public override onlyOwner {
+        require(
+            activeTssMembers.length > threshold + 1,
+            "TssGroupManager removeMember: active members must more than threshold plus one"
+        );
         for (uint256 i = 0; i < activeTssMembers.length; i++) {
             if (_isEqual(activeTssMembers[i], _publicKey)) {
                 _removeActiveTssMembers(i);
