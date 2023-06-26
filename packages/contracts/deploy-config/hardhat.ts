@@ -22,8 +22,8 @@ const config = {
   bvmFeeWalletOwner: process.env.BVM_FEE_WALLETOWNER_OWNER || '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
   bvmWhitelistOwner: process.env.BVM_WHITE_LIST_OWNER || '0x648E3e8101BFaB7bf5997Bd007Fb473786019159',
   bvmTssRewardContractOwner: process.env.BVM_TSS_REWARD_CONTRACT_OWNER || '0xc8910a1957d276cE5634B978d908B5ef9fB0e05B',
-  l1MantleAddress: process.env.L1_MANTLE_ADDRESS || '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
-  proxyL1MantleAddress: process.env.PROXY_L1_MANTLE_ADDRESS || '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
+  l1MantleAddress: process.env.L1_MANTLE_ADDRESS || '0x3c3a81e81dc49A522A592e7622A7E711c06bf354',
+  proxyL1MantleAddress: process.env.PROXY_L1_MANTLE_ADDRESS || '0x3c3a81e81dc49A522A592e7622A7E711c06bf354',
   dataManagerAddress: process.env.DATA_MANAGER_ADDRESS || '0xE5C3D068e2160c67e09afaCEff3E765e30163Eb8',
   bvmEigenSequencerAddress: process.env.BVM_EIGENDA_SEQUENCER_ADDRESS || '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
   bvmEigenFeeAddress: process.env.BVM_EIGENDA_FEE_ADDRESS || '0x6887246668a3b87F54DeB3b94Ba47a6f63F32985',
@@ -33,6 +33,7 @@ const config = {
   tssRewardSendAmountPerYear: 100000,
   tssRewardWaitingTime: 86400,
   tssDelegationManagerMinStakeAmount: '100000000000000000000',
+  tssManagerAddress: process.env.BVM_TSS_MANAGER_ADDRESS,
 }
 
 export default config

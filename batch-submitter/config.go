@@ -63,6 +63,9 @@ type Config struct {
 	// Tss manager client Url
 	TssClientUrl string
 
+	// jwt access token
+	JwtSecret string
+
 	// eigen layer upgrade block.
 	DaUpgradeBlock uint64
 
@@ -226,6 +229,9 @@ type Config struct {
 	SequencerHsmCreden string
 
 	RollupClientHttp string
+
+	// batch submitter rollback
+	AllowL2AutoRollback bool
 }
 
 // NewConfig parses the Config from the provided flags or environment variables.
@@ -238,6 +244,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		L1EthRpc:                  ctx.GlobalString(flags.L1EthRpcFlag.Name),
 		L2EthRpc:                  ctx.GlobalString(flags.L2EthRpcFlag.Name),
 		TssClientUrl:              ctx.GlobalString(flags.TssClientUrl.Name),
+		JwtSecret:                 ctx.GlobalString(flags.JwtSecret.Name),
 		DaUpgradeBlock:            ctx.GlobalUint64(flags.DaUpgradeBlockFlag.Name),
 		DAAddress:                 ctx.GlobalString(flags.DaAddressFlag.Name),
 		CTCAddress:                ctx.GlobalString(flags.CTCAddressFlag.Name),
@@ -285,6 +292,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		ProposerHsmAPIName:  ctx.GlobalString(flags.ProposerHsmAPIName.Name),
 		ProposerHsmCreden:   ctx.GlobalString(flags.ProposerHsmCreden.Name),
 		RollupClientHttp:    ctx.GlobalString(flags.RollupClientHttpFlag.Name),
+		AllowL2AutoRollback: ctx.GlobalBool(flags.AllowL2AutoRollback.Name),
 	}
 
 	err := ValidateConfig(&cfg)

@@ -98,7 +98,6 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
     mapping(address => uint256) public withdrawableFunds; // mapping from addresses to withdrawable funds (won in challenge)
     Zombie[] public zombies; // stores stakers that lost a challenge
     ChallengeCtx public challengeCtx;  // stores challenge context
-
     constructor() Lib_AddressResolver(address(0)) {
         _disableInitializers();
     }
@@ -525,6 +524,17 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         // Track as zombie so we can account for it during assertion resolution.
         zombies.push(Zombie(loserStaker, assertionID));
         challengeCtx.completed = true;
+    }
+
+    /// @inheritdoc IRollup
+    function rollbackL2Chain(uint256 _shouldRollBack, uint256 _shouldStartAtElement, bytes memory _signature) external override onlyOwner {
+        address scc = resolve("StateCommitmentChain");
+
+        // batch shift
+        (bool success, ) = scc.call(
+            abi.encodeWithSignature("rollBackL2Chain(uint256,uint256,bytes)", _shouldRollBack, _shouldStartAtElement, _signature)
+        );
+        require(success, "call rollBackL2Chain failed");
     }
 
     /**

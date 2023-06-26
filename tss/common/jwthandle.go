@@ -1,15 +1,18 @@
 package common
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 )
 
 const (
 	jwtExpiryTimeout = 60 * time.Second
+	JwtSecretLength  = 32
 )
 
 type JwtHandler struct {
@@ -18,9 +21,17 @@ type JwtHandler struct {
 }
 
 func NewJwtHandler(handle http.Handler, jetSecretKey string) (http.Handler, error) {
+	jwtSecret, err := hexutil.Decode(jetSecretKey)
+	if err != nil {
+		return nil, fmt.Errorf("invalid jwt secret %s", err.Error())
+	}
+	if len(jwtSecret) != JwtSecretLength {
+		return nil, fmt.Errorf("invalid jwt secret length, expected length %d, actual length %d",
+			JwtSecretLength, len(jwtSecret))
+	}
 	jwtHandler := &JwtHandler{
 		keyFunc: func(token *jwt.Token) (interface{}, error) {
-			return []byte(jetSecretKey), nil
+			return jwtSecret, nil
 		},
 		handler: handle,
 	}

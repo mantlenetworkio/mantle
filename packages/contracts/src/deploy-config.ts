@@ -195,6 +195,12 @@ export interface DeployConfig {
    */
   tssDelegationManagerMinStakeAmount: string
 
+
+  /**
+   * Address of tss manager.
+   */
+  tssManagerAddress: string
+
 }
 
 /**
@@ -330,6 +336,9 @@ const configSpec: {
     type: 'number',
   },
   tssDelegationManagerMinStakeAmount: {
+    type: 'string',
+  },
+  tssManagerAddress: {
     type: 'string',
   },
 }

@@ -46,6 +46,12 @@ var (
 		Required: true,
 		EnvVar:   "TSS_CLIENT_RPC",
 	}
+	JwtSecret = cli.StringFlag{
+		Name:     "jwt-secret",
+		Usage:    "jet access secret",
+		Required: true,
+		EnvVar:   "JWT_SECRET",
+	}
 	DaAddressFlag = cli.StringFlag{
 		Name:     "da-address",
 		Usage:    "Address of the da contract",
@@ -331,6 +337,12 @@ var (
 		Value:  "http://localhost:7878",
 		EnvVar: "ROLLUP_CLIENT_HTTP",
 	}
+	AllowL2AutoRollback = cli.BoolFlag{
+		Name:     "rollup.allow-l2-auto-rollback",
+		Usage:    "Trigger for allowing layer2 auto rollback",
+		Required: false,
+		EnvVar:   "ROLLUP_ALLOW_L2_AUTO_ROLLBACK",
+	}
 )
 
 var requiredFlags = []cli.Flag{
@@ -339,6 +351,7 @@ var requiredFlags = []cli.Flag{
 	L1EthRpcFlag,
 	L2EthRpcFlag,
 	TssClientUrl,
+	JwtSecret,
 	DaAddressFlag,
 	DaUpgradeBlockFlag,
 	CTCAddressFlag,
