@@ -52,6 +52,9 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
     // slither-disable-next-line external-function
     function initialize(address _l1messenger, address _l2TokenBridge, address _l1MantleAddress) public {
         require(messenger == address(0), "Contract has already been initialized.");
+        require(_l1messenger != address(0), "Cant set zero address.");
+        require(_l2TokenBridge != address(0), "Cant set zero address.");
+        require(_l1MantleAddress != address(0), "Cant set zero address.");
         messenger = _l1messenger;
         l2TokenBridge = _l2TokenBridge;
         l1MantleAddress = _l1MantleAddress;
@@ -70,6 +73,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
         require(tx.origin==msg.sender, "msg.sender is not ts origin");
         _;
     }
+
 
     /**
      * @dev This function can be called with no data
