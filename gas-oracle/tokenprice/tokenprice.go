@@ -6,6 +6,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/ethereum/go-ethereum/log"
+
 	"github.com/go-resty/resty/v2"
 )
 
@@ -109,17 +111,20 @@ func (c *Client) PriceRatioWithMode() (float64, error) {
 	mntPrice1, ethPrice1 := c.getTokenPricesFromUniswap()
 	mntPrices = append(mntPrices, mntPrice1)
 	ethPrices = append(ethPrices, ethPrice1)
+	log.Info("query prices from oracle1", "mnt_price", mntPrice1, "eth_price", ethPrice1)
 
 	// get token price from oracle2(cex)
 	mntPrice2, ethPrice2 := c.getTokenPricesFromCex()
 	mntPrices = append(mntPrices, mntPrice2)
 	ethPrices = append(ethPrices, ethPrice2)
+	log.Info("query prices from oracle2", "mnt_price", mntPrice2, "eth_price", ethPrice2)
 
 	// get token price from oracle3(cex)
 	// Todo add a third oracle to query prices
 	mntPrice3, ethPrice3 := c.getTokenPricesFromCex()
 	mntPrices = append(mntPrices, mntPrice3)
 	ethPrices = append(ethPrices, ethPrice3)
+	log.Info("query prices from oracle3", "mnt_price", mntPrice3, "eth_price", ethPrice3)
 
 	// median price for eth & mnt
 	medianMNTPrice := getMedian(mntPrices)
@@ -128,6 +133,7 @@ func (c *Client) PriceRatioWithMode() (float64, error) {
 	// determine mnt_price, eth_price
 	mntPrice := c.determineMNTPrice(medianMNTPrice)
 	ethPrice := c.determineETHPrice(medianETHPrice)
+	log.Info("prices after determine", "mnt_price", mntPrice, "eth_price", ethPrice)
 
 	// calculate ratio
 	ratio := c.determineTokenRatio(mntPrice, ethPrice)
@@ -143,6 +149,8 @@ func (c *Client) PriceRatioWithMode() (float64, error) {
 		// default mode is RealTokenRatioMode which uses eth_price / mnt_price to set token_ratio
 	}
 
+	log.Info("token ratio", "token ratio", ratio)
+
 	c.lastUpdate = time.Now()
 	c.lastRatio = ratio
 	c.lastEthPrice = ethPrice
@@ -154,10 +162,12 @@ func (c *Client) PriceRatioWithMode() (float64, error) {
 func (c *Client) getTokenPricesFromCex() (float64, float64) {
 	ethPrice, err := c.queryV5(ETHUSDT)
 	if err != nil {
+		log.Warn("get token prices", "query eth price error", err)
 		return 0, 0
 	}
 	mntPrice, err := c.queryV5(c.tokenPairForMNTPrice)
 	if err != nil {
+		log.Warn("get token prices", "query mnt price error", err)
 		return 0, ethPrice
 	}
 
