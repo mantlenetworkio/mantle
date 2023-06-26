@@ -1,4 +1,9 @@
 # Changelog
+## [v0.4.1](https://github.com/mantlenetworkio/mantle/commits/v0.4.1) - 2023-06-25
+
+### Bug Fixes
+- Remove hsm credential in log and fixed tss docker file compile bug([#1109](https://github.com/mantlenetworkio/mantle/pull/1109))
+
 ## [v0.4.1-beta.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.1-beta.0) - 2023-06-19
 
 ### Bug Fixes
