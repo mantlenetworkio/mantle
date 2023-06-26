@@ -39,6 +39,7 @@ type Config struct {
 	PriceBackendUniswapURL           string
 	tokenPricerUpdateFrequencySecond uint64
 	tokenRatioMode                   uint64
+	tokenPairMNTMode                 bool
 	l1BaseFeeSignificanceFactor      float64
 	daFeeSignificanceFactor          float64
 	enableL1BaseFee                  bool
@@ -88,6 +89,7 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.PriceBackendUniswapURL = ctx.GlobalString(flags.PriceBackendUniswapURL.Name)
 	cfg.tokenPricerUpdateFrequencySecond = ctx.GlobalUint64(flags.TokenPricerUpdateFrequencySecond.Name)
 	cfg.tokenRatioMode = ctx.GlobalUint64(flags.TokenRatioMode.Name)
+	cfg.tokenPairMNTMode = ctx.GlobalBool(flags.TokenPairMNTMode.Name)
 	cfg.floorPrice = ctx.GlobalUint64(flags.FloorPriceFlag.Name)
 	cfg.l1BaseFeeSignificanceFactor = ctx.GlobalFloat64(flags.L1BaseFeeSignificanceFactorFlag.Name)
 	cfg.daFeeSignificanceFactor = ctx.GlobalFloat64(flags.DaFeeSignificanceFactorFlag.Name)
