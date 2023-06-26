@@ -368,6 +368,9 @@ const config: HardhatUserConfig = {
     tssDelegationManagerMinStakeAmount: {
       type: 'string',
     },
+    tssManagerAddress: {
+      type: 'string',
+    },
   },
 }
 
