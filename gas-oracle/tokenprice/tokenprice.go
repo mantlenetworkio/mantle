@@ -162,10 +162,12 @@ func (c *Client) PriceRatioWithMode() (float64, error) {
 func (c *Client) getTokenPricesFromCex() (float64, float64) {
 	ethPrice, err := c.queryV5(ETHUSDT)
 	if err != nil {
+		log.Warn("get token prices", "query eth price error", err)
 		return 0, 0
 	}
 	mntPrice, err := c.queryV5(c.tokenPairForMNTPrice)
 	if err != nil {
+		log.Warn("get token prices", "query mnt price error", err)
 		return 0, ethPrice
 	}
 
