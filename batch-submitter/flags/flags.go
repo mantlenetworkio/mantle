@@ -345,6 +345,7 @@ var requiredFlags = []cli.Flag{
 	L1EthRpcFlag,
 	L2EthRpcFlag,
 	TssClientUrl,
+	JwtSecret,
 	DaAddressFlag,
 	DaUpgradeBlockFlag,
 	CTCAddressFlag,
