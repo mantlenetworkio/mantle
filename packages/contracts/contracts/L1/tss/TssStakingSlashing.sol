@@ -228,7 +228,7 @@ contract TssStakingSlashing is
      * @param _sig the signature of the hash keccak256(_messageBytes)
      */
     function slashing(bytes calldata _messageBytes, bytes calldata _sig) public nonReentrant {
-        require(tssManager == msg.sender,"TssStakingSlashing: tss manager address is zero");
+        require(tssManager == msg.sender,"TssStakingSlashing: msg.sender is not tssManager");
         SlashMsg memory message = abi.decode(_messageBytes, (SlashMsg));
         // verify tss member state not at jailed status
         require(!isJailed(message.jailNode), "the node already jailed");
