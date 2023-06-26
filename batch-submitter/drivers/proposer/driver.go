@@ -66,6 +66,7 @@ type Config struct {
 	ProposerHsmCreden      string
 	ProposerHsmAddress     string
 	ProposerHsmAPIName     string
+	AllowL2AutoRollback    bool
 }
 
 type Driver struct {
@@ -347,17 +348,23 @@ func (d *Driver) CraftBatchTx(
 	log.Info(name+" signature ", "len", len(tssResponse.Signature))
 	var tx *types.Transaction
 	if tssResponse.RollBack {
-		if d.rollbackEndBlock.Cmp(end) <= 0 && d.rollbackEndBlock.Cmp(start) > 0 {
-			tempS := stateRoots[d.rollbackEndBlock.Uint64()-start.Uint64()-1]
-			if bytes.Equal(tempS[:], d.rollbackEndStateRoot[:]) {
-				err = errors.New("l2geth is still rollback")
-				log.Error(name + " still waiting l2geth rollback result")
-				return nil, err
+		d.Metrics().TssRollbackSignal().Inc()
+		log.Error("tssResponse indicate a layer2 rollback, look up this!!!")
+		if d.cfg.AllowL2AutoRollback {
+			log.Info("l2geth trigger auto rollback")
+			if d.rollbackEndBlock.Cmp(end) <= 0 && d.rollbackEndBlock.Cmp(start) > 0 {
+				tempS := stateRoots[d.rollbackEndBlock.Uint64()-start.Uint64()-1]
+				if bytes.Equal(tempS[:], d.rollbackEndStateRoot[:]) {
+					err = errors.New("l2geth is still rollback")
+					log.Error(name + " still waiting l2geth rollback result")
+					return nil, err
+				}
 			}
+			d.rollbackEndStateRoot = stateRoots[len(stateRoots)-1]
+			d.rollbackEndBlock = end
+			log.Info("sending l2geth rollback transaction")
+			tx, err = d.fpRollup.RollbackL2Chain(opts, start, offsetStartsAtIndex, tssResponse.Signature)
 		}
-		d.rollbackEndStateRoot = stateRoots[len(stateRoots)-1]
-		d.rollbackEndBlock = end
-		tx, err = d.sccContract.RollBackL2Chain(opts, start, offsetStartsAtIndex, tssResponse.Signature)
 	} else {
 		if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
 			log.Info("append state with fraud proof")
@@ -399,9 +406,11 @@ func (d *Driver) CraftBatchTx(
 			"by current backend, using fallback gasTipCap")
 		opts.GasTipCap = drivers.FallbackGasTipCap
 		if tssResponse.RollBack {
-			return d.sccContract.RollBackL2Chain(
-				opts, start, offsetStartsAtIndex, tssResponse.Signature,
-			)
+			if d.cfg.AllowL2AutoRollback {
+				return d.fpRollup.RollbackL2Chain(opts, start, offsetStartsAtIndex, tssResponse.Signature)
+			} else {
+				return nil, nil
+			}
 		} else {
 			if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
 				log.Info("append state with fraud proof by gas tip cap")
@@ -464,7 +473,7 @@ func (d *Driver) CraftBatchTx(
 								// or RollBackL2Chain will happen multiple times
 								d.once.Do(
 									func() {
-										rollbackTx, rollbackErr = d.sccContract.RollBackL2Chain(
+										rollbackTx, rollbackErr = d.fpRollup.RollbackL2Chain(
 											opts, startInboxSize, offsetStartsAtIndex, tssResponse.Signature,
 										)
 									},
@@ -475,7 +484,7 @@ func (d *Driver) CraftBatchTx(
 									return fpChallenge.SetRollback(opts)
 								}
 							}
-							return d.sccContract.DeleteStateBatch(opts, scc.LibBVMCodecChainBatchHeader{
+							return d.fpRollup.RejectLatestCreatedAssertionWithBatch(opts, fpbindings.LibBVMCodecChainBatchHeader{
 								BatchIndex:        filter.Event.BatchIndex,
 								BatchRoot:         filter.Event.BatchRoot,
 								BatchSize:         filter.Event.BatchSize,

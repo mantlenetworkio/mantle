@@ -526,6 +526,17 @@ contract Rollup is Lib_AddressResolver, RollupBase, Whitelist {
         challengeCtx.completed = true;
     }
 
+    /// @inheritdoc IRollup
+    function rollbackL2Chain(uint256 _shouldRollBack, uint256 _shouldStartAtElement, bytes memory _signature) external override onlyOwner {
+        address scc = resolve("StateCommitmentChain");
+
+        // batch shift
+        (bool success, ) = scc.call(
+            abi.encodeWithSignature("rollBackL2Chain(uint256,uint256,bytes)", _shouldRollBack, _shouldStartAtElement, _signature)
+        );
+        require(success, "call rollBackL2Chain failed");
+    }
+
     /**
      * @notice Updates staker and assertion metadata.
      * @param stakerAddress Address of existing staker.

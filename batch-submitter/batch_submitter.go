@@ -184,6 +184,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				ProposerHsmAddress:     cfg.ProposerHsmAddress,
 				ProposerHsmCreden:      cfg.ProposerHsmCreden,
 				ProposerHsmAPIName:     cfg.ProposerHsmAPIName,
+				AllowL2AutoRollback:    cfg.AllowL2AutoRollback,
 			})
 			if err != nil {
 				return err
