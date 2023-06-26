@@ -31,28 +31,30 @@ type TssResponse struct {
 }
 
 func NewClient(url string, jwtSecretStr string) (*Client, error) {
-	jwtSecret, err := hexutil.Decode(jwtSecretStr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid jwt secret %s", err.Error())
-	}
-	if len(jwtSecret) != JwtSecretLength {
-		return nil, fmt.Errorf("invalid jwt secret length, expected length %d, actual length %d",
-			JwtSecretLength, len(jwtSecret))
-	}
 	client := resty.New()
 	client.SetHostURL(url)
-	client.SetAuthScheme("Bearer")
-	client.OnBeforeRequest(func(c *resty.Client, r *resty.Request) error {
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"iat": &jwt.NumericDate{Time: time.Now()},
-		})
-		s, err := token.SignedString(jwtSecret[:])
+	if len(jwtSecretStr) != 0 {
+		jwtSecret, err := hexutil.Decode(jwtSecretStr)
 		if err != nil {
-			return fmt.Errorf("failed to create JWT token: %w", err)
+			return nil, fmt.Errorf("invalid jwt secret %s", err.Error())
 		}
-		r.Token = s
-		return nil
-	})
+		if len(jwtSecret) != JwtSecretLength {
+			return nil, fmt.Errorf("invalid jwt secret length, expected length %d, actual length %d",
+				JwtSecretLength, len(jwtSecret))
+		}
+		client.SetAuthScheme("Bearer")
+		client.OnBeforeRequest(func(c *resty.Client, r *resty.Request) error {
+			token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+				"iat": &jwt.NumericDate{Time: time.Now()},
+			})
+			s, err := token.SignedString(jwtSecret[:])
+			if err != nil {
+				return fmt.Errorf("failed to create JWT token: %w", err)
+			}
+			r.Token = s
+			return nil
+		})
+	}
 	client.OnAfterResponse(func(c *resty.Client, r *resty.Response) error {
 		statusCode := r.StatusCode()
 		if statusCode >= 400 {
