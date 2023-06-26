@@ -105,7 +105,7 @@ func wrapUpdateOverhead(l2Backend DeployContractBackend, cfg *Config) (func(*big
 		if err != nil {
 			return err
 		}
-		log.Debug("updating L1 overhead", "tx.gasPrice", tx.GasPrice(), "tx.gasLimit", tx.Gas(),
+		log.Info("updating L1 overhead", "tx.gasPrice", tx.GasPrice(), "tx.gasLimit", tx.Gas(),
 			"tx.data", hexutil.Encode(tx.Data()), "tx.to", tx.To().Hex(), "tx.nonce", tx.Nonce())
 		if err := l2Backend.SendTransaction(context.Background(), tx); err != nil {
 			return fmt.Errorf("cannot update base fee: %w", err)
