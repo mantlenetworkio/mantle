@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
+	common2 "github.com/mantlenetworkio/mantle/l2geth/common"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -135,4 +136,23 @@ func (q QueryService) QueryInactiveInfo() (types.TssCommitteeInfo, error) {
 		Threshold:  int(threshold.Int64()),
 		TssMembers: tssMembers,
 	}, nil
+}
+
+func (q QueryService) QueryMemberByPublicKey(publicKey []byte) (*types.TgTssMember, error) {
+	currentBlockNumber, err := q.ethClient.BlockNumber(context.Background())
+	if err != nil {
+		log.Error("get eth latest block number fail", "err", err)
+		return nil, err
+	}
+	tssGroupMember, err := q.tssGroupManagerCaller.GetTssMember(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - q.confirmBlocks)}, publicKey)
+	if err != nil {
+		log.Error("query member by public key fail", "err", err)
+		return nil, err
+	}
+	tgMember := &types.TgTssMember{
+		PublicKey:   tssGroupMember.PublicKey,
+		NodeAddress: common2.Address(tssGroupMember.NodeAddress),
+		Status:      tssGroupMember.Status,
+	}
+	return tgMember, nil
 }

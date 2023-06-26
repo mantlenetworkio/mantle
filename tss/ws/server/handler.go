@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
+	"github.com/pkg/errors"
 	"net/http"
 	"runtime/debug"
 	"strconv"
@@ -20,6 +21,9 @@ import (
 )
 
 const (
+	legalTimeStampPeriod       = 5
+	messageSignatureLength     = 64
+	publicKeyLength            = 66
 	defaultWSWriteChanCapacity = 100
 	defaultWSWriteWait         = 10 * time.Second
 	defaultWSReadWait          = 30 * time.Second
@@ -31,6 +35,7 @@ const (
 // NOTE: The websocket path is defined externally, e.g. in node/node.go
 type WebsocketManager struct {
 	websocket.Upgrader
+	queryService l1chain.QueryService
 
 	logger        log.Logger
 	wsConnOptions []func(*wsConnection)
@@ -45,24 +50,16 @@ type WebsocketManager struct {
 
 // NewWebsocketManager returns a new WebsocketManager that passes a map of
 // functions, connection options and logger to new WS connections.
-func NewWebsocketManager(
+func NewWebsocketManager(l1chainQueryService l1chain.QueryService,
 	wsConnOptions ...func(*wsConnection),
 ) *WebsocketManager {
 	return &WebsocketManager{
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
-				// TODO ???
-				//
-				// The default behaviour would be relevant to browser-based clients,
-				// afaik. I suppose having a pass-through is a workaround for allowing
-				// for more complex security schemes, shifting the burden of
-				// AuthN/AuthZ outside the Tendermint RPC.
-				// I can't think of other uses right now that would warrant a TODO
-				// though. The real backstory of this TODO shall remain shrouded in
-				// mystery
 				return true
 			},
 		},
+		queryService:  l1chainQueryService,
 		logger:        log.NewNopLogger(),
 		wsConnOptions: wsConnOptions,
 
@@ -160,17 +157,27 @@ func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Requ
 	}()
 
 	pubKey := r.Header.Get("pubKey")
-	timeStr := r.Header.Get("time")
-	sig := r.Header.Get("sig")
-
-	if len(pubKey) == 0 || len(timeStr) == 0 || len(sig) == 0 {
-		wm.logger.Error("Failed to establish connection", "err", errors.New("invalid header"))
+	if len(pubKey) < publicKeyLength {
+		wm.logger.Error("Failed to establish connection", "err", errors.New("invalid pubKey in header"))
 		return
 	}
-
+	sig := r.Header.Get("sig")
+	if len(sig) < messageSignatureLength {
+		wm.logger.Error("Failed to establish connection", "err", errors.New("invalid sig in header"))
+		return
+	}
+	timeStr := r.Header.Get("time")
+	if len(timeStr) == 0 {
+		wm.logger.Error("Failed to establish connection", "err", errors.New("invalid timeStr in header"))
+		return
+	}
 	timeInt64, err := strconv.ParseInt(timeStr, 10, 64)
-	if err != nil || time.Now().Unix()-timeInt64 > 5 {
+	if err != nil || timeInt64 < 0 {
 		wm.logger.Error("illegal timestamp", "err", err)
+		return
+	}
+	if time.Now().Unix()-timeInt64 > legalTimeStampPeriod {
+		wm.logger.Error("illegal timestamp", "err", errors.New("reject because illegal timestamp"))
 		return
 	}
 
@@ -185,7 +192,20 @@ func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Requ
 		wm.logger.Error("illegal signature", "publicKey", pubKey, "time", timeStr, "signature", sig)
 		return
 	}
-
+	// check public key for tss member so that only register tss member can send msg to ws server
+	tssGroupMember, err := wm.queryService.QueryMemberByPublicKey(pubKeyBytes)
+	if err != nil {
+		wm.logger.Error("get tss group member fail", "err", err)
+		return
+	}
+	if len(tssGroupMember.PublicKey) <= 0 {
+		wm.logger.Error("tss manager", "err", errors.New("invalid tss member"))
+		return
+	}
+	if tssGroupMember.Status != 0 {
+		wm.logger.Error("tss manager", "err", errors.New("tss member is in jail"))
+		return
+	}
 	// register connection
 	con := newWSConnection(wsConn, pubKey, wm.wsConnOptions...)
 	con.SetLogger(wm.logger.With("remote", wsConn.RemoteAddr()))
@@ -199,18 +219,14 @@ func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Requ
 	if err := con.Stop(); err != nil {
 		wm.logger.Error("error while stopping connection", "error", err)
 	}
-
 }
 
 // WebSocket connection
-
 // A single websocket connection contains listener id, underlying ws
 // connection, and the event switch for subscribing to events.
-//
 // In case of an error, the connection is stopped.
 type wsConnection struct {
 	service.BaseService
-
 	remoteAddr string
 	baseConn   *websocket.Conn
 
