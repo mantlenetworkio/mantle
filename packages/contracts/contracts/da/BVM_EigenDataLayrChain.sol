@@ -274,7 +274,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
         uint32 totalOperatorsIndex,
         bool   isReRollup
     ) external onlySequencer {
-        require(startL2Block == l2ConfirmedBlockNumber, "confirmData: startL2Block must equal last l2ConfirmedBlockNumber");
+        require(startL2Block == l2ConfirmedBlockNumber, "storeData: startL2Block must equal last l2ConfirmedBlockNumber");
         require(endL2Block > startL2Block, "storeData: endL2Block must more than startL2Block");
         require(block.number - blockNumber < BLOCK_STALE_MEASURE, "storeData: stakes taken from too long ago");
         uint32 dataStoreId = IDataLayrServiceManager(dataManageAddress).taskNumber();
