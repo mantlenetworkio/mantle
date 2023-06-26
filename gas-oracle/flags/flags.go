@@ -195,6 +195,12 @@ var (
 		Usage:  "token ratio mode",
 		EnvVar: "TOKEN_RATIO_MODE",
 	}
+	TokenPairMNTMode = cli.BoolFlag{
+		Name:     "token-pair-mnt-mode",
+		Usage:    "use mnt price to calculate token ratio",
+		EnvVar:   "TOKEN_PAIR_MNT_MODE",
+		Required: true,
+	}
 	WaitForReceiptFlag = cli.BoolFlag{
 		Name:   "wait-for-receipt",
 		Usage:  "wait for receipts when sending transactions",
@@ -293,6 +299,7 @@ var Flags = []cli.Flag{
 	PriceBackendUniswapURL,
 	TokenPricerUpdateFrequencySecond,
 	TokenRatioMode,
+	TokenPairMNTMode,
 	WaitForReceiptFlag,
 	EnableL1BaseFeeFlag,
 	EnableL1OverheadFlag,

@@ -216,6 +216,8 @@ func (g *GasPriceOracle) OverHeadLoop() {
 			if err != nil {
 				continue
 			}
+			log.Info("current scc batch size", "size", ev.BatchSize)
+			log.Info("CTC circle num in SCC circle", "count", new(big.Int).Sub(currentCtcBatches, ctcTotalBatches))
 			if err := updateOverhead(new(big.Int).Sub(currentCtcBatches, ctcTotalBatches), ev.BatchSize); err != nil {
 				log.Error("cannot update da fee", "messgae", err)
 			}
@@ -253,7 +255,8 @@ func (g *GasPriceOracle) Update() error {
 
 // NewGasPriceOracle creates a new GasPriceOracle based on a Config
 func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
-	tokenPricer := tokenprice.NewClient(cfg.PriceBackendURL, cfg.PriceBackendUniswapURL, cfg.tokenPricerUpdateFrequencySecond, cfg.tokenRatioMode)
+	tokenPricer := tokenprice.NewClient(cfg.PriceBackendURL, cfg.PriceBackendUniswapURL,
+		cfg.tokenPricerUpdateFrequencySecond, cfg.tokenRatioMode, cfg.tokenPairMNTMode)
 	if tokenPricer == nil {
 		return nil, fmt.Errorf("invalid token price client")
 	}
