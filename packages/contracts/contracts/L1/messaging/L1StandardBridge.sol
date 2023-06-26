@@ -284,15 +284,5 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
         emit ERC20WithdrawalFinalized(_l1Token, _l2Token, _from, _to, _amount, _data);
     }
 
-    /*****************************
-     * Temporary - Migrating ETH *
-     *****************************/
 
-    /**
-     * @dev Adds ETH balance to the account. This is meant to allow for ETH
-     * to be migrated from an old gateway to a new gateway.
-     * NOTE: This is left for one upgrade only so we are able to receive the migrated ETH from the
-     * old contract
-     */
-    function donateETH() external payable {}
 }
