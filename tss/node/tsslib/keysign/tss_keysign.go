@@ -69,7 +69,7 @@ func (tKeySign *TssKeySign) SignMessage(msgToSign []byte, localStateItem storage
 
 	if !common2.Contains(partiesID, localPartyID) {
 		tKeySign.logger.Info().Msgf("we are not in this rounds key sign")
-		return nil, nil
+		return nil, fmt.Errorf("we are not in this rounds key sign")
 	}
 
 	outCh := make(chan tss.Message, 2*len(partiesID))
