@@ -18,8 +18,10 @@ contract CheckpointOracle {
     */
     constructor(address[] memory _adminlist, uint _sectionSize, uint _processConfirms, uint _threshold) public {
         for (uint i = 0; i < _adminlist.length; i++) {
-            admins[_adminlist[i]] = true;
-            adminList.push(_adminlist[i]);
+            if (_adminlist[i] != address(0)) {
+                admins[_adminlist[i]] = true;
+                adminList.push(_adminlist[i]);
+            }
         }
         sectionSize = _sectionSize;
         processConfirms = _processConfirms;

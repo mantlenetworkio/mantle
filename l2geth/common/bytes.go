@@ -17,7 +17,9 @@
 // Package common contains various helper functions.
 package common
 
-import "encoding/hex"
+import (
+	"encoding/hex"
+)
 
 // ToHex returns the hex representation of b, prefixed with '0x'.
 // For empty slices, the return value is "0x0".
@@ -93,13 +95,19 @@ func Bytes2Hex(d []byte) string {
 
 // Hex2Bytes returns the bytes represented by the hexadecimal string str.
 func Hex2Bytes(str string) []byte {
-	h, _ := hex.DecodeString(str)
+	h, err := hex.DecodeString(str)
+	if err != nil {
+		return nil
+	}
 	return h
 }
 
 // Hex2BytesFixed returns bytes of a specified fixed length flen.
 func Hex2BytesFixed(str string, flen int) []byte {
-	h, _ := hex.DecodeString(str)
+	h, err := hex.DecodeString(str)
+	if err != nil {
+		return nil
+	}
 	if len(h) == flen {
 		return h
 	}
