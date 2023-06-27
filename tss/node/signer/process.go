@@ -151,7 +151,7 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 
 func (p *Processor) Start() {
 	p.logger.Info().Msg("Signer is starting")
-	p.wg.Add(9)
+	p.wg.Add(10)
 	p.run()
 }
 
@@ -176,4 +176,5 @@ func (p *Processor) run() {
 	go p.deleteSlashing()
 	go p.SignRollBack()
 	go p.VerifyRollBack()
+	go p.ObserveTssGroup()
 }

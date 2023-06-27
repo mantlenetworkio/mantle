@@ -136,3 +136,34 @@ func (q QueryService) QueryInactiveInfo() (types.TssCommitteeInfo, error) {
 		TssMembers: tssMembers,
 	}, nil
 }
+
+func (q QueryService) QueryTssGroupMembers() (types.TssCommitteeInfo, error) {
+	currentBlocckNumber, err := q.ethClient.BlockNumber(context.Background())
+	if err != nil {
+		return types.TssCommitteeInfo{}, err
+	}
+	activeTssMembers, err := q.tssGroupManagerCaller.GetTssGroupMembers(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlocckNumber)})
+
+	if len(activeTssMembers) == 0 {
+		return types.TssCommitteeInfo{}, nil
+	}
+	tssMembers := make([]string, len(activeTssMembers), len(activeTssMembers))
+	for i, m := range activeTssMembers {
+		// raw public key(64bytes) ==> compress public key(33bytes)
+		unmarshalled, err := crypto.UnmarshalPubkey(append([]byte{0x04}, m...))
+		if err != nil {
+			log.Error("fail to unmarshal tss member", "err", err)
+			return types.TssCommitteeInfo{}, nil
+		}
+		compressed := crypto.CompressPubkey(unmarshalled)
+		hexEncoded := hex.EncodeToString(compressed)
+
+		// raw public key(64bytes) ==> uncompressed format: 0x04||rawPK (65bytes)
+		// uncompressed := append([]byte{0x04}, m...)
+		// hexEncoded := hex.EncodeToString(uncompressed)
+		tssMembers[i] = hexEncoded
+	}
+	return types.TssCommitteeInfo{
+		TssMembers: tssMembers,
+	}, nil
+}

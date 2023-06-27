@@ -106,6 +106,7 @@ func runNode(cmd *cobra.Command) error {
 		cfg.Node.Secrets.Enable,
 		cfg.Node.Secrets.SecretId,
 		cfg.Node.Shamir,
+		store,
 	)
 	if err != nil {
 		log.Fatal().Err(err).Msg("fail to create tss server instance")

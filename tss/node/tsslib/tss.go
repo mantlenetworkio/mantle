@@ -16,30 +16,33 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/monitor"
 	p2p2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/p2p"
 	storage2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
+	"github.com/mantlenetworkio/mantle/tss/node/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"os"
 	"sort"
 	"strings"
 	"sync"
+	"time"
 )
 
 type TssServer struct {
-	conf             common2.TssConfig
-	logger           zerolog.Logger
-	p2pCommunication *p2p2.Communication
-	localNodePubKey  string
-	participants     map[string][]string
-	preParams        *bkeygen.LocalPreParams
-	tssKeyGenLocker  *sync.Mutex
-	stopChan         chan struct{}
-	stateManager     storage2.LocalStateManager
-	secretsManager   storage2.SecretsManager
-	shamirManager    storage2.ShamirManager
-	privateKey       *ecdsa.PrivateKey
-	tssMetrics       *monitor.Metric
-	secretsEnable    bool
-	shamirEnable     bool
+	conf                common2.TssConfig
+	logger              zerolog.Logger
+	p2pCommunication    *p2p2.Communication
+	localNodePubKey     string
+	participants        map[string][]string
+	preParams           *bkeygen.LocalPreParams
+	tssKeyGenLocker     *sync.Mutex
+	stopChan            chan struct{}
+	stateManager        storage2.LocalStateManager
+	secretsManager      storage2.SecretsManager
+	shamirManager       storage2.ShamirManager
+	privateKey          *ecdsa.PrivateKey
+	tssMetrics          *monitor.Metric
+	secretsEnable       bool
+	shamirEnable        bool
+	tssGroupMemberStore types.TssMemberStore
 }
 
 func NewTss(
@@ -54,6 +57,7 @@ func NewTss(
 	secretsEnable bool,
 	secretId string,
 	shamirConfig tssconfig.ShamirConfig,
+	store types.TssMemberStore,
 ) (*TssServer, error) {
 
 	pubkey := crypto.CompressPubkey(&priKey.PublicKey)
@@ -65,6 +69,11 @@ func NewTss(
 		log.Error().Err(err).Msg("ERROR: fail to get peer id by pub key")
 	}
 	log.Info().Msgf("peer id is (%s) \n", peerId)
+
+	if err != nil {
+		return nil, err
+	}
+
 	stateManager, err := storage2.NewFileStateMgr(storageFolder)
 	if err != nil {
 		return nil, errors.New("fail to create file state manager")
@@ -98,7 +107,7 @@ func NewTss(
 		}
 	}
 
-	comm, err := p2p2.NewCommunication(bootstrapPeers, p2pPort, externalIP, waitFullConnected)
+	comm, err := p2p2.NewCommunication(bootstrapPeers, p2pPort, externalIP, waitFullConnected, store)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create communication layer: %w", err)
 	}
@@ -159,21 +168,22 @@ func NewTss(
 		metrics.Enable()
 	}
 	tssServer := TssServer{
-		conf:             conf,
-		logger:           log.With().Str("module", "tss").Logger(),
-		p2pCommunication: comm,
-		localNodePubKey:  pubkeyHex,
-		participants:     make(map[string][]string),
-		preParams:        preParams,
-		tssKeyGenLocker:  &sync.Mutex{},
-		stopChan:         make(chan struct{}),
-		stateManager:     stateManager,
-		secretsManager:   secretsManager,
-		shamirManager:    shamirManager,
-		privateKey:       priKey,
-		tssMetrics:       metrics,
-		secretsEnable:    secretsEnable,
-		shamirEnable:     shamirConfig.Enable,
+		conf:                conf,
+		logger:              log.With().Str("module", "tss").Logger(),
+		p2pCommunication:    comm,
+		localNodePubKey:     pubkeyHex,
+		participants:        make(map[string][]string),
+		preParams:           preParams,
+		tssKeyGenLocker:     &sync.Mutex{},
+		stopChan:            make(chan struct{}),
+		stateManager:        stateManager,
+		secretsManager:      secretsManager,
+		shamirManager:       shamirManager,
+		privateKey:          priKey,
+		tssMetrics:          metrics,
+		secretsEnable:       secretsEnable,
+		shamirEnable:        shamirConfig.Enable,
+		tssGroupMemberStore: store,
 	}
 
 	return &tssServer, nil
@@ -218,6 +228,7 @@ func (t *TssServer) requestToMsgId(request interface{}) (string, error) {
 		keyAccumulation += el
 	}
 	dat = append(dat, []byte(keyAccumulation)...)
+	dat = append(dat, []byte(time.Now().String())...)
 	return common2.MsgToHashString(dat)
 }
 

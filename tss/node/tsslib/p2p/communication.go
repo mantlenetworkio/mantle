@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/tss/node/types"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -52,9 +53,10 @@ type Communication struct {
 	BroadcastMsgChan  chan *messages.BroadcastMsgChan
 	externalAddr      maddr.Multiaddr
 	streamMgr         *StreamMgr
+	tssMemberStore    types.TssMemberStore
 }
 
-func NewCommunication(bootstrapPeers []maddr.Multiaddr, port int, externalIP string, waitFullConnected bool) (*Communication, error) {
+func NewCommunication(bootstrapPeers []maddr.Multiaddr, port int, externalIP string, waitFullConnected bool, store types.TssMemberStore) (*Communication, error) {
 	addr, err := maddr.NewMultiaddr(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", port))
 	if err != nil {
 		return nil, fmt.Errorf("fail to create listen addr: %w", err)
@@ -79,6 +81,7 @@ func NewCommunication(bootstrapPeers []maddr.Multiaddr, port int, externalIP str
 		externalAddr:      externalAddr,
 		streamMgr:         NewStreamMgr(),
 		waitFullConnected: waitFullConnected,
+		tssMemberStore:    store,
 	}, nil
 }
 
@@ -223,7 +226,7 @@ func (c *Communication) readFromStream(stream network.Stream) {
 				break
 			} else {
 				c.logger.Debug().Msgf("no MsgID %s found for this message,need to retry %d time", wrappedMsg.MsgID, i)
-				c.logger.Debug().Msgf("no MsgID %s found for this message,need to retry %d time", wrappedMsg.MessageType, i)
+				c.logger.Debug().Msgf("no MessageType %s found for this message,need to retry %d time", wrappedMsg.MessageType, i)
 				time.Sleep(500 * time.Millisecond)
 			}
 		}

@@ -44,6 +44,7 @@ func (t *TssServer) Keygen(req keygen2.Request) (keygen2.Response, error) {
 		t.privateKey,
 		t.p2pCommunication,
 		req.ThresHold,
+		t.tssGroupMemberStore,
 	)
 
 	keygenMsgChannel := keygenInstance.GetTssKeyGenChannels()

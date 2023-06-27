@@ -22,7 +22,6 @@ func (s *Storage) SetSigningInfo(signingInfo slash.SigningInfo) {
 func (s *Storage) GetSigningInfo(address common.Address) (bool, slash.SigningInfo) {
 	bz, err := s.db.Get(getSigningInfoKey(address), nil)
 	if err != nil {
-
 		return handleError2(slash.SigningInfo{}, err)
 	}
 	var signingInfo slash.SigningInfo
@@ -35,7 +34,6 @@ func (s *Storage) GetSigningInfo(address common.Address) (bool, slash.SigningInf
 func (s *Storage) GetNodeMissedBatchBitArray(address common.Address, index uint64) bool {
 	bz, err := s.db.Get(getNodeMissedBatchBitArrayKey(address, index), nil)
 	if err != nil {
-
 		if err == leveldb.ErrNotFound {
 			return false // lazy: treat empty key as not missed
 		}
