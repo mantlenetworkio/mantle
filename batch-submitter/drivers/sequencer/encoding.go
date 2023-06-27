@@ -443,6 +443,9 @@ func writeUint64(w io.Writer, val uint64, n uint) error {
 // of `val`.
 func readUint64(r io.Reader, val *uint64, n uint) error {
 	var buf [8]byte
+	if n > 8 {
+		return fmt.Errorf("bytes shift out of range")
+	}
 	if _, err := r.Read(buf[8-n:]); err != nil {
 		return err
 	}

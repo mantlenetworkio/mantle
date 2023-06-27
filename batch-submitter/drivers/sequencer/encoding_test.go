@@ -2,8 +2,11 @@ package sequencer_test
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"io"
 	"os"
 	"testing"
 
@@ -15,10 +18,10 @@ import (
 
 // TestBatchContextEncodeDecode tests the (de)serialization of a BatchContext
 // against the spec test vector. The encoding should be:
-//  - num_sequenced_txs:        3 bytes
-//  - num_subsequent_queue_txs: 3 bytes
-//  - timestamp:                5 bytes
-//  - block_number:             5 bytes
+//   - num_sequenced_txs:        3 bytes
+//   - num_subsequent_queue_txs: 3 bytes
+//   - timestamp:                5 bytes
+//   - block_number:             5 bytes
 func TestBatchContextEncodeDecode(t *testing.T) {
 	t.Parallel()
 
@@ -147,7 +150,7 @@ func testAppendSequencerBatchParamsEncodeDecode(
 
 	// Finally, encode the decoded object and assert it matches the original
 	// hex string.
-	paramsBytes, err := params.Serialize(sequencer.BatchTypeLegacy)
+	paramsBytes, err := params.Serialize(sequencer.BatchTypeLegacy, nil, nil)
 
 	// Return early when testing error cases, no need to reserialize again
 	if test.Error {
@@ -159,7 +162,7 @@ func testAppendSequencerBatchParamsEncodeDecode(
 	require.Equal(t, test.HexEncoding, hex.EncodeToString(paramsBytes))
 
 	// Serialize the batches in compressed form
-	compressedParamsBytes, err := params.Serialize(sequencer.BatchTypeZlib)
+	compressedParamsBytes, err := params.Serialize(sequencer.BatchTypeZlib, nil, nil)
 	require.Nil(t, err)
 
 	// Deserialize the compressed batch
@@ -251,4 +254,28 @@ func TestIsMarkerContext(t *testing.T) {
 		BlockNumber:           4,
 	}
 	require.True(t, batchContext.IsMarkerContext())
+}
+
+func TestReadUint64(t *testing.T) {
+	readUint64 := func(r io.Reader, val *uint64, n uint) error {
+		var byteOrder = binary.BigEndian
+		var buf [8]byte
+		if n > 8 {
+			return fmt.Errorf("bytes shift out of range")
+		}
+		if _, err := r.Read(buf[8-n:]); err != nil {
+			return err
+		}
+		*val = byteOrder.Uint64(buf[:])
+		return nil
+	}
+
+	var be = make([]byte, 8)
+	var x uint64
+	bytes.NewBuffer(be)
+	binary.BigEndian.PutUint64(be, 100)
+	require.NoError(t, readUint64(bytes.NewBuffer(be), &x, 8))
+	require.Equal(t, x, uint64(100))
+
+	require.Error(t, readUint64(bytes.NewBuffer(be), &x, 9))
 }
