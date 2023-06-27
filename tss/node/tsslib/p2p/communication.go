@@ -124,18 +124,6 @@ func (c *Communication) disconnect(remotePeer peer.ID) {
 		if err := cn.Close(); err != nil {
 			c.logger.Err(err).Msgf("fail to close to peer: %s", remotePeer)
 		}
-		//func() {
-		//	ctx, cancel := context.WithTimeout(context.Background(), TimeoutConnecting)
-		//	defer cancel()
-		//	addrInfo, err := peer.AddrInfoFromP2pAddr(remoteMultiAddr)
-		//	if err != nil {
-		//		c.logger.Err(err).Msgf("fail to converts a MultiAddr to an AddrInfo, peer: %s", remotePeer)
-		//		return
-		//	}
-		//	if err := c.host.Connect(ctx, *addrInfo); err != nil {
-		//		c.logger.Err(err).Msgf("fail to connect to peer: %s", remotePeer)
-		//	}
-		//}()
 	}
 }
 

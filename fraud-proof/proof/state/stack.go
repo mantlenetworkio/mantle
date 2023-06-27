@@ -90,7 +90,7 @@ func (st *Stack) Back(n int) *uint256.Int {
 }
 
 func (st *Stack) HashAfterPops(n int) common.Hash {
-	return st.hash[st.Len()-n]
+	return st.hash[len(st.hash)-n]
 }
 
 func (st *Stack) EncodeState() []byte {
