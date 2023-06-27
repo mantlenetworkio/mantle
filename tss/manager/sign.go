@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/influxdata/influxdb/pkg/slices"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	tmjson "github.com/tendermint/tendermint/libs/json"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/influxdata/influxdb/pkg/slices"
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	tmjson "github.com/tendermint/tendermint/libs/json"
 
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
@@ -87,6 +88,10 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 						}
 
 						poolPubKeyBz, _ := hex.DecodeString(ctx.TssInfos().ClusterPubKey)
+						if len(signResponse.Signature) != 64 {
+							log.Error(fmt.Sprintf("invalid signature, expected length is 64, actual length is %d", len(signResponse.Signature)))
+							return
+						}
 						if !crypto.VerifySignature(poolPubKeyBz, digestBz, signResponse.Signature[:64]) {
 							log.Error("illegal signature")
 							return
