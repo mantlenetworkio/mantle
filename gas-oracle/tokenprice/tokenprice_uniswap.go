@@ -6,6 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/log"
 
 	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
 )
@@ -67,11 +68,13 @@ func (c *Client) getTokenPricesFromUniswap() (float64, float64) {
 	eth2mntPrice, err := c.getTokenPriceFromUniswap(c.uniswapQuoterClient.ethAddress,
 		c.uniswapQuoterClient.mntAddress, c.uniswapQuoterClient.mntDecimals)
 	if err != nil {
+		log.Warn("get token prices from dex", "query eth/mnt error", err)
 		return 0, 0
 	}
 	eth2usdtPrice, err := c.getTokenPriceFromUniswap(c.uniswapQuoterClient.ethAddress,
 		c.uniswapQuoterClient.usdttAddress, c.uniswapQuoterClient.usdtDecimals)
 	if err != nil {
+		log.Warn("get token prices from dex", "query eth/usdt error", err)
 		return 0, eth2mntPrice
 	}
 
