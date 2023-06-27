@@ -47,10 +47,16 @@ func NewTxBatch(blocks []*types.Block, maxBatchSize uint64) *TxBatch {
 }
 
 func (b *TxBatch) LastBlockNumber() uint64 {
+	if len(b.Contexts) == 0 {
+		return 0
+	}
 	return b.Contexts[len(b.Contexts)-1].BlockNumber
 }
 
 func (b *TxBatch) LastBlockRoot() common.Hash {
+	if len(b.Blocks) == 0 {
+		return common.Hash{}
+	}
 	return b.Blocks[len(b.Blocks)-1].Root()
 }
 
