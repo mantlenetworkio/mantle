@@ -154,7 +154,7 @@ func (s *DaService) GetDtlBatchTransactionByDataStoreId(c gecho.Context) error {
 			txDecodeMetaData := new(eigenda.TransactionMeta)
 			if newBatchTxn[i].TxMeta == nil {
 				log.Error("Batch tx metadata shouldn't be nil")
-				continue
+				return c.JSON(http.StatusBadRequest, errors.New("Batch tx metadata shouldn't be nil"))
 			}
 			err = json.Unmarshal(newBatchTxn[i].TxMeta, txDecodeMetaData)
 			if err != nil {
