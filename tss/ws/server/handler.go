@@ -202,6 +202,7 @@ func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Requ
 		wm.logger.Error("get tss group member fail", "err", err)
 		return
 	}
+	wm.logger.Info("get tss group member success", "tssGroupMember PublicKey", tssGroupMember.PublicKey)
 	if len(tssGroupMember.PublicKey) <= 0 {
 		wm.logger.Error("tss manager", "err", errors.New("invalid tss member"))
 		return
