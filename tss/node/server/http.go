@@ -5,17 +5,18 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	sign "github.com/mantlenetworkio/mantle/tss/node/signer"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keysign"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
+	cmm "github.com/mantlenetworkio/mantle/tss/common"
+	sign "github.com/mantlenetworkio/mantle/tss/node/signer"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keygen"
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keysign"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -36,19 +37,23 @@ type GenRequest struct {
 type MockEventRequest struct {
 }
 
-func NewHttpServer(addr string, t tsslib.Server, signer *sign.Processor, nonProd bool) *Server {
+func NewHttpServer(addr string, t tsslib.Server, signer *sign.Processor, nonProd bool, jwtSecretStr string) (*Server, error) {
 	hs := &Server{
 		logger:    log.With().Str("module", "http").Logger(),
 		tssServer: t,
 		nonProd:   nonProd,
 		signer:    signer,
 	}
+	handler, err := hs.newHandler(jwtSecretStr)
+	if err != nil {
+		return nil, err
+	}
 	s := &http.Server{
 		Addr:    addr,
-		Handler: hs.newHandler(),
+		Handler: handler,
 	}
 	hs.s = s
-	return hs
+	return hs, nil
 }
 
 func (hs *Server) Start() error {
@@ -71,7 +76,7 @@ func (hs *Server) Stop() {
 	}
 }
 
-func (hs *Server) newHandler() http.Handler {
+func (hs *Server) newHandler(jwtSecretStr string) (http.Handler, error) {
 	router := mux.NewRouter()
 	router.Handle("/ping", http.HandlerFunc(hs.pingHandler)).Methods(http.MethodGet)
 	router.Handle("/gen-key", http.HandlerFunc(hs.keyGenHandler)).Methods(http.MethodPost)
@@ -84,7 +89,11 @@ func (hs *Server) newHandler() http.Handler {
 	))
 
 	router.Use(logMiddleware())
-	return router
+	if jwtSecretStr != "" {
+		return cmm.NewJwtHandler(router, jwtSecretStr)
+	}else {
+		return router,nil
+	}
 }
 
 func logMiddleware() mux.MiddlewareFunc {

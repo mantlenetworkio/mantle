@@ -31,8 +31,9 @@ import { subtask } from 'hardhat/config'
 import {
   TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS,
   TASK_COMPILE_SOLIDITY_LOG_COMPILATION_RESULT,
-  TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE
+  TASK_COMPILE_SOLIDITY_LOG_NOTHING_TO_COMPILE,
 } from 'hardhat/builtin-tasks/task-names'
+
 import { spawnSync } from 'child_process'
 
 subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS).setAction(
@@ -334,11 +335,11 @@ const config: HardhatUserConfig = {
     },
     gasPriceOracleIsBurning: {
       type: 'number',
-      default: 1,
+      default: 0,
     },
     gasPriceOracleCharge: {
       type: 'number',
-      default: 0,
+      default: 1,
     },
     gasPriceOracleL1BaseFee: {
       type: 'number',
@@ -346,7 +347,7 @@ const config: HardhatUserConfig = {
     },
     gasPriceOracleL2GasPrice: {
       type: 'number',
-      default: 1,
+      default: 50_000_000,
     },
     hfBerlinBlock: {
       type: 'number',
@@ -356,6 +357,18 @@ const config: HardhatUserConfig = {
       type: 'string',
     },
     contractsRpcUrl: {
+      type: 'string',
+    },
+    tssRewardSendAmountPerYear: {
+      type: 'number',
+    },
+    tssRewardWaitingTime: {
+      type: 'number',
+    },
+    tssDelegationManagerMinStakeAmount: {
+      type: 'string',
+    },
+    tssManagerAddress: {
       type: 'string',
     },
   },

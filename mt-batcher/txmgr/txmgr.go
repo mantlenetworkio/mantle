@@ -66,6 +66,7 @@ func (m *SimpleTxManager) Send(ctx context.Context, updateGasPrice UpdateGasPric
 				return
 			}
 			log.Error("MtBatcher update txn gas price fail", "err", err)
+			cancel()
 			return
 		}
 

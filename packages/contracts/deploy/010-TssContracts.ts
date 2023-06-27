@@ -15,6 +15,8 @@ const deployFn: DeployFunction = async (hre) => {
 
   const owner = hre.deployConfig.bvmAddressManagerOwner
   const l1MantleAddress = hre.deployConfig.proxyL1MantleAddress
+  const minStakeAmount = hre.deployConfig.tssDelegationManagerMinStakeAmount
+  const tssManagerAddress = hre.deployConfig.tssManagerAddress
 
   //deploy EmptyContract
   await deployAndVerifyAndThen({
@@ -177,6 +179,7 @@ const deployFn: DeployFunction = async (hre) => {
     Proxy_TssDelegation.address,
     Proxy__BVM_L1CrossDomainMessenger.address,
     owner,
+    tssManagerAddress,
   ]
   callData = Impl__TssStakingSlashing.interface.encodeFunctionData(
     'initialize',
@@ -371,7 +374,7 @@ const deployFn: DeployFunction = async (hre) => {
     [
       Proxy__TSS_StakingSlashing.address,
       Proxy__TSS_GroupManager.address,
-      '10000',
+      minStakeAmount,
       deployer,
     ]
   )

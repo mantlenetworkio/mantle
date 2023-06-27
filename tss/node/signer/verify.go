@@ -37,69 +37,46 @@ func (p *Processor) Verify() {
 					continue
 				}
 				var resId = req.ID
-				logger.Info().Msgf("stateroots size %d ", len(askRequest.StateRoots))
-				//batch process stateroots ,default batch size 10
-				segments := group(askRequest.StateRoots, 10)
-
-				var result = true
-				var getBlockErr = false
-				var resultErr error
-
-				for k, v := range segments {
-					offset := len(v)
-
-					wg := &sync.WaitGroup{}
-					wg.Add(offset)
-					logger.Info().Msgf("start to verify %d ", k)
-					for index, stateRoot := range v {
-						go func(fIndex int, fStateRoot [32]byte) {
-							resultTmp, err := p.verify(askRequest.StartBlock, fIndex+k, fStateRoot, logger, wg)
-							if !resultTmp {
-								result = resultTmp
-								if err != nil {
-									logger.Error().Msgf("failed to verify block %s", err.Error())
-									getBlockErr = true
-									resultErr = err
-								}
-							}
-						}(index, stateRoot)
-					}
-					wg.Wait()
-					logger.Info().Msgf("end to verify %d ", k)
-					if !result || getBlockErr {
-						break
-					}
-				}
-
-				if result {
-					hash, err := signMsgToHash(askRequest)
-					if err != nil {
-						logger.Err(err).Msg("failed to conv msg to hash")
-						RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to conv msg to hash", err.Error())
-						p.wsClient.SendMsg(RpcResponse)
-						continue
-					} else {
-						hashStr := hexutil.Encode(hash)
-						p.UpdateWaitSignEvents(hashStr, askRequest)
-					}
-				}
-
-				if getBlockErr {
-					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "get error when verify ", resultErr.Error())
+				var size = len(askRequest.StateRoots)
+				logger.Info().Msgf("stateroots size %d ", size)
+				if len(askRequest.StateRoots) == 0 {
+					logger.Error().Msg("stateroots size is empty")
+					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "stateroots size is empty ", "do not need to sign")
 					p.wsClient.SendMsg(RpcResponse)
+					continue
 				} else {
+					wg := &sync.WaitGroup{}
+					wg.Add(1)
+					result, err := p.verify(askRequest.StartBlock, size-1, askRequest.StateRoots[size-1], logger, wg)
+					if !result {
+						if err != nil {
+							logger.Error().Msgf("failed to verify block %s", err.Error())
+							RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "get error when verify ", err.Error())
+							p.wsClient.SendMsg(RpcResponse)
+						}
+					} else {
+						hash, err := signMsgToHash(askRequest)
+						if err != nil {
+							logger.Err(err).Msg("failed to conv msg to hash")
+							RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to conv msg to hash", err.Error())
+							p.wsClient.SendMsg(RpcResponse)
+							continue
+						} else {
+							hashStr := hexutil.Encode(hash)
+							p.UpdateWaitSignEvents(hashStr, askRequest)
+						}
+					}
 					askResponse := common.AskResponse{
 						Result: result,
 					}
 					RpcResponse = tdtypes.NewRPCSuccessResponse(resId, askResponse)
 					p.wsClient.SendMsg(RpcResponse)
-				}
 
+				}
 			}
 
 		}
 	}()
-
 }
 
 func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger zerolog.Logger, wg *sync.WaitGroup) (bool, error) {
@@ -108,6 +85,7 @@ func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger z
 	offset := new(big.Int).SetInt64(int64(index))
 	startBig, _ := new(big.Int).SetString(start, 10)
 	blockNumber := offset.Add(offset, startBig)
+	logger.Info().Msgf("start to query block by number %d", blockNumber)
 
 	value, ok := p.GetVerify(blockNumber.String())
 	if ok {
@@ -158,19 +136,4 @@ func (p *Processor) GetVerify(key string) (bool, bool) {
 	p.cacheVerifyLock.RLock()
 	defer p.cacheVerifyLock.RUnlock()
 	return p.cacheVerify.Get(key)
-}
-
-func group(slice [][32]byte, segment int) map[int][][32]byte {
-	size := len(slice)
-	var segments = make(map[int][][32]byte)
-	quantity := size / segment
-	remainder := size % segment
-	i := 0
-	for ; i < quantity; i++ {
-		segments[i*segment] = slice[i*segment : (i+1)*segment]
-	}
-	if remainder != 0 {
-		segments[i*segment] = slice[i*segment : i*segment+remainder]
-	}
-	return segments
 }

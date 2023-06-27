@@ -66,6 +66,10 @@ type chainContext struct {
 	ctx     context.Context
 }
 
+func (context *chainContext) ChainDb() ethdb.Database {
+	panic("not implemented")
+}
+
 func (context *chainContext) Engine() consensus.Engine {
 	return context.backend.Engine()
 }

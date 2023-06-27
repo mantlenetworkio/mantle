@@ -16,6 +16,7 @@ import {ITssRewardContract} from "../../L2/predeploys/iTssRewardContract.sol";
 import {TssDelegationManager} from "./delegation/TssDelegationManager.sol";
 import {TssDelegation} from "./delegation/TssDelegation.sol";
 import {WhiteList} from "../delegation/WhiteListBase.sol";
+import {Lib_Address} from "../../libraries/utils/Lib_Address.sol";
 
 import "./ITssGroupManager.sol";
 import "./ITssStakingSlashing.sol";
@@ -71,6 +72,7 @@ contract TssStakingSlashing is
     //claimer => operator
     mapping(address => address) public claimerOperators;
     bool public isSetParam;
+    address public tssManager;
 
 
     /**
@@ -96,7 +98,8 @@ contract TssStakingSlashing is
         address _delegationManager,
         address _delegation,
         address _l1messenger,
-        address _regulatoryAccount
+        address _regulatoryAccount,
+        address _tssManager
         ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -109,6 +112,7 @@ contract TssStakingSlashing is
         delegation = IDelegation(_delegation);
         messenger = _l1messenger;
         regulatoryAccount = _regulatoryAccount;
+        tssManager = _tssManager;
     }
 
     /**
@@ -130,10 +134,9 @@ contract TssStakingSlashing is
         regulatoryAccount = _account;
     }
 
-    function setPublicKey(bytes calldata _pubKey) public nonReentrant {
-        require(delegation.isOperator(msg.sender),"msg sender has not registered operator");
-        operators[msg.sender] = _pubKey;
-
+    function setTssManager(address _tssManager) public onlyOwner {
+        require(_tssManager != address(0),"Invalid address");
+        tssManager = _tssManager;
     }
 
     function setClaimer(
@@ -225,6 +228,7 @@ contract TssStakingSlashing is
      * @param _sig the signature of the hash keccak256(_messageBytes)
      */
     function slashing(bytes calldata _messageBytes, bytes calldata _sig) public nonReentrant {
+        require(tssManager == msg.sender,"TssStakingSlashing: msg.sender is not tssManager");
         SlashMsg memory message = abi.decode(_messageBytes, (SlashMsg));
         // verify tss member state not at jailed status
         require(!isJailed(message.jailNode), "the node already jailed");
@@ -313,6 +317,7 @@ contract TssStakingSlashing is
     function unJail() public {
         // slashing params check
         require(isSetParam, "have not set the slash amount");
+        require(isJailed(msg.sender), "An unjailed user doesn't need to call this method");
 
         uint256 totalBalance = _tokenBalance();
 
@@ -413,15 +418,15 @@ contract TssStakingSlashing is
             "msg sender did not request withdraws"
         );
         IDelegationManager.QueuedWithdrawal memory queuedWithdrawal = withdrawals[msg.sender];
-        require(delegationManager.canCompleteQueuedWithdrawal(queuedWithdrawal),"The waiting period has not yet passed");
         TssDelegationManager(tssDelegationManagerContract).completeQueuedWithdrawal(msg.sender, queuedWithdrawal, true);
         delete withdrawalRoots[msg.sender];
         delete withdrawals[msg.sender];
     }
 
     function registerAsOperator(bytes calldata _pubKey) external {
+        require(msg.sender == Lib_Address.publicKeyToAddress(_pubKey), "public key not match");
         TssDelegation(tssDelegationContract).registerAsOperator(this, msg.sender);
-        setPublicKey(_pubKey);
+        operators[msg.sender] = _pubKey;
     }
 
     function delegateTo(address _operator) external {

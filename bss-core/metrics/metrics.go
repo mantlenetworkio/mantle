@@ -43,6 +43,10 @@ type Base struct {
 	// batchConfirmationTimeMs tracks the duration it takes to confirm a batch
 	// transaction.
 	batchConfirmationTimeMs prometheus.Gauge
+
+	// tssRollbackSignal indicate tss group force rollback or send signal to rollback l2geth
+	// due to a fork state root between sequencer and verifier
+	tssRollbackSignal prometheus.Gauge
 }
 
 func NewBase(serviceName, subServiceName string) *Base {
@@ -94,6 +98,11 @@ func NewBase(serviceName, subServiceName string) *Base {
 		batchConfirmationTimeMs: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "batch_confirmation_time_ms",
 			Help:      "Time to confirm batch transactions",
+			Subsystem: subsystem,
+		}),
+		tssRollbackSignal: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "tss_rollback_signal",
+			Help:      "l2 rollback signal to indicate there is a fork state between sequencer and verifier",
 			Subsystem: subsystem,
 		}),
 	}
@@ -150,6 +159,11 @@ func (b *Base) BatchTxBuildTimeMs() prometheus.Gauge {
 // transaction.
 func (b *Base) BatchConfirmationTimeMs() prometheus.Gauge {
 	return b.batchConfirmationTimeMs
+}
+
+// TssRollbackSignal tracks the signal due to state fork between sequencer and varifier
+func (b *Base) TssRollbackSignal() prometheus.Gauge {
+	return b.tssRollbackSignal
 }
 
 // MakeSubsystemName builds the subsystem name for a group of metrics, which

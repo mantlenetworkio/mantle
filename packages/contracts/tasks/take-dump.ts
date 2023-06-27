@@ -29,20 +29,7 @@ task('take-dump').setAction(async (args, hre) => {
 
   /* eslint-enable @typescript-eslint/no-var-requires */
 
-  // Basic warning so users know that the whitelist will be disabled if the owner is the zero address.
-  if (
-    hre.deployConfig.bvmWhitelistOwner === undefined ||
-    hre.deployConfig.bvmWhitelistOwner === ethers.constants.AddressZero
-  ) {
-    console.log(
-      'WARNING: whitelist owner is undefined or address(0), whitelist will be disabled'
-    )
-  }
-
   const variables = {
-    BVM_DeployerWhitelist: {
-      owner: hre.deployConfig.bvmWhitelistOwner,
-    },
     BVM_GasPriceOracle: {
       _owner: hre.deployConfig.bvmGasPriceOracleOwner,
       gasPrice: hre.deployConfig.gasPriceOracleL2GasPrice,
@@ -72,8 +59,8 @@ task('take-dump').setAction(async (args, hre) => {
       _owner: hre.deployConfig.bvmFeeWalletOwner,
       l1FeeWallet: hre.deployConfig.bvmFeeWalletAddress,
       bvmGasPriceOracleAddress: predeploys.BVM_GasPriceOracle,
-      burner: '0x000000000000000000000000000000000000dEaD',
-      minWithdrawalAmount: 15,
+      burner: hre.deployConfig.bvmFeeWalletAddress,
+      minWithdrawalAmount: 0,
     },
     BVM_ETH: {
       l2Bridge: predeploys.L2StandardBridge,
@@ -85,7 +72,7 @@ task('take-dump').setAction(async (args, hre) => {
     BVM_MANTLE: {
       l2Bridge: predeploys.L2StandardBridge,
       // l1Token: hre.deployConfig.l1MantleAddress,
-      l1Token: '0x1A4b46696b2bB4794Eb3D4c26f1c55F9170fa4C5',
+      l1Token: '0x3c3a81e81dc49A522A592e7622A7E711c06bf354',
       _name: 'Mantle',
       _symbol: 'MNT',
       decimal: 18,
@@ -103,16 +90,9 @@ task('take-dump').setAction(async (args, hre) => {
       // Set the messageNonce to a high value to avoid overwriting old sent messages.
       messageNonce: 100000,
     },
-    WETH9: {
-      name: 'Wrapped Ether',
-      symbol: 'WETH',
-      decimals: 18,
-    },
     TssRewardContract: {
-      deadAddress: '0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead',
       _owner: hre.deployConfig.bvmTssRewardContractOwner,
-      sendAmountPerYear: 1000000,
-      bvmGasPriceOracleAddress: '0x420000000000000000000000000000000000000F',
+      sendAmountPerYear: hre.deployConfig.tssRewardSendAmountPerYear,
       messenger: predeploys.L2CrossDomainMessenger,
       sccAddress: (
         await getContractFromArtifact(
@@ -120,7 +100,7 @@ task('take-dump').setAction(async (args, hre) => {
           names.managed.contracts.StateCommitmentChain
         )
       ).address,
-      waitingTime: 86400,
+      waitingTime: hre.deployConfig.tssRewardWaitingTime,
       stakeSlashAddress: (
         await getContractFromArtifact(
           hre,

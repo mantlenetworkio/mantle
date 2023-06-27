@@ -54,6 +54,7 @@ type DriverConfig struct {
 	PrivKey                   *ecdsa.PrivateKey
 	FeePrivKey                *ecdsa.PrivateKey
 	BlockOffset               uint64
+	RollUpMinTxn              uint64
 	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
 	EigenLayerNode            int
@@ -239,7 +240,8 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 	for i := new(big.Int).Set(start); i.Cmp(end) < 0; i.Add(i, bigOne) {
 		block, err := d.Cfg.L2Client.BlockByNumber(ctx, i)
 		if err != nil {
-			return nil, big.NewInt(0), big.NewInt(0)
+			log.Error("get blockNumber from l2 fail", "err", err)
+			continue
 		}
 		txs := block.Transactions()
 		if len(txs) != 1 {
@@ -275,6 +277,7 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 		txMetaByte, err := json.Marshal(txMeta)
 		if err != nil {
 			log.Error("tx meta json marshal error", "err", err)
+			continue
 		}
 		batchTx := common3.BatchTx{
 			BlockNumber: i.Bytes(),
@@ -734,6 +737,11 @@ func (d *Driver) RollupMainWorker() {
 			log.Info("MtBatcher get batch block range", "start", start, "end", end)
 			if start.Cmp(end) == 0 {
 				log.Info("MtBatcher Sequencer no updates", "start", start, "end", end)
+				continue
+			}
+			rollupMinTransactions := new(big.Int).Sub(end, start)
+			if big.NewInt(int64(d.Cfg.RollUpMinTxn)).Cmp(rollupMinTransactions) > 0 {
+				log.Info("MtBatcher rollup total transaction less than min transations in config", "RollUpMinTxn", d.Cfg.RollUpMinTxn, "rollupMinTransactions", rollupMinTransactions)
 				continue
 			}
 			aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(

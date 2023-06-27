@@ -1,18 +1,22 @@
 package oracle
 
 import (
-	kms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"encoding/hex"
 	"fmt"
+	"reflect"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
+
 	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
+	ometrics "github.com/mantlenetworkio/mantle/gas-oracle/metrics"
+
+	kms "cloud.google.com/go/kms/apiv1"
 	"google.golang.org/api/option"
-	"reflect"
 )
 
 func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContractBackend, cfg *Config) (func() error, error) {
@@ -74,6 +78,15 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 		if err != nil {
 			return err
 		}
+		feeScalar, err := contract.Scalar(&bind.CallOpts{
+			Context: context.Background(),
+		})
+		if err != nil {
+			return err
+		}
+		// Update faa scalar metrics
+		ometrics.GasOracleStats.FeeScalarGauge.Update(feeScalar.Int64())
+
 		// NOTE this will return base multiple with coin ratio
 		log.Info("get header in l1 client", "type is", reflect.ValueOf(l1Backend).Type())
 		tip, err := l1Backend.HeaderByNumber(context.Background(), nil)
@@ -110,6 +123,7 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 			return fmt.Errorf("cannot update base fee: %w", err)
 		}
 		log.Info("L1 base fee transaction already sent", "hash", tx.Hash().Hex(), "baseFee", tip.BaseFee)
+		ometrics.GasOracleStats.L1BaseFeeGauge.Update(tip.BaseFee.Int64())
 
 		if cfg.waitForReceipt {
 			// Wait for the receipt

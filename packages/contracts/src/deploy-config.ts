@@ -180,6 +180,27 @@ export interface DeployConfig {
    */
   contractsRpcUrl: string
 
+  /**
+   * Optional initial sendAmountPerYear for TssReward contract
+   */
+  tssRewardSendAmountPerYear?: number
+
+  /**
+   * Optional initial waitingTime for TssReward contract
+   */
+  tssRewardWaitingTime?: number
+
+  /**
+   * Optional initial minStakeAmount for TssDelegationManager contract
+   */
+  tssDelegationManagerMinStakeAmount: string
+
+
+  /**
+   * Address of tss manager.
+   */
+  tssManagerAddress: string
+
 }
 
 /**
@@ -227,10 +248,10 @@ const configSpec: {
   blockStaleMeasure: {
     type: 'number',
   },
-  daFraudProofPeriod:  {
+  daFraudProofPeriod: {
     type: 'number',
   },
-  l2SubmittedBlockNumber:  {
+  l2SubmittedBlockNumber: {
     type: 'number',
   },
   bvmSequencerAddress: {
@@ -284,11 +305,11 @@ const configSpec: {
   },
   gasPriceOracleIsBurning: {
     type: 'number',
-    default: 1,
+    default: 0,
   },
   gasPriceOracleCharge: {
     type: 'number',
-    default: 0,
+    default: 1,
   },
   gasPriceOracleL1BaseFee: {
     type: 'number',
@@ -296,7 +317,7 @@ const configSpec: {
   },
   gasPriceOracleL2GasPrice: {
     type: 'number',
-    default: 1,
+    default: 50_000_000,
   },
   hfBerlinBlock: {
     type: 'number',
@@ -306,6 +327,18 @@ const configSpec: {
     type: 'string',
   },
   contractsRpcUrl: {
+    type: 'string',
+  },
+  tssRewardSendAmountPerYear: {
+    type: 'number',
+  },
+  tssRewardWaitingTime: {
+    type: 'number',
+  },
+  tssDelegationManagerMinStakeAmount: {
+    type: 'string',
+  },
+  tssManagerAddress: {
     type: 'string',
   },
 }

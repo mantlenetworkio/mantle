@@ -144,9 +144,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if _, ok := genesisErr.(*params.ConfigCompatError); genesisErr != nil && !ok {
 		return nil, genesisErr
 	}
-	if chainConfig.EigenDaBlock == nil {
-		chainConfig.EigenDaBlock = big.NewInt(config.Rollup.EigenDaBlock)
-	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
 	eth := &Ethereum{

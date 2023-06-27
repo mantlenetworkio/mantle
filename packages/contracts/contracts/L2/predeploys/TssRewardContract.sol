@@ -22,17 +22,10 @@ import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
 
-    mapping(uint256 => uint256) public ledger;
-    address public bvmGasPriceOracleAddress;
-    address public deadAddress;
-    uint256 public dust;
-    uint256 public bestBlockID;
-    uint256 public totalAmount;
     uint256 public lastBatchTime;
     uint256 public sendAmountPerYear;
-    address public sccAddress;
 
-    uint256 public dustBlock;
+    address public sccAddress;
     uint256 public waitingTime;
     // operator => tssreward
     mapping(address => uint256) public rewardDetails;
@@ -48,13 +41,11 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
 
 
     // set call address
-    constructor(address _deadAddress, address _owner, uint256 _sendAmountPerYear, address _bvmGasPriceOracleAddress,address _l2CrossDomainMessenger, address _sccAddress, uint256 _waitingTime, address _ssAddr)
+    constructor(address _owner, uint256 _sendAmountPerYear,address _l2CrossDomainMessenger, address _sccAddress, uint256 _waitingTime, address _ssAddr)
     Ownable() CrossDomainEnabled(_l2CrossDomainMessenger)
     {
         transferOwnership(_owner);
-        deadAddress = _deadAddress;
         sendAmountPerYear = _sendAmountPerYear;
-        bvmGasPriceOracleAddress = _bvmGasPriceOracleAddress;
         sccAddress = _sccAddress;
         waitingTime = _waitingTime;
         stakeSlashAddress = _sccAddress;
@@ -62,18 +53,6 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
 
     // slither-disable-next-line locked-ether
     receive() external payable {}
-
-    /**
-     * Enforces that the modified function is only callable by a specific null address.
-     *  authenticated to call this function.
-     */
-    modifier onlyFromDeadAddress() {
-        require(
-            msg.sender == deadAddress,
-            "tss reward call message unauthenticated"
-        );
-        _;
-    }
 
     modifier onlyAuthorized() {
         address operator = claimers[msg.sender];
@@ -112,6 +91,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
 
     /**
      * @dev claimReward distribute reward to tss member.
+     * @param _blockStartHeight L2 rollup batch block start height.
      * @param _batchTime Batch corresponds to L1 Block Timestamp
      * @param _length The distribute batch block number
      * @param _tssMembers The address array of tss group members
@@ -128,8 +108,7 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
             return;
         }
         require(_batchTime > lastBatchTime,"args _batchTime must gther than last lastBatchTime");
-        batchAmount = (_batchTime - lastBatchTime) * querySendAmountPerSecond() + dust;
-        dust = 0;
+        batchAmount = (_batchTime - lastBatchTime) * querySendAmountPerSecond();
         _distributeReward(batchAmount, _tssMembers);
         emit DistributeTssReward(
             lastBatchTime,
@@ -145,7 +124,8 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
      */
     function withdraw() external onlyOwner {
         if (address(this).balance > 0) {
-            payable(owner()).transfer(address(this).balance);
+            (bool success, ) = owner().call{ value: address(this).balance }(new bytes(0));
+            require(success, "TssReward withdraw: MNT transfer failed");
         }
     }
 
@@ -214,27 +194,20 @@ contract TssRewardContract is Ownable,ITssRewardContract,CrossDomainEnabled,Reen
         require(address(this).balance >= claimNumber,"The contract balance is insufficient to pay the reward value");
         if (claimNumber > 0) {
             address claimer = operators[_operator];
-            address payable addr = payable(claimer);
             delete claimAmout[_operator];
             rewardDetails[_operator] = rewardDetails[_operator] - claimNumber;
-            addr.transfer(claimNumber);
+            (bool success, ) = claimer.call{ value: claimNumber }(new bytes(0));
+            require(success, "TssReward claim: MNT transfer failed");
+            emit Claim(_operator, claimNumber);
         }
-        emit Claim(_operator, claimNumber);
     }
+
 
     function _distributeReward(uint256 amount, address[] calldata _tssMembers) internal {
         if (amount > 0) {
-            uint256 sendAmount = 0;
-            uint256 accu = 0;
-            sendAmount = amount.div(_tssMembers.length);
             for (uint i = 0; i < _tssMembers.length; i++) {
                 address operator = _tssMembers[i];
-                rewardDetails[operator] += sendAmount;
-            }
-            accu = sendAmount * _tssMembers.length;
-            uint256 reserved = amount.sub(accu);
-            if (reserved > 0) {
-                dust = dust.add(reserved);
+                rewardDetails[operator] += amount;
             }
         }
     }

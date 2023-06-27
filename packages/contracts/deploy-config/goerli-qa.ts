@@ -23,6 +23,7 @@ const config = {
   bvmGasPriceOracleOwner: process.env.BVM_GAS_PRICE_ORACLE_OWNER || '0xeEbceB07eA7D2339895Dd492B3B5960641302830',
   bvmFeeWalletOwner: process.env.BVM_FEE_WALLETOWNER_OWNER ||'0xeEbceB07eA7D2339895Dd492B3B5960641302830',
   l1MantleAddress: process.env.L1_MANTLE_ADDRESS || '0xC40C655a91ef15c8eAd818B840CFC08C755D2C0F',
+  proxyL1MantleAddress: process.env.PROXY_L1_MANTLE_ADDRESS || '0x19C22f181280dF6Ad1d97285cdD430173Df91C12',
   //on l2, same as l1 address manager.
   bvmTssRewardContractOwner: process.env.TssRewardContractOwner || '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
   dataManagerAddress: process.env.DATA_MANAGER_ADDRESS || '0xE5C3D068e2160c67e09afaCEff3E765e30163Eb8',
@@ -31,6 +32,10 @@ const config = {
   bvmEigenChallengerAddress: process.env.BVM_EIGENDA_CHALLENGER_ADDRESS || '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
   contractsDeployerKey: process.env.CONTRACTS_DEPLOYER_KEY,
   contractsRpcUrl: process.env.CONTRACTS_RPC_URL,
+  tssRewardSendAmountPerYear: 100000,
+  tssRewardWaitingTime: 86400,
+  tssDelegationManagerMinStakeAmount: '100000000000000000000',
+  tssManagerAddress: process.env.BVM_TSS_MANAGER_ADDRESS,
 }
 
 export default config
