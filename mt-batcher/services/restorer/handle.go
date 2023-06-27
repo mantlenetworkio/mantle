@@ -154,12 +154,11 @@ func (s *DaService) GetDtlBatchTransactionByDataStoreId(c gecho.Context) error {
 			txDecodeMetaData := new(eigenda.TransactionMeta)
 			err = json.Unmarshal(newBatchTxn[i].TxMeta, txDecodeMetaData)
 			if err != nil {
-				log.Error("Unmarshal json fail")
+				return c.JSON(http.StatusBadRequest, errors.New("Unmarshal json fail"))
 			}
 			rlpStream := l2rlp.NewStream(bytes.NewBuffer(newBatchTxn[i].RawTx), 0)
 			if err := l2Tx.DecodeRLP(rlpStream); err != nil {
-				log.Error("Decode RLP fail")
-				continue
+				return c.JSON(http.StatusBadRequest, errors.New("Decode RLP fail"))
 			}
 			log.Info("transaction", "hash", l2Tx.Hash().Hex())
 			newBlockNumber := new(big.Int).SetBytes(newBatchTxn[i].BlockNumber)
@@ -278,7 +277,7 @@ func (s *DaService) GetTransactionListByStoreNumber(c gecho.Context) error {
 			rlpStream := l2rlp.NewStream(bytes.NewBuffer(newBatchTxn[i].RawTx), 0)
 			if err := l2Tx.DecodeRLP(rlpStream); err != nil {
 				log.Error("Decode RLP fail")
-				continue
+				return c.JSON(http.StatusBadRequest, errors.New("Decode RLP fail"))
 			}
 			log.Info("transaction", "hash", l2Tx.Hash().Hex())
 			newBlockNumber := new(big.Int).SetBytes(newBatchTxn[i].BlockNumber)
