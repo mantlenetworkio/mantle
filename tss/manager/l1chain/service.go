@@ -144,11 +144,18 @@ func (q QueryService) QueryMemberByPublicKey(publicKey []byte) (*types.TgTssMemb
 		log.Error("get eth latest block number fail", "err", err)
 		return nil, err
 	}
-	tssGroupMember, err := q.tssGroupManagerCaller.GetTssMember(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - q.confirmBlocks)}, publicKey)
+	decompreessPublicKey, err := crypto.DecompressPubkey(publicKey)
+	if err != nil {
+		log.Error("decompreess publicKey fail", "err", err)
+		return nil, err
+	}
+	log.Info("public Key", "publicKey", hex.EncodeToString(crypto.FromECDSAPub(decompreessPublicKey)))
+	tssGroupMember, err := q.tssGroupManagerCaller.GetTssMember(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - q.confirmBlocks)}, crypto.FromECDSAPub(decompreessPublicKey))
 	if err != nil {
 		log.Error("query member by public key fail", "err", err)
 		return nil, err
 	}
+	log.Info("tssGroupMember Info", "PublicKey", tssGroupMember.PublicKey, "NodeAddress", common2.Address(tssGroupMember.NodeAddress), "Status", tssGroupMember.Status)
 	tgMember := &types.TgTssMember{
 		PublicKey:   tssGroupMember.PublicKey,
 		NodeAddress: common2.Address(tssGroupMember.NodeAddress),
