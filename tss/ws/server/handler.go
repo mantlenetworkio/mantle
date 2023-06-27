@@ -180,8 +180,8 @@ func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Requ
 		wm.logger.Error("hex decode error for pubkey or sig", "err", err)
 		return
 	}
-	if len(sigBytes) != 64 {
-		wm.logger.Error(fmt.Sprintf("invalid sigBytes, expected length is 64, actual length is %d", len(sigBytes)))
+	if len(sigBytes) < 64 {
+		wm.logger.Error(fmt.Sprintf("invalid sigBytes, expected length is no less than 64, actual length is %d", len(sigBytes)))
 		return
 	}
 	digestBz := crypto.Keccak256Hash([]byte(timeStr)).Bytes()

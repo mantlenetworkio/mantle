@@ -88,8 +88,8 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 						}
 
 						poolPubKeyBz, _ := hex.DecodeString(ctx.TssInfos().ClusterPubKey)
-						if len(signResponse.Signature) != 64 {
-							log.Error(fmt.Sprintf("invalid signature, expected length is 64, actual length is %d", len(signResponse.Signature)))
+						if len(signResponse.Signature) < 64 {
+							log.Error(fmt.Sprintf("invalid signature, expected length is no less than 64, actual length is %d", len(signResponse.Signature)))
 							return
 						}
 						if !crypto.VerifySignature(poolPubKeyBz, digestBz, signResponse.Signature[:64]) {
