@@ -4,6 +4,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/abnormal"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
@@ -11,8 +14,6 @@ import (
 	keysign2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/keysign"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
-	"strings"
-	"time"
 )
 
 func (t *TssServer) generateSignature(onlinePeers []peer.ID, req keysign2.Request, localStateItem storage.KeygenLocalState, keysignInstance *keysign2.TssKeySign) (keysign2.Response, error) {
@@ -56,7 +57,7 @@ func (t *TssServer) generateSignature(onlinePeers []peer.ID, req keysign2.Reques
 	}
 
 	return keysign2.NewResponse(
-		&signatureData,
+		signatureData,
 		common.Success,
 		"",
 		nil,
