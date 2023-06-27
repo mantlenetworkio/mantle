@@ -22,6 +22,10 @@ import (
 	"strings"
 )
 
+const (
+	maxCallReceiveMessageSize = 314572800
+)
+
 type RollupStoreRequest struct {
 	BatchIndex int64 `json:"batch_index"`
 }
@@ -94,7 +98,7 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 	defer conn.Close()
 	client := pb.NewDataRetrievalClient(conn)
 
-	opt := grpc.MaxCallRecvMsgSize(1024 * 1024 * 300)
+	opt := grpc.MaxCallRecvMsgSize(maxCallReceiveMessageSize)
 	request := &pb.FramesAndDataRequest{
 		DataStoreId: txReq.StoreNumber,
 	}
@@ -125,7 +129,7 @@ func (s *DaService) GetDtlBatchTransactionByDataStoreId(c gecho.Context) error {
 	defer conn.Close()
 	client := pb.NewDataRetrievalClient(conn)
 
-	opt := grpc.MaxCallRecvMsgSize(1024 * 1024 * 300)
+	opt := grpc.MaxCallRecvMsgSize(maxCallReceiveMessageSize)
 	request := &pb.FramesAndDataRequest{
 		DataStoreId: txReq.StoreNumber,
 	}
@@ -167,7 +171,6 @@ func (s *DaService) GetDtlBatchTransactionByDataStoreId(c gecho.Context) error {
 				l1MessageSender = nil
 			} else {
 				queueOrigin = types.QueueOriginL1ToL2
-				//TODO still need to add the L1msg
 				addrLs := common2.HexToAddress("")
 				l1MessageSender = &addrLs
 			}
