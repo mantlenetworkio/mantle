@@ -7,6 +7,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
+	"strconv"
+	"strings"
+
 	sssas "github.com/SSSaaS/sssa-golang"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -19,9 +23,6 @@ import (
 	"github.com/google/uuid"
 	nodeconfig "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/rs/zerolog/log"
-	"sort"
-	"strconv"
-	"strings"
 )
 
 const (
@@ -546,6 +547,9 @@ func NewSession(region, id, secret string) (*session.Session, error) {
 }
 
 func createUUID(key string) (string, error) {
+	if len(key) < 16 {
+		return "", fmt.Errorf("key length should not be less than 16")
+	}
 	uuidBytes := make([]byte, 16)
 	keyBytes := []byte(key)
 	copy(uuidBytes, keyBytes[len(keyBytes)-16:len(keyBytes)])
