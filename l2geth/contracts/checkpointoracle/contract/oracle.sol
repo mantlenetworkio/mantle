@@ -18,6 +18,7 @@ contract CheckpointOracle {
     */
     constructor(address[] memory _adminlist, uint _sectionSize, uint _processConfirms, uint _threshold) public {
         for (uint i = 0; i < _adminlist.length; i++) {
+            require(_adminlist[i] != address(0),"admin list cant contains 0 address");
             admins[_adminlist[i]] = true;
             adminList.push(_adminlist[i]);
         }
