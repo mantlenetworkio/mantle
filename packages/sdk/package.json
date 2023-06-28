@@ -47,7 +47,7 @@
     "typedoc": "^0.22.13"
   },
   "dependencies": {
-    "@mantleio/contracts": "0.1.4",
+    "@mantleio/contracts": "0.2.1",
     "@mantleio/core-utils": "0.1.0",
     "lodash": "^4.17.21",
     "merkletreejs": "^0.2.27",
