@@ -4,6 +4,9 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"sync"
+	"time"
+
 	tsscommon "github.com/binance-chain/tss-lib/common"
 	"github.com/binance-chain/tss-lib/ecdsa/signing"
 	"github.com/binance-chain/tss-lib/tss"
@@ -16,8 +19,6 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"sync"
-	"time"
 )
 
 type TssKeySign struct {
@@ -60,16 +61,15 @@ func (tKeySign *TssKeySign) GetTssCommonStruct() *common2.TssCommon {
 }
 
 // signMessage
-func (tKeySign *TssKeySign) SignMessage(msgToSign []byte, localStateItem storage.KeygenLocalState, parties []string) (tsscommon.SignatureData, error) {
+func (tKeySign *TssKeySign) SignMessage(msgToSign []byte, localStateItem storage.KeygenLocalState, parties []string) (*tsscommon.SignatureData, error) {
 	partiesID, localPartyID, err := conversion.GetParties(parties, localStateItem.LocalPartyKey)
-	var emptySignatureData tsscommon.SignatureData
 	if err != nil {
-		return emptySignatureData, fmt.Errorf("fail to form key sign party: %w", err)
+		return nil, fmt.Errorf("fail to form key sign party: %w", err)
 	}
 
 	if !common2.Contains(partiesID, localPartyID) {
 		tKeySign.logger.Info().Msgf("we are not in this rounds key sign")
-		return emptySignatureData, nil
+		return nil, fmt.Errorf("we are not in this rounds key sign")
 	}
 
 	outCh := make(chan tss.Message, 2*len(partiesID))
@@ -78,13 +78,13 @@ func (tKeySign *TssKeySign) SignMessage(msgToSign []byte, localStateItem storage
 
 	m, err := common2.MsgToHashInt(msgToSign)
 	if err != nil {
-		return emptySignatureData, fmt.Errorf("fail to convert msg to hash int: %w", err)
+		return nil, fmt.Errorf("fail to convert msg to hash int: %w", err)
 	}
 	moniker := m.String()
 	partiesID, eachLocalPartyID, err := conversion.GetParties(parties, localStateItem.LocalPartyKey)
 	ctx := tss.NewPeerContext(partiesID)
 	if err != nil {
-		return emptySignatureData, fmt.Errorf("error to create parties in batch signging %w\n", err)
+		return nil, fmt.Errorf("error to create parties in batch signging %w\n", err)
 	}
 
 	tKeySign.logger.Info().Msgf("message: (%s) keysign parties: %+v", m.String(), parties)
@@ -95,11 +95,15 @@ func (tKeySign *TssKeySign) SignMessage(msgToSign []byte, localStateItem storage
 
 	abnormalMgr := tKeySign.tssCommonStruct.GetAbnormalMgr()
 	partyIDMap := conversion.SetupPartyIDMap(partiesID)
-	err1 := conversion.SetupIDMaps(partyIDMap, tKeySign.tssCommonStruct.PartyIDtoP2PID)
-	err2 := conversion.SetupIDMaps(partyIDMap, abnormalMgr.PartyIDtoP2PID)
-	if err1 != nil || err2 != nil {
+	err = conversion.SetupIDMaps(partyIDMap, tKeySign.tssCommonStruct.PartyIDtoP2PID)
+	if err != nil {
 		tKeySign.logger.Error().Err(err).Msgf("error in creating mapping between partyID and P2P ID")
-		return emptySignatureData, err
+		return nil, err
+	}
+	err = conversion.SetupIDMaps(partyIDMap, abnormalMgr.PartyIDtoP2PID)
+	if err != nil {
+		tKeySign.logger.Error().Err(err).Msgf("error in creating mapping between partyID and P2P ID")
+		return nil, err
 	}
 
 	tKeySign.tssCommonStruct.SetPartyInfo(&abnormal.PartyInfo{
@@ -127,7 +131,7 @@ func (tKeySign *TssKeySign) SignMessage(msgToSign []byte, localStateItem storage
 	result, err := tKeySign.processKeySign(errCh, outCh, endCh)
 	if err != nil {
 		close(tKeySign.commStopChan)
-		return emptySignatureData, fmt.Errorf("fail to process key sign: %w", err)
+		return nil, fmt.Errorf("fail to process key sign: %w", err)
 	}
 
 	select {
@@ -138,7 +142,7 @@ func (tKeySign *TssKeySign) SignMessage(msgToSign []byte, localStateItem storage
 	}
 	keySignWg.Wait()
 	tKeySign.logger.Info().Msgf("%s successfully sign the message", tKeySign.p2pComm.GetHost().ID().String())
-	return result, nil
+	return &result, nil
 }
 
 func (tKeySign *TssKeySign) processKeySign(errChan chan struct{}, outCh <-chan tss.Message, endCh <-chan tsscommon.SignatureData) (tsscommon.SignatureData, error) {
