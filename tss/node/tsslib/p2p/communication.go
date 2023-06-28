@@ -236,6 +236,8 @@ func (c *Communication) readFromStream(stream network.Stream) {
 func (c *Communication) handleStream(stream network.Stream) {
 	peerID := stream.Conn().RemotePeer().String()
 	c.logger.Debug().Msgf("handle stream from peer: %s", peerID)
+	//We need to verify whether the sender of the message is a trusted node for us, and if not, we will not process the message.
+
 	// we will read from that stream
 	c.readFromStream(stream)
 }
@@ -501,4 +503,13 @@ func (c *Communication) ProcessBroadcast() {
 
 func (c *Communication) ReleaseStream(msgID string) {
 	c.streamMgr.ReleaseStream(msgID)
+}
+
+func (c *Communication) VerifyPeerId(peerId string) bool {
+	activeNodes, err := c.tssMemberStore.GetActiveMembers()
+	if err != nil {
+		c.logger.Error().Err(err).Msg("failed to get active members from level db")
+		return false
+	}
+	if activeNodes.TssMembers
 }

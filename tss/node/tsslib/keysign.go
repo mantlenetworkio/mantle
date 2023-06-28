@@ -130,7 +130,6 @@ func (t *TssServer) KeySign(req keysign2.Request) (keysign2.Response, error) {
 		t.p2pCommunication,
 		t.stateManager,
 		localStateItem.Threshold,
-		t.tssGroupMemberStore,
 	)
 
 	keySignChannels := keysignInstance.GetTssKeySignChannels()

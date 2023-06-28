@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mantlenetworkio/mantle/tss/node/types"
 	"strings"
 	"sync"
 
@@ -44,10 +43,9 @@ type TssCommon struct {
 	cachedWireBroadcastMsgLists *sync.Map
 	cachedWireUnicastMsgLists   *sync.Map
 	thresHold                   int
-	tssMemberStore              types.TssMemberStore
 }
 
-func NewTssCommon(peerID string, broadcastChannel chan *messages.BroadcastMsgChan, conf TssConfig, msgID string, privKey *ecdsa.PrivateKey, thresHold int, store types.TssMemberStore) *TssCommon {
+func NewTssCommon(peerID string, broadcastChannel chan *messages.BroadcastMsgChan, conf TssConfig, msgID string, privKey *ecdsa.PrivateKey, thresHold int) *TssCommon {
 	return &TssCommon{
 		conf:                        conf,
 		logger:                      log.With().Str("module", "tsscommon").Logger(),
@@ -70,7 +68,6 @@ func NewTssCommon(peerID string, broadcastChannel chan *messages.BroadcastMsgCha
 		cachedWireBroadcastMsgLists: &sync.Map{},
 		cachedWireUnicastMsgLists:   &sync.Map{},
 		thresHold:                   thresHold,
-		tssMemberStore:              store,
 	}
 }
 

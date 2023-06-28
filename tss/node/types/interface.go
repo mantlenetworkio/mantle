@@ -7,9 +7,9 @@ import (
 
 type TssMemberStore interface {
 	SetInactiveMembers(TssMembers) error
-	GetInactiveMembers() (bool, TssMembers)
+	GetInactiveMembers() (TssMembers, error)
 	SetActiveMembers(TssMembers) error
-	GetActiveMembers() (bool, TssMembers)
+	GetActiveMembers() (TssMembers, error)
 }
 
 type NodeStore interface {

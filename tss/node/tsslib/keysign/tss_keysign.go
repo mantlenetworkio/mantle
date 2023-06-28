@@ -14,7 +14,6 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/p2p"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
-	"github.com/mantlenetworkio/mantle/tss/node/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"sync"
@@ -39,12 +38,11 @@ func NewTssKeySign(localP2PID string,
 	privKey *ecdsa.PrivateKey,
 	p2pComm *p2p.Communication,
 	stateManager storage.LocalStateManager,
-	thresHold int,
-	store types.TssMemberStore) *TssKeySign {
+	thresHold int) *TssKeySign {
 	logItems := []string{"keySign", msgID}
 	return &TssKeySign{
 		logger:          log.With().Strs("module", logItems).Logger(),
-		tssCommonStruct: common2.NewTssCommon(localP2PID, broadcastChan, conf, msgID, privKey, thresHold, store),
+		tssCommonStruct: common2.NewTssCommon(localP2PID, broadcastChan, conf, msgID, privKey, thresHold),
 		stopChan:        stopChan,
 		localParties:    make([]*tss.PartyID, 0),
 		commStopChan:    make(chan struct{}),

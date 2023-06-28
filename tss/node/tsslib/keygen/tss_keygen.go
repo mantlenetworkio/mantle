@@ -4,7 +4,6 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	"github.com/mantlenetworkio/mantle/tss/node/types"
 	"sync"
 	"time"
 
@@ -53,8 +52,7 @@ func NewTssKeyGen(localP2PID string,
 	shamirManager storage2.ShamirManager,
 	privateKey *ecdsa.PrivateKey,
 	p2pComm *p2p.Communication,
-	thresHold int,
-	store types.TssMemberStore) *TssKeyGen {
+	thresHold int) *TssKeyGen {
 	return &TssKeyGen{
 		logger: log.With().
 			Str("module", "keygen").
@@ -62,7 +60,7 @@ func NewTssKeyGen(localP2PID string,
 		localNodePubKey: localNodePubKey,
 		ParticipantKeys: nil,
 		preParams:       preParam,
-		tssCommonStruct: common2.NewTssCommon(localP2PID, broadcastChan, conf, msgID, privateKey, thresHold, store),
+		tssCommonStruct: common2.NewTssCommon(localP2PID, broadcastChan, conf, msgID, privateKey, thresHold),
 		stopChan:        stopChan,
 		localParty:      nil,
 		stateManager:    stateManager,

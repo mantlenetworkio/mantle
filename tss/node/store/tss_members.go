@@ -17,16 +17,16 @@ func (s *Storage) SetInactiveMembers(members types.TssMembers) error {
 	return nil
 }
 
-func (s *Storage) GetInactiveMembers() (bool, types.TssMembers) {
+func (s *Storage) GetInactiveMembers() (types.TssMembers, error) {
 	bz, err := s.db.Get(getInactiveMemberKey(), nil)
 	if err != nil {
-		return handleError2(types.TssMembers{}, err)
+		return handleError(types.TssMembers{}, err)
 	}
 	var tssMembers types.TssMembers
 	if err = json.Unmarshal(bz, &tssMembers); err != nil {
-		panic(err)
+		return handleError(types.TssMembers{}, err)
 	}
-	return true, tssMembers
+	return tssMembers, nil
 }
 
 func (s *Storage) SetActiveMembers(members types.TssMembers) error {
@@ -40,14 +40,14 @@ func (s *Storage) SetActiveMembers(members types.TssMembers) error {
 	return nil
 }
 
-func (s *Storage) GetActiveMembers() (bool, types.TssMembers) {
+func (s *Storage) GetActiveMembers() (types.TssMembers, error) {
 	bz, err := s.db.Get(getActiveMemberKey(), nil)
 	if err != nil {
-		return handleError2(types.TssMembers{}, err)
+		return handleError(types.TssMembers{}, err)
 	}
 	var tssMembers types.TssMembers
 	if err = json.Unmarshal(bz, &tssMembers); err != nil {
-		panic(err)
+		return handleError(types.TssMembers{}, err)
 	}
-	return true, tssMembers
+	return tssMembers, nil
 }
