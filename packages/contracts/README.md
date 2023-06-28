@@ -171,4 +171,3 @@ npx hardhat withdraw-fees --help
 
 ## Security
 Please refer to our [Security Policy](https://github.com/mantlenetworkio/.github/security/policy) for information about how to disclose security issues with this code.
-We also maintain a [bug bounty program via Immunefi](https://immunefi.com/bounty/mantle/) with a maximum payout of $2,000,042 for critical bug reports.
