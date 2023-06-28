@@ -50,7 +50,7 @@ func (c *Client) GetEnqueueByIndex(index uint64) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("cannot fetch enqueue %d", index)
 	}
-	if enqueue == nil {
+	if enqueue == nil || enqueue.Origin == nil {
 		return "", fmt.Errorf("cannot deserialize enqueue %d", index)
 	}
 	return enqueue.Origin.String(), nil
