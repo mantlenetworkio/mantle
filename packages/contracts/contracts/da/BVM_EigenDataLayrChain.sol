@@ -136,16 +136,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
         require(_address != address(0), "setFraudProofAddress: address is the zero address");
         fraudProofWhitelist[_address] = true;
     }
-
-    /**
-    * @notice unavailable fraud proof address
-    * @param _address for fraud proof
-    */
-    function unavailableFraudProofAddress(address _address) external onlySequencer {
-        require(_address != address(0), "unavailableFraudProofAddress: unavailableFraudProofAddress: address is the zero address");
-        fraudProofWhitelist[_address] = false;
-    }
-
+    
     /**
     * @notice remove fraud proof address
     * @param _address for fraud proof
