@@ -37,7 +37,7 @@ type DaService struct {
 }
 
 func NewDaService(ctx context.Context, cfg *DaServiceConfig) (*DaService, error) {
-	subCtx, cancel := context.WithTimeout(ctx, common.DefaultTimeout)
+	_, cancel := context.WithTimeout(ctx, common.DefaultTimeout)
 	defer cancel()
 	e := gecho.New()
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -48,7 +48,7 @@ func NewDaService(ctx context.Context, cfg *DaServiceConfig) (*DaService, error)
 	graphClient := graphView.NewGraphClient(cfg.GraphProvider, nil)
 	graphqlClient := graphql.NewClient(graphClient.GetEndpoint(), nil)
 	server := &DaService{
-		Ctx:           subCtx,
+		Ctx:           ctx,
 		Cfg:           cfg,
 		GraphClient:   graphClient,
 		GraphqlClient: graphqlClient,

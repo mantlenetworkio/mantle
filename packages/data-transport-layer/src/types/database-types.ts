@@ -78,6 +78,7 @@ export interface TransactionEntry {
 export interface RollupStoreEntry {
   index: number
   data_store_id: number
+  upgrade_data_store_id: number
   status: string
   confirm_at: number
 }
