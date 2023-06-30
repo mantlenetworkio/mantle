@@ -20,7 +20,7 @@ type AdminService interface {
 }
 
 type TssQueryService interface {
-	QueryActiveInfo() (TssCommitteeInfo, error)
+	QueryActiveInfo(isPermission bool) (TssCommitteeInfo, error)
 	QueryInactiveInfo() (TssCommitteeInfo, error)
 }
 
