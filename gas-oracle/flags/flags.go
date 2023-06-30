@@ -105,6 +105,18 @@ var (
 		Usage:  "Setup batch size gap",
 		EnvVar: "GAS_PRICE_ORACLE_SIZE_GAP",
 	}
+	StateRollupGasUsed = cli.IntFlag{
+		Name:   "set-state-rollup-gas-used",
+		Value:  2521687,
+		Usage:  "Setup StateRollupGasUsed",
+		EnvVar: "GAS_PRICE_ORACLE_STATE_ROLLUP_GAS_USED",
+	}
+	DataRollupGasUsed = cli.IntFlag{
+		Name:   "set-data-rollup-gas-used",
+		Value:  137893,
+		Usage:  "Setup DataRollupGasUsed",
+		EnvVar: "GAS_PRICE_ORACLE_DATA_ROLLUP_GAS_USED",
+	}
 	LogLevelFlag = cli.IntFlag{
 		Name:   "loglevel",
 		Value:  3,
@@ -310,6 +322,8 @@ var Flags = []cli.Flag{
 	BatchSizeBottom,
 	BatchSizeCap,
 	SizeGap,
+	StateRollupGasUsed,
+	DataRollupGasUsed,
 	EnableHsmFlag,
 	HsmAddressFlag,
 	HsmAPINameFlag,
