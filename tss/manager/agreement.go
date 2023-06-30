@@ -3,8 +3,9 @@ package manager
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"sync"
+
 	"github.com/influxdata/influxdb/pkg/slices"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
@@ -12,7 +13,6 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/ws/server"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
-	"sync"
 )
 
 func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Method) (types.Context, error) {
@@ -102,7 +102,7 @@ func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Me
 	wg.Wait()
 
 	if len(results) < ctx.TssInfos().Threshold+1 {
-		return types.Context{}, errors.New(fmt.Sprintf("not enough response, %d nodes response for the ask result, we need at least %d nodes to complete the signing process", len(results), ctx.TssInfos().Threshold+1))
+		return types.Context{}, fmt.Errorf("not enough response, %d nodes response for the ask result, we need at least %d nodes to complete the signing process", len(results), ctx.TssInfos().Threshold+1)
 	}
 
 	approvers := make([]string, 0)
