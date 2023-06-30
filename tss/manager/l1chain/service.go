@@ -3,8 +3,7 @@ package l1chain
 import (
 	"context"
 	"encoding/hex"
-	"errors"
-	common2 "github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/pkg/errors"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -125,10 +124,6 @@ func (q QueryService) QueryInactiveInfo() (types.TssCommitteeInfo, error) {
 		}
 		compressed := crypto.CompressPubkey(unmarshalled)
 		hexEncoded := hex.EncodeToString(compressed)
-
-		// raw public key(64bytes) ==> uncompressed format: 0x04||rawPK (65bytes)
-		// uncompressed := append([]byte{0x04}, m...)
-		// hexEncoded := hex.EncodeToString(uncompressed)
 		tssMembers[i] = hexEncoded
 	}
 	return types.TssCommitteeInfo{
@@ -136,30 +131,4 @@ func (q QueryService) QueryInactiveInfo() (types.TssCommitteeInfo, error) {
 		Threshold:  int(threshold.Int64()),
 		TssMembers: tssMembers,
 	}, nil
-}
-
-func (q QueryService) QueryMemberByPublicKey(publicKey []byte) (*types.TgTssMember, error) {
-	currentBlockNumber, err := q.ethClient.BlockNumber(context.Background())
-	if err != nil {
-		log.Error("get eth latest block number fail", "err", err)
-		return nil, err
-	}
-	decompreessPublicKey, err := crypto.DecompressPubkey(publicKey)
-	if err != nil {
-		log.Error("decompreess publicKey fail", "err", err)
-		return nil, err
-	}
-	log.Info("public Key", "publicKey", hex.EncodeToString(crypto.FromECDSAPub(decompreessPublicKey)))
-	tssGroupMember, err := q.tssGroupManagerCaller.GetTssMember(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - q.confirmBlocks)}, crypto.FromECDSAPub(decompreessPublicKey))
-	if err != nil {
-		log.Error("query member by public key fail", "err", err)
-		return nil, err
-	}
-	log.Info("tssGroupMember Info", "PublicKey", tssGroupMember.PublicKey, "NodeAddress", common2.Address(tssGroupMember.NodeAddress), "Status", tssGroupMember.Status)
-	tgMember := &types.TgTssMember{
-		PublicKey:   tssGroupMember.PublicKey,
-		NodeAddress: common2.Address(tssGroupMember.NodeAddress),
-		Status:      tssGroupMember.Status,
-	}
-	return tgMember, nil
 }

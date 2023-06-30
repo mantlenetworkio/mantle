@@ -141,6 +141,20 @@ func (wm *WebsocketManager) clientDisconnected(pubkey string) {
 	wm.logger.Info("node disconnected", "public key", pubkey)
 }
 
+func (wm *WebsocketManager) JudgeWssConnectPermission(activeTssMembers, inActiveTssMembers []string, nodePublicKey string) bool {
+	for i := 0; i < len(activeTssMembers); i++ {
+		if nodePublicKey == activeTssMembers[i] {
+			return true
+		}
+	}
+	for i := 0; i < len(inActiveTssMembers); i++ {
+		if nodePublicKey == inActiveTssMembers[i] {
+			return true
+		}
+	}
+	return false
+}
+
 // WebsocketHandler upgrades the request/response (via http.Hijack) and starts
 // the wsConnection.
 func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
@@ -196,21 +210,26 @@ func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Requ
 		wm.logger.Error("illegal signature", "publicKey", pubKey, "time", timeStr, "signature", sig)
 		return
 	}
+
 	// check public key for tss member so that only register tss member can send msg to ws server
-	tssGroupMember, err := wm.queryService.QueryMemberByPublicKey(pubKeyBytes)
+	inactiveGroupMember, err := wm.queryService.QueryInactiveInfo()
 	if err != nil {
-		wm.logger.Error("get tss group member fail", "err", err)
+		wm.logger.Error("get tss inactive group member fail", "err", err)
 		return
 	}
-	wm.logger.Info("get tss group member success", "tssGroupMember PublicKey", tssGroupMember.PublicKey)
-	if len(tssGroupMember.PublicKey) <= 0 {
-		wm.logger.Error("tss manager", "err", errors.New("invalid tss member"))
+
+	activeGroupMember, err := wm.queryService.QueryActiveInfo()
+	if err != nil {
+		wm.logger.Error("get tss active group member fail", "err", err)
 		return
 	}
-	if tssGroupMember.Status != 0 {
-		wm.logger.Error("tss manager", "err", errors.New("tss member is in jail"))
+
+	permissionOk := wm.JudgeWssConnectPermission(inactiveGroupMember.TssMembers, activeGroupMember.TssMembers, pubKey)
+	if !permissionOk {
+		wm.logger.Error("No permission to connect wss server", "err", err)
 		return
 	}
+
 	// register connection
 	con := newWSConnection(wsConn, pubKey, wm.wsConnOptions...)
 	con.SetLogger(wm.logger.With("remote", wsConn.RemoteAddr()))
