@@ -21,7 +21,9 @@ func (p *Processor) ObserveTssGroup() {
 					err := p.nodeStore.SetInactiveMembers(types.TssMembers{
 						TssMembers: tssInfo.TssMembers,
 					})
-					log.Error("failed to set inactive members ", "err", err)
+					if err != nil {
+						log.Error("failed to set inactive members ", "err", err)
+					}
 				}
 			}
 			tssmembers, err := p.tssQueryService.QueryTssGroupMembers()
@@ -34,7 +36,9 @@ func (p *Processor) ObserveTssGroup() {
 					err := p.nodeStore.SetActiveMembers(types.TssMembers{
 						TssMembers: tssmembers.TssMembers,
 					})
-					log.Error("failed to set active members ", "err", err)
+					if err != nil {
+						log.Error("failed to set active members ", "err", err)
+					}
 				}
 			}
 		}()

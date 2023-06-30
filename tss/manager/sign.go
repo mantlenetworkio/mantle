@@ -102,8 +102,9 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 
 						culpritData := resp.RpcResponse.Error.Data
 						culprits := strings.Split(culpritData, ",")
+						culprits = deDuplication(culprits)
 						for _, culprit := range culprits {
-							if slices.Exists(ctx.Approvers(), culprit) {
+							if slices.ExistsIgnoreCase(ctx.Approvers(), culprit) {
 								counter.increment(culprit)
 							}
 						}
@@ -162,4 +163,16 @@ func (m Manager) sendToNodes(ctx types.Context, request interface{}, method tss.
 			}
 		}(node, rpcRequest)
 	}
+}
+
+func deDuplication(nodes []string) []string {
+	var r []string
+	h := make(map[string]bool)
+	for _, node := range nodes {
+		if _, ok := h[node]; !ok {
+			r = append(r, node)
+			h[node] = true
+		}
+	}
+	return r
 }

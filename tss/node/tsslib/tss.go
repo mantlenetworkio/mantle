@@ -23,7 +23,6 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	"time"
 )
 
 type TssServer struct {
@@ -228,7 +227,6 @@ func (t *TssServer) requestToMsgId(request interface{}) (string, error) {
 		keyAccumulation += el
 	}
 	dat = append(dat, []byte(keyAccumulation)...)
-	dat = append(dat, []byte(time.Now().String())...)
 	return common2.MsgToHashString(dat)
 }
 

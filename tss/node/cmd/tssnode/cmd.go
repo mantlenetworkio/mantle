@@ -46,6 +46,8 @@ func runNode(cmd *cobra.Command) error {
 	nonProd, _ := cmd.Flags().GetBool("non-prod")
 	waitPeersFullConnected, _ := cmd.Flags().GetBool("full")
 	debug, _ := cmd.Flags().GetBool("debug")
+	fmt.Printf("-------debug %s", debug)
+	debug = true
 	if debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	} else {
