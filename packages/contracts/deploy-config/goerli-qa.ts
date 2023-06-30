@@ -11,6 +11,8 @@ const config = {
   blockStaleMeasure: 500,
   daFraudProofPeriod: 3600,
   l2SubmittedBlockNumber: 1,
+  updateGaslimitBlock: 0,
+  eigenDaBlock: 0,
   bvmSequencerAddress: process.env.BVM_SEQUENCER_ADDRESS ||  '0x2B1D033ddCc36cd6f4DE10A9a9C2Bc329a443bEB',
   bvmProposerAddress: process.env.BVM_PROPOSER_ADDRESS || '0x4e1614113AF6a1a41cA85d1a5Fe41De105BD65fA',
   bvmRolluperAddress: process.env.BVM_ROLLUPER_ADDRESS || '0x4e1614113AF6a1a41cA85d1a5Fe41De105BD65fA',
