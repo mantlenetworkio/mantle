@@ -195,7 +195,10 @@ contract L1StandardBridgeUpgrade is IL1StandardBridge, CrossDomainEnabled {
         // withdrawals. The use of safeTransferFrom enables support of "broken tokens" which do not
         // return a boolean value.
         // slither-disable-next-line reentrancy-events, reentrancy-benign
+        uint256 expectedTransferBalance = IERC20(_l1Token).balanceOf(address(this)) + _amount;
         IERC20(_l1Token).safeTransferFrom(_from, address(this), _amount);
+        uint256 postTransferBalance = IERC20(_l1Token).balanceOf(address(this));
+        require(expectedTransferBalance == postTransferBalance,"Fee on transfer tokens not supported");
 
         // Construct calldata for _l2Token.finalizeDeposit(_to, _amount)
         bytes memory message;
