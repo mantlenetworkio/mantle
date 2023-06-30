@@ -30,7 +30,7 @@ func NewAbnormal(reason string, nodes []*Node) *Abnormal {
 	return &Abnormal{
 		FailReason:   reason,
 		Nodes:        nodes,
-		AbnormalLock: &sync.RWMutex{},
+		AbnormalLock: sync.RWMutex{},
 	}
 }
 

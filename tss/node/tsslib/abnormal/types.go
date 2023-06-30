@@ -41,5 +41,5 @@ type Abnormal struct {
 	FailReason   string  `json:"fail_reason"`
 	IsUnicast    bool    `json:"is_broadcast"`
 	Nodes        []*Node `json:"abnormal_peers,omitempty"`
-	AbnormalLock *sync.RWMutex
+	AbnormalLock sync.RWMutex
 }
