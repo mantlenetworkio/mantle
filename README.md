@@ -150,7 +150,7 @@ root
 ├── <a href="./bss-core">bss-core</a>: Core batch-submitter logic and utilities
 ├── <a href="./gas-oracle">gas-oracle</a>: Service for updating L1 gas prices on L2
 ├── <a href="./integration-tests">integration-tests</a>: Various integration tests for the Mantle network
-├── <a href="./l2geth">l2geth</a>: Mantle client software, a fork of <a href="https://github.com/ethereum/go-ethereum/tree/v1.9.10">geth v1.9.10</a>  (deprecated for BEDROCK upgrade)
+├── <a href="./l2geth">l2geth</a>: Mantle client software, a fork of <a href="https://github.com/ethereum/go-ethereum/tree/v1.9.10">geth v1.9.10</a>
 ├── <a href="./l2geth-exporter">l2geth-exporter</a>: A prometheus exporter to collect/serve metrics from an L2 geth node
 ├── <a href="./proxyd">proxyd</a>: Configurable RPC request router and proxy
 </pre>
@@ -166,6 +166,4 @@ Then check out our list of [good first issues](https://github.com/mantlenetworki
 
 ## License
 
-Code forked from [`optimism`](https://github.com/ethereum-optimism/optimism) under the name [`optimism`](https://github.com/mantlenetworkio/bitnetwork/tree/master/l2geth) is licensed under the [GNU GPLv3](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60) in accordance with the [original license](https://github.com/ethereum-optimism/optimism/blob/master/COPYING).
-
-All other files within this repository are licensed under the [MIT License](https://github.com/mantlenetworkio/bitnetwork/blob/master/LICENSE) unless stated otherwise.
+Code forked from [`optimism`](https://github.com/ethereum-optimism/optimism) under the name [`optimism`](https://github.com/ethereum-optimism/optimism) is licensed under the [MIT License](https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt) in accordance with the [original license](https://github.com/ethereum/go-ethereum/blob/master/COPYING).
