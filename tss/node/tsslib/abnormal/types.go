@@ -2,8 +2,9 @@ package abnormal
 
 import (
 	"errors"
-	"github.com/binance-chain/tss-lib/tss"
 	"sync"
+
+	"github.com/binance-chain/tss-lib/tss"
 )
 
 const (
@@ -37,8 +38,8 @@ type Node struct {
 }
 
 type Abnormal struct {
-	FailReason   string `json:"fail_reason"`
-	IsUnicast    bool   `json:"is_broadcast"`
-	Nodes        []Node `json:"abnormal_peers,omitempty"`
+	FailReason   string  `json:"fail_reason"`
+	IsUnicast    bool    `json:"is_broadcast"`
+	Nodes        []*Node `json:"abnormal_peers,omitempty"`
 	AbnormalLock *sync.RWMutex
 }

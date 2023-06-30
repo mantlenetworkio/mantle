@@ -8,37 +8,40 @@ import (
 	"sync"
 )
 
-func NewNode(pk string, data, sig []byte) Node {
-	return Node{
+func NewNode(pk string, data, sig []byte) *Node {
+	return &Node{
 		Pubkey:    pk,
 		Data:      data,
 		Signature: sig,
 	}
 }
 
-func (n *Node) Equal(node Node) bool {
+func (n *Node) Equal(node *Node) bool {
+	if node == nil {
+		return false
+	}
 	if n.Pubkey == node.Pubkey && bytes.Equal(n.Signature, node.Signature) {
 		return true
 	}
 	return false
 }
 
-func NewAbnormal(reason string, nodes []Node) Abnormal {
-	return Abnormal{
+func NewAbnormal(reason string, nodes []*Node) *Abnormal {
+	return &Abnormal{
 		FailReason:   reason,
 		Nodes:        nodes,
 		AbnormalLock: &sync.RWMutex{},
 	}
 }
 
-func (a Abnormal) String() string {
+func (a *Abnormal) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("reason:" + a.FailReason + " is_unicast:" + strconv.FormatBool(a.IsUnicast) + "\n")
 	sb.WriteString(fmt.Sprintf("nodes:%+v\n", a.Nodes))
 	return sb.String()
 }
 
-func (a *Abnormal) SetAbnormal(reason string, nodes []Node, isUnicast bool) {
+func (a *Abnormal) SetAbnormal(reason string, nodes []*Node, isUnicast bool) {
 	a.AbnormalLock.Lock()
 	defer a.AbnormalLock.Unlock()
 	a.FailReason = reason
@@ -52,8 +55,8 @@ func (a *Abnormal) AlreadyAbnormal() bool {
 	return len(a.Nodes) > 0
 }
 
-// AddBlameNodes add nodes to the blame list
-func (a *Abnormal) AddAbnormalNodes(newNodes ...Node) {
+// AddAbnormalNodes add nodes to the abnormal node list
+func (a *Abnormal) AddAbnormalNodes(newNodes ...*Node) {
 	a.AbnormalLock.Lock()
 	defer a.AbnormalLock.Unlock()
 	for _, node := range newNodes {
