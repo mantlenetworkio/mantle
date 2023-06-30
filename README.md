@@ -70,28 +70,7 @@ Different parts of the Mantle tech stack are specialized to tackle specific issu
 
 </br>
 
-### Set up Local Environment
-
-Setting up local L1 and L2 nodes may be particularly useful for testing out Mantle SDK methods.
-
-1. Make sure your system has the following tools set up and running.
-   - [Git](https://git-scm.com/downloads) - to fetch node software
-   - [Node.js](https://nodejs.org/en/) - to run node instances
-   - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/) - for dependency management
-
-2. Run L1 and L2 node instances using the following commands.
-
-```sh
- git clone https://github.com/mantlenetworkio/mantle.git
- cd mantle/ops
- make up
- # check status
- make ps
-```
-
-Find more details on setting up your local development environment [here in this README.md](ops/README.local.md).
-
-dApps need to connect to nodes for fetching block data and sending transactions to the Mantle network. Our JSON-RPC API supports **HTTPS** and **WebSocket** connections.
+DApps need to connect to nodes for fetching block data and sending transactions to the Mantle network. Our JSON-RPC API supports **HTTPS** and **WebSocket** connections.
 
 |  Service  | URL                             |
 | :-------: | ------------------------------- |
@@ -139,7 +118,6 @@ main();
 
 The [SDK docs](https://sdk.mantle.xyz/index.html) provide complete reference of all the methods available as part of the Mantle SDK to facilitate interaction between applications and Mantle network.
 
-</br>
 
 </br>
 
@@ -175,7 +153,6 @@ root
 ├── <a href="./l2geth">l2geth</a>: Mantle client software, a fork of <a href="https://github.com/ethereum/go-ethereum/tree/v1.9.10">geth v1.9.10</a>  (deprecated for BEDROCK upgrade)
 ├── <a href="./l2geth-exporter">l2geth-exporter</a>: A prometheus exporter to collect/serve metrics from an L2 geth node
 ├── <a href="./proxyd">proxyd</a>: Configurable RPC request router and proxy
-├── <a href="./technical-documents">technical-documents</a>: audits and post-mortem documents
 </pre>
 
 </br>

@@ -29,7 +29,7 @@ We believe one of the things that makes Mantle special is its coherent design an
 
 In general, the smaller the diff the easier it will be for us to review quickly.
 
-In order to contribute, fork the appropriate branch, for non-breaking changes to production that is `develop` and for the next release that is normally `release/X.X.X` branch, see [details about our branching model](https://github.com/mantlenetworkio/mantle/blob/develop/README.md#branching-model-and-releases).
+In order to contribute, fork the appropriate branch. Our development branch is `develop`, and the latest release that is normally `release/X.X.X` branch, see [details about our branching model](https://github.com/mantlenetworkio/mantle/blob/main/CONTRIBUTING.md#branching-model-and-releases).
 
 Additionally, if you are writing a new feature, please ensure you add appropriate test cases.
 
@@ -69,7 +69,7 @@ Our update process takes the form of a PR merging the `release/X.X.X` branch int
 
 ### Development branch
 
-Our primary development branch is [`develop`](https://github.com/mantlenetworkio/mantle/tree/develop/).
+Our development branch is [`develop`](https://github.com/mantlenetworkio/mantle/tree/develop/).
 Changes that are not backwards compatible and all changes to contracts within `packages/contracts/contracts` MUST be directed towards `develop`.
 
 **Changes to contracts within `packages/contracts/contracts` are usually NOT considered backwards compatible and SHOULD be made against towards `develop` branch**.
