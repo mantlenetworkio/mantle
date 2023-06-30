@@ -5,6 +5,11 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"os"
+	"sort"
+	"strings"
+	"sync"
+
 	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
@@ -18,10 +23,6 @@ import (
 	storage2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"os"
-	"sort"
-	"strings"
-	"sync"
 )
 
 type TssServer struct {
@@ -63,6 +64,7 @@ func NewTss(
 	peerId, err := conversion.GetPeerIDFromPubKey(pubkeyHex)
 	if err != nil {
 		log.Error().Err(err).Msg("ERROR: fail to get peer id by pub key")
+		return nil, errors.New("ERROR: fail to get peer id by pub key")
 	}
 	log.Info().Msgf("peer id is (%s) \n", peerId)
 	stateManager, err := storage2.NewFileStateMgr(storageFolder)
