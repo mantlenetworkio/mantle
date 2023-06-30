@@ -52,9 +52,11 @@ type Config struct {
 	HsmCreden  string
 	HsmAddress string
 	// overhead
-	batchSizeBottom int
-	batchSizeCap    int
-	sizeGap         int
+	batchSizeBottom    int
+	batchSizeCap       int
+	sizeGap            int
+	stateRollupGasUsed *big.Int
+	dataRollupGasUsed  *big.Int
 	// Metrics config
 	MetricsEnabled          bool
 	MetricsHTTP             string
@@ -105,6 +107,8 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.batchSizeCap = ctx.GlobalInt(flags.BatchSizeCap.Name)
 	cfg.batchSizeBottom = ctx.GlobalInt(flags.BatchSizeBottom.Name)
 	cfg.sizeGap = ctx.GlobalInt(flags.SizeGap.Name)
+	cfg.stateRollupGasUsed = big.NewInt(ctx.GlobalInt64(flags.StateRollupGasUsed.Name))
+	cfg.dataRollupGasUsed = big.NewInt(ctx.GlobalInt64(flags.DataRollupGasUsed.Name))
 
 	if cfg.EnableHsm {
 		log.Info("gasoracle", "enable hsm", cfg.EnableHsm,

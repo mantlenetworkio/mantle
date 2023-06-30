@@ -53,6 +53,7 @@ func (p *Processor) Verify() {
 							logger.Error().Msgf("failed to verify block %s", err.Error())
 							RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "get error when verify ", err.Error())
 							p.wsClient.SendMsg(RpcResponse)
+							continue
 						}
 					} else {
 						hash, err := signMsgToHash(askRequest)
