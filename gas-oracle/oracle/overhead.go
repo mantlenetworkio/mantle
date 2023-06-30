@@ -128,12 +128,10 @@ func wrapUpdateOverhead(l2Backend DeployContractBackend, cfg *Config) (func(*big
 }
 
 func calculateJumpTable(diff *big.Int, cfg *Config) {
-	// fixed state rollup cost
-	var rollupOverhead = new(big.Int).SetUint64(2521687)
 	// data rollup cost
-	var sequencerOverhead = new(big.Int).Mul(diff, new(big.Int).SetUint64(137893))
+	var sequencerOverhead = new(big.Int).Mul(diff, cfg.dataRollupGasUsed)
 	// sum up
-	var OverheadGasUsedOnL1 = new(big.Int).Add(rollupOverhead, sequencerOverhead)
+	var OverheadGasUsedOnL1 = new(big.Int).Add(cfg.stateRollupGasUsed, sequencerOverhead)
 	// calculate jump table
 	for levelSize := cfg.batchSizeBottom; levelSize <= cfg.batchSizeCap; {
 		orderedSizes = append(orderedSizes, levelSize)
