@@ -34,7 +34,7 @@
 
 ## Introduction
 
-Mantle is a suite of Ethereum scaling solutions including an optimistic rollup and ZK rollup built using an iterative modular chain approach, and supported by BitDAO’s native token $BIT.
+Mantle is a suite of Ethereum scaling solutions including an optimistic rollup and ZK rollup built using an iterative modular chain approach, and supported by Mantle’s native token $MNT.
 
 It is designed to bolster support for hyper-scaled throughput decentralized applications (dApps) — from derivatives decentralized exchanges (DEXs), to gaming, to operations of decentralized autonomous organizations (DAOs).
 
@@ -118,7 +118,7 @@ npm init --yes
 yarn add -D @mantleio/sdk
 ```
 
-3. Create a `.js` script and get started by making a request, for instance, to fetch the current L1 gas price.
+3. Create a `<filename>.js` script and get started by making a request, for instance, to fetch the current L1 gas price.
 
 ```js
 const ethers = require("ethers")
@@ -140,30 +140,6 @@ main();
 The [SDK docs](https://sdk.mantle.xyz/index.html) provide complete reference of all the methods available as part of the Mantle SDK to facilitate interaction between applications and Mantle network.
 
 </br>
-
-### Using the Node RPC API
-
-You can invoke the API endpoints by sending `curl` requests as well. Let's look at an example of a simple curl request being sent to invoke the `rollup_gasPrices` method that returns a JSON object containing the L1 and L2 gas prices used by a [Sequencer](https://docs.mantle.xyz/for-validators/network-roles#sequencers) to calculate the transaction gas fees.
-
-> Want to get a better understanding of how gas fees are calculated on Mantle? Check out [the section on fee basics](https://docs.mantle.xyz/for-validators/transaction-fees-on-l2) in the tech docs.
-
-```sh
-curl -X POST --data '{"jsonrpc":"2.0","method":"rollup_gasPrices","params":[],"id":1}' <node url>
-```
-The response is of the form:
-
-```json
-{
-  "jsonrpc":"2.0",
-  "id":1,
-  "result":{
-    "l1GasPrice":"0x254aa66732",
-    "l2GasPrice":"0xf3792"
-  }
-}
-```
-
-> Check out [DEVELOP.md](./DEVELOP.md) for more detailed information on getting started with developing your apps using Mantle.
 
 </br>
 
@@ -198,7 +174,6 @@ root
 ├── <a href="./integration-tests">integration-tests</a>: Various integration tests for the Mantle network
 ├── <a href="./l2geth">l2geth</a>: Mantle client software, a fork of <a href="https://github.com/ethereum/go-ethereum/tree/v1.9.10">geth v1.9.10</a>  (deprecated for BEDROCK upgrade)
 ├── <a href="./l2geth-exporter">l2geth-exporter</a>: A prometheus exporter to collect/serve metrics from an L2 geth node
-├── <a href="./op-exporter">op-exporter</a>: A prometheus exporter to collect/serve metrics from an Mantle node
 ├── <a href="./proxyd">proxyd</a>: Configurable RPC request router and proxy
 ├── <a href="./technical-documents">technical-documents</a>: audits and post-mortem documents
 </pre>

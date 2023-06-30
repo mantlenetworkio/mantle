@@ -4,13 +4,13 @@
 
 There are plenty of ways to contribute, in particular we appreciate support in the following areas:
 
-- Reporting issues. For security issues see [Security policy](https://github.com/mantlenetworkio/.github/blob/master/SECURITY.md).
+- Reporting issues. For security issues see [Security policy](https://github.com/mantlenetworkio/mantle/blob/main/SECURITY.md).
 - Fixing and responding to existing issues. You can start off with those tagged ["good first issue"](https://github.com/mantlenetworkio/mantle/contribute) which are meant as introductory issues for external contributors.
-- Improving the [community site](https://community.mantle.io/)[documentation](https://github.com/mantlenetworkio/documents) and [tutorials](https://github.com/mantlenetworkio/tutorial).
-- Become an "Optimizer" and answer questions in the [mantle Discord](https://discord.com/invite/jrnFEvq).
-- Get involved in the protocol design process by proposing changes or new features or write parts of the spec yourself in the [optimistic-specs repo](https://github.com/mantlenetworkio/optimistic-specs).
+- Improving the [documentation](https://github.com/mantlenetworkio/documents) and [tutorials](https://github.com/mantlenetworkio/mantle-tutorial).
+- Become an "Mantler" and answer questions in the [mantle Discord](https://discord.com/invite/0xMantle).
+- Get involved in the protocol design process by proposing changes or new features or write parts of the spec yourself in the [mantle-specs](https://docs.mantle.xyz/network/intro/overview).
 
-Note that we have a [Code of Conduct](https://github.com/mantlenetworkio/.github/blob/master/CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
+Note that we have a [Code of Conduct](https://github.com/mantlenetworkio/.github/blob/main/CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
 
 
 ## Contribution Guidelines
@@ -33,8 +33,6 @@ In order to contribute, fork the appropriate branch, for non-breaking changes to
 
 Additionally, if you are writing a new feature, please ensure you add appropriate test cases.
 
-Follow the [Development Quick Start](#development-quick-start) to set up your local development environment.
-
 We recommend using the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format on commit messages.
 
 Unless your PR is ready for immediate review and merging, please mark it as 'draft' (or simply do not open a PR yet).
@@ -44,56 +42,43 @@ Unless your PR is ready for immediate review and merging, please mark it as 'dra
 ### Response time:
 We aim to provide a meaningful response to all PRs and issues from external contributors within 2 business days.
 
-### Changesets
 
-We use [changesets](https://github.com/atlassian/changesets) to manage releases of our various packages.
-You *must* include a `changeset` file in your PR when making a change that would require a new package release.
-
-Adding a `changeset` file is easy:
-
-1. Navigate to the root of the monorepo.
-2. Run `yarn changeset`. You'll be prompted to select packages to include in the changeset. Use the arrow keys to move the cursor up and down, hit the `spacebar` to select a package, and hit `enter` to confirm your selection. Select *all* packages that require a new release as a result of your PR.
-3. Once you hit `enter` you'll be prompted to decide whether your selected packages need a `major`, `minor`, or `patch` release. We follow the [Semantic Versioning](https://semver.org/) scheme. Please avoid using `major` releases for any packages that are still in version `0.y.z`.
-4. Commit your changeset and push it into your PR. The changeset bot will notice your changeset file and leave a little comment to this effect on GitHub.
-5. Voilà, c'est fini!
-
-### Rebasing
-
-We use the `git rebase` command to keep our commit history tidy.
-Rebasing is an easy way to make sure that each PR includes a series of clean commits with descriptive commit messages
-See [this tutorial](https://docs.gitlab.com/ee/topics/git/git_rebase.html) for a detailed explanation of `git rebase` and how you should use it to maintain a clean commit history.
-
-
-##Branch Rule
-
-
+## Branching Model
 
 ### Active Branches
 
-| Branch          | Status                                                                           |
-| --------------- | -------------------------------------------------------------------------------- |
-| [master](https://github.com/mantlenetworkio/bitnetwork/tree/master/)    | Accepts PRs from other branch  when we intend to deploy to testnet.                                      |
-| {username}/{module-name}-{develop-feature}  | Contributors need to build the branch follow the below rules,just like `alice/l2geth-xxx`.Actually,they means the `develop` branch.
-| release/X.X.X                                                                          | For now ,we do not support the release branch util the launch of Mantle TestNet |
-
-#### The `master` branch
+| Branch                                                              | Status                                                                                                    |
+|---------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| [main](https://github.com/mantlenetworkio/mantle/tree/main/)        | Accepts PRs from `release/X.X.X` when we intend to deploy to mainnet/testnet.                             |
+| [develop](https://github.com/mantlenetworkio/mantle/tree/develop/)  | Accepts PRs for all changes, particularly those not backwards compatible with `release/X.X.X` and `main`. |
+| release/X.X.X                                                       | Create a release branch from the `develop` branch, and the release branch only receives related bugs.     |
 
 
+### Overview
 
+We generally follow [this Git branching model](https://nvie.com/posts/a-successful-git-branching-model/).
+Please read the linked post if you're planning to make frequent PRs into this repository (e.g., people working at/with Mantle).
 
-The `master` branch contains the code for our latest contributions for Mantle.
-Updates from `master` always come from the `develop` branch just like `alice/l2geth-xxx`.
-Our update process takes the form of a PR merging the `develop` branch into the `master` branch.
+### Production branch
 
-#### The `develop` branch
+Our production branch is `main`.
+The `main` branch contains the code for our latest "stable" releases.
+Updates from `main` **always** come from the `release/X.X.X` branch.
+We only ever update the `main` branch when we intend to deploy code within the `release/X.X.X` to the Mantle mainnet/testnet.
+Our update process takes the form of a PR merging the `release/X.X.X` branch into the `main` branch.
 
-Mantle is the project only
+### Development branch
 
-Our primary development branch is [`develop`](https://github.com/mantlenetworkio/bitnetwork/tree/develop/).
-`develop` contains the most up-to-date software that remains backwards compatible with our latest experimental [network deployments](https://community.bitnetwork.io/docs/useful-tools/networks/).
-If you're making a backwards compatible change, please direct your pull request towards `develop`.
+Our primary development branch is [`develop`](https://github.com/mantlenetworkio/mantle/tree/develop/).
+Changes that are not backwards compatible and all changes to contracts within `packages/contracts/contracts` MUST be directed towards `develop`.
 
-**Changes to contracts within `packages/contracts/contracts` are usually NOT considered backwards compatible and SHOULD be made against a release candidate branch**.
-Some exceptions to this rule exist for cases in which we absolutely must deploy some new contract after a release candidate branch has already been fully deployed.
-If you're changing or adding a contract and you're unsure about which branch to make a PR into, default to using the latest release candidate branch.
-See below for info about release candidate branches.
+**Changes to contracts within `packages/contracts/contracts` are usually NOT considered backwards compatible and SHOULD be made against towards `develop` branch**.
+If you're changing or adding a contract and you're unsure about which branch to make a PR into, default to using the `develop` branch.
+
+### Release candidate branches
+
+Branches marked `release/X.X.X` are **release candidate branches**.
+Release candidates are merged into `main` once they've been fully deployed.
+We may sometimes have more than one active `release/X.X.X` branch if we're in the middle of a deployment.
+`release/X.X.X` contains the most up-to-date software that remains backwards compatible with our latest [experimental network](https://docs.mantle.xyz/network/intro/quick-start).
+See table in the **Active Branches** section above to find the right branch to target.
