@@ -173,7 +173,7 @@ func (m *Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		return responseBytes, nil
 	}
 
-	tssInfo, err := m.tssQueryService.QueryActiveInfo()
+	tssInfo, err := m.tssQueryService.QueryActiveInfo(false)
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +287,7 @@ func (m *Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 func (m *Manager) SignRollBack(request tss.SignStateRequest) ([]byte, error) {
 	log.Info("received roll back request", "request", request.String())
 
-	tssInfo, err := m.tssQueryService.QueryActiveInfo()
+	tssInfo, err := m.tssQueryService.QueryActiveInfo(false)
 	if err != nil {
 		return nil, err
 	}

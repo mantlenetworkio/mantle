@@ -61,7 +61,7 @@ func (p *Processor) handleSlashing(si slash.SlashingInfo) {
 		return
 	}
 
-	currentTssInfo, err := p.tssQueryService.QueryActiveInfo()
+	currentTssInfo, err := p.tssQueryService.QueryActiveInfo(false)
 	if err != nil {
 		log.Error("failed to query active tss info", "err", err)
 		return

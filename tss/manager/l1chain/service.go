@@ -42,7 +42,7 @@ func NewQueryService(url, tssGroupContractAddress string, confirmBlocks int, sto
 	}
 }
 
-func (q QueryService) QueryActiveInfo() (types.TssCommitteeInfo, error) {
+func (q QueryService) QueryActiveInfo(isPermission bool) (types.TssCommitteeInfo, error) {
 	currentBlockNumber, err := q.ethClient.BlockNumber(context.Background())
 	if err != nil {
 		return types.TssCommitteeInfo{}, err
@@ -51,8 +51,10 @@ func (q QueryService) QueryActiveInfo() (types.TssCommitteeInfo, error) {
 	if err != nil {
 		return types.TssCommitteeInfo{}, err
 	}
-	if len(cpk) == 0 {
-		return types.TssCommitteeInfo{}, errors.New("cpk is not confirmed")
+	if !isPermission {
+		if len(cpk) == 0 {
+			return types.TssCommitteeInfo{}, errors.New("cpk is not confirmed")
+		}
 	}
 	unmarshalledCPK, err := crypto.UnmarshalPubkey(append([]byte{0x04}, cpk...))
 	if err != nil {
