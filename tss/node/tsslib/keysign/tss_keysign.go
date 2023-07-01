@@ -95,16 +95,13 @@ func (tKeySign *TssKeySign) SignMessage(msgToSign []byte, localStateItem storage
 
 	abnormalMgr := tKeySign.tssCommonStruct.GetAbnormalMgr()
 	partyIDMap := conversion.SetupPartyIDMap(partiesID)
-	err = conversion.SetupIDMaps(partyIDMap, tKeySign.tssCommonStruct.GetPartyIDtoP2PID())
+	partyIDtoP2PIDMap, err := conversion.GeneratePartyIDtoP2PIDMaps(partyIDMap)
 	if err != nil {
-		tKeySign.logger.Error().Err(err).Msgf("error in creating mapping between partyID and P2P ID")
+		tKeySign.logger.Err(err).Msgf("error in creating mapping between partyID and P2P ID")
 		return nil, err
 	}
-	err = conversion.SetupIDMaps(partyIDMap, abnormalMgr.PartyIDtoP2PID)
-	if err != nil {
-		tKeySign.logger.Error().Err(err).Msgf("error in creating mapping between partyID and P2P ID")
-		return nil, err
-	}
+	tKeySign.tssCommonStruct.SetPartyIDtoP2PID(partyIDtoP2PIDMap)
+	abnormalMgr.PartyIDtoP2PID = partyIDtoP2PIDMap
 
 	tKeySign.tssCommonStruct.SetPartyInfo(&abnormal.PartyInfo{
 		Party:      keySignParty,

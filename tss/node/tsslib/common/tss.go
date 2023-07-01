@@ -161,14 +161,23 @@ func (t *TssCommon) GetThreshHold() int {
 	return t.threshHold
 }
 
-func (t *TssCommon) GetPartyIDtoP2PID() map[string]peer.ID {
-	copiedMap := make(map[string]peer.ID)
+func (t *TssCommon) SetPartyIDtoP2PID(newMap map[string]peer.ID) {
+	t.partyIDtoP2PIDLock.Lock()
+	defer t.partyIDtoP2PIDLock.Unlock()
 
+	for k, v := range newMap {
+		t.partyIDtoP2PID[k] = v
+	}
+}
+
+func (t *TssCommon) GetPartyIDtoP2PID() map[string]peer.ID {
 	t.partyIDtoP2PIDLock.RLock()
+	defer t.partyIDtoP2PIDLock.RUnlock()
+
+	copiedMap := make(map[string]peer.ID)
 	for k, v := range t.partyIDtoP2PID {
 		copiedMap[k] = v
 	}
-	t.partyIDtoP2PIDLock.RUnlock()
 	return copiedMap
 }
 
@@ -338,7 +347,7 @@ func (t *TssCommon) updateLocal(wireMsg *messages.WireMessage) error {
 			return nil
 		}()
 		if err != nil {
-			t.logger.Error().Msgf("the malicious party (party ID:%s) try to send incorrect message to me (party ID:%s)",
+			t.logger.Err(err).Msgf("the malicious party (party ID:%s) try to send incorrect message to me (party ID:%s)",
 				partyID.Id, localMsgParty.PartyID().Id)
 			return err
 		}
