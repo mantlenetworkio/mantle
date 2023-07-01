@@ -100,7 +100,7 @@ func (tKeySign *TssKeySign) SignMessage(msgToSign []byte, localStateItem storage
 		tKeySign.logger.Err(err).Msgf("error in creating mapping between partyID and P2P ID")
 		return nil, err
 	}
-	tKeySign.tssCommonStruct.SetPartyIDtoP2PID(partyIDtoP2PIDMap)
+	tKeySign.tssCommonStruct.InsertPartyIDtoP2PID(partyIDtoP2PIDMap)
 	abnormalMgr.PartyIDtoP2PID = partyIDtoP2PIDMap
 
 	tKeySign.tssCommonStruct.SetPartyInfo(&abnormal.PartyInfo{

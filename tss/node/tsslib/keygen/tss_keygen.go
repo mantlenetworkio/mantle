@@ -113,7 +113,7 @@ func (tKeyGen *TssKeyGen) GenerateNewKey(keygenReq Request) (*bcrypto.ECPoint, e
 		tKeyGen.logger.Err(err).Msgf("error in creating mapping between partyID and P2P ID")
 		return nil, err
 	}
-	tKeyGen.tssCommonStruct.SetPartyIDtoP2PID(partyIDtoP2PIDMaps)
+	tKeyGen.tssCommonStruct.InsertPartyIDtoP2PID(partyIDtoP2PIDMaps)
 	// we never run multi keygen, so the moniker is set to default empty value
 	partyInfo := &abnormal.PartyInfo{
 		Party:      keyGenParty,
