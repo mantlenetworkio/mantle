@@ -50,7 +50,7 @@ func (m *Manager) NodeSyncAbnormal(keys []string, onlinePeers []peer.ID) (*Abnor
 		found := false
 		peerID, err := conversion2.GetPeerIDFromPubKey(item)
 		if err != nil {
-			return abnormal, fmt.Errorf("fail to get peer id from pub key")
+			return nil, fmt.Errorf("fail to get peer id from pub key")
 		}
 		for _, p := range onlinePeers {
 			if p == peerID {

@@ -17,10 +17,10 @@ type Manager struct {
 	roundMgr          *RoundMgr
 	partyInfo         *PartyInfo
 	PartyIDtoP2PID    map[string]peer.ID
-	lastMsgLocker     *sync.RWMutex
+	lastMsgLocker     sync.RWMutex
 	lastMsg           tss.Message
 	acceptedShares    map[RoundInfo][]string
-	acceptShareLocker *sync.Mutex
+	acceptShareLocker sync.Mutex
 	localPartyID      string
 }
 
@@ -34,9 +34,9 @@ func NewAbnormalManager() *Manager {
 		shareMgr:          NewTssShareMgr(),
 		roundMgr:          NewTssRoundMgr(),
 		Abnormal:          abnormal,
-		lastMsgLocker:     &sync.RWMutex{},
+		lastMsgLocker:     sync.RWMutex{},
 		acceptedShares:    make(map[RoundInfo][]string),
-		acceptShareLocker: &sync.Mutex{},
+		acceptShareLocker: sync.Mutex{},
 	}
 }
 
