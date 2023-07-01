@@ -90,12 +90,12 @@ func (tKeySign *TssKeySign) SignMessage(msgToSign []byte, localStateItem storage
 	tKeySign.logger.Info().Msgf("message: (%s) keysign parties: %+v", m.String(), parties)
 	eachLocalPartyID.Moniker = moniker
 	tKeySign.localParties = nil
-	params := tss.NewParameters(btcec.S256(), ctx, eachLocalPartyID, len(partiesID), tKeySign.GetTssCommonStruct().GetThresHold())
+	params := tss.NewParameters(btcec.S256(), ctx, eachLocalPartyID, len(partiesID), tKeySign.GetTssCommonStruct().GetThreshHold())
 	keySignParty := signing.NewLocalParty(m, params, localStateItem.LocalData, outCh, endCh)
 
 	abnormalMgr := tKeySign.tssCommonStruct.GetAbnormalMgr()
 	partyIDMap := conversion.SetupPartyIDMap(partiesID)
-	err = conversion.SetupIDMaps(partyIDMap, tKeySign.tssCommonStruct.PartyIDtoP2PID)
+	err = conversion.SetupIDMaps(partyIDMap, tKeySign.tssCommonStruct.GetPartyIDtoP2PID())
 	if err != nil {
 		tKeySign.logger.Error().Err(err).Msgf("error in creating mapping between partyID and P2P ID")
 		return nil, err
@@ -114,7 +114,7 @@ func (tKeySign *TssKeySign) SignMessage(msgToSign []byte, localStateItem storage
 	abnormalMgr.SetPartyInfo(keySignParty, partyIDMap)
 
 	tKeySign.tssCommonStruct.P2PPeersLock.Lock()
-	tKeySign.tssCommonStruct.P2PPeers = conversion.GetPeersID(tKeySign.tssCommonStruct.PartyIDtoP2PID, tKeySign.tssCommonStruct.GetLocalPeerID())
+	tKeySign.tssCommonStruct.P2PPeers = conversion.GetPeersID(tKeySign.tssCommonStruct.GetPartyIDtoP2PID(), tKeySign.tssCommonStruct.GetLocalPeerID())
 	tKeySign.tssCommonStruct.P2PPeersLock.Unlock()
 	var keySignWg sync.WaitGroup
 	keySignWg.Add(2)

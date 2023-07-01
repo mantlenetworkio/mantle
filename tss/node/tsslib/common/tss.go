@@ -21,42 +21,52 @@ import (
 )
 
 type TssCommon struct {
-	conf                        TssConfig
-	logger                      zerolog.Logger
-	partyLock                   *sync.Mutex
-	partyInfo                   *abnormal2.PartyInfo
-	PartyIDtoP2PID              map[string]peer.ID
-	unConfirmedMsgLock          *sync.Mutex
-	unConfirmedMessages         map[string]*LocalCacheItem
-	localPeerID                 string
-	broadcastChannel            chan *messages.BroadcastMsgChan
-	TssMsg                      chan *p2p.Message
-	P2PPeersLock                *sync.RWMutex
-	P2PPeers                    []peer.ID // most of tss message are broadcast, we store the peers ID to avoid iterating
-	msgID                       string
-	privateKey                  *ecdsa.PrivateKey
-	taskDone                    chan struct{}
-	abnormalMgr                 *abnormal2.Manager
-	finishedPeers               map[string]bool
-	culprits                    []*tss.PartyID
-	culpritsLock                *sync.RWMutex
-	cachedWireBroadcastMsgLists *sync.Map
-	cachedWireUnicastMsgLists   *sync.Map
-	thresHold                   int
+	conf   TssConfig
+	logger zerolog.Logger
+
+	partyLock sync.RWMutex
+	partyInfo *abnormal2.PartyInfo
+
+	partyIDtoP2PIDLock sync.RWMutex
+	partyIDtoP2PID     map[string]peer.ID
+
+	unConfirmedMsgLock  sync.RWMutex
+	unConfirmedMessages map[string]*LocalCacheItem
+
+	localPeerID      string
+	broadcastChannel chan *messages.BroadcastMsgChan
+	TssMsg           chan *p2p.Message
+
+	P2PPeersLock sync.RWMutex
+	P2PPeers     []peer.ID
+
+	msgID         string
+	privateKey    *ecdsa.PrivateKey
+	taskDone      chan struct{}
+	abnormalMgr   *abnormal2.Manager
+	finishedPeers map[string]bool
+
+	culpritsLock sync.RWMutex
+	culprits     []*tss.PartyID
+
+	cachedWireBroadcastMsgLists sync.Map
+	cachedWireUnicastMsgLists   sync.Map
+	threshHold                  int
 }
 
 func NewTssCommon(peerID string, broadcastChannel chan *messages.BroadcastMsgChan, conf TssConfig, msgID string, privKey *ecdsa.PrivateKey, thresHold int) *TssCommon {
 	return &TssCommon{
 		conf:                        conf,
 		logger:                      log.With().Str("module", "tsscommon").Logger(),
-		partyLock:                   &sync.Mutex{},
+		partyLock:                   sync.RWMutex{},
 		partyInfo:                   nil,
-		PartyIDtoP2PID:              make(map[string]peer.ID),
-		unConfirmedMsgLock:          &sync.Mutex{},
+		partyIDtoP2PIDLock:          sync.RWMutex{},
+		partyIDtoP2PID:              make(map[string]peer.ID),
+		unConfirmedMsgLock:          sync.RWMutex{},
 		unConfirmedMessages:         make(map[string]*LocalCacheItem),
 		broadcastChannel:            broadcastChannel,
 		TssMsg:                      make(chan *p2p.Message),
-		P2PPeersLock:                &sync.RWMutex{},
+		P2PPeersLock:                sync.RWMutex{},
 		P2PPeers:                    nil,
 		msgID:                       msgID,
 		localPeerID:                 peerID,
@@ -64,10 +74,10 @@ func NewTssCommon(peerID string, broadcastChannel chan *messages.BroadcastMsgCha
 		taskDone:                    make(chan struct{}),
 		abnormalMgr:                 abnormal2.NewAbnormalManager(),
 		finishedPeers:               make(map[string]bool),
-		culpritsLock:                &sync.RWMutex{},
-		cachedWireBroadcastMsgLists: &sync.Map{},
-		cachedWireUnicastMsgLists:   &sync.Map{},
-		thresHold:                   thresHold,
+		culpritsLock:                sync.RWMutex{},
+		cachedWireBroadcastMsgLists: sync.Map{},
+		cachedWireUnicastMsgLists:   sync.Map{},
+		threshHold:                  thresHold,
 	}
 }
 
@@ -147,8 +157,19 @@ func (t *TssCommon) GetTaskDone() chan struct{} {
 	return t.taskDone
 }
 
-func (t *TssCommon) GetThresHold() int {
-	return t.thresHold
+func (t *TssCommon) GetThreshHold() int {
+	return t.threshHold
+}
+
+func (t *TssCommon) GetPartyIDtoP2PID() map[string]peer.ID {
+	copiedMap := make(map[string]peer.ID)
+
+	t.partyIDtoP2PIDLock.RLock()
+	for k, v := range t.partyIDtoP2PID {
+		copiedMap[k] = v
+	}
+	t.partyIDtoP2PIDLock.RUnlock()
+	return copiedMap
 }
 
 func (t *TssCommon) GetAbnormalMgr() *abnormal2.Manager {
@@ -162,8 +183,8 @@ func (t *TssCommon) SetPartyInfo(partyInfo *abnormal2.PartyInfo) {
 }
 
 func (t *TssCommon) getPartyInfo() *abnormal2.PartyInfo {
-	t.partyLock.Lock()
-	defer t.partyLock.Unlock()
+	t.partyLock.RLock()
+	defer t.partyLock.RUnlock()
 	return t.partyInfo
 }
 
@@ -248,7 +269,9 @@ func (t *TssCommon) updateLocal(wireMsg *messages.WireMessage) error {
 		return fmt.Errorf("get message from unknown party %s", partyID.Id)
 	}
 
-	dataOwnerPeerID, ok := t.PartyIDtoP2PID[wireMsg.Routing.From.Id]
+	t.partyIDtoP2PIDLock.RLock()
+	dataOwnerPeerID, ok := t.partyIDtoP2PID[wireMsg.Routing.From.Id]
+	t.partyIDtoP2PIDLock.RUnlock()
 	if !ok {
 		t.logger.Error().Msg("fail to find the peer ID of this party")
 		return errors.New("fail to find the peer")
@@ -306,13 +329,20 @@ func (t *TssCommon) updateLocal(wireMsg *messages.WireMessage) error {
 			}
 			return false
 		}
-		t.culpritsLock.RLock()
-		if len(t.culprits) != 0 && partyInlist(partyID, t.culprits) {
-			t.logger.Error().Msgf("the malicious party (party ID:%s) try to send incorrect message to me (party ID:%s)", partyID.Id, localMsgParty.PartyID().Id)
-			t.culpritsLock.RUnlock()
-			return errors.New("tss share verification failed")
+		err = func() error {
+			t.culpritsLock.RLock()
+			defer t.culpritsLock.RUnlock()
+			if len(t.culprits) != 0 && partyInlist(partyID, t.culprits) {
+				return errors.New("tss share verification failed")
+			}
+			return nil
+		}()
+		if err != nil {
+			t.logger.Error().Msgf("the malicious party (party ID:%s) try to send incorrect message to me (party ID:%s)",
+				partyID.Id, localMsgParty.PartyID().Id)
+			return err
 		}
-		t.culpritsLock.RUnlock()
+
 		job := newJob(localMsgParty, bulkMsg.WiredBulkMsg, round.MsgIdentifier, partyID, bulkMsg.Routing.IsBroadcast)
 		tssJobChan <- job
 	}
@@ -361,7 +391,9 @@ func (t *TssCommon) sendBulkMsg(wiredMsgType string, tssMsgType messages.TSSMess
 		t.P2PPeersLock.RUnlock()
 	} else {
 		for _, each := range r.To {
-			peerID, ok := t.PartyIDtoP2PID[each.Id]
+			t.partyIDtoP2PIDLock.RLock()
+			peerID, ok := t.partyIDtoP2PID[each.Id]
+			t.partyIDtoP2PIDLock.RUnlock()
 			if !ok {
 				t.logger.Error().Msg("error in find the P2P ID")
 				continue
@@ -449,7 +481,9 @@ func (t *TssCommon) removeKey(key string) {
 
 func (t *TssCommon) hashCheck(localCacheItem *LocalCacheItem, threshold int) error {
 	dataOwner := localCacheItem.Msg.Routing.From
-	dataOwnerP2PID, ok := t.PartyIDtoP2PID[dataOwner.Id]
+	t.partyIDtoP2PIDLock.RLock()
+	dataOwnerP2PID, ok := t.partyIDtoP2PID[dataOwner.Id]
+	t.partyIDtoP2PIDLock.RUnlock()
 	if !ok {
 		t.logger.Warn().Msgf("error in find the data Owner P2PID\n")
 		return errors.New("error in find the data Owner P2PID")
@@ -622,8 +656,8 @@ func (t *TssCommon) processTSSMsg(wireMsg *messages.WireMessage, msgType message
 }
 
 func (t *TssCommon) TryGetLocalCacheItem(key string) *LocalCacheItem {
-	t.unConfirmedMsgLock.Lock()
-	defer t.unConfirmedMsgLock.Unlock()
+	t.unConfirmedMsgLock.RLock()
+	defer t.unConfirmedMsgLock.RUnlock()
 	localCacheItem, ok := t.unConfirmedMessages[key]
 	if !ok {
 		return nil

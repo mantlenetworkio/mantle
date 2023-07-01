@@ -90,7 +90,7 @@ func (tKeyGen *TssKeyGen) GenerateNewKey(keygenReq Request) (*bcrypto.ECPoint, e
 	keyGenLocalStateItem := storage2.KeygenLocalState{
 		ParticipantKeys: tKeyGen.ParticipantKeys,
 		LocalPartyKey:   tKeyGen.localNodePubKey,
-		Threshold:       tKeyGen.tssCommonStruct.GetThresHold(),
+		Threshold:       tKeyGen.tssCommonStruct.GetThreshHold(),
 	}
 
 	if err != nil {
@@ -108,7 +108,7 @@ func (tKeyGen *TssKeyGen) GenerateNewKey(keygenReq Request) (*bcrypto.ECPoint, e
 	abnormalMgr := tKeyGen.tssCommonStruct.GetAbnormalMgr()
 	keyGenParty := keygen.NewLocalParty(params, outCh, endCh, *tKeyGen.preParams)
 	partyIDMap := conversion.SetupPartyIDMap(partiesID)
-	err1 := conversion.SetupIDMaps(partyIDMap, tKeyGen.tssCommonStruct.PartyIDtoP2PID)
+	err1 := conversion.SetupIDMaps(partyIDMap, tKeyGen.tssCommonStruct.GetPartyIDtoP2PID())
 	if err1 != nil {
 		tKeyGen.logger.Error().Msgf("error in creating mapping between partyID and P2P ID")
 		return nil, err
@@ -122,7 +122,7 @@ func (tKeyGen *TssKeyGen) GenerateNewKey(keygenReq Request) (*bcrypto.ECPoint, e
 	tKeyGen.tssCommonStruct.SetPartyInfo(partyInfo)
 	abnormalMgr.SetPartyInfo(keyGenParty, partyIDMap)
 	tKeyGen.tssCommonStruct.P2PPeersLock.Lock()
-	tKeyGen.tssCommonStruct.P2PPeers = conversion.GetPeersID(tKeyGen.tssCommonStruct.PartyIDtoP2PID, tKeyGen.tssCommonStruct.GetLocalPeerID())
+	tKeyGen.tssCommonStruct.P2PPeers = conversion.GetPeersID(tKeyGen.tssCommonStruct.GetPartyIDtoP2PID(), tKeyGen.tssCommonStruct.GetLocalPeerID())
 	tKeyGen.tssCommonStruct.P2PPeersLock.Unlock()
 	var keyGenWg sync.WaitGroup
 	keyGenWg.Add(2)
