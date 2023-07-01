@@ -47,6 +47,12 @@ type Base struct {
 	// tssRollbackSignal indicate tss group force rollback or send signal to rollback l2geth
 	// due to a fork state root between sequencer and verifier
 	tssRollbackSignal prometheus.Gauge
+
+	// ctcRollupTimeDuration number of sequencer and enqueue rollup time duration
+	ctcRollupTimeDuration prometheus.Gauge
+
+	// sccRollupTimeDuration state root rollup time duration
+	sccRollupTimeDuration prometheus.Gauge
 }
 
 func NewBase(serviceName, subServiceName string) *Base {
@@ -103,6 +109,16 @@ func NewBase(serviceName, subServiceName string) *Base {
 		tssRollbackSignal: promauto.NewGauge(prometheus.GaugeOpts{
 			Name:      "tss_rollback_signal",
 			Help:      "l2 rollback signal to indicate there is a fork state between sequencer and verifier",
+			Subsystem: subsystem,
+		}),
+		ctcRollupTimeDuration: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "ctc_rollup_time_duration",
+			Help:      "",
+			Subsystem: subsystem,
+		}),
+		sccRollupTimeDuration: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "scc_rollup_time_duration",
+			Help:      "state root rollup time duration",
 			Subsystem: subsystem,
 		}),
 	}
@@ -164,6 +180,16 @@ func (b *Base) BatchConfirmationTimeMs() prometheus.Gauge {
 // TssRollbackSignal tracks the signal due to state fork between sequencer and varifier
 func (b *Base) TssRollbackSignal() prometheus.Gauge {
 	return b.tssRollbackSignal
+}
+
+// CtcRollupTimeDuration number of sequencer and enqueue rollup time duration
+func (b *Base) CtcRollupTimeDuration() prometheus.Gauge {
+	return b.ctcRollupTimeDuration
+}
+
+// SccRollupTimeDuration state root rollup time duration
+func (b *Base) SccRollupTimeDuration() prometheus.Gauge {
+	return b.sccRollupTimeDuration
 }
 
 // MakeSubsystemName builds the subsystem name for a group of metrics, which

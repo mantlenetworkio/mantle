@@ -644,6 +644,7 @@ func (c *Challenger) eventLoop() {
 					log.Info("MtChallenger get rollup store id", "DataStoreId", dataStoreId.DataStoreId)
 					continue
 				}
+				c.Cfg.Metrics.DataStoreId().Set(float64(dataStoreId.DataStoreId))
 				store, err := c.getDataStoreById(strconv.Itoa(int(dataStoreId.DataStoreId)))
 				if err != nil {
 					log.Error("MtChallenger get data store fail", "err", err)
