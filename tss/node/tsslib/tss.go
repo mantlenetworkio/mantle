@@ -5,6 +5,11 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"os"
+	"sort"
+	"strings"
+	"sync"
+
 	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
@@ -18,10 +23,6 @@ import (
 	storage2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"os"
-	"sort"
-	"strings"
-	"sync"
 )
 
 type TssServer struct {
@@ -74,13 +75,13 @@ func NewTss(
 	if shamirConfig.Enable {
 		shamirManager, err = storage2.NewShamirMgr(shamirConfig)
 		if err != nil {
-			log.Error().Err(err).Msgf("fail to create shamir manager :%w", err)
+			log.Error().Err(err).Msgf("fail to create shamir manager :%v", err)
 			return nil, errors.New("fail to create shamir manager")
 		}
 	} else if secretsEnable {
 		secretsManager, err = storage2.NewSecretsMgr(secretId)
 		if err != nil {
-			log.Error().Err(err).Msgf("fail to create secrets manager :%w", err)
+			log.Error().Err(err).Msgf("fail to create secrets manager :%v", err)
 			return nil, errors.New("fail to create secrets manager")
 		}
 	}
