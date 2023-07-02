@@ -76,13 +76,13 @@ func NewTss(
 	if shamirConfig.Enable {
 		shamirManager, err = storage2.NewShamirMgr(shamirConfig)
 		if err != nil {
-			log.Error().Err(err).Msgf("fail to create shamir manager :%w", err)
+			log.Error().Err(err).Msgf("fail to create shamir manager :%v", err)
 			return nil, errors.New("fail to create shamir manager")
 		}
 	} else if secretsEnable {
 		secretsManager, err = storage2.NewSecretsMgr(secretId)
 		if err != nil {
-			log.Error().Err(err).Msgf("fail to create secrets manager :%w", err)
+			log.Error().Err(err).Msgf("fail to create secrets manager :%v", err)
 			return nil, errors.New("fail to create secrets manager")
 		}
 	}
