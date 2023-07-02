@@ -5,6 +5,11 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"os"
+	"sort"
+	"strings"
+	"sync"
+
 	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
@@ -19,10 +24,6 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/node/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"os"
-	"sort"
-	"strings"
-	"sync"
 )
 
 type TssServer struct {
@@ -66,6 +67,7 @@ func NewTss(
 	peerId, err := conversion.GetPeerIDFromPubKey(pubkeyHex)
 	if err != nil {
 		log.Error().Err(err).Msg("ERROR: fail to get peer id by pub key")
+		return nil, errors.New("ERROR: fail to get peer id by pub key")
 	}
 	log.Info().Msgf("peer id is (%s) \n", peerId)
 
@@ -82,13 +84,13 @@ func NewTss(
 	if shamirConfig.Enable {
 		shamirManager, err = storage2.NewShamirMgr(shamirConfig)
 		if err != nil {
-			log.Error().Err(err).Msgf("fail to create shamir manager :%w", err)
+			log.Error().Err(err).Msgf("fail to create shamir manager :%v", err)
 			return nil, errors.New("fail to create shamir manager")
 		}
 	} else if secretsEnable {
 		secretsManager, err = storage2.NewSecretsMgr(secretId)
 		if err != nil {
-			log.Error().Err(err).Msgf("fail to create secrets manager :%w", err)
+			log.Error().Err(err).Msgf("fail to create secrets manager :%v", err)
 			return nil, errors.New("fail to create secrets manager")
 		}
 	}
@@ -199,9 +201,10 @@ func (t *TssServer) Stop() {
 	// stop the p2p and finish the p2p wait group
 	err := t.p2pCommunication.Stop()
 	if err != nil {
-		t.logger.Error().Msgf("error in shutdown the p2p server")
+		t.logger.Err(err).Msgf("error in shutdown the p2p server")
+	} else {
+		log.Info().Msg("The Tss and p2p server has been stopped successfully")
 	}
-	log.Info().Msg("The Tss and p2p server has been stopped successfully")
 }
 
 func (t *TssServer) GetLocalPeerID() string {

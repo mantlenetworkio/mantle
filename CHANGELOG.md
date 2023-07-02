@@ -1,4 +1,34 @@
 # Changelog
+
+## [v0.4.2-alpha.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.2-alpha.0) - 2023-06-27
+
+### Features
+- Gas Oracle
+  - Add additional sources for exchange rates and optimize the calculation method for token ratio([#1014](https://github.com/mantlenetworkio/mantle/pull/1014),[#1108](https://github.com/mantlenetworkio/mantle/pull/1108))
+  - Improve metrics monitoring([#1102](https://github.com/mantlenetworkio/mantle/pull/1102))
+  - Added a strategy of real-time adjustment of layer1 overhead based on rollup capacity, to obtain a lower tx fee experience([#926](https://github.com/mantlenetworkio/mantle/pull/926))
+- L2 Fee Calculation
+  - Support L2 fee collection, optimize the method for setting L2 gas price and allow for floating within a certain range([#1144](https://github.com/mantlenetworkio/mantle/pull/1144))
+- Upgrade Framework
+  - Enhance the upgrade framework of l2geth to support management of upgrade heights across different networks([#1007](https://github.com/mantlenetworkio/mantle/pull/1007))
+- Batch Submitter
+  - Expose Tss expected response with metric data, enrich handle logics for unexpected case, enrich control workflow([#1107](https://github.com/mantlenetworkio/mantle/pull/1107))
+- L2geth
+  - Support debug api debug_traceCall([#940](https://github.com/mantlenetworkio/mantle/pull/940))
+
+### Bug Fixes
+- Fix issues of missing permission verification in contract([#1118](https://github.com/mantlenetworkio/mantle/pull/1118))
+- Fix issues of unreasonable contract naming convention([#1095](https://github.com/mantlenetworkio/mantle/pull/1095))
+- Fix smart contract related bugs in audit reports([#1043](https://github.com/mantlenetworkio/mantle/pull/1043), [#1138](https://github.com/mantlenetworkio/mantle/pull/1138))
+- Adjust checking strategies for staker staking of MantleDa contracts([#1120](https://github.com/mantlenetworkio/mantle/pull/1120), [#1103](https://github.com/mantlenetworkio/mantle/pull/1103))
+- Code optimization for batch-submitter, dtl and mt-batcher([#1063](https://github.com/mantlenetworkio/mantle/pull/1063), [#1045](https://github.com/mantlenetworkio/mantle/pull/1045), [#1043](https://github.com/mantlenetworkio/mantle/pull/1043))
+- Add permission verification to tss http api([#854](https://github.com/mantlenetworkio/mantle/pull/854))
+
+## [v0.4.1](https://github.com/mantlenetworkio/mantle/commits/v0.4.1) - 2023-06-25
+
+### Bug Fixes
+- Remove hsm credential in log and fixed tss docker file compile bug([#1109](https://github.com/mantlenetworkio/mantle/pull/1109))
+
 ## [v0.4.1-beta.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.1-beta.0) - 2023-06-19
 
 ### Bug Fixes

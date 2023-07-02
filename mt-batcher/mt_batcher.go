@@ -10,13 +10,14 @@ import (
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/urfave/cli"
+
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	"github.com/mantlenetworkio/mantle/mt-batcher/l1l2client"
 	"github.com/mantlenetworkio/mantle/mt-batcher/metrics"
 	common2 "github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/restorer"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/sequencer"
-	"github.com/urfave/cli"
 )
 
 func Main(gitVersion string) func(ctx *cli.Context) error {
@@ -108,11 +109,6 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		log.Error("MtBatcher parse eigenda contract abi fail", "err", err)
 		return nil, err
 	}
-	eignenABI, err := bindings.BVMEigenDataLayrChainMetaData.GetAbi()
-	if err != nil {
-		log.Error("MtBatcher get eigenda contract abi fail", "err", err)
-		return nil, err
-	}
 	rawEigenContract := bind.NewBoundContract(
 		ethc.Address(common.HexToAddress(cfg.EigenContractAddress)), parsed, l1Client, l1Client,
 		l1Client,
@@ -135,11 +131,6 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		log.Error("MtBatcher parse eigen fee contract abi fail", "err", err)
 		return nil, err
 	}
-	eigenFeeABI, err := bindings.BVMEigenDataLayrFeeMetaData.GetAbi()
-	if err != nil {
-		log.Error("MtBatcher get eigen fee contract abi fail", "err", err)
-		return nil, err
-	}
 	rawEigenFeeContract := bind.NewBoundContract(
 		ethc.Address(common.HexToAddress(cfg.EigenFeeContractAddress)), feeParsed, l1Client, l1Client,
 		l1Client,
@@ -152,10 +143,8 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		DtlClientUrl:              cfg.DtlClientUrl,
 		EigenDaContract:           eigenContract,
 		RawEigenContract:          rawEigenContract,
-		EigenABI:                  eignenABI,
 		EigenFeeContract:          eigenFeeContract,
 		RawEigenFeeContract:       rawEigenFeeContract,
-		EigenFeeABI:               eigenFeeABI,
 		FeeModelEnable:            cfg.FeeModelEnable,
 		FeeSizeSec:                cfg.FeeSizeSec,
 		FeePerBytePerTime:         cfg.FeePerBytePerTime,
@@ -164,7 +153,6 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		FeePrivKey:                mtFeePrivateKey,
 		BlockOffset:               cfg.BlockOffset,
 		RollUpMinTxn:              cfg.RollUpMinTxn,
-		RollUpMinSize:             cfg.RollUpMinSize,
 		RollUpMaxSize:             cfg.RollUpMaxSize,
 		EigenLayerNode:            cfg.EigenLayerNode,
 		DataStoreDuration:         uint64(cfg.DataStoreDuration),
@@ -199,13 +187,10 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 	}
 	daServiceConfig := &restorer.DaServiceConfig{
 		EigenContract:   eigenContract,
-		EigenABI:        eignenABI,
 		RetrieverSocket: cfg.RetrieverSocket,
 		GraphProvider:   cfg.GraphProvider,
-		Timeout:         cfg.RetrieverTimeout,
 		DaServicePort:   cfg.EigenDaHttpPort,
 		EigenLayerNode:  cfg.EigenLayerNode,
-		Debug:           cfg.EchoDebug,
 	}
 	daService, err := restorer.NewDaService(ctx, daServiceConfig)
 	if err != nil {

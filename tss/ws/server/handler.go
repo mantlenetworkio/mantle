@@ -110,7 +110,7 @@ func (wm *WebsocketManager) SendMsg(msg RequestMsg) error {
 	defer wm.scRWLock.RUnlock()
 	sendChan, ok := wm.sendChan[msg.TargetNode]
 	if !ok {
-		return errors.New(fmt.Sprintf("the node(%s) is lost", msg.TargetNode))
+		return fmt.Errorf("the node(%s) is lost", msg.TargetNode)
 	}
 	go func() {
 		sendChan <- msg.RpcRequest
@@ -178,6 +178,10 @@ func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Requ
 	sigBytes, sigErr := hex.DecodeString(sig)
 	if pubErr != nil || sigErr != nil {
 		wm.logger.Error("hex decode error for pubkey or sig", "err", err)
+		return
+	}
+	if len(sigBytes) < 64 {
+		wm.logger.Error(fmt.Sprintf("invalid sigBytes, expected length is no less than 64, actual length is %d", len(sigBytes)))
 		return
 	}
 	digestBz := crypto.Keccak256Hash([]byte(timeStr)).Bytes()
@@ -496,7 +500,7 @@ func (wsc *wsConnection) writeRoutine() {
 			}
 		case msg := <-wsc.requestChan:
 			wsc.Logger.Info("send msg from requestChan to target client", "method", msg.Method)
-			jsonBytes, err := json.MarshalIndent(msg, "", "  ")
+			jsonBytes, err := json.Marshal(msg)
 			if err != nil {
 				wsc.Logger.Error("Failed to marshal RPCRequest to JSON", "err", err)
 				continue

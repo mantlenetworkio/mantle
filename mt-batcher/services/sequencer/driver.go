@@ -6,10 +6,14 @@ import (
 	"crypto/ecdsa"
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/Layr-Labs/datalayr/common/graphView"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceDL"
 	"github.com/Layr-Labs/datalayr/common/logging"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -20,6 +24,10 @@ import (
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
 	common3 "github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
+	"github.com/pkg/errors"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	rc "github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	common2 "github.com/mantlenetworkio/mantle/mt-batcher/common"
@@ -28,13 +36,6 @@ import (
 	common4 "github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/sequencer/db"
 	"github.com/mantlenetworkio/mantle/mt-batcher/txmgr"
-	"github.com/pkg/errors"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"math/big"
-	"strings"
-	"sync"
-	"time"
 )
 
 type SignerFn func(context.Context, common.Address, *types.Transaction) (*types.Transaction, error)
@@ -46,16 +47,13 @@ type DriverConfig struct {
 	DtlClientUrl              string
 	EigenDaContract           *bindings.BVMEigenDataLayrChain
 	RawEigenContract          *bind.BoundContract
-	EigenABI                  *abi.ABI
 	EigenFeeContract          *bindings.BVMEigenDataLayrFee
 	RawEigenFeeContract       *bind.BoundContract
-	EigenFeeABI               *abi.ABI
 	Logger                    *logging.Logger
 	PrivKey                   *ecdsa.PrivateKey
 	FeePrivKey                *ecdsa.PrivateKey
 	BlockOffset               uint64
 	RollUpMinTxn              uint64
-	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
 	EigenLayerNode            int
 	DataStoreDuration         uint64
@@ -359,7 +357,7 @@ func (d *Driver) StoreData(ctx context.Context, uploadHeader []byte, duration ui
 		return tx, nil
 
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
-		log.Warn("MtBather eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
+		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
 		opts.GasTipCap = common4.FallbackGasTipCap
 		return d.Cfg.EigenDaContract.StoreData(opts, uploadHeader, duration, blockNumber, startL2BlockNumber, endL2BlockNumber, totalOperatorsIndex, isReRollup)
 
@@ -409,7 +407,7 @@ func (d *Driver) ConfirmData(ctx context.Context, callData []byte, searchData rc
 		return tx, nil
 
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
-		log.Warn("MtBather eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
+		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
 		opts.GasTipCap = common4.FallbackGasTipCap
 		return d.Cfg.EigenDaContract.ConfirmData(opts, callData, searchData, startL2BlockNumber, endL2BlockNumber, originDataStoreId, reConfirmedBatchIndex, isReRollup)
 
@@ -660,7 +658,7 @@ func (d *Driver) UpdateFee(ctx context.Context, l2Block, daFee *big.Int) (*types
 	case err == nil:
 		return tx, nil
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
-		log.Warn("MtBather eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
+		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
 		opts.GasTipCap = common4.FallbackGasTipCap
 		return d.Cfg.EigenFeeContract.SetRollupFee(opts, l2Block, daFee)
 	default:

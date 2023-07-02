@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"math/big"
 	"strconv"
 	"sync"
@@ -39,7 +40,8 @@ var (
 	// errZeroGasPriceTx is the error for when a user submits a transaction
 	// with gas price zero and fees are currently enforced
 	errZeroGasPriceTx = errors.New("cannot accept 0 gas price transaction")
-	float1            = big.NewFloat(1)
+	feeThresholdDown  = big.NewFloat(1)
+	feeThresholdUp    = big.NewFloat(4000)
 )
 
 // SyncService implements the main functionality around pulling in transactions
@@ -127,17 +129,17 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	}
 	// Ensure sane values for the fee thresholds
 	if cfg.FeeThresholdDown != nil {
-		// The fee threshold down should be less than 1
-		if cfg.FeeThresholdDown.Cmp(float1) != -1 {
-			return nil, fmt.Errorf("%w: fee threshold down not lower than 1: %f", errBadConfig,
-				cfg.FeeThresholdDown)
+		// The fee threshold down should be <= feeThresholdDown
+		if cfg.FeeThresholdDown.Cmp(feeThresholdDown) == 1 {
+			return nil, fmt.Errorf("%w: fee threshold down not lower than %f: %f", errBadConfig,
+				feeThresholdDown, cfg.FeeThresholdDown)
 		}
 	}
 	if cfg.FeeThresholdUp != nil {
-		// The fee threshold up should be greater than 1
-		if cfg.FeeThresholdUp.Cmp(float1) != 1 {
-			return nil, fmt.Errorf("%w: fee threshold up not larger than 1: %f", errBadConfig,
-				cfg.FeeThresholdUp)
+		// The fee threshold up should be >= feeThresholdUp
+		if cfg.FeeThresholdUp.Cmp(feeThresholdUp) == -1 {
+			return nil, fmt.Errorf("%w: fee threshold up not larger than %f: %f", errBadConfig,
+				feeThresholdUp, cfg.FeeThresholdUp)
 		}
 	}
 
@@ -1249,7 +1251,7 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 		}
 		if errors.Is(err, fees.ErrGasPriceTooHigh) {
 			return fmt.Errorf("%w: %d wei, use at most tx.gasPrice = %s wei",
-				fees.ErrGasPriceTooHigh, tx.GasPrice(), l2GasPrice)
+				fees.ErrGasPriceTooHigh, tx.GasPrice(), mulByFloat(l2GasPrice, opts.ThresholdUp))
 		}
 		return err
 	}
@@ -1625,4 +1627,14 @@ func (s *SyncService) GetTxStatusByNumber(number uint64) (*types.TxStatusRespons
 	}
 
 	return stateRsp, nil
+}
+
+// mulByFloat multiplies a big.Int by a float and returns the
+// big.Int rounded upwards
+func mulByFloat(num *big.Int, float *big.Float) *big.Int {
+	n := new(big.Float).SetUint64(num.Uint64())
+	product := n.Mul(n, float)
+	pfloat, _ := product.Float64()
+	rounded := math.Ceil(pfloat)
+	return new(big.Int).SetUint64(uint64(rounded))
 }

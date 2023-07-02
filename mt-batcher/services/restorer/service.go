@@ -2,28 +2,25 @@ package restorer
 
 import (
 	"context"
+	"strconv"
+	"sync"
+
 	"github.com/Layr-Labs/datalayr/common/graphView"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/log"
 	gecho "github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/shurcooL/graphql"
+
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/common"
-	"github.com/shurcooL/graphql"
-	"strconv"
-	"sync"
-	"time"
 )
 
 type DaServiceConfig struct {
 	EigenContract   *bindings.BVMEigenDataLayrChain
-	EigenABI        *abi.ABI
 	RetrieverSocket string
 	GraphProvider   string
-	Timeout         time.Duration
 	DaServicePort   int
 	EigenLayerNode  int
-	Debug           bool
 }
 
 type DaService struct {
@@ -37,7 +34,7 @@ type DaService struct {
 }
 
 func NewDaService(ctx context.Context, cfg *DaServiceConfig) (*DaService, error) {
-	_, cancel := context.WithTimeout(ctx, common.DefaultTimeout)
+	subCtx, cancel := context.WithTimeout(ctx, common.DefaultTimeout)
 	defer cancel()
 	e := gecho.New()
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -48,7 +45,7 @@ func NewDaService(ctx context.Context, cfg *DaServiceConfig) (*DaService, error)
 	graphClient := graphView.NewGraphClient(cfg.GraphProvider, nil)
 	graphqlClient := graphql.NewClient(graphClient.GetEndpoint(), nil)
 	server := &DaService{
-		Ctx:           ctx,
+		Ctx:           subCtx,
 		Cfg:           cfg,
 		GraphClient:   graphClient,
 		GraphqlClient: graphqlClient,

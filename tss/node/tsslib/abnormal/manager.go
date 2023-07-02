@@ -1,11 +1,12 @@
 package abnormal
 
 import (
+	"sync"
+
 	"github.com/binance-chain/tss-lib/tss"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"sync"
 )
 
 type Manager struct {
@@ -16,15 +17,15 @@ type Manager struct {
 	roundMgr          *RoundMgr
 	partyInfo         *PartyInfo
 	PartyIDtoP2PID    map[string]peer.ID
-	lastMsgLocker     *sync.RWMutex
+	lastMsgLocker     sync.RWMutex
 	lastMsg           tss.Message
 	acceptedShares    map[RoundInfo][]string
-	acceptShareLocker *sync.Mutex
+	acceptShareLocker sync.Mutex
 	localPartyID      string
 }
 
 func NewAbnormalManager() *Manager {
-	Abnormal := NewAbnormal("", nil)
+	abnormal := NewAbnormal("", nil)
 	return &Manager{
 		logger:            log.With().Str("module", "Abnormal_manager").Logger(),
 		partyInfo:         nil,
@@ -32,10 +33,10 @@ func NewAbnormalManager() *Manager {
 		lastUnicastPeer:   make(map[string][]peer.ID),
 		shareMgr:          NewTssShareMgr(),
 		roundMgr:          NewTssRoundMgr(),
-		Abnormal:          &Abnormal,
-		lastMsgLocker:     &sync.RWMutex{},
+		Abnormal:          abnormal,
+		lastMsgLocker:     sync.RWMutex{},
 		acceptedShares:    make(map[RoundInfo][]string),
-		acceptShareLocker: &sync.Mutex{},
+		acceptShareLocker: sync.Mutex{},
 	}
 }
 

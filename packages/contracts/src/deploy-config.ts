@@ -309,7 +309,7 @@ const configSpec: {
   },
   gasPriceOracleCharge: {
     type: 'number',
-    default: 0,
+    default: 1,
   },
   gasPriceOracleL1BaseFee: {
     type: 'number',
@@ -317,7 +317,7 @@ const configSpec: {
   },
   gasPriceOracleL2GasPrice: {
     type: 'number',
-    default: 1,
+    default: 50_000_000,
   },
   hfBerlinBlock: {
     type: 'number',

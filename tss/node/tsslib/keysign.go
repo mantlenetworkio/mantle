@@ -4,6 +4,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/abnormal"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
@@ -11,8 +14,6 @@ import (
 	keysign2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/keysign"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
-	"strings"
-	"time"
 )
 
 func (t *TssServer) generateSignature(onlinePeers []peer.ID, req keysign2.Request, localStateItem storage.KeygenLocalState, keysignInstance *keysign2.TssKeySign) (keysign2.Response, error) {
@@ -56,7 +57,7 @@ func (t *TssServer) generateSignature(onlinePeers []peer.ID, req keysign2.Reques
 	}
 
 	return keysign2.NewResponse(
-		&signatureData,
+		signatureData,
 		common.Success,
 		"",
 		nil,
@@ -179,14 +180,14 @@ func (t *TssServer) isPartOfKeysignParty(parties []string) bool {
 func (t *TssServer) isContainPubkeys(signerPubKeys, participants []string, poolPubkey string) error {
 
 	participantsStr := strings.Join(participants, ",")
-	var errPubkyes []string
-	for _, pubkey := range signerPubKeys {
-		if !strings.Contains(participantsStr, pubkey) {
-			errPubkyes = append(errPubkyes, pubkey)
+	var errPubKeys []string
+	for _, pubKey := range signerPubKeys {
+		if !strings.Contains(participantsStr, pubKey) {
+			errPubKeys = append(errPubKeys, pubKey)
 		}
 	}
-	if len(errPubkyes) != 0 {
-		return errors.New(fmt.Sprintf("these pub keys %s are not members of %s's participants", strings.Join(errPubkyes, ","), poolPubkey))
+	if len(errPubKeys) != 0 {
+		return fmt.Errorf("these pub keys %s are not members of %s's participants", strings.Join(errPubKeys, ","), poolPubkey)
 	}
 	return nil
 }

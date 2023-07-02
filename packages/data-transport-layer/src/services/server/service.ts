@@ -794,7 +794,9 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         const daBatch = await this.state.db.getRollupStoreByBatchIndex(
           transaction.batchIndex
         )
-        datastore = await this.state.db.getDsById(daBatch.data_store_id)
+        datastore = await this.state.db.getDsById(
+          daBatch.data_store_id + this.options.mantleDaUpgradeDataStoreId
+        )
 
         return {
           batch,

@@ -3,8 +3,9 @@ package manager
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"sync"
+
 	"github.com/influxdata/influxdb/pkg/slices"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
@@ -12,10 +13,9 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/ws/server"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
-	"sync"
 )
 
-func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Method) (types.Context, error) {
+func (m *Manager) agreement(ctx types.Context, request interface{}, method tss.Method) (types.Context, error) {
 	respChan := make(chan server.ResponseMsg)
 	stopChan := make(chan struct{})
 	if err := m.wsServer.RegisterResChannel("ASK_"+ctx.RequestId(), respChan, stopChan); err != nil {
@@ -102,7 +102,7 @@ func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Me
 	wg.Wait()
 
 	if len(results) < ctx.TssInfos().Threshold+1 {
-		return types.Context{}, errors.New(fmt.Sprintf("not enough response, %d nodes response for the ask result, we need at least %d nodes to complete the signing process", len(results), ctx.TssInfos().Threshold+1))
+		return types.Context{}, fmt.Errorf("not enough response, %d nodes response for the ask result, we need at least %d nodes to complete the signing process", len(results), ctx.TssInfos().Threshold+1)
 	}
 
 	approvers := make([]string, 0)
@@ -120,7 +120,7 @@ func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Me
 	return ctx, nil
 }
 
-func (m Manager) askNodes(ctx types.Context, request []byte, method tss.Method, stopChan chan struct{}, errSendChan chan struct{}) {
+func (m *Manager) askNodes(ctx types.Context, request []byte, method tss.Method, stopChan chan struct{}, errSendChan chan struct{}) {
 	log.Info("start to sendTonNodes", "number", len(ctx.AvailableNodes()))
 	nodes := ctx.AvailableNodes()
 	for i := range nodes {

@@ -293,6 +293,11 @@ func (c *Challenger) constructFraudProof(store *graphView.DataStore, data []byte
 	//then we shift over by 1 to get past the first 0 byte, and then (startingSymbolIndex % 31)
 	startingSymbolIndex = (startingSymbolIndex/31)*32 + 1 + (startingSymbolIndex % 31)
 
+	//check frames range
+	if startingChunkIndex > len(frames) {
+		return nil, fmt.Errorf("startingChunkIndex is out of frames range, startingChunkIndex: %d, len(frames): %d", startingChunkIndex, len(frames))
+	}
+
 	//generate parameters for proving data on chain
 	//this is
 	//	polys: the []byte representation of the polynomials

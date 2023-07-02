@@ -146,12 +146,10 @@ func (c *rpcCache) GetRPC(ctx context.Context, req *RPCReq) (*RPCRes, error) {
 		return nil, nil
 	}
 	res, err := handler.GetRPCMethod(ctx, req)
-	if res != nil {
-		if res == nil {
-			RecordCacheMiss(req.Method)
-		} else {
-			RecordCacheHit(req.Method)
-		}
+	if res == nil {
+		RecordCacheMiss(req.Method)
+	} else {
+		RecordCacheHit(req.Method)
 	}
 	return res, err
 }

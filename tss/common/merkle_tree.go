@@ -41,6 +41,10 @@ func GetMerkleRoot(elements [][32]byte) ([32]byte, error) {
 		return elements[0], nil
 	}
 
+	if len(elements) > 131071 {
+		return [32]byte{}, errors.New("element size exceeds maximum allowed value")
+	}
+
 	// We'll need to keep track of left and right siblings.
 	var leftSibling [32]byte
 	var rightSibling [32]byte

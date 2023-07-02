@@ -354,8 +354,8 @@ func PaysEnough(opts *PaysEnoughOpts) error {
 	}
 	// Protect users from overpaying by too much
 	if opts.ThresholdUp != nil {
-		// overpaying = user fee - expected fee
-		overpaying := new(big.Int).Sub(opts.UserGasPrice, opts.ExpectedGasPrice)
+		// overpaying = user fee
+		overpaying := opts.UserGasPrice
 		threshold := mulByFloat(opts.ExpectedGasPrice, opts.ThresholdUp)
 		// if overpaying > threshold, return error
 		if overpaying.Cmp(threshold) == 1 {

@@ -129,18 +129,6 @@ func (c *Communication) disconnect(remotePeer peer.ID) {
 		if err := cn.Close(); err != nil {
 			c.logger.Err(err).Msgf("fail to close to peer: %s", remotePeer)
 		}
-		//func() {
-		//	ctx, cancel := context.WithTimeout(context.Background(), TimeoutConnecting)
-		//	defer cancel()
-		//	addrInfo, err := peer.AddrInfoFromP2pAddr(remoteMultiAddr)
-		//	if err != nil {
-		//		c.logger.Err(err).Msgf("fail to converts a MultiAddr to an AddrInfo, peer: %s", remotePeer)
-		//		return
-		//	}
-		//	if err := c.host.Connect(ctx, *addrInfo); err != nil {
-		//		c.logger.Err(err).Msgf("fail to connect to peer: %s", remotePeer)
-		//	}
-		//}()
 	}
 }
 
@@ -429,14 +417,11 @@ func (c *Communication) Start(priKeyBytes []byte) error {
 
 // Stop communication
 func (c *Communication) Stop() error {
-	// we need to stop the handler and the p2p services firstly, then terminate the our communication threads
-	if err := c.host.Close(); err != nil {
-		c.logger.Err(err).Msg("fail to close host network")
-	}
-
+	// we need to stop the handler and the p2p services firstly, then terminate the communication threads
+	err := c.host.Close()
 	close(c.stopChan)
 	c.wg.Wait()
-	return nil
+	return err
 }
 
 func (c *Communication) SetSubscribe(topic messages.TSSMessageTpe, msgID string, channel chan *Message) {
