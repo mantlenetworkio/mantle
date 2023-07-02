@@ -65,13 +65,14 @@ type NodeSignRequest struct {
 }
 
 type SignResponse struct {
-	Signature             []byte   `json:"signature"`
+	Signature []byte `json:"signature"`
 }
 
 type KeygenRequest struct {
-	Nodes     []string `json:"nodes"`
-	Threshold int      `json:"threshold"`
-	Timestamp int64    `json:"timestamp"`
+	Nodes      []string `json:"nodes"`
+	ElectionId uint64   `json:"election_id"`
+	Threshold  int      `json:"threshold"`
+	Timestamp  int64    `json:"timestamp"`
 }
 
 type KeygenResponse struct {
