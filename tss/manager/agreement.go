@@ -15,7 +15,7 @@ import (
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
-func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Method) (types.Context, error) {
+func (m *Manager) agreement(ctx types.Context, request interface{}, method tss.Method) (types.Context, error) {
 	respChan := make(chan server.ResponseMsg)
 	stopChan := make(chan struct{})
 	if err := m.wsServer.RegisterResChannel("ASK_"+ctx.RequestId(), respChan, stopChan); err != nil {
@@ -120,7 +120,7 @@ func (m Manager) agreement(ctx types.Context, request interface{}, method tss.Me
 	return ctx, nil
 }
 
-func (m Manager) askNodes(ctx types.Context, request []byte, method tss.Method, stopChan chan struct{}, errSendChan chan struct{}) {
+func (m *Manager) askNodes(ctx types.Context, request []byte, method tss.Method, stopChan chan struct{}, errSendChan chan struct{}) {
 	log.Info("start to sendTonNodes", "number", len(ctx.AvailableNodes()))
 	nodes := ctx.AvailableNodes()
 	for i := range nodes {
