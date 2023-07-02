@@ -152,6 +152,10 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _fraudProofPeriod fraud proof period
     */
     function updateFraudProofPeriod(uint256 _fraudProofPeriod) external onlySequencer {
+        // MantleDa data validity period is at least one hour
+        require(_fraudProofPeriod >= 3600, "updateFraudProofPeriod: _fraudProofPeriod need more than one hour");
+        // MantleDa data validity max period seven hour
+        require(_fraudProofPeriod <= 25200, "updateFraudProofPeriod: _fraudProofPeriod need less than seven hour");
         uint256 oldFraudProofPeriod = fraudProofPeriod;
         fraudProofPeriod = _fraudProofPeriod;
         emit FraudProofPeriodUpdated(oldFraudProofPeriod, fraudProofPeriod);
