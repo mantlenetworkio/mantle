@@ -197,7 +197,7 @@ func (t *TssCommon) processInvalidMsg(roundInfo string, round abnormal2.RoundInf
 	}
 	// This error indicates the share is wrong, we include this signature to prove that
 	// this incorrect share is from the share owner.
-	var blameNodes []abnormal2.Node
+	var blameNodes []*abnormal2.Node
 	var msgBody, sig []byte
 	for i, pk := range pubkeys {
 		invalidMsg := invalidMsgs[i]
