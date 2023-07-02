@@ -286,6 +286,41 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
           batchIndex
         )
         this.logger.info('Update batch index from(Confirmed)', dataStore)
+        // put data store to db
+        const dataStoreEntry: DataStoreEntry = {
+          dataStoreId: dataStore['Id'],
+          storeNumber: dataStore['StoreNumber'],
+          durationDataStoreId: dataStore['DurationDataStoreId'],
+          index: dataStore['Index'],
+          dataCommitment: dataStore['DataCommitment'],
+          msgHash: dataStore['MsgHash'],
+          stakesFromBlockNumber: dataStore['StakesFromBlockNumber'],
+          initTime: dataStore['InitTime'],
+          expireTime: dataStore['ExpireTime'],
+          duration: dataStore['Duration'],
+          numSys: dataStore['NumSys'],
+          numPar: dataStore['NumPar'],
+          degree: dataStore['Degree'],
+          storePeriodLength: dataStore['StorePeriodLength'],
+          fee: dataStore['Fee'],
+          confirmer: dataStore['Confirmer'],
+          header: dataStore['Header'],
+          initTxHash: dataStore['InitTxHash'],
+          initGasUsed: dataStore['InitGasUsed'],
+          initBlockNumber: dataStore['InitBlockNumber'],
+          confirmed: dataStore['Confirmed'],
+          ethSigned: dataStore['EthSigned'],
+          eigenSigned: dataStore['EigenSigned'],
+          nonSignerPubKeyHashes: dataStore['NonSignerPubKeyHashes'],
+          signatoryRecord: dataStore['SignatoryRecord'],
+          confirmTxHash: dataStore['ConfirmTxHash'],
+          confirmGasUsed: dataStore['ConfirmGasUsed'],
+        }
+        await this.state.db.putDsById(
+          dataStoreEntry,
+          dataStoreRollupId['data_store_id'] +
+            this.options.mantleDaUpgradeDataStoreId
+        )
         await this._storeTransactionListByDSId(
           dataStoreRollupId['data_store_id'],
           this.options.mantleDaUpgradeDataStoreId
