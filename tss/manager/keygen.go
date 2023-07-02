@@ -79,7 +79,7 @@ func (m *Manager) observeElection() {
 	}
 }
 
-func (m Manager) generateKey(tssMembers []string, threshold int, electionId uint64) (string, error) {
+func (m *Manager) generateKey(tssMembers []string, threshold int, electionId uint64) (string, error) {
 	availableNodes := m.availableNodes(tssMembers)
 	if len(availableNodes) < len(tssMembers) {
 		return "", errors.New("not enough available nodes to generate CPK")
@@ -162,7 +162,7 @@ func (m Manager) generateKey(tssMembers []string, threshold int, electionId uint
 	return base, nil
 }
 
-func (m Manager) callKeygen(availableNodes []string, threshold int, electionId uint64, requestId string, sendError chan struct{}) {
+func (m *Manager) callKeygen(availableNodes []string, threshold int, electionId uint64, requestId string, sendError chan struct{}) {
 	for _, node := range availableNodes {
 		nodeRequest := tss.KeygenRequest{
 			Nodes:      availableNodes,
