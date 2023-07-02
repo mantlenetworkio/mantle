@@ -82,7 +82,7 @@ func (sh *ShamirMgr) GetKeyFile(pubKey, localPartyKey string) (KeygenLocalState,
 		}
 		var keygenlocalstate KeygenLocalState
 		if err := json.Unmarshal([]byte(keygen), &keygenlocalstate); err != nil {
-			log.Error().Err(err).Msgf("fail to unmarshal data to map :%w", err)
+			log.Error().Err(err).Msgf("fail to unmarshal data to map :%v", err)
 			return KeygenLocalState{}, err
 		}
 		//缓存在内存中

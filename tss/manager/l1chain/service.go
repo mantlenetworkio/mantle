@@ -59,14 +59,14 @@ func (q QueryService) QueryActiveInfo(isPermission bool) (types.TssCommitteeInfo
 	unmarshalledCPK, err := crypto.UnmarshalPubkey(append([]byte{0x04}, cpk...))
 	if err != nil {
 		log.Error("fail to unmarshal cpk", "err", err)
-		return types.TssCommitteeInfo{}, nil
+		return types.TssCommitteeInfo{}, err
 	}
 	compressCPK := crypto.CompressPubkey(unmarshalledCPK)
 
 	unjailMembers, err := q.tssGroupManagerCaller.GetTssGroupUnJailMembers(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - q.confirmBlocks)})
 	if err != nil {
 		log.Error("fail to GetTssGroupUnJailMembers", "err", err)
-		return types.TssCommitteeInfo{}, nil
+		return types.TssCommitteeInfo{}, err
 	}
 
 	var hasJailMembers bool
@@ -82,7 +82,7 @@ func (q QueryService) QueryActiveInfo(isPermission bool) (types.TssCommitteeInfo
 		unmarshalled, err := crypto.UnmarshalPubkey(append([]byte{0x04}, m...))
 		if err != nil {
 			log.Error("fail to unmarshal tss member", "err", err)
-			return types.TssCommitteeInfo{}, nil
+			return types.TssCommitteeInfo{}, err
 		}
 		compressed := crypto.CompressPubkey(unmarshalled)
 		hexEncoded := hex.EncodeToString(compressed)
@@ -122,7 +122,7 @@ func (q QueryService) QueryInactiveInfo() (types.TssCommitteeInfo, error) {
 		unmarshalled, err := crypto.UnmarshalPubkey(append([]byte{0x04}, m...))
 		if err != nil {
 			log.Error("fail to unmarshal tss member", "err", err)
-			return types.TssCommitteeInfo{}, nil
+			return types.TssCommitteeInfo{}, err
 		}
 		compressed := crypto.CompressPubkey(unmarshalled)
 		hexEncoded := hex.EncodeToString(compressed)

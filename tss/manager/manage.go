@@ -59,55 +59,55 @@ type Manager struct {
 func NewManager(wsServer server.IWebsocketManager,
 	tssQueryService types.TssQueryService,
 	store types.ManagerStore,
-	config tss.Configuration) (Manager, error) {
+	config tss.Configuration) (*Manager, error) {
 	taskIntervalDur, err := time.ParseDuration(config.TimedTaskInterval)
 	if err != nil {
-		return Manager{}, err
+		return nil, err
 	}
 	receiptConfirmTimeoutDur, err := time.ParseDuration(config.L1ReceiptConfirmTimeout)
 	if err != nil {
-		return Manager{}, err
+		return nil, err
 	}
 	keygenTimeoutDur, err := time.ParseDuration(config.Manager.KeygenTimeout)
 	if err != nil {
-		return Manager{}, err
+		return nil, err
 	}
 	cpkConfirmTimeoutDur, err := time.ParseDuration(config.Manager.CPKConfirmTimeout)
 	if err != nil {
-		return Manager{}, err
+		return nil, err
 	}
 	askTimeoutDur, err := time.ParseDuration(config.Manager.AskTimeout)
 	if err != nil {
-		return Manager{}, err
+		return nil, err
 	}
 	signTimeoutDur, err := time.ParseDuration(config.Manager.SignTimeout)
 	if err != nil {
-		return Manager{}, err
+		return nil, err
 	}
 
 	l1Cli, err := ethclient.Dial(config.L1Url)
 	if err != nil {
-		return Manager{}, err
+		return nil, err
 	}
 	tssStakingSlashingCaller, err := tsh.NewTssStakingSlashingCaller(common.HexToAddress(config.TssStakingSlashContractAddress), l1Cli)
 	if err != nil {
-		return Manager{}, err
+		return nil, err
 	}
 	tssGroupManagerCaller, err := tgm.NewTssGroupManagerCaller(common.HexToAddress(config.TssGroupContractAddress), l1Cli)
 	if err != nil {
-		return Manager{}, err
+		return nil, err
 	}
 	privKey, err := crypto.HexToECDSA(config.Manager.PrivateKey)
 	if err != nil {
-		return Manager{}, err
+		return nil, err
 	}
 
 	chainId, err := l1Cli.ChainID(context.Background())
 	if err != nil {
-		return Manager{}, err
+		return nil, err
 	}
 
-	return Manager{
+	return &Manager{
 		wsServer:                  wsServer,
 		tssQueryService:           tssQueryService,
 		store:                     store,
@@ -134,25 +134,25 @@ func NewManager(wsServer server.IWebsocketManager,
 }
 
 // Start launch a manager
-func (m Manager) Start() {
+func (m *Manager) Start() {
 	log.Info("manager is starting......")
 	go m.observeElection()
 	go m.slashing()
 }
 
-func (m Manager) Stop() {
+func (m *Manager) Stop() {
 	close(m.stopChan)
 }
 
-func (m Manager) stopGenerateKey() {
+func (m *Manager) stopGenerateKey() {
 	m.stopGenKey = true
 }
 
-func (m Manager) recoverGenerateKey() {
+func (m *Manager) recoverGenerateKey() {
 	m.stopGenKey = false
 }
 
-func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
+func (m *Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	log.Info("received sign state request", "start block", request.StartBlock, "len", len(request.StateRoots), "index", request.OffsetStartsAtIndex)
 	offsetStartsAtIndex, _ := new(big.Int).SetString(request.OffsetStartsAtIndex, 10)
 	digestBz, err := tss.StateBatchHash(request.StateRoots, offsetStartsAtIndex)
@@ -284,7 +284,7 @@ func (m Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	return responseBytes, nil
 }
 
-func (m Manager) SignRollBack(request tss.SignStateRequest) ([]byte, error) {
+func (m *Manager) SignRollBack(request tss.SignStateRequest) ([]byte, error) {
 	log.Info("received roll back request", "request", request.String())
 
 	tssInfo, err := m.tssQueryService.QueryActiveInfo(false)
@@ -338,11 +338,11 @@ func (m Manager) SignRollBack(request tss.SignStateRequest) ([]byte, error) {
 	return responseBytes, nil
 }
 
-func (m Manager) SignTxBatch() error {
+func (m *Manager) SignTxBatch() error {
 	return errors.New("not support for now")
 }
 
-func (m Manager) availableNodes(tssMembers []string) []string {
+func (m *Manager) availableNodes(tssMembers []string) []string {
 	aliveNodes := m.wsServer.AliveNodes()
 	m.metics.OnlineNodesCount.Set(float64(len(aliveNodes)))
 	log.Info("check available nodes", "expected", fmt.Sprintf("%v", tssMembers), "alive nodes", fmt.Sprintf("%v", aliveNodes))
@@ -362,7 +362,7 @@ func randomRequestId() string {
 	return time.Now().Format("20060102150405") + code
 }
 
-func (m Manager) afterSignStateBatch(ctx types.Context, stateBatch [][32]byte, absentNodes []string) error {
+func (m *Manager) afterSignStateBatch(ctx types.Context, stateBatch [][32]byte, absentNodes []string) error {
 	batchRoot, err := tss.GetMerkleRoot(stateBatch)
 	if err != nil {
 		return err
@@ -380,7 +380,7 @@ func (m Manager) afterSignStateBatch(ctx types.Context, stateBatch [][32]byte, a
 	return nil
 }
 
-func (m Manager) getStateSignature(digestBz []byte) []byte {
+func (m *Manager) getStateSignature(digestBz []byte) []byte {
 	m.sigCacheLock.RLock()
 	defer m.sigCacheLock.RUnlock()
 	var key [32]byte
@@ -388,7 +388,7 @@ func (m Manager) getStateSignature(digestBz []byte) []byte {
 	return m.stateSignatureCache[key]
 }
 
-func (m Manager) setStateSignature(digestBz []byte, sig []byte) {
+func (m *Manager) setStateSignature(digestBz []byte, sig []byte) {
 	m.sigCacheLock.Lock()
 	defer m.sigCacheLock.Unlock()
 	var key [32]byte

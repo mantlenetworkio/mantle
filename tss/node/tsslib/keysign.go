@@ -180,14 +180,14 @@ func (t *TssServer) isPartOfKeysignParty(parties []string) bool {
 func (t *TssServer) isContainPubkeys(signerPubKeys, participants []string, poolPubkey string) error {
 
 	participantsStr := strings.Join(participants, ",")
-	var errPubkyes []string
-	for _, pubkey := range signerPubKeys {
-		if !strings.Contains(participantsStr, pubkey) {
-			errPubkyes = append(errPubkyes, pubkey)
+	var errPubKeys []string
+	for _, pubKey := range signerPubKeys {
+		if !strings.Contains(participantsStr, pubKey) {
+			errPubKeys = append(errPubKeys, pubKey)
 		}
 	}
-	if len(errPubkyes) != 0 {
-		return errors.New(fmt.Sprintf("these pub keys %s are not members of %s's participants", strings.Join(errPubkyes, ","), poolPubkey))
+	if len(errPubKeys) != 0 {
+		return fmt.Errorf("these pub keys %s are not members of %s's participants", strings.Join(errPubKeys, ","), poolPubkey)
 	}
 	return nil
 }

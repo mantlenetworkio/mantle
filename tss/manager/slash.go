@@ -33,7 +33,7 @@ var sendState = SendState{
 	lock:   &sync.Mutex{},
 }
 
-func (m Manager) slashing() {
+func (m *Manager) slashing() {
 	queryTicker := time.NewTicker(m.taskInterval)
 	for {
 		signingInfos := m.store.ListSlashingInfo()
@@ -49,7 +49,7 @@ func (m Manager) slashing() {
 	}
 }
 
-func (m Manager) handleSlashing(si slash.SlashingInfo) {
+func (m *Manager) handleSlashing(si slash.SlashingInfo) {
 	log.Info("start to handleSlashing", "address", si.Address.String(), "batch_index", si.BatchIndex, "slash_type", si.SlashType, "election id", si.ElectionId)
 	currentBlockNumber, err := m.l1Cli.BlockNumber(context.Background())
 	if err != nil {
@@ -170,7 +170,7 @@ func (m Manager) handleSlashing(si slash.SlashingInfo) {
 	return
 }
 
-func (m Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo, mesTx []byte) error {
+func (m *Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo, mesTx []byte) error {
 	txData, err := m.txBuilder(mesTx, signResp.Signature)
 	if err != nil {
 		return err

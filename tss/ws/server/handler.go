@@ -107,7 +107,7 @@ func (wm *WebsocketManager) SendMsg(msg RequestMsg) error {
 	defer wm.scRWLock.RUnlock()
 	sendChan, ok := wm.sendChan[msg.TargetNode]
 	if !ok {
-		return errors.New(fmt.Sprintf("the node(%s) is lost", msg.TargetNode))
+		return fmt.Errorf("the node(%s) is lost", msg.TargetNode)
 	}
 	go func() {
 		sendChan <- msg.RpcRequest
@@ -536,7 +536,7 @@ func (wsc *wsConnection) writeRoutine() {
 			}
 		case msg := <-wsc.requestChan:
 			wsc.Logger.Info("send msg from requestChan to target client", "method", msg.Method)
-			jsonBytes, err := json.MarshalIndent(msg, "", "  ")
+			jsonBytes, err := json.Marshal(msg)
 			if err != nil {
 				wsc.Logger.Error("Failed to marshal RPCRequest to JSON", "err", err)
 				continue
