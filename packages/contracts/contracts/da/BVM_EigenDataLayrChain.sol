@@ -403,4 +403,6 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
             dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].endBL2BlockNumber
         );
     }
+
+    uint256[49] private __gap;
 }
