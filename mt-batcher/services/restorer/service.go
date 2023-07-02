@@ -2,28 +2,25 @@ package restorer
 
 import (
 	"context"
+	"strconv"
+	"sync"
+
 	"github.com/Layr-Labs/datalayr/common/graphView"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/log"
 	gecho "github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/shurcooL/graphql"
+
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/common"
-	"github.com/shurcooL/graphql"
-	"strconv"
-	"sync"
-	"time"
 )
 
 type DaServiceConfig struct {
 	EigenContract   *bindings.BVMEigenDataLayrChain
-	EigenABI        *abi.ABI
 	RetrieverSocket string
 	GraphProvider   string
-	Timeout         time.Duration
 	DaServicePort   int
 	EigenLayerNode  int
-	Debug           bool
 }
 
 type DaService struct {
