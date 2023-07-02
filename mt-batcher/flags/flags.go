@@ -1,8 +1,9 @@
 package flags
 
 import (
-	"github.com/urfave/cli"
 	"time"
+
+	"github.com/urfave/cli"
 )
 
 const envVarPrefix = "MT_BATCHER"
@@ -124,12 +125,6 @@ var (
 		Usage:  "Rollup transaction min transactions for eigen da",
 		Value:  500,
 		EnvVar: prefixEnvVar(envVarPrefix, "ROLLUP_MIN_TXN"),
-	}
-	RollUpMinSizeFlag = cli.Uint64Flag{
-		Name:   "rollup-min-size",
-		Usage:  "Rollup transaction min size data for eigen da",
-		Value:  1000,
-		EnvVar: prefixEnvVar(envVarPrefix, "ROLLUP_MIN_SIZE"),
 	}
 	FeeSizeSecFlag = cli.StringFlag{
 		Name:   "fee-size-sec",
@@ -363,7 +358,6 @@ var requiredFlags = []cli.Flag{
 	EigenFeeContractAddressFlag,
 	BlockOffsetFlag,
 	RollUpMinTxnFlag,
-	RollUpMinSizeFlag,
 	RollUpMaxSizeFlag,
 	FeeSizeSecFlag,
 	FeePerBytePerTimeFlag,
