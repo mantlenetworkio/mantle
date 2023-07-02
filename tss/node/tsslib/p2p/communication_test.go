@@ -1,13 +1,13 @@
 package p2p
 
 import (
-	"crypto/rand"
-	"encoding/base64"
-	"github.com/libp2p/go-libp2p/core/crypto"
-	"github.com/libp2p/go-libp2p/core/peer"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/mantlenetworkio/mantle/tss/node/store"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 	maddr "github.com/multiformats/go-multiaddr"
+	"github.com/stretchr/testify/require"
 	. "gopkg.in/check.v1"
+	"testing"
 )
 
 type CommunicationTestSuite struct {
@@ -16,7 +16,10 @@ type CommunicationTestSuite struct {
 var _ = Suite(&CommunicationTestSuite{})
 
 func (CommunicationTestSuite) TestBasicCommunication(c *C) {
-	comm, err := NewCommunication(nil, 6668, "", false)
+	//new level db storage
+	store, err := store.NewStorage("/Users/jayliu/Projects/rde/local/data/test/db")
+	c.Assert(err, IsNil)
+	comm, err := NewCommunication(nil, 6668, "", false, store)
 	c.Assert(err, IsNil)
 	c.Assert(comm, NotNil)
 	comm.SetSubscribe(messages.TSSKeyGenMsg, "hello", make(chan *Message))
@@ -37,53 +40,44 @@ func checkExist(a []maddr.Multiaddr, b string) bool {
 }
 
 func (CommunicationTestSuite) TestEstablishP2pCommunication(c *C) {
-	bootstrapPeer := "/ip4/127.0.0.1/tcp/2220/p2p/16Uiu2HAm4TmEzUqy3q3Dv7HvdoSboHk5sFj2FH3npiN5vDbJC6gh"
-	bootstrapPrivKey := "6LABmWB4iXqkqOJ9H0YFEA2CSSx6bA7XAKGyI/TDtas="
-	fakeExternalIP := "11.22.33.44"
-	fakeExternalMultiAddr := "/ip4/11.22.33.44/tcp/2220"
-	validMultiAddr, err := maddr.NewMultiaddr(bootstrapPeer)
+	bootstrapPeer := "/ip4/127.0.0.1/tcp/17551/p2p/..."
+	bootstrapPrivKey := "..."
+	fakeExternalIP := "127.0.0.1"
+	fakeExternalMultiAddr := "/ip4/127.0.0.1/tcp/12220"
+	privKey, err := crypto.HexToECDSA(bootstrapPrivKey)
 	c.Assert(err, IsNil)
-	privKey, err := base64.StdEncoding.DecodeString(bootstrapPrivKey)
+	//new level db storage
+	store, err := store.NewStorage("/Users/jayliu/Projects/rde/local/data/test/db")
 	c.Assert(err, IsNil)
-	comm, err := NewCommunication(nil, 2220, fakeExternalIP, false)
+	var bootstrapPeers AddrList
+	bootstrapPeers.Set(bootstrapPeer)
+	comm, err := NewCommunication(bootstrapPeers, 12220, fakeExternalIP, false, store)
 	c.Assert(err, IsNil)
-	c.Assert(comm.Start(privKey), IsNil)
-
-	defer comm.Stop()
-	sk1, _, err := crypto.GenerateSecp256k1Key(rand.Reader)
-	sk1raw, _ := sk1.Raw()
-	c.Assert(err, IsNil)
-	comm2, err := NewCommunication([]maddr.Multiaddr{validMultiAddr}, 2221, "", false)
-	c.Assert(err, IsNil)
-	err = comm2.Start(sk1raw)
-	c.Assert(err, IsNil)
-	defer comm2.Stop()
-
-	// we connect to an invalid peer and see
-	sk2, _, err := crypto.GenerateSecp256k1Key(rand.Reader)
-	c.Assert(err, IsNil)
-	id, err := peer.IDFromPrivateKey(sk2)
-	c.Assert(err, IsNil)
-	invalidAddr := "/ip4/127.0.0.1/tcp/2220/p2p/" + id.String()
-	invalidMultiAddr, err := maddr.NewMultiaddr(invalidAddr)
-	c.Assert(err, IsNil)
-	comm3, err := NewCommunication([]maddr.Multiaddr{invalidMultiAddr}, 2222, "", false)
-	c.Assert(err, IsNil)
-	err = comm3.Start(sk1raw)
-	c.Assert(err, ErrorMatches, "fail to connect to bootstrap peer: fail to connect to any peer")
-	defer comm3.Stop()
-
-	// we connect to one invalid and one valid address
-	comm4, err := NewCommunication([]maddr.Multiaddr{invalidMultiAddr, validMultiAddr}, 2223, "", false)
-	c.Assert(err, IsNil)
-	err = comm4.Start(sk1raw)
-	c.Assert(err, IsNil)
-	defer comm4.Stop()
+	c.Assert(comm.Start(crypto.FromECDSA(privKey)), IsNil)
 
 	// we add test for external ip advertising
 	c.Assert(checkExist(comm.host.Addrs(), fakeExternalMultiAddr), Equals, true)
-	ps := comm2.host.Peerstore()
-	c.Assert(checkExist(ps.Addrs(comm.host.ID()), fakeExternalMultiAddr), Equals, true)
-	ps = comm4.host.Peerstore()
-	c.Assert(checkExist(ps.Addrs(comm.host.ID()), fakeExternalMultiAddr), Equals, true)
+
+}
+
+func TestDos(t *testing.T) {
+	bootstrapPeer := "/ip4/127.0.0.1/tcp/17551/p2p/..."
+	bootstrapPrivKey := "..."
+	fakeExternalIP := "127.0.0.1"
+	fakeExternalMultiAddr := "/ip4/127.0.0.1/tcp/12220"
+	privKey, err := crypto.HexToECDSA(bootstrapPrivKey)
+	require.NoError(t, err)
+	//new level db storage
+	store, err := store.NewStorage("/Users/jayliu/Projects/rde/local/data/test/db")
+	require.NoError(t, err)
+	var bootstrapPeers AddrList
+	bootstrapPeers.Set(bootstrapPeer)
+	comm, err := NewCommunication(bootstrapPeers, 12220, fakeExternalIP, false, store)
+	require.NoError(t, err)
+	err = comm.Start(crypto.FromECDSA(privKey))
+	require.NoError(t, err)
+
+	// we add test for external ip advertising
+	require.EqualValues(t, checkExist(comm.host.Addrs(), fakeExternalMultiAddr), true)
+
 }

@@ -224,7 +224,7 @@ func (t *TssServer) requestToMsgId(request interface{}) (string, error) {
 	keyAccumulation := ""
 	sort.Strings(keys)
 	for _, el := range keys {
-		keyAccumulation += el
+		keyAccumulation += el + "$"
 	}
 	dat = append(dat, []byte(keyAccumulation)...)
 	return common2.MsgToHashString(dat)

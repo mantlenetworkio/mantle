@@ -20,7 +20,6 @@ func (t *TssServer) Keygen(req keygen2.Request) (keygen2.Response, error) {
 	if err != nil {
 		return keygen2.Response{}, err
 	}
-	t.logger.Info().Msgf("-------------------- msgId %s", msgID)
 
 	if err = t.requestCheck(req); err != nil {
 		return keygen2.Response{}, err
