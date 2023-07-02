@@ -3,6 +3,7 @@ package abnormal
 import (
 	"errors"
 	"fmt"
+
 	"github.com/binance-chain/tss-lib/tss"
 	mapset "github.com/deckarep/golang-set"
 	"github.com/libp2p/go-libp2p/core/peer"
@@ -42,14 +43,14 @@ func (m *Manager) tssTimeoutAbnormal(lastMessageType string, partyIDMap map[stri
 	return AbnormalPubKeys, nil
 }
 
-// this Abnormal Abnormals the node who cause the timeout in node sync
-func (m *Manager) NodeSyncAbnormal(keys []string, onlinePeers []peer.ID) (Abnormal, error) {
-	Abnormal := NewAbnormal(TssSyncFail, nil)
+// NodeSyncAbnormal create a SyncAbnormal object
+func (m *Manager) NodeSyncAbnormal(keys []string, onlinePeers []peer.ID) (*Abnormal, error) {
+	abnormal := NewAbnormal(TssSyncFail, nil)
 	for _, item := range keys {
 		found := false
 		peerID, err := conversion2.GetPeerIDFromPubKey(item)
 		if err != nil {
-			return Abnormal, fmt.Errorf("fail to get peer id from pub key")
+			return nil, fmt.Errorf("fail to get peer id from pub key")
 		}
 		for _, p := range onlinePeers {
 			if p == peerID {
@@ -58,14 +59,14 @@ func (m *Manager) NodeSyncAbnormal(keys []string, onlinePeers []peer.ID) (Abnorm
 			}
 		}
 		if !found {
-			Abnormal.Nodes = append(Abnormal.Nodes, NewNode(item, nil, nil))
+			abnormal.Nodes = append(abnormal.Nodes, NewNode(item, nil, nil))
 		}
 	}
-	return Abnormal, nil
+	return abnormal, nil
 }
 
 // this Abnormal Abnormals the node who cause the timeout in unicast message
-func (m *Manager) GetUnicastAbnormal(lastMsgType string) ([]Node, error) {
+func (m *Manager) GetUnicastAbnormal(lastMsgType string) ([]*Node, error) {
 	m.lastMsgLocker.RLock()
 	if len(m.lastUnicastPeer) == 0 {
 		m.lastMsgLocker.RUnlock()
@@ -91,7 +92,7 @@ func (m *Manager) GetUnicastAbnormal(lastMsgType string) ([]Node, error) {
 		m.logger.Error().Err(err).Msg("fail to get the Abnormald peers")
 		return nil, fmt.Errorf("fail to get the Abnormald peers %w", ErrTssTimeOut)
 	}
-	var AbnormalNodes []Node
+	var AbnormalNodes []*Node
 	for _, el := range AbnormalPeers {
 		AbnormalNodes = append(AbnormalNodes, NewNode(el, nil, nil))
 	}
@@ -99,13 +100,13 @@ func (m *Manager) GetUnicastAbnormal(lastMsgType string) ([]Node, error) {
 }
 
 // this Abnormal Abnormals the node who cause the timeout in broadcast message
-func (m *Manager) GetBroadcastAbnormal(lastMessageType string) ([]Node, error) {
+func (m *Manager) GetBroadcastAbnormal(lastMessageType string) ([]*Node, error) {
 	AbnormalPeers, err := m.tssTimeoutAbnormal(lastMessageType, m.partyInfo.PartyIDMap)
 	if err != nil {
 		m.logger.Error().Err(err).Msg("fail to get the Abnormald peers")
 		return nil, fmt.Errorf("fail to get the Abnormald peers %w", ErrTssTimeOut)
 	}
-	var AbnormalNodes []Node
+	var AbnormalNodes []*Node
 	for _, el := range AbnormalPeers {
 		AbnormalNodes = append(AbnormalNodes, NewNode(el, nil, nil))
 	}
