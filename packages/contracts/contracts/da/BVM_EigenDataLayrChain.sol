@@ -75,6 +75,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     event RollupBatchIndexUpdated(uint256 oldRollupBatchIndex, uint256 newRollupBatchIndex);
     event L2ConfirmedBlockNumberUpdated(uint256 oldL2ConfirmedBlockNumber, uint256 newL2ConfirmedBlockNumber);
     event DataLayrManagerAddressUpdated(address oldDataLayrManagerAddress, address newDataLayrManagerAddress);
+    event ResetRollupBatchData(uint256 rollupBatchIndex, uint256 l2StoredBlockNumber, uint256 l2ConfirmedBlockNumber);
 
     constructor() {
         _disableInitializers();
@@ -217,13 +218,14 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @notice reset batch rollup batch data
     * @param _rollupBatchIndex update rollup index
     */
-    function resetRollupBatchData(uint256 _rollupBatchIndex) external onlySequencer {
+    function resetRollupBatchData(uint256 _rollupBatchIndex, uint256 _l2StoredBlockNumber, uint256 _l2ConfirmedBlockNumber) external onlySequencer {
         for (uint256 i = _rollupBatchIndex; i < rollupBatchIndex; i++) {
             delete rollupBatchIndexRollupStores[i];
         }
         rollupBatchIndex = _rollupBatchIndex;
-        l2StoredBlockNumber = 1;
-        l2ConfirmedBlockNumber = 1;
+        l2StoredBlockNumber = _l2StoredBlockNumber;
+        l2ConfirmedBlockNumber = _l2ConfirmedBlockNumber;
+        emit ResetRollupBatchData(_rollupBatchIndex, _l2StoredBlockNumber, _l2ConfirmedBlockNumber);
     }
 
     /**
@@ -394,4 +396,6 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
             dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].endBL2BlockNumber
         );
     }
+
+    uint256[49] private __gap;
 }
