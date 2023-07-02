@@ -500,7 +500,7 @@ func (wsc *wsConnection) writeRoutine() {
 			}
 		case msg := <-wsc.requestChan:
 			wsc.Logger.Info("send msg from requestChan to target client", "method", msg.Method)
-			jsonBytes, err := json.MarshalIndent(msg, "", "  ")
+			jsonBytes, err := json.Marshal(msg)
 			if err != nil {
 				wsc.Logger.Error("Failed to marshal RPCRequest to JSON", "err", err)
 				continue
