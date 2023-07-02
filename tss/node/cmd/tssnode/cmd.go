@@ -85,6 +85,7 @@ func runNode(cmd *cobra.Command) error {
 	p2pPort, err := strconv.Atoi(cfg.Node.P2PPort)
 	if err != nil {
 		log.Error().Err(err).Msg("p2p port value in config file, can not convert to int type")
+		return err
 	}
 
 	cfgBz, _ := json.Marshal(cfg)
@@ -109,9 +110,11 @@ func runNode(cmd *cobra.Command) error {
 	)
 	if err != nil {
 		log.Fatal().Err(err).Msg("fail to create tss server instance")
+		return err
 	}
 	if err := tssInstance.Start(); err != nil {
 		log.Error().Err(err).Msg("fail to start tss server")
+		return err
 	}
 
 	pubkey := crypto.CompressPubkey(&privKey.PublicKey)

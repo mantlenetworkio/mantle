@@ -5,15 +5,16 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math/big"
+	"sort"
+	"strconv"
+
 	"github.com/binance-chain/tss-lib/crypto"
 	"github.com/binance-chain/tss-lib/tss"
 	"github.com/btcsuite/btcd/btcec"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	crypto2 "github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/peer"
-	"math/big"
-	"sort"
-	"strconv"
 )
 
 func GetParties(keys []string, localPartyKey string) ([]*tss.PartyID, *tss.PartyID, error) {
@@ -52,15 +53,16 @@ func SetupPartyIDMap(partiesID []*tss.PartyID) map[string]*tss.PartyID {
 	return partyIDMap
 }
 
-func SetupIDMaps(parties map[string]*tss.PartyID, partyIDtoP2PID map[string]peer.ID) error {
+func GeneratePartyIDtoP2PIDMaps(parties map[string]*tss.PartyID) (map[string]peer.ID, error) {
+	partyIDtoP2PID := make(map[string]peer.ID)
 	for id, party := range parties {
 		peerID, err := GetPeerIDFromPartyID(party)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		partyIDtoP2PID[id] = peerID
 	}
-	return nil
+	return partyIDtoP2PID, nil
 }
 
 func GetPeerIDFromPartyID(partyID *tss.PartyID) (peer.ID, error) {
@@ -107,10 +109,10 @@ func BytesToHashString(msg []byte) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-func GetTssPubKey(pubKeyPoint *crypto.ECPoint) (string, []byte,[]byte, error) {
+func GetTssPubKey(pubKeyPoint *crypto.ECPoint) (string, []byte, []byte, error) {
 	// we check whether the point is on curve according to Kudelski report
 	if pubKeyPoint == nil || !isOnCurve(pubKeyPoint.X(), pubKeyPoint.Y()) {
-		return "", nil,nil, errors.New("invalid points")
+		return "", nil, nil, errors.New("invalid points")
 	}
 	tssPubKey := btcec.PublicKey{
 		Curve: btcec.S256(),
@@ -123,7 +125,7 @@ func GetTssPubKey(pubKeyPoint *crypto.ECPoint) (string, []byte,[]byte, error) {
 
 	pubKeyBytes := tssPubKey.SerializeUncompressed()
 	pubKeyBytes = pubKeyBytes[1:]
-	return pubKeyStr, address,pubKeyBytes, nil
+	return pubKeyStr, address, pubKeyBytes, nil
 }
 
 func PartyIDtoPubKey(party *tss.PartyID) (string, error) {

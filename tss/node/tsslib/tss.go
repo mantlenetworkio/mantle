@@ -64,6 +64,7 @@ func NewTss(
 	peerId, err := conversion.GetPeerIDFromPubKey(pubkeyHex)
 	if err != nil {
 		log.Error().Err(err).Msg("ERROR: fail to get peer id by pub key")
+		return nil, errors.New("ERROR: fail to get peer id by pub key")
 	}
 	log.Info().Msgf("peer id is (%s) \n", peerId)
 	stateManager, err := storage2.NewFileStateMgr(storageFolder)
@@ -191,9 +192,10 @@ func (t *TssServer) Stop() {
 	// stop the p2p and finish the p2p wait group
 	err := t.p2pCommunication.Stop()
 	if err != nil {
-		t.logger.Error().Msgf("error in shutdown the p2p server")
+		t.logger.Err(err).Msgf("error in shutdown the p2p server")
+	} else {
+		log.Info().Msg("The Tss and p2p server has been stopped successfully")
 	}
-	log.Info().Msg("The Tss and p2p server has been stopped successfully")
 }
 
 func (t *TssServer) GetLocalPeerID() string {

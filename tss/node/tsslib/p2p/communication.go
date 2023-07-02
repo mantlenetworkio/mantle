@@ -408,14 +408,11 @@ func (c *Communication) Start(priKeyBytes []byte) error {
 
 // Stop communication
 func (c *Communication) Stop() error {
-	// we need to stop the handler and the p2p services firstly, then terminate the our communication threads
-	if err := c.host.Close(); err != nil {
-		c.logger.Err(err).Msg("fail to close host network")
-	}
-
+	// we need to stop the handler and the p2p services firstly, then terminate the communication threads
+	err := c.host.Close()
 	close(c.stopChan)
 	c.wg.Wait()
-	return nil
+	return err
 }
 
 func (c *Communication) SetSubscribe(topic messages.TSSMessageTpe, msgID string, channel chan *Message) {
