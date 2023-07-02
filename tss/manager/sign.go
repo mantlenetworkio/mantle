@@ -80,7 +80,28 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 					defer func() {
 						responseNodes[resp.SourceNode] = struct{}{}
 					}()
-					if resp.RpcResponse.Error == nil {
+					if resp.RpcResponse.Error != nil {
+						if resp.RpcResponse.Error.Code == tss.CulpritErrorCode {
+							_, ok := responseNodes[resp.SourceNode]
+							if ok { // ignore if handled
+								return
+							}
+
+							culpritData := resp.RpcResponse.Error.Data
+							culprits := strings.Split(culpritData, ",")
+							for _, culprit := range culprits {
+								if slices.Exists(ctx.Approvers(), culprit) {
+									counter.increment(culprit)
+								}
+							}
+						} else {
+							log.Error("Unrecognized error code",
+								"err_code", resp.RpcResponse.Error.Code,
+								"err_data", resp.RpcResponse.Error.Data,
+								"err_message", resp.RpcResponse.Error.Message)
+						}
+						return
+					} else {
 						var signResponse tss.SignResponse
 						if err := tmjson.Unmarshal(resp.RpcResponse.Result, &signResponse); err != nil {
 							log.Error("failed to unmarshal sign response", err)
@@ -99,19 +120,6 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 
 						validSignResponse = &signResponse
 						return
-					} else if resp.RpcResponse.Error.Code == tss.CulpritErrorCode {
-						_, ok := responseNodes[resp.SourceNode]
-						if ok { // ignore if handled
-							return
-						}
-
-						culpritData := resp.RpcResponse.Error.Data
-						culprits := strings.Split(culpritData, ",")
-						for _, culprit := range culprits {
-							if slices.Exists(ctx.Approvers(), culprit) {
-								counter.increment(culprit)
-							}
-						}
 					}
 				}()
 
