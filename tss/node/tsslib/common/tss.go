@@ -554,6 +554,8 @@ func (t *TssCommon) ProcessOneMessage(wrappedMsg *messages.WrappedMessage, peerI
 			}
 			return nil
 		}
+	default:
+		return errors.New("invalid message type.")
 	}
 
 	return nil
