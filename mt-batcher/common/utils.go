@@ -2,9 +2,7 @@ package common
 
 import (
 	"fmt"
-	"github.com/Layr-Labs/datalayr/common/graphView"
 	"github.com/Layr-Labs/datalayr/common/header"
-	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 	"os"
 )
@@ -31,17 +29,6 @@ func CreateUploadHeader(params StoreParams) ([]byte, error) {
 		return nil, err
 	}
 	return uploadHeader, nil
-}
-
-func GetMessageHash(event graphView.DataStoreInit) []byte {
-	msg := make([]byte, 0)
-	msg = append(msg, uint32ToByteSlice(event.StoreNumber)...)
-	msg = append(msg, event.DataCommitment[:]...)
-	msg = append(msg, byte(event.Duration))
-	msg = append(msg, packTo(uint32ToByteSlice(event.InitTime), 32)...)
-	msg = append(msg, uint32ToByteSlice(event.Index)...)
-	msgHash := crypto.Keccak256(msg)
-	return msgHash
 }
 
 func uint32ToByteSlice(x uint32) []byte {

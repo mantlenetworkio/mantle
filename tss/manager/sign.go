@@ -43,7 +43,7 @@ func (c *Counter) satisfied(minNumber int) []string {
 	return ret
 }
 
-func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, method tss.Method) (tss.SignResponse, []string, error) {
+func (m *Manager) sign(ctx types.Context, request interface{}, digestBz []byte, method tss.Method) (tss.SignResponse, []string, error) {
 	respChan := make(chan server.ResponseMsg)
 	stopChan := make(chan struct{})
 
@@ -146,7 +146,7 @@ func (m Manager) sign(ctx types.Context, request interface{}, digestBz []byte, m
 	return *validSignResponse, culprits, nil
 }
 
-func (m Manager) sendToNodes(ctx types.Context, request interface{}, method tss.Method, errSendChan chan struct{}) {
+func (m *Manager) sendToNodes(ctx types.Context, request interface{}, method tss.Method, errSendChan chan struct{}) {
 	nodes := ctx.Approvers()
 	nodeRequest := tss.NodeSignRequest{
 		ClusterPublicKey: ctx.TssInfos().ClusterPubKey,

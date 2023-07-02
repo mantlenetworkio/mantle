@@ -91,8 +91,8 @@ func (hs *Server) newHandler(jwtSecretStr string) (http.Handler, error) {
 	router.Use(logMiddleware())
 	if jwtSecretStr != "" {
 		return cmm.NewJwtHandler(router, jwtSecretStr)
-	}else {
-		return router,nil
+	} else {
+		return router, nil
 	}
 }
 
@@ -196,7 +196,7 @@ func (hs *Server) keySignHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonResult, err := json.MarshalIndent(signResp, "", "	")
+	jsonResult, err := json.Marshal(signResp)
 	if err != nil {
 		hs.logger.Error().Err(err).Msg("fail to marshal response to json message")
 		w.WriteHeader(http.StatusInternalServerError)

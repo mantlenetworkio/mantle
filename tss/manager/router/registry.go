@@ -56,6 +56,9 @@ func (registry *Registry) SignStateHandler() gin.HandlerFunc {
 				return
 			}
 			signature, err = registry.signService.SignRollBack(request)
+		} else {
+			c.String(http.StatusBadRequest, "invalid request type %d, expected request type: 0 and 1", request.Type)
+			return
 		}
 		if err != nil {
 			c.String(http.StatusInternalServerError, "failed to sign state")
