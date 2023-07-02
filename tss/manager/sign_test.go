@@ -96,9 +96,11 @@ func TestWrongSignature(t *testing.T) {
 			ClusterPubKey: publicKey,
 		})
 	afterMsgSent := func(request server.RequestMsg, respCh chan server.ResponseMsg) error {
-		signature[22] = 0x67 // modify the signature
+		newSig := make([]byte, len(signature), len(signature))
+		copy(newSig, signature)
+		newSig[22] = 0x67 // modify the sig
 		signResp := tss.SignResponse{
-			Signature: signature,
+			Signature: newSig,
 		}
 		rpcResp := tmtypes.NewRPCSuccessResponse(request.RpcRequest.ID, signResp)
 		respCh <- server.ResponseMsg{
@@ -222,7 +224,7 @@ func TestSignSlash(t *testing.T) {
 
 	afterMsgSent := func(request server.RequestMsg, respCh chan server.ResponseMsg) error {
 		signResp := tss.SignResponse{
-			Signature:       signature,
+			Signature: signature,
 		}
 		rpcResp := tmtypes.NewRPCSuccessResponse(request.RpcRequest.ID, signResp)
 		respCh <- server.ResponseMsg{
@@ -243,7 +245,7 @@ func TestSignSlash(t *testing.T) {
 		}
 
 		signResp := tss.SignResponse{
-			Signature:       signature,
+			Signature: signature,
 		}
 		rpcResp := tmtypes.NewRPCSuccessResponse(request.RpcRequest.ID, signResp)
 		respCh <- server.ResponseMsg{

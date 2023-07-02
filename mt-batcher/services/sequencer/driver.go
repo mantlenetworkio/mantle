@@ -357,7 +357,7 @@ func (d *Driver) StoreData(ctx context.Context, uploadHeader []byte, duration ui
 		return tx, nil
 
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
-		log.Warn("MtBather eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
+		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
 		opts.GasTipCap = common4.FallbackGasTipCap
 		return d.Cfg.EigenDaContract.StoreData(opts, uploadHeader, duration, blockNumber, startL2BlockNumber, endL2BlockNumber, totalOperatorsIndex, isReRollup)
 
@@ -407,7 +407,7 @@ func (d *Driver) ConfirmData(ctx context.Context, callData []byte, searchData rc
 		return tx, nil
 
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
-		log.Warn("MtBather eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
+		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
 		opts.GasTipCap = common4.FallbackGasTipCap
 		return d.Cfg.EigenDaContract.ConfirmData(opts, callData, searchData, startL2BlockNumber, endL2BlockNumber, originDataStoreId, reConfirmedBatchIndex, isReRollup)
 
@@ -658,7 +658,7 @@ func (d *Driver) UpdateFee(ctx context.Context, l2Block, daFee *big.Int) (*types
 	case err == nil:
 		return tx, nil
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
-		log.Warn("MtBather eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
+		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
 		opts.GasTipCap = common4.FallbackGasTipCap
 		return d.Cfg.EigenFeeContract.SetRollupFee(opts, l2Block, daFee)
 	default:
