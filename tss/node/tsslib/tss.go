@@ -64,6 +64,7 @@ func NewTss(
 	peerId, err := conversion.GetPeerIDFromPubKey(pubkeyHex)
 	if err != nil {
 		log.Error().Err(err).Msg("ERROR: fail to get peer id by pub key")
+		return nil, errors.New("ERROR: fail to get peer id by pub key")
 	}
 	log.Info().Msgf("peer id is (%s) \n", peerId)
 	stateManager, err := storage2.NewFileStateMgr(storageFolder)
