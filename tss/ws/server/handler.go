@@ -110,7 +110,7 @@ func (wm *WebsocketManager) SendMsg(msg RequestMsg) error {
 	defer wm.scRWLock.RUnlock()
 	sendChan, ok := wm.sendChan[msg.TargetNode]
 	if !ok {
-		return errors.New(fmt.Sprintf("the node(%s) is lost", msg.TargetNode))
+		return fmt.Errorf("the node(%s) is lost", msg.TargetNode)
 	}
 	go func() {
 		sendChan <- msg.RpcRequest

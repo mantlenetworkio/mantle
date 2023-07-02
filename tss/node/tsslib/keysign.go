@@ -186,8 +186,8 @@ func (t *TssServer) isContainPubkeys(signerPubKeys, participants []string, poolP
 			errPubKeys = append(errPubKeys, pubKey)
 		}
 	}
-	if len(errPubKeys) != 0 {
-		return errors.New(fmt.Sprintf("these public keys %s are not members of %s's participants", strings.Join(errPubKeys, ","), poolPubkey))
+	if len(errPubkyes) != 0 {
+		return fmt.Errorf("these pub keys %s are not members of %s's participants", strings.Join(errPubkyes, ","), poolPubkey)
 	}
 	return nil
 }
