@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
 	"github.com/rs/zerolog/log"
-	"time"
 )
 
 const CtxTimeout = 30 * time.Second
@@ -42,12 +43,12 @@ func NewSecretsMgr(secretId string) (*SecretsMgr, error) {
 	result, err := client.GetSecretValue(ctx, params)
 	if err != nil {
 
-		log.Error().Err(err).Msgf("fail to get secret value form aws secrets manager :%w", err)
+		log.Error().Err(err).Msgf("fail to get secret value form aws secrets manager :%v", err)
 		return nil, err
 	}
 	var keys map[string]KeygenLocalState
 	if err := json.Unmarshal(result.SecretBinary, &keys); err != nil {
-		log.Error().Err(err).Msgf("fail to unmarshal data to map :%w", err)
+		log.Error().Err(err).Msgf("fail to unmarshal data to map :%v", err)
 		keys = map[string]KeygenLocalState{}
 	}
 
@@ -74,7 +75,7 @@ func (sm *SecretsMgr) Save() error {
 	}
 	buf, err := json.Marshal(sm.keys)
 	if err != nil {
-		log.Error().Err(err).Msgf("fail to marshal secrets keys map to json: %w", err)
+		log.Error().Err(err).Msgf("fail to marshal secrets keys map to json: %v", err)
 		return err
 	}
 	params := &secretsmanager.UpdateSecretInput{
@@ -83,7 +84,7 @@ func (sm *SecretsMgr) Save() error {
 	}
 	output, err := sm.client.UpdateSecret(context.TODO(), params)
 	if err != nil {
-		log.Error().Err(err).Msgf("fail to put data to aws's secrets manager : %w", err)
+		log.Error().Err(err).Msgf("fail to put data to aws's secrets manager : %v", err)
 		return err
 	}
 	log.Info().Msgf("put data to aws's secrets manager success, version is:%s", output.VersionId)

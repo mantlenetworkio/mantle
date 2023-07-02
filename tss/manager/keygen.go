@@ -16,7 +16,7 @@ import (
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
-func (m Manager) observeElection() {
+func (m *Manager) observeElection() {
 
 	queryTicker := time.NewTicker(m.taskInterval + 30*time.Second)
 	for {
@@ -79,7 +79,7 @@ func (m Manager) observeElection() {
 	}
 }
 
-func (m Manager) generateKey(tssMembers []string, threshold int) (string, error) {
+func (m *Manager) generateKey(tssMembers []string, threshold int) (string, error) {
 	availableNodes := m.availableNodes(tssMembers)
 	if len(availableNodes) < len(tssMembers) {
 		return "", errors.New("not enough available nodes to generate CPK")
@@ -162,7 +162,7 @@ func (m Manager) generateKey(tssMembers []string, threshold int) (string, error)
 	return base, nil
 }
 
-func (m Manager) callKeygen(availableNodes []string, threshold int, requestId string, sendError chan struct{}) {
+func (m *Manager) callKeygen(availableNodes []string, threshold int, requestId string, sendError chan struct{}) {
 	for _, node := range availableNodes {
 		nodeRequest := tss.KeygenRequest{
 			Nodes:     availableNodes,
