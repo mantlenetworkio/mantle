@@ -13,6 +13,7 @@ miss_signed_number = 5
 
 ws_addr = "tcp://0.0.0.0:8081"
 http_addr = ":8080"
+jwt_secret = ""
 db_dir = "/root/tss-manager/db"
 
 keygen_timeout = "1m"

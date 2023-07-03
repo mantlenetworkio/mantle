@@ -54,7 +54,7 @@ func (m *Manager) observeElection() {
 					if len(cpkData.Cpk) != 0 && time.Now().Sub(cpkData.CreationTime).Hours() < m.cpkConfirmTimeout.Hours() { // cpk is generated, but has not been confirmed yet
 						return
 					}
-					cpk, err := m.generateKey(tssInfo.TssMembers, tssInfo.Threshold)
+					cpk, err := m.generateKey(tssInfo.TssMembers, tssInfo.Threshold, tssInfo.ElectionId)
 					if err != nil {
 						log.Error("failed to generate key", "err", err)
 						return
@@ -79,7 +79,7 @@ func (m *Manager) observeElection() {
 	}
 }
 
-func (m *Manager) generateKey(tssMembers []string, threshold int) (string, error) {
+func (m *Manager) generateKey(tssMembers []string, threshold int, electionId uint64) (string, error) {
 	availableNodes := m.availableNodes(tssMembers)
 	if len(availableNodes) < len(tssMembers) {
 		return "", errors.New("not enough available nodes to generate CPK")
@@ -137,7 +137,7 @@ func (m *Manager) generateKey(tssMembers []string, threshold int) (string, error
 		}
 	}()
 
-	m.callKeygen(availableNodes, threshold, requestId, sendError)
+	m.callKeygen(availableNodes, threshold, electionId, requestId, sendError)
 	wg.Wait()
 
 	if anyError != nil {
@@ -162,12 +162,13 @@ func (m *Manager) generateKey(tssMembers []string, threshold int) (string, error
 	return base, nil
 }
 
-func (m *Manager) callKeygen(availableNodes []string, threshold int, requestId string, sendError chan struct{}) {
+func (m *Manager) callKeygen(availableNodes []string, threshold int, electionId uint64, requestId string, sendError chan struct{}) {
 	for _, node := range availableNodes {
 		nodeRequest := tss.KeygenRequest{
-			Nodes:     availableNodes,
-			Threshold: threshold,
-			Timestamp: time.Now().UnixMilli(),
+			Nodes:      availableNodes,
+			Threshold:  threshold,
+			ElectionId: electionId,
+			Timestamp:  time.Now().UnixMilli(),
 		}
 		requestBz, _ := json.Marshal(nodeRequest)
 		go func(node string, requestBz []byte) {
