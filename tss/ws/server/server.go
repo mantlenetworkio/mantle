@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/tendermint/tendermint/libs/service"
 	rpcserver "github.com/tendermint/tendermint/rpc/jsonrpc/server"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+
+	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
 )
 
 type WSServer struct {

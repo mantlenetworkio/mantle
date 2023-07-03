@@ -5,17 +5,19 @@ import (
 	"encoding/hex"
 	"math/big"
 
+	"github.com/influxdata/influxdb/pkg/slices"
+	"github.com/pkg/errors"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/influxdata/influxdb/pkg/slices"
+
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/manager/types"
 	"github.com/mantlenetworkio/mantle/tss/slash"
-	"github.com/pkg/errors"
 )
 
 type QueryService struct {

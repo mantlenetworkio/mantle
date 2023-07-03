@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cobra"
+
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/index"
@@ -19,7 +21,6 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/manager/store"
 	"github.com/mantlenetworkio/mantle/tss/slash"
 	"github.com/mantlenetworkio/mantle/tss/ws/server"
-	"github.com/spf13/cobra"
 )
 
 const (

@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
-	tss "github.com/mantlenetworkio/mantle/tss/common"
-	"github.com/mantlenetworkio/mantle/tss/ws/server"
 	"github.com/stretchr/testify/require"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+
+	tss "github.com/mantlenetworkio/mantle/tss/common"
+	"github.com/mantlenetworkio/mantle/tss/ws/server"
 )
 
 func TestKeygen(t *testing.T) {
