@@ -5,8 +5,6 @@ import (
 	"encoding/hex"
 	"math/big"
 
-	"github.com/pkg/errors"
-
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -17,6 +15,7 @@ import (
 	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/manager/types"
 	"github.com/mantlenetworkio/mantle/tss/slash"
+	"github.com/pkg/errors"
 )
 
 type QueryService struct {

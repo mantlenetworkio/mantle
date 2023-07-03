@@ -19,7 +19,6 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/manager/store"
 	"github.com/mantlenetworkio/mantle/tss/slash"
 	"github.com/mantlenetworkio/mantle/tss/ws/server"
-
 	"github.com/spf13/cobra"
 )
 

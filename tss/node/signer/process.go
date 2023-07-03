@@ -7,12 +7,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
-
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/mantlenetworkio/mantle/bss-core/dial"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
+	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
 	"github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
