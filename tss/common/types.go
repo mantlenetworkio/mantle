@@ -3,6 +3,8 @@ package common
 import (
 	"encoding/hex"
 	"fmt"
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -28,8 +30,8 @@ func (m Method) String() string {
 
 type SignStateRequest struct {
 	Type                uint64     `json:"type"`
-	StartBlock          string     `json:"start_block"`
-	OffsetStartsAtIndex string     `json:"offset_starts_at_index"`
+	StartBlock          *big.Int   `json:"start_block"`
+	OffsetStartsAtIndex *big.Int   `json:"offset_starts_at_index"`
 	Challenge           string     `json:"challenge"`
 	StateRoots          [][32]byte `json:"state_roots"`
 	ElectionId          uint64     `json:"election_id"`
@@ -40,7 +42,7 @@ func (ssr SignStateRequest) String() string {
 	for _, sr := range ssr.StateRoots {
 		srs = srs + hex.EncodeToString(sr[:]) + " "
 	}
-	return fmt.Sprintf("start_block: %s, offset_starts_at_index: %s, election_id: %d, state_roots: %s", ssr.StartBlock, ssr.OffsetStartsAtIndex, ssr.ElectionId, srs)
+	return fmt.Sprintf("start_block: %v, offset_starts_at_index: %v, election_id: %d, state_roots: %s", ssr.StartBlock, ssr.OffsetStartsAtIndex, ssr.ElectionId, srs)
 }
 
 type SlashRequest struct {
@@ -50,7 +52,7 @@ type SlashRequest struct {
 }
 
 type RollBackRequest struct {
-	StartBlock string `json:"start_block"`
+	StartBlock *big.Int `json:"start_block"`
 }
 
 type AskResponse struct {

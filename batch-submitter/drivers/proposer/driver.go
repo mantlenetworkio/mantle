@@ -657,8 +657,8 @@ func (d *Driver) RequestTssSignature(requestType uint64, start, offsetStartsAtIn
 	var tssResponse tssClient.TssResponse
 	tssReqParams := tss_types.SignStateRequest{
 		Type:                requestType,
-		StartBlock:          start.String(),
-		OffsetStartsAtIndex: offsetStartsAtIndex.String(),
+		StartBlock:          start,
+		OffsetStartsAtIndex: offsetStartsAtIndex,
 		Challenge:           challenge,
 		StateRoots:          stateRoots,
 	}

@@ -201,8 +201,7 @@ func (p *Processor) checkMessages(sign tsscommon.SignStateRequest) (err error, h
 }
 
 func signMsgToHash(msg tsscommon.SignStateRequest) ([]byte, error) {
-	offsetStartsAtIndex, _ := new(big.Int).SetString(msg.OffsetStartsAtIndex, 10)
-	return tsscommon.StateBatchHash(msg.StateRoots, offsetStartsAtIndex)
+	return tsscommon.StateBatchHash(msg.StateRoots, msg.OffsetStartsAtIndex)
 }
 
 func (p *Processor) removeWaitEvent(key string) {
