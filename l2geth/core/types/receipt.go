@@ -88,9 +88,9 @@ type receiptMarshaling struct {
 	L1GasUsed         *hexutil.Big
 	L1Fee             *hexutil.Big
 	// use eigen DA
-	DAGasUsed  *big.Int
-	DAGasPrice *big.Int
-	DAFee      *big.Int
+	DAGasUsed  *hexutil.Big
+	DAGasPrice *hexutil.Big
+	DAFee      *hexutil.Big
 }
 
 // receiptRLP is the consensus encoding of a receipt.
