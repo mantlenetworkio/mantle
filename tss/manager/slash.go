@@ -56,24 +56,17 @@ func (m *Manager) handleSlashing(si slash.SlashingInfo) {
 		log.Error("failed to query block number", "err", err)
 		return
 	}
-	found, err := m.tssStakingSlashingCaller.GetSlashRecord(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber)}, new(big.Int).SetUint64(si.BatchIndex), si.Address)
+	found, err := m.tssStakingSlashingCaller.GetSlashRecord(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - uint64(m.l1ConfirmBlocks))}, new(big.Int).SetUint64(si.BatchIndex), si.Address)
 	if err != nil {
 		log.Error("failed to GetSlashRecord", "err", err)
 		return
 	}
 	if found { // is submitted to ethereum
-		found, err = m.tssStakingSlashingCaller.GetSlashRecord(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - uint64(m.l1ConfirmBlocks))}, new(big.Int).SetUint64(si.BatchIndex), si.Address)
-		if err != nil {
-			log.Error("failed to GetSlashRecord", "err", err)
-			return
-		}
-		if found { // this slashing is confirmed on ethereum
-			m.store.RemoveSlashingInfo(si.Address, si.BatchIndex)
-		}
+		m.store.RemoveSlashingInfo(si.Address, si.BatchIndex)
 		return
 	}
 
-	unJailMembers, err := m.tssGroupManagerCaller.GetTssGroupUnJailMembers(nil)
+	unJailMembers, err := m.tssGroupManagerCaller.GetTssGroupUnJailMembers(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - uint64(m.l1ConfirmBlocks))})
 	if err != nil {
 		log.Error("failed to GetTssGroupUnJailMembers", "err", err)
 		return

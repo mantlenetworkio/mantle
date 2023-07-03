@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/influxdata/influxdb/pkg/slices"
 	"strings"
 	"time"
 
@@ -83,7 +84,7 @@ func (t *TssServer) KeySign(req keysign2.Request) (keysign2.Response, error) {
 
 	err := t.requestCheck(req)
 	if err != nil {
-		t.logger.Error().Msgf("not enough signers and signers=%d", len(req.SignerPubKeys))
+		t.logger.Error().Err(err).Msg("keysign request has incorrect parameter values.")
 		return emptyResp, err
 	}
 
@@ -178,11 +179,9 @@ func (t *TssServer) isPartOfKeysignParty(parties []string) bool {
 }
 
 func (t *TssServer) isContainPubkeys(signerPubKeys, participants []string, poolPubkey string) error {
-
-	participantsStr := strings.Join(participants, ",")
 	var errPubKeys []string
 	for _, pubKey := range signerPubKeys {
-		if !strings.Contains(participantsStr, pubKey) {
+		if !slices.ExistsIgnoreCase(participants, pubKey) {
 			errPubKeys = append(errPubKeys, pubKey)
 		}
 	}

@@ -3,7 +3,6 @@ package tssnode
 import (
 	"context"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -89,8 +88,6 @@ func runNode(cmd *cobra.Command) error {
 		return err
 	}
 
-	cfgBz, _ := json.Marshal(cfg)
-	log.Info().Str("config: ", string(cfgBz)).Msg("configuration file context")
 	tssInstance, err := tsslib.NewTss(
 		cfg.Node.BootstrapPeers,
 		waitPeersFullConnected,

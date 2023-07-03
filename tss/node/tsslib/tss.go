@@ -248,6 +248,17 @@ func (t *TssServer) requestCheck(request interface{}) error {
 			t.logger.Info().Msgf("fail to convert the p2p id(%s) to pubkey", t.p2pCommunication.GetHost().ID().String())
 			return err
 		}
+		if len(value.Message) == 0 {
+			return errors.New("message is empty")
+		}
+
+		if len(value.PoolPubKey) != 66 {
+			return errors.New("the length of the pool public key is not 66")
+		}
+
+		if len(value.SignerPubKeys) == 0 {
+			return errors.New("empty signer pub keys")
+		}
 		isSignMember := false
 		for _, el := range value.SignerPubKeys {
 			if myPk == el {
