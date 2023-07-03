@@ -27,7 +27,7 @@ func TestKeygen(t *testing.T) {
 		return []string{"a", "b", "c", "d"}
 	}
 	manager, _ := setup(afterMsgSent, queryAliveNodes)
-	cpk, err := manager.generateKey([]string{"a", "b", "c", "d"}, 3)
+	cpk, err := manager.generateKey([]string{"a", "b", "c", "d"}, 3, 1)
 	require.NoError(t, err)
 	require.EqualValues(t, "abcd", cpk)
 }
@@ -53,7 +53,7 @@ func TestInConsistCPKGen(t *testing.T) {
 		return []string{"a", "b", "c", "d"}
 	}
 	manager, _ := setup(afterMsgSent, queryAliveNodes)
-	cpk, err := manager.generateKey([]string{"a", "b", "c", "d"}, 3)
+	cpk, err := manager.generateKey([]string{"a", "b", "c", "d"}, 3, 1)
 	require.Error(t, err)
 	require.ErrorContains(t, err, "found different CPKs")
 	require.EqualValues(t, 0, len(cpk))
@@ -67,7 +67,7 @@ func TestSendErrorKeyGen(t *testing.T) {
 		return []string{"a", "b", "c", "d"}
 	}
 	manager, _ := setup(afterMsgSent, queryAliveNodes)
-	cpk, err := manager.generateKey([]string{"a", "b", "c", "d"}, 3)
+	cpk, err := manager.generateKey([]string{"a", "b", "c", "d"}, 3, 1)
 	require.Error(t, err)
 	require.ErrorContains(t, err, "failed to send request to node")
 	require.EqualValues(t, 0, len(cpk))
@@ -93,7 +93,7 @@ func TestTimeoutKeygen(t *testing.T) {
 	}
 	manager, _ := setup(afterMsgSent, queryAliveNodes)
 	before := time.Now()
-	cpk, err := manager.generateKey([]string{"a", "b", "c", "d"}, 3)
+	cpk, err := manager.generateKey([]string{"a", "b", "c", "d"}, 3, 1)
 	cost := time.Now().Sub(before)
 	require.Error(t, err)
 	require.ErrorContains(t, err, "timeout")
@@ -106,7 +106,7 @@ func TestNotEnoughAliveNodesKeygen(t *testing.T) {
 		return []string{"a", "b", "c"}
 	}
 	manager, _ := setup(nil, queryAliveNodes)
-	cpk, err := manager.generateKey([]string{"a", "b", "c", "d"}, 3)
+	cpk, err := manager.generateKey([]string{"a", "b", "c", "d"}, 3, 1)
 	require.Error(t, err)
 	require.ErrorContains(t, err, "not enough available nodes")
 	require.EqualValues(t, 0, len(cpk))
