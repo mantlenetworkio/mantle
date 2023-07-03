@@ -3,10 +3,11 @@ package signer
 import (
 	"context"
 	"crypto/ecdsa"
-	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
 	"math/big"
 	"sync"
 	"time"
+
+	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
 
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"

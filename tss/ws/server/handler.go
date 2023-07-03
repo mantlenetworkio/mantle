@@ -5,13 +5,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
-	"github.com/pkg/errors"
 	"net/http"
 	"runtime/debug"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
+	"github.com/pkg/errors"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gorilla/websocket"

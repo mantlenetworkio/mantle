@@ -2,11 +2,12 @@ package server
 
 import (
 	"fmt"
-	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
-	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	"net"
 	"net/http"
 	"os"
+
+	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
+	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/tendermint/tendermint/libs/service"

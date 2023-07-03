@@ -2,8 +2,9 @@ package types
 
 import (
 	"context"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"time"
+
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 type TssCommitteeInfo struct {
