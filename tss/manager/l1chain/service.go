@@ -42,7 +42,7 @@ func NewQueryService(url, tssGroupContractAddress string, confirmBlocks int, sto
 	}
 }
 
-func (q QueryService) QueryActiveInfo(isPermission bool) (types.TssCommitteeInfo, error) {
+func (q QueryService) QueryActiveInfo() (types.TssCommitteeInfo, error) {
 	currentBlockNumber, err := q.ethClient.BlockNumber(context.Background())
 	if err != nil {
 		return types.TssCommitteeInfo{}, err
@@ -51,10 +51,8 @@ func (q QueryService) QueryActiveInfo(isPermission bool) (types.TssCommitteeInfo
 	if err != nil {
 		return types.TssCommitteeInfo{}, err
 	}
-	if !isPermission {
-		if len(cpk) == 0 {
-			return types.TssCommitteeInfo{}, errors.New("cpk is not confirmed")
-		}
+	if len(cpk) == 0 {
+		return types.TssCommitteeInfo{}, errors.New("cpk is not confirmed")
 	}
 	unmarshalledCPK, err := crypto.UnmarshalPubkey(append([]byte{0x04}, cpk...))
 	if err != nil {
@@ -118,7 +116,6 @@ func (q QueryService) QueryInactiveInfo() (types.TssCommitteeInfo, error) {
 	}
 	tssMembers := make([]string, len(inactiveTssMembers), len(inactiveTssMembers))
 	for i, m := range inactiveTssMembers {
-		// raw public key(64bytes) ==> compress public key(33bytes)
 		unmarshalled, err := crypto.UnmarshalPubkey(append([]byte{0x04}, m...))
 		if err != nil {
 			log.Error("fail to unmarshal tss member", "err", err)
@@ -131,6 +128,32 @@ func (q QueryService) QueryInactiveInfo() (types.TssCommitteeInfo, error) {
 	return types.TssCommitteeInfo{
 		ElectionId: electionId.Uint64(),
 		Threshold:  int(threshold.Int64()),
+		TssMembers: tssMembers,
+	}, nil
+}
+
+func (q QueryService) QueryTssGroupMembers() (types.TssCommitteeInfo, error) {
+	currentBlocckNumber, err := q.ethClient.BlockNumber(context.Background())
+	if err != nil {
+		return types.TssCommitteeInfo{}, err
+	}
+	activeTssMembers, err := q.tssGroupManagerCaller.GetTssGroupMembers(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlocckNumber)})
+
+	if len(activeTssMembers) == 0 {
+		return types.TssCommitteeInfo{}, nil
+	}
+	tssMembers := make([]string, len(activeTssMembers), len(activeTssMembers))
+	for i, m := range activeTssMembers {
+		unmarshalled, err := crypto.UnmarshalPubkey(append([]byte{0x04}, m...))
+		if err != nil {
+			log.Error("fail to unmarshal tss member", "err", err)
+			return types.TssCommitteeInfo{}, nil
+		}
+		compressed := crypto.CompressPubkey(unmarshalled)
+		hexEncoded := hex.EncodeToString(compressed)
+		tssMembers[i] = hexEncoded
+	}
+	return types.TssCommitteeInfo{
 		TssMembers: tssMembers,
 	}, nil
 }

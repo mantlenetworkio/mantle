@@ -218,7 +218,7 @@ func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	activeGroupMember, err := wm.queryService.QueryActiveInfo(true)
+	activeGroupMember, err := wm.queryService.QueryTssGroupMembers()
 	if err != nil {
 		wm.logger.Error("get tss active group member fail", "err", err)
 		return

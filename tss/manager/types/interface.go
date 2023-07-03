@@ -20,8 +20,9 @@ type AdminService interface {
 }
 
 type TssQueryService interface {
-	QueryActiveInfo(isPermission bool) (TssCommitteeInfo, error)
+	QueryActiveInfo() (TssCommitteeInfo, error)
 	QueryInactiveInfo() (TssCommitteeInfo, error)
+	QueryTssGroupMembers() (TssCommitteeInfo, error)
 }
 
 type CPKStore interface {
