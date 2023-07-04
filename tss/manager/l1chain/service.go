@@ -86,7 +86,7 @@ func (q *QueryService) QueryActiveInfo() (*types.TssCommitteeInfo, error) {
 		}
 		compressed := crypto.CompressPubkey(unmarshalled)
 		hexEncoded := hex.EncodeToString(compressed)
-		if slices.Exists(culprits, hexEncoded) { // exclude culprits
+		if slices.ExistsIgnoreCase(culprits, hexEncoded) { // exclude culprits
 			continue
 		}
 

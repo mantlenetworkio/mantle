@@ -78,10 +78,8 @@ func (tKeySign *TssKeySign) SignMessage(msgToSign []byte, localStateItem storage
 	endCh := make(chan tsscommon.SignatureData, len(partiesID))
 	errCh := make(chan struct{})
 
-	m, err := common2.MsgToHashInt(msgToSign)
-	if err != nil {
-		return nil, fmt.Errorf("fail to convert msg to hash int: %w", err)
-	}
+	m := common2.MsgToHashInt(msgToSign)
+
 	moniker := m.String()
 	partiesID, eachLocalPartyID, err := conversion.GetParties(parties, localStateItem.LocalPartyKey)
 	ctx := tss.NewPeerContext(partiesID)

@@ -32,7 +32,6 @@ func (m *Manager) agreement(ctx types.Context, request interface{}, method tss.M
 
 	errSendChan := make(chan struct{})
 	expectedResponseCount := len(ctx.AvailableNodes())
-	maxAllowedLostCount := len(ctx.AvailableNodes())
 	results := make(map[string]bool) // node -> true/false
 	go func() {
 		cctx, cancel := context.WithTimeout(context.Background(), m.askTimeout)
@@ -54,10 +53,6 @@ func (m *Manager) agreement(ctx types.Context, request interface{}, method tss.M
 				log.Info("received ask response", "response", resp.RpcResponse.String(), "result", string(resp.RpcResponse.Result), "node", resp.SourceNode)
 				if resp.RpcResponse.Error != nil {
 					errResp[resp.SourceNode] = struct{}{}
-					if len(errResp)+errSend > maxAllowedLostCount {
-						log.Error("maxAllowedLostCount exceed.")
-						return
-					}
 					if len(errResp)+len(results) == expectedResponseCount {
 						return
 					}
@@ -67,10 +62,6 @@ func (m *Manager) agreement(ctx types.Context, request interface{}, method tss.M
 				if err := tmjson.Unmarshal(resp.RpcResponse.Result, &askResponse); err != nil {
 					log.Error("failed to unmarshal ask response", err)
 					errResp[resp.SourceNode] = struct{}{}
-					if len(errResp)+errSend > maxAllowedLostCount {
-						log.Error("maxAllowedLostCount exceed.")
-						return
-					}
 					if len(errResp)+len(results) == expectedResponseCount {
 						return
 					}
@@ -81,8 +72,8 @@ func (m *Manager) agreement(ctx types.Context, request interface{}, method tss.M
 					return
 				}
 			case <-errSendChan:
-				if errSend == maxAllowedLostCount {
-					log.Error("maxAllowedLostCount exceed")
+				if expectedResponseCount == 0 {
+					log.Error("failed to send msg to all the nodes")
 					return
 				}
 				expectedResponseCount--

@@ -387,6 +387,9 @@ func (m *Manager) getStateSignature(digestBz []byte) []byte {
 func (m *Manager) setStateSignature(digestBz []byte, sig []byte) {
 	m.sigCacheLock.Lock()
 	defer m.sigCacheLock.Unlock()
+	for key := range m.stateSignatureCache {
+		delete(m.stateSignatureCache, key)
+	}
 	var key [32]byte
 	copy(key[:], digestBz)
 	m.stateSignatureCache[key] = sig

@@ -66,27 +66,3 @@ func (a *Abnormal) SetAbnormal(reason string, nodes []*Node, isUnicast bool) {
 	a.IsUnicast = isUnicast
 	a.appendNewNodes(nodes)
 }
-
-func (a *Abnormal) AlreadyAbnormal() bool {
-	a.AbnormalLock.RLock()
-	defer a.AbnormalLock.RUnlock()
-	return len(a.Nodes) > 0
-}
-
-// AddAbnormalNodes add nodes to the abnormal node list
-func (a *Abnormal) AddAbnormalNodes(newNodes ...*Node) {
-	a.AbnormalLock.Lock()
-	defer a.AbnormalLock.Unlock()
-	for _, node := range newNodes {
-		found := false
-		for _, el := range a.Nodes {
-			if node.Equal(el) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			a.appendNewNodes([]*Node{node})
-		}
-	}
-}

@@ -187,8 +187,8 @@ func Contains(s []*tss.PartyID, e *tss.PartyID) bool {
 	return false
 }
 
-func MsgToHashInt(msg []byte) (*big.Int, error) {
-	return hashToInt(msg, btcec.S256()), nil
+func MsgToHashInt(digest []byte) *big.Int {
+	return hashToInt(digest, btcec.S256())
 }
 
 func hashToInt(hash []byte, c elliptic.Curve) *big.Int {

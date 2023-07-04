@@ -3,7 +3,6 @@ package tssnode
 import (
 	"context"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -46,6 +45,7 @@ func runNode(cmd *cobra.Command) error {
 	nonProd, _ := cmd.Flags().GetBool("non-prod")
 	waitPeersFullConnected, _ := cmd.Flags().GetBool("full")
 	debug, _ := cmd.Flags().GetBool("debug")
+
 	if debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	} else {
@@ -88,8 +88,6 @@ func runNode(cmd *cobra.Command) error {
 		return err
 	}
 
-	cfgBz, _ := json.Marshal(cfg)
-	log.Info().Str("config: ", string(cfgBz)).Msg("configuration file context")
 	tssInstance, err := tsslib.NewTss(
 		cfg.Node.BootstrapPeers,
 		waitPeersFullConnected,
@@ -107,6 +105,7 @@ func runNode(cmd *cobra.Command) error {
 		cfg.Node.Secrets.Enable,
 		cfg.Node.Secrets.SecretId,
 		cfg.Node.Shamir,
+		store,
 	)
 	if err != nil {
 		log.Fatal().Err(err).Msg("fail to create tss server instance")

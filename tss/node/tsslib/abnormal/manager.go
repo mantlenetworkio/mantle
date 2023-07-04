@@ -120,3 +120,13 @@ func (m *Manager) GetAbnormalNodePubKeys() []string {
 	}
 	return pubkeys
 }
+
+func (m *Manager) TssCulpritsNodes() []string {
+	var pubkeys []string
+	if m.GetAbnormal().FailReason == TssBrokenMsg {
+		for _, node := range m.GetAbnormal().Nodes {
+			pubkeys = append(pubkeys, node.Pubkey)
+		}
+	}
+	return pubkeys
+}

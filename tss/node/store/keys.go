@@ -15,6 +15,8 @@ var (
 	SlashingInfoKeyPrefix            = []byte{0x06}
 	ScannedHeightKeyPrefix           = []byte{0x07}
 	CulpritsKeyPrefix                = []byte{0x08}
+	TssInactiveMemberKeyPrefix       = []byte{0x09}
+	TssActiveMemberKeyPrefix         = []byte{0x10}
 )
 
 func getStateBatchKey(batchRoot [32]byte) []byte {
@@ -59,4 +61,12 @@ func getScannedHeightKey() []byte {
 
 func getCulpritsKey() []byte {
 	return CulpritsKeyPrefix
+}
+
+func getInactiveMemberKey() []byte {
+	return TssInactiveMemberKeyPrefix
+}
+
+func getActiveMemberKey() []byte {
+	return TssActiveMemberKeyPrefix
 }

@@ -25,24 +25,28 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/monitor"
 	p2p2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/p2p"
 	storage2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
+	"github.com/mantlenetworkio/mantle/tss/node/types"
 )
 
+const poolPublicKey = 66
+
 type TssServer struct {
-	conf             common2.TssConfig
-	logger           zerolog.Logger
-	p2pCommunication *p2p2.Communication
-	localNodePubKey  string
-	participants     map[string][]string
-	preParams        *bkeygen.LocalPreParams
-	tssKeyGenLocker  *sync.Mutex
-	stopChan         chan struct{}
-	stateManager     storage2.LocalStateManager
-	secretsManager   storage2.SecretsManager
-	shamirManager    storage2.ShamirManager
-	privateKey       *ecdsa.PrivateKey
-	tssMetrics       *monitor.Metric
-	secretsEnable    bool
-	shamirEnable     bool
+	conf                common2.TssConfig
+	logger              zerolog.Logger
+	p2pCommunication    *p2p2.Communication
+	localNodePubKey     string
+	participants        map[string][]string
+	preParams           *bkeygen.LocalPreParams
+	tssKeyGenLocker     *sync.Mutex
+	stopChan            chan struct{}
+	stateManager        storage2.LocalStateManager
+	secretsManager      storage2.SecretsManager
+	shamirManager       storage2.ShamirManager
+	privateKey          *ecdsa.PrivateKey
+	tssMetrics          *monitor.Metric
+	secretsEnable       bool
+	shamirEnable        bool
+	tssGroupMemberStore types.TssMemberStore
 }
 
 func NewTss(
@@ -57,6 +61,7 @@ func NewTss(
 	secretsEnable bool,
 	secretId string,
 	shamirConfig tssconfig.ShamirConfig,
+	store types.TssMemberStore,
 ) (*TssServer, error) {
 
 	pubkey := crypto.CompressPubkey(&priKey.PublicKey)
@@ -69,6 +74,11 @@ func NewTss(
 		return nil, errors.New("ERROR: fail to get peer id by pub key")
 	}
 	log.Info().Msgf("peer id is (%s) \n", peerId)
+
+	if err != nil {
+		return nil, err
+	}
+
 	stateManager, err := storage2.NewFileStateMgr(storageFolder)
 	if err != nil {
 		return nil, errors.New("fail to create file state manager")
@@ -102,7 +112,7 @@ func NewTss(
 		}
 	}
 
-	comm, err := p2p2.NewCommunication(bootstrapPeers, p2pPort, externalIP, waitFullConnected)
+	comm, err := p2p2.NewCommunication(bootstrapPeers, p2pPort, externalIP, waitFullConnected, store)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create communication layer: %w", err)
 	}
@@ -163,21 +173,22 @@ func NewTss(
 		metrics.Enable()
 	}
 	tssServer := TssServer{
-		conf:             conf,
-		logger:           log.With().Str("module", "tss").Logger(),
-		p2pCommunication: comm,
-		localNodePubKey:  pubkeyHex,
-		participants:     make(map[string][]string),
-		preParams:        preParams,
-		tssKeyGenLocker:  &sync.Mutex{},
-		stopChan:         make(chan struct{}),
-		stateManager:     stateManager,
-		secretsManager:   secretsManager,
-		shamirManager:    shamirManager,
-		privateKey:       priKey,
-		tssMetrics:       metrics,
-		secretsEnable:    secretsEnable,
-		shamirEnable:     shamirConfig.Enable,
+		conf:                conf,
+		logger:              log.With().Str("module", "tss").Logger(),
+		p2pCommunication:    comm,
+		localNodePubKey:     pubkeyHex,
+		participants:        make(map[string][]string),
+		preParams:           preParams,
+		tssKeyGenLocker:     &sync.Mutex{},
+		stopChan:            make(chan struct{}),
+		stateManager:        stateManager,
+		secretsManager:      secretsManager,
+		shamirManager:       shamirManager,
+		privateKey:          priKey,
+		tssMetrics:          metrics,
+		secretsEnable:       secretsEnable,
+		shamirEnable:        shamirConfig.Enable,
+		tssGroupMemberStore: store,
 	}
 
 	return &tssServer, nil
@@ -220,7 +231,7 @@ func (t *TssServer) requestToMsgId(request interface{}) (string, error) {
 	keyAccumulation := ""
 	sort.Strings(keys)
 	for _, el := range keys {
-		keyAccumulation += el
+		keyAccumulation += el + "$"
 	}
 	dat = append(dat, []byte(keyAccumulation)...)
 	return common2.MsgToHashString(dat)
@@ -240,6 +251,17 @@ func (t *TssServer) requestCheck(request interface{}) error {
 		if err != nil {
 			t.logger.Info().Msgf("fail to convert the p2p id(%s) to pubkey", t.p2pCommunication.GetHost().ID().String())
 			return err
+		}
+		if len(value.Message) == 0 {
+			return errors.New("message is empty")
+		}
+
+		if len(value.PoolPubKey) != poolPublicKey {
+			return errors.New("the length of the pool public key is not 66, " + value.PoolPubKey)
+		}
+
+		if len(value.SignerPubKeys) == 0 {
+			return errors.New("empty signer pub keys")
 		}
 		isSignMember := false
 		for _, el := range value.SignerPubKeys {
