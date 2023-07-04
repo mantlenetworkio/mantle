@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/mantlenetworkio/mantle/tss/manager/types"
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/tendermint/tendermint/libs/service"
 	rpcserver "github.com/tendermint/tendermint/rpc/jsonrpc/server"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
-
-	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
 )
 
 type WSServer struct {
@@ -25,7 +24,7 @@ type WSServer struct {
 	WM       *WebsocketManager
 }
 
-func NewWSServer(localAddr string, queryService *l1chain.QueryService) (*WebsocketManager, error) {
+func NewWSServer(localAddr string, queryService types.TssQueryService) (*WebsocketManager, error) {
 	wsServer := &WSServer{}
 	var err error
 

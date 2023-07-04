@@ -113,8 +113,11 @@ func (q *QueryService) QueryInactiveInfo() (*types.TssCommitteeInfo, error) {
 		return nil, err
 	}
 	electionId, threshold, inactiveTssMembers, err := q.tssGroupManagerCaller.GetTssInactiveGroupInfo(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - q.confirmBlocks)})
+	if err != nil {
+		return nil, err
+	}
 	if len(inactiveTssMembers) == 0 {
-		return nil, nil
+		return &types.TssCommitteeInfo{}, nil
 	}
 	tssMembers := make([]string, len(inactiveTssMembers), len(inactiveTssMembers))
 	for i, m := range inactiveTssMembers {

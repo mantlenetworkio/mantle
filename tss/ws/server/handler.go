@@ -16,10 +16,11 @@ import (
 
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/tendermint/tendermint/libs/service"
 	"github.com/tendermint/tendermint/rpc/jsonrpc/types"
+
+	itypes "github.com/mantlenetworkio/mantle/tss/manager/types"
 )
 
 const (
@@ -37,7 +38,7 @@ const (
 // NOTE: The websocket path is defined externally, e.g. in node/node.go
 type WebsocketManager struct {
 	websocket.Upgrader
-	queryService *l1chain.QueryService
+	queryService itypes.TssQueryService
 
 	logger        log.Logger
 	wsConnOptions []func(*wsConnection)
@@ -52,7 +53,7 @@ type WebsocketManager struct {
 
 // NewWebsocketManager returns a new WebsocketManager that passes a map of
 // functions, connection options and logger to new WS connections.
-func NewWebsocketManager(l1chainQueryService *l1chain.QueryService,
+func NewWebsocketManager(l1chainQueryService itypes.TssQueryService,
 	wsConnOptions ...func(*wsConnection),
 ) *WebsocketManager {
 	return &WebsocketManager{

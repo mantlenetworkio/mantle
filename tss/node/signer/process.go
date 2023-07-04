@@ -80,7 +80,6 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 	}
 
 	ctx, cancel := context.WithCancel(contx)
-	defer cancel()
 
 	l1Cli, err := dial.L1EthClientWithTimeout(ctx, cfg.L1Url, cfg.Node.DisableHTTP2)
 	if err != nil {
