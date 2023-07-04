@@ -1441,59 +1441,57 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 }
 
 func (s *SyncService) syncEigenTransactionBatchRange(start, end uint64) error {
-	if end > start {
-		log.Info("Syncing eigen transaction batch range", "start", start, "end", end)
-		for i := start; i <= end; i++ {
-			log.Debug("Fetching transaction batch", "index", i)
-			if s.dtlEigenEnable {
-				dtlRollupInfo, err := s.dtlEigenClient.GetDtlRollupStoreByBatchIndex(int64(i))
+	log.Info("Syncing eigen transaction batch range", "start", start, "end", end)
+	for i := start; i <= end; i++ {
+		log.Debug("Fetching transaction batch", "index", i)
+		if s.dtlEigenEnable {
+			dtlRollupInfo, err := s.dtlEigenClient.GetDtlRollupStoreByBatchIndex(int64(i))
+			if err != nil {
+				return fmt.Errorf("cannot get rollup store by batch index from dtl: %w", err)
+			}
+			if dtlRollupInfo.DataStoreId != 0 {
+				log.Info("Dtl rollup upgrade datastore id", "upgradeDatastoreId", dtlRollupInfo.UpgradeDataStoreId)
+				txs, err := s.dtlEigenClient.GetDtlBatchTransactionByDataStoreId(dtlRollupInfo.DataStoreId + dtlRollupInfo.UpgradeDataStoreId)
 				if err != nil {
-					return fmt.Errorf("cannot get rollup store by batch index from dtl: %w", err)
+					return fmt.Errorf("cannot get eigen transaction batch from dtl: %w", err)
 				}
-				if dtlRollupInfo.DataStoreId != 0 {
-					log.Info("Dtl rollup upgrade datastore id", "upgradeDatastoreId", dtlRollupInfo.UpgradeDataStoreId)
-					txs, err := s.dtlEigenClient.GetDtlBatchTransactionByDataStoreId(dtlRollupInfo.DataStoreId + dtlRollupInfo.UpgradeDataStoreId)
+				for _, tx := range txs {
+					verified, err := s.verifyTx(tx)
 					if err != nil {
-						return fmt.Errorf("cannot get eigen transaction batch from dtl: %w", err)
+						return err
 					}
-					for _, tx := range txs {
-						verified, err := s.verifyTx(tx)
-						if err != nil {
-							return err
-						}
-						if verified {
-							if err := s.applyBatchedTransaction(tx); err != nil {
-								return fmt.Errorf("cannot apply batched transaction: %w", err)
-							}
+					if verified {
+						if err := s.applyBatchedTransaction(tx); err != nil {
+							return fmt.Errorf("cannot apply batched transaction: %w", err)
 						}
 					}
-					log.Info("set latest eigen batch index", "index", i)
-					s.SetLatestEigenBatchIndex(&i)
 				}
-			} else {
-				rollupInfo, err := s.eigenClient.GetRollupStoreByRollupBatchIndex(int64(i))
+				log.Info("set latest eigen batch index", "index", i)
+				s.SetLatestEigenBatchIndex(&i)
+			}
+		} else {
+			rollupInfo, err := s.eigenClient.GetRollupStoreByRollupBatchIndex(int64(i))
+			if err != nil {
+				return fmt.Errorf("cannot get rollup store by batch index: %w", err)
+			}
+			if rollupInfo.DataStoreId != 0 {
+				txs, err := s.eigenClient.GetBatchTransactionByDataStoreId(rollupInfo.DataStoreId, s.l1MsgSender)
 				if err != nil {
-					return fmt.Errorf("cannot get rollup store by batch index: %w", err)
+					return fmt.Errorf("cannot get eigen transaction batch: %w", err)
 				}
-				if rollupInfo.DataStoreId != 0 {
-					txs, err := s.eigenClient.GetBatchTransactionByDataStoreId(rollupInfo.DataStoreId, s.l1MsgSender)
+				for _, tx := range txs {
+					verified, err := s.verifyTx(tx)
 					if err != nil {
-						return fmt.Errorf("cannot get eigen transaction batch: %w", err)
+						return err
 					}
-					for _, tx := range txs {
-						verified, err := s.verifyTx(tx)
-						if err != nil {
-							return err
-						}
-						if verified {
-							if err := s.applyBatchedTransaction(tx); err != nil {
-								return fmt.Errorf("cannot apply batched transaction: %w", err)
-							}
+					if verified {
+						if err := s.applyBatchedTransaction(tx); err != nil {
+							return fmt.Errorf("cannot apply batched transaction: %w", err)
 						}
 					}
-					log.Info("set latest eigen batch index", "index", i)
-					s.SetLatestEigenBatchIndex(&i)
 				}
+				log.Info("set latest eigen batch index", "index", i)
+				s.SetLatestEigenBatchIndex(&i)
 			}
 		}
 	}
