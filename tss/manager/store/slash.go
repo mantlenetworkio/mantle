@@ -2,10 +2,12 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/mantlenetworkio/mantle/tss/slash"
+
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/mantlenetworkio/mantle/tss/slash"
 )
 
 func (s *Storage) SetSigningInfo(signingInfo slash.SigningInfo) {

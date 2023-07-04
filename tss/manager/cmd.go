@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cobra"
+
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/index"
@@ -19,8 +21,6 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/manager/store"
 	"github.com/mantlenetworkio/mantle/tss/slash"
 	"github.com/mantlenetworkio/mantle/tss/ws/server"
-
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -43,20 +43,25 @@ func run(cmd *cobra.Command) error {
 	config := common.GetConfigFromCmd(cmd)
 	log.Info("config info print", "MissSignedNumber", config.MissSignedNumber)
 	log.Info("l1 start block number", "block number", config.L1StartBlockNumber)
-	if len(config.Manager.PrivateKey) == 0 {
-		return errors.New("need to config private key")
-	}
-	wsServer, err := server.NewWSServer(config.Manager.WsAddr)
+	l1StartBlockNumber, err := strconv.ParseUint(
+		config.L1StartBlockNumber, 10, 32,
+	)
 	if err != nil {
 		return err
 	}
+
 	managerStore, err := store.NewStorage(config.Manager.DBDir)
 	if err != nil {
 		return err
 	}
-	l1StartBlockNumber, err := strconv.ParseUint(
-		config.L1StartBlockNumber, 10, 32,
-	)
+	queryService, err := l1chain.NewQueryService(config.L1Url, config.TssGroupContractAddress, config.L1ConfirmBlocks, managerStore)
+	if err != nil {
+		return err
+	}
+	if len(config.Manager.PrivateKey) == 0 {
+		return errors.New("need to config private key")
+	}
+	wsServer, err := server.NewWSServer(config.Manager.WsAddr, queryService)
 	if err != nil {
 		return err
 	}
@@ -68,7 +73,6 @@ func run(cmd *cobra.Command) error {
 	observer = observer.SetHook(slash.NewSlashing(managerStore, managerStore, config.MissSignedNumber))
 	observer.Start()
 
-	queryService := l1chain.NewQueryService(config.L1Url, config.TssGroupContractAddress, config.L1ConfirmBlocks, managerStore)
 	manager, err := NewManager(wsServer, queryService, managerStore, config)
 	if err != nil {
 		return err

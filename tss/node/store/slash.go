@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/tss/slash"
 

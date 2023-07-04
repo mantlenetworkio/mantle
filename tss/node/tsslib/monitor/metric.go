@@ -1,10 +1,11 @@
 package monitor
 
 import (
+	"time"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"time"
 )
 
 type Metric struct {

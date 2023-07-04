@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	ethc "github.com/ethereum/go-ethereum/common"
+
 	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
@@ -95,7 +96,7 @@ func (p *Processor) SignSlash() {
 				}
 
 				signResponse := tsscommon.SignResponse{
-					Signature:       data,
+					Signature: data,
 				}
 
 				RpcResponse := tdtypes.NewRPCSuccessResponse(req.ID, signResponse)

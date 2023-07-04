@@ -9,16 +9,18 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	cmm "github.com/mantlenetworkio/mantle/tss/common"
 	sign "github.com/mantlenetworkio/mantle/tss/node/signer"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keygen"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keysign"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 type Server struct {

@@ -12,9 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gorilla/websocket"
 	"github.com/rcrowley/go-metrics"
+
+	"github.com/ethereum/go-ethereum/crypto"
+
 	"github.com/tendermint/tendermint/libs/service"
 	tmsync "github.com/tendermint/tendermint/libs/sync"
 	"github.com/tendermint/tendermint/rpc/jsonrpc/types"
@@ -114,8 +116,6 @@ func NewWS(remoteAddr, endpoint string, options ...func(*WSClient)) (*WSClient, 
 		writeWait:            defaultWriteWait,
 		pingPeriod:           defaultPingPeriod,
 		protocol:             parsedURL.Scheme,
-
-		// sentIDs: make(map[types.JSONRPCIntID]bool),
 	}
 	c.BaseService = *service.NewBaseService(nil, "WSClient", c)
 	for _, option := range options {
@@ -225,9 +225,6 @@ func (c *WSClient) Send(ctx context.Context, request types.RPCResponse) error {
 	select {
 	case c.send <- request:
 		c.Logger.Info("sent a request", "reqId", request.ID)
-		// c.mtx.Lock()
-		// c.sentIDs[request.ID.(types.JSONRPCIntID)] = true
-		// c.mtx.Unlock()
 		return nil
 	case <-ctx.Done():
 		return ctx.Err()

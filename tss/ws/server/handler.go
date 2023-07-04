@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -12,14 +11,22 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gorilla/websocket"
+	"github.com/pkg/errors"
+
+	"github.com/ethereum/go-ethereum/crypto"
+
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/tendermint/tendermint/libs/service"
 	"github.com/tendermint/tendermint/rpc/jsonrpc/types"
+
+	itypes "github.com/mantlenetworkio/mantle/tss/manager/types"
 )
 
 const (
+	legalTimeStampPeriod       = 5
+	messageSignatureLength     = 64
+	publicKeyLength            = 66
 	defaultWSWriteChanCapacity = 100
 	defaultWSWriteWait         = 10 * time.Second
 	defaultWSReadWait          = 30 * time.Second
@@ -31,6 +38,7 @@ const (
 // NOTE: The websocket path is defined externally, e.g. in node/node.go
 type WebsocketManager struct {
 	websocket.Upgrader
+	queryService itypes.TssQueryService
 
 	logger        log.Logger
 	wsConnOptions []func(*wsConnection)
@@ -45,24 +53,16 @@ type WebsocketManager struct {
 
 // NewWebsocketManager returns a new WebsocketManager that passes a map of
 // functions, connection options and logger to new WS connections.
-func NewWebsocketManager(
+func NewWebsocketManager(l1chainQueryService itypes.TssQueryService,
 	wsConnOptions ...func(*wsConnection),
 ) *WebsocketManager {
 	return &WebsocketManager{
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
-				// TODO ???
-				//
-				// The default behaviour would be relevant to browser-based clients,
-				// afaik. I suppose having a pass-through is a workaround for allowing
-				// for more complex security schemes, shifting the burden of
-				// AuthN/AuthZ outside the Tendermint RPC.
-				// I can't think of other uses right now that would warrant a TODO
-				// though. The real backstory of this TODO shall remain shrouded in
-				// mystery
 				return true
 			},
 		},
+		queryService:  l1chainQueryService,
 		logger:        log.NewNopLogger(),
 		wsConnOptions: wsConnOptions,
 
@@ -127,6 +127,7 @@ func (wm *WebsocketManager) unregisterRecvChan(requestId string) {
 func (wm *WebsocketManager) clientConnected(pubkey string, channel chan types.RPCRequest) {
 	wm.scRWLock.Lock()
 	defer wm.scRWLock.Unlock()
+
 	wm.sendChan[pubkey] = channel
 	if wm.aliveNodes == nil {
 		wm.aliveNodes = make(map[string]struct{})
@@ -142,6 +143,20 @@ func (wm *WebsocketManager) clientDisconnected(pubkey string) {
 	delete(wm.aliveNodes, pubkey)
 	delete(wm.sendChan, pubkey)
 	wm.logger.Info("node disconnected", "public key", pubkey)
+}
+
+func (wm *WebsocketManager) JudgeWssConnectPermission(activeTssMembers, inActiveTssMembers []string, nodePublicKey string) bool {
+	for i := 0; i < len(activeTssMembers); i++ {
+		if nodePublicKey == activeTssMembers[i] {
+			return true
+		}
+	}
+	for i := 0; i < len(inActiveTssMembers); i++ {
+		if nodePublicKey == inActiveTssMembers[i] {
+			return true
+		}
+	}
+	return false
 }
 
 // WebsocketHandler upgrades the request/response (via http.Hijack) and starts
@@ -160,17 +175,27 @@ func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Requ
 	}()
 
 	pubKey := r.Header.Get("pubKey")
-	timeStr := r.Header.Get("time")
-	sig := r.Header.Get("sig")
-
-	if len(pubKey) == 0 || len(timeStr) == 0 || len(sig) == 0 {
-		wm.logger.Error("Failed to establish connection", "err", errors.New("invalid header"))
+	if len(pubKey) < publicKeyLength {
+		wm.logger.Error("Failed to establish connection", "err", fmt.Errorf("invalid pubKey in header, expected length %d, actual length %d", publicKeyLength, len(pubKey)))
 		return
 	}
-
+	sig := r.Header.Get("sig")
+	if len(sig) < messageSignatureLength {
+		wm.logger.Error("Failed to establish connection", "err", fmt.Errorf("failed to establish connection, expected length %d, actual length %d", messageSignatureLength, len(sig)))
+		return
+	}
+	timeStr := r.Header.Get("time")
+	if len(timeStr) == 0 {
+		wm.logger.Error("Failed to establish connection", "err", fmt.Errorf("failed to establish connection, expected length %d, actual length %d", 0, len(timeStr)))
+		return
+	}
 	timeInt64, err := strconv.ParseInt(timeStr, 10, 64)
-	if err != nil || time.Now().Unix()-timeInt64 > 5 {
+	if err != nil || timeInt64 < 0 {
 		wm.logger.Error("illegal timestamp", "err", err)
+		return
+	}
+	if time.Now().Unix()-timeInt64 > legalTimeStampPeriod {
+		wm.logger.Error("illegal timestamp", "err", errors.New("reject because illegal timestamp"))
 		return
 	}
 
@@ -190,6 +215,25 @@ func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	// check public key for tss member so that only register tss member can send msg to ws server
+	inactiveGroupMember, err := wm.queryService.QueryInactiveInfo()
+	if err != nil {
+		wm.logger.Error("get tss inactive group member fail", "err", err)
+		return
+	}
+
+	activeGroupMember, err := wm.queryService.QueryTssGroupMembers()
+	if err != nil {
+		wm.logger.Error("get tss active group member fail", "err", err)
+		return
+	}
+
+	permissionOk := wm.JudgeWssConnectPermission(inactiveGroupMember.TssMembers, activeGroupMember.TssMembers, pubKey)
+	if !permissionOk {
+		wm.logger.Error("No permission to connect wss server", "err", err)
+		return
+	}
+
 	// register connection
 	con := newWSConnection(wsConn, pubKey, wm.wsConnOptions...)
 	con.SetLogger(wm.logger.With("remote", wsConn.RemoteAddr()))
@@ -203,18 +247,14 @@ func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Requ
 	if err := con.Stop(); err != nil {
 		wm.logger.Error("error while stopping connection", "error", err)
 	}
-
 }
 
 // WebSocket connection
-
 // A single websocket connection contains listener id, underlying ws
 // connection, and the event switch for subscribing to events.
-//
 // In case of an error, the connection is stopped.
 type wsConnection struct {
 	service.BaseService
-
 	remoteAddr string
 	baseConn   *websocket.Conn
 

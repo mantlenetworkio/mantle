@@ -7,14 +7,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/big"
+	"strings"
+
+	"github.com/btcsuite/btcd/btcec"
+
 	"github.com/binance-chain/tss-lib/ecdsa/keygen"
 	"github.com/binance-chain/tss-lib/ecdsa/signing"
 	"github.com/binance-chain/tss-lib/tss"
-	"github.com/btcsuite/btcd/btcec"
+
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/abnormal"
 	messages2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
-	"math/big"
-	"strings"
 )
 
 func GetMsgRound(msg []byte, partyID *tss.PartyID, isBroadcast bool) (abnormal.RoundInfo, error) {
