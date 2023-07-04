@@ -128,7 +128,10 @@ func (wm *WebsocketManager) clientConnected(pubkey string, channel chan types.RP
 	wm.scRWLock.Lock()
 	defer wm.scRWLock.Unlock()
 
-	wm.sendChan[pubkey] = channel
+	if _, ok := wm.sendChan[pubkey]; !ok {
+		wm.sendChan[pubkey] = channel
+	}
+	
 	if wm.aliveNodes == nil {
 		wm.aliveNodes = make(map[string]struct{})
 	}
