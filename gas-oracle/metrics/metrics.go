@@ -45,11 +45,11 @@ func InitAndRegisterStats(r metrics.Registry) {
 
 	// stats for L1 base fee, L1 bas price, da fee
 	GasOracleStats.TokenRatioGauge = metrics.NewRegisteredGauge("token_ratio", r)
-	GasOracleStats.L1BaseFeeGauge = metrics.NewRegisteredGauge("l1_base_fee(l1_gas_price*token_ratio)", r)
-	GasOracleStats.FeeScalarGauge = metrics.NewRegisteredGauge("fee_scalar(*10^6)", r)
+	GasOracleStats.L1BaseFeeGauge = metrics.NewRegisteredGauge("l1_base_fee", r)
+	GasOracleStats.FeeScalarGauge = metrics.NewRegisteredGauge("fee_scalar", r)
 	GasOracleStats.DaFeeGauge = metrics.NewRegisteredGauge("da_fee", r)
 	GasOracleStats.OverHeadGauge = metrics.NewRegisteredGauge("over_head", r)
-	GasOracleStats.L1GasPriceGauge = metrics.NewRegisteredGauge("l1_gas_price(base_fee+priority_fee)", r)
+	GasOracleStats.L1GasPriceGauge = metrics.NewRegisteredGauge("l1_gas_price", r)
 
 	// stats for gas oracle version
 	GasOracleStats.PublishVersionGauge = metrics.NewRegisteredGauge("publish_version", r)
