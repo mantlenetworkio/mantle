@@ -127,7 +127,7 @@ func (wm *WebsocketManager) unregisterRecvChan(requestId string) {
 func (wm *WebsocketManager) clientConnected(pubkey string, channel chan types.RPCRequest) {
 	wm.scRWLock.Lock()
 	defer wm.scRWLock.Unlock()
-	
+
 	wm.sendChan[pubkey] = channel
 	if wm.aliveNodes == nil {
 		wm.aliveNodes = make(map[string]struct{})

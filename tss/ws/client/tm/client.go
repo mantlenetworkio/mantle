@@ -27,7 +27,6 @@ const (
 	defaultWriteWait            = 0
 	defaultReadWait             = 0
 	defaultPingPeriod           = 0
-	defaultSignMessage          = "mantle tss websocket client"
 )
 
 // WSClient is a JSON-RPC client, which uses WebSocket for communication with
