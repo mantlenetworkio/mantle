@@ -7,18 +7,20 @@ import (
 	"sync"
 	"time"
 
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
 	bcrypto "github.com/binance-chain/tss-lib/crypto"
 	"github.com/binance-chain/tss-lib/ecdsa/keygen"
 	"github.com/binance-chain/tss-lib/tss"
-	"github.com/btcsuite/btcd/btcec"
+
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/abnormal"
 	common2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/p2p"
 	storage2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 type TssKeyGen struct {

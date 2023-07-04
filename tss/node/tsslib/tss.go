@@ -11,7 +11,11 @@ import (
 	"sync"
 
 	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
+
 	"github.com/libp2p/go-libp2p/core/peer"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	tssconfig "github.com/mantlenetworkio/mantle/tss/common"
 	common2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
@@ -21,8 +25,6 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/monitor"
 	p2p2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/p2p"
 	storage2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 type TssServer struct {
