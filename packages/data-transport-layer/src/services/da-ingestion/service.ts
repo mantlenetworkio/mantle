@@ -269,7 +269,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
           batchIndex
         )
         this.logger.info(
-          'dataStoreRollupId dataStoreRollupId dataStoreRollupId',
+          'get dataStoreRollupId of GetRollupStoreByRollupBatchIndex and tool dataStoreRollupId is',
           dataStoreRollupId
         )
         const dataStore = await this.GetDataStoreById(
@@ -286,6 +286,41 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
           batchIndex
         )
         this.logger.info('Update batch index from(Confirmed)', dataStore)
+        // put data store to db
+        const dataStoreEntry: DataStoreEntry = {
+          dataStoreId: dataStore['Id'],
+          storeNumber: dataStore['StoreNumber'],
+          durationDataStoreId: dataStore['DurationDataStoreId'],
+          index: dataStore['Index'],
+          dataCommitment: dataStore['DataCommitment'],
+          msgHash: dataStore['MsgHash'],
+          stakesFromBlockNumber: dataStore['StakesFromBlockNumber'],
+          initTime: dataStore['InitTime'],
+          expireTime: dataStore['ExpireTime'],
+          duration: dataStore['Duration'],
+          numSys: dataStore['NumSys'],
+          numPar: dataStore['NumPar'],
+          degree: dataStore['Degree'],
+          storePeriodLength: dataStore['StorePeriodLength'],
+          fee: dataStore['Fee'],
+          confirmer: dataStore['Confirmer'],
+          header: dataStore['Header'],
+          initTxHash: dataStore['InitTxHash'],
+          initGasUsed: dataStore['InitGasUsed'],
+          initBlockNumber: dataStore['InitBlockNumber'],
+          confirmed: dataStore['Confirmed'],
+          ethSigned: dataStore['EthSigned'],
+          eigenSigned: dataStore['EigenSigned'],
+          nonSignerPubKeyHashes: dataStore['NonSignerPubKeyHashes'],
+          signatoryRecord: dataStore['SignatoryRecord'],
+          confirmTxHash: dataStore['ConfirmTxHash'],
+          confirmGasUsed: dataStore['ConfirmGasUsed'],
+        }
+        await this.state.db.putDsById(
+          dataStoreEntry,
+          dataStoreRollupId['data_store_id'] +
+            this.options.mantleDaUpgradeDataStoreId
+        )
         await this._storeTransactionListByDSId(
           dataStoreRollupId['data_store_id'],
           this.options.mantleDaUpgradeDataStoreId
@@ -327,6 +362,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   ) {
     const transactionEntries: TransactionEntry[] = []
     if (storeId <= 0) {
+      this.logger.error('storeId is zero')
       return false
     }
     const batchTxs = await this.GetBatchTransactionByDataStoreId(storeId)
@@ -339,6 +375,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
       })
     try {
       if (batchTxs.length === 0) {
+        this.logger.error('batchTxs is empty')
         return false
       }
       for (const batchTx of batchTxs) {
@@ -382,10 +419,10 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         let target = constants.AddressZero
         let origin = null
         if (batchTx['TxMeta']['queueIndex'] != null) {
-          const lastestEnqueue = await this.state.db.getLatestEnqueue()
-          if (lastestEnqueue.index > batchTx['TxMeta']['queueIndex']) {
+          const latestEnqueue = await this.state.db.getLatestEnqueue()
+          if (latestEnqueue.index > batchTx['TxMeta']['queueIndex']) {
             this.logger.info('get queue index from da and l1(EigenLayer)', {
-              lastestEnqueue: lastestEnqueue.index,
+              lastestEnqueue: latestEnqueue.index,
               queueIndex: batchTx['TxMeta']['queueIndex'],
             })
             const enqueue = await this.state.db.getEnqueueByIndex(
@@ -397,6 +434,9 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
               origin = enqueue.origin
             }
           } else {
+            this.logger.error(
+              'ctc latest enqueue index is less da enqueue index'
+            )
             return false
           }
         }
