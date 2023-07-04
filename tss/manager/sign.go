@@ -91,7 +91,7 @@ func (m *Manager) sign(ctx types.Context, request interface{}, digestBz []byte, 
 							culprits := strings.Split(culpritData, ",")
 							culprits = deDuplication(culprits)
 							for _, culprit := range culprits {
-								if slices.Exists(ctx.Approvers(), culprit) {
+								if slices.ExistsIgnoreCase(ctx.Approvers(), culprit) {
 									counter.increment(culprit)
 								}
 							}
