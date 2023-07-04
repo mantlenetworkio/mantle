@@ -154,8 +154,7 @@ func (m *Manager) recoverGenerateKey() {
 
 func (m *Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 	log.Info("received sign state request", "start block", request.StartBlock, "len", len(request.StateRoots), "index", request.OffsetStartsAtIndex)
-	offsetStartsAtIndex, _ := new(big.Int).SetString(request.OffsetStartsAtIndex, 10)
-	digestBz, err := tss.StateBatchHash(request.StateRoots, offsetStartsAtIndex)
+	digestBz, err := tss.StateBatchHash(request.StateRoots, request.OffsetStartsAtIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -222,9 +221,8 @@ func (m *Manager) SignStateBatch(request tss.SignStateRequest) ([]byte, error) {
 		//change unApprovals to approvals to do sign
 		ctx = ctx.WithApprovers(ctx.UnApprovers())
 		rollback = true
-		startBlock, _ := new(big.Int).SetString(request.StartBlock, 10)
 		rollBackRequest := tss.RollBackRequest{StartBlock: request.StartBlock}
-		rollBackBz, err := tss.RollBackHash(startBlock)
+		rollBackBz, err := tss.RollBackHash(request.StartBlock)
 		if err != nil {
 			return nil, err
 		}
@@ -313,10 +311,8 @@ func (m *Manager) SignRollBack(request tss.SignStateRequest) ([]byte, error) {
 	}
 
 	var resp tss.SignResponse
-
-	startBlock, _ := new(big.Int).SetString(request.StartBlock, 10)
 	rollBackRequest := tss.RollBackRequest{StartBlock: request.StartBlock}
-	rollBackBz, err := tss.RollBackHash(startBlock)
+	rollBackBz, err := tss.RollBackHash(request.StartBlock)
 	if err != nil {
 		return nil, err
 	}

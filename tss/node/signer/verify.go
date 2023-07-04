@@ -36,6 +36,15 @@ func (p *Processor) Verify() {
 					p.wsClient.SendMsg(RpcResponse)
 					continue
 				}
+				if askRequest.StartBlock == nil ||
+					askRequest.OffsetStartsAtIndex == nil ||
+					askRequest.StartBlock.Cmp(big.NewInt(0)) < 0 ||
+					askRequest.OffsetStartsAtIndex.Cmp(big.NewInt(0)) < 0 {
+					logger.Error().Msg("StartBlock and OffsetStartsAtIndex must not be nil or negative")
+					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "invalid askRequest", "StartBlock and OffsetStartsAtIndex must not be nil or negative")
+					p.wsClient.SendMsg(RpcResponse)
+					return
+				}
 				var resId = req.ID
 				var size = len(askRequest.StateRoots)
 				logger.Info().Msgf("stateroots size %d ", size)
@@ -79,12 +88,11 @@ func (p *Processor) Verify() {
 	}()
 }
 
-func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger zerolog.Logger, wg *sync.WaitGroup) (bool, error) {
+func (p *Processor) verify(start *big.Int, index int, stateRoot [32]byte, logger zerolog.Logger, wg *sync.WaitGroup) (bool, error) {
 	defer wg.Done()
 
 	offset := new(big.Int).SetInt64(int64(index))
-	startBig, _ := new(big.Int).SetString(start, 10)
-	blockNumber := offset.Add(offset, startBig)
+	blockNumber := offset.Add(offset, start)
 	logger.Info().Msgf("start to query block by number %d", blockNumber)
 
 	value, ok := p.GetVerify(blockNumber.String())
