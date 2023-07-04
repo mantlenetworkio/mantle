@@ -8,12 +8,14 @@ import (
 	"time"
 
 	"github.com/influxdata/influxdb/pkg/slices"
+
+	tmjson "github.com/tendermint/tendermint/libs/json"
+	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/manager/types"
 	"github.com/mantlenetworkio/mantle/tss/ws/server"
-	tmjson "github.com/tendermint/tendermint/libs/json"
-	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
 func (m *Manager) observeElection() {

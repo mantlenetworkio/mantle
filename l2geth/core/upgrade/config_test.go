@@ -4,6 +4,8 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 )
 
@@ -87,26 +89,18 @@ func TestConfig_IsEigenDa(t *testing.T) {
 
 func TestConfig_IsUpdateGasLimitBlock(t *testing.T) {
 	upgradeConfig := NewMantleUpgradeConfig(params.MantleMainnetChainID)
-	result := upgradeConfig.IsUpdateGasLimitBlock(big.NewInt(222_073))
-	if result {
-		t.Error("update gaslimit upgrade could not used for mainnet")
-	}
+	result := upgradeConfig.IsUpdateGasLimitBlock(big.NewInt(222_073)) && (upgradeConfig.chainID == params.MantleTestnetChainID)
+	require.Equal(t, result, false, "update gaslimit upgrade could not used for mainnet")
 
 	upgradeConfig = NewMantleUpgradeConfig(params.MantleTestnetChainID)
 	result = upgradeConfig.IsUpdateGasLimitBlock(big.NewInt(222_073))
-	if !result {
-		t.Error("update gaslimit upgrade should used for testnet")
-	}
+	require.Equal(t, result, true, "update gaslimit upgrade should used for testnet")
 
 	upgradeConfig = NewMantleUpgradeConfig(params.MantleTestnetChainID)
 	result = upgradeConfig.IsUpdateGasLimitBlock(big.NewInt(222_074))
-	if !result {
-		t.Error("update gaslimit upgrade take effect after 222_073")
-	}
+	require.Equal(t, result, true, "update gaslimit upgrade take effect after 222_073")
 
 	upgradeConfig = NewMantleUpgradeConfig(params.MantleTestnetChainID)
 	result = upgradeConfig.IsUpdateGasLimitBlock(big.NewInt(222_072))
-	if result {
-		t.Error("update gaslimit upgrade height does not reach to")
-	}
+	require.Equal(t, result, false, "update gaslimit upgrade height does not reach to")
 }

@@ -10,14 +10,16 @@ import (
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/influxdata/influxdb/pkg/slices"
+	"github.com/rs/zerolog"
+
+	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/index"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keysign"
 	"github.com/mantlenetworkio/mantle/tss/slash"
-	"github.com/rs/zerolog"
-	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
 func (p *Processor) Sign() {
@@ -50,8 +52,17 @@ func (p *Processor) Sign() {
 				}
 				var requestBody tsscommon.SignStateRequest
 				if err := json.Unmarshal(rawMsg, &requestBody); err != nil {
-					logger.Error().Msg("failed to umarshal ask's params request body")
+					logger.Error().Msg("failed to unmarshal asker's params request body")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
+					p.wsClient.SendMsg(RpcResponse)
+					continue
+				}
+				if requestBody.StartBlock == nil ||
+					requestBody.OffsetStartsAtIndex == nil ||
+					requestBody.StartBlock.Cmp(big.NewInt(0)) < 0 ||
+					requestBody.OffsetStartsAtIndex.Cmp(big.NewInt(0)) < 0 {
+					logger.Error().Msg("StartBlock and OffsetStartsAtIndex must not be nil or negative")
+					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", "StartBlock and OffsetStartsAtIndex must not be nil or negative")
 					p.wsClient.SendMsg(RpcResponse)
 					continue
 				}
@@ -201,8 +212,7 @@ func (p *Processor) checkMessages(sign tsscommon.SignStateRequest) (err error, h
 }
 
 func signMsgToHash(msg tsscommon.SignStateRequest) ([]byte, error) {
-	offsetStartsAtIndex, _ := new(big.Int).SetString(msg.OffsetStartsAtIndex, 10)
-	return tsscommon.StateBatchHash(msg.StateRoots, offsetStartsAtIndex)
+	return tsscommon.StateBatchHash(msg.StateRoots, msg.OffsetStartsAtIndex)
 }
 
 func (p *Processor) removeWaitEvent(key string) {

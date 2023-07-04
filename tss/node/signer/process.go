@@ -3,25 +3,27 @@ package signer
 import (
 	"context"
 	"crypto/ecdsa"
-	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
 	"math/big"
 	"sync"
 	"time"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
+	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+
 	"github.com/mantlenetworkio/mantle/bss-core/dial"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
+	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
 	"github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
-	managertypes "github.com/mantlenetworkio/mantle/tss/manager/types"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib"
 	"github.com/mantlenetworkio/mantle/tss/node/types"
 	"github.com/mantlenetworkio/mantle/tss/ws/client"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
 type Processor struct {
@@ -60,7 +62,7 @@ type Processor struct {
 	taskInterval              time.Duration
 	tssStakingSlashingCaller  *tsh.TssStakingSlashingCaller
 	tssGroupManagerCaller     *tgm.TssGroupManagerCaller
-	tssQueryService           managertypes.TssQueryService
+	tssQueryService           *l1chain.QueryService
 	l1ConfirmBlocks           int
 	confirmReceiptTimeout     time.Duration
 	gasLimitScaler            int
@@ -78,6 +80,7 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 	}
 
 	ctx, cancel := context.WithCancel(contx)
+
 	l1Cli, err := dial.L1EthClientWithTimeout(ctx, cfg.L1Url, cfg.Node.DisableHTTP2)
 	if err != nil {
 		return nil, err
@@ -102,7 +105,10 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 		return nil, err
 	}
 
-	queryService := l1chain.NewQueryService(cfg.L1Url, cfg.TssGroupContractAddress, cfg.L1ConfirmBlocks, nodeStore)
+	queryService, err := l1chain.NewQueryService(cfg.L1Url, cfg.TssGroupContractAddress, cfg.L1ConfirmBlocks, nodeStore)
+	if err != nil {
+		return nil, err
+	}
 
 	processor := Processor{
 		localPubkey:               pubKeyHex,

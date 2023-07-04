@@ -2,7 +2,9 @@ package slash
 
 import (
 	"errors"
+
 	"github.com/ethereum/go-ethereum/common/hexutil"
+
 	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/index"
 )

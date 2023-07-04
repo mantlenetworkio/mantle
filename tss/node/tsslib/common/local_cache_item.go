@@ -1,8 +1,9 @@
 package common
 
 import (
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 	"sync"
+
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 )
 
 type LocalCacheItem struct {

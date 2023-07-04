@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/btcsuite/btcd/btcec"
+
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -16,6 +17,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 )
 
@@ -166,12 +168,12 @@ func EnsureConnection(client *ethclient.Client) error {
 	return nil
 }
 
-func EstimateGas(client *ethclient.Client, prikey *ecdsa.PrivateKey,chainId *big.Int, ctx context.Context, tx *types.Transaction, rawContract *bind.BoundContract, to common.Address) (*types.Transaction, error) {
+func EstimateGas(client *ethclient.Client, prikey *ecdsa.PrivateKey, chainId *big.Int, ctx context.Context, tx *types.Transaction, rawContract *bind.BoundContract, to common.Address) (*types.Transaction, error) {
 	from := crypto.PubkeyToAddress(prikey.PublicKey)
 
 	header, err := client.HeaderByNumber(ctx, nil)
 	if err != nil {
-		log.Error("failed to get header by l1client","err",err.Error())
+		log.Error("failed to get header by l1client", "err", err.Error())
 		return nil, err
 	}
 	var gasPrice *big.Int
@@ -180,7 +182,7 @@ func EstimateGas(client *ethclient.Client, prikey *ecdsa.PrivateKey,chainId *big
 	if header.BaseFee == nil {
 		gasPrice, err = client.SuggestGasPrice(ctx)
 		if err != nil {
-			log.Error("cannot fetch gas price ", "err",err.Error())
+			log.Error("cannot fetch gas price ", "err", err.Error())
 			return nil, err
 		}
 	} else {
@@ -207,12 +209,12 @@ func EstimateGas(client *ethclient.Client, prikey *ecdsa.PrivateKey,chainId *big
 
 	gasLimit, err := client.EstimateGas(ctx, msg)
 	if err != nil {
-		log.Error("failed to EstimateGas","err",err.Error())
+		log.Error("failed to EstimateGas", "err", err.Error())
 		return nil, err
 	}
 	opts, err := bind.NewKeyedTransactorWithChainID(prikey, chainId)
 	if err != nil {
-		log.Error("failed to new ops in estimate gas function","err",err.Error())
+		log.Error("failed to new ops in estimate gas function", "err", err.Error())
 		return nil, err
 	}
 	opts.Context = ctx
@@ -221,7 +223,7 @@ func EstimateGas(client *ethclient.Client, prikey *ecdsa.PrivateKey,chainId *big
 
 	opts.GasTipCap = gasTipCap
 	opts.GasFeeCap = gasFeeCap
-	opts.GasLimit = 120 * gasLimit / 100//add 20% buffer to gas limit
+	opts.GasLimit = 120 * gasLimit / 100 //add 20% buffer to gas limit
 
 	return rawContract.RawTransact(opts, tx.Data())
 }

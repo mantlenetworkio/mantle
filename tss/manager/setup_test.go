@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"math/big"
 	"time"
 
 	tss "github.com/mantlenetworkio/mantle/tss/common"
@@ -52,8 +53,8 @@ func setup(afterMsgSent afterMsgSendFunc, queryAliveNodes queryAliveNodesFunc) (
 		cpkConfirmTimeout: 5 * time.Second,
 	}
 	request := tss.SignStateRequest{
-		StartBlock:          "1",
-		OffsetStartsAtIndex: "1",
+		StartBlock:          big.NewInt(1),
+		OffsetStartsAtIndex: big.NewInt(1),
 		StateRoots:          [][32]byte{},
 	}
 	return manager, request

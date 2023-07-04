@@ -12,6 +12,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	maddr "github.com/multiformats/go-multiaddr"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
 	"github.com/libp2p/go-libp2p"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	"github.com/libp2p/go-libp2p/core/crypto"
@@ -22,10 +26,8 @@ import (
 	discovery "github.com/libp2p/go-libp2p/p2p/discovery/routing"
 	discoveryUtil "github.com/libp2p/go-libp2p/p2p/discovery/util"
 	"github.com/libp2p/go-libp2p/p2p/protocol/ping"
+
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
-	maddr "github.com/multiformats/go-multiaddr"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 // TSSProtocolID protocol id used for tss

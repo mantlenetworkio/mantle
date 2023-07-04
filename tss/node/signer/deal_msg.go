@@ -3,9 +3,10 @@ package signer
 import (
 	"errors"
 
-	"github.com/mantlenetworkio/mantle/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+
+	"github.com/mantlenetworkio/mantle/tss/common"
 )
 
 func (p *Processor) ProcessMessage() {

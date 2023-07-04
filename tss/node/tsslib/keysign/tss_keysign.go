@@ -7,18 +7,20 @@ import (
 	"sync"
 	"time"
 
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
 	tsscommon "github.com/binance-chain/tss-lib/common"
 	"github.com/binance-chain/tss-lib/ecdsa/signing"
 	"github.com/binance-chain/tss-lib/tss"
-	"github.com/btcsuite/btcd/btcec"
+
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/abnormal"
 	common2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/p2p"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 type TssKeySign struct {

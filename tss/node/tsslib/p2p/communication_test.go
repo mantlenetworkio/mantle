@@ -1,13 +1,15 @@
 package p2p
 
 import (
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/mantlenetworkio/mantle/tss/node/store"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
-	maddr "github.com/multiformats/go-multiaddr"
-	"github.com/stretchr/testify/require"
 	. "gopkg.in/check.v1"
 	"testing"
+
+	"github.com/ethereum/go-ethereum/crypto"
+	maddr "github.com/multiformats/go-multiaddr"
+	"github.com/stretchr/testify/require"
+
+	"github.com/mantlenetworkio/mantle/tss/node/store"
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 )
 
 type CommunicationTestSuite struct {

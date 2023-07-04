@@ -45,9 +45,15 @@ func (p *Processor) SignRollBack() {
 					p.wsClient.SendMsg(RpcResponse)
 					continue
 				}
+				if requestBody.StartBlock == nil ||
+					requestBody.StartBlock.Cmp(big.NewInt(0)) < 0 {
+					logger.Error().Msg("StartBlock must not be nil or negative")
+					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", "StartBlock must not be nil or negative")
+					p.wsClient.SendMsg(RpcResponse)
+					continue
+				}
 				nodeSignRequest.RequestBody = requestBody
-				startBlock, _ := new(big.Int).SetString(requestBody.StartBlock, 10)
-				hashTx, err := tsscommon.RollBackHash(startBlock)
+				hashTx, err := tsscommon.RollBackHash(requestBody.StartBlock)
 				if err != nil {
 					logger.Err(err).Msg("failed to encode roll back msg")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
