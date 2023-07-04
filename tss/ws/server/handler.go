@@ -127,25 +127,7 @@ func (wm *WebsocketManager) unregisterRecvChan(requestId string) {
 func (wm *WebsocketManager) clientConnected(pubkey string, channel chan types.RPCRequest) {
 	wm.scRWLock.Lock()
 	defer wm.scRWLock.Unlock()
-
-	inactiveGroupMember, err := wm.queryService.QueryInactiveInfo()
-	if err != nil {
-		wm.logger.Error("client connect get tss inactive group member fail", "err", err)
-		return
-	}
-
-	activeGroupMember, err := wm.queryService.QueryTssGroupMembers()
-	if err != nil {
-		wm.logger.Error("client connect get tss active group member fail", "err", err)
-		return
-	}
-
-	permissionOk := wm.JudgeWssConnectPermission(inactiveGroupMember.TssMembers, activeGroupMember.TssMembers, pubkey)
-	if !permissionOk {
-		wm.logger.Error("No permission to connect wss server", "err", err)
-		return
-	}
-
+	
 	wm.sendChan[pubkey] = channel
 	if wm.aliveNodes == nil {
 		wm.aliveNodes = make(map[string]struct{})
