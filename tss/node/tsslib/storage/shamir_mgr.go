@@ -19,10 +19,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
-	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
 	"github.com/google/uuid"
-	nodeconfig "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/rs/zerolog/log"
+
+	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
+
+	nodeconfig "github.com/mantlenetworkio/mantle/tss/common"
 )
 
 const (

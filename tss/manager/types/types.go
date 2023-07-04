@@ -30,7 +30,7 @@ type TgTssMember struct {
 type Context struct {
 	ctx            context.Context
 	requestId      string
-	tssInfo        TssCommitteeInfo
+	tssInfo        *TssCommitteeInfo
 	availableNodes []string
 	approvers      []string
 	unApprovers    []string
@@ -47,7 +47,7 @@ func NewContext() Context {
 func (c Context) RequestId() string {
 	return c.requestId
 }
-func (c Context) TssInfos() TssCommitteeInfo {
+func (c Context) TssInfos() *TssCommitteeInfo {
 	return c.tssInfo
 }
 func (c Context) AvailableNodes() []string {
@@ -73,7 +73,7 @@ func (c Context) WithRequestId(requestId string) Context {
 	return c
 }
 
-func (c Context) WithTssInfo(tssInfos TssCommitteeInfo) Context {
+func (c Context) WithTssInfo(tssInfos *TssCommitteeInfo) Context {
 	c.tssInfo = tssInfos
 	return c
 }

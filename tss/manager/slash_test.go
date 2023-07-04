@@ -3,13 +3,15 @@ package manager
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/ethereum/go-ethereum/crypto"
+	
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/index"
 	"github.com/mantlenetworkio/mantle/tss/manager/store"
 	"github.com/mantlenetworkio/mantle/tss/slash"
-	"github.com/stretchr/testify/require"
 )
 
 func TestLivenessDetect(t *testing.T) {
@@ -67,7 +69,6 @@ func TestLivenessDetect(t *testing.T) {
 	found, signingInfo = storage.GetSigningInfo(address)
 	require.True(t, found)
 	require.EqualValues(t, 1, signingInfo.MissedBlocksCounter)
-
 
 	// index: 7-15, absent from 7-10
 	for i := 7; i <= 15; i++ {

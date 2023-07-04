@@ -9,8 +9,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
-	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
 	"github.com/rs/zerolog/log"
+
+	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
 )
 
 const CtxTimeout = 30 * time.Second

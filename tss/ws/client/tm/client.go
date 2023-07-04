@@ -12,9 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gorilla/websocket"
 	"github.com/rcrowley/go-metrics"
+
+	"github.com/ethereum/go-ethereum/crypto"
+
 	"github.com/tendermint/tendermint/libs/service"
 	tmsync "github.com/tendermint/tendermint/libs/sync"
 	"github.com/tendermint/tendermint/rpc/jsonrpc/types"

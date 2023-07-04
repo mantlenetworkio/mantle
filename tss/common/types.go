@@ -3,6 +3,7 @@ package common
 import (
 	"encoding/hex"
 	"fmt"
+
 	"github.com/ethereum/go-ethereum/common"
 )
 

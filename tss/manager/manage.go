@@ -17,6 +17,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
+	"github.com/mantlenetworkio/mantle/tss/manager/l1chain"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/influxdata/influxdb/pkg/slices"
@@ -32,7 +33,7 @@ import (
 
 type Manager struct {
 	wsServer                  server.IWebsocketManager
-	tssQueryService           types.TssQueryService
+	tssQueryService           *l1chain.QueryService
 	store                     types.ManagerStore
 	l1Cli                     *ethclient.Client
 	privateKey                *ecdsa.PrivateKey
@@ -57,7 +58,7 @@ type Manager struct {
 }
 
 func NewManager(wsServer server.IWebsocketManager,
-	tssQueryService types.TssQueryService,
+	tssQueryService *l1chain.QueryService,
 	store types.ManagerStore,
 	config tss.Configuration) (*Manager, error) {
 	taskIntervalDur, err := time.ParseDuration(config.TimedTaskInterval)

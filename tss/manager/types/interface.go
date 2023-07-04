@@ -21,9 +21,9 @@ type AdminService interface {
 }
 
 type TssQueryService interface {
-	QueryActiveInfo() (TssCommitteeInfo, error)
-	QueryInactiveInfo() (TssCommitteeInfo, error)
-	QueryTssGroupMembers() (TssCommitteeInfo, error)
+	QueryActiveInfo() (*TssCommitteeInfo, error)
+	QueryInactiveInfo() (*TssCommitteeInfo, error)
+	QueryTssGroupMembers() (*TssCommitteeInfo, error)
 }
 
 type CPKStore interface {

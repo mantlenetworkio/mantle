@@ -37,7 +37,7 @@ const (
 // NOTE: The websocket path is defined externally, e.g. in node/node.go
 type WebsocketManager struct {
 	websocket.Upgrader
-	queryService l1chain.QueryService
+	queryService *l1chain.QueryService
 
 	logger        log.Logger
 	wsConnOptions []func(*wsConnection)
@@ -52,7 +52,7 @@ type WebsocketManager struct {
 
 // NewWebsocketManager returns a new WebsocketManager that passes a map of
 // functions, connection options and logger to new WS connections.
-func NewWebsocketManager(l1chainQueryService l1chain.QueryService,
+func NewWebsocketManager(l1chainQueryService *l1chain.QueryService,
 	wsConnOptions ...func(*wsConnection),
 ) *WebsocketManager {
 	return &WebsocketManager{
@@ -193,17 +193,17 @@ func (wm *WebsocketManager) WebsocketHandler(w http.ResponseWriter, r *http.Requ
 
 	pubKey := r.Header.Get("pubKey")
 	if len(pubKey) < publicKeyLength {
-		wm.logger.Error("Failed to establish connection", "err", errors.New("invalid pubKey in header"))
+		wm.logger.Error("Failed to establish connection", "err", fmt.Errorf("invalid pubKey in header, expected length %d, actual length %d", publicKeyLength, len(pubKey)))
 		return
 	}
 	sig := r.Header.Get("sig")
 	if len(sig) < messageSignatureLength {
-		wm.logger.Error("Failed to establish connection", "err", errors.New("invalid sig in header"))
+		wm.logger.Error("Failed to establish connection", "err", fmt.Errorf("failed to establish connection, expected length %d, actual length %d", messageSignatureLength, len(sig)))
 		return
 	}
 	timeStr := r.Header.Get("time")
 	if len(timeStr) == 0 {
-		wm.logger.Error("Failed to establish connection", "err", errors.New("invalid timeStr in header"))
+		wm.logger.Error("Failed to establish connection", "err", fmt.Errorf("failed to establish connection, expected length %d, actual length %d", 0, len(timeStr)))
 		return
 	}
 	timeInt64, err := strconv.ParseInt(timeStr, 10, 64)

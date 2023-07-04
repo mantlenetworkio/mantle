@@ -25,7 +25,7 @@ type WSServer struct {
 	WM       *WebsocketManager
 }
 
-func NewWSServer(localAddr string, queryService l1chain.QueryService) (*WebsocketManager, error) {
+func NewWSServer(localAddr string, queryService *l1chain.QueryService) (*WebsocketManager, error) {
 	wsServer := &WSServer{}
 	var err error
 
