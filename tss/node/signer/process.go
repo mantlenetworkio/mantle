@@ -157,6 +157,7 @@ func NewProcessor(cfg common.Configuration, contx context.Context, tssInstance t
 
 func (p *Processor) Start() {
 	p.logger.Info().Msg("Signer is starting")
+	//The concurrency number needs to be equal to the total number of threads launched by the run() function.
 	p.wg.Add(10)
 	p.run()
 }

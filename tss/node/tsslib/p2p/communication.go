@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/influxdata/influxdb/pkg/slices"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
-	"github.com/mantlenetworkio/mantle/tss/node/types"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/influxdata/influxdb/pkg/slices"
 	maddr "github.com/multiformats/go-multiaddr"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -27,7 +25,9 @@ import (
 	discoveryUtil "github.com/libp2p/go-libp2p/p2p/discovery/util"
 	"github.com/libp2p/go-libp2p/p2p/protocol/ping"
 
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
+	"github.com/mantlenetworkio/mantle/tss/node/types"
 )
 
 // TSSProtocolID protocol id used for tss
@@ -229,8 +229,8 @@ func (c *Communication) handleStream(stream network.Stream) {
 	peerID := stream.Conn().RemotePeer().String()
 	c.logger.Debug().Msgf("handle stream from peer: %s", peerID)
 	//We need to verify whether the sender of the message is a trusted node for us, and if not, we will not process the message.
-	verifyReust := c.VerifyPeerId(peerID)
-	if verifyReust {
+	verifyResult := c.VerifyPeerId(peerID)
+	if verifyResult {
 		// we will read from that stream
 		c.readFromStream(stream)
 	}
@@ -529,9 +529,7 @@ func (c *Communication) VerifyPeerId(peerId string) bool {
 			c.logger.Info().Msgf("inactive members does not contain %s。", pubKey)
 			return false
 		}
-	} else {
-		c.logger.Error().Err(err).Msg("active members array and inactive members are both empty")
-		return false
 	}
+	return false
 
 }

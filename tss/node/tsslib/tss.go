@@ -28,6 +28,8 @@ import (
 	"github.com/mantlenetworkio/mantle/tss/node/types"
 )
 
+const poolPublicKey = 66
+
 type TssServer struct {
 	conf                common2.TssConfig
 	logger              zerolog.Logger
@@ -254,8 +256,8 @@ func (t *TssServer) requestCheck(request interface{}) error {
 			return errors.New("message is empty")
 		}
 
-		if len(value.PoolPubKey) != 66 {
-			return errors.New("the length of the pool public key is not 66")
+		if len(value.PoolPubKey) != poolPublicKey {
+			return errors.New("the length of the pool public key is not 66, " + value.PoolPubKey)
 		}
 
 		if len(value.SignerPubKeys) == 0 {
