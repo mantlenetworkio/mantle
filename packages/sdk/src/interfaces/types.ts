@@ -23,7 +23,7 @@ export enum L1ChainID {
  * L2 network chain IDs
  */
 export enum L2ChainID {
-  MANTLE = 10,
+  MANTLE = 5000,
   MANTLE_TESTNET = 5001,
   MANTLE_GOERLIQA = 1705003,
   MANTLE_KOVAN = 69,
