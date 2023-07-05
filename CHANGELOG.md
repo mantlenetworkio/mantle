@@ -1,5 +1,19 @@
 # Changelog
 
+## [v0.4.2-beta.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.2-beta.0) - 2023-06-30
+
+### Bug Fixes
+
+- Fixed the issue in the process of generating the aggregate public key([#1196](https://github.com/mantlenetworkio/mantle/pull/1196))
+- Resolved a bug in the TSS node where block retrieval failed during verification([#1196](https://github.com/mantlenetworkio/mantle/pull/1196))
+- Enhance the documentation for Mantle([#1190](https://github.com/mantlenetworkio/mantle/pull/1190))
+- Optimize the configuration for deploying TSS staking([#1157](https://github.com/mantlenetworkio/mantle/pull/1157))
+- Address and resolve the bug in the DTL Datastore([#1164](https://github.com/mantlenetworkio/mantle/pull/1164))
+- Improve the resolution of DTL transaction status([#1163](https://github.com/mantlenetworkio/mantle/pull/1163))
+- Enhance the measurement of parameterized gasUsed within GasOracle system([#1185](https://github.com/mantlenetworkio/mantle/pull/1185))
+- Incorporate mainnet deployment into the implementation configration directory([#1166](https://github.com/mantlenetworkio/mantle/pull/1166))
+- Upgrade the @mantleio/contracts package version to new release([#1155](https://github.com/mantlenetworkio/mantle/pull/1155))
+
 ## [v0.4.2-alpha.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.2-alpha.0) - 2023-06-27
 
 ### Features
