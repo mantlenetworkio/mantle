@@ -58,18 +58,18 @@ export const CONTRACT_ADDRESSES: {
 } = {
   [L2ChainID.MANTLE]: {
     l1: {
-      AddressManager: '0xdE1FCfB0851916CA5101820A69b13a4E276bd81F' as const,
+      AddressManager: '0x6968f3F16C3e64003F02E121cf0D5CCBf5625a42' as const,
       L1CrossDomainMessenger:
-        '0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1' as const,
-      L1StandardBridge: '0x99C9fc46f92E8a1c0deC1b1747d010903E884bE1' as const,
+        '0x676A795fe6E43C17c668de16730c3F690FEB7120' as const,
+      L1StandardBridge: '0x95fC37A27a2f68e3A647CDc081F0A89bb47c3012' as const,
       StateCommitmentChain:
-        '0xBe5dAb4A2e9cd0F27300dB4aB94BeE3A233AEB19' as const,
+        '0x89E9D387555AF0cDE22cb98833Bae40d640AD7fa' as const,
       CanonicalTransactionChain:
-        '0x5E4e65926BA27467555EB562121fac00D24E9dD2' as const,
-      BondManager: '0xcd626E1328b41fCF24737F137BcD4CE0c32bc8d1' as const,
+        '0x291dc3819b863e19b0a9b9809F8025d2EB4aaE93' as const,
+      BondManager: '0x31aBe1c466C2A8b95fd84258dD1471472979B650' as const,
       Rollup:
         process.env.Rollup ||
-        ('0x9faB987C9C469EB23Da31B7848B28aCf30905eA8' as const),
+        ('0xD1328C9167e0693B689b5aa5a024379d4e437858' as const),
     },
     l2: DEFAULT_L2_CONTRACT_ADDRESSES,
   },
