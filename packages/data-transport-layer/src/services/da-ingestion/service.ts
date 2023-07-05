@@ -245,9 +245,9 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
           dataStoreRollupId['data_store_id'] +
             this.options.mantleDaUpgradeDataStoreId
         )
+        await this.state.db.putLastBatchIndex(index)
+        this.daIngestionMetrics.syncBatchIndex.set(index)
       }
-      await this.state.db.putLastBatchIndex(index)
-      this.daIngestionMetrics.syncBatchIndex.set(index)
     }
   }
 
