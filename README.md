@@ -166,4 +166,4 @@ Then check out our list of [good first issues](https://github.com/mantlenetworki
 
 ## License
 
-Code forked from [`optimism`](https://github.com/ethereum-optimism/optimism) under the name [`optimism`](https://github.com/ethereum-optimism/optimism) is licensed under the [MIT License](https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt) in accordance with the [original license](https://github.com/ethereum/go-ethereum/blob/master/COPYING).
+Code forked from [`optimism`](https://github.com/ethereum-optimism) under the name [`optimism`](https://github.com/ethereum-optimism/optimism) is licensed under the [MIT License](https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt) in accordance with the [original license](https://github.com/ethereum/go-ethereum/blob/master/COPYING).
