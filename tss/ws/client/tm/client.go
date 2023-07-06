@@ -27,6 +27,7 @@ const (
 	defaultWriteWait            = 0
 	defaultReadWait             = 0
 	defaultPingPeriod           = 0
+	defaultMaxSleepTime         = 3600 * time.Second
 )
 
 // WSClient is a JSON-RPC client, which uses WebSocket for communication with
@@ -282,6 +283,9 @@ func (c *WSClient) reconnect() error {
 
 	for {
 		backoffDuration := (1 << uint(attempt)) * time.Second
+		if backoffDuration > defaultMaxSleepTime {
+			backoffDuration = defaultMaxSleepTime
+		}
 		c.Logger.Info("reconnecting", "attempt", attempt+1, "backoff_duration", backoffDuration)
 		time.Sleep(backoffDuration)
 
