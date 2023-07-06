@@ -420,7 +420,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         let origin = null
         if (batchTx['TxMeta']['queueIndex'] != null) {
           const latestEnqueue = await this.state.db.getLatestEnqueue()
-          if (latestEnqueue.index > batchTx['TxMeta']['queueIndex']) {
+          if (latestEnqueue.index >= batchTx['TxMeta']['queueIndex']) {
             this.logger.info('get queue index from da and l1(EigenLayer)', {
               lastestEnqueue: latestEnqueue.index,
               queueIndex: batchTx['TxMeta']['queueIndex'],
