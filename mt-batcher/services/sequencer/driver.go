@@ -698,6 +698,7 @@ func (d *Driver) IsMaxPriorityFeePerGasNotFoundError(err error) bool {
 func (d *Driver) Start() error {
 	d.wg.Add(1)
 	go d.RollupMainWorker()
+	d.Cfg.Metrics.RollupTimeDuration().Set(float64(d.Cfg.MainWorkerPollInterval))
 	if d.Cfg.CheckerEnable {
 		batchIndex, ok := d.LevelDBStore.GetReRollupBatchIndex()
 		log.Info("get latest batch index", "batchIndex", batchIndex, "ok", ok)
@@ -705,10 +706,12 @@ func (d *Driver) Start() error {
 			d.LevelDBStore.SetReRollupBatchIndex(1)
 		}
 		d.wg.Add(1)
+		d.Cfg.Metrics.RollupTimeDuration().Set(float64(d.Cfg.CheckerWorkerPollInterval))
 		go d.CheckConfirmedWorker()
 	}
 	if d.Cfg.FeeModelEnable {
 		d.wg.Add(1)
+		d.Cfg.Metrics.RollupTimeDuration().Set(float64(d.Cfg.FeeWorkerPollInterval))
 		go d.RollUpFeeWorker()
 	}
 	return nil

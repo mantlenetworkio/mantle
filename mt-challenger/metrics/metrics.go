@@ -10,6 +10,7 @@ type ChallengerBase struct {
 	nonceETH           prometheus.Gauge
 	reRollupBatchIndex prometheus.Gauge
 	checkBatchIndex    prometheus.Gauge
+	dataStoreId        prometheus.Gauge
 }
 
 func NewChallengerBase() *ChallengerBase {
@@ -37,6 +38,11 @@ func NewChallengerBase() *ChallengerBase {
 			Help:      "checker batch index for eigen layer",
 			Subsystem: "challenger",
 		}),
+		dataStoreId: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "data_store_id",
+			Help:      "current rollup da data_store_id",
+			Subsystem: "mtbatcher",
+		}),
 	}
 }
 
@@ -54,4 +60,8 @@ func (cb *ChallengerBase) ReRollupBatchIndex() prometheus.Gauge {
 
 func (cb *ChallengerBase) CheckBatchIndex() prometheus.Gauge {
 	return cb.checkBatchIndex
+}
+
+func (cb *ChallengerBase) DataStoreId() prometheus.Gauge {
+	return cb.dataStoreId
 }
