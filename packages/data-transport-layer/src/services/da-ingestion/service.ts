@@ -245,9 +245,9 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
           dataStoreRollupId['data_store_id'] +
             this.options.mantleDaUpgradeDataStoreId
         )
+        await this.state.db.putLastBatchIndex(index)
+        this.daIngestionMetrics.syncBatchIndex.set(index)
       }
-      await this.state.db.putLastBatchIndex(index)
-      this.daIngestionMetrics.syncBatchIndex.set(index)
     }
   }
 
@@ -370,7 +370,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         return rst
       })
       .catch((error) => {
-        console.log('GetBatchTransactionByDataStoreId error ', error)
+        this.logger.error('GetBatchTransactionByDataStoreId error ', error)
         return []
       })
     try {
@@ -516,7 +516,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     )
       .then((res) => res.json())
       .catch((error) => {
-        console.log(
+        this.logger.error(
           'GetLatestTransactionBatchIndex HTTP  error : status!=200 error info = ',
           error
         )
@@ -582,7 +582,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     )
       .then((res) => res.json())
       .catch((error) => {
-        console.log(
+        this.logger.error(
           'GetBatchTransactionByDataStoreId  HTTP error status != 200 ',
           error
         )
@@ -612,7 +612,7 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     )
       .then((res) => res.json())
       .catch((error) => {
-        console.log('GetDataStoreById HTTP error status != 200 ', error)
+        this.logger.error('GetDataStoreById HTTP error status != 200 ', error)
         return error
       })
     clearTimeout(timeoutId)
@@ -642,7 +642,9 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
     )
       .then((res) => res.json())
       .catch((error) => {
-        console.log('GetTransactionListByStoreNumber HTTP error status != 200 ')
+        this.logger.error(
+          'GetTransactionListByStoreNumber HTTP error status != 200 '
+        )
         return error
       })
     clearTimeout(timeoutId)

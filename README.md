@@ -48,7 +48,6 @@ Mantle's modular architecture helps achieve greater network efficiency for resou
 
 Different parts of the Mantle tech stack are specialized to tackle specific issues.
 
-- [**Decentralized Sequencer**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/decentralized-sequencer): A permissionless set of L2 block producers
 - [**Data Availability**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/solving-data-availability): Implementing EigenDA, an innovative re-staking solution that leverages Ethereum's validator network to bring the security of L1 to L2
 - [**EVM-level Fraud Proofs**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/fraud-proofs): Improved fraud proofs that are evaluated using EVM-level instructions
 
@@ -166,4 +165,4 @@ Then check out our list of [good first issues](https://github.com/mantlenetworki
 
 ## License
 
-Code forked from [`optimism`](https://github.com/ethereum-optimism/optimism) under the name [`optimism`](https://github.com/ethereum-optimism/optimism) is licensed under the [MIT License](https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt) in accordance with the [original license](https://github.com/ethereum/go-ethereum/blob/master/COPYING).
+Code forked from [`optimism`](https://github.com/ethereum-optimism) under the name [`optimism`](https://github.com/ethereum-optimism/optimism) is licensed under the [MIT License](https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt) in accordance with the [original license](https://github.com/ethereum/go-ethereum/blob/master/COPYING).
