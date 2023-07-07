@@ -175,10 +175,3 @@ We also maintain a [bug bounty program via Immunefi](https://immunefi.com/bounty
 
 
 
-## License
-
-Mantle DA Network is powered by [EigenDA](https://www.eigenlayer.xyz/) technology and licensed by [Layr Labs,Inc](https://github.com/layr-Labs/).
-
-Modifications of EigenDA code are considered IP of EigenDA.This Agreement shall have a term commencing upon the Effective Date and shall continue until the earlier of (i) eighteen (18) months thereafter or (ii) Licensor’s or its affiliate’s deployment of the Licensed Software, or any portion or Modification thereof, on the Ethereum network, unless earlier terminated by a Party pursuant to this Section 4 (the “Term”).
-
-Those eigenDA forked contracts file are in `packages/contracts/contracts/libraries/eigenda/` path.
