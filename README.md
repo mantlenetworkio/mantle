@@ -48,7 +48,7 @@ Mantle's modular architecture helps achieve greater network efficiency for resou
 
 Different parts of the Mantle tech stack are specialized to tackle specific issues.
 
-- [**Data Availability**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/solving-data-availability): Implementing EigenDA, an innovative re-staking solution that leverages Ethereum's validator network to bring the security of L1 to L2
+- [**Data Availability**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/solving-data-availability): Data Availability powered by EigenDA technology, an innovative re-staking solution that leverages Ethereum's validator network to bring the security of L1 to L2
 - [**EVM-level Fraud Proofs**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/fraud-proofs): Improved fraud proofs that are evaluated using EVM-level instructions
 
 > We encourage you to check out the [**Mantle tech docs**](https://docs.mantle.xyz) to learn more about the inner workings of Mantle.
@@ -215,6 +215,5 @@ Then check out our list of [good first issues](https://github.com/mantlenetworki
 
 Code forked from [`optimism`](https://github.com/ethereum-optimism/optimism) under the name [`optimism`](https://github.com/mantlenetworkio/bitnetwork/tree/master/l2geth) is licensed under the [GNU GPLv3](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60) in accordance with the [original license](https://github.com/ethereum-optimism/optimism/blob/master/COPYING).
 
-Mantle DA Network is powered by [EigenDA](https://www.eigenlayer.xyz/) technology and licensed by [Layr Labs,Inc](https://github.com/layr-Labs/). Modifications of EigenDA code are considered IP of EigenDA.This Agreement shall have a term commencing upon the Effective Date and shall continue until the earlier of (i) eighteen (18) months thereafter or (ii) Licensor’s or its affiliate’s deployment of the Licensed Software, or any portion or Modification thereof, on the Ethereum network, unless earlier terminated by a Party pursuant to this Section 4 (the “Term”).
 
 All other files within this repository are licensed under the [MIT License](https://github.com/mantlenetworkio/bitnetwork/blob/master/LICENSE) unless stated otherwise.
