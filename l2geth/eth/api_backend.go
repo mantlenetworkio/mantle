@@ -20,8 +20,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 	"math/big"
+
+	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -240,9 +241,7 @@ func (b *EthAPIBackend) GetReceipts(ctx context.Context, hash common.Hash) (type
 
 func (b *EthAPIBackend) GetTxStatusByHash(ctx context.Context, blockNumber uint64) (*types.TxStatusResponse, error) {
 	txStatus, err := b.eth.syncService.GetTxStatusByNumber(blockNumber)
-	if err != nil {
-		log.Error("GetTxStatusByHash", "status error", err.Error())
-	}
+	log.Info("getTxStatusByHash", "msg", err.Error())
 	return txStatus, err
 }
 
