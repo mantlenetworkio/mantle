@@ -215,4 +215,6 @@ Then check out our list of [good first issues](https://github.com/mantlenetworki
 
 Code forked from [`optimism`](https://github.com/ethereum-optimism/optimism) under the name [`optimism`](https://github.com/mantlenetworkio/bitnetwork/tree/master/l2geth) is licensed under the [GNU GPLv3](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60) in accordance with the [original license](https://github.com/ethereum-optimism/optimism/blob/master/COPYING).
 
+Mantle DA Network is powered by [EigenDA](https://www.eigenlayer.xyz/) technology and licensed by [Layr Labs,Inc](https://github.com/layr-Labs/). Modifications of EigenDA code are considered IP of EigenDA.This Agreement shall have a term commencing upon the Effective Date and shall continue until the earlier of (i) eighteen (18) months thereafter or (ii) Licensor’s or its affiliate’s deployment of the Licensed Software, or any portion or Modification thereof, on the Ethereum network, unless earlier terminated by a Party pursuant to this Section 4 (the “Term”).
+
 All other files within this repository are licensed under the [MIT License](https://github.com/mantlenetworkio/bitnetwork/blob/master/LICENSE) unless stated otherwise.
