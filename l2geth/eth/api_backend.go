@@ -241,7 +241,9 @@ func (b *EthAPIBackend) GetReceipts(ctx context.Context, hash common.Hash) (type
 
 func (b *EthAPIBackend) GetTxStatusByHash(ctx context.Context, blockNumber uint64) (*types.TxStatusResponse, error) {
 	txStatus, err := b.eth.syncService.GetTxStatusByNumber(blockNumber)
-	log.Info("getTxStatusByHash", "msg", err.Error())
+	if err != nil {
+		log.Info("getTxStatusByHash", "msg", err.Error())
+	}
 	return txStatus, err
 }
 
