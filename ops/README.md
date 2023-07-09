@@ -53,7 +53,7 @@ docker-compose
     --build --detach
 ```
 
-A Makefile has been provided for convience. The following targets are available.
+A Makefile has been provided for convenience. The following targets are available.
 - make up
 - make down
 - make up-metrics
@@ -89,7 +89,7 @@ user: admin
 password: mantle
 ```
 
-## Data persistance
+## Data persistence
 
 Grafana data is not currently saved. Any modifications or additions will be lost on container restart.
 
@@ -97,7 +97,7 @@ InfluxDB is persisting data to a Docker volume.
 
 **Stopping the project removing the containers will not clear this volume**
 
-To remove the influxdb and grafana data, run a commands like
+To remove the influxdb and grafana data, run a command like
 ```
 docker volume rm ops_influxdb_data
 docker volume rm ops_grafana_data
