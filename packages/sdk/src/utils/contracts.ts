@@ -49,6 +49,20 @@ const NAME_REMAPPING = {
 }
 
 /**
+ * Mapping of L2 chain IDs to MNT contract addresses to detect correct token in standard-bridge
+ */
+export const L1_MNT_ADDRESS: {
+  [ChainID in L2ChainID]: string
+} = {
+  [L2ChainID.MANTLE]: "0x3c3a81e81dc49A522A592e7622A7E711c06bf354",
+  [L2ChainID.MANTLE_KOVAN]: "0x3c3a81e81dc49A522A592e7622A7E711c06bf354",
+  [L2ChainID.MANTLE_GOERLIQA]: "0x3c3a81e81dc49A522A592e7622A7E711c06bf354",
+  [L2ChainID.MANTLE_TESTNET]: "0xc1dC2d65A2243c22344E725677A3E3BEBD26E604",
+  [L2ChainID.MANTLE_HARDHAT_LOCAL]: "0x3c3a81e81dc49A522A592e7622A7E711c06bf354",
+  [L2ChainID.MANTLE_HARDHAT_DEVNET]: "0x3c3a81e81dc49A522A592e7622A7E711c06bf354"
+}
+
+/**
  * Mapping of L1 chain IDs to the appropriate contract addresses for the OE deployments to the
  * given network. Simplifies the process of getting the correct contract addresses for a given
  * contract name.
