@@ -21,7 +21,7 @@ contract BVM_MANTLE is L2StandardERC20 {
      ***************/
     // hardcode to mantle token mainnet address
     constructor()
-    L2StandardERC20(Lib_PredeployAddresses.L2_STANDARD_BRIDGE, address(0x3c3a81e81dc49A522A592e7622A7E711c06bf354), "Mantle", "MNT", 18)
+        L2StandardERC20(Lib_PredeployAddresses.L2_STANDARD_BRIDGE, address(0x3c3a81e81dc49A522A592e7622A7E711c06bf354), "Mantle", "MNT", 18)
     {}
 
 
@@ -42,18 +42,18 @@ contract BVM_MANTLE is L2StandardERC20 {
     }
 
     function increaseAllowance(address spender, uint256 addedValue)
-    public
-    virtual
-    override
+        public
+        virtual
+        override
     returns (bool)
     {
         revert("BVM_MANTLE: increaseAllowance is disabled pending further community discussion.");
     }
 
     function decreaseAllowance(address spender, uint256 subtractedValue)
-    public
-    virtual
-    override
+        public
+        virtual
+        override
     returns (bool)
     {
         revert("BVM_MANTLE: decreaseAllowance is disabled pending further community discussion.");
