@@ -4,18 +4,7 @@
 
 ### Features
 - Gas Oracle
-  - Add additional sources for exchange rates and optimize the calculation method for token ratio([#1014](https://github.com/mantlenetworkio/mantle/pull/1014),[#1108](https://github.com/mantlenetworkio/mantle/pull/1108))
-  - Improve metrics monitoring([#1102](https://github.com/mantlenetworkio/mantle/pull/1102))
-  - Added a strategy of real-time adjustment of layer1 overhead based on rollup capacity, to obtain a lower tx fee experience([#926](https://github.com/mantlenetworkio/mantle/pull/926))
   - Enhance the measurement of parameterized gasUsed within GasOracle system([#1185](https://github.com/mantlenetworkio/mantle/pull/1185))
-- L2 Fee Calculation
-  - Support L2 fee collection, optimize the method for setting L2 gas price and allow for floating within a certain range([#1144](https://github.com/mantlenetworkio/mantle/pull/1144))
-- Upgrade Framework
-  - Enhance the upgrade framework of l2geth to support management of upgrade heights across different networks([#1007](https://github.com/mantlenetworkio/mantle/pull/1007))
-- Batch Submitter
-  - Expose Tss expected response with metric data, enrich handle logics for unexpected case, enrich control workflow([#1107](https://github.com/mantlenetworkio/mantle/pull/1107))
-- L2geth
-  - Support debug api debug_traceCall([#940](https://github.com/mantlenetworkio/mantle/pull/940))
 - DA
   - Adjust checking strategies for staker staking of MantleDa contracts([#1120](https://github.com/mantlenetworkio/mantle/pull/1120), [#1103](https://github.com/mantlenetworkio/mantle/pull/1103))
   - Code optimization for batch-submitter, dtl and mt-batcher([#1063](https://github.com/mantlenetworkio/mantle/pull/1063), [#1045](https://github.com/mantlenetworkio/mantle/pull/1045), [#1043](https://github.com/mantlenetworkio/mantle/pull/1043))
@@ -35,12 +24,6 @@
   - Incorporate mainnet deployment into the implementation configration directory([#1166](https://github.com/mantlenetworkio/mantle/pull/1166))
 
 ### Bug Fixes
-- Fix issues of missing permission verification in contract([#1118](https://github.com/mantlenetworkio/mantle/pull/1118))
-- Fix issues of unreasonable contract naming convention([#1095](https://github.com/mantlenetworkio/mantle/pull/1095))
-- Fix smart contract related bugs in audit reports([#1043](https://github.com/mantlenetworkio/mantle/pull/1043), [#1138](https://github.com/mantlenetworkio/mantle/pull/1138))
-- Fixed the issue in the process of generating the aggregate public key([#1196](https://github.com/mantlenetworkio/mantle/pull/1196))
-- Resolved a bug in the TSS node where block retrieval failed during verification([#1196](https://github.com/mantlenetworkio/mantle/pull/1196))
-- Address and resolve the bug in the DTL Datastore([#1164](https://github.com/mantlenetworkio/mantle/pull/1164))
 - Fixed a bug in DTL data synchronization, ensuring accurate and reliable data transfer, resolving data inconsistency issues([#1258](https://github.com/mantlenetworkio/mantle/pull/1258), [#1250](https://github.com/mantlenetworkio/mantle/pull/1250))
 - Fixed the contract logic in BVM_EigenDataLayrChain, updated the deployment process for EigenDataLayrChain([#1215](https://github.com/mantlenetworkio/mantle/pull/1215), [#1223](https://github.com/mantlenetworkio/mantle/pull/1223))
 - Bugfix and upgrade for the DA tool, resolving issues and improving functionality([#1240](https://github.com/mantlenetworkio/mantle/pull/1240))
@@ -53,16 +36,9 @@
 ## [v0.4.2-beta.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.2-beta.0) - 2023-06-30
 
 ### Bug Fixes
-
 - Fixed the issue in the process of generating the aggregate public key([#1196](https://github.com/mantlenetworkio/mantle/pull/1196))
 - Resolved a bug in the TSS node where block retrieval failed during verification([#1196](https://github.com/mantlenetworkio/mantle/pull/1196))
-- Enhance the documentation for Mantle([#1190](https://github.com/mantlenetworkio/mantle/pull/1190))
-- Optimize the configuration for deploying TSS staking([#1157](https://github.com/mantlenetworkio/mantle/pull/1157))
 - Address and resolve the bug in the DTL Datastore([#1164](https://github.com/mantlenetworkio/mantle/pull/1164))
-- Improve the resolution of DTL transaction status([#1163](https://github.com/mantlenetworkio/mantle/pull/1163))
-- Enhance the measurement of parameterized gasUsed within GasOracle system([#1185](https://github.com/mantlenetworkio/mantle/pull/1185))
-- Incorporate mainnet deployment into the implementation configration directory([#1166](https://github.com/mantlenetworkio/mantle/pull/1166))
-- Upgrade the @mantleio/contracts package version to new release([#1155](https://github.com/mantlenetworkio/mantle/pull/1155))
 
 ## [v0.4.2-alpha.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.2-alpha.0) - 2023-06-27
 
