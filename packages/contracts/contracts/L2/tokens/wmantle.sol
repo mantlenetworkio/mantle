@@ -17,8 +17,8 @@ pragma solidity ^0.8.9;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract WMANTLE9 is ERC20  {
-    constructor() ERC20("Wrapped MANTLE", "WMANTLE") {}
+contract WMANTLE is ERC20  {
+    constructor() ERC20("Wrapped Mantle", "WMNT") {}
     event  Deposit(address indexed dst, uint256 wad);
     event  Withdrawal(address indexed src, uint256 wad);
 
@@ -47,19 +47,19 @@ contract WMANTLE9 is ERC20  {
 
 contract WMANTLEDeployer {
     function deploy() public returns(address addr) {
-        bytes32 salt = keccak256(abi.encodePacked("WMANTLE9"));
+        bytes32 salt = keccak256(abi.encodePacked("WMANTLE"));
 
-        WMANTLE9 w = new WMANTLE9{salt: salt}();
+        WMANTLE w = new WMANTLE{salt: salt}();
         return address(w);
     }
 
     function calculateAddr() public view returns(address predictedAddress){
-        bytes32 salt = keccak256(abi.encodePacked("WMANTLE9"));
+        bytes32 salt = keccak256(abi.encodePacked("WMANTLE"));
         predictedAddress = address(uint160(uint(keccak256(abi.encodePacked(
                 bytes1(0xff),
                 address(this),
                 salt,
-                keccak256(type(WMANTLE9).creationCode)
+                keccak256(type(WMANTLE).creationCode)
             )))));
     }
 }
