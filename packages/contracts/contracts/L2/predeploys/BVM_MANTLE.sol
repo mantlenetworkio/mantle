@@ -45,7 +45,7 @@ contract BVM_MANTLE is L2StandardERC20 {
         public
         virtual
         override
-    returns (bool)
+        returns (bool)
     {
         revert("BVM_MANTLE: increaseAllowance is disabled pending further community discussion.");
     }
@@ -54,7 +54,7 @@ contract BVM_MANTLE is L2StandardERC20 {
         public
         virtual
         override
-    returns (bool)
+        returns (bool)
     {
         revert("BVM_MANTLE: decreaseAllowance is disabled pending further community discussion.");
     }
