@@ -1,9 +1,32 @@
 # Changelog
 
+## [v0.4.2](https://github.com/mantlenetworkio/mantle/commits/v0.4.2) - 2023-07-10
+
+### Features
+- DA
+  - Adjust checking strategies for staker staking of MantleDa contracts([#1120](https://github.com/mantlenetworkio/mantle/pull/1120), [#1103](https://github.com/mantlenetworkio/mantle/pull/1103))
+  - Code optimization for batch-submitter, dtl and mt-batcher([#1063](https://github.com/mantlenetworkio/mantle/pull/1063), [#1045](https://github.com/mantlenetworkio/mantle/pull/1045), [#1043](https://github.com/mantlenetworkio/mantle/pull/1043))
+- TSS
+  - Add permission verification to tss http api([#854](https://github.com/mantlenetworkio/mantle/pull/854))
+- Packages
+  - Updated the addresses for mainnet contracts in SDK, ensuring accurate and reliable contract interactions([#1247](https://github.com/mantlenetworkio/mantle/pull/1247))
+- Documents
+  - Removed outdated description in README, streamlining and improving clarity in the documentation([#1252](https://github.com/mantlenetworkio/mantle/pull/1252))
+  - Updated the link for Optimism repository, providing an up-to-date and relevant resource([#1255](https://github.com/mantlenetworkio/mantle/pull/1255))
+
+### Bug Fixes
+- Fixed a bug in DTL data synchronization, ensuring accurate and reliable data transfer, resolving data inconsistency issues([#1258](https://github.com/mantlenetworkio/mantle/pull/1258), [#1250](https://github.com/mantlenetworkio/mantle/pull/1250))
+- Fixed the contract logic in BVM_EigenDataLayrChain, updated the deployment process for EigenDataLayrChain([#1215](https://github.com/mantlenetworkio/mantle/pull/1215), [#1223](https://github.com/mantlenetworkio/mantle/pull/1223))
+- Bugfix and upgrade for the DA tool, resolving issues and improving functionality([#1240](https://github.com/mantlenetworkio/mantle/pull/1240))
+- Updated gasoracle metrics by adjusting the metrics port configuration([#1246](https://github.com/mantlenetworkio/mantle/pull/1246))
+- Bugfix for transaction receipt unmarshaling, resolving issues related to data processing([#1236](https://github.com/mantlenetworkio/mantle/pull/1236))
+- Hotfix for verifer sync range, addressing synchronization issues and improving data consistency([#1213](https://github.com/mantlenetworkio/mantle/pull/1213))
+- Fixed the contract logic in BVM_EigenDataLayrChain, improving functionality and resolving issues([#1203](https://github.com/mantlenetworkio/mantle/pull/1203))
+
+
 ## [v0.4.2-beta.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.2-beta.0) - 2023-06-30
 
 ### Bug Fixes
-
 - Fixed the issue in the process of generating the aggregate public key([#1196](https://github.com/mantlenetworkio/mantle/pull/1196))
 - Resolved a bug in the TSS node where block retrieval failed during verification([#1196](https://github.com/mantlenetworkio/mantle/pull/1196))
 - Enhance the documentation for Mantle([#1190](https://github.com/mantlenetworkio/mantle/pull/1190))
@@ -13,6 +36,7 @@
 - Enhance the measurement of parameterized gasUsed within GasOracle system([#1185](https://github.com/mantlenetworkio/mantle/pull/1185))
 - Incorporate mainnet deployment into the implementation configration directory([#1166](https://github.com/mantlenetworkio/mantle/pull/1166))
 - Upgrade the @mantleio/contracts package version to new release([#1155](https://github.com/mantlenetworkio/mantle/pull/1155))
+
 
 ## [v0.4.2-alpha.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.2-alpha.0) - 2023-06-27
 
