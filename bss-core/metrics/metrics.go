@@ -182,11 +182,6 @@ func (b *Base) TssRollbackSignal() prometheus.Gauge {
 	return b.tssRollbackSignal
 }
 
-// CtcRollupTimeDuration number of sequencer and enqueue rollup time duration
-func (b *Base) CtcRollupTimeDuration() prometheus.Gauge {
-	return b.ctcRollupTimeDuration
-}
-
 // SccRollupTimeDuration state root rollup time duration
 func (b *Base) SccRollupTimeDuration() prometheus.Gauge {
 	return b.sccRollupTimeDuration

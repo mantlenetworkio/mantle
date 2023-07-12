@@ -480,7 +480,7 @@ func (c *Challenger) postFraudProof(store *graphView.DataStore, fraudProof *Frau
 	return tx, nil
 }
 
-func (c *Challenger) makReRollupBatchTx(ctx context.Context, batchIndex *big.Int) (*types.Transaction, error) {
+func (c *Challenger) makeReRollupBatchTx(ctx context.Context, batchIndex *big.Int) (*types.Transaction, error) {
 	balance, err := c.Cfg.L1Client.BalanceAt(
 		c.Ctx, ethc.Address(c.WalletAddr), nil,
 	)
@@ -530,7 +530,7 @@ func (c *Challenger) makReRollupBatchTx(ctx context.Context, batchIndex *big.Int
 }
 
 func (c *Challenger) submitReRollupBatchIndex(batchIndex *big.Int) (*types.Transaction, error) {
-	tx, err := c.makReRollupBatchTx(c.Ctx, batchIndex)
+	tx, err := c.makeReRollupBatchTx(c.Ctx, batchIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -557,16 +557,38 @@ func (c *Challenger) GetEigenLayerNode() (int, error) {
 	return len(operators), nil
 }
 
-func (c *Challenger) ServiceInit() {
+func (c *Challenger) ServiceInit() error {
 	nodeNum, err := c.GetEigenLayerNode()
 	if err != nil {
 		log.Error("MtChallenger get batch index fail", "err", err)
+		return err
 	}
 	totalDaNode = nodeNum
+	walletBalance, err := c.Cfg.L1Client.BalanceAt(
+		c.Ctx, c.WalletAddr, nil,
+	)
+	if err != nil {
+		log.Warn("Get rollup wallet address balance fail", "err", err)
+		return err
+	}
+	c.Cfg.Metrics.BalanceETH().Set(common4.WeiToEth64(walletBalance))
+	nonce, err := c.Cfg.L1Client.NonceAt(
+		c.Ctx, c.WalletAddr, nil,
+	)
+	if err != nil {
+		log.Warn("Get rollup wallet address nonce fail", "err", err)
+		return err
+	}
+	c.Cfg.Metrics.NonceETH().Set(float64(nonce))
+	return nil
 }
 
 func (c *Challenger) Start() error {
-	c.ServiceInit()
+	err := c.ServiceInit()
+	if err != nil {
+		log.Error("service init error", "err", err)
+		return err
+	}
 	if c.Cfg.ChallengerCheckEnable {
 		c.wg.Add(1)
 		go c.eventLoop()
