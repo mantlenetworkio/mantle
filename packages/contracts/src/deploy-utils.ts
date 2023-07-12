@@ -1,10 +1,9 @@
-import {Contract, ethers} from 'ethers'
-import {Provider} from '@ethersproject/abstract-provider'
-import {Signer} from '@ethersproject/abstract-signer'
-import {awaitCondition, getChainId, sleep} from '@mantleio/core-utils'
-import {HttpNetworkConfig} from 'hardhat/types'
-import assert from "assert";
-import { HardhatRuntimeEnvironment } from 'hardhat/types'
+import { Contract, ethers } from 'ethers'
+import { Provider } from '@ethersproject/abstract-provider'
+import { Signer } from '@ethersproject/abstract-signer'
+import { awaitCondition, getChainId, sleep } from '@mantleio/core-utils'
+import { HttpNetworkConfig } from 'hardhat/types'
+import assert from 'assert'
 import { Deployment, DeployResult } from 'hardhat-deploy/dist/types'
 
 
@@ -28,7 +27,7 @@ export const deploy = async ({
                                contract,
                                postDeployAction,
                              }: {
-  hre: HardhatRuntimeEnvironment
+  hre: any
   name: string
   args: any[]
   contract?: string
@@ -431,7 +430,7 @@ export const getContractFromArtifact = async (
  * @returns Array of contract objects.
  */
 export const getContractsFromArtifacts = async (
-  hre: HardhatRuntimeEnvironment,
+  hre: any,
   configs: Array<{
     name: string
     iface?: string
