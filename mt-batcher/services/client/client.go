@@ -3,9 +3,10 @@ package client
 import (
 	"errors"
 	"fmt"
+	"strconv"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup"
-	"strconv"
 )
 
 var errDtlHTTPError = errors.New("dtl http error")

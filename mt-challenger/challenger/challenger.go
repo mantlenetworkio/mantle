@@ -6,12 +6,23 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
+	"math/big"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/pkg/errors"
+	"github.com/shurcooL/graphql"
+	"google.golang.org/grpc"
+
 	datalayr "github.com/Layr-Labs/datalayr/common/contracts"
 	gkzg "github.com/Layr-Labs/datalayr/common/crypto/go-kzg-bn254"
 	"github.com/Layr-Labs/datalayr/common/graphView"
 	"github.com/Layr-Labs/datalayr/common/header"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceRetrieverServer"
 	"github.com/Layr-Labs/datalayr/common/logging"
+
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
@@ -20,6 +31,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
+
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
@@ -32,14 +44,6 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-challenger/challenger/client"
 	"github.com/mantlenetworkio/mantle/mt-challenger/challenger/db"
 	"github.com/mantlenetworkio/mantle/mt-challenger/metrics"
-	"github.com/pkg/errors"
-	"github.com/shurcooL/graphql"
-	"google.golang.org/grpc"
-	"math/big"
-	"strconv"
-	"strings"
-	"sync"
-	"time"
 )
 
 const fraudString = "2d5f2860204f2060295f2d202d5f2860206f2060295f2d202d5f286020512060295f2d2042495444414f204a5553542052454b5420594f55207c5f2860204f2060295f7c202d207c5f2860206f2060295f7c202d207c5f286020512060295f7c"
