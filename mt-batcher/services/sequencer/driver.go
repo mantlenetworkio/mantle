@@ -752,12 +752,12 @@ func (d *Driver) Start() error {
 			d.LevelDBStore.SetReRollupBatchIndex(1)
 		}
 		d.wg.Add(1)
-		d.Cfg.Metrics.RollupTimeDuration().Set(float64(d.Cfg.CheckerWorkerPollInterval))
+		d.Cfg.Metrics.CheckerTimeDuration().Set(float64(d.Cfg.CheckerWorkerPollInterval))
 		go d.CheckConfirmedWorker()
 	}
 	if d.Cfg.FeeModelEnable {
 		d.wg.Add(1)
-		d.Cfg.Metrics.RollupTimeDuration().Set(float64(d.Cfg.FeeWorkerPollInterval))
+		d.Cfg.Metrics.FeeTimeDuration().Set(float64(d.Cfg.FeeWorkerPollInterval))
 		go d.RollUpFeeWorker()
 	}
 	return nil
