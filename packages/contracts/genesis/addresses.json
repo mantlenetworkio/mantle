@@ -7,6 +7,7 @@
   "StateCommitmentChain": "0x82e130FF187E787D5DdDFAa4f36CB59e6B1Da6dd",
   "TssDelegationSlasher": "0xdf3BD218A936A92be5e43592143ecc7a33cef514",
   "TssDelegation": "0xC346c14AA2c1001eee47CCEc1404D193ab1667Ab",
+  "ProxyAdmin": "0x4914c433cC32045DD4230D476B084002169e42aF",
   "ChainStorageContainer-CTC-batches": "0x0090171f848B2aa86918E5Ef2406Ab3d424fdd83",
   "Proxy__BVM_L1StandardBridge": "0x36fCf02Fc651c0b7ef2ECA446Dd2405364F85337",
   "Proxy__TssDelegationManager": "0xD007896d9E3e4514a1f1216A91d33a72e15bf5C0",

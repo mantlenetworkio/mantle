@@ -6,6 +6,7 @@ BVM_EigenDataLayrFee
 StateCommitmentChain
 TssDelegationSlasher
 TssDelegation
+ProxyAdmin
 ChainStorageContainer-CTC-batches
 Proxy__BVM_L1StandardBridge
 Proxy__TssDelegationManager

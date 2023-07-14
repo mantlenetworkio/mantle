@@ -5,8 +5,9 @@ import { DeployFunction } from 'hardhat-deploy/dist/types'
 import {
   assertContractVariable,
   getContractsFromArtifacts,
-  deploy,
+  deploy, deployAndVerifyAndThen, getContractFromArtifact,
 } from '../src/deploy-utils'
+import {names} from "../src/address-names";
 
 const deployFn: DeployFunction = async (hre) => {
   const { deployer } = await hre.getNamedAccounts()
@@ -17,9 +18,10 @@ const deployFn: DeployFunction = async (hre) => {
     },
   ])
 
-  const proxyAdmin = await deploy({
+  await deployAndVerifyAndThen({
     hre,
     name: 'ProxyAdmin',
+    contract: 'ProxyAdmin',
     args: [deployer],
     postDeployAction: async (contract) => {
       // Owner is temporarily set to the deployer.
@@ -27,18 +29,27 @@ const deployFn: DeployFunction = async (hre) => {
     },
   })
 
-  let addressManagerOnProxy = await proxyAdmin.callStatic.addressManager()
+  const ProxyAdmin = await getContractFromArtifact(
+    hre,
+    'ProxyAdmin',
+    {
+      iface: 'ProxyAdmin',
+      signerOrProvider: deployer,
+    }
+  )
+
+  let addressManagerOnProxy = await ProxyAdmin.addressManager()
   if (addressManagerOnProxy !== addressManager.address) {
     // Set the address manager on the proxy admin
     console.log(
-      `ProxyAdmin(${proxyAdmin.address}).setAddressManager(${addressManager.address})`
+      `ProxyAdmin(${ProxyAdmin.address}).setAddressManager(${addressManager.address})`
     )
-    const tx = await proxyAdmin.setAddressManager(addressManager.address)
+    const tx = await ProxyAdmin.setAddressManager(addressManager.address)
     await tx.wait()
   }
 
   // Validate the address manager was set correctly.
-  addressManagerOnProxy = await proxyAdmin.callStatic.addressManager()
+  addressManagerOnProxy = await ProxyAdmin.addressManager()
   assert(
     addressManagerOnProxy === addressManager.address,
     'AddressManager not set on ProxyAdmin'
