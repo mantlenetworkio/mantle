@@ -1,18 +1,19 @@
 package common
 
 import (
-	kms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math/big"
+	"strings"
+
+	kms "cloud.google.com/go/kms/apiv1"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
 	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 	"google.golang.org/api/option"
-	"math/big"
-	"strings"
 
 	"github.com/decred/dcrd/hdkeychain/v3"
 	"github.com/ethereum/go-ethereum/accounts"
@@ -33,14 +34,14 @@ func ParseAddress(address string) (common.Address, error) {
 	return common.Address{}, fmt.Errorf("invalid address: %v", address)
 }
 
-func GetConfiguredPrivateKey(mnemonic, hdPath, privKeyStr string) (*ecdsa.PrivateKey, error) {
+func GetConfiguredPrivateKey(mnemonic, hdPath, privKeyStr, password string) (*ecdsa.PrivateKey, error) {
 
 	useMnemonic := mnemonic != "" && hdPath != ""
 	usePrivKeyStr := privKeyStr != ""
 
 	switch {
 	case useMnemonic && !usePrivKeyStr:
-		return DerivePrivateKey(mnemonic, hdPath)
+		return DerivePrivateKey(mnemonic, hdPath, password)
 
 	case usePrivKeyStr && !useMnemonic:
 		return ParsePrivateKeyStr(privKeyStr)
@@ -60,8 +61,8 @@ func (f fakeNetworkParams) HDPubKeyVersion() [4]byte {
 	return [4]byte{}
 }
 
-func DerivePrivateKey(mnemonic, hdPath string) (*ecdsa.PrivateKey, error) {
-	seed, err := bip39.NewSeedWithErrorChecking(mnemonic, "")
+func DerivePrivateKey(mnemonic, hdPath, password string) (*ecdsa.PrivateKey, error) {
+	seed, err := bip39.NewSeedWithErrorChecking(mnemonic, password)
 	if err != nil {
 		return nil, err
 	}
@@ -96,9 +97,9 @@ func ParsePrivateKeyStr(privKeyStr string) (*ecdsa.PrivateKey, error) {
 	return crypto.HexToECDSA(hex)
 }
 
-func ParseWalletPrivKeyAndContractAddr(name string, mnemonic string, hdPath string, privKeyStr string, contractAddrStr string) (*ecdsa.PrivateKey, common.Address, error) {
+func ParseWalletPrivKeyAndContractAddr(name string, mnemonic string, hdPath string, privKeyStr string, contractAddrStr string, password string) (*ecdsa.PrivateKey, common.Address, error) {
 
-	privKey, err := GetConfiguredPrivateKey(mnemonic, hdPath, privKeyStr)
+	privKey, err := GetConfiguredPrivateKey(mnemonic, hdPath, privKeyStr, password)
 	if err != nil {
 		return nil, common.Address{}, err
 	}
