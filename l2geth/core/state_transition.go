@@ -179,7 +179,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) (*StateTransition
 func ApplyMessage(evm *vm.EVM, msg Message, gp *GasPool) ([]byte, uint64, bool, error) {
 	stateTransition, err := NewStateTransition(evm, msg, gp)
 	if err == nil {
-		log.Error("apply message fall", err)
+		log.Error("apply message fall", "err", err)
 		return nil, 0, false, err
 	}
 	return stateTransition.TransitionDb()
