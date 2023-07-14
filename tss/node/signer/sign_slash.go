@@ -41,7 +41,7 @@ func (p *Processor) SignSlash() {
 					logger.Error().Msg("failed to unmarshal node sign request")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}
@@ -50,7 +50,7 @@ func (p *Processor) SignSlash() {
 					logger.Error().Msg("failed to umarshal slash params request body")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}
@@ -61,7 +61,7 @@ func (p *Processor) SignSlash() {
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					logger.Err(err).Msg("check event failed")
 					continue
@@ -77,7 +77,7 @@ func (p *Processor) SignSlash() {
 					logger.Err(err).Msg("failed to encode SlashMsg")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}

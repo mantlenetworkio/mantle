@@ -36,7 +36,7 @@ func (p *Processor) VerifyRollBack() {
 					logger.Error().Msgf("failed to do verify for rollback, %s", err.Error())
 					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to do verify for rollback ", err.Error())
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}
@@ -45,7 +45,7 @@ func (p *Processor) VerifyRollBack() {
 				}
 				RpcResponse = tdtypes.NewRPCSuccessResponse(resId, askResponse)
 				if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-					logger.Error().Msg("failed to send msg to manager")
+					logger.Error().Err(err).Msg("failed to send msg to manager")
 				}
 			}
 		}

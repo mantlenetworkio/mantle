@@ -36,7 +36,7 @@ func (p *Processor) SignRollBack() {
 					logger.Error().Msg("failed to unmarshal roll back request")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}
@@ -45,7 +45,7 @@ func (p *Processor) SignRollBack() {
 					logger.Error().Msg("failed to umarshal roll back params request body")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}
@@ -54,7 +54,7 @@ func (p *Processor) SignRollBack() {
 					logger.Error().Msg("StartBlock must not be nil or negative")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", "StartBlock must not be nil or negative")
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}
@@ -64,7 +64,7 @@ func (p *Processor) SignRollBack() {
 					logger.Err(err).Msg("failed to encode roll back msg")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}

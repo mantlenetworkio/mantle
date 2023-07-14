@@ -48,7 +48,7 @@ func (p *Processor) Sign() {
 					logger.Error().Msg("failed to unmarshal ask request")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}
@@ -57,7 +57,7 @@ func (p *Processor) Sign() {
 					logger.Error().Msg("failed to unmarshal asker's params request body")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}
@@ -68,7 +68,7 @@ func (p *Processor) Sign() {
 					logger.Error().Msg("StartBlock and OffsetStartsAtIndex must not be nil or negative")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", "StartBlock and OffsetStartsAtIndex must not be nil or negative")
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}
@@ -91,7 +91,7 @@ func (p *Processor) SignGo(resId tdtypes.JSONRPCStringID, sign tsscommon.NodeSig
 		RpcResponse := tdtypes.NewRPCErrorResponse(resId, 201, "failed", err.Error())
 
 		if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-			logger.Error().Msg("failed to send msg to manager")
+			logger.Error().Err(err).Msg("failed to send msg to manager")
 		}
 		logger.Err(err).Msg("check event failed")
 		return err

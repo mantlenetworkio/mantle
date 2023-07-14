@@ -34,7 +34,7 @@ func (p *Processor) Verify() {
 					logger.Error().Msg("failed to unmarshal ask request")
 					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to unmarshal ", err.Error())
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}
@@ -45,7 +45,7 @@ func (p *Processor) Verify() {
 					logger.Error().Msg("StartBlock and OffsetStartsAtIndex must not be nil or negative")
 					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "invalid askRequest", "StartBlock and OffsetStartsAtIndex must not be nil or negative")
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					return
 				}
@@ -56,7 +56,7 @@ func (p *Processor) Verify() {
 					logger.Error().Msg("stateroots size is empty")
 					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "stateroots size is empty ", "do not need to sign")
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				} else {
@@ -68,7 +68,7 @@ func (p *Processor) Verify() {
 							logger.Error().Msgf("failed to verify block %s", err.Error())
 							RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "get error when verify ", err.Error())
 							if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-								logger.Error().Msg("failed to send msg to manager")
+								logger.Error().Err(err).Msg("failed to send msg to manager")
 							}
 							continue
 						}
@@ -78,7 +78,7 @@ func (p *Processor) Verify() {
 							logger.Err(err).Msg("failed to conv msg to hash")
 							RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to conv msg to hash", err.Error())
 							if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-								logger.Error().Msg("failed to send msg to manager")
+								logger.Error().Err(err).Msg("failed to send msg to manager")
 							}
 							continue
 						} else {
@@ -91,7 +91,7 @@ func (p *Processor) Verify() {
 					}
 					RpcResponse = tdtypes.NewRPCSuccessResponse(resId, askResponse)
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 
 				}

@@ -55,7 +55,7 @@ func (p *Processor) Keygen() {
 					logger.Error().Msg("failed to unmarshal ask request")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 					if err = p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}
@@ -64,7 +64,7 @@ func (p *Processor) Keygen() {
 					logger.Error().Msg("verify threshold in keygen request is false")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", "verify threshold in keygen request is false")
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 					continue
 				}
@@ -79,7 +79,7 @@ func (p *Processor) Keygen() {
 					logger.Err(err).Msg("failed to keygen !")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 202, "failed", err.Error())
 					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-						logger.Error().Msg("failed to send msg to manager")
+						logger.Error().Err(err).Msg("failed to send msg to manager")
 					}
 				} else {
 					if resp.Status == common.Success {
@@ -88,7 +88,7 @@ func (p *Processor) Keygen() {
 						}
 						RpcResponse := tdtypes.NewRPCSuccessResponse(tdtypes.JSONRPCStringID(resId), keygenResponse)
 						if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-							logger.Error().Msg("failed to send msg to manager")
+							logger.Error().Err(err).Msg("failed to send msg to manager")
 						}
 						logger.Info().Msgf("keygen start to set group publickey for l1 contract")
 						err := p.setGroupPublicKey(p.localPubKeyByte, resp.PubKeyByte)
@@ -98,7 +98,7 @@ func (p *Processor) Keygen() {
 					} else {
 						RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 202, "failed", resp.FailReason)
 						if err := p.wsClient.SendMsg(RpcResponse); err != nil {
-							logger.Error().Msg("failed to send msg to manager")
+							logger.Error().Err(err).Msg("failed to send msg to manager")
 						}
 					}
 				}
