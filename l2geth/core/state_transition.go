@@ -127,7 +127,7 @@ func IntrinsicGas(data []byte, contractCreation, isHomestead bool, isEIP2028 boo
 }
 
 // NewStateTransition initialises and returns a new state transition object.
-func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition {
+func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) (*StateTransition, error) {
 	l1Fee := new(big.Int)
 	daFee := new(big.Int)
 	var err error
@@ -139,7 +139,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 			l1Fee, err = fees.CalculateL1MsgFee(msg, evm.StateDB, nil)
 			if err != nil {
 				log.Error("calculate l1 message fee fail", "err", err)
-				return &StateTransition{}
+				return nil, err
 			}
 			charge := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.ChargeSlot).Big()
 			if charge.Cmp(common.Big0) == 0 {
@@ -150,7 +150,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 				daFee, err = fees.CalculateDAMsgFee(msg, evm.StateDB, nil)
 				if err != nil {
 					log.Error("calculate mantle da message fee fail", "err", err)
-					return &StateTransition{}
+					return nil, err
 				}
 			}
 		}
@@ -166,7 +166,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 		state:    evm.StateDB,
 		l1Fee:    l1Fee,
 		daFee:    daFee,
-	}
+	}, nil
 }
 
 // ApplyMessage computes the new state by applying the given message
@@ -177,7 +177,12 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 // indicates a core error meaning that the message would always fail for that particular
 // state and would never be accepted within a block.
 func ApplyMessage(evm *vm.EVM, msg Message, gp *GasPool) ([]byte, uint64, bool, error) {
-	return NewStateTransition(evm, msg, gp).TransitionDb()
+	stateTransition, err := NewStateTransition(evm, msg, gp)
+	if err == nil {
+		log.Error("apply message fall", err)
+		return nil, 0, false, err
+	}
+	return stateTransition.TransitionDb()
 }
 
 // to returns the recipient of the message.
