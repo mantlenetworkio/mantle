@@ -10,17 +10,18 @@ import (
 	"strings"
 
 	kms "cloud.google.com/go/kms/apiv1"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/core/types"
-	bsscore "github.com/mantlenetworkio/mantle/bss-core"
+	"github.com/tyler-smith/go-bip39"
 	"google.golang.org/api/option"
 
 	"github.com/decred/dcrd/hdkeychain/v3"
 	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/tyler-smith/go-bip39"
+
+	bsscore "github.com/mantlenetworkio/mantle/bss-core"
 )
 
 var (
