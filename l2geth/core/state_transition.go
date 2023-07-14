@@ -131,18 +131,27 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 	l1Fee := new(big.Int)
 	daFee := new(big.Int)
 	gasPrice := msg.GasPrice()
+	var err error
 	if rcfg.UsingBVM {
 		if msg.GasPrice().Cmp(common.Big0) != 0 {
 			// Compute the L1 fee before the state transition
 			// so it only has to be read from state one time.
-			l1Fee, _ = fees.CalculateL1MsgFee(msg, evm.StateDB, nil)
+			l1Fee, err = fees.CalculateL1MsgFee(msg, evm.StateDB, nil)
+			if err != nil {
+				log.Error("calculate l1 message fee fail", "err", err)
+				return &StateTransition{}
+			}
 			charge := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.ChargeSlot).Big()
 			if charge.Cmp(common.Big0) == 0 {
 				gasPrice = common.Big0
 			}
 			daCharge := evm.StateDB.GetState(rcfg.L2GasPriceOracleAddress, rcfg.DaSwitchSlot).Big()
 			if daCharge.Cmp(common.Big1) == 0 {
-				daFee, _ = fees.CalculateDAMsgFee(msg, evm.StateDB, nil)
+				daFee, err = fees.CalculateDAMsgFee(msg, evm.StateDB, nil)
+				if err != nil {
+					log.Error("calculate mantle da message fee fail", "err", err)
+					return &StateTransition{}
+				}
 			}
 		}
 	}
