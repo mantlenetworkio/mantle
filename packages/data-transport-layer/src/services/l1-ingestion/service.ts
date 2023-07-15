@@ -67,7 +67,7 @@ const optionSettings = {
     default: 35,
     validate: validators.isInteger,
   },
-  pollingInterval: {
+  l1PollingInterval: {
     default: 5000,
     validate: validators.isInteger,
   },
@@ -245,8 +245,13 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
               )
             }
           }
-
-          await sleep(this.options.l2PollingInterval)
+          this.logger.info(
+            'Sync l1 block time duration from Layer 1 (Ethereum)',
+            {
+              l1PollingInterval: this.options.l1PollingInterval,
+            }
+          )
+          await sleep(this.options.l1PollingInterval)
           continue
         }
 
