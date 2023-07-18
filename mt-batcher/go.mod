@@ -16,7 +16,7 @@ replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
 
 require (
 	cloud.google.com/go/kms v1.11.0
-	github.com/Layr-Labs/datalayr/common v0.0.0
+	github.com/Layr-Labs/datalayr/common v0.0.0-00010101000000-000000000000
 	github.com/decred/dcrd/hdkeychain/v3 v3.0.0
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/go-resty/resty/v2 v2.7.0
