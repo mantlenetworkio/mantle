@@ -22,7 +22,7 @@ contract BVM_EigenDataLayrFee is Initializable, OwnableUpgradeable, ReentrancyGu
     }
 
     function initialize(address _address) public initializer {
-        require(_address != address(0), "initialize: address is the zero address");
+        require(_address != address(0), "initialize: can't set zero address to gasFeeAddress");
         __Ownable_init();
         userRollupFee = 0;
         gasFeeAddress = _address;
