@@ -35,7 +35,7 @@ $ make gas-oracle
 
 ### Running the service
 
-Use the `--help` flag when running the `gas-oracle` to see it's configuration
+Use the `--help` flag when running the `gas-oracle` to see its configuration
 options.
 
 ```
@@ -49,7 +49,7 @@ VERSION:
    0.0.0-1.10.4-stable
 
 DESCRIPTION:
-   Configure with a private key and an Mantle HTTP endpoint to send transactions that update the L2 gas price.
+   Configure with a private key and a Mantle HTTP endpoint to send transactions that update the L2 gas price.
 
 COMMANDS:
      help, h  Shows a list of commands or help for one command
