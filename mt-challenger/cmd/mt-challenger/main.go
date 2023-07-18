@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
+	"os"
+
+	"github.com/urfave/cli"
+
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
+
 	"github.com/mantlenetworkio/mantle/mt-challenger"
 	"github.com/mantlenetworkio/mantle/mt-challenger/flags"
-	"github.com/urfave/cli"
-	"os"
 )
 
 var (
