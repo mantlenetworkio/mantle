@@ -235,6 +235,21 @@ func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, er
 	return start, end, nil
 }
 
+func (d *Driver) GetRollupTimeInterval(ctx context.Context, start *big.Int) (time.Duration, error) {
+	startHeader, err := d.Cfg.L2Client.HeaderByNumber(ctx, start)
+	if err != nil {
+		return time.Duration(0), err
+	}
+	lastRollupTs := big.NewInt(int64(startHeader.Time))
+	nowTs := big.NewInt(int64(time.Now().Second()))
+
+	timeInterval := big.NewInt(0).Sub(nowTs, lastRollupTs)
+	if timeInterval.Cmp(big.NewInt(0)) < 0 {
+		return time.Duration(0), fmt.Errorf("invalid result :local timestamp(%v) - start timestamp(%v) ", nowTs, lastRollupTs)
+	}
+	return time.Duration(timeInterval.Int64()), nil
+}
+
 func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transactionData []byte, startL2BlockNumber *big.Int, endL2BlockNumber *big.Int) {
 	var batchTxList []common3.BatchTx
 	var transactionByte []byte
@@ -740,11 +755,21 @@ func (d *Driver) RollupMainWorker() {
 				log.Info("MtBatcher Sequencer no updates", "start", start, "end", end)
 				continue
 			}
-			rollupMinTransactions := new(big.Int).Sub(end, start)
-			if big.NewInt(int64(d.Cfg.RollUpMinTxn)).Cmp(rollupMinTransactions) > 0 {
-				log.Info("MtBatcher rollup total transaction less than min transations in config", "RollUpMinTxn", d.Cfg.RollUpMinTxn, "rollupMinTransactions", rollupMinTransactions)
+			waitedRollupTxs := new(big.Int).Sub(end, start)
+			if big.NewInt(int64(d.Cfg.RollUpMinTxn)).Cmp(waitedRollupTxs) > 0 {
+				log.Info("MtBatcher rollup total transaction less than minimum transations in config", "RollUpMinTxn", d.Cfg.RollUpMinTxn, "waitedRollupTxs", waitedRollupTxs)
 				continue
 			}
+			timeInterval, err := d.GetRollupTimeInterval(d.Ctx, start)
+			if err != nil {
+				log.Error("MtBatcher Sequencer unable to get time interval for rollup", "err", err)
+				continue
+			}
+			if timeInterval.Seconds() < d.Cfg.RollupTimeout.Seconds() {
+				log.Info("MtBatcher rollup wait time less than minimum rollup waiting time in config", "RollupTimeout", d.Cfg.RollUpMinTxn, "waitedRollupTxs", waitedRollupTxs)
+				continue
+			}
+
 			aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
 				d.Ctx, start, end,
 			)
