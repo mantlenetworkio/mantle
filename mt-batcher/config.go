@@ -1,10 +1,11 @@
 package mt_batcher
 
 import (
+	"time"
+
 	"github.com/Layr-Labs/datalayr/common/logging"
 	"github.com/mantlenetworkio/mantle/mt-batcher/flags"
 	"github.com/urfave/cli"
-	"time"
 )
 
 type Config struct {
@@ -35,7 +36,6 @@ type Config struct {
 	FeeWorkerPollInterval     time.Duration
 	BlockOffset               uint64
 	RollUpMinTxn              uint64
-	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
 	EigenLayerNode            int
 	EigenLogConfig            logging.Config
@@ -96,7 +96,6 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		PollingDuration:           ctx.GlobalDuration(flags.PollingDurationFlag.Name),
 		BlockOffset:               ctx.GlobalUint64(flags.BlockOffsetFlag.Name),
 		RollUpMinTxn:              ctx.GlobalUint64(flags.RollUpMinTxnFlag.Name),
-		RollUpMinSize:             ctx.GlobalUint64(flags.RollUpMinSizeFlag.Name),
 		RollUpMaxSize:             ctx.GlobalUint64(flags.RollUpMaxSizeFlag.Name),
 		EigenLayerNode:            ctx.GlobalInt(flags.EigenLayerNodeFlag.Name),
 		EigenLogConfig:            logging.ReadCLIConfig(ctx),

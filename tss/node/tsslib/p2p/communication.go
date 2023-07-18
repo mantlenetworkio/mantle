@@ -9,6 +9,11 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/influxdata/influxdb/pkg/slices"
+	maddr "github.com/multiformats/go-multiaddr"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
 	"github.com/libp2p/go-libp2p"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	"github.com/libp2p/go-libp2p/core/crypto"
@@ -19,10 +24,10 @@ import (
 	discovery "github.com/libp2p/go-libp2p/p2p/discovery/routing"
 	discoveryUtil "github.com/libp2p/go-libp2p/p2p/discovery/util"
 	"github.com/libp2p/go-libp2p/p2p/protocol/ping"
+
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
-	maddr "github.com/multiformats/go-multiaddr"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	"github.com/mantlenetworkio/mantle/tss/node/types"
 )
 
 // TSSProtocolID protocol id used for tss
@@ -52,9 +57,10 @@ type Communication struct {
 	BroadcastMsgChan  chan *messages.BroadcastMsgChan
 	externalAddr      maddr.Multiaddr
 	streamMgr         *StreamMgr
+	tssMemberStore    types.TssMemberStore
 }
 
-func NewCommunication(bootstrapPeers []maddr.Multiaddr, port int, externalIP string, waitFullConnected bool) (*Communication, error) {
+func NewCommunication(bootstrapPeers []maddr.Multiaddr, port int, externalIP string, waitFullConnected bool, store types.TssMemberStore) (*Communication, error) {
 	addr, err := maddr.NewMultiaddr(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", port))
 	if err != nil {
 		return nil, fmt.Errorf("fail to create listen addr: %w", err)
@@ -79,6 +85,7 @@ func NewCommunication(bootstrapPeers []maddr.Multiaddr, port int, externalIP str
 		externalAddr:      externalAddr,
 		streamMgr:         NewStreamMgr(),
 		waitFullConnected: waitFullConnected,
+		tssMemberStore:    store,
 	}, nil
 }
 
@@ -211,7 +218,7 @@ func (c *Communication) readFromStream(stream network.Stream) {
 				break
 			} else {
 				c.logger.Debug().Msgf("no MsgID %s found for this message,need to retry %d time", wrappedMsg.MsgID, i)
-				c.logger.Debug().Msgf("no MsgID %s found for this message,need to retry %d time", wrappedMsg.MessageType, i)
+				c.logger.Debug().Msgf("no MessageType %s found for this message,need to retry %d time", wrappedMsg.MessageType, i)
 				time.Sleep(500 * time.Millisecond)
 			}
 		}
@@ -221,8 +228,12 @@ func (c *Communication) readFromStream(stream network.Stream) {
 func (c *Communication) handleStream(stream network.Stream) {
 	peerID := stream.Conn().RemotePeer().String()
 	c.logger.Debug().Msgf("handle stream from peer: %s", peerID)
-	// we will read from that stream
-	c.readFromStream(stream)
+	//We need to verify whether the sender of the message is a trusted node for us, and if not, we will not process the message.
+	verifyResult := c.VerifyPeerId(peerID)
+	if verifyResult {
+		// we will read from that stream
+		c.readFromStream(stream)
+	}
 }
 
 func (c *Communication) bootStrapConnectivityCheck() error {
@@ -408,14 +419,11 @@ func (c *Communication) Start(priKeyBytes []byte) error {
 
 // Stop communication
 func (c *Communication) Stop() error {
-	// we need to stop the handler and the p2p services firstly, then terminate the our communication threads
-	if err := c.host.Close(); err != nil {
-		c.logger.Err(err).Msg("fail to close host network")
-	}
-
+	// we need to stop the handler and the p2p services firstly, then terminate the communication threads
+	err := c.host.Close()
 	close(c.stopChan)
 	c.wg.Wait()
-	return nil
+	return err
 }
 
 func (c *Communication) SetSubscribe(topic messages.TSSMessageTpe, msgID string, channel chan *Message) {
@@ -486,4 +494,42 @@ func (c *Communication) ProcessBroadcast() {
 
 func (c *Communication) ReleaseStream(msgID string) {
 	c.streamMgr.ReleaseStream(msgID)
+}
+
+func (c *Communication) VerifyPeerId(peerId string) bool {
+	activeNodes, err := c.tssMemberStore.GetActiveMembers()
+	if err != nil {
+		c.logger.Error().Err(err).Msg("failed to get active members from level db")
+		return false
+	}
+	pubKey, err := conversion.GetPubKeyFromPeerID(peerId)
+	if err != nil {
+		c.logger.Error().Err(err).Msg("failed to convert peer id to public key")
+		return false
+	}
+
+	if len(activeNodes.TssMembers) > 0 {
+		if slices.ExistsIgnoreCase(activeNodes.TssMembers, pubKey) {
+			return true
+		} else {
+			c.logger.Info().Msgf("active members does not contain %s。", pubKey)
+			return false
+		}
+	}
+
+	inactiveNodes, err := c.tssMemberStore.GetInactiveMembers()
+	if err != nil {
+		c.logger.Error().Err(err).Msg("failed to get inactive members from level db")
+		return false
+	}
+	if len(inactiveNodes.TssMembers) > 0 {
+		if slices.ExistsIgnoreCase(inactiveNodes.TssMembers, pubKey) {
+			return true
+		} else {
+			c.logger.Info().Msgf("inactive members does not contain %s。", pubKey)
+			return false
+		}
+	}
+	return false
+
 }

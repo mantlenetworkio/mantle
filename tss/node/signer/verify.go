@@ -33,8 +33,21 @@ func (p *Processor) Verify() {
 				if err := json.Unmarshal(req.Params, &askRequest); err != nil {
 					logger.Error().Msg("failed to unmarshal ask request")
 					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to unmarshal ", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
+				}
+				if askRequest.StartBlock == nil ||
+					askRequest.OffsetStartsAtIndex == nil ||
+					askRequest.StartBlock.Cmp(big.NewInt(0)) < 0 ||
+					askRequest.OffsetStartsAtIndex.Cmp(big.NewInt(0)) < 0 {
+					logger.Error().Msg("StartBlock and OffsetStartsAtIndex must not be nil or negative")
+					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "invalid askRequest", "StartBlock and OffsetStartsAtIndex must not be nil or negative")
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
+					return
 				}
 				var resId = req.ID
 				var size = len(askRequest.StateRoots)
@@ -42,7 +55,9 @@ func (p *Processor) Verify() {
 				if len(askRequest.StateRoots) == 0 {
 					logger.Error().Msg("stateroots size is empty")
 					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "stateroots size is empty ", "do not need to sign")
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				} else {
 					wg := &sync.WaitGroup{}
@@ -52,7 +67,9 @@ func (p *Processor) Verify() {
 						if err != nil {
 							logger.Error().Msgf("failed to verify block %s", err.Error())
 							RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "get error when verify ", err.Error())
-							p.wsClient.SendMsg(RpcResponse)
+							if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+								logger.Error().Err(err).Msg("failed to send msg to manager")
+							}
 							continue
 						}
 					} else {
@@ -60,7 +77,9 @@ func (p *Processor) Verify() {
 						if err != nil {
 							logger.Err(err).Msg("failed to conv msg to hash")
 							RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to conv msg to hash", err.Error())
-							p.wsClient.SendMsg(RpcResponse)
+							if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+								logger.Error().Err(err).Msg("failed to send msg to manager")
+							}
 							continue
 						} else {
 							hashStr := hexutil.Encode(hash)
@@ -71,7 +90,9 @@ func (p *Processor) Verify() {
 						Result: result,
 					}
 					RpcResponse = tdtypes.NewRPCSuccessResponse(resId, askResponse)
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 
 				}
 			}
@@ -80,12 +101,11 @@ func (p *Processor) Verify() {
 	}()
 }
 
-func (p *Processor) verify(start string, index int, stateRoot [32]byte, logger zerolog.Logger, wg *sync.WaitGroup) (bool, error) {
+func (p *Processor) verify(start *big.Int, index int, stateRoot [32]byte, logger zerolog.Logger, wg *sync.WaitGroup) (bool, error) {
 	defer wg.Done()
 
 	offset := new(big.Int).SetInt64(int64(index))
-	startBig, _ := new(big.Int).SetString(start, 10)
-	blockNumber := offset.Add(offset, startBig)
+	blockNumber := offset.Add(offset, start)
 	logger.Info().Msgf("start to query block by number %d", blockNumber)
 
 	value, ok := p.GetVerify(blockNumber.String())

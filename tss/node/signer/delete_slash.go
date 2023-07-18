@@ -2,13 +2,14 @@ package signer
 
 import (
 	"context"
-	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"math/big"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/tss/slash"
+
+	tss "github.com/mantlenetworkio/mantle/tss/common"
 )
 
 func (p *Processor) deleteSlashing() {
@@ -33,24 +34,17 @@ func (p *Processor) handleSlashing(si slash.SlashingInfo) {
 		log.Error("failed to query block number", "err", err)
 		return
 	}
-	found, err := p.tssStakingSlashingCaller.GetSlashRecord(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber)}, new(big.Int).SetUint64(si.BatchIndex), si.Address)
+	found, err := p.tssStakingSlashingCaller.GetSlashRecord(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - uint64(p.l1ConfirmBlocks))}, new(big.Int).SetUint64(si.BatchIndex), si.Address)
 	if err != nil {
 		log.Error("failed to GetSlashRecord", "err", err)
 		return
 	}
 	if found { // is submitted to ethereum
-		found, err = p.tssStakingSlashingCaller.GetSlashRecord(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - uint64(p.l1ConfirmBlocks))}, new(big.Int).SetUint64(si.BatchIndex), si.Address)
-		if err != nil {
-			log.Error("failed to GetSlashRecord", "err", err)
-			return
-		}
-		if found { // this slashing is confirmed on ethereum
-			p.nodeStore.RemoveSlashingInfo(si.Address, si.BatchIndex)
-		}
+		p.nodeStore.RemoveSlashingInfo(si.Address, si.BatchIndex)
 		return
 	}
 
-	unJailMembers, err := p.tssGroupManagerCaller.GetTssGroupUnJailMembers(nil)
+	unJailMembers, err := p.tssGroupManagerCaller.GetTssGroupUnJailMembers(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - uint64(p.l1ConfirmBlocks))})
 	if err != nil {
 		log.Error("failed to GetTssGroupUnJailMembers", "err", err)
 		return

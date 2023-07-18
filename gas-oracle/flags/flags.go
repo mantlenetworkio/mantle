@@ -232,7 +232,7 @@ var (
 	MetricsPortFlag = cli.IntFlag{
 		Name:   "metrics.port",
 		Usage:  "Metrics HTTP server listening port",
-		Value:  6060,
+		Value:  9107,
 		EnvVar: "GAS_PRICE_ORACLE_METRICS_PORT",
 	}
 	MetricsEnableInfluxDBFlag = cli.BoolFlag{

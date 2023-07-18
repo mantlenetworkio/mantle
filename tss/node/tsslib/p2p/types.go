@@ -1,8 +1,9 @@
 package p2p
 
 import (
-	maddr "github.com/multiformats/go-multiaddr"
 	"strings"
+
+	maddr "github.com/multiformats/go-multiaddr"
 )
 
 type AddrList []maddr.Multiaddr

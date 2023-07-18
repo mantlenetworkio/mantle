@@ -2,14 +2,15 @@ package router
 
 import (
 	"errors"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"math/big"
 	"net/http"
 	"strconv"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/manager/types"
@@ -34,15 +35,11 @@ func (registry *Registry) SignStateHandler() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, errors.New("invalid request body"))
 			return
 		}
-
-		_, succ := new(big.Int).SetString(request.StartBlock, 10)
-		if !succ {
-			c.JSON(http.StatusBadRequest, errors.New("wrong StartBlock, can not be converted to number"))
-			return
-		}
-		_, succ = new(big.Int).SetString(request.OffsetStartsAtIndex, 10)
-		if !succ {
-			c.JSON(http.StatusBadRequest, errors.New("wrong OffsetStartsAtIndex, can not be converted to number"))
+		if request.StartBlock == nil ||
+			request.OffsetStartsAtIndex == nil ||
+			request.StartBlock.Cmp(big.NewInt(0)) < 0 ||
+			request.OffsetStartsAtIndex.Cmp(big.NewInt(0)) < 0 {
+			c.JSON(http.StatusBadRequest, errors.New("StartBlock and OffsetStartsAtIndex must not be nil or negative"))
 			return
 		}
 		var signature []byte
@@ -55,6 +52,9 @@ func (registry *Registry) SignStateHandler() gin.HandlerFunc {
 				return
 			}
 			signature, err = registry.signService.SignRollBack(request)
+		} else {
+			c.String(http.StatusBadRequest, "invalid request type %d, expected request type: 0 and 1", request.Type)
+			return
 		}
 		if err != nil {
 			c.String(http.StatusInternalServerError, "failed to sign state")

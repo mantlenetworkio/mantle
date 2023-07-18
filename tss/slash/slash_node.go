@@ -2,8 +2,9 @@ package slash
 
 import (
 	"errors"
+
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+
 	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/index"
 )
@@ -25,8 +26,6 @@ func (s SlashingNode) AfterStateBatchIndexed(root [32]byte) error {
 	if !found {
 		return errors.New("can not find the state batch with root: " + hexutil.Encode(root[:]))
 	}
-
-	log.Info("--------", "working", len(stateBatch.WorkingNodes), "no working", len(stateBatch.AbsentNodes))
 
 	// update signingInfo for absent nodes
 	for _, absentNode := range stateBatch.AbsentNodes {
