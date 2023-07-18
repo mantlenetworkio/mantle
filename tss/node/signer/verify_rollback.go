@@ -35,14 +35,18 @@ func (p *Processor) VerifyRollBack() {
 				if err != nil {
 					logger.Error().Msgf("failed to do verify for rollback, %s", err.Error())
 					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to do verify for rollback ", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				}
 				askResponse := common.AskResponse{
 					Result: ret,
 				}
 				RpcResponse = tdtypes.NewRPCSuccessResponse(resId, askResponse)
-				p.wsClient.SendMsg(RpcResponse)
+				if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+					logger.Error().Err(err).Msg("failed to send msg to manager")
+				}
 			}
 		}
 	}()
