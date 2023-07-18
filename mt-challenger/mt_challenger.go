@@ -32,7 +32,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 		}
 		challengerPrivKey, _, err := common2.ParseWalletPrivKeyAndContractAddr(
 			"MtChallenger", cfg.Mnemonic, cfg.SequencerHDPath,
-			cfg.PrivateKey, cfg.EigenContractAddress,
+			cfg.PrivateKey, cfg.EigenContractAddress, cfg.Passphrase,
 		)
 		if err != nil {
 			return err

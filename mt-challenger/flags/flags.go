@@ -54,6 +54,11 @@ var (
 			"mnemonic. The mnemonic flag must also be set.",
 		EnvVar: prefixEnvVar("SEQUENCER_HD_PATH"),
 	}
+	PassphraseFlag = cli.StringFlag{
+		Name:   "passphrase",
+		Usage:  "passphrase for the seed generation process to increase the seed's security",
+		EnvVar: prefixEnvVar("PASSPHRASE"),
+	}
 	EigenContractAddressFlag = cli.StringFlag{
 		Name:     "rollup-address",
 		Usage:    "Address of the datalayr repository contract",
