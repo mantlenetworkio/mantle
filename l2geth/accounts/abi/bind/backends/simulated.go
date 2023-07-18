@@ -38,6 +38,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/eth/filters"
 	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
 	"github.com/mantlenetworkio/mantle/l2geth/event"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"github.com/mantlenetworkio/mantle/l2geth/rpc"
 )
@@ -436,8 +437,12 @@ func (b *SimulatedBackend) callContract(ctx context.Context, call ethereum.CallM
 	// about the transaction and calling mechanisms.
 	vmenv := vm.NewEVM(evmContext, statedb, b.config, vm.Config{})
 	gaspool := new(core.GasPool).AddGas(math.MaxUint64)
-
-	return core.NewStateTransition(vmenv, msg, gaspool).TransitionDb()
+	stateTransition, err := core.NewStateTransition(vmenv, msg, gaspool)
+	if err != nil {
+		log.Error("new state transition fail", "err", err)
+		return nil, 0, false, err
+	}
+	return stateTransition.TransitionDb()
 }
 
 // SendTransaction updates the pending block to include the given transaction.
