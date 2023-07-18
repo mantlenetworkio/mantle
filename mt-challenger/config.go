@@ -3,10 +3,12 @@ package challenger
 import (
 	"time"
 
+	"github.com/urfave/cli"
+
 	"github.com/Layr-Labs/datalayr/common/logging"
+
 	"github.com/mantlenetworkio/mantle/mt-challenger/challenger"
 	"github.com/mantlenetworkio/mantle/mt-challenger/flags"
-	"github.com/urfave/cli"
 )
 
 type Config struct {
