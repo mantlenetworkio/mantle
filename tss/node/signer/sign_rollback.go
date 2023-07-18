@@ -35,21 +35,27 @@ func (p *Processor) SignRollBack() {
 				if err := json.Unmarshal(req.Params, &nodeSignRequest); err != nil {
 					logger.Error().Msg("failed to unmarshal roll back request")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				}
 				var requestBody tsscommon.RollBackRequest
 				if err := json.Unmarshal(rawMsg, &requestBody); err != nil {
 					logger.Error().Msg("failed to umarshal roll back params request body")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				}
 				if requestBody.StartBlock == nil ||
 					requestBody.StartBlock.Cmp(big.NewInt(0)) < 0 {
 					logger.Error().Msg("StartBlock must not be nil or negative")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", "StartBlock must not be nil or negative")
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				}
 				nodeSignRequest.RequestBody = requestBody
@@ -57,7 +63,9 @@ func (p *Processor) SignRollBack() {
 				if err != nil {
 					logger.Err(err).Msg("failed to encode roll back msg")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				}
 
