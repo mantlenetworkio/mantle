@@ -123,10 +123,18 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
   }
 
   protected async _start(): Promise<void> {
-    this.updateTransactionBatches(
-      this.options.startUpdateBatchIndex,
-      this.options.endUpdateBatchIndex
-    )
+    try {
+      await this.updateTransactionBatches(
+        this.options.startUpdateBatchIndex,
+        this.options.endUpdateBatchIndex
+      )
+    } catch (err) {
+      this.logger.error('Caught an unhandled error for update da tool', {
+        message: err.toString(),
+        stack: err.stack,
+        code: err.code,
+      })
+    }
     while (this.running) {
       try {
         const batchIndexRange = await this.getBatchIndexRange()
