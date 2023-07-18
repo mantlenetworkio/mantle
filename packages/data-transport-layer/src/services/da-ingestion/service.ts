@@ -66,7 +66,7 @@ const optionSettings = {
   db: {
     validate: validators.isLevelUP,
   },
-  pollingInterval: {
+  daPollingInterval: {
     default: 5000,
     validate: validators.isInteger,
   },
@@ -141,9 +141,10 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         if (batchIndexRange.start >= batchIndexRange.end) {
           continue
         }
-        this.logger.info('Synchronizing batch index range from(EigenLayer)', {
+        this.logger.info('Synchronizing batch index range from(MantleDA)', {
           start: batchIndexRange.start,
           end: batchIndexRange.end,
+          daPollingInterval: this.options.daPollingInterval,
         })
         await this.pareTransaction(batchIndexRange)
         await sleep(this.options.daPollingInterval)

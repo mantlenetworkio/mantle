@@ -21,7 +21,7 @@ import {
 } from '../../utils'
 import { EventHandlerSet } from '../../types'
 import { L1DataTransportServiceOptions } from '../main/service'
-import {handleEventsStateCachedBatchAppended} from "./handlers/state-cached-batch-appended";
+import { handleEventsStateCachedBatchAppended } from './handlers/state-cached-batch-appended'
 
 interface L1IngestionMetrics {
   highestSyncedL1Block: Gauge<string>
@@ -67,7 +67,7 @@ const optionSettings = {
     default: 35,
     validate: validators.isInteger,
   },
-  pollingInterval: {
+  l1PollingInterval: {
     default: 5000,
     validate: validators.isInteger,
   },
@@ -210,8 +210,8 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
           this.state.startingL1BlockNumber
         const currentL1Block = await this.state.l1RpcProvider.getBlockNumber()
         const fraudProofWindow = this.options.fraudProofWindow
-        await this.state.db.putHighestL1BlockNumber(currentL1Block);
-        await this.state.db.putFraudProofWindow(fraudProofWindow);
+        await this.state.db.putHighestL1BlockNumber(currentL1Block)
+        await this.state.db.putFraudProofWindow(fraudProofWindow)
 
         const targetL1Block = Math.min(
           highestSyncedL1Block + this.options.logsPerPollingInterval,
@@ -220,7 +220,6 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
 
         // We're already at the head, so no point in attempting to sync.
         if (highestSyncedL1Block === targetL1Block) {
-
           // only when we are at head, we needn't sync the block and find the time to scan the cached event
           // if confirmation equal 0, we needn't and willn't enter into this if-else
           // because if targetl1block = currentblock,
@@ -228,7 +227,10 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
           // noConfirmTargetL1Block = currentL1Block - 1
           // stateRootCachedHeight can't < noConfirmTargetL1Block
           if (targetL1Block === currentL1Block - this.options.confirmations) {
-            const stateRootCachedHeight = Math.max(await this.state.db.getStateRootCacheHeight(),targetL1Block);
+            const stateRootCachedHeight = Math.max(
+              await this.state.db.getStateRootCacheHeight(),
+              targetL1Block
+            )
             const noConfirmTargetL1Block = currentL1Block - 1
             if (stateRootCachedHeight < noConfirmTargetL1Block) {
               await this._syncEvents(
@@ -238,11 +240,18 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
                 noConfirmTargetL1Block,
                 handleEventsStateCachedBatchAppended
               )
-              await this.state.db.putStateRootCacheHeight(noConfirmTargetL1Block);
+              await this.state.db.putStateRootCacheHeight(
+                noConfirmTargetL1Block
+              )
             }
           }
-
-          await sleep(this.options.pollingInterval)
+          this.logger.info(
+            'Sync l1 block time duration from Layer 1 (Ethereum)',
+            {
+              l1PollingInterval: this.options.l1PollingInterval,
+            }
+          )
+          await sleep(this.options.l1PollingInterval)
           continue
         }
 
@@ -288,7 +297,7 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
           currentL1Block - highestSyncedL1Block <
           this.options.logsPerPollingInterval
         ) {
-          await sleep(this.options.pollingInterval)
+          await sleep(this.options.l1PollingInterval)
         }
       } catch (err) {
         if (err instanceof MissingElementError) {
@@ -352,7 +361,7 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
             stack: err.stack,
             code: err.code,
           })
-          await sleep(this.options.pollingInterval)
+          await sleep(this.options.l1PollingInterval)
         } else {
           throw err
         }
