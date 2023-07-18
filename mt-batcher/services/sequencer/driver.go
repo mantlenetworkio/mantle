@@ -74,6 +74,9 @@ type DriverConfig struct {
 	FeeSizeSec                string
 	FeePerBytePerTime         uint64
 	FeeModelEnable            bool
+	MinTimeoutRollupTxn       uint64
+	RollupTimeout             time.Duration
+	MinRollupTxn              uint64
 	Metrics                   metrics.MtBatchMetrics
 
 	EnableHsm     bool

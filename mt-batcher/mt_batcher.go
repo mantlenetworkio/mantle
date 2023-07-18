@@ -176,6 +176,9 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		HsmCreden:                 cfg.HsmCreden,
 		HsmFeeAPIName:             cfg.HsmFeeAPIName,
 		HsmFeeAddress:             cfg.HsmFeeAddress,
+		MinRollupTxn:              cfg.MinRollupTxn,
+		MinTimeoutRollupTxn:       cfg.MinTimeoutRollupTxn,
+		RollupTimeout:             cfg.RollupTimeout,
 	}
 	log.Info("hsm",
 		"enablehsm", driverConfig.EnableHsm, "hsmaddress", driverConfig.HsmAddress,
