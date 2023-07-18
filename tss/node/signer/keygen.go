@@ -54,14 +54,18 @@ func (p *Processor) Keygen() {
 				if err := json.Unmarshal(req.Params, &keyR); err != nil {
 					logger.Error().Msg("failed to unmarshal ask request")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					if err = p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				}
 				verifyResult := p.verifyThreshold(keyR)
 				if !verifyResult {
 					logger.Error().Msg("verify threshold in keygen request is false")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", "verify threshold in keygen request is false")
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				}
 
@@ -74,14 +78,18 @@ func (p *Processor) Keygen() {
 				if err != nil {
 					logger.Err(err).Msg("failed to keygen !")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 202, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 				} else {
 					if resp.Status == common.Success {
 						keygenResponse := tsscommon.KeygenResponse{
 							ClusterPublicKey: resp.PubKey,
 						}
 						RpcResponse := tdtypes.NewRPCSuccessResponse(tdtypes.JSONRPCStringID(resId), keygenResponse)
-						p.wsClient.SendMsg(RpcResponse)
+						if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+							logger.Error().Err(err).Msg("failed to send msg to manager")
+						}
 						logger.Info().Msgf("keygen start to set group publickey for l1 contract")
 						err := p.setGroupPublicKey(p.localPubKeyByte, resp.PubKeyByte)
 						if err != nil {
@@ -89,7 +97,9 @@ func (p *Processor) Keygen() {
 						}
 					} else {
 						RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 202, "failed", resp.FailReason)
-						p.wsClient.SendMsg(RpcResponse)
+						if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+							logger.Error().Err(err).Msg("failed to send msg to manager")
+						}
 					}
 				}
 

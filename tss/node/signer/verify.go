@@ -33,7 +33,9 @@ func (p *Processor) Verify() {
 				if err := json.Unmarshal(req.Params, &askRequest); err != nil {
 					logger.Error().Msg("failed to unmarshal ask request")
 					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to unmarshal ", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				}
 				if askRequest.StartBlock == nil ||
@@ -42,7 +44,9 @@ func (p *Processor) Verify() {
 					askRequest.OffsetStartsAtIndex.Cmp(big.NewInt(0)) < 0 {
 					logger.Error().Msg("StartBlock and OffsetStartsAtIndex must not be nil or negative")
 					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "invalid askRequest", "StartBlock and OffsetStartsAtIndex must not be nil or negative")
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					return
 				}
 				var resId = req.ID
@@ -51,7 +55,9 @@ func (p *Processor) Verify() {
 				if len(askRequest.StateRoots) == 0 {
 					logger.Error().Msg("stateroots size is empty")
 					RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "stateroots size is empty ", "do not need to sign")
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				} else {
 					wg := &sync.WaitGroup{}
@@ -61,14 +67,19 @@ func (p *Processor) Verify() {
 						if err != nil {
 							logger.Error().Msgf("failed to verify block %s", err.Error())
 							RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "get error when verify ", err.Error())
-							p.wsClient.SendMsg(RpcResponse)
+							if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+								logger.Error().Err(err).Msg("failed to send msg to manager")
+							}
+							continue
 						}
 					} else {
 						hash, err := signMsgToHash(askRequest)
 						if err != nil {
 							logger.Err(err).Msg("failed to conv msg to hash")
 							RpcResponse = tdtypes.NewRPCErrorResponse(req.ID, 201, "failed to conv msg to hash", err.Error())
-							p.wsClient.SendMsg(RpcResponse)
+							if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+								logger.Error().Err(err).Msg("failed to send msg to manager")
+							}
 							continue
 						} else {
 							hashStr := hexutil.Encode(hash)
@@ -79,7 +90,9 @@ func (p *Processor) Verify() {
 						Result: result,
 					}
 					RpcResponse = tdtypes.NewRPCSuccessResponse(resId, askResponse)
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 
 				}
 			}

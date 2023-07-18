@@ -28,7 +28,9 @@ func (p *Processor) VerifySlash() {
 				if err := json.Unmarshal(req.Params, &askRequest); err != nil {
 					logger.Error().Msg("failed to unmarshal ask request")
 					RpcResponse = tdtypes.NewRPCErrorResponse(resId, 201, "failed to unmarshal", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				}
 
