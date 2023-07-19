@@ -554,7 +554,7 @@ func (api *PrivateDebugAPI) TraceCall(ctx context.Context, args ethapi.CallArgs,
 	}
 
 	// Override the fields of specified contracts before execution.
-	if config != nil {
+	if config != nil && config.StateOverrides != nil {
 		for addr, account := range *config.StateOverrides {
 			// Override account nonce.
 			if account.Nonce != nil {
