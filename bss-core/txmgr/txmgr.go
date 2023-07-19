@@ -141,7 +141,9 @@ func (m *SimpleTxManager) Send(
 		tx, err := updateGasPrice(ctxc)
 		if err != nil {
 			if err == context.Canceled ||
-				strings.Contains(err.Error(), "context canceled") {
+				strings.Contains(err.Error(), "context canceled") ||
+				err.Error() == "execution reverted: EmptyAssertion" {
+				log.Warn(name+" unable to update txn gas price", "err", err)
 				return
 			}
 			log.Error(name+" unable to update txn gas price", "err", err)

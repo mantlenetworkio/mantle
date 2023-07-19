@@ -6,6 +6,9 @@ import { Lib_PredeployAddresses } from "../../libraries/constants/Lib_PredeployA
 
 /* Contract Imports */
 import { L2StandardERC20 } from "../../standards/L2StandardERC20.sol";
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 
 /**
  * @title BVM_MANTLE
@@ -22,11 +25,11 @@ contract BVM_MANTLE is L2StandardERC20 {
     {}
 
 
-    function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
+    function transfer(address recipient, uint256 amount) public virtual override(ERC20,IERC20) returns (bool) {
         revert("BVM_MANTLE: transfer is disabled pending further community discussion.");
     }
 
-    function approve(address spender, uint256 amount) public virtual override returns (bool) {
+    function approve(address spender, uint256 amount) public virtual override(ERC20,IERC20) returns (bool) {
         revert("BVM_MANTLE: approve is disabled pending further community discussion.");
     }
 
@@ -34,7 +37,7 @@ contract BVM_MANTLE is L2StandardERC20 {
         address sender,
         address recipient,
         uint256 amount
-    ) public virtual override returns (bool) {
+    ) public virtual override(ERC20,IERC20) returns (bool) {
         revert("BVM_MANTLE: transferFrom is disabled pending further community discussion.");
     }
 
