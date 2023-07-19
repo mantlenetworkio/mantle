@@ -102,6 +102,11 @@ var (
 		Usage:  "The HD path used to derive the wallets for the mt fee",
 		EnvVar: prefixEnvVar(envVarPrefix, "SEQUENCER_HD_PATH"),
 	}
+	PassphraseFlag = cli.StringFlag{
+		Name:   "passphrase",
+		Usage:  "passphrase for the seed generation process to increase the seed's security",
+		EnvVar: prefixEnvVar(envVarPrefix, "PASSPHRASE"),
+	}
 	EigenContractAddressFlag = cli.StringFlag{
 		Name:     "rollup-address",
 		Usage:    "Address of the datalayr repository contract",
@@ -374,6 +379,7 @@ var requiredFlags = []cli.Flag{
 	FeePrivateKeyFlag,
 	FeeMnemonicFlag,
 	FeeHDPathFlag,
+	PassphraseFlag,
 	SequencerHDPathFlag,
 	EigenContractAddressFlag,
 	EigenFeeContractAddressFlag,

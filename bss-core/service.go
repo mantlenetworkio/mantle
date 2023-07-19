@@ -106,7 +106,24 @@ func NewService(cfg ServiceConfig) *Service {
 	}
 }
 
+func (s *Service) InitService() error {
+	balance, err := s.cfg.L1Client.BalanceAt(
+		s.ctx, s.cfg.Driver.WalletAddr(), nil,
+	)
+	if err != nil {
+		log.Error(s.cfg.Driver.Name()+" unable to get current balance", "err", err)
+		return err
+	}
+	s.metrics.BalanceETH().Set(weiToEth64(balance))
+	return nil
+}
+
 func (s *Service) Start() error {
+	err := s.InitService()
+	if err != nil {
+		log.Error("Service init fail", "err", err)
+		return err
+	}
 	s.wg.Add(1)
 	go s.eventLoop()
 	return nil

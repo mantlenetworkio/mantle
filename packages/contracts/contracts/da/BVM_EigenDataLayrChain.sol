@@ -82,6 +82,11 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     }
 
     function initialize(address _sequencer, address _dataManageAddress, address _reSubmitterAddress, uint256 _block_stale_measure, uint256 _fraudProofPeriod, uint256 _l2SubmittedBlockNumber) public initializer {
+        require(_sequencer != address(0), "initialize: can't set zero address to _sequencer address");
+        require(_dataManageAddress != address(0), "initialize: can't set zero address to _dataManageAddress");
+        require(_reSubmitterAddress != address(0), "initialize: can't set zero address to _reSubmitterAddress");
+        require(_fraudProofPeriod >= 3600, "initialize: _fraudProofPeriod must be no less than one hour");
+        require(_fraudProofPeriod <= 25200, "initialize: _fraudProofPeriod must be no more than seven hour");
         __Ownable_init();
         sequencer = _sequencer;
         dataManageAddress = _dataManageAddress;
@@ -137,7 +142,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
         require(_address != address(0), "setFraudProofAddress: address is the zero address");
         fraudProofWhitelist[_address] = true;
     }
-    
+
     /**
     * @notice remove fraud proof address
     * @param _address for fraud proof

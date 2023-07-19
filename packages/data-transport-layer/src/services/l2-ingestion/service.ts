@@ -53,7 +53,7 @@ const optionSettings = {
   l2ChainId: {
     validate: validators.isInteger,
   },
-  pollingInterval: {
+  l2PollingInterval: {
     default: 5000,
     validate: validators.isInteger,
   },
@@ -186,7 +186,13 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
               targetL2Block,
             }
           )
-          await sleep(this.options.pollingInterval)
+          this.logger.info(
+            'Sync l2 transaction time duration from Layer 2 (Mantle)',
+            {
+              l2PollingInterval: this.options.l2PollingInterval,
+            }
+          )
+          await sleep(this.options.l2PollingInterval)
           continue
         }
 
@@ -212,7 +218,7 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
           currentL2Block - highestSyncedL2BlockNumber <
           this.options.transactionsPerPollingInterval
         ) {
-          await sleep(this.options.pollingInterval)
+          await sleep(this.options.l2PollingInterval)
         }
       } catch (err) {
         if (!this.running || this.options.dangerouslyCatchAllErrors) {
@@ -221,7 +227,7 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
             stack: err.stack,
             code: err.code,
           })
-          await sleep(this.options.pollingInterval)
+          await sleep(this.options.l2PollingInterval)
         } else {
           throw err
         }

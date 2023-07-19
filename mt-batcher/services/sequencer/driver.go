@@ -11,23 +11,25 @@ import (
 	"sync"
 	"time"
 
+	"github.com/pkg/errors"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
 	"github.com/Layr-Labs/datalayr/common/graphView"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceDL"
 	"github.com/Layr-Labs/datalayr/common/logging"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+
 	l2gethcommon "github.com/mantlenetworkio/mantle/l2geth/common"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
 	common3 "github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
-	"github.com/pkg/errors"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	rc "github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	common2 "github.com/mantlenetworkio/mantle/mt-batcher/common"
@@ -712,9 +714,54 @@ func (d *Driver) IsMaxPriorityFeePerGasNotFoundError(err error) bool {
 	)
 }
 
+func (d *Driver) ServiceInit() error {
+	rollupWalletBalance, err := d.Cfg.L1Client.BalanceAt(
+		d.Ctx, d.WalletAddr, nil,
+	)
+	if err != nil {
+		log.Warn("Get rollup wallet address balance fail", "err", err)
+		return err
+	}
+	d.Cfg.Metrics.MtBatchBalanceETH().Set(common4.WeiToEth64(rollupWalletBalance))
+
+	rollupNonce, err := d.Cfg.L1Client.NonceAt(
+		d.Ctx, d.WalletAddr, nil,
+	)
+	if err != nil {
+		log.Warn("Get rollup wallet address nonce fail", "err", err)
+		return err
+	}
+	d.Cfg.Metrics.MtBatchNonce().Set(float64(rollupNonce))
+
+	feeWalletBalance, err := d.Cfg.L1Client.BalanceAt(
+		d.Ctx, d.FeeWalletAddr, nil,
+	)
+	if err != nil {
+		log.Warn("Get rollup fee wallet address balance fail", "err", err)
+		return err
+	}
+	d.Cfg.Metrics.MtFeeBalanceETH().Set(common4.WeiToEth64(feeWalletBalance))
+
+	feeNonce, err := d.Cfg.L1Client.NonceAt(
+		d.Ctx, d.WalletAddr, nil,
+	)
+	if err != nil {
+		log.Warn("Get rollup fee wallet address nonce fail", "err", err)
+		return err
+	}
+	d.Cfg.Metrics.MtFeeNonce().Set(float64(feeNonce))
+	return nil
+}
+
 func (d *Driver) Start() error {
 	d.wg.Add(1)
 	go d.RollupMainWorker()
+	err := d.ServiceInit()
+	if err != nil {
+		log.Error("init metrics fail", "err", err)
+		return err
+	}
+	d.Cfg.Metrics.RollupTimeDuration().Set(float64(d.Cfg.MainWorkerPollInterval))
 	if d.Cfg.CheckerEnable {
 		batchIndex, ok := d.LevelDBStore.GetReRollupBatchIndex()
 		log.Info("get latest batch index", "batchIndex", batchIndex, "ok", ok)
@@ -722,10 +769,12 @@ func (d *Driver) Start() error {
 			d.LevelDBStore.SetReRollupBatchIndex(1)
 		}
 		d.wg.Add(1)
+		d.Cfg.Metrics.CheckerTimeDuration().Set(float64(d.Cfg.CheckerWorkerPollInterval))
 		go d.CheckConfirmedWorker()
 	}
 	if d.Cfg.FeeModelEnable {
 		d.wg.Add(1)
+		d.Cfg.Metrics.FeeTimeDuration().Set(float64(d.Cfg.FeeWorkerPollInterval))
 		go d.RollUpFeeWorker()
 	}
 	return nil

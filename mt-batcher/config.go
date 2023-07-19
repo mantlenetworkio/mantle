@@ -26,6 +26,7 @@ type Config struct {
 	FeePrivateKey             string
 	FeeMnemonic               string
 	FeeHDPath                 string
+	Passphrase                string
 	EigenContractAddress      string
 	EigenFeeContractAddress   string
 	DataStoreDuration         uint64
@@ -89,6 +90,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		FeePrivateKey:             ctx.GlobalString(flags.FeePrivateKeyFlag.Name),
 		FeeMnemonic:               ctx.GlobalString(flags.FeeMnemonicFlag.Name),
 		FeeHDPath:                 ctx.GlobalString(flags.FeeHDPathFlag.Name),
+		Passphrase:                ctx.GlobalString(flags.PassphraseFlag.Name),
 		EigenContractAddress:      ctx.GlobalString(flags.EigenContractAddressFlag.Name),
 		EigenFeeContractAddress:   ctx.GlobalString(flags.EigenFeeContractAddressFlag.Name),
 		DataStoreDuration:         ctx.GlobalUint64(flags.DataStoreDurationFlag.Name),

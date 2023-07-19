@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"fmt"
+
 	"github.com/go-resty/resty/v2"
 )
 

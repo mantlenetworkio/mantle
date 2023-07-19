@@ -59,7 +59,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 
 	sequencerPrivKey, _, err := common2.ParseWalletPrivKeyAndContractAddr(
 		"MtBatcher", cfg.Mnemonic, cfg.SequencerHDPath,
-		cfg.PrivateKey, cfg.EigenContractAddress,
+		cfg.PrivateKey, cfg.EigenContractAddress, cfg.Passphrase,
 	)
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 
 	mtFeePrivateKey, _, err := common2.ParseWalletPrivKeyAndContractAddr(
 		"MtBatcher", cfg.FeeMnemonic, cfg.FeeHDPath,
-		cfg.FeePrivateKey, cfg.EigenFeeContractAddress,
+		cfg.FeePrivateKey, cfg.EigenFeeContractAddress, cfg.Passphrase,
 	)
 	if err != nil {
 		return nil, err
