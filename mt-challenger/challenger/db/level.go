@@ -2,6 +2,7 @@ package db
 
 import (
 	"encoding/binary"
+
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
