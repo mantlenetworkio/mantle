@@ -76,7 +76,6 @@ type DriverConfig struct {
 	FeeModelEnable            bool
 	MinTimeoutRollupTxn       uint64
 	RollupTimeout             time.Duration
-	MinRollupTxn              uint64
 	Metrics                   metrics.MtBatchMetrics
 
 	EnableHsm     bool
@@ -765,45 +764,49 @@ func (d *Driver) RollupMainWorker() {
 				log.Error("MtBatcher Sequencer unable to get time interval for rollup", "err", err)
 				continue
 			}
-			if timeInterval.Seconds() < d.Cfg.RollupTimeout.Seconds() {
-				log.Info("MtBatcher rollup wait time less than minimum rollup waiting time in config", "RollupTimeout", d.Cfg.RollUpMinTxn, "waitedRollupTxs", waitedRollupTxs)
-				continue
-			}
+			if waitedRollupTxs.Cmp(big.NewInt(int64(d.Cfg.RollUpMinTxn))) >= 0 || (timeInterval.Seconds() >= d.Cfg.RollupTimeout.Seconds() && waitedRollupTxs.Cmp(big.NewInt(int64(d.Cfg.MinTimeoutRollupTxn))) >= 0) {
 
-			aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
-				d.Ctx, start, end,
-			)
-			if err != nil {
-				log.Error("MtBatcher eigenDa sequencer unable to craft batch tx", "err", err)
-				continue
-			}
-			d.Cfg.Metrics.NumTxnPerBatch().Observe(float64((new(big.Int).Sub(endL2BlockNumber, startL2BlockNumber)).Uint64()))
-			d.Cfg.Metrics.BatchSizeBytes().Observe(float64(len(aggregateTxData)))
-			params, receipt, err := d.DisperseStoreData(aggregateTxData, startL2BlockNumber, endL2BlockNumber, false)
-			if err != nil {
-				log.Error("MtBatcher disperse store data fail", "err", err)
-				continue
-			}
-			log.Info("MtBatcher disperse store data success", "txHash", receipt.TxHash.String())
-			d.Cfg.Metrics.L2StoredBlockNumber().Set(float64(start.Uint64()))
-			time.Sleep(10 * time.Second) // sleep for data into graph node
-			csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, 0, big.NewInt(0), false)
-			if err != nil {
-				log.Error("MtBatcher confirm store data fail", "err", err)
-				continue
-			}
-			log.Info("MtBatcher confirm store data success", "txHash", csdReceipt.TxHash.String())
-			d.Cfg.Metrics.L2ConfirmedBlockNumber().Set(float64(start.Uint64()))
-			if d.Cfg.FeeModelEnable {
-				daFee, _ := d.CalcUserFeeByRules(big.NewInt(int64(len(aggregateTxData))))
-				feePip := &FeePipline{
-					RollUpFee:        daFee,
-					EndL2BlockNumber: endL2BlockNumber,
+				aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
+					d.Ctx, start, end,
+				)
+				if err != nil {
+					log.Error("MtBatcher eigenDa sequencer unable to craft batch tx", "err", err)
+					continue
 				}
-				d.FeeCh <- feePip
+				d.Cfg.Metrics.NumTxnPerBatch().Observe(float64((new(big.Int).Sub(endL2BlockNumber, startL2BlockNumber)).Uint64()))
+				d.Cfg.Metrics.BatchSizeBytes().Observe(float64(len(aggregateTxData)))
+				params, receipt, err := d.DisperseStoreData(aggregateTxData, startL2BlockNumber, endL2BlockNumber, false)
+				if err != nil {
+					log.Error("MtBatcher disperse store data fail", "err", err)
+					continue
+				}
+				log.Info("MtBatcher disperse store data success", "txHash", receipt.TxHash.String())
+				d.Cfg.Metrics.L2StoredBlockNumber().Set(float64(start.Uint64()))
+				time.Sleep(10 * time.Second) // sleep for data into graph node
+				csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, 0, big.NewInt(0), false)
+				if err != nil {
+					log.Error("MtBatcher confirm store data fail", "err", err)
+					continue
+				}
+				log.Info("MtBatcher confirm store data success", "txHash", csdReceipt.TxHash.String())
+				d.Cfg.Metrics.L2ConfirmedBlockNumber().Set(float64(start.Uint64()))
+				if d.Cfg.FeeModelEnable {
+					daFee, _ := d.CalcUserFeeByRules(big.NewInt(int64(len(aggregateTxData))))
+					feePip := &FeePipline{
+						RollUpFee:        daFee,
+						EndL2BlockNumber: endL2BlockNumber,
+					}
+					d.FeeCh <- feePip
+				}
+				batchIndex, _ := d.Cfg.EigenDaContract.RollupBatchIndex(&bind.CallOpts{})
+				d.Cfg.Metrics.RollUpBatchIndex().Set(float64(batchIndex.Uint64()))
+			} else {
+				if timeInterval.Seconds() > d.Cfg.RollupTimeout.Seconds() {
+					log.Info("MtBatcher rollup wait time less than minimum rollup waiting time in config", "RollupTimeout", d.Cfg.RollUpMinTxn, "waitedRollupTxs", waitedRollupTxs)
+					continue
+				}
+
 			}
-			batchIndex, _ := d.Cfg.EigenDaContract.RollupBatchIndex(&bind.CallOpts{})
-			d.Cfg.Metrics.RollUpBatchIndex().Set(float64(batchIndex.Uint64()))
 		case err := <-d.Ctx.Done():
 			log.Error("MtBatcher eigenDa sequencer service shutting down", "err", err)
 			return
