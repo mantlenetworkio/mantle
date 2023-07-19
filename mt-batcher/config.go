@@ -69,7 +69,6 @@ type Config struct {
 	HsmFeeAddress             string
 	MinTimeoutRollupTxn       uint64
 	RollupTimeout             time.Duration
-	MinRollupTxn              uint64
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -133,7 +132,6 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		HsmFeeAddress:             ctx.GlobalString(flags.HsmFeeAddressFlag.Name),
 		MinTimeoutRollupTxn:       ctx.GlobalUint64(flags.MinTimeoutRollupTxnFlag.Name),
 		RollupTimeout:             ctx.GlobalDuration(flags.RollupTimeoutFlag.Name),
-		MinRollupTxn:              ctx.GlobalUint64(flags.MinRollupTxnFlag.Name),
 	}
 	return cfg, nil
 }

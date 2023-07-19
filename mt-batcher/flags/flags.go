@@ -341,13 +341,6 @@ var (
 		EnvVar: prefixEnvVar(envVarPrefix, "HSM_CREDEN"),
 	}
 
-	MinRollupTxnFlag = cli.Uint64Flag{
-		Name:   "min-rollup-txn",
-		Usage:  "Rollup transaction min transactions for mantle da",
-		Value:  1,
-		EnvVar: prefixEnvVar(envVarPrefix, "MIN_ROLLUP_TXN"),
-	}
-
 	MinTimeoutRollupTxnFlag = cli.Uint64Flag{
 		Name:   "min-rollup-txn-timeout",
 		Usage:  "Rollup transaction timeout transactions for mantle da",
@@ -386,7 +379,6 @@ var requiredFlags = []cli.Flag{
 	BlockOffsetFlag,
 	MinTimeoutRollupTxnFlag,
 	RollupTimeoutFlag,
-	MinRollupTxnFlag,
 	RollUpMinTxnFlag,
 	RollUpMaxSizeFlag,
 	FeeSizeSecFlag,
