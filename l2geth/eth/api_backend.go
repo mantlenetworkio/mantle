@@ -22,11 +22,10 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/mantlenetworkio/mantle/l2geth/consensus"
-
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/common/math"
+	"github.com/mantlenetworkio/mantle/l2geth/consensus"
 	"github.com/mantlenetworkio/mantle/l2geth/core"
 	"github.com/mantlenetworkio/mantle/l2geth/core/bloombits"
 	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
