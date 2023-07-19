@@ -10,4 +10,6 @@ type ChallengerMetrics interface {
 	ReRollupBatchIndex() prometheus.Gauge
 
 	CheckBatchIndex() prometheus.Gauge
+
+	DataStoreId() prometheus.Gauge
 }

@@ -3,9 +3,10 @@ package client
 import (
 	"errors"
 	"fmt"
+	"strconv"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup"
-	"strconv"
 )
 
 var errDtlHTTPError = errors.New("dtl http error")
@@ -50,7 +51,7 @@ func (c *Client) GetEnqueueByIndex(index uint64) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("cannot fetch enqueue %d", index)
 	}
-	if enqueue == nil {
+	if enqueue == nil || enqueue.Origin == nil {
 		return "", fmt.Errorf("cannot deserialize enqueue %d", index)
 	}
 	return enqueue.Origin.String(), nil
