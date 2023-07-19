@@ -1,0 +1,36 @@
+3b332229 - R4R: fix secure mtl33 (#1292) (29 hours ago) <HaoyangLiu>
+df8e28f0 - add tss GetTssInactiveGroupInfo error handle (7 days ago) <sha3n>
+0b7733c1 - update change log (#1277) (7 days ago) <Sha3n>
+1d612d4b - check nonce overflow (4 days ago) <liuhaoyang>
+9ede15ca - [R4R] - {develop}: fix sigma MNT-35 (#1257) (11 days ago) <I know>
+7c77578f - [R4R] - {develop}: delete outdated description (#1251) (12 days ago) <HaoyangLiu>
+455094ef - [R4R] - {develop}: Audit fix tss security (#1232) (2 weeks ago) <I know>
+8b03b1bc - [R4R] - {develop}: fix consensys audit issue: cs-6.18 (#1243) (2 weeks ago) <HaoyangLiu>
+76b6043d - [R4R]: Auditfix/tss ws auth (#1234) (2 weeks ago) <Shijiang Guo>
+bb394d0c - [l2geth]bugfix: transaction receipt unmarshal (#1235) (2 weeks ago) <Tri-stone>
+b991dd9d - [R4R] - {packages & l2geth & gasoracle}: feat, add some small fixes (#1228) (2 weeks ago) <Tri-stone>
+87b659da - [R4R]:fix lock threshold validation (#1227) (2 weeks ago) <I know>
+d8e5c590 - R4R: fix jwt secret key config issue (#1226) (2 weeks ago) <Raymond>
+93fa77ff - fix issue about read jwt secret key failure in config (2 weeks ago) <liuhaoyang>
+fc405ded - [R4R] - {develop}: fix consensys audit issue: cs-6.35 (#1217) (2 weeks ago) <Raymond>
+c34cc6f2 - R4R: fix compile error (#1221) (2 weeks ago) <HaoyangLiu>
+c558c8fe - [R4R] - {develop}: remove unused struct for mnt-37  (#1202) (2 weeks ago) <ethan>
+29443645 - [R4R] - {develop}: Simplify error formatting (#1193) (2 weeks ago) <ethan>
+2780de70 - [R4R] - {develop}: fix consensys audit issue: cs-6.30 (#1219) (2 weeks ago) <HaoyangLiu>
+2c6c85f6 - [R4R] - {develop}: fix consensys audit issue: cs-6.42 (#1212) (2 weeks ago) <HaoyangLiu>
+56a1d4e9 - [R4R] - {develop}: fix consensys audit issue: cs-6.40 (#1210) (2 weeks ago) <HaoyangLiu>
+630afaac - [R4R] - {develop}: fix consensys audit issue: cs-6.37 (#1207) (2 weeks ago) <HaoyangLiu>
+548f9b2f - [R4R] - {develop}: fix consensys audit issue: cs-6.14 (#1204) (2 weeks ago) <HaoyangLiu>
+cff85def - [R4R] - {develop}:add default msg handler for function `ProcessOneMessage`:cs-6.26 (#1198) (2 weeks ago) <ethan>
+750da92d - [R4R] - {develop}: fix consensys audit issue: cs-6.34 (#1194) (2 weeks ago) <HaoyangLiu>
+cf0f805f - [R4R] - {develop}: fix consensys audit issue: cs-6.22 (#1191) (2 weeks ago) <ethan>
+d950bbd0 - [R4R] - {develop}: fix consensys audit issue: cs-6.33 (#1188) (2 weeks ago) <HaoyangLiu>
+1e75491e - [R4R] - {develop}: fix consensys minor audit issue: cs-6.43, cs-6.44 and cs-6.45 (#1183) (2 weeks ago) <HaoyangLiu>
+6271b15a - [R4R] - {develop}:Improper Parameter Sanitization in Setter Functions and Unsafe Defaul… (#1180) (2 weeks ago) <Shijiang Guo>
+3ed29a02 - [R4R] - {develop}: Remove unavailableFraudProofAddress function (#1176) (2 weeks ago) <Shijiang Guo>
+71b867dc - [R4R] - {develop}: add event for resetRollupBatchData (#1174) (2 weeks ago) <Shijiang Guo>
+898fb7be - [R4R] - {develop}: Remove unuseless code in mt-batcher (#1172) (2 weeks ago) <Shijiang Guo>
+3e872ab5 - log error message for unrecognized error code (2 weeks ago) <liuhaoyang>
+305b5cab - (origin/lhy/develop-test) [R4R] - {develop}: add balance check before change the deposit status. (#1168) (3 weeks ago) <ethan>
+7da9aade - [R4R] - {develop}:  [CS][5.12]: BVM_EigenDataLayrChain - Missing Gap Variables Minor Description (#1153) (3 weeks ago) <aodhgan>
+7b9b2387 - [deployer]feat: modify tss staking deploy config (#1161) (3 weeks ago) <Tri-stone>
