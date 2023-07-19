@@ -25,11 +25,11 @@ contract BVM_MANTLE is L2StandardERC20 {
     {}
 
 
-    function transfer(address recipient, uint256 amount) public virtual override(ERC20,IERC20) returns (bool) {
+    function transfer(address recipient, uint256 amount) public virtual override(IERC20) returns (bool) {
         revert("BVM_MANTLE: transfer is disabled pending further community discussion.");
     }
 
-    function approve(address spender, uint256 amount) public virtual override(ERC20,IERC20) returns (bool) {
+    function approve(address spender, uint256 amount) public virtual override(IERC20) returns (bool) {
         revert("BVM_MANTLE: approve is disabled pending further community discussion.");
     }
 
@@ -37,7 +37,7 @@ contract BVM_MANTLE is L2StandardERC20 {
         address sender,
         address recipient,
         uint256 amount
-    ) public virtual override(ERC20,IERC20) returns (bool) {
+    ) public virtual override(IERC20) returns (bool) {
         revert("BVM_MANTLE: transferFrom is disabled pending further community discussion.");
     }
 
