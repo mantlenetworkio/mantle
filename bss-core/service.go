@@ -203,8 +203,13 @@ func (s *Service) eventLoop() {
 				s.ctx, start, end, nonce,
 			)
 			if err != nil {
-				log.Error(name+" unable to craft batch tx",
-					"err", err)
+				if err.Error() == "malformed batch" {
+					log.Warn(name+" unable to craft batch tx",
+						"err", err)
+				} else {
+					log.Error(name+" unable to craft batch tx",
+						"err", err)
+				}
 				continue
 			} else if tx == nil {
 				continue
