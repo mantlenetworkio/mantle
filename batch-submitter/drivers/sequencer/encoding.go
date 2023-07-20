@@ -188,7 +188,7 @@ type AppendSequencerBatchParams struct {
 	Txs []*CachedTx
 }
 
-// Write encodes the AppendSequencerBatchParams using the following format:
+// WriteNoTxn encodes the AppendSequencerBatchParams using the following format:
 //   - should_start_at_element:        5 bytes
 //   - total_elements_to_append:       3 bytes
 //   - num_contexts:                   3 bytes
@@ -210,68 +210,6 @@ type AppendSequencerBatchParams struct {
 //
 // Note that writing to a bytes.Buffer cannot
 // error, so errors are ignored here
-func (p *AppendSequencerBatchParams) Write(
-	w *bytes.Buffer,
-	batchType BatchType,
-) error {
-
-	_ = writeUint64(w, p.ShouldStartAtElement, 5)
-	_ = writeUint64(w, p.TotalElementsToAppend, 3)
-
-	// There must be contexts if there are transactions
-	if len(p.Contexts) == 0 && len(p.Txs) != 0 {
-		return ErrMalformedBatch
-	}
-
-	// There must be transactions if there are contexts
-	if len(p.Txs) == 0 && len(p.Contexts) != 0 {
-		return ErrMalformedBatch
-	}
-
-	// copy the contexts as to not malleate the struct
-	// when it is a typed batch
-	contexts := make([]BatchContext, 0, len(p.Contexts)+1)
-	// Add the marker context, if any, for non-legacy encodings.
-	markerContext := batchType.MarkerContext()
-	if markerContext != nil {
-		contexts = append(contexts, *markerContext)
-	}
-	contexts = append(contexts, p.Contexts...)
-
-	// Write number of contexts followed by each fixed-size BatchContext.
-	_ = writeUint64(w, uint64(len(contexts)), 3)
-	for _, context := range contexts {
-		context.Write(w)
-	}
-
-	switch batchType {
-	case BatchTypeLegacy:
-		// Write each length-prefixed tx.
-		for _, tx := range p.Txs {
-			_ = writeUint64(w, uint64(tx.Size()), TxLenSize)
-			_, _ = w.Write(tx.RawTx()) // can't fail for bytes.Buffer
-		}
-	case BatchTypeZlib:
-		zw := zlib.NewWriter(w)
-		for _, tx := range p.Txs {
-			if err := writeUint64(zw, uint64(tx.Size()), TxLenSize); err != nil {
-				return err
-			}
-			if _, err := zw.Write(tx.RawTx()); err != nil {
-				return err
-			}
-		}
-		if err := zw.Close(); err != nil {
-			return err
-		}
-
-	default:
-		return fmt.Errorf("Unknown batch type: %s", batchType)
-	}
-
-	return nil
-}
-
 func (p *AppendSequencerBatchParams) WriteNoTxn(
 	w *bytes.Buffer,
 	batchType BatchType,
@@ -315,14 +253,8 @@ func (p *AppendSequencerBatchParams) Serialize(
 	upgradeBlock *big.Int,
 ) ([]byte, error) {
 	var buf bytes.Buffer
-	if l2BlockNumber.Cmp(upgradeBlock) > 0 {
-		if err := p.WriteNoTxn(&buf, batchType); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := p.Write(&buf, batchType); err != nil {
-			return nil, err
-		}
+	if err := p.WriteNoTxn(&buf, batchType); err != nil {
+		return nil, err
 	}
 	return buf.Bytes(), nil
 }
