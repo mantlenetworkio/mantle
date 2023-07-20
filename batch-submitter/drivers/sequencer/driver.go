@@ -208,9 +208,16 @@ func (d *Driver) GetBatchBlockRange(
 			return nil, nil, err
 		}
 	}
-	if start.Cmp(end) > 0 {
+	l2Txn := big.NewInt(0).Sub(end, start)
+	if l2Txn.Cmp(big.NewInt(1)) < 0 {
 		return nil, nil, fmt.Errorf("invalid range, "+
 			"end(%v) < start(%v)", end, start)
+	}
+	if l2Txn.Cmp(big.NewInt(int64(d.cfg.MinRollupTxn))) < 0 {
+		return start, start, nil
+	}
+	if l2Txn.Cmp(big.NewInt(int64(d.cfg.MaxRollupTxn))) > 0 {
+		end = big.NewInt(0).Add(start, big.NewInt(int64(d.cfg.MaxRollupTxn)))
 	}
 	return start, end, nil
 }
