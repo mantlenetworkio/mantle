@@ -232,6 +232,10 @@ type Config struct {
 
 	// batch submitter rollback
 	AllowL2AutoRollback bool
+
+	MaxRollupTxn uint64
+
+	MinRollupTxn uint64
 }
 
 // NewConfig parses the Config from the provided flags or environment variables.
@@ -293,6 +297,8 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		ProposerHsmCreden:   ctx.GlobalString(flags.ProposerHsmCreden.Name),
 		RollupClientHttp:    ctx.GlobalString(flags.RollupClientHttpFlag.Name),
 		AllowL2AutoRollback: ctx.GlobalBool(flags.AllowL2AutoRollback.Name),
+		MaxRollupTxn:        ctx.GlobalUint64(flags.MaxRollupTxnFlag.Name),
+		MinRollupTxn:        ctx.GlobalUint64(flags.MinRollupTxnFlag.Name),
 	}
 
 	err := ValidateConfig(&cfg)

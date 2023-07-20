@@ -343,6 +343,20 @@ var (
 		Required: false,
 		EnvVar:   "ROLLUP_ALLOW_L2_AUTO_ROLLBACK",
 	}
+
+	MinRollupTxnFlag = cli.Uint64Flag{
+		Name:     "min-rollup-txn",
+		Usage:    "Minimum number of transaction from l2geth which is used to submit to rollup",
+		Required: true,
+		EnvVar:   prefixEnvVar("MIN_ROLLUP_TXN"),
+	}
+
+	MaxRollupTxnFlag = cli.Uint64Flag{
+		Name:     "max-rollup-txn",
+		Usage:    "Maximum number of transaction from l2geth which is used to submit to rollup",
+		Required: true,
+		EnvVar:   prefixEnvVar("MAX_ROLLUP_TXN"),
+	}
 )
 
 var requiredFlags = []cli.Flag{
@@ -372,6 +386,8 @@ var requiredFlags = []cli.Flag{
 	RunStateBatchSubmitterFlag,
 	SafeMinimumEtherBalanceFlag,
 	ClearPendingTxsFlag,
+	MaxRollupTxnFlag,
+	MinRollupTxnFlag,
 }
 
 var optionalFlags = []cli.Flag{

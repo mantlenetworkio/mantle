@@ -52,6 +52,8 @@ type Config struct {
 	SequencerHsmAPIName   string
 	SequencerHsmCreden    string
 	BatchType             BatchType
+	MaxRollupTxn          uint64
+	MinRollupTxn          uint64
 }
 
 type Driver struct {

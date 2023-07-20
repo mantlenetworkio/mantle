@@ -147,6 +147,8 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 				SequencerHsmAPIName:   cfg.SequencerHsmAPIName,
 				SequencerHsmCreden:    cfg.SequencerHsmCreden,
 				BatchType:             sequencer.BatchTypeFromString(cfg.SequencerBatchType),
+				MaxRollupTxn:          cfg.MaxRollupTxn,
+				MinRollupTxn:          cfg.MinRollupTxn,
 			})
 			if err != nil {
 				return err
