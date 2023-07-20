@@ -279,15 +279,15 @@ func (p *AppendSequencerBatchParams) WriteNoTxn(
 	_ = writeUint64(w, p.ShouldStartAtElement, 5)
 	_ = writeUint64(w, p.TotalElementsToAppend, 3)
 
-	// There must be contexts if there are transactions
-	if len(p.Contexts) == 0 && len(p.Txs) != 0 {
-		return ErrMalformedBatch
-	}
-
-	// There must be transactions if there are contexts
-	if len(p.Txs) == 0 && len(p.Contexts) != 0 {
-		return ErrMalformedBatch
-	}
+	//// There must be contexts if there are transactions
+	//if len(p.Contexts) == 0 && len(p.Txs) != 0 {
+	//	return ErrMalformedBatch
+	//}
+	//
+	//// There must be transactions if there are contexts
+	//if len(p.Txs) == 0 && len(p.Contexts) != 0 {
+	//	return ErrMalformedBatch
+	//}
 
 	// copy the contexts as to not malleate the struct
 	// when it is a typed batch
