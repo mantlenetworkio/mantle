@@ -1,11 +1,14 @@
 package challenger
 
 import (
+	"time"
+
+	"github.com/urfave/cli"
+
 	"github.com/Layr-Labs/datalayr/common/logging"
+
 	"github.com/mantlenetworkio/mantle/mt-challenger/challenger"
 	"github.com/mantlenetworkio/mantle/mt-challenger/flags"
-	"github.com/urfave/cli"
-	"time"
 )
 
 type Config struct {
@@ -24,6 +27,7 @@ type Config struct {
 	PollInterval              time.Duration
 	CompensatePollInterval    time.Duration
 	DbPath                    string
+	Passphrase                string
 	CheckerBatchIndex         uint64
 	UpdateBatchIndexStep      uint64
 	DisableHTTP2              bool
@@ -52,6 +56,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		L2MtlRpc:             ctx.GlobalString(flags.L2MtlRpcFlag.Name),
 		PrivateKey:           ctx.GlobalString(flags.PrivateKeyFlag.Name),
 		Mnemonic:             ctx.GlobalString(flags.MnemonicFlag.Name),
+		Passphrase:           ctx.GlobalString(flags.PassphraseFlag.Name),
 		SequencerHDPath:      ctx.GlobalString(flags.SequencerHDPathFlag.Name),
 		EigenContractAddress: ctx.GlobalString(flags.EigenContractAddressFlag.Name),
 		RetrieverSocket:      ctx.GlobalString(flags.RetrieverSocketFlag.Name),

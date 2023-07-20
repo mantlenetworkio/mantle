@@ -1,8 +1,9 @@
 package flags
 
 import (
-	"github.com/Layr-Labs/datalayr/common/logging"
 	"github.com/urfave/cli"
+	
+	"github.com/Layr-Labs/datalayr/common/logging"
 )
 
 const envVarPrefix = "DA_CHALLENGER"
@@ -53,6 +54,11 @@ var (
 		Usage: "The HD path used to derive the sequencer wallet from the " +
 			"mnemonic. The mnemonic flag must also be set.",
 		EnvVar: prefixEnvVar("SEQUENCER_HD_PATH"),
+	}
+	PassphraseFlag = cli.StringFlag{
+		Name:   "passphrase",
+		Usage:  "passphrase for the seed generation process to increase the seed's security",
+		EnvVar: prefixEnvVar("PASSPHRASE"),
 	}
 	EigenContractAddressFlag = cli.StringFlag{
 		Name:     "rollup-address",

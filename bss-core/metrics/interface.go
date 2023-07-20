@@ -38,4 +38,7 @@ type Metrics interface {
 
 	// TssRollbackSignal tracks the signal due to state fork between sequencer and varifier
 	TssRollbackSignal() prometheus.Gauge
+
+	// SccRollupTimeDuration state root rollup time duration
+	SccRollupTimeDuration() prometheus.Gauge
 }

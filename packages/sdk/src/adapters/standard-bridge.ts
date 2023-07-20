@@ -23,7 +23,7 @@ import {
   TokenBridgeMessage,
   MessageDirection,
 } from '../interfaces'
-import { toAddress } from '../utils'
+import { toAddress, L1_MNT_ADDRESS } from '../utils'
 
 /**
  * Bridge adapter for any token bridge that uses the standard token bridge interface.
@@ -173,10 +173,9 @@ export class StandardBridgeAdapter implements IBridgeAdapter {
         return false
       }
 
-      // Make sure the L1 token matches.
+      // Make sure the L1 token matches the L1_MNT_ADDRESS associated with this l2ChainId
       const remoteL1Token = await contract.l1Token()
-
-      if (hexStringEquals(remoteL1Token, toAddress('0x3c3a81e81dc49A522A592e7622A7E711c06bf354'))){
+      if (hexStringEquals(remoteL1Token, toAddress(L1_MNT_ADDRESS[this.messenger.l2ChainId]))){
         return true
       }
 

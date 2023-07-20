@@ -26,4 +26,10 @@ type MtBatchMetrics interface {
 	MtBatchNonce() prometheus.Gauge
 
 	NumEigenNode() prometheus.Gauge
+
+	RollupTimeDuration() prometheus.Gauge
+
+	FeeTimeDuration() prometheus.Gauge
+
+	CheckerTimeDuration() prometheus.Gauge
 }

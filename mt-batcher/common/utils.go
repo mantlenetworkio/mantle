@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
-	"github.com/Layr-Labs/datalayr/common/header"
 	"math/big"
 	"os"
+
+	"github.com/Layr-Labs/datalayr/common/header"
 )
 
 func CreateUploadHeader(params StoreParams) ([]byte, error) {
