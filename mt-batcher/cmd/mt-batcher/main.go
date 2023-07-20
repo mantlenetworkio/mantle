@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
+	"os"
+
+	"github.com/urfave/cli"
+
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
+
 	mt_batcher "github.com/mantlenetworkio/mantle/mt-batcher"
 	"github.com/mantlenetworkio/mantle/mt-batcher/flags"
-	"github.com/urfave/cli"
-	"os"
 )
 
 var (

@@ -6,12 +6,23 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
+	"math/big"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/pkg/errors"
+	"github.com/shurcooL/graphql"
+	"google.golang.org/grpc"
+
 	datalayr "github.com/Layr-Labs/datalayr/common/contracts"
 	gkzg "github.com/Layr-Labs/datalayr/common/crypto/go-kzg-bn254"
 	"github.com/Layr-Labs/datalayr/common/graphView"
 	"github.com/Layr-Labs/datalayr/common/header"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceRetrieverServer"
 	"github.com/Layr-Labs/datalayr/common/logging"
+
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
@@ -20,6 +31,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
+
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
@@ -32,14 +44,6 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-challenger/challenger/client"
 	"github.com/mantlenetworkio/mantle/mt-challenger/challenger/db"
 	"github.com/mantlenetworkio/mantle/mt-challenger/metrics"
-	"github.com/pkg/errors"
-	"github.com/shurcooL/graphql"
-	"google.golang.org/grpc"
-	"math/big"
-	"strconv"
-	"strings"
-	"sync"
-	"time"
 )
 
 const fraudString = "2d5f2860204f2060295f2d202d5f2860206f2060295f2d202d5f286020512060295f2d2042495444414f204a5553542052454b5420594f55207c5f2860204f2060295f7c202d207c5f2860206f2060295f7c202d207c5f286020512060295f7c"
@@ -476,7 +480,7 @@ func (c *Challenger) postFraudProof(store *graphView.DataStore, fraudProof *Frau
 	return tx, nil
 }
 
-func (c *Challenger) makReRollupBatchTx(ctx context.Context, batchIndex *big.Int) (*types.Transaction, error) {
+func (c *Challenger) makeReRollupBatchTx(ctx context.Context, batchIndex *big.Int) (*types.Transaction, error) {
 	balance, err := c.Cfg.L1Client.BalanceAt(
 		c.Ctx, ethc.Address(c.WalletAddr), nil,
 	)
@@ -526,7 +530,7 @@ func (c *Challenger) makReRollupBatchTx(ctx context.Context, batchIndex *big.Int
 }
 
 func (c *Challenger) submitReRollupBatchIndex(batchIndex *big.Int) (*types.Transaction, error) {
-	tx, err := c.makReRollupBatchTx(c.Ctx, batchIndex)
+	tx, err := c.makeReRollupBatchTx(c.Ctx, batchIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -553,16 +557,38 @@ func (c *Challenger) GetEigenLayerNode() (int, error) {
 	return len(operators), nil
 }
 
-func (c *Challenger) ServiceInit() {
+func (c *Challenger) ServiceInit() error {
 	nodeNum, err := c.GetEigenLayerNode()
 	if err != nil {
 		log.Error("MtChallenger get batch index fail", "err", err)
+		return err
 	}
 	totalDaNode = nodeNum
+	walletBalance, err := c.Cfg.L1Client.BalanceAt(
+		c.Ctx, c.WalletAddr, nil,
+	)
+	if err != nil {
+		log.Warn("Get rollup wallet address balance fail", "err", err)
+		return err
+	}
+	c.Cfg.Metrics.BalanceETH().Set(common4.WeiToEth64(walletBalance))
+	nonce, err := c.Cfg.L1Client.NonceAt(
+		c.Ctx, c.WalletAddr, nil,
+	)
+	if err != nil {
+		log.Warn("Get rollup wallet address nonce fail", "err", err)
+		return err
+	}
+	c.Cfg.Metrics.NonceETH().Set(float64(nonce))
+	return nil
 }
 
 func (c *Challenger) Start() error {
-	c.ServiceInit()
+	err := c.ServiceInit()
+	if err != nil {
+		log.Error("service init error", "err", err)
+		return err
+	}
 	if c.Cfg.ChallengerCheckEnable {
 		c.wg.Add(1)
 		go c.eventLoop()

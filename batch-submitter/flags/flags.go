@@ -49,7 +49,7 @@ var (
 	JwtSecret = cli.StringFlag{
 		Name:     "jwt-secret",
 		Usage:    "jet access secret",
-		Required: true,
+		Required: false,
 		EnvVar:   "JWT_SECRET",
 	}
 	DaAddressFlag = cli.StringFlag{

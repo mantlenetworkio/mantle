@@ -82,6 +82,11 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     }
 
     function initialize(address _sequencer, address _dataManageAddress, address _reSubmitterAddress, uint256 _block_stale_measure, uint256 _fraudProofPeriod, uint256 _l2SubmittedBlockNumber) public initializer {
+        require(_sequencer != address(0), "initialize: can't set zero address to _sequencer address");
+        require(_dataManageAddress != address(0), "initialize: can't set zero address to _dataManageAddress");
+        require(_reSubmitterAddress != address(0), "initialize: can't set zero address to _reSubmitterAddress");
+        require(_fraudProofPeriod >= 3600, "initialize: _fraudProofPeriod must be no less than one hour");
+        require(_fraudProofPeriod <= 25200, "initialize: _fraudProofPeriod must be no more than seven hour");
         __Ownable_init();
         sequencer = _sequencer;
         dataManageAddress = _dataManageAddress;
@@ -137,7 +142,7 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
         require(_address != address(0), "setFraudProofAddress: address is the zero address");
         fraudProofWhitelist[_address] = true;
     }
-    
+
     /**
     * @notice remove fraud proof address
     * @param _address for fraud proof
@@ -271,7 +276,6 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
         uint32 totalOperatorsIndex,
         bool   isReRollup
     ) external onlySequencer {
-        require(startL2Block == l2ConfirmedBlockNumber, "storeData: startL2Block must equal last l2ConfirmedBlockNumber");
         require(endL2Block > startL2Block, "storeData: endL2Block must more than startL2Block");
         require(block.number - blockNumber < BLOCK_STALE_MEASURE, "storeData: stakes taken from too long ago");
         uint32 dataStoreId = IDataLayrServiceManager(dataManageAddress).taskNumber();
@@ -312,7 +316,6 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
         uint256 reConfirmedBatchIndex,
         bool isReRollup
     ) external onlySequencer {
-        require(startL2Block == l2ConfirmedBlockNumber, "confirmData: startL2Block must equal last l2ConfirmedBlockNumber");
         require(endL2Block > startL2Block, "confirmData: endL2Block must more than startL2Block");
         BatchRollupBlock memory batchRollupBlock = dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId];
         require(batchRollupBlock.startL2BlockNumber == startL2Block &&

@@ -34,7 +34,7 @@
 
 ## Introduction
 
-Mantle is a suite of Ethereum scaling solutions including an optimistic rollup and ZK rollup built using an iterative modular chain approach, and supported by BitDAO’s native token $BIT.
+Mantle is a suite of Ethereum scaling solutions including an optimistic rollup and ZK rollup built using an iterative modular chain approach, and supported by Mantle’s native token $MNT.
 
 It is designed to bolster support for hyper-scaled throughput decentralized applications (dApps) — from derivatives decentralized exchanges (DEXs), to gaming, to operations of decentralized autonomous organizations (DAOs).
 
@@ -69,28 +69,7 @@ Different parts of the Mantle tech stack are specialized to tackle specific issu
 
 </br>
 
-### Set up Local Environment
-
-Setting up local L1 and L2 nodes may be particularly useful for testing out Mantle SDK methods.
-
-1. Make sure your system has the following tools set up and running.
-   - [Git](https://git-scm.com/downloads) - to fetch node software
-   - [Node.js](https://nodejs.org/en/) - to run node instances
-   - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/) - for dependency management
-
-2. Run L1 and L2 node instances using the following commands.
-
-```sh
- git clone https://github.com/mantlenetworkio/mantle.git
- cd mantle/ops
- make up
- # check status
- make ps
-```
-
-Find more details on setting up your local development environment [here in this README.md](ops/README.local.md).
-
-dApps need to connect to nodes for fetching block data and sending transactions to the Mantle network. Our JSON-RPC API supports **HTTPS** and **WebSocket** connections.
+DApps need to connect to nodes for fetching block data and sending transactions to the Mantle network. Our JSON-RPC API supports **HTTPS** and **WebSocket** connections.
 
 |  Service  | URL                             |
 | :-------: | ------------------------------- |
@@ -117,7 +96,7 @@ npm init --yes
 yarn add -D @mantleio/sdk
 ```
 
-3. Create a `.js` script and get started by making a request, for instance, to fetch the current L1 gas price.
+3. Create a `<filename>.js` script and get started by making a request, for instance, to fetch the current L1 gas price.
 
 ```js
 const ethers = require("ethers")
@@ -138,31 +117,6 @@ main();
 
 The [SDK docs](https://sdk.mantle.xyz/index.html) provide complete reference of all the methods available as part of the Mantle SDK to facilitate interaction between applications and Mantle network.
 
-</br>
-
-### Using the Node RPC API
-
-You can invoke the API endpoints by sending `curl` requests as well. Let's look at an example of a simple curl request being sent to invoke the `rollup_gasPrices` method that returns a JSON object containing the L1 and L2 gas prices used by a [Sequencer](https://docs.mantle.xyz/for-validators/network-roles#sequencers) to calculate the transaction gas fees.
-
-> Want to get a better understanding of how gas fees are calculated on Mantle? Check out [the section on fee basics](https://docs.mantle.xyz/for-validators/transaction-fees-on-l2) in the tech docs.
-
-```sh
-curl -X POST --data '{"jsonrpc":"2.0","method":"rollup_gasPrices","params":[],"id":1}' <node url>
-```
-The response is of the form:
-
-```json
-{
-  "jsonrpc":"2.0",
-  "id":1,
-  "result":{
-    "l1GasPrice":"0x254aa66732",
-    "l2GasPrice":"0xf3792"
-  }
-}
-```
-
-> Check out [DEVELOP.md](./DEVELOP.md) for more detailed information on getting started with developing your apps using Mantle.
 
 </br>
 
@@ -195,11 +149,9 @@ root
 ├── <a href="./bss-core">bss-core</a>: Core batch-submitter logic and utilities
 ├── <a href="./gas-oracle">gas-oracle</a>: Service for updating L1 gas prices on L2
 ├── <a href="./integration-tests">integration-tests</a>: Various integration tests for the Mantle network
-├── <a href="./l2geth">l2geth</a>: Mantle client software, a fork of <a href="https://github.com/ethereum/go-ethereum/tree/v1.9.10">geth v1.9.10</a>  (deprecated for BEDROCK upgrade)
+├── <a href="./l2geth">l2geth</a>: Mantle client software, a fork of <a href="https://github.com/ethereum/go-ethereum/tree/v1.9.10">geth v1.9.10</a>
 ├── <a href="./l2geth-exporter">l2geth-exporter</a>: A prometheus exporter to collect/serve metrics from an L2 geth node
-├── <a href="./op-exporter">op-exporter</a>: A prometheus exporter to collect/serve metrics from an Mantle node
 ├── <a href="./proxyd">proxyd</a>: Configurable RPC request router and proxy
-├── <a href="./technical-documents">technical-documents</a>: audits and post-mortem documents
 </pre>
 
 </br>
@@ -213,6 +165,4 @@ Then check out our list of [good first issues](https://github.com/mantlenetworki
 
 ## License
 
-Code forked from [`optimism`](https://github.com/ethereum-optimism/optimism) under the name [`optimism`](https://github.com/mantlenetworkio/bitnetwork/tree/master/l2geth) is licensed under the [GNU GPLv3](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60) in accordance with the [original license](https://github.com/ethereum-optimism/optimism/blob/master/COPYING).
-
-All other files within this repository are licensed under the [MIT License](https://github.com/mantlenetworkio/bitnetwork/blob/master/LICENSE) unless stated otherwise.
+Code forked from [`optimism`](https://github.com/ethereum-optimism) under the name [`optimism`](https://github.com/ethereum-optimism/optimism) is licensed under the [MIT License](https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt) in accordance with the [original license](https://github.com/ethereum/go-ethereum/blob/master/COPYING).

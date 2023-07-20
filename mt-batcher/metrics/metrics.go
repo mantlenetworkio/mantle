@@ -18,6 +18,9 @@ type MtBatchBase struct {
 	mtFeeNonce             prometheus.Gauge
 	mtBatchNonce           prometheus.Gauge
 	numEigenNode           prometheus.Gauge
+	rollupTimeDuration     prometheus.Gauge
+	checkerTimeDuration    prometheus.Gauge
+	feeTimeDuration        prometheus.Gauge
 }
 
 func NewMtBatchBase() *MtBatchBase {
@@ -92,6 +95,21 @@ func NewMtBatchBase() *MtBatchBase {
 			Help:      "total eigen layer nodes",
 			Subsystem: "mtbatcher",
 		}),
+		rollupTimeDuration: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "rollup_time_duration",
+			Help:      "time duration for da rollup",
+			Subsystem: "mtbatcher",
+		}),
+		checkerTimeDuration: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "checker_time_duration",
+			Help:      "time duration for data checker re rollup",
+			Subsystem: "mtbatcher",
+		}),
+		feeTimeDuration: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "fee_time_duration",
+			Help:      "time duration for fee submitter",
+			Subsystem: "mtbatcher",
+		}),
 	}
 }
 
@@ -141,4 +159,16 @@ func (mbb *MtBatchBase) MtBatchNonce() prometheus.Gauge {
 
 func (mbb *MtBatchBase) NumEigenNode() prometheus.Gauge {
 	return mbb.numEigenNode
+}
+
+func (mbb *MtBatchBase) RollupTimeDuration() prometheus.Gauge {
+	return mbb.rollupTimeDuration
+}
+
+func (mbb *MtBatchBase) FeeTimeDuration() prometheus.Gauge {
+	return mbb.feeTimeDuration
+}
+
+func (mbb *MtBatchBase) CheckerTimeDuration() prometheus.Gauge {
+	return mbb.checkerTimeDuration
 }
