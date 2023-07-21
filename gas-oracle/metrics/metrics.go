@@ -15,7 +15,7 @@ var (
 
 		// metrics for L1 base fee, L1 bas price, da fee
 		// TokenRatioGauge token_ratio = eth_price / mnt_price
-		TokenRatioGauge metrics.Gauge
+		TokenRatioGauge metrics.GaugeFloat64
 		// L1BaseFeeGauge (l1_base_fee + l1_priority_fee) * token_ratio
 		L1BaseFeeGauge metrics.Gauge
 		// FeeScalarGauge value to scale the fee up by
@@ -44,7 +44,7 @@ func InitAndRegisterStats(r metrics.Registry) {
 	GasOracleStats.TxSendTimer = metrics.NewRegisteredTimer("tx/send", r)
 
 	// stats for L1 base fee, L1 bas price, da fee
-	GasOracleStats.TokenRatioGauge = metrics.NewRegisteredGauge("token_ratio", r)
+	GasOracleStats.TokenRatioGauge = metrics.NewRegisteredGaugeFloat64("token_ratio", r)
 	GasOracleStats.L1BaseFeeGauge = metrics.NewRegisteredGauge("l1_base_fee", r)
 	GasOracleStats.FeeScalarGauge = metrics.NewRegisteredGauge("fee_scalar", r)
 	GasOracleStats.DaFeeGauge = metrics.NewRegisteredGauge("da_fee", r)
