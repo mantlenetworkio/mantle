@@ -105,9 +105,7 @@ type Config struct {
 	// in a batch.
 	MaxTxBatchCount uint64
 
-	// MaxBatchSubmissionTime is the maximum amount of time that we will
-	// wait before submitting an under-sized batch.
-	MaxBatchSubmissionTime time.Duration
+	RollupTimeout time.Duration
 
 	// PollInterval is the delay between querying L2 for more transaction
 	// and creating a new batch.
@@ -236,6 +234,8 @@ type Config struct {
 	MaxRollupTxn uint64
 
 	MinRollupTxn uint64
+
+	MinTimeoutStateRootElements uint64
 }
 
 // NewConfig parses the Config from the provided flags or environment variables.
@@ -259,7 +259,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		MaxPlaintextBatchSize:     ctx.GlobalUint64(flags.MaxPlaintextBatchSizeFlag.Name),
 		MinStateRootElements:      ctx.GlobalUint64(flags.MinStateRootElementsFlag.Name),
 		MaxStateRootElements:      ctx.GlobalUint64(flags.MaxStateRootElementsFlag.Name),
-		MaxBatchSubmissionTime:    ctx.GlobalDuration(flags.MaxBatchSubmissionTimeFlag.Name),
+		RollupTimeout:             ctx.GlobalDuration(flags.RollupTimeoutFlag.Name),
 		PollInterval:              ctx.GlobalDuration(flags.PollIntervalFlag.Name),
 		NumConfirmations:          ctx.GlobalUint64(flags.NumConfirmationsFlag.Name),
 		SafeAbortNonceTooLowCount: ctx.GlobalUint64(flags.SafeAbortNonceTooLowCountFlag.Name),
@@ -270,35 +270,36 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		SafeMinimumEtherBalance:   ctx.GlobalUint64(flags.SafeMinimumEtherBalanceFlag.Name),
 		ClearPendingTxs:           ctx.GlobalBool(flags.ClearPendingTxsFlag.Name),
 		/* Optional Flags */
-		LogLevel:            ctx.GlobalString(flags.LogLevelFlag.Name),
-		LogTerminal:         ctx.GlobalBool(flags.LogTerminalFlag.Name),
-		SentryEnable:        ctx.GlobalBool(flags.SentryEnableFlag.Name),
-		SentryDsn:           ctx.GlobalString(flags.SentryDsnFlag.Name),
-		SentryTraceRate:     ctx.GlobalDuration(flags.SentryTraceRateFlag.Name),
-		BlockOffset:         ctx.GlobalUint64(flags.BlockOffsetFlag.Name),
-		SequencerPrivateKey: ctx.GlobalString(flags.SequencerPrivateKeyFlag.Name),
-		ProposerPrivateKey:  ctx.GlobalString(flags.ProposerPrivateKeyFlag.Name),
-		Mnemonic:            ctx.GlobalString(flags.MnemonicFlag.Name),
-		SequencerHDPath:     ctx.GlobalString(flags.SequencerHDPathFlag.Name),
-		ProposerHDPath:      ctx.GlobalString(flags.ProposerHDPathFlag.Name),
-		SequencerBatchType:  ctx.GlobalString(flags.SequencerBatchType.Name),
-		MetricsServerEnable: ctx.GlobalBool(flags.MetricsServerEnableFlag.Name),
-		MetricsHostname:     ctx.GlobalString(flags.MetricsHostnameFlag.Name),
-		MetricsPort:         ctx.GlobalUint64(flags.MetricsPortFlag.Name),
-		DisableHTTP2:        ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
-		EnableSccRollback:   ctx.GlobalBool(flags.SccRollbackFlag.Name),
-		EnableSequencerHsm:  ctx.GlobalBool(flags.EnableSequencerHsmFlag.Name),
-		SequencerHsmAddress: ctx.GlobalString(flags.SequencerHsmAddressFlag.Name),
-		SequencerHsmAPIName: ctx.GlobalString(flags.SequencerHsmAPIName.Name),
-		SequencerHsmCreden:  ctx.GlobalString(flags.SequencerHsmCreden.Name),
-		EnableProposerHsm:   ctx.GlobalBool(flags.EnableProposerHsmFlag.Name),
-		ProposerHsmAddress:  ctx.GlobalString(flags.ProposerHsmAddressFlag.Name),
-		ProposerHsmAPIName:  ctx.GlobalString(flags.ProposerHsmAPIName.Name),
-		ProposerHsmCreden:   ctx.GlobalString(flags.ProposerHsmCreden.Name),
-		RollupClientHttp:    ctx.GlobalString(flags.RollupClientHttpFlag.Name),
-		AllowL2AutoRollback: ctx.GlobalBool(flags.AllowL2AutoRollback.Name),
-		MaxRollupTxn:        ctx.GlobalUint64(flags.MaxRollupTxnFlag.Name),
-		MinRollupTxn:        ctx.GlobalUint64(flags.MinRollupTxnFlag.Name),
+		LogLevel:                    ctx.GlobalString(flags.LogLevelFlag.Name),
+		LogTerminal:                 ctx.GlobalBool(flags.LogTerminalFlag.Name),
+		SentryEnable:                ctx.GlobalBool(flags.SentryEnableFlag.Name),
+		SentryDsn:                   ctx.GlobalString(flags.SentryDsnFlag.Name),
+		SentryTraceRate:             ctx.GlobalDuration(flags.SentryTraceRateFlag.Name),
+		BlockOffset:                 ctx.GlobalUint64(flags.BlockOffsetFlag.Name),
+		SequencerPrivateKey:         ctx.GlobalString(flags.SequencerPrivateKeyFlag.Name),
+		ProposerPrivateKey:          ctx.GlobalString(flags.ProposerPrivateKeyFlag.Name),
+		Mnemonic:                    ctx.GlobalString(flags.MnemonicFlag.Name),
+		SequencerHDPath:             ctx.GlobalString(flags.SequencerHDPathFlag.Name),
+		ProposerHDPath:              ctx.GlobalString(flags.ProposerHDPathFlag.Name),
+		SequencerBatchType:          ctx.GlobalString(flags.SequencerBatchType.Name),
+		MetricsServerEnable:         ctx.GlobalBool(flags.MetricsServerEnableFlag.Name),
+		MetricsHostname:             ctx.GlobalString(flags.MetricsHostnameFlag.Name),
+		MetricsPort:                 ctx.GlobalUint64(flags.MetricsPortFlag.Name),
+		DisableHTTP2:                ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
+		EnableSccRollback:           ctx.GlobalBool(flags.SccRollbackFlag.Name),
+		EnableSequencerHsm:          ctx.GlobalBool(flags.EnableSequencerHsmFlag.Name),
+		SequencerHsmAddress:         ctx.GlobalString(flags.SequencerHsmAddressFlag.Name),
+		SequencerHsmAPIName:         ctx.GlobalString(flags.SequencerHsmAPIName.Name),
+		SequencerHsmCreden:          ctx.GlobalString(flags.SequencerHsmCreden.Name),
+		EnableProposerHsm:           ctx.GlobalBool(flags.EnableProposerHsmFlag.Name),
+		ProposerHsmAddress:          ctx.GlobalString(flags.ProposerHsmAddressFlag.Name),
+		ProposerHsmAPIName:          ctx.GlobalString(flags.ProposerHsmAPIName.Name),
+		ProposerHsmCreden:           ctx.GlobalString(flags.ProposerHsmCreden.Name),
+		RollupClientHttp:            ctx.GlobalString(flags.RollupClientHttpFlag.Name),
+		AllowL2AutoRollback:         ctx.GlobalBool(flags.AllowL2AutoRollback.Name),
+		MaxRollupTxn:                ctx.GlobalUint64(flags.MaxRollupTxnFlag.Name),
+		MinRollupTxn:                ctx.GlobalUint64(flags.MinRollupTxnFlag.Name),
+		MinTimeoutStateRootElements: ctx.GlobalUint64(flags.MinTimeoutStateRootElementsFlag.Name),
 	}
 
 	err := ValidateConfig(&cfg)

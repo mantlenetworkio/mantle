@@ -46,27 +46,28 @@ const blockBuffer = 2
 var bigOne = new(big.Int).SetUint64(1) //nolint:unused
 
 type Config struct {
-	Name                   string
-	L1Client               *ethclient.Client
-	L2Client               *l2ethclient.Client
-	TssClient              *tssClient.Client
-	BlockOffset            uint64
-	MaxStateRootElements   uint64
-	MinStateRootElements   uint64
-	SCCAddr                common.Address
-	CTCAddr                common.Address
-	FPRollupAddr           common.Address
-	ChainID                *big.Int
-	PrivKey                *ecdsa.PrivateKey
-	SccRollback            bool
-	MaxBatchSubmissionTime time.Duration
-	PollInterval           time.Duration
-	FinalityConfirmations  uint64
-	EnableProposerHsm      bool
-	ProposerHsmCreden      string
-	ProposerHsmAddress     string
-	ProposerHsmAPIName     string
-	AllowL2AutoRollback    bool
+	Name                        string
+	L1Client                    *ethclient.Client
+	L2Client                    *l2ethclient.Client
+	TssClient                   *tssClient.Client
+	BlockOffset                 uint64
+	MaxStateRootElements        uint64
+	MinStateRootElements        uint64
+	SCCAddr                     common.Address
+	CTCAddr                     common.Address
+	FPRollupAddr                common.Address
+	ChainID                     *big.Int
+	PrivKey                     *ecdsa.PrivateKey
+	SccRollback                 bool
+	RollupTimeout               time.Duration
+	PollInterval                time.Duration
+	FinalityConfirmations       uint64
+	EnableProposerHsm           bool
+	ProposerHsmCreden           string
+	ProposerHsmAddress          string
+	ProposerHsmAPIName          string
+	AllowL2AutoRollback         bool
+	MinTimeoutStateRootElements uint64
 }
 
 type Driver struct {
@@ -242,7 +243,6 @@ func (d *Driver) GetBatchBlockRange(
 		return nil, nil, fmt.Errorf("invalid range, "+
 			"end(%v) < start(%v)", end, start)
 	}
-
 	return start, end, nil
 }
 
@@ -264,19 +264,20 @@ func (d *Driver) CraftBatchTx(
 		d.lastStart = start
 		d.lastCommitTime = time.Now().Add(-d.cfg.PollInterval)
 	}
-
 	//If the waiting time has not been reached, then check whether the minimum stateroot number
 	//is met. if not, return nil
-	if time.Now().Add(-d.cfg.MaxBatchSubmissionTime).Before(d.lastCommitTime) {
-		// Abort if we don't have enough state roots to meet our minimum
-		// requirement.
-		rangeLen := end.Uint64() - start.Uint64()
-		if rangeLen < d.cfg.MinStateRootElements {
+	rollupTxn := end.Uint64() - start.Uint64()
+	if rollupTxn < d.cfg.MinStateRootElements && (time.Now().Add(-d.cfg.RollupTimeout).Before(d.lastCommitTime) || rollupTxn < d.cfg.MinTimeoutStateRootElements) {
+		if rollupTxn < d.cfg.MinStateRootElements {
 			log.Info(name+" number of state roots  below minimum",
-				"num_state_roots", rangeLen,
+				"num_state_roots", rollupTxn,
 				"min_state_roots", d.cfg.MinStateRootElements)
 			return nil, nil
 		}
+		log.Info(name+" number of timeout state roots below minimum or timeout can't satisfy the constrain",
+			"num_state_roots", rollupTxn,
+			"min_timeout_state_roots", d.cfg.MinTimeoutStateRootElements)
+		return nil, nil
 	}
 
 	var blocks []*l2types.Block

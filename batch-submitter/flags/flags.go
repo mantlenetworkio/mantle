@@ -117,12 +117,11 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar("MAX_STATE_ROOT_ELEMENTS"),
 	}
-	MaxBatchSubmissionTimeFlag = cli.DurationFlag{
-		Name: "max-batch-submission-time",
-		Usage: "Maximum amount of time that we will wait before " +
-			"submitting an under-sized batch",
+	RollupTimeoutFlag = cli.DurationFlag{
+		Name:     "rollup-timeout",
+		Usage:    "Delay between rollup timeout transactions ",
 		Required: true,
-		EnvVar:   prefixEnvVar("MAX_BATCH_SUBMISSION_TIME"),
+		EnvVar:   prefixEnvVar("ROLLUP_TIMEOUT"),
 	}
 	PollIntervalFlag = cli.DurationFlag{
 		Name: "poll-interval",
@@ -357,6 +356,14 @@ var (
 		Required: true,
 		EnvVar:   prefixEnvVar("MAX_ROLLUP_TXN"),
 	}
+
+	MinTimeoutStateRootElementsFlag = cli.Uint64Flag{
+		Name: "min-timeout-state-root-elements",
+		Usage: "Minimum number of elements required to submit a state " +
+			"root batch",
+		Required: true,
+		EnvVar:   prefixEnvVar("MIN_TIMEOUT_STATE_ROOT_ELEMENTS"),
+	}
 )
 
 var requiredFlags = []cli.Flag{
@@ -376,7 +383,7 @@ var requiredFlags = []cli.Flag{
 	MaxPlaintextBatchSizeFlag,
 	MinStateRootElementsFlag,
 	MaxStateRootElementsFlag,
-	MaxBatchSubmissionTimeFlag,
+	RollupTimeoutFlag,
 	PollIntervalFlag,
 	NumConfirmationsFlag,
 	SafeAbortNonceTooLowCountFlag,
@@ -388,6 +395,7 @@ var requiredFlags = []cli.Flag{
 	ClearPendingTxsFlag,
 	MaxRollupTxnFlag,
 	MinRollupTxnFlag,
+	MinTimeoutStateRootElementsFlag,
 }
 
 var optionalFlags = []cli.Flag{
