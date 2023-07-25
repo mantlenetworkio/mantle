@@ -851,7 +851,7 @@ func (d *Driver) RollupMainWorker() {
 				batchIndex, _ := d.Cfg.EigenDaContract.RollupBatchIndex(&bind.CallOpts{})
 				d.Cfg.Metrics.RollUpBatchIndex().Set(float64(batchIndex.Uint64()))
 			} else {
-				if timeInterval.Seconds() > d.Cfg.RollupTimeout.Seconds() {
+				if timeInterval.Seconds() < d.Cfg.RollupTimeout.Seconds() {
 					log.Info("MtBatcher rollup wait time less than minimum rollup waiting time in config", "RollupTimeout", d.Cfg.RollUpMinTxn, "waitedRollupTxs", waitedRollupTxs)
 					continue
 				}
