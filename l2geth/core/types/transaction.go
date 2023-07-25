@@ -26,6 +26,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
 )
@@ -424,7 +425,11 @@ func NewTransactionsByPriceAndNonce(signer Signer, txs map[common.Address]Transa
 		if len(accTxs) > 0 {
 			heads = append(heads, accTxs[0])
 			// Ensure the sender address is from the signer
-			acc, _ := Sender(signer, accTxs[0])
+			acc, err := Sender(signer, accTxs[0])
+			if err != nil {
+				delete(txs, from)
+				log.Error("Fail to send tx(Sender)", "err", err)
+			}
 			txs[acc] = accTxs[1:]
 			if from != acc {
 				delete(txs, from)
