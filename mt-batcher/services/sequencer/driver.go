@@ -239,10 +239,11 @@ func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, er
 func (d *Driver) GetRollupTimeInterval(ctx context.Context, start *big.Int) (time.Duration, error) {
 	startHeader, err := d.Cfg.L2Client.HeaderByNumber(ctx, start)
 	if err != nil {
+		log.Error("MT Batcher get start header number error:", err)
 		return time.Duration(0), err
 	}
 	lastRollupTs := big.NewInt(int64(startHeader.Time))
-	nowTs := big.NewInt(int64(time.Now().Second()))
+	nowTs := big.NewInt(time.Now().Unix())
 
 	timeInterval := big.NewInt(0).Sub(nowTs, lastRollupTs)
 	if timeInterval.Cmp(big.NewInt(0)) < 0 {
