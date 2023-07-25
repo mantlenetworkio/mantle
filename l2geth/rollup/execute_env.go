@@ -3,6 +3,10 @@ package rollup
 import (
 	"errors"
 	"fmt"
+	"math/big"
+	"sync"
+	"time"
+
 	mapset "github.com/deckarep/golang-set"
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/consensus"
@@ -11,9 +15,6 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
-	"math/big"
-	"sync"
-	"time"
 )
 
 type environment struct {
@@ -96,7 +97,11 @@ func (e *executor) applyTx(tx *types.Transaction) (error, *types.Block) {
 		return fmt.Errorf("Failed to create mining context: %w", err), nil
 	}
 	transactions := make(map[common.Address]types.Transactions)
-	acc, _ := types.Sender(e.current.signer, tx)
+	acc, err := types.Sender(e.current.signer, tx)
+	if err != nil {
+		log.Error("Failed to send tranaction", "err", err)
+		return err, nil
+	}
 	transactions[acc] = types.Transactions{tx}
 	txs := types.NewTransactionsByPriceAndNonce(e.current.signer, transactions)
 	if err := e.commitTransactionsWithError(txs, e.coinbase); err != nil {
@@ -180,11 +185,13 @@ func (e *executor) commitTransactionsWithError(txs *types.TransactionsByPriceAnd
 
 		case core.ErrNonceTooLow:
 			// New head notification data race between the transaction pool and miner, shift
+			log.Info("Skipping transaction with low nonce", "sender", from, "nonce", tx.Nonce())
 			log.Trace("Skipping transaction with low nonce", "sender", from, "nonce", tx.Nonce())
 			txs.Shift()
 
 		case core.ErrNonceTooHigh:
 			// Reorg notification data race between the transaction pool and miner, skip account =
+			log.Info("Skipping account with high nonce", "sender", from, "nonce", tx.Nonce())
 			log.Trace("Skipping account with high nonce", "sender", from, "nonce", tx.Nonce())
 			txs.Pop()
 
