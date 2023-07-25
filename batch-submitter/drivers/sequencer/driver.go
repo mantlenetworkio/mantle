@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
-	"fmt"
 	"math/big"
 	"strings"
 
@@ -209,10 +208,6 @@ func (d *Driver) GetBatchBlockRange(
 		}
 	}
 	l2Txn := big.NewInt(0).Sub(end, start)
-	if l2Txn.Cmp(big.NewInt(1)) < 0 {
-		return nil, nil, fmt.Errorf("invalid range, "+
-			"end(%v) < start(%v)", end, start)
-	}
 	if l2Txn.Cmp(big.NewInt(int64(d.cfg.MinRollupTxn))) < 0 {
 		return start, start, nil
 	}
