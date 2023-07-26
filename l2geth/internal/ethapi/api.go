@@ -55,7 +55,7 @@ var (
 	errStillSyncing     = errors.New("sequencer still syncing, cannot accept transactions")
 	errBlockNotIndexed  = errors.New("block in range not indexed, this should never happen")
 	txStatusPeriodZero  = "Accepted on layer2"
-	txStatusPeriodOne   = "Rolled up to layer1"
+	txStatusPeriodOne   = "Accepted on layer1"
 	txStatusPeriodTwo   = "Finalized on layer1"
 	txStatusPeriodThree = "Challenge Period Passed"
 	l1FinalizeBlock     = int64(64)
