@@ -1,6 +1,6 @@
 import { ethers } from 'hardhat'
 import { Contract } from 'ethers'
-import { calculateL1GasUsed, calculateL1Fee } from '@mantleio/core-utils'
+import { calculateL1GasUsed, calculateL1Fee } from '@mantleio/mt-core-utils'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
 import { expect } from '../../../setup'

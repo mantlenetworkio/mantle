@@ -1,0 +1,10 @@
+go 1.18
+
+use (
+	./mt-da-batcher
+	./bss-core
+	./datalayr/common
+	./l2geth
+	./fraud-proof
+  ./metrics
+)

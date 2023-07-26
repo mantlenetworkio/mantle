@@ -9,8 +9,8 @@ use (
 	l2geth
 	l2geth-exporter
 	metrics
-	mt-batcher
-	mt-challenger
+	mt-da-batcher
+	mt-da-challenger
 	proxyd
 	state-surgery
 	subsidy
@@ -26,8 +26,8 @@ replace (
 	github.com/mantlenetworkio/mantle/gas-oracle v0.0.0 => ./gas-oracle
 	github.com/mantlenetworkio/mantle/l2geth v0.0.0 => ./l2geth
 	github.com/mantlenetworkio/mantle/metrics v0.0.0 => ./metrics
-	github.com/mantlenetworkio/mantle/mt-batcher v0.0.0 => ./mt-batcher
-	github.com/mantlenetworkio/mantle/mt-challenger v0.0.0 => ./mt-challenger
+	github.com/mantlenetworkio/mantle/mt-da-batcher v0.0.0 => ./mt-da-batcher
+	github.com/mantlenetworkio/mantle/mt-da-challenger v0.0.0 => ./mt-da-challenger
 	github.com/mantlenetworkio/mantle/subsidy v0.0.0 => ./subsidy
 	github.com/mantlenetworkio/mantle/tss v0.0.0 => ./tss
 )

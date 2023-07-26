@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat'
 import { Contract } from 'ethers'
 import { MockContract, smock } from '@defi-wonderland/smock'
-import { expectApprox } from '@mantleio/core-utils'
+import { expectApprox } from '@mantleio/mt-core-utils'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
 import {
@@ -15,7 +15,7 @@ import { expect } from '../../../setup'
 
 // Still have some duplication from CanonicalTransactionChain.spec.ts, but it's so minimal that
 // this is probably cleaner for now. Particularly since we're planning to move all of this out into
-// core-utils soon anyway.
+// mt-core-utils soon anyway.
 const MAX_GAS_LIMIT = 8_000_000
 const INITIAL_TOTAL_L1_SUPPLY = 5000
 const FINALIZATION_GAS = 1_200_000

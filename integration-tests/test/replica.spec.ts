@@ -1,6 +1,6 @@
 /* Imports: External */
 import { TransactionReceipt } from '@ethersproject/abstract-provider'
-import { sleep } from '@mantleio/core-utils'
+import { sleep } from '@mantleio/mt-core-utils'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'

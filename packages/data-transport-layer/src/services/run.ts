@@ -1,6 +1,6 @@
 /* Imports: External */
 import * as dotenv from 'dotenv'
-import { Bcfg } from '@mantleio/core-utils'
+import { Bcfg } from '@mantleio/mt-core-utils'
 import Config from 'bcfg'
 
 /* Imports: Internal */
@@ -55,8 +55,8 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       syncFromL1: config.bool('sync-from-l1', false),
       syncFromL2: config.bool('sync-from-l2', false),
       syncToDa: config.bool('sync-to-da', true),
-      mtBatcherHost: config.str('mt-batcher-hostname', 'http://127.0.0.1'),
-      mtBatcherFetchPort: config.uint('mt-batcher-fetch-port', 8089),
+      mtBatcherHost: config.str('mt-da-batcher-hostname', 'http://127.0.0.1'),
+      mtBatcherFetchPort: config.uint('mt-da-batcher-fetch-port', 8089),
       eigenUpgradeEnable: config.bool('eigen-upgrade-enable', true),
 
       transactionsPerPollingInterval: config.uint(
