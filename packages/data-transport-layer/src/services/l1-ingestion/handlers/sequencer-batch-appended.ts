@@ -7,7 +7,7 @@ import {
   toRpcHexString,
   BatchType,
   SequencerBatch,
-} from '@mantleio/core-utils'
+} from '@mantleio/mt-core-utils'
 import { SequencerBatchAppendedEvent } from '@mantleio/contracts/dist/types/contracts/L1/rollup/CanonicalTransactionChain'
 
 /* Imports: Internal */

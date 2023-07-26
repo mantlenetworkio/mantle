@@ -1,10 +1,10 @@
 go 1.18
 
 use (
-	./mt-challenger
+	./mt-da-challenger
 	./datalayr
   ./l2geth
-	./mt-batcher
+	./mt-da-batcher
   ./bss-core
   ./fraud-proof
   ./metrics

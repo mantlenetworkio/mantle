@@ -1,6 +1,6 @@
 import * as url from 'url'
 
-import { fromHexString } from '@mantleio/core-utils'
+import { fromHexString } from '@mantleio/mt-core-utils'
 
 export const validators = {
   isBoolean: (val: any): boolean => {

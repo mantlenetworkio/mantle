@@ -1,6 +1,6 @@
 /* Imports: External */
 import { ethers } from 'hardhat'
-import { expectApprox } from '@mantleio/core-utils'
+import { expectApprox } from '@mantleio/mt-core-utils'
 import { predeploys } from '@mantleio/contracts'
 import { Contract, BigNumber } from 'ethers'
 

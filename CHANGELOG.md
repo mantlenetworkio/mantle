@@ -5,7 +5,7 @@
 ### Features
 - DA
   - Adjust checking strategies for staker staking of MantleDa contracts([#1120](https://github.com/mantlenetworkio/mantle/pull/1120), [#1103](https://github.com/mantlenetworkio/mantle/pull/1103))
-  - Code optimization for batch-submitter, dtl and mt-batcher([#1063](https://github.com/mantlenetworkio/mantle/pull/1063), [#1045](https://github.com/mantlenetworkio/mantle/pull/1045), [#1043](https://github.com/mantlenetworkio/mantle/pull/1043))
+  - Code optimization for batch-submitter, dtl and mt-da-batcher([#1063](https://github.com/mantlenetworkio/mantle/pull/1063), [#1045](https://github.com/mantlenetworkio/mantle/pull/1045), [#1043](https://github.com/mantlenetworkio/mantle/pull/1043))
 - TSS
   - Add permission verification to tss http api([#854](https://github.com/mantlenetworkio/mantle/pull/854))
 - Packages
@@ -59,7 +59,7 @@
 - Fix issues of unreasonable contract naming convention([#1095](https://github.com/mantlenetworkio/mantle/pull/1095))
 - Fix smart contract related bugs in audit reports([#1043](https://github.com/mantlenetworkio/mantle/pull/1043), [#1138](https://github.com/mantlenetworkio/mantle/pull/1138))
 - Adjust checking strategies for staker staking of MantleDa contracts([#1120](https://github.com/mantlenetworkio/mantle/pull/1120), [#1103](https://github.com/mantlenetworkio/mantle/pull/1103))
-- Code optimization for batch-submitter, dtl and mt-batcher([#1063](https://github.com/mantlenetworkio/mantle/pull/1063), [#1045](https://github.com/mantlenetworkio/mantle/pull/1045), [#1043](https://github.com/mantlenetworkio/mantle/pull/1043))
+- Code optimization for batch-submitter, dtl and mt-da-batcher([#1063](https://github.com/mantlenetworkio/mantle/pull/1063), [#1045](https://github.com/mantlenetworkio/mantle/pull/1045), [#1043](https://github.com/mantlenetworkio/mantle/pull/1043))
 - Add permission verification to tss http api([#854](https://github.com/mantlenetworkio/mantle/pull/854))
 
 ## [v0.4.1](https://github.com/mantlenetworkio/mantle/commits/v0.4.1) - 2023-06-25
@@ -70,7 +70,7 @@
 ## [v0.4.1-beta.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.1-beta.0) - 2023-06-19
 
 ### Bug Fixes
-- Fixed mt-batcher-fee creating signature null pointer from hsm([#971](https://github.com/mantlenetworkio/mantle/pull/971))
+- Fixed mt-da-batcher-fee creating signature null pointer from hsm([#971](https://github.com/mantlenetworkio/mantle/pull/971))
 - Fixed replica returning http error from dt query txstatus([#979](https://github.com/mantlenetworkio/mantle/pull/979))
 - Fixed the issue with improper use of go.work([#980](https://github.com/mantlenetworkio/mantle/pull/980)、[#982](https://github.com/mantlenetworkio/mantle/pull/982)、[#983](https://github.com/mantlenetworkio/mantle/pull/983)、[#996](https://github.com/mantlenetworkio/mantle/pull/996))
 - Fixed an issue where a problem node could not be slashed by placing the logic of whether to penalize tssnode in tssmanager and having tssnode verify whether it can execute([#998](https://github.com/mantlenetworkio/mantle/pull/998))
@@ -127,7 +127,7 @@
 
 ### Features
 - add white list for da fraud proof([#496](https://github.com/mantlenetworkio/mantle/issues/496))
-- support mt-batcher and mt-challenger send transaction by EIP1559([#524](https://github.com/mantlenetworkio/mantle/issues/524))
+- support mt-da-batcher and mt-da-challenger send transaction by EIP1559([#524](https://github.com/mantlenetworkio/mantle/issues/524))
 - da challenger integrate to mantle([#527](https://github.com/mantlenetworkio/mantle/issues/527))
 - add da rollup min and max size config([#528](https://github.com/mantlenetworkio/mantle/issues/528))
 - Add WBIT Token on mantle network([#540](https://github.com/mantlenetworkio/mantle/issues/540))

@@ -1,2 +1,0 @@
-# @mantleio/common-ts
-

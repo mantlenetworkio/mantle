@@ -7,7 +7,7 @@ import {
   BatchContext,
   encodeAppendSequencerBatch,
   expectApprox,
-} from '@mantleio/core-utils'
+} from '@mantleio/mt-core-utils'
 import { TransactionResponse } from '@ethersproject/abstract-provider'
 
 /* Internal Imports */
@@ -22,7 +22,7 @@ import {
 
 // Still have some duplication from CanonicalTransactionChain.spec.ts, but it's so minimal that
 // this is probably cleaner for now. Particularly since we're planning to move all of this out into
-// core-utils soon anyway.
+// mt-core-utils soon anyway.
 const MAX_GAS_LIMIT = 8_000_000
 
 const appendSequencerBatch = async (

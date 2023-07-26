@@ -7,7 +7,7 @@ import {
   deployAndVerifyAndThen,
   getContractFromArtifact,
 } from '../src/deploy-utils'
-import {awaitCondition, hexStringEquals} from "@mantleio/core-utils";
+import {awaitCondition, hexStringEquals} from "@mantleio/mt-core-utils";
 import {deploy} from "../test/helpers";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

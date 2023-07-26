@@ -1,6 +1,6 @@
 /* Imports: External */
 import { ethers } from 'ethers'
-import { sleep } from '@mantleio/core-utils'
+import { sleep } from '@mantleio/mt-core-utils'
 
 /* Imports: Internal */
 import { MantleEnv } from './env'

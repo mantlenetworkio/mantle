@@ -6,7 +6,7 @@ import {
   deployAndVerifyAndThen,
   getContractFromArtifact, isHardhatNode,
 } from '../src/deploy-utils'
-import {awaitCondition, hexStringEquals} from "@mantleio/core-utils";
+import {awaitCondition, hexStringEquals} from "@mantleio/mt-core-utils";
 
 const deployFn: DeployFunction = async (hre) => {
   const { deployer } = await hre.getNamedAccounts()

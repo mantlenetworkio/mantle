@@ -1,0 +1,56 @@
+{
+  "private": true,
+  "name": "@mantleio/mt-fault-detector",
+  "version": "0.1.1",
+  "description": "[Mantle] Service for detecting faulty L2 output proposals",
+  "main": "dist/index",
+  "types": "dist/index",
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "start": "ts-node ./src/service.ts",
+    "test": "hardhat test",
+    "test:coverage": "nyc hardhat test && nyc merge .nyc_output coverage.json",
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist/ ./tsconfig.tsbuildinfo",
+    "lint": "yarn lint:fix && yarn lint:check",
+    "pre-commit": "lint-staged",
+    "lint:fix": "yarn lint:check --fix",
+    "lint:check": "eslint . --max-warnings=0"
+  },
+  "keywords": [
+    "mantle",
+    "ethereum",
+    "fault",
+    "detector"
+  ],
+  "homepage": "https://github.com/mantlenetworkio/mantlenetworkio/tree/main/packages/fault-detector#readme",
+  "license": "MIT",
+  "author": "Mantle PBC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mantlenetworkio/mantle.git"
+  },
+  "devDependencies": {
+    "@defi-wonderland/smock": "^2.0.7",
+    "@nomiclabs/hardhat-ethers": "^2.0.6",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@types/chai": "^4.3.1",
+    "@types/dateformat": "^5.0.0",
+    "chai-as-promised": "^7.1.1",
+    "dateformat": "^4.5.1",
+    "ethereum-waffle": "^3.4.4",
+    "ethers": "^5.6.8",
+    "hardhat": "^2.9.6",
+    "lodash": "^4.17.21",
+    "ts-node": "^10.8.2"
+  },
+  "dependencies": {
+    "@mantleio/mt-common-ts": "0.1.0",
+    "@mantleio/contracts": "0.2.1",
+    "@mantleio/mt-core-utils": "0.1.0",
+    "@mantleio/mt-sdk": "0.2.1",
+    "@ethersproject/abstract-provider": "^5.6.1"
+  }
+}
