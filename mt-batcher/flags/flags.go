@@ -342,10 +342,11 @@ var (
 	}
 
 	MinTimeoutRollupTxnFlag = cli.Uint64Flag{
-		Name:   "min-rollup-txn-timeout",
-		Usage:  "Rollup transaction timeout transactions for mantle da",
-		Value:  500,
-		EnvVar: prefixEnvVar(envVarPrefix, "MIN_ROLLUP_TXN_TIMEOUT"),
+		Name:     "min-timeout-rollup-txn",
+		Usage:    "minimum of timeout Rollup transaction amount for mantle da",
+		Value:    500,
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "MIN_TIMEOUT_ROLLUP_TXN"),
 	}
 
 	RollupTimeoutFlag = cli.DurationFlag{
