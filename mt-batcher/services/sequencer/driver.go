@@ -794,10 +794,9 @@ func (d *Driver) RollupMainWorker() {
 		select {
 		case <-ticker.C:
 			if d.Cfg.MinTimeoutRollupTxn > d.Cfg.RollUpMinTxn {
-				log.Error("MtBatcher Sequencer config error ", "MinTimeoutRollupTxn(%v)>RollUpMinTxn(%v)", d.Cfg.MinTimeoutRollupTxn, d.Cfg.RollUpMinTxn)
+				log.Error("MtBatcher MinTimeoutRollupTxn more than RollUpMinTxn error ", "MinTimeoutRollupTxn(%v)>RollUpMinTxn(%v)", d.Cfg.MinTimeoutRollupTxn, d.Cfg.RollUpMinTxn)
 				continue
 			}
-			log.Info("MtBatcher eigen da sequencer fetching current block range")
 			start, end, err := d.GetBatchBlockRange(d.Ctx)
 			if err != nil {
 				log.Error("MtBatcher Sequencer unable to get block range", "err", err)

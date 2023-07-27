@@ -30,10 +30,6 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 			return err
 		}
 
-		log.Info("Config parsed",
-			"min_tx_size", cfg.MinL1TxSize,
-			"max_tx_size", cfg.MaxL1TxSize)
-
 		// The call to defer is done here so that any errors logged from
 		// this point on are posted to Sentry before exiting.
 		if cfg.SentryEnable {
@@ -130,25 +126,22 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 		var services []*bsscore.Service
 		if cfg.RunTxBatchSubmitter {
 			batchTxDriver, err := sequencer.NewDriver(sequencer.Config{
-				Name:                  "Sequencer",
-				L1Client:              l1Client,
-				L2Client:              l2Client,
-				BlockOffset:           cfg.BlockOffset,
-				MinTxSize:             cfg.MinL1TxSize,
-				MaxTxSize:             cfg.MaxL1TxSize,
-				MaxPlaintextBatchSize: cfg.MaxPlaintextBatchSize,
-				DaUpgradeBlock:        cfg.DaUpgradeBlock,
-				DAAddr:                common.Address(common.HexToAddress(cfg.DAAddress)),
-				CTCAddr:               ctcAddress,
-				ChainID:               chainID,
-				PrivKey:               sequencerPrivKey,
-				EnableSequencerHsm:    cfg.EnableSequencerHsm,
-				SequencerHsmAddress:   cfg.SequencerHsmAddress,
-				SequencerHsmAPIName:   cfg.SequencerHsmAPIName,
-				SequencerHsmCreden:    cfg.SequencerHsmCreden,
-				BatchType:             sequencer.BatchTypeFromString(cfg.SequencerBatchType),
-				MaxRollupTxn:          cfg.MaxRollupTxn,
-				MinRollupTxn:          cfg.MinRollupTxn,
+				Name:                "Sequencer",
+				L1Client:            l1Client,
+				L2Client:            l2Client,
+				BlockOffset:         cfg.BlockOffset,
+				DaUpgradeBlock:      cfg.DaUpgradeBlock,
+				DAAddr:              common.Address(common.HexToAddress(cfg.DAAddress)),
+				CTCAddr:             ctcAddress,
+				ChainID:             chainID,
+				PrivKey:             sequencerPrivKey,
+				EnableSequencerHsm:  cfg.EnableSequencerHsm,
+				SequencerHsmAddress: cfg.SequencerHsmAddress,
+				SequencerHsmAPIName: cfg.SequencerHsmAPIName,
+				SequencerHsmCreden:  cfg.SequencerHsmCreden,
+				BatchType:           sequencer.BatchTypeFromString(cfg.SequencerBatchType),
+				MaxRollupTxn:        cfg.MaxRollupTxn,
+				MinRollupTxn:        cfg.MinRollupTxn,
 			})
 			if err != nil {
 				return err

@@ -34,25 +34,22 @@ const (
 var bigOne = new(big.Int).SetUint64(1)
 
 type Config struct {
-	Name                  string
-	L1Client              *ethclient.Client
-	L2Client              *l2ethclient.Client
-	BlockOffset           uint64
-	MinTxSize             uint64
-	MaxTxSize             uint64
-	MaxPlaintextBatchSize uint64
-	CTCAddr               common.Address
-	DaUpgradeBlock        uint64
-	DAAddr                common.Address
-	ChainID               *big.Int
-	PrivKey               *ecdsa.PrivateKey
-	EnableSequencerHsm    bool
-	SequencerHsmAddress   string
-	SequencerHsmAPIName   string
-	SequencerHsmCreden    string
-	BatchType             BatchType
-	MaxRollupTxn          uint64
-	MinRollupTxn          uint64
+	Name                string
+	L1Client            *ethclient.Client
+	L2Client            *l2ethclient.Client
+	BlockOffset         uint64
+	CTCAddr             common.Address
+	DaUpgradeBlock      uint64
+	DAAddr              common.Address
+	ChainID             *big.Int
+	PrivKey             *ecdsa.PrivateKey
+	EnableSequencerHsm  bool
+	SequencerHsmAddress string
+	SequencerHsmAPIName string
+	SequencerHsmCreden  string
+	BatchType           BatchType
+	MaxRollupTxn        uint64
+	MinRollupTxn        uint64
 }
 
 type Driver struct {
@@ -266,9 +263,7 @@ func (d *Driver) CraftBatchTx(
 		calldata := append(appendSequencerBatchID, batchArguments...)
 
 		log.Info(name+" testing batch size",
-			"calldata_size", len(calldata),
-			"min_tx_size", d.cfg.MinTxSize,
-			"max_tx_size", d.cfg.MaxTxSize)
+			"calldata_size", len(calldata))
 
 		d.metrics.NumElementsPerBatch().Observe(float64(len(batchElements)))
 
