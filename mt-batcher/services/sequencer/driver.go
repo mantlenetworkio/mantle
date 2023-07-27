@@ -187,10 +187,10 @@ func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction, feeM
 		opts.NoSend = true
 	}
 	if feeModelEnable {
-		log.Info("MtBatcher update eigen da use fee", "FeeModelEnable", d.Cfg.FeeModelEnable)
+		log.Debug("MtBatcher update eigen da use fee", "FeeModelEnable", d.Cfg.FeeModelEnable)
 		finalTx, err = d.Cfg.RawEigenFeeContract.RawTransact(opts, tx.Data())
 	} else {
-		log.Info("MtBatcher rollup data", "FeeModelEnable", d.Cfg.FeeModelEnable)
+		log.Debug("MtBatcher rollup data", "FeeModelEnable", d.Cfg.FeeModelEnable)
 		finalTx, err = d.Cfg.RawEigenContract.RawTransact(opts, tx.Data())
 	}
 	switch {
@@ -201,10 +201,10 @@ func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction, feeM
 		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
 		opts.GasTipCap = common4.FallbackGasTipCap
 		if feeModelEnable {
-			log.Info("update eigen da use fee", "FeeModelEnable", d.Cfg.FeeModelEnable)
+			log.Debug("update eigen da use fee", "FeeModelEnable", d.Cfg.FeeModelEnable)
 			return d.Cfg.RawEigenFeeContract.RawTransact(opts, tx.Data())
 		} else {
-			log.Info("rollup date", "FeeModelEnable", d.Cfg.FeeModelEnable)
+			log.Debug("rollup date", "FeeModelEnable", d.Cfg.FeeModelEnable)
 			return d.Cfg.RawEigenContract.RawTransact(opts, tx.Data())
 		}
 	default:
@@ -266,7 +266,7 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 			panic(fmt.Sprintf("MtBatcher attempting to create batch element from block %d, "+
 				"found %d txs instead of 1", block.Number(), len(txs)))
 		}
-		log.Info("MtBatcher origin transactions", "TxHash", txs[0].Hash().String(), "l2BlockNumber", block.Number(), "QueueOrigin", txs[0].QueueOrigin(), "Index", *txs[0].GetMeta().Index, "QueueIndex", txs[0].GetMeta().QueueIndex, "i", i)
+		log.Debug("MtBatcher origin transactions", "TxHash", txs[0].Hash().String(), "l2BlockNumber", block.Number(), "QueueOrigin", txs[0].QueueOrigin(), "Index", *txs[0].GetMeta().Index, "QueueIndex", txs[0].GetMeta().QueueIndex, "i", i)
 		var txBuf bytes.Buffer
 		if err := txs[0].EncodeRLP(&txBuf); err != nil {
 			panic(fmt.Sprintf("MtBatcher Unable to encode tx: %v", err))
@@ -283,7 +283,6 @@ func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transac
 		} else {
 			l1MessageSender = txs[0].GetMeta().L1MessageSender
 		}
-		log.Info("MtBatcher l1 tx origin", "address", l1MessageSender)
 		txMeta := &common3.TransactionMeta{
 			L1BlockNumber:   txs[0].GetMeta().L1BlockNumber,
 			L1Timestamp:     txs[0].GetMeta().L1Timestamp,
@@ -345,12 +344,10 @@ func (d *Driver) StoreData(ctx context.Context, uploadHeader []byte, duration ui
 		log.Error("MtBatcher unable to get current balance", "err", err)
 		return nil, err
 	}
-	log.Info("MtBatcher WalletAddr Balance", "balance", balance)
 	d.Cfg.Metrics.MtBatchBalanceETH().Set(common4.WeiToEth64(balance))
 	nonce64, err := d.Cfg.L1Client.NonceAt(
 		d.Ctx, d.WalletAddr, nil,
 	)
-	log.Info("mtbatcher-account", "walletaddr", d.WalletAddr, "nonce64", nonce64)
 	if err != nil {
 		return nil, err
 	}
@@ -394,7 +391,6 @@ func (d *Driver) ConfirmData(ctx context.Context, callData []byte, searchData rc
 		log.Error("MtBatcher unable to get current balance", "err", err)
 		return nil, err
 	}
-	log.Info("MtBatcher wallet address balance", "balance", balance)
 	d.Cfg.Metrics.MtBatchBalanceETH().Set(common4.WeiToEth64(balance))
 	nonce64, err := d.Cfg.L1Client.NonceAt(
 		d.Ctx, d.WalletAddr, nil,
@@ -459,11 +455,9 @@ func (d *Driver) DisperseStoreData(data []byte, startl2BlockNumber *big.Int, end
 	} else if tx == nil {
 		return params, nil, errors.New("tx is nil")
 	}
-	log.Info("MtBatcher store data success", "txHash", tx.Hash().String())
 	updateGasPrice := func(ctx context.Context) (*types.Transaction, error) {
 		return d.UpdateGasPrice(ctx, tx, false)
 	}
-	log.Info("MtBatcher updateGasPrice", "gasPrice", updateGasPrice)
 	receipt, err := d.txMgr.Send(
 		d.Ctx, updateGasPrice, d.SendTransaction,
 	)
@@ -493,7 +487,7 @@ func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, st
 		log.Error("MtBatcher could not get initDataStore", "ok", ok)
 		return nil, errors.New("MtBatcher could not get initDataStore")
 	}
-	log.Info("PollingInitDataStore", "MsgHash", event.MsgHash, "StoreNumber", event.StoreNumber)
+	log.Debug("PollingInitDataStore", "MsgHash", event.MsgHash, "StoreNumber", event.StoreNumber)
 	meta, err := d.callDisperse(
 		params.HeaderHash,
 		event.MsgHash[:],
@@ -533,7 +527,6 @@ func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, st
 	}
 
 	updateGasPrice := func(ctx context.Context) (*types.Transaction, error) {
-		log.Info("MtBatcher ConfirmData update gas price")
 		return d.UpdateGasPrice(ctx, tx, false)
 	}
 	receipt, err := d.txMgr.Send(
@@ -562,12 +555,10 @@ func (d *Driver) callEncode(data []byte) (common2.StoreParams, error) {
 	}
 	opt := grpc.MaxCallSendMsgSize(1024 * 1024 * 300)
 	reply, err := c.EncodeStore(ctx, request, opt)
-	log.Info("MtBatcher get store", "reply", reply)
 	if err != nil {
 		log.Error("MtBatcher get store err", err)
 		return common2.StoreParams{}, err
 	}
-	log.Info("MtBatcher get store end")
 	g := reply.GetStore()
 	feeBigInt := new(big.Int).SetBytes(g.Fee)
 	params := common2.StoreParams{
@@ -646,7 +637,6 @@ func (d *Driver) UpdateFee(ctx context.Context, l2Block, daFee *big.Int) (*types
 		log.Error("MtBatcher unable to get fee wallet address current balance", "err", err)
 		return nil, err
 	}
-	log.Info("MtBatcher fee wallet address balance", "balance", balance)
 	d.Cfg.Metrics.MtFeeBalanceETH().Set(common4.WeiToEth64(balance))
 	nonce64, err := d.Cfg.L1Client.NonceAt(
 		d.Ctx, d.FeeWalletAddr, nil,
@@ -765,7 +755,6 @@ func (d *Driver) Start() error {
 	d.Cfg.Metrics.RollupTimeDuration().Set(float64(d.Cfg.MainWorkerPollInterval))
 	if d.Cfg.CheckerEnable {
 		batchIndex, ok := d.LevelDBStore.GetReRollupBatchIndex()
-		log.Info("get latest batch index", "batchIndex", batchIndex, "ok", ok)
 		if batchIndex == 0 || !ok {
 			d.LevelDBStore.SetReRollupBatchIndex(1)
 		}
@@ -833,7 +822,6 @@ func (d *Driver) RollupMainWorker() {
 					log.Error("MtBatcher disperse store data fail", "err", err)
 					continue
 				}
-				log.Info("MtBatcher disperse store data success", "txHash", receipt.TxHash.String())
 				d.Cfg.Metrics.L2StoredBlockNumber().Set(float64(start.Uint64()))
 				time.Sleep(10 * time.Second) // sleep for data into graph node
 				csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, 0, big.NewInt(0), false)
@@ -841,7 +829,7 @@ func (d *Driver) RollupMainWorker() {
 					log.Error("MtBatcher confirm store data fail", "err", err)
 					continue
 				}
-				log.Info("MtBatcher confirm store data success", "txHash", csdReceipt.TxHash.String())
+				log.Debug("MtBatcher confirm store data success", "txHash", csdReceipt.TxHash.String())
 				d.Cfg.Metrics.L2ConfirmedBlockNumber().Set(float64(start.Uint64()))
 				if d.Cfg.FeeModelEnable {
 					daFee, _ := d.CalcUserFeeByRules(big.NewInt(int64(len(aggregateTxData))))
@@ -881,7 +869,7 @@ func (d *Driver) RollUpFeeWorker() {
 					continue
 				}
 				daFee := <-d.FeeCh
-				log.Info("MtBatcher RollUpFeeWorker chainFee and daFee", "chainFee", chainFee, "daFee", *daFee)
+				log.Debug("MtBatcher RollUpFeeWorker chainFee and daFee", "chainFee", chainFee, "daFee", *daFee)
 				if chainFee.Cmp(daFee.RollUpFee) != 0 {
 					txfRpt, err := d.UpdateUserDaFee(daFee.EndL2BlockNumber, daFee.RollUpFee)
 					if err != nil {
@@ -889,7 +877,7 @@ func (d *Driver) RollUpFeeWorker() {
 						continue
 					}
 					d.Cfg.Metrics.EigenUserFee().Set(float64(daFee.RollUpFee.Uint64()))
-					log.Info("MtBatcher RollUpFeeWorker update user fee success", "Hash", txfRpt.TxHash.String())
+					log.Debug("MtBatcher RollUpFeeWorker update user fee success", "Hash", txfRpt.TxHash.String())
 				}
 			}
 		case err := <-d.Ctx.Done():
@@ -960,7 +948,6 @@ func (d *Driver) CheckConfirmedWorker() {
 						continue
 					}
 					time.Sleep(10 * time.Second) // sleep for data into graph node
-					log.Info("MtBatcher disperse re-rollup store data success", "txHash", receipt.TxHash.String())
 					csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, rollupStore.DataStoreId, reConfirmedBatchIndex, true)
 					if err != nil {
 						log.Error("Checker confirm store data fail", "err", err)
