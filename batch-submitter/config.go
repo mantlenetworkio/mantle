@@ -93,6 +93,7 @@ type Config struct {
 	// in a batch.
 	MaxTxBatchCount uint64
 
+	// RollupTimeout is the criterion which used to determine if the transaction is timeout.
 	RollupTimeout time.Duration
 
 	// PollInterval is the delay between querying L2 for more transaction
@@ -219,10 +220,13 @@ type Config struct {
 	// batch submitter rollback
 	AllowL2AutoRollback bool
 
+	// MaxRollupTxn is the maximum length of rollup batch transactions for every round.
 	MaxRollupTxn uint64
 
+	// MinRollupTxn is the minimum length of rollup batch transactions for every round.
 	MinRollupTxn uint64
 
+	// MinTimeoutStateRootElements is the minimum length of timeout rollup batch transactions for every round.
 	MinTimeoutStateRootElements uint64
 }
 
