@@ -41,7 +41,6 @@ contract BVM_EigenDataLayrFee is Initializable, OwnableUpgradeable, ReentrancyGu
     }
 
     function setRollupFee(uint256 _l2Block, uint256 _userRollupFee) public onlyGasFee {
-        require(_userRollupFee > 0, "BVM_EigenDataLayrFee:setRollupFee _userRollupFee is zero");
         userRollupFee = _userRollupFee;
         emit RollupFeeHistory(_l2Block, _userRollupFee);
     }
