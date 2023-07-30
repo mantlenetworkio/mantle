@@ -1,0 +1,10 @@
+go 1.18
+
+use (
+	./op-proposer
+  ./op-bindings
+  ./op-node
+  ./op-service
+  ./op-signer
+)
+

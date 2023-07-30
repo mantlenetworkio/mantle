@@ -11,6 +11,19 @@ use (
 	metrics
 	mt-da-batcher
 	mt-da-challenger
+	op-batcher
+	op-bindings
+	op-bootnode
+	op-chain-ops
+	op-challenger
+	op-e2e
+	op-heartbeat
+	op-node
+	op-program
+	op-proposer
+	op-service
+	op-signer
+	op-wheel
 	proxyd
 	state-surgery
 	subsidy
