@@ -267,7 +267,7 @@ func (d *Driver) CraftBatchTx(
 	//If the waiting time has not been reached, then check whether the minimum stateroot number
 	//is met. if not, return nil
 	rollupTxn := end.Uint64() - start.Uint64()
-	if rollupTxn < d.cfg.MinStateRootElements && (time.Now().Add(-d.cfg.RollupTimeout).Before(d.lastCommitTime) || rollupTxn < d.cfg.MinTimeoutStateRootElements) {
+	if rollupTxn < d.cfg.MinStateRootElements && (d.lastCommitTime.Add(d.cfg.RollupTimeout).After(time.Now()) || rollupTxn < d.cfg.MinTimeoutStateRootElements) {
 		if rollupTxn < d.cfg.MinStateRootElements {
 			log.Info(name+" number of state roots  below minimum",
 				"num_state_roots", rollupTxn,
