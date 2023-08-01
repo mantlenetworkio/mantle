@@ -236,22 +236,6 @@ func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, er
 	return start, end, nil
 }
 
-func (d *Driver) GetRollupTimeInterval(ctx context.Context, start *big.Int) (time.Duration, error) {
-	startHeader, err := d.Cfg.L2Client.HeaderByNumber(ctx, start)
-	if err != nil {
-		log.Error("MT Batcher get start header number error:", err)
-		return time.Duration(0), err
-	}
-	lastRollupTs := big.NewInt(int64(startHeader.Time))
-	nowTs := big.NewInt(time.Now().Unix())
-
-	timeInterval := big.NewInt(0).Sub(nowTs, lastRollupTs)
-	if timeInterval.Cmp(big.NewInt(0)) < 0 {
-		return time.Duration(0), fmt.Errorf("invalid result :local timestamp(%v) - start timestamp(%v) ", nowTs, lastRollupTs)
-	}
-	return time.Duration(timeInterval.Int64()), nil
-}
-
 func (d *Driver) TxAggregator(ctx context.Context, start, end *big.Int) (transactionData []byte, startL2BlockNumber *big.Int, endL2BlockNumber *big.Int) {
 	var batchTxList []common3.BatchTx
 	var transactionByte []byte
@@ -775,6 +759,38 @@ func (d *Driver) Stop() {
 	d.wg.Wait()
 }
 
+func (d *Driver) GetBatchBlockRangeWithTimeout(ctx context.Context) (*big.Int, *big.Int, error) {
+	log.Debug("RollupTimeInterval start")
+	pollingInterval := 500 * time.Millisecond
+	rollupTimout := d.Cfg.RollupTimeout
+	exit := time.NewTimer(rollupTimout)
+	ticker := time.NewTicker(pollingInterval)
+	for {
+		// normal logic
+		start, end, err := d.GetBatchBlockRange(d.Ctx)
+		if err != nil {
+			return nil, nil, err
+		}
+		if big.NewInt(0).Sub(end, start).Cmp(big.NewInt(int64(d.Cfg.RollUpMinTxn))) >= 0 {
+			return start, end, nil
+		}
+		if start.Cmp(end) == 0 {
+			log.Info("MtBatcher Sequencer no updates", "start", start, "end", end)
+			continue
+		}
+		select {
+
+		case <-exit.C:
+			if big.NewInt(0).Sub(end, start).Cmp(big.NewInt(int64(d.Cfg.MinTimeoutRollupTxn))) >= 0 {
+				return start, end, nil
+			}
+			return nil, nil, errors.Errorf("error: Timeout txn < MinTimeoutRollupTxn")
+			// timeout exit
+		case <-ticker.C:
+		}
+	}
+}
+
 func (d *Driver) RollupMainWorker() {
 	defer d.wg.Done()
 	ticker := time.NewTicker(d.Cfg.MainWorkerPollInterval)
@@ -782,72 +798,52 @@ func (d *Driver) RollupMainWorker() {
 	for {
 		select {
 		case <-ticker.C:
-			if d.Cfg.MinTimeoutRollupTxn > d.Cfg.RollUpMinTxn {
-				log.Error("MtBatcher MinTimeoutRollupTxn more than RollUpMinTxn error ", "MinTimeoutRollupTxn(%v)>RollUpMinTxn(%v)", d.Cfg.MinTimeoutRollupTxn, d.Cfg.RollUpMinTxn)
-				continue
-			}
-			start, end, err := d.GetBatchBlockRange(d.Ctx)
+
+			start, end, err := d.GetBatchBlockRangeWithTimeout(d.Ctx)
 			if err != nil {
 				log.Error("MtBatcher Sequencer unable to get block range", "err", err)
 				continue
 			}
 			log.Info("MtBatcher get batch block range", "start", start, "end", end)
-			if start.Cmp(end) == 0 {
-				log.Info("MtBatcher Sequencer no updates", "start", start, "end", end)
-				continue
-			}
 			waitedRollupTxs := new(big.Int).Sub(end, start)
 			if big.NewInt(int64(d.Cfg.RollUpMinTxn)).Cmp(waitedRollupTxs) > 0 {
 				log.Info("MtBatcher rollup total transaction less than minimum transations in config", "RollUpMinTxn", d.Cfg.RollUpMinTxn, "waitedRollupTxs", waitedRollupTxs)
 				continue
 			}
-			timeInterval, err := d.GetRollupTimeInterval(d.Ctx, start)
+			aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
+				d.Ctx, start, end,
+			)
 			if err != nil {
-				log.Error("MtBatcher Sequencer unable to get time interval for rollup", "err", err)
+				log.Error("MtBatcher eigenDa sequencer unable to craft batch tx", "err", err)
 				continue
 			}
-			if waitedRollupTxs.Cmp(big.NewInt(int64(d.Cfg.RollUpMinTxn))) >= 0 || (timeInterval.Seconds() >= d.Cfg.RollupTimeout.Seconds() && waitedRollupTxs.Cmp(big.NewInt(int64(d.Cfg.MinTimeoutRollupTxn))) >= 0) {
-
-				aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
-					d.Ctx, start, end,
-				)
-				if err != nil {
-					log.Error("MtBatcher eigenDa sequencer unable to craft batch tx", "err", err)
-					continue
-				}
-				d.Cfg.Metrics.NumTxnPerBatch().Observe(float64((new(big.Int).Sub(endL2BlockNumber, startL2BlockNumber)).Uint64()))
-				d.Cfg.Metrics.BatchSizeBytes().Observe(float64(len(aggregateTxData)))
-				params, receipt, err := d.DisperseStoreData(aggregateTxData, startL2BlockNumber, endL2BlockNumber, false)
-				if err != nil {
-					log.Error("MtBatcher disperse store data fail", "err", err)
-					continue
-				}
-				d.Cfg.Metrics.L2StoredBlockNumber().Set(float64(start.Uint64()))
-				time.Sleep(10 * time.Second) // sleep for data into graph node
-				csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, 0, big.NewInt(0), false)
-				if err != nil {
-					log.Error("MtBatcher confirm store data fail", "err", err)
-					continue
-				}
-				log.Debug("MtBatcher confirm store data success", "txHash", csdReceipt.TxHash.String())
-				d.Cfg.Metrics.L2ConfirmedBlockNumber().Set(float64(start.Uint64()))
-				if d.Cfg.FeeModelEnable {
-					daFee, _ := d.CalcUserFeeByRules(big.NewInt(int64(len(aggregateTxData))))
-					feePip := &FeePipline{
-						RollUpFee:        daFee,
-						EndL2BlockNumber: endL2BlockNumber,
-					}
-					d.FeeCh <- feePip
-				}
-				batchIndex, _ := d.Cfg.EigenDaContract.RollupBatchIndex(&bind.CallOpts{})
-				d.Cfg.Metrics.RollUpBatchIndex().Set(float64(batchIndex.Uint64()))
-			} else {
-				if timeInterval.Seconds() < d.Cfg.RollupTimeout.Seconds() {
-					log.Info("MtBatcher rollup wait time less than minimum rollup waiting time in config", "RollupTimeout", d.Cfg.RollUpMinTxn, "waitedRollupTxs", waitedRollupTxs)
-					continue
-				}
-
+			d.Cfg.Metrics.NumTxnPerBatch().Observe(float64((new(big.Int).Sub(endL2BlockNumber, startL2BlockNumber)).Uint64()))
+			d.Cfg.Metrics.BatchSizeBytes().Observe(float64(len(aggregateTxData)))
+			params, receipt, err := d.DisperseStoreData(aggregateTxData, startL2BlockNumber, endL2BlockNumber, false)
+			if err != nil {
+				log.Error("MtBatcher disperse store data fail", "err", err)
+				continue
 			}
+			d.Cfg.Metrics.L2StoredBlockNumber().Set(float64(start.Uint64()))
+			time.Sleep(10 * time.Second) // sleep for data into graph node
+			csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, 0, big.NewInt(0), false)
+			if err != nil {
+				log.Error("MtBatcher confirm store data fail", "err", err)
+				continue
+			}
+			log.Debug("MtBatcher confirm store data success", "txHash", csdReceipt.TxHash.String())
+			d.Cfg.Metrics.L2ConfirmedBlockNumber().Set(float64(start.Uint64()))
+			if d.Cfg.FeeModelEnable {
+				daFee, _ := d.CalcUserFeeByRules(big.NewInt(int64(len(aggregateTxData))))
+				feePip := &FeePipline{
+					RollUpFee:        daFee,
+					EndL2BlockNumber: endL2BlockNumber,
+				}
+				d.FeeCh <- feePip
+			}
+			batchIndex, _ := d.Cfg.EigenDaContract.RollupBatchIndex(&bind.CallOpts{})
+			d.Cfg.Metrics.RollUpBatchIndex().Set(float64(batchIndex.Uint64()))
+
 		case err := <-d.Ctx.Done():
 			log.Error("MtBatcher eigenDa sequencer service shutting down", "err", err)
 			return

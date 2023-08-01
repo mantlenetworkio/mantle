@@ -179,6 +179,10 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		MinTimeoutRollupTxn:       cfg.MinTimeoutRollupTxn,
 		RollupTimeout:             cfg.RollupTimeout,
 	}
+	if cfg.MinTimeoutRollupTxn > cfg.RollUpMinTxn {
+		log.Error("new driver fail", "err", "MinTimeoutRollupTxn(%v)>RollUpMinTxn(%v)", cfg.MinTimeoutRollupTxn, cfg.RollUpMinTxn)
+		return nil, err
+	}
 	log.Info("hsm",
 		"enablehsm", driverConfig.EnableHsm, "hsmaddress", driverConfig.HsmAddress,
 		"hsmapiname", driverConfig.HsmAPIName, "HsmFeeAPIName", driverConfig.HsmFeeAPIName, "HsmFeeAddress", driverConfig.HsmFeeAddress)
