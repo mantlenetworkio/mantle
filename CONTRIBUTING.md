@@ -7,7 +7,7 @@ There are plenty of ways to contribute, in particular we appreciate support in t
 - Reporting issues. For security issues see [Security policy](https://github.com/mantlenetworkio/mantle/blob/main/SECURITY.md).
 - Fixing and responding to existing issues. You can start off with those tagged ["good first issue"](https://github.com/mantlenetworkio/mantle/contribute) which are meant as introductory issues for external contributors.
 - Improving the [documentation](https://github.com/mantlenetworkio/documents) and [tutorials](https://docs.mantle.xyz/network/for-devs/tutorials).
-- Become an "Mantler" and answer questions in the [mantle Discord](https://discord.com/invite/0xMantle).
+- Become a "Mantler" and answer questions in the [mantle Discord](https://discord.com/invite/0xMantle).
 - Get involved in the protocol design process by proposing changes or new features or write parts of the spec yourself in the [mantle-specs](https://docs.mantle.xyz/network/intro/overview).
 
 Note that we have a [Code of Conduct](https://github.com/mantlenetworkio/.github/blob/main/CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
