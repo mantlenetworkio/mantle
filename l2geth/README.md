@@ -178,7 +178,7 @@ configuration file via:
 $ geth --config /path/to/your_config.toml
 ```
 
-To get an idea how the file should look like you can use the `dumpconfig` subcommand to
+To get an idea of how the file should look like you can use the `dumpconfig` subcommand to
 export your existing configuration:
 
 ```shell
