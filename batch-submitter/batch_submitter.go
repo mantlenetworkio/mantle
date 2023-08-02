@@ -7,8 +7,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/getsentry/sentry-go"
-	"github.com/urfave/cli"
 
 	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/proposer"
 	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/sequencer"
@@ -17,6 +15,9 @@ import (
 	"github.com/mantlenetworkio/mantle/bss-core/dial"
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
+
+	"github.com/getsentry/sentry-go"
+	"github.com/urfave/cli"
 )
 
 // Main is the entrypoint into the batch submitter service. This method returns
