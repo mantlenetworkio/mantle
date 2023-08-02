@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-
 	"math/big"
 	"net/http"
 	"strings"
@@ -65,7 +64,6 @@ func (s *DaService) GetLatestTransactionBatchIndex(c gecho.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, errors.New("fail to get batch index"))
 	}
-	log.Info("rollup batch index", "batchIndex", batchIndex.Uint64())
 	return c.JSON(http.StatusOK, batchIndex.Uint64())
 }
 
@@ -84,7 +82,6 @@ func (s *DaService) GetRollupStoreByRollupBatchIndex(c gecho.Context) error {
 		ConfirmAt:         rollupStore.ConfirmAt,
 		Status:            rollupStore.Status,
 	}
-	log.Info("datastore response", "rsRep", rsRep)
 	return c.JSON(http.StatusOK, rsRep)
 }
 
@@ -94,7 +91,6 @@ func (s *DaService) GetBatchTransactionByDataStoreId(c gecho.Context) error {
 		log.Error("invalid request params", "err", err)
 		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
 	}
-	log.Info("GetBatchTransactionByDataStoreId Request para", "StoreNumber", txReq.StoreNumber)
 	conn, err := grpc.Dial(s.Cfg.RetrieverSocket, grpc.WithInsecure())
 	if err != nil {
 		log.Error("disperser Cannot connect to", "err", err)
@@ -169,7 +165,6 @@ func (s *DaService) GetDtlBatchTransactionByDataStoreId(c gecho.Context) error {
 			if err := l2Tx.DecodeRLP(rlpStream); err != nil {
 				return c.JSON(http.StatusBadRequest, errors.New("Decode RLP fail"))
 			}
-			log.Info("transaction", "hash", l2Tx.Hash().Hex())
 			newBlockNumber := new(big.Int).SetBytes(newBatchTxn[i].BlockNumber)
 
 			var queueOrigin types.QueueOrigin
@@ -288,7 +283,6 @@ func (s *DaService) GetTransactionListByStoreNumber(c gecho.Context) error {
 				log.Error("Decode RLP fail")
 				return c.JSON(http.StatusBadRequest, errors.New("Decode RLP fail"))
 			}
-			log.Info("transaction", "hash", l2Tx.Hash().Hex())
 			newBlockNumber := new(big.Int).SetBytes(newBatchTxn[i].BlockNumber)
 			txSl := &TransactionListResponse{
 				BlockNumber: newBlockNumber.String(),

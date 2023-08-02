@@ -6,7 +6,6 @@ import { Lib_PredeployAddresses } from "../../libraries/constants/Lib_PredeployA
 
 /* Contract Imports */
 import { L2StandardERC20 } from "../../standards/L2StandardERC20.sol";
-import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 

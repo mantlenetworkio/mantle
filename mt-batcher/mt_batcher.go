@@ -2,22 +2,24 @@ package mt_batcher
 
 import (
 	"context"
+	"errors"
 	"strings"
 
-	"github.com/Layr-Labs/datalayr/common/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/urfave/cli"
 
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
 	"github.com/mantlenetworkio/mantle/mt-batcher/l1l2client"
 	"github.com/mantlenetworkio/mantle/mt-batcher/metrics"
 	common2 "github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/restorer"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/sequencer"
+
+	"github.com/Layr-Labs/datalayr/common/logging"
+	"github.com/urfave/cli"
 )
 
 func Main(gitVersion string) func(ctx *cli.Context) error {
@@ -176,6 +178,12 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		HsmCreden:                 cfg.HsmCreden,
 		HsmFeeAPIName:             cfg.HsmFeeAPIName,
 		HsmFeeAddress:             cfg.HsmFeeAddress,
+		MinTimeoutRollupTxn:       cfg.MinTimeoutRollupTxn,
+		RollupTimeout:             cfg.RollupTimeout,
+	}
+	if cfg.MinTimeoutRollupTxn >= cfg.RollUpMinTxn {
+		log.Error("new driver fail", "err", "config value error : MinTimeoutRollupTxn should less than RollUpMinTxn  MinTimeoutRollupTxn(%v)>RollUpMinTxn(%v)", cfg.MinTimeoutRollupTxn, cfg.RollUpMinTxn)
+		return nil, errors.New("config value error : MinTimeoutRollupTxn should less than RollUpMinTxn")
 	}
 	log.Info("hsm",
 		"enablehsm", driverConfig.EnableHsm, "hsmaddress", driverConfig.HsmAddress,
