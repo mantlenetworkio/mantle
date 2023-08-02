@@ -2,6 +2,7 @@ package mt_batcher
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/Layr-Labs/datalayr/common/logging"
@@ -179,9 +180,9 @@ func NewMantleBatch(cfg Config) (*MantleBatch, error) {
 		MinTimeoutRollupTxn:       cfg.MinTimeoutRollupTxn,
 		RollupTimeout:             cfg.RollupTimeout,
 	}
-	if cfg.MinTimeoutRollupTxn > cfg.RollUpMinTxn {
-		log.Error("new driver fail", "err", "MinTimeoutRollupTxn(%v)>RollUpMinTxn(%v)", cfg.MinTimeoutRollupTxn, cfg.RollUpMinTxn)
-		return nil, err
+	if cfg.MinTimeoutRollupTxn >= cfg.RollUpMinTxn {
+		log.Error("new driver fail", "err", "config value error : MinTimeoutRollupTxn should less than RollUpMinTxn  MinTimeoutRollupTxn(%v)>RollUpMinTxn(%v)", cfg.MinTimeoutRollupTxn, cfg.RollUpMinTxn)
+		return nil, errors.New("config value error : MinTimeoutRollupTxn should less than RollUpMinTxn")
 	}
 	log.Info("hsm",
 		"enablehsm", driverConfig.EnableHsm, "hsmaddress", driverConfig.HsmAddress,
