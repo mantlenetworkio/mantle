@@ -3,7 +3,6 @@ package tssnode
 import (
 	"context"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -11,22 +10,22 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
 
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	"github.com/mantlenetworkio/mantle/tss/node/store"
 
+	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/index"
 	"github.com/mantlenetworkio/mantle/tss/node/server"
 	sign "github.com/mantlenetworkio/mantle/tss/node/signer"
+	"github.com/mantlenetworkio/mantle/tss/node/store"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
+	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	"github.com/mantlenetworkio/mantle/tss/slash"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
 )
 
 func Command() *cobra.Command {
@@ -46,6 +45,7 @@ func runNode(cmd *cobra.Command) error {
 	nonProd, _ := cmd.Flags().GetBool("non-prod")
 	waitPeersFullConnected, _ := cmd.Flags().GetBool("full")
 	debug, _ := cmd.Flags().GetBool("debug")
+
 	if debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	} else {
@@ -85,10 +85,9 @@ func runNode(cmd *cobra.Command) error {
 	p2pPort, err := strconv.Atoi(cfg.Node.P2PPort)
 	if err != nil {
 		log.Error().Err(err).Msg("p2p port value in config file, can not convert to int type")
+		return err
 	}
 
-	cfgBz, _ := json.Marshal(cfg)
-	log.Info().Str("config: ", string(cfgBz)).Msg("configuration file context")
 	tssInstance, err := tsslib.NewTss(
 		cfg.Node.BootstrapPeers,
 		waitPeersFullConnected,
@@ -106,12 +105,15 @@ func runNode(cmd *cobra.Command) error {
 		cfg.Node.Secrets.Enable,
 		cfg.Node.Secrets.SecretId,
 		cfg.Node.Shamir,
+		store,
 	)
 	if err != nil {
 		log.Fatal().Err(err).Msg("fail to create tss server instance")
+		return err
 	}
 	if err := tssInstance.Start(); err != nil {
 		log.Error().Err(err).Msg("fail to start tss server")
+		return err
 	}
 
 	pubkey := crypto.CompressPubkey(&privKey.PublicKey)

@@ -7,7 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/influxdata/influxdb/pkg/slices"
 	"github.com/libp2p/go-libp2p/core/peer"
+
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/abnormal"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
@@ -83,7 +85,7 @@ func (t *TssServer) KeySign(req keysign2.Request) (keysign2.Response, error) {
 
 	err := t.requestCheck(req)
 	if err != nil {
-		t.logger.Error().Msgf("not enough signers and signers=%d", len(req.SignerPubKeys))
+		t.logger.Error().Err(err).Msg("keysign request has incorrect parameter values.")
 		return emptyResp, err
 	}
 
@@ -178,16 +180,14 @@ func (t *TssServer) isPartOfKeysignParty(parties []string) bool {
 }
 
 func (t *TssServer) isContainPubkeys(signerPubKeys, participants []string, poolPubkey string) error {
-
-	participantsStr := strings.Join(participants, ",")
-	var errPubkyes []string
-	for _, pubkey := range signerPubKeys {
-		if !strings.Contains(participantsStr, pubkey) {
-			errPubkyes = append(errPubkyes, pubkey)
+	var errPubKeys []string
+	for _, pubKey := range signerPubKeys {
+		if !slices.ExistsIgnoreCase(participants, pubKey) {
+			errPubKeys = append(errPubKeys, pubKey)
 		}
 	}
-	if len(errPubkyes) != 0 {
-		return errors.New(fmt.Sprintf("these pub keys %s are not members of %s's participants", strings.Join(errPubkyes, ","), poolPubkey))
+	if len(errPubKeys) != 0 {
+		return fmt.Errorf("these pub keys %s are not members of %s's participants", strings.Join(errPubKeys, ","), poolPubkey)
 	}
 	return nil
 }

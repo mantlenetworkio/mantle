@@ -4,11 +4,12 @@ import (
 	"context"
 	"os"
 
+	"github.com/spf13/cobra"
+
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/mantlenetworkio/mantle/tss/manager"
 	"github.com/mantlenetworkio/mantle/tss/node/cmd/tssnode"
-	"github.com/spf13/cobra"
 )
 
 func main() {

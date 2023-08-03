@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	ethc "github.com/ethereum/go-ethereum/common"
+
 	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
@@ -39,14 +40,18 @@ func (p *Processor) SignSlash() {
 				if err := json.Unmarshal(req.Params, &nodeSignRequest); err != nil {
 					logger.Error().Msg("failed to unmarshal node sign request")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				}
 				var requestBody tsscommon.SlashRequest
 				if err := json.Unmarshal(rawMsg, &requestBody); err != nil {
 					logger.Error().Msg("failed to umarshal slash params request body")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				}
 				nodeSignRequest.RequestBody = requestBody
@@ -55,7 +60,9 @@ func (p *Processor) SignSlash() {
 				if err != nil {
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
 
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					logger.Err(err).Msg("check event failed")
 					continue
 				}
@@ -69,7 +76,9 @@ func (p *Processor) SignSlash() {
 				if err != nil {
 					logger.Err(err).Msg("failed to encode SlashMsg")
 					RpcResponse := tdtypes.NewRPCErrorResponse(req.ID, 201, "failed", err.Error())
-					p.wsClient.SendMsg(RpcResponse)
+					if err := p.wsClient.SendMsg(RpcResponse); err != nil {
+						logger.Error().Err(err).Msg("failed to send msg to manager")
+					}
 					continue
 				}
 
@@ -95,7 +104,7 @@ func (p *Processor) SignSlash() {
 				}
 
 				signResponse := tsscommon.SignResponse{
-					Signature:       data,
+					Signature: data,
 				}
 
 				RpcResponse := tdtypes.NewRPCSuccessResponse(req.ID, signResponse)

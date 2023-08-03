@@ -14,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	eth "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
+
 	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/tss/bindings/tsh"
 	tss "github.com/mantlenetworkio/mantle/tss/common"
@@ -33,7 +34,7 @@ var sendState = SendState{
 	lock:   &sync.Mutex{},
 }
 
-func (m Manager) slashing() {
+func (m *Manager) slashing() {
 	queryTicker := time.NewTicker(m.taskInterval)
 	for {
 		signingInfos := m.store.ListSlashingInfo()
@@ -49,31 +50,24 @@ func (m Manager) slashing() {
 	}
 }
 
-func (m Manager) handleSlashing(si slash.SlashingInfo) {
+func (m *Manager) handleSlashing(si slash.SlashingInfo) {
 	log.Info("start to handleSlashing", "address", si.Address.String(), "batch_index", si.BatchIndex, "slash_type", si.SlashType, "election id", si.ElectionId)
 	currentBlockNumber, err := m.l1Cli.BlockNumber(context.Background())
 	if err != nil {
 		log.Error("failed to query block number", "err", err)
 		return
 	}
-	found, err := m.tssStakingSlashingCaller.GetSlashRecord(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber)}, new(big.Int).SetUint64(si.BatchIndex), si.Address)
+	found, err := m.tssStakingSlashingCaller.GetSlashRecord(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - uint64(m.l1ConfirmBlocks))}, new(big.Int).SetUint64(si.BatchIndex), si.Address)
 	if err != nil {
 		log.Error("failed to GetSlashRecord", "err", err)
 		return
 	}
 	if found { // is submitted to ethereum
-		found, err = m.tssStakingSlashingCaller.GetSlashRecord(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - uint64(m.l1ConfirmBlocks))}, new(big.Int).SetUint64(si.BatchIndex), si.Address)
-		if err != nil {
-			log.Error("failed to GetSlashRecord", "err", err)
-			return
-		}
-		if found { // this slashing is confirmed on ethereum
-			m.store.RemoveSlashingInfo(si.Address, si.BatchIndex)
-		}
+		m.store.RemoveSlashingInfo(si.Address, si.BatchIndex)
 		return
 	}
 
-	unJailMembers, err := m.tssGroupManagerCaller.GetTssGroupUnJailMembers(nil)
+	unJailMembers, err := m.tssGroupManagerCaller.GetTssGroupUnJailMembers(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(currentBlockNumber - uint64(m.l1ConfirmBlocks))})
 	if err != nil {
 		log.Error("failed to GetTssGroupUnJailMembers", "err", err)
 		return
@@ -170,7 +164,7 @@ func (m Manager) handleSlashing(si slash.SlashingInfo) {
 	return
 }
 
-func (m Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo, mesTx []byte) error {
+func (m *Manager) submitSlashing(signResp tss.SignResponse, si slash.SlashingInfo, mesTx []byte) error {
 	txData, err := m.txBuilder(mesTx, signResp.Signature)
 	if err != nil {
 		return err

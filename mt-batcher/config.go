@@ -1,10 +1,11 @@
 package mt_batcher
 
 import (
+	"time"
+
 	"github.com/Layr-Labs/datalayr/common/logging"
 	"github.com/mantlenetworkio/mantle/mt-batcher/flags"
 	"github.com/urfave/cli"
-	"time"
 )
 
 type Config struct {
@@ -25,6 +26,7 @@ type Config struct {
 	FeePrivateKey             string
 	FeeMnemonic               string
 	FeeHDPath                 string
+	Passphrase                string
 	EigenContractAddress      string
 	EigenFeeContractAddress   string
 	DataStoreDuration         uint64
@@ -35,7 +37,6 @@ type Config struct {
 	FeeWorkerPollInterval     time.Duration
 	BlockOffset               uint64
 	RollUpMinTxn              uint64
-	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
 	EigenLayerNode            int
 	EigenLogConfig            logging.Config
@@ -86,6 +87,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		FeePrivateKey:             ctx.GlobalString(flags.FeePrivateKeyFlag.Name),
 		FeeMnemonic:               ctx.GlobalString(flags.FeeMnemonicFlag.Name),
 		FeeHDPath:                 ctx.GlobalString(flags.FeeHDPathFlag.Name),
+		Passphrase:                ctx.GlobalString(flags.PassphraseFlag.Name),
 		EigenContractAddress:      ctx.GlobalString(flags.EigenContractAddressFlag.Name),
 		EigenFeeContractAddress:   ctx.GlobalString(flags.EigenFeeContractAddressFlag.Name),
 		DataStoreDuration:         ctx.GlobalUint64(flags.DataStoreDurationFlag.Name),
@@ -96,7 +98,6 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		PollingDuration:           ctx.GlobalDuration(flags.PollingDurationFlag.Name),
 		BlockOffset:               ctx.GlobalUint64(flags.BlockOffsetFlag.Name),
 		RollUpMinTxn:              ctx.GlobalUint64(flags.RollUpMinTxnFlag.Name),
-		RollUpMinSize:             ctx.GlobalUint64(flags.RollUpMinSizeFlag.Name),
 		RollUpMaxSize:             ctx.GlobalUint64(flags.RollUpMaxSizeFlag.Name),
 		EigenLayerNode:            ctx.GlobalInt(flags.EigenLayerNodeFlag.Name),
 		EigenLogConfig:            logging.ReadCLIConfig(ctx),

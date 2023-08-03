@@ -53,7 +53,7 @@ func (c *L1Client) HeaderByNumber(ctx context.Context, number *big.Int) (*types.
 	tip.BaseFee = new(big.Int).Mul(new(big.Int).Add(bestBaseFee, gasTipCap), big.NewInt(int64(ratio)))
 	log.Info("show base fee context", "bestBaseFee", bestBaseFee, "gasTipCap", gasTipCap, "ratio", ratio)
 	ometrics.GasOracleStats.L1GasPriceGauge.Update(new(big.Int).Add(bestBaseFee, gasTipCap).Int64())
-	ometrics.GasOracleStats.TokenRatioGauge.Update(int64(ratio))
+	ometrics.GasOracleStats.TokenRatioGauge.Update(ratio)
 	return tip, nil
 }
 

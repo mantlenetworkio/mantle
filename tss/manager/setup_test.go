@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"math/big"
 	"time"
 
 	tss "github.com/mantlenetworkio/mantle/tss/common"
@@ -33,7 +34,7 @@ func (mock *mockWsManager) SendMsg(request server.RequestMsg) error {
 	return mock.afterMsgSent(request, mock.responseCh)
 }
 
-func setup(afterMsgSent afterMsgSendFunc, queryAliveNodes queryAliveNodesFunc) (Manager, tss.SignStateRequest) {
+func setup(afterMsgSent afterMsgSendFunc, queryAliveNodes queryAliveNodesFunc) (*Manager, tss.SignStateRequest) {
 	mock := mockWsManager{
 		afterMsgSent:    afterMsgSent,
 		queryAliveNodes: queryAliveNodes,
@@ -42,7 +43,7 @@ func setup(afterMsgSent afterMsgSendFunc, queryAliveNodes queryAliveNodesFunc) (
 	if err != nil {
 		panic(err)
 	}
-	manager := Manager{
+	manager := &Manager{
 		wsServer: &mock,
 		store:    storage,
 
@@ -52,8 +53,8 @@ func setup(afterMsgSent afterMsgSendFunc, queryAliveNodes queryAliveNodesFunc) (
 		cpkConfirmTimeout: 5 * time.Second,
 	}
 	request := tss.SignStateRequest{
-		StartBlock:          "1",
-		OffsetStartsAtIndex: "1",
+		StartBlock:          big.NewInt(1),
+		OffsetStartsAtIndex: big.NewInt(1),
 		StateRoots:          [][32]byte{},
 	}
 	return manager, request

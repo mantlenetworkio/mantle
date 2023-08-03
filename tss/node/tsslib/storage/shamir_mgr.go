@@ -19,10 +19,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
-	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
 	"github.com/google/uuid"
-	nodeconfig "github.com/mantlenetworkio/mantle/tss/common"
 	"github.com/rs/zerolog/log"
+
+	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
+
+	nodeconfig "github.com/mantlenetworkio/mantle/tss/common"
 )
 
 const (
@@ -82,7 +84,7 @@ func (sh *ShamirMgr) GetKeyFile(pubKey, localPartyKey string) (KeygenLocalState,
 		}
 		var keygenlocalstate KeygenLocalState
 		if err := json.Unmarshal([]byte(keygen), &keygenlocalstate); err != nil {
-			log.Error().Err(err).Msgf("fail to unmarshal data to map :%w", err)
+			log.Error().Err(err).Msgf("fail to unmarshal data to map :%v", err)
 			return KeygenLocalState{}, err
 		}
 		//缓存在内存中

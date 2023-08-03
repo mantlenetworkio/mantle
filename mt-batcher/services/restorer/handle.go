@@ -4,22 +4,27 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+
+	"math/big"
+	"net/http"
+	"strings"
+
+	gecho "github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
+	"github.com/shurcooL/graphql"
+	"google.golang.org/grpc"
+
 	"github.com/Layr-Labs/datalayr/common/graphView"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceRetrieverServer"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
-	gecho "github.com/labstack/echo/v4"
+
 	common2 "github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/eigenda"
-	"github.com/pkg/errors"
-	"github.com/shurcooL/graphql"
-	"google.golang.org/grpc"
-	"math/big"
-	"net/http"
-	"strings"
 )
 
 const (

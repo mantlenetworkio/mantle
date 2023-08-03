@@ -6,16 +6,26 @@ import (
 	"crypto/ecdsa"
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/pkg/errors"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
 	"github.com/Layr-Labs/datalayr/common/graphView"
 	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceDL"
 	"github.com/Layr-Labs/datalayr/common/logging"
-	"github.com/ethereum/go-ethereum/accounts/abi"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+
 	l2gethcommon "github.com/mantlenetworkio/mantle/l2geth/common"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
@@ -28,13 +38,6 @@ import (
 	common4 "github.com/mantlenetworkio/mantle/mt-batcher/services/common"
 	"github.com/mantlenetworkio/mantle/mt-batcher/services/sequencer/db"
 	"github.com/mantlenetworkio/mantle/mt-batcher/txmgr"
-	"github.com/pkg/errors"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"math/big"
-	"strings"
-	"sync"
-	"time"
 )
 
 type SignerFn func(context.Context, common.Address, *types.Transaction) (*types.Transaction, error)
@@ -46,16 +49,13 @@ type DriverConfig struct {
 	DtlClientUrl              string
 	EigenDaContract           *bindings.BVMEigenDataLayrChain
 	RawEigenContract          *bind.BoundContract
-	EigenABI                  *abi.ABI
 	EigenFeeContract          *bindings.BVMEigenDataLayrFee
 	RawEigenFeeContract       *bind.BoundContract
-	EigenFeeABI               *abi.ABI
 	Logger                    *logging.Logger
 	PrivKey                   *ecdsa.PrivateKey
 	FeePrivKey                *ecdsa.PrivateKey
 	BlockOffset               uint64
 	RollUpMinTxn              uint64
-	RollUpMinSize             uint64
 	RollUpMaxSize             uint64
 	EigenLayerNode            int
 	DataStoreDuration         uint64
@@ -359,7 +359,7 @@ func (d *Driver) StoreData(ctx context.Context, uploadHeader []byte, duration ui
 		return tx, nil
 
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
-		log.Warn("MtBather eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
+		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
 		opts.GasTipCap = common4.FallbackGasTipCap
 		return d.Cfg.EigenDaContract.StoreData(opts, uploadHeader, duration, blockNumber, startL2BlockNumber, endL2BlockNumber, totalOperatorsIndex, isReRollup)
 
@@ -409,7 +409,7 @@ func (d *Driver) ConfirmData(ctx context.Context, callData []byte, searchData rc
 		return tx, nil
 
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
-		log.Warn("MtBather eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
+		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
 		opts.GasTipCap = common4.FallbackGasTipCap
 		return d.Cfg.EigenDaContract.ConfirmData(opts, callData, searchData, startL2BlockNumber, endL2BlockNumber, originDataStoreId, reConfirmedBatchIndex, isReRollup)
 
@@ -660,7 +660,7 @@ func (d *Driver) UpdateFee(ctx context.Context, l2Block, daFee *big.Int) (*types
 	case err == nil:
 		return tx, nil
 	case d.IsMaxPriorityFeePerGasNotFoundError(err):
-		log.Warn("MtBather eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
+		log.Warn("MtBatcher eth_maxPriorityFeePerGas is unsupported by current backend, using fallback gasTipCap")
 		opts.GasTipCap = common4.FallbackGasTipCap
 		return d.Cfg.EigenFeeContract.SetRollupFee(opts, l2Block, daFee)
 	default:
@@ -697,9 +697,54 @@ func (d *Driver) IsMaxPriorityFeePerGasNotFoundError(err error) bool {
 	)
 }
 
+func (d *Driver) ServiceInit() error {
+	rollupWalletBalance, err := d.Cfg.L1Client.BalanceAt(
+		d.Ctx, d.WalletAddr, nil,
+	)
+	if err != nil {
+		log.Warn("Get rollup wallet address balance fail", "err", err)
+		return err
+	}
+	d.Cfg.Metrics.MtBatchBalanceETH().Set(common4.WeiToEth64(rollupWalletBalance))
+
+	rollupNonce, err := d.Cfg.L1Client.NonceAt(
+		d.Ctx, d.WalletAddr, nil,
+	)
+	if err != nil {
+		log.Warn("Get rollup wallet address nonce fail", "err", err)
+		return err
+	}
+	d.Cfg.Metrics.MtBatchNonce().Set(float64(rollupNonce))
+
+	feeWalletBalance, err := d.Cfg.L1Client.BalanceAt(
+		d.Ctx, d.FeeWalletAddr, nil,
+	)
+	if err != nil {
+		log.Warn("Get rollup fee wallet address balance fail", "err", err)
+		return err
+	}
+	d.Cfg.Metrics.MtFeeBalanceETH().Set(common4.WeiToEth64(feeWalletBalance))
+
+	feeNonce, err := d.Cfg.L1Client.NonceAt(
+		d.Ctx, d.WalletAddr, nil,
+	)
+	if err != nil {
+		log.Warn("Get rollup fee wallet address nonce fail", "err", err)
+		return err
+	}
+	d.Cfg.Metrics.MtFeeNonce().Set(float64(feeNonce))
+	return nil
+}
+
 func (d *Driver) Start() error {
 	d.wg.Add(1)
 	go d.RollupMainWorker()
+	err := d.ServiceInit()
+	if err != nil {
+		log.Error("init metrics fail", "err", err)
+		return err
+	}
+	d.Cfg.Metrics.RollupTimeDuration().Set(float64(d.Cfg.MainWorkerPollInterval))
 	if d.Cfg.CheckerEnable {
 		batchIndex, ok := d.LevelDBStore.GetReRollupBatchIndex()
 		log.Info("get latest batch index", "batchIndex", batchIndex, "ok", ok)
@@ -707,10 +752,12 @@ func (d *Driver) Start() error {
 			d.LevelDBStore.SetReRollupBatchIndex(1)
 		}
 		d.wg.Add(1)
+		d.Cfg.Metrics.CheckerTimeDuration().Set(float64(d.Cfg.CheckerWorkerPollInterval))
 		go d.CheckConfirmedWorker()
 	}
 	if d.Cfg.FeeModelEnable {
 		d.wg.Add(1)
+		d.Cfg.Metrics.FeeTimeDuration().Set(float64(d.Cfg.FeeWorkerPollInterval))
 		go d.RollUpFeeWorker()
 	}
 	return nil

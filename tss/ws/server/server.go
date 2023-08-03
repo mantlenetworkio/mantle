@@ -2,14 +2,15 @@ package server
 
 import (
 	"fmt"
-	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	"net"
 	"net/http"
 	"os"
 
+	"github.com/mantlenetworkio/mantle/tss/manager/types"
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/tendermint/tendermint/libs/service"
 	rpcserver "github.com/tendermint/tendermint/rpc/jsonrpc/server"
+	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
 type WSServer struct {
@@ -23,7 +24,7 @@ type WSServer struct {
 	WM       *WebsocketManager
 }
 
-func NewWSServer(localAddr string) (*WebsocketManager, error) {
+func NewWSServer(localAddr string, queryService types.TssQueryService) (*WebsocketManager, error) {
 	wsServer := &WSServer{}
 	var err error
 
@@ -33,7 +34,7 @@ func NewWSServer(localAddr string) (*WebsocketManager, error) {
 
 	mux := http.NewServeMux()
 	wmLogger := logger.With("protocol", "ws")
-	wsServer.WM = NewWebsocketManager()
+	wsServer.WM = NewWebsocketManager(queryService)
 
 	wsServer.WM.SetWsConnOptions(OnConnect(wsServer.WM),
 		OnDisconnect(func(remoteAddr, pubKey string) {

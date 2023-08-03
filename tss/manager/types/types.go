@@ -3,6 +3,8 @@ package types
 import (
 	"context"
 	"time"
+
+	"github.com/mantlenetworkio/mantle/l2geth/common"
 )
 
 type TssCommitteeInfo struct {
@@ -18,11 +20,17 @@ type CpkData struct {
 	CreationTime time.Time `json:"creation_time"`
 }
 
+type TgTssMember struct {
+	PublicKey   []byte
+	NodeAddress common.Address
+	Status      uint8
+}
+
 // Context ---------------------------------------------
 type Context struct {
 	ctx            context.Context
 	requestId      string
-	tssInfo        TssCommitteeInfo
+	tssInfo        *TssCommitteeInfo
 	availableNodes []string
 	approvers      []string
 	unApprovers    []string
@@ -39,7 +47,7 @@ func NewContext() Context {
 func (c Context) RequestId() string {
 	return c.requestId
 }
-func (c Context) TssInfos() TssCommitteeInfo {
+func (c Context) TssInfos() *TssCommitteeInfo {
 	return c.tssInfo
 }
 func (c Context) AvailableNodes() []string {
@@ -65,7 +73,7 @@ func (c Context) WithRequestId(requestId string) Context {
 	return c
 }
 
-func (c Context) WithTssInfo(tssInfos TssCommitteeInfo) Context {
+func (c Context) WithTssInfo(tssInfos *TssCommitteeInfo) Context {
 	c.tssInfo = tssInfos
 	return c
 }

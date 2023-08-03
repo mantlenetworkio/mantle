@@ -7,18 +7,20 @@ import (
 	"sync"
 	"time"
 
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
 	bcrypto "github.com/binance-chain/tss-lib/crypto"
 	"github.com/binance-chain/tss-lib/ecdsa/keygen"
 	"github.com/binance-chain/tss-lib/tss"
-	"github.com/btcsuite/btcd/btcec"
+
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/abnormal"
 	common2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
 	"github.com/mantlenetworkio/mantle/tss/node/tsslib/p2p"
 	storage2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 type TssKeyGen struct {
@@ -90,7 +92,7 @@ func (tKeyGen *TssKeyGen) GenerateNewKey(keygenReq Request) (*bcrypto.ECPoint, e
 	keyGenLocalStateItem := storage2.KeygenLocalState{
 		ParticipantKeys: tKeyGen.ParticipantKeys,
 		LocalPartyKey:   tKeyGen.localNodePubKey,
-		Threshold:       tKeyGen.tssCommonStruct.GetThresHold(),
+		Threshold:       tKeyGen.tssCommonStruct.GetThreshHold(),
 	}
 
 	if err != nil {
@@ -108,11 +110,12 @@ func (tKeyGen *TssKeyGen) GenerateNewKey(keygenReq Request) (*bcrypto.ECPoint, e
 	abnormalMgr := tKeyGen.tssCommonStruct.GetAbnormalMgr()
 	keyGenParty := keygen.NewLocalParty(params, outCh, endCh, *tKeyGen.preParams)
 	partyIDMap := conversion.SetupPartyIDMap(partiesID)
-	err1 := conversion.SetupIDMaps(partyIDMap, tKeyGen.tssCommonStruct.PartyIDtoP2PID)
-	if err1 != nil {
-		tKeyGen.logger.Error().Msgf("error in creating mapping between partyID and P2P ID")
+	partyIDtoP2PIDMaps, err := conversion.GeneratePartyIDtoP2PIDMaps(partyIDMap)
+	if err != nil {
+		tKeyGen.logger.Err(err).Msgf("error in creating mapping between partyID and P2P ID")
 		return nil, err
 	}
+	tKeyGen.tssCommonStruct.InsertPartyIDtoP2PID(partyIDtoP2PIDMaps)
 	// we never run multi keygen, so the moniker is set to default empty value
 	partyInfo := &abnormal.PartyInfo{
 		Party:      keyGenParty,
@@ -122,7 +125,7 @@ func (tKeyGen *TssKeyGen) GenerateNewKey(keygenReq Request) (*bcrypto.ECPoint, e
 	tKeyGen.tssCommonStruct.SetPartyInfo(partyInfo)
 	abnormalMgr.SetPartyInfo(keyGenParty, partyIDMap)
 	tKeyGen.tssCommonStruct.P2PPeersLock.Lock()
-	tKeyGen.tssCommonStruct.P2PPeers = conversion.GetPeersID(tKeyGen.tssCommonStruct.PartyIDtoP2PID, tKeyGen.tssCommonStruct.GetLocalPeerID())
+	tKeyGen.tssCommonStruct.P2PPeers = conversion.GetPeersID(tKeyGen.tssCommonStruct.GetPartyIDtoP2PID(), tKeyGen.tssCommonStruct.GetLocalPeerID())
 	tKeyGen.tssCommonStruct.P2PPeersLock.Unlock()
 	var keyGenWg sync.WaitGroup
 	keyGenWg.Add(2)

@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/binary"
+
 	"github.com/ethereum/go-ethereum/common"
 )
 

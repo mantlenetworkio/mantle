@@ -75,12 +75,18 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     event RollupBatchIndexUpdated(uint256 oldRollupBatchIndex, uint256 newRollupBatchIndex);
     event L2ConfirmedBlockNumberUpdated(uint256 oldL2ConfirmedBlockNumber, uint256 newL2ConfirmedBlockNumber);
     event DataLayrManagerAddressUpdated(address oldDataLayrManagerAddress, address newDataLayrManagerAddress);
+    event ResetRollupBatchData(uint256 rollupBatchIndex, uint256 l2StoredBlockNumber, uint256 l2ConfirmedBlockNumber);
 
     constructor() {
         _disableInitializers();
     }
 
     function initialize(address _sequencer, address _dataManageAddress, address _reSubmitterAddress, uint256 _block_stale_measure, uint256 _fraudProofPeriod, uint256 _l2SubmittedBlockNumber) public initializer {
+        require(_sequencer != address(0), "initialize: can't set zero address to _sequencer address");
+        require(_dataManageAddress != address(0), "initialize: can't set zero address to _dataManageAddress");
+        require(_reSubmitterAddress != address(0), "initialize: can't set zero address to _reSubmitterAddress");
+        require(_fraudProofPeriod >= 3600, "initialize: _fraudProofPeriod must be no less than one hour");
+        require(_fraudProofPeriod <= 25200, "initialize: _fraudProofPeriod must be no more than seven hour");
         __Ownable_init();
         sequencer = _sequencer;
         dataManageAddress = _dataManageAddress;
@@ -138,15 +144,6 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     }
 
     /**
-    * @notice unavailable fraud proof address
-    * @param _address for fraud proof
-    */
-    function unavailableFraudProofAddress(address _address) external onlySequencer {
-        require(_address != address(0), "unavailableFraudProofAddress: unavailableFraudProofAddress: address is the zero address");
-        fraudProofWhitelist[_address] = false;
-    }
-
-    /**
     * @notice remove fraud proof address
     * @param _address for fraud proof
     */
@@ -160,6 +157,10 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @param _fraudProofPeriod fraud proof period
     */
     function updateFraudProofPeriod(uint256 _fraudProofPeriod) external onlySequencer {
+        // MantleDa data validity period is at least one hour
+        require(_fraudProofPeriod >= 3600, "updateFraudProofPeriod: _fraudProofPeriod need more than one hour");
+        // MantleDa data validity max period seven hour
+        require(_fraudProofPeriod <= 25200, "updateFraudProofPeriod: _fraudProofPeriod need less than seven hour");
         uint256 oldFraudProofPeriod = fraudProofPeriod;
         fraudProofPeriod = _fraudProofPeriod;
         emit FraudProofPeriodUpdated(oldFraudProofPeriod, fraudProofPeriod);
@@ -226,13 +227,14 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
     * @notice reset batch rollup batch data
     * @param _rollupBatchIndex update rollup index
     */
-    function resetRollupBatchData(uint256 _rollupBatchIndex) external onlySequencer {
+    function resetRollupBatchData(uint256 _rollupBatchIndex, uint256 _l2StoredBlockNumber, uint256 _l2ConfirmedBlockNumber) external onlySequencer {
         for (uint256 i = _rollupBatchIndex; i < rollupBatchIndex; i++) {
             delete rollupBatchIndexRollupStores[i];
         }
         rollupBatchIndex = _rollupBatchIndex;
-        l2StoredBlockNumber = 1;
-        l2ConfirmedBlockNumber = 1;
+        l2StoredBlockNumber = _l2StoredBlockNumber;
+        l2ConfirmedBlockNumber = _l2ConfirmedBlockNumber;
+        emit ResetRollupBatchData(_rollupBatchIndex, _l2StoredBlockNumber, _l2ConfirmedBlockNumber);
     }
 
     /**
@@ -401,4 +403,6 @@ contract BVM_EigenDataLayrChain is Initializable, OwnableUpgradeable, Reentrancy
             dataStoreIdToL2RollUpBlock[searchData.metadata.globalDataStoreId].endBL2BlockNumber
         );
     }
+
+    uint256[49] private __gap;
 }

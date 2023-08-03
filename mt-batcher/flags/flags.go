@@ -1,8 +1,9 @@
 package flags
 
 import (
-	"github.com/urfave/cli"
 	"time"
+
+	"github.com/urfave/cli"
 )
 
 const envVarPrefix = "MT_BATCHER"
@@ -101,6 +102,11 @@ var (
 		Usage:  "The HD path used to derive the wallets for the mt fee",
 		EnvVar: prefixEnvVar(envVarPrefix, "SEQUENCER_HD_PATH"),
 	}
+	PassphraseFlag = cli.StringFlag{
+		Name:   "passphrase",
+		Usage:  "passphrase for the seed generation process to increase the seed's security",
+		EnvVar: prefixEnvVar(envVarPrefix, "PASSPHRASE"),
+	}
 	EigenContractAddressFlag = cli.StringFlag{
 		Name:     "rollup-address",
 		Usage:    "Address of the datalayr repository contract",
@@ -124,12 +130,6 @@ var (
 		Usage:  "Rollup transaction min transactions for eigen da",
 		Value:  500,
 		EnvVar: prefixEnvVar(envVarPrefix, "ROLLUP_MIN_TXN"),
-	}
-	RollUpMinSizeFlag = cli.Uint64Flag{
-		Name:   "rollup-min-size",
-		Usage:  "Rollup transaction min size data for eigen da",
-		Value:  1000,
-		EnvVar: prefixEnvVar(envVarPrefix, "ROLLUP_MIN_SIZE"),
 	}
 	FeeSizeSecFlag = cli.StringFlag{
 		Name:   "fee-size-sec",
@@ -358,12 +358,12 @@ var requiredFlags = []cli.Flag{
 	FeePrivateKeyFlag,
 	FeeMnemonicFlag,
 	FeeHDPathFlag,
+	PassphraseFlag,
 	SequencerHDPathFlag,
 	EigenContractAddressFlag,
 	EigenFeeContractAddressFlag,
 	BlockOffsetFlag,
 	RollUpMinTxnFlag,
-	RollUpMinSizeFlag,
 	RollUpMaxSizeFlag,
 	FeeSizeSecFlag,
 	FeePerBytePerTimeFlag,
