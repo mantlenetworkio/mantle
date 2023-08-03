@@ -19,13 +19,13 @@ geth:
 	$(GORUN) build/ci.go install ./cmd/geth
 	@echo "Done building."
 	@echo "Run \"$(GOBIN)/geth\" to launch geth."
-	@sed -i.a '/^exclude.*datalayr/d' go.mod && rm go.mod.a
+	@sed -i.a '/^exclude.*datalayr/d' go.mod && rm -f go.mod.a
 
 all:
 	@echo "exclude github.com/Layr-Labs/datalayr/common v0.0.0" >> go.mod
 	@echo "exclude github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0" >> go.mod
 	$(GORUN) build/ci.go install
-	@sed -i.a '/^exclude.*datalayr/d' go.mod && rm go.mod.a
+	@sed -i.a '/^exclude.*datalayr/d' go.mod && rm -f go.mod.a
 
 android:
 	$(GORUN) build/ci.go aar --local
