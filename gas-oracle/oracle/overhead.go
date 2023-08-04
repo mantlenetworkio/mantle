@@ -135,7 +135,7 @@ func calculateJumpTable(diff *big.Int, cfg *Config) {
 	// calculate jump table
 	for levelSize := cfg.batchSizeBottom; levelSize <= cfg.batchSizeCap; {
 		orderedSizes = append(orderedSizes, levelSize)
-		jumpTable[levelSize] = new(big.Int).Add(new(big.Int).Div(OverheadGasUsedOnL1, new(big.Int).SetUint64(uint64(levelSize))), new(big.Int).SetUint64(1330))
+		jumpTable[levelSize] = new(big.Int).Add(new(big.Int).Div(OverheadGasUsedOnL1, new(big.Int).SetUint64(uint64(levelSize))), cfg.stateHashGasUsed)
 		levelSize += cfg.sizeGap
 	}
 }

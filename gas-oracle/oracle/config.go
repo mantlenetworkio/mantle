@@ -56,6 +56,7 @@ type Config struct {
 	batchSizeCap       int
 	sizeGap            int
 	stateRollupGasUsed *big.Int
+	stateHashGasUsed   *big.Int
 	dataRollupGasUsed  *big.Int
 	// Metrics config
 	MetricsEnabled          bool
@@ -108,6 +109,7 @@ func NewConfig(ctx *cli.Context) *Config {
 	cfg.batchSizeBottom = ctx.GlobalInt(flags.BatchSizeBottom.Name)
 	cfg.sizeGap = ctx.GlobalInt(flags.SizeGap.Name)
 	cfg.stateRollupGasUsed = big.NewInt(ctx.GlobalInt64(flags.StateRollupGasUsed.Name))
+	cfg.stateHashGasUsed = big.NewInt(ctx.GlobalInt64(flags.StateHashGasUsed.Name))
 	cfg.dataRollupGasUsed = big.NewInt(ctx.GlobalInt64(flags.DataRollupGasUsed.Name))
 
 	if cfg.EnableHsm {
