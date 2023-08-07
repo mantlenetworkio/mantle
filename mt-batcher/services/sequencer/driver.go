@@ -40,6 +40,10 @@ import (
 	"github.com/mantlenetworkio/mantle/mt-batcher/txmgr"
 )
 
+var (
+	pollingInterval = 1000 * time.Millisecond
+)
+
 type SignerFn func(context.Context, common.Address, *types.Transaction) (*types.Transaction, error)
 
 type DriverConfig struct {
@@ -761,32 +765,31 @@ func (d *Driver) Stop() {
 
 func (d *Driver) GetBatchBlockRangeWithTimeout(ctx context.Context) (*big.Int, *big.Int, error) {
 	log.Debug("RollupTimeInterval start")
-	pollingInterval := 500 * time.Millisecond
 	rollupTimout := d.Cfg.RollupTimeout
 	exit := time.NewTimer(rollupTimout)
 	ticker := time.NewTicker(pollingInterval)
 	for {
-		// normal logic
 		start, end, err := d.GetBatchBlockRange(d.Ctx)
 		if err != nil {
 			return nil, nil, err
 		}
-		if big.NewInt(0).Sub(end, start).Cmp(big.NewInt(int64(d.Cfg.RollUpMinTxn))) >= 0 {
-			return start, end, nil
-		}
-		if start.Cmp(end) == 0 {
-			log.Info("MtBatcher Sequencer no updates", "start", start, "end", end)
-			continue
-		}
 		select {
-
+		case <-ticker.C:
+			if big.NewInt(0).Sub(end, start).Cmp(big.NewInt(int64(d.Cfg.RollUpMinTxn))) >= 0 {
+				return start, end, nil
+			}
+			if start.Cmp(end) == 0 {
+				log.Info("MtBatcher Sequencer no updates", "start", start, "end", end)
+				continue
+			}
 		case <-exit.C:
 			if big.NewInt(0).Sub(end, start).Cmp(big.NewInt(int64(d.Cfg.MinTimeoutRollupTxn))) >= 0 {
 				return start, end, nil
 			}
-			return nil, nil, errors.Errorf("error: Timeout txn < MinTimeoutRollupTxn")
-			// timeout exit
-		case <-ticker.C:
+			return nil, nil, errors.Errorf("error: Timeout txn less than MinTimeoutRollupTxn")
+		case err := <-d.Ctx.Done():
+			log.Error("", "err", err)
+			return nil, nil, errors.New("MtBatcher get block range timeout error")
 		}
 	}
 }
@@ -798,10 +801,9 @@ func (d *Driver) RollupMainWorker() {
 	for {
 		select {
 		case <-ticker.C:
-
 			start, end, err := d.GetBatchBlockRangeWithTimeout(d.Ctx)
 			if err != nil {
-				log.Error("MtBatcher Sequencer unable to get block range", "err", err)
+				log.Warn("MtBatcher Sequencer unable to get block range", "err", err)
 				continue
 			}
 			log.Info("MtBatcher get batch block range", "start", start, "end", end)
