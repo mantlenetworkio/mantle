@@ -11,7 +11,7 @@ type Store struct {
 func NewStore(path string) (*Store, error) {
 	db, err := NewLevelDBStore(path)
 	if err != nil {
-		log.Info("Could not create leveldb database.")
+		log.Error("Could not create leveldb database.")
 		return nil, err
 	}
 	return &Store{

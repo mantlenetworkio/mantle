@@ -121,7 +121,6 @@ func (s *DaService) GetDtlBatchTransactionByDataStoreId(c gecho.Context) error {
 		log.Error("invalid request params", "err", err)
 		return c.JSON(http.StatusBadRequest, errors.New("invalid request params"))
 	}
-	log.Info("GetBatchTransactionByDataStoreId Request para", "StoreNumber", txReq.StoreNumber)
 	conn, err := grpc.Dial(s.Cfg.RetrieverSocket, grpc.WithInsecure())
 	if err != nil {
 		log.Error("disperser Cannot connect to", "err", err)
