@@ -74,7 +74,7 @@ func (m *SimpleTxManager) Send(ctx context.Context, updateGasPrice UpdateGasPric
 		nonce := tx.Nonce()
 		gasTipCap := tx.GasTipCap()
 		gasFeeCap := tx.GasFeeCap()
-		log.Info("MtBatcher publishing transaction", "txHash", txHash, "nonce", nonce, "gasTipCap", gasTipCap, "gasFeeCap", gasFeeCap)
+		log.Debug("MtBatcher publishing transaction", "txHash", txHash, "nonce", nonce, "gasTipCap", gasTipCap, "gasFeeCap", gasFeeCap)
 
 		err = sendTx(ctxc, tx)
 		sendState.ProcessSendError(err)
@@ -89,7 +89,7 @@ func (m *SimpleTxManager) Send(ctx context.Context, updateGasPrice UpdateGasPric
 			return
 		}
 
-		log.Info("MtBatcher transaction published successfully", "hash", txHash, "nonce", nonce, "gasTipCap", gasTipCap, "gasFeeCap", gasFeeCap)
+		log.Debug("MtBatcher transaction published successfully", "hash", txHash, "nonce", nonce, "gasTipCap", gasTipCap, "gasFeeCap", gasFeeCap)
 
 		receipt, err := waitMined(
 			ctxc, m.backend, tx, m.cfg.ReceiptQueryInterval,
@@ -178,7 +178,7 @@ func waitMined(
 				"numConfirmations", numConfirmations)
 
 			if txHeight+numConfirmations <= tipHeight+1 {
-				log.Info("MtBatcher Transaction confirmed", "txHash", txHash)
+				log.Debug("MtBatcher Transaction confirmed", "txHash", txHash)
 				return receipt, nil
 			}
 
