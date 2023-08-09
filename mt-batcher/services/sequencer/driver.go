@@ -788,7 +788,7 @@ func (d *Driver) GetBatchBlockRangeWithTimeout(ctx context.Context) (*big.Int, *
 			}
 			return nil, nil, errors.Errorf("error: Timeout txn less than MinTimeoutRollupTxn")
 		case err := <-d.Ctx.Done():
-			log.Error("", "err", err)
+			log.Error("MtBatcher get block range timeout error", "err", err)
 			return nil, nil, errors.New("MtBatcher get block range timeout error")
 		}
 	}
