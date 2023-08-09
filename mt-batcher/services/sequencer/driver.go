@@ -219,7 +219,7 @@ func (d *Driver) UpdateGasPrice(ctx context.Context, tx *types.Transaction, feeM
 func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, error) {
 	blockOffset := new(big.Int).SetUint64(d.Cfg.BlockOffset)
 	var end *big.Int
-	log.Info("MtBatcher GetBatchBlockRange", "blockOffset", blockOffset)
+	log.Debug("MtBatcher GetBatchBlockRange", "blockOffset", blockOffset)
 	start, err := d.Cfg.EigenDaContract.GetL2ConfirmedBlockNumber(&bind.CallOpts{
 		Context: context.Background(),
 	})
@@ -909,7 +909,7 @@ func (d *Driver) CheckConfirmedWorker() {
 				continue
 			}
 
-			log.Info("Checker db batch index and contract batch idnex", "DbBatchIndex", batchIndex, "ContractBatchIndex", latestReRollupBatchIndex.Uint64())
+			log.Debug("Checker db batch index and contract batch idnex", "DbBatchIndex", batchIndex, "ContractBatchIndex", latestReRollupBatchIndex.Uint64())
 			for i := batchIndex; i < latestReRollupBatchIndex.Uint64(); i++ {
 				log.Info("Checker batch confirm data index", "batchIndex", i)
 				reConfirmedBatchIndex, err := d.Cfg.EigenDaContract.ReRollupBatchIndex(&bind.CallOpts{}, big.NewInt(int64(i)))
@@ -929,7 +929,7 @@ func (d *Driver) CheckConfirmedWorker() {
 						log.Info("Checker get l2 rollup block fail", "err", err)
 						continue
 					}
-					log.Info("Checker DataStoreIdToL2RollUpBlock", "rollupBlock.StartL2BlockNumber", rollupBlock.StartL2BlockNumber, "rollupBlock.EndBL2BlockNumber", rollupBlock.EndBL2BlockNumber)
+					log.Debug("Checker DataStoreIdToL2RollUpBlock", "rollupBlock.StartL2BlockNumber", rollupBlock.StartL2BlockNumber, "rollupBlock.EndBL2BlockNumber", rollupBlock.EndBL2BlockNumber)
 
 					aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
 						d.Ctx, rollupBlock.StartL2BlockNumber, rollupBlock.EndBL2BlockNumber,

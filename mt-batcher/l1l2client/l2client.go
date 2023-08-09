@@ -23,7 +23,7 @@ func DialL2EthClientWithTimeout(ctx context.Context, url string, disableHTTP2 bo
 	if strings.HasPrefix(url, "http") {
 		httpClient := new(http.Client)
 		if disableHTTP2 {
-			log.Info("Disabled HTTP/2 support in L2 eth client")
+			log.Debug("Disabled HTTP/2 support in L2 eth client")
 			httpClient.Transport = &http.Transport{
 				TLSNextProto: make(map[string]func(authority string, c *tls.Conn) http.RoundTripper),
 			}
