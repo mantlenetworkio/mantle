@@ -2,6 +2,7 @@ package oracle
 
 import (
 	"context"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"math/big"
@@ -17,7 +18,11 @@ import (
 	"github.com/mantlenetworkio/mantle/gas-oracle/gasprices"
 	ometrics "github.com/mantlenetworkio/mantle/gas-oracle/metrics"
 	"github.com/mantlenetworkio/mantle/gas-oracle/tokenprice"
+	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
+	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
 )
+
+const GAS_ORACLE_SYNC_HEIGHT = "GAS_ORACLE_SYNC_HEIGHT"
 
 var (
 	// errInvalidSigningKey represents the error when the signing key used
@@ -194,12 +199,16 @@ func (g *GasPriceOracle) DaFeeLoop() {
 }
 
 func (g *GasPriceOracle) OverHeadLoop() {
+	// set ticker
+	ticker := time.NewTicker(5 * time.Second)
+
+	// read gas-oracle synced height
+	db, height := readGasOracleSyncHeight()
+	log.Info("ReadGasOracleSyncHeight", "height", height)
+	// set channel
 	stateBatchAppendChan := make(chan *bindings.StateCommitmentChainStateBatchAppended, 10)
-	stateAppendSub, err := g.sccBackend.WatchStateBatchAppended(&bind.WatchOpts{Context: g.ctx}, stateBatchAppendChan, nil)
-	if err != nil {
-		panic(err)
-	}
-	defer stateAppendSub.Unsubscribe()
+
+	// set context
 	ctcTotalBatches, err := g.ctcBackend.GetTotalBatches(&bind.CallOpts{})
 	if err != nil {
 		panic(err)
@@ -209,8 +218,41 @@ func (g *GasPriceOracle) OverHeadLoop() {
 		panic(err)
 	}
 
+	var end uint64
 	for {
 		select {
+		case <-ticker.C:
+			log.Info("OverHeadLoop is living, HeartBeat It!")
+			latestHeader, err := g.l1Backend.HeaderByNumber(g.ctx, nil)
+			if err != nil {
+				log.Warn("get latest header in error", "error", err)
+				continue
+			}
+			// repeat query latest block is not allowed
+			if height != nil && height.Uint64() != 0 && height.Uint64() == latestHeader.Number.Uint64() {
+				continue
+			}
+			if height == nil || height.Uint64() == 0 {
+				height = latestHeader.Number
+			}
+			end = latestHeader.Number.Uint64()
+
+			iter, err := g.sccBackend.FilterStateBatchAppended(&bind.FilterOpts{
+				Start:   height.Uint64(),
+				End:     &end,
+				Context: g.ctx,
+			}, nil)
+			for iter.Next() {
+				select {
+				case stateBatchAppendChan <- iter.Event:
+					log.Info("write event into channel", "channel length is", len(stateBatchAppendChan))
+				default:
+					log.Error("write too many event into channel, increase channel length")
+				}
+			}
+			_ = writeGasOracleSyncHeight(db, latestHeader.Number)
+			height = latestHeader.Number
+			log.Info("Update synced height", "height", height)
 		case ev := <-stateBatchAppendChan:
 			currentCtcBatches, err := g.ctcBackend.GetTotalBatches(&bind.CallOpts{})
 			if err != nil {
@@ -219,10 +261,11 @@ func (g *GasPriceOracle) OverHeadLoop() {
 			log.Info("current scc batch size", "size", ev.BatchSize)
 			log.Info("CTC circle num in SCC circle", "count", new(big.Int).Sub(currentCtcBatches, ctcTotalBatches))
 			if err := updateOverhead(new(big.Int).Sub(currentCtcBatches, ctcTotalBatches), ev.BatchSize); err != nil {
-				log.Error("cannot update da fee", "messgae", err)
+				log.Error("cannot update overhead", "message", err)
 			}
 			ctcTotalBatches = currentCtcBatches
 		case <-g.ctx.Done():
+			db.Close()
 			g.Stop()
 		}
 	}
@@ -266,7 +309,7 @@ func NewGasPriceOracle(cfg *Config) (*GasPriceOracle, error) {
 		return nil, err
 	}
 
-	l1Client, err := NewL1Client(cfg.ethereumWssUrl, tokenPricer)
+	l1Client, err := NewL1Client(cfg.ethereumHttpUrl, tokenPricer)
 	if err != nil {
 		return nil, err
 	}
@@ -432,6 +475,47 @@ func ensureConnection(client *ethclient.Client) error {
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+func readGasOracleSyncHeight() (ethdb.Database, *big.Int) {
+	// read synced height
+	db, err := rawdb.NewLevelDBDatabase("gas-oracle-data", 0, 0, "")
+	if err != nil {
+		log.Error("NewLevelDBDatabase in error", "err", err)
+		panic(err)
+	}
+	// will close connection at once
+	//defer db.Close()
+
+	has, err := db.Has([]byte(GAS_ORACLE_SYNC_HEIGHT))
+	if err != nil {
+		log.Error("check db has GAS_ORACLE_SYNC_HEIGHT in error", "err", err)
+		panic(err)
+	}
+	if !has {
+		return db, nil
+	}
+
+	height, err := db.Get([]byte(GAS_ORACLE_SYNC_HEIGHT))
+	if err != nil {
+		log.Error("check db Get GAS_ORACLE_SYNC_HEIGHT in error", "err", err)
+		panic(err)
+	}
+	return db, big.NewInt(0).SetUint64(binary.BigEndian.Uint64(height))
+}
+
+func writeGasOracleSyncHeight(db ethdb.Database, height *big.Int) error {
+	// will close connection at once
+	//defer db.Close()
+
+	var indexBz = make([]byte, 8)
+	binary.BigEndian.PutUint64(indexBz, height.Uint64())
+	err := db.Put([]byte(GAS_ORACLE_SYNC_HEIGHT), indexBz)
+	if err != nil {
+		log.Error("put GAS_ORACLE_SYNC_HEIGHT in error", "err", err)
+		return err
 	}
 	return nil
 }
