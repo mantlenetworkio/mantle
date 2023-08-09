@@ -807,11 +807,6 @@ func (d *Driver) RollupMainWorker() {
 				continue
 			}
 			log.Info("MtBatcher get batch block range", "start", start, "end", end)
-			waitedRollupTxs := new(big.Int).Sub(end, start)
-			if big.NewInt(int64(d.Cfg.RollUpMinTxn)).Cmp(waitedRollupTxs) > 0 {
-				log.Info("MtBatcher rollup total transaction less than minimum transations in config", "RollUpMinTxn", d.Cfg.RollUpMinTxn, "waitedRollupTxs", waitedRollupTxs)
-				continue
-			}
 			aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
 				d.Ctx, start, end,
 			)
