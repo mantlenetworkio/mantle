@@ -326,7 +326,6 @@ var (
 		Name:     "min-rollup-txn",
 		Usage:    "Minimum number of transaction from l2geth which is used to submit to rollup",
 		Required: true,
-		Value:    20,
 		EnvVar:   prefixEnvVar("MIN_ROLLUP_TXN"),
 	}
 
@@ -334,7 +333,6 @@ var (
 		Name:     "max-rollup-txn",
 		Usage:    "Maximum number of transaction from l2geth which is used to submit to rollup",
 		Required: true,
-		Value:    70,
 		EnvVar:   prefixEnvVar("MAX_ROLLUP_TXN"),
 	}
 
@@ -343,7 +341,6 @@ var (
 		Usage: "Minimum number of elements required to submit a state " +
 			"root batch",
 		Required: true,
-		Value:    100,
 		EnvVar:   prefixEnvVar("MIN_TIMEOUT_STATE_ROOT_ELEMENTS"),
 	}
 )
