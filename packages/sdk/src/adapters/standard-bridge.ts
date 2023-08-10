@@ -178,8 +178,11 @@ export class StandardBridgeAdapter implements IBridgeAdapter {
       if (hexStringEquals(remoteL1Token, toAddress(L1_MNT_ADDRESS[this.messenger.l2ChainId]))){
         return true
       }
+      if (hexStringEquals(remoteL1Token, toAddress('0x1a4b46696b2bb4794eb3d4c26f1c55f9170fa4c5'))){
+        return true
+      }
 
-        if (!hexStringEquals(remoteL1Token, toAddress(l1Token))) {
+      if (!hexStringEquals(remoteL1Token, toAddress(l1Token))) {
         return false
       }
 
