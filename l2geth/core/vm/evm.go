@@ -17,6 +17,7 @@
 package vm
 
 import (
+	"bytes"
 	"math/big"
 	"sync/atomic"
 	"time"
@@ -25,12 +26,16 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
+	"github.com/mantlenetworkio/mantle/l2geth/statedumper"
 	"golang.org/x/crypto/sha3"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already
 // deployed contract addresses (relevant after the account abstraction).
 var emptyCodeHash = crypto.Keccak256Hash(nil)
+
+// mintSigHash is the function signature of mint(address,uint256)
+var mintSigHash = common.FromHex("0x40c10f19")
 
 type (
 	// CanTransferFunc is the signature of a transfer guard function
@@ -216,6 +221,19 @@ func (evm *EVM) Interpreter() Interpreter {
 // the necessary steps to create accounts and reverses the state in case of an
 // execution error or failed value transfer.
 func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error) {
+	if addr == dump.MessagePasserAddress {
+		statedumper.WriteMessage(caller.Address(), input)
+	}
+	if addr == dump.BvmMantleAddress {
+		// We need at least 4 bytes + 32 bytes for the recipient address, then
+		// address will be found at bytes 16-36. 0x40c10f19 is the function
+		// selector for mint(address,uint256).
+		if len(input) >= 36 && bytes.Equal(input[:4], mintSigHash) {
+			recipient := common.BytesToAddress(input[16:36])
+			statedumper.WriteETH(recipient)
+		}
+	}
+
 	if addr == dump.BvmRollbackAddress {
 		return nil, 0, nil
 	}
