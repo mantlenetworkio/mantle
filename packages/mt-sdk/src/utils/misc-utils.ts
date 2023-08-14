@@ -1,5 +1,5 @@
-// TODO: A lot of this stuff could probably live in core-utils instead.
-// Review this file eventually for stuff that could go into core-utils.
+// TODO: A lot of this stuff could probably live in mt-core-utils instead.
+// Review this file eventually for stuff that could go into mt-core-utils.
 
 /**
  * Returns a copy of the given object ({ ...obj }) with the given keys omitted.

@@ -3,7 +3,7 @@ import { start } from 'repl'
 
 import { LevelUp } from 'levelup'
 import { BigNumber } from 'ethers'
-import { BatchType } from '@mantleio/core-utils'
+import { BatchType } from '@mantleio/mt-core-utils'
 
 import { SimpleDB } from './simple-db'
 import { PATCH_CONTEXTS, BSS_HF1_INDEX } from '../config'

@@ -1,6 +1,6 @@
 import { Provider, Block } from '@ethersproject/abstract-provider'
-import { BaseServiceV2, Counter, Gauge, validators } from '@mantleio/common-ts'
-import { sleep } from '@mantleio/core-utils'
+import { BaseServiceV2, Counter, Gauge, validators } from '@mantleio/mt-common-ts'
+import { sleep } from '@mantleio/mt-core-utils'
 
 type HealthcheckOptions = {
   referenceRpcProvider: Provider

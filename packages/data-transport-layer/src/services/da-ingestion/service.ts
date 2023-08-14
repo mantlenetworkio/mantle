@@ -1,7 +1,7 @@
 /* Imports: External */
 import { BigNumber, constants } from 'ethers'
-import { sleep } from '@mantleio/core-utils'
-import { BaseService, Metrics } from '@mantleio/common-ts'
+import { sleep } from '@mantleio/mt-core-utils'
+import { BaseService, Metrics } from '@mantleio/mt-common-ts'
 import { BaseProvider } from '@ethersproject/providers'
 import { LevelUp } from 'levelup'
 // eslint-disable-next-line import/order
@@ -11,7 +11,7 @@ import { Gauge } from 'prom-client'
 // import { serialize } from '@ethersproject/transactions'
 import fetch from 'node-fetch'
 // eslint-disable-next-line no-duplicate-imports
-import { toHexString } from '@mantleio/core-utils'
+import { toHexString } from '@mantleio/mt-core-utils'
 
 import { MissingElementError } from './handlers/errors'
 import { TransportDB } from '../../db/transport-db'

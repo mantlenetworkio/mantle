@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 
 import { CrossChainMessenger } from './src';
-import {sleep} from "@mantleio/core-utils";
+import {sleep} from "@mantleio/mt-core-utils";
 
 (async () => {
   const l1RpcProvider = new ethers.providers.JsonRpcProvider(process.env.L1_URL)

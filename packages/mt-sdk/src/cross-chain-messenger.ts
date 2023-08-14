@@ -14,7 +14,7 @@ import {
   remove0x,
   sleep,
   toHexString,
-} from '@mantleio/core-utils'
+} from '@mantleio/mt-core-utils'
 import { getContractInterface, predeploys } from '@mantleio/contracts'
 import * as rlp from 'rlp'
 
