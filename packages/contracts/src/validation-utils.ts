@@ -1,6 +1,6 @@
 import { createInterface } from 'readline'
 
-import { hexStringEquals } from '@mantleio/core-utils'
+import { hexStringEquals } from '@mantleio/mt-core-utils'
 
 export const getInput = (query) => {
   const rl = createInterface({

@@ -1,12 +1,12 @@
 /* Imports: External */
 import { Contract, ContractFactory } from 'ethers'
 import { ethers } from 'hardhat'
-import { MessageDirection, MessageStatus } from '@mantleio/sdk'
+import { MessageDirection, MessageStatus } from '@mantleio/mt-sdk'
 import {
   applyL1ToL2Alias,
   awaitCondition,
   sleep,
-} from '@mantleio/core-utils'
+} from '@mantleio/mt-core-utils'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'

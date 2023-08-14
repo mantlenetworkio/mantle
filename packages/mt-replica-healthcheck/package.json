@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@mantleio/replica-healthcheck",
+  "name": "@mantleio/mt-replica-healthcheck",
   "version": "0.1.0",
   "description": "[Mantle] Service for monitoring the health of replica nodes",
   "main": "dist/index",
@@ -32,8 +32,8 @@
     "url": "https://github.com/mantlenetworkio/mantle.git"
   },
   "dependencies": {
-    "@mantleio/common-ts": "0.1.0",
-    "@mantleio/core-utils": "0.1.0",
+    "@mantleio/mt-common-ts": "0.1.0",
+    "@mantleio/mt-core-utils": "0.1.0",
     "@ethersproject/abstract-provider": "^5.6.1"
   },
   "devDependencies": {

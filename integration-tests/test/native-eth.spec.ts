@@ -2,7 +2,7 @@
 import { Wallet, utils, BigNumber } from 'ethers'
 import { serialize } from '@ethersproject/transactions'
 import { predeploys } from '@mantleio/contracts'
-import { expectApprox } from '@mantleio/core-utils'
+import { expectApprox } from '@mantleio/mt-core-utils'
 
 /* Imports: Internal */
 import { expect } from './shared/setup'

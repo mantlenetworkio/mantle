@@ -2,7 +2,7 @@
 import { ethers, Contract, Overrides, BigNumber } from 'ethers'
 import { TransactionRequest, BlockTag } from '@ethersproject/abstract-provider'
 import { predeploys, getContractInterface } from '@mantleio/contracts'
-import { hexStringEquals } from '@mantleio/core-utils'
+import { hexStringEquals } from '@mantleio/mt-core-utils'
 
 import {
   NumberLike,

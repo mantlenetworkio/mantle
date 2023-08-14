@@ -1,5 +1,5 @@
 {
-  "name": "@mantleio/sdk",
+  "name": "@mantleio/mt-sdk",
   "version": "0.2.1",
   "description": "[Mantle] Tools for working with Mantle",
   "main": "dist/index",
@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@mantleio/contracts": "0.2.1",
-    "@mantleio/core-utils": "0.1.0",
+    "@mantleio/mt-core-utils": "0.1.0",
     "lodash": "^4.17.21",
     "merkletreejs": "^0.2.27",
     "rlp": "^2.2.7"

@@ -1,12 +1,12 @@
 /* Imports: External */
 import { Wallet, providers, BigNumber, utils } from 'ethers'
 import { predeploys } from '@mantleio/contracts'
-import { remove0x } from '@mantleio/core-utils'
+import { remove0x } from '@mantleio/mt-core-utils'
 import {
   CrossChainMessenger,
   NumberLike,
   asL2Provider,
-} from '@mantleio/sdk'
+} from '@mantleio/mt-sdk'
 import { cleanEnv, str, num, bool, makeValidator } from 'envalid'
 import dotenv from 'dotenv'
 dotenv.config()

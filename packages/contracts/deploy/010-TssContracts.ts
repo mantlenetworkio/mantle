@@ -1,6 +1,6 @@
 /* Imports: External */
 import { DeployFunction } from 'hardhat-deploy/dist/types'
-import { hexStringEquals, awaitCondition } from '@mantleio/core-utils'
+import { hexStringEquals, awaitCondition } from '@mantleio/mt-core-utils'
 import { ethers } from 'ethers'
 
 import { names } from '../src/address-names'

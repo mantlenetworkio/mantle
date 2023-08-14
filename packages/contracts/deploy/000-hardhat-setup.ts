@@ -1,7 +1,7 @@
 /* eslint @typescript-eslint/no-var-requires: "off" */
 import { ethers } from 'ethers'
 import { DeployFunction } from 'hardhat-deploy/dist/types'
-import { awaitCondition } from '@mantleio/core-utils'
+import { awaitCondition } from '@mantleio/mt-core-utils'
 
 import {
   getContractFromArtifact,

@@ -1,5 +1,5 @@
 {
-  "name": "@mantleio/core-utils",
+  "name": "@mantleio/mt-core-utils",
   "version": "0.1.0",
   "description": "[Mantle] Core typescript utilities",
   "main": "dist/index",
