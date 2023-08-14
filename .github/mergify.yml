@@ -7,10 +7,19 @@ pull_request_rules:
     conditions:
       - and:
         - "#review-threads-unresolved=0"
+<<<<<<< HEAD
         - "#approved-reviews-by>=2"
         - "#changes-requested-reviews-by=0"
         - "label!=do-not-merge"
         - "label!=mergify-ignore"
+=======
+        - "#approved-reviews-by>=1"
+        - "#changes-requested-reviews-by=0"
+        - "label!=do-not-merge"
+        - "label!=multiple-reviewers"
+        - "label!=mergify-ignore"
+        - "base=develop"
+>>>>>>> op-node/v1.1.1
         - or:
           - and:
             - "label!=SR-Risk"
@@ -26,7 +35,12 @@ pull_request_rules:
     actions:
       queue:
         name: default
+<<<<<<< HEAD
         method: squash
+=======
+        method: merge
+        merge_bot_account: OptimismBot
+>>>>>>> op-node/v1.1.1
   - name: Add merge train label
     conditions:
       - "queue-position >= 0"
@@ -89,6 +103,7 @@ pull_request_rules:
       comment:
         message: |
           This PR is next in line to be merged, and will be merged as soon as checks pass.
+<<<<<<< HEAD
   - name: Notify author when merge queue failed
     conditions:
       - "check-failure=Queue: Embarked in merge train"
@@ -105,3 +120,48 @@ pull_request_rules:
       comment:
         message: |
           This PR changes implementation code, but doesn't include a changeset. Did you forget to add one?
+=======
+  - name: Notify author on queue failure
+    conditions:
+      - 'check-failure=Queue: Embarked in merge train'
+    actions:
+      comment:
+        message: >
+          Hey @{{ author }}, this pull request failed to merge and has been
+          dequeued from the merge train.  If you believe your PR failed in
+          the merge train because of a flaky test, requeue it by commenting
+          with `@mergifyio requeue`.
+
+          More details can be found on the `Queue: Embarked in merge train`
+          check-run.
+  - name: Add indexer tag and ecopod reviewers
+    conditions:
+      - 'files~=^indexer/'
+    actions:
+      label:
+        add:
+          - indexer
+      request_reviews:
+        users:
+          - roninjin10
+  - name: Add sdk tag and ecopod reviewers
+    conditions:
+      - 'files~=^packages/sdk/'
+    actions:
+      label:
+        add:
+          - sdk
+      request_reviews:
+        users:
+          - roninjin10
+  - name: Add common-ts tag and ecopod reviewers
+    conditions:
+      - 'files~=^packages/common-ts/'
+    actions:
+      label:
+        add:
+          - common-ts
+      request_reviews:
+        users:
+          - roninjin10
+>>>>>>> op-node/v1.1.1

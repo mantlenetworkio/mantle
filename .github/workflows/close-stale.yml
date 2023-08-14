@@ -12,6 +12,11 @@ jobs:
           stale-pr-message: 'This PR is stale because it has been open 14 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
           exempt-pr-labels: exempt-stale
           days-before-issue-stale: 999
+<<<<<<< HEAD
           days-before-pr-stale: 15
           days-before-close: 15
+=======
+          days-before-pr-stale: 14
+          days-before-close: 5
+>>>>>>> op-node/v1.1.1
           repo-token: ${{ secrets.GITHUB_TOKEN }}

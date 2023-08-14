@@ -1,4 +1,5 @@
 ---
+<<<<<<< HEAD
 2-reviewers:
   - '.github/**/*'
   - 'l2geth/**/*'
@@ -41,3 +42,7 @@ C-Protocol-Critical:
   - 'packages/data-transport-layer/**/*.ts'
   - 'packages/contracts/**/*.sol'
   - 'l2geth/**/*.go'
+=======
+C-Protocol-Critical:
+  - 'packages/contracts-bedrock/**/*.sol'
+>>>>>>> op-node/v1.1.1

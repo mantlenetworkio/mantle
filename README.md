@@ -48,7 +48,7 @@ Mantle's modular architecture helps achieve greater network efficiency for resou
 
 Different parts of the Mantle tech stack are specialized to tackle specific issues.
 
-- [**Data Availability**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/solving-data-availability): Data Availability powered by EigenDA technology, an innovative re-staking solution that leverages Ethereum's validator network to bring the security of L1 to L2
+- [**Data Availability**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/solving-data-availability): Implementing EigenDA, an innovative re-staking solution that leverages Ethereum's validator network to bring the security of L1 to L2
 - [**EVM-level Fraud Proofs**](https://docs.mantle.xyz/introducing-mantle/a-gentle-introduction/fraud-proofs): Improved fraud proofs that are evaluated using EVM-level instructions
 
 > We encourage you to check out the [**Mantle tech docs**](https://docs.mantle.xyz) to learn more about the inner workings of Mantle.
@@ -144,12 +144,12 @@ root
 
 ~~ Production ~~
 ├── <a href="./batch-submitter">batch-submitter</a>: Service for submitting batches of transactions and results to L1
-├── <a href="./mt-batcher">mt-batcher</a>: Service for submitting batches of transactions to EigenDA
-├── <a href="./mt-challenger">mt-challenger</a>: EigenDA data fraud proof
+├── <a href="./mt-da-batcher">mt-da-batcher</a>: Service for submitting batches of transactions to EigenDA
+├── <a href="./mt-da-challenger">mt-da-challenger</a>: EigenDA data fraud proof
 ├── <a href="./bss-core">bss-core</a>: Core batch-submitter logic and utilities
 ├── <a href="./gas-oracle">gas-oracle</a>: Service for updating L1 gas prices on L2
 ├── <a href="./integration-tests">integration-tests</a>: Various integration tests for the Mantle network
-├── <a href="./l2geth">l2geth</a>: Mantle client software, a fork of <a href="https://github.com/ethereum/go-ethereum/tree/v1.9.10">geth v1.9.10</a>  (deprecated for BEDROCK upgrade)
+├── <a href="./l2geth">l2geth</a>: Mantle client software, a fork of <a href="https://github.com/ethereum/go-ethereum/tree/v1.9.10">geth v1.9.10</a>
 ├── <a href="./l2geth-exporter">l2geth-exporter</a>: A prometheus exporter to collect/serve metrics from an L2 geth node
 ├── <a href="./proxyd">proxyd</a>: Configurable RPC request router and proxy
 </pre>
@@ -165,7 +165,4 @@ Then check out our list of [good first issues](https://github.com/mantlenetworki
 
 ## License
 
-Code forked from [`optimism`](https://github.com/ethereum-optimism/optimism) under the name [`optimism`](https://github.com/mantlenetworkio/bitnetwork/tree/master/l2geth) is licensed under the [GNU GPLv3](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60) in accordance with the [original license](https://github.com/ethereum-optimism/optimism/blob/master/COPYING).
-
-
-All other files within this repository are licensed under the [MIT License](https://github.com/mantlenetworkio/bitnetwork/blob/master/LICENSE) unless stated otherwise.
+Code forked from [`optimism`](https://github.com/ethereum-optimism) under the name [`optimism`](https://github.com/ethereum-optimism/optimism) is licensed under the [MIT License](https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt) in accordance with the [original license](https://github.com/ethereum/go-ethereum/blob/master/COPYING).
