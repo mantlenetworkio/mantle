@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	notWhitelistedResponse        = `{"jsonrpc":"2.0","error":{"code":-32001,"message":"rpc method is not whitelisted"},"id":999}`
+	notWhitelistedResponse        = `{"jsonrpc":"2.0","error":{"code":-32001,"message":"rpc method is not whitelisted custom message"},"id":999}`
 	parseErrResponse              = `{"jsonrpc":"2.0","error":{"code":-32700,"message":"parse error"},"id":null}`
-	invalidJSONRPCVersionResponse = `{"error":{"code":-32601,"message":"invalid JSON-RPC version"},"id":null,"jsonrpc":"2.0"}`
-	invalidIDResponse             = `{"error":{"code":-32601,"message":"invalid ID"},"id":null,"jsonrpc":"2.0"}`
-	invalidMethodResponse         = `{"error":{"code":-32601,"message":"no method specified"},"id":null,"jsonrpc":"2.0"}`
-	invalidBatchLenResponse       = `{"error":{"code":-32601,"message":"must specify at least one batch call"},"id":null,"jsonrpc":"2.0"}`
+	invalidJSONRPCVersionResponse = `{"error":{"code":-32600,"message":"invalid JSON-RPC version"},"id":null,"jsonrpc":"2.0"}`
+	invalidIDResponse             = `{"error":{"code":-32600,"message":"invalid ID"},"id":null,"jsonrpc":"2.0"}`
+	invalidMethodResponse         = `{"error":{"code":-32600,"message":"no method specified"},"id":null,"jsonrpc":"2.0"}`
+	invalidBatchLenResponse       = `{"error":{"code":-32600,"message":"must specify at least one batch call"},"id":null,"jsonrpc":"2.0"}`
 )
 
 func TestSingleRPCValidation(t *testing.T) {
@@ -26,7 +26,7 @@ func TestSingleRPCValidation(t *testing.T) {
 
 	config := ReadConfig("whitelist")
 	client := NewProxydClient("http://127.0.0.1:8545")
-	shutdown, err := proxyd.Start(config)
+	_, shutdown, err := proxyd.Start(config)
 	require.NoError(t, err)
 	defer shutdown()
 
@@ -110,7 +110,7 @@ func TestBatchRPCValidation(t *testing.T) {
 
 	config := ReadConfig("whitelist")
 	client := NewProxydClient("http://127.0.0.1:8545")
-	shutdown, err := proxyd.Start(config)
+	_, shutdown, err := proxyd.Start(config)
 	require.NoError(t, err)
 	defer shutdown()
 

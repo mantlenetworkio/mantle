@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 type ServerConfig struct {
@@ -13,6 +14,7 @@ type ServerConfig struct {
 	WSPort            int    `toml:"ws_port"`
 	MaxBodySizeBytes  int64  `toml:"max_body_size_bytes"`
 	MaxConcurrentRPCs int64  `toml:"max_concurrent_rpcs"`
+	LogLevel          string `toml:"log_level"`
 
 	// TimeoutSeconds specifies the maximum time spent serving an HTTP request. Note that isn't used for websocket connections
 	TimeoutSeconds int `toml:"timeout_seconds"`
@@ -24,13 +26,12 @@ type ServerConfig struct {
 }
 
 type CacheConfig struct {
-	Enabled               bool   `toml:"enabled"`
-	BlockSyncRPCURL       string `toml:"block_sync_rpc_url"`
-	NumBlockConfirmations int    `toml:"num_block_confirmations"`
+	Enabled bool `toml:"enabled"`
 }
 
 type RedisConfig struct {
-	URL string `toml:"url"`
+	URL       string `toml:"url"`
+	Namespace string `toml:"namespace"`
 }
 
 type MetricsConfig struct {
@@ -40,17 +41,41 @@ type MetricsConfig struct {
 }
 
 type RateLimitConfig struct {
-	RatePerSecond    int      `toml:"rate_per_second"`
-	ExemptOrigins    []string `toml:"exempt_origins"`
-	ExemptUserAgents []string `toml:"exempt_user_agents"`
-	ErrorMessage     string   `toml:"error_message"`
+	UseRedis         bool                                `toml:"use_redis"`
+	BaseRate         int                                 `toml:"base_rate"`
+	BaseInterval     TOMLDuration                        `toml:"base_interval"`
+	ExemptOrigins    []string                            `toml:"exempt_origins"`
+	ExemptUserAgents []string                            `toml:"exempt_user_agents"`
+	ErrorMessage     string                              `toml:"error_message"`
+	MethodOverrides  map[string]*RateLimitMethodOverride `toml:"method_overrides"`
+}
+
+type RateLimitMethodOverride struct {
+	Limit    int          `toml:"limit"`
+	Interval TOMLDuration `toml:"interval"`
+	Global   bool         `toml:"global"`
+}
+
+type TOMLDuration time.Duration
+
+func (t *TOMLDuration) UnmarshalText(b []byte) error {
+	d, err := time.ParseDuration(string(b))
+	if err != nil {
+		return err
+	}
+
+	*t = TOMLDuration(d)
+	return nil
 }
 
 type BackendOptions struct {
-	ResponseTimeoutSeconds int   `toml:"response_timeout_seconds"`
-	MaxResponseSizeBytes   int64 `toml:"max_response_size_bytes"`
-	MaxRetries             int   `toml:"max_retries"`
-	OutOfServiceSeconds    int   `toml:"out_of_service_seconds"`
+	ResponseTimeoutSeconds      int          `toml:"response_timeout_seconds"`
+	MaxResponseSizeBytes        int64        `toml:"max_response_size_bytes"`
+	MaxRetries                  int          `toml:"max_retries"`
+	OutOfServiceSeconds         int          `toml:"out_of_service_seconds"`
+	MaxDegradedLatencyThreshold TOMLDuration `toml:"max_degraded_latency_threshold"`
+	MaxLatencyThreshold         TOMLDuration `toml:"max_latency_threshold"`
+	MaxErrorRateThreshold       float64      `toml:"max_error_rate_threshold"`
 }
 
 type BackendConfig struct {
@@ -58,37 +83,65 @@ type BackendConfig struct {
 	Password         string `toml:"password"`
 	RPCURL           string `toml:"rpc_url"`
 	WSURL            string `toml:"ws_url"`
+	WSPort           int    `toml:"ws_port"`
 	MaxRPS           int    `toml:"max_rps"`
 	MaxWSConns       int    `toml:"max_ws_conns"`
 	CAFile           string `toml:"ca_file"`
 	ClientCertFile   string `toml:"client_cert_file"`
 	ClientKeyFile    string `toml:"client_key_file"`
 	StripTrailingXFF bool   `toml:"strip_trailing_xff"`
+
+	ConsensusSkipPeerCountCheck bool   `toml:"consensus_skip_peer_count"`
+	ConsensusReceiptsTarget     string `toml:"consensus_receipts_target"`
 }
 
 type BackendsConfig map[string]*BackendConfig
 
 type BackendGroupConfig struct {
 	Backends []string `toml:"backends"`
+
+	ConsensusAware        bool   `toml:"consensus_aware"`
+	ConsensusAsyncHandler string `toml:"consensus_handler"`
+
+	ConsensusBanPeriod          TOMLDuration `toml:"consensus_ban_period"`
+	ConsensusMaxUpdateThreshold TOMLDuration `toml:"consensus_max_update_threshold"`
+	ConsensusMaxBlockLag        uint64       `toml:"consensus_max_block_lag"`
+	ConsensusMinPeerCount       int          `toml:"consensus_min_peer_count"`
 }
 
 type BackendGroupsConfig map[string]*BackendGroupConfig
 
 type MethodMappingsConfig map[string]string
 
+type BatchConfig struct {
+	MaxSize      int    `toml:"max_size"`
+	ErrorMessage string `toml:"error_message"`
+}
+
+// SenderRateLimitConfig configures the sender-based rate limiter
+// for eth_sendRawTransaction requests.
+type SenderRateLimitConfig struct {
+	Enabled  bool
+	Interval TOMLDuration
+	Limit    int
+}
+
 type Config struct {
-	WSBackendGroup    string              `toml:"ws_backend_group"`
-	Server            ServerConfig        `toml:"server"`
-	Cache             CacheConfig         `toml:"cache"`
-	Redis             RedisConfig         `toml:"redis"`
-	Metrics           MetricsConfig       `toml:"metrics"`
-	RateLimit         RateLimitConfig     `toml:"rate_limit"`
-	BackendOptions    BackendOptions      `toml:"backend"`
-	Backends          BackendsConfig      `toml:"backends"`
-	Authentication    map[string]string   `toml:"authentication"`
-	BackendGroups     BackendGroupsConfig `toml:"backend_groups"`
-	RPCMethodMappings map[string]string   `toml:"rpc_method_mappings"`
-	WSMethodWhitelist []string            `toml:"ws_method_whitelist"`
+	WSBackendGroup        string                `toml:"ws_backend_group"`
+	Server                ServerConfig          `toml:"server"`
+	Cache                 CacheConfig           `toml:"cache"`
+	Redis                 RedisConfig           `toml:"redis"`
+	Metrics               MetricsConfig         `toml:"metrics"`
+	RateLimit             RateLimitConfig       `toml:"rate_limit"`
+	BackendOptions        BackendOptions        `toml:"backend"`
+	Backends              BackendsConfig        `toml:"backends"`
+	BatchConfig           BatchConfig           `toml:"batch"`
+	Authentication        map[string]string     `toml:"authentication"`
+	BackendGroups         BackendGroupsConfig   `toml:"backend_groups"`
+	RPCMethodMappings     map[string]string     `toml:"rpc_method_mappings"`
+	WSMethodWhitelist     []string              `toml:"ws_method_whitelist"`
+	WhitelistErrorMessage string                `toml:"whitelist_error_message"`
+	SenderRateLimit       SenderRateLimitConfig `toml:"sender_rate_limit"`
 }
 
 func ReadFromEnvOrConfig(value string) (string, error) {

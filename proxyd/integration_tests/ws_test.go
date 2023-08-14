@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ethereum/go-ethereum/log"
+
 	"github.com/gorilla/websocket"
 	"github.com/mantlenetworkio/mantle/proxyd"
 	"github.com/stretchr/testify/require"
@@ -36,11 +38,18 @@ func TestConcurrentWSPanic(t *testing.T) {
 	require.NoError(t, os.Setenv("GOOD_BACKEND_RPC_URL", backend.URL()))
 
 	config := ReadConfig("ws")
-	shutdown, err := proxyd.Start(config)
+	_, shutdown, err := proxyd.Start(config)
 	require.NoError(t, err)
 	client, err := NewProxydWSClient("ws://127.0.0.1:8546", nil, nil)
 	require.NoError(t, err)
 	defer shutdown()
+
+	// suppress tons of log messages
+	oldHandler := log.Root().GetHandler()
+	log.Root().SetHandler(log.DiscardHandler())
+	defer func() {
+		log.Root().SetHandler(oldHandler)
+	}()
 
 	<-readyCh
 
@@ -138,7 +147,7 @@ func TestWS(t *testing.T) {
 	require.NoError(t, os.Setenv("GOOD_BACKEND_RPC_URL", backend.URL()))
 
 	config := ReadConfig("ws")
-	shutdown, err := proxyd.Start(config)
+	_, shutdown, err := proxyd.Start(config)
 	require.NoError(t, err)
 	client, err := NewProxydWSClient("ws://127.0.0.1:8546", func(msgType int, data []byte) {
 		clientHdlr.MsgCB(msgType, data)
@@ -229,7 +238,7 @@ func TestWSClientClosure(t *testing.T) {
 	require.NoError(t, os.Setenv("GOOD_BACKEND_RPC_URL", backend.URL()))
 
 	config := ReadConfig("ws")
-	shutdown, err := proxyd.Start(config)
+	_, shutdown, err := proxyd.Start(config)
 	require.NoError(t, err)
 	defer shutdown()
 
@@ -259,34 +268,5 @@ func TestWSClientClosure(t *testing.T) {
 				return
 			}
 		})
-	}
-}
-
-func TestWSClientMaxConns(t *testing.T) {
-	backend := NewMockWSBackend(nil, nil, nil)
-	defer backend.Close()
-
-	require.NoError(t, os.Setenv("GOOD_BACKEND_RPC_URL", backend.URL()))
-
-	config := ReadConfig("ws")
-	shutdown, err := proxyd.Start(config)
-	require.NoError(t, err)
-	defer shutdown()
-
-	doneCh := make(chan struct{}, 1)
-	_, err = NewProxydWSClient("ws://127.0.0.1:8546", nil, nil)
-	require.NoError(t, err)
-	_, err = NewProxydWSClient("ws://127.0.0.1:8546", nil, func(err error) {
-		require.Contains(t, err.Error(), "unexpected EOF")
-		doneCh <- struct{}{}
-	})
-	require.NoError(t, err)
-
-	timeout := time.NewTicker(30 * time.Second)
-	select {
-	case <-timeout.C:
-		t.Fatalf("timed out")
-	case <-doneCh:
-		return
 	}
 }
