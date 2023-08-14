@@ -8,11 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mantlenetworkio/mantle/proxyd"
-
 	"github.com/gorilla/mux"
+	"github.com/mantlenetworkio/mantle/proxyd"
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v3"
 )
 
 type MethodTemplate struct {

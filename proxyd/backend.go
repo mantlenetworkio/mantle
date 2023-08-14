@@ -17,14 +17,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/rpc"
-	sw "github.com/mantlenetworkio/mantle/proxyd/pkg/avg-sliding-window"
-
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/gorilla/websocket"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/semaphore"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/rpc"
+
+	sw "github.com/mantlenetworkio/mantle/proxyd/pkg/avg-sliding-window"
 )
 
 const (

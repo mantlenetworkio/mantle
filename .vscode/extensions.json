@@ -7,6 +7,11 @@
     "dbaeumer.vscode-eslint",
     "editorconfig.editorconfig",
     "juanblanco.solidity",
+<<<<<<< HEAD
     "golang.go"
   ]
+=======
+    "golang.go",
+  ],
+>>>>>>> op-node/v1.1.1
 }

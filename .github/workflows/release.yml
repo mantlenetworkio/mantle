@@ -3,8 +3,15 @@ name: Release
 on:
   push:
     branches:
+<<<<<<< HEAD
       - main
   workflow_dispatch:
+=======
+      - master
+
+# Always wait for previous release to finish before releasing again
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+>>>>>>> op-node/v1.1.1
 
 jobs:
   release:
@@ -12,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     # map the step outputs to job outputs
     outputs:
+<<<<<<< HEAD
       l2geth: ${{ steps.packages.outputs.l2geth }}
       message-relayer: ${{ steps.packages.outputs.message-relayer }}
       fault-detector: ${{ steps.packages.outputs.fault-detector }}
@@ -25,6 +33,15 @@ jobs:
       batch-submitter: ${{ steps.packages.outputs.batch-submitter }}
       ci-builder: ${{ steps.packages.outputs.ci-builder }}
       foundry: ${{ steps.packages.outputs.foundry }}
+=======
+      fault-detector: ${{ steps.packages.outputs.fault-detector }}
+      balance-mon: ${{ steps.packages.outputs.drippie-mon }}
+      drippie-mon: ${{ steps.packages.outputs.drippie-mon }}
+      wd-mon: ${{ steps.packages.outputs.wd-mon }}
+      replica-healthcheck: ${{ steps.packages.outputs.replica-healthcheck }}
+      op-exporter: ${{ steps.packages.outputs.op-exporter }}
+      endpoint-monitor: ${{ steps.packages.outputs.endpoint-monitor }}
+>>>>>>> op-node/v1.1.1
 
     steps:
       - name: Checkout Repo
@@ -58,14 +75,27 @@ jobs:
         with:
           version: nightly
 
+<<<<<<< HEAD
+=======
+      # Makes a pr to publish the changesets that when
+      # merged will publish to npm
+      # see https://github.com/changesets/action
+>>>>>>> op-node/v1.1.1
       - name: Publish To NPM or Create Release Pull Request
         uses: changesets/action@v1
         id: changesets
         with:
+<<<<<<< HEAD
           publish: yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CI: true
+=======
+          createGithubReleases: false
+          publish: yarn release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+>>>>>>> op-node/v1.1.1
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # Conditional on the release being executed, we unbundle the publishedPackages to specific
@@ -76,6 +106,7 @@ jobs:
         run: |
           node ops/scripts/ci-versions.js ${{ toJSON(steps.changesets.outputs.publishedPackages) }}
 
+<<<<<<< HEAD
   l2geth:
     name: Publish L2Geth Version ${{ needs.release.outputs.l2geth }}
     needs: release
@@ -210,6 +241,12 @@ jobs:
     name: Publish proxyd Version ${{ needs.release.outputs.proxyd }}
     needs: release
     if: needs.release.outputs.proxyd != ''
+=======
+  op-exporter:
+    name: Publish op-exporter Version ${{ needs.release.outputs.op-exporter}}
+    needs: release
+    if: needs.release.outputs.op-exporter != ''
+>>>>>>> op-node/v1.1.1
     runs-on: ubuntu-latest
 
     steps:
@@ -228,21 +265,32 @@ jobs:
         id: build_args
         run: |
           echo ::set-output name=GITDATE::"$(date +%d-%m-%Y)"
+<<<<<<< HEAD
           echo ::set-output name=GITVERSION::$(jq -r .version ./proxyd/package.json)
+=======
+          echo ::set-output name=GITVERSION::$(jq -r .version ./op-exporter/package.json)
+>>>>>>> op-node/v1.1.1
           echo ::set-output name=GITCOMMIT::"$GITHUB_SHA"
 
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: .
+<<<<<<< HEAD
           file: ./proxyd/Dockerfile
           push: true
           tags: mantlenetworkio/proxyd:${{ needs.release.outputs.proxyd }},mantlenetworkio/proxyd:latest
+=======
+          file: ./op-exporter/Dockerfile
+          push: true
+          tags: ethereumoptimism/op-exporter:${{ needs.release.outputs.op-exporter }},ethereumoptimism/op-exporter:latest
+>>>>>>> op-node/v1.1.1
           build-args: |
             GITDATE=${{ steps.build_args.outputs.GITDATE }}
             GITCOMMIT=${{ steps.build_args.outputs.GITCOMMIT }}
             GITVERSION=${{ steps.build_args.outputs.GITVERSION }}
 
+<<<<<<< HEAD
   l2geth-exporter:
     name: Publish l2geth-exporter Version ${{ needs.release.outputs.l2geth-exporter}}
     needs: release
@@ -307,6 +355,8 @@ jobs:
           push: true
           tags: mantlenetworkio/message-relayer:${{ needs.release.outputs.message-relayer }},mantlenetworkio/message-relayer:latest
 
+=======
+>>>>>>> op-node/v1.1.1
   fault-detector:
     name: Publish Fault Detector Version ${{ needs.release.outputs.fault-detector }}
     needs: release
@@ -332,12 +382,21 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: fault-detector
           push: true
+<<<<<<< HEAD
           tags: mantlenetworkio/fault-detector:${{ needs.release.outputs.fault-detector }},mantlenetworkio/fault-detector:latest
 
   data-transport-layer:
     name: Publish Data Transport Layer Version ${{ needs.release.outputs.data-transport-layer }}
     needs: release
     if: needs.release.outputs.data-transport-layer != ''
+=======
+          tags: ethereumoptimism/fault-detector:${{ needs.release.outputs.fault-detector }},ethereumoptimism/fault-detector:latest
+
+  wd-mon:
+    name: Publish Withdrawal Monitor Version ${{ needs.release.outputs.wd-mon }}
+    needs: release
+    if: needs.release.outputs.wd-mon != ''
+>>>>>>> op-node/v1.1.1
     runs-on: ubuntu-latest
 
     steps:
@@ -357,6 +416,7 @@ jobs:
         with:
           context: .
           file: ./ops/docker/Dockerfile.packages
+<<<<<<< HEAD
           target: data-transport-layer
           push: true
           tags: mantlenetworkio/data-transport-layer:${{ needs.release.outputs.data-transport-layer }},mantlenetworkio/data-transport-layer:latest
@@ -365,6 +425,16 @@ jobs:
     name: Publish Deployer Version ${{ needs.release.outputs.contracts }}
     needs: release
     if: needs.release.outputs.contracts != ''
+=======
+          target: wd-mon
+          push: true
+          tags: ethereumoptimism/wd-mon:${{ needs.release.outputs.wd-mon }},ethereumoptimism/wd-mon:latest
+
+  balance-mon:
+    name: Publish Balance Monitor Version ${{ needs.release.outputs.balance-mon }}
+    needs: release
+    if: needs.release.outputs.balance-mon != ''
+>>>>>>> op-node/v1.1.1
     runs-on: ubuntu-latest
 
     steps:
@@ -384,6 +454,7 @@ jobs:
         with:
           context: .
           file: ./ops/docker/Dockerfile.packages
+<<<<<<< HEAD
           target: deployer
           push: true
           tags: mantlenetworkio/deployer:${{ needs.release.outputs.contracts }},mantlenetworkio/deployer:latest
@@ -392,6 +463,16 @@ jobs:
     name: Publish Integration tests ${{ needs.release.outputs.integration-tests }}
     needs: release
     if: needs.release.outputs.integration-tests != ''
+=======
+          target: balance-mon
+          push: true
+          tags: ethereumoptimism/balance-mon:${{ needs.release.outputs.balance-mon }},ethereumoptimism/balance-mon:latest
+
+  drippie-mon:
+    name: Publish Drippie Monitor Version ${{ needs.release.outputs.drippie-mon }}
+    needs: release
+    if: needs.release.outputs.drippie-mon != ''
+>>>>>>> op-node/v1.1.1
     runs-on: ubuntu-latest
 
     steps:
@@ -411,9 +492,15 @@ jobs:
         with:
           context: .
           file: ./ops/docker/Dockerfile.packages
+<<<<<<< HEAD
           target: integration-tests
           push: true
           tags: mantlenetworkio/integration-tests:${{ needs.release.outputs.integration-tests }},mantlenetworkio/integration-tests:latest
+=======
+          target: drippie-mon
+          push: true
+          tags: ethereumoptimism/drippie-mon:${{ needs.release.outputs.drippie-mon }},ethereumoptimism/drippie-mon:latest
+>>>>>>> op-node/v1.1.1
 
   replica-healthcheck:
     name: Publish Replica Healthcheck Version ${{ needs.release.outputs.replica-healthcheck }}
@@ -440,12 +527,21 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: replica-healthcheck
           push: true
+<<<<<<< HEAD
           tags: mantlenetworkio/replica-healthcheck:${{ needs.release.outputs.replica-healthcheck }},mantlenetworkio/replica-healthcheck:latest
 
   batch-submitter:
     name: Publish batch-submitter Version ${{ needs.release.outputs.batch-submitter }}
     needs: release
     if: needs.release.outputs.batch-submitter != ''
+=======
+          tags: ethereumoptimism/replica-healthcheck:${{ needs.release.outputs.replica-healthcheck }},ethereumoptimism/replica-healthcheck:latest
+
+  endpoint-monitor:
+    name: Publish endpoint-monitor Version ${{ needs.release.outputs.endpoint-monitor}}
+    needs: release
+    if: needs.release.outputs.endpoint-monitor != ''
+>>>>>>> op-node/v1.1.1
     runs-on: ubuntu-latest
 
     steps:
@@ -460,10 +556,30 @@ jobs:
           username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
 
+<<<<<<< HEAD
+=======
+      - name: Set build args
+        id: build_args
+        run: |
+          echo ::set-output name=GITDATE::"$(date +%d-%m-%Y)"
+          echo ::set-output name=GITVERSION::$(jq -r .version ./endpoint-monitor/package.json)
+          echo ::set-output name=GITCOMMIT::"$GITHUB_SHA"
+
+>>>>>>> op-node/v1.1.1
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: .
+<<<<<<< HEAD
           file: ./batch-submitter/Dockerfile
           push: true
           tags: mantlenetworkio/batch-submitter:${{ needs.release.outputs.batch-submitter }},mantlenetworkio/batch-submitter:latest
+=======
+          file: ./endpoint-monitor/Dockerfile
+          push: true
+          tags: ethereumoptimism/endpoint-monitor:${{ needs.release.outputs.endpoint-monitor }},ethereumoptimism/endpoint-monitor:latest
+          build-args: |
+            GITDATE=${{ steps.build_args.outputs.GITDATE }}
+            GITCOMMIT=${{ steps.build_args.outputs.GITCOMMIT }}
+            GITVERSION=${{ steps.build_args.outputs.GITVERSION }}
+>>>>>>> op-node/v1.1.1

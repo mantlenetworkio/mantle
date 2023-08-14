@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     # map the step outputs to job outputs
     outputs:
+<<<<<<< HEAD
       l2geth: ${{ steps.packages.outputs.l2geth }}
       message-relayer: ${{ steps.packages.outputs.message-relayer }}
       fault-detector: ${{ steps.packages.outputs.fault-detector }}
@@ -27,6 +28,16 @@ jobs:
       proxyd: ${{ steps.packages.outputs.proxyd }}
       l2geth-exporter: ${{ steps.packages.outputs.l2geth-exporter }}
       batch-submitter: ${{ steps.packages.outputs.batch-submitter }}
+=======
+      fault-detector: ${{ steps.packages.outputs.fault-detector }}
+      balance-mon: ${{ steps.packages.outputs.balance-mon }}
+      drippie-mon: ${{ steps.packages.outputs.drippie-mon }}
+      wd-mon: ${{ steps.packages.outputs.wd-mon }}
+      replica-healthcheck: ${{ steps.packages.outputs.replica-healthcheck }}
+      canary-docker-tag: ${{ steps.docker-image-name.outputs.canary-docker-tag }}
+      op-exporter: ${{ steps.packages.outputs.op-exporter }}
+      endpoint-monitor: ${{ steps.packages.outputs.endpoint-monitor }}
+>>>>>>> op-node/v1.1.1
 
     steps:
       - name: Check out source code
@@ -70,6 +81,10 @@ jobs:
         uses: changesets/action@v1
         id: changesets
         with:
+<<<<<<< HEAD
+=======
+          createGithubReleases: false
+>>>>>>> op-node/v1.1.1
           publish: yarn changeset publish --tag canary
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,6 +109,7 @@ jobs:
         env:
           CUSTOM_IMAGE_NAME: ${{ github.event.inputs.customImageName }}
 
+<<<<<<< HEAD
   l2geth:
     name: Publish L2Geth Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
     needs: canary-publish
@@ -199,6 +215,8 @@ jobs:
           push: true
           tags: mantlenetworkio/message-relayer:${{ needs.canary-publish.outputs.canary-docker-tag }}
 
+=======
+>>>>>>> op-node/v1.1.1
   fault-detector:
     name: Publish Fault Detector Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
     needs: canary-publish
@@ -224,12 +242,21 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: fault-detector
           push: true
+<<<<<<< HEAD
           tags: mantlenetworkio/fault-detector:${{ needs.canary-publish.outputs.canary-docker-tag }}
 
   data-transport-layer:
     name: Publish Data Transport Layer Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
     needs: canary-publish
     if: needs.canary-publish.outputs.data-transport-layer != ''
+=======
+          tags: ethereumoptimism/fault-detector:${{ needs.canary-publish.outputs.canary-docker-tag }}
+
+  balance-mon:
+    name: Publish Balance Monitor Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
+    needs: canary-publish
+    if: needs.canary-publish.outputs.balance-mon != ''
+>>>>>>> op-node/v1.1.1
     runs-on: ubuntu-latest
 
     steps:
@@ -249,6 +276,7 @@ jobs:
         with:
           context: .
           file: ./ops/docker/Dockerfile.packages
+<<<<<<< HEAD
           target: data-transport-layer
           push: true
           tags: mantlenetworkio/data-transport-layer:${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -257,6 +285,16 @@ jobs:
     name: Publish Deployer Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
     needs: canary-publish
     if: needs.canary-publish.outputs.contracts != ''
+=======
+          target: balance-mon
+          push: true
+          tags: ethereumoptimism/balance-mon:${{ needs.canary-publish.outputs.canary-docker-tag }}
+
+  drippie-mon:
+    name: Publish Drippie Monitor Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
+    needs: canary-publish
+    if: needs.canary-publish.outputs.drippie-mon != ''
+>>>>>>> op-node/v1.1.1
     runs-on: ubuntu-latest
 
     steps:
@@ -276,6 +314,7 @@ jobs:
         with:
           context: .
           file: ./ops/docker/Dockerfile.packages
+<<<<<<< HEAD
           target: deployer
           push: true
           tags: mantlenetworkio/deployer:${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -284,6 +323,16 @@ jobs:
     name: Publish Integration tests ${{ needs.canary-publish.outputs.integration-tests }}
     needs: canary-publish
     if: needs.canary-publish.outputs.integration-tests != ''
+=======
+          target: drippie-mon
+          push: true
+          tags: ethereumoptimism/drippie-mon:${{ needs.canary-publish.outputs.canary-docker-tag }}
+
+  wd-mon:
+    name: Publish Withdrawal Monitor Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
+    needs: canary-publish
+    if: needs.canary-publish.outputs.wd-mon != ''
+>>>>>>> op-node/v1.1.1
     runs-on: ubuntu-latest
 
     steps:
@@ -303,9 +352,15 @@ jobs:
         with:
           context: .
           file: ./ops/docker/Dockerfile.packages
+<<<<<<< HEAD
           target: integration-tests
           push: true
           tags: mantlenetworkio/integration-tests:${{ needs.canary-publish.outputs.canary-docker-tag }}
+=======
+          target: wd-mon
+          push: true
+          tags: ethereumoptimism/wd-mon:${{ needs.canary-publish.outputs.canary-docker-tag }}
+>>>>>>> op-node/v1.1.1
 
   replica-healthcheck:
     name: Publish Replica Healthcheck Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -332,12 +387,21 @@ jobs:
           file: ./ops/docker/Dockerfile.packages
           target: replica-healthcheck
           push: true
+<<<<<<< HEAD
           tags: mantlenetworkio/replica-healthcheck:${{ needs.canary-publish.outputs.canary-docker-tag }}
 
   proxyd:
     name: Publish proxyd Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
     needs: canary-publish
     if: needs.canary-publish.outputs.proxyd != ''
+=======
+          tags: ethereumoptimism/replica-healthcheck:${{ needs.canary-publish.outputs.canary-docker-tag }}
+
+  op-exporter:
+    name: Publish op-exporter Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
+    needs: canary-publish
+    if: needs.canary-publish.outputs.op-exporter != ''
+>>>>>>> op-node/v1.1.1
     runs-on: ubuntu-latest
 
     steps:
@@ -356,30 +420,51 @@ jobs:
         id: build_args
         run: |
           echo ::set-output name=GITDATE::"$(date +%d-%m-%Y)"
+<<<<<<< HEAD
           echo ::set-output name=GITVERSION::$(jq -r .version ./proxyd/package.json)
+=======
+          echo ::set-output name=GITVERSION::$(jq -r .version ./op-exporter/package.json)
+>>>>>>> op-node/v1.1.1
           echo ::set-output name=GITCOMMIT::"$GITHUB_SHA"
 
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: .
+<<<<<<< HEAD
           file: ./proxyd/Dockerfile
           push: true
           tags: mantlenetworkio/proxyd:${{ needs.canary-publish.outputs.proxyd }}
+=======
+          file: ./op-exporter/Dockerfile=
+          push: true
+          tags: ethereumoptimism/op-exporter:${{ needs.canary-publish.outputs.op-exporter }}
+>>>>>>> op-node/v1.1.1
           build-args: |
             GITDATE=${{ steps.build_args.outputs.GITDATE }}
             GITCOMMIT=${{ steps.build_args.outputs.GITCOMMIT }}
             GITVERSION=${{ steps.build_args.outputs.GITVERSION }}
 
+<<<<<<< HEAD
   l2geth-exporter:
     name: Publish l2geth-exporter Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
     needs: canary-publish
     if: needs.canary-publish.outputs.l2geth-exporter != ''
+=======
+  endpoint-monitor:
+    name: Publish endpoint-monitor Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
+    needs: canary-publish
+    if: needs.canary-publish.outputs.endpoint-monitor != ''
+>>>>>>> op-node/v1.1.1
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+<<<<<<< HEAD
+=======
+
+>>>>>>> op-node/v1.1.1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
@@ -393,20 +478,31 @@ jobs:
         id: build_args
         run: |
           echo ::set-output name=GITDATE::"$(date +%d-%m-%Y)"
+<<<<<<< HEAD
           echo ::set-output name=GITVERSION::$(jq -r .version ./l2geth-exporter/package.json)
+=======
+          echo ::set-output name=GITVERSION::$(jq -r .version ./endpoint-monitor/package.json)
+>>>>>>> op-node/v1.1.1
           echo ::set-output name=GITCOMMIT::"$GITHUB_SHA"
 
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: .
+<<<<<<< HEAD
           file: ./l2geth-exporter/Dockerfile
           push: true
           tags: mantlenetworkio/l2geth-exporter:${{ needs.canary-publish.outputs.l2geth-exporter }}
+=======
+          file: ./endpoint-monitor/Dockerfile
+          push: true
+          tags: ethereumoptimism/endpoint-monitor:${{ needs.canary-publish.outputs.endpoint-monitor }}
+>>>>>>> op-node/v1.1.1
           build-args: |
             GITDATE=${{ steps.build_args.outputs.GITDATE }}
             GITCOMMIT=${{ steps.build_args.outputs.GITCOMMIT }}
             GITVERSION=${{ steps.build_args.outputs.GITVERSION }}
+<<<<<<< HEAD
 
   batch-submitter:
     name: Publish batch-submitter Version ${{ needs.canary-publish.outputs.canary-docker-tag }}
@@ -433,3 +529,5 @@ jobs:
           file: ./batch-submitter/Dockerfile
           push: true
           tags: mantlenetworkio/batch-submitter:${{ needs.canary-publish.outputs.batch-submitter }}
+=======
+>>>>>>> op-node/v1.1.1

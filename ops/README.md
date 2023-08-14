@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # docker-compose
 
 The docker-compose project runs a local mantle stack.
@@ -140,3 +141,8 @@ DATA_TRANSPORT_LAYER__POLLING_INTERVAL=100
 ROLLUP_POLL_INTERVAL_FLAG=500ms
 ```
 - [./envs/geth.env#L8](./envs/geth.env#L8)
+=======
+# ops
+
+Various operational packages
+>>>>>>> op-node/v1.1.1

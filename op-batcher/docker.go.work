@@ -1,0 +1,9 @@
+go 1.18
+
+use (
+	./op-batcher
+  ./op-bindings
+  ./op-node
+  ./op-service
+  ./op-signer
+)
