@@ -71,6 +71,17 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 	if err != nil {
 		return nil, err
 	}
+
+	// initialize some metrics
+	// initialize fee scalar from contract
+	feeScalar, err := contract.Scalar(&bind.CallOpts{
+		Context: context.Background(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	ometrics.GasOracleStats.FeeScalarGauge.Update(feeScalar.Int64())
+
 	return func() error {
 		baseFee, err := contract.L1BaseFee(&bind.CallOpts{
 			Context: context.Background(),
@@ -84,7 +95,7 @@ func wrapUpdateBaseFee(l1Backend bind.ContractTransactor, l2Backend DeployContra
 		if err != nil {
 			return err
 		}
-		// Update faa scalar metrics
+		// Update fee scalar metrics
 		ometrics.GasOracleStats.FeeScalarGauge.Update(feeScalar.Int64())
 
 		// NOTE this will return base multiple with coin ratio
