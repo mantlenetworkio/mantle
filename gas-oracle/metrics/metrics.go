@@ -24,6 +24,8 @@ var (
 		DaFeeGauge metrics.Gauge
 		// OverHeadGauge over_head, amortized cost of batch submission per transaction
 		OverHeadGauge metrics.Gauge
+		// OverHeadGauge over_head, amortized cost of batch submission per transaction
+		OverHeadUpdateGauge metrics.Gauge
 		// L1GasPriceGauge l1_base_fee + l1_priority_fee
 		L1GasPriceGauge metrics.Gauge
 
@@ -49,6 +51,7 @@ func InitAndRegisterStats(r metrics.Registry) {
 	GasOracleStats.FeeScalarGauge = metrics.NewRegisteredGauge("fee_scalar", r)
 	GasOracleStats.DaFeeGauge = metrics.NewRegisteredGauge("da_fee", r)
 	GasOracleStats.OverHeadGauge = metrics.NewRegisteredGauge("over_head", r)
+	GasOracleStats.OverHeadUpdateGauge = metrics.NewRegisteredGauge("over_head_update", r)
 	GasOracleStats.L1GasPriceGauge = metrics.NewRegisteredGauge("l1_gas_price", r)
 
 	// stats for gas oracle version

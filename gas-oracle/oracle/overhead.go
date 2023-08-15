@@ -88,8 +88,9 @@ func wrapUpdateOverhead(l2Backend DeployContractBackend, cfg *Config) (func(*big
 		if err != nil {
 			return err
 		}
+		ometrics.GasOracleStats.OverHeadUpdateGauge.Inc(1)
 		// skip update if overhead is not changed
-		if overhead == newOverheadLevel {
+		if overhead.Cmp(newOverheadLevel) == 0 {
 			log.Info("skip update overhead", "overhead", overhead)
 			return nil
 		}
