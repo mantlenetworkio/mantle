@@ -206,7 +206,7 @@ func (g *GasPriceOracle) OverHeadLoop() {
 	db, height := readGasOracleSyncHeight()
 	log.Info("ReadGasOracleSyncHeight", "height", height)
 	// set channel
-	stateBatchAppendChan := make(chan *bindings.StateCommitmentChainStateBatchAppended, 10)
+	stateBatchAppendChan := make(chan *bindings.StateCommitmentChainStateBatchAppended, 1)
 
 	// set context
 	ctcTotalBatches, err := g.ctcBackend.GetTotalBatches(&bind.CallOpts{})
@@ -247,7 +247,10 @@ func (g *GasPriceOracle) OverHeadLoop() {
 				case stateBatchAppendChan <- iter.Event:
 					log.Info("write event into channel", "channel length is", len(stateBatchAppendChan))
 				default:
-					log.Error("write too many event into channel, increase channel length")
+					// discard additional event to process the last one
+					<-stateBatchAppendChan
+					stateBatchAppendChan <- iter.Event
+					log.Warn("write additional event into channel, will ignore prev events")
 				}
 			}
 			_ = writeGasOracleSyncHeight(db, latestHeader.Number)
