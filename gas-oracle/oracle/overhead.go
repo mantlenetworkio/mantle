@@ -88,7 +88,11 @@ func wrapUpdateOverhead(l2Backend DeployContractBackend, cfg *Config) (func(*big
 		if err != nil {
 			return err
 		}
-
+		// skip update if overhead is not changed
+		if overhead == newOverheadLevel {
+			log.Info("skip update overhead", "overhead", overhead)
+			return nil
+		}
 		// Use the configured gas price if it is set,
 		// otherwise use gas estimation
 		if cfg.gasPrice != nil {
