@@ -229,7 +229,7 @@ func (g *GasPriceOracle) OverHeadLoop() {
 				continue
 			}
 			// repeat query latest block is not allowed
-			if height != nil && height.Uint64() != 0 && height.Uint64() == latestHeader.Number.Uint64() {
+			if height != nil && height.Uint64() != 0 && height.Uint64() >= latestHeader.Number.Uint64() {
 				continue
 			}
 			if height == nil || height.Uint64() == 0 {
@@ -254,7 +254,7 @@ func (g *GasPriceOracle) OverHeadLoop() {
 				}
 			}
 			_ = writeGasOracleSyncHeight(db, latestHeader.Number)
-			height = latestHeader.Number
+			height = latestHeader.Number.Add(latestHeader.Number, big.NewInt(1))
 			log.Info("Update synced height", "height", height)
 		case ev := <-stateBatchAppendChan:
 			currentCtcBatches, err := g.ctcBackend.GetTotalBatches(&bind.CallOpts{})
