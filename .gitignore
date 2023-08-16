@@ -59,3 +59,4 @@ ops/data/**
 dist/
 packages/contracts/test/data/
 packages/contracts/abi/
+gas-oracle/gas-oracle-data/

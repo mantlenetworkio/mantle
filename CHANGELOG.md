@@ -1,5 +1,58 @@
 # Changelog
 
+## [v0.4.3](https://github.com/mantlenetworkio/mantle/commits/v0.4.3) - 2023-08-16
+
+### Features
+- DA
+  - Added DA license([#1263](https://github.com/mantlenetworkio/mantle/pull/1263))
+- RollUp Service
+  - Optimized the rollup service([#1301](https://github.com/mantlenetworkio/mantle/pull/1301))
+  - Log optimization for mt-batcher and da-retriever([#1329](https://github.com/mantlenetworkio/mantle/pull/1329))
+  - Modified for Rollup services optimization code([#1334](https://github.com/mantlenetworkio/mantle/pull/1334))
+- SDK
+  - Updated @mantleio/sdk to version 0.2.2([#1349](https://github.com/mantlenetworkio/mantle/pull/1349))
+
+### Bug Fixes
+- Fixed spelling errors in some documents([#1300](https://github.com/mantlenetworkio/mantle/pull/1300))
+- Added Mantle audit report files([#1333](https://github.com/mantlenetworkio/mantle/pull/1333))
+- Deleted error judge logic,which causing incorrect judgment logic and resulting in timeout configuration failure([#1337](https://github.com/mantlenetworkio/mantle/pull/1337))
+- Handled testnet MNT token address compatibility([#1338](https://github.com/mantlenetworkio/mantle/pull/1338))
+- Fixed gas oracle go mod and dockerfile([#1341](https://github.com/mantlenetworkio/mantle/pull/1341),[#1342](https://github.com/mantlenetworkio/mantle/pull/1342))
+- Fixed gas oracle update frequency and block log query range([#1344](https://github.com/mantlenetworkio/mantle/pull/1344),[#1347](https://github.com/mantlenetworkio/mantle/pull/1347))
+- Updated gas oracle metric, fixed bigint cmp formula and fee_Scalar false alarm([#1345](https://github.com/mantlenetworkio/mantle/pull/1345),[#1346](https://github.com/mantlenetworkio/mantle/pull/1346))
+
+
+## [v0.4.3-alpha.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.3-alpha.0) - 2023-08-03
+
+### Features
+- DTL
+  - Optimized performance by separating L1 and L2 process execution time for synchronous data ([#1298](https://github.com/mantlenetworkio/mantle/pull/1298))
+- SDK
+  - Enhanced compatibility by aligning the standard-bridge with the selected chainID ([#1268](https://github.com/mantlenetworkio/mantle/pull/1268))
+- GasOracle
+  - Improved metric accuracy by modifying token_ratio ([#1310](https://github.com/mantlenetworkio/mantle/pull/1310))
+
+### Bug Fixes
+- Resolved a 'nonce too high' error caused by the DA verifier([#1313](https://github.com/mantlenetworkio/mantle/pull/1313))
+- Fixed a panic issue during traceCall operation, eliminating unexpected program crashes ([#1305](https://github.com/mantlenetworkio/mantle/pull/1305))
+- Handled unhandled errors in DA upgrade tool and NewStateTransition of l2geth, enhancing error handling and preventing potential issues ([#1288](https://github.com/mantlenetworkio/mantle/pull/1288), [#1295](https://github.com/mantlenetworkio/mantle/pull/1295))
+- Strengthened seed generation process security by introducing passphrase protection ([#1297](https://github.com/mantlenetworkio/mantle/pull/1297))
+- Addressed nonce overflow and other security-related concerns, bolstering system security ([#1293](https://github.com/mantlenetworkio/mantle/pull/1293), [#1292](https://github.com/mantlenetworkio/mantle/pull/1292))
+- Improved JWT secret key configuration and handling for enhanced security ([#1226](https://github.com/mantlenetworkio/mantle/pull/1226))
+- Renamed 'rollup' to 'Accepted on layer1', enhancing clarity and reflecting its role in the network's hierarchy ([#1314](https://github.com/mantlenetworkio/mantle/pull/1314))
+- Resolved the issue of the 'Log/txstatus' element not found, addressing a gap in log information ([#1264](https://github.com/mantlenetworkio/mantle/pull/1264))
+- Cleaned up unused DA contracts, optimizing the codebase by removing redundant contracts ([#1283](https://github.com/mantlenetworkio/mantle/pull/1283))
+- Rectified Mantle token compilation errors on the Foundry platform, ensuring successful compilation ([#1282](https://github.com/mantlenetworkio/mantle/pull/1282))
+- Fixed go mod and mt-challenger configuration issues, modified 'WMANTLE9' to 'WMANTLE' for compatibility and clarity ([#1302](https://github.com/mantlenetworkio/mantle/pull/1302), [#1281](https://github.com/mantlenetworkio/mantle/pull/1281))
+- Addressed 'sigma MNT-35' issue, conducted a TSS security audit fix, ensuring accurate handling of 'sigma MNT-35' and enhancing TSS security ([#1257](https://github.com/mantlenetworkio/mantle/pull/1257))
+- Fixed ConsenSys audit issue: cs-6.18, ensuring compliance with audit requirements ([#1243](https://github.com/mantlenetworkio/mantle/pull/1243))
+- Addressed various ConsenSys audit issues (cs-6.30, cs-6.42, cs-6.40, cs-6.37, cs-6.14, cs-6.34, cs-6.22, cs-6.33), ensuring codebase compliance ([#1219](https://github.com/mantlenetworkio/mantle/pull/1219), [#1212](https://github.com/mantlenetworkio/mantle/pull/1212), [#1210](https://github.com/mantlenetworkio/mantle/pull/1210), [#1207](https://github.com/mantlenetworkio/mantle/pull/1207), [#1204](https://github.com/mantlenetworkio/mantle/pull/1204), [#1194](https://github.com/mantlenetworkio/mantle/pull/1194), [#1191](https://github.com/mantlenetworkio/mantle/pull/1191), [#1188](https://github.com/mantlenetworkio/mantle/pull/1188))
+- Resolved lock threshold validation issue, enhancing security and preventing potential vulnerabilities ([#1227](https://github.com/mantlenetworkio/mantle/pull/1227))
+- Fixed jwt secret key configuration issue, improving the handling of secret keys ([#1226](https://github.com/mantlenetworkio/mantle/pull/1226))
+- Resolved ConsenSys minor audit issues (cs-6.35, cs-6.43, cs-6.44, cs-6.45), ensuring adherence to audit recommendations ([#1217](https://github.com/mantlenetworkio/mantle/pull/1217), [#1183](https://github.com/mantlenetworkio/mantle/pull/1183))
+- Removed unused struct related to 'mnt-37', added a default message handler for function ProcessOneMessage:cs-6.26 ([#1202](https://github.com/mantlenetworkio/mantle/pull/1202), [#1198](https://github.com/mantlenetworkio/mantle/pull/1198))
+
+
 ## [v0.4.2](https://github.com/mantlenetworkio/mantle/commits/v0.4.2) - 2023-07-10
 
 ### Features

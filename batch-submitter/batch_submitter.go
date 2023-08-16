@@ -7,8 +7,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/getsentry/sentry-go"
-	"github.com/urfave/cli"
 
 	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/proposer"
 	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/sequencer"
@@ -17,6 +15,9 @@ import (
 	"github.com/mantlenetworkio/mantle/bss-core/dial"
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
+
+	"github.com/getsentry/sentry-go"
+	"github.com/urfave/cli"
 )
 
 // Main is the entrypoint into the batch submitter service. This method returns
@@ -29,10 +30,6 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-
-		log.Info("Config parsed",
-			"min_tx_size", cfg.MinL1TxSize,
-			"max_tx_size", cfg.MaxL1TxSize)
 
 		// The call to defer is done here so that any errors logged from
 		// this point on are posted to Sentry before exiting.
@@ -130,23 +127,22 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 		var services []*bsscore.Service
 		if cfg.RunTxBatchSubmitter {
 			batchTxDriver, err := sequencer.NewDriver(sequencer.Config{
-				Name:                  "Sequencer",
-				L1Client:              l1Client,
-				L2Client:              l2Client,
-				BlockOffset:           cfg.BlockOffset,
-				MinTxSize:             cfg.MinL1TxSize,
-				MaxTxSize:             cfg.MaxL1TxSize,
-				MaxPlaintextBatchSize: cfg.MaxPlaintextBatchSize,
-				DaUpgradeBlock:        cfg.DaUpgradeBlock,
-				DAAddr:                common.Address(common.HexToAddress(cfg.DAAddress)),
-				CTCAddr:               ctcAddress,
-				ChainID:               chainID,
-				PrivKey:               sequencerPrivKey,
-				EnableSequencerHsm:    cfg.EnableSequencerHsm,
-				SequencerHsmAddress:   cfg.SequencerHsmAddress,
-				SequencerHsmAPIName:   cfg.SequencerHsmAPIName,
-				SequencerHsmCreden:    cfg.SequencerHsmCreden,
-				BatchType:             sequencer.BatchTypeFromString(cfg.SequencerBatchType),
+				Name:                "Sequencer",
+				L1Client:            l1Client,
+				L2Client:            l2Client,
+				BlockOffset:         cfg.BlockOffset,
+				DaUpgradeBlock:      cfg.DaUpgradeBlock,
+				DAAddr:              common.Address(common.HexToAddress(cfg.DAAddress)),
+				CTCAddr:             ctcAddress,
+				ChainID:             chainID,
+				PrivKey:             sequencerPrivKey,
+				EnableSequencerHsm:  cfg.EnableSequencerHsm,
+				SequencerHsmAddress: cfg.SequencerHsmAddress,
+				SequencerHsmAPIName: cfg.SequencerHsmAPIName,
+				SequencerHsmCreden:  cfg.SequencerHsmCreden,
+				BatchType:           sequencer.BatchTypeFromString(cfg.SequencerBatchType),
+				MaxRollupTxn:        cfg.MaxRollupTxn,
+				MinRollupTxn:        cfg.MinRollupTxn,
 			})
 			if err != nil {
 				return err
@@ -164,27 +160,28 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 
 		if cfg.RunStateBatchSubmitter {
 			batchStateDriver, err := proposer.NewDriver(proposer.Config{
-				Name:                   "Proposer",
-				L1Client:               l1Client,
-				L2Client:               l2Client,
-				TssClient:              tssClient,
-				BlockOffset:            cfg.BlockOffset,
-				MinStateRootElements:   cfg.MinStateRootElements,
-				MaxStateRootElements:   cfg.MaxStateRootElements,
-				SCCAddr:                sccAddress,
-				CTCAddr:                ctcAddress,
-				FPRollupAddr:           common.HexToAddress(cfg.FPRollupAddress),
-				ChainID:                chainID,
-				PrivKey:                proposerPrivKey,
-				SccRollback:            cfg.EnableSccRollback,
-				MaxBatchSubmissionTime: cfg.MaxBatchSubmissionTime,
-				PollInterval:           cfg.PollInterval,
-				FinalityConfirmations:  cfg.FinalityConfirmations,
-				EnableProposerHsm:      cfg.EnableProposerHsm,
-				ProposerHsmAddress:     cfg.ProposerHsmAddress,
-				ProposerHsmCreden:      cfg.ProposerHsmCreden,
-				ProposerHsmAPIName:     cfg.ProposerHsmAPIName,
-				AllowL2AutoRollback:    cfg.AllowL2AutoRollback,
+				Name:                        "Proposer",
+				L1Client:                    l1Client,
+				L2Client:                    l2Client,
+				TssClient:                   tssClient,
+				BlockOffset:                 cfg.BlockOffset,
+				MinStateRootElements:        cfg.MinStateRootElements,
+				MaxStateRootElements:        cfg.MaxStateRootElements,
+				SCCAddr:                     sccAddress,
+				CTCAddr:                     ctcAddress,
+				FPRollupAddr:                common.HexToAddress(cfg.FPRollupAddress),
+				ChainID:                     chainID,
+				PrivKey:                     proposerPrivKey,
+				SccRollback:                 cfg.EnableSccRollback,
+				RollupTimeout:               cfg.RollupTimeout,
+				PollInterval:                cfg.PollInterval,
+				FinalityConfirmations:       cfg.FinalityConfirmations,
+				EnableProposerHsm:           cfg.EnableProposerHsm,
+				ProposerHsmAddress:          cfg.ProposerHsmAddress,
+				ProposerHsmCreden:           cfg.ProposerHsmCreden,
+				ProposerHsmAPIName:          cfg.ProposerHsmAPIName,
+				AllowL2AutoRollback:         cfg.AllowL2AutoRollback,
+				MinTimeoutStateRootElements: cfg.MinTimeoutStateRootElements,
 			})
 			if err != nil {
 				return err
