@@ -340,6 +340,20 @@ var (
 		Usage:  "the creden of hsm key for mt-batcher",
 		EnvVar: prefixEnvVar(envVarPrefix, "HSM_CREDEN"),
 	}
+
+	MinTimeoutRollupTxnFlag = cli.Uint64Flag{
+		Name:     "min-timeout-rollup-txn",
+		Usage:    "minimum of timeout Rollup transaction amount for mantle da",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "MIN_TIMEOUT_ROLLUP_TXN"),
+	}
+
+	RollupTimeoutFlag = cli.DurationFlag{
+		Name:     "rollup-timeout",
+		Usage:    "Duration we will wait before rollup batch transaction to Mantle Da",
+		Required: true,
+		EnvVar:   prefixEnvVar(envVarPrefix, "ROLLUP_TIMEOUT"),
+	}
 )
 
 var requiredFlags = []cli.Flag{
@@ -363,6 +377,8 @@ var requiredFlags = []cli.Flag{
 	EigenContractAddressFlag,
 	EigenFeeContractAddressFlag,
 	BlockOffsetFlag,
+	MinTimeoutRollupTxnFlag,
+	RollupTimeoutFlag,
 	RollUpMinTxnFlag,
 	RollUpMaxSizeFlag,
 	FeeSizeSecFlag,

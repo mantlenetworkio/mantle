@@ -111,6 +111,12 @@ var (
 		Usage:  "Setup StateRollupGasUsed",
 		EnvVar: "GAS_PRICE_ORACLE_STATE_ROLLUP_GAS_USED",
 	}
+	StateHashGasUsed = cli.IntFlag{
+		Name:   "set-state-hash-gas-used",
+		Value:  1412,
+		Usage:  "Setup StateHashGasUsed",
+		EnvVar: "GAS_PRICE_ORACLE_STATE_HASH_GAS_USED",
+	}
 	DataRollupGasUsed = cli.IntFlag{
 		Name:   "set-data-rollup-gas-used",
 		Value:  137893,
@@ -323,6 +329,7 @@ var Flags = []cli.Flag{
 	BatchSizeCap,
 	SizeGap,
 	StateRollupGasUsed,
+	StateHashGasUsed,
 	DataRollupGasUsed,
 	EnableHsmFlag,
 	HsmAddressFlag,

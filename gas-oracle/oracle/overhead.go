@@ -88,7 +88,12 @@ func wrapUpdateOverhead(l2Backend DeployContractBackend, cfg *Config) (func(*big
 		if err != nil {
 			return err
 		}
-
+		ometrics.GasOracleStats.OverHeadUpdateGauge.Inc(1)
+		// skip update if overhead is not changed
+		if overhead.Cmp(newOverheadLevel) == 0 {
+			log.Info("skip update overhead", "overhead", overhead)
+			return nil
+		}
 		// Use the configured gas price if it is set,
 		// otherwise use gas estimation
 		if cfg.gasPrice != nil {
@@ -135,7 +140,7 @@ func calculateJumpTable(diff *big.Int, cfg *Config) {
 	// calculate jump table
 	for levelSize := cfg.batchSizeBottom; levelSize <= cfg.batchSizeCap; {
 		orderedSizes = append(orderedSizes, levelSize)
-		jumpTable[levelSize] = new(big.Int).Add(new(big.Int).Div(OverheadGasUsedOnL1, new(big.Int).SetUint64(uint64(levelSize))), new(big.Int).SetUint64(1330))
+		jumpTable[levelSize] = new(big.Int).Add(new(big.Int).Div(OverheadGasUsedOnL1, new(big.Int).SetUint64(uint64(levelSize))), cfg.stateHashGasUsed)
 		levelSize += cfg.sizeGap
 	}
 }
