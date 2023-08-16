@@ -1,6 +1,6 @@
 # Changelog
 
-## [v0.4.3-beta.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.3-beta.0) - 2023-08-16
+## [v0.4.3](https://github.com/mantlenetworkio/mantle/commits/v0.4.3) - 2023-08-16
 
 ### Features
 - DA
