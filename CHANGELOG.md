@@ -4,25 +4,22 @@
 
 ### Features
 - DA
-  - add DA license([#1263](https://github.com/mantlenetworkio/mantle/pull/1263))
+  - Added DA license([#1263](https://github.com/mantlenetworkio/mantle/pull/1263))
 - RollUp Service
-  - Optimize the rollup service([#1301](https://github.com/mantlenetworkio/mantle/pull/1301))
-  - log optimization for mt-batcher and da-retriever([#1329](https://github.com/mantlenetworkio/mantle/pull/1329))
-  - fix mt batcher, modify for Rollup services optimization code([#1334](https://github.com/mantlenetworkio/mantle/pull/1334))
+  - Optimized the rollup service([#1301](https://github.com/mantlenetworkio/mantle/pull/1301))
+  - Log optimization for mt-batcher and da-retriever([#1329](https://github.com/mantlenetworkio/mantle/pull/1329))
+  - Modified for Rollup services optimization code([#1334](https://github.com/mantlenetworkio/mantle/pull/1334))
 - SDK
-  - update @mantleio/sdk to version 0.2.2([#1349](https://github.com/mantlenetworkio/mantle/pull/1349))
+  - Updated @mantleio/sdk to version 0.2.2([#1349](https://github.com/mantlenetworkio/mantle/pull/1349))
 
 ### Bug Fixes
-- Fix typos([#1300](https://github.com/mantlenetworkio/mantle/pull/1300))
-- Add Mantle audit report files([#1333](https://github.com/mantlenetworkio/mantle/pull/1333))
-- delete error judge logic,which causing incorrect judgment logic and resulting in timeout configuration failure([#1337](https://github.com/mantlenetworkio/mantle/pull/1337))
-- handle testnet MNT token address compatibility([#1338](https://github.com/mantlenetworkio/mantle/pull/1338))
-- fix gas oracle go mod([#1341](https://github.com/mantlenetworkio/mantle/pull/1341))
-- fix gas oracle dockerfile([#1342](https://github.com/mantlenetworkio/mantle/pull/1342))
-- fix gas oracle update frequency([#1344](https://github.com/mantlenetworkio/mantle/pull/1344))
-- fix gas oracle bigint cmp formula([#1345](https://github.com/mantlenetworkio/mantle/pull/1345))
-- fix gas oracle block log query range,fix overhead compare formula([#1347](https://github.com/mantlenetworkio/mantle/pull/1347))
-- fix gas oracle fee_Scalar false alarm,Query scalar from gas_oracle contract and initialize fee_scalar for metrics when gas_oracle starts([#1346](https://github.com/mantlenetworkio/mantle/pull/1346))
+- Fixed spelling errors in some documents([#1300](https://github.com/mantlenetworkio/mantle/pull/1300))
+- Added Mantle audit report files([#1333](https://github.com/mantlenetworkio/mantle/pull/1333))
+- Deleted error judge logic,which causing incorrect judgment logic and resulting in timeout configuration failure([#1337](https://github.com/mantlenetworkio/mantle/pull/1337))
+- Handled testnet MNT token address compatibility([#1338](https://github.com/mantlenetworkio/mantle/pull/1338))
+- Fixed gas oracle go mod and dockerfile([#1341](https://github.com/mantlenetworkio/mantle/pull/1341),[#1342](https://github.com/mantlenetworkio/mantle/pull/1342))
+- Fixed gas oracle update frequency and block log query range([#1344](https://github.com/mantlenetworkio/mantle/pull/1344),[#1347](https://github.com/mantlenetworkio/mantle/pull/1347))
+- Updated gas oracle metric, fixed bigint cmp formula and fee_Scalar false alarm([#1345](https://github.com/mantlenetworkio/mantle/pull/1345),[#1346](https://github.com/mantlenetworkio/mantle/pull/1346))
 
 
 ## [v0.4.3-alpha.0](https://github.com/mantlenetworkio/mantle/commits/v0.4.3-alpha.0) - 2023-08-03
