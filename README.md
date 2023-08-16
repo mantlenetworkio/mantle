@@ -59,22 +59,22 @@ Different parts of the Mantle tech stack are specialized to tackle specific issu
 
 ### Useful Addresses
 
-|         Name          | Value                                |
-| :-------------------: | ------------------------------------ |
-| Testnet Token Faucet  | https://faucet.testnet.mantle.xyz/   |
-| Mantle Testnet Bridge | https://bridge.testnet.mantle.xyz/   |
-|    Mantle Explorer    | https://explorer.testnet.mantle.xyz/ |
-|  Mantle Node RPC URL  | https://rpc.testnet.mantle.xyz/      |
-|       Chain ID        | 5001                                 |
+|         Name          | Mainnet| Testnet                                |
+| :-------------------: | --------------------------- | ------------------------------------ |
+|     Token Faucet      | N/A                         | https://faucet.testnet.mantle.xyz/   |
+|     Mantle Bridge     | https://bridge.mantle.xyz/  | https://bridge.testnet.mantle.xyz/   |
+|    Mantle Explorer    | https://explorer.mantle.xyz/| https://explorer.testnet.mantle.xyz/ |
+|  Mantle Node RPC URL  | https://rpc.mantle.xyz/     | https://rpc.testnet.mantle.xyz/      |
+|       Chain ID        | 5000 | 5001                                 |
 
 </br>
 
 DApps need to connect to nodes for fetching block data and sending transactions to the Mantle network. Our JSON-RPC API supports **HTTPS** and **WebSocket** connections.
 
-|  Service  | URL                             |
-| :-------: | ------------------------------- |
-|    RPC    | https://rpc.testnet.mantle.xyz/ |
-| WebSocket | wss://ws.testnet.mantle.xyz     |
+|  Service  | Mainnet                 | Testnet                             |
+| :-------: | ----------------------- |------------------------------- |
+|    RPC    | https://rpc.mantle.xyz/ | https://rpc.testnet.mantle.xyz/ |
+| WebSocket | wss://ws.mantle.xyz     | wss://ws.testnet.mantle.xyz     |
 
 </br>
 
