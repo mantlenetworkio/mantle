@@ -10,3 +10,4 @@ var TssRewardAddress = common.HexToAddress("0x4200000000000000000000000000000000
 var DeadAddress = common.HexToAddress("0xdeaDDeADDEaDdeaDdEAddEADDEAdDeadDEADDEaD")
 var BvmWhitelistAddress = common.HexToAddress("0x4200000000000000000000000000000000000002")
 var BvmRollbackAddress = common.HexToAddress("0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD2222")
+var MessagePasserAddress = common.HexToAddress("0x4200000000000000000000000000000000000000")
