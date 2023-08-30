@@ -3,6 +3,7 @@ package sequencer
 import (
 	"errors"
 	"fmt"
+
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 )
 
@@ -76,113 +77,27 @@ type groupedBlock struct {
 func GenSequencerBatchParams(
 	shouldStartAtElement uint64,
 	blockOffset uint64,
-	batch []BatchElement,
+	batchNumber uint64,
+	timestamp uint64,
+	blockNumber uint64,
+
+	numSequencedTxs uint64,
+	numSubsequentQueueTxs uint64,
+
 ) (*AppendSequencerBatchParams, error) {
 	var (
-		contexts               []BatchContext
-		groupedBlocks          []groupedBlock
-		txs                    []*CachedTx
-		lastBlockIsSequencerTx bool
-		lastTimestamp          uint64
-		lastBlockNumber        uint64
+		contexts []BatchContext
 	)
-	// Iterate over the batch elements, grouping the elements according to
-	// the following criteria:
-	//  - All txs in the same group must have the same timestamp.
-	//  - All sequencer txs in the same group must have the same block number.
-	//  - If sequencer txs exist in a group, they must come before all
-	//     queued txs.
-	//
-	// Assuming the block and timestamp criteria for sequencer txs are
-	// respected within each group, the following are examples of groupings:
-	//  - [s]         // sequencer can exist by itself
-	//  - [q]         // ququed tx can exist by itself
-	//  - [s] [s]     // differing sequencer tx timestamp/blocknumber
-	//  - [s q] [s]   // sequencer tx must precede queued tx in group
-	//  - [q] [q s]   // INVALID: consecutive queued txs are split
-	//  - [q q] [s]   // correct split for preceding case
-	//  - [s q] [s q] // alternating sequencer tx interleaved with queued
-	for _, el := range batch {
-		// To enforce the above groupings, the following condition is
-		// used to determine when to create a new batch:
-		//  - On the first pass, or
-		//  - The preceding tx has a different timestamp, or
-		//  - Whenever a sequencer tx is observed, and:
-		//    - The preceding tx was a queued tx, or
-		//    - The preceding sequencer tx has a different block number.
-		// Note that a sequencer tx is usually required to create a new group,
-		// so a queued tx may ONLY exist as the first element in a group if it
-		// is the very first element or it has a different timestamp from the
-		// preceding tx.
-		needsNewGroupOnSequencerTx := !lastBlockIsSequencerTx ||
-			el.BlockNumber != lastBlockNumber
-		if len(groupedBlocks) == 0 ||
-			el.Timestamp != lastTimestamp ||
-			(el.IsSequencerTx() && needsNewGroupOnSequencerTx) {
+	contexts = append(contexts, BatchContext{
+		NumSequencedTxs:       numSequencedTxs,
+		NumSubsequentQueueTxs: numSubsequentQueueTxs,
+		Timestamp:             timestamp,
+		BlockNumber:           blockNumber,
+	})
 
-			groupedBlocks = append(groupedBlocks, groupedBlock{})
-		}
-
-		// Append the tx to either the sequenced or queued txs,
-		// depending on its type.
-		cur := len(groupedBlocks) - 1
-		if el.IsSequencerTx() {
-			groupedBlocks[cur].sequenced =
-				append(groupedBlocks[cur].sequenced, el)
-
-			// Gather all sequencer txs, as these will be encoded in
-			// the calldata of the batch tx submitted to the L1 CTC
-			// contract.
-			txs = append(txs, el.Tx)
-		} else {
-			groupedBlocks[cur].queued =
-				append(groupedBlocks[cur].queued, el)
-		}
-
-		lastBlockIsSequencerTx = el.IsSequencerTx()
-		lastTimestamp = el.Timestamp
-		lastBlockNumber = el.BlockNumber
-	}
-
-	// For each group, construct the resulting BatchContext.
-	for _, block := range groupedBlocks {
-		numSequencedTxs := uint64(len(block.sequenced))
-		numSubsequentQueueTxs := uint64(len(block.queued))
-
-		// Ensure at least one tx was included in this group.
-		if numSequencedTxs == 0 && numSubsequentQueueTxs == 0 {
-			return nil, ErrBlockWithInvalidContext
-		}
-
-		// Compute the timestamp and block number from for the batch
-		// using either the earliest sequenced tx or the earliest queued
-		// tx. If a batch has a sequencer tx it is given preference,
-		// since it is guaranteed to be the earliest item in the group.
-		// Otherwise, we fallback to the earliest queued tx since it was
-		// the very first item.
-		var (
-			timestamp   uint64
-			blockNumber uint64
-		)
-		if numSequencedTxs > 0 {
-			timestamp = block.sequenced[0].Timestamp
-			blockNumber = block.sequenced[0].BlockNumber
-		} else {
-			timestamp = block.queued[0].Timestamp
-			blockNumber = block.queued[0].BlockNumber
-		}
-
-		contexts = append(contexts, BatchContext{
-			NumSequencedTxs:       numSequencedTxs,
-			NumSubsequentQueueTxs: numSubsequentQueueTxs,
-			Timestamp:             timestamp,
-			BlockNumber:           blockNumber,
-		})
-	}
 	return &AppendSequencerBatchParams{
 		ShouldStartAtElement:  shouldStartAtElement - blockOffset,
-		TotalElementsToAppend: uint64(len(batch)),
+		TotalElementsToAppend: batchNumber,
 		Contexts:              contexts,
-		Txs:                   txs,
 	}, nil
 }

@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"math/big"
 
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
 	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
@@ -239,8 +238,6 @@ func (p *AppendSequencerBatchParams) WriteNoTxn(
 // bytes slice.
 func (p *AppendSequencerBatchParams) Serialize(
 	batchType BatchType,
-	l2BlockNumber *big.Int,
-	upgradeBlock *big.Int,
 ) ([]byte, error) {
 	var buf bytes.Buffer
 	if err := p.WriteNoTxn(&buf, batchType); err != nil {
