@@ -213,18 +213,10 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
         await this.state.db.putHighestL1BlockNumber(currentL1Block)
         await this.state.db.putFraudProofWindow(fraudProofWindow)
 
-        let targetL1Block = Math.min(
+        const targetL1Block = Math.min(
           highestSyncedL1Block + this.options.logsPerPollingInterval,
           currentL1Block - this.options.confirmations
         )
-
-        // Don't sync beyond the shutoff block!
-        if (Number.isInteger(this.options.l1SyncShutoffBlock)) {
-          targetL1Block = Math.min(
-            targetL1Block,
-            this.options.l1SyncShutoffBlock
-          )
-        }
 
         // We're already at the head, so no point in attempting to sync.
         if (highestSyncedL1Block === targetL1Block) {
