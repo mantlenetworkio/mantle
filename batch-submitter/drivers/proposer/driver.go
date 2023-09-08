@@ -229,7 +229,7 @@ func (d *Driver) GetBatchBlockRange(
 		return nil, nil, err
 	}
 	finality := new(big.Int).SetUint64(d.cfg.FinalityConfirmations)
-	finality.Add(finality, new(big.Int).SetInt64(blockBuffer)) // add 2 block number buffer to dtl sync data
+	//finality.Add(finality, new(big.Int).SetInt64(blockBuffer)) // add 2 block number buffer to dtl sync data
 	currentNumber := currentHeader.Number
 	currentNumber.Sub(currentNumber, finality)
 
