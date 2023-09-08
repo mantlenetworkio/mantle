@@ -1,6 +1,6 @@
 /* Imports: External */
 import { DeployFunction } from 'hardhat-deploy/dist/types'
-import { hexStringEquals } from '@mantleio/core-utils'
+import { hexStringEquals, sleep } from '@mantleio/core-utils'
 
 /* Imports: Internal */
 import {
@@ -74,6 +74,8 @@ const deployFn: DeployFunction = async (hre) => {
   namesAndAddresses = namesAndAddresses.filter(({ name, address }) => {
     return !hexStringEquals(existingAddresses[name], address)
   })
+
+  await sleep(10000)
 
   await deployAndVerifyAndThen({
     hre,
