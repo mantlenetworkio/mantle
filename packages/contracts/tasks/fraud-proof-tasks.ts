@@ -1,6 +1,6 @@
 import { task } from 'hardhat/config'
 import { ethers } from 'ethers'
-import { hexStringEquals } from '@mantleio/core-utils'
+import {hexStringEquals, sleep} from '@mantleio/core-utils'
 
 // @ts-ignore
 import { getContractFactory } from '../src'
@@ -112,6 +112,7 @@ task('rollupStake')
       }
 
       await mantle.connect(deployer).transfer(stakerWallet.address, mantleAmount)
+      await sleep(10000)
       console.log(
         'balance: ',
         stakerWallet.address,
@@ -122,22 +123,29 @@ task('rollupStake')
         'ETH Balance:',
         stakerWallet.address,
         ' ',
-        await stakerWallet.getBalance()
+        (await stakerWallet.getBalance()).toString()
       )
+      await sleep(10000)
       await mantle
         .connect(stakerWallet)
         .approve(taskArgs.rollup, ethers.utils.parseEther(taskArgs.amount))
+
+      await sleep(10000);
       console.log(
         'ETH Balance:',
         stakerWallet.address,
         ' ',
-        await stakerWallet.getBalance()
+        (await stakerWallet.getBalance()).toString()
       )
+
+      await sleep(10000)
 
       console.log('stake', stakerWallet.address, operators[i])
       await rollup
         .connect(stakerWallet)
         .stake(ethers.utils.parseEther(taskArgs.amount), operators[i])
+
+      await sleep(10000)
     }
   })
 
