@@ -7,6 +7,9 @@ import (
 	"math/big"
 	"strings"
 
+	kms "cloud.google.com/go/kms/apiv1"
+	"google.golang.org/api/option"
+
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -23,9 +26,6 @@ import (
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
-
-	kms "cloud.google.com/go/kms/apiv1"
-	"google.golang.org/api/option"
 )
 
 const (
@@ -241,11 +241,10 @@ func (d *Driver) CraftBatchTx(
 		if err != nil {
 			return nil, err
 		}
-
 		// For each sequencer transaction, update our running total with the
 		// size of the transaction.
 		batchElement := BatchElementFromBlock(block)
-		if batchElement.IsSequencerTx() {
+		if batchElement.IsSequencerTx {
 			numSequencedTxs += 1
 		} else {
 			numSubsequentQueueTxs += 1
@@ -257,12 +256,24 @@ func (d *Driver) CraftBatchTx(
 	}
 	blocksLen := numSequencedTxs + numSubsequentQueueTxs
 	shouldStartAt := start.Uint64()
+
 	for {
-		batchParams, err := GenSequencerBatchParams(
-			shouldStartAt, d.cfg.BlockOffset, uint64(blocksLen), lastTimestamp,
-			lastBlockNumber, uint64(numSequencedTxs), uint64(numSubsequentQueueTxs))
-		if err != nil {
-			return nil, err
+		var (
+			contexts []BatchContext
+		)
+
+		batchContext := BatchContext{
+			NumSequencedTxs:       uint64(numSequencedTxs),
+			NumSubsequentQueueTxs: uint64(numSubsequentQueueTxs),
+			Timestamp:             lastTimestamp,
+			BlockNumber:           lastBlockNumber,
+		}
+
+		contexts = append(contexts, batchContext)
+		batchParams := &AppendSequencerBatchParams{
+			ShouldStartAtElement:  shouldStartAt - d.cfg.BlockOffset,
+			TotalElementsToAppend: uint64(blocksLen),
+			Contexts:              contexts,
 		}
 
 		// Encode the batch arguments using the configured encoding type.

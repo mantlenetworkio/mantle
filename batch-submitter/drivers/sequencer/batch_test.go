@@ -4,10 +4,11 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/sequencer"
 	l2common "github.com/mantlenetworkio/mantle/l2geth/common"
 	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
-	"github.com/stretchr/testify/require"
 )
 
 func TestBatchElementFromBlock(t *testing.T) {
@@ -30,8 +31,7 @@ func TestBatchElementFromBlock(t *testing.T) {
 
 	require.Equal(t, element.Timestamp, expTime)
 	require.Equal(t, element.BlockNumber, expBlockNumber)
-	require.True(t, element.IsSequencerTx())
-	require.Equal(t, element.Tx.Tx(), expTx)
+	require.True(t, element.IsSequencerTx)
 
 	queueMeta := l2types.NewTransactionMeta(
 		new(big.Int).SetUint64(expBlockNumber), 0, nil,
@@ -44,6 +44,5 @@ func TestBatchElementFromBlock(t *testing.T) {
 
 	require.Equal(t, element.Timestamp, expTime)
 	require.Equal(t, element.BlockNumber, expBlockNumber)
-	require.False(t, element.IsSequencerTx())
-	require.Nil(t, element.Tx)
+	require.False(t, element.IsSequencerTx)
 }

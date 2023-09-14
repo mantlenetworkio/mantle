@@ -181,10 +181,6 @@ type AppendSequencerBatchParams struct {
 	// tx windows in Txs and implicitly allow one to compute how many
 	// (omitted) queued txs are in a given window.
 	Contexts []BatchContext
-
-	// Txs contains all sequencer txs that will be recorded in the L1 CTC
-	// contract.
-	Txs []*CachedTx
 }
 
 // WriteNoTxn encodes the AppendSequencerBatchParams using the following format:
@@ -209,7 +205,7 @@ type AppendSequencerBatchParams struct {
 //
 // Note that writing to a bytes.Buffer cannot
 // error, so errors are ignored here
-func (p *AppendSequencerBatchParams) WriteNoTxn(
+func (p *AppendSequencerBatchParams) Write(
 	w *bytes.Buffer,
 	batchType BatchType,
 ) error {
@@ -240,7 +236,7 @@ func (p *AppendSequencerBatchParams) Serialize(
 	batchType BatchType,
 ) ([]byte, error) {
 	var buf bytes.Buffer
-	if err := p.WriteNoTxn(&buf, batchType); err != nil {
+	if err := p.Write(&buf, batchType); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
@@ -320,10 +316,10 @@ func (p *AppendSequencerBatchParams) Read(r io.Reader) error {
 		// encoded object. Silence the error and return success if
 		// the batch is well formed.
 		if err == io.EOF {
-			if len(p.Contexts) == 0 && len(p.Txs) != 0 {
+			if len(p.Contexts) == 0 {
 				return ErrMalformedBatch
 			}
-			if len(p.Txs) == 0 && len(p.Contexts) != 0 {
+			if len(p.Contexts) != 0 {
 				return ErrMalformedBatch
 			}
 			return closeReader()
@@ -335,8 +331,6 @@ func (p *AppendSequencerBatchParams) Read(r io.Reader) error {
 		if err := tx.DecodeRLP(l2rlp.NewStream(r, txLen)); err != nil {
 			return err
 		}
-
-		p.Txs = append(p.Txs, NewCachedTx(tx))
 	}
 }
 
