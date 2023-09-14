@@ -269,6 +269,11 @@ func (d *Driver) CraftBatchTx(
 			BlockNumber:           lastBlockNumber,
 		}
 
+		d.metrics.BatchNumSequencedTxs().Set(float64(batchContext.NumSequencedTxs))
+		d.metrics.BatchNumSubsequentQueueTxs().Set(float64(batchContext.NumSubsequentQueueTxs))
+		d.metrics.BatchTimestamp().Set(float64(batchContext.Timestamp))
+		d.metrics.BatchBlockNumber().Set(float64(batchContext.BlockNumber))
+
 		contexts = append(contexts, batchContext)
 		batchParams := &AppendSequencerBatchParams{
 			ShouldStartAtElement:  shouldStartAt - d.cfg.BlockOffset,
