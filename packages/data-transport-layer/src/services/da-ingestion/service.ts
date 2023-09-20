@@ -448,6 +448,9 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
             )
             return false
           }
+          this.daIngestionMetrics.currentL2TransactionIndex.set(
+            batchTx['TxMeta']['index']
+          )
         }
         transactionEntries.push({
           index: batchTx['TxMeta']['index'],
@@ -464,9 +467,6 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
           decoded,
           confirmed: true,
         })
-        this.daIngestionMetrics.currentL2TransactionIndex.set(
-          batchTx['TxMeta']['index']
-        )
       }
       await this.state.db.putTransactions(transactionEntries)
       await this.state.db.putBatchTransactionByDsId(
