@@ -6,6 +6,18 @@ describe('L2Provider', () => {
     it('should query the GasPriceOracle contract', () => {})
   })
 
+  describe('decimals', () => {
+    it('should query the GasPriceOracle contract', () => {})
+  })
+
+  describe('scalar', () => {
+    it('should query the GasPriceOracle contract', () => {})
+  })
+
+  describe('overhead', () => {
+    it('should query the GasPriceOracle contract', () => {})
+  })
+
   describe('estimateL1Gas', () => {
     it('should query the GasPriceOracle contract', () => {})
   })
