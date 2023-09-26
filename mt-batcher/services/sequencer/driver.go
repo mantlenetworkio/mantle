@@ -235,7 +235,7 @@ func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, er
 		return nil, nil, fmt.Errorf("invalid range, end(%v) < start(%v)", end, start)
 	}
 	if end.Cmp(latestHeader.Number) > 0 {
-		end = latestHeader.Number
+		end = new(big.Int).Add(latestHeader.Number, bigOne)
 	}
 	return start, end, nil
 }
