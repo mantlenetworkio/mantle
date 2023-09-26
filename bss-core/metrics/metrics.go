@@ -53,6 +53,14 @@ type Base struct {
 
 	// sccRollupTimeDuration state root rollup time duration
 	sccRollupTimeDuration prometheus.Gauge
+
+	batchNumSequencedTxs prometheus.Gauge
+
+	batchNumSubsequentQueueTxs prometheus.Gauge
+
+	batchTimestamp prometheus.Gauge
+
+	batchBlockNumber prometheus.Gauge
 }
 
 func NewBase(serviceName, subServiceName string) *Base {
@@ -121,6 +129,26 @@ func NewBase(serviceName, subServiceName string) *Base {
 			Help:      "state root rollup time duration",
 			Subsystem: subsystem,
 		}),
+		batchNumSequencedTxs: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "batch_num_sequenced_txs",
+			Help:      "Number of batch sequenced transactions",
+			Subsystem: subsystem,
+		}),
+		batchNumSubsequentQueueTxs: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "batch_num_subsequent_queue_txs",
+			Help:      "Number of batch subsequent queue transactions",
+			Subsystem: subsystem,
+		}),
+		batchTimestamp: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "batch_timestamp",
+			Help:      "Timestamp of batch",
+			Subsystem: subsystem,
+		}),
+		batchBlockNumber: promauto.NewGauge(prometheus.GaugeOpts{
+			Name:      "batch_block_number",
+			Help:      "Block number of batch",
+			Subsystem: subsystem,
+		}),
 	}
 }
 
@@ -185,6 +213,26 @@ func (b *Base) TssRollbackSignal() prometheus.Gauge {
 // SccRollupTimeDuration state root rollup time duration
 func (b *Base) SccRollupTimeDuration() prometheus.Gauge {
 	return b.sccRollupTimeDuration
+}
+
+// BatchNumSequencedTxs Number of batch sequenced transactions
+func (b *Base) BatchNumSequencedTxs() prometheus.Gauge {
+	return b.batchNumSequencedTxs
+}
+
+// BatchNumSubsequentQueueTxs Number of batch subsequent queue transactions
+func (b *Base) BatchNumSubsequentQueueTxs() prometheus.Gauge {
+	return b.batchNumSubsequentQueueTxs
+}
+
+// BatchTimestamp Timestamp of batch
+func (b *Base) BatchTimestamp() prometheus.Gauge {
+	return b.batchTimestamp
+}
+
+// BatchBlockNumber Block number of batch
+func (b *Base) BatchBlockNumber() prometheus.Gauge {
+	return b.batchBlockNumber
 }
 
 // MakeSubsystemName builds the subsystem name for a group of metrics, which
