@@ -133,6 +133,8 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) (*StateTransition
 	var err error
 	gasPrice := msg.GasPrice()
 	if rcfg.UsingBVM {
+		log.Info("-------TraceTransaction traceTx ApplyMessage UsingBVM")
+
 		if msg.GasPrice().Cmp(common.Big0) != 0 {
 			// Compute the L1 fee before the state transition
 			// so it only has to be read from state one time.
@@ -155,6 +157,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) (*StateTransition
 			}
 		}
 	}
+	log.Info("-------TraceTransaction traceTx ApplyMessage return")
 
 	return &StateTransition{
 		gp:       gp,
@@ -177,6 +180,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) (*StateTransition
 // indicates a core error meaning that the message would always fail for that particular
 // state and would never be accepted within a block.
 func ApplyMessage(evm *vm.EVM, msg Message, gp *GasPool) ([]byte, uint64, bool, error) {
+	log.Info("-------TraceTransaction traceTx ApplyMessage")
 	stateTransition, err := NewStateTransition(evm, msg, gp)
 	if err != nil {
 		log.Error("apply message fall", "err", err)

@@ -865,6 +865,7 @@ func (api *PrivateDebugAPI) computeStateDB(block *types.Block, reexec uint64) (*
 // and returns them as a JSON object.
 func (api *PrivateDebugAPI) TraceTransaction(ctx context.Context, hash common.Hash, config *TraceConfig) (interface{}, error) {
 	// Retrieve the transaction and assemble its EVM context
+	log.Info("-------TraceTransaction start ", "hash", hash)
 	tx, blockHash, _, index := rawdb.ReadTransaction(api.eth.ChainDb(), hash)
 	if tx == nil {
 		return nil, fmt.Errorf("transaction %#x not found", hash)
@@ -873,10 +874,13 @@ func (api *PrivateDebugAPI) TraceTransaction(ctx context.Context, hash common.Ha
 	if config != nil && config.Reexec != nil {
 		reexec = *config.Reexec
 	}
+	log.Info("-------TraceTransaction computeTxEnv ", "blockHash", blockHash)
 	msg, vmctx, statedb, err := api.computeTxEnv(blockHash, int(index), reexec)
 	if err != nil {
 		return nil, err
 	}
+	log.Info("-------TraceTransaction traceTx ")
+
 	// Trace the transaction and return
 	return api.traceTx(ctx, msg, vmctx, statedb, config)
 }
@@ -892,6 +896,7 @@ func (api *PrivateDebugAPI) traceTx(ctx context.Context, message core.Message, v
 	)
 	switch {
 	case config != nil && config.Tracer != nil:
+		log.Info("-------TraceTransaction traceTx tracer ", "tracer", config.Tracer)
 		// Define a meaningful timeout of a single transaction trace
 		timeout := defaultTraceTimeout
 		if config.Timeout != nil {
@@ -918,6 +923,8 @@ func (api *PrivateDebugAPI) traceTx(ctx context.Context, message core.Message, v
 		tracer = vm.NewStructLogger(config.LogConfig)
 	}
 
+	log.Info("-------TraceTransaction traceTx chain config ")
+
 	chainConfig := api.eth.blockchain.Config()
 	if config != nil && config.LogConfig != nil && config.LogConfig.Overrides != nil {
 		chainConfigCopy := new(params.ChainConfig)
@@ -928,8 +935,11 @@ func (api *PrivateDebugAPI) traceTx(ctx context.Context, message core.Message, v
 		}
 	}
 
+	log.Info("-------TraceTransaction traceTx new evm ")
+
 	// Run the transaction with tracing enabled.
 	vmenv := vm.NewEVM(vmctx, statedb, chainConfig, vm.Config{Debug: true, Tracer: tracer})
+	log.Info("-------TraceTransaction traceTx apply message")
 
 	ret, gas, failed, err := core.ApplyMessage(vmenv, message, new(core.GasPool).AddGas(message.Gas()))
 	if err != nil {
@@ -938,6 +948,8 @@ func (api *PrivateDebugAPI) traceTx(ctx context.Context, message core.Message, v
 	// Depending on the tracer type, format and return the output
 	switch tracer := tracer.(type) {
 	case *vm.StructLogger:
+		log.Info("-------TraceTransaction traceTx struct logger")
+
 		return &ethapi.ExecutionResult{
 			Gas:         gas,
 			Failed:      failed,
@@ -946,9 +958,13 @@ func (api *PrivateDebugAPI) traceTx(ctx context.Context, message core.Message, v
 		}, nil
 
 	case *tracers.Tracer:
+		log.Info("-------TraceTransaction traceTx tracer result")
+
 		return tracer.GetResult()
 
 	default:
+		log.Info("-------TraceTransaction traceTx bad tracer")
+
 		panic(fmt.Sprintf("bad tracer type %T", tracer))
 	}
 }
@@ -960,18 +976,24 @@ func (api *PrivateDebugAPI) computeTxEnv(blockHash common.Hash, txIndex int, ree
 	if block == nil {
 		return nil, vm.Context{}, nil, fmt.Errorf("block %#x not found", blockHash)
 	}
+	log.Info("-------TraceTransaction computeTxEnv GetBlockByHash", "block", block.NumberU64())
+
 	parent := api.eth.blockchain.GetBlock(block.ParentHash(), block.NumberU64()-1)
 	if parent == nil {
 		return nil, vm.Context{}, nil, fmt.Errorf("parent %#x not found", block.ParentHash())
 	}
+	log.Info("-------TraceTransaction computeTxEnv computeStateDB", "parent", parent.NumberU64())
+
 	statedb, err := api.computeStateDB(parent, reexec)
 	if err != nil {
 		return nil, vm.Context{}, nil, err
 	}
+	log.Info("-------TraceTransaction computeTxEnv computeStateDB end ")
 
 	if txIndex == 0 && len(block.Transactions()) == 0 {
 		return nil, vm.Context{}, statedb, nil
 	}
+	log.Info("-------TraceTransaction computeTxEnv ", "transactions len", len(block.Transactions()))
 
 	// Recompute transactions up to the target index.
 	signer := types.MakeSigner(api.eth.blockchain.Config(), block.Number())
@@ -992,5 +1014,7 @@ func (api *PrivateDebugAPI) computeTxEnv(blockHash common.Hash, txIndex int, ree
 		// Only delete empty objects if EIP158/161 (a.k.a Spurious Dragon) is in effect
 		statedb.Finalise(vmenv.ChainConfig().IsEIP158(block.Number()))
 	}
+	log.Info("-------TraceTransaction computeTxEnv ApplyMessage end")
+
 	return nil, vm.Context{}, nil, fmt.Errorf("transaction index %d out of range for block %#x", txIndex, blockHash)
 }

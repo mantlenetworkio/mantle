@@ -75,6 +75,7 @@ func ReadTransaction(db ethdb.Reader, hash common.Hash) (*types.Transaction, com
 	if blockNumber == nil {
 		return nil, common.Hash{}, 0, 0
 	}
+	log.Info("-------TraceTransaction ReadTransaction ", "blockNumber", blockNumber)
 	blockHash := ReadCanonicalHash(db, *blockNumber)
 	if blockHash == (common.Hash{}) {
 		return nil, common.Hash{}, 0, 0
@@ -84,6 +85,8 @@ func ReadTransaction(db ethdb.Reader, hash common.Hash) (*types.Transaction, com
 		log.Error("Transaction referenced missing", "number", blockNumber, "hash", blockHash)
 		return nil, common.Hash{}, 0, 0
 	}
+	log.Info("-------TraceTransaction ReadTransactionMeta ")
+
 	for txIndex, tx := range body.Transactions {
 		if tx.Hash() == hash {
 			// UsingBVM
