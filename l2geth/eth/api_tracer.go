@@ -945,6 +945,8 @@ func (api *PrivateDebugAPI) traceTx(ctx context.Context, message core.Message, v
 	if err != nil {
 		return nil, fmt.Errorf("tracing failed: %v", err)
 	}
+	log.Info("-------TraceTransaction traceTx apply message end")
+
 	// Depending on the tracer type, format and return the output
 	switch tracer := tracer.(type) {
 	case *vm.StructLogger:
