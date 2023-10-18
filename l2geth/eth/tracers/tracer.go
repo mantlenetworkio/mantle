@@ -640,7 +640,11 @@ func (jst *Tracer) GetResult() (json.RawMessage, error) {
 	// Clean up the JavaScript environment
 	jst.vm.DestroyHeap()
 	jst.vm.Destroy()
-	log.Info("-------TraceTransaction tracer return", "result", result)
+	bytes, err := result.MarshalJSON()
+	if err != nil {
+		jst.err = wrapError("result", err)
+	}
+	log.Info("-------TraceTransaction tracer return", "result len", len(bytes))
 
 	return result, jst.err
 }
