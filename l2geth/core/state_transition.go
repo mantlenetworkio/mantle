@@ -133,7 +133,9 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) (*StateTransition
 	var err error
 	gasPrice := msg.GasPrice()
 	if rcfg.UsingBVM {
-		log.Info("-------TraceTransaction traceTx ApplyMessage UsingBVM")
+		if msg.To().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+			log.Info("-------TraceTransaction traceTx ApplyMessage UsingBVM")
+		}
 
 		if msg.GasPrice().Cmp(common.Big0) != 0 {
 			// Compute the L1 fee before the state transition
@@ -157,7 +159,9 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) (*StateTransition
 			}
 		}
 	}
-	log.Info("-------TraceTransaction traceTx ApplyMessage return")
+	if msg.To().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage return")
+	}
 
 	return &StateTransition{
 		gp:       gp,
@@ -180,13 +184,17 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) (*StateTransition
 // indicates a core error meaning that the message would always fail for that particular
 // state and would never be accepted within a block.
 func ApplyMessage(evm *vm.EVM, msg Message, gp *GasPool) ([]byte, uint64, bool, error) {
-	log.Info("-------TraceTransaction traceTx ApplyMessage", "to", msg.To())
+	if msg.To().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage", "to", msg.To())
+	}
 	stateTransition, err := NewStateTransition(evm, msg, gp)
 	if err != nil {
 		log.Error("apply message fall", "err", err)
 		return nil, 0, false, err
 	}
-	log.Info("-------TraceTransaction traceTx ApplyMessage stateTransition")
+	if msg.To().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage stateTransition")
+	}
 
 	return stateTransition.TransitionDb()
 }
@@ -209,6 +217,9 @@ func (st *StateTransition) useGas(amount uint64) error {
 }
 
 func (st *StateTransition) buyGas() error {
+	if st.to().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb pre check buyGas")
+	}
 	mgval := new(big.Int).Mul(new(big.Int).SetUint64(st.msg.Gas()), st.gasPrice)
 	if rcfg.UsingBVM {
 		// Only charge the L1 fee for QueueOrigin sequencer transactions
@@ -221,8 +232,14 @@ func (st *StateTransition) buyGas() error {
 
 		}
 	}
+	if st.to().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb pre check GetBalance")
+	}
 	if st.state.GetBalance(st.msg.From()).Cmp(mgval) < 0 {
 		return errInsufficientBalanceForGas
+	}
+	if st.to().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb pre check SubGas")
 	}
 	if err := st.gp.SubGas(st.msg.Gas()); err != nil {
 		return err
@@ -231,12 +248,18 @@ func (st *StateTransition) buyGas() error {
 
 	st.initialGas = st.msg.Gas()
 	st.state.SubBalance(st.msg.From(), mgval)
+	if st.to().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb pre check return")
+	}
 	return nil
 }
 
 func (st *StateTransition) preCheck() error {
 	// Make sure this transaction's nonce is correct.
 	if st.msg.CheckNonce() {
+		if st.to().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+			log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb pre check CheckNonce")
+		}
 		if rcfg.UsingBVM {
 			if st.msg.QueueOrigin() == types.QueueOriginL1ToL2 {
 				return st.buyGas()
@@ -249,6 +272,9 @@ func (st *StateTransition) preCheck() error {
 			return ErrNonceTooLow
 		}
 	}
+	if st.to().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb pre check end")
+	}
 	return st.buyGas()
 }
 
@@ -256,12 +282,17 @@ func (st *StateTransition) preCheck() error {
 // returning the result including the used gas. It returns an error if failed.
 // An error indicates a consensus issue.
 func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bool, err error) {
-	log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb", "to address", st.to())
+
+	if st.to().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb", "to address", st.to())
+	}
 
 	if err = st.preCheck(); err != nil {
 		return
 	}
-	log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb preCheck", "to address", st.to())
+	if st.to().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb preCheck", "to address", st.to())
+	}
 
 	msg := st.msg
 	sender := vm.AccountRef(msg.From())
@@ -277,7 +308,9 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 	if err = st.useGas(gas); err != nil {
 		return nil, 0, false, err
 	}
-	log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb gas", "to address", st.to())
+	if st.to().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb gas", "to address", st.to())
+	}
 
 	var (
 		evm = st.evm
@@ -299,7 +332,9 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		st.state.SetNonce(msg.From(), st.state.GetNonce(msg.From())+1)
 		ret, st.gas, vmerr = evm.Call(sender, st.to(), st.data, st.gas, st.value)
 	}
-	log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb vm", "to address", st.to())
+	if st.to().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb vm", "to address", st.to())
+	}
 
 	if vmerr != nil {
 		log.Debug("VM returned with error", "err", vmerr, "ret", hexutil.Encode(ret))
@@ -311,7 +346,9 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		}
 	}
 	st.refundGas()
-	log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb last", "to address", st.to())
+	if st.to().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb last", "to address", st.to())
+	}
 
 	if rcfg.UsingBVM {
 		// The L2 Fee is the same as the fee that is charged in the normal geth
@@ -324,7 +361,9 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 	} else {
 		st.state.AddBalance(evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
 	}
-	log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb return", "to address", st.to())
+	if st.to().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		log.Info("-------TraceTransaction traceTx ApplyMessage TransitionDb return", "to address", st.to())
+	}
 
 	return ret, st.gasUsed(), vmerr != nil, err
 }
