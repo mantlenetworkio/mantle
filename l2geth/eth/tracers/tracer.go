@@ -601,6 +601,7 @@ func (jst *Tracer) CaptureEnd(output []byte, gasUsed uint64, t time.Duration, er
 func (jst *Tracer) GetResult() (json.RawMessage, error) {
 	// Transform the context into a JavaScript object and inject into the state
 	obj := jst.vm.PushObject()
+	log.Info("-------TraceTransaction tracer for loop")
 
 	for key, val := range jst.ctx {
 		switch val := val.(type) {
@@ -628,14 +629,18 @@ func (jst *Tracer) GetResult() (json.RawMessage, error) {
 	}
 	jst.vm.PutPropString(jst.stateObject, "ctx")
 
+	log.Info("-------TraceTransaction tracer call")
+
 	// Finalize the trace and return the results
 	result, err := jst.call("result", "ctx", "db")
 	if err != nil {
 		jst.err = wrapError("result", err)
 	}
+	log.Info("-------TraceTransaction tracer call end")
 	// Clean up the JavaScript environment
 	jst.vm.DestroyHeap()
 	jst.vm.Destroy()
+	log.Info("-------TraceTransaction tracer return", "result", result)
 
 	return result, jst.err
 }
