@@ -133,7 +133,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) (*StateTransition
 	var err error
 	gasPrice := msg.GasPrice()
 	if rcfg.UsingBVM {
-		if msg.To().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+		if msg.To() != nil && msg.To().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
 			log.Info("-------TraceTransaction traceTx ApplyMessage UsingBVM")
 		}
 
@@ -159,7 +159,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) (*StateTransition
 			}
 		}
 	}
-	if msg.To().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+	if msg.To() != nil && msg.To().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
 		log.Info("-------TraceTransaction traceTx ApplyMessage return")
 	}
 
@@ -184,7 +184,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) (*StateTransition
 // indicates a core error meaning that the message would always fail for that particular
 // state and would never be accepted within a block.
 func ApplyMessage(evm *vm.EVM, msg Message, gp *GasPool) ([]byte, uint64, bool, error) {
-	if msg.To().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+	if msg.To() != nil && msg.To().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
 		log.Info("-------TraceTransaction traceTx ApplyMessage", "to", msg.To())
 	}
 	stateTransition, err := NewStateTransition(evm, msg, gp)
@@ -192,7 +192,7 @@ func ApplyMessage(evm *vm.EVM, msg Message, gp *GasPool) ([]byte, uint64, bool, 
 		log.Error("apply message fall", "err", err)
 		return nil, 0, false, err
 	}
-	if msg.To().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
+	if msg.To() != nil && msg.To().String() == "0xDc6eddfeeF7794c23a6Bce1736f5f524246af999" {
 		log.Info("-------TraceTransaction traceTx ApplyMessage stateTransition")
 	}
 
