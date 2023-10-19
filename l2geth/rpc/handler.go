@@ -135,7 +135,7 @@ func (h *handler) handleMsg(msg *jsonrpcMessage) {
 		return
 	}
 	h.startCallProc(func(cp *callProc) {
-		log.Info("-------- start to call ")
+		log.Info("-------- start to call ", "method", msg.Method)
 		answer := h.handleCallMsg(cp, msg)
 		h.addSubscriptions(cp.notifiers)
 		if answer != nil {
@@ -297,6 +297,7 @@ func (h *handler) handleCallMsg(ctx *callProc, msg *jsonrpcMessage) *jsonrpcMess
 	case msg.isNotification():
 		h.handleCall(ctx, msg)
 		h.log.Debug("Served "+msg.Method, "t", time.Since(start))
+		h.log.Info("---------- isNotification")
 		return nil
 	case msg.isCall():
 		resp := h.handleCall(ctx, msg)
@@ -305,6 +306,8 @@ func (h *handler) handleCallMsg(ctx *callProc, msg *jsonrpcMessage) *jsonrpcMess
 		} else {
 			h.log.Debug("Served "+msg.Method, "reqid", idForLog{msg.ID}, "t", time.Since(start))
 		}
+		h.log.Info("---------- isCall")
+
 		return resp
 	case msg.hasValidID():
 		return msg.errorResponse(&invalidRequestError{"invalid request"})
