@@ -100,7 +100,11 @@ func (msg *jsonrpcMessage) errorResponse(err error) *jsonrpcMessage {
 
 func (msg *jsonrpcMessage) response(result interface{}) *jsonrpcMessage {
 	enc, err := json.Marshal(result)
+	log.Info("------", "method", msg.Method, "result len", len(enc))
+
 	if err != nil {
+		log.Info("------", "method", msg.Method, "Marshal err")
+
 		// TODO: wrap with 'internal server error'
 		return msg.errorResponse(err)
 	}
@@ -202,6 +206,7 @@ func (c *jsonCodec) readBatch() (msg []*jsonrpcMessage, batch bool, err error) {
 	if err := c.decode(&rawmsg); err != nil {
 		return nil, false, err
 	}
+	log.Info("--------", "len", len(rawmsg))
 	msg, batch = parseMessage(rawmsg)
 	return msg, batch, nil
 }
@@ -235,6 +240,7 @@ func (c *jsonCodec) closed() <-chan interface{} {
 // is called. Any non-JSON-RPC messages in the input return the zero value of
 // jsonrpcMessage.
 func parseMessage(raw json.RawMessage) ([]*jsonrpcMessage, bool) {
+	log.Info("-------- parseMessage")
 	if !isBatch(raw) {
 		msgs := []*jsonrpcMessage{{}}
 		json.Unmarshal(raw, &msgs[0])
@@ -247,6 +253,8 @@ func parseMessage(raw json.RawMessage) ([]*jsonrpcMessage, bool) {
 		msgs = append(msgs, new(jsonrpcMessage))
 		dec.Decode(&msgs[len(msgs)-1])
 	}
+	log.Info("-------- parseMessage return")
+
 	return msgs, true
 }
 
