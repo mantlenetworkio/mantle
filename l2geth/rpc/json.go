@@ -216,6 +216,8 @@ func (c *jsonCodec) writeJSON(ctx context.Context, v interface{}) error {
 	defer c.encMu.Unlock()
 	log.Info("---------- http json encode")
 	deadline, ok := ctx.Deadline()
+	log.Info("---------- http json encode ", "deadline", deadline.Second())
+
 	if !ok {
 		deadline = time.Now().Add(defaultWriteTimeout)
 	}
