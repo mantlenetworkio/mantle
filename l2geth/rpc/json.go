@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"io"
 	"reflect"
 	"strings"
@@ -208,7 +209,7 @@ func (c *jsonCodec) readBatch() (msg []*jsonrpcMessage, batch bool, err error) {
 func (c *jsonCodec) writeJSON(ctx context.Context, v interface{}) error {
 	c.encMu.Lock()
 	defer c.encMu.Unlock()
-
+	log.Info("---------- http json encode")
 	deadline, ok := ctx.Deadline()
 	if !ok {
 		deadline = time.Now().Add(defaultWriteTimeout)
