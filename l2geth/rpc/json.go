@@ -37,7 +37,7 @@ const (
 	unsubscribeMethodSuffix  = "_unsubscribe"
 	notificationMethodSuffix = "_subscription"
 
-	defaultWriteTimeout = 10 * time.Second // used if context has no deadline
+	defaultWriteTimeout = 60 * time.Second // used if context has no deadline
 )
 
 var null = json.RawMessage("null")

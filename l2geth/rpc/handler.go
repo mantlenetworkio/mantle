@@ -93,6 +93,9 @@ func newHandler(connCtx context.Context, conn jsonWriter, idgen func() ID, reg *
 
 // handleBatch executes all messages in a batch and returns the responses.
 func (h *handler) handleBatch(msgs []*jsonrpcMessage) {
+
+	log.Info("-------- start to handleBatch ", "method len", len(msgs))
+
 	// Emit error response for empty batches:
 	if len(msgs) == 0 {
 		h.startCallProc(func(cp *callProc) {
@@ -119,10 +122,14 @@ func (h *handler) handleBatch(msgs []*jsonrpcMessage) {
 				answers = append(answers, answer)
 			}
 		}
+		log.Info("-------- start to handleBatch ", "calls len", len(calls))
+		log.Info("-------- start to handleBatch ", "answers", len(answers))
+
 		h.addSubscriptions(cp.notifiers)
 		if len(answers) > 0 {
 			h.conn.writeJSON(cp.ctx, answers)
 		}
+
 		for _, n := range cp.notifiers {
 			n.activate()
 		}
