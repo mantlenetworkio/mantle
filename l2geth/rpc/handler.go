@@ -146,10 +146,10 @@ func (h *handler) handleMsg(msg *jsonrpcMessage) {
 		answer := h.handleCallMsg(cp, msg)
 		h.addSubscriptions(cp.notifiers)
 		if answer != nil {
-			h.conn.writeJSON(cp.ctx, answer)
+			err := h.conn.writeJSON(cp.ctx, answer)
+			log.Info("-------- start to writeJSON ", "method", msg.Method, "err", err)
 		} else {
 			log.Info("-------- answer is nil   ")
-
 		}
 
 		for _, n := range cp.notifiers {
@@ -313,7 +313,7 @@ func (h *handler) handleCallMsg(ctx *callProc, msg *jsonrpcMessage) *jsonrpcMess
 		} else {
 			h.log.Debug("Served "+msg.Method, "reqid", idForLog{msg.ID}, "t", time.Since(start))
 		}
-		h.log.Info("---------- isCall")
+		h.log.Info("---------- isCall", "method", msg.Method)
 
 		return resp
 	case msg.hasValidID():
