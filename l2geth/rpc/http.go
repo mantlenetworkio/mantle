@@ -100,7 +100,7 @@ type HTTPTimeouts struct {
 // configuration is not provided.
 var DefaultHTTPTimeouts = HTTPTimeouts{
 	ReadTimeout:  30 * time.Second,
-	WriteTimeout: 120 * time.Second,
+	WriteTimeout: 30 * time.Second,
 	IdleTimeout:  120 * time.Second,
 }
 
@@ -227,6 +227,7 @@ func NewHTTPServer(cors []string, vhosts []string, timeouts HTTPTimeouts, srv ht
 		log.Warn("Sanitizing invalid HTTP write timeout", "provided", timeouts.WriteTimeout, "updated", DefaultHTTPTimeouts.WriteTimeout)
 		timeouts.WriteTimeout = DefaultHTTPTimeouts.WriteTimeout
 	}
+	log.Info("-------------------", "timeout", timeouts.WriteTimeout.String())
 	if timeouts.IdleTimeout < time.Second {
 		log.Warn("Sanitizing invalid HTTP idle timeout", "provided", timeouts.IdleTimeout, "updated", DefaultHTTPTimeouts.IdleTimeout)
 		timeouts.IdleTimeout = DefaultHTTPTimeouts.IdleTimeout
