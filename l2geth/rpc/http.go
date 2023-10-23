@@ -232,7 +232,6 @@ func NewHTTPServer(cors []string, vhosts []string, timeouts HTTPTimeouts, srv ht
 		log.Warn("Sanitizing invalid HTTP idle timeout", "provided", timeouts.IdleTimeout, "updated", DefaultHTTPTimeouts.IdleTimeout)
 		timeouts.IdleTimeout = DefaultHTTPTimeouts.IdleTimeout
 	}
-	timeouts.WriteTimeout = DefaultHTTPTimeouts.WriteTimeout
 	// Bundle and start the HTTP server
 	return &http.Server{
 		Handler:      handler,
