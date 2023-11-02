@@ -219,6 +219,13 @@ export const BRIDGE_ADAPTER_DATA: {
       l2Bridge: '0x467194771dAe2967Aef3ECbEDD3Bf9a310C76C65' as const,
     },
   },
+  [L2ChainID.MANTLE_TESTNET]: {
+    wstETH: {
+      Adapter: ERC20BridgeAdapter,
+      l1Bridge: '0x2fD573Ace456904709444d04AdCa189fB19e725a' as const,
+      l2Bridge: '0x08C2EE913D3cb544D182bCC7632cB0B382A2933e' as const,
+    },
+  },
   [L2ChainID.MANTLE_KOVAN]: {
     wstETH: {
       Adapter: ERC20BridgeAdapter,
