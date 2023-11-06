@@ -118,7 +118,6 @@ func (result *ExecutionResult) Return() []byte {
 // Revert returns the concrete revert reason if the execution is aborted by `REVERT`
 // opcode. Note the reason can be nil if no data supplied with revert opcode.
 func (result *ExecutionResult) Revert() []byte {
-	log.Info("ExecutionResult", "result.Err", result.Err)
 	if result.Err != vm.ErrExecutionReverted {
 		return nil
 	}
