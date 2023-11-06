@@ -135,7 +135,7 @@ func NewEVMInterpreter(evm *EVM, cfg Config) *EVMInterpreter {
 //
 // It's important to note that any errors returned by the interpreter should be
 // considered a revert-and-consume-all-gas operation except for
-// errExecutionReverted which means revert-and-keep-gas-left.
+// ErrExecutionReverted which means revert-and-keep-gas-left.
 func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (ret []byte, err error) {
 	if in.intPool == nil {
 		in.intPool = poolOfIntPools.get()
@@ -289,7 +289,7 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 		case err != nil:
 			return nil, err
 		case operation.reverts:
-			return res, errExecutionReverted
+			return res, ErrExecutionReverted
 		case operation.halts:
 			return res, nil
 		case !operation.jumps:
