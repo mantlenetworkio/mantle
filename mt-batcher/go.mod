@@ -2,9 +2,9 @@ module github.com/mantlenetworkio/mantle/mt-batcher
 
 go 1.19
 
-replace github.com/Layr-Labs/datalayr/common => ../datalayr/common
-
-replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr/lib/merkzg
+//replace github.com/Layr-Labs/datalayr/common => ../datalayr/common
+//
+//replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr/lib/merkzg
 
 replace github.com/mantlenetworkio/mantle/l2geth => ../l2geth
 
@@ -16,7 +16,7 @@ replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
 
 require (
 	cloud.google.com/go/kms v1.11.0
-	github.com/Layr-Labs/datalayr/common v0.0.0
+	//github.com/Layr-Labs/datalayr/common v0.0.0
 	github.com/decred/dcrd/hdkeychain/v3 v3.0.0
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/go-resty/resty/v2 v2.7.0

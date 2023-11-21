@@ -2,9 +2,9 @@ module github.com/mantlenetworkio/mantle/mt-challenger
 
 go 1.19
 
-replace github.com/Layr-Labs/datalayr/common => ../datalayr/common
-
-replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr/lib/merkzg
+//replace github.com/Layr-Labs/datalayr/common => ../datalayr/common
+//
+//replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr/lib/merkzg
 
 replace github.com/mantlenetworkio/mantle/mt-batcher => ../mt-batcher
 
@@ -17,7 +17,7 @@ replace github.com/mantlenetworkio/mantle/metrics => ../metrics
 replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
 
 require (
-	github.com/Layr-Labs/datalayr/common v0.0.0
+	// github.com/Layr-Labs/datalayr/common v0.0.0
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/mantlenetworkio/mantle/l2geth v0.0.0
@@ -36,7 +36,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.0.1 // indirect
 	cloud.google.com/go/kms v1.11.0 // indirect
-	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0 // indirect
+	// github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0 // indirect
 	github.com/VictoriaMetrics/fastcache v1.9.0 // indirect
 	github.com/aristanetworks/goarista v0.0.0-20170210015632-ea17b1a17847 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect

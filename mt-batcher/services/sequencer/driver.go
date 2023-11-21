@@ -11,20 +11,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
-	"github.com/Layr-Labs/datalayr/common/graphView"
-	pb "github.com/Layr-Labs/datalayr/common/interfaces/interfaceDL"
-	"github.com/Layr-Labs/datalayr/common/logging"
-
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/pkg/errors"
 
 	l2gethcommon "github.com/mantlenetworkio/mantle/l2geth/common"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
@@ -47,15 +40,15 @@ var (
 type SignerFn func(context.Context, common.Address, *types.Transaction) (*types.Transaction, error)
 
 type DriverConfig struct {
-	L1Client                  *ethclient.Client
-	L2Client                  *l2ethclient.Client
-	L1ChainID                 *big.Int
-	DtlClientUrl              string
-	EigenDaContract           *bindings.BVMEigenDataLayrChain
-	RawEigenContract          *bind.BoundContract
-	EigenFeeContract          *bindings.BVMEigenDataLayrFee
-	RawEigenFeeContract       *bind.BoundContract
-	Logger                    *logging.Logger
+	L1Client            *ethclient.Client
+	L2Client            *l2ethclient.Client
+	L1ChainID           *big.Int
+	DtlClientUrl        string
+	EigenDaContract     *bindings.BVMEigenDataLayrChain
+	RawEigenContract    *bind.BoundContract
+	EigenFeeContract    *bindings.BVMEigenDataLayrFee
+	RawEigenFeeContract *bind.BoundContract
+	// Logger                    *logging.Logger
 	PrivKey                   *ecdsa.PrivateKey
 	FeePrivKey                *ecdsa.PrivateKey
 	BlockOffset               uint64
@@ -70,7 +63,7 @@ type DriverConfig struct {
 	CheckerWorkerPollInterval time.Duration
 	GraphPollingDuration      time.Duration
 	GraphProvider             string
-	EigenLogConfig            logging.Config
+	// EigenLogConfig            logging.Config
 	ResubmissionTimeout       time.Duration
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
@@ -102,13 +95,13 @@ type Driver struct {
 	Cfg           *DriverConfig
 	WalletAddr    common.Address
 	FeeWalletAddr common.Address
-	GraphClient   *graphView.GraphClient
-	DtlClient     client.DtlClient
-	txMgr         txmgr.TxManager
-	LevelDBStore  *db.Store
-	FeeCh         chan *FeePipline
-	cancel        func()
-	wg            sync.WaitGroup
+	// GraphClient   *graphView.GraphClient
+	DtlClient    client.DtlClient
+	txMgr        txmgr.TxManager
+	LevelDBStore *db.Store
+	FeeCh        chan *FeePipline
+	cancel       func()
+	wg           sync.WaitGroup
 }
 
 var bigOne = new(big.Int).SetUint64(1)
@@ -125,7 +118,7 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 
 	txMgr := txmgr.NewSimpleTxManager(txManagerConfig, cfg.L1Client)
 
-	graphClient := graphView.NewGraphClient(cfg.GraphProvider, cfg.Logger)
+	// graphClient := graphView.NewGraphClient(cfg.GraphProvider, cfg.Logger)
 
 	levelDBStore, err := db.NewStore(cfg.DbPath)
 	if err != nil {
@@ -146,12 +139,12 @@ func NewDriver(ctx context.Context, cfg *DriverConfig) (*Driver, error) {
 		Ctx:           ctx,
 		WalletAddr:    walletAddr,
 		FeeWalletAddr: feeWalletAddr,
-		GraphClient:   graphClient,
-		DtlClient:     dtlClient,
-		txMgr:         txMgr,
-		LevelDBStore:  levelDBStore,
-		FeeCh:         make(chan *FeePipline),
-		cancel:        cancel,
+		// GraphClient:   graphClient,
+		DtlClient:    dtlClient,
+		txMgr:        txMgr,
+		LevelDBStore: levelDBStore,
+		FeeCh:        make(chan *FeePipline),
+		cancel:       cancel,
 	}, nil
 }
 
@@ -528,79 +521,81 @@ func (d *Driver) ConfirmStoredData(txHash []byte, params common2.StoreParams, st
 }
 
 func (d *Driver) callEncode(data []byte) (common2.StoreParams, error) {
-	conn, err := grpc.Dial(d.Cfg.DisperserSocket, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Error("MtBatcher Disperser Cannot connect to", "DisperserSocket", d.Cfg.DisperserSocket)
-		return common2.StoreParams{}, err
-	}
-	defer conn.Close()
-	c := pb.NewDataDispersalClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(d.Cfg.DataStoreTimeout))
-	defer cancel()
-	request := &pb.EncodeStoreRequest{
-		Duration: d.Cfg.DataStoreDuration,
-		Data:     data,
-	}
-	opt := grpc.MaxCallSendMsgSize(1024 * 1024 * 300)
-	reply, err := c.EncodeStore(ctx, request, opt)
-	if err != nil {
-		log.Error("MtBatcher get store err", err)
-		return common2.StoreParams{}, err
-	}
-	g := reply.GetStore()
-	feeBigInt := new(big.Int).SetBytes(g.Fee)
-	params := common2.StoreParams{
-		ReferenceBlockNumber: g.ReferenceBlockNumber,
-		TotalOperatorsIndex:  g.TotalOperatorsIndex,
-		OrigDataSize:         g.OrigDataSize,
-		NumTotal:             g.NumTotal,
-		Quorum:               g.Quorum,
-		NumSys:               g.NumSys,
-		NumPar:               g.NumPar,
-		Duration:             g.Duration,
-		KzgCommit:            g.KzgCommit,
-		LowDegreeProof:       g.LowDegreeProof,
-		Degree:               g.Degree,
-		TotalSize:            g.TotalSize,
-		Order:                g.Order,
-		Fee:                  feeBigInt,
-		HeaderHash:           g.HeaderHash,
-		Disperser:            g.Disperser,
-	}
-	return params, nil
+	//conn, err := grpc.Dial(d.Cfg.DisperserSocket, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	//if err != nil {
+	//	log.Error("MtBatcher Disperser Cannot connect to", "DisperserSocket", d.Cfg.DisperserSocket)
+	//	return common2.StoreParams{}, err
+	//}
+	//defer conn.Close()
+	//c := pb.NewDataDispersalClient(conn)
+	//ctx, cancel := context.WithTimeout(context.Background(), time.Duration(d.Cfg.DataStoreTimeout))
+	//defer cancel()
+	//request := &pb.EncodeStoreRequest{
+	//	Duration: d.Cfg.DataStoreDuration,
+	//	Data:     data,
+	//}
+	//opt := grpc.MaxCallSendMsgSize(1024 * 1024 * 300)
+	//reply, err := c.EncodeStore(ctx, request, opt)
+	//if err != nil {
+	//	log.Error("MtBatcher get store err", err)
+	//	return common2.StoreParams{}, err
+	//}
+	//g := reply.GetStore()
+	//feeBigInt := new(big.Int).SetBytes(g.Fee)
+	//params := common2.StoreParams{
+	//	ReferenceBlockNumber: g.ReferenceBlockNumber,
+	//	TotalOperatorsIndex:  g.TotalOperatorsIndex,
+	//	OrigDataSize:         g.OrigDataSize,
+	//	NumTotal:             g.NumTotal,
+	//	Quorum:               g.Quorum,
+	//	NumSys:               g.NumSys,
+	//	NumPar:               g.NumPar,
+	//	Duration:             g.Duration,
+	//	KzgCommit:            g.KzgCommit,
+	//	LowDegreeProof:       g.LowDegreeProof,
+	//	Degree:               g.Degree,
+	//	TotalSize:            g.TotalSize,
+	//	Order:                g.Order,
+	//	Fee:                  feeBigInt,
+	//	HeaderHash:           g.HeaderHash,
+	//	Disperser:            g.Disperser,
+	//}
+	//return params, nil
+	return common2.StoreParams{}, nil
 }
 
 func (d *Driver) callDisperse(headerHash []byte, messageHash []byte) (common2.DisperseMeta, error) {
-	conn, err := grpc.Dial(d.Cfg.DisperserSocket, grpc.WithInsecure())
-	if err != nil {
-		log.Error("MtBatcher Dial DisperserSocket", "err", err)
-		return common2.DisperseMeta{}, err
-	}
-	defer conn.Close()
-	c := pb.NewDataDispersalClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(d.Cfg.DataStoreTimeout))
-	defer cancel()
-	request := &pb.DisperseStoreRequest{
-		HeaderHash:  headerHash,
-		MessageHash: messageHash,
-	}
-	reply, err := c.DisperseStore(ctx, request)
-	if err != nil {
-		return common2.DisperseMeta{}, err
-	}
-	sigs := reply.GetSigs()
-	aggSig := common2.AggregateSignature{
-		AggSig:            sigs.AggSig,
-		StoredAggPubkeyG1: sigs.StoredAggPubkeyG1,
-		UsedAggPubkeyG2:   sigs.UsedAggPubkeyG2,
-		NonSignerPubkeys:  sigs.NonSignerPubkeys,
-	}
-	meta := common2.DisperseMeta{
-		Sigs:            aggSig,
-		ApkIndex:        reply.GetApkIndex(),
-		TotalStakeIndex: reply.GetTotalStakeIndex(),
-	}
-	return meta, nil
+	//conn, err := grpc.Dial(d.Cfg.DisperserSocket, grpc.WithInsecure())
+	//if err != nil {
+	//	log.Error("MtBatcher Dial DisperserSocket", "err", err)
+	//	return common2.DisperseMeta{}, err
+	//}
+	//defer conn.Close()
+	//c := pb.NewDataDispersalClient(conn)
+	//ctx, cancel := context.WithTimeout(context.Background(), time.Duration(d.Cfg.DataStoreTimeout))
+	//defer cancel()
+	//request := &pb.DisperseStoreRequest{
+	//	HeaderHash:  headerHash,
+	//	MessageHash: messageHash,
+	//}
+	//reply, err := c.DisperseStore(ctx, request)
+	//if err != nil {
+	//	return common2.DisperseMeta{}, err
+	//}
+	//sigs := reply.GetSigs()
+	//aggSig := common2.AggregateSignature{
+	//	AggSig:            sigs.AggSig,
+	//	StoredAggPubkeyG1: sigs.StoredAggPubkeyG1,
+	//	UsedAggPubkeyG2:   sigs.UsedAggPubkeyG2,
+	//	NonSignerPubkeys:  sigs.NonSignerPubkeys,
+	//}
+	//meta := common2.DisperseMeta{
+	//	Sigs:            aggSig,
+	//	ApkIndex:        reply.GetApkIndex(),
+	//	TotalStakeIndex: reply.GetTotalStakeIndex(),
+	//}
+	//return meta, nil
+	return common2.DisperseMeta{}, nil
 }
 
 func (d *Driver) CalcUserFeeByRules(rollupDateSize *big.Int) (*big.Int, error) {

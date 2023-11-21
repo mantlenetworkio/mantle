@@ -4,32 +4,31 @@ import (
 	"fmt"
 	"math/big"
 	"os"
-
-	"github.com/Layr-Labs/datalayr/common/header"
 )
 
 func CreateUploadHeader(params StoreParams) ([]byte, error) {
-	var kzgCommitArray [64]byte
-	copy(kzgCommitArray[:], params.KzgCommit)
-	var lowDegreeProof [64]byte
-	copy(lowDegreeProof[:], params.LowDegreeProof)
-	var disperserArray [20]byte
-	copy(disperserArray[:], params.Disperser)
-
-	h := header.DataStoreHeader{
-		KzgCommit:      kzgCommitArray,
-		LowDegreeProof: lowDegreeProof,
-		Degree:         params.Degree,
-		NumSys:         params.NumSys,
-		NumPar:         params.NumPar,
-		OrigDataSize:   params.OrigDataSize,
-		Disperser:      disperserArray,
-	}
-	uploadHeader, _, err := header.CreateUploadHeader(h)
-	if err != nil {
-		return nil, err
-	}
-	return uploadHeader, nil
+	//var kzgCommitArray [64]byte
+	//copy(kzgCommitArray[:], params.KzgCommit)
+	//var lowDegreeProof [64]byte
+	//copy(lowDegreeProof[:], params.LowDegreeProof)
+	//var disperserArray [20]byte
+	//copy(disperserArray[:], params.Disperser)
+	//
+	//h := header.DataStoreHeader{
+	//	KzgCommit:      kzgCommitArray,
+	//	LowDegreeProof: lowDegreeProof,
+	//	Degree:         params.Degree,
+	//	NumSys:         params.NumSys,
+	//	NumPar:         params.NumPar,
+	//	OrigDataSize:   params.OrigDataSize,
+	//	Disperser:      disperserArray,
+	//}
+	//uploadHeader, _, err := header.CreateUploadHeader(h)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//return uploadHeader, nil
+	return nil, nil
 }
 
 func uint32ToByteSlice(x uint32) []byte {

@@ -3,7 +3,6 @@ package mt_batcher
 import (
 	"time"
 
-	"github.com/Layr-Labs/datalayr/common/logging"
 	"github.com/mantlenetworkio/mantle/mt-batcher/flags"
 	"github.com/urfave/cli"
 )
@@ -39,7 +38,7 @@ type Config struct {
 	RollUpMinTxn              uint64
 	RollUpMaxSize             uint64
 	EigenLayerNode            int
-	EigenLogConfig            logging.Config
+	//EigenLogConfig            logging.Config
 	MetricsServerEnable       bool
 	MetricsHostname           string
 	MetricsPort               uint64
@@ -102,7 +101,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		RollUpMinTxn:              ctx.GlobalUint64(flags.RollUpMinTxnFlag.Name),
 		RollUpMaxSize:             ctx.GlobalUint64(flags.RollUpMaxSizeFlag.Name),
 		EigenLayerNode:            ctx.GlobalInt(flags.EigenLayerNodeFlag.Name),
-		EigenLogConfig:            logging.ReadCLIConfig(ctx),
+		//EigenLogConfig:            logging.ReadCLIConfig(ctx),
 		RetrieverTimeout:          ctx.GlobalDuration(flags.RetrieverTimeoutFlag.Name),
 		ResubmissionTimeout:       ctx.GlobalDuration(flags.ResubmissionTimeoutFlag.Name),
 		NumConfirmations:          ctx.GlobalUint64(flags.NumConfirmationsFlag.Name),

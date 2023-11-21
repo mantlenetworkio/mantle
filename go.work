@@ -18,8 +18,8 @@ use (
 )
 
 replace (
-	github.com/Layr-Labs/datalayr/common v0.0.0 => ./datalayr/common
-	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0 => ./datalayr/lib/merkzg
+	// github.com/Layr-Labs/datalayr/common v0.0.0 => ./datalayr/common
+	// github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0 => ./datalayr/lib/merkzg
 	github.com/ethereum/go-ethereum v1.10.21 => github.com/ethereum-mantle/reference-optimistic-geth v0.0.0-20220803173305-1c9d4cc76a6e
 	github.com/mantlenetworkio/mantle/bss-core v0.0.0 => ./bss-core
 	github.com/mantlenetworkio/mantle/fraud-proof v0.0.0 => ./fraud-proof

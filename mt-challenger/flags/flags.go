@@ -2,8 +2,6 @@ package flags
 
 import (
 	"github.com/urfave/cli"
-	
-	"github.com/Layr-Labs/datalayr/common/logging"
 )
 
 const envVarPrefix = "DA_CHALLENGER"
@@ -274,7 +272,8 @@ var optionalFlags = []cli.Flag{
 
 func init() {
 	Flags = append(requiredFlags, optionalFlags...)
-	Flags = append(Flags, logging.CLIFlags(envVarPrefix)...)
+	//Flags = append(Flags, logging.CLIFlags(envVarPrefix)...)
+	_ = Flags
 }
 
 var Flags []cli.Flag

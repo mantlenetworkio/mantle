@@ -6,7 +6,6 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/Layr-Labs/datalayr/common/logging"
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 
@@ -26,7 +25,7 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		logger, err := logging.GetLogger(cfg.LoggingConfig)
+		// logger, err := logging.GetLogger(cfg.LoggingConfig)
 		if err != nil {
 			return err
 		}
@@ -61,11 +60,11 @@ func Main(gitVersion string) func(ctx *cli.Context) error {
 		}
 
 		challengerConfig := &challenger.ChallengerConfig{
-			L1Client:                  l1Client,
-			L2Client:                  l2Client,
-			L1ChainID:                 chainID,
-			EigenContractAddr:         ethc.Address(common.HexToAddress(cfg.EigenContractAddress)),
-			Logger:                    logger,
+			L1Client:          l1Client,
+			L2Client:          l2Client,
+			L1ChainID:         chainID,
+			EigenContractAddr: ethc.Address(common.HexToAddress(cfg.EigenContractAddress)),
+			// Logger:                    logger,
 			PrivKey:                   challengerPrivKey,
 			GraphProvider:             cfg.GraphProvider,
 			RetrieverSocket:           cfg.RetrieverSocket,

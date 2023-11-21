@@ -5,8 +5,6 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/Layr-Labs/datalayr/common/logging"
-
 	"github.com/mantlenetworkio/mantle/mt-challenger/challenger"
 	"github.com/mantlenetworkio/mantle/mt-challenger/flags"
 )
@@ -38,14 +36,14 @@ type Config struct {
 	ResubmissionTimeout       time.Duration
 	NumConfirmations          uint64
 	SafeAbortNonceTooLowCount uint64
-	LoggingConfig             logging.Config
-	MetricsServerEnable       bool
-	MetricsHostname           string
-	MetricsPort               uint64
-	EnableHsm                 bool
-	HsmAPIName                string
-	HsmCreden                 string
-	HsmAddress                string
+	// LoggingConfig             logging.Config
+	MetricsServerEnable bool
+	MetricsHostname     string
+	MetricsPort         uint64
+	EnableHsm           bool
+	HsmAPIName          string
+	HsmCreden           string
+	HsmAddress          string
 }
 
 func NewConfig(ctx *cli.Context) (Config, error) {
@@ -71,25 +69,25 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		ResubmissionTimeout:       ctx.GlobalDuration(flags.ResubmissionTimeoutFlag.Name),
 		NumConfirmations:          ctx.GlobalUint64(flags.NumConfirmationsFlag.Name),
 		SafeAbortNonceTooLowCount: ctx.GlobalUint64(flags.SafeAbortNonceTooLowCountFlag.Name),
-		LoggingConfig:             logging.ReadCLIConfig(ctx),
-		FromStoreNumber:           ctx.GlobalUint64(flags.StartStoreNumFlag.Name),
-		PollInterval:              ctx.GlobalDuration(flags.PollIntervalFlag.Name),
-		CompensatePollInterval:    ctx.GlobalDuration(flags.CompensatePollIntervalFlag.Name),
-		DbPath:                    ctx.GlobalString(flags.DbPathFlag.Name),
-		CheckerBatchIndex:         ctx.GlobalUint64(flags.CheckerBatchIndexFlag.Name),
-		UpdateBatchIndexStep:      ctx.GlobalUint64(flags.UpdateBatchIndexStepFlag.Name),
-		NeedReRollupBatch:         ctx.GlobalString(flags.NeedReRollupBatchFlag.Name),
-		ChallengerCheckEnable:     ctx.GlobalBool(flags.ChallengerCheckEnableFlag.Name),
-		ReRollupToolEnable:        ctx.GlobalBool(flags.ReRollupToolEnableFlag.Name),
-		DataCompensateEnable:      ctx.GlobalBool(flags.DataCompensateEnableFlag.Name),
-		DisableHTTP2:              ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
-		MetricsServerEnable:       ctx.GlobalBool(flags.MetricsServerEnableFlag.Name),
-		MetricsHostname:           ctx.GlobalString(flags.MetricsHostnameFlag.Name),
-		MetricsPort:               ctx.GlobalUint64(flags.MetricsPortFlag.Name),
-		EnableHsm:                 ctx.GlobalBool(flags.EnableHsmFlag.Name),
-		HsmAddress:                ctx.GlobalString(flags.HsmAddressFlag.Name),
-		HsmAPIName:                ctx.GlobalString(flags.HsmAPINameFlag.Name),
-		HsmCreden:                 ctx.GlobalString(flags.HsmCredenFlag.Name),
+		// LoggingConfig:             logging.ReadCLIConfig(ctx),
+		FromStoreNumber:        ctx.GlobalUint64(flags.StartStoreNumFlag.Name),
+		PollInterval:           ctx.GlobalDuration(flags.PollIntervalFlag.Name),
+		CompensatePollInterval: ctx.GlobalDuration(flags.CompensatePollIntervalFlag.Name),
+		DbPath:                 ctx.GlobalString(flags.DbPathFlag.Name),
+		CheckerBatchIndex:      ctx.GlobalUint64(flags.CheckerBatchIndexFlag.Name),
+		UpdateBatchIndexStep:   ctx.GlobalUint64(flags.UpdateBatchIndexStepFlag.Name),
+		NeedReRollupBatch:      ctx.GlobalString(flags.NeedReRollupBatchFlag.Name),
+		ChallengerCheckEnable:  ctx.GlobalBool(flags.ChallengerCheckEnableFlag.Name),
+		ReRollupToolEnable:     ctx.GlobalBool(flags.ReRollupToolEnableFlag.Name),
+		DataCompensateEnable:   ctx.GlobalBool(flags.DataCompensateEnableFlag.Name),
+		DisableHTTP2:           ctx.GlobalBool(flags.HTTP2DisableFlag.Name),
+		MetricsServerEnable:    ctx.GlobalBool(flags.MetricsServerEnableFlag.Name),
+		MetricsHostname:        ctx.GlobalString(flags.MetricsHostnameFlag.Name),
+		MetricsPort:            ctx.GlobalUint64(flags.MetricsPortFlag.Name),
+		EnableHsm:              ctx.GlobalBool(flags.EnableHsmFlag.Name),
+		HsmAddress:             ctx.GlobalString(flags.HsmAddressFlag.Name),
+		HsmAPIName:             ctx.GlobalString(flags.HsmAPINameFlag.Name),
+		HsmCreden:              ctx.GlobalString(flags.HsmCredenFlag.Name),
 	}
 	return cfg, nil
 }

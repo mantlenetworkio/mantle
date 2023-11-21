@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/Layr-Labs/datalayr/common/graphView"
 	"github.com/ethereum/go-ethereum/log"
 	gecho "github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -24,9 +23,9 @@ type DaServiceConfig struct {
 }
 
 type DaService struct {
-	Ctx           context.Context
-	Cfg           *DaServiceConfig
-	GraphClient   *graphView.GraphClient
+	Ctx context.Context
+	Cfg *DaServiceConfig
+	// GraphClient   *graphView.GraphClient
 	GraphqlClient *graphql.Client
 	echo          *gecho.Echo
 	cancel        func()
@@ -42,12 +41,12 @@ func NewDaService(ctx context.Context, cfg *DaServiceConfig) (*DaService, error)
 	}))
 	e.Debug = true
 	e.Use(middleware.Recover())
-	graphClient := graphView.NewGraphClient(cfg.GraphProvider, nil)
+	// graphClient := graphView.NewGraphClient(cfg.GraphProvider, nil)
 	graphqlClient := graphql.NewClient(graphClient.GetEndpoint(), nil)
 	server := &DaService{
-		Ctx:           ctx,
-		Cfg:           cfg,
-		GraphClient:   graphClient,
+		Ctx: ctx,
+		Cfg: cfg,
+		// GraphClient:   graphClient,
 		GraphqlClient: graphqlClient,
 		echo:          e,
 		cancel:        cancel,
