@@ -1,23 +1,23 @@
-module github.com/mantlenetworkio/mantle/fraud-proof
+module github.com/tenderly/mantle/fraud-proof
 
 go 1.19
 
-replace github.com/mantlenetworkio/mantle/fraud-proof => ./
+replace github.com/tenderly/mantle/fraud-proof => ./
 
-replace github.com/mantlenetworkio/mantle/metrics => ../metrics
+replace github.com/tenderly/mantle/metrics => ../metrics
 
-replace github.com/mantlenetworkio/mantle/l2geth => ../l2geth
+replace github.com/tenderly/mantle/l2geth => ../l2geth
 
-replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
+replace github.com/tenderly/mantle/bss-core => ../bss-core
 
 require (
 	cloud.google.com/go/kms v1.11.0
 	github.com/cbergoon/merkletree v0.2.0
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/holiman/uint256 v1.2.0
-	github.com/mantlenetworkio/mantle/bss-core v0.0.0
-	github.com/mantlenetworkio/mantle/l2geth v0.0.0
-	github.com/mantlenetworkio/mantle/metrics v0.0.0
+	github.com/tenderly/mantle/bss-core v0.0.0
+	github.com/tenderly/mantle/l2geth v0.0.0
+	github.com/tenderly/mantle/metrics v0.0.0
 	github.com/prometheus/client_golang v1.15.1
 	github.com/specularl2/specular/clients/geth/specular v0.0.0-20221120100224-5e02437e9455
 	github.com/stretchr/testify v1.8.4

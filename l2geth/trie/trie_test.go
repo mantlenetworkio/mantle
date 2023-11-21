@@ -29,11 +29,11 @@ import (
 	"testing/quick"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	"github.com/mantlenetworkio/mantle/l2geth/ethdb/leveldb"
-	"github.com/mantlenetworkio/mantle/l2geth/ethdb/memorydb"
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/ethdb/leveldb"
+	"github.com/tenderly/mantle/l2geth/ethdb/memorydb"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 func init() {

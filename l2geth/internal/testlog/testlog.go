@@ -21,7 +21,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/log"
 )
 
 // Handler returns a log handler which logs to the unit test log of t.

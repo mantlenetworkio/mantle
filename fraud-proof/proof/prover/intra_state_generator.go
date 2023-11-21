@@ -19,10 +19,10 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/fraud-proof/proof/state"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/tenderly/mantle/fraud-proof/proof/state"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/vm"
+	"github.com/tenderly/mantle/l2geth/log"
 )
 
 type GeneratedIntraState struct {

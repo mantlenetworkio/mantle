@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/mantlenetworkio/mantle/l2geth/node"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p"
-	"github.com/mantlenetworkio/mantle/l2geth/rpc"
+	"github.com/tenderly/mantle/l2geth/node"
+	"github.com/tenderly/mantle/l2geth/p2p"
+	"github.com/tenderly/mantle/l2geth/rpc"
 )
 
 // SampleService is a trivial network service that can be attached to a node for

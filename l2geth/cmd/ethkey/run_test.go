@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	"github.com/docker/docker/pkg/reexec"
-	"github.com/mantlenetworkio/mantle/l2geth/internal/cmdtest"
+	"github.com/tenderly/mantle/l2geth/internal/cmdtest"
 )
 
 type testEthkey struct {

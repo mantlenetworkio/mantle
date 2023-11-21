@@ -21,9 +21,9 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/mantlenetworkio/mantle/l2geth/core/state"
-	"github.com/mantlenetworkio/mantle/l2geth/core/types"
-	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/core/state"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 var (

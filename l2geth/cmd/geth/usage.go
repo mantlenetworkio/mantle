@@ -22,8 +22,8 @@ import (
 	"io"
 	"sort"
 
-	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
-	"github.com/mantlenetworkio/mantle/l2geth/internal/debug"
+	"github.com/tenderly/mantle/l2geth/cmd/utils"
+	"github.com/tenderly/mantle/l2geth/internal/debug"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

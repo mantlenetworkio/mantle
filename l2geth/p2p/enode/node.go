@@ -27,8 +27,8 @@ import (
 	"net"
 	"strings"
 
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/enr"
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/p2p/enr"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 var errMissingPrefix = errors.New("missing 'enr:' prefix for base64-encoded record")

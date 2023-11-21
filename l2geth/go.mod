@@ -1,12 +1,12 @@
-module github.com/mantlenetworkio/mantle/l2geth
+module github.com/tenderly/mantle/l2geth
 
 go 1.18
 
-replace github.com/mantlenetworkio/mantle/fraud-proof => ../fraud-proof
+replace github.com/tenderly/mantle/fraud-proof => ../fraud-proof
 
-replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
+replace github.com/tenderly/mantle/bss-core => ../bss-core
 
-replace github.com/mantlenetworkio/mantle/metrics => ../metrics
+replace github.com/tenderly/mantle/metrics => ../metrics
 
 require (
 	github.com/Azure/azure-storage-blob-go v0.7.0
@@ -38,7 +38,6 @@ require (
 	github.com/jarcoal/httpmock v1.0.8
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/karalabe/usb v0.0.2
-	github.com/mantlenetworkio/mantle/fraud-proof v0.0.0
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.16
 	github.com/naoina/toml v0.1.2-0.20170918210437-9fafd6967416
@@ -54,6 +53,7 @@ require (
 	github.com/steakknife/bloomfilter v0.0.0-20180922174646-6819c0d2a570
 	github.com/stretchr/testify v1.8.4
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
+	github.com/tenderly/mantle/fraud-proof v0.0.0
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/wsddn/go-ecdh v0.0.0-20161211032359-48726bab9208
 	golang.org/x/crypto v0.9.0
@@ -94,8 +94,6 @@ require (
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.2.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/mantlenetworkio/mantle/bss-core v0.0.0 // indirect
-	github.com/mantlenetworkio/mantle/metrics v0.0.0 // indirect
 	github.com/mattn/go-ieproxy v0.0.0-20190610004146-91bb50d98149 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
@@ -110,6 +108,8 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/specularl2/specular/clients/geth/specular v0.0.0-20221120100224-5e02437e9455 // indirect
 	github.com/steakknife/hamming v0.0.0-20180906055917-c99c65617cd3 // indirect
+	github.com/tenderly/mantle/bss-core v0.0.0 // indirect
+	github.com/tenderly/mantle/metrics v0.0.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect

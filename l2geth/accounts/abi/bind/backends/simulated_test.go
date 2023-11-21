@@ -24,14 +24,14 @@ import (
 	"testing"
 	"time"
 
-	ethereum "github.com/mantlenetworkio/mantle/l2geth"
-	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi"
-	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi/bind"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/core"
-	"github.com/mantlenetworkio/mantle/l2geth/core/types"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	"github.com/mantlenetworkio/mantle/l2geth/params"
+	ethereum "github.com/tenderly/mantle/l2geth"
+	"github.com/tenderly/mantle/l2geth/accounts/abi"
+	"github.com/tenderly/mantle/l2geth/accounts/abi/bind"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 func TestSimulatedBackend(t *testing.T) {

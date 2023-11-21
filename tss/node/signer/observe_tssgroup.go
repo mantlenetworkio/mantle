@@ -1,8 +1,8 @@
 package signer
 
 import (
-	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/tss/node/types"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/tss/node/types"
 	"time"
 )
 

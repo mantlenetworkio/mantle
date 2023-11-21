@@ -24,7 +24,7 @@ import (
 
 	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
 
-	nodeconfig "github.com/mantlenetworkio/mantle/tss/common"
+	nodeconfig "github.com/tenderly/mantle/tss/common"
 )
 
 const (

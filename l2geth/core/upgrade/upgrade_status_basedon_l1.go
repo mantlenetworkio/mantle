@@ -1,8 +1,8 @@
 package upgrade
 
 import (
-	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/ethdb"
+	"github.com/tenderly/mantle/l2geth/log"
 )
 
 /*

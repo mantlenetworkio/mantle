@@ -22,7 +22,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mantlenetworkio/mantle/l2geth/metrics"
+	"github.com/tenderly/mantle/l2geth/metrics"
 )
 
 var (

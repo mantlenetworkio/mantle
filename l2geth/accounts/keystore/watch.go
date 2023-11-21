@@ -22,7 +22,7 @@ package keystore
 import (
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/log"
 	"github.com/rjeczalik/notify"
 )
 

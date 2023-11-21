@@ -25,16 +25,16 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/mantlenetworkio/mantle/l2geth/accounts"
-	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
-	"github.com/mantlenetworkio/mantle/l2geth/accounts/scwallet"
-	"github.com/mantlenetworkio/mantle/l2geth/accounts/usbwallet"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
-	"github.com/mantlenetworkio/mantle/l2geth/internal/ethapi"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
-	"github.com/mantlenetworkio/mantle/l2geth/signer/storage"
+	"github.com/tenderly/mantle/l2geth/accounts"
+	"github.com/tenderly/mantle/l2geth/accounts/keystore"
+	"github.com/tenderly/mantle/l2geth/accounts/scwallet"
+	"github.com/tenderly/mantle/l2geth/accounts/usbwallet"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/mantle/l2geth/internal/ethapi"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/signer/storage"
 )
 
 const (

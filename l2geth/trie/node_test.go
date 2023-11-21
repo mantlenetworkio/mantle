@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 func newTestFullNode(v []byte) []interface{} {

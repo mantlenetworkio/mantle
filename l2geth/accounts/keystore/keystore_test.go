@@ -26,9 +26,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/accounts"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/event"
+	"github.com/tenderly/mantle/l2geth/accounts"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/event"
 )
 
 var testSigData = make([]byte, 32)

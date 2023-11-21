@@ -23,9 +23,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common/math"
-	"github.com/mantlenetworkio/mantle/l2geth/core/types"
-	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/common/math"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 type diffTest struct {

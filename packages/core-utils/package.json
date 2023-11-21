@@ -24,12 +24,12 @@
     "core",
     "utils"
   ],
-  "homepage": "https://github.com/mantlenetworkio/mantle/tree/main/packages/core-utils#readme",
+  "homepage": "https://github.com/tenderly/mantle/tree/main/packages/core-utils#readme",
   "license": "MIT",
   "author": "Mantle",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mantlenetworkio/mantle.git"
+    "url": "git+https://github.com/tenderly/mantle.git"
   },
   "dependencies": {
     "@ethersproject/abstract-provider": "^5.6.1",
@@ -45,7 +45,7 @@
     "mocha": "^10.0.0"
   },
   "bugs": {
-    "url": "https://github.com/mantlenetworkio/mantle/issues"
+    "url": "https://github.com/tenderly/mantle/issues"
   },
   "directories": {
     "test": "test"

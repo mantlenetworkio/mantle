@@ -20,12 +20,12 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/mantlenetworkio/mantle/l2geth/accounts"
-	"github.com/mantlenetworkio/mantle/l2geth/accounts/keystore"
-	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
-	"github.com/mantlenetworkio/mantle/l2geth/console"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/accounts"
+	"github.com/tenderly/mantle/l2geth/accounts/keystore"
+	"github.com/tenderly/mantle/l2geth/cmd/utils"
+	"github.com/tenderly/mantle/l2geth/console"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/log"
 	"gopkg.in/urfave/cli.v1"
 )
 

@@ -20,8 +20,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/ethdb"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/ethdb"
 )
 
 // Tests that the node iterator indeed walks over the entire database contents.

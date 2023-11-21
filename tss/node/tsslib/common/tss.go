@@ -14,11 +14,11 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	abnormal2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/abnormal"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/p2p"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	abnormal2 "github.com/tenderly/mantle/tss/node/tsslib/abnormal"
+	"github.com/tenderly/mantle/tss/node/tsslib/conversion"
+	"github.com/tenderly/mantle/tss/node/tsslib/messages"
+	"github.com/tenderly/mantle/tss/node/tsslib/p2p"
 )
 
 type TssCommon struct {

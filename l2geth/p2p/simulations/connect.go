@@ -20,7 +20,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
 )
 
 var (

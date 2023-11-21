@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/mantlenetworkio/mantle/l2geth/cmd/evm/internal/compiler"
+	"github.com/tenderly/mantle/l2geth/cmd/evm/internal/compiler"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

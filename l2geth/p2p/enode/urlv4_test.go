@@ -24,8 +24,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/enr"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/p2p/enr"
 )
 
 func init() {

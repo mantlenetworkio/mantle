@@ -23,10 +23,10 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 // Constants to match up protocol versions and messages

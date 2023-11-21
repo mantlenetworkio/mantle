@@ -1,4 +1,4 @@
-module github.com/mantlenetworkio/mantle/bss-core
+module github.com/tenderly/mantle/bss-core
 
 go 1.18
 

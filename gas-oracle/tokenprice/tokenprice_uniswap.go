@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 
-	"github.com/mantlenetworkio/mantle/gas-oracle/bindings"
+	"github.com/tenderly/mantle/gas-oracle/bindings"
 )
 
 var (

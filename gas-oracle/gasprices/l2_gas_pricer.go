@@ -6,7 +6,7 @@ import (
 	"math"
 
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/mantlenetworkio/mantle/gas-oracle/tokenprice"
+	"github.com/tenderly/mantle/gas-oracle/tokenprice"
 )
 
 type GetTargetGasPerSecond func() float64

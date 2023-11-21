@@ -24,8 +24,8 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/enr"
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/p2p/enr"
+	"github.com/tenderly/mantle/l2geth/rlp"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common"
 )
 
 func TestPack(t *testing.T) {

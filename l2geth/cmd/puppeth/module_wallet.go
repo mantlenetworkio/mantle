@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/log"
 )
 
 // walletDockerfile is the Dockerfile required to run a web wallet.

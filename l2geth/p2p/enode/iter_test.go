@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/enr"
+	"github.com/tenderly/mantle/l2geth/p2p/enr"
 )
 
 func TestReadNodes(t *testing.T) {

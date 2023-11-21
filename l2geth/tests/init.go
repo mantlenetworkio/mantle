@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 // Forks table defines supported forks and their chain config.

@@ -16,16 +16,16 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	tssconfig "github.com/mantlenetworkio/mantle/tss/common"
-	common2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/conversion"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keygen"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keysign"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/monitor"
-	p2p2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/p2p"
-	storage2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/storage"
-	"github.com/mantlenetworkio/mantle/tss/node/types"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	tssconfig "github.com/tenderly/mantle/tss/common"
+	common2 "github.com/tenderly/mantle/tss/node/tsslib/common"
+	"github.com/tenderly/mantle/tss/node/tsslib/conversion"
+	"github.com/tenderly/mantle/tss/node/tsslib/keygen"
+	"github.com/tenderly/mantle/tss/node/tsslib/keysign"
+	"github.com/tenderly/mantle/tss/node/tsslib/monitor"
+	p2p2 "github.com/tenderly/mantle/tss/node/tsslib/p2p"
+	storage2 "github.com/tenderly/mantle/tss/node/tsslib/storage"
+	"github.com/tenderly/mantle/tss/node/types"
 )
 
 const poolPublicKey = 66

@@ -18,8 +18,8 @@ import (
 	"encoding/binary"
 
 	"github.com/holiman/uint256"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/vm"
 	"github.com/specularl2/specular/clients/geth/specular/merkletree"
 )
 

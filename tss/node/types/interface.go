@@ -1,8 +1,8 @@
 package types
 
 import (
-	"github.com/mantlenetworkio/mantle/tss/index"
-	"github.com/mantlenetworkio/mantle/tss/slash"
+	"github.com/tenderly/mantle/tss/index"
+	"github.com/tenderly/mantle/tss/slash"
 )
 
 type TssMemberStore interface {

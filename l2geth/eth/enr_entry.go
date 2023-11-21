@@ -17,10 +17,10 @@
 package eth
 
 import (
-	"github.com/mantlenetworkio/mantle/l2geth/core"
-	"github.com/mantlenetworkio/mantle/l2geth/core/forkid"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/core"
+	"github.com/tenderly/mantle/l2geth/core/forkid"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 // ethEntry is the "eth" ENR entry which advertises eth protocol

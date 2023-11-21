@@ -7,8 +7,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
-	bindings "github.com/mantlenetworkio/mantle/tss/bindings/fp"
-	"github.com/mantlenetworkio/mantle/tss/common"
+	bindings "github.com/tenderly/mantle/tss/bindings/fp"
+	"github.com/tenderly/mantle/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 

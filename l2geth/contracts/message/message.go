@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/mantlenetworkio/mantle/l2geth/accounts/abi"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/accounts/abi"
+	"github.com/tenderly/mantle/l2geth/common"
 )
 
 var (

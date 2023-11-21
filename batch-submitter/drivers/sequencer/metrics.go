@@ -1,7 +1,7 @@
 package sequencer
 
 import (
-	"github.com/mantlenetworkio/mantle/bss-core/metrics"
+	"github.com/tenderly/mantle/bss-core/metrics"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"

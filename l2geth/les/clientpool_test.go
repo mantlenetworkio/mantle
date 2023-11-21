@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common/mclock"
-	"github.com/mantlenetworkio/mantle/l2geth/core/rawdb"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/common/mclock"
+	"github.com/tenderly/mantle/l2geth/core/rawdb"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
 )
 
 func TestClientPoolL10C100Free(t *testing.T) {

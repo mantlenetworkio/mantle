@@ -21,7 +21,7 @@ import (
 	"io"
 	"net"
 
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 // Entry is implemented by known node record entry types.

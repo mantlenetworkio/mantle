@@ -19,7 +19,7 @@ package event_test
 import (
 	"fmt"
 
-	"github.com/mantlenetworkio/mantle/l2geth/event"
+	"github.com/tenderly/mantle/l2geth/event"
 )
 
 func ExampleFeed_acknowledgedEvents() {

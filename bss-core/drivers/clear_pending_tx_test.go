@@ -13,9 +13,9 @@ import (
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/mantlenetworkio/mantle/bss-core/drivers"
-	"github.com/mantlenetworkio/mantle/bss-core/mock"
-	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
+	"github.com/tenderly/mantle/bss-core/drivers"
+	"github.com/tenderly/mantle/bss-core/mock"
+	"github.com/tenderly/mantle/bss-core/txmgr"
 	"github.com/stretchr/testify/require"
 )
 

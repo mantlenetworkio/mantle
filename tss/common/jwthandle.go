@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
 )
 
 const (

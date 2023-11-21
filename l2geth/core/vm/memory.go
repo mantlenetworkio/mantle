@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common/math"
+	"github.com/tenderly/mantle/l2geth/common/math"
 )
 
 // Memory implements a simple memory model for the ethereum virtual machine.

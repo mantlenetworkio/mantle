@@ -19,7 +19,7 @@ package bloombits
 import (
 	"errors"
 
-	"github.com/mantlenetworkio/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/core/types"
 )
 
 var (

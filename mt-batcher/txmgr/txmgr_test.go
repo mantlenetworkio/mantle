@@ -13,7 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/mantlenetworkio/mantle/mt-batcher/txmgr"
+	"github.com/tenderly/mantle/mt-batcher/txmgr"
 )
 
 type testHarness struct {

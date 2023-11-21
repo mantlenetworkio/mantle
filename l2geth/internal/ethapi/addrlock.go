@@ -19,7 +19,7 @@ package ethapi
 import (
 	"sync"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common"
 )
 
 type AddrLocker struct {

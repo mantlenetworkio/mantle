@@ -24,12 +24,12 @@
     "replica",
     "healthcheck"
   ],
-  "homepage": "https://github.com/mantlenetworkio/mantle/tree/develop/packages/replica-healthcheck#readme",
+  "homepage": "https://github.com/tenderly/mantle/tree/develop/packages/replica-healthcheck#readme",
   "license": "MIT",
   "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mantlenetworkio/mantle.git"
+    "url": "https://github.com/tenderly/mantle.git"
   },
   "dependencies": {
     "@mantleio/common-ts": "0.1.0",

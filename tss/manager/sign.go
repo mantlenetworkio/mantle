@@ -11,13 +11,13 @@ import (
 	"time"
 
 	"github.com/influxdata/influxdb/pkg/slices"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/crypto"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 
-	"github.com/mantlenetworkio/mantle/l2geth/log"
-	tss "github.com/mantlenetworkio/mantle/tss/common"
-	"github.com/mantlenetworkio/mantle/tss/manager/types"
-	"github.com/mantlenetworkio/mantle/tss/ws/server"
+	"github.com/tenderly/mantle/l2geth/log"
+	tss "github.com/tenderly/mantle/tss/common"
+	"github.com/tenderly/mantle/tss/manager/types"
+	"github.com/tenderly/mantle/tss/ws/server"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 

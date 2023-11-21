@@ -23,7 +23,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/simulations/pipes"
+	"github.com/tenderly/mantle/l2geth/p2p/simulations/pipes"
 )
 
 func TestTCPPipe(t *testing.T) {

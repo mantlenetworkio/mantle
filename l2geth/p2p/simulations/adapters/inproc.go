@@ -24,13 +24,13 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"github.com/mantlenetworkio/mantle/l2geth/event"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/l2geth/node"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/simulations/pipes"
-	"github.com/mantlenetworkio/mantle/l2geth/rpc"
+	"github.com/tenderly/mantle/l2geth/event"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/node"
+	"github.com/tenderly/mantle/l2geth/p2p"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/p2p/simulations/pipes"
+	"github.com/tenderly/mantle/l2geth/rpc"
 )
 
 // SimAdapter is a NodeAdapter which creates in-memory simulation nodes and

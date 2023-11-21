@@ -40,7 +40,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 const SizeLimit = 300 // maximum encoded size of a node record in bytes

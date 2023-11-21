@@ -25,7 +25,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/log"
 )
 
 const (

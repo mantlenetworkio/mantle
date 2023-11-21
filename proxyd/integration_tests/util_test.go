@@ -15,7 +15,7 @@ import (
 	"github.com/gorilla/websocket"
 
 	"github.com/BurntSushi/toml"
-	"github.com/mantlenetworkio/mantle/proxyd"
+	"github.com/tenderly/mantle/proxyd"
 	"github.com/stretchr/testify/require"
 )
 

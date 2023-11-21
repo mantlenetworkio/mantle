@@ -25,12 +25,12 @@
     "fault",
     "detector"
   ],
-  "homepage": "https://github.com/mantlenetworkio/mantlenetworkio/tree/main/packages/fault-detector#readme",
+  "homepage": "https://github.com/tenderly/mantlenetworkio/tree/main/packages/fault-detector#readme",
   "license": "MIT",
   "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mantlenetworkio/mantle.git"
+    "url": "https://github.com/tenderly/mantle.git"
   },
   "devDependencies": {
     "@defi-wonderland/smock": "^2.0.7",

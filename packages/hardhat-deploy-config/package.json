@@ -24,12 +24,12 @@
     "config",
     "plugin"
   ],
-  "homepage": "https://github.com/mantlenetworkio/mantle/tree/develop/packages/hardhat-deploy-config#readme",
+  "homepage": "https://github.com/tenderly/mantle/tree/develop/packages/hardhat-deploy-config#readme",
   "license": "MIT",
   "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mantlenetworkio/mantle.git"
+    "url": "https://github.com/tenderly/mantle.git"
   },
   "devDependencies": {
     "ethers": "^5.6.8",

@@ -49,12 +49,12 @@
     "contracts",
     "solidity"
   ],
-  "homepage": "https://github.com/mantlenetworkio/mantle/tree/main/packages/contracts#readme",
+  "homepage": "https://github.com/tenderly/mantle/tree/main/packages/contracts#readme",
   "license": "MIT",
   "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mantlenetworkio/mantle.git"
+    "url": "https://github.com/tenderly/mantle.git"
   },
   "dependencies": {
     "@mantleio/core-utils": "0.1.0",

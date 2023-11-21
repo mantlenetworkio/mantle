@@ -3,7 +3,7 @@ package upgrade
 import (
 	"math/big"
 
-	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 type Config struct {

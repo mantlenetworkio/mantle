@@ -16,8 +16,8 @@ import (
 	"github.com/binance-chain/tss-lib/ecdsa/signing"
 	"github.com/binance-chain/tss-lib/tss"
 
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/abnormal"
-	messages2 "github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
+	"github.com/tenderly/mantle/tss/node/tsslib/abnormal"
+	messages2 "github.com/tenderly/mantle/tss/node/tsslib/messages"
 )
 
 func GetMsgRound(msg []byte, partyID *tss.PartyID, isBroadcast bool) (abnormal.RoundInfo, error) {

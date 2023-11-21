@@ -20,7 +20,7 @@ import (
 	"github.com/tendermint/tendermint/libs/service"
 	"github.com/tendermint/tendermint/rpc/jsonrpc/types"
 
-	itypes "github.com/mantlenetworkio/mantle/tss/manager/types"
+	itypes "github.com/tenderly/mantle/tss/manager/types"
 )
 
 const (
@@ -131,7 +131,7 @@ func (wm *WebsocketManager) clientConnected(pubkey string, channel chan types.RP
 	if _, ok := wm.sendChan[pubkey]; !ok {
 		wm.sendChan[pubkey] = channel
 	}
-	
+
 	if wm.aliveNodes == nil {
 		wm.aliveNodes = make(map[string]struct{})
 	}

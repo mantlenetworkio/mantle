@@ -7,7 +7,7 @@ import (
 
 	ethc "github.com/ethereum/go-ethereum/common"
 
-	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
+	tsscommon "github.com/tenderly/mantle/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 

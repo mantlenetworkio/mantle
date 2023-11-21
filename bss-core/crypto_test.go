@@ -10,7 +10,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	bsscore "github.com/mantlenetworkio/mantle/bss-core"
+	bsscore "github.com/tenderly/mantle/bss-core"
 	"github.com/stretchr/testify/require"
 )
 

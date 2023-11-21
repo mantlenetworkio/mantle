@@ -24,14 +24,14 @@ import (
 	"net"
 	"os"
 
-	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/discover"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/discv5"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/nat"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/netutil"
+	"github.com/tenderly/mantle/l2geth/cmd/utils"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/p2p/discover"
+	"github.com/tenderly/mantle/l2geth/p2p/discv5"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/p2p/nat"
+	"github.com/tenderly/mantle/l2geth/p2p/netutil"
 )
 
 func main() {

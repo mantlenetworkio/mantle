@@ -13,9 +13,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	cmm "github.com/mantlenetworkio/mantle/tss/common"
-	sign "github.com/mantlenetworkio/mantle/tss/node/signer"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib"
+	cmm "github.com/tenderly/mantle/tss/common"
+	sign "github.com/tenderly/mantle/tss/node/signer"
+	"github.com/tenderly/mantle/tss/node/tsslib"
 )
 
 type Server struct {

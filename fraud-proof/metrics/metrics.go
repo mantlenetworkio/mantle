@@ -2,7 +2,7 @@ package metrics
 
 import (
 	"context"
-	"github.com/mantlenetworkio/mantle/metrics"
+	"github.com/tenderly/mantle/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

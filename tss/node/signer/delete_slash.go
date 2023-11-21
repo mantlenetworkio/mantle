@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/tss/slash"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/tss/slash"
 
-	tss "github.com/mantlenetworkio/mantle/tss/common"
+	tss "github.com/tenderly/mantle/tss/common"
 )
 
 func (p *Processor) deleteSlashing() {

@@ -9,11 +9,11 @@ import (
 	"math/big"
 
 	ethc "github.com/ethereum/go-ethereum/common"
-	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
-	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/core/types"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/tenderly/mantle/fraud-proof/bindings"
+	"github.com/tenderly/mantle/fraud-proof/proof"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/log"
 )
 
 func SubmitOneStepProof(

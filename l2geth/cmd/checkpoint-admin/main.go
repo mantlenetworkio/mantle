@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
-	"github.com/mantlenetworkio/mantle/l2geth/common/fdlimit"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/cmd/utils"
+	"github.com/tenderly/mantle/l2geth/common/fdlimit"
+	"github.com/tenderly/mantle/l2geth/log"
 	"gopkg.in/urfave/cli.v1"
 )
 

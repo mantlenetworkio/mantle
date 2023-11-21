@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common"
 	"golang.org/x/crypto/pbkdf2"
 )
 

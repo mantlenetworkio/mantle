@@ -19,7 +19,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 func TestTransaction(t *testing.T) {

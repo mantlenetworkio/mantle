@@ -24,8 +24,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/p2p"
 )
 
 // Tests that datadirs can be successfully created, be them manually configured

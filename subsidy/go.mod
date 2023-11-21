@@ -1,4 +1,4 @@
-module github.com/mantlenetworkio/mantle/subsidy
+module github.com/tenderly/mantle/subsidy
 
 go 1.18
 

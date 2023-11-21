@@ -10,8 +10,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/shurcooL/graphql"
 
-	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
-	"github.com/mantlenetworkio/mantle/mt-batcher/services/common"
+	"github.com/tenderly/mantle/mt-batcher/bindings"
+	"github.com/tenderly/mantle/mt-batcher/services/common"
 )
 
 type DaServiceConfig struct {

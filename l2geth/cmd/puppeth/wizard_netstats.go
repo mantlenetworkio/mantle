@@ -23,8 +23,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mantlenetworkio/mantle/l2geth/core"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/core"
+	"github.com/tenderly/mantle/l2geth/log"
 	"github.com/olekukonko/tablewriter"
 )
 

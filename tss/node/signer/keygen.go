@@ -15,11 +15,11 @@ import (
 	etht "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 
-	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/tss/bindings/tgm"
-	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keygen"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/tss/bindings/tgm"
+	tsscommon "github.com/tenderly/mantle/tss/common"
+	"github.com/tenderly/mantle/tss/node/tsslib/common"
+	"github.com/tenderly/mantle/tss/node/tsslib/keygen"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 

@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/mantlenetworkio/mantle/l2geth/rollup"
+	"github.com/tenderly/mantle/l2geth/rollup"
 )
 
 var errDtlHTTPError = errors.New("dtl http error")

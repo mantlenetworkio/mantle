@@ -32,10 +32,10 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto/ecies"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/simulations/pipes"
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/crypto/ecies"
+	"github.com/tenderly/mantle/l2geth/p2p/simulations/pipes"
+	"github.com/tenderly/mantle/l2geth/rlp"
 	"golang.org/x/crypto/sha3"
 )
 

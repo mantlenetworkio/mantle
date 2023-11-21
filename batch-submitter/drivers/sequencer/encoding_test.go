@@ -10,9 +10,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/sequencer"
-	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
-	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/batch-submitter/drivers/sequencer"
+	l2types "github.com/tenderly/mantle/l2geth/core/types"
+	l2rlp "github.com/tenderly/mantle/l2geth/rlp"
 	"github.com/stretchr/testify/require"
 )
 

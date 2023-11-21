@@ -1,4 +1,4 @@
-module github.com/mantlenetworkio/mantle/mt-challenger
+module github.com/tenderly/mantle/mt-challenger
 
 go 1.19
 
@@ -6,22 +6,22 @@ go 1.19
 //
 //replace github.com/Layr-Labs/datalayr/lib/merkzg => ../datalayr/lib/merkzg
 
-replace github.com/mantlenetworkio/mantle/mt-batcher => ../mt-batcher
+replace github.com/tenderly/mantle/mt-batcher => ../mt-batcher
 
-replace github.com/mantlenetworkio/mantle/l2geth => ../l2geth
+replace github.com/tenderly/mantle/l2geth => ../l2geth
 
-replace github.com/mantlenetworkio/mantle/fraud-proof => ../fraud-proof
+replace github.com/tenderly/mantle/fraud-proof => ../fraud-proof
 
-replace github.com/mantlenetworkio/mantle/metrics => ../metrics
+replace github.com/tenderly/mantle/metrics => ../metrics
 
-replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
+replace github.com/tenderly/mantle/bss-core => ../bss-core
 
 require (
 	// github.com/Layr-Labs/datalayr/common v0.0.0
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/mantlenetworkio/mantle/l2geth v0.0.0
-	github.com/mantlenetworkio/mantle/mt-batcher v0.0.0
+	github.com/tenderly/mantle/l2geth v0.0.0
+	github.com/tenderly/mantle/mt-batcher v0.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.15.1
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29
@@ -71,7 +71,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.2.0 // indirect
-	github.com/mantlenetworkio/mantle/bss-core v0.0.0 // indirect
+	github.com/tenderly/mantle/bss-core v0.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect

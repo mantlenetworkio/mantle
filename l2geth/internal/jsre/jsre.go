@@ -26,8 +26,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/internal/jsre/deps"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/internal/jsre/deps"
 	"github.com/robertkrimen/otto"
 )
 

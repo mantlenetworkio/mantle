@@ -22,7 +22,7 @@ package geth
 import (
 	"errors"
 
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/discv5"
+	"github.com/tenderly/mantle/l2geth/p2p/discv5"
 )
 
 // Enode represents a host on the network.

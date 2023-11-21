@@ -3,7 +3,7 @@ package store
 import (
 	"encoding/json"
 
-	"github.com/mantlenetworkio/mantle/tss/node/types"
+	"github.com/tenderly/mantle/tss/node/types"
 )
 
 func (s *Storage) SetInactiveMembers(members types.TssMembers) error {

@@ -31,7 +31,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 // Command line flags to configure the interpreters.

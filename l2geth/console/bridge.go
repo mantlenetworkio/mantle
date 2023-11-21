@@ -23,10 +23,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/accounts/scwallet"
-	"github.com/mantlenetworkio/mantle/l2geth/accounts/usbwallet"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/l2geth/rpc"
+	"github.com/tenderly/mantle/l2geth/accounts/scwallet"
+	"github.com/tenderly/mantle/l2geth/accounts/usbwallet"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/rpc"
 	"github.com/robertkrimen/otto"
 )
 

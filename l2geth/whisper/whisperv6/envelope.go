@@ -26,10 +26,10 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto/ecies"
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/crypto/ecies"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 // Envelope represents a clear-text data packet to transmit through the Whisper

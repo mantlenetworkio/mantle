@@ -1,16 +1,16 @@
-module github.com/mantlenetworkio/mantle/gas-oracle
+module github.com/tenderly/mantle/gas-oracle
 
 go 1.18
 
-replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
-replace github.com/mantlenetworkio/mantle/l2geth => ../l2geth
+replace github.com/tenderly/mantle/bss-core => ../bss-core
+replace github.com/tenderly/mantle/l2geth => ../l2geth
 
 require (
 	cloud.google.com/go/kms v1.11.0
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/mantlenetworkio/mantle/bss-core v0.0.0
-	github.com/mantlenetworkio/mantle/l2geth v0.0.0
+	github.com/tenderly/mantle/bss-core v0.0.0
+	github.com/tenderly/mantle/l2geth v0.0.0
 	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli v1.22.14
 	google.golang.org/api v0.126.0

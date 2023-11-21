@@ -11,8 +11,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/mantlenetworkio/mantle/bss-core/metrics"
-	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
+	"github.com/tenderly/mantle/bss-core/metrics"
+	"github.com/tenderly/mantle/bss-core/txmgr"
 )
 
 var (

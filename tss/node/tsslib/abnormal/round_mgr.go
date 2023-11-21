@@ -3,7 +3,7 @@ package abnormal
 import (
 	"sync"
 
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/messages"
+	"github.com/tenderly/mantle/tss/node/tsslib/messages"
 )
 
 type RoundInfo struct {

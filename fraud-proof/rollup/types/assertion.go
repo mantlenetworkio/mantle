@@ -3,8 +3,8 @@ package types
 import (
 	"math/big"
 
-	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/tenderly/mantle/fraud-proof/bindings"
+	"github.com/tenderly/mantle/l2geth/common"
 )
 
 // Assertion represents disputable assertion for L1 rollup contract

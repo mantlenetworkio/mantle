@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mantlenetworkio/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/log"
 )
 
 // explorerDockerfile is the Dockerfile required to run a block explorer.

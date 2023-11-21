@@ -22,8 +22,8 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/l2geth/metrics"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/metrics"
 )
 
 // Handler returns an HTTP handler which dump metrics in Prometheus format.

@@ -10,13 +10,13 @@ import (
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/mt-batcher/bindings"
-	"github.com/mantlenetworkio/mantle/mt-batcher/l1l2client"
-	"github.com/mantlenetworkio/mantle/mt-batcher/metrics"
-	common2 "github.com/mantlenetworkio/mantle/mt-batcher/services/common"
-	"github.com/mantlenetworkio/mantle/mt-batcher/services/restorer"
-	"github.com/mantlenetworkio/mantle/mt-batcher/services/sequencer"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/mt-batcher/bindings"
+	"github.com/tenderly/mantle/mt-batcher/l1l2client"
+	"github.com/tenderly/mantle/mt-batcher/metrics"
+	common2 "github.com/tenderly/mantle/mt-batcher/services/common"
+	"github.com/tenderly/mantle/mt-batcher/services/restorer"
+	"github.com/tenderly/mantle/mt-batcher/services/sequencer"
 
 	"github.com/urfave/cli"
 )

@@ -26,7 +26,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 var (

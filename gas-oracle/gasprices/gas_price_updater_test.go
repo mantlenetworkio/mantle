@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/mantlenetworkio/mantle/gas-oracle/tokenprice"
+	"github.com/tenderly/mantle/gas-oracle/tokenprice"
 )
 
 type MockEpoch struct {

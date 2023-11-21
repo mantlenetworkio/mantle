@@ -6,7 +6,7 @@ import (
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 
-	"github.com/mantlenetworkio/mantle/tss/common"
+	"github.com/tenderly/mantle/tss/common"
 )
 
 func (p *Processor) ProcessMessage() {

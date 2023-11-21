@@ -19,7 +19,7 @@ package vm
 import (
 	"errors"
 
-	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 type (

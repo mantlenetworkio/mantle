@@ -20,14 +20,14 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/mantlenetworkio/mantle/fraud-proof/proof/proof"
-	"github.com/mantlenetworkio/mantle/fraud-proof/proof/state"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
-	"github.com/mantlenetworkio/mantle/l2geth/core/types"
-	"github.com/mantlenetworkio/mantle/l2geth/core/vm"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/l2geth/params"
+	"github.com/tenderly/mantle/fraud-proof/proof/proof"
+	"github.com/tenderly/mantle/fraud-proof/proof/state"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/core/vm"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 var ErrStepIdxAndHashMismatch = errors.New("step index and hash mismatch")

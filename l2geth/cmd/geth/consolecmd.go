@@ -24,10 +24,10 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
-	"github.com/mantlenetworkio/mantle/l2geth/console"
-	"github.com/mantlenetworkio/mantle/l2geth/node"
-	"github.com/mantlenetworkio/mantle/l2geth/rpc"
+	"github.com/tenderly/mantle/l2geth/cmd/utils"
+	"github.com/tenderly/mantle/l2geth/console"
+	"github.com/tenderly/mantle/l2geth/node"
+	"github.com/tenderly/mantle/l2geth/rpc"
 	"gopkg.in/urfave/cli.v1"
 )
 

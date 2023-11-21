@@ -14,12 +14,12 @@ import (
 
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 
-	"github.com/mantlenetworkio/mantle/l2geth/common/hexutil"
-	tsscommon "github.com/mantlenetworkio/mantle/tss/common"
-	"github.com/mantlenetworkio/mantle/tss/index"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/common"
-	"github.com/mantlenetworkio/mantle/tss/node/tsslib/keysign"
-	"github.com/mantlenetworkio/mantle/tss/slash"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	tsscommon "github.com/tenderly/mantle/tss/common"
+	"github.com/tenderly/mantle/tss/index"
+	"github.com/tenderly/mantle/tss/node/tsslib/common"
+	"github.com/tenderly/mantle/tss/node/tsslib/keysign"
+	"github.com/tenderly/mantle/tss/slash"
 )
 
 func (p *Processor) Sign() {

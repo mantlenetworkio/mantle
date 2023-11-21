@@ -10,8 +10,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 
-	ometrics "github.com/mantlenetworkio/mantle/gas-oracle/metrics"
-	"github.com/mantlenetworkio/mantle/gas-oracle/tokenprice"
+	ometrics "github.com/tenderly/mantle/gas-oracle/metrics"
+	"github.com/tenderly/mantle/gas-oracle/tokenprice"
 )
 
 type L1Client struct {

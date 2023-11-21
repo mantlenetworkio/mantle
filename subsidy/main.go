@@ -8,9 +8,9 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics/influxdb"
 	"github.com/ethereum/go-ethereum/params"
-	ometrics "github.com/mantlenetworkio/mantle/gas-oracle/metrics"
-	flags "github.com/mantlenetworkio/mantle/subsidy/flags"
-	"github.com/mantlenetworkio/mantle/subsidy/payer"
+	ometrics "github.com/tenderly/mantle/gas-oracle/metrics"
+	flags "github.com/tenderly/mantle/subsidy/flags"
+	"github.com/tenderly/mantle/subsidy/payer"
 	"github.com/urfave/cli"
 )
 

@@ -36,11 +36,11 @@ import (
 	"time"
 
 	"github.com/golang/snappy"
-	"github.com/mantlenetworkio/mantle/l2geth/common/bitutil"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto"
-	"github.com/mantlenetworkio/mantle/l2geth/crypto/ecies"
-	"github.com/mantlenetworkio/mantle/l2geth/metrics"
-	"github.com/mantlenetworkio/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/common/bitutil"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/crypto/ecies"
+	"github.com/tenderly/mantle/l2geth/metrics"
+	"github.com/tenderly/mantle/l2geth/rlp"
 	"golang.org/x/crypto/sha3"
 )
 

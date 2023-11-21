@@ -28,9 +28,9 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/mantlenetworkio/mantle/l2geth/internal/jsre"
-	"github.com/mantlenetworkio/mantle/l2geth/internal/web3ext"
-	"github.com/mantlenetworkio/mantle/l2geth/rpc"
+	"github.com/tenderly/mantle/l2geth/internal/jsre"
+	"github.com/tenderly/mantle/l2geth/internal/web3ext"
+	"github.com/tenderly/mantle/l2geth/rpc"
 	"github.com/mattn/go-colorable"
 	"github.com/peterh/liner"
 	"github.com/robertkrimen/otto"

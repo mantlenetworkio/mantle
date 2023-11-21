@@ -19,8 +19,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/mantlenetworkio/mantle/l2geth/cmd/utils"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/cmd/utils"
+	"github.com/tenderly/mantle/l2geth/common"
 	"gopkg.in/urfave/cli.v1"
 )
 

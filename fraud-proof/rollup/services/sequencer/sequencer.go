@@ -11,14 +11,14 @@ import (
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/rpc"
 
-	"github.com/mantlenetworkio/mantle/fraud-proof/bindings"
-	"github.com/mantlenetworkio/mantle/fraud-proof/metrics"
-	"github.com/mantlenetworkio/mantle/fraud-proof/proof"
-	"github.com/mantlenetworkio/mantle/fraud-proof/rollup/services"
-	rollupTypes "github.com/mantlenetworkio/mantle/fraud-proof/rollup/types"
-	"github.com/mantlenetworkio/mantle/l2geth/common"
-	"github.com/mantlenetworkio/mantle/l2geth/log"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p"
+	"github.com/tenderly/mantle/fraud-proof/bindings"
+	"github.com/tenderly/mantle/fraud-proof/metrics"
+	"github.com/tenderly/mantle/fraud-proof/proof"
+	"github.com/tenderly/mantle/fraud-proof/rollup/services"
+	rollupTypes "github.com/tenderly/mantle/fraud-proof/rollup/types"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/p2p"
 )
 
 func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {

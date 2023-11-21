@@ -19,8 +19,8 @@ package p2p
 import (
 	"fmt"
 
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/enode"
-	"github.com/mantlenetworkio/mantle/l2geth/p2p/enr"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/p2p/enr"
 )
 
 // Protocol represents a P2P subprotocol implementation.
