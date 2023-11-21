@@ -21,7 +21,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 
-	bsscore "github.com/tenderly/mantle/bss-core"
+	bsscore "github.com/tenderly/optimism/bss-core"
 )
 
 var (

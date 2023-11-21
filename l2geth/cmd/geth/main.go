@@ -29,21 +29,19 @@ import (
 	"time"
 
 	"github.com/elastic/gosigar"
-	fp "github.com/tenderly/mantle/fraud-proof"
-	fpcmd "github.com/tenderly/mantle/fraud-proof/cmd"
-	"github.com/tenderly/mantle/l2geth/accounts"
-	"github.com/tenderly/mantle/l2geth/accounts/keystore"
-	"github.com/tenderly/mantle/l2geth/cmd/utils"
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/console"
-	"github.com/tenderly/mantle/l2geth/eth"
-	"github.com/tenderly/mantle/l2geth/eth/downloader"
-	"github.com/tenderly/mantle/l2geth/ethclient"
-	"github.com/tenderly/mantle/l2geth/internal/debug"
-	"github.com/tenderly/mantle/l2geth/les"
-	"github.com/tenderly/mantle/l2geth/log"
-	"github.com/tenderly/mantle/l2geth/metrics"
-	"github.com/tenderly/mantle/l2geth/node"
+	"github.com/tenderly/optimism/l2geth/accounts"
+	"github.com/tenderly/optimism/l2geth/accounts/keystore"
+	"github.com/tenderly/optimism/l2geth/cmd/utils"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/console"
+	"github.com/tenderly/optimism/l2geth/eth"
+	"github.com/tenderly/optimism/l2geth/eth/downloader"
+	"github.com/tenderly/optimism/l2geth/ethclient"
+	"github.com/tenderly/optimism/l2geth/internal/debug"
+	"github.com/tenderly/optimism/l2geth/les"
+	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/metrics"
+	"github.com/tenderly/optimism/l2geth/node"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -486,10 +484,10 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 	}
 
 	// <FRAUD-PROOF modification>
-	if ctx.IsSet(utils.RollupRoleFlag.Name) {
-		cfg := fpcmd.MakeFraudProofConfig(ctx)
-		fp.RegisterFraudProofService(stack, cfg)
-	}
+	//if ctx.IsSet(utils.RollupRoleFlag.Name) {
+	//	cfg := fpcmd.MakeFraudProofConfig(ctx)
+	//	fp.RegisterFraudProofService(stack, cfg)
+	//}
 	// <FRAUD-PROOF modification/>
 }
 

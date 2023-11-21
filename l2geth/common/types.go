@@ -27,7 +27,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/optimism/l2geth/common/hexutil"
 	"golang.org/x/crypto/sha3"
 )
 

@@ -28,10 +28,10 @@ import (
 	mrand "math/rand"
 	"strconv"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/crypto/ecies"
-	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/crypto/ecies"
+	"github.com/tenderly/optimism/l2geth/log"
 )
 
 // MessageParams specifies the exact way a message should be wrapped

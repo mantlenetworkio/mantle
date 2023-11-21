@@ -27,13 +27,13 @@ import (
 	"time"
 
 	lru "github.com/hashicorp/golang-lru"
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/consensus"
-	"github.com/tenderly/mantle/l2geth/core/rawdb"
-	"github.com/tenderly/mantle/l2geth/core/types"
-	"github.com/tenderly/mantle/l2geth/ethdb"
-	"github.com/tenderly/mantle/l2geth/log"
-	"github.com/tenderly/mantle/l2geth/params"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/consensus"
+	"github.com/tenderly/optimism/l2geth/core/rawdb"
+	"github.com/tenderly/optimism/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/ethdb"
+	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/params"
 )
 
 const (

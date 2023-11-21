@@ -8,9 +8,9 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics/influxdb"
 	"github.com/ethereum/go-ethereum/params"
-	"github.com/tenderly/mantle/gas-oracle/flags"
-	ometrics "github.com/tenderly/mantle/gas-oracle/metrics"
-	"github.com/tenderly/mantle/gas-oracle/oracle"
+	"github.com/tenderly/optimism/gas-oracle/flags"
+	ometrics "github.com/tenderly/optimism/gas-oracle/metrics"
+	"github.com/tenderly/optimism/gas-oracle/oracle"
 	"github.com/urfave/cli"
 )
 

@@ -25,9 +25,9 @@ import (
 	discoveryUtil "github.com/libp2p/go-libp2p/p2p/discovery/util"
 	"github.com/libp2p/go-libp2p/p2p/protocol/ping"
 
-	"github.com/tenderly/mantle/tss/node/tsslib/conversion"
-	"github.com/tenderly/mantle/tss/node/tsslib/messages"
-	"github.com/tenderly/mantle/tss/node/types"
+	"github.com/tenderly/optimism/tss/node/tsslib/conversion"
+	"github.com/tenderly/optimism/tss/node/tsslib/messages"
+	"github.com/tenderly/optimism/tss/node/types"
 )
 
 // TSSProtocolID protocol id used for tss

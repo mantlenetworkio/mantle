@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/tenderly/mantle/tss/manager/types"
+	"github.com/tenderly/optimism/tss/manager/types"
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/tendermint/tendermint/libs/service"
 	rpcserver "github.com/tendermint/tendermint/rpc/jsonrpc/server"

@@ -19,10 +19,10 @@ package keystore
 import (
 	"math/big"
 
-	ethereum "github.com/tenderly/mantle/l2geth"
-	"github.com/tenderly/mantle/l2geth/accounts"
-	"github.com/tenderly/mantle/l2geth/core/types"
-	"github.com/tenderly/mantle/l2geth/crypto"
+	ethereum "github.com/tenderly/optimism/l2geth"
+	"github.com/tenderly/optimism/l2geth/accounts"
+	"github.com/tenderly/optimism/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/crypto"
 )
 
 // keystoreWallet implements the accounts.Wallet interface for the original

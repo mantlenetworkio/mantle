@@ -21,8 +21,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/tenderly/mantle/l2geth/accounts/abi"
-	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/accounts/abi"
+	"github.com/tenderly/optimism/l2geth/common"
 )
 
 func TestMakeTopics(t *testing.T) {

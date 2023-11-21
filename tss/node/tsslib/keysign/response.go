@@ -2,7 +2,7 @@ package keysign
 
 import (
 	common2 "github.com/binance-chain/tss-lib/common"
-	"github.com/tenderly/mantle/tss/node/tsslib/common"
+	"github.com/tenderly/optimism/tss/node/tsslib/common"
 )
 
 type Response struct {

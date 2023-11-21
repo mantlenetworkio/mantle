@@ -26,14 +26,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/consensus/ethash"
-	"github.com/tenderly/mantle/l2geth/core"
-	"github.com/tenderly/mantle/l2geth/eth"
-	"github.com/tenderly/mantle/l2geth/internal/jsre"
-	"github.com/tenderly/mantle/l2geth/miner"
-	"github.com/tenderly/mantle/l2geth/node"
-	"github.com/tenderly/mantle/l2geth/rollup"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/consensus/ethash"
+	"github.com/tenderly/optimism/l2geth/core"
+	"github.com/tenderly/optimism/l2geth/eth"
+	"github.com/tenderly/optimism/l2geth/internal/jsre"
+	"github.com/tenderly/optimism/l2geth/miner"
+	"github.com/tenderly/optimism/l2geth/node"
+	"github.com/tenderly/optimism/l2geth/rollup"
 )
 
 const (

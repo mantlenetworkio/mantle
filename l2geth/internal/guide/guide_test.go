@@ -30,8 +30,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/accounts/keystore"
-	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/accounts/keystore"
+	"github.com/tenderly/optimism/l2geth/core/types"
 )
 
 // Tests that the account management snippets work correctly.

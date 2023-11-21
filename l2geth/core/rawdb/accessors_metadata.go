@@ -19,11 +19,11 @@ package rawdb
 import (
 	"encoding/json"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/ethdb"
-	"github.com/tenderly/mantle/l2geth/log"
-	"github.com/tenderly/mantle/l2geth/params"
-	"github.com/tenderly/mantle/l2geth/rlp"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/ethdb"
+	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/params"
+	"github.com/tenderly/optimism/l2geth/rlp"
 )
 
 // ReadDatabaseVersion retrieves the version number of the database.

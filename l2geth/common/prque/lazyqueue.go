@@ -20,7 +20,7 @@ import (
 	"container/heap"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/common/mclock"
+	"github.com/tenderly/optimism/l2geth/common/mclock"
 )
 
 // LazyQueue is a priority queue data structure where priorities can change over

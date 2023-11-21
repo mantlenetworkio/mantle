@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/tenderly/mantle/l2geth/params"
+	"github.com/tenderly/optimism/l2geth/params"
 )
 
 func TestConfig_IsTssReward(t *testing.T) {

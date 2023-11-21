@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/tenderly/mantle/subsidy/types"
+	"github.com/tenderly/optimism/subsidy/types"
 )
 
 type PayerStateFileWriter struct {

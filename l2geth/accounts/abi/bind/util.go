@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/core/types"
-	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/log"
 )
 
 // WaitMined waits for tx to be mined on the blockchain.

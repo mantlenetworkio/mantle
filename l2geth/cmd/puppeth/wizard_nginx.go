@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/log"
 )
 
 // ensureVirtualHost checks whether a reverse-proxy is running on the specified

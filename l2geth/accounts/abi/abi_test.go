@@ -25,8 +25,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/crypto"
 )
 
 const jsondata = `

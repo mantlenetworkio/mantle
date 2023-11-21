@@ -23,10 +23,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tenderly/mantle/l2geth/cmd/utils"
-	"github.com/tenderly/mantle/l2geth/consensus/ethash"
-	"github.com/tenderly/mantle/l2geth/eth"
-	"github.com/tenderly/mantle/l2geth/params"
+	"github.com/tenderly/optimism/l2geth/cmd/utils"
+	"github.com/tenderly/optimism/l2geth/consensus/ethash"
+	"github.com/tenderly/optimism/l2geth/eth"
+	"github.com/tenderly/optimism/l2geth/params"
 	"gopkg.in/urfave/cli.v1"
 )
 

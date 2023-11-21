@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/ethclient"
-	"github.com/tenderly/mantle/l2geth/log"
-	"github.com/tenderly/mantle/l2geth/rpc"
+	"github.com/tenderly/optimism/l2geth/ethclient"
+	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/rpc"
 )
 
 const (

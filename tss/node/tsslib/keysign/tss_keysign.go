@@ -15,12 +15,12 @@ import (
 	"github.com/binance-chain/tss-lib/ecdsa/signing"
 	"github.com/binance-chain/tss-lib/tss"
 
-	"github.com/tenderly/mantle/tss/node/tsslib/abnormal"
-	common2 "github.com/tenderly/mantle/tss/node/tsslib/common"
-	"github.com/tenderly/mantle/tss/node/tsslib/conversion"
-	"github.com/tenderly/mantle/tss/node/tsslib/messages"
-	"github.com/tenderly/mantle/tss/node/tsslib/p2p"
-	"github.com/tenderly/mantle/tss/node/tsslib/storage"
+	"github.com/tenderly/optimism/tss/node/tsslib/abnormal"
+	common2 "github.com/tenderly/optimism/tss/node/tsslib/common"
+	"github.com/tenderly/optimism/tss/node/tsslib/conversion"
+	"github.com/tenderly/optimism/tss/node/tsslib/messages"
+	"github.com/tenderly/optimism/tss/node/tsslib/p2p"
+	"github.com/tenderly/optimism/tss/node/tsslib/storage"
 )
 
 type TssKeySign struct {

@@ -20,7 +20,7 @@ import (
 	"github.com/tendermint/tendermint/libs/service"
 	"github.com/tendermint/tendermint/rpc/jsonrpc/types"
 
-	itypes "github.com/tenderly/mantle/tss/manager/types"
+	itypes "github.com/tenderly/optimism/tss/manager/types"
 )
 
 const (

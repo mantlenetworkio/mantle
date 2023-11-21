@@ -23,9 +23,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/rlp"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/rlp"
 )
 
 // The values in those tests are from the Transaction Tests

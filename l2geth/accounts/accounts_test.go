@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/optimism/l2geth/common/hexutil"
 )
 
 func TestTextHash(t *testing.T) {

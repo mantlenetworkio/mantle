@@ -19,10 +19,10 @@ package clique
 import (
 	"fmt"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/consensus"
-	"github.com/tenderly/mantle/l2geth/core/types"
-	"github.com/tenderly/mantle/l2geth/rpc"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/consensus"
+	"github.com/tenderly/optimism/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/rpc"
 )
 
 // API is a user facing RPC API to allow controlling the signer and voting

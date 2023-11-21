@@ -1,10 +1,10 @@
-module github.com/tenderly/mantle/tss
+module github.com/tenderly/optimism/tss
 
 go 1.19
 
 replace (
-	github.com/tenderly/mantle/bss-core => ../bss-core
-	github.com/tenderly/mantle/l2geth => ../l2geth
+	github.com/tenderly/optimism/bss-core => ../bss-core
+	github.com/tenderly/optimism/l2geth => ../l2geth
 )
 
 require (
@@ -26,8 +26,8 @@ require (
 	github.com/influxdata/influxdb v1.8.3
 	github.com/libp2p/go-libp2p v0.24.1
 	github.com/libp2p/go-libp2p-kad-dht v0.20.0
-	github.com/tenderly/mantle/bss-core v0.0.0
-	github.com/tenderly/mantle/l2geth v0.0.0
+	github.com/tenderly/optimism/bss-core v0.0.0
+	github.com/tenderly/optimism/l2geth v0.0.0
 	github.com/multiformats/go-multiaddr v0.8.0
 	github.com/prometheus/client_golang v1.15.1
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0

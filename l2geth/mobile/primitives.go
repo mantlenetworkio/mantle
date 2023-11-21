@@ -22,7 +22,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/common"
 )
 
 // Strings represents s slice of strs.

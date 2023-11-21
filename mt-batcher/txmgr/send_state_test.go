@@ -8,7 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
-	"github.com/tenderly/mantle/mt-batcher/txmgr"
+	"github.com/tenderly/optimism/mt-batcher/txmgr"
 )
 
 const testSafeAbortNonceTooLowCount = 3

@@ -27,16 +27,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/accounts"
-	"github.com/tenderly/mantle/l2geth/accounts/keystore"
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/common/hexutil"
-	"github.com/tenderly/mantle/l2geth/core/types"
-	"github.com/tenderly/mantle/l2geth/internal/ethapi"
-	"github.com/tenderly/mantle/l2geth/rlp"
-	"github.com/tenderly/mantle/l2geth/signer/core"
-	"github.com/tenderly/mantle/l2geth/signer/fourbyte"
-	"github.com/tenderly/mantle/l2geth/signer/storage"
+	"github.com/tenderly/optimism/l2geth/accounts"
+	"github.com/tenderly/optimism/l2geth/accounts/keystore"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/common/hexutil"
+	"github.com/tenderly/optimism/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/internal/ethapi"
+	"github.com/tenderly/optimism/l2geth/rlp"
+	"github.com/tenderly/optimism/l2geth/signer/core"
+	"github.com/tenderly/optimism/l2geth/signer/fourbyte"
+	"github.com/tenderly/optimism/l2geth/signer/storage"
 )
 
 //Used for testing

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/tenderly/mantle/proxyd"
+	"github.com/tenderly/optimism/proxyd"
 	"github.com/stretchr/testify/require"
 )
 

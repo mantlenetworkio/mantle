@@ -19,10 +19,10 @@ package state
 import (
 	"bytes"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/ethdb"
-	"github.com/tenderly/mantle/l2geth/rlp"
-	"github.com/tenderly/mantle/l2geth/trie"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/ethdb"
+	"github.com/tenderly/optimism/l2geth/rlp"
+	"github.com/tenderly/optimism/l2geth/trie"
 )
 
 // NewStateSync create a new state trie download scheduler.

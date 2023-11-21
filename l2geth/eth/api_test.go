@@ -25,10 +25,10 @@ import (
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/core/rawdb"
-	"github.com/tenderly/mantle/l2geth/core/state"
-	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/core/rawdb"
+	"github.com/tenderly/optimism/l2geth/core/state"
+	"github.com/tenderly/optimism/l2geth/crypto"
 )
 
 var dumper = spew.ConfigState{Indent: "    "}

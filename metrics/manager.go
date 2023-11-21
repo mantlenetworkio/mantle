@@ -3,7 +3,7 @@ package metrics
 import (
 	"context"
 	"fmt"
-	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

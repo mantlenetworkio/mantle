@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/tenderly/mantle/tss/common"
+	"github.com/tenderly/optimism/tss/common"
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 

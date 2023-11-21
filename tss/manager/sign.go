@@ -11,13 +11,13 @@ import (
 	"time"
 
 	"github.com/influxdata/influxdb/pkg/slices"
-	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/crypto"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 
-	"github.com/tenderly/mantle/l2geth/log"
-	tss "github.com/tenderly/mantle/tss/common"
-	"github.com/tenderly/mantle/tss/manager/types"
-	"github.com/tenderly/mantle/tss/ws/server"
+	"github.com/tenderly/optimism/l2geth/log"
+	tss "github.com/tenderly/optimism/tss/common"
+	"github.com/tenderly/optimism/tss/manager/types"
+	"github.com/tenderly/optimism/tss/ws/server"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 

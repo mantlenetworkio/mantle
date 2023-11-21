@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/tenderly/mantle/l2geth/common/hexutil"
-	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/common/hexutil"
+	"github.com/tenderly/optimism/l2geth/crypto"
 )
 
 type bytesBacked interface {

@@ -29,9 +29,9 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/core/rawdb"
-	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/core/rawdb"
+	"github.com/tenderly/optimism/l2geth/core/types"
 )
 
 // Tests that updating a state trie does not leak any database writes prior to

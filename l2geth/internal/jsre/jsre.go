@@ -26,8 +26,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/internal/jsre/deps"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/internal/jsre/deps"
 	"github.com/robertkrimen/otto"
 )
 

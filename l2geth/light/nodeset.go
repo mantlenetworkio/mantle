@@ -20,10 +20,10 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/ethdb"
-	"github.com/tenderly/mantle/l2geth/rlp"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/ethdb"
+	"github.com/tenderly/optimism/l2geth/rlp"
 )
 
 // NodeSet stores a set of trie nodes. It implements trie.Database and can also

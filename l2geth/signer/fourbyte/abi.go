@@ -23,8 +23,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/tenderly/mantle/l2geth/accounts/abi"
-	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/accounts/abi"
+	"github.com/tenderly/optimism/l2geth/common"
 )
 
 // decodedCallData is an internal type to represent a method call parsed according

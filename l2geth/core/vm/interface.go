@@ -17,11 +17,11 @@
 package vm
 
 import (
-	"github.com/tenderly/mantle/l2geth/core/state"
+	"github.com/tenderly/optimism/l2geth/core/state"
 	"math/big"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/core/types"
 )
 
 // StateDB is an EVM database for full state querying.

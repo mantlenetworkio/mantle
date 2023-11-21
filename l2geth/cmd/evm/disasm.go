@@ -22,7 +22,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/tenderly/mantle/l2geth/core/asm"
+	"github.com/tenderly/optimism/l2geth/core/asm"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

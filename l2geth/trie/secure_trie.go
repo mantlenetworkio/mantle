@@ -19,8 +19,8 @@ package trie
 import (
 	"fmt"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/log"
 )
 
 // SecureTrie wraps a trie with key hashing. In a secure trie, all

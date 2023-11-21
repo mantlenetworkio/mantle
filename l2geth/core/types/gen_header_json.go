@@ -7,8 +7,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/common/hexutil"
 )
 
 var _ = (*headerMarshaling)(nil)

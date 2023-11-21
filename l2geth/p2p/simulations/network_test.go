@@ -27,10 +27,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/log"
-	"github.com/tenderly/mantle/l2geth/node"
-	"github.com/tenderly/mantle/l2geth/p2p/enode"
-	"github.com/tenderly/mantle/l2geth/p2p/simulations/adapters"
+	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/node"
+	"github.com/tenderly/optimism/l2geth/p2p/enode"
+	"github.com/tenderly/optimism/l2geth/p2p/simulations/adapters"
 )
 
 // Tests that a created snapshot with a minimal service only contains the expected connections

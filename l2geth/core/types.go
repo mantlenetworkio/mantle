@@ -17,9 +17,9 @@
 package core
 
 import (
-	"github.com/tenderly/mantle/l2geth/core/state"
-	"github.com/tenderly/mantle/l2geth/core/types"
-	"github.com/tenderly/mantle/l2geth/core/vm"
+	"github.com/tenderly/optimism/l2geth/core/state"
+	"github.com/tenderly/optimism/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/core/vm"
 )
 
 // Validator is an interface which defines the standard for block validation. It

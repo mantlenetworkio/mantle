@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/common"
 )
 
 type QueueOrigin uint8

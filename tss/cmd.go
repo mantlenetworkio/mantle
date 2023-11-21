@@ -6,10 +6,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/tenderly/mantle/l2geth/log"
-	"github.com/tenderly/mantle/tss/common"
-	"github.com/tenderly/mantle/tss/manager"
-	"github.com/tenderly/mantle/tss/node/cmd/tssnode"
+	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/optimism/tss/common"
+	"github.com/tenderly/optimism/tss/manager"
+	"github.com/tenderly/optimism/tss/node/cmd/tssnode"
 )
 
 func main() {

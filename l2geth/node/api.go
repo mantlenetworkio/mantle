@@ -21,11 +21,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tenderly/mantle/l2geth/common/hexutil"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/p2p"
-	"github.com/tenderly/mantle/l2geth/p2p/enode"
-	"github.com/tenderly/mantle/l2geth/rpc"
+	"github.com/tenderly/optimism/l2geth/common/hexutil"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/p2p"
+	"github.com/tenderly/optimism/l2geth/p2p/enode"
+	"github.com/tenderly/optimism/l2geth/rpc"
 )
 
 // PrivateAdminAPI is the collection of administrative API methods exposed only

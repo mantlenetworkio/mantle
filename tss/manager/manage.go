@@ -15,19 +15,19 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/tenderly/mantle/tss/bindings/tgm"
-	"github.com/tenderly/mantle/tss/bindings/tsh"
+	"github.com/tenderly/optimism/tss/bindings/tgm"
+	"github.com/tenderly/optimism/tss/bindings/tsh"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/influxdata/influxdb/pkg/slices"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/log"
-	tss "github.com/tenderly/mantle/tss/common"
-	"github.com/tenderly/mantle/tss/index"
-	"github.com/tenderly/mantle/tss/manager/metics"
-	"github.com/tenderly/mantle/tss/manager/types"
-	"github.com/tenderly/mantle/tss/slash"
-	"github.com/tenderly/mantle/tss/ws/server"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/log"
+	tss "github.com/tenderly/optimism/tss/common"
+	"github.com/tenderly/optimism/tss/index"
+	"github.com/tenderly/optimism/tss/manager/metics"
+	"github.com/tenderly/optimism/tss/manager/types"
+	"github.com/tenderly/optimism/tss/slash"
+	"github.com/tenderly/optimism/tss/ws/server"
 )
 
 type Manager struct {

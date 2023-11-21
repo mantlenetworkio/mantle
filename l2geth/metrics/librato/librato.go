@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/metrics"
+	"github.com/tenderly/optimism/l2geth/metrics"
 )
 
 // a regexp for extracting the unit from time.Duration.String

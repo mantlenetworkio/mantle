@@ -19,8 +19,8 @@ package memorydb
 import (
 	"testing"
 
-	"github.com/tenderly/mantle/l2geth/ethdb"
-	"github.com/tenderly/mantle/l2geth/ethdb/dbtest"
+	"github.com/tenderly/optimism/l2geth/ethdb"
+	"github.com/tenderly/optimism/l2geth/ethdb/dbtest"
 )
 
 func TestMemoryDB(t *testing.T) {

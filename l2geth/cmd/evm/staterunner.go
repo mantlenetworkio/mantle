@@ -23,10 +23,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/tenderly/mantle/l2geth/core/state"
-	"github.com/tenderly/mantle/l2geth/core/vm"
-	"github.com/tenderly/mantle/l2geth/log"
-	"github.com/tenderly/mantle/l2geth/tests"
+	"github.com/tenderly/optimism/l2geth/core/state"
+	"github.com/tenderly/optimism/l2geth/core/vm"
+	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/tests"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

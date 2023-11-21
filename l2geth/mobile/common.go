@@ -24,8 +24,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/common/hexutil"
 )
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.

@@ -21,12 +21,12 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/core/rawdb"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/ethdb"
-	"github.com/tenderly/mantle/l2geth/ethdb/memorydb"
-	"github.com/tenderly/mantle/l2geth/trie"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/core/rawdb"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/ethdb"
+	"github.com/tenderly/optimism/l2geth/ethdb/memorydb"
+	"github.com/tenderly/optimism/l2geth/trie"
 )
 
 // testAccount is the data associated with an account used by the state tests.

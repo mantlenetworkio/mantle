@@ -9,11 +9,11 @@ import (
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/mt-batcher/l1l2client"
-	common2 "github.com/tenderly/mantle/mt-batcher/services/common"
-	"github.com/tenderly/mantle/mt-challenger/challenger"
-	"github.com/tenderly/mantle/mt-challenger/metrics"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/mt-batcher/l1l2client"
+	common2 "github.com/tenderly/optimism/mt-batcher/services/common"
+	"github.com/tenderly/optimism/mt-challenger/challenger"
+	"github.com/tenderly/optimism/mt-challenger/metrics"
 )
 
 func Main(gitVersion string) func(ctx *cli.Context) error {

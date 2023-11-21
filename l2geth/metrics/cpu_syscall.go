@@ -22,7 +22,7 @@ package metrics
 import (
 	"syscall"
 
-	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/log"
 )
 
 // getProcessCPUTime retrieves the process' CPU time since program startup.

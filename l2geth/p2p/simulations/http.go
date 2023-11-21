@@ -31,11 +31,11 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/julienschmidt/httprouter"
-	"github.com/tenderly/mantle/l2geth/event"
-	"github.com/tenderly/mantle/l2geth/p2p"
-	"github.com/tenderly/mantle/l2geth/p2p/enode"
-	"github.com/tenderly/mantle/l2geth/p2p/simulations/adapters"
-	"github.com/tenderly/mantle/l2geth/rpc"
+	"github.com/tenderly/optimism/l2geth/event"
+	"github.com/tenderly/optimism/l2geth/p2p"
+	"github.com/tenderly/optimism/l2geth/p2p/enode"
+	"github.com/tenderly/optimism/l2geth/p2p/simulations/adapters"
+	"github.com/tenderly/optimism/l2geth/rpc"
 )
 
 // DefaultClient is the default simulation API client which expects the API

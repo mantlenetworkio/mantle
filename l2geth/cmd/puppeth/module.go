@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/log"
 )
 
 var (

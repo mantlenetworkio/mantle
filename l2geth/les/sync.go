@@ -21,11 +21,11 @@ import (
 	"errors"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/core/rawdb"
-	"github.com/tenderly/mantle/l2geth/eth/downloader"
-	"github.com/tenderly/mantle/l2geth/light"
-	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/core/rawdb"
+	"github.com/tenderly/optimism/l2geth/eth/downloader"
+	"github.com/tenderly/optimism/l2geth/light"
+	"github.com/tenderly/optimism/l2geth/log"
 )
 
 var errInvalidCheckpoint = errors.New("invalid advertised checkpoint")

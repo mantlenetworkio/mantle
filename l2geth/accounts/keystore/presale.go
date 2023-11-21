@@ -25,8 +25,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/tenderly/mantle/l2geth/accounts"
-	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/accounts"
+	"github.com/tenderly/optimism/l2geth/crypto"
 	"github.com/pborman/uuid"
 	"golang.org/x/crypto/pbkdf2"
 )

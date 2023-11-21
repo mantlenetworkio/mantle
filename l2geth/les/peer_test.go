@@ -21,15 +21,15 @@ import (
 	"net"
 	"testing"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/common/mclock"
-	"github.com/tenderly/mantle/l2geth/core/rawdb"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/eth"
-	"github.com/tenderly/mantle/l2geth/les/flowcontrol"
-	"github.com/tenderly/mantle/l2geth/p2p"
-	"github.com/tenderly/mantle/l2geth/p2p/enode"
-	"github.com/tenderly/mantle/l2geth/rlp"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/common/mclock"
+	"github.com/tenderly/optimism/l2geth/core/rawdb"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/eth"
+	"github.com/tenderly/optimism/l2geth/les/flowcontrol"
+	"github.com/tenderly/optimism/l2geth/p2p"
+	"github.com/tenderly/optimism/l2geth/p2p/enode"
+	"github.com/tenderly/optimism/l2geth/rlp"
 )
 
 const protocolVersion = lpv2

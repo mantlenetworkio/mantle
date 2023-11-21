@@ -22,15 +22,15 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/common/hexutil"
-	"github.com/tenderly/mantle/l2geth/common/math"
-	"github.com/tenderly/mantle/l2geth/core"
-	"github.com/tenderly/mantle/l2geth/core/rawdb"
-	"github.com/tenderly/mantle/l2geth/core/state"
-	"github.com/tenderly/mantle/l2geth/core/vm"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/params"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/common/hexutil"
+	"github.com/tenderly/optimism/l2geth/common/math"
+	"github.com/tenderly/optimism/l2geth/core"
+	"github.com/tenderly/optimism/l2geth/core/rawdb"
+	"github.com/tenderly/optimism/l2geth/core/state"
+	"github.com/tenderly/optimism/l2geth/core/vm"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/params"
 )
 
 // VMTest checks EVM execution without block or transaction context.

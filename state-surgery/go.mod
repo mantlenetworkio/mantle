@@ -1,12 +1,12 @@
-module github.com/tenderly/mantle/state-surgery
+module github.com/tenderly/optimism/state-surgery
 
 go 1.18
 
-replace github.com/tenderly/mantle/l2geth => ../l2geth
+replace github.com/tenderly/optimism/l2geth => ../l2geth
 
 require (
 	github.com/ethereum/go-ethereum v1.10.26
-	github.com/tenderly/mantle/l2geth v0.0.0
+	github.com/tenderly/optimism/l2geth v0.0.0
 	github.com/mattn/go-isatty v0.0.16
 	github.com/urfave/cli/v2 v2.10.2
 	golang.org/x/crypto v0.9.0

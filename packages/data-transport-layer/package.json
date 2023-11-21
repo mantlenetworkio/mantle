@@ -28,12 +28,12 @@
     "transport",
     "layer"
   ],
-  "homepage": "https://github.com/tenderly/mantle/tree/main/packages/data-transport-layer#readme",
+  "homepage": "https://github.com/tenderly/optimism/tree/main/packages/data-transport-layer#readme",
   "license": "MIT",
   "author": "Mantle",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tenderly/mantle.git"
+    "url": "git+https://github.com/tenderly/optimism.git"
   },
   "dependencies": {
     "@ethersproject/providers": "^5.6.8",
@@ -70,7 +70,7 @@
     "ts-node": "^10.0.0"
   },
   "bugs": {
-    "url": "https://github.com/tenderly/mantle/issues"
+    "url": "https://github.com/tenderly/optimism/issues"
   },
   "directories": {
     "test": "test"

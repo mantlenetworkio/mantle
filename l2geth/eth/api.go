@@ -28,16 +28,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/common/hexutil"
-	"github.com/tenderly/mantle/l2geth/core"
-	"github.com/tenderly/mantle/l2geth/core/rawdb"
-	"github.com/tenderly/mantle/l2geth/core/state"
-	"github.com/tenderly/mantle/l2geth/core/types"
-	"github.com/tenderly/mantle/l2geth/internal/ethapi"
-	"github.com/tenderly/mantle/l2geth/rlp"
-	"github.com/tenderly/mantle/l2geth/rpc"
-	"github.com/tenderly/mantle/l2geth/trie"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/common/hexutil"
+	"github.com/tenderly/optimism/l2geth/core"
+	"github.com/tenderly/optimism/l2geth/core/rawdb"
+	"github.com/tenderly/optimism/l2geth/core/state"
+	"github.com/tenderly/optimism/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/internal/ethapi"
+	"github.com/tenderly/optimism/l2geth/rlp"
+	"github.com/tenderly/optimism/l2geth/rpc"
+	"github.com/tenderly/optimism/l2geth/trie"
 )
 
 // PublicEthereumAPI provides an API to access Ethereum full node-related

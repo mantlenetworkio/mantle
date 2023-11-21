@@ -22,12 +22,12 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/common/math"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/crypto/blake2b"
-	"github.com/tenderly/mantle/l2geth/crypto/bn256"
-	"github.com/tenderly/mantle/l2geth/params"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/common/math"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/crypto/blake2b"
+	"github.com/tenderly/optimism/l2geth/crypto/bn256"
+	"github.com/tenderly/optimism/l2geth/params"
 
 	//lint:ignore SA1019 Needed for precompile
 	"golang.org/x/crypto/ripemd160"

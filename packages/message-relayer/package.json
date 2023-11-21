@@ -23,12 +23,12 @@
     "ethereum",
     "relayer"
   ],
-  "homepage": "https://github.com/tenderly/mantle/tree/develop/packages/message-relayer#readme",
+  "homepage": "https://github.com/tenderly/optimism/tree/develop/packages/message-relayer#readme",
   "license": "MIT",
   "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tenderly/mantle.git"
+    "url": "https://github.com/tenderly/optimism.git"
   },
   "dependencies": {
     "@mantleio/common-ts": "0.1.0",

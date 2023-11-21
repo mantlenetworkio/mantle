@@ -10,7 +10,7 @@
 Clone, install, and build the Mantle monorepo:
 
 ```
-git clone https://github.com/tenderly/mantle.git
+git clone https://github.com/tenderly/optimism.git
 yarn install
 yarn build
 ```

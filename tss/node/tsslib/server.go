@@ -1,8 +1,8 @@
 package tsslib
 
 import (
-	keygen2 "github.com/tenderly/mantle/tss/node/tsslib/keygen"
-	keysign2 "github.com/tenderly/mantle/tss/node/tsslib/keysign"
+	keygen2 "github.com/tenderly/optimism/tss/node/tsslib/keygen"
+	keysign2 "github.com/tenderly/optimism/tss/node/tsslib/keysign"
 )
 
 type Server interface {

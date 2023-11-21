@@ -18,8 +18,8 @@ import (
 	"github.com/binance-chain/tss-lib/ecdsa/keygen"
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/tenderly/mantle/tss/node/tsslib/conversion"
-	"github.com/tenderly/mantle/tss/node/tsslib/p2p"
+	"github.com/tenderly/optimism/tss/node/tsslib/conversion"
+	"github.com/tenderly/optimism/tss/node/tsslib/p2p"
 )
 
 const PreParams = "pre_params"

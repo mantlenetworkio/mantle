@@ -20,8 +20,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/core/types"
 )
 
 // senderFromServer is a types.Signer that remembers the sender address returned by the RPC

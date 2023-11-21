@@ -14,7 +14,7 @@
 
 package state
 
-import "github.com/tenderly/mantle/l2geth/common"
+import "github.com/tenderly/optimism/l2geth/common"
 
 type AccessListTrie struct {
 }

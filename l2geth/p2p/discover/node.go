@@ -23,9 +23,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/common/math"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/p2p/enode"
+	"github.com/tenderly/optimism/l2geth/common/math"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/p2p/enode"
 )
 
 // node represents a host on the network.

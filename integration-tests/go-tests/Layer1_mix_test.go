@@ -4,8 +4,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	addressDict "github.com/tenderly/mantle/go-test/contracts/L1/deployment/AddressDictator.sol"
-	l1bridge "github.com/tenderly/mantle/go-test/contracts/L1/messaging/L1StandardBridge.sol"
+	addressDict "github.com/tenderly/optimism/go-test/contracts/L1/deployment/AddressDictator.sol"
+	l1bridge "github.com/tenderly/optimism/go-test/contracts/L1/messaging/L1StandardBridge.sol"
 
 	"github.com/stretchr/testify/require"
 	"testing"

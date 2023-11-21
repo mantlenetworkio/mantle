@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenderly/mantle/proxyd"
+	"github.com/tenderly/optimism/proxyd"
 	"github.com/stretchr/testify/require"
 )
 

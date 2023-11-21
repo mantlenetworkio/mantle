@@ -24,14 +24,14 @@ import (
 	"testing"
 	"time"
 
-	ethereum "github.com/tenderly/mantle/l2geth"
-	"github.com/tenderly/mantle/l2geth/accounts/abi"
-	"github.com/tenderly/mantle/l2geth/accounts/abi/bind"
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/core"
-	"github.com/tenderly/mantle/l2geth/core/types"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/params"
+	ethereum "github.com/tenderly/optimism/l2geth"
+	"github.com/tenderly/optimism/l2geth/accounts/abi"
+	"github.com/tenderly/optimism/l2geth/accounts/abi/bind"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/core"
+	"github.com/tenderly/optimism/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/params"
 )
 
 func TestSimulatedBackend(t *testing.T) {

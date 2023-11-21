@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/tenderly/mantle/bss-core/dial"
-	"github.com/tenderly/mantle/l2geth/ethclient"
-	"github.com/tenderly/mantle/l2geth/log"
-	"github.com/tenderly/mantle/l2geth/rpc"
+	"github.com/tenderly/optimism/bss-core/dial"
+	"github.com/tenderly/optimism/l2geth/ethclient"
+	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/rpc"
 )
 
 // DialL2EthClientWithTimeout attempts to dial the L2 provider using the

@@ -25,12 +25,12 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/tenderly/mantle/l2geth/accounts/abi"
-	"github.com/tenderly/mantle/l2geth/accounts/abi/bind"
-	"github.com/tenderly/mantle/l2geth/cmd/utils"
-	"github.com/tenderly/mantle/l2geth/common/compiler"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/accounts/abi"
+	"github.com/tenderly/optimism/l2geth/accounts/abi/bind"
+	"github.com/tenderly/optimism/l2geth/cmd/utils"
+	"github.com/tenderly/optimism/l2geth/common/compiler"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/log"
 	"gopkg.in/urfave/cli.v1"
 )
 

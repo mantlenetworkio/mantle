@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/tenderly/mantle/l2geth/cmd/utils"
+	"github.com/tenderly/optimism/l2geth/cmd/utils"
 	"gopkg.in/urfave/cli.v1"
 )
 

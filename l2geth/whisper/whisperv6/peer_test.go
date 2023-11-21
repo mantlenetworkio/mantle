@@ -27,13 +27,13 @@ import (
 
 	"net"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/common/hexutil"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/p2p"
-	"github.com/tenderly/mantle/l2geth/p2p/enode"
-	"github.com/tenderly/mantle/l2geth/p2p/nat"
-	"github.com/tenderly/mantle/l2geth/rlp"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/common/hexutil"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/p2p"
+	"github.com/tenderly/optimism/l2geth/p2p/enode"
+	"github.com/tenderly/optimism/l2geth/p2p/nat"
+	"github.com/tenderly/optimism/l2geth/rlp"
 )
 
 var keys = []string{

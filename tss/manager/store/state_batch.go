@@ -3,7 +3,7 @@ package store
 import (
 	"encoding/json"
 
-	"github.com/tenderly/mantle/tss/index"
+	"github.com/tenderly/optimism/tss/index"
 )
 
 func (s *Storage) SetStateBatch(info index.StateBatchInfo) error {

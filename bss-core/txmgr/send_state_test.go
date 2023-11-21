@@ -6,7 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
-	"github.com/tenderly/mantle/bss-core/txmgr"
+	"github.com/tenderly/optimism/bss-core/txmgr"
 	"github.com/stretchr/testify/require"
 )
 

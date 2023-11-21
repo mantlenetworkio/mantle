@@ -10,12 +10,12 @@ import (
 	"github.com/influxdata/influxdb/pkg/slices"
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/tenderly/mantle/tss/node/tsslib/abnormal"
-	"github.com/tenderly/mantle/tss/node/tsslib/common"
-	"github.com/tenderly/mantle/tss/node/tsslib/conversion"
-	keysign2 "github.com/tenderly/mantle/tss/node/tsslib/keysign"
-	"github.com/tenderly/mantle/tss/node/tsslib/messages"
-	"github.com/tenderly/mantle/tss/node/tsslib/storage"
+	"github.com/tenderly/optimism/tss/node/tsslib/abnormal"
+	"github.com/tenderly/optimism/tss/node/tsslib/common"
+	"github.com/tenderly/optimism/tss/node/tsslib/conversion"
+	keysign2 "github.com/tenderly/optimism/tss/node/tsslib/keysign"
+	"github.com/tenderly/optimism/tss/node/tsslib/messages"
+	"github.com/tenderly/optimism/tss/node/tsslib/storage"
 )
 
 func (t *TssServer) generateSignature(onlinePeers []peer.ID, req keysign2.Request, localStateItem storage.KeygenLocalState, keysignInstance *keysign2.TssKeySign) (keysign2.Response, error) {

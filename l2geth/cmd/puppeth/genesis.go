@@ -22,13 +22,13 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/common/hexutil"
-	math2 "github.com/tenderly/mantle/l2geth/common/math"
-	"github.com/tenderly/mantle/l2geth/consensus/ethash"
-	"github.com/tenderly/mantle/l2geth/core"
-	"github.com/tenderly/mantle/l2geth/core/types"
-	"github.com/tenderly/mantle/l2geth/params"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/common/hexutil"
+	math2 "github.com/tenderly/optimism/l2geth/common/math"
+	"github.com/tenderly/optimism/l2geth/consensus/ethash"
+	"github.com/tenderly/optimism/l2geth/core"
+	"github.com/tenderly/optimism/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/params"
 )
 
 // alethGenesisSpec represents the genesis specification format used by the

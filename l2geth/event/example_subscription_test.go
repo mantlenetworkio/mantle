@@ -19,7 +19,7 @@ package event_test
 import (
 	"fmt"
 
-	"github.com/tenderly/mantle/l2geth/event"
+	"github.com/tenderly/optimism/l2geth/event"
 )
 
 func ExampleNewSubscription() {

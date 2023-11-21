@@ -26,9 +26,9 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/tenderly/mantle/l2geth/common/math"
-	"github.com/tenderly/mantle/l2geth/crypto"
-	"github.com/tenderly/mantle/l2geth/p2p/enr"
+	"github.com/tenderly/optimism/l2geth/common/math"
+	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/optimism/l2geth/p2p/enr"
 )
 
 var (

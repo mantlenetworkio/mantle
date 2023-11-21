@@ -19,9 +19,9 @@ package core
 import (
 	"context"
 
-	"github.com/tenderly/mantle/l2geth/internal/ethapi"
-	"github.com/tenderly/mantle/l2geth/log"
-	"github.com/tenderly/mantle/l2geth/rpc"
+	"github.com/tenderly/optimism/l2geth/internal/ethapi"
+	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/rpc"
 )
 
 type StdIOUI struct {

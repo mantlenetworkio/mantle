@@ -10,8 +10,8 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
-	"github.com/tenderly/mantle/l2geth/log"
-	"github.com/tenderly/mantle/tss/bindings/scc"
+	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/optimism/tss/bindings/scc"
 )
 
 var stateBatchAppendedTopicHash = crypto.Keccak256Hash([]byte("StateBatchAppended(uint256,bytes32,uint256,uint256,bytes,bytes)"))

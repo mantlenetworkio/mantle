@@ -26,14 +26,14 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/tenderly/mantle/l2geth/accounts"
-	"github.com/tenderly/mantle/l2geth/core/rawdb"
-	"github.com/tenderly/mantle/l2geth/ethdb"
-	"github.com/tenderly/mantle/l2geth/event"
-	"github.com/tenderly/mantle/l2geth/internal/debug"
-	"github.com/tenderly/mantle/l2geth/log"
-	"github.com/tenderly/mantle/l2geth/p2p"
-	"github.com/tenderly/mantle/l2geth/rpc"
+	"github.com/tenderly/optimism/l2geth/accounts"
+	"github.com/tenderly/optimism/l2geth/core/rawdb"
+	"github.com/tenderly/optimism/l2geth/ethdb"
+	"github.com/tenderly/optimism/l2geth/event"
+	"github.com/tenderly/optimism/l2geth/internal/debug"
+	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/p2p"
+	"github.com/tenderly/optimism/l2geth/rpc"
 	"github.com/prometheus/tsdb/fileutil"
 )
 

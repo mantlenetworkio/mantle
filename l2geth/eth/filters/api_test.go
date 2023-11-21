@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/rpc"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/rpc"
 )
 
 func TestUnmarshalJSONNewFilterArgs(t *testing.T) {

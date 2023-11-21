@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/common/mclock"
+	"github.com/tenderly/optimism/l2geth/common/mclock"
 )
 
 // Subscription represents a stream of events. The carrier of the events is typically a

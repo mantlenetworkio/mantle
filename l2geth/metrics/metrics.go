@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/log"
 )
 
 // Enabled is checked by the constructor functions for all of the

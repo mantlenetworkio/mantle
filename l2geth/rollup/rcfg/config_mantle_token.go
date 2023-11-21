@@ -3,8 +3,8 @@ package rcfg
 import (
 	"math/big"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/rollup/dump"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/rollup/dump"
 )
 
 var (

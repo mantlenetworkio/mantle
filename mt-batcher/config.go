@@ -3,7 +3,7 @@ package mt_batcher
 import (
 	"time"
 
-	"github.com/tenderly/mantle/mt-batcher/flags"
+	"github.com/tenderly/optimism/mt-batcher/flags"
 	"github.com/urfave/cli"
 )
 

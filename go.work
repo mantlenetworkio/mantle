@@ -21,15 +21,15 @@ replace (
 	// github.com/Layr-Labs/datalayr/common v0.0.0 => ./datalayr/common
 	// github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0 => ./datalayr/lib/merkzg
 	github.com/ethereum/go-ethereum v1.10.21 => github.com/ethereum-mantle/reference-optimistic-geth v0.0.0-20220803173305-1c9d4cc76a6e
-	github.com/tenderly/mantle/bss-core v0.0.0 => ./bss-core
-	github.com/tenderly/mantle/fraud-proof v0.0.0 => ./fraud-proof
-	github.com/tenderly/mantle/gas-oracle v0.0.0 => ./gas-oracle
-	github.com/tenderly/mantle/l2geth v0.0.0 => ./l2geth
-	github.com/tenderly/mantle/metrics v0.0.0 => ./metrics
-	github.com/tenderly/mantle/mt-batcher v0.0.0 => ./mt-batcher
-	github.com/tenderly/mantle/mt-challenger v0.0.0 => ./mt-challenger
-	github.com/tenderly/mantle/subsidy v0.0.0 => ./subsidy
-	github.com/tenderly/mantle/tss v0.0.0 => ./tss
+	github.com/tenderly/optimism/bss-core v0.0.0 => ./bss-core
+	github.com/tenderly/optimism/fraud-proof v0.0.0 => ./fraud-proof
+	github.com/tenderly/optimism/gas-oracle v0.0.0 => ./gas-oracle
+	github.com/tenderly/optimism/l2geth v0.0.0 => ./l2geth
+	github.com/tenderly/optimism/metrics v0.0.0 => ./metrics
+	github.com/tenderly/optimism/mt-batcher v0.0.0 => ./mt-batcher
+	github.com/tenderly/optimism/mt-challenger v0.0.0 => ./mt-challenger
+	github.com/tenderly/optimism/subsidy v0.0.0 => ./subsidy
+	github.com/tenderly/optimism/tss v0.0.0 => ./tss
 )
 
 // For local debugging:

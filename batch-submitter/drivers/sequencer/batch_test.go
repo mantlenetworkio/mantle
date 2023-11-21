@@ -4,9 +4,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/tenderly/mantle/batch-submitter/drivers/sequencer"
-	l2common "github.com/tenderly/mantle/l2geth/common"
-	l2types "github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/optimism/batch-submitter/drivers/sequencer"
+	l2common "github.com/tenderly/optimism/l2geth/common"
+	l2types "github.com/tenderly/optimism/l2geth/core/types"
 	"github.com/stretchr/testify/require"
 )
 

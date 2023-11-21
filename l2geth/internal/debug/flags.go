@@ -25,9 +25,9 @@ import (
 	"runtime"
 
 	"github.com/fjl/memsize/memsizeui"
-	"github.com/tenderly/mantle/l2geth/log"
-	"github.com/tenderly/mantle/l2geth/metrics"
-	"github.com/tenderly/mantle/l2geth/metrics/exp"
+	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/optimism/l2geth/metrics"
+	"github.com/tenderly/optimism/l2geth/metrics/exp"
 	colorable "github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"gopkg.in/urfave/cli.v1"

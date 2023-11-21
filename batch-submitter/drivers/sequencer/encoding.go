@@ -11,8 +11,8 @@ import (
 	"math"
 	"math/big"
 
-	l2types "github.com/tenderly/mantle/l2geth/core/types"
-	l2rlp "github.com/tenderly/mantle/l2geth/rlp"
+	l2types "github.com/tenderly/optimism/l2geth/core/types"
+	l2rlp "github.com/tenderly/optimism/l2geth/rlp"
 )
 
 const (

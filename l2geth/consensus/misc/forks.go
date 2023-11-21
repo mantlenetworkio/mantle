@@ -19,9 +19,9 @@ package misc
 import (
 	"fmt"
 
-	"github.com/tenderly/mantle/l2geth/common"
-	"github.com/tenderly/mantle/l2geth/core/types"
-	"github.com/tenderly/mantle/l2geth/params"
+	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/optimism/l2geth/core/types"
+	"github.com/tenderly/optimism/l2geth/params"
 )
 
 // VerifyForkHashes verifies that blocks conforming to network hard-forks do have

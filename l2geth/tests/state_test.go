@@ -23,7 +23,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/tenderly/mantle/l2geth/core/vm"
+	"github.com/tenderly/optimism/l2geth/core/vm"
 )
 
 func TestState(t *testing.T) {

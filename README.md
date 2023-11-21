@@ -10,7 +10,7 @@
 
 </br>
 
-[![](https://github.com/tenderly/mantle/actions/workflows/build-image.yml/badge.svg)](https://github.com/tenderly/mantle/actions/workflows/build-image.yml)
+[![](https://github.com/tenderly/optimism/actions/workflows/build-image.yml/badge.svg)](https://github.com/tenderly/optimism/actions/workflows/build-image.yml)
 
 </p>
 
@@ -159,7 +159,7 @@ root
 ## How to Contribute
 
 Read through [CONTRIBUTING.md](./CONTRIBUTING.md) for a general overview of our contribution process.
-Then check out our list of [good first issues](https://github.com/tenderly/mantle/contribute) to find something fun to work on!
+Then check out our list of [good first issues](https://github.com/tenderly/optimism/contribute) to find something fun to work on!
 
 <br/>
 
