@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
+//go:build darwin || dragonfly || freebsd || linux || nacl || netbsd || openbsd || solaris
 // +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
 
 package rpc
@@ -21,7 +22,7 @@ package rpc
 /*
 #include <sys/un.h>
 
-int max_socket_path_size2() {
+int max_socket_path_size3() {
 struct sockaddr_un s;
 return sizeof(s.sun_path);
 }
@@ -29,5 +30,5 @@ return sizeof(s.sun_path);
 import "C"
 
 var (
-	max_path_size = C.max_socket_path_size2()
+	max_path_size = C.max_socket_path_size3()
 )
