@@ -1,24 +1,24 @@
-module github.com/tenderly/optimism/batch-submitter
+module github.com/tenderly/mantle/batch-submitter
 
 go 1.18
 
-replace github.com/tenderly/optimism/bss-core => ../bss-core
+replace github.com/tenderly/mantle/bss-core => ../bss-core
 
-replace github.com/tenderly/optimism/l2geth => ../l2geth
+replace github.com/tenderly/mantle/l2geth => ../l2geth
 
-replace github.com/tenderly/optimism/tss => ../tss
+replace github.com/tenderly/mantle/tss => ../tss
 
-replace github.com/tenderly/optimism/fraud-proof => ../fraud-proof
+replace github.com/tenderly/mantle/fraud-proof => ../fraud-proof
 
 require (
 	cloud.google.com/go/kms v1.11.0
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/getsentry/sentry-go v0.12.0
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/tenderly/optimism/bss-core v0.0.0
-	github.com/tenderly/optimism/fraud-proof v0.0.0
-	github.com/tenderly/optimism/l2geth v0.0.0
-	github.com/tenderly/optimism/tss v0.0.0
+	github.com/tenderly/mantle/bss-core v0.0.0
+	github.com/tenderly/mantle/fraud-proof v0.0.0
+	github.com/tenderly/mantle/l2geth v0.0.0
+	github.com/tenderly/mantle/tss v0.0.0
 	github.com/prometheus/client_golang v1.15.1
 	github.com/stretchr/testify v1.8.4
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7

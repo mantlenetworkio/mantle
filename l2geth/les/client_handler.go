@@ -21,14 +21,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/common/mclock"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/eth/downloader"
-	"github.com/tenderly/optimism/l2geth/light"
-	"github.com/tenderly/optimism/l2geth/log"
-	"github.com/tenderly/optimism/l2geth/p2p"
-	"github.com/tenderly/optimism/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common/mclock"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/eth/downloader"
+	"github.com/tenderly/mantle/l2geth/light"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/p2p"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 // clientHandler is responsible for receiving and processing all incoming server

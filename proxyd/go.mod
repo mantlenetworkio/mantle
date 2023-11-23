@@ -1,4 +1,4 @@
-module github.com/tenderly/optimism/proxyd
+module github.com/tenderly/mantle/proxyd
 
 go 1.18
 

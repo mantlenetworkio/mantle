@@ -1,7 +1,7 @@
 package dump
 
 import (
-	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common"
 )
 
 var BvmMantleAddress = common.HexToAddress("0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000")

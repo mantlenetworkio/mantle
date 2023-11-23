@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/tenderly/optimism/fraud-proof/rollup/services"
-	"github.com/tenderly/optimism/l2geth/cmd/utils"
-	"github.com/tenderly/optimism/l2geth/common"
+	"github.com/tenderly/mantle/fraud-proof/rollup/services"
+	"github.com/tenderly/mantle/l2geth/cmd/utils"
+	"github.com/tenderly/mantle/l2geth/common"
 
 	"gopkg.in/urfave/cli.v1"
 )

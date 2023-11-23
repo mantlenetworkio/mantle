@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/crypto"
 )
 
 // Event is an event potentially triggered by the EVM's LOG mechanism. The Event
@@ -59,7 +59,7 @@ func (e Event) String() string {
 //
 // Example
 //
-//     event foo(uint32 a, int b) = "foo(uint32,int256)"
+//	event foo(uint32 a, int b) = "foo(uint32,int256)"
 //
 // Please note that "int" is substitute for its canonical representation "int256"
 func (e Event) Sig() string {

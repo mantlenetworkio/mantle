@@ -20,12 +20,12 @@
     "integration",
     "tests"
   ],
-  "homepage": "https://github.com/tenderly/optimism/tree/develop/packages/integration-tests#readme",
+  "homepage": "https://github.com/tenderly/mantle/tree/develop/packages/integration-tests#readme",
   "license": "MIT",
   "author": "Mantle PBC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tenderly/optimism.git"
+    "url": "https://github.com/tenderly/mantle.git"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.5.4",

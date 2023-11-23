@@ -15,8 +15,8 @@
 package proof
 
 import (
-	"github.com/tenderly/optimism/fraud-proof/proof/state"
-	"github.com/tenderly/optimism/l2geth/core/vm"
+	"github.com/tenderly/mantle/fraud-proof/proof/state"
+	"github.com/tenderly/mantle/l2geth/core/vm"
 )
 
 type genProofFunc func(ctx ProofGenContext, currState, nextState *state.IntraState, vmerr error) (*OneStepProof, error)

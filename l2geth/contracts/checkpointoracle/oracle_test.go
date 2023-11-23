@@ -27,13 +27,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/accounts/abi/bind"
-	"github.com/tenderly/optimism/l2geth/accounts/abi/bind/backends"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/contracts/checkpointoracle/contract"
-	"github.com/tenderly/optimism/l2geth/core"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/accounts/abi/bind"
+	"github.com/tenderly/mantle/l2geth/accounts/abi/bind/backends"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/contracts/checkpointoracle/contract"
+	"github.com/tenderly/mantle/l2geth/core"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 var (

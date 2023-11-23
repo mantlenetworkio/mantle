@@ -24,9 +24,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/event"
-	"github.com/tenderly/optimism/l2geth/log"
-	"github.com/tenderly/optimism/l2geth/metrics"
+	"github.com/tenderly/mantle/l2geth/event"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/metrics"
 )
 
 const (

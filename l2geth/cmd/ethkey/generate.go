@@ -23,10 +23,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/tenderly/optimism/l2geth/accounts/keystore"
-	"github.com/tenderly/optimism/l2geth/cmd/utils"
-	"github.com/tenderly/optimism/l2geth/crypto"
 	"github.com/pborman/uuid"
+	"github.com/tenderly/mantle/l2geth/accounts/keystore"
+	"github.com/tenderly/mantle/l2geth/cmd/utils"
+	"github.com/tenderly/mantle/l2geth/crypto"
 	"gopkg.in/urfave/cli.v1"
 )
 

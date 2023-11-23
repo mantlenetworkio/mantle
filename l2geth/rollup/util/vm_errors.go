@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tenderly/optimism/l2geth/accounts/abi"
+	"github.com/tenderly/mantle/l2geth/accounts/abi"
 )
 
 var codec abi.ABI

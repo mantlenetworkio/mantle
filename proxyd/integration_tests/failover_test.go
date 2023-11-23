@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/alicebob/miniredis"
-	"github.com/tenderly/optimism/proxyd"
 	"github.com/stretchr/testify/require"
+	"github.com/tenderly/mantle/proxyd"
 )
 
 const (

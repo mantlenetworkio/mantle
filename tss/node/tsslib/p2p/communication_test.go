@@ -8,8 +8,8 @@ import (
 	maddr "github.com/multiformats/go-multiaddr"
 	"github.com/stretchr/testify/require"
 
-	"github.com/tenderly/optimism/tss/node/store"
-	"github.com/tenderly/optimism/tss/node/tsslib/messages"
+	"github.com/tenderly/mantle/tss/node/store"
+	"github.com/tenderly/mantle/tss/node/tsslib/messages"
 )
 
 type CommunicationTestSuite struct {

@@ -15,15 +15,15 @@ import (
 	ethc "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
-	"github.com/tenderly/optimism/bss-core/dial"
-	l2ethclient "github.com/tenderly/optimism/l2geth/ethclient"
-	"github.com/tenderly/optimism/tss/bindings/tgm"
-	"github.com/tenderly/optimism/tss/bindings/tsh"
-	"github.com/tenderly/optimism/tss/common"
-	"github.com/tenderly/optimism/tss/manager/l1chain"
-	"github.com/tenderly/optimism/tss/node/tsslib"
-	"github.com/tenderly/optimism/tss/node/types"
-	"github.com/tenderly/optimism/tss/ws/client"
+	"github.com/tenderly/mantle/bss-core/dial"
+	l2ethclient "github.com/tenderly/mantle/l2geth/ethclient"
+	"github.com/tenderly/mantle/tss/bindings/tgm"
+	"github.com/tenderly/mantle/tss/bindings/tsh"
+	"github.com/tenderly/mantle/tss/common"
+	"github.com/tenderly/mantle/tss/manager/l1chain"
+	"github.com/tenderly/mantle/tss/node/tsslib"
+	"github.com/tenderly/mantle/tss/node/types"
+	"github.com/tenderly/mantle/tss/ws/client"
 )
 
 type Processor struct {

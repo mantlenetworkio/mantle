@@ -22,13 +22,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/common/bitutil"
-	"github.com/tenderly/optimism/l2geth/core/bloombits"
-	"github.com/tenderly/optimism/l2geth/core/rawdb"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/ethdb"
-	"github.com/tenderly/optimism/l2geth/node"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common/bitutil"
+	"github.com/tenderly/mantle/l2geth/core/bloombits"
+	"github.com/tenderly/mantle/l2geth/core/rawdb"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/ethdb"
+	"github.com/tenderly/mantle/l2geth/node"
 )
 
 func BenchmarkBloomBits512(b *testing.B) {

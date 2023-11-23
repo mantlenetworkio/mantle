@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/tenderly/optimism/tss/slash"
+	"github.com/tenderly/mantle/tss/slash"
 
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"

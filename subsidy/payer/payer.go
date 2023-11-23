@@ -13,8 +13,8 @@ import (
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/tenderly/optimism/subsidy/cache-file"
-	"github.com/tenderly/optimism/subsidy/types"
+	"github.com/tenderly/mantle/subsidy/cache-file"
+	"github.com/tenderly/mantle/subsidy/types"
 )
 
 type Payer struct {

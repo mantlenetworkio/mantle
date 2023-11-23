@@ -19,10 +19,10 @@ package leveldb
 import (
 	"testing"
 
-	"github.com/tenderly/optimism/l2geth/ethdb"
-	"github.com/tenderly/optimism/l2geth/ethdb/dbtest"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/storage"
+	"github.com/tenderly/mantle/l2geth/ethdb"
+	"github.com/tenderly/mantle/l2geth/ethdb/dbtest"
 )
 
 func TestLevelDB(t *testing.T) {

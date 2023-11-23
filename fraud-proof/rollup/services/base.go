@@ -8,11 +8,11 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/tenderly/optimism/fraud-proof/bindings"
-	"github.com/tenderly/optimism/fraud-proof/proof"
-	"github.com/tenderly/optimism/l2geth/core"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/mantle/fraud-proof/bindings"
+	"github.com/tenderly/mantle/fraud-proof/proof"
+	"github.com/tenderly/mantle/l2geth/core"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/log"
 )
 
 type BaseService struct {

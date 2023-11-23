@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	gresty "github.com/go-resty/resty/v2"
-	common2 "github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/log"
-	l2rlp "github.com/tenderly/optimism/l2geth/rlp"
 	"github.com/pkg/errors"
+	common2 "github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/log"
+	l2rlp "github.com/tenderly/mantle/l2geth/rlp"
 )
 
 var errEigenHTTPError = errors.New("eigen da http error")

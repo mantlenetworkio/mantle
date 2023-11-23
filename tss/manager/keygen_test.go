@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 
-	tss "github.com/tenderly/optimism/tss/common"
-	"github.com/tenderly/optimism/tss/ws/server"
+	tss "github.com/tenderly/mantle/tss/common"
+	"github.com/tenderly/mantle/tss/ws/server"
 )
 
 func TestKeygen(t *testing.T) {

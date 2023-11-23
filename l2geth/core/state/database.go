@@ -19,9 +19,9 @@ package state
 import (
 	"fmt"
 	lru "github.com/hashicorp/golang-lru"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/ethdb"
-	"github.com/tenderly/optimism/l2geth/trie"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/ethdb"
+	"github.com/tenderly/mantle/l2geth/trie"
 )
 
 const (

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenderly/optimism/proxyd"
 	"github.com/stretchr/testify/require"
+	"github.com/tenderly/mantle/proxyd"
 )
 
 type resWithCode struct {

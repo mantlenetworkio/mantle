@@ -10,8 +10,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	bsscore "github.com/tenderly/optimism/bss-core"
 	"github.com/stretchr/testify/require"
+	bsscore "github.com/tenderly/mantle/bss-core"
 )
 
 var (
@@ -209,9 +209,9 @@ func TestParsePrivateKeyStr(t *testing.T) {
 }
 
 // TestGetConfiguredPrivateKey asserts that GetConfiguredPrivateKey either:
-//  1) Derives the correct private key assuming the BIP39 mnemonic and BIP32
+//  1. Derives the correct private key assuming the BIP39 mnemonic and BIP32
 //     derivation path are both present and the private key string is omitted.
-//  2) Parses the correct private key assuming only the private key string is
+//  2. Parses the correct private key assuming only the private key string is
 //     present, but the BIP39 mnemonic and BIP32 derivation path are omitted.
 func TestGetConfiguredPrivateKey(t *testing.T) {
 	tests := []struct {

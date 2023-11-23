@@ -24,9 +24,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/p2p"
-	"github.com/tenderly/optimism/l2geth/rpc"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/p2p"
+	"github.com/tenderly/mantle/l2geth/rpc"
 )
 
 var (

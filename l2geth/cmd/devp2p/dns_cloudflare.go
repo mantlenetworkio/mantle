@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tenderly/optimism/l2geth/log"
-	"github.com/tenderly/optimism/l2geth/p2p/dnsdisc"
 	"github.com/cloudflare/cloudflare-go"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/p2p/dnsdisc"
 	"gopkg.in/urfave/cli.v1"
 )
 

@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/tenderly/optimism/proxyd"
 	"github.com/stretchr/testify/require"
+	"github.com/tenderly/mantle/proxyd"
 )
 
 // TestConcurrentWSPanic tests for a panic in the websocket proxy

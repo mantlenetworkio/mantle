@@ -11,9 +11,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/tenderly/optimism/l2geth/log"
-	tss "github.com/tenderly/optimism/tss/common"
-	"github.com/tenderly/optimism/tss/manager/types"
+	"github.com/tenderly/mantle/l2geth/log"
+	tss "github.com/tenderly/mantle/tss/common"
+	"github.com/tenderly/mantle/tss/manager/types"
 )
 
 type Registry struct {

@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	tss "github.com/tenderly/optimism/tss/common"
-	"github.com/tenderly/optimism/tss/manager/types"
-	"github.com/tenderly/optimism/tss/ws/server"
 	"github.com/stretchr/testify/require"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	tss "github.com/tenderly/mantle/tss/common"
+	"github.com/tenderly/mantle/tss/manager/types"
+	"github.com/tenderly/mantle/tss/ws/server"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 

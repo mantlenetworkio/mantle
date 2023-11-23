@@ -22,13 +22,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tenderly/optimism/l2geth/accounts"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/common/hexutil"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/internal/ethapi"
-	"github.com/tenderly/optimism/l2geth/signer/core"
-	"github.com/tenderly/optimism/l2geth/signer/storage"
+	"github.com/tenderly/mantle/l2geth/accounts"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/internal/ethapi"
+	"github.com/tenderly/mantle/l2geth/signer/core"
+	"github.com/tenderly/mantle/l2geth/signer/storage"
 )
 
 const JS = `
@@ -242,7 +242,7 @@ func (d *dummyUI) OnApprovedTx(tx ethapi.SignTransactionResult) {
 func (d *dummyUI) OnSignerStartup(info core.StartupInfo) {
 }
 
-//TestForwarding tests that the rule-engine correctly dispatches requests to the next caller
+// TestForwarding tests that the rule-engine correctly dispatches requests to the next caller
 func TestForwarding(t *testing.T) {
 
 	js := ""
@@ -543,7 +543,7 @@ func (d *dontCallMe) OnApprovedTx(tx ethapi.SignTransactionResult) {
 	d.t.Fatalf("Did not expect next-handler to be called")
 }
 
-//TestContextIsCleared tests that the rule-engine does not retain variables over several requests.
+// TestContextIsCleared tests that the rule-engine does not retain variables over several requests.
 // if it does, that would be bad since developers may rely on that to store data,
 // instead of using the disk-based data storage
 func TestContextIsCleared(t *testing.T) {

@@ -21,12 +21,12 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/core/rawdb"
-	"github.com/tenderly/optimism/l2geth/core/state"
-	"github.com/tenderly/optimism/l2geth/core/vm"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/rawdb"
+	"github.com/tenderly/mantle/l2geth/core/state"
+	"github.com/tenderly/mantle/l2geth/core/vm"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 // Config is a basic type specifying certain configuration flags for running

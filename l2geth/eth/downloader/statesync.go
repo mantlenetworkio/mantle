@@ -22,12 +22,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/core/rawdb"
-	"github.com/tenderly/optimism/l2geth/core/state"
-	"github.com/tenderly/optimism/l2geth/ethdb"
-	"github.com/tenderly/optimism/l2geth/log"
-	"github.com/tenderly/optimism/l2geth/trie"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/rawdb"
+	"github.com/tenderly/mantle/l2geth/core/state"
+	"github.com/tenderly/mantle/l2geth/ethdb"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/trie"
 	"golang.org/x/crypto/sha3"
 )
 

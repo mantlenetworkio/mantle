@@ -23,12 +23,12 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/tenderly/optimism/fraud-proof/proof/prover"
-	oss "github.com/tenderly/optimism/fraud-proof/proof/state"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/core"
-	"github.com/tenderly/optimism/l2geth/core/vm"
-	"github.com/tenderly/optimism/l2geth/rpc"
+	"github.com/tenderly/mantle/fraud-proof/proof/prover"
+	oss "github.com/tenderly/mantle/fraud-proof/proof/state"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core"
+	"github.com/tenderly/mantle/l2geth/core/vm"
+	"github.com/tenderly/mantle/l2geth/rpc"
 )
 
 func (api *ProverAPI) GenerateProofForStep(ctx context.Context, fraud bool, hash common.Hash, step int64, config *ProverConfig) (json.RawMessage, error) {

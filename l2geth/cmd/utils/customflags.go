@@ -26,7 +26,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/tenderly/optimism/l2geth/common/math"
+	"github.com/tenderly/mantle/l2geth/common/math"
 	"gopkg.in/urfave/cli.v1"
 )
 

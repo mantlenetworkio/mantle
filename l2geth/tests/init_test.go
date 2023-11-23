@@ -31,7 +31,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tenderly/optimism/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 // Command line flags to configure the interpreters.

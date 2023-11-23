@@ -8,10 +8,10 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/params"
-	"github.com/tenderly/optimism/l2geth/rollup/rcfg"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/rollup/rcfg"
 )
 
 var (

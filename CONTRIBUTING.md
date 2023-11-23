@@ -4,8 +4,8 @@
 
 There are plenty of ways to contribute, in particular we appreciate support in the following areas:
 
-- Reporting issues. For security issues see [Security policy](https://github.com/tenderly/optimism/blob/main/SECURITY.md).
-- Fixing and responding to existing issues. You can start off with those tagged ["good first issue"](https://github.com/tenderly/optimism/contribute) which are meant as introductory issues for external contributors.
+- Reporting issues. For security issues see [Security policy](https://github.com/tenderly/mantle/blob/main/SECURITY.md).
+- Fixing and responding to existing issues. You can start off with those tagged ["good first issue"](https://github.com/tenderly/mantle/contribute) which are meant as introductory issues for external contributors.
 - Improving the [documentation](https://github.com/mantlenetworkio/documents) and [tutorials](https://docs.mantle.xyz/network/for-devs/tutorials).
 - Become a "Mantler" and answer questions in the [mantle Discord](https://discord.com/invite/0xMantle).
 - Get involved in the protocol design process by proposing changes or new features or write parts of the spec yourself in the [mantle-specs](https://docs.mantle.xyz/network/intro/overview).
@@ -29,7 +29,7 @@ We believe one of the things that makes Mantle special is its coherent design an
 
 In general, the smaller the diff the easier it will be for us to review quickly.
 
-In order to contribute, fork the appropriate branch. Our development branch is `develop`, and the latest release that is normally `release/X.X.X` branch, see [details about our branching model](https://github.com/tenderly/optimism/blob/main/CONTRIBUTING.md#branching-model-and-releases).
+In order to contribute, fork the appropriate branch. Our development branch is `develop`, and the latest release that is normally `release/X.X.X` branch, see [details about our branching model](https://github.com/tenderly/mantle/blob/main/CONTRIBUTING.md#branching-model-and-releases).
 
 Additionally, if you are writing a new feature, please ensure you add appropriate test cases.
 
@@ -49,8 +49,8 @@ We aim to provide a meaningful response to all PRs and issues from external cont
 
 | Branch                                                              | Status                                                                                                    |
 |---------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
-| [main](https://github.com/tenderly/optimism/tree/main/)        | Accepts PRs from `release/X.X.X` when we intend to deploy to mainnet/testnet.                             |
-| [develop](https://github.com/tenderly/optimism/tree/develop/)  | Accepts PRs for all changes, particularly those not backwards compatible with `release/X.X.X` and `main`. |
+| [main](https://github.com/tenderly/mantle/tree/main/)        | Accepts PRs from `release/X.X.X` when we intend to deploy to mainnet/testnet.                             |
+| [develop](https://github.com/tenderly/mantle/tree/develop/)  | Accepts PRs for all changes, particularly those not backwards compatible with `release/X.X.X` and `main`. |
 | release/X.X.X                                                       | Create a release branch from the `develop` branch, and the release branch only receives related bugs.     |
 
 
@@ -69,7 +69,7 @@ Our update process takes the form of a PR merging the `release/X.X.X` branch int
 
 ### Development branch
 
-Our development branch is [`develop`](https://github.com/tenderly/optimism/tree/develop/).
+Our development branch is [`develop`](https://github.com/tenderly/mantle/tree/develop/).
 Changes that are not backwards compatible and all changes to contracts within `packages/contracts/contracts` MUST be directed towards `develop`.
 
 **Changes to contracts within `packages/contracts/contracts` are usually NOT considered backwards compatible and SHOULD be made against towards `develop` branch**.

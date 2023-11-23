@@ -42,7 +42,7 @@ import (
 	"fmt"
 	"hash"
 
-	ethcrypto "github.com/tenderly/optimism/l2geth/crypto"
+	ethcrypto "github.com/tenderly/mantle/l2geth/crypto"
 )
 
 var (

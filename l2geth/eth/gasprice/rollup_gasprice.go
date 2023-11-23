@@ -5,9 +5,9 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/log"
-	"github.com/tenderly/optimism/l2geth/rollup/fees"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/rollup/fees"
 )
 
 // RollupOracle holds the L1 and L2 gas prices for fee calculation

@@ -12,10 +12,10 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 
-	"github.com/tenderly/optimism/l2geth/log"
-	tss "github.com/tenderly/optimism/tss/common"
-	"github.com/tenderly/optimism/tss/manager/types"
-	"github.com/tenderly/optimism/tss/ws/server"
+	"github.com/tenderly/mantle/l2geth/log"
+	tss "github.com/tenderly/mantle/tss/common"
+	"github.com/tenderly/mantle/tss/manager/types"
+	"github.com/tenderly/mantle/tss/ws/server"
 )
 
 func (m *Manager) observeElection() {

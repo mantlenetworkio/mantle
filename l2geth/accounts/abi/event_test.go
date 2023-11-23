@@ -25,10 +25,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/crypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/crypto"
 )
 
 var jsonEventTransfer = []byte(`{

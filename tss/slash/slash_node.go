@@ -5,8 +5,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	tss "github.com/tenderly/optimism/tss/common"
-	"github.com/tenderly/optimism/tss/index"
+	tss "github.com/tenderly/mantle/tss/common"
+	"github.com/tenderly/mantle/tss/index"
 )
 
 type SlashingNode struct {

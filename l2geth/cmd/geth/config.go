@@ -27,12 +27,12 @@ import (
 
 	"gopkg.in/urfave/cli.v1"
 
-	"github.com/tenderly/optimism/l2geth/cmd/utils"
-	"github.com/tenderly/optimism/l2geth/eth"
-	"github.com/tenderly/optimism/l2geth/node"
-	"github.com/tenderly/optimism/l2geth/params"
-	whisper "github.com/tenderly/optimism/l2geth/whisper/whisperv6"
 	"github.com/naoina/toml"
+	"github.com/tenderly/mantle/l2geth/cmd/utils"
+	"github.com/tenderly/mantle/l2geth/eth"
+	"github.com/tenderly/mantle/l2geth/node"
+	"github.com/tenderly/mantle/l2geth/params"
+	whisper "github.com/tenderly/mantle/l2geth/whisper/whisperv6"
 )
 
 var (

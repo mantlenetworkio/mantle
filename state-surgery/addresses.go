@@ -10,7 +10,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethdb"
-	l2grawdb "github.com/tenderly/optimism/l2geth/core/rawdb"
+	l2grawdb "github.com/tenderly/mantle/l2geth/core/rawdb"
 )
 
 var (

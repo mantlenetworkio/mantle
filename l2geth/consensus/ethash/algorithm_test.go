@@ -26,9 +26,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/common/hexutil"
-	"github.com/tenderly/optimism/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/mantle/l2geth/core/types"
 )
 
 // prepare converts an ethash cache or dataset from a byte stream into the internal

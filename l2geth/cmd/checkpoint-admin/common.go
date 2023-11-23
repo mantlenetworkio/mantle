@@ -19,15 +19,15 @@ package main
 import (
 	"strconv"
 
-	"github.com/tenderly/optimism/l2geth/accounts"
-	"github.com/tenderly/optimism/l2geth/accounts/abi/bind"
-	"github.com/tenderly/optimism/l2geth/accounts/external"
-	"github.com/tenderly/optimism/l2geth/cmd/utils"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/contracts/checkpointoracle"
-	"github.com/tenderly/optimism/l2geth/ethclient"
-	"github.com/tenderly/optimism/l2geth/params"
-	"github.com/tenderly/optimism/l2geth/rpc"
+	"github.com/tenderly/mantle/l2geth/accounts"
+	"github.com/tenderly/mantle/l2geth/accounts/abi/bind"
+	"github.com/tenderly/mantle/l2geth/accounts/external"
+	"github.com/tenderly/mantle/l2geth/cmd/utils"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/contracts/checkpointoracle"
+	"github.com/tenderly/mantle/l2geth/ethclient"
+	"github.com/tenderly/mantle/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/rpc"
 	"gopkg.in/urfave/cli.v1"
 )
 

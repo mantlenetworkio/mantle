@@ -10,10 +10,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/tenderly/optimism/batch-submitter/drivers/sequencer"
-	l2types "github.com/tenderly/optimism/l2geth/core/types"
-	l2rlp "github.com/tenderly/optimism/l2geth/rlp"
 	"github.com/stretchr/testify/require"
+	"github.com/tenderly/mantle/batch-submitter/drivers/sequencer"
+	l2types "github.com/tenderly/mantle/l2geth/core/types"
+	l2rlp "github.com/tenderly/mantle/l2geth/rlp"
 )
 
 // TestBatchContextEncodeDecode tests the (de)serialization of a BatchContext

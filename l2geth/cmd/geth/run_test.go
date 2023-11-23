@@ -25,8 +25,8 @@ import (
 	"time"
 
 	"github.com/docker/docker/pkg/reexec"
-	"github.com/tenderly/optimism/l2geth/internal/cmdtest"
-	"github.com/tenderly/optimism/l2geth/rpc"
+	"github.com/tenderly/mantle/l2geth/internal/cmdtest"
+	"github.com/tenderly/mantle/l2geth/rpc"
 )
 
 func tmpdir(t *testing.T) string {

@@ -22,9 +22,9 @@ import (
 	"math"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/common/hexutil"
-	"github.com/tenderly/optimism/l2geth/common/mclock"
-	"github.com/tenderly/optimism/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/mantle/l2geth/common/mclock"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
 )
 
 var (
@@ -314,10 +314,11 @@ func NewPrivateLightAPI(backend *lesCommons) *PrivateLightAPI {
 // LatestCheckpoint returns the latest local checkpoint package.
 //
 // The checkpoint package consists of 4 strings:
-//   result[0], hex encoded latest section index
-//   result[1], 32 bytes hex encoded latest section head hash
-//   result[2], 32 bytes hex encoded latest section canonical hash trie root hash
-//   result[3], 32 bytes hex encoded latest section bloom trie root hash
+//
+//	result[0], hex encoded latest section index
+//	result[1], 32 bytes hex encoded latest section head hash
+//	result[2], 32 bytes hex encoded latest section canonical hash trie root hash
+//	result[3], 32 bytes hex encoded latest section bloom trie root hash
 func (api *PrivateLightAPI) LatestCheckpoint() ([4]string, error) {
 	var res [4]string
 	cp := api.backend.latestLocalCheckpoint()
@@ -332,9 +333,10 @@ func (api *PrivateLightAPI) LatestCheckpoint() ([4]string, error) {
 // GetLocalCheckpoint returns the specific local checkpoint package.
 //
 // The checkpoint package consists of 3 strings:
-//   result[0], 32 bytes hex encoded latest section head hash
-//   result[1], 32 bytes hex encoded latest section canonical hash trie root hash
-//   result[2], 32 bytes hex encoded latest section bloom trie root hash
+//
+//	result[0], 32 bytes hex encoded latest section head hash
+//	result[1], 32 bytes hex encoded latest section canonical hash trie root hash
+//	result[2], 32 bytes hex encoded latest section bloom trie root hash
 func (api *PrivateLightAPI) GetCheckpoint(index uint64) ([3]string, error) {
 	var res [3]string
 	cp := api.backend.localCheckpoint(index)

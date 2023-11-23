@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/tenderly/optimism/bss-core/txmgr"
+	"github.com/tenderly/mantle/bss-core/txmgr"
 )
 
 // ErrClearPendingRetry signals that a transaction from a previous running

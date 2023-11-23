@@ -22,7 +22,7 @@ package geth
 import (
 	"errors"
 
-	"github.com/tenderly/optimism/l2geth/p2p/discv5"
+	"github.com/tenderly/mantle/l2geth/p2p/discv5"
 )
 
 // Enode represents a host on the network.
@@ -38,8 +38,8 @@ type Enode struct {
 //
 // For incomplete nodes, the designator must look like one of these
 //
-//    enode://<hex node id>
-//    <hex node id>
+//	enode://<hex node id>
+//	<hex node id>
 //
 // For complete nodes, the node ID is encoded in the username portion
 // of the URL, separated from the host by an @ sign. The hostname can
@@ -52,7 +52,7 @@ type Enode struct {
 // a node with IP address 10.3.58.6, TCP listening port 30303
 // and UDP discovery port 30301.
 //
-//    enode://<hex node id>@10.3.58.6:30303?discport=30301
+//	enode://<hex node id>@10.3.58.6:30303?discport=30301
 func NewEnode(rawurl string) (enode *Enode, _ error) {
 	node, err := discv5.ParseNode(rawurl)
 	if err != nil {

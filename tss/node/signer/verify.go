@@ -7,9 +7,9 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/tenderly/optimism/l2geth/common/hexutil"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/tss/common"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/tss/common"
 
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )

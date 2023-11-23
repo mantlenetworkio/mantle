@@ -19,10 +19,10 @@ package simulations
 import (
 	"testing"
 
-	"github.com/tenderly/optimism/l2geth/p2p"
-	"github.com/tenderly/optimism/l2geth/p2p/enode"
-	"github.com/tenderly/optimism/l2geth/p2p/enr"
-	"github.com/tenderly/optimism/l2geth/rpc"
+	"github.com/tenderly/mantle/l2geth/p2p"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/p2p/enr"
+	"github.com/tenderly/mantle/l2geth/rpc"
 )
 
 // NoopService is the service that does not do anything

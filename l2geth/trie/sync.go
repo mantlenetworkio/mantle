@@ -20,9 +20,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/common/prque"
-	"github.com/tenderly/optimism/l2geth/ethdb"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common/prque"
+	"github.com/tenderly/mantle/l2geth/ethdb"
 )
 
 // ErrNotRequested is returned by the trie sync when it's requested to process a

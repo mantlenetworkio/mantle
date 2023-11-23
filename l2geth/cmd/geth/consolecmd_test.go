@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 const (

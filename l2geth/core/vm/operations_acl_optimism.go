@@ -19,9 +19,9 @@ package vm
 import (
 	"errors"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/common/math"
-	"github.com/tenderly/optimism/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common/math"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 // These functions are modified to work without the access list logic.

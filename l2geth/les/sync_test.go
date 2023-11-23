@@ -22,11 +22,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/accounts/abi/bind"
-	"github.com/tenderly/optimism/l2geth/core"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/light"
-	"github.com/tenderly/optimism/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/accounts/abi/bind"
+	"github.com/tenderly/mantle/l2geth/core"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/light"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 // Test light syncing which will download all headers from genesis.

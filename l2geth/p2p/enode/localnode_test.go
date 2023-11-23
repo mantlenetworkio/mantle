@@ -21,9 +21,9 @@ import (
 	"net"
 	"testing"
 
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/p2p/enr"
 	"github.com/stretchr/testify/assert"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/p2p/enr"
 )
 
 func newLocalNodeForTesting() (*LocalNode, *DB) {

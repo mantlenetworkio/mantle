@@ -14,12 +14,12 @@ import (
 
 	tdtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 
-	"github.com/tenderly/optimism/l2geth/common/hexutil"
-	tsscommon "github.com/tenderly/optimism/tss/common"
-	"github.com/tenderly/optimism/tss/index"
-	"github.com/tenderly/optimism/tss/node/tsslib/common"
-	"github.com/tenderly/optimism/tss/node/tsslib/keysign"
-	"github.com/tenderly/optimism/tss/slash"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	tsscommon "github.com/tenderly/mantle/tss/common"
+	"github.com/tenderly/mantle/tss/index"
+	"github.com/tenderly/mantle/tss/node/tsslib/common"
+	"github.com/tenderly/mantle/tss/node/tsslib/keysign"
+	"github.com/tenderly/mantle/tss/slash"
 )
 
 func (p *Processor) Sign() {

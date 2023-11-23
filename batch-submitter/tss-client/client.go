@@ -6,9 +6,9 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/tenderly/optimism/l2geth/common/hexutil"
-	"github.com/tenderly/optimism/tss/common"
 	"github.com/syndtr/goleveldb/leveldb/errors"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/mantle/tss/common"
 )
 
 const (

@@ -12,16 +12,16 @@ import (
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/rpc"
 
-	"github.com/tenderly/optimism/fraud-proof/bindings"
-	"github.com/tenderly/optimism/fraud-proof/metrics"
-	"github.com/tenderly/optimism/fraud-proof/proof"
-	"github.com/tenderly/optimism/fraud-proof/rollup/services"
-	rollupTypes "github.com/tenderly/optimism/fraud-proof/rollup/types"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/core/rawdb"
-	"github.com/tenderly/optimism/l2geth/log"
-	"github.com/tenderly/optimism/l2geth/rlp"
-	rpc2 "github.com/tenderly/optimism/l2geth/rpc"
+	"github.com/tenderly/mantle/fraud-proof/bindings"
+	"github.com/tenderly/mantle/fraud-proof/metrics"
+	"github.com/tenderly/mantle/fraud-proof/proof"
+	"github.com/tenderly/mantle/fraud-proof/rollup/services"
+	rollupTypes "github.com/tenderly/mantle/fraud-proof/rollup/types"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/rawdb"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/rlp"
+	rpc2 "github.com/tenderly/mantle/l2geth/rpc"
 )
 
 func RegisterService(eth services.Backend, proofBackend proof.Backend, cfg *services.Config, auth *bind.TransactOpts) {

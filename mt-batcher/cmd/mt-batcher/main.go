@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 
-	mt_batcher "github.com/tenderly/optimism/mt-batcher"
-	"github.com/tenderly/optimism/mt-batcher/flags"
+	mt_batcher "github.com/tenderly/mantle/mt-batcher"
+	"github.com/tenderly/mantle/mt-batcher/flags"
 )
 
 var (

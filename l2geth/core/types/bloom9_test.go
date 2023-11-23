@@ -54,7 +54,7 @@ func TestBloom(t *testing.T) {
 import (
 	"testing"
 
-	"github.com/tenderly/optimism/l2geth/core/state"
+	"github.com/tenderly/mantle/l2geth/core/state"
 )
 
 func TestBloom9(t *testing.T) {

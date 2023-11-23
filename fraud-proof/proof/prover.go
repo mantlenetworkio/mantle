@@ -20,16 +20,16 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/tenderly/optimism/fraud-proof/proof/proof"
-	"github.com/tenderly/optimism/fraud-proof/proof/prover"
-	proofState "github.com/tenderly/optimism/fraud-proof/proof/state"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/core"
-	"github.com/tenderly/optimism/l2geth/core/state"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/core/vm"
-	"github.com/tenderly/optimism/l2geth/log"
-	"github.com/tenderly/optimism/l2geth/rpc"
+	"github.com/tenderly/mantle/fraud-proof/proof/proof"
+	"github.com/tenderly/mantle/fraud-proof/proof/prover"
+	proofState "github.com/tenderly/mantle/fraud-proof/proof/state"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core"
+	"github.com/tenderly/mantle/l2geth/core/state"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/core/vm"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/rpc"
 )
 
 const (

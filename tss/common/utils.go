@@ -18,7 +18,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
-	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/log"
 )
 
 var (

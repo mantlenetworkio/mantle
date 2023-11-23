@@ -18,12 +18,12 @@ import (
 	"encoding/binary"
 
 	"github.com/holiman/uint256"
-	"github.com/tenderly/optimism/fraud-proof/proof/state"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/core/vm"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/rlp"
+	"github.com/tenderly/mantle/fraud-proof/proof/state"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/core/vm"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 type IntraStateProof struct {

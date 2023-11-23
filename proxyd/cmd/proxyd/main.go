@@ -7,7 +7,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/tenderly/optimism/proxyd"
+	"github.com/tenderly/mantle/proxyd"
 )
 
 var (

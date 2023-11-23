@@ -4,8 +4,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/tenderly/optimism/l2geth/common"
 	"github.com/stretchr/testify/require"
+	"github.com/tenderly/mantle/l2geth/common"
 )
 
 func TestExecutionStateHash(t *testing.T) {

@@ -19,7 +19,7 @@
 package fetcher
 
 import (
-	"github.com/tenderly/optimism/l2geth/metrics"
+	"github.com/tenderly/mantle/l2geth/metrics"
 )
 
 var (

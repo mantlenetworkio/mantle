@@ -33,11 +33,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/accounts"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/event"
+	"github.com/tenderly/mantle/l2geth/accounts"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/event"
 )
 
 var (

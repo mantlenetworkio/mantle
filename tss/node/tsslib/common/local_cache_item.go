@@ -3,7 +3,7 @@ package common
 import (
 	"sync"
 
-	"github.com/tenderly/optimism/tss/node/tsslib/messages"
+	"github.com/tenderly/mantle/tss/node/tsslib/messages"
 )
 
 type LocalCacheItem struct {

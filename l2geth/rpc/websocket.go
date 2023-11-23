@@ -26,9 +26,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/tenderly/optimism/l2geth/log"
 	mapset "github.com/deckarep/golang-set"
 	"github.com/gorilla/websocket"
+	"github.com/tenderly/mantle/l2geth/log"
 )
 
 const (

@@ -1,11 +1,11 @@
-module github.com/tenderly/optimism/metrics
+module github.com/tenderly/mantle/metrics
 
 go 1.19
 
-replace github.com/tenderly/optimism/l2geth => ../l2geth
+replace github.com/tenderly/mantle/l2geth => ../l2geth
 
 require (
-	github.com/tenderly/optimism/l2geth v0.0.0
+	github.com/tenderly/mantle/l2geth v0.0.0
 	github.com/prometheus/client_golang v1.15.1
 )
 

@@ -30,15 +30,15 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/tenderly/optimism/l2geth/accounts"
-	"github.com/tenderly/optimism/l2geth/accounts/abi"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/common/hexutil"
-	"github.com/tenderly/optimism/l2geth/common/math"
-	"github.com/tenderly/optimism/l2geth/consensus/clique"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/accounts"
+	"github.com/tenderly/mantle/l2geth/accounts/abi"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/mantle/l2geth/common/math"
+	"github.com/tenderly/mantle/l2geth/consensus/clique"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 type SigFormat struct {

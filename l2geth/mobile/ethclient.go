@@ -21,8 +21,8 @@ package geth
 import (
 	"math/big"
 
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/ethclient"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/ethclient"
 )
 
 // EthereumClient provides access to the Ethereum APIs.

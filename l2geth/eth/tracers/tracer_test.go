@@ -24,10 +24,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/core/state"
-	"github.com/tenderly/optimism/l2geth/core/vm"
-	"github.com/tenderly/optimism/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/state"
+	"github.com/tenderly/mantle/l2geth/core/vm"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 type account struct{}

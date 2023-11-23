@@ -39,7 +39,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/crypto"
 )
 
 // Ensure the KDF generates appropriately sized keys.

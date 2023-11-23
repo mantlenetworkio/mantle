@@ -25,12 +25,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tenderly/optimism/l2geth/accounts/keystore"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/common/hexutil"
-	"github.com/tenderly/optimism/l2geth/common/math"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/signer/core"
+	"github.com/tenderly/mantle/l2geth/accounts/keystore"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/mantle/l2geth/common/math"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/signer/core"
 )
 
 var typesStandard = core.Types{

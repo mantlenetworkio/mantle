@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	batchsubmitter "github.com/tenderly/optimism/batch-submitter"
 	"github.com/stretchr/testify/require"
+	batchsubmitter "github.com/tenderly/mantle/batch-submitter"
 )
 
 var validateConfigTests = []struct {

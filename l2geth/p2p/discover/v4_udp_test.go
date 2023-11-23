@@ -32,13 +32,13 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/internal/testlog"
-	"github.com/tenderly/optimism/l2geth/log"
-	"github.com/tenderly/optimism/l2geth/p2p/enode"
-	"github.com/tenderly/optimism/l2geth/p2p/enr"
-	"github.com/tenderly/optimism/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/internal/testlog"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/p2p/enr"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 func init() {

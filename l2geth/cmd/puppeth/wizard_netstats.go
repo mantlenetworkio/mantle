@@ -23,9 +23,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/tenderly/optimism/l2geth/core"
-	"github.com/tenderly/optimism/l2geth/log"
 	"github.com/olekukonko/tablewriter"
+	"github.com/tenderly/mantle/l2geth/core"
+	"github.com/tenderly/mantle/l2geth/log"
 )
 
 // networkStats verifies the status of network components and generates a protip

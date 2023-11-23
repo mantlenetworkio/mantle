@@ -1,8 +1,8 @@
 package types
 
 import (
-	"github.com/tenderly/optimism/tss/index"
-	"github.com/tenderly/optimism/tss/slash"
+	"github.com/tenderly/mantle/tss/index"
+	"github.com/tenderly/mantle/tss/slash"
 )
 
 type TssMemberStore interface {

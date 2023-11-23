@@ -22,12 +22,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/tenderly/optimism/l2geth/internal/ethapi"
-	"github.com/tenderly/optimism/l2geth/log"
-	"github.com/tenderly/optimism/l2geth/signer/core"
-	"github.com/tenderly/optimism/l2geth/signer/rules/deps"
-	"github.com/tenderly/optimism/l2geth/signer/storage"
 	"github.com/robertkrimen/otto"
+	"github.com/tenderly/mantle/l2geth/internal/ethapi"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/signer/core"
+	"github.com/tenderly/mantle/l2geth/signer/rules/deps"
+	"github.com/tenderly/mantle/l2geth/signer/storage"
 )
 
 var (

@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/urfave/cli"
 
-	batchsubmitter "github.com/tenderly/optimism/batch-submitter"
-	"github.com/tenderly/optimism/batch-submitter/flags"
+	batchsubmitter "github.com/tenderly/mantle/batch-submitter"
+	"github.com/tenderly/mantle/batch-submitter/flags"
 )
 
 var (

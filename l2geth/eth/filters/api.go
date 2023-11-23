@@ -25,13 +25,13 @@ import (
 	"sync"
 	"time"
 
-	ethereum "github.com/tenderly/optimism/l2geth"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/common/hexutil"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/ethdb"
-	"github.com/tenderly/optimism/l2geth/event"
-	"github.com/tenderly/optimism/l2geth/rpc"
+	ethereum "github.com/tenderly/mantle/l2geth"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/ethdb"
+	"github.com/tenderly/mantle/l2geth/event"
+	"github.com/tenderly/mantle/l2geth/rpc"
 )
 
 var (

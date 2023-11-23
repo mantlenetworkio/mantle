@@ -21,8 +21,8 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/event"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/event"
 )
 
 // Config contains the settings of the global account manager.

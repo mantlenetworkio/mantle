@@ -3,7 +3,7 @@ package store
 import (
 	"encoding/json"
 
-	"github.com/tenderly/optimism/tss/manager/types"
+	"github.com/tenderly/mantle/tss/manager/types"
 )
 
 func (s *Storage) Insert(cpkData types.CpkData) error {

@@ -21,10 +21,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/params"
-	"github.com/tenderly/optimism/l2geth/rollup/dump"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/rollup/dump"
 	"golang.org/x/crypto/sha3"
 )
 

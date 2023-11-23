@@ -17,8 +17,8 @@
 package core
 
 import (
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/types"
 )
 
 // NewTxsEvent is posted when a batch of transactions enter the transaction pool.

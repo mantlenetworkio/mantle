@@ -7,12 +7,12 @@ import (
 	"math/big"
 	"strings"
 
-	ethereum "github.com/tenderly/optimism/l2geth"
-	"github.com/tenderly/optimism/l2geth/accounts/abi"
-	"github.com/tenderly/optimism/l2geth/accounts/abi/bind"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/event"
+	ethereum "github.com/tenderly/mantle/l2geth"
+	"github.com/tenderly/mantle/l2geth/accounts/abi"
+	"github.com/tenderly/mantle/l2geth/accounts/abi/bind"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/event"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

@@ -14,9 +14,9 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 
-	bsscore "github.com/tenderly/optimism/bss-core"
-	"github.com/tenderly/optimism/gas-oracle/bindings"
-	ometrics "github.com/tenderly/optimism/gas-oracle/metrics"
+	bsscore "github.com/tenderly/mantle/bss-core"
+	"github.com/tenderly/mantle/gas-oracle/bindings"
+	ometrics "github.com/tenderly/mantle/gas-oracle/metrics"
 
 	kms "cloud.google.com/go/kms/apiv1"
 	"google.golang.org/api/option"

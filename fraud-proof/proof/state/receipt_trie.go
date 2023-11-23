@@ -18,10 +18,10 @@ import (
 	"bytes"
 
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/ethdb/memorydb"
-	"github.com/tenderly/optimism/l2geth/trie"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/ethdb/memorydb"
+	"github.com/tenderly/mantle/l2geth/trie"
 )
 
 type ReceiptTrie struct {

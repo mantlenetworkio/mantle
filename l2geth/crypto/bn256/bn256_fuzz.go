@@ -11,8 +11,8 @@ import (
 	"bytes"
 	"math/big"
 
-	cloudflare "github.com/tenderly/optimism/l2geth/crypto/bn256/cloudflare"
-	google "github.com/tenderly/optimism/l2geth/crypto/bn256/google"
+	cloudflare "github.com/tenderly/mantle/l2geth/crypto/bn256/cloudflare"
+	google "github.com/tenderly/mantle/l2geth/crypto/bn256/google"
 )
 
 // FuzzAdd fuzzez bn256 addition between the Google and Cloudflare libraries.

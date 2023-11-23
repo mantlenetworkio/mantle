@@ -23,11 +23,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/p2p/enr"
-	"github.com/tenderly/optimism/l2geth/rlp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/p2p/enr"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 var (

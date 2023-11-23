@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tenderly/optimism/tss/node/tsslib/abnormal"
-	"github.com/tenderly/optimism/tss/node/tsslib/common"
-	conversion2 "github.com/tenderly/optimism/tss/node/tsslib/conversion"
-	keygen2 "github.com/tenderly/optimism/tss/node/tsslib/keygen"
-	"github.com/tenderly/optimism/tss/node/tsslib/messages"
+	"github.com/tenderly/mantle/tss/node/tsslib/abnormal"
+	"github.com/tenderly/mantle/tss/node/tsslib/common"
+	conversion2 "github.com/tenderly/mantle/tss/node/tsslib/conversion"
+	keygen2 "github.com/tenderly/mantle/tss/node/tsslib/keygen"
+	"github.com/tenderly/mantle/tss/node/tsslib/messages"
 )
 
 func (t *TssServer) Keygen(req keygen2.Request) (keygen2.Response, error) {

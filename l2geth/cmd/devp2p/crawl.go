@@ -19,9 +19,9 @@ package main
 import (
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/log"
-	"github.com/tenderly/optimism/l2geth/p2p/discover"
-	"github.com/tenderly/optimism/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/p2p/discover"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
 )
 
 type crawler struct {

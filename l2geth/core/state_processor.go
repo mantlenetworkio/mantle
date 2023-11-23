@@ -17,17 +17,17 @@
 package core
 
 import (
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/consensus"
-	"github.com/tenderly/optimism/l2geth/consensus/misc"
-	"github.com/tenderly/optimism/l2geth/core/state"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/core/upgrade"
-	"github.com/tenderly/optimism/l2geth/core/vm"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/params"
-	"github.com/tenderly/optimism/l2geth/rollup/fees"
-	"github.com/tenderly/optimism/l2geth/rollup/rcfg"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/consensus"
+	"github.com/tenderly/mantle/l2geth/consensus/misc"
+	"github.com/tenderly/mantle/l2geth/core/state"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/core/upgrade"
+	"github.com/tenderly/mantle/l2geth/core/vm"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/rollup/fees"
+	"github.com/tenderly/mantle/l2geth/rollup/rcfg"
 )
 
 // StateProcessor is a basic Processor, which takes care of transitioning

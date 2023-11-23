@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/crypto"
 )
 
 // Method represents a callable given a `Name` and whether the method is a constant.
@@ -53,7 +53,7 @@ type Method struct {
 //
 // Example
 //
-//     function foo(uint32 a, int b) = "foo(uint32,int256)"
+//	function foo(uint32 a, int b) = "foo(uint32,int256)"
 //
 // Please note that "int" is substitute for its canonical representation "int256"
 func (method Method) Sig() string {

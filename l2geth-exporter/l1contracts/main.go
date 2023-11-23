@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/tenderly/optimism/l2geth-exporter/bindings"
+	"github.com/tenderly/mantle/l2geth-exporter/bindings"
 )
 
 // CTC interacts with the BVM Canonical Transaction Chain contract

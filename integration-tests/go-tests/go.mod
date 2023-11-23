@@ -1,8 +1,8 @@
-module github.com/tenderly/optimism/go-test
+module github.com/tenderly/mantle/go-test
 
 go 1.18
 
-replace github.com/tenderly/optimism/go-test => ./
+replace github.com/tenderly/mantle/go-test => ./
 
 require (
 	github.com/ethereum/go-ethereum v1.10.26

@@ -16,16 +16,16 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/tenderly/optimism/l2geth/crypto"
-	tssconfig "github.com/tenderly/optimism/tss/common"
-	common2 "github.com/tenderly/optimism/tss/node/tsslib/common"
-	"github.com/tenderly/optimism/tss/node/tsslib/conversion"
-	"github.com/tenderly/optimism/tss/node/tsslib/keygen"
-	"github.com/tenderly/optimism/tss/node/tsslib/keysign"
-	"github.com/tenderly/optimism/tss/node/tsslib/monitor"
-	p2p2 "github.com/tenderly/optimism/tss/node/tsslib/p2p"
-	storage2 "github.com/tenderly/optimism/tss/node/tsslib/storage"
-	"github.com/tenderly/optimism/tss/node/types"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	tssconfig "github.com/tenderly/mantle/tss/common"
+	common2 "github.com/tenderly/mantle/tss/node/tsslib/common"
+	"github.com/tenderly/mantle/tss/node/tsslib/conversion"
+	"github.com/tenderly/mantle/tss/node/tsslib/keygen"
+	"github.com/tenderly/mantle/tss/node/tsslib/keysign"
+	"github.com/tenderly/mantle/tss/node/tsslib/monitor"
+	p2p2 "github.com/tenderly/mantle/tss/node/tsslib/p2p"
+	storage2 "github.com/tenderly/mantle/tss/node/tsslib/storage"
+	"github.com/tenderly/mantle/tss/node/types"
 )
 
 const poolPublicKey = 66

@@ -8,19 +8,19 @@ import (
 
 	kms "cloud.google.com/go/kms/apiv1"
 	"github.com/ethereum/go-ethereum/common"
-	bsscore "github.com/tenderly/optimism/bss-core"
+	bsscore "github.com/tenderly/mantle/bss-core"
 	"google.golang.org/api/option"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
-	"github.com/tenderly/optimism/fraud-proof/rollup/services"
-	"github.com/tenderly/optimism/fraud-proof/rollup/services/sequencer"
-	"github.com/tenderly/optimism/fraud-proof/rollup/services/validator"
-	"github.com/tenderly/optimism/l2geth/accounts"
-	"github.com/tenderly/optimism/l2geth/accounts/keystore"
-	"github.com/tenderly/optimism/l2geth/eth"
-	"github.com/tenderly/optimism/l2geth/log"
-	"github.com/tenderly/optimism/l2geth/node"
+	"github.com/tenderly/mantle/fraud-proof/rollup/services"
+	"github.com/tenderly/mantle/fraud-proof/rollup/services/sequencer"
+	"github.com/tenderly/mantle/fraud-proof/rollup/services/validator"
+	"github.com/tenderly/mantle/l2geth/accounts"
+	"github.com/tenderly/mantle/l2geth/accounts/keystore"
+	"github.com/tenderly/mantle/l2geth/eth"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/node"
 )
 
 // RegisterFraudProofService registers rollup service configured by ctx

@@ -25,7 +25,7 @@ import (
 	"time"
 
 	mapset "github.com/deckarep/golang-set"
-	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/log"
 )
 
 // fileCache is a cache of files seen during scan of keystore.

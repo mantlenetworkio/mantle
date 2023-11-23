@@ -1,4 +1,4 @@
-module github.com/tenderly/optimism/l2geth
+module github.com/tenderly/mantle/l2geth
 
 go 1.18
 

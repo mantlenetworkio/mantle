@@ -31,17 +31,17 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/common/mclock"
-	"github.com/tenderly/optimism/l2geth/consensus"
-	"github.com/tenderly/optimism/l2geth/core"
-	"github.com/tenderly/optimism/l2geth/core/types"
-	"github.com/tenderly/optimism/l2geth/eth"
-	"github.com/tenderly/optimism/l2geth/event"
-	"github.com/tenderly/optimism/l2geth/les"
-	"github.com/tenderly/optimism/l2geth/log"
-	"github.com/tenderly/optimism/l2geth/p2p"
-	"github.com/tenderly/optimism/l2geth/rpc"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common/mclock"
+	"github.com/tenderly/mantle/l2geth/consensus"
+	"github.com/tenderly/mantle/l2geth/core"
+	"github.com/tenderly/mantle/l2geth/core/types"
+	"github.com/tenderly/mantle/l2geth/eth"
+	"github.com/tenderly/mantle/l2geth/event"
+	"github.com/tenderly/mantle/l2geth/les"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/p2p"
+	"github.com/tenderly/mantle/l2geth/rpc"
 )
 
 const (

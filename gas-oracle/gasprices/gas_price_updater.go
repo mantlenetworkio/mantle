@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/tenderly/optimism/gas-oracle/tokenprice"
+	"github.com/tenderly/mantle/gas-oracle/tokenprice"
 )
 
 type GetLatestBlockNumberFn func() (uint64, error)

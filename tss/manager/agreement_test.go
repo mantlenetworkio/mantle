@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	tss "github.com/tenderly/optimism/tss/common"
-	"github.com/tenderly/optimism/tss/manager/types"
-	"github.com/tenderly/optimism/tss/ws/server"
 	"github.com/stretchr/testify/require"
+	tss "github.com/tenderly/mantle/tss/common"
+	"github.com/tenderly/mantle/tss/manager/types"
+	"github.com/tenderly/mantle/tss/ws/server"
 	tmtypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 

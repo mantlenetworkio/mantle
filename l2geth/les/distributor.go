@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/common/mclock"
+	"github.com/tenderly/mantle/l2geth/common/mclock"
 )
 
 // requestDistributor implements a mechanism that distributes requests to

@@ -3,9 +3,9 @@ package store
 import (
 	"fmt"
 
-	"github.com/tenderly/optimism/tss/node/types"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/storage"
+	"github.com/tenderly/mantle/tss/node/types"
 )
 
 type Storage struct {

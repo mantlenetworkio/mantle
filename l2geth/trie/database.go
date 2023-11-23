@@ -25,11 +25,11 @@ import (
 	"time"
 
 	"github.com/VictoriaMetrics/fastcache"
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/ethdb"
-	"github.com/tenderly/optimism/l2geth/log"
-	"github.com/tenderly/optimism/l2geth/metrics"
-	"github.com/tenderly/optimism/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/ethdb"
+	"github.com/tenderly/mantle/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/metrics"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 var (
@@ -182,7 +182,7 @@ func (n *cachedNode) obj(hash common.Hash) node {
 
 // forChilds invokes the callback for  all the tracked children of this node,
 // both the implicit ones  from inside the node as well as the explicit ones
-//from outside the node.
+// from outside the node.
 func (n *cachedNode) forChilds(onChild func(hash common.Hash)) {
 	for child := range n.children {
 		onChild(child)

@@ -11,7 +11,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"github.com/tenderly/optimism/proxyd"
+	"github.com/tenderly/mantle/proxyd"
 )
 
 type RecordedRequest struct {

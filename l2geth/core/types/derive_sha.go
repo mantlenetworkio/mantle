@@ -19,9 +19,9 @@ package types
 import (
 	"bytes"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/rlp"
-	"github.com/tenderly/optimism/l2geth/trie"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/trie"
 )
 
 type DerivableList interface {

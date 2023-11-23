@@ -27,13 +27,13 @@ import (
 
 	"net"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/common/hexutil"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/p2p"
-	"github.com/tenderly/optimism/l2geth/p2p/enode"
-	"github.com/tenderly/optimism/l2geth/p2p/nat"
-	"github.com/tenderly/optimism/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/common/hexutil"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/p2p"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/p2p/nat"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 var keys = []string{
@@ -487,7 +487,7 @@ func checkBloomFilterExchange(t *testing.T) {
 	}
 }
 
-//two generic whisper node handshake
+// two generic whisper node handshake
 func TestPeerHandshakeWithTwoFullNode(t *testing.T) {
 	w1 := Whisper{}
 	p1 := newPeer(&w1, p2p.NewPeer(enode.ID{}, "test", []p2p.Cap{}), &rwStub{[]interface{}{ProtocolVersion, uint64(123), make([]byte, BloomFilterSize), false}})
@@ -497,7 +497,7 @@ func TestPeerHandshakeWithTwoFullNode(t *testing.T) {
 	}
 }
 
-//two generic whisper node handshake. one don't send light flag
+// two generic whisper node handshake. one don't send light flag
 func TestHandshakeWithOldVersionWithoutLightModeFlag(t *testing.T) {
 	w1 := Whisper{}
 	p1 := newPeer(&w1, p2p.NewPeer(enode.ID{}, "test", []p2p.Cap{}), &rwStub{[]interface{}{ProtocolVersion, uint64(123), make([]byte, BloomFilterSize)}})
@@ -507,7 +507,7 @@ func TestHandshakeWithOldVersionWithoutLightModeFlag(t *testing.T) {
 	}
 }
 
-//two light nodes handshake. restriction disabled
+// two light nodes handshake. restriction disabled
 func TestTwoLightPeerHandshakeRestrictionOff(t *testing.T) {
 	w1 := Whisper{}
 	w1.settings.Store(restrictConnectionBetweenLightClientsIdx, false)
@@ -519,7 +519,7 @@ func TestTwoLightPeerHandshakeRestrictionOff(t *testing.T) {
 	}
 }
 
-//two light nodes handshake. restriction enabled
+// two light nodes handshake. restriction enabled
 func TestTwoLightPeerHandshakeError(t *testing.T) {
 	w1 := Whisper{}
 	w1.settings.Store(restrictConnectionBetweenLightClientsIdx, true)

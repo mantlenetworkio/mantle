@@ -15,8 +15,8 @@ import (
 	"github.com/gorilla/websocket"
 
 	"github.com/BurntSushi/toml"
-	"github.com/tenderly/optimism/proxyd"
 	"github.com/stretchr/testify/require"
+	"github.com/tenderly/mantle/proxyd"
 )
 
 type ProxydHTTPClient struct {

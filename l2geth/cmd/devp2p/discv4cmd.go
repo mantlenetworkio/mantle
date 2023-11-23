@@ -22,11 +22,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/p2p/discover"
-	"github.com/tenderly/optimism/l2geth/p2p/enode"
-	"github.com/tenderly/optimism/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/p2p/discover"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/params"
 	"gopkg.in/urfave/cli.v1"
 )
 

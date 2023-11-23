@@ -24,7 +24,7 @@ import (
 	"os"
 	"runtime/trace"
 
-	"github.com/tenderly/optimism/l2geth/log"
+	"github.com/tenderly/mantle/l2geth/log"
 )
 
 // StartGoTrace turns on tracing, writing to the given file.

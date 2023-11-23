@@ -11,8 +11,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/tenderly/optimism/bss-core/txmgr"
 	"github.com/stretchr/testify/require"
+	"github.com/tenderly/mantle/bss-core/txmgr"
 )
 
 // testHarness houses the necessary resources to test the SimpleTxManager.

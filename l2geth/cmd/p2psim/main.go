@@ -19,21 +19,20 @@
 // Here is an example of creating a 2 node network with the first node
 // connected to the second:
 //
-//     $ p2psim node create
-//     Created node01
+//	$ p2psim node create
+//	Created node01
 //
-//     $ p2psim node start node01
-//     Started node01
+//	$ p2psim node start node01
+//	Started node01
 //
-//     $ p2psim node create
-//     Created node02
+//	$ p2psim node create
+//	Created node02
 //
-//     $ p2psim node start node02
-//     Started node02
+//	$ p2psim node start node02
+//	Started node02
 //
-//     $ p2psim node connect node01 node02
-//     Connected node01 to node02
-//
+//	$ p2psim node connect node01 node02
+//	Connected node01 to node02
 package main
 
 import (
@@ -45,12 +44,12 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/p2p"
-	"github.com/tenderly/optimism/l2geth/p2p/enode"
-	"github.com/tenderly/optimism/l2geth/p2p/simulations"
-	"github.com/tenderly/optimism/l2geth/p2p/simulations/adapters"
-	"github.com/tenderly/optimism/l2geth/rpc"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/p2p"
+	"github.com/tenderly/mantle/l2geth/p2p/enode"
+	"github.com/tenderly/mantle/l2geth/p2p/simulations"
+	"github.com/tenderly/mantle/l2geth/p2p/simulations/adapters"
+	"github.com/tenderly/mantle/l2geth/rpc"
 	"gopkg.in/urfave/cli.v1"
 )
 

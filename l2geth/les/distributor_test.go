@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/common/mclock"
+	"github.com/tenderly/mantle/l2geth/common/mclock"
 )
 
 type testDistReq struct {

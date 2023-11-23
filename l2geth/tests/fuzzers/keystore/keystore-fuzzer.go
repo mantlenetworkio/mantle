@@ -19,7 +19,7 @@ package keystore
 import (
 	"os"
 
-	"github.com/tenderly/optimism/l2geth/accounts/keystore"
+	"github.com/tenderly/mantle/l2geth/accounts/keystore"
 )
 
 func Fuzz(input []byte) int {

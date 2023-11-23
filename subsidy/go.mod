@@ -1,4 +1,4 @@
-module github.com/tenderly/optimism/subsidy
+module github.com/tenderly/mantle/subsidy
 
 go 1.18
 

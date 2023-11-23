@@ -22,9 +22,9 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/tenderly/optimism/l2geth/cmd/utils"
-	"github.com/tenderly/optimism/l2geth/console"
-	"github.com/tenderly/optimism/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/cmd/utils"
+	"github.com/tenderly/mantle/l2geth/console"
+	"github.com/tenderly/mantle/l2geth/crypto"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -72,7 +72,8 @@ func getPassphrase(ctx *cli.Context) string {
 // that can be safely used to calculate a signature from.
 //
 // The hash is calulcated as
-//   keccak256("\x19Ethereum Signed Message:\n"${message length}${message}).
+//
+//	keccak256("\x19Ethereum Signed Message:\n"${message length}${message}).
 //
 // This gives context to the signed message and prevents signing of transactions.
 func signHash(data []byte) []byte {

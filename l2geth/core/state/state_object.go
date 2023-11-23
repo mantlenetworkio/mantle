@@ -23,10 +23,10 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/tenderly/optimism/l2geth/common"
-	"github.com/tenderly/optimism/l2geth/crypto"
-	"github.com/tenderly/optimism/l2geth/metrics"
-	"github.com/tenderly/optimism/l2geth/rlp"
+	"github.com/tenderly/mantle/l2geth/common"
+	"github.com/tenderly/mantle/l2geth/crypto"
+	"github.com/tenderly/mantle/l2geth/metrics"
+	"github.com/tenderly/mantle/l2geth/rlp"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)

@@ -21,9 +21,9 @@ package geth
 import (
 	"encoding/json"
 
-	"github.com/tenderly/optimism/l2geth/core"
-	"github.com/tenderly/optimism/l2geth/p2p/discv5"
-	"github.com/tenderly/optimism/l2geth/params"
+	"github.com/tenderly/mantle/l2geth/core"
+	"github.com/tenderly/mantle/l2geth/p2p/discv5"
+	"github.com/tenderly/mantle/l2geth/params"
 )
 
 // MainnetGenesis returns the JSON spec to use for the main Ethereum network. It
