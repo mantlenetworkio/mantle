@@ -18,6 +18,7 @@ package core
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"math/big"
 
@@ -299,6 +300,10 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, vmerr err
 	if err != nil {
 		return nil, 0, err, err
 	}
+	if st.gas < gas {
+		return nil, 0, nil, fmt.Errorf("%w: have %d, want %d", ErrIntrinsicGas, st.gas, gas)
+	}
+
 	if err = st.useGas(gas); err != nil {
 		return nil, 0, err, err
 	}
