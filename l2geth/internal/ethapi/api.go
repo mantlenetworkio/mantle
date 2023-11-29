@@ -1078,6 +1078,11 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNrOrHash 
 			if errors.Is(err, core.ErrIntrinsicGas) {
 				return true, nil, nil // Special case, raise gas limit
 			}
+			if !result.Failed() {
+				if errors.Is(err, vm.ErrInsufficientBalance) {
+					return false, result, nil
+				}
+			}
 			return true, nil, err
 		}
 		return result.Failed(), result, nil

@@ -335,7 +335,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, vmerr err
 		// sufficient balance to make the transfer happen. The first
 		// balance transfer may never fail.
 		if vmerr == vm.ErrInsufficientBalance {
-			return nil, 0, vmerr, vmerr
+			return nil, 0, nil, vmerr
 		}
 	}
 	st.refundGas()
