@@ -21,10 +21,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/tyler-smith/go-bip39"
 	"math/big"
 	"strings"
 	"time"
+
+	"github.com/tyler-smith/go-bip39"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/mantlenetworkio/mantle/l2geth/accounts"
@@ -982,14 +983,40 @@ func (s *PublicBlockChainAPI) Call(ctx context.Context, args CallArgs, blockNrOr
 		return nil, err
 	}
 	if failed {
-		reason, errUnpack := abi.UnpackRevert(result)
-		err := errors.New("execution reverted")
-		if errUnpack == nil {
-			err = fmt.Errorf("execution reverted: %v", reason)
-		}
-		return (hexutil.Bytes)(result), err
+		return nil, newRevertError(result)
 	}
 	return (hexutil.Bytes)(result), err
+}
+
+// revertError is an API error that encompasses an EVM revertal with JSON error
+// code and a binary data blob.
+type revertError struct {
+	error
+	reason string // revert reason hex encoded
+}
+
+func newRevertError(result []byte) *revertError {
+	reason, errUnpack := abi.UnpackRevert(result)
+	err := errors.New("execution reverted")
+	if errUnpack == nil {
+		err = fmt.Errorf("execution reverted: %v", reason)
+	}
+	log.Info("newRevertError", "errMsg", err.Error(), "result", hexutil.Encode(result))
+	return &revertError{
+		error:  err,
+		reason: hexutil.Encode(result),
+	}
+}
+
+// ErrorCode returns the JSON error code for a revertal.
+// See: https://github.com/ethereum/wiki/wiki/JSON-RPC-Error-Codes-Improvement-Proposal
+func (e *revertError) ErrorCode() int {
+	return 3
+}
+
+// ErrorData returns the hex encoded revert reason.
+func (e *revertError) ErrorData() interface{} {
+	return e.reason
 }
 
 // Mantle note: The gasPrice in Mantle is modified to always return 1 gwei. We
