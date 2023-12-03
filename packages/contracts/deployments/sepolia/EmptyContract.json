@@ -1,0 +1,54 @@
+{
+  "address": "0x63d200e4E4ed926cb0Cb2B73E943293A0CA27bf5",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "foo",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xcc562b6106cd65e36a097ee55dbfdacd655012d51c9b3a493b8bf1f355aa9593",
+  "receipt": {
+    "to": null,
+    "from": "0xc675f727fB9f19C31f10A15dDad8D05A27504C46",
+    "contractAddress": "0x63d200e4E4ed926cb0Cb2B73E943293A0CA27bf5",
+    "transactionIndex": 8,
+    "gasUsed": "79145",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x07954aff3da1b26512d14cea3a81e2bff478aeaaf7b987bb6ffae223c2306f65",
+    "transactionHash": "0xcc562b6106cd65e36a097ee55dbfdacd655012d51c9b3a493b8bf1f355aa9593",
+    "logs": [],
+    "blockNumber": 4812148,
+    "cumulativeGasUsed": "1428603",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "4680dfd6ad2c66b818dcc0bce38511f9",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.9+commit.e5eed63a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"foo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/test-helpers/EmptyContract.sol\":\"EmptyContract\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/test-helpers/EmptyContract.sol\":{\"content\":\"// SPDX-License-Identifier: UNLICENSED\\npragma solidity ^0.8.9;\\n\\ncontract EmptyContract {\\n    function foo() public pure returns (uint256) {\\n        return 0;\\n    }\\n}\\n\",\"keccak256\":\"0x0938ef4968e02a9cebf7c45e46e02cd8bb6771ed7a184cdf7e989af7142f7714\",\"license\":\"UNLICENSED\"}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50607780601d6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c8063c298557814602d575b600080fd5b600060405190815260200160405180910390f3fea2646970667358221220b72a61a19498172c16e3dd47e923813a716c2b1749272efe87dc903ee958638864736f6c63430008090033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c8063c298557814602d575b600080fd5b600060405190815260200160405180910390f3fea2646970667358221220b72a61a19498172c16e3dd47e923813a716c2b1749272efe87dc903ee958638864736f6c63430008090033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}
