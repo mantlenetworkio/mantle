@@ -9,7 +9,7 @@ const config = {
   sccFaultProofWindowSeconds: 10,
   sccSequencerPublishWindowSeconds: 12592000,
   blockStaleMeasure: 100,
-  daFraudProofPeriod: 120,
+  daFraudProofPeriod: 3600,
   l2SubmittedBlockNumber: 1,
   bvmSequencerAddress: process.env.BVM_SEQUENCER_ADDRESS,
   bvmProposerAddress: process.env.BVM_PROPOSER_ADDRESS,
