@@ -209,7 +209,18 @@ const config: HardhatUserConfig = {
     apiKey: {
       mainnet: process.env.ETHERSCAN_API_KEY,
       goerli: process.env.ETHERSCAN_API_KEY,
-    },
+      sepolia: process.env.ETHERSCAN_API_KEY,
+      },
+      customChains: [
+        {
+          network: "sepolia",
+          chainId: 11155111,
+          urls: {
+            apiURL: "https://api-sepolia.etherscan.io/api",
+              browserURL: "https://sepolia.etherscan.io"
+          }
+      }
+    ]
   },
   dodoc: {
     runOnCompile: true,
