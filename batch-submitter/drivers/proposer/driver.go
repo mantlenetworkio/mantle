@@ -653,7 +653,7 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 	bytes32ArrayTy, _ := abi.NewType("bytes32[]", "", nil)
 	uint256, _ := abi.NewType("uint256", "", nil)
 	bytes, _ := abi.NewType("bytes", "", nil)
-	byte32, _ := abi.NewType("byte32", "", nil)
+	bytes32, _ := abi.NewType("bytes32", "", nil)
 
 	arguments := abi.Arguments{
 		{
