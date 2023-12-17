@@ -676,11 +676,11 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 	)
 
 	hash := crypto.Keccak256Hash(bz)
-	fmt.Print(">>>>>>>> veriSig")
-	fmt.Println(hash.String())
-	fmt.Print(hex.EncodeToString(signature))
+	fmt.Print(">>>>>>>> veriSig:")
+	fmt.Println("hash:",hash.String())
+	fmt.Print("hex:",hex.EncodeToString(signature))
 
-	fmt.Print(">>>>>>>> createAssertion")
+	fmt.Print(">>>>>>>> createAssertion:")
 	bz2, _ := arguments.Pack(
 		assertion.VmHash,
 		assertion.InboxSize,
@@ -688,6 +688,7 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 		shouldStartAtElement,
 		signature,
 	)
+	fmt.Print(">>>>>>>> finish pack:")
 	fmt.Print(hex.EncodeToString(bz2))
 
 
