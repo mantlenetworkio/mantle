@@ -550,7 +550,7 @@ func (d *Driver) UpdateGasPrice(
 	}
 	opts.Context = ctx
 	opts.Nonce = new(big.Int).SetUint64(tx.Nonce())
-	opts.NoSend = true
+	opts.NoSend = false
 
 	if len(d.cfg.FPRollupAddr.Bytes()) != 0 {
 		// ##### FRAUD-PROOF modify #####
