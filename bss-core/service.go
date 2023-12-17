@@ -210,9 +210,10 @@ func (s *Service) eventLoop() {
 					log.Error(name+" unable to craft batch tx",
 						"err", err)
 				}
-				continue
+				// continue
 			} else if tx == nil {
-				continue
+				log.Error(name+" tx is empty")
+				// continue
 			}
 			batchTxBuildTime := time.Since(batchTxBuildStart) / time.Millisecond
 			s.metrics.BatchTxBuildTimeMs().Set(float64(batchTxBuildTime))
