@@ -679,7 +679,9 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 
 	hash := crypto.Keccak256Hash(bz)
 
-
+	fmt.Println(">>>>>>>> veriSig:")
+	fmt.Println("hash:",hash.String())
+	fmt.Println("hex:",hex.EncodeToString(signature))
 	fmt.Println(">>>>>>>> createAssertion:")
 	bz2, _ := arguments.Pack(
 		assertion.VmHash,
