@@ -336,7 +336,7 @@ func (d *Driver) CraftBatchTx(
 	}
 	opts.Context = ctx
 	opts.Nonce = nonce
-	opts.NoSend = true
+	opts.NoSend = false
 
 	blockOffset := new(big.Int).SetUint64(d.cfg.BlockOffset)
 	offsetStartsAtIndex := new(big.Int).Sub(start, blockOffset)
@@ -379,9 +379,11 @@ func (d *Driver) CraftBatchTx(
 				return nil, nil
 			}
 			// Append state batch
+			fmt.Println("aaaa")
 			tx, err = d.FraudProofAppendStateBatch(
 				opts, stateRoots, offsetStartsAtIndex, tssResponse.Signature, blocks,
 			)
+			fmt.Println("bbb")
 			if err != nil {
 				log.Error("fraud proof append state batch is failed", "err", err)
 			}
@@ -676,9 +678,7 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 	)
 
 	hash := crypto.Keccak256Hash(bz)
-	fmt.Println(">>>>>>>> veriSig:")
-	fmt.Println("hash:",hash.String())
-	fmt.Println("hex:",hex.EncodeToString(signature))
+
 
 	fmt.Println(">>>>>>>> createAssertion:")
 	bz2, _ := arguments.Pack(
