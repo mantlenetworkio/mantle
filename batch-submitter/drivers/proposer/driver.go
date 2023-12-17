@@ -650,6 +650,47 @@ func (d *Driver) FraudProofAppendStateBatch(opts *bind.TransactOpts, batch [][32
 	log.Debug("show assertion", "ShouldStartAtElement", shouldStartAtElement.String())
 	log.Debug("show assertion", "Signature", hex.EncodeToString(signature))
 
+	bytes32ArrayTy, _ := abi.NewType("bytes32[]", "", nil)
+	uint256, _ := abi.NewType("uint256", "", nil)
+	bytes, _ := abi.NewType("bytes", "", nil)
+	byte32, _ := abi.NewType("byte32", "", nil)
+
+	arguments := abi.Arguments{
+		{
+			Type: bytes32ArrayTy,
+		},
+		{
+			Type: uint256,
+		},
+		{
+			Type: bytes,
+		},
+		{
+			Type: byte32,
+		},
+	}
+
+	bz, _ := arguments.Pack(
+		batch,
+		shouldStartAtElement,
+	)
+
+	hash := crypto.Keccak256Hash(bz)
+	fmt.Print(">>>>>>>> veriSig")
+	fmt.Println(hash.String())
+	fmt.Print(hex.EncodeToString(signature))
+
+	fmt.Print(">>>>>>>> createAssertion")
+	bz2, _ := arguments.Pack(
+		assertion.VmHash,
+		assertion.InboxSize,
+		batch,
+		shouldStartAtElement,
+		signature,
+	)
+	fmt.Print(hex.EncodeToString(bz2))
+
+
 	// create assertion
 	return d.fpRollup.CreateAssertionWithStateBatch(
 		opts, assertion.VmHash, assertion.InboxSize, batch, shouldStartAtElement, signature)
