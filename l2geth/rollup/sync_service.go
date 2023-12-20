@@ -376,6 +376,8 @@ func (s *SyncService) initializeLatestL1(ctcDeployHeight *big.Int) error {
 				break
 			}
 			num := block.Number().Uint64()
+			log.Info("Found block number", "num", num)
+
 			// Handle the genesis block
 			if num == 0 {
 				log.Info("Hit genesis block when fixing queue index")
@@ -388,8 +390,10 @@ func (s *SyncService) initializeLatestL1(ctcDeployHeight *big.Int) error {
 				log.Warn("Found block with unexpected number of txs", "count", len(txs), "height", num)
 				break
 			}
+			log.Info("Found tx success", "len(txs)", len(txs))
 			tx := txs[0]
 			qi := tx.GetMeta().QueueIndex
+			log.Info("Found get meta queue index", "qi", qi)
 			// When the queue index is set
 			if qi != nil {
 				if *qi == *queueIndex {
