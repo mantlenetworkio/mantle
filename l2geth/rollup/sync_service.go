@@ -1532,15 +1532,41 @@ func (s *SyncService) syncTransactions(backend Backend) (*uint64, error) {
 // start to end (inclusive) from a specific Backend
 func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) error {
 	log.Info("Syncing transaction range", "start", start, "end", end, "backend", backend.String())
+	rangeTxs := &sync.Map{}
+	var wg sync.WaitGroup
+	wg.Add(int(end - start + 1))
 	for i := start; i <= end; i++ {
-		tx, err := s.client.GetTransaction(i, backend)
-		if err != nil {
-			return fmt.Errorf("cannot fetch transaction %d: %w", i, err)
+		go func() {
+			defer wg.Done()
+			tx, _ := s.client.GetTransaction(i, backend)
+			rangeTxs.Store(i, tx)
+		}()
+	}
+	wg.Wait()
+
+	for i := start; i <= end; i++ {
+		tx, ok := rangeTxs.Load(i)
+		var err error
+		if !ok {
+			tx, err = s.client.GetTransaction(i, backend)
+			if err != nil {
+				return fmt.Errorf("cannot fetch transaction %d: %w", i, err)
+			}
 		}
-		if err := s.applyTransaction(tx); err != nil {
+		if err = s.applyTransaction(tx.(*types.Transaction)); err != nil {
 			return fmt.Errorf("Cannot apply transaction: %w", err)
 		}
 	}
+
+	//for i := start; i <= end; i++ {
+	//	tx, err := s.client.GetTransaction(i, backend)
+	//	if err != nil {
+	//		return fmt.Errorf("cannot fetch transaction %d: %w", i, err)
+	//	}
+	//	if err := s.applyTransaction(tx); err != nil {
+	//		return fmt.Errorf("Cannot apply transaction: %w", err)
+	//	}
+	//}
 	return nil
 }
 
