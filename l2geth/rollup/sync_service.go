@@ -1528,24 +1528,45 @@ func (s *SyncService) syncTransactions(backend Backend) (*uint64, error) {
 	return index, nil
 }
 
+func (s *SyncService) getTransactions(start, end uint64, txs map[uint64]*types.Transaction, backend Backend) error {
+	var wg sync.WaitGroup
+	var returnErr error
+	wg.Add(int(end - start + 1))
+
+	for i := start; i < end; i++ {
+		go func(index uint64) {
+			defer wg.Done()
+			tx, err := s.client.GetTransaction(index, backend)
+			returnErr = err
+			txs[index] = tx
+		}(i)
+	}
+	wg.Wait()
+	return returnErr
+}
+
 // syncTransactionRange will sync a range of transactions from
 // start to end (inclusive) from a specific Backend
 func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) error {
 	log.Info("Syncing transaction range", "start", start, "end", end, "backend", backend.String())
-	rangeTxs := &sync.Map{}
-	var wg sync.WaitGroup
-	wg.Add(int(end - start + 1))
-	for i := start; i <= end; i++ {
-		go func() {
-			defer wg.Done()
-			tx, _ := s.client.GetTransaction(i, backend)
-			rangeTxs.Store(i, tx)
-		}()
+	rangeTxs := make(map[uint64]*types.Transaction)
+	concurrency := 50
+	segment := int(end-start) / concurrency
+	for i := 0; i <= segment; i++ {
+		subStart := start + uint64(i*concurrency)
+		subEnd := subStart + uint64(concurrency)
+		if subEnd > end {
+			subEnd = end + 1
+		}
+
+		err := s.getTransactions(subStart, subEnd, rangeTxs, backend)
+		if err != nil {
+			return fmt.Errorf("cannot fetch transaction %d: %w", i, err)
+		}
 	}
-	wg.Wait()
 
 	for i := start; i <= end; i++ {
-		tx, ok := rangeTxs.Load(i)
+		tx, ok := rangeTxs[i]
 		var err error
 		if !ok {
 			tx, err = s.client.GetTransaction(i, backend)
@@ -1553,7 +1574,7 @@ func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) e
 				return fmt.Errorf("cannot fetch transaction %d: %w", i, err)
 			}
 		}
-		if err = s.applyTransaction(tx.(*types.Transaction)); err != nil {
+		if err = s.applyTransaction(tx); err != nil {
 			return fmt.Errorf("Cannot apply transaction: %w", err)
 		}
 	}
