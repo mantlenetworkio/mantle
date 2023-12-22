@@ -238,16 +238,13 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     this.state.app[method](route, async (req, res) => {
       const start = Date.now()
       try {
-        // const [json, httpCode] = await handler(req, res)
         let httpCode = HttpCodes.OK, json;
-        console.log(httpCode);
         const result = await handler(req, res)
         if(Array.isArray(result)) {
           [json, httpCode] = result;
         } else {
           json = result;
         }
-        console.log(httpCode);
         const elapsed = Date.now() - start
         this.logger.info('Served HTTP Request', {
           method: req.method,
