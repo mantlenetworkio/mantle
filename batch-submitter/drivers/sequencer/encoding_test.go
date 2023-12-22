@@ -11,8 +11,6 @@ import (
 	"testing"
 
 	"github.com/mantlenetworkio/mantle/batch-submitter/drivers/sequencer"
-	l2types "github.com/mantlenetworkio/mantle/l2geth/core/types"
-	l2rlp "github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/stretchr/testify/require"
 )
 
@@ -67,7 +65,6 @@ type AppendSequencerBatchParamsTest struct {
 	ShouldStartAtElement  uint64                   `json:"should_start_at_element"`
 	TotalElementsToAppend uint64                   `json:"total_elements_to_append"`
 	Contexts              []sequencer.BatchContext `json:"contexts"`
-	Txs                   []string                 `json:"txs"`
 	Error                 bool                     `json:"error"`
 }
 
@@ -99,29 +96,12 @@ func TestAppendSequencerBatchParamsEncodeDecode(t *testing.T) {
 
 func testAppendSequencerBatchParamsEncodeDecode(
 	t *testing.T, test AppendSequencerBatchParamsTest) {
-
-	// Decode the expected transactions from their hex serialization.
-	var expTxs []*l2types.Transaction
-	for _, txHex := range test.Txs {
-		txBytes, err := hex.DecodeString(txHex)
-		require.Nil(t, err)
-
-		rlpStream := l2rlp.NewStream(bytes.NewReader(txBytes), uint64(len(txBytes)))
-
-		tx := new(l2types.Transaction)
-		err = tx.DecodeRLP(rlpStream)
-		require.Nil(t, err)
-
-		expTxs = append(expTxs, tx)
-	}
-
 	// Construct the params we expect to decode, minus the txs. Those are
 	// compared separately below.
 	expParams := sequencer.AppendSequencerBatchParams{
 		ShouldStartAtElement:  test.ShouldStartAtElement,
 		TotalElementsToAppend: test.TotalElementsToAppend,
 		Contexts:              test.Contexts,
-		Txs:                   nil,
 	}
 
 	// Decode the batch from the test string.
@@ -142,15 +122,11 @@ func testAppendSequencerBatchParamsEncodeDecode(
 	// for spam prevention, so it is safe to ignore wrt. to serialization.
 	// The decoded txs are reset on the the decoded params afterwards to
 	// test the serialization.
-	decodedTxs := params.Txs
-	params.Txs = nil
 	require.Equal(t, expParams, params)
-	compareTxs(t, expTxs, decodedTxs)
-	params.Txs = decodedTxs
 
 	// Finally, encode the decoded object and assert it matches the original
 	// hex string.
-	paramsBytes, err := params.Serialize(sequencer.BatchTypeLegacy, nil, nil)
+	paramsBytes, err := params.Serialize(sequencer.BatchTypeZlib)
 
 	// Return early when testing error cases, no need to reserialize again
 	if test.Error {
@@ -162,7 +138,7 @@ func testAppendSequencerBatchParamsEncodeDecode(
 	require.Equal(t, test.HexEncoding, hex.EncodeToString(paramsBytes))
 
 	// Serialize the batches in compressed form
-	compressedParamsBytes, err := params.Serialize(sequencer.BatchTypeZlib, nil, nil)
+	compressedParamsBytes, err := params.Serialize(sequencer.BatchTypeZlib)
 	require.Nil(t, err)
 
 	// Deserialize the compressed batch
@@ -170,22 +146,7 @@ func testAppendSequencerBatchParamsEncodeDecode(
 	err = paramsCompressed.Read(bytes.NewReader(compressedParamsBytes))
 	require.Nil(t, err)
 
-	decompressedTxs := paramsCompressed.Txs
-	paramsCompressed.Txs = nil
-
 	require.Equal(t, expParams, paramsCompressed)
-	compareTxs(t, expTxs, decompressedTxs)
-	paramsCompressed.Txs = decompressedTxs
-}
-
-// compareTxs compares a list of two transactions, testing each pair by tx hash.
-// This is used rather than require.Equal, since there `time` metadata on the
-// decoded tx and the expected tx will differ, and can't be modified/ignored.
-func compareTxs(t *testing.T, a []*l2types.Transaction, b []*sequencer.CachedTx) {
-	require.Equal(t, len(a), len(b))
-	for i, txA := range a {
-		require.Equal(t, txA.Hash(), b[i].Tx().Hash())
-	}
 }
 
 // TestMarkerContext asserts that each batch type returns the correct marker

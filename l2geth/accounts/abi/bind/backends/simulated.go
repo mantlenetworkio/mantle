@@ -442,7 +442,13 @@ func (b *SimulatedBackend) callContract(ctx context.Context, call ethereum.CallM
 		log.Error("new state transition fail", "err", err)
 		return nil, 0, false, err
 	}
-	return stateTransition.TransitionDb()
+	ret, usedGas, vmerr, err := stateTransition.TransitionDb()
+	failed := false
+	if vmerr != nil {
+		failed = true
+	}
+
+	return ret, usedGas, failed, err
 }
 
 // SendTransaction updates the pending block to include the given transaction.

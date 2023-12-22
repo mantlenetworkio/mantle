@@ -41,4 +41,16 @@ type Metrics interface {
 
 	// SccRollupTimeDuration state root rollup time duration
 	SccRollupTimeDuration() prometheus.Gauge
+
+	// BatchNumSequencedTxs Number of batch sequenced transactions
+	BatchNumSequencedTxs() prometheus.Gauge
+
+	// BatchNumSubsequentQueueTxs Number of batch subsequent queue transactions
+	BatchNumSubsequentQueueTxs() prometheus.Gauge
+
+	// BatchTimestamp Timestamp of batch
+	BatchTimestamp() prometheus.Gauge
+
+	// BatchBlockNumber Block number of batch
+	BatchBlockNumber() prometheus.Gauge
 }
