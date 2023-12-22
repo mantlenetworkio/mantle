@@ -1528,17 +1528,22 @@ func (s *SyncService) syncTransactions(backend Backend) (*uint64, error) {
 	return index, nil
 }
 
-func (s *SyncService) getTransactions(start, end uint64, txs map[uint64]*types.Transaction, backend Backend) error {
+func (s *SyncService) getTransactions(start, end, offset uint64, txs []*types.Transaction, backend Backend) error {
 	var wg sync.WaitGroup
 	var returnErr error
-	wg.Add(int(end - start + 1))
+	if start-offset < 0 {
+		return fmt.Errorf("offset %d is small than start %d", offset, start)
+	}
+	wg.Add(int(end - start))
 
 	for i := start; i < end; i++ {
 		go func(index uint64) {
 			defer wg.Done()
 			tx, err := s.client.GetTransaction(index, backend)
-			returnErr = err
-			txs[index] = tx
+			if err != nil {
+				returnErr = err
+			}
+			txs[index-offset] = tx
 		}(i)
 	}
 	wg.Wait()
@@ -1549,7 +1554,7 @@ func (s *SyncService) getTransactions(start, end uint64, txs map[uint64]*types.T
 // start to end (inclusive) from a specific Backend
 func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) error {
 	log.Info("Syncing transaction range", "start", start, "end", end, "backend", backend.String())
-	rangeTxs := make(map[uint64]*types.Transaction)
+	rangeTxs := make([]*types.Transaction, (end-start)+1)
 	concurrency := 50
 	segment := int(end-start) / concurrency
 	for i := 0; i <= segment; i++ {
@@ -1559,23 +1564,23 @@ func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) e
 			subEnd = end + 1
 		}
 
-		err := s.getTransactions(subStart, subEnd, rangeTxs, backend)
+		err := s.getTransactions(subStart, subEnd, start, rangeTxs, backend)
 		if err != nil {
 			return fmt.Errorf("cannot fetch transaction %d: %w", i, err)
 		}
 	}
 
 	for i := start; i <= end; i++ {
-		tx, ok := rangeTxs[i]
+		tx := rangeTxs[i-start]
 		var err error
-		if !ok {
+		if tx == nil {
 			tx, err = s.client.GetTransaction(i, backend)
 			if err != nil {
 				return fmt.Errorf("cannot fetch transaction %d: %w", i, err)
 			}
 		}
 		if err = s.applyTransaction(tx); err != nil {
-			return fmt.Errorf("Cannot apply transaction: %w", err)
+			return fmt.Errorf("cannot apply transaction: %w", err)
 		}
 	}
 
