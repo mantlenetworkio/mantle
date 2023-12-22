@@ -1382,6 +1382,11 @@ func (s *SyncService) sync(getLatest indexGetter, getNext nextGetter, syncer ran
 	if nextIndex == *latestIndex+1 {
 		return latestIndex, nil
 	}
+	//TODO
+	if *latestIndex-nextIndex > 10000 {
+		*latestIndex = nextIndex + 10000
+	}
+
 	if err := syncer(nextIndex, *latestIndex); err != nil {
 		return nil, err
 	}
