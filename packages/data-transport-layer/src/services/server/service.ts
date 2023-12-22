@@ -572,16 +572,16 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     this._registerRoute(
       'get',
       '/batch/transaction/index/:index',
-      async (req): Promise<TransactionBatchResponse> => {
+      async (req): Promise<[TransactionBatchResponse, HttpCodes]> => {
         const batch = await this.state.db.getTransactionBatchByIndex(
           BigNumber.from(req.params.index).toNumber()
         )
 
         if (batch === null) {
-          return {
+          return [{
             batch: null,
             transactions: [],
-          }
+          }, HttpCodes.NOT_FOUND]
         }
 
         const transactions =
@@ -591,10 +591,10 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
               BigNumber.from(batch.size).toNumber()
           )
 
-        return {
+        return [{
           batch,
           transactions,
-        }
+        }, HttpCodes.OK]
       }
     )
 
@@ -943,21 +943,21 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     this._registerRoute(
       'get',
       '/da/transaction/index/:index',
-      async (req): Promise<TransactionResponse> => {
+      async (req): Promise<[TransactionResponse, HttpCodes]> => {
         const transactionEntry = await this.state.db.getDaTransactionByIndex(
           BigNumber.from(req.params.index).toNumber()
         )
 
         if (transactionEntry === null) {
-          return {
+          return [{
             transaction: null,
             batch: null,
-          }
+          }, HttpCodes.NOT_FOUND]
         }
-        return {
+        return [{
           transaction: transactionEntry,
           batch: null,
-        }
+        }, HttpCodes.OK]
       }
     )
 
