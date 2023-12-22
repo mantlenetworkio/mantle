@@ -218,6 +218,11 @@ export const BRIDGE_ADAPTER_DATA: {
       l1Bridge: '0x10E6593CDda8c58a1d0f14C5164B376352a55f2F' as const,
       l2Bridge: '0x467194771dAe2967Aef3ECbEDD3Bf9a310C76C65' as const,
     },
+    wstETH: {
+      Adapter: ERC20BridgeAdapter,
+      l1Bridge: '0x2D001d79E5aF5F65a939781FE228B267a8Ed468B' as const,
+      l2Bridge: '0x9c46560D6209743968cC24150893631A39AfDe4d' as const,
+    },
   },
   [L2ChainID.MANTLE_TESTNET]: {
     wstETH: {
