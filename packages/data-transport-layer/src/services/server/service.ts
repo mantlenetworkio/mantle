@@ -8,6 +8,7 @@ import { JsonRpcProvider } from '@ethersproject/providers'
 import { LevelUp } from 'levelup'
 import * as Sentry from '@sentry/node'
 import * as Tracing from '@sentry/tracing'
+import {HttpCodes} from "../../utils";
 
 /* Imports: Internal */
 
@@ -237,7 +238,16 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     this.state.app[method](route, async (req, res) => {
       const start = Date.now()
       try {
-        const json = await handler(req, res)
+        // const [json, httpCode] = await handler(req, res)
+        let httpCode = HttpCodes.OK, json;
+        console.log(httpCode);
+        const result = await handler(req, res)
+        if(Array.isArray(result)) {
+          [json, httpCode] = result;
+        } else {
+          json = result;
+        }
+        console.log(httpCode);
         const elapsed = Date.now() - start
         this.logger.info('Served HTTP Request', {
           method: req.method,
@@ -249,7 +259,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           url: req.url,
           body: json,
         })
-        return res.json(json)
+        return res.status(httpCode).json(json)
       } catch (e) {
         const elapsed = Date.now() - start
         this.logger.error('Failed HTTP Request', {
@@ -498,7 +508,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     this._registerRoute(
       'get',
       '/transaction/index/:index',
-      async (req): Promise<TransactionResponse> => {
+      async (req): Promise<[TransactionResponse, HttpCodes]> => {
         const backend = req.query.backend || this.options.defaultBackend
         let transaction = null
 
@@ -518,20 +528,20 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         }
 
         if (transaction === null) {
-          return {
+          return [{
             transaction: null,
             batch: null,
-          }
+          }, HttpCodes.NOT_FOUND]
         }
 
         const batch = await this.state.db.getTransactionBatchByIndex(
           transaction.batchIndex
         )
 
-        return {
+        return [{
           transaction,
           batch,
-        }
+        }, HttpCodes.OK]
       }
     )
 
