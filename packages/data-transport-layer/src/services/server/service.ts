@@ -8,6 +8,7 @@ import { JsonRpcProvider } from '@ethersproject/providers'
 import { LevelUp } from 'levelup'
 import * as Sentry from '@sentry/node'
 import * as Tracing from '@sentry/tracing'
+import {HttpCodes} from "../../utils";
 
 /* Imports: Internal */
 
@@ -237,7 +238,13 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     this.state.app[method](route, async (req, res) => {
       const start = Date.now()
       try {
-        const json = await handler(req, res)
+        let httpCode = HttpCodes.OK, json;
+        const result = await handler(req, res)
+        if(Array.isArray(result)) {
+          [json, httpCode] = result;
+        } else {
+          json = result;
+        }
         const elapsed = Date.now() - start
         this.logger.info('Served HTTP Request', {
           method: req.method,
@@ -249,7 +256,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           url: req.url,
           body: json,
         })
-        return res.json(json)
+        return res.status(httpCode).json(json)
       } catch (e) {
         const elapsed = Date.now() - start
         this.logger.error('Failed HTTP Request', {
@@ -498,7 +505,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     this._registerRoute(
       'get',
       '/transaction/index/:index',
-      async (req): Promise<TransactionResponse> => {
+      async (req): Promise<[TransactionResponse, HttpCodes]> => {
         const backend = req.query.backend || this.options.defaultBackend
         let transaction = null
 
@@ -518,20 +525,20 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         }
 
         if (transaction === null) {
-          return {
+          return [{
             transaction: null,
             batch: null,
-          }
+          }, HttpCodes.NOT_FOUND]
         }
 
         const batch = await this.state.db.getTransactionBatchByIndex(
           transaction.batchIndex
         )
 
-        return {
+        return [{
           transaction,
           batch,
-        }
+        }, HttpCodes.OK]
       }
     )
 
@@ -565,16 +572,16 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     this._registerRoute(
       'get',
       '/batch/transaction/index/:index',
-      async (req): Promise<TransactionBatchResponse> => {
+      async (req): Promise<[TransactionBatchResponse, HttpCodes]> => {
         const batch = await this.state.db.getTransactionBatchByIndex(
           BigNumber.from(req.params.index).toNumber()
         )
 
         if (batch === null) {
-          return {
+          return [{
             batch: null,
             transactions: [],
-          }
+          }, HttpCodes.NOT_FOUND]
         }
 
         const transactions =
@@ -584,10 +591,10 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
               BigNumber.from(batch.size).toNumber()
           )
 
-        return {
+        return [{
           batch,
           transactions,
-        }
+        }, HttpCodes.OK]
       }
     )
 
@@ -936,21 +943,21 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     this._registerRoute(
       'get',
       '/da/transaction/index/:index',
-      async (req): Promise<TransactionResponse> => {
+      async (req): Promise<[TransactionResponse, HttpCodes]> => {
         const transactionEntry = await this.state.db.getDaTransactionByIndex(
           BigNumber.from(req.params.index).toNumber()
         )
 
         if (transactionEntry === null) {
-          return {
+          return [{
             transaction: null,
             batch: null,
-          }
+          }, HttpCodes.NOT_FOUND]
         }
-        return {
+        return [{
           transaction: transactionEntry,
           batch: null,
-        }
+        }, HttpCodes.OK]
       }
     )
 
