@@ -18,6 +18,7 @@ package vm
 
 import (
 	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
@@ -769,6 +770,7 @@ func opCall(pc *uint64, interpreter *EVMInterpreter, contract *Contract, memory 
 	if value.Sign() != 0 {
 		gas += params.CallStipend
 	}
+	fmt.Println("=====22222===evm call===22222=====", "contract==", contract, "toAddr===", toAddr, "args===", args, "gas===", gas, "value===", value)
 	ret, returnGas, err := interpreter.evm.Call(contract, toAddr, args, gas, value)
 	if err != nil {
 		stack.push(interpreter.intPool.getZero())
@@ -799,6 +801,7 @@ func opCallCode(pc *uint64, interpreter *EVMInterpreter, contract *Contract, mem
 	if value.Sign() != 0 {
 		gas += params.CallStipend
 	}
+	fmt.Println("=====3333===evm call===333333=====", "contract==", contract, "toAddr===", toAddr, "args===", args, "gas===", gas, "value===", value)
 	ret, returnGas, err := interpreter.evm.CallCode(contract, toAddr, args, gas, value)
 	if err != nil {
 		stack.push(interpreter.intPool.getZero())

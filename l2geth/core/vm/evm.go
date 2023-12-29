@@ -247,6 +247,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		return nil, gas, ErrDepth
 	}
 	// Fail if we're trying to transfer more than the available balance
+	fmt.Println("call address and value", "callerAddress", caller.Address(), "value", value)
 	if !evm.Context.CanTransfer(evm.StateDB, caller.Address(), value) {
 		fmt.Println("===33333333==vmerrvmerrvmerrvmerrvmerr==33333333==")
 		return nil, gas, ErrInsufficientBalance

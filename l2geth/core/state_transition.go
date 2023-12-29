@@ -18,6 +18,7 @@ package core
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"math/big"
 
@@ -286,7 +287,9 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 	} else {
 		// Increment the nonce for the next transaction
 		st.state.SetNonce(msg.From(), st.state.GetNonce(msg.From())+1)
+		fmt.Println("=====11111===evm call===1111=====", "sender==", sender, "st.to()====", st.to(), "st.data===", st.data, "st.gas===", st.gas, "st.value===", st.value, "senderBalance", evm.StateDB.GetBalance(common.Address(sender)))
 		ret, st.gas, vmerr = evm.Call(sender, st.to(), st.data, st.gas, st.value)
+		fmt.Println("=====aaaa=====vmerrvmerrvmerrvmerr=====aaaa=====", "vmerr", vmerr)
 	}
 
 	if vmerr != nil {
