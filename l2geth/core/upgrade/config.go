@@ -1,6 +1,7 @@
 package upgrade
 
 import (
+	"fmt"
 	"math/big"
 
 	"github.com/mantlenetworkio/mantle/l2geth/params"
@@ -111,6 +112,7 @@ func (c *Config) IsEigenDa(num *big.Int) bool {
 // IsUpdateGasLimitBlock returns whether num is either equal to the IsUpdateGasLimitBlock fork block or greater.
 // Compare with L2 BlockNumber
 func (c *Config) IsUpdateGasLimitBlock(num *big.Int) bool {
+	fmt.Println("c.updateGasLimitL2Blockc.updateGasLimitL2Blockc.updateGasLimitL2Blockc.updateGasLimitL2Block", c.updateGasLimitL2Block)
 	return isBlockForked(c.updateGasLimitL2Block, num)
 }
 
@@ -125,14 +127,14 @@ func (c *Config) IsMockUpgradeBasedOnL1BlockNumber(num *big.Int) bool {
 // isBlockForked is used to compare with Layer1 block height
 func isBlockForked(s, head *big.Int) bool {
 	if s == nil || head == nil {
-		return false
+		return true
 	}
 
 	if s.Cmp(big.NewInt(0)) <= 0 {
-		return false
+		return true
 	}
 
-	return s.Cmp(head) <= 0 // false  22w
+	return s.Cmp(head) > 0
 }
 
 // isExactBlockForked returns whether a fork scheduled at block s is active at the

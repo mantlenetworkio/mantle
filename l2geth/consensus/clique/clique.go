@@ -586,14 +586,17 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainReader, header *types.
 	//if UpdateGasLimitBlock not set , will not changed, for mainnet.
 	//if UpdateGasLimitBlock = 0, from the genesis block
 	//if UpdateGasLimitBlock = x, from the x
+	fmt.Println("=========before adjustment============", "Gaslimit===", header.GasLimit, "header.Number", header.Number)
 	mantleUpgradeConfig := upgrade.NewMantleUpgradeConfig(chain.Config().ChainID)
 	fmt.Println("mantleUpgradeConfig.IsUpdateGasLimitBlock(header.Number)===", mantleUpgradeConfig.IsUpdateGasLimitBlock(header.Number), "upgrade.PreUpgradedGaslimit", upgrade.PreUpgradedGaslimit, "chain.Config().ChainID", chain.Config().ChainID, "params.MantleTestnetChainID", params.MantleTestnetChainID)
-	if !mantleUpgradeConfig.IsUpdateGasLimitBlock(header.Number) && chain.Config().ChainID == params.MantleTestnetChainID {
+	if mantleUpgradeConfig.IsUpdateGasLimitBlock(header.Number) && chain.Config().ChainID == params.MantleTestnetChainID {
 		//for testnet, when the UpdateGasLimitBlock  is actived, we must update the gaslimit for all of block
 		//which is after the "updategaslimit" block
 		fmt.Println("===========debug=1111111=============", "chain.Config().ChainID", chain.Config().ChainID, "params.MantleTestnetChainID", params.MantleTestnetChainID)
 		header.GasLimit = uint64(upgrade.PreUpgradedGaslimit)
 	}
+
+	fmt.Println("=========end adjustment============", "Gaslimit===", header.GasLimit)
 
 	// Assemble and return the final block for sealing
 	return types.NewBlock(header, txs, nil, receipts), nil
