@@ -587,10 +587,11 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainReader, header *types.
 	//if UpdateGasLimitBlock = 0, from the genesis block
 	//if UpdateGasLimitBlock = x, from the x
 	mantleUpgradeConfig := upgrade.NewMantleUpgradeConfig(chain.Config().ChainID)
-	fmt.Println("mantleUpgradeConfig.IsUpdateGasLimitBlock(header.Number)===", mantleUpgradeConfig.IsUpdateGasLimitBlock(header.Number), "upgrade.PreUpgradedGaslimit", upgrade.PreUpgradedGaslimit)
+	fmt.Println("mantleUpgradeConfig.IsUpdateGasLimitBlock(header.Number)===", mantleUpgradeConfig.IsUpdateGasLimitBlock(header.Number), "upgrade.PreUpgradedGaslimit", upgrade.PreUpgradedGaslimit, "chain.Config().ChainID", chain.Config().ChainID, "params.MantleTestnetChainID", params.MantleTestnetChainID)
 	if !mantleUpgradeConfig.IsUpdateGasLimitBlock(header.Number) && chain.Config().ChainID == params.MantleTestnetChainID {
 		//for testnet, when the UpdateGasLimitBlock  is actived, we must update the gaslimit for all of block
 		//which is after the "updategaslimit" block
+		fmt.Println("===========debug=1111111=============", "chain.Config().ChainID", chain.Config().ChainID, "params.MantleTestnetChainID", params.MantleTestnetChainID)
 		header.GasLimit = uint64(upgrade.PreUpgradedGaslimit)
 	}
 
