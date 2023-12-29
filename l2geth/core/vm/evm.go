@@ -18,6 +18,7 @@ package vm
 
 import (
 	"bytes"
+	"fmt"
 	"math/big"
 	"sync/atomic"
 	"time"
@@ -247,6 +248,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	}
 	// Fail if we're trying to transfer more than the available balance
 	if !evm.Context.CanTransfer(evm.StateDB, caller.Address(), value) {
+		fmt.Println("===33333333==vmerrvmerrvmerrvmerrvmerr==33333333==")
 		return nil, gas, ErrInsufficientBalance
 	}
 
@@ -324,6 +326,7 @@ func (evm *EVM) CallCode(caller ContractRef, addr common.Address, input []byte, 
 	}
 	// Fail if we're trying to transfer more than the available balance
 	if !evm.CanTransfer(evm.StateDB, caller.Address(), value) {
+		fmt.Println("=====000000===CanTransfer StateDB call error===0000000====")
 		return nil, gas, ErrInsufficientBalance
 	}
 
@@ -440,6 +443,7 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 		return nil, common.Address{}, gas, ErrDepth
 	}
 	if !evm.CanTransfer(evm.StateDB, caller.Address(), value) {
+		fmt.Println("======CanTransfer StateDB call error=======")
 		return nil, common.Address{}, gas, ErrInsufficientBalance
 	}
 	nonce := evm.StateDB.GetNonce(caller.Address())

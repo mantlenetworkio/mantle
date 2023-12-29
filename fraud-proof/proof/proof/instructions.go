@@ -16,6 +16,7 @@ package proof
 
 import (
 	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/holiman/uint256"
@@ -879,6 +880,7 @@ func opCreateProof(ctx ProofGenContext, currState, nextState *state.IntraState, 
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("=====vmerrvmerrvmerrvmerrvmerr====", "vmerr", vmerr)
 	if vmerr == vm.ErrInsufficientBalance || vmerr == vm.ErrNonceUintOverflow || vmerr == vm.ErrContractAddressCollision {
 		err := osp.addRevertProof(ctx, currState, nextState, vmerr)
 		if err != nil {
@@ -917,6 +919,7 @@ func opCallProof(ctx ProofGenContext, currState, nextState *state.IntraState, vm
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("===11111111==vmerrvmerrvmerrvmerrvmerr==111111==", "vmerr", vmerr)
 	if vmerr == vm.ErrInsufficientBalance {
 		err := osp.addRevertProof(ctx, currState, nextState, vmerr)
 		if err != nil {
@@ -1154,6 +1157,7 @@ func opCreate2Proof(ctx ProofGenContext, currState, nextState *state.IntraState,
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("===22222222222==vmerrvmerrvmerrvmerrvmerr==222222222==", "vmerr", vmerr)
 	if vmerr == vm.ErrInsufficientBalance || vmerr == vm.ErrNonceUintOverflow || vmerr == vm.ErrContractAddressCollision {
 		err := osp.addRevertProof(ctx, currState, nextState, vmerr)
 		if err != nil {

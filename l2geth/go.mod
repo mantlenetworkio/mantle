@@ -8,6 +8,11 @@ replace github.com/mantlenetworkio/mantle/bss-core => ../bss-core
 
 replace github.com/mantlenetworkio/mantle/metrics => ../metrics
 
+exclude (
+	github.com/Layr-Labs/datalayr/lib/merkzg v0.0.0
+	github.com/Layr-Labs/datalayr/common v0.0.0
+)
+
 require (
 	github.com/Azure/azure-storage-blob-go v0.7.0
 	github.com/VictoriaMetrics/fastcache v1.9.0
