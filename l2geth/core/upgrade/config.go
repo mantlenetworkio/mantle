@@ -132,7 +132,7 @@ func isBlockForked(s, head *big.Int) bool {
 		return false
 	}
 
-	return s.Cmp(head) <= 0
+	return s.Cmp(head) <= 0 // false  22w
 }
 
 // isExactBlockForked returns whether a fork scheduled at block s is active at the
