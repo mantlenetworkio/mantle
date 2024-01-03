@@ -49,6 +49,30 @@ export type L2Provider<TProvider extends Provider> = TProvider & {
   getL1GasPrice(): Promise<BigNumber>
 
   /**
+   * Number of decimals of the scalar
+   *
+   * @returns decimals
+   */
+  decimals(): Promise<BigNumber>
+
+  /**
+   * Value to scale the fee up by
+   *
+   * @returns scale
+   */
+  scalar(): Promise<BigNumber>
+
+  /**
+   * Computes the amount of L1 gas used for a transaction
+   * The overhead represents the per batch gas overhead of
+   * posting both transaction and state roots to L1 given larger
+   * batch sizes.
+   *
+   * @returns Current L1 data gas price in wei.
+   */
+  overhead(): Promise<BigNumber>
+
+  /**
    * Estimates the L1 (data) gas required for a transaction.
    *
    * @param tx Transaction to estimate L1 gas for.

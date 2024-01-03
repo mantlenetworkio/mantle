@@ -7,6 +7,9 @@ import (
 	"math/big"
 	"strings"
 
+	kms "cloud.google.com/go/kms/apiv1"
+	"google.golang.org/api/option"
+
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -23,9 +26,6 @@ import (
 	"github.com/mantlenetworkio/mantle/bss-core/metrics"
 	"github.com/mantlenetworkio/mantle/bss-core/txmgr"
 	l2ethclient "github.com/mantlenetworkio/mantle/l2geth/ethclient"
-
-	kms "cloud.google.com/go/kms/apiv1"
-	"google.golang.org/api/option"
 )
 
 const (
@@ -231,31 +231,58 @@ func (d *Driver) CraftBatchTx(
 	log.Info(name+" crafting batch tx", "start", start, "end", end,
 		"nonce", nonce, "type", d.cfg.BatchType.String())
 
-	var batchElements []BatchElement
+	var lastTimestamp uint64
+	var lastBlockNumber uint64
+	numSequencedTxs := 0
+	numSubsequentQueueTxs := 0
 
 	for i := new(big.Int).Set(start); i.Cmp(end) < 0; i.Add(i, bigOne) {
 		block, err := d.cfg.L2Client.BlockByNumber(ctx, i)
 		if err != nil {
 			return nil, err
 		}
-
 		// For each sequencer transaction, update our running total with the
 		// size of the transaction.
 		batchElement := BatchElementFromBlock(block)
-		batchElements = append(batchElements, batchElement)
+		if batchElement.IsSequencerTx {
+			numSequencedTxs += 1
+		} else {
+			numSubsequentQueueTxs += 1
+		}
+		if i.Cmp(big.NewInt(0).Sub(end, bigOne)) == 0 {
+			lastTimestamp = batchElement.Timestamp
+			lastBlockNumber = batchElement.BlockNumber
+		}
 	}
-
+	blocksLen := numSequencedTxs + numSubsequentQueueTxs
 	shouldStartAt := start.Uint64()
+
 	for {
-		batchParams, err := GenSequencerBatchParams(
-			shouldStartAt, d.cfg.BlockOffset, batchElements,
+		var (
+			contexts []BatchContext
 		)
-		if err != nil {
-			return nil, err
+
+		batchContext := BatchContext{
+			NumSequencedTxs:       uint64(numSequencedTxs),
+			NumSubsequentQueueTxs: uint64(numSubsequentQueueTxs),
+			Timestamp:             lastTimestamp,
+			BlockNumber:           lastBlockNumber,
+		}
+
+		d.metrics.BatchNumSequencedTxs().Set(float64(batchContext.NumSequencedTxs))
+		d.metrics.BatchNumSubsequentQueueTxs().Set(float64(batchContext.NumSubsequentQueueTxs))
+		d.metrics.BatchTimestamp().Set(float64(batchContext.Timestamp))
+		d.metrics.BatchBlockNumber().Set(float64(batchContext.BlockNumber))
+
+		contexts = append(contexts, batchContext)
+		batchParams := &AppendSequencerBatchParams{
+			ShouldStartAtElement:  shouldStartAt - d.cfg.BlockOffset,
+			TotalElementsToAppend: uint64(blocksLen),
+			Contexts:              contexts,
 		}
 
 		// Encode the batch arguments using the configured encoding type.
-		batchArguments, err := batchParams.Serialize(d.cfg.BatchType, start, big.NewInt(int64(d.cfg.DaUpgradeBlock)))
+		batchArguments, err := batchParams.Serialize(d.cfg.BatchType)
 		if err != nil {
 			return nil, err
 		}
@@ -266,10 +293,10 @@ func (d *Driver) CraftBatchTx(
 		log.Info(name+" testing batch size",
 			"calldata_size", len(calldata))
 
-		d.metrics.NumElementsPerBatch().Observe(float64(len(batchElements)))
+		d.metrics.NumElementsPerBatch().Observe(float64(blocksLen))
 
 		log.Info(name+" batch constructed",
-			"num_txs", len(batchElements),
+			"num_txs", blocksLen,
 			"final_size", len(calldata),
 			"batch_type", d.cfg.BatchType)
 

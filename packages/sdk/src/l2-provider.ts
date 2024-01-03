@@ -60,6 +60,45 @@ export const getL1GasPrice = async (
 }
 
 /**
+ * Number of decimals of the scalar
+ *
+ * @param l2Provider L2 provider to query the decimals from.
+ * @returns decimals
+ */
+export const decimals = async (
+  l2Provider: ProviderLike
+): Promise<BigNumber> => {
+  const gpo = connectGasPriceOracle(l2Provider)
+  return gpo.decimals()
+}
+
+/**
+ * Value to scale the fee up by
+ *
+ * @param l2Provider L2 provider to query the L1 gas used from.
+ * @returns scalar
+ */
+export const scalar = async (
+  l2Provider: ProviderLike
+): Promise<BigNumber> => {
+  const gpo = connectGasPriceOracle(l2Provider)
+  return gpo.scalar()
+}
+
+/**
+ * Gets the current L1 gas limit as seen on L2.
+ *
+ * @param l2Provider L2 provider to query the L1 gas used from.
+ * @returns Current L1 gas limit as seen on L2.
+ */
+export const overhead = async (
+  l2Provider: ProviderLike
+): Promise<BigNumber> => {
+  const gpo = connectGasPriceOracle(l2Provider)
+  return gpo.overhead()
+}
+
+/**
  * Estimates the amount of L1 gas required for a given L2 transaction.
  *
  * @param l2Provider L2 provider to query the gas usage from.
@@ -244,6 +283,15 @@ export const asL2Provider = <TProvider extends Provider>(
   // Connect extra functions.
   l2Provider.getL1GasPrice = async () => {
     return getL1GasPrice(l2Provider)
+  }
+  l2Provider.decimals = async () => {
+    return decimals(l2Provider)
+  }
+  l2Provider.scalar = async () => {
+    return scalar(l2Provider)
+  }
+  l2Provider.overhead = async () => {
+    return overhead(l2Provider)
   }
   l2Provider.estimateL1Gas = async (tx: TransactionRequest) => {
     return estimateL1Gas(l2Provider, tx)

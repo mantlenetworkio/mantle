@@ -32,6 +32,7 @@ import (
 	"github.com/mantlenetworkio/mantle/l2geth/rlp"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/rcfg"
+	"github.com/mantlenetworkio/mantle/l2geth/statedumper"
 	"github.com/mantlenetworkio/mantle/l2geth/trie"
 	"golang.org/x/crypto/sha3"
 )
@@ -244,6 +245,7 @@ func (s *StateDB) GetBalance(addr common.Address) *big.Int {
 	if rcfg.UsingBVM {
 		// Get balance from the bvm_ETH contract.
 		// NOTE: We may remove this feature in a future release.
+		statedumper.WriteETH(addr)
 		key := GetbvmBalanceKey(addr)
 		bal := s.GetState(dump.BvmMantleAddress, key)
 		return bal.Big()
@@ -373,6 +375,7 @@ func (s *StateDB) HasSuicided(addr common.Address) bool {
 // AddBalance adds amount to the account associated with addr.
 func (s *StateDB) AddBalance(addr common.Address, amount *big.Int) {
 	if rcfg.UsingBVM {
+		statedumper.WriteETH(addr)
 		// Mutate the storage slot inside of bvm_ETH to change balances.
 		// Note that we don't need to check for overflows or underflows here because the code that
 		// uses this codepath already checks for them. You can follow the original codepath below
@@ -393,6 +396,7 @@ func (s *StateDB) AddBalance(addr common.Address, amount *big.Int) {
 // SubBalance subtracts amount from the account associated with addr.
 func (s *StateDB) SubBalance(addr common.Address, amount *big.Int) {
 	if rcfg.UsingBVM {
+		statedumper.WriteETH(addr)
 		// Mutate the storage slot inside of bvm_ETH to change balances.
 		// Note that we don't need to check for overflows or underflows here because the code that
 		// uses this codepath already checks for them. You can follow the original codepath below
@@ -412,6 +416,7 @@ func (s *StateDB) SubBalance(addr common.Address, amount *big.Int) {
 
 func (s *StateDB) SetBalance(addr common.Address, amount *big.Int) {
 	if rcfg.UsingBVM {
+		statedumper.WriteETH(addr)
 		// Mutate the storage slot inside of bvm_ETH to change balances.
 		key := GetbvmBalanceKey(addr)
 		s.SetState(dump.BvmMantleAddress, key, common.BigToHash(amount))

@@ -235,7 +235,7 @@ func (d *Driver) GetBatchBlockRange(ctx context.Context) (*big.Int, *big.Int, er
 		return nil, nil, fmt.Errorf("invalid range, end(%v) < start(%v)", end, start)
 	}
 	if end.Cmp(latestHeader.Number) > 0 {
-		end = latestHeader.Number
+		end = new(big.Int).Add(latestHeader.Number, bigOne)
 	}
 	return start, end, nil
 }
@@ -821,6 +821,7 @@ func (d *Driver) RollupMainWorker() {
 				log.Error("MtBatcher disperse store data fail", "err", err)
 				continue
 			}
+			log.Info("MtBatcher disperse store data success", "txHash", receipt.TxHash.String())
 			d.Cfg.Metrics.L2StoredBlockNumber().Set(float64(start.Uint64()))
 			time.Sleep(10 * time.Second) // sleep for data into graph node
 			csdReceipt, err := d.ConfirmStoredData(receipt.TxHash.Bytes(), params, startL2BlockNumber, endL2BlockNumber, 0, big.NewInt(0), false)
@@ -828,7 +829,7 @@ func (d *Driver) RollupMainWorker() {
 				log.Error("MtBatcher confirm store data fail", "err", err)
 				continue
 			}
-			log.Debug("MtBatcher confirm store data success", "txHash", csdReceipt.TxHash.String())
+			log.Info("MtBatcher confirm store data success", "txHash", csdReceipt.TxHash.String())
 			d.Cfg.Metrics.L2ConfirmedBlockNumber().Set(float64(start.Uint64()))
 			if d.Cfg.FeeModelEnable {
 				daFee, _ := d.CalcUserFeeByRules(big.NewInt(int64(len(aggregateTxData))))
@@ -862,7 +863,7 @@ func (d *Driver) RollUpFeeWorker() {
 					continue
 				}
 				daFee := <-d.FeeCh
-				log.Debug("MtBatcher RollUpFeeWorker chainFee and daFee", "chainFee", chainFee, "daFee", *daFee)
+				log.Info("MtBatcher RollUpFeeWorker chainFee and daFee", "chainFee", chainFee, "daFee", *daFee)
 				if chainFee.Cmp(daFee.RollUpFee) != 0 {
 					txfRpt, err := d.UpdateUserDaFee(daFee.EndL2BlockNumber, daFee.RollUpFee)
 					if err != nil {
@@ -870,7 +871,7 @@ func (d *Driver) RollUpFeeWorker() {
 						continue
 					}
 					d.Cfg.Metrics.EigenUserFee().Set(float64(daFee.RollUpFee.Uint64()))
-					log.Debug("MtBatcher RollUpFeeWorker update user fee success", "Hash", txfRpt.TxHash.String())
+					log.Info("MtBatcher RollUpFeeWorker update user fee success", "Hash", txfRpt.TxHash.String())
 				}
 			}
 		case err := <-d.Ctx.Done():
@@ -924,7 +925,7 @@ func (d *Driver) CheckConfirmedWorker() {
 						log.Info("Checker get l2 rollup block fail", "err", err)
 						continue
 					}
-					log.Debug("Checker DataStoreIdToL2RollUpBlock", "rollupBlock.StartL2BlockNumber", rollupBlock.StartL2BlockNumber, "rollupBlock.EndBL2BlockNumber", rollupBlock.EndBL2BlockNumber)
+					log.Info("Checker DataStoreIdToL2RollUpBlock", "rollupBlock.StartL2BlockNumber", rollupBlock.StartL2BlockNumber, "rollupBlock.EndBL2BlockNumber", rollupBlock.EndBL2BlockNumber)
 
 					aggregateTxData, startL2BlockNumber, endL2BlockNumber := d.TxAggregator(
 						d.Ctx, rollupBlock.StartL2BlockNumber, rollupBlock.EndBL2BlockNumber,
