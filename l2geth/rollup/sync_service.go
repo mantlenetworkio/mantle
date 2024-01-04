@@ -1382,7 +1382,7 @@ func (s *SyncService) sync(getLatest indexGetter, getNext nextGetter, syncer ran
 	if nextIndex == *latestIndex+1 {
 		return latestIndex, nil
 	}
-	//TODO
+	//TODO synchronize up to 10000 blocks at a time
 	if *latestIndex-nextIndex > 10000 {
 		*latestIndex = nextIndex + 10000
 	}
@@ -1536,6 +1536,7 @@ func (s *SyncService) syncTransactions(backend Backend) (*uint64, error) {
 func (s *SyncService) getTransactions(start, end, offset uint64, txs []*types.Transaction, backend Backend) error {
 	var wg sync.WaitGroup
 	var returnErr error
+	var mu sync.Mutex
 	if start-offset < 0 {
 		return fmt.Errorf("offset %d is small than start %d", offset, start)
 	}
@@ -1546,7 +1547,22 @@ func (s *SyncService) getTransactions(start, end, offset uint64, txs []*types.Tr
 			defer wg.Done()
 			tx, err := s.client.GetTransaction(index, backend)
 			if err != nil {
-				returnErr = err
+				log.Warn("cannot fetch transaction by index,will retry 5 times", "index", index)
+				//retry 5 times
+				retry := 1
+				for retry <= 5 {
+					log.Warn("cannot fetch transaction by index", "index", index, "retry time", retry)
+					tx, err = s.client.GetTransaction(index, backend)
+					if err == nil || retry == 5 {
+						break
+					}
+					retry++
+				}
+				if err != nil && returnErr == nil {
+					mu.Lock()
+					returnErr = err
+					mu.Unlock()
+				}
 			}
 			txs[index-offset] = tx
 		}(i)
@@ -1568,17 +1584,21 @@ func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) e
 		if subEnd > end {
 			subEnd = end + 1
 		}
-
 		err := s.getTransactions(subStart, subEnd, start, rangeTxs, backend)
 		if err != nil {
-			return fmt.Errorf("cannot fetch transaction %d: %w", i, err)
+			log.Error("fetch transaction err", "subStart", subStart, "subEnd", subEnd, "err", err)
 		}
 	}
 
 	for i := start; i <= end; i++ {
 		tx := rangeTxs[i-start]
 		var err error
+		var previousTxIsNil bool
+		if tx == nil && previousTxIsNil {
+			return fmt.Errorf("tx index is not contiguous and needs to be re-fetched index %d", i)
+		}
 		if tx == nil {
+			previousTxIsNil = true
 			tx, err = s.client.GetTransaction(i, backend)
 			if err != nil {
 				return fmt.Errorf("cannot fetch transaction %d: %w", i, err)
