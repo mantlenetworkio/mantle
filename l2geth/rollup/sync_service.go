@@ -1557,6 +1557,7 @@ func (s *SyncService) getTransactions(start, end, offset uint64, txs []*types.Tr
 						break
 					}
 					retry++
+					time.Sleep(10 * time.Millisecond)
 				}
 				if err != nil && returnErr == nil {
 					mu.Lock()
