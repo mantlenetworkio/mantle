@@ -1577,7 +1577,7 @@ func (s *SyncService) getTransactions(start, end, offset uint64, txs []*types.Tr
 func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) error {
 	log.Info("Syncing transaction range", "start", start, "end", end, "backend", backend.String())
 	rangeTxs := make([]*types.Transaction, (end-start)+1)
-	concurrency := 50
+	concurrency := 100
 	segment := int(end-start) / concurrency
 	for i := 0; i <= segment; i++ {
 		subStart := start + uint64(i*concurrency)
