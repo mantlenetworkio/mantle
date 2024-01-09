@@ -1588,6 +1588,7 @@ func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) e
 		err := s.getTransactions(subStart, subEnd, start, rangeTxs, backend)
 		if err != nil {
 			log.Error("fetch transaction err", "subStart", subStart, "subEnd", subEnd, "err", err)
+			break
 		}
 	}
 
