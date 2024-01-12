@@ -295,7 +295,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 	}
 
 	if vmerr != nil {
-		log.Info("VM returned with error", "err", vmerr, "ret", hexutil.Encode(ret))
+		log.Info("VM returned with error", "err", vmerr, "ret", hexutil.Encode(ret), "msg.From", msg.From(), "msg.To", msg.To(), "msg.Nonce", msg.Nonce())
 		// The only possible consensus-error would be if there wasn't
 		// sufficient balance to make the transfer happen. The first
 		// balance transfer may never fail.
