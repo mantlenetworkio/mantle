@@ -113,13 +113,15 @@ func IntrinsicGas(data []byte, contractCreation, isHomestead bool, isEIP2028 boo
 			nonZeroGas = params.TxDataNonZeroGasEIP2028
 		}
 		if (math.MaxUint64-gas)/nonZeroGas < nz {
-			return 0, vm.ErrOutOfGas
+			//return 0, vm.ErrOutOfGas
+			return 0, nil
 		}
 		gas += nz * nonZeroGas
 
 		z := uint64(len(data)) - nz
 		if (math.MaxUint64-gas)/params.TxDataZeroGas < z {
-			return 0, vm.ErrOutOfGas
+			//return 0, vm.ErrOutOfGas
+			return 0, nil
 		}
 		gas += z * params.TxDataZeroGas
 	}
@@ -195,7 +197,8 @@ func (st *StateTransition) to() common.Address {
 
 func (st *StateTransition) useGas(amount uint64) error {
 	if st.gas < amount {
-		return vm.ErrOutOfGas
+		//return vm.ErrOutOfGas
+		return nil
 	}
 	st.gas -= amount
 
@@ -216,10 +219,12 @@ func (st *StateTransition) buyGas() error {
 		}
 	}
 	if st.state.GetBalance(st.msg.From()).Cmp(mgval) < 0 {
-		return errInsufficientBalanceForGas
+		//return errInsufficientBalanceForGas
+		return nil
 	}
 	if err := st.gp.SubGas(st.msg.Gas()); err != nil {
-		return err
+		//return err
+		return nil
 	}
 	st.gas += st.msg.Gas()
 
@@ -290,12 +295,15 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 	}
 
 	if vmerr != nil {
-		log.Debug("VM returned with error", "err", vmerr, "ret", hexutil.Encode(ret))
+		log.Info("VM returned with error", "err", vmerr, "ret", hexutil.Encode(ret))
 		// The only possible consensus-error would be if there wasn't
 		// sufficient balance to make the transfer happen. The first
 		// balance transfer may never fail.
 		if vmerr == vm.ErrInsufficientBalance {
-			return nil, 0, false, vmerr
+			// hack a version to handle insufficient balance transfer(failed tx)
+			//gasUsed := msg.Gas()
+			vmerr = nil
+			return nil, 0, true, vmerr
 		}
 	}
 	st.refundGas()

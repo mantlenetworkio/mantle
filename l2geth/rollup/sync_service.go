@@ -1208,7 +1208,8 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 		return fmt.Errorf("invalid transaction: %w", core.ErrInvalidSender)
 	}
 	if state.GetBalance(from).Cmp(cost) < 0 {
-		return fmt.Errorf("invalid transaction: %w", core.ErrInsufficientFunds)
+		//return fmt.Errorf("invalid transaction: %w", core.ErrInsufficientFunds)
+		return nil
 	}
 	if tx.GasPrice().Cmp(common.Big0) == 0 {
 		// Allow 0 gas price transactions only if it is the owner of the gas
