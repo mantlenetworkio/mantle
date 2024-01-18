@@ -215,15 +215,20 @@ func (st *StateTransition) buyGas() error {
 
 		}
 	}
-	if st.state.GetBalance(st.msg.From()).Cmp(mgval) < 0 {
-		return errInsufficientBalanceForGas
-	}
+	//if st.state.GetBalance(st.msg.From()).Cmp(mgval) < 0 {
+	//	return errInsufficientBalanceForGas
+	//}
 	if err := st.gp.SubGas(st.msg.Gas()); err != nil {
 		return err
 	}
 	st.gas += st.msg.Gas()
 
 	st.initialGas = st.msg.Gas()
+
+	if st.state.GetBalance(st.msg.From()).Cmp(mgval) < 0 {
+		return nil
+	}
+	
 	st.state.SubBalance(st.msg.From(), mgval)
 	return nil
 }
