@@ -41,6 +41,12 @@ type Error interface {
 	ErrorCode() int // returns the code
 }
 
+// A DataError contains some data in addition to the error message.
+type DataError interface {
+	Error() string          // returns the message
+	ErrorData() interface{} // returns the error data
+}
+
 // ServerCodec implements reading, parsing and writing RPC messages for the server side of
 // a RPC session. Implementations must be go-routine safe since the codec can be called in
 // multiple go-routines concurrently.
@@ -89,6 +95,12 @@ func (bn *BlockNumber) UnmarshalJSON(data []byte) error {
 		return nil
 	case "pending":
 		*bn = PendingBlockNumber
+		return nil
+	case "finalized":
+		*bn = LatestBlockNumber
+		return nil
+	case "safe":
+		*bn = LatestBlockNumber
 		return nil
 	}
 

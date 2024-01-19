@@ -111,9 +111,13 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	}
 
 	// Apply the transaction to the current state (included in the env)
-	_, gas, failed, err := ApplyMessage(vmenv, msg, gp)
+	_, gas, vmerr, err := ApplyMessage(vmenv, msg, gp)
 	if err != nil {
 		return nil, err
+	}
+	failed := false
+	if vmerr != nil {
+		failed = true
 	}
 
 	// Update the state with pending changes
