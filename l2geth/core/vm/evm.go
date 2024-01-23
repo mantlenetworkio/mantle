@@ -24,6 +24,7 @@ import (
 
 	"github.com/mantlenetworkio/mantle/l2geth/common"
 	"github.com/mantlenetworkio/mantle/l2geth/crypto"
+	"github.com/mantlenetworkio/mantle/l2geth/log"
 	"github.com/mantlenetworkio/mantle/l2geth/params"
 	"github.com/mantlenetworkio/mantle/l2geth/rollup/dump"
 	"github.com/mantlenetworkio/mantle/l2geth/statedumper"
@@ -247,7 +248,9 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	}
 	// Fail if we're trying to transfer more than the available balance
 	if !evm.Context.CanTransfer(evm.StateDB, caller.Address(), value) {
-		return nil, gas, ErrInsufficientBalance
+		//return nil, gas, ErrInsufficientBalance
+		log.Info("ErrInsufficientBalance Call", "from", caller.Address().String(), "balance", evm.StateDB.GetBalance(caller.Address()).String(), "value", value.String())
+		value = big.NewInt(0)
 	}
 
 	var (
@@ -324,7 +327,9 @@ func (evm *EVM) CallCode(caller ContractRef, addr common.Address, input []byte, 
 	}
 	// Fail if we're trying to transfer more than the available balance
 	if !evm.CanTransfer(evm.StateDB, caller.Address(), value) {
-		return nil, gas, ErrInsufficientBalance
+		//return nil, gas, ErrInsufficientBalance
+		log.Info("ErrInsufficientBalance CallCode", "from", caller.Address().String(), "balance", evm.StateDB.GetBalance(caller.Address()).String(), "value", value.String())
+		value = big.NewInt(0)
 	}
 
 	var (
@@ -440,7 +445,9 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 		return nil, common.Address{}, gas, ErrDepth
 	}
 	if !evm.CanTransfer(evm.StateDB, caller.Address(), value) {
-		return nil, common.Address{}, gas, ErrInsufficientBalance
+		//return nil, common.Address{}, gas, ErrInsufficientBalance
+		log.Info("ErrInsufficientBalance create", "from", caller.Address().String(), "balance", evm.StateDB.GetBalance(caller.Address()).String(), "value", value.String())
+		value = big.NewInt(0)
 	}
 	nonce := evm.StateDB.GetNonce(caller.Address())
 	if nonce+1 < nonce {
