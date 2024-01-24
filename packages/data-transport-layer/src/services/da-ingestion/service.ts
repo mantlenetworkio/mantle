@@ -598,6 +598,10 @@ export class DaIngestionService extends BaseService<DaIngestionServiceOptions> {
         return error
       })
     clearTimeout(timeoutId)
+    this.logger.info('result of GetBatchTransactionByDataStoreId', result)
+    if (result == null) {
+      return []
+    }
     return result
   }
 
