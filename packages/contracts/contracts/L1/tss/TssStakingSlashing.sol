@@ -478,6 +478,7 @@ contract TssStakingSlashing is
     function defund() external returns (uint256) {
         uint256 amount = underlyingToken.balanceOf(address(this));
         require(amount > 0, "Not sufficient funds");
+        require(DEFUND_ADDRESS != address(0),"Invalid DEFUND_ADDRESS address");
         underlyingToken.transfer(DEFUND_ADDRESS, amount);
         emit Defund(address(underlyingToken), DEFUND_ADDRESS, amount);
         return amount;
