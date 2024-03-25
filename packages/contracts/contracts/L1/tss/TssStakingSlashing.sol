@@ -73,6 +73,7 @@ contract TssStakingSlashing is
     mapping(address => address) public claimerOperators;
     bool public isSetParam;
     address public tssManager;
+    address public constant DEFUND_ADDRESS = 0x2F44BD2a54aC3fB20cd7783cF94334069641daC9;
 
 
     /**
@@ -83,6 +84,8 @@ contract TssStakingSlashing is
     event Slashing(address, SlashType);
 
     event WithdrawQueue(address,uint256);
+    event Defund(address, address, uint256);
+
 
     constructor()  CrossDomainEnabled(address(0)) {
         _disableInitializers();
@@ -470,6 +473,15 @@ contract TssStakingSlashing is
                 }
             }
         }
+    }
+
+    function defund() external returns (uint256) {
+        uint256 amount = underlyingToken.balanceOf(address(this));
+        require(amount > 0, "Not sufficient funds");
+        require(DEFUND_ADDRESS != address(0),"Invalid DEFUND_ADDRESS address");
+        underlyingToken.transfer(DEFUND_ADDRESS, amount);
+        emit Defund(address(underlyingToken), DEFUND_ADDRESS, amount);
+        return amount;
     }
 
 }
