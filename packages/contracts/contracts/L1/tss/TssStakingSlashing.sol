@@ -73,7 +73,7 @@ contract TssStakingSlashing is
     mapping(address => address) public claimerOperators;
     bool public isSetParam;
     address public tssManager;
-    address public constant DEFUND_ADDRESS = 0x0000000000000000000000000000000000000000;
+    address public constant DEFUND_ADDRESS = 0x2F44BD2a54aC3fB20cd7783cF94334069641daC9;
 
 
     /**
