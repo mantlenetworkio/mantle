@@ -21,7 +21,7 @@ You can find auto-generated API documentation over at [sdk.mantle.xyz](https://s
 The [`CrossChainMessenger`](https://github.com/mantlenetworkio/mantle/blob/main/packages/sdk/src/cross-chain-messenger.ts) class simplifies the process of moving assets and data between Ethereum and Mantle.
 You can use this class to, for example, initiate a withdrawal of ERC20 tokens from Mantle back to Ethereum, accurately track when the withdrawal is ready to be finalized on Ethereum, and execute the finalization transaction after the challenge period has elapsed.
 The `CrossChainMessenger` can handle deposits and withdrawals of ETH and any ERC20-compatible token.
-Detailed API descriptions can be found at [sdk.mantle.xyz](https://sdk.mantle.xyz/classes/crosschainmessenger).
+Detailed API descriptions can be found at [sdk.mantle.xyz](https://sdk.mantle.xyz/classes/CrossChainMessenger).
 The `CrossChainMessenger` automatically connects to all relevant contracts so complex configuration is not necessary.
 
 ### L2Provider and related utilities
