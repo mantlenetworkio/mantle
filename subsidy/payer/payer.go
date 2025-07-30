@@ -105,7 +105,7 @@ func (ob *Payer) PayRollupCost() error {
 			return err
 		}
 	}
-	log.Info(fmt.Sprintf("block height form %v to %v,amount:%v,transfer hash:%v,reveiver:%v", fromBlock, toBlock, totalFee, hash, ob.config.receiverAddr))
+	log.Info(fmt.Sprintf("block height form %v to %v,amount:%v,transfer hash:%v,receiver:%v", fromBlock, toBlock, totalFee, hash, ob.config.receiverAddr))
 	payerState := types.PayerState{
 		LastPayTime: time.Now(),
 		EndBlock:    toBlock,
@@ -210,7 +210,7 @@ func (ob *Payer) payLoop() {
 		select {
 		case <-timer.C:
 			if err := ob.PayRollupCost(); err != nil {
-				log.Error("cannot pay rollup cost", "messgae", err)
+				log.Error("cannot pay rollup cost", "message", err)
 			}
 
 		case <-ob.ctx.Done():
