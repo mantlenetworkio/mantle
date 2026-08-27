@@ -78,6 +78,20 @@ DApps need to connect to nodes for fetching block data and sending transactions 
 
 </br>
 
+### Third-Party RPC Providers
+
+| Provider | Mainnet RPC URL |
+| :--- | :--- |
+| [GetBlock](https://getblock.io/nodes/mantle/) | `https://go.getblock.io/<ACCESS-TOKEN>` |
+| [DRPC](https://drpc.org/chainlist/mantle) | `https://mantle.drpc.org` |
+| [Allnodes](https://mantle.publicnode.com/) | `https://mantle-rpc.publicnode.com/` |
+| [1RPC](https://www.1rpc.io/) | `https://1rpc.io/mantle` |
+| [QuickNode](https://www.quicknode.com/chains/mantle) | `https://rpc.mantle.quicknode.com` |
+| [ZAN](https://zan.top/service/apikeys) | `https://api.zan.top/public/mantle-mainnet` |
+| [Alchemy](https://www.alchemy.com/mantle) | `https://auth.alchemy.com/` |
+
+</br>
+
 ### Using the Mantle SDK
 
 You can use `npm` or `yarn` package managers to download and install the `@mantleio/sdk` package. We'll use `yarn` in this example.
